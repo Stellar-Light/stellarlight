@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-16T10:19:30.932Z",
+	"generatedAt": "2026-10-19T11:29:26.593Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -14,7 +14,7 @@
 		},
 		{
 			"probe": "note-stale:dfns/dfns-sdk-python:pypi:dfns-sdk",
-			"note": "note (asOf 2026-09-13) cites 0.0.4; registry latest is 1.0.1 (published 2026-10-01)",
+			"note": "note (asOf 2026-09-13) cites 0.0.4; registry latest is 1.0.2 (published 2026-10-16)",
 			"surface": "code"
 		},
 		{
@@ -143,6 +143,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:NethermindEth/stellar-private-payments:npm:stellar-private-payments",
+			"note": "note (asOf 2026-09-14) cites 0.1.0; registry latest is 0.2.1 (published 2026-10-16)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:Scopuly/x402-stellar-guard:npm:@scopuly/x402-stellar-guard",
 			"note": "note (asOf 2026-09-14) cites 0.1.0; registry latest is 0.2.0 (published 2026-10-15)",
 			"surface": "code"
@@ -189,7 +194,7 @@
 		},
 		{
 			"probe": "note-stale:Soneso/stellar_wallet_flutter_sdk:pub:stellar_wallet_flutter_sdk",
-			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.6 (published 2026-09-30)",
+			"note": "note (asOf 2026-09-14) cites 1.1.4; registry latest is 1.1.7 (published 2026-10-16)",
 			"surface": "code"
 		},
 		{
@@ -255,6 +260,11 @@
 		{
 			"probe": "note-repo-gone:axis-markets/stellarexpert-data-source",
 			"note": "public note asOf 2026-09-14; github.com/axis-markets/stellarexpert-data-source is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:lumenloop/lumenloop-ng-skills",
+			"note": "public note asOf 2026-09-14; github.com/lumenloop/lumenloop-ng-skills is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		},
 		{
