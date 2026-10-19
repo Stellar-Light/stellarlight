@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-19T13:17:38.950Z",
+ "generatedAt": "2026-10-19T13:29:40.055Z",
  "surfaces": [
   {
    "surface": "code",
@@ -389,8 +389,8 @@
     },
     "lifetime": {
      "newFindings": 850,
-     "repeats": 843,
-     "ratePct": 99.2
+     "repeats": 844,
+     "ratePct": 99.3
     },
     "byClass": [
      {
@@ -401,8 +401,8 @@
      },
      {
       "class": "cross-surface-consistency",
-      "total": 223,
-      "open": 78,
+      "total": 306,
+      "open": 139,
       "firstSeen": "2026-07-22"
      },
      {
@@ -412,12 +412,6 @@
       "firstSeen": "2026-07-22"
      },
      {
-      "class": "unclassified",
-      "total": 88,
-      "open": 66,
-      "firstSeen": "2026-09-17"
-     },
-     {
       "class": "evidence-population",
       "total": 40,
       "open": 0,
@@ -425,8 +419,8 @@
      },
      {
       "class": "contract-completeness",
-      "total": 33,
-      "open": 0,
+      "total": 38,
+      "open": 5,
       "firstSeen": "2026-07-22"
      },
      {

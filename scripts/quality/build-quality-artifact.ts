@@ -131,6 +131,9 @@ const CLASS_OF: Record<string, string> = {
 	// §0.5 contract completeness — spec and live surface disagree
 	"api-drift": "contract-completeness",
 	"ambiguous-contract": "contract-completeness",
+	// A query parameter the route accepts and ignores: QUALITY.md names
+	// "silently-ignored params" as this class outright.
+	"silent-param": "contract-completeness",
 	// nightly-claims failures are contract-surface: a published claim the live
 	// surface will not support.
 	"claim-blocker": "contract-completeness",
@@ -146,6 +149,15 @@ const CLASS_OF: Record<string, string> = {
 	// no longer serves — the same disagreement as a stale note, found by the
 	// daily link checker instead of the nightly sweep.
 	"broken-link": "cross-surface-consistency",
+	// The same disagreement found by other probes: a served repo GitHub
+	// 404s (gone-repos), a Live row the product itself denies (weak-basis
+	// liveness), a stamp its deciding page no longer supports or a project
+	// we called dead that answers again (stamp re-reads), and an archived
+	// repo with no successor recorded (a refresh, like note-stale).
+	"repo-gone": "cross-surface-consistency",
+	"status-contradicted": "cross-surface-consistency",
+	"stamp-revived": "cross-surface-consistency",
+	"supersession-unrecorded": "cross-surface-consistency",
 	"battery-coverage-weak": "meta-eval",
 	"consumer-code-shallow": "meta-eval",
 };
