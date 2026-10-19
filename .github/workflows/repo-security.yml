@@ -28,12 +28,13 @@ permissions: { contents: read }
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       DATABASE_URI: ${{ secrets.DATABASE_URI }}
       PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
-      # Trees only for the few repos stage 1 flags; files come from
-      # raw.githubusercontent.com, so the Actions token is enough.
+      # Root files for 50 repos per GraphQL query (about 280 points a run),
+      # trees only for the few repos stage 1 flags: the Actions token's
+      # 1,000 an hour covers both.
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4

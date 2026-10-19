@@ -10,14 +10,17 @@
  * A held repo is left out of every read but trust and explain, which serve
  * it with a warning (the Repos collection's access and beforeOperation hook).
  *
- * Two stages, so a sweep spends almost no API quota:
+ * Two stages, so a sweep of the whole index stays inside GITHUB_TOKEN's
+ * limits (raw.githubusercontent.com throttles a runner long before 13k
+ * repos x 3 files):
  * 1. every repo: .vscode/tasks.json, .vscode/settings.json and the root
- *    package.json from raw.githubusercontent.com (not the REST API);
- * 2. repos stage 1 flags, that have a .vscode/ file, or that are held: the
- *    full tree through the API, then every package.json and font in it
- *    (fonts first, and only their first 64 bytes).
- * ponytail: a nested install hook with no .vscode file beside it is not
- * seen; read every repo's tree when the scan PAT has room.
+ *    package.json, 50 repos to a GraphQL query;
+ * 2. repos stage 1 flags, that have a tasks.json, or that are held: the
+ *    full tree through the REST API, then every package.json and font in it
+ *    from raw (fonts first, and only their first 64 bytes).
+ * ponytail: a nested install hook in a repo with no tasks.json and nothing
+ * at its root is not seen; read every tree when a token has room for one
+ * tree call per repo a run.
  *
  * What was read is evidence enough to hold a repo. Clearing one needs every
  * read to succeed, so a failed read never releases a hold: that repo is
@@ -43,11 +46,94 @@ const CONTEXT = { internal: true, includeSecurityHeld: true };
 /** Files read per repo in stage 2; a repo with more is could-not-check
  * unless what was read already holds it. */
 const MAX_FILES = 200;
+const ROOT_FILES = {
+	tasks: ".vscode/tasks.json",
+	settings: ".vscode/settings.json",
+	pkg: "package.json",
+} as const;
+const REPO_NAME = /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/;
 
+type File = { path: string; text?: string; bytes?: Uint8Array };
+type Root = { files: File[]; gaps: string[] };
 type Read = { ok: true; text?: string; bytes?: Uint8Array } | { ok: false };
+type Blob = { text?: string | null; isTruncated?: boolean } | null;
+type GraphqlBody = {
+	data?: Record<string, Record<string, Blob> | null>;
+	errors?: Array<{ type?: string; path?: unknown[] }>;
+};
 
-/** One raw file at the default branch: absent (404) reads as no file. A
- * font's magic number sits in its first bytes, so binary reads stop at 64. */
+/** One GraphQL request; null = no data after three tries. */
+async function graphql(query: string): Promise<GraphqlBody | null> {
+	for (let attempt = 0; attempt < 3; attempt++) {
+		try {
+			const res = await fetch("https://api.github.com/graphql", {
+				method: "POST",
+				headers: {
+					Authorization: `Bearer ${TOKEN}`,
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({ query }),
+				signal: AbortSignal.timeout(60_000),
+			});
+			if (res.ok) {
+				const body = (await res.json()) as GraphqlBody;
+				if (body?.data) return body;
+			}
+		} catch {}
+		await new Promise((r) => setTimeout(r, 5000 * (attempt + 1)));
+	}
+	return null;
+}
+
+/** Stage 1: the three root files of every repo, 50 repos to a query. A
+ * repo or file that does not exist reads as no file. */
+async function rootFiles(names: string[]): Promise<Map<string, Root>> {
+	const out = new Map<string, Root>();
+	const valid = names.filter((n) => {
+		if (REPO_NAME.test(n)) return true;
+		out.set(n, { files: [], gaps: ["not a GitHub owner/name"] });
+		return false;
+	});
+	const fields = Object.entries(ROOT_FILES)
+		.map(
+			([alias, path]) =>
+				`${alias}: object(expression: ${JSON.stringify(`HEAD:${path}`)}) { ... on Blob { text isTruncated } }`,
+		)
+		.join(" ");
+	for (let i = 0; i < valid.length; i += 50) {
+		const batch = valid.slice(i, i + 50);
+		const query = `query { ${batch
+			.map((n, k) => {
+				const [owner, name] = n.split("/");
+				return `r${k}: repository(owner: ${JSON.stringify(owner)}, name: ${JSON.stringify(name)}) { ${fields} }`;
+			})
+			.join(" ")} }`;
+		const body = await graphql(query);
+		batch.forEach((n, k) => {
+			const root: Root = { files: [], gaps: [] };
+			const err = body?.errors?.find((e) => e.path?.[0] === `r${k}`);
+			if (!body) root.gaps.push("could not read the root files");
+			// NOT_FOUND: no such repo (deleted or private), so no files.
+			else if (err && err.type !== "NOT_FOUND")
+				root.gaps.push(
+					`could not read the root files (${err.type ?? "error"})`,
+				);
+			for (const [alias, path] of Object.entries(ROOT_FILES)) {
+				const blob = body?.data?.[`r${k}`]?.[alias];
+				if (!blob) continue;
+				if (blob.isTruncated || typeof blob.text !== "string")
+					root.gaps.push(`could not read ${path}`);
+				else root.files.push({ path, text: blob.text });
+			}
+			out.set(n, root);
+		});
+	}
+	return out;
+}
+
+/** One raw file at the default branch (stage 2): absent (404) reads as no
+ * file. A font's magic number sits in its first bytes, so binary reads stop
+ * at 64. */
 async function raw(
 	full: string,
 	path: string,
@@ -86,7 +172,7 @@ async function tree(full: string): Promise<string[] | null> {
 		{
 			headers: {
 				Accept: "application/vnd.github+json",
-				...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+				Authorization: `Bearer ${TOKEN}`,
 			},
 			signal: AbortSignal.timeout(30_000),
 		},
@@ -104,28 +190,25 @@ type Outcome =
 	| { repo: string; state: "checked"; indicators: Indicator[] }
 	| { repo: string; state: "could-not-check"; why: string };
 
-/** `held`: the repo is held now, so it gets the full read a release needs. */
-async function check(full: string, held: boolean): Promise<Outcome> {
-	const files: Array<{ path: string; text?: string; bytes?: Uint8Array }> = [];
-	const gaps: string[] = [];
-	let deep = held;
-	for (const path of [
-		".vscode/tasks.json",
-		".vscode/settings.json",
-		"package.json",
-	]) {
-		const r = await raw(full, path);
-		if (r === null) continue;
-		if (!r.ok) {
-			gaps.push(`could not read ${path}`);
-			continue;
-		}
-		files.push({ path, text: r.text });
-		if (path.startsWith(".vscode/")) deep = true;
-	}
-	if (deep || gaps.length || detectIndicators(files).length) {
+/** Stage 2 where stage 1 calls for it, then the verdict. `held`: the repo
+ * is held now, so it gets the full read a release needs. */
+async function check(
+	full: string,
+	held: boolean,
+	root: Root,
+): Promise<Outcome> {
+	const files = [...root.files];
+	let gaps = [...root.gaps];
+	const deep =
+		held ||
+		gaps.length > 0 ||
+		files.some((f) => f.path === ROOT_FILES.tasks) ||
+		detectIndicators(files).length > 0;
+	if (deep) {
 		const paths = await tree(full);
-		if (!paths) gaps.push("could not read the tree");
+		// The tree read re-reads whatever stage 1 could not, with its own gaps.
+		if (paths) gaps = [];
+		else gaps.push("could not read the tree");
 		const todo = (paths ?? [])
 			.filter(
 				(p) =>
@@ -189,8 +272,16 @@ type Repo = {
 };
 
 async function main() {
+	if (!TOKEN) {
+		console.error("✗ GITHUB_TOKEN is not set; stage 1 reads through GraphQL");
+		process.exitCode = 1;
+		return;
+	}
 	if (ONLY) {
-		for (const o of await pool(ONLY, 4, (r) => check(r, false)))
+		const roots = await rootFiles(ONLY);
+		for (const o of await pool(ONLY, 4, (r) =>
+			check(r, false, roots.get(r) as Root),
+		))
 			console.log(
 				o.state === "checked"
 					? `${o.repo}: ${o.indicators.length ? `${shouldHold(o.indicators) ? "HOLD" : "report only"}: ${list(o.indicators)}` : "no indicators"}`
@@ -225,10 +316,15 @@ async function main() {
 	}
 	console.log(`${names.length} indexed repos to check`);
 
+	const roots = await rootFiles(names);
+	console.log(
+		`stage 1: root files of ${roots.size} repos, ${[...roots.values()].filter((r) => r.gaps.length).length} not read`,
+	);
 	const outcomes = await pool(names, 6, (n) =>
 		check(
 			n,
 			(groups.get(n.toLowerCase()) ?? []).some((r) => r.securityHeld),
+			roots.get(n) as Root,
 		),
 	);
 	const now = new Date().toISOString();
