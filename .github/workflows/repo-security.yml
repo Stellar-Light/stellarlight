@@ -1,14 +1,15 @@
 name: Repo security holds
 
-# Holds every indexed repo whose default branch carries malware indicators
-# (a VS Code task that runs on folder open, an install hook running a hidden
-# script, a font file that is not a font) and releases the hold once a check
-# finds them gone. A held repo is left out of everything Scout serves but the
+# Holds every indexed repo whose default branch carries a known malware
+# payload (a task or script that runs a font file, or a fake font beside a
+# folder-open task or install hook) and releases the hold once a check finds
+# it gone. A held repo is left out of every read of the repo index but the
 # two operations that name it, which carry the warning. Files are read as
-# text and bytes, never run.
+# text and bytes, never run (scripts/check-repo-security.ts).
 #
-# A failed read never releases a hold; more than a tenth unreadable exits 2.
-# Manual dispatch is dry-run unless execute=true; the schedule always writes.
+# A failed read never releases a hold. More than a tenth unreadable, or more
+# than a quarter not found on GitHub, exits 2. Manual dispatch is a dry run
+# unless execute=true; the schedule always writes.
 
 on:
   workflow_dispatch:
