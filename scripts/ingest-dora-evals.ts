@@ -79,6 +79,9 @@ async function main() {
 				where: { fullName: { equals: full } },
 				limit: 1,
 				depth: 0,
+				// Held repos too: a lookup that misses one creates a second,
+				// unheld row for it.
+				context: { includeSecurityHeld: true },
 			})
 		).docs[0] as Record<string, any> | undefined;
 

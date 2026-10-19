@@ -284,6 +284,8 @@ async function main(): Promise<number> {
 					lastCommitAt: true,
 					stars: true,
 				},
+				// Held repos are existing rows too, or they come back as new ones.
+				context: { includeSecurityHeld: true },
 			});
 			// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
 			for (const d of r.docs as any[]) {

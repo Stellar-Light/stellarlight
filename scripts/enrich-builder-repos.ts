@@ -209,6 +209,8 @@ async function main() {
 			page,
 			depth: 0,
 			select: { fullName: true },
+			// Held repos are known too, or they come back as new rows.
+			context: { includeSecurityHeld: true },
 		});
 		for (const d of r.docs as Array<{ fullName?: string }>) {
 			if (d.fullName) known.add(d.fullName.toLowerCase());
@@ -297,6 +299,7 @@ async function main() {
 			where: { fullName: { equals: a.fullName } },
 			limit: 1,
 			depth: 0,
+			context: { includeSecurityHeld: true },
 		});
 		if (existing.docs.length > 0) continue;
 		await payload.create({

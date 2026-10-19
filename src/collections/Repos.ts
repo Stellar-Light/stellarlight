@@ -53,6 +53,29 @@ export const Repos: CollectionConfig = {
 				};
 			},
 		],
+		// Backstop for a writer whose lookup left out includeSecurityHeld: it
+		// finds no row for a held repo, and creating one would serve the repo
+		// again under a fresh, unheld row. Refuse, loudly.
+		beforeChange: [
+			async ({ data, operation, req }) => {
+				if (operation !== "create" || !data?.fullName) return data;
+				const name = String(data.fullName).toLowerCase();
+				const held = await req.payload.find({
+					collection: "repos",
+					where: { securityHeld: { equals: true } },
+					select: { fullName: true },
+					pagination: false,
+					depth: 0,
+					// No req: Payload would merge this context into the writer's own.
+					context: { includeSecurityHeld: true },
+				});
+				if (held.docs.some((d) => String(d.fullName).toLowerCase() === name))
+					throw new Error(
+						`${data.fullName} is held for malware indicators; not creating a second row for it`,
+					);
+				return data;
+			},
+		],
 		// Internal knowledge notes are triage memory (why a long-tail repo
 		// isn't worth surfacing/deep-indexing) and must never leave the DB
 		// through ANY read path — including Payload's auto-exposed
