@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-19",
 		surfaces: ["api"],
+		version: "spec@1.9.83",
+		type: "added",
+		summary:
+			"getSkill holds a live-fetched skill whose upstream text adds a risky instruction since its last review, and serves the reviewed version with a `contentHeld` note.",
+		detail:
+			"Curated skills read from GitHub and every skills.stellar.org entry, SDF-authored and community-built, are fetched live and served as instructions an agent runs. Each fetch is scanned for running a download or decoded code, installing from a bare URL, steering the agent against its instructions or its user, sending a secret, and hidden text. A line a skill was already reviewed with (an official installer piped to sh) is not new; only a new one holds the skill, which then serves its last reviewed version, or none, until a human accepts the change. Every other update is served live as it lands. An hourly lane keeps the reviewed copies.",
+	},
+	{
+		date: "2026-10-19",
+		surfaces: ["api"],
 		version: "spec@1.9.82",
 		type: "added",
 		summary:

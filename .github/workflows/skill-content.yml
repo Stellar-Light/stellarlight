@@ -1,0 +1,54 @@
+name: Skill content holds
+
+# Keeps a reviewed copy of every live-fetched skill (curated skills read
+# from GitHub, every skills.stellar.org registry entry) and holds a skill
+# whose live text adds a risky line since its last review: running a
+# download or decoded code, installing from a bare URL, steering the agent,
+# sending a secret, hidden text. Every other update is served live as it
+# lands; a held skill serves its reviewed copy until a human accepts the
+# change (scripts/check-skill-content.ts, src/lib/skill-guard.ts).
+#
+# Red while any skill is held; exits 2 when the registry or a quarter of the
+# skills cannot be read. Manual dispatch is a dry run unless execute=true;
+# the schedule always writes.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write copies and holds? Leave false for a dry run."
+        type: boolean
+        default: false
+      baseline:
+        description: "Accept every never-accepted skill's live text as it stands (the first run)."
+        type: boolean
+        default: false
+      accept:
+        description: "Comma-separated slugs whose held upstream change a human reviewed and accepts."
+        type: string
+        default: ""
+  schedule:
+    - cron: "17 * * * *" # hourly, off the hour
+
+concurrency:
+  group: skill-content
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      # Through the environment, never interpolated into a shell line.
+      SKILL_ACCEPT: ${{ inputs.accept }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsx scripts/check-skill-content.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} ${{ inputs.baseline && '--baseline' || '' }}

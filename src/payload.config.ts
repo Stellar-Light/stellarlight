@@ -34,6 +34,7 @@ import { RSSFeeds } from "./collections/RSSFeeds";
 import { RwaAssets } from "./collections/RwaAssets";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Signals } from "./collections/Signals";
+import { SkillSnapshots } from "./collections/SkillSnapshots";
 import { StablecoinSnapshots } from "./collections/StablecoinSnapshots";
 import { Stablecoins } from "./collections/Stablecoins";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
@@ -107,6 +108,7 @@ export default buildConfig({
 		Carousel,
 		Hackathons,
 		LinkChecks,
+		SkillSnapshots,
 		IdeaSubmissions,
 		ApiUsage,
 		ResearchDocs,

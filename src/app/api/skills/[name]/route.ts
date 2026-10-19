@@ -31,6 +31,7 @@ import { logApiHit } from "@/lib/api-usage";
 import {
 	CURATED_SKILLS,
 	type CuratedSkill,
+	curatedSkillRawUrl,
 } from "@/lib/integrations/curated-skills";
 import {
 	fetchRegistryLive,
@@ -42,6 +43,7 @@ import {
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { serverTiming } from "@/lib/server-timing";
+import { type ContentHeld, guardSkillContent } from "@/lib/skill-guard";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
 import { generateSlug } from "@/lib/utils/normalize";
@@ -114,7 +116,7 @@ export async function GET(
 					...(curated.registryName && registry?.has(curated.registryName)
 						? { registry: SKILLS_REGISTRY }
 						: {}),
-					content: await resolveCuratedContent(curated),
+					...(await resolveCuratedContent(curated)),
 				},
 			},
 			{ sMaxAge: 3600, startedAt },
@@ -146,7 +148,9 @@ export async function GET(
 				},
 				skill: {
 					...registrySkillView(skill),
-					content: skill.content, // raw SKILL.md, frontmatter included
+					// Raw SKILL.md, frontmatter included, unless it adds a risky
+					// line since its last review (src/lib/skill-guard.ts).
+					...(await guarded(skill.name, skill.content)),
 				},
 			},
 			{ sMaxAge: 86_400, startedAt },
@@ -265,18 +269,24 @@ function toUnifiedShape(c: CuratedSkill) {
  * from skills.stellar.org. Best-effort by design: a fetch failure returns null,
  * exactly the behaviour callers already handle, and never fails the request.
  */
-async function resolveCuratedContent(c: CuratedSkill): Promise<string | null> {
-	const inlined = INLINED_SKILL_CONTENT[c.slug];
-	if (inlined) return inlined;
+/** `{ content, contentHeld? }` for a served skill: live text through the
+ * guard, with the hold flag only when one applies. */
+async function guarded(
+	slug: string,
+	live: string | null,
+): Promise<{ content: string | null; contentHeld?: ContentHeld }> {
+	const g = await guardSkillContent(slug, live);
+	return g.contentHeld ? g : { content: g.content };
+}
 
-	// repository points at the skill's directory, e.g.
-	// https://github.com/<owner>/<repo>/tree/main/skills/<name>
-	const m = c.repository?.match(
-		/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/tree\/([^/]+)\/(.+)$/,
-	);
-	if (!m) return null;
-	const [, owner, repo, ref, dir] = m;
-	const raw = `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${dir.replace(/\/$/, "")}/SKILL.md`;
+async function resolveCuratedContent(
+	c: CuratedSkill,
+): Promise<{ content: string | null; contentHeld?: ContentHeld }> {
+	const inlined = INLINED_SKILL_CONTENT[c.slug];
+	// Our own skills ship with the deploy, reviewed in this repo's PRs.
+	if (inlined) return { content: inlined };
+	const raw = curatedSkillRawUrl(c);
+	if (!raw) return { content: null };
 	try {
 		const res = await fetch(raw, {
 			// 5 minutes, not an hour. These are INSTRUCTIONS an agent executes
@@ -290,11 +300,11 @@ async function resolveCuratedContent(c: CuratedSkill): Promise<string | null> {
 			next: { revalidate: 300 },
 			signal: AbortSignal.timeout(6000),
 		});
-		if (!res.ok) return null;
-		const text = await res.text();
-		return text.trim() || null;
+		if (!res.ok) return { content: null };
+		const text = (await res.text()).trim();
+		return guarded(c.slug, text || null);
 	} catch {
-		return null;
+		return { content: null };
 	}
 }
 

@@ -41,6 +41,7 @@ import {
 	SDF_SKILL_NAMES,
 } from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { guardSkillContent } from "@/lib/skill-guard";
 import { STELLAR_DEVELOPER_ACTIVITY_SKILL } from "@/lib/stellar-developer-activity-skill";
 import { STELLAR_SCOUT_SKILL } from "@/lib/stellar-scout-skill";
 
@@ -372,7 +373,10 @@ async function loadSkill(slug: string): Promise<SkillData | null> {
 	if (registryNames.includes(slug)) {
 		const s = await fetchSdfSkill(slug);
 		if (!s) return null;
-		return { ...registrySkillView(s), content: s.content };
+		// The page renders the text: a risky line new since review serves the
+		// reviewed copy instead, or none (src/lib/skill-guard.ts).
+		const { content } = await guardSkillContent(s.name, s.content);
+		return { ...registrySkillView(s), content };
 	}
 	// Community
 	return loadApprovedCommunitySkill(slug);
