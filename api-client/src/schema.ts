@@ -1654,7 +1654,7 @@ export interface components {
                     factsReadAt?: string;
                 } | null;
                 /**
-                 * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown: the repo's activity was not read, the event has no end date, or it ended under 90 days ago with no commit past that mark. It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
+                 * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown: the repo's activity was not read, the event has no usable end date (missing or unreadable), or it ended under 90 days ago with no commit past that mark. It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
                  * @enum {string}
                  */
                 afterEvent?: "commits 90+ days after" | "no commits 90+ days after" | "archived" | "repo not found";
@@ -3694,7 +3694,7 @@ export interface operations {
                                 factsReadAt?: string;
                             } | null;
                             /**
-                             * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown: the repo's activity was not read, the event has no end date, or it ended under 90 days ago with no commit past that mark. It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
+                             * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown: the repo's activity was not read, the event has no usable end date (missing or unreadable), or it ended under 90 days ago with no commit past that mark. It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
                              * @enum {string}
                              */
                             afterEvent?: "commits 90+ days after" | "no commits 90+ days after" | "archived" | "repo not found";
