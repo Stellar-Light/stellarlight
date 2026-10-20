@@ -216,17 +216,23 @@ describe("vet-idea reads an idea's vertical", () => {
 		expect(verticalOf("stablecoin wallet for remittances")).toBe("Wallet");
 	});
 
-	it("keeps Stablecoin for a stablecoin product", () => {
-		expect(verticalOf("stablecoin issuer for merchant payments")).toBe(
-			"Stablecoin",
-		);
+	it("keeps Stablecoin for a stablecoin product, even beside a payments word", () => {
+		// Each phrase also names Payments, so a rail reading would move it.
+		for (const idea of [
+			"stablecoin issuer for merchant payments",
+			"stablecoin issuance for payroll",
+			"a stablecoin with 1:1 backing for merchant payments",
+			"fiat-backed stablecoin for payments",
+			"a minted stablecoin for payments",
+			"a stablecoin pegging the dollar for payments",
+			"redeemable stablecoin for merchant payments",
+			"a stablecoin with daily redemptions for payroll",
+			"stablecoin reserves dashboard for payments teams",
+		])
+			expect(verticalOf(idea)).toBe("Stablecoin");
 		expect(verticalOf("a stablecoin that anchors its peg to gold")).toBe(
 			"Stablecoin",
 		);
-		expect(verticalOf("fiat-backed stablecoin with daily redemptions")).toBe(
-			"Stablecoin",
-		);
-		expect(verticalOf("a fiat-backed stablecoin issuer")).toBe("Stablecoin");
 	});
 
 	it("knows the plural and compound forms ideas use", () => {
@@ -238,6 +244,7 @@ describe("vet-idea reads an idea's vertical", () => {
 		expect(verticalOf("donation matching for nonprofits")).toBe(
 			"Social Impact",
 		);
+		expect(verticalOf("accept donations in crypto")).toBe("Social Impact");
 		expect(verticalOf("transparent donation platform for charities")).toBe(
 			"Social Impact",
 		);

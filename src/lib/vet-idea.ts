@@ -99,7 +99,7 @@ export const VERTICAL_TOKENS: Record<string, string> = {
 /** Words that make an idea a stablecoin product rather than one paid in
  * stablecoins. */
 const STABLECOIN_PRODUCT =
-	/\b(?:issu(?:e|es|er|ers|ance|ing)|mint(?:s|ing)?|pegs?|pegged|backed|reserves?|redeem(?:s|able)?|redemptions?)\b/i;
+	/\b(?:issu(?:e|es|ed|er|ers|ance|ing)|mint(?:s|ed|ing)?|peg(?:s|ged|ging)?|back(?:ed|ing)|reserves?|redeem(?:s|ed|able|ing)?|redemptions?|collateralized)\b/i;
 
 /** The idea's vertical: its first mapped token, except that a stablecoin
  * used as the rail yields to the idea's other vertical. "stablecoin payroll"
