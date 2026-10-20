@@ -23,11 +23,12 @@ export interface PriorArtCandidate {
 
 /** A word's stem for matching, the same on both sides, so it need not be a
  * word: plurals meet their singular ("libraries" and "library" at "librari",
- * "movies" and "movie" at "movi", "repos" and "repo" at "repo"). */
+ * "movies" and "movie" at "movi", "tries" and "try" at "tri", "repos" and
+ * "repo" at "repo"). */
 const stem = (w: string) => {
 	if (w.length > 4 && w.endsWith("ies")) return `${w.slice(0, -3)}i`;
 	if (w.length > 3 && w.endsWith("ie")) return w.slice(0, -1);
-	if (w.length > 3 && /[^aeiou]y$/.test(w)) return `${w.slice(0, -1)}i`;
+	if (w.length > 2 && /[^aeiou]y$/.test(w)) return `${w.slice(0, -1)}i`;
 	return w.length > 3 ? w.replace(/(?<!s)s$/, "") : w;
 };
 

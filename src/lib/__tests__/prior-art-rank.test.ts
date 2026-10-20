@@ -60,6 +60,16 @@ describe("prior art among judged repos", () => {
 		).toEqual(["m/film"]);
 	});
 
+	it("matches short -y words to their -ies plurals (try, tries)", () => {
+		const tried = [
+			...corpus,
+			{ fullName: "y/retry", description: "Retry failed payment tries" },
+		];
+		expect(
+			rankPriorArt(["payment", "try"], tried).map((r) => r.fullName),
+		).toEqual(["y/retry"]);
+	});
+
 	it("matches -ies plurals to -y words", () => {
 		const libs = [
 			...corpus,

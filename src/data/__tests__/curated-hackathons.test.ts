@@ -14,9 +14,15 @@ describe("curated hackathons", () => {
 
 	it("records a shifted timestamp written through the rows' helper", () => {
 		const before = TS_DATE_SHIFTS.length;
-		curatedTimestamp("2026-08-21T00:00:00+05:30");
-		expect(TS_DATE_SHIFTS.slice(before)).toEqual(["2026-08-21T00:00:00+05:30"]);
-		TS_DATE_SHIFTS.splice(before);
+		try {
+			curatedTimestamp("2026-08-21T00:00:00+05:30");
+			expect(TS_DATE_SHIFTS.slice(before)).toEqual([
+				"2026-08-21T00:00:00+05:30",
+			]);
+		} finally {
+			// Never leave the shared list dirty for the "empty" test.
+			TS_DATE_SHIFTS.splice(before);
+		}
 	});
 
 	it("detects a timestamp whose UTC date is not the date written", () => {
@@ -41,7 +47,7 @@ describe("curated hackathons", () => {
 		expect(h?.description).not.toMatch(/36 hours|\$50,000/);
 	});
 
-	it("says HackMeridian 2025's days are derived, and claims no hours", () => {
+	it("says HackMeridian 2025's days are derived, and stores them at midday", () => {
 		const h = CURATED_HACKATHONS.find((x) => x.uname === "hackmeridian-2025");
 		expect(h?.description).toMatch(/15 to 16 September dates here are derived/);
 		const iso = (s?: number) => new Date((s ?? 0) * 1000).toISOString();
