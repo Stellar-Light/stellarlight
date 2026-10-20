@@ -44,6 +44,7 @@
  */
 
 import { writeFileSync } from "node:fs";
+import { registrableDomain } from "../src/lib/partner-project-identity";
 import { STATUS_FIX } from "./data/curation-maps";
 
 const OUT = "improvements/audits/packet-stamps-latest.json";
@@ -329,6 +330,8 @@ export function judgeStamp(p: {
 	httpStatus: number | null;
 	html: string;
 	error?: string;
+	/** The URL that finally answered, after redirects (Response.url). */
+	finalUrl?: string;
 	/** apps.apple.com only: currentVersionReleaseDate from the iTunes lookup
 	 *  API (ISO). The listing's release recency IS the product signal; the
 	 *  HTML title never reliably names the row (boss-revolution's listing is
@@ -400,7 +403,9 @@ export function judgeStamp(p: {
 	// keeps its Live stamp.
 	if (isChromeStore(p.sourceUrl) && p.httpStatus === 200) {
 		const title = titleOf(p.html).trim();
-		const named = /\S/.test(title.replace(/chrome web store/i, "").replace(/[-–—|]/g, ""));
+		const named = /\S/.test(
+			title.replace(/chrome web store/i, "").replace(/[-–—|]/g, ""),
+		);
 		return named
 			? {
 					verdict: "HOLDS",
@@ -462,6 +467,17 @@ export function judgeStamp(p: {
 	}
 
 	if (p.to === "Inactive") {
+		// Another site answering is not the product coming back. basement.dev
+		// began 307ing to divergentlabs.xyz, an unrelated product, and that
+		// page's 200 read as REVIVED (2026-10-07). Same rule as page-verdict's
+		// offsite-redirect: such a page is not evidence the product is alive.
+		const from = registrableDomain(p.sourceUrl);
+		const to = registrableDomain(p.finalUrl);
+		if (to && from && to !== from)
+			return {
+				verdict: "HOLDS",
+				reason: `redirects off-site (${from} → ${to}); another site answering is not evidence the product came back`,
+			};
 		// A death that came back is worth a human look, never an auto-flip.
 		if (marker) return { verdict: "HOLDS", reason: `still says "${marker}"` };
 		if (text.length <= 300)
@@ -564,6 +580,7 @@ export async function probe(s: {
 	let httpStatus: number | null = null;
 	let html = "";
 	let error: string | undefined;
+	let finalUrl: string | undefined;
 	try {
 		const res = await fetch(s.sourceUrl, {
 			headers: { "user-agent": UA, accept: "text/html,*/*" },
@@ -571,6 +588,7 @@ export async function probe(s: {
 			signal: AbortSignal.timeout(TIMEOUT_MS),
 		});
 		httpStatus = res.status;
+		finalUrl = res.url;
 		html = await res.text();
 	} catch (e) {
 		error = String((e as Error).message ?? e).slice(0, 140);
@@ -593,6 +611,7 @@ export async function probe(s: {
 		httpStatus,
 		html,
 		error,
+		finalUrl,
 		storeReleasedAt,
 		rpcHealth: health,
 	});

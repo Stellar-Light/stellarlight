@@ -143,6 +143,30 @@ describe("judgeStamp", () => {
 		).toBe("HOLDS");
 	});
 
+	// basement, 2026-10-07 onward: the Inactive stamp's URL 307s to
+	// divergentlabs.xyz, an unrelated product, and its 200 read as a revival.
+	it("HOLDS an Inactive stamp whose URL now redirects to another site", () => {
+		const v = judgeStamp({
+			...base,
+			to: "Inactive",
+			sourceUrl: "https://basement.dev/",
+			finalUrl: "https://divergentlabs.xyz/",
+			html: `<p>${filler}</p>`,
+		});
+		expect(v.verdict).toBe("HOLDS");
+		expect(v.reason).toMatch(/basement\.dev → divergentlabs\.xyz/);
+		// A same-site hop (scheme, www, path) is still the product's own page.
+		expect(
+			judgeStamp({
+				...base,
+				to: "Inactive",
+				sourceUrl: "http://example.com/",
+				finalUrl: "https://www.example.com/home",
+				html: `<p>${filler}</p>`,
+			}).verdict,
+		).toBe("REVIVED");
+	});
+
 	it("never turns an unreadable page into a contradiction, in either direction", () => {
 		for (const to of ["Live", "Inactive"]) {
 			expect(judgeStamp({ ...base, to, httpStatus: 403 }).verdict).toBe(
