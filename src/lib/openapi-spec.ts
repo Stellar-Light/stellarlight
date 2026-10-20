@@ -3159,7 +3159,6 @@ export const spec: OpenAPISpec = {
 						"meridian",
 						"prize pool",
 						"deadline",
-						"check-in",
 					],
 					useWhen: [
 						"who won [event] / who won its soroban track",

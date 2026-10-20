@@ -3332,8 +3332,7 @@
 						"hackmeridian",
 						"meridian",
 						"prize pool",
-						"deadline",
-						"check-in"
+						"deadline"
 					],
 					"useWhen": [
 						"who won [event] / who won its soroban track",
