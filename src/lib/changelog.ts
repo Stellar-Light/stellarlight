@@ -31,6 +31,66 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
+		type: "changed",
+		summary:
+			"getHackathon's routing now carries HackMeridian, Meridian, prize pool and deadline, so questions about the event reach it.",
+		detail:
+			'Raven\'s tokenizer splits "HackMeridian" into "hack" and "meridian", and no hackathon operation\'s indexed text held "meridian" or a year, so short questions ("When and where is HackMeridian 2026?") failed Raven\'s 60% coverage gate and reached no Scout tool. Measured with the Raven scorer replica: 32 HackMeridian questions put an expected operation in Scout\'s top two 23 times, up from 15; 12 held-out HackMeridian questions in other words, never used for tuning, 8 times, up from 2; the 65 standing routing questions are unchanged (57 in the top three, no first pick moved). One conference question ("Where is the Meridian conference venue?") now reaches getHackathon, whose HackMeridian 2026 text names the conference venue, Convento do Beato.',
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
+		type: "fixed",
+		summary:
+			"hackathonBrief's `builds` uses the same hybrid search and evidence rule as vetIdea's `priorArt.builds`, and is null, not [], when the submissions index cannot be read.",
+		detail:
+			"The brief embeds vetIdea (`vet`) and also listed its own `builds` by keyword search, so one response could carry two prior-art lists made two ways. Winners matching half the idea's words still come first, then the builds vetIdea lists from the same top five; every build listed, winners included, has a meaning score of at least 0.7 or two matched words. An unreadable index used to read as [], which says no team tried the idea.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api", "mcp"],
+		version: "spec@1.9.83",
+		type: "changed",
+		summary:
+			"searchHackathonBuilds searches in hybrid mode by default (words plus meaning); analyzeHackathonSubmissions still counts with keyword. Pass mode=keyword for the old behavior.",
+		detail:
+			"On a 40-idea labeled set (top 5 per idea, every returned build graded), keyword filled 40% of the slots with builds that were not the idea and found 36 of 118 same-idea builds; hybrid 22% and 56. Exact-name lookups held (27 of 30 first against keyword's 26, all 30 in the top three either way) for about 150 ms more at the median. When search by meaning cannot run, keyword results are served and meta.warnings says so.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
+		type: "fixed",
+		summary:
+			"getHackathon's `stats.totalPrizeUSD` is null, not 0, when no USD prize figure is known, and the spec now declares it.",
+		detail:
+			"An event whose prizes are not cash (Stellar PULSO's trips and Instawards) or whose prize pool is not yet announced was served a total of 0, which reads as no prize. The value is the event's prize pool, else the sum of its winners' recorded prizes, else null.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
+		type: "fixed",
+		summary:
+			"vetIdea's prior art is about the idea: `priorArt.builds` lists the stored hackathon submissions that match it by hybrid search, with the words each matched and the meaning score, and `priorArt.repos` keeps only judged repos that match two of its words.",
+		detail:
+			"Prior art took judged repos where any one of the idea's words appeared as a substring and sorted them by most recent commit, so the same few recently pushed repos answered remittance, insurance, QR payments and subscription ideas alike. `priorArt.builds` is now searchHackathonBuilds in hybrid mode, across events on DoraHacks and off it: on a 40-idea labeled set (top 5 per idea), keyword search filled 40% of the slots with builds that were not the idea and found 36 of 118 same-idea builds, hybrid 22% and 56; a build is listed only with a meaning score of at least 0.7 or two matched words, which kept all 56 and cut the wrong slots to 18%; `buildsMode` says keyword when search by meaning could not run; `priorArt.repos` weighs each word by its rarity across the whole judged set and needs two matched words covering half the weight of the idea's words the set uses, one of them found in no more than a tenth of the set, so a repo sharing one word, or only common words, is not prior art. `priorArt.builds` is null, not [], when the submissions index cannot be read.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
+		type: "added",
+		summary:
+			"HackMeridian, which runs off DoraHacks, is served like any other event: HackMeridian 2025 with its six winners as submissions, and HackMeridian 2026 with its paths, dates and prize pool.",
+		detail:
+			"Submissions from events off DoraHacks are stored as hackathon builds with `curated-<event>-<name>` ids, which getHackathonSubmission now accepts, so search, prior art, briefs and event pages find them. HackMeridian 2025 (Rio, September 2025): Open Innovation, The Simple Fund, 4Bridge and Stellar Forge; Composability, Lance, Star Lends and Panorama Block, per SDF's recap, with no repo linked until one is verified. HackMeridian 2026 (Warehouse ONE16, Lisbon, 25 to 26 October), from the organizer's site: hacking from 09:00 Sunday to the 12:00 Monday deadline (27 hours; the organizer says 28), Genesis and Scale categories with the Stellar Unlocked and Stellar Composed tracks, up to $30,000 across 6 winners paid in XLM, and the judging criteria for each category.",
+	},
+	{
 		date: "2026-10-19",
 		surfaces: ["api"],
 		version: "spec@1.9.82",

@@ -539,7 +539,7 @@ export interface paths {
         };
         /**
          * Hackathon brief — vet + starter repos with trust + live contracts + funding + what not to claim, in one call
-         * @description One call for a hackathon team's first hour: vet (same as vet-idea — competitors, maturity, gap, judged prior art), builds (prototype-layer prior art from DoraHacks submissions), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.
+         * @description One call for a hackathon team's first hour: vet (same as vet-idea: competitors, maturity, gap, judged prior art), builds (prototype-layer prior art, hybrid search), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.
          */
         get: operations["hackathonBrief"];
         put?: never;
@@ -1588,6 +1588,8 @@ export interface components {
                 /** @description Counts for the event. totalSubmissions counts the submissions served here (null = no submission list). */
                 stats?: {
                     totalSubmissions?: number | null;
+                    /** @description Prize money in USD: the event's prize pool, else the sum of its winners' recorded prizes. null = no USD figure is known (a prize not yet announced, or prizes that are not cash); never 0 for unknown. */
+                    totalPrizeUSD?: number | null;
                     /** @description DoraHacks' own count of the event's submissions (its buidls_count), read daily with the stored event page. null = not a DoraHacks event, or the page has not been read. */
                     upstreamSubmissions?: number | null;
                     /** @description Winning submissions of this event that this page does not serve because their teams hid or deleted them on DoraHacks: each one's placement and award, never the submission itself. placementRank is parsed as served winners' is (placement, else award), so a missing ranked tier joins to it. [] = none; null = no stored DoraHacks roster backs this page, or the read failed. */
@@ -3520,7 +3522,7 @@ export interface operations {
             query?: {
                 /** @description Topic to search build names + descriptions (prior-art lookup). */
                 q?: string;
-                /** @description How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
+                /** @description How q matches (default: hybrid). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
@@ -3674,7 +3676,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description The submission id from searchHackathonBuilds (dorahacks-buidl-<n>) or the bare number from its dorahacks.io/buidl/<n> link. */
+                /** @description The submission id from searchHackathonBuilds (dorahacks-buidl-<n>, or curated-<event>-<name> for an event off DoraHacks such as HackMeridian) or the bare number from its dorahacks.io/buidl/<n> link. */
                 id: string;
             };
             cookie?: never;
@@ -3841,7 +3843,7 @@ export interface operations {
                 top?: number;
                 /** @description Topic: count only the submissions that match it, the way searchHackathonBuilds matches. Empty = every submission. */
                 q?: string;
-                /** @description How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
+                /** @description How q matches (default: keyword). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
@@ -5184,7 +5186,7 @@ export interface operations {
                                     basis?: string;
                                 } | null;
                             };
-                            /** @description Prototype-layer prior art: up to two prize winners covering at least half of the idea's concepts, then the closest other DoraHacks submissions, five in all. */
+                            /** @description Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners matching at least half of the idea's words, then the builds vetIdea lists from the same top five, five at most; every build listed, winners included, has a meaning score of at least 0.7 or two matched words. null = the submissions index could not be read (not checked), [] = checked, none. */
                             builds?: {
                                 /** @description Opens the full submission in getHackathonSubmission. */
                                 id?: string;
@@ -5222,7 +5224,7 @@ export interface operations {
                                      */
                                     factsReadAt?: string;
                                 } | null;
-                            }[];
+                            }[] | null;
                             /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */
                             startFrom?: {
                                 repo?: {
@@ -5427,6 +5429,23 @@ export interface operations {
                                 basis?: string;
                             };
                             priorArt?: {
+                                /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                builds?: {
+                                    id?: string;
+                                    name?: string;
+                                    hackathon?: string;
+                                    placement?: string | null;
+                                    isWinner?: boolean;
+                                    githubUrl?: string | null;
+                                    matchedTerms?: string[];
+                                    /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
+                                    similarity?: number;
+                                }[] | null;
+                                /**
+                                 * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.
+                                 * @enum {string|null}
+                                 */
+                                buildsMode?: "keyword" | "meaning" | "hybrid" | null;
                                 repos?: {
                                     fullName?: string;
                                     hackathonWinner?: boolean;

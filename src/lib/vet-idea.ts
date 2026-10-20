@@ -22,7 +22,13 @@ import {
 	GAP_VERTICALS,
 	type TypeCoverage,
 } from "./ecosystem-gaps";
+import { queryBuilds } from "./hackathon-build-query";
+import {
+	type BuildSearchMode,
+	getHackathonBuildsIndex,
+} from "./hackathon-builds";
 import { ACTIVE_PROJECT_STATUSES } from "./population";
+import { priorArtTop, rankPriorArt } from "./prior-art-rank";
 import {
 	anchorTokens,
 	buildHaystack,
@@ -120,6 +126,21 @@ export interface VetIdeaReport {
 			activityState: string;
 			lastCommitAt: string | null;
 		}>;
+		/** Stored hackathon submissions matching the idea, best first; null =
+		 * the index could not be read (not checked), [] = checked, none. */
+		builds: Array<{
+			id: string;
+			name: string;
+			hackathon: string;
+			placement: string | null;
+			isWinner: boolean;
+			githubUrl: string | null;
+			matchedTerms: string[];
+			/** Meaning similarity to the idea, when search by meaning ran. */
+			similarity?: number;
+		}> | null;
+		/** The search that served builds: hybrid, or keyword when meaning could not run; null with builds. */
+		buildsMode: BuildSearchMode | null;
 		note: string;
 	};
 	gap: (TypeCoverage & { basis: string }) | null;
@@ -334,45 +355,74 @@ export async function buildVetIdea(
 	}
 
 	// Prior art from OUR corpus: judged-hackathon repos matching the idea.
-	// Dead prior art is a signal, not noise — surface state honestly.
+	// Dead prior art is a signal, not noise: surface state honestly.
 	const hres = await payload.find({
 		collection: "repos",
 		where: {
-			and: [
-				// judgedHackathon is TEXT (the hackathon the judge score came
-				// from) — 365 populated rows; `equals: true` matched zero (found
-				// live 2026-08-15, the wrong-predicate false-negative class).
-				{ judgedHackathon: { exists: true } },
-				...(tokens.length
-					? [
-							{
-								// biome-ignore lint/suspicious/noExplicitAny: Payload Where union is awkward
-								or: tokens.flatMap((t) => [
-									{ fullName: { like: t } },
-									{ description: { like: t } },
-								]) as any[],
-							},
-						]
-					: []),
-			],
+			// judgedHackathon is TEXT (the hackathon the judge score came from),
+			// about 365 populated rows; `equals: true` matched zero (found live
+			// 2026-08-15, the wrong-predicate false-negative class).
+			judgedHackathon: { exists: true },
 		},
-		limit: 5,
+		// The whole judged set, not a word-filtered slice: rankPriorArt weighs
+		// each word by its rarity across it, and sorting a one-word match by
+		// recency let the latest pushed repos answer every idea.
+		limit: 1000,
 		depth: 0,
 		sort: "-lastCommitAt",
 		select: {
 			fullName: true,
+			description: true,
 			hackathonWinner: true,
 			lastCommitAt: true,
 			isArchived: true,
 		},
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-	const priorArtRepos = (hres.docs as any[]).map((h) => ({
+	const priorArtRepos = rankPriorArt(tokens, hres.docs as any[]).map((h) => ({
 		fullName: String(h.fullName),
 		hackathonWinner: !!h.hackathonWinner,
 		activityState: activityStateOf(h.lastCommitAt ?? null, !!h.isArchived),
 		lastCommitAt: h.lastCommitAt ? String(h.lastCommitAt) : null,
 	}));
+
+	// Prior art from every stored hackathon submission, on DoraHacks and off
+	// it, by hybrid search (words plus meaning). Most submissions' repos are
+	// not in the repo index, so the judged repos above are a small slice.
+	// Hybrid, not keyword: on the 40-idea labeled set (2026-10-20, top 5 per
+	// idea) keyword filled 40% of slots with builds that are not the idea and
+	// found 36 of 118 same-idea builds; hybrid 22% and 56. When meaning cannot
+	// run, queryBuilds serves keyword and says so.
+	// An unreadable or empty index (it holds over a thousand) is "not
+	// checked": builds is then null, never [], which would say nobody built
+	// it (outside review, 2026-10-20).
+	const index = await getHackathonBuildsIndex().catch(() => null);
+	const buildSearch = index?.length
+		? await queryBuilds(
+				index,
+				{
+					q: q.toLowerCase().trim(),
+					mode: "hybrid",
+					winnersOnly: false,
+					hackathons: [],
+				},
+				{ perSubmission: true },
+			).catch(() => null)
+		: null;
+	const priorArtBuilds = buildSearch
+		? priorArtTop(buildSearch.scored).map(({ b, matched, similarity }) => ({
+				id: b.id,
+				name: b.name,
+				hackathon: b.hackathon.title,
+				placement: b.hackathonPlacement ?? null,
+				isWinner: !!b.isWinner,
+				githubUrl: b.githubUrl ?? null,
+				matchedTerms: matched,
+				...(similarity !== undefined
+					? { similarity: Math.round(similarity * 1000) / 1000 }
+					: {}),
+			}))
+		: null;
 
 	// Gap verdict for the vertical (supply-side only — same computation and
 	// caveats as analyze?dimension=gaps).
@@ -440,7 +490,16 @@ export async function buildVetIdea(
 		},
 		priorArt: {
 			repos: priorArtRepos,
-			note: "Judged-hackathon repos from our index matching the idea; dead prior art is itself a signal. Not exhaustive — DoraHacks builds without a surviving repo are on /api/hackathons/builds.",
+			builds: priorArtBuilds,
+			buildsMode: buildSearch?.served ?? null,
+			note: [
+				"builds: stored hackathon submissions matching the idea, best first, by hybrid search (words plus meaning) unless buildsMode says keyword. matchedTerms are the words each matched; similarity is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words the set uses, cover half their weight, and include one word found in no more than a tenth of the set, so often none. Dead prior art is itself a signal.",
+				...(buildSearch
+					? buildSearch.warnings
+					: [
+							"builds is null: the submissions index could not be read, so builds were not checked. It does not mean nobody built this.",
+						]),
+			].join(" "),
 		},
 		gap,
 		funding,

@@ -261,7 +261,11 @@ const BUILD_PROJECT_SCHEMA = {
 
 /** The filters searchHackathonBuilds and analyzeHackathonSubmissions share, parsed by
  * src/lib/hackathon-build-query.ts: one list, so the two cannot drift. */
-const buildFilterParams = (qDescription: string) => [
+const buildFilterParams = (
+	qDescription: string,
+	/** Mirrors the defaultMode each route passes to parseBuildFilters. */
+	defaultMode: (typeof BUILD_SEARCH_MODES)[number],
+) => [
 	{
 		name: "q",
 		in: "query",
@@ -273,12 +277,11 @@ const buildFilterParams = (qDescription: string) => [
 		name: "mode",
 		in: "query",
 		required: false,
-		description:
-			"How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+		description: `How q matches (default: ${defaultMode}). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).`,
 		schema: {
 			type: "string",
 			enum: [...BUILD_SEARCH_MODES],
-			default: "keyword",
+			default: defaultMode,
 		},
 	},
 	{
@@ -3152,6 +3155,10 @@ export const spec: OpenAPISpec = {
 						"judging criteria",
 						"submission requirements",
 						"rules",
+						"hackmeridian",
+						"meridian",
+						"prize pool",
+						"deadline",
 					],
 					useWhen: [
 						"who won [event] / who won its soroban track",
@@ -3428,6 +3435,7 @@ export const spec: OpenAPISpec = {
 				parameters: [
 					...buildFilterParams(
 						"Topic to search build names + descriptions (prior-art lookup).",
+						"hybrid",
 					),
 					{
 						name: "limit",
@@ -3656,7 +3664,7 @@ export const spec: OpenAPISpec = {
 						in: "path",
 						required: true,
 						description:
-							"The submission id from searchHackathonBuilds (dorahacks-buidl-<n>) or the bare number from its dorahacks.io/buidl/<n> link.",
+							"The submission id from searchHackathonBuilds (dorahacks-buidl-<n>, or curated-<event>-<name> for an event off DoraHacks such as HackMeridian) or the bare number from its dorahacks.io/buidl/<n> link.",
 						schema: { type: "string" },
 					},
 				],
@@ -3789,6 +3797,7 @@ export const spec: OpenAPISpec = {
 					},
 					...buildFilterParams(
 						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches. Empty = every submission.",
+						"keyword",
 					),
 				],
 				responses: {
@@ -5685,7 +5694,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Hackathon brief — vet + starter repos with trust + live contracts + funding + what not to claim, in one call",
 				description:
-					"One call for a hackathon team's first hour: vet (same as vet-idea — competitors, maturity, gap, judged prior art), builds (prototype-layer prior art from DoraHacks submissions), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.",
+					"One call for a hackathon team's first hour: vet (same as vet-idea: competitors, maturity, gap, judged prior art), builds (prototype-layer prior art, hybrid search), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.",
 				"x-routing": {
 					purpose:
 						"ONE call for a hackathon team: is it built, what to fork (with trust), what is live to build against, is there money after, and what the demo must not claim.",
@@ -5751,8 +5760,9 @@ export const spec: OpenAPISpec = {
 												vet: VET_BLOCK_SCHEMA,
 												builds: {
 													type: "array",
+													nullable: true,
 													description:
-														"Prototype-layer prior art: up to two prize winners covering at least half of the idea's concepts, then the closest other DoraHacks submissions, five in all.",
+														"Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners matching at least half of the idea's words, then the builds vetIdea lists from the same top five, five at most; every build listed, winners included, has a meaning score of at least 0.7 or two matched words. null = the submissions index could not be read (not checked), [] = checked, none.",
 													items: {
 														type: "object",
 														properties: {
@@ -6100,6 +6110,39 @@ export const spec: OpenAPISpec = {
 												priorArt: {
 													type: "object",
 													properties: {
+														builds: {
+															type: "array",
+															nullable: true,
+															description:
+																"null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it.",
+															items: {
+																type: "object",
+																properties: {
+																	id: { type: "string" },
+																	name: { type: "string" },
+																	hackathon: { type: "string" },
+																	placement: { type: "string", nullable: true },
+																	isWinner: { type: "boolean" },
+																	githubUrl: { type: "string", nullable: true },
+																	matchedTerms: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																	similarity: {
+																		type: "number",
+																		description:
+																			"Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run.",
+																	},
+																},
+															},
+														},
+														buildsMode: {
+															type: "string",
+															nullable: true,
+															enum: [...BUILD_SEARCH_MODES],
+															description:
+																"The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.",
+														},
 														repos: {
 															type: "array",
 															items: {
@@ -10425,6 +10468,12 @@ export const spec: OpenAPISpec = {
 									"Counts for the event. totalSubmissions counts the submissions served here (null = no submission list).",
 								properties: {
 									totalSubmissions: { type: "integer", nullable: true },
+									totalPrizeUSD: {
+										type: "number",
+										nullable: true,
+										description:
+											"Prize money in USD: the event's prize pool, else the sum of its winners' recorded prizes. null = no USD figure is known (a prize not yet announced, or prizes that are not cash); never 0 for unknown.",
+									},
 									upstreamSubmissions: {
 										type: "integer",
 										nullable: true,

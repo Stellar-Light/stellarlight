@@ -51,6 +51,10 @@ export interface BuildFilters {
  * an error. */
 export function parseBuildFilters(
 	sp: URLSearchParams,
+	/** The mode when the request names none. Search answers "has anyone built
+	 * X" best with hybrid; analyze counts with keyword so its numbers do not
+	 * move with the meaning index. Required, so each caller chooses. */
+	defaultMode: BuildSearchMode,
 ): { filters: BuildFilters } | { error: Record<string, unknown> } {
 	const winnersOnly = strictBoolParam(sp.get("winnersOnly"));
 	if (winnersOnly === "invalid")
@@ -60,7 +64,7 @@ export function parseBuildFilters(
 				validValues: [...BOOL_TRUE_VALUES, ...BOOL_FALSE_VALUES],
 			},
 		};
-	const mode = sp.get("mode") ?? "keyword";
+	const mode = sp.get("mode") ?? defaultMode;
 	if (!(BUILD_SEARCH_MODES as readonly string[]).includes(mode))
 		return {
 			error: {

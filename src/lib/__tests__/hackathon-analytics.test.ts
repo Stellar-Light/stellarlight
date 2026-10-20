@@ -155,7 +155,8 @@ describe("winners against the rest", () => {
 });
 
 describe("shared filters", () => {
-	const parse = (qs: string) => parseBuildFilters(new URLSearchParams(qs));
+	const parse = (qs: string) =>
+		parseBuildFilters(new URLSearchParams(qs), "keyword");
 
 	it("spells a category the vocabulary's way and rejects unknown ones", () => {
 		expect(parse("category=payments")).toMatchObject({
@@ -170,6 +171,14 @@ describe("shared filters", () => {
 		});
 		expect("error" in parse("winnersOnly=maybe")).toBe(true);
 		expect("error" in parse("mode=fuzzy")).toBe(true);
+		// The default is the caller's: search hybrid, analyze keyword.
+		const mode = (qs: string, d: "keyword" | "hybrid") => {
+			const r = parseBuildFilters(new URLSearchParams(qs), d);
+			return "filters" in r ? r.filters.mode : null;
+		};
+		expect(mode("q=lending", "hybrid")).toBe("hybrid");
+		expect(mode("q=lending", "keyword")).toBe("keyword");
+		expect(mode("q=lending&mode=keyword", "hybrid")).toBe("keyword");
 	});
 });
 

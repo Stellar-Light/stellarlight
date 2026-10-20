@@ -17,12 +17,10 @@
  */
 import type { Payload } from "payload";
 import { buildContractsRegistry, type ContractRow } from "./contracts-registry";
-import {
-	getHackathonBuildsIndex,
-	type IndexedBuild,
-	searchHackathonBuilds,
-} from "./hackathon-builds";
+import { queryBuilds } from "./hackathon-build-query";
+import { getHackathonBuildsIndex, type ScoredBuild } from "./hackathon-builds";
 import { heldSecurity } from "./held-repos";
+import { isPriorArtEvidence, priorArtTop } from "./prior-art-rank";
 import { buildScfPitch, type ScfPitchReport } from "./scf-pitch";
 import { buildTrustReport, type TrustReport } from "./trust-report";
 
@@ -116,7 +114,8 @@ export interface HackathonBrief {
 	vertical: string | null;
 	/** Same computation as /api/vet-idea (competitors, maturity, gap, judged prior art). */
 	vet: ScfPitchReport["vet"];
-	/** Prototype-layer prior art: DoraHacks submissions matching the idea, winners first. */
+	/** Prototype-layer prior art: stored submissions matching the idea by
+	 * hybrid search, winners first; null = the index could not be read. */
 	builds: Array<{
 		name: string;
 		hackathon: string;
@@ -131,7 +130,7 @@ export interface HackathonBrief {
 		project?: { slug: string; name: string } | null;
 		/** Opens the full submission in getHackathonBuild. */
 		id: string;
-	}>;
+	}> | null;
 	/** Candidate repos to fork/study — the top competitor repos that are not
 	 * archived, with a trust summary each. A competitor is a starting point to
 	 * READ, not necessarily a template. */
@@ -166,23 +165,23 @@ export interface HackathonBrief {
 /**
  * Prior-art builds for a brief: winners first, then broaden, the order
  * prior-art research should take. Up to two prize winners covering at least
- * half of the idea's concepts, then the closest other builds, five in all.
- * Ranking alone can bury a winner under builds whose text repeats the query's
- * exact phrase; a winner matching one word of three is not prior art.
+ * half of the idea's words (share, the keyword coverage hybrid search keeps;
+ * a build found by meaning alone has 0), then the builds vetIdea lists from
+ * the same top five (priorArtTop), five at most. Ranking alone can bury a
+ * winner under builds whose text repeats the query's exact phrase; a winner
+ * matching one word of three is not prior art. Every build listed passes
+ * vetIdea's evidence rule (isPriorArtEvidence), so the brief never lists a
+ * build vetIdea would reject; it may list a winner ranked below vetIdea's
+ * top five.
  */
-export function pickBriefBuilds(index: IndexedBuild[], q: string) {
-	const winners = searchHackathonBuilds(index, q, {
-		winnersOnly: true,
-		perSubmission: true,
-	})
-		.filter((s) => s.share >= 0.5)
+export function pickBriefBuilds(scored: ScoredBuild[]) {
+	const winners = scored
+		.filter((s) => s.b.isWinner && s.share >= 0.5 && isPriorArtEvidence(s))
 		.slice(0, 2);
 	const seen = new Set(winners.map((s) => s.b.id));
 	return [
 		...winners,
-		...searchHackathonBuilds(index, q, { perSubmission: true }).filter(
-			(s) => !seen.has(s.b.id),
-		),
+		...priorArtTop(scored).filter((s) => !seen.has(s.b.id)),
 	].slice(0, 5);
 }
 
@@ -238,7 +237,7 @@ export async function buildHackathonBrief(
 		domain.domain
 			? buildContractsRegistry(payload, { domain: domain.domain, limit: 5 })
 			: Promise.resolve({ contracts: [] as ContractRow[], total: 0 }),
-		getHackathonBuildsIndex().catch(() => []),
+		getHackathonBuildsIndex().catch(() => null),
 	]);
 
 	// Starter candidates: top competitor repos that are not archived, ≤2, each
@@ -257,18 +256,34 @@ export async function buildHackathonBrief(
 		.filter((t): t is TrustReport => !!t)
 		.map(summarizeTrust);
 
-	const builds = pickBriefBuilds(index, q).map(({ b }) => ({
-		id: b.id,
-		name: b.name,
-		hackathon: b.hackathon.title,
-		endedAt: b.hackathon.endedAt ?? null,
-		isWinner: b.isWinner,
-		placement: b.hackathonPlacement ?? null,
-		githubUrl: b.githubUrl ?? null,
-		...heldSecurity(b),
-		url: b.url ?? null,
-		...(b.project !== undefined ? { project: b.project } : {}),
-	}));
+	// The same hybrid search vetIdea runs. null when the index could not be
+	// read: [] would say no team ever tried the idea.
+	const buildSearch = index?.length
+		? await queryBuilds(
+				index,
+				{
+					q: q.toLowerCase().trim(),
+					mode: "hybrid",
+					winnersOnly: false,
+					hackathons: [],
+				},
+				{ perSubmission: true },
+			).catch(() => null)
+		: null;
+	const builds = buildSearch
+		? pickBriefBuilds(buildSearch.scored).map(({ b }) => ({
+				id: b.id,
+				name: b.name,
+				hackathon: b.hackathon.title,
+				endedAt: b.hackathon.endedAt ?? null,
+				isWinner: b.isWinner,
+				placement: b.hackathonPlacement ?? null,
+				githubUrl: b.githubUrl ?? null,
+				...heldSecurity(b),
+				url: b.url ?? null,
+				...(b.project !== undefined ? { project: b.project } : {}),
+			}))
+		: null;
 
 	const partial: Omit<HackathonBrief, "whatNotToClaim"> = {
 		idea: q,

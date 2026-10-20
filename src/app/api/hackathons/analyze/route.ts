@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
 			{ status: 400 },
 		);
 	const by = (byRaw ?? undefined) as GroupFacetId | undefined;
-	const parsed = parseBuildFilters(sp);
+	const parsed = parseBuildFilters(sp, "keyword");
 	if ("error" in parsed)
 		return NextResponse.json(parsed.error, { status: 400 });
 	const f = parsed.filters;

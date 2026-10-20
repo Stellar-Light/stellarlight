@@ -295,7 +295,7 @@ const BUILD_FILTER_INPUTS = {
 		.enum(["keyword", "meaning", "hybrid"])
 		.optional()
 		.describe(
-			"How q matches: keyword (default), meaning (vector similarity) or hybrid.",
+			"How q matches: keyword, meaning (vector similarity) or hybrid (both). Default: hybrid for search_hackathon_builds, keyword for analyze_hackathon_submissions.",
 		),
 	winnersOnly: z.boolean().optional().describe("Only prize-winning builds."),
 	hackathon: z
