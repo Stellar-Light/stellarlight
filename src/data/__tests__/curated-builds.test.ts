@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseBuildId } from "@/lib/hackathon-build-links";
+import { CURATED_BUILD_ID, parseBuildId } from "@/lib/hackathon-build-links";
 import { CURATED_BUILDS } from "../curated-builds";
 import { CURATED_HACKATHONS } from "../curated-hackathons";
 
@@ -9,7 +9,7 @@ describe("curated hackathon builds", () => {
 		const ids = CURATED_BUILDS.map((b) => b.id);
 		expect(new Set(ids).size).toBe(ids.length);
 		for (const b of CURATED_BUILDS) {
-			expect(b.id).toMatch(/^curated-[a-z0-9-]+$/);
+			expect(b.id).toMatch(CURATED_BUILD_ID);
 			expect(events.has(b.hackathonSlug), b.id).toBe(true);
 			expect(b.url).toMatch(/^https:\/\//);
 		}
@@ -36,6 +36,10 @@ describe("curated hackathon builds", () => {
 			"curated-hackmeridian-2025-the-simple-fund",
 		);
 		expect(parseBuildId("dorahacks-buidl-42585")).toBe("dorahacks-buidl-42585");
+		// Not ids the generator makes.
+		expect(parseBuildId("curated--")).toBeNull();
+		expect(parseBuildId("curated-a-")).toBeNull();
+		expect(parseBuildId("curated-a--b")).toBeNull();
 		expect(parseBuildId("https://dorahacks.io/buidl/42585")).toBe(
 			"dorahacks-buidl-42585",
 		);

@@ -16,6 +16,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import { CURATED_BUILDS } from "../src/data/curated-builds";
 import { CURATED_HACKATHONS } from "../src/data/curated-hackathons";
+import { CURATED_BUILD_ID } from "../src/lib/hackathon-build-links";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -29,9 +30,7 @@ async function main() {
 	const bad = CURATED_BUILDS.filter((b) => {
 		const dup = ids.has(b.id);
 		ids.add(b.id);
-		return (
-			dup || !events.has(b.hackathonSlug) || !/^curated-[a-z0-9-]+$/.test(b.id)
-		);
+		return dup || !events.has(b.hackathonSlug) || !CURATED_BUILD_ID.test(b.id);
 	});
 	if (bad.length) {
 		console.error(
@@ -64,6 +63,7 @@ async function main() {
 			]),
 		);
 	const stored = await read();
+	const expected = new Map<string, Record<string, unknown>>();
 	let created = 0;
 	let updated = 0;
 	let same = 0;
@@ -81,25 +81,30 @@ async function main() {
 			endedAt: new Date(ev.end_time * 1000).toISOString(),
 			url: b.url,
 			isWinner: b.isWinner,
-			...(b.track ? { track: b.track } : {}),
-			...(b.placement ? { placement: b.placement } : {}),
-			...(b.description ? { vision: b.description } : {}),
-			...(b.githubUrl ? { githubUrl: b.githubUrl } : {}),
-			...(b.demoUrl ? { demoUrl: b.demoUrl } : {}),
+			// Written as null when empty, so a second run clears a value the
+			// file corrected (outside review, 2026-10-20).
+			track: b.track ?? null,
+			placement: b.placement ?? null,
+			vision: b.description ?? null,
+			githubUrl: b.githubUrl ?? null,
+			demoUrl: b.demoUrl ?? null,
+			hiddenUpstream: false,
 		};
+		expected.set(entryKey, facts);
 		const old = stored.get(entryKey);
-		const changed =
-			!old ||
-			Object.entries(facts).some(
-				([k, v]) => JSON.stringify(old[k]) !== JSON.stringify(v),
-			);
-		if (!changed) {
+		const diff = Object.entries(facts).filter(
+			([k, v]) => !sameValue(old?.[k], v),
+		);
+		if (old && !diff.length) {
 			same++;
 			continue;
 		}
-		console.log(
-			`  ${old ? "update" : "create"} ${entryKey}: ${b.name} (${b.track ?? "no track"}, ${b.placement ?? "entry"})`,
-		);
+		// The dry run shows exactly what would be written.
+		console.log(`  ${old ? "update" : "create"} ${entryKey}`);
+		for (const [k, v] of diff)
+			console.log(
+				`      ${k}: ${JSON.stringify(old?.[k] ?? null)} -> ${JSON.stringify(v)}`,
+			);
 		if (!EXECUTE) {
 			if (old) updated++;
 			else created++;
@@ -126,22 +131,74 @@ async function main() {
 			console.error(`  ✗ ${entryKey}: ${(e as Error).message}`);
 		}
 	}
+	// A curated row no longer in the file (a renamed or withdrawn winner) is
+	// hidden, never deleted, so it stops being served and can come back.
+	const orphans = (
+		await payload.find({
+			collection: "hackathon-builds",
+			where: {
+				and: [
+					{ buildId: { like: "curated-" } },
+					{ hackathonSlug: { in: [...events.keys()] } },
+					{ entryKey: { not_in: keys } },
+					{ hiddenUpstream: { not_equals: true } },
+				],
+			},
+			limit: 100,
+			depth: 0,
+			context: CONTEXT,
+		})
+	).docs as unknown as Array<Record<string, unknown>>;
+	for (const o of orphans) {
+		console.log(`  hide ${o.entryKey}: no longer in curated-builds.ts`);
+		if (!EXECUTE) continue;
+		try {
+			await payload.update({
+				collection: "hackathon-builds",
+				id: String(o.id),
+				data: { hiddenUpstream: true, lastSeenAt: now },
+				context: CONTEXT,
+			});
+		} catch (e) {
+			failed++;
+			console.error(`  ✗ hide ${o.entryKey}: ${(e as Error).message}`);
+		}
+	}
 	console.log(
-		`\n${CURATED_BUILDS.length} curated rows: ${created} created, ${updated} updated, ${same} unchanged, ${failed} failed`,
+		`\n${CURATED_BUILDS.length} curated rows: ${created} created, ${updated} updated, ${same} unchanged, ${orphans.length} to hide, ${failed} failed`,
 	);
 	if (!EXECUTE) {
 		console.log("dry run: nothing written. Re-run with --execute to write.");
 		return;
 	}
-	// Read back: a row that did not land is a submission nobody can find.
+	// Read back every field, not just the key: Payload drops a field it does
+	// not know without an error, so a row can land without its write-up.
 	const back = await read();
-	const missing = keys.filter((k) => !back.has(k));
-	if (failed || missing.length) {
+	const wrong = [...expected].flatMap(([k, facts]) => {
+		const row = back.get(k);
+		if (!row) return [`${k}: not stored`];
+		return Object.entries(facts)
+			.filter(([f, v]) => !sameValue(row[f], v))
+			.map(
+				([f, v]) =>
+					`${k}.${f}: stored ${JSON.stringify(row[f] ?? null)}, wrote ${JSON.stringify(v)}`,
+			);
+	});
+	if (failed || wrong.length) {
 		console.error(
-			`✗ ${failed} write(s) failed; ${missing.length} row(s) not stored: ${missing.join(", ")}`,
+			`✗ ${failed} write(s) failed; ${wrong.length} field(s) wrong:`,
 		);
+		for (const w of wrong) console.error(`  ${w}`);
 		process.exitCode = 1;
-	} else console.log(`${back.size} curated row(s) stored`);
+	} else
+		console.log(`${back.size} curated row(s) stored, every field read back`);
+}
+
+/** Equal as stored: a field written as null may read back absent. */
+function sameValue(stored: unknown, wrote: unknown): boolean {
+	if (wrote === null || wrote === false)
+		return stored === wrote || stored === null || stored === undefined;
+	return JSON.stringify(stored) === JSON.stringify(wrote);
 }
 
 main()
