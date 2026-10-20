@@ -92,7 +92,7 @@ export async function GET(
 			status: 404,
 			error: `Submission ${id} is not in Scout's store.`,
 			advisory:
-				"Not stored here is not proof it does not exist. The store holds submissions to ended Stellar hackathons on DoraHacks; ones their teams deleted or made private are not served.",
+				"Not stored here is not proof it does not exist. The store holds submissions to ended Stellar hackathons on DoraHacks, plus curated ones from events off it (curated-<event>-<name>); ones their teams deleted or made private are not served.",
 			startedAt,
 		});
 

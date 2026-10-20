@@ -11,7 +11,18 @@
  */
 import type { DoraHacksHackathon } from "@/lib/integrations/dorahacks";
 
-const ts = (iso: string) => Math.floor(Date.parse(iso) / 1000);
+/** Timestamps whose UTC date is not the date written. The API serves an
+ * event's dates as UTC dates, so local midnight east of UTC, or late evening
+ * west of it, shows a day off (Jaipur served 20 August for 21). A test keeps
+ * this empty: write each row at a local time that stays on its date. */
+export const TS_DATE_SHIFTS: string[] = [];
+
+const ts = (iso: string) => {
+	const sec = Math.floor(Date.parse(iso) / 1000);
+	if (new Date(sec * 1000).toISOString().slice(0, 10) !== iso.slice(0, 10))
+		TS_DATE_SHIFTS.push(iso);
+	return sec;
+};
 
 export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 	{
@@ -50,7 +61,8 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		description:
 			"Three months of online builder challenges with Rise In: a belt-progression builder track and a startup track (payments, stablecoins, RWAs, cross-border, wallets, AI + blockchain, anchors). $20,000 monthly prize pool.",
 		start_time: ts("2026-05-31T00:00:00Z"),
-		end_time: ts("2026-08-31T23:59:00Z"),
+		// The program ends 19 September; 31 August is when registration closes.
+		end_time: ts("2026-09-19T23:59:00Z"),
 		bonus_price: 20000,
 		hackers_count: 0,
 		winner_announced: false,
@@ -70,7 +82,7 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		title: "APAC Stellar Hackathon",
 		uname: "apac-stellar-hackathon-2026",
 		description:
-			"Rise In and SDF's Asia-Pacific hackathon for user-facing finance apps: payments, DeFi with real assets, local financial tools for Vietnam, Indonesia and the Philippines. Up to $60,000 in prizes; demo day at GCash, grand finale Jul 24, 2026.",
+			"Rise In and SDF's Asia-Pacific hackathon for user-facing finance apps: payments, DeFi with real assets, local financial tools for Vietnam, Indonesia and the Philippines. Up to $60,000 in prizes; final submissions July 15, a hybrid demo day July 18 and an in-person grand finale for the top teams from each country on July 24, 2026.",
 		start_time: ts("2026-05-13T00:00:00Z"),
 		end_time: ts("2026-07-24T23:59:00Z"),
 		bonus_price: 60000,
@@ -92,8 +104,9 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		uname: "stellar-builders-camp-jaipur-2026",
 		description:
 			"Five-day builder residency with Rise In, SDF and Stellar India: payments, remittances, DeFi, identity, AI and tooling, aimed at SCF-ready projects. $2,000 in prizes. Registration has closed.",
-		start_time: ts("2026-08-21T00:00:00+05:30"),
-		end_time: ts("2026-08-25T23:59:00+05:30"),
+		// Luma's times, India Standard Time.
+		start_time: ts("2026-08-21T15:00:00+05:30"),
+		end_time: ts("2026-08-25T14:00:00+05:30"),
 		bonus_price: 2000,
 		hackers_count: 0,
 		winner_announced: false,
@@ -113,7 +126,9 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		uname: "build-on-stellar-philippines-2026",
 		description:
 			"Stellar PH and Rise In's national hackathon: 165 registrations, 32 submissions, 28 mainnet deployments; ₱60,000 in prizes. Winners: AbotPera, PinkRaft, Axial, Sobre, TyFi.",
-		start_time: ts("2026-05-18T00:00:00+08:00"),
+		// Launch day 18 May (the page body; no time of day published), so a
+		// daytime start: local midnight served 17 May.
+		start_time: ts("2026-05-18T09:00:00+08:00"),
 		end_time: ts("2026-05-24T23:59:00+08:00"),
 		bonus_price: 0,
 		hackers_count: 165,
@@ -136,7 +151,7 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		description:
 			"NearX's week-long team build sprint in São Paulo (about 100 builders): payments, tokenization, DeFi, contracts, AI, developer tools and confidential tokens, closing at Stellar House SP.",
 		start_time: ts("2026-07-30T00:00:00-03:00"),
-		end_time: ts("2026-08-06T23:59:00-03:00"),
+		end_time: ts("2026-08-06T18:00:00-03:00"),
 		bonus_price: 0,
 		hackers_count: 100,
 		winner_announced: false,
