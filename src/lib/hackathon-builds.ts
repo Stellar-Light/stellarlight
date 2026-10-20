@@ -439,7 +439,12 @@ export function dedupeBuilds(rows: IndexedBuild[]): IndexedBuild[] {
 
 export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
 	const stored = await readStoredBuilds();
-	return dedupeBuilds(stored?.length ? stored : await buildLiveIndex());
+	const index = dedupeBuilds(stored?.length ? stored : await buildLiveIndex());
+	// Never return an empty index: unstable_cache would keep it for an hour in
+	// place of the last good one. A throw keeps the cached index and is an
+	// outage every caller already answers as one (503, or null).
+	if (!index.length) throw new Error("hackathon builds index came back empty");
+	return index;
 }
 
 export const getHackathonBuildsIndex = unstable_cache(
