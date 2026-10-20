@@ -34,6 +34,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 		date: "2026-10-20",
 		surfaces: ["api"],
 		version: "spec@1.9.83",
+		type: "changed",
+		summary:
+			"getHackathon's routing now carries HackMeridian, Meridian, venue, deadline and check-in, and three HackMeridian example questions, so questions about the event reach it.",
+		detail:
+			'Raven\'s tokenizer splits "HackMeridian" into "hack" and "meridian", and no hackathon operation\'s indexed text held "meridian" or a year, so short questions ("When and where is HackMeridian 2026?") failed Raven\'s 60% coverage gate and reached no Scout tool. Measured with the Raven scorer replica: 32 HackMeridian questions put an expected operation in Scout\'s top two 24 times, up from 15; the 65 standing routing questions are unchanged (57 in the top three before and after, no first pick moved).',
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
 		type: "fixed",
 		summary:
 			"hackathonBrief's `builds` uses the same hybrid search and evidence rule as vetIdea's `priorArt.builds`, and is null, not [], when the submissions index cannot be read.",
