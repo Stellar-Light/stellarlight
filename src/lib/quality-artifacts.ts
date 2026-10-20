@@ -399,7 +399,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					...decided
 						.slice(0, 4)
 						.map((r) => `${r.verdict}: ${r.slug} (${r.to}) — ${r.reason}`),
-					`${t.couldNotCheck} could-not-check — a 403, a timeout or a client-rendered shell is a page we did not read, never a contradiction`,
+					`${t.couldNotCheck} could-not-check: a 403, a timeout, a client-rendered shell or a redirect to another site is a page we did not read, never a contradiction`,
 					"read-only: this guard files a finding for a human and never writes a status, because reading a marketing banner as a product state is the failure it exists to catch",
 				],
 				asOf: packetStamps.generatedAt.slice(0, 10),
