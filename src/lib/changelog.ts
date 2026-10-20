@@ -36,9 +36,9 @@ export const CHANGELOG: ChangelogEntry[] = [
 		version: "spec@1.9.83",
 		type: "changed",
 		summary:
-			"getHackathon's routing now carries HackMeridian, Meridian, prize pool, deadline and check-in, and two HackMeridian example questions, so questions about the event reach it.",
+			"getHackathon's routing now carries HackMeridian, Meridian, prize pool, deadline and check-in, so questions about the event reach it.",
 		detail:
-			'Raven\'s tokenizer splits "HackMeridian" into "hack" and "meridian", and no hackathon operation\'s indexed text held "meridian" or a year, so short questions ("When and where is HackMeridian 2026?") failed Raven\'s 60% coverage gate and reached no Scout tool. Measured with the Raven scorer replica: 32 HackMeridian questions put an expected operation in Scout\'s top two 24 times, up from 15; the 65 standing routing questions are unchanged (57 in the top three before and after, no first pick moved). One conference question ("Where is the Meridian conference venue?") now reaches getHackathon, whose HackMeridian 2026 text names the conference venue, Convento do Beato.',
+			'Raven\'s tokenizer splits "HackMeridian" into "hack" and "meridian", and no hackathon operation\'s indexed text held "meridian" or a year, so short questions ("When and where is HackMeridian 2026?") failed Raven\'s 60% coverage gate and reached no Scout tool. Measured with the Raven scorer replica: 32 HackMeridian questions put an expected operation in Scout\'s top two 24 times, up from 15; 12 held-out HackMeridian questions in other words, never used for tuning, 8 times, up from 2; the 65 standing routing questions are unchanged (57 in the top three, no first pick moved). One conference question ("Where is the Meridian conference venue?") now reaches getHackathon, whose HackMeridian 2026 text names the conference venue, Convento do Beato.',
 	},
 	{
 		date: "2026-10-20",

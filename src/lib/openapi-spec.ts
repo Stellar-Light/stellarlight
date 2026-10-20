@@ -3179,8 +3179,6 @@ export const spec: OpenAPISpec = {
 						"Who won the Stellar x402 hackathon?",
 						"What tracks did the event have and what did they pay?",
 						"How are submissions judged at Stellar Hacks: Real-World ZK, and what must a submission include?",
-						"When and where is HackMeridian, and when is the submission deadline?",
-						"Who won HackMeridian, and how many builders took part?",
 					],
 				},
 				parameters: [

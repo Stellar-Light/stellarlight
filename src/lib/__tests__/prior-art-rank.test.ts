@@ -60,14 +60,13 @@ describe("prior art among judged repos", () => {
 		).toEqual(["m/film"]);
 	});
 
-	it("matches short -y words to their -ies plurals (try, tries)", () => {
-		const tried = [
+	it("never treats APY and API as one word", () => {
+		// Outside review: a three-letter y rule mapped "apy" to "api".
+		const yields = [
 			...corpus,
-			{ fullName: "y/retry", description: "Retry failed payment tries" },
+			{ fullName: "p/api-kit", description: "Payment API kit for wallets" },
 		];
-		expect(
-			rankPriorArt(["payment", "try"], tried).map((r) => r.fullName),
-		).toEqual(["y/retry"]);
+		expect(rankPriorArt(["apy", "payment"], yields)).toEqual([]);
 	});
 
 	it("matches -ies plurals to -y words", () => {
