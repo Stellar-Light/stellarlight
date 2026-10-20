@@ -51,12 +51,18 @@ export const VERTICAL_TOKENS: Record<string, string> = {
 	lend: "Lending",
 	borrow: "Lending",
 	loan: "Lending",
+	loans: "Lending",
+	microloan: "Lending",
+	microloans: "Lending",
+	microfinance: "Lending",
 	bridge: "Bridge",
 	payments: "Payments",
 	payment: "Payments",
 	remittance: "Payments",
 	checkout: "Payments",
+	payroll: "Payments",
 	anchor: "Anchor",
+	anchors: "Anchor",
 	ramp: "Anchor",
 	onramp: "Anchor",
 	offramp: "Anchor",
@@ -83,9 +89,25 @@ export const VERTICAL_TOKENS: Record<string, string> = {
 	"erc-3643": "RWA",
 	stablecoin: "Stablecoin",
 	stablecoins: "Stablecoin",
+	donation: "Social Impact",
+	donations: "Social Impact",
+	charity: "Social Impact",
+	charities: "Social Impact",
 	rpc: "RPC",
 	faucet: "Faucet",
 } as const;
+
+/** The idea's vertical: the first mapped token, with Stablecoin only when no
+ * other vertical maps. "stablecoin payroll" is a payroll product on a
+ * stablecoin rail; read as Stablecoin, it was weighed against stablecoin
+ * issuers (payroll, subscription billing and a savings app on 40 labeled
+ * ideas). */
+export function verticalOf(q: string): string | null {
+	const mapped = contentTokens(q).flatMap((t) =>
+		VERTICAL_TOKENS[t] ? [VERTICAL_TOKENS[t]] : [],
+	);
+	return mapped.find((v) => v !== "Stablecoin") ?? mapped[0] ?? null;
+}
 
 export interface VetIdeaReport {
 	idea: string;
@@ -152,8 +174,7 @@ export async function buildVetIdea(
 	q: string,
 ): Promise<VetIdeaReport> {
 	const tokens = contentTokens(q);
-	const vertical =
-		tokens.map((t) => VERTICAL_TOKENS[t]).find((v) => v !== undefined) ?? null;
+	const vertical = verticalOf(q);
 
 	// Competitor repos via the full search stack (identity, vocabulary,
 	// canonical injection all apply).

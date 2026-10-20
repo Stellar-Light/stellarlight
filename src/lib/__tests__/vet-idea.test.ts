@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GAP_VERTICALS } from "../ecosystem-gaps";
 import { buildHaystack, scoreTokens, tokenize } from "../project-search-match";
-import { VERTICAL_TOKENS } from "../vet-idea";
+import { VERTICAL_TOKENS, verticalOf } from "../vet-idea";
 
 describe("vet-idea vertical map", () => {
 	it("every VERTICAL_TOKENS value is a real GAP_VERTICALS member", () => {
@@ -203,5 +203,24 @@ describe("vet-idea tie-break is prominence, not the alphabet", () => {
 				{ slug: "niche", name: "Niche", __rel: 3, prominence: 0 },
 			]),
 		).toEqual(["niche", "freighter"]);
+	});
+});
+
+describe("vet-idea reads an idea's vertical", () => {
+	it("reads Stablecoin only when no other vertical maps", () => {
+		// Payroll on a stablecoin rail competes with payroll tools, not issuers.
+		expect(verticalOf("stablecoin payroll for freelancers")).toBe("Payments");
+		expect(
+			verticalOf("subscription billing with recurring stablecoin payments"),
+		).toBe("Payments");
+		expect(verticalOf("a fiat-backed stablecoin issuer")).toBe("Stablecoin");
+	});
+
+	it("knows the plural and compound forms ideas use", () => {
+		expect(verticalOf("microloans for small businesses")).toBe("Lending");
+		expect(verticalOf("transparent donation platform for charities")).toBe(
+			"Social Impact",
+		);
+		expect(verticalOf("cash out through local anchors")).toBe("Anchor");
 	});
 });

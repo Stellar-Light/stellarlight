@@ -16,6 +16,26 @@ import {
 import type { TrustReport } from "../trust-report";
 
 describe("contractDomainFor", () => {
+	it("a payments idea that is not x402 gets no x402 contracts; an x402 idea still does", () => {
+		expect(
+			contractDomainFor("merchant QR code payments for small shops", "Payments")
+				.domain,
+		).toBeNull();
+		expect(
+			contractDomainFor("AI agent that pays for API calls using x402", "AI")
+				.domain,
+		).toBe("payments-x402");
+	});
+
+	it("anchors, plural, names the anchor domain", () => {
+		expect(
+			contractDomainFor(
+				"remittance app cashing out through local anchors",
+				"Payments",
+			).domain,
+		).toBe("anchor-ramp");
+	});
+
 	it("every mapped domain is a real CODE_DOMAINS value (closed set; unknown values 400 on /api/contracts)", () => {
 		for (const d of Object.values(VERTICAL_TO_CONTRACT_DOMAIN))
 			expect(CODE_DOMAINS as readonly string[]).toContain(d);
