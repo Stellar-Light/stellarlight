@@ -62,7 +62,6 @@ export const VERTICAL_TOKENS: Record<string, string> = {
 	checkout: "Payments",
 	payroll: "Payments",
 	anchor: "Anchor",
-	anchors: "Anchor",
 	ramp: "Anchor",
 	onramp: "Anchor",
 	offramp: "Anchor",
@@ -97,16 +96,23 @@ export const VERTICAL_TOKENS: Record<string, string> = {
 	faucet: "Faucet",
 } as const;
 
-/** The idea's vertical: the first mapped token, with Stablecoin only when no
- * other vertical maps. "stablecoin payroll" is a payroll product on a
- * stablecoin rail; read as Stablecoin, it was weighed against stablecoin
- * issuers (payroll, subscription billing and a savings app on 40 labeled
- * ideas). */
+/** Words that make an idea a stablecoin product rather than one paid in
+ * stablecoins. */
+const STABLECOIN_PRODUCT =
+	/\b(?:issu(?:e|es|er|ers|ance|ing)|mint(?:s|ing)?|pegs?|pegged|backed|reserves?|redeem(?:s|able)?|redemptions?)\b/i;
+
+/** The idea's vertical: its first mapped token, except that a stablecoin
+ * used as the rail yields to the idea's other vertical. "stablecoin payroll"
+ * is a payroll product; read as Stablecoin, it was weighed against stablecoin
+ * issuers (payroll and subscription billing on 40 labeled ideas). An issuer,
+ * mint, peg, backing, reserves or redemption keeps Stablecoin. */
 export function verticalOf(q: string): string | null {
 	const mapped = contentTokens(q).flatMap((t) =>
 		VERTICAL_TOKENS[t] ? [VERTICAL_TOKENS[t]] : [],
 	);
-	return mapped.find((v) => v !== "Stablecoin") ?? mapped[0] ?? null;
+	if (mapped[0] === "Stablecoin" && !STABLECOIN_PRODUCT.test(q))
+		return mapped.find((v) => v !== "Stablecoin") ?? "Stablecoin";
+	return mapped[0] ?? null;
 }
 
 export interface VetIdeaReport {

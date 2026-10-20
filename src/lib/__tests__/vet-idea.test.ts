@@ -207,20 +207,40 @@ describe("vet-idea tie-break is prominence, not the alphabet", () => {
 });
 
 describe("vet-idea reads an idea's vertical", () => {
-	it("reads Stablecoin only when no other vertical maps", () => {
+	it("reads a stablecoin rail by the idea's other vertical", () => {
 		// Payroll on a stablecoin rail competes with payroll tools, not issuers.
 		expect(verticalOf("stablecoin payroll for freelancers")).toBe("Payments");
 		expect(
 			verticalOf("subscription billing with recurring stablecoin payments"),
 		).toBe("Payments");
+		expect(verticalOf("stablecoin wallet for remittances")).toBe("Wallet");
+	});
+
+	it("keeps Stablecoin for a stablecoin product", () => {
+		expect(verticalOf("stablecoin issuer for merchant payments")).toBe(
+			"Stablecoin",
+		);
+		expect(verticalOf("a stablecoin that anchors its peg to gold")).toBe(
+			"Stablecoin",
+		);
+		expect(verticalOf("fiat-backed stablecoin with daily redemptions")).toBe(
+			"Stablecoin",
+		);
 		expect(verticalOf("a fiat-backed stablecoin issuer")).toBe("Stablecoin");
 	});
 
 	it("knows the plural and compound forms ideas use", () => {
+		expect(verticalOf("loans for farmers")).toBe("Lending");
+		expect(verticalOf("microloan app")).toBe("Lending");
 		expect(verticalOf("microloans for small businesses")).toBe("Lending");
+		expect(verticalOf("microfinance platform")).toBe("Lending");
+		expect(verticalOf("charity auctions")).toBe("Social Impact");
+		expect(verticalOf("donation matching for nonprofits")).toBe(
+			"Social Impact",
+		);
 		expect(verticalOf("transparent donation platform for charities")).toBe(
 			"Social Impact",
 		);
-		expect(verticalOf("cash out through local anchors")).toBe("Anchor");
+		expect(verticalOf("payroll for remote teams")).toBe("Payments");
 	});
 });

@@ -27,13 +27,32 @@ describe("contractDomainFor", () => {
 		).toBe("payments-x402");
 	});
 
-	it("anchors, plural, names the anchor domain", () => {
+	it("an anchor, singular or plural, names the anchor domain; the verb does not", () => {
+		expect(
+			contractDomainFor("integrate with a local anchor", "Anchor").domain,
+		).toBe("anchor-ramp");
 		expect(
 			contractDomainFor(
 				"remittance app cashing out through local anchors",
 				"Payments",
 			).domain,
 		).toBe("anchor-ramp");
+		expect(
+			contractDomainFor(
+				"a stablecoin that anchors its peg to gold",
+				"Stablecoin",
+			).domain,
+		).toBeNull();
+	});
+
+	it("an MPP idea names the x402 domain; a plain payments idea says no domain fits", () => {
+		expect(
+			contractDomainFor("agents paying per call over MPP", "AI").domain,
+		).toBe("payments-x402");
+		expect(
+			contractDomainFor("merchant QR code payments for small shops", "Payments")
+				.basis,
+		).toMatch(/fits the Payments vertical as a whole/);
 	});
 
 	it("every mapped domain is a real CODE_DOMAINS value (closed set; unknown values 400 on /api/contracts)", () => {
@@ -57,7 +76,9 @@ describe("contractDomainFor", () => {
 	it("verticals with no code-domain axis resolve to null with an honest basis", () => {
 		const r = contractDomainFor("cross-chain bridge to Ethereum", "Bridge");
 		expect(r.domain).toBeNull();
-		expect(r.basis).toMatch(/Bridge vertical has no code-domain axis/);
+		expect(r.basis).toMatch(
+			/no code domain in the contracts registry fits the Bridge vertical/,
+		);
 	});
 
 	it("no vertical and no hint → null, never a guessed domain", () => {

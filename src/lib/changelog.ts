@@ -35,9 +35,9 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
-			"vetIdea, scfPitch and hackathonBrief read an idea's vertical with Stablecoin last and know payroll, microloans, donations and charities; the brief no longer serves x402 contracts for payments ideas that are not x402.",
+			"vetIdea, scfPitch and hackathonBrief read an idea that uses stablecoins as its rail by its other vertical (an issuer, mint, peg, backing or redemption stays Stablecoin) and know payroll, microloans, donations and charities; the brief no longer serves x402 contracts for payments ideas that are not x402.",
 		detail:
-			"On 40 labeled ideas: stablecoin payroll and subscription billing moved from Stablecoin to Payments, donations to charities now map to Social Impact and microloans to Lending (both mapped to none), a remittance idea cashing out through anchors gets anchor-ramp contracts instead of x402, and merchant QR, bill payments, streaming salary and tipping no longer get x402 contracts, which they received as the Payments vertical's closest domain.",
+			"On 40 labeled ideas: stablecoin payroll and subscription billing moved from Stablecoin to Payments, donations to charities now map to Social Impact and microloans to Lending (both mapped to none), a remittance idea cashing out through anchors gets anchor-ramp contracts instead of x402, and merchant QR, bill payments, streaming salary and tipping no longer get x402 contracts, which they received as the Payments vertical's closest domain. Microloans now take the Lending vertical's closest domain, defi-lending, with that basis stated.",
 	},
 	{
 		date: "2026-10-20",
