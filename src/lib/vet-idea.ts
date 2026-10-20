@@ -22,9 +22,10 @@ import {
 	GAP_VERTICALS,
 	type TypeCoverage,
 } from "./ecosystem-gaps";
+import { queryBuilds } from "./hackathon-build-query";
 import {
+	type BuildSearchMode,
 	getHackathonBuildsIndex,
-	searchHackathonBuilds,
 } from "./hackathon-builds";
 import { ACTIVE_PROJECT_STATUSES } from "./population";
 import { rankPriorArt } from "./prior-art-rank";
@@ -134,7 +135,11 @@ export interface VetIdeaReport {
 			isWinner: boolean;
 			githubUrl: string | null;
 			matchedTerms: string[];
+			/** Meaning similarity to the idea, when search by meaning ran. */
+			similarity?: number;
 		}>;
+		/** The search that served builds: hybrid, or keyword when meaning could not run. */
+		buildsMode: BuildSearchMode;
 		note: string;
 	};
 	gap: (TypeCoverage & { basis: string }) | null;
@@ -381,15 +386,26 @@ export async function buildVetIdea(
 	}));
 
 	// Prior art from every stored hackathon submission, on DoraHacks and off
-	// it: the search searchHackathonBuilds serves, with the words each build
-	// matched, so a one-word match reads as one. Most submissions' repos are
+	// it, by hybrid search (words plus meaning). Most submissions' repos are
 	// not in the repo index, so the judged repos above are a small slice.
+	// Hybrid, not keyword: on the 40-idea labeled set (2026-10-20, top 5 per
+	// idea) keyword filled 40% of slots with builds that are not the idea and
+	// found 36 of 118 same-idea builds; hybrid 22% and 56. When meaning cannot
+	// run, queryBuilds serves keyword and says so.
 	const index = await getHackathonBuildsIndex().catch(() => []);
-	const priorArtBuilds = searchHackathonBuilds(index, q, {
-		perSubmission: true,
-	})
+	const buildSearch = await queryBuilds(
+		index,
+		{
+			q: q.toLowerCase().trim(),
+			mode: "hybrid",
+			winnersOnly: false,
+			hackathons: [],
+		},
+		{ perSubmission: true },
+	);
+	const priorArtBuilds = buildSearch.scored
 		.slice(0, 5)
-		.map(({ b, matched }) => ({
+		.map(({ b, matched, similarity }) => ({
 			id: b.id,
 			name: b.name,
 			hackathon: b.hackathon.title,
@@ -397,6 +413,9 @@ export async function buildVetIdea(
 			isWinner: !!b.isWinner,
 			githubUrl: b.githubUrl ?? null,
 			matchedTerms: matched,
+			...(similarity !== undefined
+				? { similarity: Math.round(similarity * 1000) / 1000 }
+				: {}),
 		}));
 
 	// Gap verdict for the vertical (supply-side only — same computation and
@@ -466,7 +485,11 @@ export async function buildVetIdea(
 		priorArt: {
 			repos: priorArtRepos,
 			builds: priorArtBuilds,
-			note: "builds: stored hackathon submissions matching the idea, best first, with the words each matched (a one-word match is a weak one). repos: judged-hackathon repos from our index that match at least two of the idea's words and half their weight, so often none; one shared word is not prior art. Dead prior art is itself a signal.",
+			buildsMode: buildSearch.served,
+			note: [
+				"builds: stored hackathon submissions matching the idea by hybrid search (words plus meaning), best first. matchedTerms are the words each matched (one word is a weak match); similarity is the meaning score; a build with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words and half their weight, so often none; one shared word is not prior art. Dead prior art is itself a signal.",
+				...buildSearch.warnings,
+			].join(" "),
 		},
 		gap,
 		funding,

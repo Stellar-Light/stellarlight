@@ -5427,7 +5427,7 @@ export interface operations {
                                 basis?: string;
                             };
                             priorArt?: {
-                                /** @description Stored hackathon submissions matching the idea, best first: the search searchHackathonBuilds serves, across events on DoraHacks and off it. `matchedTerms` shows how strong each match is; a one-word match is a weak one. */
+                                /** @description Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched (one word is a weak match); `similarity` is the meaning score; a build with similarity and no matchedTerms was found by meaning alone, so check it. */
                                 builds?: {
                                     id?: string;
                                     name?: string;
@@ -5436,7 +5436,14 @@ export interface operations {
                                     isWinner?: boolean;
                                     githubUrl?: string | null;
                                     matchedTerms?: string[];
+                                    /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
+                                    similarity?: number;
                                 }[];
+                                /**
+                                 * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so).
+                                 * @enum {string}
+                                 */
+                                buildsMode?: "keyword" | "meaning" | "hybrid";
                                 repos?: {
                                     fullName?: string;
                                     hackathonWinner?: boolean;
