@@ -1,10 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { CURATED_HACKATHONS, TS_DATE_SHIFTS } from "../curated-hackathons";
+import {
+	CURATED_HACKATHONS,
+	shiftsUtcDate,
+	TS_DATE_SHIFTS,
+} from "../curated-hackathons";
 
 describe("curated hackathons", () => {
 	it("serves every date as written: no timestamp crosses a UTC date", () => {
 		expect(CURATED_HACKATHONS.length).toBeGreaterThan(0);
 		expect(TS_DATE_SHIFTS).toEqual([]);
+	});
+
+	it("detects a timestamp whose UTC date is not the date written", () => {
+		// Local midnight east of UTC, and late evening west of it, roll over.
+		expect(shiftsUtcDate("2026-08-21T00:00:00+05:30")).toBe(true);
+		expect(shiftsUtcDate("2026-08-06T23:59:00-03:00")).toBe(true);
+		expect(shiftsUtcDate("2026-08-21T15:00:00+05:30")).toBe(false);
+		expect(shiftsUtcDate("2026-10-25T09:00:00+00:00")).toBe(false);
 	});
 
 	it("keeps HackMeridian 2026 on the organizer's figures, not 2024's", () => {
@@ -16,6 +28,7 @@ describe("curated hackathons", () => {
 		expect(h?.description).toMatch(/Genesis/);
 		expect(h?.description).toMatch(/Scale/);
 		expect(h?.description).toMatch(/\$30,000/);
+		expect(h?.description).toMatch(/calls it 28 hours; its schedule gives 27/);
 		// The archived 2024 session's figures.
 		expect(h?.description).not.toMatch(/36 hours|\$50,000/);
 	});

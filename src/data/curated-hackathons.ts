@@ -17,11 +17,15 @@ import type { DoraHacksHackathon } from "@/lib/integrations/dorahacks";
  * this empty: write each row at a local time that stays on its date. */
 export const TS_DATE_SHIFTS: string[] = [];
 
-const ts = (iso: string) => {
+/** Whether a timestamp's UTC date differs from the date written in it. */
+export function shiftsUtcDate(iso: string): boolean {
 	const sec = Math.floor(Date.parse(iso) / 1000);
-	if (new Date(sec * 1000).toISOString().slice(0, 10) !== iso.slice(0, 10))
-		TS_DATE_SHIFTS.push(iso);
-	return sec;
+	return new Date(sec * 1000).toISOString().slice(0, 10) !== iso.slice(0, 10);
+}
+
+const ts = (iso: string) => {
+	if (shiftsUtcDate(iso)) TS_DATE_SHIFTS.push(iso);
+	return Math.floor(Date.parse(iso) / 1000);
 };
 
 export const CURATED_HACKATHONS: DoraHacksHackathon[] = [

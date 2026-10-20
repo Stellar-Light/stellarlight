@@ -7,9 +7,10 @@
  *   pnpm exec tsx scripts/import-curated-builds.ts --execute  # write
  *
  * The one writer of `curated-` rows: the DoraHacks sync writes only rows it
- * reads from DoraHacks rosters and never touches these. Upserts by entryKey,
- * writes only a row that changed, and never deletes. A field the data file
- * leaves null never blanks a stored value.
+ * reads from DoraHacks rosters and never touches these. Upserts by entryKey
+ * and writes only a row that changed. A field the data file leaves empty is
+ * written as null, so a correction clears it. A curated row no longer in the
+ * file is hidden (hiddenUpstream), never deleted. Every write is read back.
  */
 
 import "./load-env";
@@ -137,14 +138,14 @@ async function main() {
 		await payload.find({
 			collection: "hackathon-builds",
 			where: {
+				// Any event: a curated row whose event left the file is an orphan too.
 				and: [
 					{ buildId: { like: "curated-" } },
-					{ hackathonSlug: { in: [...events.keys()] } },
 					{ entryKey: { not_in: keys } },
 					{ hiddenUpstream: { not_equals: true } },
 				],
 			},
-			limit: 100,
+			pagination: false,
 			depth: 0,
 			context: CONTEXT,
 		})
@@ -174,16 +175,39 @@ async function main() {
 	// Read back every field, not just the key: Payload drops a field it does
 	// not know without an error, so a row can land without its write-up.
 	const back = await read();
-	const wrong = [...expected].flatMap(([k, facts]) => {
-		const row = back.get(k);
-		if (!row) return [`${k}: not stored`];
-		return Object.entries(facts)
-			.filter(([f, v]) => !sameValue(row[f], v))
-			.map(
-				([f, v]) =>
-					`${k}.${f}: stored ${JSON.stringify(row[f] ?? null)}, wrote ${JSON.stringify(v)}`,
-			);
-	});
+	// The hides too: a withdrawn row still served is the failure this guards.
+	const stillServed = orphans.length
+		? (
+				await payload.find({
+					collection: "hackathon-builds",
+					where: {
+						and: [
+							{ id: { in: orphans.map((o) => o.id) } },
+							{ hiddenUpstream: { not_equals: true } },
+						],
+					},
+					pagination: false,
+					depth: 0,
+					context: CONTEXT,
+				})
+			).docs.map(
+				(d) =>
+					`${String((d as { entryKey?: string }).entryKey)}: still served after hide`,
+			)
+		: [];
+	const wrong = [
+		...stillServed,
+		...[...expected].flatMap(([k, facts]) => {
+			const row = back.get(k);
+			if (!row) return [`${k}: not stored`];
+			return Object.entries(facts)
+				.filter(([f, v]) => !sameValue(row[f], v))
+				.map(
+					([f, v]) =>
+						`${k}.${f}: stored ${JSON.stringify(row[f] ?? null)}, wrote ${JSON.stringify(v)}`,
+				);
+		}),
+	];
 	if (failed || wrong.length) {
 		console.error(
 			`✗ ${failed} write(s) failed; ${wrong.length} field(s) wrong:`,
