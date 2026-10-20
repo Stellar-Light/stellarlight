@@ -6107,8 +6107,9 @@ export const spec: OpenAPISpec = {
 													properties: {
 														builds: {
 															type: "array",
+															nullable: true,
 															description:
-																"Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build is listed only with a score of at least 0.7 or two matched words, and one with similarity and no matchedTerms was found by meaning alone, so check it.",
+																"null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build is listed only with a score of at least 0.7 or two matched words, and one with similarity and no matchedTerms was found by meaning alone, so check it.",
 															items: {
 																type: "object",
 																properties: {
@@ -6132,6 +6133,7 @@ export const spec: OpenAPISpec = {
 														},
 														buildsMode: {
 															type: "string",
+															nullable: true,
 															enum: [...BUILD_SEARCH_MODES],
 															description:
 																"The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so).",

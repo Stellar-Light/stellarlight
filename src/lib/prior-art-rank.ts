@@ -2,15 +2,15 @@
  * Prior art for an idea among judged hackathon repos, ranked by how much of
  * the idea a repo is about: the idea's content words found as whole words in
  * the repo's name and description, each weighted by its rarity across the
- * candidates (pass the whole judged set, so "app" weighs nothing). A repo
- * must match two of the idea's words that occur in the set and cover half of
- * their weight; an idea with fewer than two such words gets none, because
- * one shared word is not prior art. Ties go to hackathon winners, then to
- * recent commits.
+ * candidates (pass the whole judged set, so "app" weighs little). A repo
+ * must match two of the idea's words and cover half the weight of all of
+ * them, a word no candidate uses weighing the most; an idea with fewer than
+ * two words the set uses gets none, because one shared word is not prior
+ * art. Ties go to hackathon winners, then to recent commits.
  *
  * Before this (2026-10-20), one word found as a substring was enough and the
- * most recently pushed judged repos won, so the same three repos answered
- * remittance, insurance, QR payments and subscription ideas alike.
+ * most recently pushed judged repos won, so four repos filled the prior art
+ * for 9 of 16 test ideas: remittance, insurance, QR payments and more.
  */
 
 export interface PriorArtCandidate {
@@ -40,10 +40,15 @@ export function rankPriorArt<T extends PriorArtCandidate>(
 	limit = 5,
 	minCoverage = 0.5,
 ): T[] {
-	// Hyphenated tokens arrive with their parts as tokens too.
+	// Every word of the idea, split the way repo text is: the tokenizer keeps
+	// punctuation ("(rosca," for "savings circle (ROSCA, tanda)"), and a
+	// hyphenated token arrives with its parts as tokens too.
 	const terms = [
 		...new Set(
-			tokens.filter((t) => !t.includes("-")).map((t) => stem(t.toLowerCase())),
+			tokens
+				.flatMap((t) => t.toLowerCase().split(/[^a-z0-9]+/))
+				.filter(Boolean)
+				.map(stem),
 		),
 	];
 	const docs = candidates.map((c) => ({
@@ -53,16 +58,20 @@ export function rankPriorArt<T extends PriorArtCandidate>(
 		),
 	}));
 	const n = docs.length;
-	const idf = new Map(
-		terms.map((t) => {
-			const df = docs.filter((d) => d.words.has(t)).length;
-			return [t, df ? Math.log((n + 1) / (df + 0.5)) : 0] as const;
-		}),
+	const df = new Map(
+		terms.map((t) => [t, docs.filter((d) => d.words.has(t)).length] as const),
 	);
-	// Words no candidate uses cannot match; they do not count for or against.
-	const present = terms.filter((t) => (idf.get(t) ?? 0) > 0);
-	if (present.length < 2) return [];
-	const total = present.reduce((s, t) => s + (idf.get(t) ?? 0), 0);
+	// Rarer words weigh more, and a word no candidate uses weighs the most:
+	// it is the idea's most specific word. Leaving such words out of the total
+	// let common words ("app", "stellar") cover the whole idea (outside
+	// review, 2026-10-20).
+	const idf = new Map(
+		terms.map(
+			(t) => [t, Math.log((n + 1) / ((df.get(t) ?? 0) + 0.5))] as const,
+		),
+	);
+	if (terms.filter((t) => (df.get(t) ?? 0) > 0).length < 2) return [];
+	const total = terms.reduce((s, t) => s + (idf.get(t) ?? 0), 0);
 	return docs
 		.map((d) => {
 			const hit = terms.filter((t) => d.words.has(t));

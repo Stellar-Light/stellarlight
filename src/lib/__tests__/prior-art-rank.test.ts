@@ -45,6 +45,29 @@ describe("prior art among judged repos", () => {
 	it("matches plurals, and puts a winner first on a tie", () => {
 		expect(names(["borrows", "collaterals"])).toEqual(["e/lend", "f/lend2"]);
 	});
+
+	it("never lets common words stand in for the idea's missing ones", () => {
+		// "rosca" and "tanda" are in no repo; "app" and "stellar" are in most.
+		// Found by an outside review: dropping the missing words from the
+		// weight let any app-on-Stellar repo cover the whole idea.
+		expect(names(["app", "rosca", "tanda", "stellar"])).toEqual([]);
+	});
+
+	it("reads words through the tokenizer's punctuation", () => {
+		// contentTokens keeps "(rosca," for "savings circle (ROSCA, tanda)".
+		const withCircle = [
+			...corpus,
+			{
+				fullName: "g/rosca",
+				description: "A rosca where a tanda pays out by turns",
+			},
+		];
+		expect(
+			rankPriorArt(["savings", "(rosca,", "tanda)"], withCircle).map(
+				(r) => r.fullName,
+			),
+		).toEqual(["g/rosca"]);
+	});
 });
 
 describe("isPriorArtEvidence", () => {

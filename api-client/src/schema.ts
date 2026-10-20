@@ -5429,7 +5429,7 @@ export interface operations {
                                 basis?: string;
                             };
                             priorArt?: {
-                                /** @description Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build is listed only with a score of at least 0.7 or two matched words, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build is listed only with a score of at least 0.7 or two matched words, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
                                 builds?: {
                                     id?: string;
                                     name?: string;
@@ -5440,12 +5440,12 @@ export interface operations {
                                     matchedTerms?: string[];
                                     /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
                                     similarity?: number;
-                                }[];
+                                }[] | null;
                                 /**
                                  * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so).
-                                 * @enum {string}
+                                 * @enum {string|null}
                                  */
-                                buildsMode?: "keyword" | "meaning" | "hybrid";
+                                buildsMode?: "keyword" | "meaning" | "hybrid" | null;
                                 repos?: {
                                     fullName?: string;
                                     hackathonWinner?: boolean;

@@ -126,7 +126,8 @@ export interface VetIdeaReport {
 			activityState: string;
 			lastCommitAt: string | null;
 		}>;
-		/** Stored hackathon submissions matching the idea, best first. */
+		/** Stored hackathon submissions matching the idea, best first; null =
+		 * the index could not be read (not checked), [] = checked, none. */
 		builds: Array<{
 			id: string;
 			name: string;
@@ -137,9 +138,9 @@ export interface VetIdeaReport {
 			matchedTerms: string[];
 			/** Meaning similarity to the idea, when search by meaning ran. */
 			similarity?: number;
-		}>;
-		/** The search that served builds: hybrid, or keyword when meaning could not run. */
-		buildsMode: BuildSearchMode;
+		}> | null;
+		/** The search that served builds: hybrid, or keyword when meaning could not run; null with builds. */
+		buildsMode: BuildSearchMode | null;
 		note: string;
 	};
 	gap: (TypeCoverage & { basis: string }) | null;
@@ -392,32 +393,38 @@ export async function buildVetIdea(
 	// idea) keyword filled 40% of slots with builds that are not the idea and
 	// found 36 of 118 same-idea builds; hybrid 22% and 56. When meaning cannot
 	// run, queryBuilds serves keyword and says so.
-	const index = await getHackathonBuildsIndex().catch(() => []);
-	const buildSearch = await queryBuilds(
-		index,
-		{
-			q: q.toLowerCase().trim(),
-			mode: "hybrid",
-			winnersOnly: false,
-			hackathons: [],
-		},
-		{ perSubmission: true },
-	);
-	const priorArtBuilds = buildSearch.scored
-		.filter(isPriorArtEvidence)
-		.slice(0, 5)
-		.map(({ b, matched, similarity }) => ({
-			id: b.id,
-			name: b.name,
-			hackathon: b.hackathon.title,
-			placement: b.hackathonPlacement ?? null,
-			isWinner: !!b.isWinner,
-			githubUrl: b.githubUrl ?? null,
-			matchedTerms: matched,
-			...(similarity !== undefined
-				? { similarity: Math.round(similarity * 1000) / 1000 }
-				: {}),
-		}));
+	// An unreadable or empty index (it holds over a thousand) is "not
+	// checked": builds is then null, never [], which would say nobody built
+	// it (outside review, 2026-10-20).
+	const index = await getHackathonBuildsIndex().catch(() => null);
+	const buildSearch = index?.length
+		? await queryBuilds(
+				index,
+				{
+					q: q.toLowerCase().trim(),
+					mode: "hybrid",
+					winnersOnly: false,
+					hackathons: [],
+				},
+				{ perSubmission: true },
+			)
+		: null;
+	const priorArtBuilds =
+		buildSearch?.scored
+			.filter(isPriorArtEvidence)
+			.slice(0, 5)
+			.map(({ b, matched, similarity }) => ({
+				id: b.id,
+				name: b.name,
+				hackathon: b.hackathon.title,
+				placement: b.hackathonPlacement ?? null,
+				isWinner: !!b.isWinner,
+				githubUrl: b.githubUrl ?? null,
+				matchedTerms: matched,
+				...(similarity !== undefined
+					? { similarity: Math.round(similarity * 1000) / 1000 }
+					: {}),
+			})) ?? null;
 
 	// Gap verdict for the vertical (supply-side only — same computation and
 	// caveats as analyze?dimension=gaps).
@@ -486,10 +493,14 @@ export async function buildVetIdea(
 		priorArt: {
 			repos: priorArtRepos,
 			builds: priorArtBuilds,
-			buildsMode: buildSearch.served,
+			buildsMode: buildSearch?.served ?? null,
 			note: [
-				"builds: stored hackathon submissions matching the idea by hybrid search (words plus meaning), best first. matchedTerms are the words each matched; similarity is the meaning score; a build needs a score of at least 0.7 or two matched words, and one with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words and half their weight, so often none; one shared word is not prior art. Dead prior art is itself a signal.",
-				...buildSearch.warnings,
+				"builds: stored hackathon submissions matching the idea by hybrid search (words plus meaning), best first. matchedTerms are the words each matched; similarity is the meaning score; a build needs a score of at least 0.7 or two matched words, and one with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words and cover half the weight of all of them, so often none. Dead prior art is itself a signal.",
+				...(buildSearch
+					? buildSearch.warnings
+					: [
+							"builds is null: the submissions index could not be read, so builds were not checked. It does not mean nobody built this.",
+						]),
 			].join(" "),
 		},
 		gap,
