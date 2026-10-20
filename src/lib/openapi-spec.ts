@@ -10456,6 +10456,12 @@ export const spec: OpenAPISpec = {
 									"Counts for the event. totalSubmissions counts the submissions served here (null = no submission list).",
 								properties: {
 									totalSubmissions: { type: "integer", nullable: true },
+									totalPrizeUSD: {
+										type: "number",
+										nullable: true,
+										description:
+											"Prize money in USD: the event's prize pool, else the sum of its winners' recorded prizes. null = no USD figure is known (a prize not yet announced, or prizes that are not cash); never 0 for unknown.",
+									},
 									upstreamSubmissions: {
 										type: "integer",
 										nullable: true,

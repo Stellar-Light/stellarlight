@@ -36,6 +36,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 		version: "spec@1.9.83",
 		type: "fixed",
 		summary:
+			"getHackathon's `stats.totalPrizeUSD` is null, not 0, when no USD prize figure is known, and the spec now declares it.",
+		detail:
+			"An event whose prizes are not cash (Stellar PULSO's trips and Instawards) or whose prize pool is not yet announced was served a total of 0, which reads as no prize. The value is the event's prize pool, else the sum of its winners' recorded prizes, else null.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
+		type: "fixed",
+		summary:
 			"vetIdea's prior art is about the idea: `priorArt.builds` lists the stored hackathon submissions that match it by hybrid search, with the words each matched and the meaning score, and `priorArt.repos` keeps only judged repos that match two of its words.",
 		detail:
 			"Prior art took judged repos where any one of the idea's words appeared as a substring and sorted them by most recent commit, so the same few recently pushed repos answered remittance, insurance, QR payments and subscription ideas alike. `priorArt.builds` is now searchHackathonBuilds in hybrid mode, across events on DoraHacks and off it: on a 40-idea labeled set (top 5 per idea), keyword search filled 40% of the slots with builds that were not the idea and found 36 of 118 same-idea builds, hybrid 22% and 56; `buildsMode` says keyword when search by meaning could not run; `priorArt.repos` weighs each word by its rarity across the whole judged set and needs two of them and half their weight, so a one-word overlap is no longer prior art and an idea with no real match gets none.",

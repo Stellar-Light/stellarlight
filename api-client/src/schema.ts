@@ -1588,6 +1588,8 @@ export interface components {
                 /** @description Counts for the event. totalSubmissions counts the submissions served here (null = no submission list). */
                 stats?: {
                     totalSubmissions?: number | null;
+                    /** @description Prize money in USD: the event's prize pool, else the sum of its winners' recorded prizes. null = no USD figure is known (a prize not yet announced, or prizes that are not cash); never 0 for unknown. */
+                    totalPrizeUSD?: number | null;
                     /** @description DoraHacks' own count of the event's submissions (its buidls_count), read daily with the stored event page. null = not a DoraHacks event, or the page has not been read. */
                     upstreamSubmissions?: number | null;
                     /** @description Winning submissions of this event that this page does not serve because their teams hid or deleted them on DoraHacks: each one's placement and award, never the submission itself. placementRank is parsed as served winners' is (placement, else award), so a missing ranked tier joins to it. [] = none; null = no stored DoraHacks roster backs this page, or the read failed. */

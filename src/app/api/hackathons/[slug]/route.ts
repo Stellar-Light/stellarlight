@@ -464,7 +464,9 @@ export async function GET(
 							),
 							hiddenWinners: hidden,
 							winnersNote: hiddenWinnersNote(hidden),
-							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || 0,
+							// null, not 0, when no USD figure is known: a prize not yet
+							// announced or a non-cash prize read as "no prize" (PULSO).
+							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || null,
 							winners: winners.length,
 							// Every bucket was hardcoded 0, including `unknown` — so a
 							// hackathon with 300 submissions reported none built,
@@ -639,7 +641,7 @@ export async function GET(
 						coverageNote: null,
 						hiddenWinners: null,
 						winnersNote: null,
-						totalPrizeUSD,
+						totalPrizeUSD: totalPrizeUSD || null,
 						winners: winners.length,
 						outcomes: submissions.length ? outcomes : null,
 					},
