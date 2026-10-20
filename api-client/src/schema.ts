@@ -3674,7 +3674,7 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description The submission id from searchHackathonBuilds (dorahacks-buidl-<n>) or the bare number from its dorahacks.io/buidl/<n> link. */
+                /** @description The submission id from searchHackathonBuilds (dorahacks-buidl-<n>, or curated-<event>-<name> for an event off DoraHacks such as HackMeridian) or the bare number from its dorahacks.io/buidl/<n> link. */
                 id: string;
             };
             cookie?: never;

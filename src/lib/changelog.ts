@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
+		type: "added",
+		summary:
+			"HackMeridian, which runs off DoraHacks, is served like any other event: HackMeridian 2025 with its six winners as submissions, and HackMeridian 2026 with its paths, dates and prize pool.",
+		detail:
+			"Submissions from events off DoraHacks are stored as hackathon builds with `curated-<event>-<name>` ids, which getHackathonSubmission now accepts, so search, prior art, briefs and event pages find them. HackMeridian 2025 (Rio, September 2025): Open Innovation, The Simple Fund, 4Bridge and Stellar Forge; Composability, Lance, Star Lends and Panorama Block, per SDF's recap, with no repo linked until one is verified. HackMeridian 2026 (Lisbon, 25 to 26 October): Genesis and Scale paths, $50,000 in total prizes.",
+	},
+	{
 		date: "2026-10-19",
 		surfaces: ["api"],
 		version: "spec@1.9.82",

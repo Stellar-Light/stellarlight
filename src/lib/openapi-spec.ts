@@ -3656,7 +3656,7 @@ export const spec: OpenAPISpec = {
 						in: "path",
 						required: true,
 						description:
-							"The submission id from searchHackathonBuilds (dorahacks-buidl-<n>) or the bare number from its dorahacks.io/buidl/<n> link.",
+							"The submission id from searchHackathonBuilds (dorahacks-buidl-<n>, or curated-<event>-<name> for an event off DoraHacks such as HackMeridian) or the bare number from its dorahacks.io/buidl/<n> link.",
 						schema: { type: "string" },
 					},
 				],

@@ -44,7 +44,7 @@ export async function GET(
 			status: 400,
 			error: `Not a submission id: '${raw}'.`,
 			advisory:
-				"Use the `id` searchHackathonBuilds returns (dorahacks-buidl-<n>) or the bare number from the dorahacks.io/buidl/<n> link.",
+				"Use the `id` searchHackathonBuilds returns (dorahacks-buidl-<n>, or curated-<event>-<name> for an event off DoraHacks) or the bare number from the dorahacks.io/buidl/<n> link.",
 			startedAt,
 		});
 

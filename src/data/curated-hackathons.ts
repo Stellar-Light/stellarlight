@@ -7,7 +7,7 @@
  *
  * Add a row when an event is announced; the status (upcoming / active /
  * ended) is derived from the dates at request time, never hand-set.
- * Verified 2026-08-17.
+ * Verified 2026-08-17; HackMeridian rows 2026-10-20.
  */
 import type { DoraHacksHackathon } from "@/lib/integrations/dorahacks";
 
@@ -19,10 +19,13 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		title: "HackMeridian 2026",
 		uname: "hackmeridian-2026",
 		description:
-			"The two-day hackathon before Meridian 2026 in Lisbon, open to developers of all experience levels building on Stellar. Venue, tracks and prize pool are still to be announced; the 2025 edition in Rio drew 500+ builders for $50,000 in XLM.",
+			"36 hours of building on Stellar in Lisbon, 25 to 26 October 2026, before the Meridian conference (28 to 29 October). Two paths: Genesis, for early-stage ideas and prototypes, and Scale, for teams with an existing product or advanced prototype; no prior Stellar experience is needed. Stellar engineers, technical mentors, workshops, office hours, team formation and AI development support on site. $50,000 in total prizes. Apply at meridian.stellar.org/hackmeridian. The 2025 edition in Rio drew more than 400 builders and 110+ submissions (hackmeridian-2025).",
 		start_time: ts("2026-10-25T09:00:00+01:00"),
 		end_time: ts("2026-10-26T17:00:00+01:00"),
-		bonus_price: 0,
+		// SDF's "HackMeridian Winners Circle" session page on the Meridian 2026
+		// site: "$50,000 in total prizes", 36 hours. Paths and support: the
+		// official page and SDF's Road to HackMeridian events (2026-10-20).
+		bonus_price: 50000,
 		hackers_count: 0,
 		winner_announced: false,
 		status: 1,
@@ -142,5 +145,29 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		// only public record is press coverage, so this row runs coverless.
 		source: "curated",
 		kind: "summit",
+	},
+	{
+		id: -1007,
+		title: "HackMeridian 2025",
+		uname: "hackmeridian-2025",
+		description:
+			"The two-day hackathon before Meridian 2025 at the Copacabana Palace in Rio de Janeiro: more than 400 builders and 110+ submissions across two tracks, Open Innovation (56 projects) and Composability (35 teams building on each other's work), with six teams pitching on the mainstage. Open Innovation: The Simple Fund, 4Bridge, Stellar Forge. Composability: Lance, Star Lends, Panorama Block. Held in mid-September 2025; SDF's recap does not give the days.",
+		// SDF's recap, "Building the Future of Finance at Meridian 2025"
+		// (2025-10-01), for every count and winner. The days are derived:
+		// two days before Meridian 2025, which a third-party listing dates
+		// 17 to 18 September 2025. Correct them from SDF's list.
+		start_time: ts("2025-09-15T09:00:00-03:00"),
+		end_time: ts("2025-09-16T18:00:00-03:00"),
+		bonus_price: 0,
+		hackers_count: 400,
+		winner_announced: true,
+		status: 2,
+		field: "IRL,Meridian",
+		ecosystem: "Stellar",
+		organization: { id: 3096, name: "Stellar Development Foundation" },
+		external_url:
+			"https://stellar.org/blog/foundation-news/the-blueprint-at-meridian-2025",
+		source: "curated",
+		kind: "hackathon",
 	},
 ];

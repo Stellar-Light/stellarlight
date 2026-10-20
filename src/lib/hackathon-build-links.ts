@@ -236,10 +236,12 @@ export function ownerAndNameLink(
 }
 
 /** A submission's stored id from what an agent is likely to hold: the `id`
- * searchHackathonBuilds returns (dorahacks-buidl-<n>), the bare number, or
- * the dorahacks.io/buidl/<n> link. null when it is none of those. */
+ * searchHackathonBuilds returns (dorahacks-buidl-<n>, or curated-<event>-<name>
+ * for an event off DoraHacks), the bare number, or the dorahacks.io/buidl/<n>
+ * link. null when it is none of those. */
 export function parseBuildId(raw: string): string | null {
 	const s = raw.trim();
+	if (/^curated-[a-z0-9-]+$/.test(s)) return s;
 	const m =
 		/^dorahacks-buidl-(\d+)$/.exec(s) ??
 		/^(\d+)$/.exec(s) ??
