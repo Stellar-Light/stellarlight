@@ -19,13 +19,18 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		title: "HackMeridian 2026",
 		uname: "hackmeridian-2026",
 		description:
-			"36 hours of building on Stellar in Lisbon, 25 to 26 October 2026, before the Meridian conference (28 to 29 October). Two paths: Genesis, for early-stage ideas and prototypes, and Scale, for teams with an existing product or advanced prototype; no prior Stellar experience is needed. Stellar engineers, technical mentors, workshops, office hours, team formation and AI development support on site. $50,000 in total prizes. Apply at meridian.stellar.org/hackmeridian. The 2025 edition in Rio drew more than 400 builders and 110+ submissions (hackmeridian-2025).",
-		start_time: ts("2026-10-25T09:00:00+01:00"),
-		end_time: ts("2026-10-26T17:00:00+01:00"),
-		// SDF's "HackMeridian Winners Circle" session page on the Meridian 2026
-		// site: "$50,000 in total prizes", 36 hours. Paths and support: the
-		// official page and SDF's Road to HackMeridian events (2026-10-20).
-		bonus_price: 50000,
+			"28 hours of building on Stellar at Warehouse ONE16 in Marvila, Lisbon: check-in and hacking open at 09:00 on Sunday 25 October 2026, and hacking ends at 12:00 on Monday 26 October, the submission deadline (no late submissions). Two categories: Genesis takes a new idea or early prototype to a working MVP; Scale moves an existing product or advanced prototype toward production. Thematic tracks: Stellar Unlocked (new uses of Stellar's core protocol features) and Stellar Composed (two or more ecosystem tools or projects combined). This year's priorities are smart contracts, smart accounts and cross-chain transfers. No prior Stellar experience is needed, solo applicants are welcome and AI-assisted development is allowed. Up to $30,000 across 6 winners, set in USD and paid in XLM. Judging is an async review of the demo video, pitch deck, GitHub repo and submission answers: Genesis on problem clarity, MVP quality, Stellar integration and continued development potential; Scale on milestones against goals set at pre-event intake, SCF eligibility, production readiness and ecosystem impact. Finalists pitch live at the Meridian conference on 28 October (conference 28 to 29 October, Lisbon). Stellar engineers, technical mentors and product experts are on site with workshops and office hours; travel support goes to selected participants. Organized by Grow with Guava LLC (hackmeridian.com); apply at meridian.stellar.org/hackmeridian. The 2025 edition in Rio drew more than 400 builders and 110+ submissions (hackmeridian-2025).",
+		// Lisbon leaves summer time at 01:00 UTC that Sunday, so 09:00 local is
+		// UTC+0. Hacking ends 12:00 Monday; guests leave at 16:00.
+		start_time: ts("2026-10-25T09:00:00+00:00"),
+		end_time: ts("2026-10-26T16:00:00+00:00"),
+		// The organizer's site, hackmeridian.com (Grow with Guava LLC; its Apply
+		// button opens the same SDF registration, Bizzabo event 949257), checked
+		// 2026-10-20 for hours, venue, categories, tracks, prize, judging and
+		// support. SDF's own page gives only the dates, Lisbon and "two days".
+		// Not the Winners Circle session page: its 36 hours and $50,000 are
+		// HackMeridian 2024 (the video is titled "Meridian 2024").
+		bonus_price: 30000,
 		hackers_count: 0,
 		winner_announced: false,
 		status: 1,
@@ -154,7 +159,7 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 			"The two-day hackathon before Meridian 2025 at the Copacabana Palace in Rio de Janeiro: more than 400 builders and 110+ submissions across two tracks, Open Innovation (56 projects) and Composability (35 teams building on each other's work), with six teams pitching on the mainstage. Open Innovation: The Simple Fund, 4Bridge, Stellar Forge. Composability: Lance, Star Lends, Panorama Block. Held in mid-September 2025; SDF's recap does not give the days.",
 		// SDF's recap, "Building the Future of Finance at Meridian 2025"
 		// (2025-10-01), for every count and winner. The days are derived:
-		// two days before Meridian 2025, which a third-party listing dates
+		// two days before Meridian 2025, which SDF's event page dates
 		// 17 to 18 September 2025. Correct them from SDF's list.
 		start_time: ts("2025-09-15T09:00:00-03:00"),
 		end_time: ts("2025-09-16T18:00:00-03:00"),
