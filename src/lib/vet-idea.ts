@@ -33,6 +33,7 @@ import {
 	anchorTokens,
 	buildHaystack,
 	scoreTokens,
+	tokenHits,
 	tokenize,
 } from "./project-search-match";
 import { activityStateOf } from "./repo-grade";
@@ -262,10 +263,11 @@ export async function buildVetIdea(
 	if (allTokens.length)
 		for (const p of projDocs) {
 			const hay = buildHaystack(p);
-			p.__rel = scoreTokens(hay, allTokens);
+			// Which idea words this row matched, read together as scoreTokens
+			// reads them: coversEnoughOfIdea weighs them.
+			p.__hits = tokenHits(hay, allTokens);
+			p.__rel = p.__hits.length;
 			p.__anchor = allAnchors.length ? scoreTokens(hay, allAnchors) : 0;
-			// Which idea words this row matched: coversEnoughOfIdea weighs them.
-			p.__hits = allTokens.filter((t) => scoreTokens(hay, [t]) > 0);
 		}
 	const enoughOfIdea = coversEnoughOfIdea(
 		allTokens,

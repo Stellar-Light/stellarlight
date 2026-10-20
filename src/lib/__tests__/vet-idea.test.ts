@@ -298,3 +298,38 @@ describe("vet-idea competitors are not padded with one-word matches", () => {
 		expect(await served("wallet")).toEqual(["freighter"]);
 	});
 });
+
+describe("vet-idea weighs a negation-seeking idea's words in context", () => {
+	const row = (slug: string, types: string[], shortDescription: string) => ({
+		slug,
+		name: slug,
+		status: "Live",
+		types,
+		prominence: 0,
+		shortDescription,
+	});
+	const rows = [
+		row("acme-vault", ["Wallet"], "A non-custodial wallet for teams."),
+		row("custody-co", ["Custody"], "A regulated custodial wallet service."),
+		row("anon-pay", ["Payments"], "An anonymous payments app with a wallet."),
+		row("nft-gallery", ["NFT"], "A non-fungible token gallery and wallet."),
+		row("nonce-kit", ["Tooling"], "Nonce tools for wallet developers."),
+		row("pocket", ["Wallet"], "A mobile wallet."),
+	];
+	const payload = {
+		find: async ({ collection }: { collection: string }) =>
+			collection === "projects"
+				? { docs: structuredClone(rows), totalDocs: rows.length }
+				: { docs: [], totalDocs: 0 },
+	};
+
+	it("serves the non-custodial wallet the idea asks for", async () => {
+		// Read one word at a time, "custodial" missed "non-custodial", so the
+		// rare word's weight went to the custodial service alone and the
+		// wallet the idea describes fell under the coverage floor.
+		const served = (
+			await buildVetIdea(payload as never, "non custodial wallet")
+		).competitors.projects.map((p) => p.slug);
+		expect(served[0]).toBe("acme-vault");
+	});
+});

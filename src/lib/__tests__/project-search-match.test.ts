@@ -18,6 +18,7 @@ import {
 	structuredHit,
 	structuredSelectClauses,
 	termsForToken,
+	tokenHits,
 	tokenize,
 	typeMatch,
 } from "../project-search-match";
@@ -733,5 +734,40 @@ describe("/api/projects/search wires the admission + the Draft belt", () => {
 		const total = src.indexOf("totalMatching = projects.length");
 		expect(filt).toBeGreaterThan(0);
 		expect(total).toBeGreaterThan(filt); // page slicing + total come after
+	});
+});
+
+describe("tokenHits reads each token in the whole query's context", () => {
+	const hay = buildHaystack({
+		name: "Acme",
+		slug: "acme",
+		shortDescription: "A non-custodial wallet for teams",
+		category: "Wallet",
+		types: ["Wallet"],
+	});
+
+	it("keeps a negated word when the idea itself seeks the negation", () => {
+		// vetIdea weighs the idea words a row matched; read one at a time,
+		// "custodial" missed the non-custodial wallet an idea asked for.
+		expect(tokenize("non custodial wallet")).toEqual([
+			"non",
+			"custodial",
+			"wallet",
+		]);
+		expect(tokenHits(hay, ["non", "custodial", "wallet"])).toEqual([
+			"non",
+			"custodial",
+			"wallet",
+		]);
+		expect(tokenHits(hay, ["custodial"])).toEqual([]);
+	});
+
+	it("is what scoreTokens counts", () => {
+		for (const q of [
+			["non", "custodial", "wallet"],
+			["custodial", "wallet"],
+			["teams"],
+		])
+			expect(scoreTokens(hay, q)).toBe(tokenHits(hay, q).length);
 	});
 });
