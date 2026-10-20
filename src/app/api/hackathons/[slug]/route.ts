@@ -13,7 +13,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
-import { eventProfile } from "@/lib/hackathon-analytics";
+import { afterEventFields, eventProfile } from "@/lib/hackathon-analytics";
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
@@ -28,6 +28,7 @@ import {
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 	getHackathonUrl,
+	parsePlacement,
 } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -52,7 +53,9 @@ interface SubmissionRow {
 	placementRank?: number | null;
 	hackathonPrize: number | null;
 	hackathonPrizeTrack: string | null;
-	scfAwarded: boolean;
+	// Curated winners: read from the linked directory project, null when the
+	// winner links none or the read failed (unknown, never "not funded").
+	scfAwarded: boolean | null;
 	// Set only for curated winners (who built it). Absent for DB submissions.
 	builder?: string | null;
 	url: string;
@@ -197,19 +200,61 @@ function parsePrizeTiers(description?: string | null): PrizeTier[] {
  */
 function staticWinnersForSlug(slug: string): SubmissionRow[] {
 	if (slug !== LATEST_WINNERS.hackathonUname) return [];
-	return LATEST_WINNERS.winners.map((w) => ({
-		id: `winner-${LATEST_WINNERS.hackathonUname}-${w.rank}`,
+	// Ids by roster position: `rank` is the place within a track, so twelve
+	// winners carried two ids between them.
+	return LATEST_WINNERS.winners.map((w, i) => ({
+		id: `winner-${LATEST_WINNERS.hackathonUname}-${i + 1}`,
 		name: w.projectName,
-		slug: null,
+		slug: projectSlugOf(getWinnerLink(w)),
 		category: null,
 		shortDescription: w.description,
 		hackathonStatus: null,
 		hackathonPlacement: w.placementLabel,
 		hackathonPrize: w.prizeUsd,
 		hackathonPrizeTrack: null,
-		scfAwarded: false,
+		scfAwarded: null,
 		builder: w.builder,
 		url: getWinnerLink(w),
+	}));
+}
+
+/** The directory slug a roster link points at (a stellarlight.xyz project
+ * page), or null when it points anywhere else. */
+function projectSlugOf(url: string): string | null {
+	return (
+		/^https:\/\/(?:www\.)?stellarlight\.xyz\/project\/([a-z0-9-]+)\/?$/.exec(
+			url,
+		)?.[1] ?? null
+	);
+}
+
+/** The curated roster with each winner's SCF award read from its directory
+ * project (scf.awarded, the structured record). It said false for all twelve
+ * Builder Summit winners while Trustless Work holds a $150,000 award on
+ * record. A winner whose project is not on record, or a failed read, stays
+ * null. */
+async function curatedWinnersFor(
+	payload: NonNullable<Awaited<ReturnType<typeof getPayloadSafe>>>,
+	slug: string,
+): Promise<SubmissionRow[]> {
+	const rows = staticWinnersForSlug(slug);
+	const slugs = [...new Set(rows.flatMap((r) => (r.slug ? [r.slug] : [])))];
+	if (!slugs.length) return rows;
+	const docs = await payload
+		.find({
+			collection: "projects",
+			where: { slug: { in: slugs } },
+			select: { slug: true, scf: true },
+			limit: slugs.length,
+			depth: 0,
+		})
+		.then((r) => r.docs)
+		.catch(() => null);
+	if (!docs) return rows;
+	const scf = new Map(docs.map((d) => [d.slug, d.scf?.awarded === true]));
+	return rows.map((r) => ({
+		...r,
+		scfAwarded: r.slug ? (scf.get(r.slug) ?? null) : null,
 	}));
 }
 
@@ -279,7 +324,7 @@ export async function GET(
 			});
 			// Curated winner roster (if we have one for this event) — even when the
 			// full submission list isn't in our DB, we can still answer "who won".
-			const curatedWinners = staticWinnersForSlug(slug);
+			const curatedWinners = await curatedWinnersFor(payload, slug);
 			const totalPrizeUSD = curatedWinners.reduce(
 				(s, w) => s + (w.hackathonPrize ?? 0),
 				0,
@@ -369,8 +414,22 @@ export async function GET(
 					: null;
 			const page = storedEvent?.description ?? dora.description ?? null;
 			const liveWinners = liveSubmissions.filter((sub) => sub.isWinner);
+			// What each winner won and became, on winner rows only (the
+			// submissions list keeps its shape): prizeUsd from its own
+			// placement, since award is the category title every placement in
+			// it shares, and from the stored row its directory project and what
+			// its repo did after the event.
+			const storedById = new Map(stored.map((b) => [b.id, b]));
 			const winners = liveWinners.length
-				? rankAndSort(liveWinners)
+				? rankAndSort(liveWinners).map((w) => {
+						const b = storedById.get(w.id);
+						return {
+							...w,
+							prizeUsd: parsePlacement(w.hackathonPlacement).prizeUsd || null,
+							...(b?.project !== undefined ? { project: b.project } : {}),
+							...(b ? afterEventFields(b) : {}),
+						};
+					})
 				: rankAndSort(curatedWinners);
 			const trackMap = new Map<
 				string,
@@ -560,7 +619,7 @@ export async function GET(
 		// placement-tagged submissions.
 		const dbWinners = submissions.filter((s) => !!s.hackathonPlacement);
 		const winners = rankAndSort(
-			dbWinners.length ? dbWinners : staticWinnersForSlug(slug),
+			dbWinners.length ? dbWinners : await curatedWinnersFor(payload, slug),
 		);
 
 		const totalPrizeUSD = submissions.reduce(

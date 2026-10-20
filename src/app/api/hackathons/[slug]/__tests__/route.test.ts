@@ -22,6 +22,10 @@ let hiddenRows:
 	| Array<{ buildId: string; placement: string | null; award?: string }>
 	| Error = [];
 let buildsQuery: { where?: unknown; select?: unknown } | null = null;
+// Directory projects the curated roster links; read for their SCF record.
+let projectDocs: Array<{ slug: string; scf?: { awarded?: boolean | null } }> =
+	[];
+let projectsQuery: { where?: unknown; select?: unknown } | null = null;
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({
 		find: vi.fn(
@@ -34,6 +38,10 @@ vi.mock("@/lib/payload-client", () => ({
 					buildsQuery = args;
 					if (hiddenRows instanceof Error) throw hiddenRows;
 					return { docs: hiddenRows };
+				}
+				if (args.collection === "projects") {
+					projectsQuery = args;
+					return { docs: projectDocs };
 				}
 				return {
 					docs: args.collection === "hackathon-events" ? [storedEvent] : [],
@@ -106,6 +114,8 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		live.mockClear();
 		hiddenRows = [];
 		buildsQuery = null;
+		projectDocs = [];
+		projectsQuery = null;
 	});
 
 	it("serves the stored submissions, page, rules and profile without a live roster read", async () => {
@@ -203,6 +213,80 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 			hiddenWinners: null,
 			winnersNote: null,
 		});
+	});
+
+	it("winner rows carry what the winner won and became; submissions keep their shape", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const after = { lastCommitAt: "2026-03-01T00:00:00.000Z", archived: false };
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			build("w3", {
+				isWinner: true,
+				hackathonPlacement: "3rd Place - $1,250 in XLM",
+				award: "$10,000 XLM Prize",
+				project: {
+					slug: "acme",
+					name: "Acme",
+					status: "Live",
+					scfAwarded: true,
+				},
+				activity: after,
+			}),
+			build("x", { activity: after }),
+		]);
+		const body = await getEvent();
+		// award is the category pool; prizeUsd is what this placement won.
+		expect(body.winners[0]).toMatchObject({
+			id: "w3",
+			award: "$10,000 XLM Prize",
+			prizeUsd: 1250,
+			project: { slug: "acme", status: "Live", scfAwarded: true },
+			afterEvent: "commits 90+ days after",
+			lastCommitAt: "2026-03-01T00:00:00.000Z",
+		});
+		for (const s of body.submissions)
+			for (const k of ["prizeUsd", "project", "afterEvent", "lastCommitAt"])
+				expect(k in s).toBe(false);
+	});
+
+	it("the curated roster gives each winner its own id, its project and its SCF record", async () => {
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			{
+				...doraEvent,
+				uname: "stellar-builder-summit-2026",
+				title: "Stellar Builder Summit 2026",
+				source: "curated",
+			} as Awaited<ReturnType<typeof fetchAllDoraHacksHackathons>>[number],
+		]);
+		projectDocs = [
+			{ slug: "trustless-work", scf: { awarded: true } },
+			{ slug: "acta", scf: { awarded: false } },
+		];
+		const { GET } = await import("../route");
+		const res = await GET(
+			new NextRequest(
+				"https://x.test/api/hackathons/stellar-builder-summit-2026",
+			),
+			{ params: Promise.resolve({ slug: "stellar-builder-summit-2026" }) },
+		);
+		const ws = (await res.json()).winners as Array<{
+			id: string;
+			slug: string | null;
+			scfAwarded: boolean | null;
+		}>;
+		expect(ws).toHaveLength(12);
+		// `rank` is the place within a track: twelve winners had two ids.
+		expect(new Set(ws.map((w) => w.id)).size).toBe(12);
+		expect(projectsQuery?.select).toEqual({ slug: true, scf: true });
+		const scfOf = (slug: string) =>
+			ws.filter((w) => w.slug === slug).map((w) => w.scfAwarded);
+		// It said false for every winner; Trustless Work holds an award.
+		expect(scfOf("trustless-work")).toEqual([true, true]);
+		expect(scfOf("acta")).toEqual([false]);
+		// A linked project with no record here is unknown, not unfunded.
+		expect(scfOf("quietbook")).toEqual([null]);
 	});
 
 	it("a failed hidden-winner read says nothing, not none", async () => {

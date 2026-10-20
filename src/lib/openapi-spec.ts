@@ -18,7 +18,12 @@ import {
 	RWA_VERIFICATION_LEVELS,
 } from "../data/rwa-registry";
 import { CODE_DOMAINS } from "./code-domains";
-import { FACET_IDS, GROUP_FACETS, SHIFT_FACETS } from "./hackathon-analytics";
+import {
+	AFTER_EVENT_VALUES,
+	FACET_IDS,
+	GROUP_FACETS,
+	SHIFT_FACETS,
+} from "./hackathon-analytics";
 import {
 	BUILD_MATCH_MODES,
 	BUILD_SEARCH_MODES,
@@ -257,6 +262,24 @@ const BUILD_PROJECT_SCHEMA = {
 		},
 	},
 	required: ["slug", "name"],
+};
+
+/** What a submission's repo did after its event (afterEventFields in
+ * src/lib/hackathon-analytics.ts): on build search rows and winner rows. */
+const BUILD_AFTER_EVENT_PROPERTIES = {
+	afterEvent: {
+		type: "string",
+		enum: [...AFTER_EVENT_VALUES],
+		description:
+			"What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown (the repo was not read, or the event ended under 90 days ago with no commit past that mark). It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.",
+	},
+	lastCommitAt: {
+		type: "string",
+		format: "date-time",
+		nullable: true,
+		description:
+			"The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo was not read.",
+	},
 };
 
 /** The filters searchHackathonBuilds and analyzeHackathonSubmissions share, parsed by
@@ -3594,6 +3617,7 @@ export const spec: OpenAPISpec = {
 													votes: { type: "integer", nullable: true },
 													endedAt: { type: "string", nullable: true },
 													project: BUILD_PROJECT_SCHEMA,
+													...BUILD_AFTER_EVENT_PROPERTIES,
 													stack: {
 														type: "array",
 														items: { type: "string" },
@@ -10520,7 +10544,7 @@ export const spec: OpenAPISpec = {
 								id: {
 									type: "string",
 									description:
-										"Stable row id (dorahacks-buidl-{id} for live rows).",
+										"Stable row id (dorahacks-buidl-{id} for live rows, winner-{event}-{n} for a curated roster).",
 								},
 								name: { type: "string" },
 								hackathonPlacement: { type: "string", nullable: true },
@@ -10561,6 +10585,20 @@ export const spec: OpenAPISpec = {
 								source: {
 									type: "string",
 									description: "'dorahacks' for live rows.",
+								},
+								project: BUILD_PROJECT_SCHEMA,
+								...BUILD_AFTER_EVENT_PROPERTIES,
+								slug: {
+									type: "string",
+									nullable: true,
+									description:
+										"Curated roster rows: the directory project the winner links; null when it links none.",
+								},
+								scfAwarded: {
+									type: "boolean",
+									nullable: true,
+									description:
+										"Curated roster rows: whether the linked directory project has an SCF award on record; null when the winner links no project on record. Stored DoraHacks winners carry this as project.scfAwarded.",
 								},
 							},
 						},

@@ -1608,7 +1608,7 @@ export interface components {
             };
             /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first. */
             winners?: {
-                /** @description Stable row id (dorahacks-buidl-{id} for live rows). */
+                /** @description Stable row id (dorahacks-buidl-{id} for live rows, winner-{event}-{n} for a curated roster). */
                 id?: string;
                 name?: string;
                 hackathonPlacement?: string | null;
@@ -1631,6 +1631,42 @@ export interface components {
                 voteCount?: number;
                 /** @description 'dorahacks' for live rows. */
                 source?: string;
+                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                project?: {
+                    slug: string;
+                    name: string;
+                    /**
+                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
+                     * @enum {string}
+                     */
+                    basis?: "repo" | "website" | "owner-and-name";
+                    /**
+                     * @description The project's directory status today. Absent when it could not be read (unknown).
+                     * @enum {string|null}
+                     */
+                    status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
+                    /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
+                    scfAwarded?: boolean;
+                    /**
+                     * Format: date-time
+                     * @description When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.
+                     */
+                    factsReadAt?: string;
+                } | null;
+                /**
+                 * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown (the repo was not read, or the event ended under 90 days ago with no commit past that mark). It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
+                 * @enum {string}
+                 */
+                afterEvent?: "commits 90+ days after" | "no commits 90+ days after" | "archived" | "repo not found";
+                /**
+                 * Format: date-time
+                 * @description The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo was not read.
+                 */
+                lastCommitAt?: string | null;
+                /** @description Curated roster rows: the directory project the winner links; null when it links none. */
+                slug?: string | null;
+                /** @description Curated roster rows: whether the linked directory project has an SCF award on record; null when the winner links no project on record. Stored DoraHacks winners carry this as project.scfAwarded. */
+                scfAwarded?: boolean | null;
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
@@ -3657,6 +3693,16 @@ export interface operations {
                                  */
                                 factsReadAt?: string;
                             } | null;
+                            /**
+                             * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown (the repo was not read, or the event ended under 90 days ago with no commit past that mark). It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
+                             * @enum {string}
+                             */
+                            afterEvent?: "commits 90+ days after" | "no commits 90+ days after" | "archived" | "repo not found";
+                            /**
+                             * Format: date-time
+                             * @description The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo was not read.
+                             */
+                            lastCommitAt?: string | null;
                             /** @description Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none. */
                             stack?: string[];
                             /** @description Directory project types this build was sorted into, best first. Present only when categorized; scores and method are on getHackathonSubmission. */
