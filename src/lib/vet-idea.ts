@@ -28,7 +28,7 @@ import {
 	getHackathonBuildsIndex,
 } from "./hackathon-builds";
 import { ACTIVE_PROJECT_STATUSES } from "./population";
-import { isPriorArtEvidence, rankPriorArt } from "./prior-art-rank";
+import { priorArtTop, rankPriorArt } from "./prior-art-rank";
 import {
 	anchorTokens,
 	buildHaystack,
@@ -407,13 +407,10 @@ export async function buildVetIdea(
 					hackathons: [],
 				},
 				{ perSubmission: true },
-			)
+			).catch(() => null)
 		: null;
-	const priorArtBuilds =
-		buildSearch?.scored
-			.filter(isPriorArtEvidence)
-			.slice(0, 5)
-			.map(({ b, matched, similarity }) => ({
+	const priorArtBuilds = buildSearch
+		? priorArtTop(buildSearch.scored).map(({ b, matched, similarity }) => ({
 				id: b.id,
 				name: b.name,
 				hackathon: b.hackathon.title,
@@ -424,7 +421,8 @@ export async function buildVetIdea(
 				...(similarity !== undefined
 					? { similarity: Math.round(similarity * 1000) / 1000 }
 					: {}),
-			})) ?? null;
+			}))
+		: null;
 
 	// Gap verdict for the vertical (supply-side only — same computation and
 	// caveats as analyze?dimension=gaps).
@@ -495,7 +493,7 @@ export async function buildVetIdea(
 			builds: priorArtBuilds,
 			buildsMode: buildSearch?.served ?? null,
 			note: [
-				"builds: stored hackathon submissions matching the idea by hybrid search (words plus meaning), best first. matchedTerms are the words each matched; similarity is the meaning score; a build needs a score of at least 0.7 or two matched words, and one with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words and cover half the weight of all of them, so often none. Dead prior art is itself a signal.",
+				"builds: stored hackathon submissions matching the idea, best first, by hybrid search (words plus meaning) unless buildsMode says keyword. matchedTerms are the words each matched; similarity is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words and cover half the weight of all of them, so often none. Dead prior art is itself a signal.",
 				...(buildSearch
 					? buildSearch.warnings
 					: [

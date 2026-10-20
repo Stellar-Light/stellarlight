@@ -5186,7 +5186,7 @@ export interface operations {
                                     basis?: string;
                                 } | null;
                             };
-                            /** @description Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners covering at least half of the idea's concepts, then other stored submissions that vetIdea would list (a meaning score of at least 0.7 or two matched words), five in all. null = the submissions index could not be read (not checked), [] = checked, none. */
+                            /** @description Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners covering at least half of the idea's concepts, then the builds vetIdea lists from the same top five (a meaning score of at least 0.7 or two matched words), five at most. null = the submissions index could not be read (not checked), [] = checked, none. */
                             builds?: {
                                 /** @description Opens the full submission in getHackathonSubmission. */
                                 id?: string;
@@ -5429,7 +5429,7 @@ export interface operations {
                                 basis?: string;
                             };
                             priorArt?: {
-                                /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build is listed only with a score of at least 0.7 or two matched words, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
                                 builds?: {
                                     id?: string;
                                     name?: string;
@@ -5442,7 +5442,7 @@ export interface operations {
                                     similarity?: number;
                                 }[] | null;
                                 /**
-                                 * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so).
+                                 * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.
                                  * @enum {string|null}
                                  */
                                 buildsMode?: "keyword" | "meaning" | "hybrid" | null;

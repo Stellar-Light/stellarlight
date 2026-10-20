@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { isPriorArtEvidence, rankPriorArt } from "../prior-art-rank";
+import {
+	isPriorArtEvidence,
+	priorArtTop,
+	rankPriorArt,
+} from "../prior-art-rank";
 
 // A judged set where "app" and "stellar" are everywhere, as in the real one.
 const corpus = [
@@ -65,6 +69,28 @@ describe("prior art among judged repos", () => {
 		expect(names(["app", "rosca", "tanda", "stellar"])).toEqual([]);
 	});
 
+	it("keeps real matches when the idea also has words no repo uses", () => {
+		// Outside review: weighting the missing words most let "hawala" and
+		// "informal" hide a repo matching both words the set does use.
+		const big = [
+			{
+				fullName: "r/remit-pay",
+				description: "Remittance payments for families abroad",
+			},
+			{ fullName: "r/two", description: "Remittance corridor" },
+			{ fullName: "r/three", description: "Merchant payments" },
+			...Array.from({ length: 37 }, (_, i) => ({
+				fullName: `s/app-${i}`,
+				description: "An app on Stellar",
+			})),
+		];
+		expect(
+			rankPriorArt(["remittance", "payments", "hawala", "informal"], big).map(
+				(r) => r.fullName,
+			),
+		).toEqual(["r/remit-pay"]);
+	});
+
 	it("reads words through the tokenizer's punctuation", () => {
 		// contentTokens keeps "(rosca," for "savings circle (ROSCA, tanda)".
 		const withCircle = [
@@ -92,5 +118,20 @@ describe("isPriorArtEvidence", () => {
 		// Search by meaning down: no score, so one word is not enough.
 		expect(isPriorArtEvidence({ matched: ["x", "y"] })).toBe(true);
 		expect(isPriorArtEvidence({ matched: ["x"] })).toBe(false);
+	});
+});
+
+describe("priorArtTop", () => {
+	it("filters the top five without pulling in lower-ranked builds", () => {
+		const strong = (id: string) => ({ id, similarity: 0.8, matched: [] });
+		const ranked = [
+			{ id: "weak", similarity: 0.69, matched: ["x"] },
+			strong("b"),
+			strong("c"),
+			strong("d"),
+			strong("e"),
+			strong("sixth"),
+		];
+		expect(priorArtTop(ranked).map((r) => r.id)).toEqual(["b", "c", "d", "e"]);
 	});
 });

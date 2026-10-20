@@ -3,10 +3,11 @@
  * the idea a repo is about: the idea's content words found as whole words in
  * the repo's name and description, each weighted by its rarity across the
  * candidates (pass the whole judged set, so "app" weighs little). A repo
- * must match two of the idea's words and cover half the weight of all of
- * them, a word no candidate uses weighing the most; an idea with fewer than
- * two words the set uses gets none, because one shared word is not prior
- * art. Ties go to hackathon winners, then to recent commits.
+ * must match two of the idea's words that occur in the set, cover half of
+ * their weight, and include at least one word that occurs in no more than a
+ * tenth of the set; an idea with fewer than two words the set uses gets
+ * none, because one shared word is not prior art. Ties go to hackathon
+ * winners, then to recent commits.
  *
  * Before this (2026-10-20), one word found as a substring was enough and the
  * most recently pushed judged repos won, so four repos filled the prior art
@@ -40,6 +41,10 @@ function wordsOf(text: string): Set<string> {
 	);
 }
 
+/** A word in more than this share of the candidates is too common to show
+ * a repo is about the idea on its own. */
+const MAX_COMMON_SHARE = 0.1;
+
 export function rankPriorArt<T extends PriorArtCandidate>(
 	tokens: string[],
 	candidates: T[],
@@ -67,27 +72,38 @@ export function rankPriorArt<T extends PriorArtCandidate>(
 	const df = new Map(
 		terms.map((t) => [t, docs.filter((d) => d.words.has(t)).length] as const),
 	);
-	// Rarer words weigh more, and a word no candidate uses weighs the most:
-	// it is the idea's most specific word. Leaving such words out of the total
-	// let common words ("app", "stellar") cover the whole idea (outside
-	// review, 2026-10-20).
+	// Words no candidate uses cannot match; they do not count for or against
+	// (weighting them most hid real matches for ideas with one unusual word).
+	const present = terms.filter((t) => (df.get(t) ?? 0) > 0);
+	if (present.length < 2) return [];
 	const idf = new Map(
-		terms.map(
+		present.map(
 			(t) => [t, Math.log((n + 1) / ((df.get(t) ?? 0) + 0.5))] as const,
 		),
 	);
-	if (terms.filter((t) => (df.get(t) ?? 0) > 0).length < 2) return [];
-	const total = terms.reduce((s, t) => s + (idf.get(t) ?? 0), 0);
+	const total = present.reduce((s, t) => s + (idf.get(t) ?? 0), 0);
+	// A word in more than a tenth of the set ("app", "stellar") says nothing
+	// about the idea, so a match needs at least one rarer word: common words
+	// alone covered whole ideas whose specific words no repo uses (outside
+	// review, 2026-10-20). ponytail: one fixed share; tune with the labels.
+	const specific = new Set(
+		present.filter(
+			(t) => (df.get(t) ?? 0) <= Math.max(1, n * MAX_COMMON_SHARE),
+		),
+	);
 	return docs
 		.map((d) => {
-			const hit = terms.filter((t) => d.words.has(t));
+			const hit = present.filter((t) => d.words.has(t));
 			return {
 				c: d.c,
 				matched: hit.length,
+				specific: hit.some((t) => specific.has(t)),
 				score: hit.reduce((s, t) => s + (idf.get(t) ?? 0), 0),
 			};
 		})
-		.filter((d) => d.matched >= 2 && d.score >= total * minCoverage)
+		.filter(
+			(d) => d.matched >= 2 && d.specific && d.score >= total * minCoverage,
+		)
 		.sort(
 			(a, b) =>
 				b.score - a.score ||
@@ -120,4 +136,16 @@ export function isPriorArtEvidence(s: {
 	return (
 		(s.similarity ?? 0) >= PRIOR_ART_MIN_SIMILARITY || s.matched.length >= 2
 	);
+}
+
+/**
+ * The builds of a ranked list's top `k` that count as prior art. The window
+ * is cut before filtering, so a weak build leaves its slot empty rather than
+ * pulling in one ranked below the window: what the labeled measurement scored
+ * (outside review, 2026-10-20).
+ */
+export function priorArtTop<
+	T extends { similarity?: number; matched: string[] },
+>(ranked: T[], k = 5): T[] {
+	return ranked.slice(0, k).filter(isPriorArtEvidence);
 }

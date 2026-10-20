@@ -20,7 +20,7 @@ import { buildContractsRegistry, type ContractRow } from "./contracts-registry";
 import { queryBuilds } from "./hackathon-build-query";
 import { getHackathonBuildsIndex, type ScoredBuild } from "./hackathon-builds";
 import { heldSecurity } from "./held-repos";
-import { isPriorArtEvidence } from "./prior-art-rank";
+import { priorArtTop } from "./prior-art-rank";
 import { buildScfPitch, type ScfPitchReport } from "./scf-pitch";
 import { buildTrustReport, type TrustReport } from "./trust-report";
 
@@ -168,8 +168,8 @@ export interface HackathonBrief {
  * half of the idea's concepts, then the closest other builds, five in all.
  * Ranking alone can bury a winner under builds whose text repeats the query's
  * exact phrase; a winner matching one word of three is not prior art. Takes
- * the hybrid search's scored list, and keeps the rest to builds vetIdea would
- * list too (isPriorArtEvidence), so the two never disagree on one idea.
+ * the hybrid search's scored list, and takes the rest from the same top five
+ * vetIdea lists (priorArtTop), so the two never disagree on one idea.
  */
 export function pickBriefBuilds(scored: ScoredBuild[]) {
 	const winners = scored
@@ -178,7 +178,7 @@ export function pickBriefBuilds(scored: ScoredBuild[]) {
 	const seen = new Set(winners.map((s) => s.b.id));
 	return [
 		...winners,
-		...scored.filter((s) => !seen.has(s.b.id) && isPriorArtEvidence(s)),
+		...priorArtTop(scored).filter((s) => !seen.has(s.b.id)),
 	].slice(0, 5);
 }
 
@@ -265,7 +265,7 @@ export async function buildHackathonBrief(
 					hackathons: [],
 				},
 				{ perSubmission: true },
-			)
+			).catch(() => null)
 		: null;
 	const builds = buildSearch
 		? pickBriefBuilds(buildSearch.scored).map(({ b }) => ({
