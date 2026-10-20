@@ -48,7 +48,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"The Stellar Builder Summit 2026 roster read every winner as not SCF funded; scfAwarded now comes from the linked directory project, slug names that project, and each winner has its own id.",
 		detail:
-			"scfAwarded was a constant false on all twelve curated winners while Trustless Work, linked twice, holds a $150,000 award on record. It is read from scf.awarded and is null when a winner links no project on record. Ids were built from the place within a track, so the twelve rows carried two ids.",
+			"scfAwarded was a constant false on all twelve curated winners while Trustless Work, linked twice, holds a $150,000 award on record. It is read from scf.awarded and is null when a winner links no project on record. Ids were built from the place within a track, so the twelve rows carried two ids; they are now built from each winner's name, and the old -1 and -2 ids are no longer served. Roster rows also carry prizeUsd.",
 	},
 	{
 		date: "2026-10-20",

@@ -52,9 +52,13 @@ interface SubmissionRow {
 	// label, and guarantees winners[0] is the 1st-place entry. null = unplaced.
 	placementRank?: number | null;
 	hackathonPrize: number | null;
+	// Curated roster rows: what this winner won in USD, the roster's figure,
+	// as DoraHacks winners carry prizeUsd.
+	prizeUsd?: number | null;
 	hackathonPrizeTrack: string | null;
-	// Curated winners: read from the linked directory project, null when the
-	// winner links none or the read failed (unknown, never "not funded").
+	// Curated winners: read from the linked directory project; null when the
+	// winner links none, that project has no SCF record, or the read failed
+	// (unknown, never "not funded").
 	scfAwarded: boolean | null;
 	// Set only for curated winners (who built it). Absent for DB submissions.
 	builder?: string | null;
@@ -200,10 +204,14 @@ function parsePrizeTiers(description?: string | null): PrizeTier[] {
  */
 function staticWinnersForSlug(slug: string): SubmissionRow[] {
 	if (slug !== LATEST_WINNERS.hackathonUname) return [];
-	// Ids by roster position: `rank` is the place within a track, so twelve
-	// winners carried two ids between them.
-	return LATEST_WINNERS.winners.map((w, i) => ({
-		id: `winner-${LATEST_WINNERS.hackathonUname}-${i + 1}`,
+	// Ids from the winner's name: `rank` is the place within a track, so
+	// twelve winners carried two ids, and the old -1 and -2 are not reused
+	// for a different winner.
+	return LATEST_WINNERS.winners.map((w) => ({
+		id: `winner-${LATEST_WINNERS.hackathonUname}-${w.projectName
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-|-$/g, "")}`,
 		name: w.projectName,
 		slug: projectSlugOf(getWinnerLink(w)),
 		category: null,
@@ -211,6 +219,7 @@ function staticWinnersForSlug(slug: string): SubmissionRow[] {
 		hackathonStatus: null,
 		hackathonPlacement: w.placementLabel,
 		hackathonPrize: w.prizeUsd,
+		prizeUsd: w.prizeUsd,
 		hackathonPrizeTrack: null,
 		scfAwarded: null,
 		builder: w.builder,
@@ -231,8 +240,8 @@ function projectSlugOf(url: string): string | null {
 /** The curated roster with each winner's SCF award read from its directory
  * project (scf.awarded, the structured record). It said false for all twelve
  * Builder Summit winners while Trustless Work holds a $150,000 award on
- * record. A winner whose project is not on record, or a failed read, stays
- * null. */
+ * record. A winner whose project is not on record, a project with no SCF
+ * record, or a failed read stays null. */
 async function curatedWinnersFor(
 	payload: NonNullable<Awaited<ReturnType<typeof getPayloadSafe>>>,
 	slug: string,
@@ -251,7 +260,12 @@ async function curatedWinnersFor(
 		.then((r) => r.docs)
 		.catch(() => null);
 	if (!docs) return rows;
-	const scf = new Map(docs.map((d) => [d.slug, d.scf?.awarded === true]));
+	const scf = new Map(
+		docs.map((d) => {
+			const awarded = d.scf?.awarded;
+			return [d.slug, typeof awarded === "boolean" ? awarded : null];
+		}),
+	);
 	return rows.map((r) => ({
 		...r,
 		scfAwarded: r.slug ? (scf.get(r.slug) ?? null) : null,

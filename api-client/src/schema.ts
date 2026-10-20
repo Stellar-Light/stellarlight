@@ -1608,7 +1608,7 @@ export interface components {
             };
             /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first. */
             winners?: {
-                /** @description Stable row id (dorahacks-buidl-{id} for live rows, winner-{event}-{n} for a curated roster). */
+                /** @description Stable row id (dorahacks-buidl-{id} for live rows, winner-{event}-{name} for a curated roster, from the winner's name). */
                 id?: string;
                 name?: string;
                 hackathonPlacement?: string | null;
@@ -1654,18 +1654,18 @@ export interface components {
                     factsReadAt?: string;
                 } | null;
                 /**
-                 * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown (the repo was not read, or the event ended under 90 days ago with no commit past that mark). It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
+                 * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown: the repo's activity was not read, the event has no end date, or it ended under 90 days ago with no commit past that mark. It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
                  * @enum {string}
                  */
                 afterEvent?: "commits 90+ days after" | "no commits 90+ days after" | "archived" | "repo not found";
                 /**
                  * Format: date-time
-                 * @description The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo was not read.
+                 * @description The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo's activity was not read (a repo not found has none to read).
                  */
                 lastCommitAt?: string | null;
                 /** @description Curated roster rows: the directory project the winner links; null when it links none. */
                 slug?: string | null;
-                /** @description Curated roster rows: whether the linked directory project has an SCF award on record; null when the winner links no project on record. Stored DoraHacks winners carry this as project.scfAwarded. */
+                /** @description Curated roster rows: whether the linked directory project has an SCF award on record (scf.awarded); null when the winner links no project on record or that project has no SCF record. Stored DoraHacks winners carry this as project.scfAwarded. */
                 scfAwarded?: boolean | null;
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
@@ -3694,13 +3694,13 @@ export interface operations {
                                 factsReadAt?: string;
                             } | null;
                             /**
-                             * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown (the repo was not read, or the event ended under 90 days ago with no commit past that mark). It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
+                             * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown: the repo's activity was not read, the event has no end date, or it ended under 90 days ago with no commit past that mark. It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
                              * @enum {string}
                              */
                             afterEvent?: "commits 90+ days after" | "no commits 90+ days after" | "archived" | "repo not found";
                             /**
                              * Format: date-time
-                             * @description The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo was not read.
+                             * @description The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo's activity was not read (a repo not found has none to read).
                              */
                             lastCommitAt?: string | null;
                             /** @description Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none. */

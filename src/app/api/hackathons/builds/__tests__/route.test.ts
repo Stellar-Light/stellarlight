@@ -35,6 +35,10 @@ vi.mock("@/lib/hackathon-builds", async (orig) => ({
 		}),
 		build("gone", { repoMissing: true }),
 		build("unread"),
+		build("noend", {
+			hackathon: { title: "N", slug: "n", endedAt: null },
+			activity: { lastCommitAt: "2025-06-01T00:00:00.000Z", archived: false },
+		}),
 		build("recent", {
 			hackathon: { title: "R", slug: "r", endedAt: recentEnd },
 			activity: { lastCommitAt: null, archived: false },
@@ -64,6 +68,11 @@ describe("GET /api/hackathons/builds rows say what the repo did after the event"
 		// Repo never read: unknown, so neither field is served.
 		expect("afterEvent" in (rows.get("unread") ?? {})).toBe(false);
 		expect("lastCommitAt" in (rows.get("unread") ?? {})).toBe(false);
+		// Read, but with no end date there is no mark to measure from.
+		expect("afterEvent" in (rows.get("noend") ?? {})).toBe(false);
+		expect(rows.get("noend")?.lastCommitAt).toBe("2025-06-01T00:00:00.000Z");
+		// A repo not found has no activity to read.
+		expect("lastCommitAt" in (rows.get("gone") ?? {})).toBe(false);
 		// Read, but the event ended too recently to say the team stopped.
 		expect("afterEvent" in (rows.get("recent") ?? {})).toBe(false);
 		expect(rows.get("recent")?.lastCommitAt).toBeNull();

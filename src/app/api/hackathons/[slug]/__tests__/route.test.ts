@@ -263,6 +263,7 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		projectDocs = [
 			{ slug: "trustless-work", scf: { awarded: true } },
 			{ slug: "acta", scf: { awarded: false } },
+			{ slug: "stellar-memory", scf: { awarded: null } },
 		];
 		const { GET } = await import("../route");
 		const res = await GET(
@@ -275,18 +276,30 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 			id: string;
 			slug: string | null;
 			scfAwarded: boolean | null;
+			prizeUsd?: number | null;
 		}>;
 		expect(ws).toHaveLength(12);
 		// `rank` is the place within a track: twelve winners had two ids.
 		expect(new Set(ws.map((w) => w.id)).size).toBe(12);
+		// The old ids named six rows each; neither is reused for one winner.
+		for (const old of ["-1", "-2"])
+			expect(ws.map((w) => w.id)).not.toContain(
+				`winner-stellar-builder-summit-2026${old}`,
+			);
+		expect(ws.map((w) => w.id)).toContain(
+			"winner-stellar-builder-summit-2026-quietbook",
+		);
+		expect(ws.every((w) => typeof w.prizeUsd === "number")).toBe(true);
 		expect(projectsQuery?.select).toEqual({ slug: true, scf: true });
 		const scfOf = (slug: string) =>
 			ws.filter((w) => w.slug === slug).map((w) => w.scfAwarded);
 		// It said false for every winner; Trustless Work holds an award.
 		expect(scfOf("trustless-work")).toEqual([true, true]);
 		expect(scfOf("acta")).toEqual([false]);
-		// A linked project with no record here is unknown, not unfunded.
+		// A linked project with no record here is unknown, not unfunded,
+		// and so is a project on record whose SCF field is empty.
 		expect(scfOf("quietbook")).toEqual([null]);
+		expect(scfOf("stellar-memory")).toEqual([null]);
 	});
 
 	it("a failed hidden-winner read says nothing, not none", async () => {
