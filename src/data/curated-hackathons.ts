@@ -27,6 +27,8 @@ const ts = (iso: string) => {
 	if (shiftsUtcDate(iso)) TS_DATE_SHIFTS.push(iso);
 	return Math.floor(Date.parse(iso) / 1000);
 };
+/** The rows' timestamp helper, exported so a test can check it records. */
+export { ts as curatedTimestamp };
 
 export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 	{

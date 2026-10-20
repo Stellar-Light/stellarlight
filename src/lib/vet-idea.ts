@@ -493,7 +493,7 @@ export async function buildVetIdea(
 			builds: priorArtBuilds,
 			buildsMode: buildSearch?.served ?? null,
 			note: [
-				"builds: stored hackathon submissions matching the idea, best first, by hybrid search (words plus meaning) unless buildsMode says keyword. matchedTerms are the words each matched; similarity is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words and cover half the weight of all of them, so often none. Dead prior art is itself a signal.",
+				"builds: stored hackathon submissions matching the idea, best first, by hybrid search (words plus meaning) unless buildsMode says keyword. matchedTerms are the words each matched; similarity is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words the set uses, cover half their weight, and include one word found in no more than a tenth of the set, so often none. Dead prior art is itself a signal.",
 				...(buildSearch
 					? buildSearch.warnings
 					: [

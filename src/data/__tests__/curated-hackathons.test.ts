@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	CURATED_HACKATHONS,
+	curatedTimestamp,
 	shiftsUtcDate,
 	TS_DATE_SHIFTS,
 } from "../curated-hackathons";
@@ -9,6 +10,13 @@ describe("curated hackathons", () => {
 	it("serves every date as written: no timestamp crosses a UTC date", () => {
 		expect(CURATED_HACKATHONS.length).toBeGreaterThan(0);
 		expect(TS_DATE_SHIFTS).toEqual([]);
+	});
+
+	it("records a shifted timestamp written through the rows' helper", () => {
+		const before = TS_DATE_SHIFTS.length;
+		curatedTimestamp("2026-08-21T00:00:00+05:30");
+		expect(TS_DATE_SHIFTS.slice(before)).toEqual(["2026-08-21T00:00:00+05:30"]);
+		TS_DATE_SHIFTS.splice(before);
 	});
 
 	it("detects a timestamp whose UTC date is not the date written", () => {

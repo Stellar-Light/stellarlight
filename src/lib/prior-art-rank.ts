@@ -85,10 +85,13 @@ export function rankPriorArt<T extends PriorArtCandidate>(
 	// A word in more than a tenth of the set ("app", "stellar") says nothing
 	// about the idea, so a match needs at least one rarer word: common words
 	// alone covered whole ideas whose specific words no repo uses (outside
-	// review, 2026-10-20). ponytail: one fixed share; tune with the labels.
+	// review, 2026-10-20). An idea made only of common words therefore gets no
+	// repo prior art; the builds path still answers it. A word in two repos
+	// always counts as rare, so a small set is not all common.
+	// ponytail: one fixed share; tune it with the labels.
 	const specific = new Set(
 		present.filter(
-			(t) => (df.get(t) ?? 0) <= Math.max(1, n * MAX_COMMON_SHARE),
+			(t) => (df.get(t) ?? 0) <= Math.max(2, n * MAX_COMMON_SHARE),
 		),
 	);
 	return docs

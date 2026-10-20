@@ -91,6 +91,35 @@ describe("prior art among judged repos", () => {
 		).toEqual(["r/remit-pay"]);
 	});
 
+	it("gives an idea made only of common words no repo prior art", () => {
+		// Both words are in most repos: a match on them says nothing.
+		expect(names(["app", "stellar"])).toEqual([]);
+	});
+
+	it("keeps a match on one common word plus one rare one", () => {
+		const mixed = [
+			...corpus,
+			{ fullName: "q/qr-shop", description: "QR app for corner shops" },
+		];
+		expect(
+			rankPriorArt(["qr", "app", "shops"], mixed).map((r) => r.fullName),
+		).toEqual(["q/qr-shop"]);
+	});
+
+	it("does not call a word common in a tiny set for being in two repos", () => {
+		const tiny = [
+			{ fullName: "t/a", description: "Remittance over hawala networks" },
+			{ fullName: "t/b", description: "Hawala remittance ledger" },
+			...Array.from({ length: 7 }, (_, i) => ({
+				fullName: `t/x-${i}`,
+				description: "An app on Stellar",
+			})),
+		];
+		expect(
+			rankPriorArt(["remittance", "hawala"], tiny).map((r) => r.fullName),
+		).toEqual(["t/a", "t/b"]);
+	});
+
 	it("reads words through the tokenizer's punctuation", () => {
 		// contentTokens keeps "(rosca," for "savings circle (ROSCA, tanda)".
 		const withCircle = [
