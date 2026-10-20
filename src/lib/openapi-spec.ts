@@ -128,6 +128,9 @@ const SCF_FUNDED_PEER_SCHEMA = {
 /** ScfPitchReport["fundingBar"]. */
 const SCF_FUNDING_BAR_SCHEMA = {
 	type: "object",
+	nullable: true,
+	description:
+		"null when the idea maps to no vertical: nothing was counted, which is not zero funded projects.",
 	properties: {
 		fundedProjects: {
 			type: "integer",
@@ -721,6 +724,9 @@ const SCF_PITCH_REPORT_SCHEMA = {
 		round: SCF_ROUND_SCHEMA,
 		fundedPeers: {
 			type: "array",
+			nullable: true,
+			description:
+				"null when the idea maps to no vertical (not computed, never an empty list).",
 			items: SCF_FUNDED_PEER_SCHEMA,
 		},
 		fundingBar: SCF_FUNDING_BAR_SCHEMA,
@@ -5961,6 +5967,9 @@ export const spec: OpenAPISpec = {
 														round: SCF_ROUND_SCHEMA,
 														fundedPeers: {
 															type: "array",
+															nullable: true,
+															description:
+																"null when the idea maps to no vertical (not computed, never an empty list).",
 															items: SCF_FUNDED_PEER_SCHEMA,
 														},
 														fundingBar: SCF_FUNDING_BAR_SCHEMA,

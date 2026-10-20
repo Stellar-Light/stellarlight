@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-20",
 		surfaces: ["api"],
+		version: "spec@1.9.84",
+		type: "fixed",
+		summary:
+			"scfPitch and hackathonBrief serve fundedPeers and fundingBar as null, not an empty list and $0, when the idea maps to no vertical; the brief's dead prior art caution counts only dormant or archived repos.",
+		detail:
+			"Without a vertical the funded-peer count never ran, yet the pitch showed 0 funded projects and $0 (17 of 40 labeled ideas). The brief's caution fired on any prior-art repo not marked active, so a maintained repo (a commit within 180 days) and an unread one counted as dead; it now uses the pitch's own rule, dormant or archived.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
 		version: "spec@1.9.83",
 		type: "changed",
 		summary:
