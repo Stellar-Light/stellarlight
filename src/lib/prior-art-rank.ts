@@ -20,8 +20,14 @@ export interface PriorArtCandidate {
 	lastCommitAt?: string | null;
 }
 
-/** A word's stem for matching: lowercase, a plural "s" dropped. */
-const stem = (w: string) => (w.length > 3 ? w.replace(/(?<!s)s$/, "") : w);
+/** A word's stem for matching: lowercase, a plural dropped ("libraries"
+ * and "library" meet at "library", "repos" and "repo" at "repo"). */
+const stem = (w: string) =>
+	w.length > 4 && w.endsWith("ies")
+		? `${w.slice(0, -3)}y`
+		: w.length > 3
+			? w.replace(/(?<!s)s$/, "")
+			: w;
 
 function wordsOf(text: string): Set<string> {
 	return new Set(

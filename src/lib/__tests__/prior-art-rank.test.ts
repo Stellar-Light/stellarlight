@@ -46,6 +46,18 @@ describe("prior art among judged repos", () => {
 		expect(names(["borrows", "collaterals"])).toEqual(["e/lend", "f/lend2"]);
 	});
 
+	it("matches -ies plurals to -y words", () => {
+		const libs = [
+			...corpus,
+			{ fullName: "h/zk-lib", description: "A zk proof library for Soroban" },
+		];
+		expect(
+			// Without the -ies rule "libraries" matches nothing, one word is left,
+			// and an idea with one usable word gets no prior art.
+			rankPriorArt(["proof", "libraries"], libs).map((r) => r.fullName),
+		).toEqual(["h/zk-lib"]);
+	});
+
 	it("never lets common words stand in for the idea's missing ones", () => {
 		// "rosca" and "tanda" are in no repo; "app" and "stellar" are in most.
 		// Found by an outside review: dropping the missing words from the
