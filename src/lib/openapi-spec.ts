@@ -5690,7 +5690,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Hackathon brief — vet + starter repos with trust + live contracts + funding + what not to claim, in one call",
 				description:
-					"One call for a hackathon team's first hour: vet (same as vet-idea — competitors, maturity, gap, judged prior art), builds (prototype-layer prior art from DoraHacks submissions), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.",
+					"One call for a hackathon team's first hour: vet (same as vet-idea: competitors, maturity, gap, judged prior art), builds (prototype-layer prior art, hybrid search), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.",
 				"x-routing": {
 					purpose:
 						"ONE call for a hackathon team: is it built, what to fork (with trust), what is live to build against, is there money after, and what the demo must not claim.",
@@ -5756,8 +5756,9 @@ export const spec: OpenAPISpec = {
 												vet: VET_BLOCK_SCHEMA,
 												builds: {
 													type: "array",
+													nullable: true,
 													description:
-														"Prototype-layer prior art: up to two prize winners covering at least half of the idea's concepts, then the closest other DoraHacks submissions, five in all.",
+														"Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners covering at least half of the idea's concepts, then other stored submissions that vetIdea would list (a meaning score of at least 0.7 or two matched words), five in all. null = the submissions index could not be read (not checked), [] = checked, none.",
 													items: {
 														type: "object",
 														properties: {

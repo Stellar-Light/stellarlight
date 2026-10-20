@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
+		type: "fixed",
+		summary:
+			"hackathonBrief's `builds` uses the same hybrid search and evidence rule as vetIdea's `priorArt.builds`, and is null, not [], when the submissions index cannot be read.",
+		detail:
+			"The brief embeds vetIdea (`vet`) and also listed its own `builds` by keyword search, so one response could carry two prior-art lists made two ways. Winners covering half the idea's concepts still come first; the rest are builds vetIdea would list (a meaning score of at least 0.7 or two matched words). An unreadable index used to read as [], which says no team tried the idea.",
+	},
+	{
+		date: "2026-10-20",
 		surfaces: ["api", "mcp"],
 		version: "spec@1.9.83",
 		type: "changed",

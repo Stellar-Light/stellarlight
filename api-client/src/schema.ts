@@ -539,7 +539,7 @@ export interface paths {
         };
         /**
          * Hackathon brief — vet + starter repos with trust + live contracts + funding + what not to claim, in one call
-         * @description One call for a hackathon team's first hour: vet (same as vet-idea — competitors, maturity, gap, judged prior art), builds (prototype-layer prior art from DoraHacks submissions), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.
+         * @description One call for a hackathon team's first hour: vet (same as vet-idea: competitors, maturity, gap, judged prior art), builds (prototype-layer prior art, hybrid search), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.
          */
         get: operations["hackathonBrief"];
         put?: never;
@@ -5186,7 +5186,7 @@ export interface operations {
                                     basis?: string;
                                 } | null;
                             };
-                            /** @description Prototype-layer prior art: up to two prize winners covering at least half of the idea's concepts, then the closest other DoraHacks submissions, five in all. */
+                            /** @description Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners covering at least half of the idea's concepts, then other stored submissions that vetIdea would list (a meaning score of at least 0.7 or two matched words), five in all. null = the submissions index could not be read (not checked), [] = checked, none. */
                             builds?: {
                                 /** @description Opens the full submission in getHackathonSubmission. */
                                 id?: string;
@@ -5224,7 +5224,7 @@ export interface operations {
                                      */
                                     factsReadAt?: string;
                                 } | null;
-                            }[];
+                            }[] | null;
                             /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */
                             startFrom?: {
                                 repo?: {

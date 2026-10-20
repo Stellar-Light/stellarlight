@@ -308,17 +308,21 @@ describe("rarity and phrases", () => {
 describe("brief picks winners first, then broadens", () => {
 	it("puts covering winners first and leaves out a one-word winner", async () => {
 		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
+		// The brief takes the search's scored list (hybrid in production).
 		const picks = pickBriefBuilds(
-			[
-				build("Exact phrase", "x402 pay-per-call API for AI agents."),
-				build(
-					"RenderGate",
-					"Pay-per-render browser API for agents with x402.",
-					true,
-				),
-				build("Wallet winner", "A wallet.", true),
-			],
-			"x402 pay-per-call API for AI agents",
+			searchHackathonBuilds(
+				[
+					build("Exact phrase", "x402 pay-per-call API for AI agents."),
+					build(
+						"RenderGate",
+						"Pay-per-render browser API for agents with x402.",
+						true,
+					),
+					build("Wallet winner", "A wallet.", true),
+				],
+				"x402 pay-per-call API for AI agents",
+				{ perSubmission: true },
+			),
 		).map((s) => s.b.name);
 		expect(picks[0]).toBe("RenderGate");
 		expect(picks).toContain("Exact phrase");
