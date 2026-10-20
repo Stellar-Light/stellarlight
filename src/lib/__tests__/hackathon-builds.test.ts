@@ -326,7 +326,61 @@ describe("brief picks winners first, then broadens", () => {
 		).map((s) => s.b.name);
 		expect(picks[0]).toBe("RenderGate");
 		expect(picks).toContain("Exact phrase");
-		expect(picks.indexOf("Wallet winner")).not.toBe(0);
+		expect(picks).not.toContain("Wallet winner");
+	});
+
+	it("keeps winners-first on a hybrid list: share is keyword coverage", async () => {
+		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
+		const pool = [
+			build("Keyword winner", "Multisig treasury wallet for teams.", true),
+			build("Meaning-only winner", "Shared custody for group funds.", true),
+			build("One-word winner", "A wallet for gamers.", true),
+			build("Close match", "Multisig wallet for team treasuries."),
+		];
+		// Meaning scores as the vector search would give them (at or above the
+		// floor); "Meaning-only winner" shares no word with the idea.
+		const semantic = new Map(
+			pool.map((b, i) => [b.id, [0.8, 0.79, 0.69, 0.78][i]] as const),
+		);
+		const scored = searchHackathonBuilds(
+			pool,
+			"multisig wallet team treasury",
+			{
+				perSubmission: true,
+				mode: "hybrid",
+				semantic,
+			},
+		);
+		const meaningOnly = scored.find((s) => s.b.name === "Meaning-only winner");
+		expect(meaningOnly?.share).toBe(0);
+		const picks = pickBriefBuilds(scored).map((s) => s.b.name);
+		expect(picks[0]).toBe("Keyword winner");
+		// One word of four and a meaning score under 0.7: not prior art.
+		expect(picks).not.toContain("One-word winner");
+		// Found by meaning alone: not a winner-first slot, but listed on merit.
+		expect(picks.indexOf("Meaning-only winner")).toBeGreaterThan(0);
+	});
+
+	it("holds winners to the evidence rule: half of a two-word idea is one word", async () => {
+		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
+		const pool = [
+			build("Gamer wallet", "A wallet for gamers.", true),
+			build("Team multisig", "Multisig wallet for teams."),
+		];
+		const semantic = new Map([
+			[pool[0].id, 0.69],
+			[pool[1].id, 0.8],
+		]);
+		const scored = searchHackathonBuilds(pool, "multisig wallet", {
+			perSubmission: true,
+			mode: "hybrid",
+			semantic,
+		});
+		// One of two words is share 0.5, but one word and 0.69 is not prior art.
+		expect(scored.find((s) => s.b.name === "Gamer wallet")?.share).toBe(0.5);
+		expect(pickBriefBuilds(scored).map((s) => s.b.name)).toEqual([
+			"Team multisig",
+		]);
 	});
 });
 

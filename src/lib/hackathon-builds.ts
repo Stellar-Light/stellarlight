@@ -440,9 +440,11 @@ export function dedupeBuilds(rows: IndexedBuild[]): IndexedBuild[] {
 export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
 	const stored = await readStoredBuilds();
 	const index = dedupeBuilds(stored?.length ? stored : await buildLiveIndex());
-	// Never return an empty index: unstable_cache would keep it for an hour in
-	// place of the last good one. A throw keeps the cached index and is an
-	// outage every caller already answers as one (503, or null).
+	// Never return an empty index: unstable_cache would store it for an hour
+	// in place of the last good one; a throw stores nothing. Search, analyze
+	// and review answer the throw with a 503, vetIdea and the brief with null,
+	// compare with a note. The event detail and builder pages still show an
+	// unreadable index as no submissions, as they did an empty one.
 	if (!index.length) throw new Error("hackathon builds index came back empty");
 	return index;
 }

@@ -20,7 +20,7 @@ import { buildContractsRegistry, type ContractRow } from "./contracts-registry";
 import { queryBuilds } from "./hackathon-build-query";
 import { getHackathonBuildsIndex, type ScoredBuild } from "./hackathon-builds";
 import { heldSecurity } from "./held-repos";
-import { priorArtTop } from "./prior-art-rank";
+import { isPriorArtEvidence, priorArtTop } from "./prior-art-rank";
 import { buildScfPitch, type ScfPitchReport } from "./scf-pitch";
 import { buildTrustReport, type TrustReport } from "./trust-report";
 
@@ -165,15 +165,18 @@ export interface HackathonBrief {
 /**
  * Prior-art builds for a brief: winners first, then broaden, the order
  * prior-art research should take. Up to two prize winners covering at least
- * half of the idea's concepts, then the closest other builds, five in all.
- * Ranking alone can bury a winner under builds whose text repeats the query's
- * exact phrase; a winner matching one word of three is not prior art. Takes
- * the hybrid search's scored list, and takes the rest from the same top five
- * vetIdea lists (priorArtTop), so the two never disagree on one idea.
+ * half of the idea's words (share, the keyword coverage hybrid search keeps;
+ * a build found by meaning alone has 0), then the builds vetIdea lists from
+ * the same top five (priorArtTop), five at most. Ranking alone can bury a
+ * winner under builds whose text repeats the query's exact phrase; a winner
+ * matching one word of three is not prior art. Every build listed passes
+ * vetIdea's evidence rule (isPriorArtEvidence), so the brief never lists a
+ * build vetIdea would reject; it may list a winner ranked below vetIdea's
+ * top five.
  */
 export function pickBriefBuilds(scored: ScoredBuild[]) {
 	const winners = scored
-		.filter((s) => s.b.isWinner && s.share >= 0.5)
+		.filter((s) => s.b.isWinner && s.share >= 0.5 && isPriorArtEvidence(s))
 		.slice(0, 2);
 	const seen = new Set(winners.map((s) => s.b.id));
 	return [
