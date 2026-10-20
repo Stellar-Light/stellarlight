@@ -1619,7 +1619,7 @@ export interface components {
                 track?: string | null;
                 /** @description Award CATEGORY title, shared by every placement inside it — NOT this project's prize. DoraHacks nests placements under an award category, so all five winners of a '$10,000 XLM Prize' category carry that same string while placing 1st ($5,000) through 5th ($750); the placements sum to the category pool. Reading this as one winner's prize overstates 3rd place by 8x and makes the winners sum to 5x the pot. For what this project actually won, use `prizeUsd` (or parse `placement`). */
                 award?: string | null;
-                /** @description What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250). null when the placement carries no amount (tier-labelled winners like 'Track Winner') — never 0, which would assert a prize of nothing. */
+                /** @description What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250); on curated roster rows, the roster's own figure. null when the placement carries no amount (tier-labelled winners like 'Track Winner'), never 0, which would assert a prize of nothing. */
                 prizeUsd?: number | null;
                 isWinner?: boolean;
                 githubUrl?: string | null;

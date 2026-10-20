@@ -281,7 +281,8 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		expect(ws).toHaveLength(12);
 		// `rank` is the place within a track: twelve winners had two ids.
 		expect(new Set(ws.map((w) => w.id)).size).toBe(12);
-		// The old ids named six rows each; neither is reused for one winner.
+		// Production's rank-based ids, -1 and -2, named six rows each;
+		// neither is reused for a single winner.
 		for (const old of ["-1", "-2"])
 			expect(ws.map((w) => w.id)).not.toContain(
 				`winner-stellar-builder-summit-2026${old}`,

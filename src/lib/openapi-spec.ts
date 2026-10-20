@@ -10567,7 +10567,7 @@ export const spec: OpenAPISpec = {
 									type: "number",
 									nullable: true,
 									description:
-										"What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250). null when the placement carries no amount (tier-labelled winners like 'Track Winner') — never 0, which would assert a prize of nothing.",
+										"What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250); on curated roster rows, the roster's own figure. null when the placement carries no amount (tier-labelled winners like 'Track Winner'), never 0, which would assert a prize of nothing.",
 								},
 								isWinner: { type: "boolean" },
 								githubUrl: { type: "string", nullable: true },
