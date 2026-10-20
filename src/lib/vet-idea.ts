@@ -22,7 +22,12 @@ import {
 	GAP_VERTICALS,
 	type TypeCoverage,
 } from "./ecosystem-gaps";
+import {
+	getHackathonBuildsIndex,
+	searchHackathonBuilds,
+} from "./hackathon-builds";
 import { ACTIVE_PROJECT_STATUSES } from "./population";
+import { rankPriorArt } from "./prior-art-rank";
 import {
 	anchorTokens,
 	buildHaystack,
@@ -119,6 +124,16 @@ export interface VetIdeaReport {
 			hackathonWinner: boolean;
 			activityState: string;
 			lastCommitAt: string | null;
+		}>;
+		/** Stored hackathon submissions matching the idea, best first. */
+		builds: Array<{
+			id: string;
+			name: string;
+			hackathon: string;
+			placement: string | null;
+			isWinner: boolean;
+			githubUrl: string | null;
+			matchedTerms: string[];
 		}>;
 		note: string;
 	};
@@ -334,45 +349,55 @@ export async function buildVetIdea(
 	}
 
 	// Prior art from OUR corpus: judged-hackathon repos matching the idea.
-	// Dead prior art is a signal, not noise — surface state honestly.
+	// Dead prior art is a signal, not noise: surface state honestly.
 	const hres = await payload.find({
 		collection: "repos",
 		where: {
-			and: [
-				// judgedHackathon is TEXT (the hackathon the judge score came
-				// from) — 365 populated rows; `equals: true` matched zero (found
-				// live 2026-08-15, the wrong-predicate false-negative class).
-				{ judgedHackathon: { exists: true } },
-				...(tokens.length
-					? [
-							{
-								// biome-ignore lint/suspicious/noExplicitAny: Payload Where union is awkward
-								or: tokens.flatMap((t) => [
-									{ fullName: { like: t } },
-									{ description: { like: t } },
-								]) as any[],
-							},
-						]
-					: []),
-			],
+			// judgedHackathon is TEXT (the hackathon the judge score came from),
+			// about 365 populated rows; `equals: true` matched zero (found live
+			// 2026-08-15, the wrong-predicate false-negative class).
+			judgedHackathon: { exists: true },
 		},
-		limit: 5,
+		// The whole judged set, not a word-filtered slice: rankPriorArt weighs
+		// each word by its rarity across it, and sorting a one-word match by
+		// recency let the latest pushed repos answer every idea.
+		limit: 1000,
 		depth: 0,
 		sort: "-lastCommitAt",
 		select: {
 			fullName: true,
+			description: true,
 			hackathonWinner: true,
 			lastCommitAt: true,
 			isArchived: true,
 		},
 	});
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-	const priorArtRepos = (hres.docs as any[]).map((h) => ({
+	const priorArtRepos = rankPriorArt(tokens, hres.docs as any[]).map((h) => ({
 		fullName: String(h.fullName),
 		hackathonWinner: !!h.hackathonWinner,
 		activityState: activityStateOf(h.lastCommitAt ?? null, !!h.isArchived),
 		lastCommitAt: h.lastCommitAt ? String(h.lastCommitAt) : null,
 	}));
+
+	// Prior art from every stored hackathon submission, on DoraHacks and off
+	// it: the search searchHackathonBuilds serves, with the words each build
+	// matched, so a one-word match reads as one. Most submissions' repos are
+	// not in the repo index, so the judged repos above are a small slice.
+	const index = await getHackathonBuildsIndex().catch(() => []);
+	const priorArtBuilds = searchHackathonBuilds(index, q, {
+		perSubmission: true,
+	})
+		.slice(0, 5)
+		.map(({ b, matched }) => ({
+			id: b.id,
+			name: b.name,
+			hackathon: b.hackathon.title,
+			placement: b.hackathonPlacement ?? null,
+			isWinner: !!b.isWinner,
+			githubUrl: b.githubUrl ?? null,
+			matchedTerms: matched,
+		}));
 
 	// Gap verdict for the vertical (supply-side only — same computation and
 	// caveats as analyze?dimension=gaps).
@@ -440,7 +465,8 @@ export async function buildVetIdea(
 		},
 		priorArt: {
 			repos: priorArtRepos,
-			note: "Judged-hackathon repos from our index matching the idea; dead prior art is itself a signal. Not exhaustive — DoraHacks builds without a surviving repo are on /api/hackathons/builds.",
+			builds: priorArtBuilds,
+			note: "builds: stored hackathon submissions matching the idea, best first, with the words each matched (a one-word match is a weak one). repos: judged-hackathon repos from our index that match at least two of the idea's words and half their weight, so often none; one shared word is not prior art. Dead prior art is itself a signal.",
 		},
 		gap,
 		funding,

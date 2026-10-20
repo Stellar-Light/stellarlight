@@ -90,7 +90,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: `${getAppUrl()}/api/vet-idea`,
 				generatedAt: new Date().toISOString(),
-				note: "Evidence-grounded composite; every block carries its basis. gap is SUPPLY-side coverage (a gap is not demand); maturity absence means no evidence on record, not a negative claim; priorArt covers judged-hackathon repos in our index (builds without surviving repos live on /api/hackathons/builds). vertical=null means the idea doesn't map onto the measurable vertical axis, not that no market exists.",
+				note: "Evidence-grounded composite; every block carries its basis. gap is SUPPLY-side coverage (a gap is not demand); maturity absence means no evidence on record, not a negative claim; priorArt.builds covers every stored hackathon submission (DoraHacks and off it) with the words each matched; priorArt.repos only judged-hackathon repos that match two of the idea's words, so it is often empty. vertical=null means the idea doesn't map onto the measurable vertical axis, not that no market exists.",
 			},
 			report,
 		},

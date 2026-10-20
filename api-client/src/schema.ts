@@ -5427,6 +5427,16 @@ export interface operations {
                                 basis?: string;
                             };
                             priorArt?: {
+                                /** @description Stored hackathon submissions matching the idea, best first: the search searchHackathonBuilds serves, across events on DoraHacks and off it. `matchedTerms` shows how strong each match is; a one-word match is a weak one. */
+                                builds?: {
+                                    id?: string;
+                                    name?: string;
+                                    hackathon?: string;
+                                    placement?: string | null;
+                                    isWinner?: boolean;
+                                    githubUrl?: string | null;
+                                    matchedTerms?: string[];
+                                }[];
                                 repos?: {
                                     fullName?: string;
                                     hackathonWinner?: boolean;

@@ -34,6 +34,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 		date: "2026-10-20",
 		surfaces: ["api"],
 		version: "spec@1.9.83",
+		type: "fixed",
+		summary:
+			"vetIdea's prior art is about the idea: `priorArt.builds` lists the stored hackathon submissions that match it, with the words each matched, and `priorArt.repos` keeps only judged repos that match two of its words.",
+		detail:
+			"Prior art took judged repos where any one of the idea's words appeared as a substring and sorted them by most recent commit, so the same few recently pushed repos answered remittance, insurance, QR payments and subscription ideas alike. `priorArt.builds` is now the search searchHackathonBuilds serves, across events on DoraHacks and off it; `priorArt.repos` weighs each word by its rarity across the whole judged set and needs two of them and half their weight, so a one-word overlap is no longer prior art and an idea with no real match gets none.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.83",
 		type: "added",
 		summary:
 			"HackMeridian, which runs off DoraHacks, is served like any other event: HackMeridian 2025 with its six winners as submissions, and HackMeridian 2026 with its paths, dates and prize pool.",

@@ -6100,6 +6100,26 @@ export const spec: OpenAPISpec = {
 												priorArt: {
 													type: "object",
 													properties: {
+														builds: {
+															type: "array",
+															description:
+																"Stored hackathon submissions matching the idea, best first: the search searchHackathonBuilds serves, across events on DoraHacks and off it. `matchedTerms` shows how strong each match is; a one-word match is a weak one.",
+															items: {
+																type: "object",
+																properties: {
+																	id: { type: "string" },
+																	name: { type: "string" },
+																	hackathon: { type: "string" },
+																	placement: { type: "string", nullable: true },
+																	isWinner: { type: "boolean" },
+																	githubUrl: { type: "string", nullable: true },
+																	matchedTerms: {
+																		type: "array",
+																		items: { type: "string" },
+																	},
+																},
+															},
+														},
 														repos: {
 															type: "array",
 															items: {
