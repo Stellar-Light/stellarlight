@@ -375,8 +375,23 @@ export async function buildVetIdea(
 	// honest answer. Always filled to 8, "fans fund artists" served Tipper
 	// plus seven rows that share only "fund" (Friendbot funds testnet
 	// accounts). The audit count above still covers every matched row.
-	const competitorDocs = projDocs.filter((p) => enoughOfIdea(p.__hits ?? []));
-	const competitorProjects = competitorDocs.slice(0, 8).map((p) => ({
+	const competitorDocs = projDocs
+		.filter((p) => enoughOfIdea(p.__hits ?? []))
+		.slice(0, 8);
+	// The label describes the rows served, so it is set after the cut, which
+	// can drop every typed member, every scored row, or every row; an emptied
+	// list read under a "vertical" label looked like a landscape.
+	if (!competitorDocs.length) competitorMatch = "weak";
+	else if (
+		competitorMatch === "vertical" ||
+		competitorMatch === "vertical+scored"
+	) {
+		const members = competitorDocs.some((p) => p.__via === "vertical");
+		const scored = competitorDocs.some((p) => p.__via === "scored");
+		competitorMatch =
+			members && scored ? "vertical+scored" : members ? "vertical" : "scored";
+	}
+	const competitorProjects = competitorDocs.map((p) => ({
 		slug: String(p.slug),
 		name: p.name ? String(p.name) : null,
 		status: p.status ? String(p.status) : null,
@@ -522,8 +537,9 @@ export async function buildVetIdea(
 			repos: competitorRepos,
 			projects: competitorProjects,
 			matchMode: competitorMatch,
-			matchModeLabel:
-				competitorMatch === "vertical"
+			matchModeLabel: !competitorProjects.length
+				? "no directory project matched enough of the idea's own words: we found nothing close, which is not evidence that none exists"
+				: competitorMatch === "vertical"
 					? "typed members of the idea's vertical"
 					: competitorMatch === "vertical+scored"
 						? "typed members of the idea's vertical, plus rows that matched the idea's own terms — a product ABOUT a vertical competes with tools, not only with members of that vertical"

@@ -333,3 +333,55 @@ describe("vet-idea weighs a negation-seeking idea's words in context", () => {
 		expect(served[0]).toBe("acme-vault");
 	});
 });
+
+describe("vet-idea labels the competitors it serves", () => {
+	const row = (slug: string, types: string[], shortDescription: string) => ({
+		slug,
+		name: slug,
+		status: "Live",
+		types,
+		prominence: 0,
+		shortDescription,
+	});
+	const vet = (rows: ReturnType<typeof row>[], q: string) =>
+		buildVetIdea(
+			{
+				find: async ({ collection }: { collection: string }) =>
+					collection === "projects"
+						? { docs: structuredClone(rows), totalDocs: rows.length }
+						: { docs: [], totalDocs: 0 },
+			} as never,
+			q,
+		).then((r) => r.competitors);
+	const lendco = row(
+		"lendco",
+		["Lending"],
+		"A lending protocol for stablecoins.",
+	);
+
+	it("an idea no row covers enough of serves nothing, labelled weak", async () => {
+		// Each row matches one of three equally rare words: a third of the
+		// idea. The label was set before the cut, so [] read as "typed
+		// members of the idea's vertical", a landscape with nobody in it.
+		const c = await vet(
+			[
+				lendco,
+				row("artbox", ["NFT"], "A marketplace for artists."),
+				row("coverly", ["Insurance"], "Parametric insurance for travel."),
+			],
+			"lending artists insurance",
+		);
+		expect(c.projects).toEqual([]);
+		expect(c.matchMode).toBe("weak");
+		expect(c.matchModeLabel).toMatch(/not evidence that none exists/);
+	});
+
+	it("names how the served rows were found, not the rows the cut removed", async () => {
+		const c = await vet(
+			[lendco, row("duo", ["Tooling"], "Insurance for artists' gear.")],
+			"lending artists insurance",
+		);
+		expect(c.projects.map((p) => p.slug)).toEqual(["duo"]);
+		expect(c.matchMode).toBe("scored");
+	});
+});
