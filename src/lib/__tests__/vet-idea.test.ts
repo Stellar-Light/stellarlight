@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GAP_VERTICALS } from "../ecosystem-gaps";
 import { buildHaystack, scoreTokens, tokenize } from "../project-search-match";
-import { VERTICAL_TOKENS } from "../vet-idea";
+import { buildVetIdea, VERTICAL_TOKENS } from "../vet-idea";
 
 describe("vet-idea vertical map", () => {
 	it("every VERTICAL_TOKENS value is a real GAP_VERTICALS member", () => {
@@ -203,5 +203,98 @@ describe("vet-idea tie-break is prominence, not the alphabet", () => {
 				{ slug: "niche", name: "Niche", __rel: 3, prominence: 0 },
 			]),
 		).toEqual(["niche", "freighter"]);
+	});
+});
+
+/**
+ * Competitor padding (2026-10-20, 40 blind-labeled ideas). The block was
+ * filled to 8 with whatever matched one word, ordered by prominence:
+ * "fans fund artists" served Tipper plus the seven rows below, which share
+ * only "fund" (Friendbot funds testnet accounts). These are the rows the
+ * live directory served that day, in its own words.
+ */
+describe("vet-idea competitors are not padded with one-word matches", () => {
+	const row = (
+		slug: string,
+		name: string,
+		types: string[],
+		prominence: number,
+		shortDescription: string,
+	) => ({ slug, name, status: "Live", types, prominence, shortDescription });
+	const rows = [
+		row(
+			"tipper",
+			"Tipper",
+			["Payments"],
+			0,
+			"TIPPER is the best way for creators to get tipped in USDC on Stellar. Tipper allows for Latin American influencers, artists and communities that want monetize their audience, get support from fans anywhere around the world, and convert their tips and earnings into Digital Dollars.",
+		),
+		row(
+			"freighter",
+			"Freighter",
+			["Wallet"],
+			90,
+			"Freighter is the Stellar Development Foundation's official non-custodial Stellar wallet: a browser extension and iOS/Android apps, across Mainnet, Testnet and Futurenet (Friendbot funding).",
+		),
+		row(
+			"stellar-cli",
+			"Stellar CLI",
+			["Faucet"],
+			90,
+			"The Stellar CLI is the official command-line tool for Stellar/Soroban developers. It generates a keypair and funds it with test XLM via Friendbot, the fastest way to fund a testnet account.",
+		),
+		row(
+			"benji",
+			"Benji",
+			["RWA"],
+			88,
+			"Benji is Franklin Templeton's tokenized real-world asset (RWA) platform. The Franklin OnChain U.S. Government Money Fund (FOBXX), a tokenized money market fund, is natively issued on Stellar.",
+		),
+		row(
+			"friendbot",
+			"Friendbot",
+			["Faucet"],
+			85,
+			"Friendbot is Stellar's official testnet faucet: an SDF-hosted bot that funds new accounts and Soroban contracts with 10,000 fake test XLM.",
+		),
+		row(
+			"chaincerts",
+			"Chaincerts",
+			["Security"],
+			82,
+			"Chaincerts issues verifiable credentials and decentralized identity (DID) on Stellar using Soroban smart contracts. SCF-funded, by kommitters.",
+		),
+		row(
+			"nodies",
+			"Nodies",
+			["RPC"],
+			82,
+			"Nodies is a Web3 infrastructure platform and Stellar RPC node provider offering RPC and Horizon endpoints. SCF-funded.",
+		),
+		row(
+			"phoenix",
+			"Phoenix",
+			["DEX"],
+			80,
+			"Phoenix DeFi Hub is an SCF-funded AMM-based DEX on Stellar/Soroban running constant-product and stableswap liquidity pools.",
+		),
+	];
+	const payload = {
+		find: async ({ collection }: { collection: string }) =>
+			collection === "projects"
+				? { docs: structuredClone(rows), totalDocs: rows.length }
+				: { docs: [], totalDocs: 0 },
+	};
+	const served = async (q: string) =>
+		(await buildVetIdea(payload as never, q)).competitors.projects.map(
+			(p) => p.slug,
+		);
+
+	it("a row sharing only a common word of the idea is not served", async () => {
+		expect(await served("fans fund artists")).toEqual(["tipper"]);
+	});
+
+	it("a one-word idea is not gated", async () => {
+		expect(await served("wallet")).toEqual(["freighter"]);
 	});
 });
