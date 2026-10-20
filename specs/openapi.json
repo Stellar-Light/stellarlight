@@ -3965,7 +3965,7 @@
 						"name": "mode",
 						"in": "query",
 						"required": false,
-						"description": "How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+						"description": "How q matches (default: hybrid). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
 						"schema": {
 							"type": "string",
 							"enum": [
@@ -3973,7 +3973,7 @@
 								"meaning",
 								"hybrid"
 							],
-							"default": "keyword"
+							"default": "hybrid"
 						}
 					},
 					{
@@ -4917,7 +4917,7 @@
 						"name": "mode",
 						"in": "query",
 						"required": false,
-						"description": "How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+						"description": "How q matches (default: keyword). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
 						"schema": {
 							"type": "string",
 							"enum": [

@@ -261,7 +261,11 @@ const BUILD_PROJECT_SCHEMA = {
 
 /** The filters searchHackathonBuilds and analyzeHackathonSubmissions share, parsed by
  * src/lib/hackathon-build-query.ts: one list, so the two cannot drift. */
-const buildFilterParams = (qDescription: string) => [
+const buildFilterParams = (
+	qDescription: string,
+	/** Mirrors the defaultMode each route passes to parseBuildFilters. */
+	defaultMode: (typeof BUILD_SEARCH_MODES)[number],
+) => [
 	{
 		name: "q",
 		in: "query",
@@ -273,12 +277,11 @@ const buildFilterParams = (qDescription: string) => [
 		name: "mode",
 		in: "query",
 		required: false,
-		description:
-			"How q matches. keyword (default): the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).",
+		description: `How q matches (default: ${defaultMode}). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served).`,
 		schema: {
 			type: "string",
 			enum: [...BUILD_SEARCH_MODES],
-			default: "keyword",
+			default: defaultMode,
 		},
 	},
 	{
@@ -3428,6 +3431,7 @@ export const spec: OpenAPISpec = {
 				parameters: [
 					...buildFilterParams(
 						"Topic to search build names + descriptions (prior-art lookup).",
+						"hybrid",
 					),
 					{
 						name: "limit",
@@ -3789,6 +3793,7 @@ export const spec: OpenAPISpec = {
 					},
 					...buildFilterParams(
 						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches. Empty = every submission.",
+						"keyword",
 					),
 				],
 				responses: {

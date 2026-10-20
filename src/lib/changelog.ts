@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-20",
+		surfaces: ["api", "mcp"],
+		version: "spec@1.9.83",
+		type: "changed",
+		summary:
+			"searchHackathonBuilds searches in hybrid mode by default (words plus meaning); analyzeHackathonSubmissions still counts with keyword. Pass mode=keyword for the old behavior.",
+		detail:
+			"On a 40-idea labeled set (top 5 per idea, every returned build graded), keyword filled 40% of the slots with builds that were not the idea and found 36 of 118 same-idea builds; hybrid 22% and 56. Exact-name lookups held (27 of 30 first against keyword's 26, all 30 in the top three either way) for about 150 ms more at the median. When search by meaning cannot run, keyword results are served and meta.warnings says so.",
+	},
+	{
+		date: "2026-10-20",
 		surfaces: ["api"],
 		version: "spec@1.9.83",
 		type: "fixed",
