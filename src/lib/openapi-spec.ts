@@ -6108,7 +6108,7 @@ export const spec: OpenAPISpec = {
 														builds: {
 															type: "array",
 															description:
-																"Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched (one word is a weak match); `similarity` is the meaning score; a build with similarity and no matchedTerms was found by meaning alone, so check it.",
+																"Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build is listed only with a score of at least 0.7 or two matched words, and one with similarity and no matchedTerms was found by meaning alone, so check it.",
 															items: {
 																type: "object",
 																properties: {

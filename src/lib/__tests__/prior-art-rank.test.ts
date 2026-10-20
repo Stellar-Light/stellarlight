@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { rankPriorArt } from "../prior-art-rank";
+import { isPriorArtEvidence, rankPriorArt } from "../prior-art-rank";
 
 // A judged set where "app" and "stellar" are everywhere, as in the real one.
 const corpus = [
@@ -44,5 +44,18 @@ describe("prior art among judged repos", () => {
 
 	it("matches plurals, and puts a winner first on a tie", () => {
 		expect(names(["borrows", "collaterals"])).toEqual(["e/lend", "f/lend2"]);
+	});
+});
+
+describe("isPriorArtEvidence", () => {
+	it("needs a meaning score at the floor or two matched words", () => {
+		expect(isPriorArtEvidence({ similarity: 0.71, matched: [] })).toBe(true);
+		expect(isPriorArtEvidence({ similarity: 0.7, matched: ["x"] })).toBe(true);
+		expect(isPriorArtEvidence({ similarity: 0.69, matched: ["x"] })).toBe(
+			false,
+		);
+		// Search by meaning down: no score, so one word is not enough.
+		expect(isPriorArtEvidence({ matched: ["x", "y"] })).toBe(true);
+		expect(isPriorArtEvidence({ matched: ["x"] })).toBe(false);
 	});
 });

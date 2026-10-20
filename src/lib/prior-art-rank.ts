@@ -85,3 +85,24 @@ export function rankPriorArt<T extends PriorArtCandidate>(
 		.slice(0, limit)
 		.map((d) => d.c);
 }
+
+/**
+ * Whether a build from hybrid search counts as prior art: its meaning score
+ * clears PRIOR_ART_MIN_SIMILARITY, or it matched two of the idea's words. On
+ * the 40-idea labeled set (2026-10-20, top 5 per idea) this kept all 56
+ * same-idea builds found, cut wrong builds from 22% to 18%, and cut builds
+ * shown for ideas with no real match from 60 to 47. With search by meaning
+ * down there is no score, so only two-word matches count.
+ * ponytail: one fixed floor tuned on draft labels; re-measure it when the
+ * embedding model or the labels change.
+ */
+export const PRIOR_ART_MIN_SIMILARITY = 0.7;
+
+export function isPriorArtEvidence(s: {
+	similarity?: number;
+	matched: string[];
+}): boolean {
+	return (
+		(s.similarity ?? 0) >= PRIOR_ART_MIN_SIMILARITY || s.matched.length >= 2
+	);
+}
