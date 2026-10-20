@@ -470,13 +470,14 @@ export function judgeStamp(p: {
 		// Another site answering is not the product coming back. basement.dev
 		// began 307ing to divergentlabs.xyz, an unrelated product, and that
 		// page's 200 read as REVIVED (2026-10-07). Same rule as page-verdict's
-		// offsite-redirect: such a page is not evidence the product is alive.
+		// offsite-redirect: a rebrand and a hijack look identical, so the page
+		// is evidence neither way and the stamp is not re-read, not held.
 		const from = registrableDomain(p.sourceUrl);
 		const to = registrableDomain(p.finalUrl);
 		if (to && from && to !== from)
 			return {
-				verdict: "HOLDS",
-				reason: `redirects off-site (${from} → ${to}); another site answering is not evidence the product came back`,
+				verdict: "COULD-NOT-CHECK",
+				reason: `redirects off-site (${from} → ${to}); another site answering is evidence neither way, a rebrand and a hijack look the same`,
 			};
 		// A death that came back is worth a human look, never an auto-flip.
 		if (marker) return { verdict: "HOLDS", reason: `still says "${marker}"` };

@@ -145,7 +145,7 @@ describe("judgeStamp", () => {
 
 	// basement, 2026-10-07 onward: the Inactive stamp's URL 307s to
 	// divergentlabs.xyz, an unrelated product, and its 200 read as a revival.
-	it("HOLDS an Inactive stamp whose URL now redirects to another site", () => {
+	it("cannot check an Inactive stamp whose URL now redirects to another site", () => {
 		const v = judgeStamp({
 			...base,
 			to: "Inactive",
@@ -153,7 +153,9 @@ describe("judgeStamp", () => {
 			finalUrl: "https://divergentlabs.xyz/",
 			html: `<p>${filler}</p>`,
 		});
-		expect(v.verdict).toBe("HOLDS");
+		// Neither REVIVED (another product answered) nor HOLDS (a rebrand
+		// would look the same): page-verdict's offsite-redirect rule.
+		expect(v.verdict).toBe("COULD-NOT-CHECK");
 		expect(v.reason).toMatch(/basement\.dev → divergentlabs\.xyz/);
 		// A same-site hop (scheme, www, path) is still the product's own page.
 		expect(
