@@ -36,7 +36,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		version: "spec@1.9.84",
 		type: "fixed",
 		summary:
-			"vetIdea serves only competitors that match enough of the idea: one shared common word no longer earns a slot, so fewer than 8 can be served, and an emptied list reads weak. The vetIdea matchMode enum now lists vertical+scored, which it already served.",
+			"vetIdea serves only competitors that match enough of the idea: rarer idea words weigh more, so a row sharing only a common word with a more specific idea no longer earns a slot; fewer than 8 can be served, and an emptied list reads weak. The vetIdea matchMode enum now lists vertical+scored, which it already served.",
 		detail:
 			"Every row matching one idea word qualified and editorial prominence filled all 8 slots: 'fans fund artists' served Tipper plus seven rows that share only 'fund' (Friendbot funds testnet accounts). Each idea word now weighs by its rarity across the active directory, and a row must match a minimum share of that weight; matchMode and its label are set from the rows served. On 40 blind-labeled ideas, rows that are not competitors fell from 78 to 32 of 160 on the 20 used for tuning and from 70 to 44 on the 20 held out, with direct competitors served unchanged in total (three lost and three gained on the tuning half, one swapped on the held-out half).",
 	},

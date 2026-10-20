@@ -383,5 +383,19 @@ describe("vet-idea labels the competitors it serves", () => {
 		);
 		expect(c.projects.map((p) => p.slug)).toEqual(["duo"]);
 		expect(c.matchMode).toBe("scored");
+		expect(c.matchModeLabel).toBe("matched the idea's own terms");
+	});
+
+	it("keeps calling a served member a member when every scored row was cut", async () => {
+		const c = await vet(
+			[
+				row("lendco", ["Lending"], "Lending and insurance for artists."),
+				row("quotes", ["Tooling"], "Insurance quotes."),
+			],
+			"lending artists insurance",
+		);
+		expect(c.projects.map((p) => p.slug)).toEqual(["lendco"]);
+		expect(c.matchMode).toBe("vertical");
+		expect(c.matchModeLabel).toBe("typed members of the idea's vertical");
 	});
 });
