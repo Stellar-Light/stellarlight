@@ -50,6 +50,16 @@ describe("prior art among judged repos", () => {
 		expect(names(["borrows", "collaterals"])).toEqual(["e/lend", "f/lend2"]);
 	});
 
+	it("matches -ies plurals to -ie words too (movies, movie)", () => {
+		const films = [
+			...corpus,
+			{ fullName: "m/film", description: "Movie tickets with resale" },
+		];
+		expect(
+			rankPriorArt(["movies", "tickets"], films).map((r) => r.fullName),
+		).toEqual(["m/film"]);
+	});
+
 	it("matches -ies plurals to -y words", () => {
 		const libs = [
 			...corpus,

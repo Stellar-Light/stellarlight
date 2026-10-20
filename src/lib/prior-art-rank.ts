@@ -4,9 +4,9 @@
  * the repo's name and description, each weighted by its rarity across the
  * candidates (pass the whole judged set, so "app" weighs little). A repo
  * must match two of the idea's words that occur in the set, cover half of
- * their weight, and include at least one word that occurs in no more than a
- * tenth of the set; an idea with fewer than two words the set uses gets
- * none, because one shared word is not prior art. Ties go to hackathon
+ * their weight, and include at least one rare word (in no more than a tenth
+ * of the set, or in at most two repos); an idea with fewer than two words
+ * the set uses gets none, because one shared word is not prior art. Ties go to hackathon
  * winners, then to recent commits.
  *
  * Before this (2026-10-20), one word found as a substring was enough and the
@@ -21,14 +21,15 @@ export interface PriorArtCandidate {
 	lastCommitAt?: string | null;
 }
 
-/** A word's stem for matching: lowercase, a plural dropped ("libraries"
- * and "library" meet at "library", "repos" and "repo" at "repo"). */
-const stem = (w: string) =>
-	w.length > 4 && w.endsWith("ies")
-		? `${w.slice(0, -3)}y`
-		: w.length > 3
-			? w.replace(/(?<!s)s$/, "")
-			: w;
+/** A word's stem for matching, the same on both sides, so it need not be a
+ * word: plurals meet their singular ("libraries" and "library" at "librari",
+ * "movies" and "movie" at "movi", "repos" and "repo" at "repo"). */
+const stem = (w: string) => {
+	if (w.length > 4 && w.endsWith("ies")) return `${w.slice(0, -3)}i`;
+	if (w.length > 3 && w.endsWith("ie")) return w.slice(0, -1);
+	if (w.length > 3 && /[^aeiou]y$/.test(w)) return `${w.slice(0, -1)}i`;
+	return w.length > 3 ? w.replace(/(?<!s)s$/, "") : w;
+};
 
 function wordsOf(text: string): Set<string> {
 	return new Set(

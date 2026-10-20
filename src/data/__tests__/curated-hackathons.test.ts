@@ -41,8 +41,12 @@ describe("curated hackathons", () => {
 		expect(h?.description).not.toMatch(/36 hours|\$50,000/);
 	});
 
-	it("says HackMeridian 2025's days are derived", () => {
+	it("says HackMeridian 2025's days are derived, and claims no hours", () => {
 		const h = CURATED_HACKATHONS.find((x) => x.uname === "hackmeridian-2025");
-		expect(h?.description).toMatch(/derived/);
+		expect(h?.description).toMatch(/15 to 16 September dates here are derived/);
+		const iso = (s?: number) => new Date((s ?? 0) * 1000).toISOString();
+		// Midday Rio time on each derived day.
+		expect(iso(h?.start_time)).toBe("2025-09-15T15:00:00.000Z");
+		expect(iso(h?.end_time)).toBe("2025-09-16T15:00:00.000Z");
 	});
 });

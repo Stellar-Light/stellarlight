@@ -453,7 +453,9 @@ export const getHackathonBuildsIndex = unstable_cache(
 	buildHackathonBuildsIndex,
 	// Bump when IndexedBuild's shape changes: the cache outlives deploys, and
 	// an old-shape index serves every new field as unknown for up to an hour.
-	["hackathon-builds-index:v3"],
+	// v4: an empty index is no longer cached, so one cached before this
+	// deploy must not outlive it.
+	["hackathon-builds-index:v4"],
 	{
 		revalidate: 3600,
 		tags: ["hackathons"],

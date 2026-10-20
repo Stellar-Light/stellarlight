@@ -5758,7 +5758,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													nullable: true,
 													description:
-														"Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners covering at least half of the idea's concepts, then the builds vetIdea lists from the same top five (a meaning score of at least 0.7 or two matched words), five at most. null = the submissions index could not be read (not checked), [] = checked, none.",
+														"Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners matching at least half of the idea's words, then the builds vetIdea lists from the same top five, five at most; every build listed, winners included, has a meaning score of at least 0.7 or two matched words. null = the submissions index could not be read (not checked), [] = checked, none.",
 													items: {
 														type: "object",
 														properties: {

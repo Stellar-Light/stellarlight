@@ -85,7 +85,7 @@ export async function GET(req: NextRequest) {
 			{
 				error: "hackathon builds index unavailable",
 				advisory:
-					"The prior-art index could not be built because the upstream roster read timed out. This is an outage, NOT a claim that nothing similar was built. Retry after a moment.",
+					"The prior-art index could not be built: the stored submissions could not be read, or the read came back empty. This is an outage, NOT a claim that nothing similar was built. Retry after a moment.",
 				retryAfterSeconds: 2,
 			},
 			{
