@@ -68,7 +68,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"HackMeridian, which runs off DoraHacks, is served like any other event: HackMeridian 2025 with its six winners as submissions, and HackMeridian 2026 with its paths, dates and prize pool.",
 		detail:
-			"Submissions from events off DoraHacks are stored as hackathon builds with `curated-<event>-<name>` ids, which getHackathonSubmission now accepts, so search, prior art, briefs and event pages find them. HackMeridian 2025 (Rio, September 2025): Open Innovation, The Simple Fund, 4Bridge and Stellar Forge; Composability, Lance, Star Lends and Panorama Block, per SDF's recap, with no repo linked until one is verified. HackMeridian 2026 (Warehouse ONE16, Lisbon, 25 to 26 October), from the organizer's site: 28 hours, Genesis and Scale categories with the Stellar Unlocked and Stellar Composed tracks, up to $30,000 across 6 winners paid in XLM, and the judging criteria for each category.",
+			"Submissions from events off DoraHacks are stored as hackathon builds with `curated-<event>-<name>` ids, which getHackathonSubmission now accepts, so search, prior art, briefs and event pages find them. HackMeridian 2025 (Rio, September 2025): Open Innovation, The Simple Fund, 4Bridge and Stellar Forge; Composability, Lance, Star Lends and Panorama Block, per SDF's recap, with no repo linked until one is verified. HackMeridian 2026 (Warehouse ONE16, Lisbon, 25 to 26 October), from the organizer's site: hacking from 09:00 Sunday to the 12:00 Monday deadline (27 hours; the organizer says 28), Genesis and Scale categories with the Stellar Unlocked and Stellar Composed tracks, up to $30,000 across 6 winners paid in XLM, and the judging criteria for each category.",
 	},
 	{
 		date: "2026-10-19",
