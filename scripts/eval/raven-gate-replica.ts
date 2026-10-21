@@ -1,4 +1,10 @@
 /**
+ * Portions of this file are ported, with changes, from
+ * stellar-experimental/stellar-raven at commit b1dc866 (Apache License 2.0),
+ * and through Raven's vendored scorer from @cloudflare/codemode 0.4.2 (MIT
+ * License, Copyright (c) 2025 Cloudflare, Inc.). See THIRD-PARTY-NOTICES.md
+ * and LICENSES/ for the notices and license texts.
+ *
  * Raven routing-gate replica: would Raven accept this OpenAPI spec, and which
  * of its routing questions move?
  *
