@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-20",
 		surfaces: ["api"],
+		type: "changed",
+		summary:
+			'searchResearch removes a trailing "?" after the question\'s text before embedding it, so a question retrieves the same pool asked with or without one, and serves one submission per SCF project unless the request is scoped to source=scf-proposal.',
+		detail:
+			'The query was embedded as typed. Measured before this change, a trailing "?" moved chunk vector scores by 0.005 on average, and on 20 questions asked with and without it the top 5 changed for 11 (mean overlap 0.81), while three repeats of each form were identical. Only a trailing question mark after other text is now removed before the query is embedded and before the keyword fallback splits it; a "?" or "!" inside the query can be code (the ? operator, vec!, !=) and stays. Several submissions of one SCF project used to share a page: one 8-row page for a lending question carried two projects twice each, one for a payroll question up to three. A submission that names a project page repeats an earlier one only when that page was already served, and one without a page line repeats an earlier one with the same title; a later submission of a project already on the page now refills it only after every other document. Confidence scores are unchanged.',
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
 		type: "fixed",
 		summary:
 			"vetIdea, scfPitch and hackathonBrief read an idea that uses stablecoins as its rail by its other vertical (an issuer, mint, peg, backing or redemption stays Stablecoin) and know payroll, microloans, donations and charities; the brief no longer serves x402 contracts for payments ideas that are not x402.",
