@@ -81,15 +81,23 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    State: not started.
    Done when: every served field and every served null is declared.
 
-7. **Missed build-to-project links, one from letter case.**
+7. **Five confirmed build-to-project links are missing.**
    Probe: `/api/hackathons/review?link=https://github.com/hoops-finance/cometswap`
    says no project lists the repo, while searchProjects lists
-   `Hoops-Finance/cometswap`. The previous-attempts lane confirmed four more
-   by reading both descriptions (2026-10-20): YieldBack.Cash, PayZoll,
-   clevercon, Juntta.
+   `Hoops-Finance/cometswap` among the hoops project's repos.
+   Found: the previous-attempts lane (2026-10-20), confirming each by reading
+   both descriptions. The causes differ, so no one rule fixes them: the link
+   rule reads a project's own `github.repos` and its `links.github`, never
+   its indexed repos (Comet x Hoops; letter case is not the cause, both sides
+   are lowercased in `src/lib/hackathon-build-links.ts`); the repo moved
+   (YieldBack.Cash, clevercon); the build has no repo and a different demo
+   host (PayZoll); only the name matches (Juntta). Broad rules measured badly
+   in that lane: name-only links were right 3 of 15 times, indexed-repo
+   links about 1 of 5.
    State: not started.
-   Done when: repo matching ignores case, the link lane re-ran (dry run, then
-   execute), and the five links are live.
+   Done when: the five verified links are recorded as a curated link basis
+   the link lane reads (a spec enum entry for the basis), the lane re-ran
+   (dry run, then execute), and the five links are live.
 
 8. **Events with announced winners show 0 winners.**
    Probe: `/api/hackathons/stellarhack` has `stats.winners == 0` beside a
