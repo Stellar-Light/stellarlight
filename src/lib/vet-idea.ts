@@ -52,11 +52,16 @@ export const VERTICAL_TOKENS: Record<string, string> = {
 	lend: "Lending",
 	borrow: "Lending",
 	loan: "Lending",
+	loans: "Lending",
+	microloan: "Lending",
+	microloans: "Lending",
+	microfinance: "Lending",
 	bridge: "Bridge",
 	payments: "Payments",
 	payment: "Payments",
 	remittance: "Payments",
 	checkout: "Payments",
+	payroll: "Payments",
 	anchor: "Anchor",
 	ramp: "Anchor",
 	onramp: "Anchor",
@@ -84,9 +89,34 @@ export const VERTICAL_TOKENS: Record<string, string> = {
 	"erc-3643": "RWA",
 	stablecoin: "Stablecoin",
 	stablecoins: "Stablecoin",
+	donation: "Social Impact",
+	donations: "Social Impact",
+	charity: "Social Impact",
+	charities: "Social Impact",
 	rpc: "RPC",
 	faucet: "Faucet",
 } as const;
+
+/** Words that make an idea a stablecoin product rather than one paid in
+ * stablecoins. Stems on purpose: matching too much keeps Stablecoin, which is
+ * what the first-token rule already did; matching too little moves a
+ * stablecoin product to another vertical, which is worse. */
+const STABLECOIN_PRODUCT =
+	/\b(?:issu\w*|mint\w*|back(?:ed|ing|ers?)|reserves?|redeem\w*|redemptions?|algorithmic)\b|collateral|peg/i;
+
+/** The idea's vertical: its first mapped token, except that a stablecoin
+ * used as the rail yields to the idea's other vertical. "stablecoin payroll"
+ * is a payroll product; read as Stablecoin, it was weighed against stablecoin
+ * issuers (payroll and subscription billing on 40 labeled ideas). An issuer,
+ * mint, peg, backing, reserves or redemption keeps Stablecoin. */
+export function verticalOf(q: string): string | null {
+	const mapped = contentTokens(q).flatMap((t) =>
+		VERTICAL_TOKENS[t] ? [VERTICAL_TOKENS[t]] : [],
+	);
+	if (mapped[0] === "Stablecoin" && !STABLECOIN_PRODUCT.test(q))
+		return mapped.find((v) => v !== "Stablecoin") ?? "Stablecoin";
+	return mapped[0] ?? null;
+}
 
 export interface VetIdeaReport {
 	idea: string;
@@ -189,8 +219,7 @@ export async function buildVetIdea(
 	q: string,
 ): Promise<VetIdeaReport> {
 	const tokens = contentTokens(q);
-	const vertical =
-		tokens.map((t) => VERTICAL_TOKENS[t]).find((v) => v !== undefined) ?? null;
+	const vertical = verticalOf(q);
 
 	// Competitor repos via the full search stack (identity, vocabulary,
 	// canonical injection all apply).

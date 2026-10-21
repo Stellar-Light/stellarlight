@@ -163,6 +163,20 @@ function titleMatchFraction(c: RankableChunk, query: string): number {
 const FULL_LEXICAL_MAX_TOKENS = 8;
 const FULL_LEXICAL_DISCRIMINATING_MAX = 5;
 
+/**
+ * The text retrieval embeds: the query without a trailing question mark.
+ * Embedded as typed, a trailing "?" moved chunk vector scores by 0.005 on
+ * average, enough to change the top 5 for 11 of 20 questions asked with and
+ * without it (three repeats of each form were identical, 2026-10-20). Only
+ * the trailing mark goes: a "?" or "!" inside the query can be code (the ?
+ * operator, ?Sized, vec!, !=) and stays. The lexical stages below already
+ * split on punctuation. A query of nothing but question marks is kept.
+ */
+export function normalizeQueryText(query: string): string {
+	const s = query.trim().replace(/[\s?]+$/, "");
+	return s || query.trim();
+}
+
 export function queryLexTokens(query: string | undefined): string[] {
 	if (!query) return [];
 	const tokens = [
@@ -869,6 +883,50 @@ export function researchOrder(
 		(b.score ?? 0) - (a.score ?? 0);
 }
 
+// One SCF project, one row (2026-10-20): scf-proposal holds one document per
+// submission, and a project that applied in several rounds matched a
+// question several times over (Slender twice and Fixed-Rate Stablecoin
+// Credit twice in one 8-row page for a lending question, Hurupay and
+// Seasonal Workers Payroll twice each for a payroll one), pushing distinct
+// documents off the page. A submission that names a project page (the
+// "Project: ... (.../project/<slug>)" line the first chunk of every
+// submission carries) repeats a served one only when that page was served;
+// one without a page line repeats a served one with the same title (rounds
+// keep the title). Distinct pages therefore never merge, not even through a
+// row without a page. Titles keep their word breaks, so "Stellar Pay" and
+// "StellarPay" stay two projects.
+// ponytail: parsed from title and content; store the project slug on the row
+// at ingest if renamed resubmissions without a page line slip through.
+// Only a line that starts with "Project:" counts; a mention inside a
+// sentence does not.
+const SCF_PROJECT_PAGE_RE =
+	/^Project:[^\n]*?\(https:\/\/communityfund\.stellar\.org\/project\/([a-z0-9-]+)\)/im;
+
+interface ScfIdentity {
+	page: string | null;
+	title: string;
+}
+
+function scfIdentity(c: RankableChunk): ScfIdentity {
+	return {
+		page: c.content.match(SCF_PROJECT_PAGE_RE)?.[1]?.toLowerCase() ?? null,
+		title: (c.title ?? "")
+			.replace(/\s*\(SCF submission,.*$/i, "")
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, " ")
+			.trim(),
+	};
+}
+
+/** Whether `id` repeats a project already served (see the rule above). */
+function repeatsServedScf(
+	id: ScfIdentity,
+	served: { pages: Set<string>; titles: Set<string> },
+): boolean {
+	if (id.page) return served.pages.has(id.page);
+	return id.title !== "" && served.titles.has(id.title);
+}
+
 export function rankResearchChunks<T extends RankableChunk>(
 	pool: T[],
 	opts: {
@@ -876,6 +934,8 @@ export function rankResearchChunks<T extends RankableChunk>(
 		mode: "vector" | "keyword";
 		query?: string;
 		now?: number;
+		/** The request's source scope: asking for scf-proposal itself keeps every submission. */
+		source?: string | null;
 	},
 ): Array<T & { confidence: Confidence }> {
 	const now = opts.now ?? Date.now();
@@ -977,8 +1037,11 @@ export function rankResearchChunks<T extends RankableChunk>(
 	const familyCount = new Map<string, number>();
 	const seenUrl = new Set<string>();
 	const seenContent = new Set<string>();
+	const servedScf = { pages: new Set<string>(), titles: new Set<string>() };
 	const primary: typeof scored = [];
 	const leftovers: typeof scored = [];
+	// A project's further submissions refill last, after every other leftover.
+	const scfRepeats: typeof scored = [];
 	for (const c of scored) {
 		const contentKey = c.content.trim();
 		if (seenContent.has(contentKey)) continue; // mirror — never serve twice
@@ -994,9 +1057,18 @@ export function rankResearchChunks<T extends RankableChunk>(
 			leftovers.push(c);
 			continue;
 		}
+		if (c.source === "scf-proposal" && opts.source !== "scf-proposal") {
+			const id = scfIdentity(c);
+			if (repeatsServedScf(id, servedScf)) {
+				scfRepeats.push(c);
+				continue;
+			}
+			if (id.page) servedScf.pages.add(id.page);
+			if (id.title) servedScf.titles.add(id.title);
+		}
 		familyCount.set(fam, n + 1);
 		primary.push(c);
 	}
 	// …then refill from leftovers only if distinct docs can't fill the page.
-	return [...primary, ...leftovers].slice(0, opts.limit);
+	return [...primary, ...leftovers, ...scfRepeats].slice(0, opts.limit);
 }

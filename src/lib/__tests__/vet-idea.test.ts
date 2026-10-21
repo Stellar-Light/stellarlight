@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GAP_VERTICALS } from "../ecosystem-gaps";
 import { buildHaystack, scoreTokens, tokenize } from "../project-search-match";
-import { buildVetIdea, VERTICAL_TOKENS } from "../vet-idea";
+import { buildVetIdea, VERTICAL_TOKENS, verticalOf } from "../vet-idea";
 
 describe("vet-idea vertical map", () => {
 	it("every VERTICAL_TOKENS value is a real GAP_VERTICALS member", () => {
@@ -203,6 +203,58 @@ describe("vet-idea tie-break is prominence, not the alphabet", () => {
 				{ slug: "niche", name: "Niche", __rel: 3, prominence: 0 },
 			]),
 		).toEqual(["niche", "freighter"]);
+	});
+});
+
+describe("vet-idea reads an idea's vertical", () => {
+	it("reads a stablecoin rail by the idea's other vertical", () => {
+		// Payroll on a stablecoin rail competes with payroll tools, not issuers.
+		expect(verticalOf("stablecoin payroll for freelancers")).toBe("Payments");
+		expect(
+			verticalOf("subscription billing with recurring stablecoin payments"),
+		).toBe("Payments");
+		expect(verticalOf("stablecoin wallet for remittances")).toBe("Wallet");
+	});
+
+	it("keeps Stablecoin for a stablecoin product, even beside a payments word", () => {
+		// Each phrase also names Payments, so a rail reading would move it.
+		for (const idea of [
+			"stablecoin issuer for merchant payments",
+			"stablecoin issuance for payroll",
+			"a stablecoin with 1:1 backing for merchant payments",
+			"fiat-backed stablecoin for payments",
+			"a minted stablecoin for payments",
+			"a stablecoin pegging the dollar for payments",
+			"redeemable stablecoin for merchant payments",
+			"a stablecoin with daily redemptions for payroll",
+			"stablecoin reserves dashboard for payments teams",
+			"a stablecoin minter for merchant payments",
+			"an overcollateralized stablecoin for lending",
+			"a stablecoin with dollar collateral for payments",
+			"stablecoin issuances for payroll",
+			"an algorithmic stablecoin for merchant payments",
+			"a depegged stablecoin for merchant payments",
+		])
+			expect(verticalOf(idea)).toBe("Stablecoin");
+		expect(verticalOf("a stablecoin that anchors its peg to gold")).toBe(
+			"Stablecoin",
+		);
+	});
+
+	it("knows the plural and compound forms ideas use", () => {
+		expect(verticalOf("loans for farmers")).toBe("Lending");
+		expect(verticalOf("microloan app")).toBe("Lending");
+		expect(verticalOf("microloans for small businesses")).toBe("Lending");
+		expect(verticalOf("microfinance platform")).toBe("Lending");
+		expect(verticalOf("charity auctions")).toBe("Social Impact");
+		expect(verticalOf("donation matching for nonprofits")).toBe(
+			"Social Impact",
+		);
+		expect(verticalOf("accept donations in crypto")).toBe("Social Impact");
+		expect(verticalOf("transparent donation platform for charities")).toBe(
+			"Social Impact",
+		);
+		expect(verticalOf("payroll for remote teams")).toBe("Payments");
 	});
 });
 

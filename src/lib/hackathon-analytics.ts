@@ -28,21 +28,43 @@ interface Facet {
 	values: (b: IndexedBuild, now: number) => string[] | null;
 }
 
+/** What a submitted repo did after its event: the activity facet's values
+ * and a served row's afterEvent, one list so the spec cannot drift. */
+export const AFTER_EVENT_VALUES = [
+	`commits ${KEPT_BUILDING_DAYS}+ days after`,
+	`no commits ${KEPT_BUILDING_DAYS}+ days after`,
+	"archived",
+	"repo not found",
+] as const;
+const [KEPT, QUIET, ARCHIVED, GONE] = AFTER_EVENT_VALUES;
+
 /** What a submission's repo did after its event, or null when that cannot be
  * told yet. */
 function activityAfter(b: IndexedBuild, now: number): string[] | null {
-	if (b.repoMissing) return ["repo not found"];
+	if (b.repoMissing) return [GONE];
 	if (!b.activity) return null;
-	if (b.activity.archived) return ["archived"];
+	if (b.activity.archived) return [ARCHIVED];
 	const end = Date.parse(b.hackathon.endedAt ?? "");
 	if (!Number.isFinite(end)) return null;
 	const mark = end + KEPT_BUILDING_DAYS * DAY;
 	const last = Date.parse(b.activity.lastCommitAt ?? "");
-	if (Number.isFinite(last) && last >= mark)
-		return [`commits ${KEPT_BUILDING_DAYS}+ days after`];
+	if (Number.isFinite(last) && last >= mark) return [KEPT];
 	// The event ended too recently to say the team stopped.
 	if (now < mark) return null;
-	return [`no commits ${KEPT_BUILDING_DAYS}+ days after`];
+	return [QUIET];
+}
+
+/** What a submission's repo did after its event, for a served row: the
+ * activity facet's value (absent when it cannot be told yet) and the repo's
+ * last commit (absent when the repo was not read). It describes the
+ * submitted repo, not the project: work can move to another repo, and a
+ * live product can sit still in code. */
+export function afterEventFields(b: IndexedBuild, now = Date.now()) {
+	const afterEvent = activityAfter(b, now)?.[0];
+	return {
+		...(afterEvent ? { afterEvent } : {}),
+		...(b.activity ? { lastCommitAt: b.activity.lastCommitAt } : {}),
+	};
 }
 
 /** Package names that are one library: renamed scopes, legacy names and a
