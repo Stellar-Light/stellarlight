@@ -18,7 +18,7 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
-import { distribution } from "@/lib/hackathon-analytics";
+import { afterEventFields, distribution } from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
 	parseBuildFilters,
@@ -139,6 +139,9 @@ export async function GET(req: NextRequest) {
 			// Present only when the link was checked: the directory project that
 			// lists this build's exact repo, or null when none does.
 			...(b.project !== undefined ? { project: b.project } : {}),
+			// What the repo did after the event, in analyze's activity
+			// vocabulary, and its last commit: absent is unknown.
+			...afterEventFields(b),
 			// Present only when the repo was read: absent is unknown.
 			...(b.stack ? { stack: b.stack } : {}),
 			// Present only when categorized: best first.

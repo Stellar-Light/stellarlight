@@ -33,6 +33,26 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-20",
 		surfaces: ["api"],
+		version: "spec@1.9.85",
+		type: "added",
+		summary:
+			"searchHackathonBuilds rows and getHackathon winners say what happened after the event: afterEvent and lastCommitAt. Winners also carry prizeUsd and the directory project they became.",
+		detail:
+			"afterEvent takes analyzeHackathonSubmissions' activity values (commits 90+ days after, no commits 90+ days after, archived, repo not found) and is absent when that cannot be told yet. The store held repo activity for most submissions but served it only as counts, so 'did anyone keep building this' took one review call per build. It describes the submitted repo, not the project: read project.status before calling a build dead. Winner rows only, so the submissions list keeps its size; prizeUsd was documented on winners and never served, which left award (the category pool) to read as each winner's prize.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.85",
+		type: "fixed",
+		summary:
+			"The Stellar Builder Summit 2026 roster read every winner as not SCF funded; scfAwarded now comes from the linked directory project, slug names that project, and each winner has its own id.",
+		detail:
+			"scfAwarded was a constant false on all twelve curated winners while Trustless Work, linked twice, holds a $150,000 award on record. It is read from scf.awarded and is null when a winner links no project on record. Ids were built from the place within a track, so the twelve rows carried two ids; they are now built from each winner's name, and the old -1 and -2 ids are no longer served. Roster rows also carry prizeUsd.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
 		type: "changed",
 		summary:
 			'searchResearch removes a trailing "?" after the question\'s text before embedding it, so a question retrieves the same pool asked with or without one, and serves one submission per SCF project unless the request is scoped to source=scf-proposal.',
