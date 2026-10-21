@@ -1,19 +1,23 @@
 # TODO: the one queue
 
-Every known gap in this repo's own work, one item each: what is wrong, how
-it was found (a probe anyone can re-run), its state, and what done means.
-New items go here, not in chat, PR threads or private notes. When an item is
-done, move its line to the round ledger that closed it and delete it here.
-`docs/QUALITY-FINDINGS-QUEUE.md` is the historical queue it replaces.
+Every known gap in this repo's own work. A **Now** item carries four parts:
+what is wrong, how it was found (a probe anyone can re-run, or a named
+source), its state, and what done means. A **Next** item carries what is
+wrong and how it was found; it gains a state and a done line when it moves
+to Now. New items go here, not in chat, PR threads or private notes. When an
+item is done, record it in the Outcome of the round ledger that closed it,
+and delete it here. `docs/QUALITY-FINDINGS-QUEUE.md` is the historical queue
+this replaces.
 
-A probe is a GET plus an assertion that is true now and flips when the item
-is fixed. Base URL: https://www.stellarlight.xyz.
+A probe is a request plus an assertion that is true now and flips when the
+item is fixed. API base URL: https://www.stellarlight.xyz.
 
 ## Now
 
 1. **Raven holds our spec at 1.9.61.**
-   Found: Raven's `inventory/stellar-light.json` (snapshot fetched
-   2026-10-02) and its open drift issue #223. Its routing gate scored our
+   Probe: `gh api repos/stellar-experimental/stellar-raven/contents/inventory/stellar-light.json`
+   decodes to a snapshot whose spec version is 1.9.61 (fetched 2026-10-02);
+   Raven's drift issue #223 is open. Its routing gate scored our
    1.9.78 at 220 / 295 / 325 correct at top 1 / 3 / 5 and 111 operation hits,
    against floors of 219 / 298 / 326 and 112; our wording pulled in
    questions labelled for Lumenloop and Docs. Nothing we changed since 1.9.61
@@ -32,7 +36,9 @@ is fixed. Base URL: https://www.stellarlight.xyz.
    Done when: the execute ran, every row was read back, and both probes flip.
 
 3. **Open PRs #1840, #1841, #1842 and `fix/vet-vertical-map`.**
-   State: each passed an independent review; all four claim spec 1.9.84.
+   Probe: `gh pr view 1840 --json state` (and 1841, 1842) answers OPEN.
+   State: each passed an independent review; three claim spec 1.9.84 and the
+   branch changes no spec text.
    Done when: merged one at a time with versions renumbered so no two merged
    PRs share one, each verified live, and the contract audit's follow-ups
    applied: #1840 declares `voteCount` nullable; #1842's changelog names
@@ -53,10 +59,12 @@ is fixed. Base URL: https://www.stellarlight.xyz.
    claiming none.
 
 6. **Served fields the spec does not declare.**
-   Found: contract audit 2026-10-20. `priorArt.builds`, `buildsMode` and
-   `via` on the scfPitch, hackathonBrief and reviewSubmission vet blocks;
-   getHackathon `stats.winners` and `stats.outcomes`; `winners[].voteCount`
-   served null while typed as a non-nullable integer.
+   Probe: `/api/hackathons/stellar-agents-x402-stripe-mpp` serves
+   `winners[0].voteCount == null`, while the spec types it as a non-nullable
+   integer. Also found by the contract audit (2026-10-20): `priorArt.builds`,
+   `buildsMode` and `via` on the scfPitch, hackathonBrief and
+   reviewSubmission vet blocks, and getHackathon `stats.winners` and
+   `stats.outcomes`, all served and undeclared.
    Done when: every served field and every served null is declared.
 
 7. **Missed build-to-project links, one from letter case.**
@@ -85,10 +93,26 @@ is fixed. Base URL: https://www.stellarlight.xyz.
    the padded rows are fixed.
 
 10. **No secret scanning on a public repo.**
+    Probe: `ls .github/workflows | grep -i -E 'gitleaks|secret'` prints
+    nothing.
     Done when: a gitleaks workflow with a checksum-verified install, a
     pre-commit hook, and one full-history audit, clean or triaged.
 
+11. **Repos deleted on GitHub are still served.**
+    Found: the gone-repos probe's 2026-10-20 run
+    (`improvements/audits/gone-repos-latest.json`, `tally`) counts 56 newly
+    gone repos still served and 2 that came back. The ledger raises a stale
+    high finding once a gone repo stays served past 30 days (the /quality
+    lane dated the first at about 2026-10-28).
+    State: the execute lane would hide the 56 and un-hide the 2; it has not
+    run.
+    Done when: the execute ran (dry run read first) and the hidden rows read
+    back as hidden.
+
 ## Next
+
+Found by the 2026-10-20 round's consumer-style QA round and contract audit
+unless noted.
 
 - Substring matching: `track=AI` matches "Main Track"; q "Star Lends" marks
   "Blend" and "starting". Done when short terms match whole words on build

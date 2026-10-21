@@ -41,13 +41,14 @@ questions blocks every later change of ours from reaching Raven's agents.
 ## Measurement
 
 - Grade against ground truth, not opinions: blind labels with a written
-  rubric (for example 2 same, 1 related, 0 words only; ties to the stricter
-  grade), labelled before the served list is opened.
+  rubric stored next to them (for example 2 same, 1 related, 0 words only;
+  ties to the stricter grade), labelled before the served list is opened.
 - Hold out a slice of every question set before looking at any result, and
   never tune on it. Report tuned and held-out numbers separately.
 - Every fix ships a test that fails with the fix reverted. Show it failing.
-- Measure at production scale. A small fixture hid an over-correction that
-  dropped real matches on the full corpus.
+- Measure on the full corpus the route serves, not only a fixture. A small
+  fixture hid an over-correction that dropped real matches on the full
+  corpus.
 - Record the API version at the start and end of every live eval run; a
   mismatch means the run is not comparable.
 - A total that did not move can hide a swap. Report what was lost and gained.
@@ -57,10 +58,12 @@ questions blocks every later change of ours from reaching Raven's agents.
 - Descriptions stay within 600 characters; vocabulary goes in
   `x-routing.keywords`. Topic words (a protocol, a product) do not belong in
   one operation's keywords.
-- Check routing changes against Raven's gate before shipping
-  (`scripts/eval/raven-gate-replica.ts` once merged): no question of another
-  provider newly captured, no Scout question lost. Batch routing edits into
-  one release.
+- Check routing changes against Raven's gate before shipping: no question
+  of another provider newly captured, no Scout question lost. The local
+  replica, `scripts/eval/raven-gate-replica.ts`, is queue item 1; until it
+  exists, run `scripts/eval/raven-scorer-replica.ts` on the changed
+  questions and say the check is partial. Batch routing edits into one
+  release.
 - Never copy eval questions into example questions.
 
 ## Data and contract rules
@@ -73,16 +76,20 @@ The nine recurring bug classes, checked on every new field and endpoint:
    `[]` or `0` for something that was not computed.
 4. Array order reads as rank: carry an explicit rank and say when order is
    meaningless.
-5. Free-text matching uses the shared scorer; short terms match whole words.
-6. Authority breaks ties; it never beats relevance or an exact name.
+5. Free-text matching uses the shared scorer; a query term of five letters
+   or fewer matches whole words only, never inside another word.
+6. Authority signals (prominence, SCF awards, stars, source authority) break
+   ties; they never beat relevance or an exact name.
 7. Aggregates carry their basis and date; never a headline beside an empty
    breakdown.
 8. Descriptions are routing contracts: scope every name-drop.
 9. Duplicates get a canonical pointer, never two answers.
 
 Every served field is in the spec; a served enum value is in its enum; a
-served `null` is declared nullable. A request filter that matches nothing it
-recognises answers 400 or a warning, never a silent empty 200.
+served `null` is declared nullable. A filter value the API does not
+recognise answers 400 with the valid values when the set is closed (slugs,
+enums), and otherwise a warning in the response naming what was not
+recognised; never a silent empty 200.
 
 ## Production and outward actions
 
@@ -99,8 +106,9 @@ recognises answers 400 or a warning, never a silent empty 200.
 
 ## Writing
 
-- No em dashes or en dashes in copy, API text, docs, code comments or
-  commit messages.
+- No em dashes or en dashes in anything new or edited: copy, API text,
+  docs, code comments, commit messages. Historical files are not rewritten
+  for it.
 - No third-party personal names in commits. No private repo paths in this
   public repo. Never print or commit secrets.
 - Plain language: say what was measured, with numbers, and what was not.
