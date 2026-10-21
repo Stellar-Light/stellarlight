@@ -3,6 +3,7 @@ import {
 	anchorDocUrls,
 	hasFullLexicalCoverage,
 	identifierTargets,
+	normalizeQueryText,
 	queryLexTokens,
 	rankResearchChunks,
 	recencyContentTokens,
@@ -1069,5 +1070,114 @@ describe("researchOrder: one ranking across sources (2026-10-03)", () => {
 			row("dev-docs", "https://developers.stellar.org/docs/y", 0.8, 0.79),
 		];
 		expect(rows.sort(researchOrder("soroban host"))[0].source).toBe("dev-docs");
+	});
+});
+
+describe("normalizeQueryText: punctuation cannot move retrieval (2026-10-20)", () => {
+	it("a trailing ? or ! gives the same text as none", () => {
+		const q = "Best docs to read before building a Soroban lending protocol";
+		expect(normalizeQueryText(`${q}?`)).toBe(normalizeQueryText(q));
+		expect(normalizeQueryText(`${q}!`)).toBe(q);
+		expect(normalizeQueryText(`${q}.`)).toBe(q);
+		expect(normalizeQueryText(`  ${q} ?? `)).toBe(q);
+	});
+
+	it("drops inline question marks, keeps the words around them", () => {
+		expect(
+			normalizeQueryText(
+				"How is SDF funded? Is SDF a nonprofit, and does it pay taxes?",
+			),
+		).toBe("How is SDF funded Is SDF a nonprofit, and does it pay taxes");
+	});
+
+	it("keeps identifiers, figures and versions intact", () => {
+		expect(
+			normalizeQueryText(
+				"CAP-46 vs SEP-24 under $300,000 for soroban-sdk v25.0.2?",
+			),
+		).toBe("CAP-46 vs SEP-24 under $300,000 for soroban-sdk v25.0.2");
+	});
+
+	it("falls back to the query when only punctuation is left", () => {
+		expect(normalizeQueryText(" ?? ")).toBe("??");
+	});
+});
+
+describe("one row per SCF project unless scf-proposal is asked for (2026-10-20)", () => {
+	const scf = (id: string, title: string, score: number, content?: string) => ({
+		...chunk({
+			url: `https://communityfund.stellar.org/submissions/${id}`,
+			score,
+			source: "scf-proposal",
+			content,
+		}),
+		title,
+	});
+	const hurupay = (title: string, round: string) =>
+		`# ${title} (SCF submission, ${round})\n\nProject: Hurupay Virtual Accounts Program (https://communityfund.stellar.org/project/hurupay-virtual-accounts-program-gts)\nAward round: ${round}\n\nVirtual accounts for freelancers and remote workers, paid in USDC through local rails in ${round}.`;
+	const pool = [
+		scf("recA", "Slender (SCF submission, SCF #17)", 0.8),
+		scf("recB", "Slender (SCF submission, Liquidity Award - '24 Q1)", 0.79),
+		{
+			...chunk({ url: "https://developers.stellar.org/docs/lend", score: 0.7 }),
+			source: "dev-docs",
+		},
+		scf(
+			"recC",
+			"Crypto Lombard Credit on Stellar (SCF submission, SCF #40)",
+			0.69,
+		),
+	];
+	const urls = (rows: Array<{ url: string }>) =>
+		rows.map((r) => r.url.split("/").pop());
+
+	it("a project's second submission drops below distinct documents", () => {
+		const out = rankResearchChunks(pool, {
+			limit: 3,
+			mode: "vector",
+			now: NOW,
+		});
+		expect(urls(out)).toEqual(["recA", "lend", "recC"]);
+	});
+
+	it("keeps every submission when the caller scoped to scf-proposal", () => {
+		const out = rankResearchChunks(pool, {
+			limit: 3,
+			mode: "vector",
+			now: NOW,
+			source: "scf-proposal",
+		});
+		expect(urls(out)).toEqual(["recA", "recB", "lend"]);
+	});
+
+	it("a renamed resubmission is the same project when it names the same project page", () => {
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recH1",
+					"Stablecoin Orchestration API on Stellar (SCF submission, SCF #39)",
+					0.81,
+					hurupay("Stablecoin Orchestration API on Stellar", "SCF #39"),
+				),
+				scf(
+					"recH2",
+					"Multi-currency accounts on Stellar (SCF submission, SCF #38)",
+					0.8,
+					hurupay("Multi-currency accounts on Stellar", "SCF #38"),
+				),
+				...pool.slice(2),
+			],
+			{ limit: 3, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recH1", "lend", "recC"]);
+	});
+
+	it("further submissions still refill a page distinct documents cannot fill", () => {
+		const out = rankResearchChunks(pool.slice(0, 2), {
+			limit: 2,
+			mode: "vector",
+			now: NOW,
+		});
+		expect(urls(out)).toEqual(["recA", "recB"]);
 	});
 });

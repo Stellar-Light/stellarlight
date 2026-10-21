@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-20",
 		surfaces: ["api"],
+		type: "changed",
+		summary:
+			'searchResearch returns the same rows whether or not a question ends in "?", and serves one submission per SCF project unless the request is scoped to source=scf-proposal.',
+		detail:
+			'The query was embedded with its punctuation. A trailing "?" moved chunk vector scores by 0.005 on average, and on 20 questions asked with and without it the top 5 changed for 11 (mean overlap 0.81), while three repeats of each form were identical. Question marks, exclamation marks and trailing periods, commas, colons and semicolons are now removed before the query is embedded and before the keyword fallback splits it. Several submissions of one SCF project (same title, or the same project page) used to share a page: one 8-row page for a lending question carried two projects twice each, one for a payroll question up to three. A later submission now ranks below every distinct document and only refills a page that distinct documents cannot fill. Confidence scores are unchanged. Simulated on production result pools: the 37 golden research questions all still pass, and the top-five grade of 12 hand-graded questions moved from 55 to 59 of 120, one question losing a point.',
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
 		version: "spec@1.9.83",
 		type: "changed",
 		summary:

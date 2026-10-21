@@ -163,6 +163,25 @@ function titleMatchFraction(c: RankableChunk, query: string): number {
 const FULL_LEXICAL_MAX_TOKENS = 8;
 const FULL_LEXICAL_DISCRIMINATING_MAX = 5;
 
+/**
+ * The text retrieval runs on: ? and ! removed, trailing . , ; : removed,
+ * whitespace collapsed. The query used to be embedded as typed, and a
+ * trailing "?" moved chunk vector scores by 0.005 on average, enough to
+ * change the top 5 for 11 of 20 questions asked with and without it (three
+ * repeats of each form were identical, 2026-10-20). The lexical stages below
+ * already split on punctuation. Falls back to the trimmed query when nothing
+ * but punctuation is left.
+ */
+export function normalizeQueryText(query: string): string {
+	const s = query
+		.replace(/[?!]+/g, " ")
+		.replace(/\s+/g, " ")
+		.trim()
+		.replace(/[.,;:]+$/, "")
+		.trim();
+	return s || query.trim();
+}
+
 export function queryLexTokens(query: string | undefined): string[] {
 	if (!query) return [];
 	const tokens = [
@@ -869,6 +888,32 @@ export function researchOrder(
 		(b.score ?? 0) - (a.score ?? 0);
 }
 
+// One SCF project, one row (2026-10-20): scf-proposal holds one document per
+// submission, and a project that applied in several rounds matched a
+// question several times over (Slender twice and Fixed-Rate Stablecoin
+// Credit twice in one 8-row page for a lending question, Hurupay and
+// Seasonal Workers Payroll twice each for a payroll one), pushing distinct
+// documents off the page. A submission is the same project as one already
+// served when it has the same title (rounds keep the title) or names the same
+// project page (the "Project: … (…/project/<slug>)" line the first chunk of
+// every submission carries).
+// ponytail: parsed from title and content; store the project slug on the row
+// at ingest if renamed resubmissions slip through.
+const SCF_PROJECT_PAGE_RE =
+	/Project:[^\n]*?\(https:\/\/communityfund\.stellar\.org\/project\/([a-z0-9-]+)\)/i;
+
+function scfProjectKeys(c: RankableChunk): string[] {
+	const title = (c.title ?? "")
+		.replace(/\s*\(SCF submission,.*$/i, "")
+		.toLowerCase()
+		.replace(/[^a-z0-9]+/g, "");
+	const page = c.content.match(SCF_PROJECT_PAGE_RE)?.[1]?.toLowerCase();
+	return [
+		...(title ? [`title:${title}`] : []),
+		...(page ? [`page:${page}`] : []),
+	];
+}
+
 export function rankResearchChunks<T extends RankableChunk>(
 	pool: T[],
 	opts: {
@@ -876,6 +921,8 @@ export function rankResearchChunks<T extends RankableChunk>(
 		mode: "vector" | "keyword";
 		query?: string;
 		now?: number;
+		/** The request's source scope: asking for scf-proposal itself keeps every submission. */
+		source?: string | null;
 	},
 ): Array<T & { confidence: Confidence }> {
 	const now = opts.now ?? Date.now();
@@ -977,6 +1024,7 @@ export function rankResearchChunks<T extends RankableChunk>(
 	const familyCount = new Map<string, number>();
 	const seenUrl = new Set<string>();
 	const seenContent = new Set<string>();
+	const seenScfProject = new Set<string>();
 	const primary: typeof scored = [];
 	const leftovers: typeof scored = [];
 	for (const c of scored) {
@@ -993,6 +1041,14 @@ export function rankResearchChunks<T extends RankableChunk>(
 		if (n >= familyCap) {
 			leftovers.push(c);
 			continue;
+		}
+		if (c.source === "scf-proposal" && opts.source !== "scf-proposal") {
+			const keys = scfProjectKeys(c);
+			if (keys.some((k) => seenScfProject.has(k))) {
+				leftovers.push(c);
+				continue;
+			}
+			for (const k of keys) seenScfProject.add(k);
 		}
 		familyCount.set(fam, n + 1);
 		primary.push(c);
