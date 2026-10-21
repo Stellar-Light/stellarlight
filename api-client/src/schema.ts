@@ -4250,19 +4250,21 @@ export interface operations {
                                     }[];
                                     note?: string;
                                 };
+                                /** @description null when the idea maps to no vertical (not computed, never an empty list). */
                                 fundedPeers?: {
                                     slug?: string;
                                     name?: string | null;
                                     totalAwardedUSD?: number | null;
                                     lastAwardedRound?: number | null;
-                                }[];
+                                }[] | null;
+                                /** @description null when the idea maps to no vertical: nothing was counted, which is not zero funded projects. */
                                 fundingBar?: {
                                     /** @description Every ACTIVE directory project in the vertical with an SCF award on record. fundedPeers lists only the 8 largest, so its length is not this count. */
                                     fundedProjects?: number;
                                     /** @description Recorded award USD across all fundedProjects, not just the listed peers. */
                                     totalAwardedUSD?: number;
                                     basis?: string;
-                                };
+                                } | null;
                                 /** @description Same computation as /api/vet-idea: competitors, maturity, judged prior art, and the supply-side gap row. */
                                 vet?: {
                                     competitors?: {
@@ -5071,19 +5073,21 @@ export interface operations {
                                 }[];
                                 note?: string;
                             };
+                            /** @description null when the idea maps to no vertical (not computed, never an empty list). */
                             fundedPeers?: {
                                 slug?: string;
                                 name?: string | null;
                                 totalAwardedUSD?: number | null;
                                 lastAwardedRound?: number | null;
-                            }[];
+                            }[] | null;
+                            /** @description null when the idea maps to no vertical: nothing was counted, which is not zero funded projects. */
                             fundingBar?: {
                                 /** @description Every ACTIVE directory project in the vertical with an SCF award on record. fundedPeers lists only the 8 largest, so its length is not this count. */
                                 fundedProjects?: number;
                                 /** @description Recorded award USD across all fundedProjects, not just the listed peers. */
                                 totalAwardedUSD?: number;
                                 basis?: string;
-                            };
+                            } | null;
                             /** @description Same computation as /api/vet-idea: competitors, maturity, judged prior art, and the supply-side gap row. */
                             vet?: {
                                 competitors?: {
@@ -5376,19 +5380,21 @@ export interface operations {
                                     }[];
                                     note?: string;
                                 };
+                                /** @description null when the idea maps to no vertical (not computed, never an empty list). */
                                 fundedPeers?: {
                                     slug?: string;
                                     name?: string | null;
                                     totalAwardedUSD?: number | null;
                                     lastAwardedRound?: number | null;
-                                }[];
+                                }[] | null;
+                                /** @description null when the idea maps to no vertical: nothing was counted, which is not zero funded projects. */
                                 fundingBar?: {
                                     /** @description Every ACTIVE directory project in the vertical with an SCF award on record. fundedPeers lists only the 8 largest, so its length is not this count. */
                                     fundedProjects?: number;
                                     /** @description Recorded award USD across all fundedProjects, not just the listed peers. */
                                     totalAwardedUSD?: number;
                                     basis?: string;
-                                };
+                                } | null;
                             };
                             /** @description Deterministic cautions derived from THIS brief's own facts — each names the fact it stands on. Empty when the brief gives no reason for one. */
                             whatNotToClaim?: string[];

@@ -28,19 +28,21 @@ export interface ScfPitchReport {
 		}>;
 		note: string;
 	};
-	/** Already-funded ACTIVE projects in the vertical, largest award first —
-	 * the projects a pitch must differentiate against. */
+	/** Already-funded ACTIVE projects in the vertical, largest award first:
+	 * the projects a pitch must differentiate against. null when the idea maps
+	 * to no vertical, so there was nothing to count (never an empty list). */
 	fundedPeers: Array<{
 		slug: string;
 		name: string | null;
 		totalAwardedUSD: number | null;
 		lastAwardedRound: number | null;
-	}>;
+	}> | null;
+	/** null with fundedPeers: not computed, never zero funded. */
 	fundingBar: {
 		fundedProjects: number;
 		totalAwardedUSD: number;
 		basis: string;
-	};
+	} | null;
 	/** The competitive/gap/prior-art view — same computation as /api/vet-idea. */
 	vet: Pick<VetIdeaReport, "competitors" | "maturity" | "priorArt" | "gap">;
 	/** Deterministic angles — each names the fact it stands on. */
@@ -78,7 +80,7 @@ export async function buildScfPitch(
 			};
 
 	// Funded peers: vertical-wide over ACTIVE projects, structured scf truth.
-	let fundedPeers: ScfPitchReport["fundedPeers"] = [];
+	let fundedPeers: ScfPitchReport["fundedPeers"] = null;
 	let fundedCount = 0;
 	let totalAwardedUSD = 0;
 	if (vet.vertical) {
@@ -113,7 +115,9 @@ export async function buildScfPitch(
 		);
 	if (vet.gap && vet.gap.total > 3 && fundedCount)
 		angles.push(
-			`Differentiation required: ${vet.vertical} has ${vet.gap.total} active projects and SCF already funded ${fundedCount} of them (largest awards: ${fundedPeers
+			`Differentiation required: ${vet.vertical} has ${vet.gap.total} active projects and SCF already funded ${fundedCount} of them (largest awards: ${(
+				fundedPeers ?? []
+			)
 				.slice(0, 3)
 				.map((p) => p.slug)
 				.join(", ")}). The pitch must say what they don't do.`,
@@ -137,12 +141,16 @@ export async function buildScfPitch(
 		vertical: vet.vertical,
 		round,
 		fundedPeers,
-		fundingBar: {
-			fundedProjects: fundedCount,
-			totalAwardedUSD,
-			basis:
-				"Every ACTIVE directory project in the vertical with a structured SCF award record (scf.awarded); totalAwardedUSD is the recorded award USD across all of them. fundedPeers lists the 8 largest.",
-		},
+		// A pitch for an idea with no vertical showed 0 funded projects and
+		// $0 from a count that never ran (17 of 40 labeled ideas).
+		fundingBar: vet.vertical
+			? {
+					fundedProjects: fundedCount,
+					totalAwardedUSD,
+					basis:
+						"Every ACTIVE directory project in the vertical with a structured SCF award record (scf.awarded); totalAwardedUSD is the recorded award USD across all of them. fundedPeers lists the 8 largest.",
+				}
+			: null,
 		vet: {
 			competitors: vet.competitors,
 			maturity: vet.maturity,
@@ -162,7 +170,7 @@ export function fundedInVertical(
 	docs: any[],
 	vertical: string,
 ): {
-	peers: ScfPitchReport["fundedPeers"];
+	peers: NonNullable<ScfPitchReport["fundedPeers"]>;
 	count: number;
 	totalAwardedUSD: number;
 } {

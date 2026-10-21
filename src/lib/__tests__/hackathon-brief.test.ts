@@ -194,6 +194,22 @@ describe("deriveWhatNotToClaim", () => {
 		},
 	});
 
+	it("calls prior art dead only when it went quiet: dormant or archived", () => {
+		const dead = (repos: Array<{ activityState: string | null }>) => {
+			const b = base();
+			b.vet.priorArt.repos = repos as never[];
+			// biome-ignore lint/suspicious/noExplicitAny: test shape
+			return deriveWhatNotToClaim(b as any).some((s) =>
+				/Dead hackathon prior art/.test(s),
+			);
+		};
+		// A commit within 180 days, or activity never read, is not dead.
+		expect(
+			dead([{ activityState: "maintained" }, { activityState: null }]),
+		).toBe(false);
+		expect(dead([{ activityState: "dormant" }])).toBe(true);
+	});
+
 	it("says nothing it cannot ground: a clean brief yields no cautions", () => {
 		// biome-ignore lint/suspicious/noExplicitAny: test shape
 		expect(deriveWhatNotToClaim(base() as any)).toEqual([]);

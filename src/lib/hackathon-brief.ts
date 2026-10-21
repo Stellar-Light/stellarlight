@@ -21,7 +21,11 @@ import { queryBuilds } from "./hackathon-build-query";
 import { getHackathonBuildsIndex, type ScoredBuild } from "./hackathon-builds";
 import { heldSecurity } from "./held-repos";
 import { isPriorArtEvidence, priorArtTop } from "./prior-art-rank";
-import { buildScfPitch, type ScfPitchReport } from "./scf-pitch";
+import {
+	buildScfPitch,
+	countWentQuiet,
+	type ScfPitchReport,
+} from "./scf-pitch";
 import { buildTrustReport, type TrustReport } from "./trust-report";
 
 /** GAP_VERTICALS value → the closest code-domain axis /api/contracts filters
@@ -219,7 +223,9 @@ export function deriveWhatNotToClaim(
 		out.push(
 			"SCF round state came back unavailable — do not say the round is closed. Verify at communityfund.stellar.org.",
 		);
-	if (b.vet.priorArt.repos.some((r) => r.activityState !== "active"))
+	// Dormant or archived only, as the pitch counts it: "not active" also
+	// caught maintained repos (a commit within 180 days) and unread ones.
+	if (countWentQuiet(b.vet.priorArt.repos) > 0)
 		out.push(
 			"Dead hackathon prior art is a signal about the idea's difficulty, not proof the space is free. Name it and say why yours will survive the weekend.",
 		);
@@ -315,7 +321,7 @@ export async function buildHackathonBrief(
 		},
 		funding: {
 			round: pitch.round,
-			fundedPeers: pitch.fundedPeers.slice(0, 5),
+			fundedPeers: pitch.fundedPeers?.slice(0, 5) ?? null,
 			fundingBar: pitch.fundingBar,
 		},
 	};

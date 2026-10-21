@@ -87,7 +87,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: `${getAppUrl()}/api/scf-pitch`,
 				generatedAt: new Date().toISOString(),
-				note: "Evidence-grounded pitch prep; every block carries its basis. round never asserts a negative on fetch failure (source: unavailable = verify yourself). fundedPeers/fundingBar are recorded SCF awards on ACTIVE directory projects — absence of a record is not proof of no award. angles are deterministic derivations from the served facts, not judgments.",
+				note: "Evidence-grounded pitch prep; every block carries its basis. round never asserts a negative on fetch failure (source: unavailable = verify yourself). fundedPeers/fundingBar are recorded SCF awards on ACTIVE directory projects: absence of a record is not proof of no award, and both are null when the idea maps to no vertical (not computed, not zero). angles are deterministic derivations from the served facts, not judgments.",
 			},
 			report,
 		},

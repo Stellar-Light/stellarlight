@@ -1,6 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { computeEcosystemGaps, GAP_PROJECT_SELECT } from "@/lib/ecosystem-gaps";
-import { countWentQuiet, fundedInVertical } from "@/lib/scf-pitch";
+import {
+	buildScfPitch,
+	countWentQuiet,
+	fundedInVertical,
+} from "@/lib/scf-pitch";
+
+vi.mock("@/lib/scf-rounds", () => ({
+	fetchScfRounds: vi.fn(async () => ({ roundsInProgress: [] })),
+}));
 
 describe("funded peers count every funded project", () => {
 	const docs = Array.from({ length: 12 }, (_, i) => ({
@@ -66,5 +74,27 @@ describe("the gap computation's field list", () => {
 		expect(
 			gaps.byType.find((c) => c.type === "Payments")?.hackathonWinners,
 		).toBe(1);
+	});
+});
+
+describe("funding without a vertical", () => {
+	const payload = { find: async () => ({ docs: [], totalDocs: 0 }) } as never;
+
+	it("is null, not zero, when the idea maps to no vertical", async () => {
+		// The count never runs without a vertical; it used to read 0 and $0.
+		const r = await buildScfPitch(payload, "fans fund artists");
+		expect(r.vertical).toBeNull();
+		expect(r.fundedPeers).toBeNull();
+		expect(r.fundingBar).toBeNull();
+	});
+
+	it("is counted, even to zero, when it does", async () => {
+		const r = await buildScfPitch(payload, "lending protocol for stablecoins");
+		expect(r.vertical).toBe("Lending");
+		expect(r.fundedPeers).toEqual([]);
+		expect(r.fundingBar).toMatchObject({
+			fundedProjects: 0,
+			totalAwardedUSD: 0,
+		});
 	});
 });
