@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-20",
 		surfaces: ["api"],
+		version: "spec@1.9.84",
+		type: "changed",
+		summary:
+			"Six example questions, one routing keyword and one description no longer pull other services' questions to Scout, so the spec passes Raven's routing gates.",
+		detail:
+			"Raven has held our spec at 1.9.61: 1.9.83 scored 220/295/325 at top 1/3/5 and 111 operation hits on its 338 routing questions, against accepted 219/298/326 and 112. Each of the five lost questions traced to routing text added since 1.9.61: an example that shares two words with another service's question lifts Raven's notFor rejection, and its words join the routing keywords. The examples now use other words: x402 on searchHackathonBuilds, lending on Stellar on getClusters, Real-World ZK on getHackathon, building on Stellar and a payroll app on vetIdea, payments on scfPitch. getHackathonSubmission's description drops team's and a, one-letter tokens that matched any word starting with s or a. Measured with scripts/eval/raven-gate-replica.ts, which reproduces Raven's accepted totals exactly: 220/298/326 and 112, skills and holdout unchanged, no question in Raven's 544 routing rows moves from hit to miss, and both gains since 1.9.61 hold.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
 		version: "spec@1.9.83",
 		type: "changed",
 		summary:
