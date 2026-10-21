@@ -63,6 +63,11 @@ const FRESHNESS_EXPECTATIONS_DAYS: Record<string, number> = {
 const UNDATEABLE_SOURCES: Record<string, string> = {
 	"repo-docs": "GitHub READMEs state no publication date",
 	"scf-handbook": "handbook site pages state no publication date",
+	// Checked 2026-10-20: the submission pages, the project-page submission
+	// records (id, title, status, roundName, budget, awardType) and
+	// /backend/projects carry no date. Each document names its round instead.
+	"scf-proposal":
+		"SCF submission pages state no date; each document names its award round instead",
 };
 
 // titleIssue (and its calibration history) moved to src/lib/title-quality.ts

@@ -34,7 +34,8 @@ import { buildTrustReport, type TrustReport } from "./trust-report";
 export const VERTICAL_TO_CONTRACT_DOMAIN: Record<string, string> = {
 	Lending: "defi-lending",
 	DEX: "defi-amm",
-	Payments: "payments-x402",
+	// Not Payments: remittances, merchant QR and payroll are not x402, and
+	// they were served x402 contracts. x402 and MPP ideas name it themselves.
 	Anchor: "anchor-ramp",
 	Indexer: "indexer",
 	Wallet: "wallet-infra",
@@ -50,7 +51,11 @@ const TOKEN_TO_CONTRACT_DOMAIN: Array<[RegExp, string]> = [
 	[/\bx402\b|\bmpp\b/i, "payments-x402"],
 	[/\bamm\b|\bswap\b|\bdex\b/i, "defi-amm"],
 	[/\blend(ing)?\b|\bborrow/i, "defi-lending"],
-	[/\banchor\b|\bon[- ]?ramp|\boff[- ]?ramp|sep-?24/i, "anchor-ramp"],
+	// "anchors" the noun, not the verb ("anchors its peg").
+	[
+		/\banchors?\b(?!\s+(?:its|the|a|an|their)\b)|\bon[- ]?ramp|\boff[- ]?ramp|sep-?24/i,
+		"anchor-ramp",
+	],
 	[/\bindexer\b|\bindexing\b/i, "indexer"],
 	[/\bpasskey|\bsmart[- ]account|\bwallet\b/i, "wallet-infra"],
 ];
@@ -70,7 +75,7 @@ export function contractDomainFor(
 	return {
 		domain: null,
 		basis: vertical
-			? `the ${vertical} vertical has no code-domain axis in the contracts registry`
+			? `no code domain in the contracts registry fits the ${vertical} vertical as a whole`
 			: "the idea did not resolve to a vertical or a code domain",
 	};
 }

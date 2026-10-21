@@ -279,7 +279,7 @@ export interface paths {
         };
         /**
          * One Stellar hackathon submission in full
-         * @description One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or a dorahacks.io/buidl link's number. For submissions on a topic → use searchHackathonBuilds.
+         * @description One stored Stellar hackathon submission in full: the write-up its team published (markdown, claims not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or the number in any dorahacks.io/buidl link. For submissions on a topic → use searchHackathonBuilds.
          */
         get: operations["getHackathonSubmission"];
         put?: never;
@@ -1608,7 +1608,7 @@ export interface components {
             };
             /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first. */
             winners?: {
-                /** @description Stable row id (dorahacks-buidl-{id} for live rows). */
+                /** @description Stable row id (dorahacks-buidl-{id} for live rows, winner-{event}-{name} for a curated roster, from the winner's name). */
                 id?: string;
                 name?: string;
                 hackathonPlacement?: string | null;
@@ -1619,7 +1619,7 @@ export interface components {
                 track?: string | null;
                 /** @description Award CATEGORY title, shared by every placement inside it — NOT this project's prize. DoraHacks nests placements under an award category, so all five winners of a '$10,000 XLM Prize' category carry that same string while placing 1st ($5,000) through 5th ($750); the placements sum to the category pool. Reading this as one winner's prize overstates 3rd place by 8x and makes the winners sum to 5x the pot. For what this project actually won, use `prizeUsd` (or parse `placement`). */
                 award?: string | null;
-                /** @description What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250). null when the placement carries no amount (tier-labelled winners like 'Track Winner') — never 0, which would assert a prize of nothing. */
+                /** @description What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250); on curated roster rows, the roster's own figure. null when the placement carries no amount (tier-labelled winners like 'Track Winner'), never 0, which would assert a prize of nothing. */
                 prizeUsd?: number | null;
                 isWinner?: boolean;
                 githubUrl?: string | null;
@@ -1631,6 +1631,42 @@ export interface components {
                 voteCount?: number;
                 /** @description 'dorahacks' for live rows. */
                 source?: string;
+                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                project?: {
+                    slug: string;
+                    name: string;
+                    /**
+                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
+                     * @enum {string}
+                     */
+                    basis?: "repo" | "website" | "owner-and-name";
+                    /**
+                     * @description The project's directory status today. Absent when it could not be read (unknown).
+                     * @enum {string|null}
+                     */
+                    status?: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive" | null;
+                    /** @description Whether SCF funded the project. Absent when it could not be read (unknown). */
+                    scfAwarded?: boolean;
+                    /**
+                     * Format: date-time
+                     * @description When status and scfAwarded were read from the directory (with the submissions index, at most an hour before this response). Absent with them.
+                     */
+                    factsReadAt?: string;
+                } | null;
+                /**
+                 * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown: the repo's activity was not read, the event has no usable end date (missing or unreadable), or it ended under 90 days ago with no commit past that mark. It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
+                 * @enum {string}
+                 */
+                afterEvent?: "commits 90+ days after" | "no commits 90+ days after" | "archived" | "repo not found";
+                /**
+                 * Format: date-time
+                 * @description The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo's activity was not read (a repo not found has none to read).
+                 */
+                lastCommitAt?: string | null;
+                /** @description Curated roster rows: the directory project the winner links; null when it links none. */
+                slug?: string | null;
+                /** @description Curated roster rows: whether the linked directory project has an SCF award on record (scf.awarded); null when the winner links no project on record or that project has no SCF record. Stored DoraHacks winners carry this as project.scfAwarded. */
+                scfAwarded?: boolean | null;
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
@@ -3657,6 +3693,16 @@ export interface operations {
                                  */
                                 factsReadAt?: string;
                             } | null;
+                            /**
+                             * @description What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown: the repo's activity was not read, the event has no usable end date (missing or unreadable), or it ended under 90 days ago with no commit past that mark. It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.
+                             * @enum {string}
+                             */
+                            afterEvent?: "commits 90+ days after" | "no commits 90+ days after" | "archived" | "repo not found";
+                            /**
+                             * Format: date-time
+                             * @description The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo's activity was not read (a repo not found has none to read).
+                             */
+                            lastCommitAt?: string | null;
                             /** @description Stellar packages this build's repo declares in its package.json and Cargo.toml files (soroban-sdk, @stellar/stellar-sdk, ...). Present only when the repo was read: absent = unknown (no repo link, not public, or not read yet); [] = declares none. */
                             stack?: string[];
                             /** @description Directory project types this build was sorted into, best first. Present only when categorized; scores and method are on getHackathonSubmission. */
@@ -4223,7 +4269,7 @@ export interface operations {
                                 vet?: {
                                     competitors?: {
                                         /**
-                                         * @description How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).
+                                         * @description How relevance was established for the served projects: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists) or no project matched enough of the idea (projects is empty, which is not evidence that none exists). When the idea uses two or more words the directory knows, every served project matches a minimum share of their weight (rarer words weigh more), so fewer than 8 can be served.
                                          * @enum {string}
                                          */
                                         matchMode?: "vertical" | "vertical+scored" | "scored" | "weak";
@@ -5046,7 +5092,7 @@ export interface operations {
                             vet?: {
                                 competitors?: {
                                     /**
-                                     * @description How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).
+                                     * @description How relevance was established for the served projects: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists) or no project matched enough of the idea (projects is empty, which is not evidence that none exists). When the idea uses two or more words the directory knows, every served project matches a minimum share of their weight (rarer words weigh more), so fewer than 8 can be served.
                                      * @enum {string}
                                      */
                                     matchMode?: "vertical" | "vertical+scored" | "scored" | "weak";
@@ -5142,7 +5188,7 @@ export interface operations {
                             vet?: {
                                 competitors?: {
                                     /**
-                                     * @description How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).
+                                     * @description How relevance was established for the served projects: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists) or no project matched enough of the idea (projects is empty, which is not evidence that none exists). When the idea uses two or more words the directory knows, every served project matches a minimum share of their weight (rarer words weigh more), so fewer than 8 can be served.
                                      * @enum {string}
                                      */
                                     matchMode?: "vertical" | "vertical+scored" | "scored" | "weak";
@@ -5423,10 +5469,10 @@ export interface operations {
                                     types?: string[];
                                 }[];
                                 /**
-                                 * @description How relevance was established. vertical = typed members of the idea's vertical; scored = the idea's own (non-generic) terms matched; weak = only generic words matched — the rows are nearest NEIGHBOURS, not evidence a competitor exists. Weigh a weak block as 'we found nothing close', never as a competitive landscape.
+                                 * @description How relevance was established for the served projects. vertical = typed members of the idea's vertical; vertical+scored = typed members plus rows that matched the idea's own terms; scored = the idea's own (non-generic) terms matched; weak = only generic words matched (the rows are nearest NEIGHBOURS, not evidence a competitor exists) or no project matched enough of the idea (projects is empty, which is not evidence that none exists). Weigh a weak block as 'we found nothing close', never as a competitive landscape. When the idea uses two or more words the directory knows, every served project matches a minimum share of their weight (rarer words weigh more), so fewer than 8 can be served.
                                  * @enum {string}
                                  */
-                                matchMode?: "vertical" | "scored" | "weak";
+                                matchMode?: "vertical" | "vertical+scored" | "scored" | "weak";
                                 matchModeLabel?: string;
                             };
                             maturity?: {

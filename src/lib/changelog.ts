@@ -33,12 +33,70 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-20",
 		surfaces: ["api"],
-		version: "spec@1.9.84",
+		version: "spec@1.9.87",
 		type: "changed",
 		summary:
 			"scfPitch, hackathonBrief and reviewSubmission's pitch block serve fundedPeers and fundingBar as null, not an empty list and $0, when the idea maps to no vertical; the brief's dead prior art caution counts only dormant or archived repos.",
 		detail:
 			"Without a vertical the funded-peer count never ran, yet the pitch showed 0 funded projects and $0 (17 of 40 labeled ideas). The brief's caution fired on any prior-art repo not marked active, so a maintained repo (a commit within 180 days) and an unread one counted as dead; it now uses the pitch's own rule, dormant or archived. A client that reads fundedPeers.length or fundingBar.fundedProjects must handle null.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.86",
+		type: "fixed",
+		summary:
+			"vetIdea serves only competitors that match a minimum share of the idea's word weight, rarer words weighing more, instead of always filling 8 slots: fewer than 8 can be served, and an emptied list reads weak. The vetIdea matchMode enum now lists vertical+scored, which it already served.",
+		detail:
+			"Every row matching one idea word qualified and editorial prominence filled all 8 slots: 'fans fund artists' served Tipper plus seven rows that share only 'fund' (Friendbot funds testnet accounts). Each idea word now weighs by its rarity across the active directory, and a row must match a minimum share of that weight; matchMode and its label are set from the rows served. On 40 blind-labeled ideas, rows that are not competitors fell from 78 to 32 of 160 on the 20 used for tuning and from 70 to 44 on the 20 held out, with direct competitors served unchanged in total (three lost and three gained on the tuning half, one swapped on the held-out half).",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.85",
+		type: "added",
+		summary:
+			"searchHackathonBuilds rows and getHackathon winners say what happened after the event: afterEvent and lastCommitAt. Winners also carry prizeUsd and the directory project they became.",
+		detail:
+			"afterEvent takes analyzeHackathonSubmissions' activity values (commits 90+ days after, no commits 90+ days after, archived, repo not found) and is absent when that cannot be told yet. The store held repo activity for most submissions but served it only as counts, so 'did anyone keep building this' took one review call per build. It describes the submitted repo, not the project: read project.status before calling a build dead. Winner rows only, so the submissions list keeps its size; prizeUsd was documented on winners and never served, which left award (the category pool) to read as each winner's prize.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.85",
+		type: "fixed",
+		summary:
+			"The Stellar Builder Summit 2026 roster read every winner as not SCF funded; scfAwarded now comes from the linked directory project, slug names that project, and each winner has its own id.",
+		detail:
+			"scfAwarded was a constant false on all twelve curated winners while Trustless Work, linked twice, holds a $150,000 award on record. It is read from scf.awarded and is null when a winner links no project on record. Ids were built from the place within a track, so the twelve rows carried two ids; they are now built from each winner's name, and the old -1 and -2 ids are no longer served. Roster rows also carry prizeUsd.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		type: "changed",
+		summary:
+			'searchResearch removes a trailing "?" after the question\'s text before embedding it, so a question retrieves the same pool asked with or without one, and serves one submission per SCF project unless the request is scoped to source=scf-proposal.',
+		detail:
+			'The query was embedded as typed. Measured before this change, a trailing "?" moved chunk vector scores by 0.005 on average, and on 20 questions asked with and without it the top 5 changed for 11 (mean overlap 0.81), while three repeats of each form were identical. Only a trailing question mark after other text is now removed before the query is embedded and before the keyword fallback splits it; a "?" or "!" inside the query can be code (the ? operator, vec!, !=) and stays. Several submissions of one SCF project used to share a page: one 8-row page for a lending question carried two projects twice each, one for a payroll question up to three. A submission that names a project page repeats an earlier one only when that page was already served, and one without a page line repeats an earlier one with the same title; a later submission of a project already on the page now refills it only after every other document. Confidence scores are unchanged.',
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"vetIdea, scfPitch and hackathonBrief read an idea that uses stablecoins as its rail by its other vertical (an issuer, mint, peg, backing or redemption stays Stablecoin) and know payroll, microloans, donations and charities; the brief no longer serves x402 contracts for payments ideas that are not x402.",
+		detail:
+			"On 40 labeled ideas: stablecoin payroll and subscription billing moved from Stablecoin to Payments, donations to charities now map to Social Impact and microloans to Lending (both mapped to none), a remittance idea cashing out through anchors gets anchor-ramp contracts instead of x402, and merchant QR, bill payments, streaming salary and tipping no longer get x402 contracts, which they received as the Payments vertical's closest domain. Microloans now take the Lending vertical's closest domain, defi-lending, with that basis stated.",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
+		version: "spec@1.9.84",
+		type: "changed",
+		summary:
+			"Six example questions, one routing keyword and one description no longer pull other services' questions to Scout, so the spec passes Raven's routing gates.",
+		detail:
+			"Raven has held our spec at 1.9.61: 1.9.83 scored 220/295/325 at top 1/3/5 and 111 operation hits on its 338 routing questions, against accepted 219/298/326 and 112. Each of the five lost questions traced to routing text added since 1.9.61: an example that shares two words with another service's question lifts Raven's notFor rejection, and its words join the routing keywords. The examples now use other words: x402 on searchHackathonBuilds, lending on Stellar on getClusters, Real-World ZK on getHackathon, building on Stellar and a payroll app on vetIdea, payments on scfPitch. getHackathonSubmission's description drops team's and a, one-letter tokens that matched any word starting with s or a. Measured with scripts/eval/raven-gate-replica.ts, whose self-check reproduces Raven's accepted totals exactly: this spec scores 220/298/326 and 112 against the accepted 219/298/326 and 112, skills and holdout equal the accepted values, no question in Raven's 544 routing rows (338 legacy, 23 skills, 49 holdout, 122 extended, 12 protocol) moves from hit to miss, and the two questions gained since 1.9.61 stay gained. The trade: with 'x402' gone from searchHackathonBuilds, an x402 build question that does not also say prizes, built or hackathon builds can rank that operation third instead of first on our own replica (2 of 5 phrasings checked); any x402 token there pushes one of Raven's Docs questions past its margin.",
 	},
 	{
 		date: "2026-10-20",

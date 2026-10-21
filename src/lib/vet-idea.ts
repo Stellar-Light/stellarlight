@@ -33,6 +33,7 @@ import {
 	anchorTokens,
 	buildHaystack,
 	scoreTokens,
+	tokenHits,
 	tokenize,
 } from "./project-search-match";
 import { activityStateOf } from "./repo-grade";
@@ -51,11 +52,16 @@ export const VERTICAL_TOKENS: Record<string, string> = {
 	lend: "Lending",
 	borrow: "Lending",
 	loan: "Lending",
+	loans: "Lending",
+	microloan: "Lending",
+	microloans: "Lending",
+	microfinance: "Lending",
 	bridge: "Bridge",
 	payments: "Payments",
 	payment: "Payments",
 	remittance: "Payments",
 	checkout: "Payments",
+	payroll: "Payments",
 	anchor: "Anchor",
 	ramp: "Anchor",
 	onramp: "Anchor",
@@ -83,9 +89,34 @@ export const VERTICAL_TOKENS: Record<string, string> = {
 	"erc-3643": "RWA",
 	stablecoin: "Stablecoin",
 	stablecoins: "Stablecoin",
+	donation: "Social Impact",
+	donations: "Social Impact",
+	charity: "Social Impact",
+	charities: "Social Impact",
 	rpc: "RPC",
 	faucet: "Faucet",
 } as const;
+
+/** Words that make an idea a stablecoin product rather than one paid in
+ * stablecoins. Stems on purpose: matching too much keeps Stablecoin, which is
+ * what the first-token rule already did; matching too little moves a
+ * stablecoin product to another vertical, which is worse. */
+const STABLECOIN_PRODUCT =
+	/\b(?:issu\w*|mint\w*|back(?:ed|ing|ers?)|reserves?|redeem\w*|redemptions?|algorithmic)\b|collateral|peg/i;
+
+/** The idea's vertical: its first mapped token, except that a stablecoin
+ * used as the rail yields to the idea's other vertical. "stablecoin payroll"
+ * is a payroll product; read as Stablecoin, it was weighed against stablecoin
+ * issuers (payroll and subscription billing on 40 labeled ideas). An issuer,
+ * mint, peg, backing, reserves or redemption keeps Stablecoin. */
+export function verticalOf(q: string): string | null {
+	const mapped = contentTokens(q).flatMap((t) =>
+		VERTICAL_TOKENS[t] ? [VERTICAL_TOKENS[t]] : [],
+	);
+	if (mapped[0] === "Stablecoin" && !STABLECOIN_PRODUCT.test(q))
+		return mapped.find((v) => v !== "Stablecoin") ?? "Stablecoin";
+	return mapped[0] ?? null;
+}
 
 export interface VetIdeaReport {
 	idea: string;
@@ -147,13 +178,48 @@ export interface VetIdeaReport {
 	funding: { scfAwardedProjects: number; basis: string } | null;
 }
 
+/** Share of an idea's word weight a directory project must match to be
+ * served as a competitor. Tuned on 20 blind-labeled ideas (2026-10-20):
+ * unrelated rows served 78 to 32 of 160, direct competitors 38 to 38 (3
+ * lost, 3 gained). On 20 held-out ideas: 70 to 44, and 32 to 32.
+ * ponytail: one fixed share; re-tune it when the labels change. */
+export const MIN_IDEA_COVERAGE = 0.375;
+
+/**
+ * Whether a row matches enough of the idea to be called a competitor. Each
+ * idea word weighs by its rarity across the active directory (inverse
+ * document frequency), so "fund", in hundreds of descriptions, weighs
+ * little and "artists" a lot; a row must match MIN_IDEA_COVERAGE of the
+ * weight of the idea's words that any row uses. Before this, one shared
+ * word earned a slot and editorial prominence filled the rest. An idea
+ * with fewer than two such words is not gated.
+ * `hitsPerDoc`: the idea words each active project matched.
+ */
+export function coversEnoughOfIdea(
+	tokens: string[],
+	hitsPerDoc: string[][],
+): (hits: string[]) => boolean {
+	const df = new Map<string, number>();
+	for (const hits of hitsPerDoc)
+		for (const t of new Set(hits)) df.set(t, (df.get(t) ?? 0) + 1);
+	const present = [...new Set(tokens)].filter((t) => (df.get(t) ?? 0) > 0);
+	if (present.length < 2) return () => true;
+	const weight = (t: string) =>
+		Math.log((hitsPerDoc.length + 1) / ((df.get(t) ?? 0) + 0.5));
+	const total = present.reduce((s, t) => s + weight(t), 0);
+	return (hits) =>
+		present
+			.filter((t) => hits.includes(t))
+			.reduce((s, t) => s + weight(t), 0) >=
+		total * MIN_IDEA_COVERAGE;
+}
+
 export async function buildVetIdea(
 	payload: Payload,
 	q: string,
 ): Promise<VetIdeaReport> {
 	const tokens = contentTokens(q);
-	const vertical =
-		tokens.map((t) => VERTICAL_TOKENS[t]).find((v) => v !== undefined) ?? null;
+	const vertical = verticalOf(q);
 
 	// Competitor repos via the full search stack (identity, vocabulary,
 	// canonical injection all apply).
@@ -226,9 +292,16 @@ export async function buildVetIdea(
 	if (allTokens.length)
 		for (const p of projDocs) {
 			const hay = buildHaystack(p);
-			p.__rel = scoreTokens(hay, allTokens);
+			// Which idea words this row matched, read together as scoreTokens
+			// reads them: coversEnoughOfIdea weighs them.
+			p.__hits = tokenHits(hay, allTokens);
+			p.__rel = p.__hits.length;
 			p.__anchor = allAnchors.length ? scoreTokens(hay, allAnchors) : 0;
 		}
+	const enoughOfIdea = coversEnoughOfIdea(
+		allTokens,
+		projDocs.map((p) => p.__hits ?? []),
+	);
 
 	if (vertical) {
 		const inVertical = (p: { types?: unknown }) =>
@@ -327,7 +400,27 @@ export async function buildVetIdea(
 			String(a.name ?? a.slug).localeCompare(String(b.name ?? b.slug))
 		);
 	});
-	const competitorProjects = projDocs.slice(0, 8).map((p) => ({
+	// Only rows that match enough of the idea are served; fewer than 8 is an
+	// honest answer. Always filled to 8, "fans fund artists" served Tipper
+	// plus seven rows that share only "fund" (Friendbot funds testnet
+	// accounts). The audit count above still covers every matched row.
+	const competitorDocs = projDocs
+		.filter((p) => enoughOfIdea(p.__hits ?? []))
+		.slice(0, 8);
+	// The label describes the rows served, so it is set after the cut, which
+	// can drop every typed member, every scored row, or every row; an emptied
+	// list read under a "vertical" label looked like a landscape.
+	if (!competitorDocs.length) competitorMatch = "weak";
+	else if (
+		competitorMatch === "vertical" ||
+		competitorMatch === "vertical+scored"
+	) {
+		const members = competitorDocs.some((p) => p.__via === "vertical");
+		const scored = competitorDocs.some((p) => p.__via === "scored");
+		competitorMatch =
+			members && scored ? "vertical+scored" : members ? "vertical" : "scored";
+	}
+	const competitorProjects = competitorDocs.map((p) => ({
 		slug: String(p.slug),
 		name: p.name ? String(p.name) : null,
 		status: p.status ? String(p.status) : null,
@@ -473,8 +566,9 @@ export async function buildVetIdea(
 			repos: competitorRepos,
 			projects: competitorProjects,
 			matchMode: competitorMatch,
-			matchModeLabel:
-				competitorMatch === "vertical"
+			matchModeLabel: !competitorProjects.length
+				? "no directory project matched enough of the idea's own words: we found nothing close, which is not evidence that none exists"
+				: competitorMatch === "vertical"
 					? "typed members of the idea's vertical"
 					: competitorMatch === "vertical+scored"
 						? "typed members of the idea's vertical, plus rows that matched the idea's own terms — a product ABOUT a vertical competes with tools, not only with members of that vertical"

@@ -677,23 +677,25 @@ function hasPositiveHit(hay: string, v: string): boolean {
 	return false;
 }
 
-// Prose+structured keyword score: how many query tokens hit the haystack (each
-// token counts once, via any of its expanded terms).
-export function scoreTokens(hay: string, tokens: string[]): number {
-	if (!tokens.length) return 1;
-	// …unless the QUERY is itself negation-seeking ("non custodial wallet") —
+// The query tokens that hit the haystack (each token once, via any of its
+// expanded terms), read together: a token is judged in the whole query's
+// context, so ask which idea words a row matched here, never one token at a
+// time ("custodial" alone reads "non-custodial" as the opposite).
+export function tokenHits(hay: string, tokens: string[]): string[] {
+	// …unless the QUERY is itself negation-seeking ("non custodial wallet"):
 	// then negated prose is exactly what it's asking for.
 	const negSeeking = tokens.some((t) => t.startsWith("non") || t === "self");
-	return tokens.reduce(
-		(s, t) =>
-			s +
-			(termsForToken(t).some((v) =>
-				negSeeking ? hay.includes(v) : hasPositiveHit(hay, v),
-			)
-				? 1
-				: 0),
-		0,
+	return tokens.filter((t) =>
+		termsForToken(t).some((v) =>
+			negSeeking ? hay.includes(v) : hasPositiveHit(hay, v),
+		),
 	);
+}
+
+// Prose+structured keyword score: how many query tokens hit the haystack.
+export function scoreTokens(hay: string, tokens: string[]): number {
+	if (!tokens.length) return 1;
+	return tokenHits(hay, tokens).length;
 }
 
 /**

@@ -18,7 +18,12 @@ import {
 	RWA_VERIFICATION_LEVELS,
 } from "../data/rwa-registry";
 import { CODE_DOMAINS } from "./code-domains";
-import { FACET_IDS, GROUP_FACETS, SHIFT_FACETS } from "./hackathon-analytics";
+import {
+	AFTER_EVENT_VALUES,
+	FACET_IDS,
+	GROUP_FACETS,
+	SHIFT_FACETS,
+} from "./hackathon-analytics";
 import {
 	BUILD_MATCH_MODES,
 	BUILD_SEARCH_MODES,
@@ -262,6 +267,24 @@ const BUILD_PROJECT_SCHEMA = {
 	required: ["slug", "name"],
 };
 
+/** What a submission's repo did after its event (afterEventFields in
+ * src/lib/hackathon-analytics.ts): on build search rows and winner rows. */
+const BUILD_AFTER_EVENT_PROPERTIES = {
+	afterEvent: {
+		type: "string",
+		enum: [...AFTER_EVENT_VALUES],
+		description:
+			"What the submitted repo did after the event, in analyzeHackathonSubmissions' activity vocabulary: a commit 90 or more days after the event ended, none by then, archived, or the repo not found. Absent = unknown: the repo's activity was not read, the event has no usable end date (missing or unreadable), or it ended under 90 days ago with no commit past that mark. It describes the submitted repo, not the project: work can move to another repo and a live product can sit still in code, so read `project.status` before calling a build dead.",
+	},
+	lastCommitAt: {
+		type: "string",
+		format: "date-time",
+		nullable: true,
+		description:
+			"The submitted repo's last commit on its default branch when it was last read; null = read, no commit date. Absent = the repo's activity was not read (a repo not found has none to read).",
+	},
+};
+
 /** The filters searchHackathonBuilds and analyzeHackathonSubmissions share, parsed by
  * src/lib/hackathon-build-query.ts: one list, so the two cannot drift. */
 const buildFilterParams = (
@@ -424,7 +447,7 @@ const VET_BLOCK_SCHEMA = {
 					type: "string",
 					enum: ["vertical", "vertical+scored", "scored", "weak"],
 					description:
-						"How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).",
+						"How relevance was established for the served projects: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists) or no project matched enough of the idea (projects is empty, which is not evidence that none exists). When the idea uses two or more words the directory knows, every served project matches a minimum share of their weight (rarer words weigh more), so fewer than 8 can be served.",
 				},
 				matchModeLabel: { type: "string" },
 				repos: {
@@ -3183,7 +3206,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"Who won the Stellar x402 hackathon?",
 						"What tracks did the event have and what did they pay?",
-						"How are submissions judged at Stellar Hacks: Real-World ZK, and what must a submission include?",
+						"How are submissions judged at HackMeridian, and what must a submission include?",
 					],
 				},
 				parameters: [
@@ -3415,7 +3438,6 @@ export const spec: OpenAPISpec = {
 						"winning builds",
 						"hackathon winners by topic",
 						"won prizes",
-						"x402 builds",
 						"search by meaning",
 						"similar hackathon projects",
 					],
@@ -3434,7 +3456,7 @@ export const spec: OpenAPISpec = {
 						"Has anyone built a recurring payments protocol at a Stellar hackathon?",
 						"What prediction markets were built at Stellar hackathons?",
 						"Show me winning ZK privacy builds.",
-						"Which x402 projects won prizes at Stellar hackathons?",
+						"Which payments projects won prizes at Stellar hackathons?",
 						"Which Stellar hackathon projects were built with passkey-kit?",
 					],
 				},
@@ -3600,6 +3622,7 @@ export const spec: OpenAPISpec = {
 													votes: { type: "integer", nullable: true },
 													endedAt: { type: "string", nullable: true },
 													project: BUILD_PROJECT_SCHEMA,
+													...BUILD_AFTER_EVENT_PROPERTIES,
 													stack: {
 														type: "array",
 														items: { type: "string" },
@@ -3640,7 +3663,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "One Stellar hackathon submission in full",
 				description:
-					"One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or a dorahacks.io/buidl link's number. For submissions on a topic → use searchHackathonBuilds.",
+					"One stored Stellar hackathon submission in full: the write-up its team published (markdown, claims not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or the number in any dorahacks.io/buidl link. For submissions on a topic → use searchHackathonBuilds.",
 				"x-routing": {
 					purpose:
 						"Read one hackathon submission in full: what the team wrote, its links and placement, and what it became.",
@@ -5662,7 +5685,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"Help me prepare my Stellar Community Fund application.",
 						"Is an SCF round open now, and who in my vertical already got funded?",
-						"What angles should my SCF pitch take for a payments idea?",
+						"What angles should my SCF pitch take for my idea?",
 					],
 				},
 				parameters: [
@@ -6027,8 +6050,8 @@ export const spec: OpenAPISpec = {
 						"demand claims — gap is SUPPLY-side coverage only",
 					],
 					exampleQuestions: [
-						"I want to build a lending protocol on Stellar. What already exists?",
-						"Vet this idea: a payroll app that pays contractors in USDC.",
+						"Does a lending protocol like mine already exist?",
+						"Vet this idea: invoicing for freelancers, settled in USDC.",
 						"Is the wallet space on Stellar crowded, and is anyone funded in it?",
 						"Should I build this on Stellar or has it been done?",
 					],
@@ -6101,9 +6124,14 @@ export const spec: OpenAPISpec = {
 														},
 														matchMode: {
 															type: "string",
-															enum: ["vertical", "scored", "weak"],
+															enum: [
+																"vertical",
+																"vertical+scored",
+																"scored",
+																"weak",
+															],
 															description:
-																"How relevance was established. vertical = typed members of the idea's vertical; scored = the idea's own (non-generic) terms matched; weak = only generic words matched — the rows are nearest NEIGHBOURS, not evidence a competitor exists. Weigh a weak block as 'we found nothing close', never as a competitive landscape.",
+																"How relevance was established for the served projects. vertical = typed members of the idea's vertical; vertical+scored = typed members plus rows that matched the idea's own terms; scored = the idea's own (non-generic) terms matched; weak = only generic words matched (the rows are nearest NEIGHBOURS, not evidence a competitor exists) or no project matched enough of the idea (projects is empty, which is not evidence that none exists). Weigh a weak block as 'we found nothing close', never as a competitive landscape. When the idea uses two or more words the directory knows, every served project matches a minimum share of their weight (rarer words weigh more), so fewer than 8 can be served.",
 														},
 														matchModeLabel: { type: "string" },
 													},
@@ -7585,7 +7613,7 @@ export const spec: OpenAPISpec = {
 						// 2026-09-05 routing battery (T4): "verticals" and "least" were
 						// absent from every field, so the question gated out entirely.
 						"Which verticals on Stellar have the least competition?",
-						"How crowded is lending on Stellar?",
+						"How crowded is lending?",
 					],
 				},
 				parameters: [
@@ -10529,7 +10557,7 @@ export const spec: OpenAPISpec = {
 								id: {
 									type: "string",
 									description:
-										"Stable row id (dorahacks-buidl-{id} for live rows).",
+										"Stable row id (dorahacks-buidl-{id} for live rows, winner-{event}-{name} for a curated roster, from the winner's name).",
 								},
 								name: { type: "string" },
 								hackathonPlacement: { type: "string", nullable: true },
@@ -10552,7 +10580,7 @@ export const spec: OpenAPISpec = {
 									type: "number",
 									nullable: true,
 									description:
-										"What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250). null when the placement carries no amount (tier-labelled winners like 'Track Winner') — never 0, which would assert a prize of nothing.",
+										"What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250); on curated roster rows, the roster's own figure. null when the placement carries no amount (tier-labelled winners like 'Track Winner'), never 0, which would assert a prize of nothing.",
 								},
 								isWinner: { type: "boolean" },
 								githubUrl: { type: "string", nullable: true },
@@ -10570,6 +10598,20 @@ export const spec: OpenAPISpec = {
 								source: {
 									type: "string",
 									description: "'dorahacks' for live rows.",
+								},
+								project: BUILD_PROJECT_SCHEMA,
+								...BUILD_AFTER_EVENT_PROPERTIES,
+								slug: {
+									type: "string",
+									nullable: true,
+									description:
+										"Curated roster rows: the directory project the winner links; null when it links none.",
+								},
+								scfAwarded: {
+									type: "boolean",
+									nullable: true,
+									description:
+										"Curated roster rows: whether the linked directory project has an SCF award on record (scf.awarded); null when the winner links no project on record or that project has no SCF record. Stored DoraHacks winners carry this as project.scfAwarded.",
 								},
 							},
 						},

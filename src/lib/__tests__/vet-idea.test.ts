@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { GAP_VERTICALS } from "../ecosystem-gaps";
 import { buildHaystack, scoreTokens, tokenize } from "../project-search-match";
-import { VERTICAL_TOKENS } from "../vet-idea";
+import { buildVetIdea, VERTICAL_TOKENS, verticalOf } from "../vet-idea";
 
 describe("vet-idea vertical map", () => {
 	it("every VERTICAL_TOKENS value is a real GAP_VERTICALS member", () => {
@@ -203,5 +203,251 @@ describe("vet-idea tie-break is prominence, not the alphabet", () => {
 				{ slug: "niche", name: "Niche", __rel: 3, prominence: 0 },
 			]),
 		).toEqual(["niche", "freighter"]);
+	});
+});
+
+describe("vet-idea reads an idea's vertical", () => {
+	it("reads a stablecoin rail by the idea's other vertical", () => {
+		// Payroll on a stablecoin rail competes with payroll tools, not issuers.
+		expect(verticalOf("stablecoin payroll for freelancers")).toBe("Payments");
+		expect(
+			verticalOf("subscription billing with recurring stablecoin payments"),
+		).toBe("Payments");
+		expect(verticalOf("stablecoin wallet for remittances")).toBe("Wallet");
+	});
+
+	it("keeps Stablecoin for a stablecoin product, even beside a payments word", () => {
+		// Each phrase also names Payments, so a rail reading would move it.
+		for (const idea of [
+			"stablecoin issuer for merchant payments",
+			"stablecoin issuance for payroll",
+			"a stablecoin with 1:1 backing for merchant payments",
+			"fiat-backed stablecoin for payments",
+			"a minted stablecoin for payments",
+			"a stablecoin pegging the dollar for payments",
+			"redeemable stablecoin for merchant payments",
+			"a stablecoin with daily redemptions for payroll",
+			"stablecoin reserves dashboard for payments teams",
+			"a stablecoin minter for merchant payments",
+			"an overcollateralized stablecoin for lending",
+			"a stablecoin with dollar collateral for payments",
+			"stablecoin issuances for payroll",
+			"an algorithmic stablecoin for merchant payments",
+			"a depegged stablecoin for merchant payments",
+		])
+			expect(verticalOf(idea)).toBe("Stablecoin");
+		expect(verticalOf("a stablecoin that anchors its peg to gold")).toBe(
+			"Stablecoin",
+		);
+	});
+
+	it("knows the plural and compound forms ideas use", () => {
+		expect(verticalOf("loans for farmers")).toBe("Lending");
+		expect(verticalOf("microloan app")).toBe("Lending");
+		expect(verticalOf("microloans for small businesses")).toBe("Lending");
+		expect(verticalOf("microfinance platform")).toBe("Lending");
+		expect(verticalOf("charity auctions")).toBe("Social Impact");
+		expect(verticalOf("donation matching for nonprofits")).toBe(
+			"Social Impact",
+		);
+		expect(verticalOf("accept donations in crypto")).toBe("Social Impact");
+		expect(verticalOf("transparent donation platform for charities")).toBe(
+			"Social Impact",
+		);
+		expect(verticalOf("payroll for remote teams")).toBe("Payments");
+	});
+});
+
+/**
+ * Competitor padding (2026-10-20, 40 blind-labeled ideas). The block was
+ * filled to 8 with whatever matched one word, ordered by prominence:
+ * "fans fund artists" served Tipper plus the seven rows below, which share
+ * only "fund" (Friendbot funds testnet accounts). These are the rows the
+ * live directory served that day, in its own words.
+ */
+describe("vet-idea competitors are not padded with one-word matches", () => {
+	const row = (
+		slug: string,
+		name: string,
+		types: string[],
+		prominence: number,
+		shortDescription: string,
+	) => ({ slug, name, status: "Live", types, prominence, shortDescription });
+	const rows = [
+		row(
+			"tipper",
+			"Tipper",
+			["Payments"],
+			0,
+			"TIPPER is the best way for creators to get tipped in USDC on Stellar. Tipper allows for Latin American influencers, artists and communities that want monetize their audience, get support from fans anywhere around the world, and convert their tips and earnings into Digital Dollars.",
+		),
+		row(
+			"freighter",
+			"Freighter",
+			["Wallet"],
+			90,
+			"Freighter is the Stellar Development Foundation's official non-custodial Stellar wallet: a browser extension and iOS/Android apps, across Mainnet, Testnet and Futurenet (Friendbot funding).",
+		),
+		row(
+			"stellar-cli",
+			"Stellar CLI",
+			["Faucet"],
+			90,
+			"The Stellar CLI is the official command-line tool for Stellar/Soroban developers. It generates a keypair and funds it with test XLM via Friendbot, the fastest way to fund a testnet account.",
+		),
+		row(
+			"benji",
+			"Benji",
+			["RWA"],
+			88,
+			"Benji is Franklin Templeton's tokenized real-world asset (RWA) platform. The Franklin OnChain U.S. Government Money Fund (FOBXX), a tokenized money market fund, is natively issued on Stellar.",
+		),
+		row(
+			"friendbot",
+			"Friendbot",
+			["Faucet"],
+			85,
+			"Friendbot is Stellar's official testnet faucet: an SDF-hosted bot that funds new accounts and Soroban contracts with 10,000 fake test XLM.",
+		),
+		row(
+			"chaincerts",
+			"Chaincerts",
+			["Security"],
+			82,
+			"Chaincerts issues verifiable credentials and decentralized identity (DID) on Stellar using Soroban smart contracts. SCF-funded, by kommitters.",
+		),
+		row(
+			"nodies",
+			"Nodies",
+			["RPC"],
+			82,
+			"Nodies is a Web3 infrastructure platform and Stellar RPC node provider offering RPC and Horizon endpoints. SCF-funded.",
+		),
+		row(
+			"phoenix",
+			"Phoenix",
+			["DEX"],
+			80,
+			"Phoenix DeFi Hub is an SCF-funded AMM-based DEX on Stellar/Soroban running constant-product and stableswap liquidity pools.",
+		),
+	];
+	const payload = {
+		find: async ({ collection }: { collection: string }) =>
+			collection === "projects"
+				? { docs: structuredClone(rows), totalDocs: rows.length }
+				: { docs: [], totalDocs: 0 },
+	};
+	const served = async (q: string) =>
+		(await buildVetIdea(payload as never, q)).competitors.projects.map(
+			(p) => p.slug,
+		);
+
+	it("a row sharing only a common word of the idea is not served", async () => {
+		expect(await served("fans fund artists")).toEqual(["tipper"]);
+	});
+
+	it("a one-word idea is not gated", async () => {
+		expect(await served("wallet")).toEqual(["freighter"]);
+	});
+});
+
+describe("vet-idea weighs a negation-seeking idea's words in context", () => {
+	const row = (slug: string, types: string[], shortDescription: string) => ({
+		slug,
+		name: slug,
+		status: "Live",
+		types,
+		prominence: 0,
+		shortDescription,
+	});
+	const rows = [
+		row("acme-vault", ["Wallet"], "A non-custodial wallet for teams."),
+		row("custody-co", ["Custody"], "A regulated custodial wallet service."),
+		row("anon-pay", ["Payments"], "An anonymous payments app with a wallet."),
+		row("nft-gallery", ["NFT"], "A non-fungible token gallery and wallet."),
+		row("nonce-kit", ["Tooling"], "Nonce tools for wallet developers."),
+		row("pocket", ["Wallet"], "A mobile wallet."),
+	];
+	const payload = {
+		find: async ({ collection }: { collection: string }) =>
+			collection === "projects"
+				? { docs: structuredClone(rows), totalDocs: rows.length }
+				: { docs: [], totalDocs: 0 },
+	};
+
+	it("serves the non-custodial wallet the idea asks for", async () => {
+		// Read one word at a time, "custodial" missed "non-custodial", so the
+		// rare word's weight went to the custodial service alone and the
+		// wallet the idea describes fell under the coverage floor.
+		const served = (
+			await buildVetIdea(payload as never, "non custodial wallet")
+		).competitors.projects.map((p) => p.slug);
+		expect(served[0]).toBe("acme-vault");
+	});
+});
+
+describe("vet-idea labels the competitors it serves", () => {
+	const row = (slug: string, types: string[], shortDescription: string) => ({
+		slug,
+		name: slug,
+		status: "Live",
+		types,
+		prominence: 0,
+		shortDescription,
+	});
+	const vet = (rows: ReturnType<typeof row>[], q: string) =>
+		buildVetIdea(
+			{
+				find: async ({ collection }: { collection: string }) =>
+					collection === "projects"
+						? { docs: structuredClone(rows), totalDocs: rows.length }
+						: { docs: [], totalDocs: 0 },
+			} as never,
+			q,
+		).then((r) => r.competitors);
+	const lendco = row(
+		"lendco",
+		["Lending"],
+		"A lending protocol for stablecoins.",
+	);
+
+	it("an idea no row covers enough of serves nothing, labelled weak", async () => {
+		// Each row matches one of three equally rare words: a third of the
+		// idea. The label was set before the cut, so [] read as "typed
+		// members of the idea's vertical", a landscape with nobody in it.
+		const c = await vet(
+			[
+				lendco,
+				row("artbox", ["NFT"], "A marketplace for artists."),
+				row("coverly", ["Insurance"], "Parametric insurance for travel."),
+			],
+			"lending artists insurance",
+		);
+		expect(c.projects).toEqual([]);
+		expect(c.matchMode).toBe("weak");
+		expect(c.matchModeLabel).toMatch(/not evidence that none exists/);
+	});
+
+	it("names how the served rows were found, not the rows the cut removed", async () => {
+		const c = await vet(
+			[lendco, row("duo", ["Tooling"], "Insurance for artists' gear.")],
+			"lending artists insurance",
+		);
+		expect(c.projects.map((p) => p.slug)).toEqual(["duo"]);
+		expect(c.matchMode).toBe("scored");
+		expect(c.matchModeLabel).toBe("matched the idea's own terms");
+	});
+
+	it("keeps calling a served member a member when every scored row was cut", async () => {
+		const c = await vet(
+			[
+				row("lendco", ["Lending"], "Lending and insurance for artists."),
+				row("quotes", ["Tooling"], "Insurance quotes."),
+			],
+			"lending artists insurance",
+		);
+		expect(c.projects.map((p) => p.slug)).toEqual(["lendco"]);
+		expect(c.matchMode).toBe("vertical");
+		expect(c.matchModeLabel).toBe("typed members of the idea's vertical");
 	});
 });
