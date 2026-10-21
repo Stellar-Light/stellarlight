@@ -228,6 +228,10 @@ describe("vet-idea reads an idea's vertical", () => {
 			"redeemable stablecoin for merchant payments",
 			"a stablecoin with daily redemptions for payroll",
 			"stablecoin reserves dashboard for payments teams",
+			"a stablecoin minter for merchant payments",
+			"an overcollateralized stablecoin for lending",
+			"a stablecoin with dollar collateral for payments",
+			"stablecoin issuances for payroll",
 		])
 			expect(verticalOf(idea)).toBe("Stablecoin");
 		expect(verticalOf("a stablecoin that anchors its peg to gold")).toBe(
