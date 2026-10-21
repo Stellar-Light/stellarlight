@@ -1298,6 +1298,43 @@ describe("one row per SCF project unless scf-proposal is asked for (2026-10-20)"
 		expect(urls(out)).toEqual(["recH1", "recQ"]);
 	});
 
+	it("a row without a page line never chains two different pages together", () => {
+		const titled = (page: string | null) =>
+			`# Payroll on Stellar (SCF submission, SCF #30)\n\n${page ? `Project: Payroll on Stellar (https://communityfund.stellar.org/project/${page})\n\n` : ""}Payroll in USDC.`;
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recN",
+					"Payroll on Stellar (SCF submission, SCF #30)",
+					0.81,
+					titled(null),
+				),
+				scf(
+					"recX",
+					"Payroll on Stellar (SCF submission, SCF #31)",
+					0.8,
+					titled("payroll-x"),
+				),
+				scf(
+					"recY",
+					"Payroll on Stellar (SCF submission, SCF #32)",
+					0.79,
+					titled("payroll-y"),
+				),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 3, mode: "vector", now: NOW },
+		);
+		// Two named pages are two projects; the page-less row merges neither.
+		expect(urls(out)).toEqual(["recN", "recX", "recY"]);
+	});
+
 	it("titles keep their word breaks: Stellar Pay and StellarPay are two projects", () => {
 		const out = rankResearchChunks(
 			[

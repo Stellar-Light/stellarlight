@@ -888,14 +888,17 @@ export function researchOrder(
 // question several times over (Slender twice and Fixed-Rate Stablecoin
 // Credit twice in one 8-row page for a lending question, Hurupay and
 // Seasonal Workers Payroll twice each for a payroll one), pushing distinct
-// documents off the page. Two submissions are one project when both name a
-// project page (the "Project: ... (.../project/<slug>)" line the first chunk
-// of every submission carries) and it is the same page; when either page is
-// unknown, when their titles match (rounds keep the title). Titles keep
-// their word breaks, so "Stellar Pay" and "StellarPay" stay two projects.
+// documents off the page. A submission that names a project page (the
+// "Project: ... (.../project/<slug>)" line the first chunk of every
+// submission carries) repeats a served one only when that page was served;
+// one without a page line repeats a served one with the same title (rounds
+// keep the title). Distinct pages therefore never merge, not even through a
+// row without a page. Titles keep their word breaks, so "Stellar Pay" and
+// "StellarPay" stay two projects.
 // ponytail: parsed from title and content; store the project slug on the row
 // at ingest if renamed resubmissions without a page line slip through.
-// The header line starts its own line; a quoted line elsewhere does not.
+// Only a line that starts with "Project:" counts; a mention inside a
+// sentence does not.
 const SCF_PROJECT_PAGE_RE =
 	/^Project:[^\n]*?\(https:\/\/communityfund\.stellar\.org\/project\/([a-z0-9-]+)\)/im;
 
@@ -915,9 +918,13 @@ function scfIdentity(c: RankableChunk): ScfIdentity {
 	};
 }
 
-function sameScfProject(a: ScfIdentity, b: ScfIdentity): boolean {
-	if (a.page && b.page) return a.page === b.page;
-	return a.title !== "" && a.title === b.title;
+/** Whether `id` repeats a project already served (see the rule above). */
+function repeatsServedScf(
+	id: ScfIdentity,
+	served: { pages: Set<string>; titles: Set<string> },
+): boolean {
+	if (id.page) return served.pages.has(id.page);
+	return id.title !== "" && served.titles.has(id.title);
 }
 
 export function rankResearchChunks<T extends RankableChunk>(
@@ -1030,7 +1037,7 @@ export function rankResearchChunks<T extends RankableChunk>(
 	const familyCount = new Map<string, number>();
 	const seenUrl = new Set<string>();
 	const seenContent = new Set<string>();
-	const servedScf: ScfIdentity[] = [];
+	const servedScf = { pages: new Set<string>(), titles: new Set<string>() };
 	const primary: typeof scored = [];
 	const leftovers: typeof scored = [];
 	// A project's further submissions refill last, after every other leftover.
@@ -1052,11 +1059,12 @@ export function rankResearchChunks<T extends RankableChunk>(
 		}
 		if (c.source === "scf-proposal" && opts.source !== "scf-proposal") {
 			const id = scfIdentity(c);
-			if (servedScf.some((s) => sameScfProject(s, id))) {
+			if (repeatsServedScf(id, servedScf)) {
 				scfRepeats.push(c);
 				continue;
 			}
-			servedScf.push(id);
+			if (id.page) servedScf.pages.add(id.page);
+			if (id.title) servedScf.titles.add(id.title);
 		}
 		familyCount.set(fam, n + 1);
 		primary.push(c);
