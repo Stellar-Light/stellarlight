@@ -32,9 +32,13 @@
  * eval/gates.json acceptedTotals exactly, then rebuild the committed Scout and
  * stellarDocs entries from Raven's own inventory, every field identical but
  * provenance (source URL, fetch time). Either miss
- * exits 2: Raven changed its scorer or builder, so re-port before trusting a
- * verdict. Exit 0 = Raven would accept, 1 = it would hold (gate breach, a lower
- * accepted total, a per-question hit-to-miss flip, or a catalog build guard).
+ * exits 2, as does a changed ported source file (PORTED_FROM_RAVEN), a missing
+ * --raven, or a thrown error: re-port before trusting a verdict. Exit 0 =
+ * Raven would accept, 1 = it would hold (gate breach, a lower accepted total,
+ * a per-question hit-to-miss flip in any of the 544 rows across five lanes:
+ * 338 legacy, 23 skills, 49 holdout, 122 extended, 12 protocol; or a catalog
+ * build guard). Question counts come from Raven's case files, the same for
+ * the baseline and the candidate.
  *
  * Ported from Raven at commit b1dc866 (2026-10-15):
  *   src/catalog/vendor/search-scoring.ts  field scorer and coverage gate
@@ -69,6 +73,41 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+
+/**
+ * The Raven source files this script ports, hashed at commit b1dc866. Any
+ * difference fails the self-check: Raven can change its scorer without
+ * changing its accepted totals, and a port of old code would then grade a
+ * spec by rules Raven no longer runs.
+ */
+const PORTED_FROM_RAVEN: Record<string, string> = {
+	"src/catalog/vendor/search-scoring.ts":
+		"718924d10533ea49d472602f600ece0e4d7a0aae3e9e0ca5a95d9a8c6e611b14",
+	"src/catalog/scoring.ts":
+		"5c2d39dbefae23a89abd07a07eba61f05a3116f9477900f0b1324f1aa086781a",
+	"src/catalog/search.ts":
+		"02e8c9b3512ca791582a29c9a21f1baba8ea347490e7cec75b5041a5aa7945fe",
+	"src/catalog/known-aliases.ts":
+		"fbff3fb8eeb0a256020fca2e93f889e7b5c474526a3baf4d576ed3a4a44b3db2",
+	"src/catalog/skill-search-admission.ts":
+		"6c26fb77db5663db6b5774f494e428db338213faca197eec5935b65a5d1744d3",
+	"src/catalog/id.ts":
+		"f39bd39a88d171956a1760ae451c559fea5363413b24625f0fbf64c42cead104",
+	"src/catalog/extract-keywords.ts":
+		"598a0d012a4a4b0855092547f2d61e0cf63e53b9c66c41a45a2c98978a8f684e",
+	"src/catalog/extract-routing-phrases.ts":
+		"943251c31eb5ce37ea27ee960ad7aa707a80793df0dfdda8c77df7d16b247812",
+	"scripts/build-catalog.mjs":
+		"ee74cbd0f454fcb1c9befcfe35335d1efdda35b1a3ca6981a6bbc485f32dfa6b",
+	"scripts/description-notes.mjs":
+		"7dcc25e2d52672cdff2fb9ee3916c78d64faf5ee6ccf1816d097e63dcc68c908",
+	"scripts/emitted-text-guard.mjs":
+		"4ba4fa5df05cde34ba3516f4fd4cd2c91d1b09c6725a2d65ae83c47830e75717",
+	"eval/run-routing.mjs":
+		"61fdb67b1d8cc17d81afd3719d68e3e56f398104c15d93744a26d701841c11bb",
+	"eval/lib/grade.mjs":
+		"86d42c16038821629ad517cf9db0a8a6238a197caea8917801463e9986c3a8cf",
+};
 
 type Json = Record<string, unknown>;
 interface Phrase {
@@ -2590,7 +2629,20 @@ async function main() {
 				!rebuilt.some((r) => r.id === e.id),
 		)
 		.map((e) => e.id);
+	const changedSources = Object.entries(PORTED_FROM_RAVEN)
+		.filter(([path, sha]) => {
+			try {
+				const bytes = readFileSync(join(raven.dir, path));
+				return createHash("sha256").update(bytes).digest("hex") !== sha;
+			} catch {
+				return true;
+			}
+		})
+		.map(([path]) => path);
 	console.log(`Raven checkout ${raven.dir}`);
+	console.log(
+		`  ported sources: ${changedSources.length ? `CHANGED since b1dc866 (${changedSources.join(", ")})` : "identical to b1dc866"}`,
+	);
 	console.log(
 		`  manifest sha256 ${raven.manifestSha.slice(0, 12)} ${raven.manifestSha === pinned ? "= gates.json evidence" : "!= gates.json evidence (baseline may be stale)"}`,
 	);
@@ -2603,6 +2655,7 @@ async function main() {
 		`  rebuilds committed Scout + stellarDocs entries from inventory (Scout ${inv.openapiVersion}): ${mismatched.length + missing.length === 0 && parityProblems.length === 0 ? "identical (provenance aside)" : `NO (${[...mismatched, ...missing, ...parityProblems].join("; ")})`}`,
 	);
 	if (
+		changedSources.length ||
 		!reproduced ||
 		mismatched.length ||
 		missing.length ||
@@ -2610,7 +2663,7 @@ async function main() {
 		baseProblems.length
 	) {
 		console.log(
-			"SELF-CHECK FAILED: Raven's scorer or builder changed; re-port before trusting a verdict.",
+			"SELF-CHECK FAILED: Raven's scorer, builder or grading changed; re-port (and re-pin PORTED_FROM_RAVEN) before trusting a verdict.",
 		);
 		process.exit(2);
 	}
