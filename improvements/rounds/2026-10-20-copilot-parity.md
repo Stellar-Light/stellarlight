@@ -75,9 +75,14 @@ the diff and the evidence it needed.
 - Between 23:26 and 23:27 UTC (orch): `gh workflow run curated-builds.yml --repo Stellar-Light/stellarlight --ref main -f execute=true`
   was refused by the session's permission classifier as a production
   deploy; queue item 2.
-- 23:27:53 to 23:27:56 UTC (orch): `gh pr create --repo Stellar-Light/stellarlight --base main --head <branch> --title <title> --body-file <description>`
-  for `feat/hackathon-outcomes` (#1840), `fix/vet-competitor-floor` (#1841)
-  and `fix/dead-prior-art-claims` (#1842).
+- 23:27:53 to 23:27:56 UTC (orch), with each description written to a
+  local file first:
+  - `gh pr create --repo Stellar-Light/stellarlight --base main --head feat/hackathon-outcomes --title "feat(hackathons): say what happened after the event on builds and winners" --body-file pr-outcomes.md`
+    opened #1840.
+  - `gh pr create --repo Stellar-Light/stellarlight --base main --head fix/vet-competitor-floor --title "fix(vet-idea): serve competitors that match enough of the idea" --body-file pr-competitors.md`
+    opened #1841.
+  - `gh pr create --repo Stellar-Light/stellarlight --base main --head fix/dead-prior-art-claims --title "fix(pitch, brief): null funding without a vertical; dead means dormant or archived" --body-file pr-dead.md`
+    opened #1842.
 
 ## Outcome
 
