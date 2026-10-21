@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-21T10:49:51.985Z",
+ "generatedAt": "2026-10-21T13:07:04.123Z",
  "surfaces": [
   {
    "surface": "code",
@@ -364,9 +364,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 171,
-     "recurred": 144,
-     "ratePct": 84.2
+     "newFindings": 169,
+     "recurred": 142,
+     "ratePct": 84
     },
     "lifetime": {
      "newFindings": 860,
@@ -383,8 +383,8 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 171,
-     "repeats": 171,
+     "newFindings": 169,
+     "repeats": 169,
      "ratePct": 100
     },
     "lifetime": {
@@ -9545,11 +9545,11 @@
     },
     {
      "label": "slowing",
-     "count": 1063
+     "count": 1065
     },
     {
      "label": "active",
-     "count": 1024
+     "count": 1022
     },
     {
      "label": "unknown",
