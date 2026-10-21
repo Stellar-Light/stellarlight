@@ -20,9 +20,11 @@ questions blocks every later change of ours from reaching Raven's agents.
 
 ## The work loop
 
-1. **Queue.** Every known gap is one item in `improvements/TODO.md`: what is
-   wrong, how it was found (evidence path or probe), its state, and what done
-   means. Owner decisions sit at the end, each with a safe default.
+1. **Queue.** Every known gap is one item in `improvements/TODO.md`. A Now
+   item states what is wrong, how it was found (a probe or a named source),
+   its state, and what done means; a Next item states what is wrong and how
+   it was found, and gains the rest when it moves to Now. Owner decisions sit
+   at the end, each with a safe default.
 2. **Round.** Multi-step or multi-agent work opens a ledger in
    `improvements/rounds/` before it starts: scope, lanes, an append-only log
    with exact commands and results, outcome.

@@ -19,8 +19,9 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    decodes to a snapshot whose spec version is 1.9.61 (fetched 2026-10-02);
    Raven's drift issue #223 is open. Its routing gate scored our
    1.9.78 at 220 / 295 / 325 correct at top 1 / 3 / 5 and 111 operation hits,
-   against floors of 219 / 298 / 326 and 112; our wording pulled in
-   questions labelled for Lumenloop and Docs. Nothing we changed since 1.9.61
+   against floors of 219 / 298 / 326 and 112 (stellar-raven
+   `.agents/rounds/2026-10-15-truth-maintenance.md`, the table at line 46);
+   our wording pulled in questions labelled for Lumenloop and Docs. Nothing we changed since 1.9.61
    reaches Raven's agents.
    State: a local replica of Raven's gate is being built.
    Done when: the replica reproduces Raven's baseline exactly, our current
@@ -47,13 +48,16 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 
 4. **The `hackathon` filter fails silently.**
    Probe: `/api/hackathons/builds?hackathon=Stellar%20Hacks:%20Agents`
-   answers 200 with 0 matched and no warning; the slug matches 249.
-   Done when: an unknown value answers 400 naming valid slugs, or a warning,
-   on searchHackathonBuilds and analyzeHackathonSubmissions.
+   answers 200 with 0 matched and no warning, while
+   `hackathon=stellar-agents-x402-stripe-mpp` matches 249.
+   State: not started.
+   Done when: an unknown value answers 400 naming the valid slugs, on
+   searchHackathonBuilds and analyzeHackathonSubmissions.
 
 5. **vetIdea `priorArt.builds` claims none for short ideas.**
    Probe: `/api/vet-idea?q=remittance%20app` has `priorArt.builds == []`
    while `/api/hackathons/builds?q=remittance%20app` matches 16.
+   State: not started.
    Done when: a short idea gets the builds that match every content word, or
    the block says the five nearest did not meet the evidence rule instead of
    claiming none.
@@ -65,19 +69,25 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    `buildsMode` and `via` on the scfPitch, hackathonBrief and
    reviewSubmission vet blocks, and getHackathon `stats.winners` and
    `stats.outcomes`, all served and undeclared.
+   State: not started.
    Done when: every served field and every served null is declared.
 
 7. **Missed build-to-project links, one from letter case.**
    Probe: `/api/hackathons/review?link=https://github.com/hoops-finance/cometswap`
    says no project lists the repo, while searchProjects lists
-   `Hoops-Finance/cometswap`. Four more confirmed misses: YieldBack.Cash,
-   PayZoll, clevercon, Juntta.
+   `Hoops-Finance/cometswap`. The previous-attempts lane confirmed four more
+   by reading both descriptions (2026-10-20): YieldBack.Cash, PayZoll,
+   clevercon, Juntta.
+   State: not started.
    Done when: repo matching ignores case, the link lane re-ran (dry run, then
    execute), and the five links are live.
 
 8. **Events with announced winners show 0 winners.**
    Probe: `/api/hackathons/stellarhack` has `stats.winners == 0` beside a
-   prize pool; PULSO, Philippines and four more DoraHacks events too.
+   prize pool of 15,000; so do `stellar-pulso-hackathon` (its page says
+   winners were announced) and `build-on-stellar-philippines-2026` (its page
+   names five winners).
+   State: not started.
    Done when: winners are served, or the response says they are not recorded
    upstream instead of 0.
 
@@ -95,6 +105,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 10. **No secret scanning on a public repo.**
     Probe: `ls .github/workflows | grep -i -E 'gitleaks|secret'` prints
     nothing.
+    State: not started.
     Done when: a gitleaks workflow with a checksum-verified install, a
     pre-commit hook, and one full-history audit, clean or triaged.
 
@@ -141,13 +152,17 @@ unless noted.
 - The golden eval gate counts questions (its floor was set at 37; the set has
   53); eval runs record the API version; the battery's held-out rows become a
   frozen routing holdout.
-- A dependency audit workflow; usage logging that survives the response.
+- No dependency audit runs (stellar-raven keeps one rolling issue with a
+  fingerprint of the findings); API usage logging is a voided promise
+  (`src/lib/api-usage.ts`) that can be dropped after the response.
 - The /quality external-findings block reads only each finding's first issue
   link, so it reports every fix as shipped.
 - Handoffs for findings fixed live (sls-085, 086, 088, 094): drafts.
 - `maturity.auditedProjects` is not specific to the idea.
 - No link from a builder to a build: ingest team handles.
-- Event format, location, submission deadline and judges as fields.
+- Events carry no format, location, submission deadline or judges fields,
+  while curated rows already store format tags the API drops
+  (`src/data/curated-hackathons.ts`).
 - Routing vocabulary for outcome and reading-intent questions, only through
   the Raven gate replica.
 

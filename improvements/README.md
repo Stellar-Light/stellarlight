@@ -3,8 +3,8 @@
 Every engine run, audit, fix wave and design brief lands here, so any session
 or cold outsider can reconstruct what was measured, what was fixed, and why.
 
-- **TODO.md** is the one queue: every known gap, how it was found, its state,
-  and what done means. Start there.
+- **TODO.md** is the one queue: every known gap and how it was found; Now
+  items also carry their state and what done means. Start there.
 - **rounds/** holds one dated ledger per multi-step effort: scope, lanes,
   review verdicts, an append-only log, outcome. The rules for both are in
   [AGENTS.md](../AGENTS.md).
