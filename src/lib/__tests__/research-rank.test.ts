@@ -1240,6 +1240,64 @@ describe("one row per SCF project unless scf-proposal is asked for (2026-10-20)"
 		expect(urls(out)).toEqual(["recP1", "recP2"]);
 	});
 
+	it("without a page line, a repeat is matched by its title", () => {
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recH1",
+					"Seasonal Workers Payroll (SCF submission, SCF #33)",
+					0.8,
+					"# Seasonal Workers Payroll (SCF submission, SCF #33)\n\nProject: Seasonal Workers Payroll (https://communityfund.stellar.org/project/seasonal-payroll)\n\nPayroll.",
+				),
+				// A later chunk of another round's submission: no header line.
+				scf(
+					"recH2",
+					"Seasonal Workers Payroll (SCF submission, SCF #35)",
+					0.79,
+					"Milestones and budget for the second phase of seasonal payroll.",
+				),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 2, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recH1", "weak"]);
+	});
+
+	it("a project page quoted mid-text is not the submission's own page", () => {
+		const quoting = scf(
+			"recQ",
+			"Payroll Hub (SCF submission, SCF #36)",
+			0.79,
+			"# Payroll Hub (SCF submission, SCF #36)\n\nWe build on prior work (see Project: Seasonal Workers Payroll (https://communityfund.stellar.org/project/seasonal-payroll)).\n\nPayroll for teams.",
+		);
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recH1",
+					"Seasonal Workers Payroll (SCF submission, SCF #33)",
+					0.8,
+					"# Seasonal Workers Payroll (SCF submission, SCF #33)\n\nProject: Seasonal Workers Payroll (https://communityfund.stellar.org/project/seasonal-payroll)\n\nPayroll.",
+				),
+				quoting,
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 2, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recH1", "recQ"]);
+	});
+
 	it("titles keep their word breaks: Stellar Pay and StellarPay are two projects", () => {
 		const out = rankResearchChunks(
 			[

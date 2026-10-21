@@ -895,8 +895,9 @@ export function researchOrder(
 // their word breaks, so "Stellar Pay" and "StellarPay" stay two projects.
 // ponytail: parsed from title and content; store the project slug on the row
 // at ingest if renamed resubmissions without a page line slip through.
+// The header line starts its own line; a quoted line elsewhere does not.
 const SCF_PROJECT_PAGE_RE =
-	/Project:[^\n]*?\(https:\/\/communityfund\.stellar\.org\/project\/([a-z0-9-]+)\)/i;
+	/^Project:[^\n]*?\(https:\/\/communityfund\.stellar\.org\/project\/([a-z0-9-]+)\)/im;
 
 interface ScfIdentity {
 	page: string | null;
