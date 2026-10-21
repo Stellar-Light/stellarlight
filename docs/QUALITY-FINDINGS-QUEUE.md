@@ -1,5 +1,7 @@
 # Quality findings queue — the 56 open ledger rows
 
+> Superseded for new items by [improvements/TODO.md](../improvements/TODO.md) (2026-10-20). Kept as history.
+
 > **STATUS 2026-08-31 — most of this is done.** Worked in PR #1133; each item
 > below is annotated where it was actioned. Summary of what changed and what
 > was deliberately not:
