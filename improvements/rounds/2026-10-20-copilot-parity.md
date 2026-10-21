@@ -35,8 +35,8 @@ per lane. Reviewer on every push: Grok, through the grok CLI.
 | stellar-raven analysis: infra and CI | scratch | adoption list (lane) |
 | stellar-raven analysis: agents and process | scratch | adoption list; their open findings about us (lane) |
 | stellar-raven analysis: evals | scratch | adoption list; Raven holds our spec at 1.9.61 (lane) |
-| Research ranking | own worktree | running |
-| Raven routing gate replica | own worktree | running |
+| Research ranking | own worktree | cause: the query was embedded as typed; golden research 37 of 37 before and after in simulation (lane); branch `fix/research-trailing-question-mark` after four review rounds |
+| Raven routing gate replica | own worktree | reproduces Raven's accepted totals exactly (lane; re-run by the orchestrator: self-check yes, main HOLD, branch ACCEPT); branch `feat/raven-gate-replica` after two review rounds |
 
 ## Review
 

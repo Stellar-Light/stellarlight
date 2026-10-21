@@ -23,7 +23,12 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    `.agents/rounds/2026-10-15-truth-maintenance.md`, the table at line 46);
    our wording pulled in questions labelled for Lumenloop and Docs. Nothing we changed since 1.9.61
    reaches Raven's agents.
-   State: a local replica of Raven's gate is being built.
+   State: `scripts/eval/raven-gate-replica.ts` (branch
+   `feat/raven-gate-replica`) reproduces Raven's accepted totals exactly; on
+   it 1.9.83 holds (five hit-to-miss flips) and the branch's spec, with six
+   example questions, one keyword and one description reworded, would be
+   accepted at 220/298/326/112 with no flip. Waiting on merge, deploy and
+   Raven's re-sync.
    Done when: the replica reproduces Raven's baseline exactly, our current
    spec passes every gate in it, and Raven's accepted snapshot moves past
    1.9.61.
@@ -36,10 +41,14 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    0 updates, 0 hides; the execute has not run.
    Done when: the execute ran, every row was read back, and both probes flip.
 
-3. **Open PRs #1840, #1841, #1842 and `fix/vet-vertical-map`.**
+3. **Open PRs #1840, #1841, #1842 and branches `fix/vet-vertical-map`,
+   `fix/research-trailing-question-mark`, `feat/raven-gate-replica`,
+   `docs/working-model`.**
    Probe: `gh pr view 1840 --json state` (and 1841, 1842) answers OPEN.
-   State: each passed an independent review; three claim spec 1.9.84 and the
-   branch changes no spec text.
+   State: each passed an independent review. Four claim spec 1.9.84 (the
+   three PRs and the gate branch); merge the gate branch first so Raven can
+   re-sync, then renumber the rest. The other branches change no spec
+   text.
    Done when: merged one at a time with versions renumbered so no two merged
    PRs share one, each verified live, and the contract audit's follow-ups
    applied: #1840 declares `voteCount` nullable; #1842's changelog names
@@ -97,8 +106,11 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    lending protocol?` returns 5 scf-proposal rows of 8; the same text without
    "?" returns none. "idea maze for stablecoin remittances" puts unrelated
    CAPs in the top 5.
-   State: a lane is measuring against the 53-question golden eval with a
-   held-out half.
+   State: branch `fix/research-trailing-question-mark` strips only a
+   trailing question mark before embedding and serves one row per SCF
+   project; authority still beats relevance (a 75/15/10 weighting held out
+   best in simulation and changes about 10% of confidence labels; not
+   shipped).
    Done when: punctuation cannot swing the set, no golden pass regresses, and
    the padded rows are fixed.
 
