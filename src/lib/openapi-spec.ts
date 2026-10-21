@@ -444,7 +444,7 @@ const VET_BLOCK_SCHEMA = {
 					type: "string",
 					enum: ["vertical", "vertical+scored", "scored", "weak"],
 					description:
-						"How relevance was established: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists).",
+						"How relevance was established for the served projects: vertical = typed membership; vertical+scored = typed members plus rows that scored on the idea's own terms; scored = an anchor token matched; weak = generic words only (rows are neighbours, not evidence a competitor exists) or no project matched enough of the idea (projects is empty, which is not evidence that none exists). When the idea uses two or more words the directory knows, every served project matches a minimum share of their weight (rarer words weigh more), so fewer than 8 can be served.",
 				},
 				matchModeLabel: { type: "string" },
 				repos: {
@@ -6115,9 +6115,14 @@ export const spec: OpenAPISpec = {
 														},
 														matchMode: {
 															type: "string",
-															enum: ["vertical", "scored", "weak"],
+															enum: [
+																"vertical",
+																"vertical+scored",
+																"scored",
+																"weak",
+															],
 															description:
-																"How relevance was established. vertical = typed members of the idea's vertical; scored = the idea's own (non-generic) terms matched; weak = only generic words matched — the rows are nearest NEIGHBOURS, not evidence a competitor exists. Weigh a weak block as 'we found nothing close', never as a competitive landscape.",
+																"How relevance was established for the served projects. vertical = typed members of the idea's vertical; vertical+scored = typed members plus rows that matched the idea's own terms; scored = the idea's own (non-generic) terms matched; weak = only generic words matched (the rows are nearest NEIGHBOURS, not evidence a competitor exists) or no project matched enough of the idea (projects is empty, which is not evidence that none exists). Weigh a weak block as 'we found nothing close', never as a competitive landscape. When the idea uses two or more words the directory knows, every served project matches a minimum share of their weight (rarer words weigh more), so fewer than 8 can be served.",
 														},
 														matchModeLabel: { type: "string" },
 													},

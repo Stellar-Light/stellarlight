@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-20",
 		surfaces: ["api"],
+		version: "spec@1.9.86",
+		type: "fixed",
+		summary:
+			"vetIdea serves only competitors that match a minimum share of the idea's word weight, rarer words weighing more, instead of always filling 8 slots: fewer than 8 can be served, and an emptied list reads weak. The vetIdea matchMode enum now lists vertical+scored, which it already served.",
+		detail:
+			"Every row matching one idea word qualified and editorial prominence filled all 8 slots: 'fans fund artists' served Tipper plus seven rows that share only 'fund' (Friendbot funds testnet accounts). Each idea word now weighs by its rarity across the active directory, and a row must match a minimum share of that weight; matchMode and its label are set from the rows served. On 40 blind-labeled ideas, rows that are not competitors fell from 78 to 32 of 160 on the 20 used for tuning and from 70 to 44 on the 20 held out, with direct competitors served unchanged in total (three lost and three gained on the tuning half, one swapped on the held-out half).",
+	},
+	{
+		date: "2026-10-20",
+		surfaces: ["api"],
 		version: "spec@1.9.85",
 		type: "added",
 		summary:
