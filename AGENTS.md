@@ -60,12 +60,14 @@ questions blocks every later change of ours from reaching Raven's agents.
 - Descriptions stay within 600 characters; vocabulary goes in
   `x-routing.keywords`. Topic words (a protocol, a product) do not belong in
   one operation's keywords.
-- Check routing changes against Raven's gate before shipping: no question
-  of another provider newly captured, no Scout question lost. The local
-  replica, `scripts/eval/raven-gate-replica.ts`, is queue item 1; until it
-  exists, run `scripts/eval/raven-scorer-replica.ts` on the changed
-  questions and say the check is partial. Batch routing edits into one
-  release.
+- Check routing changes against Raven's gate before shipping:
+  `pnpm raven:gate --raven <stellar-raven checkout>` must say ACCEPT (exit
+  0): every gate passes, no accepted total drops, and no question flips
+  from hit to miss. Exit 1 is a hold: a gate breach, a lower total, a
+  flip, or a catalog build guard. Exit 2 means no verdict can be trusted:
+  the self-check failed, a ported source file changed, `--raven` is
+  missing, or the run errored; re-port or fix first. Batch routing edits
+  into one release.
 - Never copy eval questions into example questions.
 
 ## Data and contract rules
