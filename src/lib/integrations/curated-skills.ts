@@ -853,3 +853,15 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 export function findCuratedSkill(slug: string): CuratedSkill | undefined {
 	return CURATED_SKILLS.find((s) => s.slug === slug);
 }
+
+/** Where a curated skill's SKILL.md is read live: its repository directory
+ * on GitHub (https://github.com/<owner>/<repo>/tree/<ref>/<dir>). null for a
+ * skill not hosted that way. */
+export function curatedSkillRawUrl(c: CuratedSkill): string | null {
+	const m = c.repository?.match(
+		/^https:\/\/github\.com\/([^/]+)\/([^/]+)\/tree\/([^/]+)\/(.+)$/,
+	);
+	if (!m) return null;
+	const [, owner, repo, ref, dir] = m;
+	return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${dir.replace(/\/$/, "")}/SKILL.md`;
+}

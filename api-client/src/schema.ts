@@ -6037,8 +6037,16 @@ export interface operations {
                             featured?: boolean;
                             /** @description Agent hosts known to run it. */
                             compatibility?: string[];
-                            /** @description Full SKILL.md text; null when the source ships no file — absence of content is not absence of the skill. */
+                            /** @description Full SKILL.md text; null when the source ships no file, and absence of content is not absence of the skill. When `contentHeld` is present this is the last reviewed version, or null if there is none. */
                             content?: string | null;
+                            /** @description Present only when the live upstream SKILL.md adds a risky instruction since its last review: running a download or decoded code, installing from a bare URL, steering the agent against its instructions or its user, sending a secret, or hidden text. `content` is then the last reviewed version (or null), and nothing from the newer upstream copy should be run until it is accepted. `rules` names the kinds found; the text itself is never echoed. Absent means no hold, which is not a claim the skill is safe. */
+                            contentHeld?: {
+                                held?: boolean;
+                                rules?: ("runs-download" | "runs-decoded" | "installs-from-url" | "steers-the-agent" | "sends-a-secret" | "hidden-characters")[];
+                                note?: string;
+                                /** @description When the version served instead was accepted; null when none is on record. */
+                                servedFrom?: string | null;
+                            };
                         };
                     };
                 };

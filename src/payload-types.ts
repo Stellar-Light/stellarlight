@@ -91,6 +91,7 @@ export interface Config {
 		carousel: Carousel;
 		hackathons: Hackathon;
 		"link-checks": LinkCheck;
+		"skill-snapshots": SkillSnapshot;
 		"idea-submissions": IdeaSubmission;
 		"api-usage": ApiUsage;
 		"research-docs": ResearchDoc;
@@ -145,6 +146,7 @@ export interface Config {
 		carousel: CarouselSelect<false> | CarouselSelect<true>;
 		hackathons: HackathonsSelect<false> | HackathonsSelect<true>;
 		"link-checks": LinkChecksSelect<false> | LinkChecksSelect<true>;
+		"skill-snapshots": SkillSnapshotsSelect<false> | SkillSnapshotsSelect<true>;
 		"idea-submissions":
 			| IdeaSubmissionsSelect<false>
 			| IdeaSubmissionsSelect<true>;
@@ -2219,6 +2221,57 @@ export interface Carousel {
 	createdAt: string;
 }
 /**
+ * The last reviewed copy of each live-fetched skill, served in place of a held newer fetch.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skill-snapshots".
+ */
+export interface SkillSnapshot {
+	id: string;
+	slug: string;
+	source: "curated" | "registry";
+	/**
+	 * The last accepted SKILL.md, served in place of a held newer fetch
+	 */
+	content?: string | null;
+	/**
+	 * Normalized risky lines accepted with this copy (an official installer piped to sh). A newer fetch is held only for a line not in this list.
+	 */
+	acceptedRisky?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * When this copy was accepted, ISO
+	 */
+	acceptedAt?: string | null;
+	/**
+	 * When the lane last read the live skill, ISO
+	 */
+	checkedAt?: string | null;
+	/**
+	 * The live copy carries a risky line this copy did not: the guard serves this copy until a human accepts the change
+	 */
+	held?: boolean | null;
+	heldAt?: string | null;
+	heldRules?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
  * Daily link health checks across Projects, Builders, Entities, Hackathons, and curated skills. Sorted broken-first.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3167,6 +3220,10 @@ export interface PayloadLockedDocument {
 				value: string | LinkCheck;
 		  } | null)
 		| ({
+				relationTo: "skill-snapshots";
+				value: string | SkillSnapshot;
+		  } | null)
+		| ({
 				relationTo: "idea-submissions";
 				value: string | IdeaSubmission;
 		  } | null)
@@ -4063,6 +4120,23 @@ export interface HackathonsSelect<T extends boolean = true> {
 	externalUrl?: T;
 	status?: T;
 	projects?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skill-snapshots_select".
+ */
+export interface SkillSnapshotsSelect<T extends boolean = true> {
+	slug?: T;
+	source?: T;
+	content?: T;
+	acceptedRisky?: T;
+	acceptedAt?: T;
+	checkedAt?: T;
+	held?: T;
+	heldAt?: T;
+	heldRules?: T;
 	updatedAt?: T;
 	createdAt?: T;
 }
