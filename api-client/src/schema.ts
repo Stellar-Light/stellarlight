@@ -279,7 +279,7 @@ export interface paths {
         };
         /**
          * One Stellar hackathon submission in full
-         * @description One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or a dorahacks.io/buidl link's number. For submissions on a topic → use searchHackathonBuilds.
+         * @description One stored Stellar hackathon submission in full: the write-up its team published (markdown, claims not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or the number in any dorahacks.io/buidl link. For submissions on a topic → use searchHackathonBuilds.
          */
         get: operations["getHackathonSubmission"];
         put?: never;

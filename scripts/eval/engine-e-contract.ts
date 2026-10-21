@@ -62,6 +62,11 @@ const BASELINE_QUERY: Record<string, string> = {
 	"/api/repos/search": "q=soroban",
 	"/api/repos/explain": "q=soroban",
 	"/api/research": "q=stellar anchors",
+	// `mode` (keyword|meaning|hybrid) says how q is matched, so probed with no
+	// q it is inert by design: a false silent-param on every deploy from
+	// 2026-10-05, when the param shipped.
+	"/api/hackathons/builds": "q=wallet",
+	"/api/hackathons/analyze": "q=wallet",
 };
 
 // ── spec plumbing ──────────────────────────────────────────────────────────
@@ -123,18 +128,22 @@ async function call(
  * meta.counts (a filter that leaves the first page identical still moves
  * total). meta itself is EXCLUDED — it may echo the applied filter, which
  * would make every probe trivially "different".
+ *
+ * A response with NO top-level array (an aggregate such as
+ * /api/hackathons/analyze) is compared on its whole non-meta body. The array
+ * test has to run before meta.counts is added: when it ran after, a constant
+ * meta.counts stood in for the payload and every analyze param read as inert.
  */
-function rowsOf(r: { body: Json; text: string }): string {
+export function rowsOf(r: { body: Json; text: string }): string {
 	if (!r.body || typeof r.body !== "object") return r.text;
-	const picked: Record<string, Json> = {};
-	for (const k of Object.keys(r.body).sort()) {
-		if (Array.isArray(r.body[k])) picked[k] = r.body[k];
-	}
-	if (r.body.meta?.counts) picked.__counts = r.body.meta.counts;
-	if (Object.keys(picked).length === 0) {
-		const { meta: _meta, generatedAt: _g, ...rest } = r.body;
-		return JSON.stringify(rest);
-	}
+	const { meta, generatedAt: _g, ...rest } = r.body;
+	const arrays = Object.keys(rest)
+		.sort()
+		.filter((k) => Array.isArray(rest[k]));
+	const picked: Record<string, Json> = arrays.length
+		? Object.fromEntries(arrays.map((k) => [k, rest[k]]))
+		: rest;
+	if (meta?.counts) picked.__counts = meta.counts;
 	return JSON.stringify(picked);
 }
 
@@ -543,7 +552,9 @@ async function main() {
 	process.exit(silentParams.length > 0 || rejectedParams.length > 0 ? 1 : 0);
 }
 
-main().catch((e) => {
-	console.error("FATAL", e);
-	process.exit(1);
-});
+// Guarded so a test can import rowsOf without sweeping production.
+if (process.argv[1]?.includes("engine-e-contract"))
+	main().catch((e) => {
+		console.error("FATAL", e);
+		process.exit(1);
+	});

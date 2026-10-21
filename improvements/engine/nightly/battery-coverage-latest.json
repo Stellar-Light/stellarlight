@@ -1,11 +1,5 @@
 {
-	"generatedAt": "2026-10-19T11:28:45.340Z",
+	"generatedAt": "2026-10-21T10:48:25.731Z",
 	"detector": "battery-coverage",
-	"failures": [
-		{
-			"probe": "battery:q-agent-identity-erc8004-stellar",
-			"note": "top 0.58 < 0.6 via research/confidence for \"What does ERC-8004 provide for AI-agent identity and reputation, and what can a \" (compliance-rwa-payments); best: https://stellar.org/blog/foundation-news/chainlink-is-now-live-on-stellar-unleashing-a-new-wave-of-defi-innovation",
-			"surface": "corpus"
-		}
-	]
+	"failures": []
 }

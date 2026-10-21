@@ -3200,7 +3200,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"Who won the Stellar x402 hackathon?",
 						"What tracks did the event have and what did they pay?",
-						"How are submissions judged at Stellar Hacks: Real-World ZK, and what must a submission include?",
+						"How are submissions judged at HackMeridian, and what must a submission include?",
 					],
 				},
 				parameters: [
@@ -3432,7 +3432,6 @@ export const spec: OpenAPISpec = {
 						"winning builds",
 						"hackathon winners by topic",
 						"won prizes",
-						"x402 builds",
 						"search by meaning",
 						"similar hackathon projects",
 					],
@@ -3451,7 +3450,7 @@ export const spec: OpenAPISpec = {
 						"Has anyone built a recurring payments protocol at a Stellar hackathon?",
 						"What prediction markets were built at Stellar hackathons?",
 						"Show me winning ZK privacy builds.",
-						"Which x402 projects won prizes at Stellar hackathons?",
+						"Which payments projects won prizes at Stellar hackathons?",
 						"Which Stellar hackathon projects were built with passkey-kit?",
 					],
 				},
@@ -3658,7 +3657,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "One Stellar hackathon submission in full",
 				description:
-					"One stored Stellar hackathon submission in full: the team's own write-up (markdown, a claim not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or a dorahacks.io/buidl link's number. For submissions on a topic → use searchHackathonBuilds.",
+					"One stored Stellar hackathon submission in full: the write-up its team published (markdown, claims not proof), the DoraHacks summary, self-reported tags, the event (hackathon.slug opens getHackathon), placement and prize, links, `project` (the directory project listing its exact repo; absent = not checked, null = none), `stack` (the Stellar packages its repo declares) and when we read each. Pass the `id` from searchHackathonBuilds or hackathonBrief, or the number in any dorahacks.io/buidl link. For submissions on a topic → use searchHackathonBuilds.",
 				"x-routing": {
 					purpose:
 						"Read one hackathon submission in full: what the team wrote, its links and placement, and what it became.",
@@ -5680,7 +5679,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"Help me prepare my Stellar Community Fund application.",
 						"Is an SCF round open now, and who in my vertical already got funded?",
-						"What angles should my SCF pitch take for a payments idea?",
+						"What angles should my SCF pitch take for my idea?",
 					],
 				},
 				parameters: [
@@ -6042,8 +6041,8 @@ export const spec: OpenAPISpec = {
 						"demand claims — gap is SUPPLY-side coverage only",
 					],
 					exampleQuestions: [
-						"I want to build a lending protocol on Stellar. What already exists?",
-						"Vet this idea: a payroll app that pays contractors in USDC.",
+						"Does a lending protocol like mine already exist?",
+						"Vet this idea: invoicing for freelancers, settled in USDC.",
 						"Is the wallet space on Stellar crowded, and is anyone funded in it?",
 						"Should I build this on Stellar or has it been done?",
 					],
@@ -7600,7 +7599,7 @@ export const spec: OpenAPISpec = {
 						// 2026-09-05 routing battery (T4): "verticals" and "least" were
 						// absent from every field, so the question gated out entirely.
 						"Which verticals on Stellar have the least competition?",
-						"How crowded is lending on Stellar?",
+						"How crowded is lending?",
 					],
 				},
 				parameters: [

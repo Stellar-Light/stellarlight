@@ -3,6 +3,7 @@ import {
 	anchorDocUrls,
 	hasFullLexicalCoverage,
 	identifierTargets,
+	normalizeQueryText,
 	queryLexTokens,
 	rankResearchChunks,
 	recencyContentTokens,
@@ -1069,5 +1070,295 @@ describe("researchOrder: one ranking across sources (2026-10-03)", () => {
 			row("dev-docs", "https://developers.stellar.org/docs/y", 0.8, 0.79),
 		];
 		expect(rows.sort(researchOrder("soroban host"))[0].source).toBe("dev-docs");
+	});
+});
+
+describe("normalizeQueryText: a trailing ? cannot move retrieval (2026-10-20)", () => {
+	it("a trailing ? gives the same text as none", () => {
+		const q = "Best docs to read before building a Soroban lending protocol";
+		expect(normalizeQueryText(`${q}?`)).toBe(q);
+		expect(normalizeQueryText(`  ${q} ?? `)).toBe(q);
+	});
+
+	it("keeps a ? or ! inside the query, which can be code", () => {
+		expect(normalizeQueryText("what does the ? operator do in Soroban?")).toBe(
+			"what does the ? operator do in Soroban",
+		);
+		expect(normalizeQueryText("?Sized bounds in soroban-sdk")).toBe(
+			"?Sized bounds in soroban-sdk",
+		);
+		expect(normalizeQueryText("x != y in a contract")).toBe(
+			"x != y in a contract",
+		);
+		expect(normalizeQueryText("how does vec! work")).toBe("how does vec! work");
+	});
+
+	it("keeps identifiers, figures, versions and a final period", () => {
+		expect(
+			normalizeQueryText(
+				"CAP-46 vs SEP-24 under $300,000 for soroban-sdk v25.0.2?",
+			),
+		).toBe("CAP-46 vs SEP-24 under $300,000 for soroban-sdk v25.0.2");
+		expect(normalizeQueryText("set the value in config.")).toBe(
+			"set the value in config.",
+		);
+	});
+
+	it("keeps a query of nothing but question marks", () => {
+		expect(normalizeQueryText(" ?? ")).toBe("??");
+	});
+});
+
+describe("one row per SCF project unless scf-proposal is asked for (2026-10-20)", () => {
+	const scf = (id: string, title: string, score: number, content?: string) => ({
+		...chunk({
+			url: `https://communityfund.stellar.org/submissions/${id}`,
+			score,
+			source: "scf-proposal",
+			content,
+		}),
+		title,
+	});
+	const hurupay = (title: string, round: string) =>
+		`# ${title} (SCF submission, ${round})\n\nProject: Hurupay Virtual Accounts Program (https://communityfund.stellar.org/project/hurupay-virtual-accounts-program-gts)\nAward round: ${round}\n\nVirtual accounts for freelancers and remote workers, paid in USDC through local rails in ${round}.`;
+	const pool = [
+		scf("recA", "Slender (SCF submission, SCF #17)", 0.8),
+		scf("recB", "Slender (SCF submission, Liquidity Award - '24 Q1)", 0.79),
+		{
+			...chunk({ url: "https://developers.stellar.org/docs/lend", score: 0.7 }),
+			source: "dev-docs",
+		},
+		scf(
+			"recC",
+			"Crypto Lombard Credit on Stellar (SCF submission, SCF #40)",
+			0.69,
+		),
+	];
+	const urls = (rows: Array<{ url: string }>) =>
+		rows.map((r) => r.url.split("/").pop());
+
+	it("a project's second submission drops below distinct documents", () => {
+		const out = rankResearchChunks(pool, {
+			limit: 3,
+			mode: "vector",
+			now: NOW,
+		});
+		expect(urls(out)).toEqual(["recA", "lend", "recC"]);
+	});
+
+	it("keeps every submission when the caller scoped to scf-proposal", () => {
+		const out = rankResearchChunks(pool, {
+			limit: 3,
+			mode: "vector",
+			now: NOW,
+			source: "scf-proposal",
+		});
+		expect(urls(out)).toEqual(["recA", "recB", "lend"]);
+	});
+
+	it("a renamed resubmission is the same project when it names the same project page", () => {
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recH1",
+					"Stablecoin Orchestration API on Stellar (SCF submission, SCF #39)",
+					0.81,
+					hurupay("Stablecoin Orchestration API on Stellar", "SCF #39"),
+				),
+				scf(
+					"recH2",
+					"Multi-currency accounts on Stellar (SCF submission, SCF #38)",
+					0.8,
+					hurupay("Multi-currency accounts on Stellar", "SCF #38"),
+				),
+				...pool.slice(2),
+			],
+			{ limit: 3, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recH1", "lend", "recC"]);
+	});
+
+	it("dedupes unscoped and keeps every submission when scoped to scf-proposal", () => {
+		// Same pool both ways: the scoped call keeps recB in score order.
+		const opts = { limit: 3, mode: "vector" as const, now: NOW };
+		expect(urls(rankResearchChunks(pool, opts))).toEqual([
+			"recA",
+			"lend",
+			"recC",
+		]);
+		expect(
+			urls(rankResearchChunks(pool, { ...opts, source: "scf-proposal" })),
+		).toEqual(["recA", "recB", "lend"]);
+	});
+
+	it("a repeat refills only after every distinct document, even a weaker one", () => {
+		const out = rankResearchChunks(
+			[
+				scf("recA", "Slender (SCF submission, SCF #17)", 0.8),
+				scf("recB", "Slender (SCF submission, SCF #22)", 0.79),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 3, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recA", "weak", "recB"]);
+	});
+
+	it("two projects with one title but different project pages both stay", () => {
+		const page = (slug: string) =>
+			`# Payroll on Stellar (SCF submission, SCF #30)\n\nProject: Payroll on Stellar (https://communityfund.stellar.org/project/${slug})\nAward round: SCF #30\n\nPayroll in USDC.`;
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recP1",
+					"Payroll on Stellar (SCF submission, SCF #30)",
+					0.8,
+					page("payroll-a"),
+				),
+				scf(
+					"recP2",
+					"Payroll on Stellar (SCF submission, SCF #30)",
+					0.79,
+					page("payroll-b"),
+				),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 2, mode: "vector", now: NOW },
+		);
+		// A wrong merge would demote recP2 below the weaker distinct doc.
+		expect(urls(out)).toEqual(["recP1", "recP2"]);
+	});
+
+	it("without a page line, a repeat is matched by its title", () => {
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recH1",
+					"Seasonal Workers Payroll (SCF submission, SCF #33)",
+					0.8,
+					"# Seasonal Workers Payroll (SCF submission, SCF #33)\n\nProject: Seasonal Workers Payroll (https://communityfund.stellar.org/project/seasonal-payroll)\n\nPayroll.",
+				),
+				// A later chunk of another round's submission: no header line.
+				scf(
+					"recH2",
+					"Seasonal Workers Payroll (SCF submission, SCF #35)",
+					0.79,
+					"Milestones and budget for the second phase of seasonal payroll.",
+				),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 2, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recH1", "weak"]);
+	});
+
+	it("a project page quoted mid-text is not the submission's own page", () => {
+		const quoting = scf(
+			"recQ",
+			"Payroll Hub (SCF submission, SCF #36)",
+			0.79,
+			"# Payroll Hub (SCF submission, SCF #36)\n\nWe build on prior work (see Project: Seasonal Workers Payroll (https://communityfund.stellar.org/project/seasonal-payroll)).\n\nPayroll for teams.",
+		);
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recH1",
+					"Seasonal Workers Payroll (SCF submission, SCF #33)",
+					0.8,
+					"# Seasonal Workers Payroll (SCF submission, SCF #33)\n\nProject: Seasonal Workers Payroll (https://communityfund.stellar.org/project/seasonal-payroll)\n\nPayroll.",
+				),
+				quoting,
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 2, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recH1", "recQ"]);
+	});
+
+	it("a row without a page line never chains two different pages together", () => {
+		const titled = (page: string | null) =>
+			`# Payroll on Stellar (SCF submission, SCF #30)\n\n${page ? `Project: Payroll on Stellar (https://communityfund.stellar.org/project/${page})\n\n` : ""}Payroll in USDC.`;
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recN",
+					"Payroll on Stellar (SCF submission, SCF #30)",
+					0.81,
+					titled(null),
+				),
+				scf(
+					"recX",
+					"Payroll on Stellar (SCF submission, SCF #31)",
+					0.8,
+					titled("payroll-x"),
+				),
+				scf(
+					"recY",
+					"Payroll on Stellar (SCF submission, SCF #32)",
+					0.79,
+					titled("payroll-y"),
+				),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 3, mode: "vector", now: NOW },
+		);
+		// Two named pages are two projects; the page-less row merges neither.
+		expect(urls(out)).toEqual(["recN", "recX", "recY"]);
+	});
+
+	it("titles keep their word breaks: Stellar Pay and StellarPay are two projects", () => {
+		const out = rankResearchChunks(
+			[
+				scf("recS1", "Stellar Pay (SCF submission, SCF #20)", 0.8),
+				scf("recS2", "StellarPay (SCF submission, SCF #21)", 0.79),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 2, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recS1", "recS2"]);
+	});
+
+	it("further submissions still refill a page distinct documents cannot fill", () => {
+		const out = rankResearchChunks(pool.slice(0, 2), {
+			limit: 2,
+			mode: "vector",
+			now: NOW,
+		});
+		expect(urls(out)).toEqual(["recA", "recB"]);
 	});
 });
