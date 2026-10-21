@@ -54,8 +54,9 @@ the diff and the evidence it needed.
 - #1842 (null funding, dead prior art): push on the first round.
 - `fix/vet-vertical-map`: do not push three times (Stablecoin-last too blunt,
   missed word forms, tests that could not fail); push on the fourth.
-- This ledger and the queue: do not push twice (missing probes and states,
-  no model names, unsplit numbers, vague or contradictory rules); in review.
+- This ledger and the queue: do not push three times (missing probes and
+  states, no model names, unsplit numbers, vague or contradictory rules, a
+  log line with placeholders); push on the fourth.
 
 ## Log
 
