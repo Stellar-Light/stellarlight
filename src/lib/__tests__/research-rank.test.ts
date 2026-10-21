@@ -1073,32 +1073,38 @@ describe("researchOrder: one ranking across sources (2026-10-03)", () => {
 	});
 });
 
-describe("normalizeQueryText: punctuation cannot move retrieval (2026-10-20)", () => {
-	it("a trailing ? or ! gives the same text as none", () => {
+describe("normalizeQueryText: a trailing ? cannot move retrieval (2026-10-20)", () => {
+	it("a trailing ? gives the same text as none", () => {
 		const q = "Best docs to read before building a Soroban lending protocol";
-		expect(normalizeQueryText(`${q}?`)).toBe(normalizeQueryText(q));
-		expect(normalizeQueryText(`${q}!`)).toBe(q);
-		expect(normalizeQueryText(`${q}.`)).toBe(q);
+		expect(normalizeQueryText(`${q}?`)).toBe(q);
 		expect(normalizeQueryText(`  ${q} ?? `)).toBe(q);
 	});
 
-	it("drops inline question marks, keeps the words around them", () => {
-		expect(
-			normalizeQueryText(
-				"How is SDF funded? Is SDF a nonprofit, and does it pay taxes?",
-			),
-		).toBe("How is SDF funded Is SDF a nonprofit, and does it pay taxes");
+	it("keeps a ? or ! inside the query, which can be code", () => {
+		expect(normalizeQueryText("what does the ? operator do in Soroban?")).toBe(
+			"what does the ? operator do in Soroban",
+		);
+		expect(normalizeQueryText("?Sized bounds in soroban-sdk")).toBe(
+			"?Sized bounds in soroban-sdk",
+		);
+		expect(normalizeQueryText("x != y in a contract")).toBe(
+			"x != y in a contract",
+		);
+		expect(normalizeQueryText("how does vec! work")).toBe("how does vec! work");
 	});
 
-	it("keeps identifiers, figures and versions intact", () => {
+	it("keeps identifiers, figures, versions and a final period", () => {
 		expect(
 			normalizeQueryText(
 				"CAP-46 vs SEP-24 under $300,000 for soroban-sdk v25.0.2?",
 			),
 		).toBe("CAP-46 vs SEP-24 under $300,000 for soroban-sdk v25.0.2");
+		expect(normalizeQueryText("set the value in config.")).toBe(
+			"set the value in config.",
+		);
 	});
 
-	it("falls back to the query when only punctuation is left", () => {
+	it("keeps a query of nothing but question marks", () => {
 		expect(normalizeQueryText(" ?? ")).toBe("??");
 	});
 });
@@ -1170,6 +1176,86 @@ describe("one row per SCF project unless scf-proposal is asked for (2026-10-20)"
 			{ limit: 3, mode: "vector", now: NOW },
 		);
 		expect(urls(out)).toEqual(["recH1", "lend", "recC"]);
+	});
+
+	it("dedupes unscoped and keeps every submission when scoped to scf-proposal", () => {
+		// Same pool both ways: the scoped call keeps recB in score order.
+		const opts = { limit: 3, mode: "vector" as const, now: NOW };
+		expect(urls(rankResearchChunks(pool, opts))).toEqual([
+			"recA",
+			"lend",
+			"recC",
+		]);
+		expect(
+			urls(rankResearchChunks(pool, { ...opts, source: "scf-proposal" })),
+		).toEqual(["recA", "recB", "lend"]);
+	});
+
+	it("a repeat refills only after every distinct document, even a weaker one", () => {
+		const out = rankResearchChunks(
+			[
+				scf("recA", "Slender (SCF submission, SCF #17)", 0.8),
+				scf("recB", "Slender (SCF submission, SCF #22)", 0.79),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 3, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recA", "weak", "recB"]);
+	});
+
+	it("two projects with one title but different project pages both stay", () => {
+		const page = (slug: string) =>
+			`# Payroll on Stellar (SCF submission, SCF #30)\n\nProject: Payroll on Stellar (https://communityfund.stellar.org/project/${slug})\nAward round: SCF #30\n\nPayroll in USDC.`;
+		const out = rankResearchChunks(
+			[
+				scf(
+					"recP1",
+					"Payroll on Stellar (SCF submission, SCF #30)",
+					0.8,
+					page("payroll-a"),
+				),
+				scf(
+					"recP2",
+					"Payroll on Stellar (SCF submission, SCF #30)",
+					0.79,
+					page("payroll-b"),
+				),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 2, mode: "vector", now: NOW },
+		);
+		// A wrong merge would demote recP2 below the weaker distinct doc.
+		expect(urls(out)).toEqual(["recP1", "recP2"]);
+	});
+
+	it("titles keep their word breaks: Stellar Pay and StellarPay are two projects", () => {
+		const out = rankResearchChunks(
+			[
+				scf("recS1", "Stellar Pay (SCF submission, SCF #20)", 0.8),
+				scf("recS2", "StellarPay (SCF submission, SCF #21)", 0.79),
+				{
+					...chunk({
+						url: "https://developers.stellar.org/docs/weak",
+						score: 0.5,
+					}),
+					source: "dev-docs",
+				},
+			],
+			{ limit: 2, mode: "vector", now: NOW },
+		);
+		expect(urls(out)).toEqual(["recS1", "recS2"]);
 	});
 
 	it("further submissions still refill a page distinct documents cannot fill", () => {

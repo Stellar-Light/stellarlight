@@ -164,21 +164,16 @@ const FULL_LEXICAL_MAX_TOKENS = 8;
 const FULL_LEXICAL_DISCRIMINATING_MAX = 5;
 
 /**
- * The text retrieval runs on: ? and ! removed, trailing . , ; : removed,
- * whitespace collapsed. The query used to be embedded as typed, and a
- * trailing "?" moved chunk vector scores by 0.005 on average, enough to
- * change the top 5 for 11 of 20 questions asked with and without it (three
- * repeats of each form were identical, 2026-10-20). The lexical stages below
- * already split on punctuation. Falls back to the trimmed query when nothing
- * but punctuation is left.
+ * The text retrieval embeds: the query without a trailing question mark.
+ * Embedded as typed, a trailing "?" moved chunk vector scores by 0.005 on
+ * average, enough to change the top 5 for 11 of 20 questions asked with and
+ * without it (three repeats of each form were identical, 2026-10-20). Only
+ * the trailing mark goes: a "?" or "!" inside the query can be code (the ?
+ * operator, ?Sized, vec!, !=) and stays. The lexical stages below already
+ * split on punctuation. A query of nothing but question marks is kept.
  */
 export function normalizeQueryText(query: string): string {
-	const s = query
-		.replace(/[?!]+/g, " ")
-		.replace(/\s+/g, " ")
-		.trim()
-		.replace(/[.,;:]+$/, "")
-		.trim();
+	const s = query.trim().replace(/[\s?]+$/, "");
 	return s || query.trim();
 }
 
@@ -893,25 +888,35 @@ export function researchOrder(
 // question several times over (Slender twice and Fixed-Rate Stablecoin
 // Credit twice in one 8-row page for a lending question, Hurupay and
 // Seasonal Workers Payroll twice each for a payroll one), pushing distinct
-// documents off the page. A submission is the same project as one already
-// served when it has the same title (rounds keep the title) or names the same
-// project page (the "Project: … (…/project/<slug>)" line the first chunk of
-// every submission carries).
+// documents off the page. Two submissions are one project when both name a
+// project page (the "Project: ... (.../project/<slug>)" line the first chunk
+// of every submission carries) and it is the same page; when either page is
+// unknown, when their titles match (rounds keep the title). Titles keep
+// their word breaks, so "Stellar Pay" and "StellarPay" stay two projects.
 // ponytail: parsed from title and content; store the project slug on the row
-// at ingest if renamed resubmissions slip through.
+// at ingest if renamed resubmissions without a page line slip through.
 const SCF_PROJECT_PAGE_RE =
 	/Project:[^\n]*?\(https:\/\/communityfund\.stellar\.org\/project\/([a-z0-9-]+)\)/i;
 
-function scfProjectKeys(c: RankableChunk): string[] {
-	const title = (c.title ?? "")
-		.replace(/\s*\(SCF submission,.*$/i, "")
-		.toLowerCase()
-		.replace(/[^a-z0-9]+/g, "");
-	const page = c.content.match(SCF_PROJECT_PAGE_RE)?.[1]?.toLowerCase();
-	return [
-		...(title ? [`title:${title}`] : []),
-		...(page ? [`page:${page}`] : []),
-	];
+interface ScfIdentity {
+	page: string | null;
+	title: string;
+}
+
+function scfIdentity(c: RankableChunk): ScfIdentity {
+	return {
+		page: c.content.match(SCF_PROJECT_PAGE_RE)?.[1]?.toLowerCase() ?? null,
+		title: (c.title ?? "")
+			.replace(/\s*\(SCF submission,.*$/i, "")
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, " ")
+			.trim(),
+	};
+}
+
+function sameScfProject(a: ScfIdentity, b: ScfIdentity): boolean {
+	if (a.page && b.page) return a.page === b.page;
+	return a.title !== "" && a.title === b.title;
 }
 
 export function rankResearchChunks<T extends RankableChunk>(
@@ -1024,9 +1029,11 @@ export function rankResearchChunks<T extends RankableChunk>(
 	const familyCount = new Map<string, number>();
 	const seenUrl = new Set<string>();
 	const seenContent = new Set<string>();
-	const seenScfProject = new Set<string>();
+	const servedScf: ScfIdentity[] = [];
 	const primary: typeof scored = [];
 	const leftovers: typeof scored = [];
+	// A project's further submissions refill last, after every other leftover.
+	const scfRepeats: typeof scored = [];
 	for (const c of scored) {
 		const contentKey = c.content.trim();
 		if (seenContent.has(contentKey)) continue; // mirror — never serve twice
@@ -1043,16 +1050,16 @@ export function rankResearchChunks<T extends RankableChunk>(
 			continue;
 		}
 		if (c.source === "scf-proposal" && opts.source !== "scf-proposal") {
-			const keys = scfProjectKeys(c);
-			if (keys.some((k) => seenScfProject.has(k))) {
-				leftovers.push(c);
+			const id = scfIdentity(c);
+			if (servedScf.some((s) => sameScfProject(s, id))) {
+				scfRepeats.push(c);
 				continue;
 			}
-			for (const k of keys) seenScfProject.add(k);
+			servedScf.push(id);
 		}
 		familyCount.set(fam, n + 1);
 		primary.push(c);
 	}
 	// …then refill from leftovers only if distinct docs can't fill the page.
-	return [...primary, ...leftovers].slice(0, opts.limit);
+	return [...primary, ...leftovers, ...scfRepeats].slice(0, opts.limit);
 }
