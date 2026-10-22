@@ -187,7 +187,12 @@ unless noted.
   the skill omits build search params.
 - Consumer safety in `contract:check`: every non-GET operation declares
   `x-side-effecting` (matchPartners does not); an operationId removal or
-  rename fails unless the changelog marks it breaking.
+  rename fails unless the changelog marks it breaking. matchPartners only
+  reads (its route writes nothing), so it declares `false`: Raven's catalog
+  build throws on any operation it exposes that is marked `true`
+  (`scripts/build-catalog.mjs`, `assertSideEffectingOpsExcluded`, in
+  stellar-experimental/stellar-raven at b1dc866), and matchPartners is one
+  of its 30 exposed operations.
 - The golden eval gate counts questions (its floor was set at 37; the set has
   53); eval runs record the API version; the battery's held-out rows become a
   frozen routing holdout.
@@ -206,6 +211,46 @@ unless noted.
   (`src/data/curated-hackathons.ts`).
 - Routing vocabulary for outcome and reading-intent questions, only through
   the Raven gate replica.
+
+Found 2026-10-22 by reading how Raven calls and reads Scout
+(stellar-experimental/stellar-raven at b1dc866: `src/adapters/scout.ts`,
+`src/executor/providers.ts`, `src/policy/truncate.ts`,
+`scripts/build-catalog.mjs`) against our routes and live responses:
+
+- Rate-limit waits never reach Raven's agents. On a 429 or 5xx it keeps
+  `error`, `hint`, the status and any `valid*` lists, and drops the rest,
+  headers included (a 503 marked `unavailable` gets Raven's own hint
+  instead). None of our 25 route files that answer 429 puts the
+  wait in `error` or `hint` (the text is "rate limit exceeded" or "try again
+  shortly"); twelve carry it only in a `retryAfterSeconds` field, six of
+  them (through `apiError`) also in an `advisory` line.
+- Most responses carry no data date. Raven reads freshness only from a
+  top-level or `meta` `dataAsOf` or `asOf`, and otherwise labels the answer
+  with its own fetch time. Of 14 endpoints probed live, 3 serve one
+  (`/api/leaderboard`, `/api/stablecoins`, `/api/changes`).
+- A partial read discards good rows. When any backend read fails we set
+  `meta.partial` and add a warning that begins "backend read failed"
+  (`src/lib/degraded-read.ts`); Raven drops every row on either signal and
+  tells the agent to retry once and report the result inconclusive. Both
+  signals have to change: raise them only when the served rows cannot be
+  trusted, or report the loss per source in a form that trips neither.
+- A 404 reads as "nothing found". Raven turns every 404 into a soft empty
+  result with a widen-your-search hint; `error` and `hint` survive as text,
+  `valid*` lists do not. Not yet audited: which routes answer 404 when they
+  could not check, rather than when the thing does not exist.
+- Words that appear only in parameter descriptions never reach Raven's
+  search. Its catalog indexes summary, description, `x-routing` (purpose,
+  use-when, examples and keywords, with `notFor` as exclusions) and schema
+  property names, not parameter or field description prose.
+- Long responses are cut. Raven cuts what an agent's script returns at
+  24,000 characters and keeps the front; `meta` already comes first on the 9
+  endpoints checked, so the cut drops rows, not metadata. The owner parked
+  response-size changes on 2026-08-18; ask before changing any response
+  shape.
+- Raven's calls are anonymous. It sends plain GETs with no key, no
+  User-Agent, no timeout and no retries, from Cloudflare's network, so its
+  users likely share one per-IP limit [inferred]. See the owner decision on
+  a key below.
 
 ## Owner decisions (safe default in brackets)
 
