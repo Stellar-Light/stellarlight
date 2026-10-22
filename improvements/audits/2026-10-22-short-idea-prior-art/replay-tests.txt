@@ -1,0 +1,174 @@
+perpetuals / derivatives trading protocol on Stellar kept              label=- W text=0.67 [perpetuals,trading] Kale on Zenex
+perpetuals / derivatives trading protocol on Stellar kept              label=-   text=0.00 [] Kaleidofi
+perpetuals / derivatives trading protocol on Stellar kept              label=-   text=0.00 [] Cerida
+perpetuals / derivatives trading protocol on Stellar kept              label=-   text=0.00 [] Obscura - ZK Leverage
+perpetuals / derivatives trading protocol on Stellar kept              label=-   text=0.00 [] PNLX
+a non-custodial wallet for Stellar kept              label=-   text=1.00 [wallet,non-custodial] Cyphras
+a non-custodial wallet for Stellar kept              label=-   text=1.00 [wallet,non-custodial] Stellar Stake House
+a non-custodial wallet for Stellar kept              label=-   text=0.50 [wallet] Stella - Private Payments Wallet
+a non-custodial wallet for Stellar kept              label=- W text=0.50 [wallet] Umbra Wallet
+a non-custodial wallet for Stellar kept              label=-   text=0.50 [non-custodial] Contextio
+stablecoin payroll for freelancers kept              label=-   text=0.33 [stablecoin,freelancers] WorkOn
+stablecoin payroll for freelancers kept              label=-   text=0.33 [stablecoin,freelancers] GigPay
+stablecoin payroll for freelancers kept              label=-   text=0.33 [stablecoin,payroll] ShieldPay
+stablecoin payroll for freelancers kept              label=-   text=0.33 [payroll] StealthPayroll
+stablecoin payroll for freelancers kept              label=-   text=0.33 [stablecoin,payroll] Cloakpay
+subscription billing with recurring stablecoin payments kept              label=- W text=0.80 [subscription,recurring,stablecoin,payments] Streamr
+subscription billing with recurring stablecoin payments kept              label=-   text=0.40 [subscription,payments] FixedRateX Tagline: A Stellar-powered payment gateway for cr
+subscription billing with recurring stablecoin payments kept              label=-   text=0.40 [subscription,stablecoin,payments] StellarAgent
+subscription billing with recurring stablecoin payments kept              label=-   text=0.40 [billing,stablecoin,payments] AgentCompute
+subscription billing with recurring stablecoin payments kept              label=-   text=0.40 [subscription,payments] Stellar Payment API (PLUTO)
+stablecoin wallet for remittances kept              label=-   text=0.33 [stablecoin,remittances] EazeFi
+stablecoin wallet for remittances kept              label=- W text=0.33 [stablecoin,remittances] Tukar
+stablecoin wallet for remittances kept              label=-   text=0.33 [remittances] CrossBorder Pay: Global Remittances with Stellar and Soroban
+stablecoin wallet for remittances kept              label=-   text=0.67 [stablecoin,wallet] Econova stellar
+stablecoin wallet for remittances kept              label=-   text=0.00 [] StellarRemit
+stablecoin issuer for merchant payments kept              label=-   text=0.50 [stablecoin,merchant,payments] cowrie
+stablecoin issuer for merchant payments kept              label=-   text=0.50 [merchant,payments] Stellar Payment API (PLUTO)
+stablecoin issuer for merchant payments kept              label=- W text=0.25 [stablecoin,payments] TollPay
+stablecoin issuer for merchant payments kept              label=-   text=0.25 [stablecoin,payments] Stellect
+stablecoin issuer for merchant payments kept              label=-   text=0.50 [merchant,payments] PaywitAI
+stablecoin issuance for payroll kept              label=-   text=0.67 [stablecoin,payroll] Zebra — Confidential Stablecoin Payroll on Stellar (Complian
+stablecoin issuance for payroll kept              label=-   text=0.33 [stablecoin,payroll] ShieldPay
+stablecoin issuance for payroll kept              label=-   text=0.33 [payroll] StealthPayroll
+stablecoin issuance for payroll kept              label=-   text=0.00 [] ZetaPay
+stablecoin issuance for payroll kept              label=-   text=0.33 [stablecoin,payroll] Cloakpay
+a stablecoin with 1:1 backing for merchant payments kept              label=-   text=0.40 [stablecoin,merchant,payments] cowrie
+a stablecoin with 1:1 backing for merchant payments kept              label=- W text=0.00 [] Pacto
+a stablecoin with 1:1 backing for merchant payments kept              label=-   text=0.40 [merchant,payments] Stellar Payment API (PLUTO)
+a stablecoin with 1:1 backing for merchant payments kept              label=- W text=0.00 [] SENDA
+a stablecoin with 1:1 backing for merchant payments kept              label=-   text=0.40 [stablecoin,payments] CosmosPay | Wallet & Payment Gateway for Stellar Developers
+fiat-backed stablecoin for payments kept              label=- W text=0.00 [] Pacto
+fiat-backed stablecoin for payments kept              label=-   text=0.67 [stablecoin,payments] Why Stellar Feels Boring
+fiat-backed stablecoin for payments kept              label=-   text=0.33 [stablecoin,payments] cowrie
+fiat-backed stablecoin for payments kept              label=-   text=0.67 [stablecoin,payments] CosmosPay | Wallet & Payment Gateway for Stellar Developers
+fiat-backed stablecoin for payments kept              label=- W text=0.67 [stablecoin,payments] Streamr
+a minted stablecoin for payments kept              label=-   text=0.33 [stablecoin,payments] Stellect
+a minted stablecoin for payments kept              label=-   text=0.67 [stablecoin,payments] Why Stellar Feels Boring
+a minted stablecoin for payments kept              label=- W text=0.33 [stablecoin,payments] TollPay
+a minted stablecoin for payments kept              label=-   text=0.67 [stablecoin,payments] CosmosPay | Wallet & Payment Gateway for Stellar Developers
+a minted stablecoin for payments kept              label=- W text=0.00 [] Pacto
+a stablecoin pegging the dollar for payments kept              label=-   text=0.75 [stablecoin,dollar,payments] Veilum
+a stablecoin pegging the dollar for payments kept              label=- W text=0.00 [] Pacto
+a stablecoin pegging the dollar for payments kept              label=- W text=0.25 [stablecoin,payments] clevercon
+a stablecoin pegging the dollar for payments kept              label=-   text=0.25 [stablecoin,payments] cowrie
+a stablecoin pegging the dollar for payments kept              label=-   text=0.50 [stablecoin,payments] Why Stellar Feels Boring
+redeemable stablecoin for merchant payments kept              label=-   text=0.50 [stablecoin,merchant,payments] cowrie
+redeemable stablecoin for merchant payments kept              label=- W text=0.50 [stablecoin,payments] Streamr
+redeemable stablecoin for merchant payments kept              label=-   text=0.50 [merchant,payments] Stellar Payment API (PLUTO)
+redeemable stablecoin for merchant payments kept              label=-   text=0.50 [stablecoin,payments] StellarPay
+redeemable stablecoin for merchant payments kept              label=-   text=0.00 [] Nexo
+a stablecoin with daily redemptions for payroll kept              label=- W text=0.00 [] Streamr
+a stablecoin with daily redemptions for payroll kept              label=- W text=0.00 [] PayZoll_Stellar
+a stablecoin with daily redemptions for payroll kept              label=-   text=0.00 [] PayDay
+a stablecoin with daily redemptions for payroll kept              label=-   text=0.25 [stablecoin,payroll] Cloakpay
+a stablecoin with daily redemptions for payroll kept              label=-   text=0.25 [stablecoin,payroll] ShieldPay
+stablecoin reserves dashboard for payments teams kept              label=-   text=0.40 [stablecoin,reserves] Stellar Proof of Reserves
+stablecoin reserves dashboard for payments teams kept              label=-   text=0.40 [stablecoin,reserves] Crisp — Real-Time ZK Proof-of-Reserves & Solvency Oracle for
+stablecoin reserves dashboard for payments teams kept              label=-   text=0.20 [reserves] ZK Proof-of-Reserves for Stellar
+stablecoin reserves dashboard for payments teams kept              label=- W text=0.20 [reserves] zkProofofReserve
+stablecoin reserves dashboard for payments teams kept              label=-   text=0.40 [stablecoin,reserves] Strata Reserves
+a stablecoin minter for merchant payments kept              label=-   text=0.50 [stablecoin,merchant,payments] cowrie
+a stablecoin minter for merchant payments kept              label=-   text=0.25 [stablecoin,payments] Stellect
+a stablecoin minter for merchant payments kept              label=-   text=0.50 [merchant,payments] Stellar Payment API (PLUTO)
+a stablecoin minter for merchant payments kept              label=- W text=0.25 [stablecoin,payments] TollPay
+a stablecoin minter for merchant payments kept              label=-   text=0.50 [stablecoin,payments] CosmosPay | Wallet & Payment Gateway for Stellar Developers
+an overcollateralized stablecoin for lending kept              label=-   text=0.33 [stablecoin,lending] Kale Deal Done
+an overcollateralized stablecoin for lending kept              label=-   text=0.33 [stablecoin,lending] Writz Protocol
+an overcollateralized stablecoin for lending kept              label=-   text=0.00 [lending] Loanet
+an overcollateralized stablecoin for lending kept              label=-   text=0.00 [] Orion
+an overcollateralized stablecoin for lending kept              label=-   text=0.33 [lending] BlendScore
+a stablecoin with dollar collateral for payments kept              label=-   text=0.75 [stablecoin,dollar,payments] Veilum
+a stablecoin with dollar collateral for payments kept              label=- W text=0.50 [stablecoin,payments] Streamr
+a stablecoin with dollar collateral for payments kept              label=-   text=0.25 [stablecoin,payments] cowrie
+a stablecoin with dollar collateral for payments kept              label=- W text=0.00 [] Pacto
+a stablecoin with dollar collateral for payments kept              label=-   text=0.50 [stablecoin,payments] Why Stellar Feels Boring
+stablecoin issuances for payroll kept              label=-   text=0.67 [stablecoin,payroll] Zebra — Confidential Stablecoin Payroll on Stellar (Complian
+stablecoin issuances for payroll kept              label=-   text=0.33 [payroll] StealthPayroll
+stablecoin issuances for payroll kept              label=-   text=0.33 [stablecoin,payroll] ShieldPay
+stablecoin issuances for payroll kept              label=-   text=0.33 [stablecoin,payroll] Cloakpay
+stablecoin issuances for payroll kept              label=- W text=0.00 [] Streamr
+an algorithmic stablecoin for merchant payments kept              label=-   text=0.50 [stablecoin,merchant,payments] cowrie
+an algorithmic stablecoin for merchant payments kept              label=-   text=0.25 [stablecoin,payments] Stellect
+an algorithmic stablecoin for merchant payments kept              label=- W text=0.25 [stablecoin,payments] clevercon
+an algorithmic stablecoin for merchant payments kept              label=-   text=0.50 [merchant,payments] Stellar Payment API (PLUTO)
+an algorithmic stablecoin for merchant payments kept              label=-   text=0.25 [merchant,payments] MicoPay Protocol
+a depegged stablecoin for merchant payments kept              label=-   text=0.50 [stablecoin,merchant,payments] cowrie
+a depegged stablecoin for merchant payments kept              label=-   text=0.50 [merchant,payments] Stellar Payment API (PLUTO)
+a depegged stablecoin for merchant payments kept              label=- W text=0.00 [] Pacto
+a depegged stablecoin for merchant payments kept              label=-   text=0.50 [stablecoin,payments] Why Stellar Feels Boring
+a depegged stablecoin for merchant payments kept              label=-   text=0.25 [stablecoin,payments] Stellect
+a stablecoin that anchors its peg to gold below             label=0   text=0.25 [anchors] AnchorVault: Trustless On-Chain Remittance Liquidity Routing
+a stablecoin that anchors its peg to gold below             label=0   text=0.00 [] KaleShield
+a stablecoin that anchors its peg to gold below             label=0   text=0.00 [] veil
+a stablecoin that anchors its peg to gold below             label=0   text=0.00 [] Monitor the Situation
+a stablecoin that anchors its peg to gold below             label=0 W text=0.00 [] Kale on Zenex
+loans for farmers          below             label=0   text=0.50 [loans] Loanet
+loans for farmers          below             label=1   text=0.50 [farmers] Agrocylo
+loans for farmers          below             label=0 W text=0.50 [farmers] Kale Farmers Market
+loans for farmers          below             label=0   text=0.50 [farmers] StellarForge
+loans for farmers          below             label=1   text=0.50 [farmers] AgroChain LATAM
+microloan app              kept              label=-   text=1.00 [microloan] Vyn
+microloan app              kept              label=-   text=0.00 [] Loanet
+microloan app              kept              label=-   text=0.00 [] RemitLend
+microloan app              kept              label=-   text=0.00 [] Micro Lending
+microloan app              kept              label=-   text=0.00 [] Minerchant
+microloans for small businesses kept              label=-   text=0.67 [small,businesses] Micro Lending
+microloans for small businesses kept              label=-   text=0.00 [] Minerchant
+microloans for small businesses kept              label=-   text=0.67 [small,businesses] PayOnProof
+microloans for small businesses kept              label=-   text=0.00 [] Tutum Financial
+microloans for small businesses kept              label=-   text=0.00 [] Calificación Crediticia con IA en Soroban para Microfinanzas
+microfinance platform      gained            label=1   text=1.00 [microfinance] CALCY ( EduChain)
+microfinance platform      kept              label=2   text=0.00 [] Micro Lending
+microfinance platform      kept              label=1   text=0.00 [] Minerchant
+microfinance platform      kept              label=1   text=0.00 [] RemitLend
+microfinance platform      below             label=2   text=0.00 [] Vyn
+charity auctions           kept              label=-   text=0.50 [auctions] Astraea
+charity auctions           below             label=-   text=0.50 [auctions] IDIO
+charity auctions           below             label=-   text=0.50 [auctions] Zk Sealed
+charity auctions           below             label=-   text=0.50 [auctions] SealedStellar
+charity auctions           below             label=-   text=0.50 [charity] ImpactPools
+donation matching for nonprofits kept              label=-   text=0.33 [donation] Donation Management
+donation matching for nonprofits below             label=-   text=0.00 [] GiveChain
+donation matching for nonprofits below             label=-   text=0.00 [] Stellar Donate-Safe
+donation matching for nonprofits below             label=-   text=0.00 [] DONATRACE
+donation matching for nonprofits below             label=-   text=0.00 [] Doni
+accept donations in crypto kept              label=-   text=0.50 [donations] Donation Management
+accept donations in crypto below             label=-   text=0.50 [donations] Stellar Donate-Safe
+accept donations in crypto below             label=- W text=0.50 [accept] x402-mcp-stellar-template
+accept donations in crypto below             label=-   text=0.50 [donations] SAVIA
+accept donations in crypto below             label=-   text=0.50 [accept] Onboard
+transparent donation platform for charities kept              label=-   text=0.67 [transparent,donation] Donation Management
+transparent donation platform for charities kept              label=-   text=0.67 [transparent,donation] DonarIA
+transparent donation platform for charities kept              label=-   text=0.00 [] GiveChain
+transparent donation platform for charities kept              label=-   text=0.00 [] Stellar Donate-Safe
+transparent donation platform for charities kept              label=-   text=0.00 [] Trace
+payroll for remote teams   kept              label=-   text=0.67 [payroll,teams] StealthPayroll
+payroll for remote teams   kept              label=-   text=0.67 [payroll,teams] Contextio
+payroll for remote teams   below             label=-   text=0.33 [payroll] Zebra — Confidential Stablecoin Payroll on Stellar (Complian
+payroll for remote teams   below             label=-   text=0.33 [payroll] Obscura - Payroll · Voting · Credentials · Treasury · Compli
+payroll for remote teams   below             label=-   text=0.33 [payroll] Tecta - ZK-Proof Powered Payroll for Enterprise
+fans fund artists          kept              label=-   text=0.67 [fans,artists] Twin Ticket
+fans fund artists          kept              label=-   text=0.67 [fans,fund] Dropsland
+fans fund artists          kept              label=-   text=0.67 [fans,fund] Be A Stellar
+fans fund artists          below             label=-   text=0.33 [fund] Aegis — Provable Clean-Funds Compliance Coprocessor (RISC Ze
+fans fund artists          below             label=-   text=0.33 [fund] The Simple Fund
+wallet                     gained            label=2 W text=1.00 [wallet] Umbra Wallet
+wallet                     gained            label=1 W text=1.00 [wallet] Cards402.com
+wallet                     gained            label=0 W text=1.00 [wallet] ANCHORSHIELD
+wallet                     gained            label=0 W text=1.00 [wallet] Soroswap Pro Trader
+wallet                     gained            label=0 W text=1.00 [wallet] Kale Grab Rush
+non custodial wallet       kept              label=-   text=1.00 [non,custodial,wallet] Cyphras
+non custodial wallet       kept              label=-   text=0.67 [custodial,wallet] Stella - Private Payments Wallet
+non custodial wallet       kept              label=-   text=0.33 [wallet] NeuralWallet
+non custodial wallet       kept              label=-   text=1.00 [non,custodial,wallet] Stellar Stake House
+non custodial wallet       kept              label=-   text=0.67 [non,custodial] Contextio
+lending artists insurance  kept              label=-   text=0.67 [lending,insurance] KaleGuardVaults
+lending artists insurance  below             label=-   text=0.33 [insurance] FireBastion - Decentralized Fire Damage Insurance for Homes
+lending artists insurance  below             label=-   text=0.33 [insurance] LumenSure - Private Proof-Backed Insurance Payouts on Stella
+lending artists insurance  below             label=- W text=0.33 [lending] Blend Pool Creator
+lending artists insurance  below             label=-   text=0.33 [lending] Micro Lending
+api 1.9.87 -> 1.9.87; parity failures (before != live vetIdea): 0
+label arrays are [0 words only, 1 related, 2 same idea, unlabelled]
+test-short {"ideas":19,"oneWordIdeas":3,"beforeServed":62,"unguardServed":68,"guardedServed":68,"beforeEmpty":2,"guardedEmpty":1,"guardedEmptyBelowRule":1,"gainedVsBefore":6,"lostVsBefore":0,"droppedByGuard":0,"labelsBefore":[0,2,1,59],"labelsGuarded":[3,4,2,59],"labelsGainedVsBefore":[3,2,1,0]}
+test-long {"ideas":15,"oneWordIdeas":0,"beforeServed":70,"unguardServed":70,"guardedServed":70,"beforeEmpty":1,"guardedEmpty":1,"guardedEmptyBelowRule":1,"gainedVsBefore":0,"lostVsBefore":0,"droppedByGuard":0,"labelsBefore":[0,0,0,70],"labelsGuarded":[0,0,0,70]}

@@ -1,0 +1,25 @@
+payroll                matched=23 inText by variant={"payroll":23} onlyTrackOrAward=0
+invoicing              matched=1 inText by variant={"invoicing":1} onlyTrackOrAward=0
+microloans             matched=21 inText by variant={"microloans":1} onlyTrackOrAward=0
+crowdfunding           matched=5 inText by variant={"crowdfunding":5} onlyTrackOrAward=0
+escrow                 matched=34 inText by variant={"escrow":31} onlyTrackOrAward=3
+    Trace {track: Experiencia del Donante; award: -}
+    FlowLock Protocol {track: 🇨🇴 PULSO Colombia; award: -}
+    Thalos {track: 🇨🇴 PULSO Colombia; award: -}
+lottery                matched=2 inText by variant={"lottery":2} onlyTrackOrAward=0
+kyc                    matched=28 inText by variant={"kyc":28} onlyTrackOrAward=0
+remittance app         matched=16 inText by variant={"remittance":16} onlyTrackOrAward=0
+send money home        matched=2 inText by variant={"home":2} onlyTrackOrAward=0
+stablecoin             matched=123 inText by variant={"stablecoin":27} onlyTrackOrAward=96
+    W VETCHAIN {track: Track Universitario; award: 🥇 1er lugar – $500 USD}
+    W x402-mcp-stellar-template {track: All BUIDLs; award: 10K Prize Pool}
+    W TollPay {track: All BUIDLs; award: 10K Prize Pool}
+    W clevercon {track: All BUIDLs; award: 10K Prize Pool}
+    W Tukar {track: -; award: $10,000 XLM Prize}
+    Dolaro Calamaro USDC {track: Producto / Soluciones en Stellar; award: -}
+oracle                 matched=22 inText by variant={"oracle":21} onlyTrackOrAward=1
+    Synapse Trade {track: Composability; award: -}
+insurance              matched=8 inText by variant={"insurance":8} onlyTrackOrAward=0
+microloan app          matched=32 inText by variant={"microloan":1} onlyTrackOrAward=0
+microfinance platform  matched=13 inText by variant={"microfinance":1} onlyTrackOrAward=0
+wallet                 matched=73 inText by variant={"wallet":73} onlyTrackOrAward=0

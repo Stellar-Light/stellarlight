@@ -1,0 +1,54 @@
+{
+  "writtenAt": "2026-10-22T16:19Z",
+  "writtenBefore": "any vetIdea or searchHackathonBuilds result was opened in this lane",
+  "rule": "Short idea = one to three content words. Held-out ideas are never used to choose or adjust the fix; their numbers are reported separately.",
+  "rubric": "Each served build is graded against the idea from its name and description only, before seeing whether it is served: 2 = the same idea (a build of the thing the idea names), 1 = related (same space, a different product), 0 = shares words only. Ties go to the stricter grade.",
+  "ideas": [
+    { "idea": "payroll", "domain": "payments", "slice": "tune" },
+    { "idea": "merchant payments", "domain": "payments", "slice": "tune" },
+    { "idea": "recurring subscription payments", "domain": "payments", "slice": "held-out" },
+    { "idea": "invoicing", "domain": "payments", "slice": "tune" },
+
+    { "idea": "microloans", "domain": "lending", "slice": "tune" },
+    { "idea": "p2p lending", "domain": "lending", "slice": "held-out" },
+    { "idea": "undercollateralized loans", "domain": "lending", "slice": "tune" },
+    { "idea": "crowdfunding", "domain": "lending", "slice": "tune" },
+
+    { "idea": "multisig wallet", "domain": "wallets", "slice": "tune" },
+    { "idea": "passkey wallet", "domain": "wallets", "slice": "held-out" },
+    { "idea": "mobile wallet", "domain": "wallets", "slice": "tune" },
+
+    { "idea": "nft marketplace", "domain": "nfts", "slice": "tune" },
+    { "idea": "music nfts", "domain": "nfts", "slice": "held-out" },
+    { "idea": "event ticketing", "domain": "nfts", "slice": "tune" },
+
+    { "idea": "yield aggregator", "domain": "defi", "slice": "tune" },
+    { "idea": "perpetual futures", "domain": "defi", "slice": "held-out" },
+    { "idea": "escrow", "domain": "defi", "slice": "tune" },
+    { "idea": "prediction market", "domain": "defi", "slice": "tune" },
+
+    { "idea": "chess game", "domain": "gaming", "slice": "tune" },
+    { "idea": "lottery", "domain": "gaming", "slice": "held-out" },
+    { "idea": "play to earn", "domain": "gaming", "slice": "tune" },
+
+    { "idea": "decentralized identity", "domain": "identity", "slice": "tune" },
+    { "idea": "kyc", "domain": "identity", "slice": "held-out" },
+    { "idea": "verifiable credentials", "domain": "identity", "slice": "tune" },
+
+    { "idea": "remittance app", "domain": "remittances", "slice": "tune" },
+    { "idea": "cross border remittances", "domain": "remittances", "slice": "held-out" },
+    { "idea": "send money home", "domain": "remittances", "slice": "tune" },
+
+    { "idea": "stablecoin", "domain": "stablecoins", "slice": "tune" },
+    { "idea": "stablecoin savings", "domain": "stablecoins", "slice": "held-out" },
+    { "idea": "usdc payroll", "domain": "stablecoins", "slice": "tune" },
+
+    { "idea": "block explorer", "domain": "tooling", "slice": "tune" },
+    { "idea": "soroban sdk", "domain": "tooling", "slice": "held-out" },
+    { "idea": "testing framework", "domain": "tooling", "slice": "tune" },
+    { "idea": "oracle", "domain": "tooling", "slice": "held-out" },
+
+    { "idea": "insurance", "domain": "defi", "slice": "held-out" },
+    { "idea": "carbon credits", "domain": "other", "slice": "held-out" }
+  ]
+}

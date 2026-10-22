@@ -1,0 +1,6 @@
+synonym only: escrow -> Trace (label 1)
+synonym only: stablecoin -> VETCHAIN (label 0)
+synonym only: stablecoin -> x402-mcp-stellar-template (label 0)
+synonym only: stablecoin -> TollPay (label 0)
+synonym only: stablecoin -> clevercon (label 0)
+[0 words only, 1 related, 2 same idea, unlabelled] {"literal":[8,12,26,0],"synonymOnly":[4,1,0,0]}
