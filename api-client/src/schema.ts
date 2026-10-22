@@ -5548,6 +5548,8 @@ export interface operations {
                                     name?: string | null;
                                     status?: string | null;
                                     types?: string[];
+                                    /** @description How the row qualified: vertical = a typed member of the idea's vertical; scored = it matched the idea's own words. Absent when the idea maps to no vertical. */
+                                    via?: string;
                                 }[];
                                 /**
                                  * @description How relevance was established for the served projects. vertical = typed members of the idea's vertical; vertical+scored = typed members plus rows that matched the idea's own terms; scored = the idea's own (non-generic) terms matched; weak = only generic words matched (the rows are nearest NEIGHBOURS, not evidence a competitor exists) or no project matched enough of the idea (projects is empty, which is not evidence that none exists). Weigh a weak block as 'we found nothing close', never as a competitive landscape. When the idea uses two or more words the directory knows, every served project matches a minimum share of their weight (rarer words weigh more), so fewer than 8 can be served.

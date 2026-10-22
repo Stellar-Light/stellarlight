@@ -8,6 +8,7 @@ import {
 	countWentQuiet,
 	fundedInVertical,
 } from "@/lib/scf-pitch";
+import { buildVetIdea } from "@/lib/vet-idea";
 import {
 	responseSchema,
 	undeclaredInServed,
@@ -124,6 +125,7 @@ describe("funding without a vertical", () => {
 // scfPitch's report, reviewSubmission's review.pitch and hackathonBrief's
 // report all serve this vet block; the spec declared none of priorArt.builds,
 // buildsMode or competitors.projects[].via (contract audit, 2026-10-20).
+// vetIdea, whose computation it is, served via undeclared too.
 describe("the spec declares the vet block every composite serves", () => {
 	const project = (
 		slug: string,
@@ -176,6 +178,7 @@ describe("the spec declares the vet block every composite serves", () => {
 			payload,
 			"lending protocol for stablecoins",
 		);
+		const vet = await buildVetIdea(payload, "lending protocol for stablecoins");
 		return {
 			pitch,
 			undeclared: {
@@ -184,10 +187,16 @@ describe("the spec declares the vet block every composite serves", () => {
 					review: { pitch },
 				}),
 				hackathonBrief: undeclared("/api/hackathon-brief", { report: brief }),
+				vetIdea: undeclared("/api/vet-idea", { report: vet }),
 			},
 		};
 	};
-	const none = { scfPitch: [], reviewSubmission: [], hackathonBrief: [] };
+	const none = {
+		scfPitch: [],
+		reviewSubmission: [],
+		hackathonBrief: [],
+		vetIdea: [],
+	};
 
 	it("with builds found by meaning and both routes to a competitor", async () => {
 		buildsIndex = [winner];

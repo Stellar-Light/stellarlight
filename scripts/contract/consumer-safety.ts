@@ -7,8 +7,9 @@
  *    and treats an unmarked one as safe, so a missing flag on an operation
  *    that writes reads as safe. matchPartners only reads, so it says false.
  * 2. An operationId the base spec served is not removed or renamed unless a
- *    changelog entry at this spec version names it and says BREAKING: the
- *    consumer keys its catalog on operationIds, so a silent rename breaks it.
+ *    changelog entry at this spec version announces it as
+ *    `BREAKING: <operationId>` (several ids comma-separated). The consumer
+ *    keys its catalog on operationIds, so a silent rename breaks it.
  */
 import type { ChangelogEntry } from "../../src/lib/changelog";
 
@@ -49,19 +50,25 @@ export function operationIds(spec: Spec): Set<string> {
 }
 
 /** Base operationIds this spec no longer serves, minus those a changelog
- * entry at `spec@<version>` names beside the word BREAKING. */
+ * entry at `spec@<version>` announces as `BREAKING: getFoo, getBar`: only
+ * the ids listed right after the marker count, never prose around it. */
 export function unannouncedRemovals(
 	base: Set<string>,
 	current: Set<string>,
 	changelog: ChangelogEntry[],
 	version: string,
 ): string[] {
-	const named = new Set(
+	const announced = new Set(
 		changelog
 			.filter((e) => e.version === `spec@${version}`)
-			.map((e) => `${e.summary} ${e.detail ?? ""}`)
-			.filter((text) => /\bBREAKING\b/.test(text))
-			.flatMap((text) => text.match(/\w+/g) ?? []),
+			.flatMap((e) => [
+				...`${e.summary} ${e.detail ?? ""}`.matchAll(
+					/\bBREAKING:\s*(\w+(?:\s*,\s*\w+)*)/g,
+				),
+			])
+			.flatMap((m) => m[1].split(/\s*,\s*/)),
 	);
-	return [...base].filter((id) => !current.has(id) && !named.has(id)).sort();
+	return [...base]
+		.filter((id) => !current.has(id) && !announced.has(id))
+		.sort();
 }

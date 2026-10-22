@@ -319,7 +319,11 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		expect(body.submissions).toHaveLength(2);
 	});
 
-	it("the spec declares every field and every null it serves", async () => {
+	it("declares every served field and null outside the open maps: winners, stats, rules, profile", async () => {
+		// hackathon, submissions[] and tracks[] are open maps
+		// (additionalProperties: true): a key the spec does not name passes
+		// there unjudged. Their declared children (stats, rules, profile,
+		// description) are judged like any other field.
 		const undeclared = (body: unknown) =>
 			undeclaredInServed(
 				spec,

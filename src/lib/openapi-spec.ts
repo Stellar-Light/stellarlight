@@ -6160,6 +6160,11 @@ export const spec: OpenAPISpec = {
 																		type: "array",
 																		items: { type: "string" },
 																	},
+																	via: {
+																		type: "string",
+																		description:
+																			"How the row qualified: vertical = a typed member of the idea's vertical; scored = it matched the idea's own words. Absent when the idea maps to no vertical.",
+																	},
 																},
 															},
 														},

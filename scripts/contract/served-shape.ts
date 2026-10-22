@@ -7,10 +7,14 @@
  * declares everything that body serves. Only what the body serves is
  * checked: a branch the fixture never reaches proves nothing.
  *
- * Never accuses on ambiguity: a schema that declares no properties is not
- * judged, a oneOf/anyOf passes when any branch passes, and null passes when
- * any branch is nullable. Array indices collapse to [] so one finding names
- * a field once, however many rows serve it.
+ * Findings: a key its object schema does not list, a null its schema does
+ * not allow, a value outside its enum, an object or array served where the
+ * schema declares no properties or items, and a $ref that resolves to
+ * nothing. Not judged: the keys an open map allows (additionalProperties:
+ * true or a schema), and types other than null. A oneOf/anyOf passes when
+ * any branch passes, and null passes when any branch is nullable. Array
+ * indices collapse to [] so one finding names a field once, however many
+ * rows serve it.
  */
 
 type Node = Record<string, unknown>;
@@ -39,54 +43,68 @@ export function undeclaredInServed(
 	schema: unknown,
 	value: unknown,
 ): string[] {
-	const deref = (s: unknown): Node => {
+	const out = new Set<string>();
+	/** Where a $ref chain ends; undefined, reported, when it ends nowhere. */
+	const resolve = (s: unknown, at: string): Node | undefined => {
 		let node = s;
-		for (let i = 0; i < 10 && isObject(node) && "$ref" in node; i++) {
+		for (let hops = 0; isObject(node) && "$ref" in node; hops++) {
+			const ref = String(node.$ref);
 			let cur: unknown = spec;
-			for (const key of String(node.$ref).replace(/^#\//, "").split("/"))
+			for (const key of ref.replace(/^#\//, "").split("/"))
 				cur = isObject(cur) ? cur[key] : undefined;
+			if (!isObject(cur) || hops === 10) {
+				out.add(`unresolvable $ref: ${at} (${ref})`);
+				return undefined;
+			}
 			node = cur;
 		}
 		return isObject(node) ? node : {};
 	};
-	const branches = (s: Node, key: "allOf" | "oneOf" | "anyOf") =>
-		Array.isArray(s[key]) ? (s[key] as unknown[]).map(deref) : [];
-	const nullable = (s: Node): boolean =>
+	const branches = (s: Node, key: "allOf" | "oneOf" | "anyOf", at: string) =>
+		Array.isArray(s[key])
+			? (s[key] as unknown[]).flatMap((b) => resolve(b, at) ?? [])
+			: [];
+	const nullable = (s: Node, at: string): boolean =>
 		s.nullable === true ||
 		(Array.isArray(s.type) && s.type.includes("null")) ||
 		s.type === "null" ||
 		[
-			...branches(s, "allOf"),
-			...branches(s, "oneOf"),
-			...branches(s, "anyOf"),
-		].some(nullable);
+			...branches(s, "allOf", at),
+			...branches(s, "oneOf", at),
+			...branches(s, "anyOf", at),
+		].some((b) => nullable(b, at));
 
-	const walk = (raw: unknown, v: unknown, at: string, out: Set<string>) => {
-		const s = deref(raw);
+	const walk = (raw: unknown, v: unknown, at: string, found: Set<string>) => {
+		const s = resolve(raw, at);
+		if (!s) return;
 		if (v === null) {
-			if (!nullable(s)) out.add(`undeclared null: ${at}`);
+			if (!nullable(s, at)) found.add(`undeclared null: ${at}`);
 			return;
 		}
-		const alternatives = [...branches(s, "oneOf"), ...branches(s, "anyOf")];
+		const alternatives = [
+			...branches(s, "oneOf", at),
+			...branches(s, "anyOf", at),
+		];
 		if (alternatives.length) {
 			const tries = alternatives.map((b) => {
-				const found = new Set<string>();
-				walk(b, v, at, found);
-				return found;
+				const f = new Set<string>();
+				walk(b, v, at, f);
+				return f;
 			});
-			const best = tries.reduce((a, b) => (b.size < a.size ? b : a));
-			for (const f of best) out.add(f);
+			for (const f of tries.reduce((a, b) => (b.size < a.size ? b : a)))
+				found.add(f);
 			return;
 		}
-		const parts = [s, ...branches(s, "allOf")];
-		const enums = parts.flatMap((p) => (Array.isArray(p.enum) ? [p.enum] : []));
-		for (const e of enums)
-			if (!e.includes(v))
-				out.add(`value not in enum: ${at} = ${JSON.stringify(v)}`);
+		const parts = [s, ...branches(s, "allOf", at)];
+		for (const p of parts)
+			if (Array.isArray(p.enum) && !p.enum.includes(v))
+				found.add(`value not in enum: ${at} = ${JSON.stringify(v)}`);
 		if (Array.isArray(v)) {
 			const items = parts.find((p) => "items" in p)?.items;
 			if (items !== undefined)
-				for (const item of v) walk(items, item, `${at}[]`, out);
+				for (const item of v) walk(items, item, `${at}[]`, found);
+			else if (v.length)
+				found.add(`undeclared items: ${at}[] (the schema declares none)`);
 			return;
 		}
 		if (!isObject(v)) return;
@@ -97,18 +115,21 @@ export function undeclaredInServed(
 		const extra = parts.find(
 			(p) => "additionalProperties" in p,
 		)?.additionalProperties;
-		const declaresShape =
-			parts.some((p) => isObject(p.properties)) || extra !== undefined;
-		if (!declaresShape) return;
+		if (!parts.some((p) => isObject(p.properties)) && extra === undefined) {
+			if (Object.keys(v).length)
+				found.add(
+					`undeclared shape: ${at} (the schema declares no properties)`,
+				);
+			return;
+		}
 		for (const [key, child] of Object.entries(v)) {
 			if (Object.hasOwn(props, key))
-				walk(props[key], child, `${at}.${key}`, out);
-			else if (isObject(extra)) walk(extra, child, `${at}{}`, out);
-			else if (extra !== true) out.add(`undeclared field: ${at}.${key}`);
+				walk(props[key], child, `${at}.${key}`, found);
+			else if (isObject(extra)) walk(extra, child, `${at}{}`, found);
+			else if (extra !== true) found.add(`undeclared field: ${at}.${key}`);
 		}
 	};
 
-	const out = new Set<string>();
 	walk(schema, value, "$", out);
 	return [...out].sort();
 }

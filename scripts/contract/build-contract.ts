@@ -23,7 +23,8 @@
  * entry fails (checked in the workflow). --check also holds the consumer
  * safety promises (consumer-safety.ts): every non-GET operation declares
  * x-side-effecting, and no operationId on the base branch disappears unless
- * the changelog marks it BREAKING. The daily live checks
+ * a changelog entry at the new version announces it as
+ * `BREAKING: <operationId>`. The daily live checks
  * (check-api-drift.ts field coverage) remain the backstop for data/deploy
  * drift that PR-time can't see.
  */
@@ -109,7 +110,7 @@ function consumerSafetyProblems(): { problems: string[]; base?: string } {
 		API_VERSION,
 	))
 		problems.push(
-			`operationId ${id} is in ${base.at} and not in this spec: a removal or rename breaks every consumer keyed on it. Keep it, or add a changelog entry at spec@${API_VERSION} that names ${id} and says BREAKING`,
+			`operationId ${id} is in ${base.at} and not in this spec: a removal or rename breaks every consumer keyed on it. Keep it, or announce it in a changelog entry at spec@${API_VERSION} as "BREAKING: ${id}"`,
 		);
 	return { problems, base: base.at };
 }
@@ -152,7 +153,7 @@ function main() {
 			process.exit(1);
 		}
 		console.log(
-			`✓ consumer safety: every non-GET operation declares x-side-effecting; every operationId in ${base} is served or announced BREAKING`,
+			`✓ consumer safety: every non-GET operation declares x-side-effecting; every operationId in ${base} is served or announced as BREAKING: <operationId>`,
 		);
 		return;
 	}

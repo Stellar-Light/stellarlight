@@ -143,8 +143,9 @@ describe("GET /api/hackathons/review", () => {
 		expect(r.pitch.idea).toBe("TollPay. Stripe for MCP servers.");
 	});
 
-	it("the spec declares every field and every null it serves", async () => {
-		// review.pitch is the scfPitch report, checked in scf-pitch.test.ts.
+	it("declares every served field and null of the review; the pitch is mocked here", async () => {
+		// review.pitch is the scfPitch report, served as built: the real one
+		// is checked against this schema in scf-pitch.test.ts.
 		const { body } = await get("link=github.com/rajkaria/toll");
 		expect(
 			undeclaredInServed(
