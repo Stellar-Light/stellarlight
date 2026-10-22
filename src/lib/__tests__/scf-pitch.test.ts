@@ -1,13 +1,35 @@
 import { describe, expect, it, vi } from "vitest";
 import { computeEcosystemGaps, GAP_PROJECT_SELECT } from "@/lib/ecosystem-gaps";
+import { buildHackathonBrief } from "@/lib/hackathon-brief";
+import type { IndexedBuild } from "@/lib/hackathon-builds";
+import { spec } from "@/lib/openapi-spec";
 import {
 	buildScfPitch,
 	countWentQuiet,
 	fundedInVertical,
 } from "@/lib/scf-pitch";
+import {
+	responseSchema,
+	undeclaredInServed,
+} from "../../../scripts/contract/served-shape";
 
 vi.mock("@/lib/scf-rounds", () => ({
 	fetchScfRounds: vi.fn(async () => ({ roundsInProgress: [] })),
+}));
+// The submissions index the prior-art search reads; an Error fails the read.
+let buildsIndex: IndexedBuild[] | Error = [];
+vi.mock("@/lib/hackathon-builds", async (orig) => ({
+	...(await orig<typeof import("@/lib/hackathon-builds")>()),
+	getHackathonBuildsIndex: vi.fn(async () => {
+		if (buildsIndex instanceof Error) throw buildsIndex;
+		return buildsIndex;
+	}),
+}));
+vi.mock("@/lib/hackathon-build-semantic", async (orig) => ({
+	...(await orig<typeof import("@/lib/hackathon-build-semantic")>()),
+	semanticBuildScores: vi.fn(
+		async () => new Map([["dorahacks-buidl-1", 0.82]]),
+	),
 }));
 
 describe("funded peers count every funded project", () => {
@@ -96,5 +118,98 @@ describe("funding without a vertical", () => {
 			fundedProjects: 0,
 			totalAwardedUSD: 0,
 		});
+	});
+});
+
+// scfPitch's report, reviewSubmission's review.pitch and hackathonBrief's
+// report all serve this vet block; the spec declared none of priorArt.builds,
+// buildsMode or competitors.projects[].via (contract audit, 2026-10-20).
+describe("the spec declares the vet block every composite serves", () => {
+	const project = (
+		slug: string,
+		types: string[],
+		shortDescription: string,
+	) => ({
+		slug,
+		name: slug,
+		status: "Live",
+		types,
+		prominence: 0,
+		shortDescription,
+	});
+	const rows = [
+		project("lendco", ["Lending"], "A lending protocol for stablecoins."),
+		project("stabledesk", ["Wallet"], "A stablecoin lending desk."),
+	];
+	const payload = {
+		find: async ({ collection }: { collection: string }) =>
+			collection === "projects"
+				? { docs: structuredClone(rows), totalDocs: rows.length }
+				: { docs: [], totalDocs: 0 },
+	} as never;
+	const winner: IndexedBuild = {
+		id: "dorahacks-buidl-1",
+		name: "StableLend",
+		description: "A lending protocol for stablecoins on Soroban.",
+		githubUrl: "https://github.com/acme/stablelend",
+		demoUrl: null,
+		videoUrl: null,
+		track: null,
+		hackathonPlacement: "1st Place",
+		award: null,
+		isWinner: true,
+		voteCount: null,
+		url: "https://dorahacks.io/buidl/1",
+		source: "dorahacks",
+		hackathon: { title: "Stellar Hacks", slug: "hacks", endedAt: "2026-04-13" },
+		haystack: "stablelend a lending protocol for stablecoins on soroban.",
+		project: { slug: "lendco", name: "lendco", status: "Live" },
+	};
+	const undeclared = (path: string, body: unknown) =>
+		undeclaredInServed(spec, responseSchema(spec, path), body);
+	const served = async () => {
+		const pitch = await buildScfPitch(
+			payload,
+			"lending protocol for stablecoins",
+		);
+		const brief = await buildHackathonBrief(
+			payload,
+			"lending protocol for stablecoins",
+		);
+		return {
+			pitch,
+			undeclared: {
+				scfPitch: undeclared("/api/scf-pitch", { report: pitch }),
+				reviewSubmission: undeclared("/api/hackathons/review", {
+					review: { pitch },
+				}),
+				hackathonBrief: undeclared("/api/hackathon-brief", { report: brief }),
+			},
+		};
+	};
+	const none = { scfPitch: [], reviewSubmission: [], hackathonBrief: [] };
+
+	it("with builds found by meaning and both routes to a competitor", async () => {
+		buildsIndex = [winner];
+		const { pitch, undeclared } = await served();
+		// The fixture reaches every field the audit named.
+		expect(pitch.vet.competitors.projects.map((p) => p.via)).toEqual([
+			"vertical",
+			"scored",
+		]);
+		expect(pitch.vet.priorArt.buildsMode).toBe("hybrid");
+		expect(pitch.vet.priorArt.builds?.[0]).toMatchObject({
+			id: "dorahacks-buidl-1",
+			similarity: 0.82,
+		});
+		expect(undeclared).toEqual(none);
+	});
+
+	it("with the submissions index unreadable", async () => {
+		buildsIndex = new Error("store down");
+		const { pitch, undeclared } = await served();
+		expect(pitch.vet.priorArt.builds).toBeNull();
+		expect(pitch.vet.priorArt.buildsMode).toBeNull();
+		expect(undeclared).toEqual(none);
 	});
 });

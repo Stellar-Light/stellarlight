@@ -1,6 +1,11 @@
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
+import { spec } from "@/lib/openapi-spec";
+import {
+	responseSchema,
+	undeclaredInServed,
+} from "../../../../../../scripts/contract/served-shape";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 const stored = {
@@ -136,6 +141,18 @@ describe("GET /api/hackathons/review", () => {
 			shareOfSubmissions: 0.667,
 		});
 		expect(r.pitch.idea).toBe("TollPay. Stripe for MCP servers.");
+	});
+
+	it("the spec declares every field and every null it serves", async () => {
+		// review.pitch is the scfPitch report, checked in scf-pitch.test.ts.
+		const { body } = await get("link=github.com/rajkaria/toll");
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/review"),
+				body,
+			),
+		).toEqual([]);
 	});
 
 	it("answers 400 without a link and 404 for one it does not hold", async () => {

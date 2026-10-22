@@ -482,6 +482,11 @@ const VET_BLOCK_SCHEMA = {
 									"The project's directory status, read live with this response; not dated per row.",
 							},
 							types: { type: "array", items: { type: "string" } },
+							via: {
+								type: "string",
+								description:
+									"How the row qualified: vertical = a typed member of the idea's vertical; scored = it matched the idea's own words. Absent when the idea maps to no vertical.",
+							},
 						},
 					},
 				},
@@ -498,6 +503,39 @@ const VET_BLOCK_SCHEMA = {
 		priorArt: {
 			type: "object",
 			properties: {
+				builds: {
+					type: "array",
+					nullable: true,
+					description:
+						"null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it.",
+					items: {
+						type: "object",
+						properties: {
+							id: { type: "string" },
+							name: { type: "string" },
+							hackathon: { type: "string" },
+							placement: { type: "string", nullable: true },
+							isWinner: { type: "boolean" },
+							githubUrl: { type: "string", nullable: true },
+							matchedTerms: {
+								type: "array",
+								items: { type: "string" },
+							},
+							similarity: {
+								type: "number",
+								description:
+									"Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run.",
+							},
+						},
+					},
+				},
+				buildsMode: {
+					type: "string",
+					nullable: true,
+					enum: [...BUILD_SEARCH_MODES],
+					description:
+						"The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.",
+				},
 				repos: {
 					type: "array",
 					items: {
@@ -4788,6 +4826,9 @@ export const spec: OpenAPISpec = {
 		"/api/partners/match": {
 			post: {
 				operationId: "matchPartners",
+				// Only reads published partners and ranks them; writes nothing
+				// beyond the usage log every route keeps.
+				"x-side-effecting": false,
 				"x-routing": {
 					purpose:
 						"Rank published partners against a plain-language builder need, each with a one-line reason.",
@@ -10543,6 +10584,22 @@ export const spec: OpenAPISpec = {
 										description:
 											"Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept.",
 									},
+									winners: {
+										type: "integer",
+										description: "The number of rows in `winners`.",
+									},
+									outcomes: {
+										type: "object",
+										nullable: true,
+										description:
+											"Submissions by status after the event, summing to totalSubmissions; null when no submission list is held. Only submissions that are directory projects carry a status; DoraHacks submissions are not classified, so on a DoraHacks event built, inProgress and abandoned are 0 and unknown counts every submission. `profile` says what they became.",
+										properties: {
+											built: { type: "integer" },
+											inProgress: { type: "integer" },
+											abandoned: { type: "integer" },
+											unknown: { type: "integer" },
+										},
+									},
 								},
 							},
 						},
@@ -10592,13 +10649,15 @@ export const spec: OpenAPISpec = {
 								},
 								voteCount: {
 									type: "integer",
+									nullable: true,
 									description:
-										"Always 0 since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability — never read as 'zero votes'.",
+										"null on every row since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability; null is unknown, never zero votes.",
 								},
 								source: {
 									type: "string",
 									description: "'dorahacks' for live rows.",
 								},
+								security: BUILD_HOLD_SCHEMA,
 								project: BUILD_PROJECT_SCHEMA,
 								...BUILD_AFTER_EVENT_PROPERTIES,
 								slug: {
@@ -10612,6 +10671,35 @@ export const spec: OpenAPISpec = {
 									nullable: true,
 									description:
 										"Curated roster rows: whether the linked directory project has an SCF award on record (scf.awarded); null when the winner links no project on record or that project has no SCF record. Stored DoraHacks winners carry this as project.scfAwarded.",
+								},
+								shortDescription: {
+									type: "string",
+									nullable: true,
+									description:
+										"Curated roster and directory rows: the project's one-line description. DoraHacks rows carry `description` instead.",
+								},
+								category: {
+									type: "string",
+									nullable: true,
+									description:
+										"Directory rows: the project's directory category; null on curated roster rows.",
+								},
+								hackathonStatus: {
+									type: "string",
+									nullable: true,
+									description:
+										"Directory rows: the project's status after the event (Built, In Progress or Abandoned); null when none is recorded, and on curated roster rows.",
+								},
+								hackathonPrizeTrack: {
+									type: "string",
+									nullable: true,
+									description:
+										"Directory rows: the prize track the project placed in; null when none is recorded, and on curated roster rows. DoraHacks rows carry `track`.",
+								},
+								builder: {
+									type: "string",
+									description:
+										"Curated roster rows: who built it, as the roster names them; absent when it names no one.",
 								},
 							},
 						},

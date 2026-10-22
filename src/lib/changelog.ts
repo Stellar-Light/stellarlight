@@ -31,6 +31,26 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.89",
+		type: "fixed",
+		summary:
+			"The spec now declares the fields and nulls getHackathon, scfPitch, hackathonBrief and reviewSubmission served without a declaration: winners[].voteCount is nullable (it is null on every row), getHackathon declares stats.winners and stats.outcomes, and the vet block declares priorArt.builds, priorArt.buildsMode and competitors.projects[].via.",
+		detail:
+			"Response data is unchanged; the contract now says what the API already served. Checked against 46 live responses on 1.9.87 (all 27 events, 8 ideas each on scfPitch and hackathonBrief, 3 review links) and against the route code; getHackathon's hackathon object and its submissions and tracks rows stay open maps, which allow any field. getHackathon: voteCount was typed a non-nullable integer, described as always 0, while every row serves null because DoraHacks no longer exposes votes. stats.winners is the number of winners rows. stats.outcomes counts submissions by status after the event and is null with no submission list; DoraHacks submissions are not classified, so on a DoraHacks event built, inProgress and abandoned are 0 and every submission counts as unknown. Winner rows also declare security (served when the repo is held for malware, as on submissions) and the curated roster's shortDescription, category, hackathonStatus, hackathonPrizeTrack and builder. The vet block in scfPitch's report, hackathonBrief's report and reviewSubmission's review.pitch now declares priorArt.builds and buildsMode as vetIdea does, and competitors.projects[].via: vertical or scored, absent when the idea maps to no vertical.",
+	},
+	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.89",
+		type: "changed",
+		summary:
+			"matchPartners declares x-side-effecting false: it ranks published partners and writes nothing. Every non-GET operation now says whether a call does more than answer.",
+		detail:
+			"matchPartners carried no flag, which a consumer had to read as safe. The contract check now fails a spec in which a non-GET operation leaves the flag out, or in which an operationId on the base branch is gone, removed or renamed, without a changelog entry at the new spec version that names it and says BREAKING.",
+	},
+	{
 		date: "2026-10-20",
 		surfaces: ["api"],
 		version: "spec@1.9.87",

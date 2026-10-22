@@ -1602,6 +1602,15 @@ export interface components {
                     winnersNote?: string | null;
                     /** @description Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. */
                     coverageNote?: string | null;
+                    /** @description The number of rows in `winners`. */
+                    winners?: number;
+                    /** @description Submissions by status after the event, summing to totalSubmissions; null when no submission list is held. Only submissions that are directory projects carry a status; DoraHacks submissions are not classified, so on a DoraHacks event built, inProgress and abandoned are 0 and unknown counts every submission. `profile` says what they became. */
+                    outcomes?: {
+                        built?: number;
+                        inProgress?: number;
+                        abandoned?: number;
+                        unknown?: number;
+                    } | null;
                 };
             } & {
                 [key: string]: unknown;
@@ -1627,10 +1636,15 @@ export interface components {
                 videoUrl?: string | null;
                 /** @description The submission's DoraHacks buidl page. */
                 url?: string;
-                /** @description Always 0 since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability — never read as 'zero votes'. */
-                voteCount?: number;
+                /** @description null on every row since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability; null is unknown, never zero votes. */
+                voteCount?: number | null;
                 /** @description 'dorahacks' for live rows. */
                 source?: string;
+                /** @description Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe. */
+                security?: {
+                    held?: boolean;
+                    note?: string;
+                };
                 /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                 project?: {
                     slug: string;
@@ -1667,6 +1681,16 @@ export interface components {
                 slug?: string | null;
                 /** @description Curated roster rows: whether the linked directory project has an SCF award on record (scf.awarded); null when the winner links no project on record or that project has no SCF record. Stored DoraHacks winners carry this as project.scfAwarded. */
                 scfAwarded?: boolean | null;
+                /** @description Curated roster and directory rows: the project's one-line description. DoraHacks rows carry `description` instead. */
+                shortDescription?: string | null;
+                /** @description Directory rows: the project's directory category; null on curated roster rows. */
+                category?: string | null;
+                /** @description Directory rows: the project's status after the event (Built, In Progress or Abandoned); null when none is recorded, and on curated roster rows. */
+                hackathonStatus?: string | null;
+                /** @description Directory rows: the prize track the project placed in; null when none is recorded, and on curated roster rows. DoraHacks rows carry `track`. */
+                hackathonPrizeTrack?: string | null;
+                /** @description Curated roster rows: who built it, as the roster names them; absent when it names no one. */
+                builder?: string;
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
@@ -4288,6 +4312,8 @@ export interface operations {
                                             /** @description The project's directory status, read live with this response; not dated per row. */
                                             status?: string | null;
                                             types?: string[];
+                                            /** @description How the row qualified: vertical = a typed member of the idea's vertical; scored = it matched the idea's own words. Absent when the idea maps to no vertical. */
+                                            via?: string;
                                         }[];
                                     };
                                     maturity?: {
@@ -4296,6 +4322,23 @@ export interface operations {
                                         basis?: string;
                                     };
                                     priorArt?: {
+                                        /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                        builds?: {
+                                            id?: string;
+                                            name?: string;
+                                            hackathon?: string;
+                                            placement?: string | null;
+                                            isWinner?: boolean;
+                                            githubUrl?: string | null;
+                                            matchedTerms?: string[];
+                                            /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
+                                            similarity?: number;
+                                        }[] | null;
+                                        /**
+                                         * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.
+                                         * @enum {string|null}
+                                         */
+                                        buildsMode?: "keyword" | "meaning" | "hybrid" | null;
                                         repos?: {
                                             fullName?: string;
                                             hackathonWinner?: boolean;
@@ -5111,6 +5154,8 @@ export interface operations {
                                         /** @description The project's directory status, read live with this response; not dated per row. */
                                         status?: string | null;
                                         types?: string[];
+                                        /** @description How the row qualified: vertical = a typed member of the idea's vertical; scored = it matched the idea's own words. Absent when the idea maps to no vertical. */
+                                        via?: string;
                                     }[];
                                 };
                                 maturity?: {
@@ -5119,6 +5164,23 @@ export interface operations {
                                     basis?: string;
                                 };
                                 priorArt?: {
+                                    /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                    builds?: {
+                                        id?: string;
+                                        name?: string;
+                                        hackathon?: string;
+                                        placement?: string | null;
+                                        isWinner?: boolean;
+                                        githubUrl?: string | null;
+                                        matchedTerms?: string[];
+                                        /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
+                                        similarity?: number;
+                                    }[] | null;
+                                    /**
+                                     * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.
+                                     * @enum {string|null}
+                                     */
+                                    buildsMode?: "keyword" | "meaning" | "hybrid" | null;
                                     repos?: {
                                         fullName?: string;
                                         hackathonWinner?: boolean;
@@ -5207,6 +5269,8 @@ export interface operations {
                                         /** @description The project's directory status, read live with this response; not dated per row. */
                                         status?: string | null;
                                         types?: string[];
+                                        /** @description How the row qualified: vertical = a typed member of the idea's vertical; scored = it matched the idea's own words. Absent when the idea maps to no vertical. */
+                                        via?: string;
                                     }[];
                                 };
                                 maturity?: {
@@ -5215,6 +5279,23 @@ export interface operations {
                                     basis?: string;
                                 };
                                 priorArt?: {
+                                    /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                    builds?: {
+                                        id?: string;
+                                        name?: string;
+                                        hackathon?: string;
+                                        placement?: string | null;
+                                        isWinner?: boolean;
+                                        githubUrl?: string | null;
+                                        matchedTerms?: string[];
+                                        /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
+                                        similarity?: number;
+                                    }[] | null;
+                                    /**
+                                     * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.
+                                     * @enum {string|null}
+                                     */
+                                    buildsMode?: "keyword" | "meaning" | "hybrid" | null;
                                     repos?: {
                                         fullName?: string;
                                         hackathonWinner?: boolean;
