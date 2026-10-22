@@ -87,9 +87,9 @@ the diff and the evidence it needed.
   - `gh pr create --repo Stellar-Light/stellarlight --base main --head fix/dead-prior-art-claims --title "fix(pitch, brief): null funding without a vertical; dead means dormant or archived" --body-file pr-dead.md`
     opened #1842.
 
-- 2026-10-21, the merge train (orch; times are GitHub's merge times,
-  which can differ by a second from the commit timestamps). Each merge
-  followed
+- 2026-10-21, the merge train (orch; times are the squash commits'
+  timestamps from `git log`; GitHub's `mergedAt` can be a second later).
+  Each merge followed
   `gh api repos/Stellar-Light/stellarlight/commits/<head>/check-runs`
   reading every run completed and success, <head> being the commit each
   command below pins:
@@ -99,7 +99,7 @@ the diff and the evidence it needed.
     merged as ee5e9ca3.
   - 18:57:34 UTC (orch): `gh pr merge 1847 --repo Stellar-Light/stellarlight --squash --match-head-commit 1428218c65a15fc0f3ed1be9fd7a64fed068c7b5`;
     merged as 605e4df6.
-  - 19:00:13 UTC (orch): `gh pr merge 1845 --repo Stellar-Light/stellarlight --squash --match-head-commit ee099a661c101451d84dd1c0f5c7471f96b71db7`;
+  - 19:00:12 UTC (orch): `gh pr merge 1845 --repo Stellar-Light/stellarlight --squash --match-head-commit ee099a661c101451d84dd1c0f5c7471f96b71db7`;
     merged as 8568ac17 (main merged into the branch first).
   - 19:04:37 UTC (orch): `gh pr merge 1846 --repo Stellar-Light/stellarlight --squash --match-head-commit e4d1a9389416b9aec504c87bdfedbddb328845b2`;
     merged as 9ddf4ebd (main merged into the branch first).
@@ -116,9 +116,9 @@ the diff and the evidence it needed.
   and `pnpm raven:gate --raven <clone>` ACCEPT at that version. Merged
   with `--match-head-commit` as above:
   - #1840 to 1.9.85 at d3d302ca76986774e473bb8754d6c82a2e4a9a96 (vitest
-    passing; the log kept no count); merged as 31c940fb at 19:09:15.
+    passing; the log kept no count); merged as 31c940fb at 19:09:14.
   - #1841 to 1.9.86 at 740b6c0ebc7623dfd8092c7662374b3c9f75c624 (vitest
-    2243 passed); merged as f4c3ac3d at 19:14:14.
+    2243 passed); merged as f4c3ac3d at 19:14:13.
   - #1842 to 1.9.87 at 06a5691479e29d70ef979a57cd39104b6115e9c7 (vitest
     2246 passed), its changelog naming reviewSubmission (it serves the
     whole ScfPitchReport) and typed changed; merged as e8f6e4bb at
