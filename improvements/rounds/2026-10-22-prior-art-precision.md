@@ -107,3 +107,105 @@ by rarity helps only on the holdout (4 fewer wrong, no same-idea lost),
 fixes no probe, and drops one same-idea build on the short-idea set. i01's
 Delibera uses every word of the idea and scores 0.788 by meaning, so a
 floor high enough to remove it also drops same-idea builds on other ideas. Moved to `improvements/TODO.md` Now 9.
+
+## Part 2: words need meaning (lane G)
+
+Scope: test, on a fresh labeled set, part 1's lead that when search by
+meaning ran, a build passing only on two matched words should also have a
+meaning score (be among the meaning neighbours). G1: the two-word path
+needs a meaning score; G2: G1 plus the one-word (textShare) path. Keyword
+mode unchanged. Ship criteria fixed in the lane brief before the capture:
+on the fresh set no removed build graded 2, removed grade 0 at least
+removed grade 1, at least one grade-0 build removed; on every earlier set no
+build graded 2 lost.
+
+| lane | model and effort | write set | output |
+| --- | --- | --- | --- |
+| G: words need meaning | Claude Opus 5.5, xhigh | own worktree, branch `lane/g-words-need-meaning` from 9635f6c8: `improvements/audits/2026-10-22-words-need-meaning/`, this ledger (append), one TODO item | a commit on the branch, not pushed; nothing shipped, so no `src/` change |
+
+Fresh ideas written by a separate agent (Claude Sonnet 5.5) not told the
+rule; blind grades from two labelers (Claude Sonnet 5.5, effort high, each
+reading only the sheet).
+
+### Log
+
+- 2026-10-22 (lane G): `git switch -c lane/g-words-need-meaning
+  9635f6c87ccb71a22220b2819d1cab7b44ed377c`; `pnpm install
+  --frozen-lockfile --prefer-offline` exit 0; `pnpm generate:importmap`
+  exit 0.
+- Fresh set copied unchanged to
+  `improvements/audits/2026-10-22-words-need-meaning/fresh-ideas.frozen.json`:
+  sha256 0c8b95f967c908aee6535631bcf643a004419e3a0b947ca7ff49cdd8f5afa3e5,
+  file frozen 2026-10-22T21:26:20Z; 30 ideas, 10 short, 10 medium, 10
+  long.
+- `node improvements/audits/2026-10-22-words-need-meaning/capture.mjs
+  .../fresh-ideas.frozen.json scratchpad/lane-g/live-fresh.json`: exit 0;
+  corpus 1344; every request 200; all 30 ideas served hybrid; whole
+  rankings captured (2 to 310 rows); apiVersion 1.9.91 at 21:30:05Z and
+  1.9.91 at 21:36:57Z.
+- `pnpm exec tsx .../derive.mts scratchpad/lane-g/live-fresh.json
+  .../windows-fresh.json`: vetIdea parity failures 0 of 30; brief parity
+  failures 0 of 30; replayed matched words differ from live on 0 of 1,015
+  rows; the brief's vet block equals vetIdea on 30 of 30. Builds with a
+  meaning score per idea: short 0 to 29 (median 0.5), medium 0 to 123
+  (median 19), long 8 to 289 (median 36.5). f23 (286, lowest 0.694) and f26
+  (289, lowest 0.712) stopped at the 300 cap; f22 (280, lowest 0.681) near
+  it.
+- `pnpm exec tsx .../removals.mts .../windows-fresh.json
+  scratchpad/lane-g/live-fresh.json
+  improvements/audits/2026-10-22-prior-art-precision/labels.json <sheet>
+  <key>`: G1 and G2 remove the same 13 builds (12 from vetIdea's five, 1
+  brief winner slot on f17) and the brief gains 1 (f17); vetIdea lists 101
+  under the current rule and 89 under either; 6 ideas left empty; none on
+  f22, f23 or f26. Sheet of 27 rows (13 removed, 1 gained, 13 kept decoys),
+  seed 20261022, sent for blind labels.
+- `pnpm exec tsx .../evaluate.mts .../windows-fresh.json <no grades> ...`
+  over part 1's earlier sets (before the grades arrived): G1 loses Decrow
+  Finance (graded 2, recurring subscription payments) on the 36 short
+  ideas; G2 loses 39 graded 2 there and Umbra Wallet (graded 2) on the 34
+  test ideas. Both fail the earlier-set criterion whatever the fresh grades.
+- One read-only check, after that and not used to tune:
+  `GET /api/hackathons/builds?q=recurring%20subscription%20payments` on
+  1.9.91 still lists Decrow Finance third with no meaning score;
+  `mode=meaning` scores 7 builds for the idea.
+- Grades returned (two labelers, agreement 25 of 27, both disagreements
+  kept decoys on f17), joined by sheet row with the key's status into
+  `grades.json`. `pnpm exec tsx .../evaluate.mts
+  .../windows-fresh.json .../grades.json labeler1|labeler2
+  improvements/audits/2026-10-22-prior-art-precision`: removed 0 graded 2,
+  6 graded 1, 7 graded 0 under both labelers; brief gain graded 0; decoys
+  0 / 11 / 2 (labeler 1) and 0 / 9 / 4 (labeler 2). Fresh criteria pass
+  for G1 and G2; earlier sets fail both.
+- `npx biome check --linter-enabled=false --write` on the new scripts and
+  JSON (not the frozen file); a rerun of derive, removals and both
+  evaluate runs reproduced every committed output (derive.txt and the
+  evaluate files byte for byte, the window data equal once parsed).
+- Checks: `pnpm exec tsc --noEmit -p tsconfig.json` exit 0; `npx vitest
+  run src/lib/__tests__ src/app/api` exit 0, 178 files and 2225 tests
+  (tests/int/api.int.spec.ts not run: it needs a Payload secret).
+- TODO Now 10 probe rechecked at 23:15Z on 1.9.91: `GET /api/vet-idea?q=
+  marketplace for renting out tools and equipment with deposits held in
+  escrow contracts` lists LumenSure (`dorahacks-buidl-46284`) and
+  ContractForge (`dorahacks-buidl-36190`) with matched words and no
+  similarity, `buildsMode` hybrid.
+- Review (Claude Fable 5.1, effort high, fresh context, read-only clone at
+  c0fa6e33): every number recomputed from the committed data matched.
+  GATE: push with four low findings, all fixed: a build without a meaning
+  score may also not be embedded yet (coverage was not checked), now said in
+  the README and the queue item's title; the freeze time is as recorded in
+  this log, since git keeps no modification times; a stray line break in
+  this outcome; one awkward README sentence.
+
+### Outcome
+
+Not shipped; nothing in `src/` changed. On the fresh set both candidates
+remove 13 builds, 7 graded 0 and 6 graded 1, none graded 2, under both
+labelers, and the brief swaps a grade-0 winner for a grade-0 build on f17.
+On part 1's 40 ideas G1 removes 4 graded 0 and 3 graded 1 and none graded
+2. But on the 36 short ideas G1 drops Decrow Finance (graded 2): short
+ideas get few meaning scores (7 builds scored for "recurring subscription
+payments"), so a same-idea build matching two words can have none. G2 also
+drops 39 graded 2 there, 38 of them kept by G1 only through the one-word
+path. Only G1 and G2 were measured. Evidence in
+`improvements/audits/2026-10-22-words-need-meaning/`; moved to
+`improvements/TODO.md` Now 10.

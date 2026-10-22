@@ -1,0 +1,5801 @@
+{
+	"about": "Per fresh idea, the rows of the live hybrid ranking the rules read (top 20, plus every winner whose share is at least 0.5), derived by derive.mts from a capture of https://www.stellarlight.xyz. similarity and matched are live; textShare and share are this tree's scorer over the stored corpus. No upstream descriptions.",
+	"apiVersionStart": "1.9.91",
+	"apiVersionEnd": "1.9.91",
+	"capturedFrom": "2026-10-22T21:30:05.042Z",
+	"capturedTo": "2026-10-22T21:36:57.782Z",
+	"corpus": 1344,
+	"ideas": [
+		{
+			"id": "f01",
+			"idea": "stellar domain names",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 34,
+			"rankedCaptured": 34,
+			"rowsWithMeaningScore": 29,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 29,
+			"lowestMeaningScore": 0.68,
+			"meaningCap": null,
+			"liveVetBuilds": ["dorahacks-buidl-46434", "dorahacks-buidl-36302"],
+			"liveBriefBuilds": ["dorahacks-buidl-46434", "dorahacks-buidl-36302"],
+			"liveBriefVetBuilds": ["dorahacks-buidl-46434", "dorahacks-buidl-36302"],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-46434",
+					"name": "Cloakwork",
+					"isWinner": false,
+					"similarity": 0.732,
+					"matched": ["domain"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-36259",
+					"name": "StellarPay",
+					"isWinner": false,
+					"similarity": 0.687,
+					"matched": ["names"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-39945",
+					"name": "AndesMaaS 3.0",
+					"isWinner": true,
+					"matched": ["names"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-36302",
+					"name": "SAMPLED - The Producer and Music Martketplace on Stellar",
+					"isWinner": true,
+					"similarity": 0.703,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-27022",
+					"name": "[ZCDNS.ID] - Free DNS Education: Subdomain Delegation",
+					"isWinner": false,
+					"matched": ["domain"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-37983",
+					"name": "D-Library",
+					"isWinner": false,
+					"matched": ["domain"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-46110",
+					"name": "ZK Paycheck Shield",
+					"isWinner": false,
+					"matched": ["names"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-46304",
+					"name": "ZK AidShield",
+					"isWinner": false,
+					"matched": ["names"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-36064",
+					"name": "Stellar Marketplace",
+					"isWinner": false,
+					"similarity": 0.703,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-46325",
+					"name": "SealedStellar",
+					"isWinner": false,
+					"similarity": 0.702,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-25338",
+					"name": "CreatorFi",
+					"isWinner": false,
+					"similarity": 0.697,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-32695",
+					"name": "Kale Farmers Market",
+					"isWinner": true,
+					"similarity": 0.692,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-39826",
+					"name": "Cosmic Coders",
+					"isWinner": true,
+					"similarity": 0.692,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-41503",
+					"name": "NomadEx",
+					"isWinner": false,
+					"similarity": 0.693,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-42617",
+					"name": "Nova Registry SDK",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-25340",
+					"name": "CelestX",
+					"isWinner": false,
+					"similarity": 0.689,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-28438",
+					"name": "TrustArk",
+					"isWinner": false,
+					"similarity": 0.688,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-42721",
+					"name": "Bear Protocol",
+					"isWinner": false,
+					"similarity": 0.688,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-46241",
+					"name": "HumanVouch",
+					"isWinner": false,
+					"similarity": 0.686,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-46353",
+					"name": "Astraea",
+					"isWinner": false,
+					"similarity": 0.686,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f02",
+			"idea": "pay by voice",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 144,
+			"rankedCaptured": 144,
+			"rowsWithMeaningScore": 1,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 1,
+			"lowestMeaningScore": 0.695,
+			"meaningCap": null,
+			"liveVetBuilds": [],
+			"liveBriefBuilds": [],
+			"liveBriefVetBuilds": [],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-42594",
+					"name": "Eleventts-stellar-x402",
+					"isWinner": false,
+					"similarity": 0.695,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-46476",
+					"name": "BatchGuard ZK: Private Settlement Gate for Real-World Invoices on Stellar",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-36316",
+					"name": "StellarInvoice",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-46109",
+					"name": "Obscura \u2014 Confidential B2B Invoice Settlement & Double-Factoring Fraud Prevention on Stellar",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-46536",
+					"name": "InvoiceVeil",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-41513",
+					"name": "Settler",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-46254",
+					"name": "Privora",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-46468",
+					"name": "Cloakpay",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-24691",
+					"name": "RemittEase AI: Intelligent Cross-Border Finance Platform with Reflector",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-45883",
+					"name": "ProofPay",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-46011",
+					"name": "SettleZK",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-46337",
+					"name": "Payfurt",
+					"isWinner": false,
+					"matched": ["voice"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-42585",
+					"name": "TollPay",
+					"isWinner": true,
+					"matched": ["pay"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-42656",
+					"name": "clevercon",
+					"isWinner": true,
+					"matched": ["pay"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-42807",
+					"name": "RenderGate",
+					"isWinner": true,
+					"matched": ["pay"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-30904",
+					"name": "Stellar Pay",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-41508",
+					"name": "PayStream",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-41512",
+					"name": "Centurion-Pay",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-42703",
+					"name": "Zap402 \u2014 Pay-per-Query AI Agent Marketplace on Stellar",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.5,
+					"share": 0.5
+				}
+			]
+		},
+		{
+			"id": "f03",
+			"idea": "tokenized farmland",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 11,
+			"rankedCaptured": 11,
+			"rowsWithMeaningScore": 0,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 0,
+			"lowestMeaningScore": null,
+			"meaningCap": null,
+			"liveVetBuilds": [],
+			"liveBriefBuilds": [],
+			"liveBriefVetBuilds": [],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-25268",
+					"name": "EazeFi",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-25329",
+					"name": "Stellar Verse",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-36340",
+					"name": "Orion",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-34223",
+					"name": "TerraLedger",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-42159",
+					"name": "Mineral Gateway: Agent-Powered Critical Minerals Traceability on Stellar",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-46062",
+					"name": "BairrouApp! Wallet",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-45392",
+					"name": "ZK Proof-of-Reserves for Stellar",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-46248",
+					"name": "NARTHEX",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-46376",
+					"name": "Surevo Labs",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-46442",
+					"name": "Pool Pass",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-46444",
+					"name": "Confidia",
+					"isWinner": false,
+					"matched": ["tokenized"],
+					"textShare": 0.5,
+					"share": 0.5
+				}
+			]
+		},
+		{
+			"id": "f04",
+			"idea": "DAO grant board",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 16,
+			"rankedCaptured": 16,
+			"rowsWithMeaningScore": 0,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 0,
+			"lowestMeaningScore": null,
+			"meaningCap": null,
+			"liveVetBuilds": ["dorahacks-buidl-27337"],
+			"liveBriefBuilds": ["dorahacks-buidl-27337"],
+			"liveBriefVetBuilds": ["dorahacks-buidl-27337"],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-27337",
+					"name": "deedao",
+					"isWinner": false,
+					"matched": ["dao", "board"],
+					"textShare": 0.6666666666666666,
+					"share": 0.6666666666666666
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-35618",
+					"name": "DeGrant",
+					"isWinner": false,
+					"matched": ["grant"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-36778",
+					"name": "GrantFox",
+					"isWinner": false,
+					"matched": ["grant"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-46171",
+					"name": "GrantDrop",
+					"isWinner": false,
+					"matched": ["grant"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-24565",
+					"name": "DAO Monitor Bot",
+					"isWinner": false,
+					"matched": ["dao"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-30848",
+					"name": "Soroban Community Treasury DAO para Microbecas Transfronterizas",
+					"isWinner": false,
+					"matched": ["dao"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-37320",
+					"name": "AlienFlowSpace DAO",
+					"isWinner": false,
+					"matched": ["dao"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-28426",
+					"name": "Stellar Onboarding Hub",
+					"isWinner": true,
+					"matched": ["board"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-22506",
+					"name": "DeFi-DashBoard",
+					"isWinner": false,
+					"matched": ["board"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-27002",
+					"name": "AI-Powered Blend Risk Dashboard Innovation",
+					"isWinner": false,
+					"matched": ["board"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-30681",
+					"name": "Onboardr(SoroAI)",
+					"isWinner": false,
+					"matched": ["board"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-33711",
+					"name": "Onboard",
+					"isWinner": false,
+					"matched": ["board"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-36752",
+					"name": "Stellar on Boarding Hub",
+					"isWinner": false,
+					"matched": ["board"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-39770",
+					"name": "Decentralized ZK-Leaderboard",
+					"isWinner": false,
+					"matched": ["board"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-46154",
+					"name": "QuestBoard",
+					"isWinner": false,
+					"matched": ["board"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-46493",
+					"name": "Crimate Crisis Dashboard",
+					"isWinner": false,
+					"matched": ["board"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				}
+			]
+		},
+		{
+			"id": "f05",
+			"idea": "game item marketplace",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 13,
+			"rankedCaptured": 13,
+			"rowsWithMeaningScore": 0,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 0,
+			"lowestMeaningScore": null,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-39896",
+				"dorahacks-buidl-36334",
+				"dorahacks-buidl-39855"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-39896",
+				"dorahacks-buidl-36334",
+				"dorahacks-buidl-39855"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-39896",
+				"dorahacks-buidl-36334",
+				"dorahacks-buidl-39855"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-39896",
+					"name": "Poison-Game",
+					"isWinner": false,
+					"matched": ["game", "item"],
+					"textShare": 0.6666666666666666,
+					"share": 0.6666666666666666
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-36334",
+					"name": "VIVO-RUN",
+					"isWinner": false,
+					"matched": ["game", "item"],
+					"textShare": 0.6666666666666666,
+					"share": 0.6666666666666666
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-39855",
+					"name": "NFT DND",
+					"isWinner": false,
+					"matched": ["game", "item"],
+					"textShare": 0.6666666666666666,
+					"share": 0.6666666666666666
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-39622",
+					"name": "xray.games \u2013 The Arcade Evolved | skill proven onchain",
+					"isWinner": true,
+					"matched": ["game"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-14618",
+					"name": "APTOSPACE - NFT Marketplace Website",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-36064",
+					"name": "Stellar Marketplace",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-42435",
+					"name": "Agentic Stellar: x402 Agent Payments Marketplace",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-42534",
+					"name": "Stellar Agent Gateway \u2014 x402 Micropayment Marketplace for AI Agents",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-42650",
+					"name": "Stellar Agent marketplace",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-42678",
+					"name": "Agent Tasks MarketPlace",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-42703",
+					"name": "Zap402 \u2014 Pay-per-Query AI Agent Marketplace on Stellar",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-39897",
+					"name": "DeegaGames ZK",
+					"isWinner": false,
+					"matched": ["game"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-39808",
+					"name": "AlphaDuel - ZK Multiplayer Word Guessing Game",
+					"isWinner": false,
+					"matched": ["game"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				}
+			]
+		},
+		{
+			"id": "f06",
+			"idea": "crop insurance",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 46,
+			"rankedCaptured": 46,
+			"rowsWithMeaningScore": 0,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 0,
+			"lowestMeaningScore": null,
+			"meaningCap": null,
+			"liveVetBuilds": [],
+			"liveBriefBuilds": [],
+			"liveBriefVetBuilds": [],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-25263",
+					"name": "FireBastion - Decentralized Fire Damage Insurance for Homes",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-46284",
+					"name": "LumenSure - Private Proof-Backed Insurance Payouts on Stellar",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-32618",
+					"name": "KaleGuardVaults",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-32658",
+					"name": "KaleShield",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-32713",
+					"name": "Kaleidofi",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42373",
+					"name": "Alusa",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-45999",
+					"name": "ZK Reserve",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-46105",
+					"name": "ClaimProof",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-42585",
+					"name": "TollPay",
+					"isWinner": true,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-42656",
+					"name": "clevercon",
+					"isWinner": true,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-42807",
+					"name": "RenderGate",
+					"isWinner": true,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42534",
+					"name": "Stellar Agent Gateway \u2014 x402 Micropayment Marketplace for AI Agents",
+					"isWinner": false,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-42798",
+					"name": "AXON-Micropayment-Platform-for-Decentralized-AI-Services-DeAI-",
+					"isWinner": false,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-30845",
+					"name": "Calificación Crediticia con IA en Soroban para Microfinanzas Globales",
+					"isWinner": false,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-42087",
+					"name": "StellarPayAgent",
+					"isWinner": false,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-42102",
+					"name": "AgentForge",
+					"isWinner": false,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-42141",
+					"name": "StellarMind",
+					"isWinner": false,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-42161",
+					"name": "Risk Pulse AI",
+					"isWinner": false,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-42305",
+					"name": "AgentMesh",
+					"isWinner": false,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-42406",
+					"name": "Lumen Trust",
+					"isWinner": false,
+					"matched": ["crop"],
+					"textShare": 0.5,
+					"share": 0.5
+				}
+			]
+		},
+		{
+			"id": "f07",
+			"idea": "agent wallet spending limits",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 109,
+			"rankedCaptured": 109,
+			"rowsWithMeaningScore": 25,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 25,
+			"lowestMeaningScore": 0.682,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-42668",
+				"dorahacks-buidl-42540",
+				"dorahacks-buidl-42507",
+				"dorahacks-buidl-42759",
+				"dorahacks-buidl-42606"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-42819",
+				"dorahacks-buidl-42668",
+				"dorahacks-buidl-42540",
+				"dorahacks-buidl-42507",
+				"dorahacks-buidl-42759"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-42668",
+				"dorahacks-buidl-42540",
+				"dorahacks-buidl-42507",
+				"dorahacks-buidl-42759",
+				"dorahacks-buidl-42606"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-42668",
+					"name": "AgentCard",
+					"isWinner": false,
+					"similarity": 0.747,
+					"matched": ["agent", "spending", "limits"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-42540",
+					"name": "Watchdog",
+					"isWinner": false,
+					"similarity": 0.742,
+					"matched": ["agent", "spending", "limits"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-42507",
+					"name": "Stellar Smart Wallets",
+					"isWinner": false,
+					"similarity": 0.724,
+					"matched": ["agent", "wallet", "spending", "limits"],
+					"textShare": 1,
+					"share": 1
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-42759",
+					"name": "SpendGuard - AI Agent Governance",
+					"isWinner": false,
+					"similarity": 0.738,
+					"matched": ["agent", "spending", "limits"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-42606",
+					"name": "AAEK",
+					"isWinner": false,
+					"similarity": 0.714,
+					"matched": ["agent", "wallet", "spending", "limits"],
+					"textShare": 1,
+					"share": 1
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42639",
+					"name": "SpendGuard",
+					"isWinner": false,
+					"similarity": 0.732,
+					"matched": ["agent", "wallet", "limits"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-42616",
+					"name": "OrbitSafe",
+					"isWinner": false,
+					"similarity": 0.71,
+					"matched": ["agent", "wallet", "spending", "limits"],
+					"textShare": 1,
+					"share": 1
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-42800",
+					"name": "Shieldex",
+					"isWinner": false,
+					"similarity": 0.708,
+					"matched": ["agent", "spending", "limits"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-41492",
+					"name": "Agent-Vault-Stellar",
+					"isWinner": false,
+					"similarity": 0.703,
+					"matched": ["agent", "spending", "limits"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-42567",
+					"name": "x402 Autopilot",
+					"isWinner": false,
+					"similarity": 0.705,
+					"matched": ["agent", "wallet", "spending"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-45981",
+					"name": "Prism",
+					"isWinner": false,
+					"similarity": 0.684,
+					"matched": ["agent", "wallet", "spending", "limits"],
+					"textShare": 1,
+					"share": 1
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42611",
+					"name": "StellarGuard",
+					"isWinner": false,
+					"similarity": 0.698,
+					"matched": ["agent", "spending", "limits"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-42819",
+					"name": "Cards402.com",
+					"isWinner": true,
+					"similarity": 0.704,
+					"matched": ["agent", "wallet"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-42412",
+					"name": "Aegis402",
+					"isWinner": false,
+					"matched": ["agent", "spending", "limits"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-42305",
+					"name": "AgentMesh",
+					"isWinner": false,
+					"similarity": 0.699,
+					"matched": ["agent", "spending"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-42799",
+					"name": "AgentPay by Legasi",
+					"isWinner": false,
+					"similarity": 0.698,
+					"matched": ["agent", "limits"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-42644",
+					"name": "SentinelShield",
+					"isWinner": false,
+					"matched": ["agent", "wallet", "spending"],
+					"textShare": 0.75,
+					"share": 0.75
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-45311",
+					"name": "StellarSpend: Private Spending Limits with Zero-Knowledge Proofs",
+					"isWinner": false,
+					"matched": ["spending", "limits"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-46410",
+					"name": "Warrant",
+					"isWinner": false,
+					"matched": ["spending", "limits"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-46485",
+					"name": "Ciphermit",
+					"isWinner": false,
+					"matched": ["spending", "limits"],
+					"textShare": 0.5,
+					"share": 0.5
+				}
+			]
+		},
+		{
+			"id": "f08",
+			"idea": "peso stablecoin",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 129,
+			"rankedCaptured": 129,
+			"rowsWithMeaningScore": 1,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 1,
+			"lowestMeaningScore": 0.687,
+			"meaningCap": null,
+			"liveVetBuilds": ["dorahacks-buidl-46217"],
+			"liveBriefBuilds": ["dorahacks-buidl-46217"],
+			"liveBriefVetBuilds": ["dorahacks-buidl-46217"],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-46217",
+					"name": "Link2Pay",
+					"isWinner": false,
+					"matched": ["peso", "stablecoin"],
+					"textShare": 0.5,
+					"share": 1
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-32676",
+					"name": "ARS Price Arena",
+					"isWinner": true,
+					"matched": ["peso"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-28397",
+					"name": "Pacto",
+					"isWinner": true,
+					"similarity": 0.687,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-28455",
+					"name": "SAVIA",
+					"isWinner": false,
+					"matched": ["peso"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-41512",
+					"name": "Centurion-Pay",
+					"isWinner": false,
+					"matched": ["peso"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-46157",
+					"name": "Passpay",
+					"isWinner": false,
+					"matched": ["peso"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-46202",
+					"name": "Ponte Pay",
+					"isWinner": false,
+					"matched": ["peso"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-36328",
+					"name": "Streamr",
+					"isWinner": true,
+					"matched": ["stablecoin"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-34215",
+					"name": "VETCHAIN",
+					"isWinner": true,
+					"matched": ["stablecoin"],
+					"textShare": 0,
+					"share": 0.5
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-42579",
+					"name": "x402-mcp-stellar-template",
+					"isWinner": true,
+					"matched": ["stablecoin"],
+					"textShare": 0,
+					"share": 0.5
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-42585",
+					"name": "TollPay",
+					"isWinner": true,
+					"matched": ["stablecoin"],
+					"textShare": 0,
+					"share": 0.5
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42656",
+					"name": "clevercon",
+					"isWinner": true,
+					"matched": ["stablecoin"],
+					"textShare": 0,
+					"share": 0.5
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-46474",
+					"name": "Tukar",
+					"isWinner": true,
+					"matched": ["stablecoin"],
+					"textShare": 0,
+					"share": 0.5
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-46108",
+					"name": "Zebra \u2014 Confidential Stablecoin Payroll on Stellar (Compliant Privacy for the Web3 Workforce)",
+					"isWinner": false,
+					"matched": ["stablecoin"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-24491",
+					"name": "Abroad",
+					"isWinner": false,
+					"matched": ["stablecoin"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-33711",
+					"name": "Onboard",
+					"isWinner": false,
+					"matched": ["stablecoin"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-42669",
+					"name": "CriPay",
+					"isWinner": false,
+					"matched": ["stablecoin"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-36748",
+					"name": "Trustless Work",
+					"isWinner": false,
+					"matched": ["stablecoin"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-37932",
+					"name": "Why Stellar Feels Boring",
+					"isWinner": false,
+					"matched": ["stablecoin"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-38001",
+					"name": "Dolaro Calamaro USDC",
+					"isWinner": false,
+					"matched": ["stablecoin"],
+					"textShare": 0,
+					"share": 0.5
+				}
+			]
+		},
+		{
+			"id": "f09",
+			"idea": "refugee aid vouchers",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 2,
+			"rankedCaptured": 2,
+			"rowsWithMeaningScore": 0,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 0,
+			"lowestMeaningScore": null,
+			"meaningCap": null,
+			"liveVetBuilds": [],
+			"liveBriefBuilds": [],
+			"liveBriefVetBuilds": [],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-46304",
+					"name": "ZK AidShield",
+					"isWinner": false,
+					"matched": ["aid"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-46471",
+					"name": "AidShield",
+					"isWinner": false,
+					"matched": ["aid"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				}
+			]
+		},
+		{
+			"id": "f10",
+			"idea": "wallet recovery guardians",
+			"length": "short",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 17,
+			"rankedCaptured": 17,
+			"rowsWithMeaningScore": 3,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 3,
+			"lowestMeaningScore": 0.681,
+			"meaningCap": null,
+			"liveVetBuilds": ["dorahacks-buidl-36325"],
+			"liveBriefBuilds": ["dorahacks-buidl-36325"],
+			"liveBriefVetBuilds": ["dorahacks-buidl-36325"],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-36325",
+					"name": "PayPulse: Offline-First Bluetooth Payments on Stellar",
+					"isWinner": false,
+					"matched": ["wallet", "recovery"],
+					"textShare": 0.6666666666666666,
+					"share": 0.6666666666666666
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-39631",
+					"name": "Treasure Recovery",
+					"isWinner": false,
+					"matched": ["recovery"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-32681",
+					"name": "Risk Guardian",
+					"isWinner": false,
+					"matched": ["guardians"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-42820",
+					"name": "MyIP Guardian |  Agent-payable IP protection on Stellar (x402)",
+					"isWinner": false,
+					"matched": ["guardians"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-45643",
+					"name": "PayOrder W3 Guardian",
+					"isWinner": false,
+					"matched": ["guardians"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42662",
+					"name": "Ai2wallet",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-46541",
+					"name": "Umbra Wallet",
+					"isWinner": true,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-24829",
+					"name": "Nexagrid",
+					"isWinner": false,
+					"similarity": 0.682,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-42507",
+					"name": "Stellar Smart Wallets",
+					"isWinner": false,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-25289",
+					"name": "NeuralWallet",
+					"isWinner": false,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-25341",
+					"name": "StellaX AI Wallet",
+					"isWinner": false,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42714",
+					"name": "x402 Smart Wallet - By Sorobanhooks",
+					"isWinner": false,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-46174",
+					"name": "CosmosPay | Wallet & Payment Gateway for Stellar Developers",
+					"isWinner": false,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-46062",
+					"name": "BairrouApp! Wallet",
+					"isWinner": false,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-45901",
+					"name": "Shield-Wallet",
+					"isWinner": false,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-46426",
+					"name": "Stella - Private Payments Wallet",
+					"isWinner": false,
+					"matched": ["wallet"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-42401",
+					"name": "Veil",
+					"isWinner": false,
+					"similarity": 0.682,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f11",
+			"idea": "cheapest route to swap USDC into naira",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 34,
+			"rankedCaptured": 34,
+			"rowsWithMeaningScore": 19,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 19,
+			"lowestMeaningScore": 0.682,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-33711",
+				"dorahacks-buidl-33220",
+				"dorahacks-buidl-27417",
+				"dorahacks-buidl-24491",
+				"dorahacks-buidl-30621"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-33711",
+				"dorahacks-buidl-33220",
+				"dorahacks-buidl-27417",
+				"dorahacks-buidl-24491",
+				"dorahacks-buidl-30621"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-33711",
+				"dorahacks-buidl-33220",
+				"dorahacks-buidl-27417",
+				"dorahacks-buidl-24491",
+				"dorahacks-buidl-30621"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-33711",
+					"name": "Onboard",
+					"isWinner": false,
+					"similarity": 0.717,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-33220",
+					"name": "SwaptoX",
+					"isWinner": false,
+					"similarity": 0.7,
+					"matched": ["route", "swap"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-27417",
+					"name": "Comet x Hoops Finance",
+					"isWinner": true,
+					"similarity": 0.704,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-24491",
+					"name": "Abroad",
+					"isWinner": false,
+					"similarity": 0.706,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-30621",
+					"name": "CashAbroad",
+					"isWinner": false,
+					"similarity": 0.704,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-24804",
+					"name": "Mammon App",
+					"isWinner": false,
+					"similarity": 0.7,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-42666",
+					"name": "MicoPay Protocol",
+					"isWinner": false,
+					"similarity": 0.698,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-38001",
+					"name": "Dolaro Calamaro USDC",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": ["usdc"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-30961",
+					"name": "Mint-Regalos",
+					"isWinner": false,
+					"similarity": 0.693,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-27456",
+					"name": "YieldBack.Cash",
+					"isWinner": true,
+					"similarity": 0.69,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-46478",
+					"name": "Shade",
+					"isWinner": false,
+					"similarity": 0.693,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-30635",
+					"name": "ClearSwap",
+					"isWinner": false,
+					"similarity": 0.688,
+					"matched": ["swap"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-38088",
+					"name": "Stellar Liquidity Intellligence Layer - SLIL",
+					"isWinner": false,
+					"matched": ["route", "swap"],
+					"textShare": 0.2,
+					"share": 0.4
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-18558",
+					"name": "PeerPesa",
+					"isWinner": false,
+					"similarity": 0.691,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-46504",
+					"name": "AnyRamp",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-46330",
+					"name": "cowrie",
+					"isWinner": false,
+					"similarity": 0.689,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-46295",
+					"name": "ShieldPass",
+					"isWinner": false,
+					"similarity": 0.688,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-42608",
+					"name": "Agent Paywall Router",
+					"isWinner": false,
+					"matched": ["route"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-42685",
+					"name": "MPP Router",
+					"isWinner": false,
+					"matched": ["route"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-42756",
+					"name": "RouteDock",
+					"isWinner": false,
+					"matched": ["route"],
+					"textShare": 0.2,
+					"share": 0.2
+				}
+			]
+		},
+		{
+			"id": "f12",
+			"idea": "flash loan liquidation bot for Blend",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 28,
+			"rankedCaptured": 28,
+			"rowsWithMeaningScore": 8,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 8,
+			"lowestMeaningScore": 0.681,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-27451",
+				"dorahacks-buidl-27002",
+				"dorahacks-buidl-27450",
+				"dorahacks-buidl-36320"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-27451",
+				"dorahacks-buidl-27002",
+				"dorahacks-buidl-27450",
+				"dorahacks-buidl-36320"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-27451",
+				"dorahacks-buidl-27002",
+				"dorahacks-buidl-27450",
+				"dorahacks-buidl-36320"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-27451",
+					"name": "Blend Leveraged Positions",
+					"isWinner": false,
+					"similarity": 0.748,
+					"matched": ["flash", "loan", "blend"],
+					"textShare": 0.6,
+					"share": 0.6
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-27002",
+					"name": "AI-Powered Blend Risk Dashboard Innovation",
+					"isWinner": false,
+					"similarity": 0.707,
+					"matched": ["liquidation", "blend"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-27450",
+					"name": "Blend Sentinel",
+					"isWinner": false,
+					"similarity": 0.693,
+					"matched": ["liquidation", "blend"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-36320",
+					"name": "FlashBet",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": ["flash", "loan"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-27454",
+					"name": "BlendScore",
+					"isWinner": false,
+					"similarity": 0.699,
+					"matched": ["blend"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42428",
+					"name": "FLASH",
+					"isWinner": false,
+					"matched": ["flash"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-46559",
+					"name": "PrismZK(PrismFlashZK)",
+					"isWinner": false,
+					"matched": ["flash"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-27438",
+					"name": "Blend Pool Creator",
+					"isWinner": true,
+					"matched": ["blend"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-42748",
+					"name": "Fund402 \u2014 Just-In-Time Loans for AI Agents",
+					"isWinner": false,
+					"matched": ["loan"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-36274",
+					"name": "Loanet",
+					"isWinner": false,
+					"matched": ["loan"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-24565",
+					"name": "DAO Monitor Bot",
+					"isWinner": false,
+					"matched": ["bot"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-38105",
+					"name": "Robots que tributan",
+					"isWinner": false,
+					"matched": ["bot"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-39898",
+					"name": "Human vs Bots",
+					"isWinner": false,
+					"matched": ["bot"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-42746",
+					"name": "Autotrader Bot",
+					"isWinner": false,
+					"matched": ["bot"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-42774",
+					"name": "AutoBooks: The AI CFO That Charges Other Bots for Advice",
+					"isWinner": false,
+					"matched": ["bot"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-42791",
+					"name": "Calypso: x402 Bot Swarm",
+					"isWinner": false,
+					"matched": ["bot"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-27458",
+					"name": "Blend AI Powered Smart Monitoring By Sorobanhooks",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": ["blend"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-27167",
+					"name": "Blendifi",
+					"isWinner": false,
+					"matched": ["blend"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-27171",
+					"name": "BlendMCP",
+					"isWinner": false,
+					"matched": ["blend"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-27237",
+					"name": "Blend Position Manager",
+					"isWinner": false,
+					"matched": ["blend"],
+					"textShare": 0.2,
+					"share": 0.2
+				}
+			]
+		},
+		{
+			"id": "f13",
+			"idea": "tokenized music royalties paid out monthly",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 15,
+			"rankedCaptured": 15,
+			"rowsWithMeaningScore": 14,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 14,
+			"lowestMeaningScore": 0.68,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-36289",
+				"dorahacks-buidl-36328",
+				"dorahacks-buidl-36302",
+				"dorahacks-buidl-30688"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-36289",
+				"dorahacks-buidl-36328",
+				"dorahacks-buidl-36302",
+				"dorahacks-buidl-30688"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-36289",
+				"dorahacks-buidl-36328",
+				"dorahacks-buidl-36302",
+				"dorahacks-buidl-30688"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-36289",
+					"name": "Dropsland",
+					"isWinner": false,
+					"similarity": 0.719,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-36328",
+					"name": "Streamr",
+					"isWinner": true,
+					"similarity": 0.708,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-36302",
+					"name": "SAMPLED - The Producer and Music Martketplace on Stellar",
+					"isWinner": true,
+					"similarity": 0.691,
+					"matched": ["music", "paid"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-30688",
+					"name": "StellarVideos",
+					"isWinner": false,
+					"similarity": 0.706,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-40194",
+					"name": "PoetryVerse",
+					"isWinner": false,
+					"similarity": 0.696,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42806",
+					"name": "Soundstake",
+					"isWinner": false,
+					"similarity": 0.692,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-30964",
+					"name": "StemMarket",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-42689",
+					"name": "Toll",
+					"isWinner": false,
+					"similarity": 0.689,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-34006",
+					"name": "TokenTicket",
+					"isWinner": false,
+					"similarity": 0.689,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-46284",
+					"name": "LumenSure - Private Proof-Backed Insurance Payouts on Stellar",
+					"isWinner": false,
+					"matched": ["out"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-25334",
+					"name": "Celestium",
+					"isWinner": false,
+					"similarity": 0.684,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42524",
+					"name": "Stellar Payment API (PLUTO)",
+					"isWinner": false,
+					"similarity": 0.684,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-46494",
+					"name": "hush 402",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-46520",
+					"name": "Drongo AI",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-33742",
+					"name": "Permamuseum",
+					"isWinner": false,
+					"similarity": 0.68,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f14",
+			"idea": "freelancer marketplace with onchain reputation scores",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 132,
+			"rankedCaptured": 132,
+			"rowsWithMeaningScore": 123,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 123,
+			"lowestMeaningScore": 0.68,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-22963",
+				"dorahacks-buidl-42680",
+				"dorahacks-buidl-26435",
+				"dorahacks-buidl-35590",
+				"dorahacks-buidl-36317"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-22963",
+				"dorahacks-buidl-42680",
+				"dorahacks-buidl-26435",
+				"dorahacks-buidl-35590",
+				"dorahacks-buidl-36317"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-22963",
+				"dorahacks-buidl-42680",
+				"dorahacks-buidl-26435",
+				"dorahacks-buidl-35590",
+				"dorahacks-buidl-36317"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-22963",
+					"name": "web3lancer",
+					"isWinner": false,
+					"similarity": 0.803,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-42680",
+					"name": "Credence",
+					"isWinner": false,
+					"similarity": 0.768,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-26435",
+					"name": "web3lancer app",
+					"isWinner": false,
+					"similarity": 0.766,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-35590",
+					"name": "WorkOn",
+					"isWinner": false,
+					"similarity": 0.755,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-36317",
+					"name": "Secureflow",
+					"isWinner": true,
+					"similarity": 0.734,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-26908",
+					"name": "APT - UTC",
+					"isWinner": false,
+					"similarity": 0.746,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-42678",
+					"name": "Agent Tasks MarketPlace",
+					"isWinner": false,
+					"similarity": 0.72,
+					"matched": ["marketplace"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-46154",
+					"name": "QuestBoard",
+					"isWinner": false,
+					"similarity": 0.738,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-42794",
+					"name": "Agent Rep",
+					"isWinner": false,
+					"similarity": 0.736,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-42711",
+					"name": "Mogause",
+					"isWinner": false,
+					"similarity": 0.736,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-36274",
+					"name": "Loanet",
+					"isWinner": false,
+					"similarity": 0.734,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-30887",
+					"name": "SOLWAGE",
+					"isWinner": false,
+					"similarity": 0.732,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-34609",
+					"name": "dehix",
+					"isWinner": false,
+					"similarity": 0.731,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-42769",
+					"name": "stellar8004.com",
+					"isWinner": false,
+					"similarity": 0.729,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-41515",
+					"name": "Nuup",
+					"isWinner": false,
+					"similarity": 0.728,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-42749",
+					"name": "Lodestar",
+					"isWinner": false,
+					"similarity": 0.727,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-36197",
+					"name": "PromptHash",
+					"isWinner": false,
+					"similarity": 0.726,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-28438",
+					"name": "TrustArk",
+					"isWinner": false,
+					"similarity": 0.725,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-42154",
+					"name": "AgentBazaar",
+					"isWinner": false,
+					"similarity": 0.723,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-42630",
+					"name": "Stellar Autotask",
+					"isWinner": false,
+					"similarity": 0.723,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f15",
+			"idea": "pay per article paywall using micropayments",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 88,
+			"rankedCaptured": 88,
+			"rowsWithMeaningScore": 73,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 73,
+			"lowestMeaningScore": 0.681,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-42523",
+				"dorahacks-buidl-42761",
+				"dorahacks-buidl-42779",
+				"dorahacks-buidl-42585",
+				"dorahacks-buidl-42608"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-42585",
+				"dorahacks-buidl-42807",
+				"dorahacks-buidl-42523",
+				"dorahacks-buidl-42761",
+				"dorahacks-buidl-42779"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-42523",
+				"dorahacks-buidl-42761",
+				"dorahacks-buidl-42779",
+				"dorahacks-buidl-42585",
+				"dorahacks-buidl-42608"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-42523",
+					"name": "StellarRead",
+					"isWinner": false,
+					"similarity": 0.743,
+					"matched": ["pay", "article"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-42761",
+					"name": "StellarRead paywell",
+					"isWinner": false,
+					"similarity": 0.78,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-42779",
+					"name": "PayWall.ai",
+					"isWinner": false,
+					"similarity": 0.716,
+					"matched": ["paywall", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-42585",
+					"name": "TollPay",
+					"isWinner": true,
+					"similarity": 0.715,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-42608",
+					"name": "Agent Paywall Router",
+					"isWinner": false,
+					"similarity": 0.72,
+					"matched": ["pay", "paywall"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42661",
+					"name": "Stellar Resume Analyzer",
+					"isWinner": false,
+					"similarity": 0.722,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-42788",
+					"name": "NyayaMitra AI \u2014 Legal Intelligence MCP Network on Stellar x402",
+					"isWinner": false,
+					"similarity": 0.713,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-42541",
+					"name": "PennyAgent",
+					"isWinner": false,
+					"similarity": 0.709,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-42804",
+					"name": "StellarAgent",
+					"isWinner": false,
+					"similarity": 0.709,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-42807",
+					"name": "RenderGate",
+					"isWinner": true,
+					"similarity": 0.694,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-42713",
+					"name": "ero.",
+					"isWinner": false,
+					"similarity": 0.692,
+					"matched": ["pay", "paywall"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42801",
+					"name": "Pay-per-Query Web Search MCP Server",
+					"isWinner": false,
+					"similarity": 0.722,
+					"matched": ["pay"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-42161",
+					"name": "Risk Pulse AI",
+					"isWinner": false,
+					"similarity": 0.697,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-42780",
+					"name": "solva-mcp",
+					"isWinner": false,
+					"similarity": 0.692,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-42652",
+					"name": "lumens.news",
+					"isWinner": false,
+					"similarity": 0.726,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-42521",
+					"name": "Heekowave",
+					"isWinner": false,
+					"matched": ["pay", "paywall"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-42534",
+					"name": "Stellar Agent Gateway \u2014 x402 Micropayment Marketplace for AI Agents",
+					"isWinner": false,
+					"similarity": 0.689,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-42656",
+					"name": "clevercon",
+					"isWinner": true,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-42664",
+					"name": "Kairos",
+					"isWinner": false,
+					"similarity": 0.687,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-42653",
+					"name": "StellarScope",
+					"isWinner": false,
+					"similarity": 0.686,
+					"matched": ["pay", "micropayments"],
+					"textShare": 0.5,
+					"share": 0.5
+				}
+			]
+		},
+		{
+			"id": "f16",
+			"idea": "AI agent that rebalances my DeFi positions",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 129,
+			"rankedCaptured": 129,
+			"rowsWithMeaningScore": 20,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 20,
+			"lowestMeaningScore": 0.68,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-42789",
+				"dorahacks-buidl-27435",
+				"dorahacks-buidl-30677",
+				"dorahacks-buidl-32593",
+				"dorahacks-buidl-24562"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-32593",
+				"dorahacks-buidl-42789",
+				"dorahacks-buidl-27435",
+				"dorahacks-buidl-30677",
+				"dorahacks-buidl-24562"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-42789",
+				"dorahacks-buidl-27435",
+				"dorahacks-buidl-30677",
+				"dorahacks-buidl-32593",
+				"dorahacks-buidl-24562"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-42789",
+					"name": "Credio Agents",
+					"isWinner": false,
+					"similarity": 0.72,
+					"matched": ["agent", "defi", "positions"],
+					"textShare": 0.6,
+					"share": 0.6
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-27435",
+					"name": "BlendX- Defi Manager for Stellar",
+					"isWinner": false,
+					"similarity": 0.706,
+					"matched": ["rebalances", "defi", "positions"],
+					"textShare": 0.6,
+					"share": 0.6
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-30677",
+					"name": "Verbex",
+					"isWinner": true,
+					"similarity": 0.73,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-32593",
+					"name": "xbid.ai",
+					"isWinner": true,
+					"similarity": 0.708,
+					"matched": ["ai", "agent", "defi"],
+					"textShare": 0.4,
+					"share": 0.6
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-24562",
+					"name": "edwin",
+					"isWinner": false,
+					"similarity": 0.712,
+					"matched": ["ai", "agent", "defi"],
+					"textShare": 0.6,
+					"share": 0.6
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42726",
+					"name": "Flipper on Stellar",
+					"isWinner": false,
+					"similarity": 0.697,
+					"matched": ["ai", "agent", "defi", "positions"],
+					"textShare": 0.8,
+					"share": 0.8
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-42589",
+					"name": "DeFi Copilot",
+					"isWinner": false,
+					"similarity": 0.7,
+					"matched": ["ai", "agent", "defi"],
+					"textShare": 0.6,
+					"share": 0.6
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-42622",
+					"name": "Agentic Ocean",
+					"isWinner": false,
+					"similarity": 0.706,
+					"matched": ["ai", "agent"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-32708",
+					"name": "RebalanceX",
+					"isWinner": false,
+					"similarity": 0.683,
+					"matched": ["rebalances", "defi"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-27409",
+					"name": "Stellar BLend Autopilot",
+					"isWinner": false,
+					"similarity": 0.705,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-23313",
+					"name": "NeoSen AI",
+					"isWinner": false,
+					"similarity": 0.691,
+					"matched": ["ai", "defi"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-24233",
+					"name": "OrbitYield",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": ["ai", "defi"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-27459",
+					"name": "Position-maker",
+					"isWinner": false,
+					"matched": ["defi", "positions"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-27237",
+					"name": "Blend Position Manager",
+					"isWinner": false,
+					"matched": ["defi", "positions"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-42461",
+					"name": "AgentNet",
+					"isWinner": false,
+					"similarity": 0.689,
+					"matched": ["ai", "agent"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-32699",
+					"name": "Stellar Portfolio Rebalancer",
+					"isWinner": false,
+					"similarity": 0.68,
+					"matched": ["rebalances"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-42748",
+					"name": "Fund402 \u2014 Just-In-Time Loans for AI Agents",
+					"isWinner": false,
+					"matched": ["ai", "agent", "defi"],
+					"textShare": 0.4,
+					"share": 0.6
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-42474",
+					"name": "Nulucre Agents",
+					"isWinner": false,
+					"matched": ["ai", "agent", "defi"],
+					"textShare": 0.6,
+					"share": 0.6
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-42734",
+					"name": "AgentGuard",
+					"isWinner": false,
+					"matched": ["ai", "agent", "defi"],
+					"textShare": 0.6,
+					"share": 0.6
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-46414",
+					"name": "PayGuard Agent",
+					"isWinner": false,
+					"matched": ["ai", "agent", "defi"],
+					"textShare": 0.6,
+					"share": 0.6
+				}
+			]
+		},
+		{
+			"id": "f17",
+			"idea": "Soroban contract template generator from plain English",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 48,
+			"rankedCaptured": 48,
+			"rowsWithMeaningScore": 31,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 31,
+			"lowestMeaningScore": 0.68,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-38045",
+				"dorahacks-buidl-25271",
+				"dorahacks-buidl-38062",
+				"dorahacks-buidl-24764",
+				"dorahacks-buidl-27458"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-42579",
+				"dorahacks-buidl-38045",
+				"dorahacks-buidl-25271",
+				"dorahacks-buidl-38062",
+				"dorahacks-buidl-24764"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-38045",
+				"dorahacks-buidl-25271",
+				"dorahacks-buidl-38062",
+				"dorahacks-buidl-24764",
+				"dorahacks-buidl-27458"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-38045",
+					"name": "Sorobai Studio",
+					"isWinner": false,
+					"similarity": 0.726,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-25271",
+					"name": "Soroban to MCP Server in seconds + Policy Signers Playground",
+					"isWinner": true,
+					"similarity": 0.709,
+					"matched": ["soroban", "contract"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-38062",
+					"name": "Qué es Stellar? - Desarrollo en Soroban | Fabian Sanchez",
+					"isWinner": true,
+					"similarity": 0.708,
+					"matched": ["soroban", "contract"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-24764",
+					"name": "Soride",
+					"isWinner": false,
+					"similarity": 0.713,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-27458",
+					"name": "Blend AI Powered Smart Monitoring By Sorobanhooks",
+					"isWinner": false,
+					"similarity": 0.697,
+					"matched": ["soroban", "contract"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42579",
+					"name": "x402-mcp-stellar-template",
+					"isWinner": true,
+					"matched": ["soroban", "contract", "template"],
+					"textShare": 0.3333333333333333,
+					"share": 0.5
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-24772",
+					"name": "Sorobanhooks",
+					"isWinner": false,
+					"similarity": 0.691,
+					"matched": ["soroban", "contract"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-27455",
+					"name": "TrustBridge",
+					"isWinner": false,
+					"similarity": 0.696,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-39850",
+					"name": "Phantom Fleet",
+					"isWinner": false,
+					"matched": ["soroban", "contract", "template"],
+					"textShare": 0.3333333333333333,
+					"share": 0.5
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-38101",
+					"name": "Adelanta",
+					"isWinner": false,
+					"similarity": 0.694,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-38050",
+					"name": "CertiX",
+					"isWinner": false,
+					"similarity": 0.693,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-39922",
+					"name": "RemesaProgramable",
+					"isWinner": false,
+					"similarity": 0.692,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-46105",
+					"name": "ClaimProof",
+					"isWinner": false,
+					"similarity": 0.691,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-46109",
+					"name": "Obscura \u2014 Confidential B2B Invoice Settlement & Double-Factoring Fraud Prevention on Stellar",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-33712",
+					"name": "Micro Lending",
+					"isWinner": false,
+					"similarity": 0.688,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-46418",
+					"name": "AnchorFX",
+					"isWinner": false,
+					"similarity": 0.688,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-40214",
+					"name": "AuthFlow",
+					"isWinner": true,
+					"similarity": 0.687,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-46456",
+					"name": "soroban-zk-std",
+					"isWinner": false,
+					"similarity": 0.682,
+					"matched": ["soroban", "contract"],
+					"textShare": 0.16666666666666666,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-36309",
+					"name": "LumenPass",
+					"isWinner": false,
+					"similarity": 0.687,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-36319",
+					"name": "SoroSocial",
+					"isWinner": false,
+					"similarity": 0.687,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f18",
+			"idea": "quadratic voting for community grants",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 8,
+			"rankedCaptured": 8,
+			"rowsWithMeaningScore": 1,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 1,
+			"lowestMeaningScore": 0.681,
+			"meaningCap": null,
+			"liveVetBuilds": ["dorahacks-buidl-25344", "dorahacks-buidl-46124"],
+			"liveBriefBuilds": ["dorahacks-buidl-25344", "dorahacks-buidl-46124"],
+			"liveBriefVetBuilds": ["dorahacks-buidl-25344", "dorahacks-buidl-46124"],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-25344",
+					"name": "Stellar.Gov",
+					"isWinner": false,
+					"matched": ["voting", "community"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-46124",
+					"name": "Dr. T",
+					"isWinner": false,
+					"matched": ["voting", "community"],
+					"textShare": 0.5,
+					"share": 0.5
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-30848",
+					"name": "Soroban Community Treasury DAO para Microbecas Transfronterizas",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": ["community"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-18773",
+					"name": "E-Vote Decentralized Voting App",
+					"isWinner": false,
+					"matched": ["voting"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-46405",
+					"name": "Obscura - Payroll · Voting · Credentials · Treasury · Compliance",
+					"isWinner": false,
+					"matched": ["voting"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-35618",
+					"name": "DeGrant",
+					"isWinner": false,
+					"matched": ["grants"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-36778",
+					"name": "GrantFox",
+					"isWinner": false,
+					"matched": ["grants"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-46171",
+					"name": "GrantDrop",
+					"isWinner": false,
+					"matched": ["grants"],
+					"textShare": 0.25,
+					"share": 0.25
+				}
+			]
+		},
+		{
+			"id": "f19",
+			"idea": "pay as you go health insurance for gig workers",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 14,
+			"rankedCaptured": 14,
+			"rowsWithMeaningScore": 0,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 0,
+			"lowestMeaningScore": null,
+			"meaningCap": null,
+			"liveVetBuilds": ["dorahacks-buidl-37994"],
+			"liveBriefBuilds": ["dorahacks-buidl-37994"],
+			"liveBriefVetBuilds": ["dorahacks-buidl-37994"],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-37994",
+					"name": "Mão na Roda - Mutual Protection for Gig Workers.",
+					"isWinner": false,
+					"matched": ["gig", "workers"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-25263",
+					"name": "FireBastion - Decentralized Fire Damage Insurance for Homes",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-46284",
+					"name": "LumenSure - Private Proof-Backed Insurance Payouts on Stellar",
+					"isWinner": false,
+					"matched": ["insurance"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-25325",
+					"name": "Stellar Health Point",
+					"isWinner": false,
+					"matched": ["health"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-31600",
+					"name": "AI Health Triage",
+					"isWinner": false,
+					"matched": ["health"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42701",
+					"name": "CareGuard \u2014 AI Healthcare Agent on Stellar",
+					"isWinner": false,
+					"matched": ["health"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-30904",
+					"name": "Stellar Pay",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-41508",
+					"name": "PayStream",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-41512",
+					"name": "Centurion-Pay",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-42703",
+					"name": "Zap402 \u2014 Pay-per-Query AI Agent Marketplace on Stellar",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42801",
+					"name": "Pay-per-Query Web Search MCP Server",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-46202",
+					"name": "Ponte Pay",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-46339",
+					"name": "Starlit Pay",
+					"isWinner": false,
+					"matched": ["pay"],
+					"textShare": 0.16666666666666666,
+					"share": 0.16666666666666666
+				}
+			]
+		},
+		{
+			"id": "f20",
+			"idea": "verifiable diploma credentials for university graduates",
+			"length": "medium",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 22,
+			"rankedCaptured": 22,
+			"rowsWithMeaningScore": 19,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 19,
+			"lowestMeaningScore": 0.684,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-25160",
+				"dorahacks-buidl-42451",
+				"dorahacks-buidl-28422",
+				"dorahacks-buidl-27412",
+				"dorahacks-buidl-31779"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-25160",
+				"dorahacks-buidl-42451",
+				"dorahacks-buidl-28422",
+				"dorahacks-buidl-27412",
+				"dorahacks-buidl-31779"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-25160",
+				"dorahacks-buidl-42451",
+				"dorahacks-buidl-28422",
+				"dorahacks-buidl-27412",
+				"dorahacks-buidl-31779"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-25160",
+					"name": "EduChain-Decentralized-LearningCredentials",
+					"isWinner": false,
+					"similarity": 0.733,
+					"matched": ["verifiable", "credentials"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-42451",
+					"name": "ACREDIA",
+					"isWinner": false,
+					"similarity": 0.749,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-28422",
+					"name": "SkillHubID",
+					"isWinner": false,
+					"similarity": 0.742,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-27412",
+					"name": "EduChain-Decentralized-LearningCredentials",
+					"isWinner": false,
+					"similarity": 0.723,
+					"matched": ["verifiable", "credentials"],
+					"textShare": 0.4,
+					"share": 0.4
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-31779",
+					"name": "Skillotav",
+					"isWinner": false,
+					"similarity": 0.736,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-35572",
+					"name": "Hackathon-BlockTrust",
+					"isWinner": false,
+					"similarity": 0.726,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-31318",
+					"name": "Career Plug AI \u2013 Smart Careers, Strong Identities",
+					"isWinner": false,
+					"similarity": 0.721,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-36777",
+					"name": "ACTA",
+					"isWinner": false,
+					"similarity": 0.719,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-39890",
+					"name": "zkQuestChain",
+					"isWinner": false,
+					"similarity": 0.716,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-46073",
+					"name": "Identizy",
+					"isWinner": false,
+					"similarity": 0.71,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-35585",
+					"name": "UniPass",
+					"isWinner": false,
+					"similarity": 0.708,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-28433",
+					"name": "StarProof",
+					"isWinner": false,
+					"similarity": 0.703,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-46510",
+					"name": "StellarCred",
+					"isWinner": false,
+					"similarity": 0.694,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-38104",
+					"name": "AuraKnode: The Multilingual Social Edu-Layer on Stellar",
+					"isWinner": false,
+					"similarity": 0.693,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-28438",
+					"name": "TrustArk",
+					"isWinner": false,
+					"similarity": 0.691,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-46405",
+					"name": "Obscura - Payroll · Voting · Credentials · Treasury · Compliance",
+					"isWinner": false,
+					"matched": ["credentials"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-46231",
+					"name": "Payments and credential at E4C",
+					"isWinner": false,
+					"matched": ["credentials"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-35615",
+					"name": "WorldKey",
+					"isWinner": false,
+					"similarity": 0.689,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-46447",
+					"name": "VeriCompute \u2014 verifiable compute on Stellar",
+					"isWinner": false,
+					"matched": ["verifiable"],
+					"textShare": 0.2,
+					"share": 0.2
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-36761",
+					"name": "Edu&Chain",
+					"isWinner": false,
+					"similarity": 0.686,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f21",
+			"idea": "app where migrant workers split remittances automatically between family members in different countries",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 15,
+			"rankedCaptured": 15,
+			"rowsWithMeaningScore": 13,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 13,
+			"lowestMeaningScore": 0.681,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-46216",
+				"dorahacks-buidl-36062",
+				"dorahacks-buidl-30786",
+				"dorahacks-buidl-28444",
+				"dorahacks-buidl-25268"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-46216",
+				"dorahacks-buidl-36062",
+				"dorahacks-buidl-30786",
+				"dorahacks-buidl-28444",
+				"dorahacks-buidl-25268"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-46216",
+				"dorahacks-buidl-36062",
+				"dorahacks-buidl-30786",
+				"dorahacks-buidl-28444",
+				"dorahacks-buidl-25268"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-46216",
+					"name": "Grow",
+					"isWinner": false,
+					"similarity": 0.738,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-36062",
+					"name": "RemitLend",
+					"isWinner": false,
+					"similarity": 0.723,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"isWinner": false,
+					"similarity": 0.716,
+					"matched": ["remittances"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-28444",
+					"name": "LumOrbit",
+					"isWinner": false,
+					"similarity": 0.713,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-25268",
+					"name": "EazeFi",
+					"isWinner": false,
+					"similarity": 0.711,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-30961",
+					"name": "Mint-Regalos",
+					"isWinner": false,
+					"similarity": 0.696,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-24819",
+					"name": "StellarRemit",
+					"isWinner": false,
+					"similarity": 0.695,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-38162",
+					"name": "Cachay",
+					"isWinner": false,
+					"similarity": 0.695,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-38027",
+					"name": "EduRemit",
+					"isWinner": false,
+					"similarity": 0.692,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-40208",
+					"name": "MIMO App",
+					"isWinner": false,
+					"similarity": 0.688,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-37994",
+					"name": "Mão na Roda - Mutual Protection for Gig Workers.",
+					"isWinner": false,
+					"matched": ["workers"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-45260",
+					"name": "AnchorVault: Trustless On-Chain Remittance Liquidity Routing",
+					"isWinner": false,
+					"matched": ["remittances"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-30965",
+					"name": "StellarPay LATAM",
+					"isWinner": false,
+					"similarity": 0.684,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-18558",
+					"name": "PeerPesa",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-36330",
+					"name": "Nexar - Next-Gen AI-Powered Stellar Payments and Social",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f22",
+			"idea": "lending protocol that accepts tokenized invoices as collateral and pays lenders in stablecoins",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 297,
+			"rankedCaptured": 297,
+			"rowsWithMeaningScore": 280,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 280,
+			"lowestMeaningScore": 0.681,
+			"meaningCap": "near cap",
+			"liveVetBuilds": [
+				"dorahacks-buidl-36316",
+				"dorahacks-buidl-46109",
+				"dorahacks-buidl-46010",
+				"dorahacks-buidl-46332",
+				"dorahacks-buidl-41513"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-36316",
+				"dorahacks-buidl-46109",
+				"dorahacks-buidl-46010",
+				"dorahacks-buidl-46332",
+				"dorahacks-buidl-41513"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-36316",
+				"dorahacks-buidl-46109",
+				"dorahacks-buidl-46010",
+				"dorahacks-buidl-46332",
+				"dorahacks-buidl-41513"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-36316",
+					"name": "StellarInvoice",
+					"isWinner": false,
+					"similarity": 0.792,
+					"matched": ["invoices"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-46109",
+					"name": "Obscura \u2014 Confidential B2B Invoice Settlement & Double-Factoring Fraud Prevention on Stellar",
+					"isWinner": false,
+					"similarity": 0.728,
+					"matched": ["invoices", "stablecoins"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-46010",
+					"name": "Aero",
+					"isWinner": false,
+					"similarity": 0.754,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-46332",
+					"name": "Kryon Network",
+					"isWinner": false,
+					"similarity": 0.748,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-41513",
+					"name": "Settler",
+					"isWinner": false,
+					"similarity": 0.743,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-46536",
+					"name": "InvoiceVeil",
+					"isWinner": false,
+					"similarity": 0.726,
+					"matched": ["invoices"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-37961",
+					"name": "Kleo Protocol",
+					"isWinner": false,
+					"similarity": 0.741,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-42748",
+					"name": "Fund402 \u2014 Just-In-Time Loans for AI Agents",
+					"isWinner": false,
+					"similarity": 0.72,
+					"matched": ["lending", "pays"],
+					"textShare": 0.125,
+					"share": 0.25
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-36328",
+					"name": "Streamr",
+					"isWinner": true,
+					"similarity": 0.726,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-36340",
+					"name": "Orion",
+					"isWinner": false,
+					"similarity": 0.736,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-42516",
+					"name": "Autorepay",
+					"isWinner": false,
+					"similarity": 0.731,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-46067",
+					"name": "Covenant",
+					"isWinner": false,
+					"similarity": 0.731,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-46108",
+					"name": "Zebra \u2014 Confidential Stablecoin Payroll on Stellar (Compliant Privacy for the Web3 Workforce)",
+					"isWinner": false,
+					"similarity": 0.71,
+					"matched": ["pays", "stablecoins"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-42632",
+					"name": "argen",
+					"isWinner": false,
+					"similarity": 0.73,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-36267",
+					"name": "Stellar Bits",
+					"isWinner": false,
+					"similarity": 0.729,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-46064",
+					"name": "Yield2Pay",
+					"isWinner": false,
+					"similarity": 0.728,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-27454",
+					"name": "BlendScore",
+					"isWinner": false,
+					"similarity": 0.717,
+					"matched": ["lending"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-42724",
+					"name": "Stellar Autopay X402",
+					"isWinner": false,
+					"similarity": 0.726,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-46162",
+					"name": "Contextio",
+					"isWinner": false,
+					"similarity": 0.726,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-46498",
+					"name": "Steal-App",
+					"isWinner": false,
+					"similarity": 0.725,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f23",
+			"idea": "browser extension that warns users about scam tokens and malicious Stellar accounts before signing",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 286,
+			"rankedCaptured": 286,
+			"rowsWithMeaningScore": 286,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 286,
+			"lowestMeaningScore": 0.694,
+			"meaningCap": "at cap",
+			"liveVetBuilds": [
+				"dorahacks-buidl-30702",
+				"dorahacks-buidl-27457",
+				"dorahacks-buidl-42419",
+				"dorahacks-buidl-40211",
+				"dorahacks-buidl-42769"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-30702",
+				"dorahacks-buidl-27457",
+				"dorahacks-buidl-42419",
+				"dorahacks-buidl-40211",
+				"dorahacks-buidl-42769"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-30702",
+				"dorahacks-buidl-27457",
+				"dorahacks-buidl-42419",
+				"dorahacks-buidl-40211",
+				"dorahacks-buidl-42769"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-30702",
+					"name": "Socio - AI-generated swap signals for Stellar & Soroban",
+					"isWinner": false,
+					"similarity": 0.763,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-27457",
+					"name": "ScamGuardAI",
+					"isWinner": false,
+					"similarity": 0.752,
+					"matched": ["scam"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-42419",
+					"name": "stellarshield-ai",
+					"isWinner": false,
+					"similarity": 0.755,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-40211",
+					"name": "TrustVox",
+					"isWinner": true,
+					"similarity": 0.727,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-42769",
+					"name": "stellar8004.com",
+					"isWinner": false,
+					"similarity": 0.738,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-38049",
+					"name": "Safe.xlm",
+					"isWinner": false,
+					"similarity": 0.737,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-46373",
+					"name": "ANCHORSHIELD",
+					"isWinner": true,
+					"similarity": 0.724,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-25343",
+					"name": "SkillTokenDAO",
+					"isWinner": false,
+					"similarity": 0.734,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-36779",
+					"name": "Accesly",
+					"isWinner": false,
+					"similarity": 0.733,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-46363",
+					"name": "human",
+					"isWinner": false,
+					"similarity": 0.733,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-34006",
+					"name": "TokenTicket",
+					"isWinner": false,
+					"similarity": 0.732,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42682",
+					"name": "Stellar Security Audit Agent",
+					"isWinner": false,
+					"similarity": 0.731,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-30924",
+					"name": "Accesly",
+					"isWinner": false,
+					"similarity": 0.731,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-39224",
+					"name": "Stellar AI Escrow Commerce",
+					"isWinner": false,
+					"similarity": 0.731,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-28433",
+					"name": "StarProof",
+					"isWinner": false,
+					"similarity": 0.731,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-38050",
+					"name": "CertiX",
+					"isWinner": false,
+					"similarity": 0.731,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-36219",
+					"name": "Stellar Studio",
+					"isWinner": false,
+					"similarity": 0.73,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-42782",
+					"name": "Shield Stellar",
+					"isWinner": false,
+					"similarity": 0.73,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-46144",
+					"name": "StealthPay",
+					"isWinner": false,
+					"similarity": 0.73,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-38066",
+					"name": "TrustGenome AI",
+					"isWinner": false,
+					"similarity": 0.729,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f24",
+			"idea": "NGO tool to track disaster relief cash transfers to individual recipients with receipts",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 21,
+			"rankedCaptured": 21,
+			"rowsWithMeaningScore": 14,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 14,
+			"lowestMeaningScore": 0.681,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-46186",
+				"dorahacks-buidl-46512",
+				"dorahacks-buidl-46256",
+				"dorahacks-buidl-24534"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-46186",
+				"dorahacks-buidl-46512",
+				"dorahacks-buidl-46256",
+				"dorahacks-buidl-24534"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-46186",
+				"dorahacks-buidl-46512",
+				"dorahacks-buidl-46256",
+				"dorahacks-buidl-24534"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-46186",
+					"name": "Almoner",
+					"isWinner": false,
+					"similarity": 0.707,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-46512",
+					"name": "Zeker",
+					"isWinner": false,
+					"similarity": 0.706,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-46256",
+					"name": "Lumen",
+					"isWinner": false,
+					"similarity": 0.702,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-24534",
+					"name": "Financial inclusion for NGOS",
+					"isWinner": false,
+					"similarity": 0.698,
+					"matched": ["ngo", "track"],
+					"textShare": 0.2222222222222222,
+					"share": 0.2222222222222222
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-46535",
+					"name": "AidOS",
+					"isWinner": false,
+					"similarity": 0.697,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-46471",
+					"name": "AidShield",
+					"isWinner": false,
+					"similarity": 0.696,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-28402",
+					"name": "DONATRACE",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-46207",
+					"name": "ProofAid",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-38071",
+					"name": "TrustBid",
+					"isWinner": false,
+					"similarity": 0.687,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-46522",
+					"name": "Benelo",
+					"isWinner": false,
+					"similarity": 0.687,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-27456",
+					"name": "YieldBack.Cash",
+					"isWinner": true,
+					"matched": ["track", "cash"],
+					"textShare": 0.1111111111111111,
+					"share": 0.2222222222222222
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-46196",
+					"name": "TrustBid",
+					"isWinner": false,
+					"similarity": 0.685,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-46294",
+					"name": "Zloak",
+					"isWinner": false,
+					"similarity": 0.683,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-46128",
+					"name": "Warden ZK Receipts",
+					"isWinner": false,
+					"matched": ["receipts"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-30621",
+					"name": "CashAbroad",
+					"isWinner": false,
+					"matched": ["cash"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-35608",
+					"name": "TransferSave",
+					"isWinner": false,
+					"matched": ["transfers"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-31797",
+					"name": "Donation Management",
+					"isWinner": false,
+					"similarity": 0.682,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-28439",
+					"name": "ClariCoin",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-30866",
+					"name": "Track de Contenido: Construye en Stellar",
+					"isWinner": false,
+					"matched": ["track"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-30910",
+					"name": "Track de contenido - Stellar",
+					"isWinner": false,
+					"matched": ["track"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				}
+			]
+		},
+		{
+			"id": "f25",
+			"idea": "onchain fantasy sports game where winners are paid in stablecoins from the prize pool",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 88,
+			"rankedCaptured": 88,
+			"rowsWithMeaningScore": 51,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 51,
+			"lowestMeaningScore": 0.68,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-32676",
+				"dorahacks-buidl-42785",
+				"dorahacks-buidl-36332",
+				"dorahacks-buidl-36343",
+				"dorahacks-buidl-33869"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-32676",
+				"dorahacks-buidl-42785",
+				"dorahacks-buidl-36332",
+				"dorahacks-buidl-36343",
+				"dorahacks-buidl-33869"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-32676",
+				"dorahacks-buidl-42785",
+				"dorahacks-buidl-36332",
+				"dorahacks-buidl-36343",
+				"dorahacks-buidl-33869"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-32676",
+					"name": "ARS Price Arena",
+					"isWinner": true,
+					"similarity": 0.728,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-42785",
+					"name": "FanForge",
+					"isWinner": false,
+					"similarity": 0.739,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-36332",
+					"name": "SpectraBet",
+					"isWinner": false,
+					"similarity": 0.737,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-36343",
+					"name": "BalloonFly",
+					"isWinner": false,
+					"similarity": 0.73,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-33869",
+					"name": "CryptoPlay",
+					"isWinner": true,
+					"similarity": 0.712,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-36159",
+					"name": "Playlumen",
+					"isWinner": false,
+					"similarity": 0.717,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-32481",
+					"name": "Kale Grab Rush",
+					"isWinner": true,
+					"similarity": 0.71,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-38005",
+					"name": "Futuro Fútbol",
+					"isWinner": false,
+					"similarity": 0.717,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-23557",
+					"name": "AI Arena",
+					"isWinner": false,
+					"similarity": 0.713,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-46378",
+					"name": "Cypher Markets",
+					"isWinner": false,
+					"similarity": 0.708,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-31466",
+					"name": "Zeta-Playground",
+					"isWinner": false,
+					"similarity": 0.708,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-36787",
+					"name": "Lotty",
+					"isWinner": false,
+					"similarity": 0.706,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-42384",
+					"name": "KO! 402",
+					"isWinner": false,
+					"similarity": 0.701,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-36320",
+					"name": "FlashBet",
+					"isWinner": false,
+					"similarity": 0.7,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-39288",
+					"name": "Prophecy Predictive Market",
+					"isWinner": false,
+					"similarity": 0.7,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-39887",
+					"name": "Chickenz.io - Real Time Competitive Platformer",
+					"isWinner": true,
+					"similarity": 0.694,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-39622",
+					"name": "xray.games \u2013 The Arcade Evolved | skill proven onchain",
+					"isWinner": true,
+					"similarity": 0.682,
+					"matched": ["onchain", "game"],
+					"textShare": 0.2222222222222222,
+					"share": 0.2222222222222222
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-39849",
+					"name": "ZKombat",
+					"isWinner": false,
+					"similarity": 0.697,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-46091",
+					"name": "PigFi",
+					"isWinner": false,
+					"similarity": 0.696,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-36214",
+					"name": "No Loss Lottery",
+					"isWinner": true,
+					"similarity": 0.692,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f26",
+			"idea": "autonomous agents that negotiate prices with each other and settle payments on Stellar",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 310,
+			"rankedCaptured": 310,
+			"rowsWithMeaningScore": 289,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 289,
+			"lowestMeaningScore": 0.712,
+			"meaningCap": "at cap",
+			"liveVetBuilds": [
+				"dorahacks-buidl-42654",
+				"dorahacks-buidl-42438",
+				"dorahacks-buidl-42711",
+				"dorahacks-buidl-42637",
+				"dorahacks-buidl-42693"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-42654",
+				"dorahacks-buidl-42438",
+				"dorahacks-buidl-42711",
+				"dorahacks-buidl-42637",
+				"dorahacks-buidl-42693"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-42654",
+				"dorahacks-buidl-42438",
+				"dorahacks-buidl-42711",
+				"dorahacks-buidl-42637",
+				"dorahacks-buidl-42693"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-42654",
+					"name": "HaggleNet",
+					"isWinner": false,
+					"similarity": 0.842,
+					"matched": ["autonomous", "agents", "negotiate", "settle"],
+					"textShare": 0.5714285714285714,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-42438",
+					"name": "HivePayAI",
+					"isWinner": false,
+					"similarity": 0.798,
+					"matched": ["autonomous", "agents", "negotiate", "other", "payments"],
+					"textShare": 0.7142857142857143,
+					"share": 0.7142857142857143
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-42711",
+					"name": "Mogause",
+					"isWinner": false,
+					"similarity": 0.808,
+					"matched": ["autonomous", "agents", "negotiate", "other"],
+					"textShare": 0.5714285714285714,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-42637",
+					"name": "Agent Market",
+					"isWinner": false,
+					"similarity": 0.805,
+					"matched": ["autonomous", "agents", "other", "settle", "payments"],
+					"textShare": 0.7142857142857143,
+					"share": 0.7142857142857143
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-42693",
+					"name": "Telos",
+					"isWinner": false,
+					"similarity": 0.789,
+					"matched": ["autonomous", "agents", "other", "settle", "payments"],
+					"textShare": 0.7142857142857143,
+					"share": 0.7142857142857143
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-42621",
+					"name": "Stellar Chaos Swarm",
+					"isWinner": false,
+					"similarity": 0.783,
+					"matched": ["autonomous", "agents", "negotiate", "other"],
+					"textShare": 0.5714285714285714,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-42087",
+					"name": "StellarPayAgent",
+					"isWinner": false,
+					"similarity": 0.815,
+					"matched": ["autonomous", "agents", "settle", "payments"],
+					"textShare": 0.5714285714285714,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-42486",
+					"name": "Autonomics",
+					"isWinner": false,
+					"similarity": 0.812,
+					"matched": ["autonomous", "agents", "settle", "payments"],
+					"textShare": 0.42857142857142855,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-42381",
+					"name": "Apex",
+					"isWinner": false,
+					"similarity": 0.793,
+					"matched": ["autonomous", "agents", "other", "payments"],
+					"textShare": 0.5714285714285714,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-42547",
+					"name": "Ai Bora",
+					"isWinner": false,
+					"similarity": 0.793,
+					"matched": ["autonomous", "agents", "settle", "payments"],
+					"textShare": 0.5714285714285714,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-42102",
+					"name": "AgentForge",
+					"isWinner": false,
+					"similarity": 0.81,
+					"matched": ["autonomous", "agents", "payments"],
+					"textShare": 0.42857142857142855,
+					"share": 0.42857142857142855
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42520",
+					"name": "Agentex",
+					"isWinner": false,
+					"similarity": 0.811,
+					"matched": ["agents", "other"],
+					"textShare": 0.2857142857142857,
+					"share": 0.2857142857142857
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-42774",
+					"name": "AutoBooks: The AI CFO That Charges Other Bots for Advice",
+					"isWinner": false,
+					"similarity": 0.779,
+					"matched": ["autonomous", "agents", "other", "payments"],
+					"textShare": 0.5714285714285714,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-42701",
+					"name": "CareGuard \u2014 AI Healthcare Agent on Stellar",
+					"isWinner": false,
+					"similarity": 0.77,
+					"matched": ["autonomous", "agents", "prices", "payments"],
+					"textShare": 0.5714285714285714,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-42305",
+					"name": "AgentMesh",
+					"isWinner": false,
+					"similarity": 0.792,
+					"matched": ["agents", "other", "payments"],
+					"textShare": 0.42857142857142855,
+					"share": 0.42857142857142855
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-42154",
+					"name": "AgentBazaar",
+					"isWinner": false,
+					"similarity": 0.799,
+					"matched": ["agents", "other"],
+					"textShare": 0.2857142857142857,
+					"share": 0.2857142857142857
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-42675",
+					"name": "MagentiX",
+					"isWinner": false,
+					"similarity": 0.795,
+					"matched": ["autonomous", "agents", "payments"],
+					"textShare": 0.42857142857142855,
+					"share": 0.42857142857142855
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-42723",
+					"name": "AgentCompute",
+					"isWinner": false,
+					"similarity": 0.791,
+					"matched": ["autonomous", "agents", "payments"],
+					"textShare": 0.42857142857142855,
+					"share": 0.42857142857142855
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-46154",
+					"name": "QuestBoard",
+					"isWinner": false,
+					"similarity": 0.759,
+					"matched": ["agents", "other", "settle", "payments"],
+					"textShare": 0.42857142857142855,
+					"share": 0.5714285714285714
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-42534",
+					"name": "Stellar Agent Gateway \u2014 x402 Micropayment Marketplace for AI Agents",
+					"isWinner": false,
+					"similarity": 0.789,
+					"matched": ["autonomous", "agents", "payments"],
+					"textShare": 0.42857142857142855,
+					"share": 0.42857142857142855
+				}
+			]
+		},
+		{
+			"id": "f27",
+			"idea": "round up savings app that sweeps spare change from purchases into a yield bearing stablecoin",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 143,
+			"rankedCaptured": 143,
+			"rowsWithMeaningScore": 128,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 128,
+			"lowestMeaningScore": 0.68,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-46393",
+				"dorahacks-buidl-35594",
+				"dorahacks-buidl-46509",
+				"dorahacks-buidl-46216",
+				"dorahacks-buidl-28397"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-46393",
+				"dorahacks-buidl-35594",
+				"dorahacks-buidl-46509",
+				"dorahacks-buidl-46216",
+				"dorahacks-buidl-28397"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-46393",
+				"dorahacks-buidl-35594",
+				"dorahacks-buidl-46509",
+				"dorahacks-buidl-46216",
+				"dorahacks-buidl-28397"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-46393",
+					"name": "Autopilot: AI-Powered Financial Automation on the Stellar Network",
+					"isWinner": false,
+					"similarity": 0.736,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-35594",
+					"name": "OrbitSave",
+					"isWinner": false,
+					"similarity": 0.731,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-46509",
+					"name": "Sharibo",
+					"isWinner": false,
+					"similarity": 0.726,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-46216",
+					"name": "Grow",
+					"isWinner": false,
+					"similarity": 0.726,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-28397",
+					"name": "Pacto",
+					"isWinner": true,
+					"similarity": 0.717,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-46064",
+					"name": "Yield2Pay",
+					"isWinner": false,
+					"similarity": 0.718,
+					"matched": ["yield"],
+					"textShare": 0.1,
+					"share": 0.1
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-36328",
+					"name": "Streamr",
+					"isWinner": true,
+					"similarity": 0.714,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-46330",
+					"name": "cowrie",
+					"isWinner": false,
+					"similarity": 0.721,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-36792",
+					"name": "Juby",
+					"isWinner": false,
+					"similarity": 0.72,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-27456",
+					"name": "YieldBack.Cash",
+					"isWinner": true,
+					"similarity": 0.704,
+					"matched": ["yield"],
+					"textShare": 0.1,
+					"share": 0.1
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-40207",
+					"name": "SENDA",
+					"isWinner": true,
+					"similarity": 0.708,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-32697",
+					"name": "Hedge",
+					"isWinner": false,
+					"similarity": 0.713,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-30909",
+					"name": "Stash",
+					"isWinner": false,
+					"similarity": 0.712,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-36687",
+					"name": "Vaquita Stellar",
+					"isWinner": false,
+					"similarity": 0.711,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-33869",
+					"name": "CryptoPlay",
+					"isWinner": true,
+					"similarity": 0.704,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-46191",
+					"name": "SEYF",
+					"isWinner": false,
+					"similarity": 0.708,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-36339",
+					"name": "Stellar Automations Studio",
+					"isWinner": false,
+					"similarity": 0.708,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-34193",
+					"name": "Agro Coop",
+					"isWinner": false,
+					"similarity": 0.707,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-46424",
+					"name": "Econova stellar",
+					"isWinner": false,
+					"similarity": 0.707,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-30961",
+					"name": "Mint-Regalos",
+					"isWinner": false,
+					"similarity": 0.705,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f28",
+			"idea": "marketplace for renting out tools and equipment with deposits held in escrow contracts",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 20,
+			"rankedCaptured": 20,
+			"rowsWithMeaningScore": 8,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 8,
+			"lowestMeaningScore": 0.681,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-46038",
+				"dorahacks-buidl-46284",
+				"dorahacks-buidl-39224",
+				"dorahacks-buidl-36190"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-46038",
+				"dorahacks-buidl-46284",
+				"dorahacks-buidl-39224",
+				"dorahacks-buidl-36190"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-46038",
+				"dorahacks-buidl-46284",
+				"dorahacks-buidl-39224",
+				"dorahacks-buidl-36190"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-46038",
+					"name": "BeTrustless -  BeTrusty <> Trustless Work Integration",
+					"isWinner": false,
+					"similarity": 0.721,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-34609",
+					"name": "dehix",
+					"isWinner": false,
+					"similarity": 0.688,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-46284",
+					"name": "LumenSure - Private Proof-Backed Insurance Payouts on Stellar",
+					"isWinner": false,
+					"matched": ["out", "contracts"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-39224",
+					"name": "Stellar AI Escrow Commerce",
+					"isWinner": false,
+					"matched": ["escrow", "contracts"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-36190",
+					"name": "ContractForge",
+					"isWinner": false,
+					"matched": ["marketplace", "contracts"],
+					"textShare": 0.25,
+					"share": 0.25
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-14618",
+					"name": "APTOSPACE - NFT Marketplace Website",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-36064",
+					"name": "Stellar Marketplace",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-42435",
+					"name": "Agentic Stellar: x402 Agent Payments Marketplace",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-42534",
+					"name": "Stellar Agent Gateway \u2014 x402 Micropayment Marketplace for AI Agents",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-42650",
+					"name": "Stellar Agent marketplace",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-42678",
+					"name": "Agent Tasks MarketPlace",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-42703",
+					"name": "Zap402 \u2014 Pay-per-Query AI Agent Marketplace on Stellar",
+					"isWinner": false,
+					"matched": ["marketplace"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-46341",
+					"name": "UrbanRentisha TrustLayer",
+					"isWinner": false,
+					"similarity": 0.684,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-36748",
+					"name": "Trustless Work",
+					"isWinner": false,
+					"similarity": 0.683,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-46361",
+					"name": "ZK contracts and factory",
+					"isWinner": false,
+					"matched": ["contracts"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-36795",
+					"name": "TralaContract",
+					"isWinner": false,
+					"matched": ["contracts"],
+					"textShare": 0.125,
+					"share": 0.125
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-25342",
+					"name": "Stellar Rent",
+					"isWinner": false,
+					"similarity": 0.682,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-42404",
+					"name": "A2A Protocol",
+					"isWinner": false,
+					"similarity": 0.682,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-42721",
+					"name": "Bear Protocol",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-42715",
+					"name": "AgentMarket",
+					"isWinner": false,
+					"similarity": 0.681,
+					"matched": [],
+					"share": 0
+				}
+			]
+		},
+		{
+			"id": "f29",
+			"idea": "forex hedging tool for exporters that locks exchange rates using onchain forward contracts",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 39,
+			"rankedCaptured": 39,
+			"rowsWithMeaningScore": 11,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 11,
+			"lowestMeaningScore": 0.681,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-25159",
+				"dorahacks-buidl-32697",
+				"dorahacks-buidl-30621",
+				"dorahacks-buidl-46202",
+				"dorahacks-buidl-46418"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-25159",
+				"dorahacks-buidl-32697",
+				"dorahacks-buidl-30621",
+				"dorahacks-buidl-46202",
+				"dorahacks-buidl-46418"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-25159",
+				"dorahacks-buidl-32697",
+				"dorahacks-buidl-30621",
+				"dorahacks-buidl-46202",
+				"dorahacks-buidl-46418"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-25159",
+					"name": "FixedRateX Tagline: A Stellar-powered payment gateway for cross-border subscriptions with fixed FX rates.",
+					"isWinner": false,
+					"similarity": 0.718,
+					"matched": ["locks", "exchange", "rates"],
+					"textShare": 0.3333333333333333,
+					"share": 0.3333333333333333
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-32697",
+					"name": "Hedge",
+					"isWinner": false,
+					"similarity": 0.723,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-30621",
+					"name": "CashAbroad",
+					"isWinner": false,
+					"similarity": 0.714,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-46202",
+					"name": "Ponte Pay",
+					"isWinner": false,
+					"similarity": 0.709,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-46418",
+					"name": "AnchorFX",
+					"isWinner": false,
+					"similarity": 0.707,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-45921",
+					"name": "AgroFactoring",
+					"isWinner": false,
+					"similarity": 0.703,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-38085",
+					"name": "PathBound",
+					"isWinner": false,
+					"similarity": 0.7,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-32710",
+					"name": "Stellar Arbitrage",
+					"isWinner": false,
+					"similarity": 0.695,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-41513",
+					"name": "Settler",
+					"isWinner": false,
+					"similarity": 0.691,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-37970",
+					"name": "Onchain Boys",
+					"isWinner": false,
+					"matched": ["locks", "onchain"],
+					"textShare": 0.2222222222222222,
+					"share": 0.2222222222222222
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-24480",
+					"name": "Quantum Shield Exchange",
+					"isWinner": false,
+					"matched": ["locks", "exchange"],
+					"textShare": 0.2222222222222222,
+					"share": 0.2222222222222222
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-39622",
+					"name": "xray.games \u2013 The Arcade Evolved | skill proven onchain",
+					"isWinner": true,
+					"matched": ["onchain"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-35587",
+					"name": "CarbonChain Morelos",
+					"isWinner": false,
+					"matched": ["onchain"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-25312",
+					"name": "Blockchain-Powered Brainwave AI Model",
+					"isWinner": false,
+					"matched": ["locks", "rates"],
+					"textShare": 0.2222222222222222,
+					"share": 0.2222222222222222
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-42822",
+					"name": "Programmable Data Exchange",
+					"isWinner": false,
+					"matched": ["exchange"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-46214",
+					"name": "FlowLock Protocol",
+					"isWinner": false,
+					"matched": ["locks", "contracts"],
+					"textShare": 0.2222222222222222,
+					"share": 0.2222222222222222
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-39568",
+					"name": "Clash of Pirates",
+					"isWinner": false,
+					"matched": ["rates"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-30702",
+					"name": "Socio - AI-generated swap signals for Stellar & Soroban",
+					"isWinner": false,
+					"matched": ["rates"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-39873",
+					"name": "Pirate's Treasure",
+					"isWinner": false,
+					"matched": ["rates"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-46361",
+					"name": "ZK contracts and factory",
+					"isWinner": false,
+					"matched": ["contracts"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				}
+			]
+		},
+		{
+			"id": "f30",
+			"idea": "DAO tool that lets members delegate votes to experts by topic and revoke any time",
+			"length": "long",
+			"buildsMode": "hybrid",
+			"rankedServed": "hybrid",
+			"rankedMatched": 30,
+			"rankedCaptured": 30,
+			"rowsWithMeaningScore": 22,
+			"rowsWithMeaningScoreComplete": true,
+			"meaningNeighbours": 22,
+			"lowestMeaningScore": 0.68,
+			"meaningCap": null,
+			"liveVetBuilds": [
+				"dorahacks-buidl-25343",
+				"dorahacks-buidl-46364",
+				"dorahacks-buidl-25344",
+				"dorahacks-buidl-31772"
+			],
+			"liveBriefBuilds": [
+				"dorahacks-buidl-25343",
+				"dorahacks-buidl-46364",
+				"dorahacks-buidl-25344",
+				"dorahacks-buidl-31772"
+			],
+			"liveBriefVetBuilds": [
+				"dorahacks-buidl-25343",
+				"dorahacks-buidl-46364",
+				"dorahacks-buidl-25344",
+				"dorahacks-buidl-31772"
+			],
+			"window": [
+				{
+					"rank": 1,
+					"id": "dorahacks-buidl-25343",
+					"name": "SkillTokenDAO",
+					"isWinner": false,
+					"similarity": 0.737,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 2,
+					"id": "dorahacks-buidl-46364",
+					"name": "VeilVote",
+					"isWinner": false,
+					"similarity": 0.709,
+					"matched": ["dao", "votes"],
+					"textShare": 0.2222222222222222,
+					"share": 0.2222222222222222
+				},
+				{
+					"rank": 3,
+					"id": "dorahacks-buidl-25344",
+					"name": "Stellar.Gov",
+					"isWinner": false,
+					"similarity": 0.711,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 4,
+					"id": "dorahacks-buidl-31772",
+					"name": "StellarVote",
+					"isWinner": false,
+					"similarity": 0.702,
+					"matched": ["votes"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 5,
+					"id": "dorahacks-buidl-25321",
+					"name": "Stellar Vote",
+					"isWinner": false,
+					"similarity": 0.696,
+					"matched": ["votes"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 6,
+					"id": "dorahacks-buidl-46565",
+					"name": "StellarSeal",
+					"isWinner": false,
+					"similarity": 0.7,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 7,
+					"id": "dorahacks-buidl-20464",
+					"name": "PIVOT",
+					"isWinner": false,
+					"similarity": 0.7,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 8,
+					"id": "dorahacks-buidl-38829",
+					"name": "Karn",
+					"isWinner": false,
+					"similarity": 0.692,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 9,
+					"id": "dorahacks-buidl-32711",
+					"name": "Kale-Weather-Farming-System",
+					"isWinner": false,
+					"similarity": 0.692,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 10,
+					"id": "dorahacks-buidl-30848",
+					"name": "Soroban Community Treasury DAO para Microbecas Transfronterizas",
+					"isWinner": false,
+					"similarity": 0.686,
+					"matched": ["dao"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 11,
+					"id": "dorahacks-buidl-46361",
+					"name": "ZK contracts and factory",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 12,
+					"id": "dorahacks-buidl-32704",
+					"name": "Stellar Stake House",
+					"isWinner": false,
+					"similarity": 0.69,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 13,
+					"id": "dorahacks-buidl-42755",
+					"name": "API for agents to do deep research independently",
+					"isWinner": false,
+					"similarity": 0.688,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 14,
+					"id": "dorahacks-buidl-36786",
+					"name": "Lance Protocol",
+					"isWinner": false,
+					"similarity": 0.686,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 15,
+					"id": "dorahacks-buidl-18986",
+					"name": "BaseVote",
+					"isWinner": false,
+					"matched": ["votes"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 16,
+					"id": "dorahacks-buidl-18773",
+					"name": "E-Vote Decentralized Voting App",
+					"isWinner": false,
+					"matched": ["votes"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 17,
+					"id": "dorahacks-buidl-24565",
+					"name": "DAO Monitor Bot",
+					"isWinner": false,
+					"matched": ["dao"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 18,
+					"id": "dorahacks-buidl-37320",
+					"name": "AlienFlowSpace DAO",
+					"isWinner": false,
+					"matched": ["dao"],
+					"textShare": 0.1111111111111111,
+					"share": 0.1111111111111111
+				},
+				{
+					"rank": 19,
+					"id": "dorahacks-buidl-46124",
+					"name": "Dr. T",
+					"isWinner": false,
+					"similarity": 0.686,
+					"matched": [],
+					"share": 0
+				},
+				{
+					"rank": 20,
+					"id": "dorahacks-buidl-36219",
+					"name": "Stellar Studio",
+					"isWinner": false,
+					"similarity": 0.685,
+					"matched": [],
+					"share": 0
+				}
+			]
+		}
+	]
+}

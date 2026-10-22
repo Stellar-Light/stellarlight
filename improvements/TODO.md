@@ -179,6 +179,33 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    labeled set, and QR Mint and Stellar Automations Studio are no longer
    listed for those two ideas.
 
+10. **vetIdea and hackathonBrief list builds admitted on two matched words
+    that have no meaning score (not close in meaning, or not embedded yet).**
+    Probe: `/api/vet-idea?q=marketplace for renting out tools and equipment
+    with deposits held in escrow contracts` lists LumenSure
+    (`dorahacks-buidl-46284`, matched words "out" and "contracts") and
+    ContractForge (`dorahacks-buidl-36190`) in `priorArt.builds` with no
+    `similarity`, though search by meaning ran (`buildsMode` hybrid); both
+    are graded 0 by two blind labelers (rechecked live on 1.9.91,
+    2026-10-22).
+    Found by part 1's lead (4 of 5 wrong builds admitted on two words alone
+    had no meaning score) and measured on 1.9.91 over 30 fresh ideas
+    written before any result was read
+    (`improvements/audits/2026-10-22-words-need-meaning/`).
+    State: not fixed. Requiring a meaning score for the two-word path (G1)
+    removed 13 builds on the fresh set, 7 graded 0 and 6 graded 1, none
+    graded 2, and on part 1's 40 ideas 4 graded 0 and 3 graded 1, none
+    graded 2. On short ideas, where meaning scores are sparse (7 builds
+    scored for "recurring subscription payments"), it drops a real match:
+    Decrow Finance, graded 2, matches two words and has no meaning score.
+    Also requiring it for the one-word path (G2) drops 39 builds graded 2 on
+    the 36 short ideas. Only these two rules were measured. Labels are
+    drafts.
+    Done when: a rule, fixed before a fresh labeled set is read, lists
+    fewer builds graded 0 on it with no build graded 2 removed there or
+    lost on any earlier labeled set (the short ideas included), measured as
+    in that directory.
+
 ## Next
 
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
