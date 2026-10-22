@@ -436,6 +436,8 @@ const BUILD_FILTERS_ECHO_SCHEMA = {
 			type: "array",
 			nullable: true,
 			items: { type: "string" },
+			description:
+				"The slugs the hackathon values resolved to; a value that could not be checked against the event listing (meta.warnings names it) is echoed as sent, lowercased. null = no hackathon filter.",
 		},
 		track: { type: "string", nullable: true },
 		category: { type: "string", nullable: true },

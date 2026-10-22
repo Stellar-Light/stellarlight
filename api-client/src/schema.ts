@@ -3630,6 +3630,7 @@ export interface operations {
                             filters?: {
                                 q?: string | null;
                                 winnersOnly?: boolean;
+                                /** @description The slugs the hackathon values resolved to; a value that could not be checked against the event listing (meta.warnings names it) is echoed as sent, lowercased. null = no hackathon filter. */
                                 hackathon?: string[] | null;
                                 track?: string | null;
                                 category?: string | null;
@@ -3988,6 +3989,7 @@ export interface operations {
                             filters?: {
                                 q?: string | null;
                                 winnersOnly?: boolean;
+                                /** @description The slugs the hackathon values resolved to; a value that could not be checked against the event listing (meta.warnings names it) is echoed as sent, lowercased. null = no hackathon filter. */
                                 hackathon?: string[] | null;
                                 track?: string | null;
                                 category?: string | null;

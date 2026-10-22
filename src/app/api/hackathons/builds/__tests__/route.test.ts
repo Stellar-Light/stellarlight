@@ -7,15 +7,18 @@ vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 // curated one whose submissions are not stored.
 vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
 	...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
-	fetchAllDoraHacksHackathons: vi.fn(async () => [
-		{ id: 1, uname: "e", title: "E", source: "dorahacks" },
-		{
-			id: -1007,
-			uname: "hackmeridian-2025",
-			title: "HackMeridian 2025",
-			source: "curated",
-		},
-	]),
+	fetchAllDoraHacksHackathonsChecked: vi.fn(async () => ({
+		hackathons: [
+			{ id: 1, uname: "e", title: "E", source: "dorahacks" },
+			{
+				id: -1007,
+				uname: "hackmeridian-2025",
+				title: "HackMeridian 2025",
+				source: "curated",
+			},
+		],
+		complete: true,
+	})),
 }));
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({ find: async () => ({ docs: [] }) })),

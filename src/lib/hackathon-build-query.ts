@@ -15,7 +15,7 @@ import {
 	BOOL_TRUE_VALUES,
 	strictBoolParam,
 } from "@/lib/http-params";
-import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
+import { fetchAllDoraHacksHackathonsChecked } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { PROJECT_TYPES } from "@/lib/project-types";
 
@@ -78,12 +78,14 @@ export interface ListedEvents {
 export async function listedEvents(): Promise<ListedEvents> {
 	const [payload, dora] = await Promise.all([
 		getPayloadSafe(),
-		fetchAllDoraHacksHackathons(),
+		fetchAllDoraHacksHackathonsChecked(),
 	]);
-	const events = dora.map((h) => ({ slug: h.uname, title: h.title }));
-	// The DoraHacks read swallows its own failures and still returns the
-	// curated file, so no DoraHacks row at all means that read failed.
-	let complete = dora.some((h) => h.source === "dorahacks") && !!payload;
+	const events = dora.hackathons.map((h) => ({
+		slug: h.uname,
+		title: h.title,
+	}));
+	// One failed DoraHacks read leaves its events out: then not checked.
+	let complete = dora.complete && !!payload;
 	if (payload)
 		try {
 			const res = await payload.find({
@@ -188,6 +190,16 @@ export async function parseBuildFilters(
 	const raw = sp.get("hackathon") ?? "";
 	const stored = indexed.map((b) => b.hackathon);
 	let { slugs, unknown } = resolveEvents(raw, eventNames(stored));
+	const tooMany = {
+		error: {
+			error: `At most ${MAX_EVENTS} hackathon slugs.`,
+			hint: "hackathon=slug-a,slug-b: each an event's slug or exact title.",
+		},
+	};
+	// Counted before the listing read too, so a pile of values the index
+	// does not hold never sets it off. ponytail: here an unstored listed
+	// title with commas counts once per piece; it can only matter at the cap.
+	if (slugs.size + unknown.size > MAX_EVENTS) return tooMany;
 	// A value the index does not hold may still name an event getHackathons
 	// lists whose submissions are not stored: resolve again over both.
 	let complete = true;
@@ -199,13 +211,8 @@ export async function parseBuildFilters(
 			eventNames([...stored, ...l.events]),
 		));
 	}
-	if (slugs.size + unknown.size > MAX_EVENTS)
-		return {
-			error: {
-				error: `At most ${MAX_EVENTS} hackathon slugs.`,
-				hint: "hackathon=slug-a,slug-b: each an event's slug or exact title.",
-			},
-		};
+	// Again after it: a title several events share selects them all.
+	if (slugs.size + unknown.size > MAX_EVENTS) return tooMany;
 	const storedSlugs = new Set(stored.map((h) => h.slug));
 	if (unknown.size && complete)
 		return {

@@ -12,38 +12,44 @@ vi.mock("@/lib/hackathon-builds", async (orig) => ({
 	...(await orig<typeof import("@/lib/hackathon-builds")>()),
 	getHackathonBuildsIndex: vi.fn(async () => index),
 }));
+const doraRows = [
+	{
+		uname: "kale",
+		title: "KALE",
+		start_time: 1,
+		end_time: 2,
+		bonus_price: 10_000,
+		hackers_count: 50,
+		source: "dorahacks",
+	},
+	{
+		uname: "agents",
+		title: "Agents",
+		start_time: 1,
+		end_time: 3,
+		bonus_price: 20_000,
+		hackers_count: 90,
+		source: "dorahacks",
+	},
+	// Listed, with no stored submissions.
+	{
+		uname: "hackmeridian-2025",
+		title: "HackMeridian 2025",
+		start_time: 1,
+		end_time: 2,
+		bonus_price: 0,
+		hackers_count: 0,
+		source: "curated",
+	},
+];
+// compare reads the plain list; the hackathon filter reads the checked one.
 vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
 	...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
-	fetchAllDoraHacksHackathons: vi.fn(async () => [
-		{
-			uname: "kale",
-			title: "KALE",
-			start_time: 1,
-			end_time: 2,
-			bonus_price: 10_000,
-			hackers_count: 50,
-			source: "dorahacks",
-		},
-		{
-			uname: "agents",
-			title: "Agents",
-			start_time: 1,
-			end_time: 3,
-			bonus_price: 20_000,
-			hackers_count: 90,
-			source: "dorahacks",
-		},
-		// Listed, with no stored submissions.
-		{
-			uname: "hackmeridian-2025",
-			title: "HackMeridian 2025",
-			start_time: 1,
-			end_time: 2,
-			bonus_price: 0,
-			hackers_count: 0,
-			source: "curated",
-		},
-	]),
+	fetchAllDoraHacksHackathons: vi.fn(async () => doraRows),
+	fetchAllDoraHacksHackathonsChecked: vi.fn(async () => ({
+		hackathons: doraRows,
+		complete: true,
+	})),
 }));
 // No curated collection rows: compare falls through to DoraHacks.
 vi.mock("@/lib/payload-client", () => ({

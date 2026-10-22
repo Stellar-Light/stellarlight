@@ -231,6 +231,21 @@ describe("shared filters", () => {
 		expect(spy).not.toHaveBeenCalled();
 	});
 
+	it("refuses more than 10 values before it reads the event listing", async () => {
+		const spy = vi.fn(listed);
+		const junk = Array.from({ length: 11 }, (_, i) => `junk${i}`).join(",");
+		const r = await parseBuildFilters(
+			new URLSearchParams(`hackathon=${junk}`),
+			"keyword",
+			events,
+			spy,
+		);
+		expect(r).toMatchObject({
+			error: { error: "At most 10 hackathon slugs." },
+		});
+		expect(spy).not.toHaveBeenCalled();
+	});
+
 	it("answers a value that names no listed event with 400 and the valid slugs", async () => {
 		// The live miss: an event's title matched no slug, and the empty
 		// result read as a field of zero.
