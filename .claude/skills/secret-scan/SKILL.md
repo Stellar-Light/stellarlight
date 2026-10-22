@@ -6,9 +6,10 @@ description: Use for a full-history secret scan, when a secret may have been com
 # Secret scan
 
 CI (`.github/workflows/secret-scan.yml`) scans each PR range and each push to
-main after the push. A full-history scan runs locally, never as a workflow
-dispatch: this repo is public, so Actions logs are world-readable, and a real
-hit would be visible before anyone could rotate it.
+main after the push. The workflow also has a manual run whose `full` input
+defaults to true; do not use it for full history. This repo is public, so
+Actions logs are world-readable, and the log would show where a real hit is
+before anyone could rotate it. Full-history scans run locally.
 
 ## Scan
 

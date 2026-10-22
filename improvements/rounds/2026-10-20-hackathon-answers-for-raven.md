@@ -123,6 +123,9 @@ the diff and the evidence it needed.
     2246 passed), its changelog naming reviewSubmission (it serves the
     whole ScfPitchReport) and typed changed; merged as e8f6e4bb at
     19:21:08.
+  The #1840 and #1841 pushes were merges of main with renumbering and got
+  the gates above but no independent review; #1842's push carried the
+  changelog edit, which Grok reviewed (push, no findings).
 - 19:15:36 UTC (orch): live spec 1.9.85; then the receipts script
   (scratch): build rows carry afterEvent 10 of 10; winner rows carry
   prizeUsd, afterEvent and project; Builder Summit serves 12 ids for 12

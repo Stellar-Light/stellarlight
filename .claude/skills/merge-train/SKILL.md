@@ -17,11 +17,15 @@ its checks ran on. Every PR in the train needs the owner's explicit go.
 
 ## For each PR that conflicts with main or claims a taken version
 
-Run from any worktree with dependencies installed (`pnpm install` done):
+The PR's worktree needs dependencies installed (`pnpm install`), because the
+script runs `pnpm contract:write` there:
 
 ```bash
-zsh .claude/skills/merge-train/update_pr_branch.sh <pr-worktree> <next-version>
+zsh .claude/skills/merge-train/update_pr_branch.sh <pr-worktree> [<next-version>]
 ```
+
+Pass the next free version for a PR that bumps the spec; omit it for a PR
+that changes no spec text.
 
 It merges `origin/main`, takes main's generated files, merges
 `src/lib/changelog.ts` by entry with the PR's own entries on top (renumbered),
@@ -63,3 +67,6 @@ Then, in the PR worktree:
   equal the merge time.
 - Squash commit timestamps can be a second earlier than GitHub's `mergedAt`;
   record one source and say which.
+- `merge_changelog.py` treats any entry text the base lacks as the PR's own.
+  If the PR edited an existing entry, it inserts the edited copy on top and
+  keeps main's original; fix that by hand.

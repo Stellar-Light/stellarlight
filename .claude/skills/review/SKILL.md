@@ -11,9 +11,12 @@ The reviewer runs on a model other than the author's and starts from a fresh
 context.
 
 - Docs, API text, product judgment: a fresh-context Claude review on a
-  different model from the author's. Start it with the Agent tool and name
-  the model (`model: "fable"` when the author is Opus), with the clone path
-  and the brief below.
+  different model from the author's. Make a clone with no push remote,
+  `git clone --quiet --no-hardlinks --branch <branch> "$(git rev-parse --show-toplevel)" <dir> && git -C <dir> remote remove origin`,
+  then start the reviewer with the Agent tool, name the model
+  (`model: "fable"` when the author is Opus), and give it the clone path, the
+  brief below, and read-only instructions (no installs, no network, no
+  writes). Only the Grok runner below is OS-sandboxed.
 - Code, data rules, anything executable: also a model from another family.
   Today that is Grok, run with `run-grok-review.sh`.
 - Grok's findings are leads, not verdicts: reproduce each one before acting,

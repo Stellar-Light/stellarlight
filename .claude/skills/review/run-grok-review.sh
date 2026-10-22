@@ -10,6 +10,7 @@ BR=$1; BRIEF=$2; TURNS=${3:-60}; shift $(( $# < 3 ? $# : 3 ))
 ROOT=$(git rev-parse --show-toplevel)
 OUT=$(mktemp -d "${TMPDIR:-/tmp}/review.XXXXXX")
 git clone --quiet --no-hardlinks --branch "$BR" "$ROOT" "$OUT/repo"
+git -C "$OUT/repo" remote remove origin
 cp "$BRIEF" "$OUT/repo/.review-brief.md"
 for f in "$@"; do cp "$f" "$OUT/repo/"; done
 cd "$OUT/repo"

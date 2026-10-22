@@ -41,8 +41,9 @@ questions blocks every later change of ours from reaching Raven's agents.
    review on a different model for docs, API text and product judgment;
    for code, also a model from another family (today Grok). Grok's
    findings are leads until reproduced, never the verdict. The reviewer gets
-   a real checkout of the branch (a throwaway clone, sandboxed, no network
-   for its tools), not a curated excerpt, and is told to break the change.
+   a real checkout of the branch (a throwaway clone with no push remote; the
+   Grok runner also sandboxes it, with no network for its tools), not a
+   curated excerpt, and is told to break the change.
    Record the reviewer's model and effort. Every finding is fixed or
    answered in writing, and the reviewer re-checks the fixes.
 5. **Receipts.** "Verified" means a live re-check after deploy, by someone

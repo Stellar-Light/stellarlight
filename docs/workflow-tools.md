@@ -18,9 +18,8 @@ Claude Code session editing a real FastAPI+React repo): ~46% of baseline LOC,
 ~78% of the tokens, with safety guards held.
 
 Install is **per-user, one time** — Claude Code's first plugin install is
-interactive and can't be auto-installed from committed settings (and we
-gitignore `.claude/`, so there's nothing to commit anyway). Run these as two
-separate prompts in Claude Code:
+interactive and can't be auto-installed from committed settings. Run these
+as two separate prompts in Claude Code:
 
 ```
 /plugin marketplace add DietrichGebert/ponytail
@@ -35,22 +34,13 @@ catching in our own diffs.
 
 [`caveman-shrink`](https://github.com/JuliusBrussee/caveman) (npm, MIT, v0.1.0)
 is a stdio MCP proxy that shrinks the `description` prose in an upstream MCP's
-tool catalog (`tools/list`), preserving code/URLs/paths. It does **not** touch
-tool-call _results_. Wrap a genuinely verbose third-party MCP:
+tool catalog (`tools/list`), preserving code, URLs and paths. It does not
+touch tool-call results.
 
-```jsonc
-// .mcp.json — example: shrink a bulky third-party catalog
-{ "mcpServers": { "fs-shrunk": {
-  "type": "stdio", "command": "npx",
-  "args": ["caveman-shrink", "npx", "@modelcontextprotocol/server-filesystem", "/path"]
-}}}
-```
-
-**Do not wrap our own `@stellar-light/scout-mcp`.** Its tool descriptions are the
-deliberately-tuned Raven routing surface (≤600 chars, routing-tested by the
-`routing-surface-check`). Compressing them would degrade the very thing we
-tuned. Use caveman-shrink only where catalog tokens actually hurt — and treat it
-as experimental (pre-1.0).
+Not adopted: terse descriptions make agents reason more to rebuild the
+missing context. Never wrap our own `@stellar-light/scout-mcp` in any case:
+its tool descriptions are the routing surface Raven reads (600 characters at
+most, checked by `routing-surface-check`).
 
 ## 3. headroom: compress tool, DB and RAG outputs · **not adopted**
 
