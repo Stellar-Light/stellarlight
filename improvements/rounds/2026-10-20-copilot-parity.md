@@ -87,7 +87,9 @@ the diff and the evidence it needed.
   - `gh pr create --repo Stellar-Light/stellarlight --base main --head fix/dead-prior-art-claims --title "fix(pitch, brief): null funding without a vertical; dead means dormant or archived" --body-file pr-dead.md`
     opened #1842.
 
-- 2026-10-21, the merge train (orch). Each merge followed
+- 2026-10-21, the merge train (orch; times are GitHub's merge times,
+  which can differ by a second from the commit timestamps). Each merge
+  followed
   `gh api repos/Stellar-Light/stellarlight/commits/<head>/check-runs`
   reading every run completed and success, <head> being the commit each
   command below pins:

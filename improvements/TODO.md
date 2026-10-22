@@ -112,15 +112,18 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    the commit is already public.
 
 9. **Repos deleted on GitHub are still served.**
-   Found: the gone-repos probe's 2026-10-20 run
-   (`improvements/audits/gone-repos-latest.json`, `tally`) counts 56 newly
-   gone repos still served and 2 that came back. The ledger raises a stale
-   high finding once a gone repo stays served past 30 days (the /quality
-   lane dated the first at about 2026-10-28).
-   State: the execute lane would hide the 56 and un-hide the 2; it has not
-   run.
-   Done when: the execute ran (dry run read first) and the hidden rows read
-   back as hidden.
+   Found: the gone-repos probe (`improvements/audits/gone-repos-latest.json`,
+   `tally`, the same counts on 2026-10-20 and 2026-10-22) counts 56 newly
+   gone repos still served and 2 that came back. The ledger calls a high
+   finding stale once it has been open more than 30 days (`STALE_DAYS` in
+   `src/lib/improvement-ledger.ts`); the oldest open gone-repos finding was
+   first seen 2026-09-27T10:59Z, so the first turns stale at
+   2026-10-27T10:59Z.
+   State: the execute would mark the 56 `gone` (out of search and builder
+   results; a lookup by name still answers, marked gone) and set the 2 back
+   to `error` for a rescan, reading every row back; it has not run.
+   Done when: the execute ran (dry run read first) and its read-back
+   passed.
 
 10. **"Recent mainnet upgrade" leads with an upgrade not yet on mainnet.**
     Probe: in `/api/research?q=recent mainnet upgrade&limit=5`, no row
@@ -207,7 +210,7 @@ unless noted.
 ## Owner decisions (safe default in brackets)
 
 - Run the curated-builds execute [run].
-- Run the gone-repos execute before about 2026-10-28 [run].
+- Run the gone-repos execute before 2026-10-27 10:59 UTC [run].
 - Turn on GitHub secret scanning and push protection; repository settings
   only the owner can change [on].
 - Add Yield as a gap vertical [no].
