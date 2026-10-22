@@ -1,9 +1,7 @@
 # AGENTS.md: how work is done in this repo
 
 One rulebook for every agent and person working here. `CLAUDE.md` imports
-it. Durable rules live in this file, not in anyone's private notes. The
-model is adapted from stellar-raven's own `AGENTS.md` and `.agents/`
-discipline, the main consumer of this API.
+it. Durable rules live in this file, not in anyone's private notes.
 
 ## What we are
 
@@ -28,17 +26,33 @@ questions blocks every later change of ours from reaching Raven's agents.
 2. **Round.** Multi-step or multi-agent work opens a ledger in
    `improvements/rounds/` before it starts: scope, lanes, an append-only log
    with exact commands and results, outcome.
-3. **Lanes.** One agent per lane, with a stated write set. Agents never share
-   a worktree. The orchestrator alone holds git pushes, PRs, production runs
-   and anything outward.
-4. **Review.** The reviewer differs from the author. An independent model
-   gates each push (today Grok, with web search off, git denied, and a bundle
-   of only the diff and the evidence it needs). Its findings are leads until
-   reproduced; every finding is either fixed or answered in writing before
-   the push.
+3. **Lanes.** Split work only where pieces can move independently, isolate
+   risk, or give an independent check; never just to add agents. One agent
+   per lane, with a written brief: the goal, what done means, the files it
+   owns, what it must not do, and the checks to run. A lane returns its
+   result, evidence paths, the checks it ran and open risks, not a
+   transcript. Name the model and effort for every lane and never rely on a
+   default: Sonnet for bounded sweeps and lookups, Opus for hard
+   implementation, planning and synthesis. Agents never share a worktree.
+   The orchestrator alone holds git pushes, PRs, production runs and
+   anything outward.
+4. **Review.** Every push gets an independent review on a model other than
+   the author's, picked by the kind of change: a fresh-context Claude
+   review on a different model for docs, API text and product judgment;
+   for code, also a model from another family (today Grok). Grok's
+   findings are leads until reproduced, never the verdict. The reviewer gets
+   a real checkout of the branch (a throwaway clone with no push remote; the
+   Grok runner also sandboxes it, with no network for its tools), not a
+   curated excerpt, and is told to break the change.
+   Record the reviewer's model and effort. Every finding is fixed or
+   answered in writing, and the reviewer re-checks the fixes.
 5. **Receipts.** "Verified" means a live re-check after deploy, by someone
    other than the author, with the commit. A test that passes is not a
    receipt. A closed issue is evidence to inspect, not proof.
+6. **Skills.** Recurring procedures are skills in `.claude/skills/`:
+   `merge-train`, `live-checks`, `raven-gate`, `red-lane-triage`,
+   `secret-scan` and `review`. Use the matching skill when a task triggers
+   it, and fix the skill when a step in it turns out wrong.
 
 ## Measurement
 
@@ -60,11 +74,12 @@ questions blocks every later change of ours from reaching Raven's agents.
 - Descriptions stay within 600 characters; vocabulary goes in
   `x-routing.keywords`. Topic words (a protocol, a product) do not belong in
   one operation's keywords.
-- Check routing changes against Raven's gate before shipping: no question
-  of another provider newly captured, no Scout question lost. The local
-  replica, `scripts/eval/raven-gate-replica.ts`, is queue item 1; until it
-  exists, run `scripts/eval/raven-scorer-replica.ts` on the changed
-  questions and say the check is partial. Batch routing edits into one
+- Check routing changes against Raven's gate before shipping:
+  `pnpm raven:gate --raven <stellar-raven checkout>` must say ACCEPT
+  (exit 0). Exit 1 is a hold. Exit 2 means no verdict can be trusted (the
+  replica could not run, or its self-check failed); re-port or fix first.
+  The script, `scripts/eval/raven-gate-replica.ts`, is the authority on
+  the conditions behind each exit. Batch routing edits into one
   release.
 - Never copy eval questions into example questions.
 
@@ -111,6 +126,8 @@ recognised; never a silent empty 200.
 - No em dashes or en dashes in anything new or edited: copy, API text,
   docs, code comments, commit messages. Historical files are not rewritten
   for it.
-- No third-party personal names in commits. No private repo paths in this
-  public repo. Never print or commit secrets.
+- No third-party personal names in commits. Rules and docs say what we do
+  and why; they do not attribute practices to other people, teams or
+  products. No private repo paths in this public repo. Never print or
+  commit secrets.
 - Plain language: say what was measured, with numbers, and what was not.

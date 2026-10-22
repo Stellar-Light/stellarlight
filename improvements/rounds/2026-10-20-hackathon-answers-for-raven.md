@@ -1,4 +1,4 @@
-# 2026-10-20: Copilot v2 parity for Raven
+# 2026-10-20: hackathon answers for Raven
 
 Reconstruction: this ledger was written at the end of the round from the
 lane reports and the orchestrator's own commands, before the rounds
@@ -12,9 +12,9 @@ change.
 
 ## Scope
 
-Can Raven answer, from Scout data, the questions Colosseum Copilot v2
-answers for Solana (review a project, check an idea against every hackathon,
-what winners built, previous attempts, what to read, trends, feedback, tools),
+Can Raven answer, from Scout data, the questions builders ask about
+hackathons (review a project, check an idea against every hackathon, what
+winners built, previous attempts, what to read, trends, feedback, tools),
 and where does Scout feed it wrong or padded data?
 
 ## Lanes
@@ -51,7 +51,9 @@ the diff and the evidence it needed.
   incomplete absence notes, reused ids), fixed; two more rounds; push.
 - #1841 (competitor floor): do not push (label chosen before the cut), then
   three rounds on overclaiming text and a missing test; push.
-- #1842 (null funding, dead prior art): push on the first round.
+- #1842 (null funding, dead prior art): push on the first round. Its
+  changelog follow-up from the contract audit (name reviewSubmission, type
+  the entry changed): push on the first round, no findings (2026-10-21).
 - `fix/vet-vertical-map`: do not push three times (Stablecoin-last too blunt,
   missed word forms, tests that could not fail); push on the fourth.
 - This ledger and the queue: do not push three times (missing probes and
@@ -85,9 +87,83 @@ the diff and the evidence it needed.
   - `gh pr create --repo Stellar-Light/stellarlight --base main --head fix/dead-prior-art-claims --title "fix(pitch, brief): null funding without a vertical; dead means dormant or archived" --body-file pr-dead.md`
     opened #1842.
 
+- 2026-10-21, the merge train (orch; times are the squash commits'
+  timestamps from `git log`; GitHub's `mergedAt` can be a second later).
+  Each merge followed
+  `gh api repos/Stellar-Light/stellarlight/commits/<head>/check-runs`
+  reading every run completed and success, <head> being the commit each
+  command below pins:
+  - 18:55:41 UTC (orch): `gh pr merge 1843 --repo Stellar-Light/stellarlight --squash --match-head-commit b2154cdbd555a5981d1a2759b863453292e1cb3e`;
+    merged as 25840f27.
+  - 18:56:03 UTC (orch): `gh pr merge 1844 --repo Stellar-Light/stellarlight --squash --match-head-commit 9f0e7b8c35dd042976813977a1b8bfbf40fdd2a9`;
+    merged as ee5e9ca3.
+  - 18:57:34 UTC (orch): `gh pr merge 1847 --repo Stellar-Light/stellarlight --squash --match-head-commit 1428218c65a15fc0f3ed1be9fd7a64fed068c7b5`;
+    merged as 605e4df6.
+  - 19:00:12 UTC (orch): `gh pr merge 1845 --repo Stellar-Light/stellarlight --squash --match-head-commit ee099a661c101451d84dd1c0f5c7471f96b71db7`;
+    merged as 8568ac17 (main merged into the branch first).
+  - 19:04:37 UTC (orch): `gh pr merge 1846 --repo Stellar-Light/stellarlight --squash --match-head-commit e4d1a9389416b9aec504c87bdfedbddb328845b2`;
+    merged as 9ddf4ebd (main merged into the branch first).
+- About 19:00 UTC (orch): `GET /api/openapi.json` reported 1.9.84;
+  `pnpm raven:gate --raven <clone> --spec <file>`, with <clone> a clone of
+  stellar-experimental/stellar-raven at b1dc866 and <file> that response:
+  ported sources identical to b1dc866, accepted totals reproduced,
+  220/298/326/112, no hit-to-miss flip, ACCEPT.
+- 19:05 to 19:21:08 UTC (orch): before its push, each spec PR got main
+  merged into it, changelog entries merged by entry, its own entries
+  renumbered, and artifacts rebuilt; then `pnpm exec tsc --noEmit -p .`
+  exit 0, `pnpm contract:check` exit 0, `pnpm exec vitest run` with one
+  failing file, `tests/int/api.int.spec.ts` (it needs a Payload secret),
+  and `pnpm raven:gate --raven <clone>` ACCEPT at that version. Merged
+  with `--match-head-commit` as above:
+  - #1840 to 1.9.85 at d3d302ca76986774e473bb8754d6c82a2e4a9a96 (vitest
+    passing; the log kept no count); merged as 31c940fb at 19:09:14.
+  - #1841 to 1.9.86 at 740b6c0ebc7623dfd8092c7662374b3c9f75c624 (vitest
+    2243 passed); merged as f4c3ac3d at 19:14:13.
+  - #1842 to 1.9.87 at 06a5691479e29d70ef979a57cd39104b6115e9c7 (vitest
+    2246 passed), its changelog naming reviewSubmission (it serves the
+    whole ScfPitchReport) and typed changed; merged as e8f6e4bb at
+    19:21:08.
+  The #1840 and #1841 pushes were merges of main with renumbering and got
+  the gates above but no independent review; #1842's push carried the
+  changelog edit, which Grok reviewed (push, no findings).
+- 19:15:36 UTC (orch): live spec 1.9.85; then the receipts script
+  (scratch): build rows carry afterEvent 10 of 10; winner rows carry
+  prizeUsd, afterEvent and project; Builder Summit serves 12 ids for 12
+  rows.
+- 19:20 UTC (orch): `gitleaks git --redact=100 --no-banner --log-opts=origin/main --report-format json --report-path <scratch file> .`
+  (8.30.1, run locally so findings stay out of public Actions logs;
+  <scratch file> is a JSON report in the session scratchpad, not
+  committed): gitleaks reported 2,474 commits scanned and 10 findings,
+  none a credential: six Airtable base, table and view ids (each match
+  holds one 17-character value starting app, tbl or viw), two Airtable
+  attachment URLs, a property name in `engine-b-sweeps-latest.json`, and
+  a README curl example whose header value is a placeholder. Each recorded
+  with its reason in `.gitleaksignore`; at 19:22 UTC the same scan
+  reported no leaks.
+- From 19:23:12 UTC (orch), when `GET /api/openapi.json` first reported
+  1.9.87: the receipts script (scratch) passed 9 of 10; the miss is the
+  HackMeridian 2025 winners (queue item 2). Its SCF-repeat check had served
+  0 SCF rows, so it proved nothing; re-run on four questions that return
+  SCF rows: 32 SCF rows, 28 with a project page, no repeat by page or by
+  title.
+  `pnpm raven:gate --raven <clone> --spec <that response>`: ACCEPT, legacy
+  220/298/326/112 against accepted 219/298/326/112, skills 17, holdout
+  at 10 forbidden captures.
+  `pnpm exec tsx scripts/eval/run-golden.ts --json`: 50 pass, 2 N/A,
+  1 fail (`recent-mainnet-upgrade`, queue item 10). The question ends
+  in no "?" and its results hold no SCF row, the two things #1846
+  changed.
+
 ## Outcome
 
-Shipped: #1838 and #1839. Open: #1840, #1841, #1842 and
-`fix/vet-vertical-map`. The 1.9.83 changelog's HackMeridian 2025 winners
-claim is not true until the curated-builds execute runs (queue item 2).
-Every unresolved finding moved to `improvements/TODO.md`.
+Shipped: #1838 and #1839 on 2026-10-20; on 2026-10-21, in this order, #1843
+(the gate replica and Raven-safe routing text, 1.9.84), #1844 (secret scan),
+#1847 (this working model), #1845 (vertical map), #1846 (research), #1840
+(1.9.85), #1841 (1.9.86) and #1842 (1.9.87). Each merge was pinned to a head
+whose check-runs all read success. #1840 to #1842 each passed raven:gate
+before its push, and #1843's branch did in the orchestrator's re-run
+(Lanes). On 1.9.87 the live receipts pass except the HackMeridian 2025
+winners, and Raven's gate replica accepts the live spec. The 1.9.83
+changelog's HackMeridian 2025 winners claim is not true until the
+curated-builds execute runs (queue item 2). Every unresolved finding moved
+to `improvements/TODO.md`.

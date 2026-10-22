@@ -1,0 +1,23 @@
+# Triaged gitleaks findings: full history of main scanned 2026-10-21 with
+# gitleaks 8.30.1 (it reported 2,474 commits scanned and 10 findings, none a credential).
+# One fingerprint per line (commit:file:rule:line); the comment above it says why.
+# a property name in engine-b-sweeps-latest.json, not a key
+2acaf1f80677f8ee72207a8c973c7157b23ff414:scripts/improvement-ledger.ts:generic-api-key:186
+# an Airtable base, table or view id (app, tbl, viw), not a key
+0af24d6a0f6ebf49534f22350103b5c1f515c8e4:.env.example:airtable-api-key:79
+# an Airtable base, table or view id (app, tbl, viw), not a key
+0af24d6a0f6ebf49534f22350103b5c1f515c8e4:.env.example:airtable-api-key:82
+# an Airtable base, table or view id (app, tbl, viw), not a key
+0af24d6a0f6ebf49534f22350103b5c1f515c8e4:.env.example:airtable-api-key:85
+# a curl example (lines 605 to 609) whose header value is the placeholder YOUR_CRON_SECRET
+0af24d6a0f6ebf49534f22350103b5c1f515c8e4:README.md:curl-auth-header:605
+# an Airtable base, table or view id (app, tbl, viw), not a key
+0e0fbea70982ddc24eaf2b19bb209022e05ec0e6:src/app/api/import/airtable/route.ts:airtable-api-key:7
+# an Airtable base, table or view id (app, tbl, viw), not a key
+0e0fbea70982ddc24eaf2b19bb209022e05ec0e6:src/app/api/import/airtable/route.ts:airtable-api-key:8
+# an Airtable base, table or view id (app, tbl, viw), not a key
+0e0fbea70982ddc24eaf2b19bb209022e05ec0e6:src/app/api/import/airtable/route.ts:airtable-api-key:9
+# an Airtable attachment URL (v5.airtableusercontent.com), not a key
+7c636ad89d0c48370875b403f445d23cdaec5725:airtable_import.csv:generic-api-key:75
+# an Airtable attachment URL (v5.airtableusercontent.com), not a key
+0af24d6a0f6ebf49534f22350103b5c1f515c8e4:scripts/airtable_import.csv:generic-api-key:75
