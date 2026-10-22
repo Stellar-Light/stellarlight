@@ -152,6 +152,13 @@ unless noted.
   on 1.9.87 (2026-10-21) the top 8 for "idea maze for stablecoin
   remittances" are all about stablecoins or remittances, with or without a
   trailing "?". Needs a question that reproduces before any change.
+- The research corpus refresh fails its idempotence step on some days
+  (failed on 2026-10-16 to 10-19 and on 10-22, passed on 10-20 and
+  10-21): after the execute, a re-plan still wants writes. On 10-22 (run
+  39767218973) lumenloop-research planned 3 updates and sdf-org 23 (21
+  meta-only); every other source planned 0. The lane names three possible
+  causes: a step that died mid-run, a writer that is not idempotent, or
+  two writers on one row.
 - vetIdea competitor rows do not carry the idea words they matched, so a
   judge cannot grade a row from the response alone (contract audit,
   2026-10-20; the follow-up left on #1841).
