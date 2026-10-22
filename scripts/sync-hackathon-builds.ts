@@ -76,13 +76,12 @@ import {
 } from "../src/lib/hackathon-events";
 import {
 	type DoraHacksHackathon,
-	type DoraHacksSubmission,
 	doraEventRef,
 	endedDoraHacksEvents,
 	fetchAllDoraHacksHackathons,
 	fetchBuidlDetail,
 	fetchHackathonDetail,
-	fetchHackathonSubmissions,
+	readEventRosters,
 } from "../src/lib/integrations/dorahacks";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
@@ -435,17 +434,17 @@ async function main() {
 		);
 	}
 	const rows = new Map<string, Row>();
-	let emptyRosters = 0;
 	console.log(`\n${events.length} ended Stellar events on DoraHacks:`);
-	for (const h of events) {
-		let subs: DoraHacksSubmission[] = [];
-		try {
-			subs = await fetchHackathonSubmissions(h);
-		} catch (e) {
-			console.error(
-				`  ✗ ${h.uname}: roster read failed: ${(e as Error).message}`,
-			);
-		}
+	// An event whose roster or winner assignments could not be read is
+	// skipped: no rows are read for it, so its stored rows, winners included,
+	// are not written this run (a 429 on the winners once unplaced them all).
+	const rosters = await readEventRosters(events);
+	for (const f of rosters.failed)
+		console.error(
+			`  ✗ ${f.uname}: not read (${f.error}); skipped, its stored rows are kept as they are`,
+		);
+	let emptyRosters = rosters.failed.length;
+	for (const { event: h, subs } of rosters.read) {
 		if (!subs.length) emptyRosters++;
 		const ev = doraEventRef(h);
 		for (const s of subs) {

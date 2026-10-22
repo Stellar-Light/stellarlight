@@ -306,43 +306,41 @@ function cleanDescription(raw: unknown): string | null {
  * the /hackathon-winner-assignments announcement. The v1 hub API no longer puts
  * `winner_prizes` on buidl rows — this endpoint's `award_list[].prizes[]`
  * ("1st Place - $5,000 in XLM" → buidl ids) is where winners live now. Empty
- * map on any error or before winners are announced.
+ * only when DoraHacks answers with no prizes listed. Any failed read throws
+ * (an HTTP error, a timeout, a body that is not JSON): an empty map on a 429
+ * read every winner of the event as unplaced, and the sync stored that.
  */
 async function fetchWinnerPrizeMap(
 	uname: string,
 ): Promise<Map<number, { placement: string; award: string | null }>> {
 	const map = new Map<number, { placement: string; award: string | null }>();
-	try {
-		const res = await fetch(
-			`${DORAHACKS_API_BASE}/hackathon-winner-assignments?hackathon=${encodeURIComponent(uname)}`,
-			{
-				headers: DORA_BROWSER_HEADERS,
-				next: { revalidate: 3600 },
-				signal: AbortSignal.timeout(5000),
-			},
-		);
-		if (!res.ok) return map;
-		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
-		const data: any = await res.json();
-		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
-		const awards: any[] = Array.isArray(data?.award_list)
-			? data.award_list
-			: [];
-		for (const a of awards) {
-			for (const p of Array.isArray(a?.prizes) ? a.prizes : []) {
-				for (const bid of Array.isArray(p?.buidls) ? p.buidls : []) {
-					if (typeof bid === "number" && !map.has(bid)) {
-						map.set(bid, {
-							placement: typeof p?.name === "string" ? p.name : "Winner",
-							award: typeof a?.title === "string" ? a.title : null,
-						});
-					}
+	const res = await fetch(
+		`${DORAHACKS_API_BASE}/hackathon-winner-assignments?hackathon=${encodeURIComponent(uname)}`,
+		{
+			headers: DORA_BROWSER_HEADERS,
+			next: { revalidate: 3600 },
+			signal: AbortSignal.timeout(5000),
+		},
+	);
+	if (!res.ok)
+		throw new Error(`DoraHacks winners for ${uname}: HTTP ${res.status}`);
+	// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+	const data: any = await res.json();
+	// ponytail: a 200 without award_list still reads as no prizes; throw on it
+	// once DoraHacks' answer for an event with no winners is known.
+	// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
+	const awards: any[] = Array.isArray(data?.award_list) ? data.award_list : [];
+	for (const a of awards) {
+		for (const p of Array.isArray(a?.prizes) ? a.prizes : []) {
+			for (const bid of Array.isArray(p?.buidls) ? p.buidls : []) {
+				if (typeof bid === "number" && !map.has(bid)) {
+					map.set(bid, {
+						placement: typeof p?.name === "string" ? p.name : "Winner",
+						award: typeof a?.title === "string" ? a.title : null,
+					});
 				}
 			}
 		}
-	} catch (err) {
-		console.error(`Error fetching DoraHacks winners for ${uname}:`, err);
-		if (isAbortError(err)) throw err;
 	}
 	return map;
 }
@@ -351,15 +349,17 @@ async function fetchWinnerPrizeMap(
  * Fetches the live submission ("buidl") roster for one DoraHacks hackathon.
  * The v1 hub buidls endpoint is keyed by numeric hackathon id (uname is still
  * needed for the winner-assignments join), and each row nests the project
- * under `buidl`. Read-through: returns [] on any error (feed down / WAF /
- * unknown id) so callers degrade gracefully.
+ * under `buidl`. Read-through: returns [] on a failed roster read (feed down /
+ * WAF / unknown id) so callers degrade gracefully. A failed read of the
+ * winner assignments throws instead, as a timeout does: a roster without
+ * them would serve, and store, every winner as unplaced.
  */
 export async function fetchHackathonSubmissions(
 	hackathon: Pick<DoraHacksHackathon, "id" | "uname">,
 ): Promise<DoraHacksSubmission[]> {
+	const winners = await fetchWinnerPrizeMap(hackathon.uname);
 	const out: DoraHacksSubmission[] = [];
 	try {
-		const winners = await fetchWinnerPrizeMap(hackathon.uname);
 		let page = 1;
 		let reportedTotal: number | null = null;
 		// The cap is a runaway guard, NOT a size assumption. It used to be 6
@@ -439,6 +439,28 @@ export async function fetchHackathonSubmissions(
 		if (isAbortError(err)) throw err;
 	}
 	return out;
+}
+
+/** The sync's roster read: each event read whole, or skipped and named with
+ * why. A skipped event yields no rows, and the sync writes only rows it read,
+ * so the event's stored rows, winners included, stay as they are. */
+export async function readEventRosters(events: DoraHacksHackathon[]): Promise<{
+	read: Array<{ event: DoraHacksHackathon; subs: DoraHacksSubmission[] }>;
+	failed: Array<{ uname: string; error: string }>;
+}> {
+	const read: Array<{
+		event: DoraHacksHackathon;
+		subs: DoraHacksSubmission[];
+	}> = [];
+	const failed: Array<{ uname: string; error: string }> = [];
+	for (const event of events) {
+		try {
+			read.push({ event, subs: await fetchHackathonSubmissions(event) });
+		} catch (e) {
+			failed.push({ uname: event.uname, error: (e as Error).message });
+		}
+	}
+	return { read, failed };
 }
 
 /** One submission's own page, beyond what the event roster lists. */
@@ -609,7 +631,11 @@ export async function fetchLatestHackathonWinners(
 		.filter((h) => h.status === 2 && h.winner_announced)
 		.sort((a, b) => b.end_time - a.end_time);
 	for (const h of ended.slice(0, 2)) {
-		const subs = await fetchHackathonSubmissions(h);
+		// A failed read tries the next event; the page falls back to the
+		// curated roster when neither answers.
+		const subs = await fetchHackathonSubmissions(h).catch(
+			() => [] as DoraHacksSubmission[],
+		);
 		const winners = subs
 			.filter((s) => s.isWinner)
 			.map((s) => {

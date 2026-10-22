@@ -43,6 +43,11 @@ describe("curated hackathon builds", () => {
 			"Best Use of Stellar: TyFi",
 		]);
 		expect(w[0].id).toBe("curated-build-on-stellar-philippines-2026-abotpera");
+		// BitPinas: low-connectivity and zero-data use, places without stable
+		// internet; not a claim about mobile data plans.
+		expect(w[0].description).toMatch(
+			/little or no connectivity, for rural and remote areas without stable internet/,
+		);
 		for (const b of w) {
 			expect(b.url).toBe(
 				"https://bitpinas.com/feature/stellar-rise-in-ph-hackathon-concludes/",

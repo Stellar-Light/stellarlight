@@ -91,7 +91,7 @@ export const CURATED_BUILDS: CuratedBuild[] = [
 	ph2026(
 		"AbotPera",
 		"Champion",
-		"Digital payments app built to work with little or no mobile data, for rural and remote areas.",
+		"Digital payments app built to work with little or no connectivity, for rural and remote areas without stable internet.",
 	),
 	ph2026(
 		"PinkRaft",

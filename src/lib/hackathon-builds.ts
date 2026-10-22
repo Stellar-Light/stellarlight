@@ -128,7 +128,8 @@ const haystackOf = (
 
 /** Live read of the most recent ended DoraHacks events: the fallback when the
  * store has nothing to serve. Capped to bound cold-rebuild cost; the store has
- * no cap. */
+ * no cap. An event whose winners cannot be read fails it, as a timeout does:
+ * an index cached for an hour must not serve its winners as unplaced. */
 async function buildLiveIndex(): Promise<IndexedBuild[]> {
 	const ended = endedDoraHacksEvents(await fetchAllDoraHacksHackathons()).slice(
 		0,

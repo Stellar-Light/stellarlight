@@ -255,10 +255,12 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
 		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
 		const body = await getEvent();
-		expect(body.hackathon.stats).toMatchObject({
-			hiddenWinners: null,
-			winnersNote: null,
-		});
+		expect(body.hackathon.stats.hiddenWinners).toBeNull();
+		// No roster at all (the live read returned none): its 0 winners is
+		// not a count either.
+		expect(body.hackathon.stats.winnersNote).toMatch(
+			/^Winners could not be checked/,
+		);
 	});
 
 	it("a curated event has no DoraHacks roster to hide from", async () => {
@@ -402,6 +404,47 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 				end_time: Math.floor(Date.now() / 1000) + 86_400,
 			}),
 		).toBeNull();
+	});
+
+	it("with no stored copy and a failed live roster, the winners could not be checked", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		const outage = async (over: Partial<DoraHacksHackathon>) => {
+			vi.mocked(getHackathonBuildsIndex).mockRejectedValueOnce(
+				new Error("store down"),
+			);
+			// The live read now throws when DoraHacks' winner list cannot be read.
+			live.mockRejectedValueOnce(
+				new Error("DoraHacks winners for stellar-hacks-zk: HTTP 429"),
+			);
+			vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+				{ ...doraEvent, ...over } as Awaited<
+					ReturnType<typeof fetchAllDoraHacksHackathons>
+				>[number],
+			]);
+			const { GET } = await import("../route");
+			const res = await GET(
+				new NextRequest("https://x.test/api/hackathons/stellar-hacks-zk"),
+				{ params: Promise.resolve({ slug: "stellar-hacks-zk" }) },
+			);
+			expect(res.status).toBe(200);
+			const body = await res.json();
+			expect(body.winners).toEqual([]);
+			expect(body.hackathon.stats.totalSubmissions).toBeNull();
+			return body.hackathon.stats.winnersNote as string | null;
+		};
+		// An outage is not "not recorded": nothing could be checked.
+		for (const flag of [true, null])
+			expect(await outage({ winner_announced: flag })).toMatch(
+				/^Winners could not be checked: no submission of this event could be read .*so this 0 is not a count/,
+			);
+		// Not announced still stands on DoraHacks' own flag, without claiming
+		// a roster was read.
+		const notAnnounced = await outage({ winner_announced: false });
+		expect(notAnnounced).toMatch(/^Not announced upstream/);
+		expect(notAnnounced).not.toMatch(/no submission served here/);
 	});
 
 	it("winners named off DoraHacks carry the page that names them, and the note says who is not served", async () => {

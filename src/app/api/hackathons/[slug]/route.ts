@@ -235,10 +235,18 @@ function staticWinnersForSlug(slug: string): SubmissionRow[] {
 
 /** Why an ended DoraHacks event serves no winner, from DoraHacks' own
  * winner_announced flag: not announced is said as that, never as "none
- * won". null when the listing did not carry the flag (not checked). */
-function noWinnersNote(announced: boolean | null): string | null {
+ * won". With no submission read (the stored copy holds none and the live
+ * roster failed or was empty), a 0 is not a count: the winners could not be
+ * checked. null when the listing did not carry the flag and a roster was
+ * read (not checked). */
+function noWinnersNote(
+	announced: boolean | null,
+	rosterRead: boolean,
+): string | null {
 	if (announced === false)
-		return "Not announced upstream: DoraHacks lists this event's winners as not announced (winner_announced false in its event listing, which Scout refreshes hourly), and no submission served here carries a prize. This is not a claim that no one won: an organizer can name winners off DoraHacks.";
+		return `Not announced upstream: DoraHacks lists this event's winners as not announced (winner_announced false in its event listing, which Scout refreshes hourly)${rosterRead ? ", and no submission served here carries a prize" : ""}. This is not a claim that no one won: an organizer can name winners off DoraHacks.`;
+	if (!rosterRead)
+		return "Winners could not be checked: no submission of this event could be read (Scout's stored copy holds none, and DoraHacks' live roster failed or returned none), so this 0 is not a count.";
 	if (announced === true)
 		return "DoraHacks lists this event's winners as announced (winner_announced true), but no submission served here carries a prize, so its winners are not recorded here. This is not a claim that no one won.";
 	return null;
@@ -425,7 +433,12 @@ export async function GET(
 						url: b.url,
 						source: "dorahacks" as const,
 					}))
-				: await fetchHackathonSubmissions(dora);
+				: // A failed live read (its winners unreadable, a timeout)
+					// serves no roster; the winners note then says they could
+					// not be checked.
+					await fetchHackathonSubmissions(dora).catch(
+						() => [] as DoraHacksSubmission[],
+					);
 			// Hidden winners this page does not serve. The index is cached for
 			// an hour and its live fallback still lists hidden submissions, so
 			// a row flagged hidden can be on this page. [] claims a stored
@@ -474,7 +487,10 @@ export async function GET(
 				winnersNote ??=
 					WINNER_OVERLAY.find((e) => e.hackathonSlug === slug)?.note ?? null;
 			else if (!winners.length && status === "completed")
-				winnersNote ??= noWinnersNote(dora.winner_announced);
+				winnersNote ??= noWinnersNote(
+					dora.winner_announced,
+					liveSubmissions.length > 0,
+				);
 			const trackMap = new Map<
 				string,
 				{ name: string; submissionCount: number; winnerCount: number }
