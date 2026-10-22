@@ -382,6 +382,73 @@ describe("brief picks winners first, then broadens", () => {
 			"Team multisig",
 		]);
 	});
+
+	it("does not pull a winner that only mentions a one-word idea above the top five", async () => {
+		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
+		// Five builds about stablecoins, close in meaning, rank above a winner
+		// that mentions the word once and has no meaning score.
+		const pool = [
+			...[1, 2, 3, 4, 5].map((i) =>
+				build(`Peg ${i}`, "A stablecoin backed by treasuries."),
+			),
+			build("Tip jar", "Tips for streamers, with a stablecoin option.", true),
+		];
+		const semantic = new Map(pool.slice(0, 5).map((b) => [b.id, 0.8]));
+		const scored = searchHackathonBuilds(pool, "stablecoin", {
+			perSubmission: true,
+			mode: "hybrid",
+			semantic,
+		});
+		expect(scored.findIndex((s) => s.b.name === "Tip jar")).toBe(5);
+		const picks = pickBriefBuilds(scored).map((s) => s.b.name);
+		expect(picks).not.toContain("Tip jar");
+		expect(picks).toHaveLength(5);
+	});
+});
+
+describe("textShare reads the build's own words", () => {
+	const withText = (
+		name: string,
+		description: string,
+		extra: Partial<IndexedBuild> = {},
+	): IndexedBuild => {
+		const b = { ...build(name, description), ...extra };
+		return {
+			...b,
+			haystack:
+				`${b.name} ${b.description ?? ""} ${b.track ?? ""} ${b.award ?? ""}`.toLowerCase(),
+		};
+	};
+	const textShares = (pool: IndexedBuild[], q: string) =>
+		Object.fromEntries(
+			searchHackathonBuilds(pool, q).map((s) => [s.b.name, s.textShare]),
+		);
+
+	it("counts the word in a name or description, not only in a track or award", () => {
+		expect(
+			textShares(
+				[
+					withText("Peg", "Stablecoins backed by treasuries."),
+					withText("Swap", "A DEX.", {
+						award: "Best Stablecoin Integration",
+					}),
+					withText("Rail", "Payroll.", { track: "Stablecoin track" }),
+				],
+				"stablecoin",
+			),
+		).toEqual({ Peg: 1, Swap: 0, Rail: 0 });
+	});
+
+	it("does not count a synonym as the idea's word", () => {
+		// The search matches "usdc" for "stablecoin"; a build that only pays in
+		// USDC is not a stablecoin build.
+		expect(
+			textShares(
+				[withText("Toll", "Per-call USDC micropayments for MCP servers.")],
+				"stablecoin",
+			),
+		).toEqual({ Toll: 0 });
+	});
 });
 
 describe("one submission in full", () => {

@@ -20,7 +20,7 @@ import { buildContractsRegistry, type ContractRow } from "./contracts-registry";
 import { queryBuilds } from "./hackathon-build-query";
 import { getHackathonBuildsIndex, type ScoredBuild } from "./hackathon-builds";
 import { heldSecurity } from "./held-repos";
-import { isPriorArtEvidence, priorArtTop } from "./prior-art-rank";
+import { priorArtTop, twoWordsOrMeaning } from "./prior-art-rank";
 import {
 	buildScfPitch,
 	countWentQuiet,
@@ -181,11 +181,13 @@ export interface HackathonBrief {
  * matching one word of three is not prior art. Every build listed passes
  * vetIdea's evidence rule (isPriorArtEvidence), so the brief never lists a
  * build vetIdea would reject; it may list a winner ranked below vetIdea's
- * top five.
+ * top five. Such a winner needs two matched words or a meaning score of 0.7
+ * (twoWordsOrMeaning), not the rule's one-word path: on a one-word idea every
+ * winner that mentions the word would qualify, ahead of builds ranked above it.
  */
 export function pickBriefBuilds(scored: ScoredBuild[]) {
 	const winners = scored
-		.filter((s) => s.b.isWinner && s.share >= 0.5 && isPriorArtEvidence(s))
+		.filter((s) => s.b.isWinner && s.share >= 0.5 && twoWordsOrMeaning(s))
 		.slice(0, 2);
 	const seen = new Set(winners.map((s) => s.b.id));
 	return [

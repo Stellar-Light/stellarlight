@@ -3,6 +3,7 @@ import {
 	isPriorArtEvidence,
 	priorArtTop,
 	rankPriorArt,
+	twoWordsOrMeaning,
 } from "../prior-art-rank";
 
 // A judged set where "app" and "stellar" are everywhere, as in the real one.
@@ -166,6 +167,29 @@ describe("isPriorArtEvidence", () => {
 		// Search by meaning down: no score, so one word is not enough.
 		expect(isPriorArtEvidence({ matched: ["x", "y"] })).toBe(true);
 		expect(isPriorArtEvidence({ matched: ["x"] })).toBe(false);
+	});
+
+	it("counts a build whose own words use every word of the idea, so a one-word idea gets prior art", () => {
+		// The search reads "remittance app" as one word ("app" is generic), so
+		// two matched words could never happen: vetIdea served [] while
+		// searchHackathonBuilds matched 16 (live probe, 2026-10-22).
+		expect(isPriorArtEvidence({ matched: ["remittance"], textShare: 1 })).toBe(
+			true,
+		);
+		// Half of a two-word idea is still not prior art.
+		expect(isPriorArtEvidence({ matched: ["multisig"], textShare: 0.5 })).toBe(
+			false,
+		);
+		// Matched, but only through a synonym or the track or award text.
+		expect(isPriorArtEvidence({ matched: ["stablecoin"], textShare: 0 })).toBe(
+			false,
+		);
+	});
+
+	it("leaves the one-word path out of twoWordsOrMeaning", () => {
+		expect(twoWordsOrMeaning({ matched: ["remittance"] })).toBe(false);
+		expect(twoWordsOrMeaning({ matched: ["x", "y"] })).toBe(true);
+		expect(twoWordsOrMeaning({ similarity: 0.7, matched: [] })).toBe(true);
 	});
 });
 

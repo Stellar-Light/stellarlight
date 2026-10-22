@@ -488,12 +488,17 @@ export function buildsForRepos(
 // self-referential SSR fetches fail on Vercel). The route calls this too, so
 // the two can never drift.
 
+/** A query token and its plural or singular. */
+function wordForms(token: string): string[] {
+	if (token.length > 3 && token.endsWith("s"))
+		return [token, token.slice(0, -1)];
+	return token.length > 2 ? [token, `${token}s`] : [token];
+}
+
 /** Expand a query token with a plural/singular stem + shared vocabulary synonyms
  *  so niche phrasing matches (nft↔non-fungible, lending↔loan/credit, …). */
 export function expandBuildTerm(token: string): string[] {
-	const out = new Set<string>([token]);
-	if (token.length > 3 && token.endsWith("s")) out.add(token.slice(0, -1));
-	else if (token.length > 2) out.add(`${token}s`);
+	const out = new Set<string>(wordForms(token));
 	for (const syn of CORE_SYNONYMS[token] ?? []) out.add(syn);
 	return [...out];
 }
@@ -506,6 +511,12 @@ export interface ScoredBuild {
 	coverage: number;
 	/** Share of the query's concepts the build covers, 0 to 1. */
 	share: number;
+	/** Share of the query's concepts the build's own name or description
+	 * uses as typed (or in the plural or singular), 0 to 1; set on word
+	 * matches. A synonym does not count ("usdc" is not "stablecoin"), nor does
+	 * track or award text, which names a category every entry in it shares
+	 * ("Best Stablecoin Integration"). */
+	textShare?: number;
 	/** Vector similarity to the query, when search by meaning ran. */
 	similarity?: number;
 }
@@ -615,13 +626,17 @@ export function searchHackathonBuilds(
 		raw.filter((t) => t.includes("-")).flatMap((t) => t.split("-")),
 	);
 	const tokens = raw.filter((t) => !parts.has(t));
-	const terms = tokens.map((t) => ({
-		t,
-		variants: [
-			...expandBuildTerm(t),
-			...(t.includes("-") ? [t.replace(/-/g, " "), t.replace(/-/g, "")] : []),
-		].map(termMatcher),
-	}));
+	const terms = tokens.map((t) => {
+		const joined = t.includes("-")
+			? [t.replace(/-/g, " "), t.replace(/-/g, "")]
+			: [];
+		return {
+			t,
+			variants: [...expandBuildTerm(t), ...joined].map(termMatcher),
+			// The word as typed, without synonyms: what textShare reads.
+			own: [...wordForms(t), ...joined].map(termMatcher),
+		};
+	});
 	// Rarer words say more. In an agents hackathon "agents" is everywhere and
 	// "x402" is not, so a build is weighed by WHICH words it covers, not how
 	// many: counting words let descriptions padded with common ones ("per",
@@ -638,8 +653,11 @@ export function searchHackathonBuilds(
 		let score = 0;
 		let nameMatched = false;
 		const matched = new Set<string>();
+		// Concepts the build's own name or description uses as typed.
+		const inText = new Set<string>();
 		const name = b.name.toLowerCase();
-		for (const { t, variants } of terms) {
+		const text = `${name} ${b.description ?? ""}`.toLowerCase();
+		for (const { t, variants, own } of terms) {
 			for (const hit of variants) {
 				if (hit(name)) {
 					score += 3;
@@ -650,6 +668,7 @@ export function searchHackathonBuilds(
 					matched.add(t);
 				}
 			}
+			if (own.some((hit) => hit(text))) inText.add(t);
 		}
 		if (
 			score > 0 &&
@@ -667,6 +686,7 @@ export function searchHackathonBuilds(
 				matched: [...matched],
 				coverage,
 				share: matched.size / (tokens.length || 1),
+				textShare: inText.size / (tokens.length || 1),
 			});
 		}
 	}
