@@ -16,6 +16,7 @@
 
 import { Memo, TransactionBuilder } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import {
 	AUTHORIZATION_NONCE_RE,
 	BALLOT_FEE_PER_OP,
@@ -63,12 +64,7 @@ export async function POST(req: NextRequest) {
 		limit: 600,
 		windowMs: 10 * 60 * 1000,
 	});
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{ error: "rate limit exceeded" },
-			{ status: 429, headers: rateLimitHeaders(limit) },
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 
 	let body: {
 		signedXdr?: unknown;

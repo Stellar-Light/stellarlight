@@ -822,9 +822,11 @@ export interface components {
         RetryableError: {
             /** @description What failed, in one line. */
             error: string;
+            /** @description On a 429: the wait and the next step in words, the same number as retryAfterSeconds ('Wait 37 seconds, then resend the same request.'), for a consumer that keeps only error and hint. */
+            hint?: string;
             /** @description What the failure is not a claim about, and what to do (retry after Retry-After, or where else to look). */
             advisory?: string;
-            /** @description Seconds to wait before resending; the same value as the Retry-After header. 2 on database reads, 60 or 300 on the skills registry. */
+            /** @description Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait; on a 503, 2 on database reads and 60 or 300 on the skills registry. */
             retryAfterSeconds: number;
         };
         /** @description The request itself was wrong (a 400): fix the call, do not retry it as is. */
@@ -2995,6 +2997,21 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     getChangelog: {
@@ -4691,12 +4708,20 @@ export interface operations {
                     };
                 };
             };
-            /** @description Rate limited */
+            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
             /** @description AI backend unavailable — fall back to GET /api/partners */
             503: {
@@ -4778,12 +4803,20 @@ export interface operations {
                     };
                 };
             };
-            /** @description Rate limited */
+            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
             /** @description AI backend unavailable */
             503: {
@@ -4856,12 +4889,20 @@ export interface operations {
                     };
                 };
             };
-            /** @description Rate limited */
+            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
             /** @description AI backend unavailable */
             503: {
@@ -4946,12 +4987,20 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Rate limited */
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
         };
     };
@@ -5185,6 +5234,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
         };
     };
@@ -5442,12 +5506,20 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Rate limited (30/min/IP). */
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
             /** @description Index unavailable. */
             503: {
@@ -5565,6 +5637,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
         };
     };
@@ -5693,6 +5780,21 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     listContracts: {
@@ -5792,6 +5894,21 @@ export interface operations {
                     };
                 };
             };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     listAudits: {
@@ -5887,6 +6004,21 @@ export interface operations {
                             engagementId?: string | null;
                         }[];
                     };
+                };
+            };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };
@@ -5995,10 +6127,10 @@ export interface operations {
                     "application/json": components["schemas"]["RequestError"];
                 };
             };
-            /** @description This instance's per-minute window is spent. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from these headers is approximate; wait Retry-After and resend. */
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
-                    /** @description Seconds until this instance's window resets. */
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
                     "Retry-After"?: number;
                     /** @description Always `instance`: the counter is per serverless instance, not global. */
                     "X-RateLimit-Scope"?: "instance";
@@ -6598,13 +6730,19 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Rate limit exceeded */
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };

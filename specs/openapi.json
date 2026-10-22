@@ -2207,6 +2207,39 @@
 					},
 					"400": {
 						"description": "Missing or invalid since, an unknown parameter (named with the supported set in hint), or an invalid surface; never silently ignored."
+					},
+					"429": {
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -7229,7 +7262,37 @@
 						}
 					},
 					"429": {
-						"description": "Rate limited"
+						"description": "This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					},
 					"503": {
 						"description": "AI backend unavailable — fall back to GET /api/partners",
@@ -7449,7 +7512,37 @@
 						}
 					},
 					"429": {
-						"description": "Rate limited"
+						"description": "This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					},
 					"503": {
 						"description": "AI backend unavailable",
@@ -7632,7 +7725,37 @@
 						}
 					},
 					"429": {
-						"description": "Rate limited"
+						"description": "This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					},
 					"503": {
 						"description": "AI backend unavailable",
@@ -7847,7 +7970,37 @@
 						}
 					},
 					"429": {
-						"description": "Rate limited"
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -8489,6 +8642,39 @@
 					},
 					"400": {
 						"description": "Missing/too-short q or unknown params."
+					},
+					"429": {
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -9215,7 +9401,37 @@
 						"description": "Bad or unknown query param."
 					},
 					"429": {
-						"description": "Rate limited (30/min/IP)."
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					},
 					"503": {
 						"description": "Index unavailable."
@@ -9523,6 +9739,39 @@
 					},
 					"400": {
 						"description": "Missing/too-short q or unknown params."
+					},
+					"429": {
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -9883,6 +10132,39 @@
 					},
 					"404": {
 						"description": "Repo not in the index (absence of evidence, not a verdict)."
+					},
+					"429": {
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -10185,6 +10467,39 @@
 								}
 							}
 						}
+					},
+					"429": {
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
+								}
+							}
+						}
 					}
 				}
 			}
@@ -10467,6 +10782,39 @@
 											}
 										}
 									}
+								}
+							}
+						}
+					},
+					"429": {
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
+						"content": {
+							"application/json": {
+								"schema": {
+									"$ref": "#/components/schemas/RetryableError"
 								}
 							}
 						}
@@ -10949,10 +11297,10 @@
 						}
 					},
 					"429": {
-						"description": "This instance's per-minute window is spent. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from these headers is approximate; wait Retry-After and resend.",
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
 						"headers": {
 							"Retry-After": {
-								"description": "Seconds until this instance's window resets.",
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
 								"schema": {
 									"type": "integer"
 								}
@@ -12651,11 +12999,34 @@
 						}
 					},
 					"429": {
-						"description": "Rate limit exceeded",
+						"description": "This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.",
+						"headers": {
+							"Retry-After": {
+								"description": "Seconds to wait; the same number as retryAfterSeconds.",
+								"schema": {
+									"type": "integer"
+								}
+							},
+							"X-RateLimit-Scope": {
+								"description": "Always `instance`: the counter is per serverless instance, not global.",
+								"schema": {
+									"type": "string",
+									"enum": [
+										"instance"
+									]
+								}
+							},
+							"Server-Timing": {
+								"description": "Our own wall time, as on a 200.",
+								"schema": {
+									"type": "string"
+								}
+							}
+						},
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse"
+									"$ref": "#/components/schemas/RetryableError"
 								}
 							}
 						}
@@ -13352,13 +13723,17 @@
 						"type": "string",
 						"description": "What failed, in one line."
 					},
+					"hint": {
+						"type": "string",
+						"description": "On a 429: the wait and the next step in words, the same number as retryAfterSeconds ('Wait 37 seconds, then resend the same request.'), for a consumer that keeps only error and hint."
+					},
 					"advisory": {
 						"type": "string",
 						"description": "What the failure is not a claim about, and what to do (retry after Retry-After, or where else to look)."
 					},
 					"retryAfterSeconds": {
 						"type": "integer",
-						"description": "Seconds to wait before resending; the same value as the Retry-After header. 2 on database reads, 60 or 300 on the skills registry."
+						"description": "Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait; on a 503, 2 on database reads and 60 or 300 on the skills registry."
 					}
 				}
 			},

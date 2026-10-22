@@ -77,6 +77,37 @@ const VERIFY_CLAIM_TYPES = ["audited", "live", "maintained", "issued"];
 // from live observation + the serializer's own TS interface. Keeping ONE
 // schema per shared shape here is what keeps the copies from drifting.
 
+/** The 429 every rate-limited operation answers (rateLimited and
+ * modelRateLimited in src/lib/api-error.ts). The wait is in `hint` too: a
+ * consumer may keep only `error` and `hint`. */
+const rateLimited429 = (callsModel = false) => ({
+	description: `${
+		callsModel
+			? "This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none)."
+			: "This endpoint's rate window is spent."
+	} hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.`,
+	headers: {
+		"Retry-After": {
+			description: "Seconds to wait; the same number as retryAfterSeconds.",
+			schema: { type: "integer" },
+		},
+		"X-RateLimit-Scope": {
+			description:
+				"Always `instance`: the counter is per serverless instance, not global.",
+			schema: { type: "string", enum: [RATE_LIMIT_SCOPE] },
+		},
+		"Server-Timing": {
+			description: "Our own wall time, as on a 200.",
+			schema: { type: "string" },
+		},
+	},
+	content: {
+		"application/json": {
+			schema: { $ref: "#/components/schemas/RetryableError" },
+		},
+	},
+});
+
 /** One-shot report meta — {source, generatedAt, note} (scf-pitch,
  * hackathon-brief, vet-idea, repos/trust routes serve exactly this). */
 const REPORT_META_SCHEMA = {
@@ -2344,6 +2375,7 @@ export const spec: OpenAPISpec = {
 						description:
 							"Missing or invalid since, an unknown parameter (named with the supported set in hint), or an invalid surface; never silently ignored.",
 					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -4953,7 +4985,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": { description: "Rate limited" },
+					"429": rateLimited429(true),
 					"503": {
 						description:
 							"AI backend unavailable — fall back to GET /api/partners",
@@ -5132,7 +5164,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": { description: "Rate limited" },
+					"429": rateLimited429(true),
 					"503": {
 						description: "AI backend unavailable",
 						content: {
@@ -5262,7 +5294,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": { description: "Rate limited" },
+					"429": rateLimited429(true),
 					"503": {
 						description: "AI backend unavailable",
 						content: {
@@ -5420,7 +5452,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": { description: "Rate limited" },
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -5750,6 +5782,7 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"400": { description: "Missing/too-short q or unknown params." },
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -6049,7 +6082,7 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"400": { description: "Bad or unknown query param." },
-					"429": { description: "Rate limited (30/min/IP)." },
+					"429": rateLimited429(),
 					"503": { description: "Index unavailable." },
 				},
 			},
@@ -6262,6 +6295,7 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"400": { description: "Missing/too-short q or unknown params." },
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -6440,6 +6474,7 @@ export const spec: OpenAPISpec = {
 						description:
 							"Repo not in the index (absence of evidence, not a verdict).",
 					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -6661,6 +6696,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -6879,6 +6915,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -7274,30 +7311,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": {
-						description:
-							"This instance's per-minute window is spent. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from these headers is approximate; wait Retry-After and resend.",
-						headers: {
-							"Retry-After": {
-								description: "Seconds until this instance's window resets.",
-								schema: { type: "integer" },
-							},
-							"X-RateLimit-Scope": {
-								description:
-									"Always `instance`: the counter is per serverless instance, not global.",
-								schema: { type: "string", enum: [RATE_LIMIT_SCOPE] },
-							},
-							"Server-Timing": {
-								description: "Our own wall time, as on a 200.",
-								schema: { type: "string" },
-							},
-						},
-						content: {
-							"application/json": {
-								schema: { $ref: "#/components/schemas/RetryableError" },
-							},
-						},
-					},
+					"429": rateLimited429(),
 					"503": {
 						description:
 							"A read failed: the database handle could not be opened, or both the vector and the keyword stage threw. An outage, NOT an empty result: retry after Retry-After.",
@@ -8657,14 +8671,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": {
-						description: "Rate limit exceeded",
-						content: {
-							"application/json": {
-								schema: { $ref: "#/components/schemas/ErrorResponse" },
-							},
-						},
-					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -9232,6 +9239,11 @@ export const spec: OpenAPISpec = {
 				required: ["error", "retryAfterSeconds"],
 				properties: {
 					error: { type: "string", description: "What failed, in one line." },
+					hint: {
+						type: "string",
+						description:
+							"On a 429: the wait and the next step in words, the same number as retryAfterSeconds ('Wait 37 seconds, then resend the same request.'), for a consumer that keeps only error and hint.",
+					},
 					advisory: {
 						type: "string",
 						description:
@@ -9240,7 +9252,7 @@ export const spec: OpenAPISpec = {
 					retryAfterSeconds: {
 						type: "integer",
 						description:
-							"Seconds to wait before resending; the same value as the Retry-After header. 2 on database reads, 60 or 300 on the skills registry.",
+							"Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait; on a 503, 2 on database reads and 60 or 300 on the skills registry.",
 					},
 				},
 			},

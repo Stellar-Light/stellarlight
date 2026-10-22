@@ -31,8 +31,9 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
+import { modelRateLimited, rateLimited } from "@/lib/api-error";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
-import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -247,18 +248,7 @@ export async function POST(req: NextRequest) {
 		limit: RATE_LIMIT_MAX,
 		windowMs: RATE_LIMIT_WINDOW_MS,
 	});
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{ error: "Too many messages — give it a moment and try again." },
-			{
-				status: 429,
-				headers: {
-					...rateLimitHeaders(limit),
-					"Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)),
-				},
-			},
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 
 	const anthropic = getAnthropic();
 	if (!anthropic) {
@@ -372,12 +362,8 @@ export async function POST(req: NextRequest) {
 			{ status: 400 },
 		);
 	} catch (err) {
-		if (err instanceof Anthropic.RateLimitError) {
-			return NextResponse.json(
-				{ error: "Busy right now — try again in a moment." },
-				{ status: 429 },
-			);
-		}
+		if (err instanceof Anthropic.RateLimitError)
+			return modelRateLimited(err.headers?.get("retry-after"));
 		// Auth / billing / permission failures (401/403, and the 400 "credit
 		// balance too low") are OUR account-config problem, not the partner's —
 		// surface them like the no-key case so the UI falls back cleanly to the

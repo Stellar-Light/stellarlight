@@ -18,6 +18,7 @@
 
 import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import { roundOpenState } from "@/lib/awards/ballot";
 import { loadRoundResult } from "@/lib/awards/round";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -32,12 +33,7 @@ export async function GET(req: NextRequest) {
 		limit: 300,
 		windowMs: 5 * 60 * 1000,
 	});
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{ error: "rate limit exceeded" },
-			{ status: 429, headers: rateLimitHeaders(limit) },
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 	const address = (req.nextUrl.searchParams.get("address") ?? "")
 		.trim()
 		.toUpperCase();

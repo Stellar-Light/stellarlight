@@ -21,7 +21,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { apiError } from "@/lib/api-error";
+import { rateLimited } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { clampLimit } from "@/lib/http-params";
@@ -68,20 +68,7 @@ export async function GET(req: NextRequest) {
 		limit: 60,
 		windowMs: 60_000,
 	});
-	if (!limit.allowed) {
-		return apiError({
-			status: 429,
-			error: "rate limit exceeded",
-			advisory:
-				"This instance's per-minute window is spent (counters are per serverless instance: X-RateLimit-Scope: instance). Wait Retry-After and resend; this says nothing about the data.",
-			retryAfterSeconds: Math.max(
-				1,
-				Math.ceil((limit.resetAt - Date.now()) / 1000),
-			),
-			startedAt,
-			headers: rateLimitHeaders(limit),
-		});
-	}
+	if (!limit.allowed) return rateLimited(limit, { startedAt });
 
 	const sp = req.nextUrl.searchParams;
 
