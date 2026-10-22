@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-10-21T10:50:51.000Z",
-	"specVersion": "1.9.83",
+	"generatedAt": "2026-10-22T10:52:19.259Z",
+	"specVersion": "1.9.87",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
