@@ -20,14 +20,25 @@
  *
  * CI (contract-gate.yml) runs --check on every PR: a spec edit without the
  * regenerated snapshot+types fails, and a snapshot change without a changelog
- * entry fails (checked in the workflow). The daily live checks
+ * entry fails (checked in the workflow). --check also holds the consumer
+ * safety promises (consumer-safety.ts): every non-GET operation declares
+ * x-side-effecting, and no operationId on the base branch disappears unless
+ * a changelog entry at the new version announces it as
+ * `BREAKING: <operationId>`. The daily live checks
  * (check-api-drift.ts field coverage) remain the backstop for data/deploy
  * drift that PR-time can't see.
  */
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import { CHANGELOG } from "../../src/lib/changelog";
 import { spec } from "../../src/lib/openapi-spec";
+import { API_VERSION } from "../../src/lib/version";
+import {
+	operationIds,
+	sideEffectingProblems,
+	unannouncedRemovals,
+} from "./consumer-safety";
 
 const ROOT = join(import.meta.dirname, "..", "..");
 const SNAPSHOT = join(ROOT, "specs", "openapi.json");
@@ -58,6 +69,50 @@ function buildSchemaTs(snapshotPath: string): string {
 		{ cwd: ROOT, encoding: "utf8", maxBuffer: 32 * 1024 * 1024 },
 	);
 	return GENERATED_HEADER + out;
+}
+
+/** The snapshot committed where this branch forks from its base branch: the
+ * operationIds consumers have today. CONTRACT_BASE overrides the base ref. */
+function baseSnapshot(): { at: string; spec: object } {
+	const ref =
+		process.env.CONTRACT_BASE ??
+		`origin/${process.env.GITHUB_BASE_REF || "main"}`;
+	const git = (args: string[]) =>
+		execFileSync("git", args, {
+			cwd: ROOT,
+			encoding: "utf8",
+			maxBuffer: 64 * 1024 * 1024,
+			stdio: ["ignore", "pipe", "pipe"],
+		});
+	const base = git(["merge-base", "HEAD", ref]).trim();
+	return {
+		at: `${ref} (${base.slice(0, 8)})`,
+		spec: JSON.parse(git(["show", `${base}:specs/openapi.json`])),
+	};
+}
+
+function consumerSafetyProblems(): { problems: string[]; base?: string } {
+	const problems = sideEffectingProblems(spec);
+	let base: ReturnType<typeof baseSnapshot>;
+	try {
+		base = baseSnapshot();
+	} catch (e) {
+		const why = String((e as { stderr?: unknown }).stderr || e).trim();
+		problems.push(
+			`could not read the base branch's specs/openapi.json to compare operationIds (${why.split("\n")[0]}): fetch origin/main, or set CONTRACT_BASE to the ref this branch merges into`,
+		);
+		return { problems };
+	}
+	for (const id of unannouncedRemovals(
+		operationIds(base.spec),
+		operationIds(spec),
+		CHANGELOG,
+		API_VERSION,
+	))
+		problems.push(
+			`operationId ${id} is in ${base.at} and not in this spec: a removal or rename breaks every consumer keyed on it. Keep it, or announce it in a changelog entry at spec@${API_VERSION} as "BREAKING: ${id}"`,
+		);
+	return { problems, base: base.at };
 }
 
 function main() {
@@ -91,6 +146,15 @@ function main() {
 			process.exit(1);
 		}
 		console.log("✓ contract artifacts are fresh (snapshot + generated types)");
+		const { problems, base } = consumerSafetyProblems();
+		if (problems.length) {
+			console.error(`✗ consumer safety: ${problems.length} problem(s)`);
+			for (const p of problems) console.error(`   ${p}`);
+			process.exit(1);
+		}
+		console.log(
+			`✓ consumer safety: every non-GET operation declares x-side-effecting; every operationId in ${base} is served or announced as BREAKING: <operationId>`,
+		);
 		return;
 	}
 

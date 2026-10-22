@@ -1,6 +1,12 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
+import { BUILD_HOLD } from "@/lib/held-repos";
+import { spec } from "@/lib/openapi-spec";
+import {
+	responseSchema,
+	undeclaredInServed,
+} from "../../../../../../scripts/contract/served-shape";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 const storedEvent = {
@@ -311,5 +317,71 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 			winnersNote: null,
 		});
 		expect(body.submissions).toHaveLength(2);
+	});
+
+	it("declares every served field and null outside the open maps: winners, stats, rules, profile", async () => {
+		// hackathon, submissions[] and tracks[] are open maps
+		// (additionalProperties: true): a key the spec does not name passes
+		// there unjudged. Their declared children (stats, rules, profile,
+		// description) are judged like any other field.
+		const undeclared = (body: unknown) =>
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			);
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		// A stored winner with a held repo, a project and repo activity;
+		// voteCount is null on every stored row (DoraHacks stopped serving it).
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			build("w", {
+				isWinner: true,
+				hackathonPlacement: "1st Place - $5,000 in XLM",
+				security: BUILD_HOLD,
+				project: {
+					slug: "acme",
+					name: "Acme",
+					basis: "repo",
+					status: "Live",
+					scfAwarded: true,
+					factsReadAt: "2026-10-05T00:00:00.000Z",
+				},
+				activity: { lastCommitAt: null, archived: false },
+			}),
+			build("x"),
+		]);
+		hiddenRows = [{ buildId: "h1", placement: "2nd Place" }];
+		const stored = await getEvent();
+		expect(stored.winners[0].voteCount).toBeNull();
+		expect(stored.winners[0].security).toEqual(BUILD_HOLD);
+		expect(stored.hackathon.stats.outcomes.unknown).toBe(2);
+
+		// The curated roster: who built it, and the directory row's fields.
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			{
+				...doraEvent,
+				uname: "stellar-builder-summit-2026",
+				source: "curated",
+			} as Awaited<ReturnType<typeof fetchAllDoraHacksHackathons>>[number],
+		]);
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
+		const { GET } = await import("../route");
+		const roster = await (
+			await GET(
+				new NextRequest(
+					"https://x.test/api/hackathons/stellar-builder-summit-2026",
+				),
+				{ params: Promise.resolve({ slug: "stellar-builder-summit-2026" }) },
+			)
+		).json();
+		expect(roster.winners[0]).toHaveProperty("builder");
+		expect(roster.hackathon.stats.outcomes).toBeNull();
+		expect({
+			stored: undeclared(stored),
+			roster: undeclared(roster),
+		}).toEqual({ stored: [], roster: [] });
 	});
 });
