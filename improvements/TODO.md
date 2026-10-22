@@ -163,14 +163,17 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    1.9.90 (i01, i04, i11) and measured on 1.9.91 over all 40 labeled ideas
    (`improvements/audits/2026-10-22-prior-art-precision/`): of 17 wrong
    builds listed for the 27 working ideas, 12 pass on the meaning score
-   alone, 5 on the meaning score with two words, none on words alone.
+   alone, 4 on the meaning score with two words, 1 on all three conditions,
+   none on words alone.
    State: not fixed. No filter-only rule met the ship criteria. Weighing the
    word path by rarity removes 4 of 16 wrong builds on the 13 held-out ideas
    but none on working and drops a same-idea build on the short-idea set;
    a higher meaning floor for meaning-only builds drops same-idea builds on
-   every set (a same-idea build scores 0.701, and one ties a wrong build at
-   0.733). i01's Delibera uses every word of the idea and scores 0.788, so
-   no rule over words or the meaning score removes it. Labels are drafts.
+   working at every floor tried (a same-idea build scores 0.701, and one
+   ties a wrong build at 0.733), on the short and test sets at 0.735, and on
+   the holdout from 0.745. i01's Delibera uses every word of the idea and
+   scores 0.788, so a floor above that also drops same-idea builds on other
+   ideas. Labels are drafts.
    Done when: a rule, measured as in that directory on a fresh held-out
    slice, lists fewer builds graded 0 with no build graded 2 lost on any
    labeled set, and QR Mint and Stellar Automations Studio are no longer
