@@ -102,9 +102,8 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    gitleaks 8.30.1, its checksum pinned in the workflow, on every PR range
    and every push to main; from its own PR on, it ran 13 times on
    2026-10-21 and passed every time (#1843 merged before the workflow
-   reached main). A
-   local full-history scan on 2026-10-21 (2,474 commits)
-   found 10 findings, none a credential; `.gitleaksignore` records each
+   reached main). A local full-history scan on 2026-10-21 (gitleaks
+   reported 2,474 commits scanned) found 10 findings, none a credential; `.gitleaksignore` records each
    with its reason. GitHub's own secret scanning and push protection are
    owner settings.
    Done when: a secret is stopped before it is public, by GitHub push

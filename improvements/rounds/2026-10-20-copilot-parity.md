@@ -128,11 +128,11 @@ the diff and the evidence it needed.
 - 19:20 UTC (orch): `gitleaks git --redact=100 --no-banner --log-opts=origin/main --report-format json --report-path <scratch file> .`
   (8.30.1, run locally so findings stay out of public Actions logs;
   <scratch file> is a JSON report in the session scratchpad, not
-  committed): 2,474
-  commits, 10 findings, none a credential: six Airtable base, table and
-  view ids (each match holds one 17-character value starting app, tbl or
-  viw), two expiring signed attachment URLs, a key naming an array in
-  `engine-b-sweeps-latest.json`, and a README placeholder. Each recorded
+  committed): gitleaks reported 2,474 commits scanned and 10 findings,
+  none a credential: six Airtable base, table and view ids (each match
+  holds one 17-character value starting app, tbl or viw), two Airtable
+  attachment URLs, a property name in `engine-b-sweeps-latest.json`, and
+  a README curl example whose header value is a placeholder. Each recorded
   with its reason in `.gitleaksignore`; at 19:22 UTC the same scan
   reported no leaks.
 - From 19:23:12 UTC (orch), when `GET /api/openapi.json` first reported
