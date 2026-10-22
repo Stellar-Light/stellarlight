@@ -20,6 +20,7 @@
 
 import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import {
 	ballotSourceOf,
 	buildStatusTx,
@@ -46,12 +47,7 @@ export async function POST(req: NextRequest) {
 		windowMs: 10 * 60 * 1000,
 	});
 	const headers = rateLimitHeaders(limit);
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{ error: "rate limit exceeded" },
-			{ status: 429, headers },
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 	let body: { address?: unknown; signedXdr?: unknown; round?: unknown };
 	try {
 		body = await req.json();

@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
 	// Public unauthenticated write — cap it so it can't flood the M0.
@@ -9,12 +10,7 @@ export async function POST(request: NextRequest) {
 		limit: 10,
 		windowMs: 60_000,
 	});
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{ message: "Too many submissions — try again shortly." },
-			{ status: 429, headers: rateLimitHeaders(limit) },
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 	try {
 		const body = await request.json();
 

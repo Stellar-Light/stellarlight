@@ -25,6 +25,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
 	claimVerifiedByDomain,
@@ -68,16 +69,7 @@ export async function POST(req: NextRequest) {
 		limit: 5,
 		windowMs: 10 * 60_000,
 	});
-	if (!limit.allowed) {
-		const retry = Math.ceil((limit.resetAt - Date.now()) / 1000);
-		return NextResponse.json(
-			{ error: "Too many requests — try again shortly." },
-			{
-				status: 429,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": String(retry) },
-			},
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 
 	let email = "";
 	try {

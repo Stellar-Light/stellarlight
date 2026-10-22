@@ -1,10 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
 	distribution,
 	distributionBy,
 	winnersVsOthers,
 } from "@/lib/hackathon-analytics";
-import { parseBuildFilters } from "@/lib/hackathon-build-query";
+import {
+	type ListedEvents,
+	parseBuildFilters,
+} from "@/lib/hackathon-build-query";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 
 const NOW = Date.parse("2026-10-05T00:00:00Z");
@@ -155,30 +158,181 @@ describe("winners against the rest", () => {
 });
 
 describe("shared filters", () => {
+	const events = [
+		build("a1", { event: "a" }),
+		build("b1", { event: "b" }),
+		build("z1", {
+			hackathon: {
+				title: "Stellar Hacks: Agents",
+				slug: "stellar-agents-x402-stripe-mpp",
+				endedAt: "2026-04-13",
+			},
+		}),
+		build("c1", {
+			hackathon: {
+				title: "Stellar Ideaton: Build, Create & Win on the Road to Meridian",
+				slug: "telluscoop-ideaton",
+				endedAt: "2025-09-01",
+			},
+		}),
+	];
+	// What getHackathons lists beyond the index: events with no stored
+	// submissions, one of them titled with a comma.
+	const listed = async (): Promise<ListedEvents> => ({
+		events: [
+			{ slug: "hackmeridian-2025", title: "HackMeridian 2025" },
+			{
+				slug: "stellar-builders-camp-jaipur-2026",
+				title: "Stellar Builders Camp, Jaipur",
+			},
+		],
+		complete: true,
+	});
 	const parse = (qs: string) =>
-		parseBuildFilters(new URLSearchParams(qs), "keyword");
+		parseBuildFilters(new URLSearchParams(qs), "keyword", events, listed);
 
-	it("spells a category the vocabulary's way and rejects unknown ones", () => {
-		expect(parse("category=payments")).toMatchObject({
+	it("spells a category the vocabulary's way and rejects unknown ones", async () => {
+		expect(await parse("category=payments")).toMatchObject({
 			filters: { category: "Payments" },
 		});
-		expect("error" in parse("category=defi")).toBe(true);
+		expect("error" in (await parse("category=defi"))).toBe(true);
 	});
 
-	it("takes several events and never coerces a bad flag", () => {
-		expect(parse("hackathon=a, B,a")).toMatchObject({
+	it("takes several events and never coerces a bad flag", async () => {
+		expect(await parse("hackathon=a, B,a")).toMatchObject({
 			filters: { hackathons: ["a", "b"] },
+			warnings: [],
 		});
-		expect("error" in parse("winnersOnly=maybe")).toBe(true);
-		expect("error" in parse("mode=fuzzy")).toBe(true);
+		expect("error" in (await parse("winnersOnly=maybe"))).toBe(true);
+		expect("error" in (await parse("mode=fuzzy"))).toBe(true);
 		// The default is the caller's: search hybrid, analyze keyword.
-		const mode = (qs: string, d: "keyword" | "hybrid") => {
-			const r = parseBuildFilters(new URLSearchParams(qs), d);
+		const mode = async (qs: string, d: "keyword" | "hybrid") => {
+			const r = await parseBuildFilters(
+				new URLSearchParams(qs),
+				d,
+				events,
+				listed,
+			);
 			return "filters" in r ? r.filters.mode : null;
 		};
-		expect(mode("q=lending", "hybrid")).toBe("hybrid");
-		expect(mode("q=lending", "keyword")).toBe("keyword");
-		expect(mode("q=lending&mode=keyword", "hybrid")).toBe("keyword");
+		expect(await mode("q=lending", "hybrid")).toBe("hybrid");
+		expect(await mode("q=lending", "keyword")).toBe("keyword");
+		expect(await mode("q=lending&mode=keyword", "hybrid")).toBe("keyword");
+	});
+
+	it("reads the event listing only when a value names no indexed event", async () => {
+		const spy = vi.fn(listed);
+		await parseBuildFilters(
+			new URLSearchParams("hackathon=a,Stellar Hacks: Agents"),
+			"keyword",
+			events,
+			spy,
+		);
+		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it("refuses more than 10 values before it reads the event listing", async () => {
+		const spy = vi.fn(listed);
+		const junk = Array.from({ length: 11 }, (_, i) => `junk${i}`).join(",");
+		const r = await parseBuildFilters(
+			new URLSearchParams(`hackathon=${junk}`),
+			"keyword",
+			events,
+			spy,
+		);
+		expect(r).toMatchObject({
+			error: { error: "At most 10 hackathon slugs." },
+		});
+		expect(spy).not.toHaveBeenCalled();
+	});
+
+	it("answers a value that names no listed event with 400 and the valid slugs", async () => {
+		// The live miss: an event's title matched no slug, and the empty
+		// result read as a field of zero.
+		const r = await parse("hackathon=Stellar%20Hacks%3A%20Agent,nope,a");
+		expect(r).toEqual({
+			error: {
+				error:
+					"hackathon value(s) name no event getHackathons lists: 'Stellar Hacks: Agent', 'nope'.",
+				hint: expect.stringContaining("getHackathons lists every event"),
+				validHackathons: [
+					"a",
+					"b",
+					"stellar-agents-x402-stripe-mpp",
+					"telluscoop-ideaton",
+				],
+			},
+		});
+	});
+
+	it("keeps a listed event with no stored submissions in the filter and says why it is empty", async () => {
+		const r = await parse(
+			"hackathon=HackMeridian 2025,Stellar Builders Camp, Jaipur,a",
+		);
+		expect(r).toEqual({
+			filters: expect.objectContaining({
+				hackathons: [
+					"hackmeridian-2025",
+					"stellar-builders-camp-jaipur-2026",
+					"a",
+				],
+			}),
+			warnings: [
+				"no submissions are stored for hackmeridian-2025; 0 matched from it is not evidence that nothing was built",
+				"no submissions are stored for stellar-builders-camp-jaipur-2026; 0 matched from it is not evidence that nothing was built",
+			],
+		});
+	});
+
+	it("says a value could not be checked when the listing could not be read, and never widens the filter", async () => {
+		const r = await parseBuildFilters(
+			new URLSearchParams("hackathon=Nope"),
+			"keyword",
+			events,
+			async () => ({ events: [], complete: false }),
+		);
+		expect(r).toEqual({
+			filters: expect.objectContaining({ hackathons: ["nope"] }),
+			warnings: [
+				"could not check hackathon 'Nope': the event listing could not be read; 0 matched from it is not evidence that nothing was built",
+			],
+		});
+	});
+
+	it("takes an event's exact title, any case, as its slug, commas and all", async () => {
+		expect(
+			await parse(
+				"hackathon=stellar hacks: agents, Stellar Ideaton: Build, Create %26 Win on the Road to Meridian,b",
+			),
+		).toMatchObject({
+			filters: {
+				hackathons: [
+					"stellar-agents-x402-stripe-mpp",
+					"telluscoop-ideaton",
+					"b",
+				],
+			},
+		});
+		// Ten events, a comma title counted once, is still within the cap.
+		const ten = await parseBuildFilters(
+			new URLSearchParams(
+				`hackathon=${encodeURIComponent(
+					[
+						"Stellar Ideaton: Build, Create & Win on the Road to Meridian",
+						...Array.from({ length: 9 }, (_, i) => `e${i}`),
+					].join(","),
+				)}`,
+			),
+			"keyword",
+			[
+				...events,
+				...Array.from({ length: 9 }, (_, i) =>
+					build(`x${i}`, { event: `e${i}` }),
+				),
+			],
+			listed,
+		);
+		expect("filters" in ten && ten.filters.hackathons.length).toBe(10);
 	});
 });
 
