@@ -1,0 +1,942 @@
+[
+ {
+  "n": 1,
+  "idea": "crowdfunding",
+  "id": "dorahacks-buidl-31165"
+ },
+ {
+  "n": 2,
+  "idea": "prediction market",
+  "id": "dorahacks-buidl-32032"
+ },
+ {
+  "n": 3,
+  "idea": "decentralized identity",
+  "id": "dorahacks-buidl-28438"
+ },
+ {
+  "n": 4,
+  "idea": "soroban sdk",
+  "id": "dorahacks-buidl-24772"
+ },
+ {
+  "n": 5,
+  "idea": "passkey wallet",
+  "id": "dorahacks-buidl-46229"
+ },
+ {
+  "n": 6,
+  "idea": "merchant payments",
+  "id": "dorahacks-buidl-42759"
+ },
+ {
+  "n": 7,
+  "idea": "merchant payments",
+  "id": "dorahacks-buidl-42831"
+ },
+ {
+  "n": 8,
+  "idea": "stablecoin",
+  "id": "dorahacks-buidl-34215"
+ },
+ {
+  "n": 9,
+  "idea": "crowdfunding",
+  "id": "dorahacks-buidl-19680"
+ },
+ {
+  "n": 10,
+  "idea": "cross border remittances",
+  "id": "dorahacks-buidl-46474"
+ },
+ {
+  "n": 11,
+  "idea": "oracle",
+  "id": "dorahacks-buidl-36739"
+ },
+ {
+  "n": 12,
+  "idea": "block explorer",
+  "id": "dorahacks-buidl-46110"
+ },
+ {
+  "n": 13,
+  "idea": "decentralized identity",
+  "id": "dorahacks-buidl-28433"
+ },
+ {
+  "n": 14,
+  "idea": "perpetual futures",
+  "id": "dorahacks-buidl-46532"
+ },
+ {
+  "n": 15,
+  "idea": "undercollateralized loans",
+  "id": "dorahacks-buidl-30929"
+ },
+ {
+  "n": 16,
+  "idea": "carbon credits",
+  "id": "dorahacks-buidl-35598"
+ },
+ {
+  "n": 17,
+  "idea": "a stablecoin that anchors its peg to gold",
+  "id": "dorahacks-buidl-45979"
+ },
+ {
+  "n": 18,
+  "idea": "merchant payments",
+  "id": "dorahacks-buidl-42666"
+ },
+ {
+  "n": 19,
+  "idea": "payroll",
+  "id": "dorahacks-buidl-46403"
+ },
+ {
+  "n": 20,
+  "idea": "insurance",
+  "id": "dorahacks-buidl-46284"
+ },
+ {
+  "n": 21,
+  "idea": "crowdfunding",
+  "id": "dorahacks-buidl-31154"
+ },
+ {
+  "n": 22,
+  "idea": "crowdfunding",
+  "id": "dorahacks-buidl-41491"
+ },
+ {
+  "n": 23,
+  "idea": "play to earn",
+  "id": "dorahacks-buidl-31466"
+ },
+ {
+  "n": 24,
+  "idea": "lottery",
+  "id": "dorahacks-buidl-36214"
+ },
+ {
+  "n": 25,
+  "idea": "chess game",
+  "id": "dorahacks-buidl-42533"
+ },
+ {
+  "n": 26,
+  "idea": "mobile wallet",
+  "id": "dorahacks-buidl-30635"
+ },
+ {
+  "n": 27,
+  "idea": "loans for farmers",
+  "id": "dorahacks-buidl-36269"
+ },
+ {
+  "n": 28,
+  "idea": "soroban sdk",
+  "id": "dorahacks-buidl-42617"
+ },
+ {
+  "n": 29,
+  "idea": "a stablecoin that anchors its peg to gold",
+  "id": "dorahacks-buidl-45260"
+ },
+ {
+  "n": 30,
+  "idea": "verifiable credentials",
+  "id": "dorahacks-buidl-25160"
+ },
+ {
+  "n": 31,
+  "idea": "send money home",
+  "id": "dorahacks-buidl-36266"
+ },
+ {
+  "n": 32,
+  "idea": "yield aggregator",
+  "id": "dorahacks-buidl-27456"
+ },
+ {
+  "n": 33,
+  "idea": "decentralized identity",
+  "id": "dorahacks-buidl-46126"
+ },
+ {
+  "n": 34,
+  "idea": "stablecoin",
+  "id": "dorahacks-buidl-42656"
+ },
+ {
+  "n": 35,
+  "idea": "payroll",
+  "id": "dorahacks-buidl-46405"
+ },
+ {
+  "n": 36,
+  "idea": "carbon credits",
+  "id": "dorahacks-buidl-35621"
+ },
+ {
+  "n": 37,
+  "idea": "mobile wallet",
+  "id": "dorahacks-buidl-25268"
+ },
+ {
+  "n": 38,
+  "idea": "kyc",
+  "id": "dorahacks-buidl-36782"
+ },
+ {
+  "n": 39,
+  "idea": "crowdfunding",
+  "id": "dorahacks-buidl-31167"
+ },
+ {
+  "n": 40,
+  "idea": "usdc payroll",
+  "id": "dorahacks-buidl-46318"
+ },
+ {
+  "n": 41,
+  "idea": "microfinance platform",
+  "id": "dorahacks-buidl-45988"
+ },
+ {
+  "n": 42,
+  "idea": "stablecoin",
+  "id": "dorahacks-buidl-42579"
+ },
+ {
+  "n": 43,
+  "idea": "microloans",
+  "id": "dorahacks-buidl-30845"
+ },
+ {
+  "n": 44,
+  "idea": "oracle",
+  "id": "dorahacks-buidl-46007"
+ },
+ {
+  "n": 45,
+  "idea": "perpetual futures",
+  "id": "dorahacks-buidl-41519"
+ },
+ {
+  "n": 46,
+  "idea": "chess game",
+  "id": "dorahacks-buidl-39789"
+ },
+ {
+  "n": 47,
+  "idea": "mobile wallet",
+  "id": "dorahacks-buidl-42624"
+ },
+ {
+  "n": 48,
+  "idea": "insurance",
+  "id": "dorahacks-buidl-32618"
+ },
+ {
+  "n": 49,
+  "idea": "testing framework",
+  "id": "dorahacks-buidl-42577"
+ },
+ {
+  "n": 50,
+  "idea": "music nfts",
+  "id": "dorahacks-buidl-14618"
+ },
+ {
+  "n": 51,
+  "idea": "escrow",
+  "id": "dorahacks-buidl-35590"
+ },
+ {
+  "n": 52,
+  "idea": "nft marketplace",
+  "id": "dorahacks-buidl-31775"
+ },
+ {
+  "n": 53,
+  "idea": "testing framework",
+  "id": "dorahacks-buidl-24577"
+ },
+ {
+  "n": 54,
+  "idea": "perpetual futures",
+  "id": "dorahacks-buidl-32688"
+ },
+ {
+  "n": 55,
+  "idea": "remittance app",
+  "id": "dorahacks-buidl-46474"
+ },
+ {
+  "n": 56,
+  "idea": "wallet",
+  "id": "dorahacks-buidl-46373"
+ },
+ {
+  "n": 57,
+  "idea": "cross border remittances",
+  "id": "dorahacks-buidl-25268"
+ },
+ {
+  "n": 58,
+  "idea": "multisig wallet",
+  "id": "dorahacks-buidl-46300"
+ },
+ {
+  "n": 59,
+  "idea": "passkey wallet",
+  "id": "dorahacks-buidl-30911"
+ },
+ {
+  "n": 60,
+  "idea": "play to earn",
+  "id": "dorahacks-buidl-31775"
+ },
+ {
+  "n": 61,
+  "idea": "usdc payroll",
+  "id": "dorahacks-buidl-46162"
+ },
+ {
+  "n": 62,
+  "idea": "yield aggregator",
+  "id": "dorahacks-buidl-24527"
+ },
+ {
+  "n": 63,
+  "idea": "block explorer",
+  "id": "dorahacks-buidl-39848"
+ },
+ {
+  "n": 64,
+  "idea": "music nfts",
+  "id": "dorahacks-buidl-30688"
+ },
+ {
+  "n": 65,
+  "idea": "p2p lending",
+  "id": "dorahacks-buidl-24804"
+ },
+ {
+  "n": 66,
+  "idea": "soroban sdk",
+  "id": "dorahacks-buidl-46229"
+ },
+ {
+  "n": 67,
+  "idea": "mobile wallet",
+  "id": "dorahacks-buidl-18558"
+ },
+ {
+  "n": 68,
+  "idea": "payroll",
+  "id": "dorahacks-buidl-46526"
+ },
+ {
+  "n": 69,
+  "idea": "verifiable credentials",
+  "id": "dorahacks-buidl-27412"
+ },
+ {
+  "n": 70,
+  "idea": "wallet",
+  "id": "dorahacks-buidl-32481"
+ },
+ {
+  "n": 71,
+  "idea": "stablecoin savings",
+  "id": "dorahacks-buidl-46424"
+ },
+ {
+  "n": 72,
+  "idea": "microloans",
+  "id": "dorahacks-buidl-45988"
+ },
+ {
+  "n": 73,
+  "idea": "remittance app",
+  "id": "dorahacks-buidl-25268"
+ },
+ {
+  "n": 74,
+  "idea": "multisig wallet",
+  "id": "dorahacks-buidl-38049"
+ },
+ {
+  "n": 75,
+  "idea": "soroban sdk",
+  "id": "dorahacks-buidl-24764"
+ },
+ {
+  "n": 76,
+  "idea": "p2p lending",
+  "id": "dorahacks-buidl-36274"
+ },
+ {
+  "n": 77,
+  "idea": "send money home",
+  "id": "dorahacks-buidl-25263"
+ },
+ {
+  "n": 78,
+  "idea": "undercollateralized loans",
+  "id": "dorahacks-buidl-36274"
+ },
+ {
+  "n": 79,
+  "idea": "play to earn",
+  "id": "dorahacks-buidl-25331"
+ },
+ {
+  "n": 80,
+  "idea": "music nfts",
+  "id": "dorahacks-buidl-30964"
+ },
+ {
+  "n": 81,
+  "idea": "a stablecoin that anchors its peg to gold",
+  "id": "dorahacks-buidl-32688"
+ },
+ {
+  "n": 82,
+  "idea": "oracle",
+  "id": "dorahacks-buidl-36195"
+ },
+ {
+  "n": 83,
+  "idea": "a stablecoin that anchors its peg to gold",
+  "id": "dorahacks-buidl-42475"
+ },
+ {
+  "n": 84,
+  "idea": "loans for farmers",
+  "id": "dorahacks-buidl-32671"
+ },
+ {
+  "n": 85,
+  "idea": "p2p lending",
+  "id": "dorahacks-buidl-35583"
+ },
+ {
+  "n": 86,
+  "idea": "recurring subscription payments",
+  "id": "dorahacks-buidl-45930"
+ },
+ {
+  "n": 87,
+  "idea": "wallet",
+  "id": "dorahacks-buidl-46541"
+ },
+ {
+  "n": 88,
+  "idea": "music nfts",
+  "id": "dorahacks-buidl-36302"
+ },
+ {
+  "n": 89,
+  "idea": "mobile wallet",
+  "id": "dorahacks-buidl-46424"
+ },
+ {
+  "n": 90,
+  "idea": "soroban sdk",
+  "id": "dorahacks-buidl-36779"
+ },
+ {
+  "n": 91,
+  "idea": "undercollateralized loans",
+  "id": "dorahacks-buidl-27230"
+ },
+ {
+  "n": 92,
+  "idea": "escrow",
+  "id": "dorahacks-buidl-41522"
+ },
+ {
+  "n": 93,
+  "idea": "loans for farmers",
+  "id": "dorahacks-buidl-32695"
+ },
+ {
+  "n": 94,
+  "idea": "cross border remittances",
+  "id": "dorahacks-buidl-45591"
+ },
+ {
+  "n": 95,
+  "idea": "passkey wallet",
+  "id": "dorahacks-buidl-46093"
+ },
+ {
+  "n": 96,
+  "idea": "perpetual futures",
+  "id": "dorahacks-buidl-31318"
+ },
+ {
+  "n": 97,
+  "idea": "multisig wallet",
+  "id": "dorahacks-buidl-42662"
+ },
+ {
+  "n": 98,
+  "idea": "microfinance platform",
+  "id": "dorahacks-buidl-31794"
+ },
+ {
+  "n": 99,
+  "idea": "usdc payroll",
+  "id": "dorahacks-buidl-25141"
+ },
+ {
+  "n": 100,
+  "idea": "verifiable credentials",
+  "id": "dorahacks-buidl-46073"
+ },
+ {
+  "n": 101,
+  "idea": "stablecoin",
+  "id": "dorahacks-buidl-36328"
+ },
+ {
+  "n": 102,
+  "idea": "escrow",
+  "id": "dorahacks-buidl-36778"
+ },
+ {
+  "n": 103,
+  "idea": "verifiable credentials",
+  "id": "dorahacks-buidl-36777"
+ },
+ {
+  "n": 104,
+  "idea": "block explorer",
+  "id": "dorahacks-buidl-32653"
+ },
+ {
+  "n": 105,
+  "idea": "insurance",
+  "id": "dorahacks-buidl-32658"
+ },
+ {
+  "n": 106,
+  "idea": "microloans",
+  "id": "dorahacks-buidl-33712"
+ },
+ {
+  "n": 107,
+  "idea": "microloans",
+  "id": "dorahacks-buidl-35580"
+ },
+ {
+  "n": 108,
+  "idea": "merchant payments",
+  "id": "dorahacks-buidl-36272"
+ },
+ {
+  "n": 109,
+  "idea": "verifiable credentials",
+  "id": "dorahacks-buidl-28433"
+ },
+ {
+  "n": 110,
+  "idea": "prediction market",
+  "id": "dorahacks-buidl-46438"
+ },
+ {
+  "n": 111,
+  "idea": "payroll",
+  "id": "dorahacks-buidl-46108"
+ },
+ {
+  "n": 112,
+  "idea": "carbon credits",
+  "id": "dorahacks-buidl-35635"
+ },
+ {
+  "n": 113,
+  "idea": "event ticketing",
+  "id": "dorahacks-buidl-25336"
+ },
+ {
+  "n": 114,
+  "idea": "prediction market",
+  "id": "dorahacks-buidl-32653"
+ },
+ {
+  "n": 115,
+  "idea": "play to earn",
+  "id": "dorahacks-buidl-32677"
+ },
+ {
+  "n": 116,
+  "idea": "usdc payroll",
+  "id": "dorahacks-buidl-46468"
+ },
+ {
+  "n": 117,
+  "idea": "multisig wallet",
+  "id": "dorahacks-buidl-24829"
+ },
+ {
+  "n": 118,
+  "idea": "oracle",
+  "id": "dorahacks-buidl-32653"
+ },
+ {
+  "n": 119,
+  "idea": "insurance",
+  "id": "dorahacks-buidl-25263"
+ },
+ {
+  "n": 120,
+  "idea": "block explorer",
+  "id": "dorahacks-buidl-34078"
+ },
+ {
+  "n": 121,
+  "idea": "recurring subscription payments",
+  "id": "dorahacks-buidl-25159"
+ },
+ {
+  "n": 122,
+  "idea": "nft marketplace",
+  "id": "dorahacks-buidl-36272"
+ },
+ {
+  "n": 123,
+  "idea": "cross border remittances",
+  "id": "dorahacks-buidl-46169"
+ },
+ {
+  "n": 124,
+  "idea": "insurance",
+  "id": "dorahacks-buidl-32713"
+ },
+ {
+  "n": 125,
+  "idea": "escrow",
+  "id": "dorahacks-buidl-39224"
+ },
+ {
+  "n": 126,
+  "idea": "perpetual futures",
+  "id": "dorahacks-buidl-46514"
+ },
+ {
+  "n": 127,
+  "idea": "chess game",
+  "id": "dorahacks-buidl-39854"
+ },
+ {
+  "n": 128,
+  "idea": "merchant payments",
+  "id": "dorahacks-buidl-42524"
+ },
+ {
+  "n": 129,
+  "idea": "yield aggregator",
+  "id": "dorahacks-buidl-27427"
+ },
+ {
+  "n": 130,
+  "idea": "event ticketing",
+  "id": "dorahacks-buidl-40067"
+ },
+ {
+  "n": 131,
+  "idea": "event ticketing",
+  "id": "dorahacks-buidl-31793"
+ },
+ {
+  "n": 132,
+  "idea": "passkey wallet",
+  "id": "dorahacks-buidl-42401"
+ },
+ {
+  "n": 133,
+  "idea": "microfinance platform",
+  "id": "dorahacks-buidl-36062"
+ },
+ {
+  "n": 134,
+  "idea": "testing framework",
+  "id": "dorahacks-buidl-36228"
+ },
+ {
+  "n": 135,
+  "idea": "recurring subscription payments",
+  "id": "dorahacks-buidl-42524"
+ },
+ {
+  "n": 136,
+  "idea": "p2p lending",
+  "id": "dorahacks-buidl-36062"
+ },
+ {
+  "n": 137,
+  "idea": "remittance app",
+  "id": "dorahacks-buidl-32591"
+ },
+ {
+  "n": 138,
+  "idea": "event ticketing",
+  "id": "dorahacks-buidl-46429"
+ },
+ {
+  "n": 139,
+  "idea": "decentralized identity",
+  "id": "dorahacks-buidl-27412"
+ },
+ {
+  "n": 140,
+  "idea": "loans for farmers",
+  "id": "dorahacks-buidl-30959"
+ },
+ {
+  "n": 141,
+  "idea": "chess game",
+  "id": "dorahacks-buidl-39863"
+ },
+ {
+  "n": 142,
+  "idea": "carbon credits",
+  "id": "dorahacks-buidl-35587"
+ },
+ {
+  "n": 143,
+  "idea": "invoicing",
+  "id": "dorahacks-buidl-46217"
+ },
+ {
+  "n": 144,
+  "idea": "recurring subscription payments",
+  "id": "dorahacks-buidl-46219"
+ },
+ {
+  "n": 145,
+  "idea": "kyc",
+  "id": "dorahacks-buidl-28455"
+ },
+ {
+  "n": 146,
+  "idea": "play to earn",
+  "id": "dorahacks-buidl-36159"
+ },
+ {
+  "n": 147,
+  "idea": "escrow",
+  "id": "dorahacks-buidl-31161"
+ },
+ {
+  "n": 148,
+  "idea": "payroll",
+  "id": "dorahacks-buidl-25141"
+ },
+ {
+  "n": 149,
+  "idea": "prediction market",
+  "id": "dorahacks-buidl-32678"
+ },
+ {
+  "n": 150,
+  "idea": "music nfts",
+  "id": "dorahacks-buidl-30930"
+ },
+ {
+  "n": 151,
+  "idea": "nft marketplace",
+  "id": "dorahacks-buidl-36195"
+ },
+ {
+  "n": 152,
+  "idea": "stablecoin savings",
+  "id": "dorahacks-buidl-28397"
+ },
+ {
+  "n": 153,
+  "idea": "undercollateralized loans",
+  "id": "dorahacks-buidl-27451"
+ },
+ {
+  "n": 154,
+  "idea": "carbon credits",
+  "id": "dorahacks-buidl-35524"
+ },
+ {
+  "n": 155,
+  "idea": "microfinance platform",
+  "id": "dorahacks-buidl-35580"
+ },
+ {
+  "n": 156,
+  "idea": "lottery",
+  "id": "dorahacks-buidl-36281"
+ },
+ {
+  "n": 157,
+  "idea": "a stablecoin that anchors its peg to gold",
+  "id": "dorahacks-buidl-32658"
+ },
+ {
+  "n": 158,
+  "idea": "usdc payroll",
+  "id": "dorahacks-buidl-46108"
+ },
+ {
+  "n": 159,
+  "idea": "chess game",
+  "id": "dorahacks-buidl-19680"
+ },
+ {
+  "n": 160,
+  "idea": "nft marketplace",
+  "id": "dorahacks-buidl-14618"
+ },
+ {
+  "n": 161,
+  "idea": "undercollateralized loans",
+  "id": "dorahacks-buidl-42748"
+ },
+ {
+  "n": 162,
+  "idea": "remittance app",
+  "id": "dorahacks-buidl-45260"
+ },
+ {
+  "n": 163,
+  "idea": "remittance app",
+  "id": "dorahacks-buidl-30786"
+ },
+ {
+  "n": 164,
+  "idea": "block explorer",
+  "id": "dorahacks-buidl-25335"
+ },
+ {
+  "n": 165,
+  "idea": "cross border remittances",
+  "id": "dorahacks-buidl-30786"
+ },
+ {
+  "n": 166,
+  "idea": "nft marketplace",
+  "id": "dorahacks-buidl-25334"
+ },
+ {
+  "n": 167,
+  "idea": "stablecoin",
+  "id": "dorahacks-buidl-42585"
+ },
+ {
+  "n": 168,
+  "idea": "stablecoin savings",
+  "id": "dorahacks-buidl-46393"
+ },
+ {
+  "n": 169,
+  "idea": "oracle",
+  "id": "dorahacks-buidl-42387"
+ },
+ {
+  "n": 170,
+  "idea": "loans for farmers",
+  "id": "dorahacks-buidl-36274"
+ },
+ {
+  "n": 171,
+  "idea": "recurring subscription payments",
+  "id": "dorahacks-buidl-36328"
+ },
+ {
+  "n": 172,
+  "idea": "kyc",
+  "id": "dorahacks-buidl-45931"
+ },
+ {
+  "n": 173,
+  "idea": "microloans",
+  "id": "dorahacks-buidl-36274"
+ },
+ {
+  "n": 174,
+  "idea": "wallet",
+  "id": "dorahacks-buidl-30659"
+ },
+ {
+  "n": 175,
+  "idea": "yield aggregator",
+  "id": "dorahacks-buidl-33220"
+ },
+ {
+  "n": 176,
+  "idea": "decentralized identity",
+  "id": "dorahacks-buidl-31779"
+ },
+ {
+  "n": 177,
+  "idea": "prediction market",
+  "id": "dorahacks-buidl-46378"
+ },
+ {
+  "n": 178,
+  "idea": "stablecoin savings",
+  "id": "dorahacks-buidl-33711"
+ },
+ {
+  "n": 179,
+  "idea": "microfinance platform",
+  "id": "dorahacks-buidl-33712"
+ },
+ {
+  "n": 180,
+  "idea": "event ticketing",
+  "id": "dorahacks-buidl-42810"
+ },
+ {
+  "n": 181,
+  "idea": "stablecoin savings",
+  "id": "dorahacks-buidl-46330"
+ },
+ {
+  "n": 182,
+  "idea": "passkey wallet",
+  "id": "dorahacks-buidl-46264"
+ },
+ {
+  "n": 183,
+  "idea": "wallet",
+  "id": "dorahacks-buidl-42819"
+ },
+ {
+  "n": 184,
+  "idea": "p2p lending",
+  "id": "dorahacks-buidl-28397"
+ },
+ {
+  "n": 185,
+  "idea": "yield aggregator",
+  "id": "dorahacks-buidl-46402"
+ },
+ {
+  "n": 186,
+  "idea": "kyc",
+  "id": "dorahacks-buidl-46373"
+ },
+ {
+  "n": 187,
+  "idea": "multisig wallet",
+  "id": "dorahacks-buidl-38221"
+ },
+ {
+  "n": 188,
+  "idea": "kyc",
+  "id": "dorahacks-buidl-45517"
+ }
+]

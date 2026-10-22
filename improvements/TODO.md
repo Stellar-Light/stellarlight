@@ -26,7 +26,8 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    State: the replica (`pnpm raven:gate`, merged in #1843) reproduces
    Raven's accepted totals exactly; on it 1.9.83 held (five hit-to-miss
    flips). Production's spec passes it: 1.9.84 at about 19:00 UTC on
-   2026-10-21 and 1.9.87 from 19:23 UTC, each at 220/298/326/112 with no
+   2026-10-21, 1.9.87 from 19:23 UTC that day, and 1.9.90 at 18:44 UTC on
+   2026-10-22, each at 220/298/326/112 with no
    hit-to-miss flip. Waiting on Raven's re-sync.
    Done when: the replica reproduces Raven's baseline exactly, our current
    spec passes every gate in it, and Raven's accepted snapshot moves past
@@ -40,33 +41,25 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    0 updates, 0 hides; the execute has not run.
    Done when: the execute ran, every row was read back, and both probes flip.
 
-3. **The `hackathon` filter fails silently.**
-   Probe: `/api/hackathons/builds?hackathon=Stellar%20Hacks:%20Agents`
-   answers 200 with 0 matched and no warning, while
-   `hackathon=stellar-agents-x402-stripe-mpp` matches 249.
-   State: not started.
-   Done when: an unknown value answers 400 naming the valid slugs, on
-   searchHackathonBuilds and analyzeHackathonSubmissions.
+3. **Served fields the spec still does not declare.**
+   Probe: `/api/stablecoins` rows serve `paymentsCount24h` while the 1.9.90
+   spec never mentions it (2026-10-22). Found with one live request per GET
+   operation on 2026-10-22: getQualityReport (14 fields); compareHackathons
+   `deltas.prizePoolUSD`, `prizePerWinnerUSD`, `hackersCount`,
+   `submissionCount`; getSkill `skill.argumentHint`, `rawUrl`, `registry`,
+   `userInvocable`; searchProjects and searchRepos
+   `codeVerified.ciPresent` and `codeVerified.testsPresent`; getHackathons
+   `meta.counts.curated` and `meta.counts.dorahacks`; getChanges
+   `meta.generatedAt`; getPartners `meta.counts.filteredOut`; listAudits
+   `meta.counts.matched`; listSkills `meta.counts.bySource`; getStablecoins
+   `stablecoins[].paymentsCount24h`.
+   State: the four operations named on 2026-10-20 are declared (#1850), and
+   `scripts/contract/served-shape.ts` lists any undeclared field, null or
+   enum value in a body.
+   Done when: every operation's served fields and nulls are declared and a
+   test walks each operation's body with served-shape.
 
-4. **vetIdea `priorArt.builds` claims none for short ideas.**
-   Probe: `/api/vet-idea?q=remittance%20app` has `priorArt.builds == []`
-   while `/api/hackathons/builds?q=remittance%20app` matches 16.
-   State: not started.
-   Done when: a short idea gets the builds that match every content word, or
-   the block says the five nearest did not meet the evidence rule instead of
-   claiming none.
-
-5. **Served fields the spec does not declare.**
-   Probe: `/api/hackathons/stellar-agents-x402-stripe-mpp` serves
-   `winners[0].voteCount == null`, while the spec types it as a non-nullable
-   integer. Also found by the contract audit (2026-10-20): `priorArt.builds`,
-   `buildsMode` and `via` on the scfPitch, hackathonBrief and
-   reviewSubmission vet blocks, and getHackathon `stats.winners` and
-   `stats.outcomes`, all served and undeclared.
-   State: not started.
-   Done when: every served field and every served null is declared.
-
-6. **Five confirmed build-to-project links are missing.**
+4. **Five confirmed build-to-project links are missing.**
    Probe: `/api/hackathons/review?link=https://github.com/hoops-finance/cometswap`
    says no project lists the repo, while searchProjects lists
    `Hoops-Finance/cometswap` among the hoops project's repos.
@@ -84,16 +77,29 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    the link lane reads (a spec enum entry for the basis), the lane re-ran
    (dry run, then execute), and the five links are live.
 
-7. **Events with announced winners show 0 winners.**
-   Probe: `/api/hackathons/stellarhack` has `stats.winners == 0` beside a
-   prize pool of 15,000; so do `stellar-pulso-hackathon` (its page says
-   winners were announced) and `build-on-stellar-philippines-2026` (its page
-   names five winners).
-   State: not started.
-   Done when: winners are served, or the response says they are not recorded
-   upstream instead of 0.
+5. **Events with announced winners show 0 winners.**
+   Probe: `/api/hackathons/build-on-stellar-philippines-2026` has
+   `stats.winners == 0`, while bitpinas.com (2026-06-08) names five winners
+   with their places.
+   Found (2026-10-22; every source fetched again by the orchestrator): of 13
+   past events served with 0 winners, 4 have winners on readable pages:
+   hackmeridian-2025 (six, waiting on the curated-builds execute);
+   build-on-stellar-philippines-2026 (AbotPera champion, PinkRaft and Axial
+   runners-up, Sobre and TyFi best use of Stellar); alebrije2026 (Mañana
+   Seguro, Seyf and Gibbor named as winning projects, no places; BAF
+   newsletter, 2026-05-04); apac-stellar-hackathon-2026 (Olio, first in the
+   Payment and Consumer Application track; risein.com, 2026-09-01; the other
+   two tracks not found). The other 9 show none announced on any readable
+   page, and each DoraHacks-sourced one reports `winner_announced: false`.
+   The earlier note that stellar-pulso-hackathon's page says winners were
+   announced was a planned timeline row.
+   State: not started. alebrije2026's submissions are stored from DoraHacks,
+   so its winners need an override on the stored rows, not new curated rows.
+   Done when: the confirmed winners are served (curated rows or an override,
+   then the curated-builds lane run), a partial event says it is partial,
+   and the 9 say winners were not announced upstream instead of a bare 0.
 
-8. **Secret scanning covers new commits only.**
+6. **Secret scanning covers new commits only.**
    Probe: `gh api repos/Stellar-Light/stellarlight --jq
    .security_and_analysis.secret_scanning_push_protection.status` answers
    `disabled`, and `grep -l -i gitleaks .githooks/*` prints nothing (the
@@ -111,7 +117,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    changes (either flips the probe); CI scans only after the push, when
    the commit is already public.
 
-9. **Repos deleted on GitHub are still served.**
+7. **Repos deleted on GitHub are still served.**
    Found: the gone-repos probe (`improvements/audits/gone-repos-latest.json`,
    `tally`, the same counts on 2026-10-20 and 2026-10-22) counts 56 newly
    gone repos still served and 2 that came back. The ledger calls a high
@@ -125,23 +131,26 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    Done when: the execute ran (dry run read first) and its read-back
    passed.
 
-10. **"Recent mainnet upgrade" leads with an upgrade not yet on mainnet.**
-    Probe: in `/api/research?q=recent mainnet upgrade&limit=5`, no row
-    names Protocol 26 to 29 or Zipper. Rows 1 and 2 are "Introducing Bell,
-    Protocol 30 on Stellar" and the Bell upgrade guide (published
-    2026-10-20; the mainnet vote is 2026-11-23); with `limit=8` the
-    Zipper (Protocol 27) guide is sixth. The golden case `recent-mainnet-upgrade` fails on 1.9.87
-    (2026-10-21): the one research failure among 37 graded (2 more were
-    N/A).
-    State: not started. Inferred cause, not verified: freshness outweighs
-    relevance here (the two-day-old Bell rows have relevance 0.37 and 0.36,
-    the 140-day-old Zipper guide 0.85), and no field on a row says whether
-    an upgrade is announced or live; the vote dates sit only in the posts'
-    prose.
-    Done when: the latest upgrade live on mainnet is in the top 5 for that
-    question, an announced upgrade is labelled with its vote date or ranked
-    below it, and the golden case accepts Protocol 30 once its mainnet vote
-    passes.
+8. **"Recent mainnet upgrade" leads with an upgrade not yet on mainnet.**
+   Probe: in `/api/research?q=recent mainnet upgrade&limit=5`, no row
+   names Protocol 26 to 29 or Zipper. Rows 1 and 2 are "Introducing Bell,
+   Protocol 30 on Stellar" and the Bell upgrade guide (published
+   2026-10-20; the mainnet vote is 2026-11-23); with `limit=8` the
+   Zipper (Protocol 27) guide is sixth. The golden case `recent-mainnet-upgrade` fails on 1.9.87
+   (2026-10-21): the one research failure among 37 graded (2 more were
+   N/A).
+   State: cause measured 2026-10-22. "recent" fires recency intent, which
+   sorts by 0.6 x confidence + 0.4 x dated freshness (half-life 120 days):
+   the Bell rows (confidence 0.53, relevance 0.37 and 0.36, 2 days old)
+   score 0.713 and the Zipper guide (confidence 0.82, relevance 0.85, 140
+   days old) 0.670. No field on a row says whether an upgrade is announced
+   or live; the vote dates sit only in the posts' prose. A multiplicative
+   blend would lift the undated "Software Versions" page back to the top,
+   so a fix needs an A/B on the golden set and the recency questions.
+   Done when: the latest upgrade live on mainnet is in the top 5 for that
+   question, an announced upgrade is labelled with its vote date or ranked
+   below it, and the golden case accepts Protocol 30 once its mainnet vote
+   passes.
 
 ## Next
 
@@ -165,8 +174,11 @@ unless noted.
   judge cannot grade a row from the response alone (contract audit,
   2026-10-20; the follow-up left on #1841).
 - Substring matching: `track=AI` matches "Main Track"; q "Star Lends" marks
-  "Blend" and "starting". Done when short terms match whole words on build
-  search and analyze.
+  "Blend" and "starting". Since #1851 a one-word idea lists builds whose own
+  text mentions the word, so loose matching reaches vetIdea too: "send
+  money home" reads as "home" and lists two builds that only mention it,
+  and on a one-word idea the winner bonus breaks every tie. Done when short
+  terms match whole words on build search and analyze.
 - compareHackathons labels curated events "dorahacks", leaves durability
   empty, and names a highest and a lowest for tied pools.
 - getHackathon `stats.outcomes.built` is 0 for Agents while
@@ -185,14 +197,6 @@ unless noted.
   "7 SDF skills" (sk-027); Builders "in the dozens" (sk-028), in
   `public/skills/stellar-scout.md` and `public/skills/references/api-reference.md`;
   the skill omits build search params.
-- Consumer safety in `contract:check`: every non-GET operation declares
-  `x-side-effecting` (matchPartners does not); an operationId removal or
-  rename fails unless the changelog marks it breaking. matchPartners only
-  reads (its route writes nothing), so it declares `false`: Raven's catalog
-  build throws on any operation it exposes that is marked `true`
-  (`scripts/build-catalog.mjs`, `assertSideEffectingOpsExcluded`, in
-  stellar-experimental/stellar-raven at b1dc866), and matchPartners is one
-  of its 30 exposed operations.
 - The golden eval gate counts questions (its floor was set at 37; the set has
   53); eval runs record the API version; the battery's held-out rows become a
   frozen routing holdout.
@@ -212,18 +216,26 @@ unless noted.
 - Routing vocabulary for outcome and reading-intent questions, only through
   the Raven gate replica.
 
+- Events seen in sources but absent from getHackathons: Argentina Builder
+  Challenge (2026-09-12 to 09-27), Stellar Pro Hackathon and Stellar Hack
+  Pera (Istanbul), Tellus Find Your Way (2026-09-01 to 10-12) (found
+  2026-10-22 while checking winners).
+- apac-stellar-hackathon-2026 serves endDate 2026-07-24, but its
+  organizer's 2026-07-29 post puts the grand finale on 31 July (found
+  2026-10-22).
+
 Found 2026-10-22 by reading how Raven calls and reads Scout
 (stellar-experimental/stellar-raven at b1dc866: `src/adapters/scout.ts`,
 `src/executor/providers.ts`, `src/policy/truncate.ts`,
 `scripts/build-catalog.mjs`) against our routes and live responses:
 
-- Rate-limit waits never reach Raven's agents. On a 429 or 5xx it keeps
-  `error`, `hint`, the status and any `valid*` lists, and drops the rest,
-  headers included (a 503 marked `unavailable` gets Raven's own hint
-  instead). None of our 25 route files that answer 429 puts the
-  wait in `error` or `hint` (the text is "rate limit exceeded" or "try again
-  shortly"); twelve carry it only in a `retryAfterSeconds` field, six of
-  them (through `apiError`) also in an `advisory` line.
+- 5xx waits never reach Raven's agents. On a 5xx it keeps `error`, `hint`,
+  the status and any `valid*` lists, and drops the rest, headers included
+  (a 503 marked `unavailable` gets Raven's own hint instead). Every 429 now
+  states the wait in `hint` (#1849); our 503s still carry it only in
+  `retryAfterSeconds` and Retry-After, or in the header alone
+  (`src/app/api/community-skills/route.ts`, and `src/app/api/ask/answer/route.ts`,
+  which is not in the spec).
 - Most responses carry no data date. Raven reads freshness only from a
   top-level or `meta` `dataAsOf` or `asOf`, and otherwise labels the answer
   with its own fetch time. Of 14 endpoints probed live, 3 serve one
@@ -251,6 +263,7 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   User-Agent, no timeout and no retries, from Cloudflare's network, so its
   users likely share one per-IP limit [inferred]. See the owner decision on
   a key below.
+
 
 ## Owner decisions (safe default in brackets)
 

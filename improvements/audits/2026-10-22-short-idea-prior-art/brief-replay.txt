@@ -1,0 +1,30 @@
+payroll                listed before=0 guardOnly=5 now=5; winners qualifying before=0 guardOnly=1 now=0; guardOnly and now list the same builds in the same order
+    qualifies only by mention: in top five PayZoll_Stellar
+invoicing              listed before=0 guardOnly=1 now=1; winners qualifying before=0 guardOnly=0 now=0; guardOnly and now list the same builds in the same order
+microloans             listed before=5 guardOnly=5 now=5; winners qualifying before=0 guardOnly=0 now=0; guardOnly and now list the same builds in the same order
+crowdfunding           listed before=0 guardOnly=5 now=5; winners qualifying before=0 guardOnly=0 now=0; guardOnly and now list the same builds in the same order
+escrow                 listed before=0 guardOnly=4 now=4; winners qualifying before=0 guardOnly=0 now=0; guardOnly and now list the same builds in the same order
+lottery                listed before=0 guardOnly=2 now=2; winners qualifying before=0 guardOnly=1 now=0; guardOnly and now list the same builds in the same order
+    qualifies only by mention: in top five No Loss Lottery
+kyc                    listed before=0 guardOnly=5 now=5; winners qualifying before=0 guardOnly=1 now=0; guardOnly and now list the same builds in the same order
+    qualifies only by mention: in top five ANCHORSHIELD
+remittance app         listed before=0 guardOnly=5 now=5; winners qualifying before=0 guardOnly=1 now=0; guardOnly and now list the same builds in the same order
+    qualifies only by mention: in top five Tukar
+send money home        listed before=0 guardOnly=2 now=2; winners qualifying before=0 guardOnly=0 now=0; guardOnly and now list the same builds in the same order
+stablecoin             listed before=0 guardOnly=1 now=1; winners qualifying before=0 guardOnly=1 now=0; guardOnly and now list the same builds in the same order
+    qualifies only by mention: in top five Streamr
+oracle                 listed before=0 guardOnly=5 now=5; winners qualifying before=0 guardOnly=2 now=0; guardOnly and now list the same builds in the same order
+    qualifies only by mention: in top five Reflector TradeBet
+    qualifies only by mention: in top five Splicers
+insurance              listed before=0 guardOnly=5 now=5; winners qualifying before=0 guardOnly=0 now=0; guardOnly and now list the same builds in the same order
+microloan app          listed before=5 guardOnly=5 now=5; winners qualifying before=0 guardOnly=0 now=0; guardOnly and now list the same builds in the same order
+microfinance platform  listed before=3 guardOnly=4 now=4; winners qualifying before=0 guardOnly=0 now=0; guardOnly and now list the same builds in the same order
+wallet                 listed before=0 guardOnly=5 now=5; winners qualifying before=0 guardOnly=6 now=0; guardOnly and now list the same builds in the same order
+    qualifies only by mention: in top five Umbra Wallet
+    qualifies only by mention: in top five Cards402.com
+    qualifies only by mention: in top five ANCHORSHIELD
+    qualifies only by mention: in top five Soroswap Pro Trader
+    qualifies only by mention: in top five Kale Grab Rush
+    qualifies only by mention: BEYOND top five CouvePIX
+api 1.9.87 -> 1.9.87; parity failures (before != live brief): 0
+{"listedBefore":13,"listedGuardOnly":59,"listedNow":59,"winnersQualifyingBefore":0,"winnersQualifyingGuardOnly":13,"winnersQualifyingNow":0,"winnersPulledFromBeyondTop5Before":0,"winnersPulledFromBeyondTop5GuardOnly":0,"winnersPulledFromBeyondTop5Now":0,"vetBuildsMissingFromBriefNow":0}
