@@ -234,7 +234,8 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   (a 503 marked `unavailable` gets Raven's own hint instead). Every 429 now
   states the wait in `hint` (#1849); our 503s still carry it only in
   `retryAfterSeconds` and Retry-After, or in the header alone
-  (`src/app/api/community-skills/route.ts`).
+  (`src/app/api/community-skills/route.ts`, and `src/app/api/ask/answer/route.ts`,
+  which is not in the spec).
 - Most responses carry no data date. Raven reads freshness only from a
   top-level or `meta` `dataAsOf` or `asOf`, and otherwise labels the answer
   with its own fetch time. Of 14 endpoints probed live, 3 serve one
