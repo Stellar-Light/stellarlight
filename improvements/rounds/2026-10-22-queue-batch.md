@@ -133,7 +133,9 @@ the spec says what four operations serve, consumer safety in
 contract:check) and #1851 (1.9.90, short ideas get prior art or a
 near-miss count), each reviewed by Claude Fable 5.1 on a fresh clone,
 fixed, re-checked, merged on green check-runs and verified live. Grok could
-not review this round (402, usage balance exhausted). Queue items 3, 4 and
-the named fields of 5 are closed; what remains, and what this round found,
-is in `improvements/TODO.md`.
+not review this round (402, usage balance exhausted). Closed in the queue:
+the silent hackathon filter, short-idea prior art, the fields of the four
+operations named on 2026-10-20, consumer safety in contract:check, and the
+429 half of the rate-limit item. What remains, and what this round found,
+is in `improvements/TODO.md`, renumbered.
 
