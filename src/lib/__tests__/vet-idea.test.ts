@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { GAP_VERTICALS } from "../ecosystem-gaps";
+import { semanticBuildScores } from "../hackathon-build-semantic";
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
@@ -476,7 +477,11 @@ describe("vet-idea labels the competitors it serves", () => {
  * says checked and none, which was false.
  */
 describe("vet-idea prior-art builds for short ideas", () => {
-	const build = (id: string, description: string): IndexedBuild => ({
+	const build = (
+		id: string,
+		description: string,
+		award: string | null = null,
+	): IndexedBuild => ({
 		id,
 		name: id,
 		description,
@@ -485,13 +490,13 @@ describe("vet-idea prior-art builds for short ideas", () => {
 		videoUrl: null,
 		track: null,
 		hackathonPlacement: null,
-		award: null,
+		award,
 		isWinner: false,
 		voteCount: null,
 		url: `https://dorahacks.io/buidl/${id}`,
 		source: "dorahacks",
 		hackathon: { title: "E", slug: "e", endedAt: "2025-01-15" },
-		haystack: `${id} ${description}`.toLowerCase(),
+		haystack: `${id} ${description} ${award ?? ""}`.toLowerCase(),
 	});
 	beforeAll(() => {
 		buildsIndex.push(
@@ -499,6 +504,12 @@ describe("vet-idea prior-art builds for short ideas", () => {
 			build("corridor", "A remittance corridor for families abroad."),
 			build("chess-club", "A chess game for clubs."),
 			build("bracket", "Esports tournament brackets."),
+			build("peg-desk", "A stablecoin backed by treasuries."),
+			build(
+				"swap-award",
+				"A DEX for long-tail assets.",
+				"Best Stablecoin Integration",
+			),
 		);
 	});
 	afterAll(() => {
@@ -541,5 +552,33 @@ describe("vet-idea prior-art builds for short ideas", () => {
 		const p = await priorArt("remittance app");
 		expect(p.builds).toBeNull();
 		expect(p.buildsBelowEvidenceRule).toBeNull();
+	});
+
+	it("lists a one-word idea's builds only when their own words use it", async () => {
+		// swap-award has the word only in its award title; remit-home matches
+		// only through the synonym usdc. Both are near, neither is evidence.
+		const p = await priorArt("stablecoin");
+		expect(p.builds?.map((b) => b.id)).toEqual(["peg-desk"]);
+		expect(p.buildsBelowEvidenceRule).toBe(2);
+	});
+
+	it("says a one-word idea's builds need only mention the word", async () => {
+		const p = await priorArt("remittance app");
+		expect(p.note).toMatch(
+			/reads this idea as one word, "remittance": each listed build need only mention it/,
+		);
+		expect((await priorArt("chess tournament")).note).not.toMatch(
+			/reads this idea as one word/,
+		);
+	});
+
+	it("says search by meaning did not run, in keyword mode, instead of citing a score", async () => {
+		vi.mocked(semanticBuildScores).mockResolvedValueOnce(null);
+		const p = await priorArt("chess tournament");
+		expect(p.buildsMode).toBe("keyword");
+		expect(p.note).toMatch(
+			/did not meet the evidence rule: too few of the idea's words matched, and search by meaning could not run/,
+		);
+		expect(p.note).not.toMatch(/no meaning score reached 0\.7/);
 	});
 });
