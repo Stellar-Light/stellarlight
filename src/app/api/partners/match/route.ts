@@ -24,6 +24,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
+import { modelRateLimited, rateLimited } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { scorePartners } from "@/lib/partner-match";
@@ -165,16 +166,7 @@ export async function POST(req: NextRequest) {
 		limit: RATE_LIMIT_MAX,
 		windowMs: RATE_LIMIT_WINDOW_MS,
 	});
-	if (!limit.allowed) {
-		const retry = Math.ceil((limit.resetAt - Date.now()) / 1000);
-		return NextResponse.json(
-			{ error: "rate limit exceeded", retryAfterSeconds: retry },
-			{
-				status: 429,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": String(retry) },
-			},
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 
 	let body: unknown;
 	try {
@@ -372,12 +364,8 @@ export async function POST(req: NextRequest) {
 			{ headers: rateLimitHeaders(limit) },
 		);
 	} catch (err) {
-		if (err instanceof Anthropic.RateLimitError) {
-			return NextResponse.json(
-				{ error: "Busy right now — try again in a moment." },
-				{ status: 429, headers: rateLimitHeaders(limit) },
-			);
-		}
+		if (err instanceof Anthropic.RateLimitError)
+			return modelRateLimited(err.headers?.get("retry-after"), limit);
 		if (err instanceof Anthropic.APIError) {
 			return NextResponse.json(
 				{

@@ -20,6 +20,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import { roundManifestDigest } from "@/lib/awards/publish";
 import { loadRound } from "@/lib/awards/round";
 import {
@@ -71,12 +72,7 @@ export async function GET(req: NextRequest) {
 		limit: 60,
 		windowMs: 5 * 60 * 1000,
 	});
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{ error: "rate limit exceeded" },
-			{ status: 429, headers: rateLimitHeaders(limit) },
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 	const slug = (req.nextUrl.searchParams.get("round") ?? "").trim();
 	if (!slug) {
 		return NextResponse.json(

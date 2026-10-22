@@ -77,6 +77,37 @@ const VERIFY_CLAIM_TYPES = ["audited", "live", "maintained", "issued"];
 // from live observation + the serializer's own TS interface. Keeping ONE
 // schema per shared shape here is what keeps the copies from drifting.
 
+/** The 429 every rate-limited operation answers (rateLimited and
+ * modelRateLimited in src/lib/api-error.ts). The wait is in `hint` too: a
+ * consumer may keep only `error` and `hint`. */
+const rateLimited429 = (callsModel = false) => ({
+	description: `${
+		callsModel
+			? "This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number)."
+			: "This endpoint's rate window is spent."
+	} hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.`,
+	headers: {
+		"Retry-After": {
+			description: "Seconds to wait; the same number as retryAfterSeconds.",
+			schema: { type: "integer" },
+		},
+		"X-RateLimit-Scope": {
+			description:
+				"Always `instance`: the counter is per serverless instance, not global.",
+			schema: { type: "string", enum: [RATE_LIMIT_SCOPE] },
+		},
+		"Server-Timing": {
+			description: "Our own wall time, as on a 200.",
+			schema: { type: "string" },
+		},
+	},
+	content: {
+		"application/json": {
+			schema: { $ref: "#/components/schemas/RetryableError" },
+		},
+	},
+});
+
 /** One-shot report meta — {source, generatedAt, note} (scf-pitch,
  * hackathon-brief, vet-idea, repos/trust routes serve exactly this). */
 const REPORT_META_SCHEMA = {
@@ -326,7 +357,7 @@ const buildFilterParams = (
 		in: "query",
 		required: false,
 		description:
-			"Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement.",
+			"Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement.",
 		schema: { type: "string" },
 	},
 	{
@@ -354,6 +385,45 @@ const buildFilterParams = (
 	},
 ];
 
+/** The 400 both operations answer (src/lib/hackathon-build-query.ts and the
+ * two routes): the body names what was wrong and lists what would work. */
+const BUILD_FILTERS_400 = {
+	description:
+		"A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event getHackathons lists.",
+	content: {
+		"application/json": {
+			schema: {
+				type: "object",
+				required: ["error"],
+				properties: {
+					error: {
+						type: "string",
+						description: "What was wrong, naming the value.",
+					},
+					hint: { type: "string", description: "How to correct the call." },
+					supportedParams: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"Every parameter the operation reads; sent with an unknown parameter.",
+					},
+					validValues: {
+						type: "array",
+						items: { type: "string" },
+						description: "The values the named parameter accepts.",
+					},
+					validHackathons: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value names no event getHackathons lists. Pass one of these, or the event's exact title. getHackathons lists every event; one whose submissions are not stored is accepted and matches nothing, with a meta.warnings line.",
+					},
+				},
+			},
+		},
+	},
+};
+
 /** The filters as applied, echoed in meta. */
 const BUILD_FILTERS_ECHO_SCHEMA = {
 	type: "object",
@@ -366,6 +436,8 @@ const BUILD_FILTERS_ECHO_SCHEMA = {
 			type: "array",
 			nullable: true,
 			items: { type: "string" },
+			description:
+				"The slugs the hackathon values resolved to; a value that could not be checked against the event listing (meta.warnings names it) is echoed as sent, lowercased. null = no hackathon filter.",
 		},
 		track: { type: "string", nullable: true },
 		category: { type: "string", nullable: true },
@@ -2305,6 +2377,7 @@ export const spec: OpenAPISpec = {
 						description:
 							"Missing or invalid since, an unknown parameter (named with the supported set in hint), or an invalid surface; never silently ignored.",
 					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -3527,7 +3600,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Present only when something limited this answer, e.g. search by meaning could not run.",
+														"Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), or the event listing could not be read to check a hackathon value ('could not check hackathon ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built.",
 												},
 												filters: BUILD_FILTERS_ECHO_SCHEMA,
 												counts: {
@@ -3651,6 +3724,26 @@ export const spec: OpenAPISpec = {
 										},
 									},
 								},
+							},
+						},
+					},
+					"400": BUILD_FILTERS_400,
+					"503": {
+						description:
+							"The submissions index could not be built: the stored submissions could not be read, or the read came back empty. An outage, not a claim that nothing similar was built: retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+							"Server-Timing": {
+								description: "Our own wall time, as on a 200.",
+								schema: { type: "string" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
 							},
 						},
 					},
@@ -3863,6 +3956,8 @@ export const spec: OpenAPISpec = {
 												warnings: {
 													type: "array",
 													items: { type: "string" },
+													description:
+														"Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built.",
 												},
 												source: { type: "string" },
 												upstream: { type: "string" },
@@ -3983,10 +4078,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"400": {
-						description:
-							"An unknown parameter, facet, by, category, mode or winnersOnly value; the body names the valid ones.",
-					},
+					"400": BUILD_FILTERS_400,
 					"503": {
 						description:
 							"The index could not be built; retry after Retry-After.",
@@ -4916,7 +5008,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": { description: "Rate limited" },
+					"429": rateLimited429(true),
 					"503": {
 						description:
 							"AI backend unavailable — fall back to GET /api/partners",
@@ -5095,7 +5187,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": { description: "Rate limited" },
+					"429": rateLimited429(true),
 					"503": {
 						description: "AI backend unavailable",
 						content: {
@@ -5225,7 +5317,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": { description: "Rate limited" },
+					"429": rateLimited429(true),
 					"503": {
 						description: "AI backend unavailable",
 						content: {
@@ -5383,7 +5475,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": { description: "Rate limited" },
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -5713,6 +5805,7 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"400": { description: "Missing/too-short q or unknown params." },
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -6012,7 +6105,7 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"400": { description: "Bad or unknown query param." },
-					"429": { description: "Rate limited (30/min/IP)." },
+					"429": rateLimited429(),
 					"503": { description: "Index unavailable." },
 				},
 			},
@@ -6225,6 +6318,7 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"400": { description: "Missing/too-short q or unknown params." },
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -6403,6 +6497,7 @@ export const spec: OpenAPISpec = {
 						description:
 							"Repo not in the index (absence of evidence, not a verdict).",
 					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -6624,6 +6719,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -6842,6 +6938,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -7237,30 +7334,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": {
-						description:
-							"This instance's per-minute window is spent. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from these headers is approximate; wait Retry-After and resend.",
-						headers: {
-							"Retry-After": {
-								description: "Seconds until this instance's window resets.",
-								schema: { type: "integer" },
-							},
-							"X-RateLimit-Scope": {
-								description:
-									"Always `instance`: the counter is per serverless instance, not global.",
-								schema: { type: "string", enum: [RATE_LIMIT_SCOPE] },
-							},
-							"Server-Timing": {
-								description: "Our own wall time, as on a 200.",
-								schema: { type: "string" },
-							},
-						},
-						content: {
-							"application/json": {
-								schema: { $ref: "#/components/schemas/RetryableError" },
-							},
-						},
-					},
+					"429": rateLimited429(),
 					"503": {
 						description:
 							"A read failed: the database handle could not be opened, or both the vector and the keyword stage threw. An outage, NOT an empty result: retry after Retry-After.",
@@ -8620,14 +8694,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": {
-						description: "Rate limit exceeded",
-						content: {
-							"application/json": {
-								schema: { $ref: "#/components/schemas/ErrorResponse" },
-							},
-						},
-					},
+					"429": rateLimited429(),
 				},
 			},
 		},
@@ -9195,6 +9262,11 @@ export const spec: OpenAPISpec = {
 				required: ["error", "retryAfterSeconds"],
 				properties: {
 					error: { type: "string", description: "What failed, in one line." },
+					hint: {
+						type: "string",
+						description:
+							"On a 429: the wait and the next step in words, the same number as retryAfterSeconds ('Wait 37 seconds, then resend the same request.'), for a consumer that keeps only error and hint.",
+					},
 					advisory: {
 						type: "string",
 						description:
@@ -9203,7 +9275,7 @@ export const spec: OpenAPISpec = {
 					retryAfterSeconds: {
 						type: "integer",
 						description:
-							"Seconds to wait before resending; the same value as the Retry-After header. 2 on database reads, 60 or 300 on the skills registry.",
+							"Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait (at most 3600, 60 when it sent no usable number); on a 503, 2 on database reads and 60 or 300 on the skills registry.",
 					},
 				},
 			},

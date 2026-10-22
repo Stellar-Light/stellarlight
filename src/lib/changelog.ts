@@ -31,6 +31,26 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.88",
+		type: "changed",
+		summary:
+			"Every 429 states the wait and the next step in hint ('Wait 37 seconds, then resend the same request.') and carries retryAfterSeconds and Retry-After; the 13 operations that answer 429 declare it.",
+		detail:
+			"A consumer that keeps only error and hint from a failed call lost the wait: 12 of the 25 routes that answer 429 carried it only in retryAfterSeconds, and the rest in no body field. Every 429 now carries hint with the wait in seconds, advisory, retryAfterSeconds, the Retry-After header and Server-Timing. When the language model behind partnerAssistant, matchPartners or partnerOnboard is at its own rate limit, the 429 passes on the model's Retry-After, rounded up and at most 3600 seconds, or 60 seconds when it sent no usable number; its error says so, and it carries the X-RateLimit headers like every other 429. The error text of a spent window is 'rate limit exceeded' everywhere except submitPartnerListing, whose forms show its own line; submitFeedback's was 'rate-limited'. RetryableError gains hint. listAudits, getChanges, listContracts, getRepoTrust, scfPitch and vetIdea declare their 429 for the first time; submitFeedback's 429 is now RetryableError. 5xx bodies are unchanged.",
+	},
+	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.88",
+		type: "fixed",
+		summary:
+			"searchHackathonBuilds and analyzeHackathonSubmissions no longer answer a hackathon value they cannot match with a silent empty 200: an event getHackathons lists whose submissions are not stored gets a meta.warnings line, a value that names no event answers 400 with validHackathons, and an event's exact title, any case, now works as its slug.",
+		detail:
+			"hackathon=Stellar Hacks: Agents matched no slug and answered 200 with 0 matched and no warning, while its slug, stellar-agents-x402-stripe-mpp, matches 249. Each comma-separated value is now an event's slug or its exact title (a title that holds commas is still one value), and meta.filters.hackathon echoes the slugs the values resolved to (a value that could not be checked is echoed as sent, lowercased). An event getHackathons lists whose submissions are not stored (hackmeridian-2025 today) stays in the filter, matches nothing, and adds 'no submissions are stored for <slug>; 0 matched from it is not evidence that nothing was built' to meta.warnings, as compareHackathons already treats such an event. A value that names no event getHackathons lists answers 400 with error naming it, a hint, and validHackathons: the slug of every event with stored submissions, alphabetical. When the event listing cannot be read, such a value is not refused: it stays in the filter, matches nothing, and meta.warnings says it could not be checked. The cap of 10 counts events, not commas. Both operations declare the 400, and searchHackathonBuilds now declares its 503.",
+	},
+	{
 		date: "2026-10-20",
 		surfaces: ["api"],
 		version: "spec@1.9.87",

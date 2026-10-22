@@ -21,6 +21,7 @@
 
 import { randomBytes } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
 	claimVerifiedByDomain,
@@ -145,19 +146,11 @@ export async function POST(req: NextRequest) {
 		limit: RATE_LIMIT_MAX,
 		windowMs: RATE_LIMIT_WINDOW_MS,
 	});
-	if (!limit.allowed) {
-		const retry = Math.ceil((limit.resetAt - Date.now()) / 1000);
-		return NextResponse.json(
-			{
-				error: "Too many submissions — give it a moment.",
-				retryAfterSeconds: retry,
-			},
-			{
-				status: 429,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": String(retry) },
-			},
-		);
-	}
+	// The listing forms show `error` to people.
+	if (!limit.allowed)
+		return rateLimited(limit, {
+			error: "Too many submissions, give it a moment.",
+		});
 
 	let body: unknown;
 	try {

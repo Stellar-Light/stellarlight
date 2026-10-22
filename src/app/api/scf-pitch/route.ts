@@ -11,6 +11,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -28,21 +29,7 @@ export async function GET(req: NextRequest) {
 		limit: 30,
 		windowMs: 60_000,
 	});
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{
-				error: "rate limit exceeded",
-				retryAfterSeconds: Math.ceil((limit.resetAt - Date.now()) / 1000),
-			},
-			{
-				status: 429,
-				headers: {
-					...rateLimitHeaders(limit),
-					"Retry-After": String(Math.ceil((limit.resetAt - Date.now()) / 1000)),
-				},
-			},
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 
 	const sp = req.nextUrl.searchParams;
 	const unknown = [...sp.keys()].filter((k) => !VALID_PARAMS.includes(k));
