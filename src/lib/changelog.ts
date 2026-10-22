@@ -33,6 +33,46 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-22",
 		surfaces: ["api"],
+		version: "spec@1.9.91",
+		type: "fixed",
+		summary:
+			"A DoraHacks winner list that cannot be read no longer unplaces an event's winners: the daily sync skips that event for the run and keeps its stored rows, where a rate limit or an error status used to store every winner of the event as unplaced until the next run.",
+		detail:
+			"The read of DoraHacks' winner assignments answered an empty list on any error status, and on a network error or a page that was not JSON, so a 429 read as an event with no winners and the sync wrote placement, award and isWinner off for every one of its submissions. Any failed read now throws: the sync names the event in its log and writes none of its rows that run (more than half of the events failing still stops the run, as before). The same read behind getHackathon's live roster serves no roster, and the live fallback that builds the submissions index when the store cannot be read leaves that event out and serves the rest, rather than serving its winners as unplaced for an hour; a timeout there now leaves its event out the same way, where it used to fail the whole read. The winners highlight on the hackathons page tries the next event. An answer that lists no prizes is still read as none.",
+	},
+	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.91",
+		type: "fixed",
+		summary:
+			"getHackathon says why an ended event serves no winner instead of a bare 0: on a DoraHacks event, stats.winnersNote reports DoraHacks' winner_announced flag ('Not announced upstream: ...'), and an event off DoraHacks with winners missing carries a dated note. Neither claims that no one won.",
+		detail:
+			"Nine past events served stats.winners 0 with winnersNote null, stellarhack beside a 15,000 USD prize pool among them. The seven on DoraHacks (stellarhack, give-hackathon-argentina, telluscoop-ideaton, codigoraiz2025, buildonstellarhack, mqcstellar, stellar-pulso-hackathon) report winner_announced false, and their note now says so, from DoraHacks' event listing, refreshed hourly. An ended DoraHacks event marked announced whose served submissions carry no prize says its winners are not recorded here. The note is null when the listing does not carry the flag: a missing flag is now read as unknown, not as false. stellar-journey-to-mastery-2026 and stellar-builders-camp-jaipur-2026 say no page we could read names their winners (checked 2026-10-22); apac-stellar-hackathon-2026 says winners are published for one track only, Olio 1st in Payment & Consumer Application, and not for the other tracks. When no submission of an event can be read (the stored copy holds none and DoraHacks' live roster fails), the note says its winners could not be checked instead of calling them not recorded, and such a failed live read no longer answers 500. A winning submission hidden upstream is still the first thing winnersNote reports.",
+	},
+	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.91",
+		type: "added",
+		summary:
+			"Winners named off DoraHacks are served on their stored submissions with winnerSource, the page that names them: Hack+ Alebrije's Mañana Seguro and Gibbor, named by BAF's newsletter, are winners in search, analyze, prior art, briefs, the event page and submission detail.",
+		detail:
+			"DoraHacks assigned Hack+ Alebrije (alebrije2026) no winners, so its 28 submissions served 0. BAF's newsletter (2026-05-04) names three winning projects without places: Mañana Seguro, Seyf and Gibbor. The first two were matched by hand to their stored submissions, dorahacks-buidl-41505 and dorahacks-buidl-41502, and are served with isWinner true and placement 'Winner'; none of the 28 stored submissions is Seyf, so it is not served, and stats.winnersNote says so (a SEYF entry stored for stellar-pulso-hackathon is another event's and does not carry the win). winnerSource is on getHackathon's winner rows and on getHackathonSubmission's build and entries (reviewSubmission's submission too); search rows carry isWinner and placement without it. The win is applied when submissions are read, never written to the store, and a placement DoraHacks assigns always replaces it. winnersOnly finds them in every mode: search by meaning lets the rows of an event the overlay names through its winners filter and keeps only the named winners.",
+	},
+	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.91",
+		type: "added",
+		summary:
+			"The winners of Build on Stellar Philippines (AbotPera, Champion; PinkRaft, 1st Runner-Up; Axial, 2nd Runner-Up; Sobre and TyFi, Best Use of Stellar) and the APAC Stellar Hackathon's Payment & Consumer Application track (Olio, 1st) are added to the curated submissions. They are served once the curated-builds lane stores them; until then both events serve 0 winners.",
+		detail:
+			"Each row carries the page it was verified against (BitPinas, 2026-06-08; Rise In's builder spotlight, 2026-09-01) and what the project does as that page says; no repo is linked, since neither page links one. getHackathon now ranks a '1st Runner-Up' second and a '2nd Runner-Up' third, behind a 'Champion' ranked first: the ordinal was read as the place, which put the runners-up ahead of the champion.",
+	},
+	{
+		date: "2026-10-22",
+		surfaces: ["api"],
 		version: "spec@1.9.90",
 		type: "fixed",
 		summary:

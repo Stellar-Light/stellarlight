@@ -1600,7 +1600,7 @@ export interface components {
                         award?: string | null;
                         placementRank?: number | null;
                     }[] | null;
-                    /** @description Non-null when hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award, so a missing winner is explained rather than silent. */
+                    /** @description Why the winners are what they are, so a missing winner or a 0 is explained rather than silent. When hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award. On an event off DoraHacks: a dated note that its winners are published only in part, or not announced upstream. When winners carry winnerSource: the page that names them and which named winners are not served. On an ended DoraHacks event with no winner served: DoraHacks' winner_announced flag, from its event listing (refreshed hourly), says not announced upstream, or announced but not recorded here. Not announced is never a claim that no one won. null = nothing to add, or the flag could not be read. */
                     winnersNote?: string | null;
                     /** @description Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. */
                     coverageNote?: string | null;
@@ -1619,7 +1619,7 @@ export interface components {
             };
             /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first. */
             winners?: {
-                /** @description Stable row id (dorahacks-buidl-{id} for live rows, winner-{event}-{name} for a curated roster, from the winner's name). */
+                /** @description Stable row id (dorahacks-buidl-{id} for live rows, curated-{event}-{name} for a stored submission from an event off DoraHacks, winner-{event}-{name} for a curated roster, from the winner's name). */
                 id?: string;
                 name?: string;
                 hackathonPlacement?: string | null;
@@ -1633,10 +1633,12 @@ export interface components {
                 /** @description What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250); on curated roster rows, the roster's own figure. null when the placement carries no amount (tier-labelled winners like 'Track Winner'), never 0, which would assert a prize of nothing. */
                 prizeUsd?: number | null;
                 isWinner?: boolean;
+                /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                winnerSource?: string;
                 githubUrl?: string | null;
                 demoUrl?: string | null;
                 videoUrl?: string | null;
-                /** @description The submission's DoraHacks buidl page. */
+                /** @description The submission's DoraHacks buidl page; on a curated-{event}-{name} row, the page the win was verified against. */
                 url?: string;
                 /** @description null on every row since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability; null is unknown, never zero votes. */
                 voteCount?: number | null;
@@ -3601,7 +3603,7 @@ export interface operations {
                 q?: string;
                 /** @description How q matches (default: hybrid). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";
-                /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
+                /** @description Set to 1 for prize winners only: the winners DoraHacks assigned and those a page off DoraHacks names (getHackathon shows these with winnerSource), by words and by meaning alike. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
                 /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
@@ -3838,6 +3840,8 @@ export interface operations {
                             award?: string | null;
                             prizeUsd?: number | null;
                             isWinner?: boolean;
+                            /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                            winnerSource?: string;
                             /** @description Every event this submission entered, best first, each with its own track, placement and award. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
                             entries?: {
                                 hackathon?: {
@@ -3850,6 +3854,8 @@ export interface operations {
                                 award?: string | null;
                                 prizeUsd?: number | null;
                                 isWinner?: boolean;
+                                /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                                winnerSource?: string;
                             }[];
                             links?: {
                                 dorahacks?: string;
@@ -3966,7 +3972,7 @@ export interface operations {
                 q?: string;
                 /** @description How q matches (default: keyword). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";
-                /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
+                /** @description Set to 1 for prize winners only: the winners DoraHacks assigned and those a page off DoraHacks names (getHackathon shows these with winnerSource), by words and by meaning alike. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
                 /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
@@ -4185,6 +4191,8 @@ export interface operations {
                                 award?: string | null;
                                 prizeUsd?: number | null;
                                 isWinner?: boolean;
+                                /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                                winnerSource?: string;
                                 /** @description Every event this submission entered, best first, each with its own track, placement and award. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
                                 entries?: {
                                     hackathon?: {
@@ -4197,6 +4205,8 @@ export interface operations {
                                     award?: string | null;
                                     prizeUsd?: number | null;
                                     isWinner?: boolean;
+                                    /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                                    winnerSource?: string;
                                 }[];
                                 links?: {
                                     dorahacks?: string;

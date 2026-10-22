@@ -1,8 +1,12 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CURATED_BUILDS } from "@/data/curated-builds";
+import { CURATED_WINNERS_NOTES } from "@/data/curated-hackathons";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 import { BUILD_HOLD } from "@/lib/held-repos";
+import type { DoraHacksHackathon } from "@/lib/integrations/dorahacks";
 import { spec } from "@/lib/openapi-spec";
+import type { HackathonBuild } from "@/payload-types";
 import {
 	responseSchema,
 	undeclaredInServed,
@@ -56,11 +60,11 @@ vi.mock("@/lib/payload-client", () => ({
 		),
 	})),
 }));
-const getEvent = async () => {
+const getEvent = async (slug = "stellar-hacks-zk") => {
 	const { GET } = await import("../route");
 	const res = await GET(
-		new NextRequest("https://x.test/api/hackathons/stellar-hacks-zk"),
-		{ params: Promise.resolve({ slug: "stellar-hacks-zk" }) },
+		new NextRequest(`https://x.test/api/hackathons/${slug}`),
+		{ params: Promise.resolve({ slug }) },
 	);
 	return res.json();
 };
@@ -102,6 +106,59 @@ const build = (id: string, over: Partial<IndexedBuild> = {}): IndexedBuild => ({
 	haystack: id,
 	...over,
 });
+// Hack+ Alebrije: DoraHacks assigned no winners; BAF's newsletter names
+// two of its stored submissions (src/data/winner-overlay.ts).
+const BAF =
+	"https://bafs-newsletter.beehiiv.com/p/b-news-from-mexico-city-to-lima-this-month-s-web3-route";
+const ALEBRIJE_EVENT = {
+	...doraEvent,
+	id: 2405,
+	uname: "alebrije2026",
+	title: "Hack+ Alebrije | CDMX 2026",
+	winner_announced: false,
+} as DoraHacksHackathon;
+/** A stored Alebrije row as the DoraHacks sync writes it: unplaced. */
+const alebrije = (buildId: string, name: string): HackathonBuild => ({
+	id: buildId,
+	buildId,
+	name,
+	hackathonSlug: "alebrije2026",
+	hackathonTitle: "Hack+ Alebrije | CDMX 2026",
+	endedAt: "2026-03-22",
+	placement: null,
+	isWinner: false,
+	url: `https://dorahacks.io/buidl/${buildId.replace(/\D/g, "")}`,
+	firstSeenAt: "2026-10-05T00:00:00.000Z",
+	lastSeenAt: "2026-10-22T00:00:00.000Z",
+	updatedAt: "2026-10-22T00:00:00.000Z",
+	createdAt: "2026-10-05T00:00:00.000Z",
+});
+/** A curated event's winners as the curated-builds lane stores them
+ * (scripts/import-curated-builds.ts) and the index reads them. */
+const storedCurated = async (slug: string): Promise<IndexedBuild[]> => {
+	const { indexedFromStored } = await import("@/lib/hackathon-builds");
+	return CURATED_BUILDS.filter((b) => b.hackathonSlug === slug).map((b) =>
+		indexedFromStored({
+			id: b.id,
+			buildId: b.id,
+			name: b.name,
+			vision: b.description,
+			hackathonSlug: slug,
+			hackathonTitle: slug,
+			endedAt: "2026-07-24",
+			url: b.url,
+			isWinner: b.isWinner,
+			track: b.track,
+			placement: b.placement,
+			githubUrl: b.githubUrl,
+			demoUrl: b.demoUrl,
+			firstSeenAt: "2026-10-22T00:00:00.000Z",
+			lastSeenAt: "2026-10-22T00:00:00.000Z",
+			updatedAt: "2026-10-22T00:00:00.000Z",
+			createdAt: "2026-10-22T00:00:00.000Z",
+		}),
+	);
+};
 vi.mock("@/lib/hackathon-builds", async (orig) => ({
 	...(await orig<typeof import("@/lib/hackathon-builds")>()),
 	getHackathonBuildsIndex: vi.fn(async () => [
@@ -198,10 +255,12 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
 		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
 		const body = await getEvent();
-		expect(body.hackathon.stats).toMatchObject({
-			hiddenWinners: null,
-			winnersNote: null,
-		});
+		expect(body.hackathon.stats.hiddenWinners).toBeNull();
+		// No roster at all (the live read returned none): its 0 winners is
+		// not a count either.
+		expect(body.hackathon.stats.winnersNote).toMatch(
+			/^Winners could not be checked/,
+		);
 	});
 
 	it("a curated event has no DoraHacks roster to hide from", async () => {
@@ -309,6 +368,212 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		expect(scfOf("stellar-memory")).toEqual([null]);
 	});
 
+	it("an ended DoraHacks event with no winner says what DoraHacks' flag reports, never 'none won'", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		const note = async (over: Partial<DoraHacksHackathon>) => {
+			vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+				build("x"),
+				build("y"),
+			]);
+			vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+				{ ...doraEvent, ...over } as Awaited<
+					ReturnType<typeof fetchAllDoraHacksHackathons>
+				>[number],
+			]);
+			const body = await getEvent();
+			expect(body.hackathon.stats.winners).toBe(0);
+			expect(body.winners).toEqual([]);
+			return body.hackathon.stats.winnersNote;
+		};
+		expect(await note({ winner_announced: false })).toMatch(
+			/^Not announced upstream: DoraHacks lists this event's winners as not announced \(winner_announced false in its event listing, .*\).* This is not a claim that no one won/,
+		);
+		expect(await note({ winner_announced: true })).toMatch(
+			/^DoraHacks lists this event's winners as announced \(winner_announced true\), but no submission served here carries a prize, so its winners are not recorded here/,
+		);
+		// A listing without the flag could not say: nothing, not "not announced".
+		expect(await note({ winner_announced: null })).toBeNull();
+		expect(await note({})).toBeNull();
+		// An event still running has no winners yet.
+		expect(
+			await note({
+				winner_announced: false,
+				end_time: Math.floor(Date.now() / 1000) + 86_400,
+			}),
+		).toBeNull();
+	});
+
+	it("with no stored copy and a failed live roster, the winners could not be checked", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		const outage = async (over: Partial<DoraHacksHackathon>) => {
+			vi.mocked(getHackathonBuildsIndex).mockRejectedValueOnce(
+				new Error("store down"),
+			);
+			// The live read now throws when DoraHacks' winner list cannot be read.
+			live.mockRejectedValueOnce(
+				new Error("DoraHacks winners for stellar-hacks-zk: HTTP 429"),
+			);
+			vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+				{ ...doraEvent, ...over } as Awaited<
+					ReturnType<typeof fetchAllDoraHacksHackathons>
+				>[number],
+			]);
+			const { GET } = await import("../route");
+			const res = await GET(
+				new NextRequest("https://x.test/api/hackathons/stellar-hacks-zk"),
+				{ params: Promise.resolve({ slug: "stellar-hacks-zk" }) },
+			);
+			expect(res.status).toBe(200);
+			const body = await res.json();
+			expect(body.winners).toEqual([]);
+			expect(body.hackathon.stats.totalSubmissions).toBeNull();
+			return body.hackathon.stats.winnersNote as string | null;
+		};
+		// An outage is not "not recorded": nothing could be checked.
+		for (const flag of [true, null])
+			expect(await outage({ winner_announced: flag })).toMatch(
+				/^Winners could not be checked: no submission of this event could be read .*so this 0 is not a count/,
+			);
+		// Not announced still stands on DoraHacks' own flag, without claiming
+		// a roster was read.
+		const notAnnounced = await outage({ winner_announced: false });
+		expect(notAnnounced).toMatch(/^Not announced upstream/);
+		expect(notAnnounced).not.toMatch(/no submission served here/);
+	});
+
+	it("winners named off DoraHacks carry the page that names them, and the note says who is not served", async () => {
+		const { getHackathonBuildsIndex, indexedFromStored } = await import(
+			"@/lib/hackathon-builds"
+		);
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(
+			[
+				alebrije("dorahacks-buidl-41339", "Nomilar"),
+				alebrije("dorahacks-buidl-41505", "MañanaSeguro"),
+				alebrije("dorahacks-buidl-41502", "GIBBOR"),
+			].map((d) => indexedFromStored(d)),
+		);
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			ALEBRIJE_EVENT,
+		]);
+		const body = await getEvent("alebrije2026");
+		expect(
+			body.winners.map((w: Record<string, unknown>) => [
+				w.name,
+				w.hackathonPlacement,
+				w.placementRank,
+				w.winnerSource,
+				w.url,
+			]),
+		).toEqual([
+			["MañanaSeguro", "Winner", null, BAF, "https://dorahacks.io/buidl/41505"],
+			["GIBBOR", "Winner", null, BAF, "https://dorahacks.io/buidl/41502"],
+		]);
+		// No places: the order is not a ranking.
+		expect(body.winnersRanked).toBe(false);
+		expect(body.hackathon.stats.winners).toBe(2);
+		expect(body.hackathon.stats.winnersNote).toMatch(
+			/^Winners named by BAF's newsletter \(2026-05-04\), not by DoraHacks, which assigned none when checked on 2026-10-22: .*Seyf is not served/,
+		);
+		expect(body.hackathon.profile.winners).toBe(2);
+		// The submissions list keeps its shape; the source is on winner rows.
+		for (const s of body.submissions) expect("winnerSource" in s).toBe(false);
+		expect(
+			body.submissions
+				.filter((s: { isWinner: boolean }) => s.isWinner)
+				.map((s: { name: string }) => s.name),
+		).toEqual(["MañanaSeguro", "GIBBOR"]);
+	});
+
+	it("an event off DoraHacks says why its winners are missing, from its dated note", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		const curated = (uname: string) =>
+			({
+				...doraEvent,
+				uname,
+				source: "curated",
+				winner_announced: false,
+			}) as Awaited<ReturnType<typeof fetchAllDoraHacksHackathons>>[number];
+		// No winner published: the note, not a bare 0.
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			curated("stellar-journey-to-mastery-2026"),
+		]);
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
+		const journey = await getEvent("stellar-journey-to-mastery-2026");
+		expect(journey.hackathon.stats.winners).toBe(0);
+		expect(journey.hackathon.stats.winnersNote).toBe(
+			CURATED_WINNERS_NOTES["stellar-journey-to-mastery-2026"],
+		);
+		// One track's winner stored: it is served, and the note says the
+		// event is partial.
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			curated("apac-stellar-hackathon-2026"),
+		]);
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(
+			await storedCurated("apac-stellar-hackathon-2026"),
+		);
+		const apac = await getEvent("apac-stellar-hackathon-2026");
+		expect(
+			apac.winners.map((w: Record<string, unknown>) => [
+				w.name,
+				w.track,
+				w.placementRank,
+			]),
+		).toEqual([["Olio", "Payment & Consumer Application", 1]]);
+		expect(apac.hackathon.stats.winnersNote).toMatch(
+			/^Winners published for one track only/,
+		);
+	});
+
+	it("ranks a Champion first and its runners-up after it", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			{
+				...doraEvent,
+				uname: "build-on-stellar-philippines-2026",
+				source: "curated",
+				winner_announced: true,
+			} as Awaited<ReturnType<typeof fetchAllDoraHacksHackathons>>[number],
+		]);
+		// As the curated-builds lane stores them, reversed so the order is the
+		// ranking's, not the file's.
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(
+			(await storedCurated("build-on-stellar-philippines-2026")).reverse(),
+		);
+		const body = await getEvent("build-on-stellar-philippines-2026");
+		expect(
+			body.winners.map((w: Record<string, unknown>) => [
+				w.name,
+				w.hackathonPlacement,
+				w.placementRank,
+			]),
+		).toEqual([
+			["AbotPera", "Champion", 1],
+			["PinkRaft", "1st Runner-Up", 2],
+			["Axial", "2nd Runner-Up", 3],
+			// A special award has no place; unranked rows keep their order.
+			["TyFi", "Best Use of Stellar", null],
+			["Sobre", "Best Use of Stellar", null],
+		]);
+		expect(body.winnersRanked).toBe(true);
+		// Every winner the source names is served: nothing to add.
+		expect(body.hackathon.stats.winnersNote).toBeNull();
+	});
+
 	it("a failed hidden-winner read says nothing, not none", async () => {
 		hiddenRows = new Error("db down");
 		const body = await getEvent();
@@ -379,9 +644,24 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		).json();
 		expect(roster.winners[0]).toHaveProperty("builder");
 		expect(roster.hackathon.stats.outcomes).toBeNull();
+
+		// Winners named off DoraHacks: their source, and the event's note
+		// (a hidden winner's note would come first).
+		hiddenRows = [];
+		const { indexedFromStored } = await import("@/lib/hackathon-builds");
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			ALEBRIJE_EVENT,
+		]);
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			indexedFromStored(alebrije("dorahacks-buidl-41502", "GIBBOR")),
+		]);
+		const overlay = await getEvent("alebrije2026");
+		expect(overlay.winners[0].winnerSource).toBe(BAF);
+		expect(overlay.hackathon.stats.winnersNote).toMatch(/^Winners named/);
 		expect({
 			stored: undeclared(stored),
 			roster: undeclared(roster),
-		}).toEqual({ stored: [], roster: [] });
+			overlay: undeclared(overlay),
+		}).toEqual({ stored: [], roster: [], overlay: [] });
 	});
 });

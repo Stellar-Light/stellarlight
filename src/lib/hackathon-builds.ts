@@ -8,6 +8,7 @@
  * cold fan-out.
  */
 import { unstable_cache } from "next/cache";
+import { overlayWinnerOf } from "@/data/winner-overlay";
 import { withReadTimeout } from "@/lib/degraded-read";
 import {
 	BUILD_SEARCH_MODES,
@@ -48,6 +49,20 @@ export interface IndexedBuild extends DoraHacksSubmission {
 	activity?: { lastCommitAt: string | null; archived: boolean };
 	/** The repo answered not found the last time it was read. */
 	repoMissing?: boolean;
+	/** Present only on a winner that a page off DoraHacks names
+	 * (src/data/winner-overlay.ts): that page, the evidence of the win. */
+	winnerSource?: string;
+}
+
+/** The off-DoraHacks win of a stored entry DoraHacks did not place, or null.
+ * Read here, never written: the sync stays the one writer of the stored
+ * isWinner, and a placement DoraHacks assigned always wins. */
+function overlayWinner(
+	buildId: string,
+	hackathonSlug: string,
+	placedByDoraHacks: boolean,
+): { placement: string; winnerSource: string } | null {
+	return placedByDoraHacks ? null : overlayWinnerOf(buildId, hackathonSlug);
 }
 
 /** One project type a build was sorted into; score 0 to 1 (the share of its
@@ -99,21 +114,50 @@ const haystackOf = (
 
 /** Live read of the most recent ended DoraHacks events: the fallback when the
  * store has nothing to serve. Capped to bound cold-rebuild cost; the store has
- * no cap. */
+ * no cap. Each event settles on its own: one that cannot be read (its winner
+ * list unreadable, a timeout) is left out and named in the log, never served
+ * with its winners unplaced, and the rest are served. Routes treat a left-out
+ * event as one whose submissions are not held: getHackathon reads it live or
+ * says its winners could not be checked, and a hackathon filter naming it
+ * warns that 0 matched from it is not evidence. None read: the index is
+ * empty, and buildHackathonBuildsIndex throws. */
 async function buildLiveIndex(): Promise<IndexedBuild[]> {
 	const ended = endedDoraHacksEvents(await fetchAllDoraHacksHackathons()).slice(
 		0,
 		40,
 	);
+	const unread: string[] = [];
+	// Settled per event inside the 6-wide pool: Promise.allSettled over all 40
+	// at once would drop the cap and invite the rate limits that fail reads.
 	const perHack = await pool(ended, 6, async (h) => {
-		const subs = await fetchHackathonSubmissions(h);
+		let subs: DoraHacksSubmission[];
+		try {
+			subs = await fetchHackathonSubmissions(h);
+		} catch (e) {
+			unread.push(`${h.uname} (${(e as Error).message})`);
+			return [];
+		}
 		const hackathon = doraEventRef(h);
-		return subs.map((s) => ({
-			...s,
-			hackathon,
-			haystack: haystackOf(s.name, s.description, s.track, s.award),
-		}));
+		return subs.map((s) => {
+			const won = overlayWinner(s.id, hackathon.slug, s.isWinner);
+			return {
+				...s,
+				...(won
+					? {
+							isWinner: true,
+							hackathonPlacement: won.placement,
+							winnerSource: won.winnerSource,
+						}
+					: {}),
+				hackathon,
+				haystack: haystackOf(s.name, s.description, s.track, s.award),
+			};
+		});
 	});
+	if (unread.length)
+		console.error(
+			`hackathon builds live read: ${unread.length} of ${ended.length} events could not be read and are left out: ${unread.join("; ")}`,
+		);
 	return perHack.flat();
 }
 
@@ -180,6 +224,7 @@ export function indexedFromStored(
 	facts?: ProjectFacts,
 ): IndexedBuild {
 	const description = d.vision ?? null;
+	const won = overlayWinner(d.buildId, d.hackathonSlug, !!d.isWinner);
 	return {
 		id: d.buildId,
 		name: d.name,
@@ -189,9 +234,10 @@ export function indexedFromStored(
 		demoUrl: d.demoUrl ?? null,
 		videoUrl: d.videoUrl ?? null,
 		track: d.track ?? null,
-		hackathonPlacement: d.placement ?? null,
+		hackathonPlacement: won?.placement ?? d.placement ?? null,
 		award: d.award ?? null,
-		isWinner: !!d.isWinner,
+		isWinner: !!d.isWinner || !!won,
+		...(won ? { winnerSource: won.winnerSource } : {}),
 		voteCount: null,
 		url: d.url,
 		source: "dorahacks",
@@ -238,6 +284,8 @@ export interface BuildDetail {
 	award: string | null;
 	prizeUsd: number | null;
 	isWinner: boolean;
+	/** Present only when the best entry's win is named off DoraHacks. */
+	winnerSource?: string;
 	links: {
 		dorahacks: string;
 		github: string | null;
@@ -275,6 +323,8 @@ export interface BuildEntry {
 	award: string | null;
 	prizeUsd: number | null;
 	isWinner: boolean;
+	/** Present only when a page off DoraHacks names this entry's win. */
+	winnerSource?: string;
 }
 
 /** A submission's event entries, best first: a placed one, then the latest
@@ -306,6 +356,8 @@ export function onePerSubmission(builds: IndexedBuild[]): IndexedBuild[] {
 }
 
 function entryOf(d: HackathonBuild): BuildEntry {
+	const won = overlayWinner(d.buildId, d.hackathonSlug, !!d.isWinner);
+	const placement = won?.placement ?? d.placement ?? null;
 	return {
 		hackathon: {
 			title: d.hackathonTitle,
@@ -313,10 +365,11 @@ function entryOf(d: HackathonBuild): BuildEntry {
 			endedAt: d.endedAt ?? null,
 		},
 		track: d.track ?? null,
-		placement: d.placement ?? null,
+		placement,
 		award: d.award ?? null,
-		prizeUsd: parsePlacement(d.placement ?? null).prizeUsd || null,
-		isWinner: !!d.isWinner,
+		prizeUsd: parsePlacement(placement).prizeUsd || null,
+		isWinner: !!d.isWinner || !!won,
+		...(won ? { winnerSource: won.winnerSource } : {}),
 	};
 }
 
@@ -327,7 +380,12 @@ export function buildDetailFromStored(
 	rows: HackathonBuild[],
 	facts?: ProjectFacts,
 ): BuildDetail {
-	const sorted = [...rows].sort(entryOrder);
+	// Ordered by the entries as served, so a win named off DoraHacks counts.
+	const key = (r: HackathonBuild) => ({
+		isWinner: entryOf(r).isWinner,
+		endedAt: r.endedAt,
+	});
+	const sorted = [...rows].sort((a, b) => entryOrder(key(a), key(b)));
 	const d = sorted[0];
 	// Submission-level dates span every row: an entry restored later must not
 	// make the submission look new.
@@ -454,8 +512,9 @@ export const getHackathonBuildsIndex = unstable_cache(
 	// Bump when IndexedBuild's shape changes: the cache outlives deploys, and
 	// an old-shape index serves every new field as unknown for up to an hour.
 	// v4: an empty index is no longer cached, so one cached before this
-	// deploy must not outlive it.
-	["hackathon-builds-index:v4"],
+	// deploy must not outlive it. v5: winners named off DoraHacks
+	// (winnerSource), which a v4 index serves as unplaced.
+	["hackathon-builds-index:v5"],
 	{
 		revalidate: 3600,
 		tags: ["hackathons"],
