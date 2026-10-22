@@ -77,8 +77,7 @@ author's.
   (graded 2) on the short ideas and Micro Lending (graded 2) on the test
   ideas.
 - Verdict: no candidate meets the ship criteria; nothing in `src/` changed.
-  Evidence in `improvements/audits/2026-10-22-prior-art-precision/`;
-  `bash tmp/rerun.sh` reproduced every committed output byte for byte.
+  Evidence in `improvements/audits/2026-10-22-prior-art-precision/`.
 - Checks on the branch: `pnpm generate:importmap` (the gitignored import
   map tsc needs) exit 0; `pnpm exec tsc --noEmit -p tsconfig.json` exit 0;
   `npx vitest run src/lib/__tests__ src/app/api` exit 0, 178 files and
@@ -87,6 +86,15 @@ author's.
   pnpm contract:check` exit 0; `pnpm raven:gate --raven <stellar-raven
   checkout>` exit 0, ACCEPT 1.9.91; `npx biome check --linter-enabled=false`
   on the changed .mts, .mjs and .json files exit 0.
+- Review (Claude Fable 5.1, effort high, fresh context, read-only clone at
+  9635f6c8): every number recomputed from the committed data matched.
+  GATE: fix, four wording findings, all fixed: "drops same-idea builds on
+  every set" was too broad (the holdout loses none below a 0.745 floor);
+  the queue item's condition counts now read 12 / 4 / 1 / 0 as the README
+  does; a rerun claim that pointed at an uncommitted local script was
+  removed (the README's Rerun block is the reproducible path); the README's
+  derive command now uses `tmp/out` as run, and warns that `tmp/` is not
+  ignored by git.
 
 ## Outcome
 
@@ -97,8 +105,8 @@ scores 0.701 and another ties a wrong one at 0.733; on the holdout a wrong
 build (0.755) scores above a same-idea one (0.744). Weighing the word path
 by rarity helps only on the holdout (4 fewer wrong, no same-idea lost),
 fixes no probe, and drops one same-idea build on the short-idea set. i01's
-Delibera uses every word of the idea and scores 0.788 by meaning, so no
-rule over these signals removes it. Moved to `improvements/TODO.md` Now 9.
+Delibera uses every word of the idea and scores 0.788 by meaning, so a
+floor high enough to remove it also drops same-idea builds on other ideas. Moved to `improvements/TODO.md` Now 9.
 
 ## Part 2: words need meaning (lane G)
 

@@ -6,8 +6,9 @@ Evidence for the round in `improvements/rounds/2026-10-22-prior-art-precision.md
 hypothesis (the word path admits builds on two common words) does not hold
 on the working set: every wrong build there clears the 0.7 meaning floor,
 12 of 17 on meaning alone, so no change to the word path removes one. The
-meaning score does not separate wrong builds from same-idea builds, so any
-higher meaning floor that removes wrong builds also drops same-idea builds.
+meaning score does not separate wrong builds from same-idea builds, so every
+higher meaning floor tried that removes wrong builds also drops same-idea
+builds on at least one labeled set (on the holdout only from 0.745).
 The labels are drafts, pending owner review.
 
 ## Method (fixed before any result was read)
@@ -184,7 +185,8 @@ since the battery read 1.9.90 (Autopilot is no longer in i11's five).
 ## Rerun
 
 Copy this directory to `tmp/` at the repository root (the scripts import
-`src/lib` by a path relative to `tmp/`). From the root:
+`src/lib` by a path relative to `tmp/`; git does not ignore `tmp/`, so do
+not commit it). From the root:
 
 ```
 pnpm exec tsx tmp/evaluate.mts improvements/audits/2026-10-22-prior-art-precision/windows-40.json working
@@ -195,4 +197,4 @@ pnpm exec tsx tmp/diagnose.mts improvements/audits/2026-10-22-prior-art-precisio
 
 A fresh capture (live data moves, so numbers can change):
 `node tmp/capture.mjs tmp/ideas.json tmp/live-40.json`, then
-`pnpm exec tsx tmp/derive.mts tmp/live-40.json tmp/labels.json improvements/audits/2026-10-22-short-idea-prior-art tmp/`.
+`pnpm exec tsx tmp/derive.mts tmp/live-40.json tmp/labels.json improvements/audits/2026-10-22-short-idea-prior-art tmp/out`.
