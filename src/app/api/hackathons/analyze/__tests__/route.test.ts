@@ -22,6 +22,7 @@ vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
 			end_time: 2,
 			bonus_price: 10_000,
 			hackers_count: 50,
+			source: "dorahacks",
 		},
 		{
 			uname: "agents",
@@ -30,11 +31,25 @@ vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
 			end_time: 3,
 			bonus_price: 20_000,
 			hackers_count: 90,
+			source: "dorahacks",
+		},
+		// Listed, with no stored submissions.
+		{
+			uname: "hackmeridian-2025",
+			title: "HackMeridian 2025",
+			start_time: 1,
+			end_time: 2,
+			bonus_price: 0,
+			hackers_count: 0,
+			source: "curated",
 		},
 	]),
 }));
+// No curated collection rows: compare falls through to DoraHacks.
 vi.mock("@/lib/payload-client", () => ({
-	getPayloadSafe: vi.fn(async () => null),
+	getPayloadSafe: vi.fn(async () => ({
+		find: async () => ({ docs: [], totalDocs: 0 }),
+	})),
 }));
 
 const build = (
@@ -145,10 +160,17 @@ describe("GET /api/hackathons/analyze", () => {
 		expect((await get("analyze", "sort=new")).status).toBe(400);
 	});
 
-	it("answers an event it does not hold with 400 and the valid slugs, and takes a title", async () => {
-		const miss = await get("analyze", "hackathon=hackmeridian-2025");
+	it("splits a listed event with no stored submissions from a value that names none, and takes a title", async () => {
+		const unstored = await get("analyze", "hackathon=hackmeridian-2025");
+		expect(unstored.status).toBe(200);
+		expect(unstored.body.total.builds).toBe(0);
+		expect(unstored.body.meta.warnings).toContain(
+			"no submissions are stored for hackmeridian-2025; 0 matched from it is not evidence that nothing was built",
+		);
+
+		const miss = await get("analyze", "hackathon=nope");
 		expect(miss.status).toBe(400);
-		expect(miss.body.error).toContain("'hackmeridian-2025'");
+		expect(miss.body.error).toContain("'nope'");
 		expect(miss.body.validHackathons).toEqual(["agents", "kale"]);
 
 		index.push(

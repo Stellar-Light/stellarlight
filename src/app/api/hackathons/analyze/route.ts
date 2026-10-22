@@ -27,6 +27,7 @@ import {
 } from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
+	listedEvents,
 	MEANING_NEIGHBOURS,
 	parseBuildFilters,
 	queryBuilds,
@@ -98,12 +99,13 @@ export async function GET(req: NextRequest) {
 		);
 	}
 	// After the index read: a hackathon value is checked against its events.
-	const parsed = parseBuildFilters(sp, "keyword", indexed);
+	const parsed = await parseBuildFilters(sp, "keyword", indexed, listedEvents);
 	if ("error" in parsed)
 		return NextResponse.json(parsed.error, { status: 400 });
 	const f = parsed.filters;
 
 	const { scored, field, served, warnings } = await queryBuilds(indexed, f);
+	warnings.unshift(...parsed.warnings);
 	if (f.q && served !== "keyword")
 		warnings.push(
 			`Counted by meaning: at most the ${MEANING_NEIGHBOURS} submissions nearest the query that clear the similarity floor, and a neighbour in meaning is not proof a build is about the topic. For a share of a topic, keyword mode counts every build that names it.`,

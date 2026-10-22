@@ -21,6 +21,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { afterEventFields, distribution } from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
+	listedEvents,
 	parseBuildFilters,
 	queryBuilds,
 } from "@/lib/hackathon-build-query";
@@ -86,7 +87,7 @@ export async function GET(req: NextRequest) {
 	// top-5 slots to keyword's 40%, and kept exact-name lookups (27 of 30
 	// first, keyword 26) for about 150 ms more at the median (2026-10-20).
 	// After the index read: a hackathon value is checked against its events.
-	const parsed = parseBuildFilters(sp, "hybrid", indexed);
+	const parsed = await parseBuildFilters(sp, "hybrid", indexed, listedEvents);
 	if ("error" in parsed)
 		return NextResponse.json(parsed.error, { status: 400 });
 	const f = parsed.filters;
@@ -108,6 +109,7 @@ export async function GET(req: NextRequest) {
 	} = await queryBuilds(indexed, f, {
 		perSubmission: true,
 	});
+	warnings.unshift(...parsed.warnings);
 
 	const builds = scored
 		.slice(offset, offset + limit)

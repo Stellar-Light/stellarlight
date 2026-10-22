@@ -3579,7 +3579,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. A value that names no event with stored submissions answers 400 with validHackathons, the slugs of every event that has them. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
+                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -3624,7 +3624,7 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description Present only when something limited this answer, e.g. search by meaning could not run. */
+                            /** @description Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), or the event listing could not be read to check a hackathon value ('could not check hackathon ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. */
                             warnings?: string[];
                             /** @description The filters as applied: an echo, so a caller can see what was honoured. */
                             filters?: {
@@ -3732,7 +3732,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event with stored submissions. */
+            /** @description A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event getHackathons lists. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3747,9 +3747,22 @@ export interface operations {
                         supportedParams?: string[];
                         /** @description The values the named parameter accepts. */
                         validValues?: string[];
-                        /** @description The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value was not recognised. Pass one of these, or the event's exact title. */
+                        /** @description The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value names no event getHackathons lists. Pass one of these, or the event's exact title. getHackathons lists every event; one whose submissions are not stored is accepted and matches nothing, with a meta.warnings line. */
                         validHackathons?: string[];
                     };
+                };
+            };
+            /** @description The submissions index could not be built: the stored submissions could not be read, or the read came back empty. An outage, not a claim that nothing similar was built: retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };
@@ -3930,7 +3943,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. A value that names no event with stored submissions answers 400 with validHackathons, the slugs of every event that has them. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
+                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -3965,6 +3978,7 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
+                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. */
                             warnings?: string[];
                             source?: string;
                             upstream?: string;
@@ -4065,7 +4079,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event with stored submissions. */
+            /** @description A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event getHackathons lists. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -4080,7 +4094,7 @@ export interface operations {
                         supportedParams?: string[];
                         /** @description The values the named parameter accepts. */
                         validValues?: string[];
-                        /** @description The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value was not recognised. Pass one of these, or the event's exact title. */
+                        /** @description The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value names no event getHackathons lists. Pass one of these, or the event's exact title. getHackathons lists every event; one whose submissions are not stored is accepted and matches nothing, with a meta.warnings line. */
                         validHackathons?: string[];
                     };
                 };
