@@ -46,6 +46,58 @@ export interface BuildFilters {
 	package?: string;
 }
 
+/** Every name `hackathon` accepts, lowercased, to the slugs it selects: each
+ * indexed event's slug and its exact title. A title several events share
+ * selects them all. */
+function eventNames(indexed: IndexedBuild[]): Map<string, Set<string>> {
+	const names = new Map<string, Set<string>>();
+	for (const { hackathon: h } of indexed)
+		for (const name of [h.slug, h.title]) {
+			const key = name.trim().toLowerCase();
+			if (key) names.set(key, (names.get(key) ?? new Set()).add(h.slug));
+		}
+	return names;
+}
+
+/** Split `hackathon` into slugs and the values that name no indexed event.
+ * Titles can hold commas ("Build, Create & Win"), so from each piece the
+ * longest run of pieces that names an event wins. */
+function resolveEvents(
+	raw: string,
+	names: Map<string, Set<string>>,
+): { slugs: Set<string>; unknown: Set<string> } {
+	// Bounds the runs tried by the most commas any name holds, so a value of
+	// many commas costs a few lookups per piece, not one per pair of pieces.
+	const maxRun = Math.max(
+		1,
+		...[...names.keys()].map((k) => k.split(",").length),
+	);
+	const pieces = raw.split(",");
+	const slugs = new Set<string>();
+	const unknown = new Set<string>();
+	for (let i = 0; i < pieces.length; ) {
+		let run = Math.min(maxRun, pieces.length - i);
+		let key = "";
+		for (; run > 0; run--) {
+			key = pieces
+				.slice(i, i + run)
+				.join(",")
+				.trim()
+				.toLowerCase();
+			if (names.has(key)) break;
+		}
+		if (run > 0) {
+			for (const s of names.get(key) ?? []) slugs.add(s);
+			i += run;
+		} else {
+			const v = pieces[i].trim();
+			if (v) unknown.add(v);
+			i++;
+		}
+	}
+	return { slugs, unknown };
+}
+
 /** Parse the shared filters, or the 400 body naming what was wrong. A bad
  * value is never coerced: a list that looks filtered but is not is worse than
  * an error. */
@@ -55,6 +107,9 @@ export function parseBuildFilters(
 	 * X" best with hybrid; analyze counts with keyword so its numbers do not
 	 * move with the meaning index. Required, so each caller chooses. */
 	defaultMode: BuildSearchMode,
+	/** The index the filters will run over: `hackathon` must name its events.
+	 * A slug it does not hold matched nothing and answered an empty 200. */
+	indexed: IndexedBuild[],
 ): { filters: BuildFilters } | { error: Record<string, unknown> } {
 	const winnersOnly = strictBoolParam(sp.get("winnersOnly"));
 	if (winnersOnly === "invalid")
@@ -72,21 +127,28 @@ export function parseBuildFilters(
 				validValues: BUILD_SEARCH_MODES,
 			},
 		};
-	const hackathons = [
-		...new Set(
-			(sp.get("hackathon") ?? "")
-				.split(",")
-				.map((s) => s.trim().toLowerCase())
-				.filter(Boolean),
-		),
-	];
-	if (hackathons.length > MAX_EVENTS)
+	const { slugs, unknown } = resolveEvents(
+		sp.get("hackathon") ?? "",
+		eventNames(indexed),
+	);
+	if (slugs.size + unknown.size > MAX_EVENTS)
 		return {
 			error: {
 				error: `At most ${MAX_EVENTS} hackathon slugs.`,
-				hint: "hackathon=slug-a,slug-b (the slugs getHackathons lists)",
+				hint: "hackathon=slug-a,slug-b: each an event's slug or exact title.",
 			},
 		};
+	if (unknown.size)
+		return {
+			error: {
+				error: `hackathon value(s) not recognised: ${[...unknown].map((v) => `'${v}'`).join(", ")}.`,
+				hint: "Pass a slug from validHackathons (every event with stored submissions) or an event's exact title, any case.",
+				validHackathons: [
+					...new Set(indexed.map((b) => b.hackathon.slug)),
+				].sort(),
+			},
+		};
+	const hackathons = [...slugs];
 	const rawCategory = sp.get("category")?.trim();
 	const category = rawCategory
 		? PROJECT_TYPES.find((t) => t.toLowerCase() === rawCategory.toLowerCase())

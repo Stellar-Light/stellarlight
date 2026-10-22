@@ -62,18 +62,6 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	// Hybrid by default: on 40 labeled ideas it put a wrong build in 22% of
-	// top-5 slots to keyword's 40%, and kept exact-name lookups (27 of 30
-	// first, keyword 26) for about 150 ms more at the median (2026-10-20).
-	const parsed = parseBuildFilters(sp, "hybrid");
-	if ("error" in parsed)
-		return NextResponse.json(parsed.error, { status: 400 });
-	const f = parsed.filters;
-	const q = f.q || undefined;
-	const limit = clampLimit(sp.get("limit"), 20, 100);
-	// Pages share one ranking: offset skips that many matched builds.
-	const offset = clampOffset(sp.get("offset"));
-
 	let indexed: IndexedBuild[];
 	try {
 		indexed = await getIndex();
@@ -94,6 +82,18 @@ export async function GET(req: NextRequest) {
 			},
 		);
 	}
+	// Hybrid by default: on 40 labeled ideas it put a wrong build in 22% of
+	// top-5 slots to keyword's 40%, and kept exact-name lookups (27 of 30
+	// first, keyword 26) for about 150 ms more at the median (2026-10-20).
+	// After the index read: a hackathon value is checked against its events.
+	const parsed = parseBuildFilters(sp, "hybrid", indexed);
+	if ("error" in parsed)
+		return NextResponse.json(parsed.error, { status: 400 });
+	const f = parsed.filters;
+	const q = f.q || undefined;
+	const limit = clampLimit(sp.get("limit"), 20, 100);
+	// Pages share one ranking: offset skips that many matched builds.
+	const offset = clampOffset(sp.get("offset"));
 	// Submissions, not event entries: a submission entered in several events
 	// is one result here (sls-092).
 	const indexedTotal = new Set(indexed.map((b) => b.id)).size;

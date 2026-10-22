@@ -77,10 +77,6 @@ export async function GET(req: NextRequest) {
 			{ status: 400 },
 		);
 	const by = (byRaw ?? undefined) as GroupFacetId | undefined;
-	const parsed = parseBuildFilters(sp, "keyword");
-	if ("error" in parsed)
-		return NextResponse.json(parsed.error, { status: 400 });
-	const f = parsed.filters;
 	const value = sp.get("value")?.trim() || undefined;
 	const top = clampLimit(sp.get("top"), by ? 5 : 10, 30);
 
@@ -101,6 +97,11 @@ export async function GET(req: NextRequest) {
 			},
 		);
 	}
+	// After the index read: a hackathon value is checked against its events.
+	const parsed = parseBuildFilters(sp, "keyword", indexed);
+	if ("error" in parsed)
+		return NextResponse.json(parsed.error, { status: 400 });
+	const f = parsed.filters;
 
 	const { scored, field, served, warnings } = await queryBuilds(indexed, f);
 	if (f.q && served !== "keyword")

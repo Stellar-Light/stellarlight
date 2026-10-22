@@ -144,6 +144,32 @@ describe("GET /api/hackathons/analyze", () => {
 		expect((await get("analyze", "category=defi")).status).toBe(400);
 		expect((await get("analyze", "sort=new")).status).toBe(400);
 	});
+
+	it("answers an event it does not hold with 400 and the valid slugs, and takes a title", async () => {
+		const miss = await get("analyze", "hackathon=hackmeridian-2025");
+		expect(miss.status).toBe(400);
+		expect(miss.body.error).toContain("'hackmeridian-2025'");
+		expect(miss.body.validHackathons).toEqual(["agents", "kale"]);
+
+		index.push(
+			build("z1", "x", "2026-04-13", {
+				hackathon: {
+					title: "Stellar Hacks: Agents",
+					slug: "stellar-agents-x402-stripe-mpp",
+					endedAt: "2026-04-13",
+				},
+			}),
+		);
+		const hit = await get(
+			"analyze",
+			"hackathon=stellar%20hacks:%20agents&facet=event",
+		);
+		expect(hit.status).toBe(200);
+		expect(hit.body.meta.filters.hackathon).toEqual([
+			"stellar-agents-x402-stripe-mpp",
+		]);
+		expect(hit.body.total.builds).toBe(1);
+	});
 });
 
 describe("GET /api/hackathons/compare", () => {

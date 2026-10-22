@@ -3562,7 +3562,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
+                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. A value that names no event with stored submissions answers 400 with validHackathons, the slugs of every event that has them. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -3712,6 +3712,26 @@ export interface operations {
                             /** @description Vector similarity to the query (0 to 1), present when mode was meaning or hybrid and the build cleared the floor. A row with similarity and no matchedTerms was found by meaning alone: verify it. */
                             similarity?: number;
                         }[];
+                    };
+                };
+            };
+            /** @description A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event with stored submissions. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description What was wrong, naming the value. */
+                        error: string;
+                        /** @description How to correct the call. */
+                        hint?: string;
+                        /** @description Every parameter the operation reads; sent with an unknown parameter. */
+                        supportedParams?: string[];
+                        /** @description The values the named parameter accepts. */
+                        validValues?: string[];
+                        /** @description The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value was not recognised. Pass one of these, or the event's exact title. */
+                        validHackathons?: string[];
                     };
                 };
             };
@@ -3893,7 +3913,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
+                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. A value that names no event with stored submissions answers 400 with validHackathons, the slugs of every event that has them. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -4028,12 +4048,25 @@ export interface operations {
                     };
                 };
             };
-            /** @description An unknown parameter, facet, by, category, mode or winnersOnly value; the body names the valid ones. */
+            /** @description A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event with stored submissions. */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        /** @description What was wrong, naming the value. */
+                        error: string;
+                        /** @description How to correct the call. */
+                        hint?: string;
+                        /** @description Every parameter the operation reads; sent with an unknown parameter. */
+                        supportedParams?: string[];
+                        /** @description The values the named parameter accepts. */
+                        validValues?: string[];
+                        /** @description The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value was not recognised. Pass one of these, or the event's exact title. */
+                        validHackathons?: string[];
+                    };
+                };
             };
             /** @description The index could not be built; retry after Retry-After. */
             503: {

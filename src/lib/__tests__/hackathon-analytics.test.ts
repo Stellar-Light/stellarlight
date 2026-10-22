@@ -155,8 +155,26 @@ describe("winners against the rest", () => {
 });
 
 describe("shared filters", () => {
+	const events = [
+		build("a1", { event: "a" }),
+		build("b1", { event: "b" }),
+		build("z1", {
+			hackathon: {
+				title: "Stellar Hacks: Agents",
+				slug: "stellar-agents-x402-stripe-mpp",
+				endedAt: "2026-04-13",
+			},
+		}),
+		build("c1", {
+			hackathon: {
+				title: "Stellar Ideaton: Build, Create & Win on the Road to Meridian",
+				slug: "telluscoop-ideaton",
+				endedAt: "2025-09-01",
+			},
+		}),
+	];
 	const parse = (qs: string) =>
-		parseBuildFilters(new URLSearchParams(qs), "keyword");
+		parseBuildFilters(new URLSearchParams(qs), "keyword", events);
 
 	it("spells a category the vocabulary's way and rejects unknown ones", () => {
 		expect(parse("category=payments")).toMatchObject({
@@ -173,12 +191,66 @@ describe("shared filters", () => {
 		expect("error" in parse("mode=fuzzy")).toBe(true);
 		// The default is the caller's: search hybrid, analyze keyword.
 		const mode = (qs: string, d: "keyword" | "hybrid") => {
-			const r = parseBuildFilters(new URLSearchParams(qs), d);
+			const r = parseBuildFilters(new URLSearchParams(qs), d, events);
 			return "filters" in r ? r.filters.mode : null;
 		};
 		expect(mode("q=lending", "hybrid")).toBe("hybrid");
 		expect(mode("q=lending", "keyword")).toBe("keyword");
 		expect(mode("q=lending&mode=keyword", "hybrid")).toBe("keyword");
+	});
+
+	it("answers an event it does not hold with the valid slugs, never an empty filter", () => {
+		// The live miss: an event's title matched no slug, and the empty
+		// result read as a field of zero.
+		const r = parse("hackathon=Stellar%20Hacks%3A%20Agent,nope,a");
+		expect(r).toEqual({
+			error: {
+				error:
+					"hackathon value(s) not recognised: 'Stellar Hacks: Agent', 'nope'.",
+				hint: expect.stringContaining("validHackathons"),
+				validHackathons: [
+					"a",
+					"b",
+					"stellar-agents-x402-stripe-mpp",
+					"telluscoop-ideaton",
+				],
+			},
+		});
+	});
+
+	it("takes an event's exact title, any case, as its slug, commas and all", () => {
+		expect(
+			parse(
+				"hackathon=stellar hacks: agents, Stellar Ideaton: Build, Create %26 Win on the Road to Meridian,b",
+			),
+		).toMatchObject({
+			filters: {
+				hackathons: [
+					"stellar-agents-x402-stripe-mpp",
+					"telluscoop-ideaton",
+					"b",
+				],
+			},
+		});
+		// Ten events, a comma title counted once, is still within the cap.
+		const ten = parseBuildFilters(
+			new URLSearchParams(
+				`hackathon=${encodeURIComponent(
+					[
+						"Stellar Ideaton: Build, Create & Win on the Road to Meridian",
+						...Array.from({ length: 9 }, (_, i) => `e${i}`),
+					].join(","),
+				)}`,
+			),
+			"keyword",
+			[
+				...events,
+				...Array.from({ length: 9 }, (_, i) =>
+					build(`x${i}`, { event: `e${i}` }),
+				),
+			],
+		);
+		expect("filters" in ten && ten.filters.hackathons.length).toBe(10);
 	});
 });
 

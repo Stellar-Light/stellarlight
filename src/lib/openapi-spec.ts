@@ -326,7 +326,7 @@ const buildFilterParams = (
 		in: "query",
 		required: false,
 		description:
-			"Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement.",
+			"Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. A value that names no event with stored submissions answers 400 with validHackathons, the slugs of every event that has them. A submission can enter several events; under this filter each row is that event's own entry, with its own placement.",
 		schema: { type: "string" },
 	},
 	{
@@ -353,6 +353,45 @@ const buildFilterParams = (
 		schema: { type: "string" },
 	},
 ];
+
+/** The 400 both operations answer (src/lib/hackathon-build-query.ts and the
+ * two routes): the body names what was wrong and lists what would work. */
+const BUILD_FILTERS_400 = {
+	description:
+		"A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event with stored submissions.",
+	content: {
+		"application/json": {
+			schema: {
+				type: "object",
+				required: ["error"],
+				properties: {
+					error: {
+						type: "string",
+						description: "What was wrong, naming the value.",
+					},
+					hint: { type: "string", description: "How to correct the call." },
+					supportedParams: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"Every parameter the operation reads; sent with an unknown parameter.",
+					},
+					validValues: {
+						type: "array",
+						items: { type: "string" },
+						description: "The values the named parameter accepts.",
+					},
+					validHackathons: {
+						type: "array",
+						items: { type: "string" },
+						description:
+							"The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value was not recognised. Pass one of these, or the event's exact title.",
+					},
+				},
+			},
+		},
+	},
+};
 
 /** The filters as applied, echoed in meta. */
 const BUILD_FILTERS_ECHO_SCHEMA = {
@@ -3654,6 +3693,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"400": BUILD_FILTERS_400,
 				},
 			},
 		},
@@ -3983,10 +4023,7 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"400": {
-						description:
-							"An unknown parameter, facet, by, category, mode or winnersOnly value; the body names the valid ones.",
-					},
+					"400": BUILD_FILTERS_400,
 					"503": {
 						description:
 							"The index could not be built; retry after Retry-After.",

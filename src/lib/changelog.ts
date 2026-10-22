@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.88",
+		type: "fixed",
+		summary:
+			"searchHackathonBuilds and analyzeHackathonSubmissions answer 400 with validHackathons when a hackathon value names no event with stored submissions, instead of an empty 200; an event's exact title, any case, now works as its slug.",
+		detail:
+			"hackathon=Stellar Hacks: Agents matched no slug and answered 200 with 0 matched and no warning, while its slug, stellar-agents-x402-stripe-mpp, matches 249. Each comma-separated value is now an event's slug or its exact title (a title that holds commas is still one value), and meta.filters.hackathon echoes the slugs the values resolved to. A value that names no event with stored submissions answers 400 with error naming it, a hint, and validHackathons: the slug of every event with stored submissions, alphabetical. That includes an event getHackathons lists whose submissions are not stored (hackmeridian-2025 today), which used to answer an empty 200. The cap of 10 counts events, not commas. Both operations declare the 400 and its body.",
+	},
+	{
 		date: "2026-10-20",
 		surfaces: ["api"],
 		version: "spec@1.9.87",
