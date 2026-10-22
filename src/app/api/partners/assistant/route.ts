@@ -320,9 +320,7 @@ export async function POST(req: NextRequest) {
 		);
 	} catch (err) {
 		if (err instanceof Anthropic.RateLimitError)
-			return modelRateLimited(err.headers?.get("retry-after"), {
-				headers: rateLimitHeaders(limit),
-			});
+			return modelRateLimited(err.headers?.get("retry-after"), limit);
 		if (
 			err instanceof Anthropic.AuthenticationError ||
 			err instanceof Anthropic.PermissionDeniedError ||

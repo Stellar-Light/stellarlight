@@ -77,23 +77,30 @@ export function rateLimited(
 	});
 }
 
+/** The longest model wait passed on: past it, the number is not a wait. */
+const MAX_MODEL_WAIT_SECONDS = 3600;
+
 /** The 429 when the language model a route calls is at its own rate limit:
- * the model's Retry-After, or 60 seconds when it sent none (its limits are
- * counted per minute). */
+ * the model's Retry-After, rounded up and capped, or 60 seconds when it sent
+ * no positive finite number (its limits are counted per minute). Takes the
+ * route's own window so the X-RateLimit headers go out on this 429 too. */
 export function modelRateLimited(
 	retryAfter: string | null | undefined,
-	opts: { startedAt?: number; headers?: Record<string, string> } = {},
+	limit: RateLimitResult,
+	opts: { startedAt?: number } = {},
 ): NextResponse {
-	const sent = Math.ceil(Number(retryAfter));
-	const retryAfterSeconds = sent > 0 ? sent : 60;
+	const sent = Number(retryAfter);
+	const retryAfterSeconds =
+		Number.isFinite(sent) && sent > 0
+			? Math.min(Math.ceil(sent), MAX_MODEL_WAIT_SECONDS)
+			: 60;
 	return apiError({
 		status: 429,
 		error: "The language model behind this endpoint is at its rate limit.",
 		hint: waitHint(retryAfterSeconds),
-		advisory:
-			"The wait is the model's own Retry-After, or 60 seconds when it sent none. This says nothing about the request.",
+		advisory: `The wait is the model's own Retry-After, at most ${MAX_MODEL_WAIT_SECONDS} seconds, or 60 seconds when it sent no usable number. This says nothing about the request.`,
 		retryAfterSeconds,
 		startedAt: opts.startedAt ?? Date.now(),
-		headers: opts.headers,
+		headers: rateLimitHeaders(limit),
 	});
 }

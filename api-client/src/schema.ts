@@ -826,7 +826,7 @@ export interface components {
             hint?: string;
             /** @description What the failure is not a claim about, and what to do (retry after Retry-After, or where else to look). */
             advisory?: string;
-            /** @description Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait; on a 503, 2 on database reads and 60 or 300 on the skills registry. */
+            /** @description Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait (at most 3600, 60 when it sent no usable number); on a 503, 2 on database reads and 60 or 300 on the skills registry. */
             retryAfterSeconds: number;
         };
         /** @description The request itself was wrong (a 400): fix the call, do not retry it as is. */
@@ -4722,7 +4722,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
                     /** @description Seconds to wait; the same number as retryAfterSeconds. */
@@ -4817,7 +4817,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
                     /** @description Seconds to wait; the same number as retryAfterSeconds. */
@@ -4903,7 +4903,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
                     /** @description Seconds to wait; the same number as retryAfterSeconds. */

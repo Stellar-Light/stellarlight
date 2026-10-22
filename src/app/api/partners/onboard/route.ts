@@ -363,7 +363,7 @@ export async function POST(req: NextRequest) {
 		);
 	} catch (err) {
 		if (err instanceof Anthropic.RateLimitError)
-			return modelRateLimited(err.headers?.get("retry-after"));
+			return modelRateLimited(err.headers?.get("retry-after"), limit);
 		// Auth / billing / permission failures (401/403, and the 400 "credit
 		// balance too low") are OUR account-config problem, not the partner's —
 		// surface them like the no-key case so the UI falls back cleanly to the

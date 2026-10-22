@@ -83,7 +83,7 @@ const VERIFY_CLAIM_TYPES = ["audited", "live", "maintained", "issued"];
 const rateLimited429 = (callsModel = false) => ({
 	description: `${
 		callsModel
-			? "This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, or 60 seconds when it sent none)."
+			? "This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number)."
 			: "This endpoint's rate window is spent."
 	} hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request.`,
 	headers: {
@@ -9273,7 +9273,7 @@ export const spec: OpenAPISpec = {
 					retryAfterSeconds: {
 						type: "integer",
 						description:
-							"Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait; on a 503, 2 on database reads and 60 or 300 on the skills registry.",
+							"Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait (at most 3600, 60 when it sent no usable number); on a 503, 2 on database reads and 60 or 300 on the skills registry.",
 					},
 				},
 			},
