@@ -80,4 +80,18 @@ describe("winners-only search by meaning", () => {
 		expect(filterSent()).toEqual({ hiddenUpstream: { $ne: true } });
 		expect(all?.size).toBe(3);
 	});
+
+	it("reads every candidate when winners only, so the overlay events' other rows cannot take a winner's place", async () => {
+		rows = [];
+		await vectorBuildScores([0.1, 0.2], { winnersOnly: true, limit: 2 });
+		expect(pipeline[0]?.$vectorSearch).toMatchObject({
+			numCandidates: 300,
+			limit: 300,
+		});
+		await vectorBuildScores([0.1, 0.2], { limit: 2 });
+		expect(pipeline[0]?.$vectorSearch).toMatchObject({
+			numCandidates: 300,
+			limit: 2,
+		});
+	});
 });

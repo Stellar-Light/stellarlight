@@ -17,7 +17,8 @@ const OVERLAY_EVENTS = [...new Set(WINNER_OVERLAY.map((e) => e.hackathonSlug))];
  * named winners. hackathonSlug and isWinner are filter fields of
  * hackathon_build_vector_index (the sync's VECTOR_INDEX). All stored winners
  * and those events' rows stay well under the 300 neighbours a search reads,
- * so no winner is crowded out. */
+ * and a winners-only search returns every neighbour it reads, so no winner
+ * is crowded out. */
 export function winnersOnlyFilter(overlayEvents: readonly string[]) {
 	return overlayEvents.length
 		? {
@@ -73,6 +74,12 @@ export async function vectorBuildScores(
 	try {
 		const coll = await buildsCollection();
 		if (!coll) return null;
+		// Candidates well above the limit, for recall at the larger limits
+		// counting asks for.
+		const numCandidates = Math.min(
+			2_000,
+			Math.max(300, (opts.limit ?? 50) * 4),
+		);
 		const raw = (await withReadTimeout(
 			coll
 				.aggregate([
@@ -81,15 +88,15 @@ export async function vectorBuildScores(
 							index: "hackathon_build_vector_index",
 							path: "embedding",
 							queryVector,
-							// Candidates well above the limit, for recall at the
-							// larger limits counting asks for.
-							numCandidates: Math.min(
-								2_000,
-								Math.max(300, (opts.limit ?? 50) * 4),
-							),
-							// Slack for the excluded submission, which has a row per
-							// event it entered (sls-092).
-							limit: (opts.limit ?? 50) + (opts.excludeId ? 5 : 0),
+							numCandidates,
+							// Winners only reads every candidate: the overlay events'
+							// other rows pass the filter and are dropped below, so a
+							// smaller limit would let them take winners' places.
+							// Otherwise slack for the excluded submission, which has
+							// a row per event it entered (sls-092).
+							limit: opts.winnersOnly
+								? numCandidates
+								: (opts.limit ?? 50) + (opts.excludeId ? 5 : 0),
 							filter: {
 								hiddenUpstream: { $ne: true },
 								...(opts.winnersOnly ? winnersOnlyFilter(OVERLAY_EVENTS) : {}),
