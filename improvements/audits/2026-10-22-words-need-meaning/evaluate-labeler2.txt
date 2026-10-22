@@ -1,0 +1,192 @@
+fresh set: 30 ideas, api 1.9.91 -> 1.9.91; grades of labeler2
+kept decoys (vetIdea lists them under every rule): g2 0, g1 9, g0 4
+
+[fresh] G1: removed g2 0, g1 6, g0 7; brief gains g2 0, g1 0, g0 1; ideas whose vetIdea list empties 6
+   removed f04 deedao g=0 (vetIdea+brief)
+   removed f05 Poison-Game g=0 (vetIdea+brief)
+   removed f05 VIVO-RUN g=1 (vetIdea+brief)
+   removed f05 NFT DND g=0 (vetIdea+brief)
+   removed f08 Link2Pay g=1 (vetIdea+brief)
+   removed f10 PayPulse: Offline-First Bluetooth Payments on Stel g=0 (vetIdea+brief)
+   removed f17 x402-mcp-stellar-template g=0 (brief)
+   gained  f17 Blend AI Powered Smart Monitoring By Sorobanhooks g=0 (brief)
+   removed f18 Stellar.Gov g=1 (vetIdea+brief)
+   removed f18 Dr. T g=1 (vetIdea+brief)
+   removed f19 Mão na Roda - Mutual Protection for Gig Workers. g=1 (vetIdea+brief)
+   removed f28 LumenSure - Private Proof-Backed Insurance Payouts g=0 (vetIdea+brief)
+   removed f28 Stellar AI Escrow Commerce g=1 (vetIdea+brief)
+   removed f28 ContractForge g=0 (vetIdea+brief)
+
+[fresh] G2: removed g2 0, g1 6, g0 7; brief gains g2 0, g1 0, g0 1; ideas whose vetIdea list empties 6
+   removed f04 deedao g=0 (vetIdea+brief)
+   removed f05 Poison-Game g=0 (vetIdea+brief)
+   removed f05 VIVO-RUN g=1 (vetIdea+brief)
+   removed f05 NFT DND g=0 (vetIdea+brief)
+   removed f08 Link2Pay g=1 (vetIdea+brief)
+   removed f10 PayPulse: Offline-First Bluetooth Payments on Stel g=0 (vetIdea+brief)
+   removed f17 x402-mcp-stellar-template g=0 (brief)
+   gained  f17 Blend AI Powered Smart Monitoring By Sorobanhooks g=0 (brief)
+   removed f18 Stellar.Gov g=1 (vetIdea+brief)
+   removed f18 Dr. T g=1 (vetIdea+brief)
+   removed f19 Mão na Roda - Mutual Protection for Gig Workers. g=1 (vetIdea+brief)
+   removed f28 LumenSure - Private Proof-Backed Insurance Payouts g=0 (vetIdea+brief)
+   removed f28 Stellar AI Escrow Commerce g=1 (vetIdea+brief)
+   removed f28 ContractForge g=0 (vetIdea+brief)
+
+[40 ideas (1.9.91)] current: vetIdea lists g2 56, g1 92, g0 33; lost g2 0, g1 0, g0 0; ideas emptied 0
+
+[40 ideas (1.9.91)] G1: vetIdea lists g2 56, g1 89, g0 29; lost g2 0, g1 3, g0 4; ideas emptied 0
+   lost i18 SettleZK g=0 (vetIdea; matched 2, textShare 0.5)
+   lost i18 Micro Lending g=1 (vetIdea; matched 2, textShare 0.5)
+   lost i21 Stellar Rent g=0 (vetIdea; matched 3, textShare 0.6)
+   lost i21 PayOnProof g=0 (vetIdea; matched 3, textShare 0.6)
+   lost i30 Mineral Gateway: Agent-Powered Critical Minerals T g=1 (vetIdea; matched 3, textShare 0.6)
+   lost i38 Soroscan g=1 (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost i39 clevercon g=0 (vetIdea; matched 2, textShare 0.5)
+
+[40 ideas (1.9.91)] G2: vetIdea lists g2 56, g1 89, g0 29; lost g2 0, g1 3, g0 4; ideas emptied 0
+   lost i18 SettleZK g=0 (vetIdea; matched 2, textShare 0.5)
+   lost i18 Micro Lending g=1 (vetIdea; matched 2, textShare 0.5)
+   lost i21 Stellar Rent g=0 (vetIdea; matched 3, textShare 0.6)
+   lost i21 PayOnProof g=0 (vetIdea; matched 3, textShare 0.6)
+   lost i30 Mineral Gateway: Agent-Powered Critical Minerals T g=1 (vetIdea; matched 3, textShare 0.6)
+   lost i38 Soroscan g=1 (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost i39 clevercon g=0 (vetIdea; matched 2, textShare 0.5)
+
+[40 ideas (1.9.91), brief within the top 20] G1: lost g2 0, g1 3, g0 5, ungraded 1
+   brief lost i05 xbid.ai g=0
+   brief lost i13 clevercon g=-
+   brief lost i18 SettleZK g=0
+   brief lost i18 Micro Lending g=1
+   brief lost i21 Stellar Rent g=0
+   brief lost i21 PayOnProof g=0
+   brief lost i30 Mineral Gateway: Agent-Powered Critical Minerals T g=1
+   brief lost i38 Soroscan g=1
+   brief lost i39 clevercon g=0
+
+[40 ideas (1.9.91), brief within the top 20] G2: lost g2 0, g1 3, g0 5, ungraded 1
+   brief lost i05 xbid.ai g=0
+   brief lost i13 clevercon g=-
+   brief lost i18 SettleZK g=0
+   brief lost i18 Micro Lending g=1
+   brief lost i21 Stellar Rent g=0
+   brief lost i21 PayOnProof g=0
+   brief lost i30 Mineral Gateway: Agent-Powered Critical Minerals T g=1
+   brief lost i38 Soroscan g=1
+   brief lost i39 clevercon g=0
+
+[36 short ideas (1.9.87)] current: vetIdea lists g2 59, g1 40, g0 10; lost g2 0, g1 0, g0 0; ideas emptied 0
+
+[36 short ideas (1.9.87)] G1: vetIdea lists g2 58, g1 36, g0 9; lost g2 1, g1 4, g0 1; ideas emptied 0
+   lost merchant payments Turista g=1 (vetIdea; matched 2, textShare 0.5)
+   lost merchant payments MicoPay Protocol g=1 (vetIdea; matched 2, textShare 0.5)
+   lost recurring subscription payments Decrow Finance g=2 (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost recurring subscription payments RADOX g=0 (vetIdea; matched 2, textShare 0.3333333333333333)
+   lost recurring subscription payments Stellar Payment API (PLUTO) g=1 (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost stablecoin savings Autopilot: AI-Powered Financial Automation on the  g=1 (vetIdea; matched 2, textShare 0.5)
+
+[36 short ideas (1.9.87)] G2: vetIdea lists g2 20, g1 13, g0 3; lost g2 39, g1 27, g0 7; ideas emptied 22
+   lost payroll PayZoll_Stellar g=2 (vetIdea; matched 1, textShare 1)
+   lost payroll Zebra - Confidential Stablecoin Payroll on Stellar g=2 (vetIdea; matched 1, textShare 1)
+   lost payroll StealthPayroll g=2 (vetIdea; matched 1, textShare 1)
+   lost payroll Obscura - Payroll · Voting · Credentials · Treasur g=1 (vetIdea; matched 1, textShare 1)
+   lost payroll Tecta - ZK-Proof Powered Payroll for Enterprise g=2 (vetIdea; matched 1, textShare 1)
+   lost merchant payments Stellar Payment API (PLUTO) g=2 (vetIdea; matched 2, textShare 1)
+   lost merchant payments SpendGuard - AI Agent Governance g=1 (vetIdea; matched 2, textShare 1)
+   lost merchant payments Turista g=1 (vetIdea; matched 2, textShare 0.5)
+   lost merchant payments MicoPay Protocol g=1 (vetIdea; matched 2, textShare 0.5)
+   lost merchant payments PaywitAI g=1 (vetIdea; matched 2, textShare 1)
+   lost recurring subscription payments Decrow Finance g=2 (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost recurring subscription payments RADOX g=0 (vetIdea; matched 2, textShare 0.3333333333333333)
+   lost recurring subscription payments Stellar Payment API (PLUTO) g=1 (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost invoicing Link2Pay g=2 (vetIdea; matched 1, textShare 1)
+   lost crowdfunding Project Merlin g=1 (vetIdea; matched 1, textShare 1)
+   lost crowdfunding Lumencito g=2 (vetIdea; matched 1, textShare 1)
+   lost crowdfunding NovaFund g=2 (vetIdea; matched 1, textShare 1)
+   lost crowdfunding Impuls(ar) g=2 (vetIdea; matched 1, textShare 1)
+   lost crowdfunding Bimex g=2 (vetIdea; matched 1, textShare 1)
+   lost passkey wallet Tornado-style privacy pools on Stellar Soroban g=1 (vetIdea; matched 2, textShare 1)
+   lost mobile wallet PeerPesa g=1 (vetIdea; matched 2, textShare 1)
+   lost mobile wallet Econova stellar g=2 (vetIdea; matched 2, textShare 1)
+   lost nft marketplace Turista g=1 (vetIdea; matched 2, textShare 1)
+   lost music nfts APTOSPACE - NFT Marketplace Website g=1 (vetIdea; matched 2, textShare 1)
+   lost event ticketing BlockFest g=2 (vetIdea; matched 2, textShare 1)
+   lost yield aggregator Yieldspan Protocol g=2 (vetIdea; matched 2, textShare 1)
+   lost perpetual futures Cerida g=2 (vetIdea; matched 2, textShare 1)
+   lost escrow Stellar AI Escrow Commerce g=2 (vetIdea; matched 1, textShare 1)
+   lost escrow WorkOn g=1 (vetIdea; matched 1, textShare 1)
+   lost escrow GrantFox g=1 (vetIdea; matched 1, textShare 1)
+   lost escrow Tanko g=1 (vetIdea; matched 1, textShare 1)
+   lost prediction market Reflector TradeBet g=1 (vetIdea; matched 2, textShare 1)
+   lost prediction market Cypher Markets g=2 (vetIdea; matched 2, textShare 1)
+   lost prediction market KALE Markets g=2 (vetIdea; matched 2, textShare 1)
+   lost prediction market Move Markets g=2 (vetIdea; matched 2, textShare 1)
+   lost prediction market KALE-ndar: A Prediction Market for Real-World Even g=2 (vetIdea; matched 2, textShare 1)
+   lost chess game Divine Wrath g=1 (vetIdea; matched 2, textShare 1)
+   lost lottery No Loss Lottery g=2 (vetIdea; matched 1, textShare 1)
+   lost lottery LuckyLedgers g=2 (vetIdea; matched 1, textShare 1)
+   lost play to earn Zeta-Playground g=1 (vetIdea; matched 2, textShare 1)
+   lost play to earn Playlumen g=2 (vetIdea; matched 2, textShare 1)
+   lost play to earn Stellar Odyssey g=1 (vetIdea; matched 2, textShare 1)
+   lost play to earn Aniverse g=1 (vetIdea; matched 2, textShare 1)
+   lost play to earn Kale Farm Re-Design g=1 (vetIdea; matched 2, textShare 1)
+   lost kyc ANCHORSHIELD g=2 (vetIdea; matched 1, textShare 1)
+   lost kyc SAK Stellar Anchor KYC g=2 (vetIdea; matched 1, textShare 1)
+   lost kyc ZK-KYC-PASSPORT g=2 (vetIdea; matched 1, textShare 1)
+   lost kyc ACBU-KYC-ZK g=2 (vetIdea; matched 1, textShare 1)
+   lost kyc SAVIA g=1 (vetIdea; matched 1, textShare 1)
+   lost remittance app Tukar g=2 (vetIdea; matched 1, textShare 1)
+   lost remittance app CrossBorder Pay: Global Remittances with Stellar a g=2 (vetIdea; matched 1, textShare 1)
+   lost remittance app AnchorVault: Trustless On-Chain Remittance Liquidi g=1 (vetIdea; matched 1, textShare 1)
+   lost remittance app EazeFi g=2 (vetIdea; matched 1, textShare 1)
+   lost remittance app KaleConnect g=2 (vetIdea; matched 1, textShare 1)
+   lost send money home FireBastion - Decentralized Fire Damage Insurance  g=0 (vetIdea; matched 1, textShare 1)
+   lost send money home 131,044 XLM Home Page g=0 (vetIdea; matched 1, textShare 1)
+   lost stablecoin Streamr g=1 (vetIdea; matched 1, textShare 1)
+   lost stablecoin savings Onboard g=0 (vetIdea; matched 2, textShare 1)
+   lost stablecoin savings Autopilot: AI-Powered Financial Automation on the  g=1 (vetIdea; matched 2, textShare 0.5)
+   lost usdc payroll Contextio g=1 (vetIdea; matched 2, textShare 1)
+   lost usdc payroll ShieldPay g=2 (vetIdea; matched 2, textShare 1)
+   lost usdc payroll Cloakpay g=2 (vetIdea; matched 2, textShare 1)
+   lost oracle Reflector TradeBet g=0 (vetIdea; matched 1, textShare 1)
+   lost oracle Splicers g=0 (vetIdea; matched 1, textShare 1)
+   lost oracle Astro-Shiba: SAC Factory + Bonding Curve AMM + Ora g=0 (vetIdea; matched 1, textShare 1)
+   lost oracle AgentOracle - The Trust Layer for AI Agents g=1 (vetIdea; matched 1, textShare 1)
+   lost oracle Blind Oracle g=2 (vetIdea; matched 1, textShare 1)
+   lost insurance FireBastion - Decentralized Fire Damage Insurance  g=2 (vetIdea; matched 1, textShare 1)
+   lost insurance LumenSure - Private Proof-Backed Insurance Payouts g=2 (vetIdea; matched 1, textShare 1)
+   lost insurance KaleGuardVaults g=1 (vetIdea; matched 1, textShare 1)
+   lost insurance KaleShield g=2 (vetIdea; matched 1, textShare 1)
+   lost insurance Kaleidofi g=2 (vetIdea; matched 1, textShare 1)
+   lost carbon credits Zucane g=2 (vetIdea; matched 2, textShare 1)
+
+[34 test ideas (1.9.87)] current: vetIdea lists g2 2, g1 4, g0 3, ungraded 129; lost g2 0, g1 0, g0 0; ideas emptied 0
+
+[34 test ideas (1.9.87)] G1: vetIdea lists g2 2, g1 4, g0 3, ungraded 122; lost g2 0, g1 0, g0 0, ungraded 7; ideas emptied 3
+   lost microloans for small businesses PayOnProof g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost payroll for remote teams StealthPayroll g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost payroll for remote teams Contextio g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost fans fund artists Twin Ticket g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost fans fund artists Dropsland g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost fans fund artists Be A Stellar g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost lending artists insurance KaleGuardVaults g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+
+[34 test ideas (1.9.87)] G2: vetIdea lists g2 1, g1 2, g0 0, ungraded 121; lost g2 1, g1 2, g0 3, ungraded 8; ideas emptied 4
+   lost microloans for small businesses PayOnProof g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost microfinance platform CALCY ( EduChain) g=1 (vetIdea; matched 1, textShare 1)
+   lost payroll for remote teams StealthPayroll g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost payroll for remote teams Contextio g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost fans fund artists Twin Ticket g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost fans fund artists Dropsland g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost fans fund artists Be A Stellar g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+   lost wallet Umbra Wallet g=2 (vetIdea; matched 1, textShare 1)
+   lost wallet Cards402.com g=1 (vetIdea; matched 1, textShare 1)
+   lost wallet ANCHORSHIELD g=0 (vetIdea; matched 1, textShare 1)
+   lost wallet Soroswap Pro Trader g=0 (vetIdea; matched 1, textShare 1)
+   lost wallet Kale Grab Rush g=0 (vetIdea; matched 1, textShare 1)
+   lost non custodial wallet Stellar Stake House g=- (vetIdea; matched 3, textShare 1)
+   lost lending artists insurance KaleGuardVaults g=- (vetIdea; matched 2, textShare 0.6666666666666666)
+
+ship criteria:
+  G1: FAIL (36 short ideas (1.9.87): 1 lost graded 2)
+  G2: FAIL (36 short ideas (1.9.87): 39 lost graded 2; 34 test ideas (1.9.87): 1 lost graded 2)

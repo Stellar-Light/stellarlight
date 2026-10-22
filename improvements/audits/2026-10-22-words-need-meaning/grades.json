@@ -1,0 +1,200 @@
+{
+	"about": "Blind grades for the 27 rows of the lane G label sheet (13 builds G1 and G2 remove, 1 the brief gains, 13 kept decoys), from two labelers who each read only the sheet: idea, build name, event, description cut to 600 characters. status comes from the key, which the labelers did not see. Draft labels, owner review pending.",
+	"rubric": "v1, as in ../2026-10-22-prior-art-precision/labels.json: 2 same idea, 1 related, 0 not prior art; when torn, the stricter grade",
+	"labelers": {
+		"labeler1": "Claude Sonnet 5.5, effort high",
+		"labeler2": "Claude Sonnet 5.5, effort high"
+	},
+	"agreement": "25 of 27",
+	"grades": [
+		{
+			"ideaId": "f04",
+			"buildId": "dorahacks-buidl-27337",
+			"status": "removed",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f05",
+			"buildId": "dorahacks-buidl-36334",
+			"status": "removed",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f05",
+			"buildId": "dorahacks-buidl-39855",
+			"status": "removed",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f05",
+			"buildId": "dorahacks-buidl-39896",
+			"status": "removed",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-46217",
+			"status": "removed",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f10",
+			"buildId": "dorahacks-buidl-36325",
+			"status": "removed",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f12",
+			"buildId": "dorahacks-buidl-27451",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f12",
+			"buildId": "dorahacks-buidl-36320",
+			"status": "kept",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f14",
+			"buildId": "dorahacks-buidl-35590",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f16",
+			"buildId": "dorahacks-buidl-32593",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f17",
+			"buildId": "dorahacks-buidl-27458",
+			"status": "gained",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f17",
+			"buildId": "dorahacks-buidl-24764",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f17",
+			"buildId": "dorahacks-buidl-25271",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f17",
+			"buildId": "dorahacks-buidl-38045",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f17",
+			"buildId": "dorahacks-buidl-38062",
+			"status": "kept",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f17",
+			"buildId": "dorahacks-buidl-42579",
+			"status": "removed",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f18",
+			"buildId": "dorahacks-buidl-25344",
+			"status": "removed",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f18",
+			"buildId": "dorahacks-buidl-46124",
+			"status": "removed",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f19",
+			"buildId": "dorahacks-buidl-37994",
+			"status": "removed",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f21",
+			"buildId": "dorahacks-buidl-36062",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f22",
+			"buildId": "dorahacks-buidl-46332",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f28",
+			"buildId": "dorahacks-buidl-46038",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f28",
+			"buildId": "dorahacks-buidl-36190",
+			"status": "removed",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f28",
+			"buildId": "dorahacks-buidl-39224",
+			"status": "removed",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f28",
+			"buildId": "dorahacks-buidl-46284",
+			"status": "removed",
+			"labeler1": 0,
+			"labeler2": 0
+		},
+		{
+			"ideaId": "f29",
+			"buildId": "dorahacks-buidl-32697",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 1
+		},
+		{
+			"ideaId": "f30",
+			"buildId": "dorahacks-buidl-46364",
+			"status": "kept",
+			"labeler1": 1,
+			"labeler2": 1
+		}
+	]
+}
