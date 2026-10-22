@@ -1,7 +1,23 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 import { GAP_VERTICALS } from "../ecosystem-gaps";
+import {
+	getHackathonBuildsIndex,
+	type IndexedBuild,
+} from "../hackathon-builds";
 import { buildHaystack, scoreTokens, tokenize } from "../project-search-match";
 import { buildVetIdea, VERTICAL_TOKENS, verticalOf } from "../vet-idea";
+
+vi.mock("@/lib/hackathon-build-semantic", () => ({
+	BUILD_SEMANTIC_FLOOR: 0.68,
+	// Search by meaning ran and found nothing above its floor, which is what a
+	// short idea gets in production.
+	semanticBuildScores: vi.fn(async () => new Map()),
+}));
+const buildsIndex: IndexedBuild[] = [];
+vi.mock("@/lib/hackathon-builds", async (orig) => ({
+	...(await orig<typeof import("@/lib/hackathon-builds")>()),
+	getHackathonBuildsIndex: vi.fn(async () => buildsIndex),
+}));
 
 describe("vet-idea vertical map", () => {
 	it("every VERTICAL_TOKENS value is a real GAP_VERTICALS member", () => {
@@ -449,5 +465,81 @@ describe("vet-idea labels the competitors it serves", () => {
 		expect(c.projects.map((p) => p.slug)).toEqual(["lendco"]);
 		expect(c.matchMode).toBe("vertical");
 		expect(c.matchModeLabel).toBe("typed members of the idea's vertical");
+	});
+});
+
+/**
+ * Live probe (2026-10-22): `/api/vet-idea?q=remittance app` served
+ * priorArt.builds [] while searchHackathonBuilds matched 16. The search reads
+ * the idea as one word, so the two-word evidence rule could never pass, and
+ * search by meaning never clears its floor for so few words. An empty list
+ * says checked and none, which was false.
+ */
+describe("vet-idea prior-art builds for short ideas", () => {
+	const build = (id: string, description: string): IndexedBuild => ({
+		id,
+		name: id,
+		description,
+		githubUrl: null,
+		demoUrl: null,
+		videoUrl: null,
+		track: null,
+		hackathonPlacement: null,
+		award: null,
+		isWinner: false,
+		voteCount: null,
+		url: `https://dorahacks.io/buidl/${id}`,
+		source: "dorahacks",
+		hackathon: { title: "E", slug: "e", endedAt: "2025-01-15" },
+		haystack: `${id} ${description}`.toLowerCase(),
+	});
+	beforeAll(() => {
+		buildsIndex.push(
+			build("remit-home", "Send remittances home in USDC."),
+			build("corridor", "A remittance corridor for families abroad."),
+			build("chess-club", "A chess game for clubs."),
+			build("bracket", "Esports tournament brackets."),
+		);
+	});
+	afterAll(() => {
+		buildsIndex.length = 0;
+	});
+	const payload = {
+		find: async () => ({ docs: [], totalDocs: 0 }),
+	} as never;
+	const priorArt = async (q: string) =>
+		(await buildVetIdea(payload, q)).priorArt;
+
+	it("serves the builds that match every word of a one-word idea", async () => {
+		const p = await priorArt("remittance app");
+		expect(p.builds?.map((b) => b.id).sort()).toEqual([
+			"corridor",
+			"remit-home",
+		]);
+		expect(p.buildsBelowEvidenceRule).toBe(0);
+	});
+
+	it("says the nearest builds did not meet the evidence rule instead of claiming none", async () => {
+		// Each build matches one of the idea's two words: near, not evidence.
+		const p = await priorArt("chess tournament");
+		expect(p.builds).toEqual([]);
+		expect(p.buildsBelowEvidenceRule).toBe(2);
+		expect(p.note).toMatch(
+			/2 nearest submissions did not meet the evidence rule/,
+		);
+	});
+
+	it("keeps [] for an idea no build matches at all", async () => {
+		const p = await priorArt("quantum teleportation");
+		expect(p.builds).toEqual([]);
+		expect(p.buildsBelowEvidenceRule).toBe(0);
+		expect(p.note).not.toMatch(/did not meet the evidence rule/);
+	});
+
+	it("serves null, not a count, when the index could not be read", async () => {
+		vi.mocked(getHackathonBuildsIndex).mockRejectedValueOnce(new Error("down"));
+		const p = await priorArt("remittance app");
+		expect(p.builds).toBeNull();
+		expect(p.buildsBelowEvidenceRule).toBeNull();
 	});
 });

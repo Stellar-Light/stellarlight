@@ -28,7 +28,7 @@ import {
 	getHackathonBuildsIndex,
 } from "./hackathon-builds";
 import { ACTIVE_PROJECT_STATUSES } from "./population";
-import { priorArtTop, rankPriorArt } from "./prior-art-rank";
+import { PRIOR_ART_TOP, priorArtTop, rankPriorArt } from "./prior-art-rank";
 import {
 	anchorTokens,
 	buildHaystack,
@@ -172,6 +172,10 @@ export interface VetIdeaReport {
 		}> | null;
 		/** The search that served builds: hybrid, or keyword when meaning could not run; null with builds. */
 		buildsMode: BuildSearchMode | null;
+		/** How many of the five nearest builds are not listed because they fell
+		 * short of the evidence rule. builds [] with a count above 0 means
+		 * submissions came close, not that none exist; null with builds. */
+		buildsBelowEvidenceRule: number | null;
 		note: string;
 	};
 	gap: (TypeCoverage & { basis: string }) | null;
@@ -502,8 +506,20 @@ export async function buildVetIdea(
 				{ perSubmission: true },
 			).catch(() => null)
 		: null;
-	const priorArtBuilds = buildSearch
-		? priorArtTop(buildSearch.scored).map(({ b, matched, similarity }) => ({
+	// The window priorArtTop reads. Its builds that fall short of the evidence
+	// rule are counted, so an empty list cannot pass for "nobody built this"
+	// when submissions came close (live probe, 2026-10-22).
+	const nearest = buildSearch?.scored.slice(0, PRIOR_ART_TOP) ?? null;
+	const evidence = nearest ? priorArtTop(nearest) : null;
+	const buildsBelowEvidenceRule =
+		nearest && evidence ? nearest.length - evidence.length : null;
+	const n = buildsBelowEvidenceRule ?? 0;
+	const nearMisses =
+		evidence?.length === 0 && n > 0
+			? `builds is empty because ${n === 1 ? "the nearest submission" : `the ${n} nearest submissions`} did not meet the evidence rule: too few of the idea's words matched, and no meaning score reached 0.7. That is not a finding that nobody built this; searchHackathonBuilds with the same q lists them with the words each matched.`
+			: null;
+	const priorArtBuilds = evidence
+		? evidence.map(({ b, matched, similarity }) => ({
 				id: b.id,
 				name: b.name,
 				hackathon: b.hackathon.title,
@@ -586,8 +602,10 @@ export async function buildVetIdea(
 			repos: priorArtRepos,
 			builds: priorArtBuilds,
 			buildsMode: buildSearch?.served ?? null,
+			buildsBelowEvidenceRule,
 			note: [
-				"builds: stored hackathon submissions matching the idea, best first, by hybrid search (words plus meaning) unless buildsMode says keyword. matchedTerms are the words each matched; similarity is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words the set uses, cover half their weight, and include one word found in no more than a tenth of the set, so often none. Dead prior art is itself a signal.",
+				"builds: stored hackathon submissions matching the idea, best first, by hybrid search (words plus meaning) unless buildsMode says keyword. matchedTerms are the words each matched; similarity is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads (it skips generic words such as app) are listed, and buildsBelowEvidenceRule counts the rest. One with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words the set uses, cover half their weight, and include one word found in no more than a tenth of the set, so often none. Dead prior art is itself a signal.",
+				...(nearMisses ? [nearMisses] : []),
 				...(buildSearch
 					? buildSearch.warnings
 					: [

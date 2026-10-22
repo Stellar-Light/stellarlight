@@ -4296,6 +4296,25 @@ export interface operations {
                                         basis?: string;
                                     };
                                     priorArt?: {
+                                        /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads (it skips generic words such as app, so a one-word idea's builds match that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                        builds?: {
+                                            id?: string;
+                                            name?: string;
+                                            hackathon?: string;
+                                            placement?: string | null;
+                                            isWinner?: boolean;
+                                            githubUrl?: string | null;
+                                            matchedTerms?: string[];
+                                            /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
+                                            similarity?: number;
+                                        }[] | null;
+                                        /**
+                                         * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.
+                                         * @enum {string|null}
+                                         */
+                                        buildsMode?: "keyword" | "meaning" | "hybrid" | null;
+                                        /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
+                                        buildsBelowEvidenceRule?: number | null;
                                         repos?: {
                                             fullName?: string;
                                             hackathonWinner?: boolean;
@@ -5119,6 +5138,25 @@ export interface operations {
                                     basis?: string;
                                 };
                                 priorArt?: {
+                                    /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads (it skips generic words such as app, so a one-word idea's builds match that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                    builds?: {
+                                        id?: string;
+                                        name?: string;
+                                        hackathon?: string;
+                                        placement?: string | null;
+                                        isWinner?: boolean;
+                                        githubUrl?: string | null;
+                                        matchedTerms?: string[];
+                                        /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
+                                        similarity?: number;
+                                    }[] | null;
+                                    /**
+                                     * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.
+                                     * @enum {string|null}
+                                     */
+                                    buildsMode?: "keyword" | "meaning" | "hybrid" | null;
+                                    /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
+                                    buildsBelowEvidenceRule?: number | null;
                                     repos?: {
                                         fullName?: string;
                                         hackathonWinner?: boolean;
@@ -5215,6 +5253,25 @@ export interface operations {
                                     basis?: string;
                                 };
                                 priorArt?: {
+                                    /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads (it skips generic words such as app, so a one-word idea's builds match that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                    builds?: {
+                                        id?: string;
+                                        name?: string;
+                                        hackathon?: string;
+                                        placement?: string | null;
+                                        isWinner?: boolean;
+                                        githubUrl?: string | null;
+                                        matchedTerms?: string[];
+                                        /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
+                                        similarity?: number;
+                                    }[] | null;
+                                    /**
+                                     * @description The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.
+                                     * @enum {string|null}
+                                     */
+                                    buildsMode?: "keyword" | "meaning" | "hybrid" | null;
+                                    /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
+                                    buildsBelowEvidenceRule?: number | null;
                                     repos?: {
                                         fullName?: string;
                                         hackathonWinner?: boolean;
@@ -5236,7 +5293,7 @@ export interface operations {
                                     basis?: string;
                                 } | null;
                             };
-                            /** @description Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners matching at least half of the idea's words, then the builds vetIdea lists from the same top five, five at most; every build listed, winners included, has a meaning score of at least 0.7 or two matched words. null = the submissions index could not be read (not checked), [] = checked, none. */
+                            /** @description Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners matching at least half of the idea's words, then the builds vetIdea lists from the same top five, five at most; every build listed, winners included, has a meaning score of at least 0.7, two matched words, or every word of the idea the search reads. null = the submissions index could not be read (not checked), [] = checked, none listed (vet.priorArt.buildsBelowEvidenceRule says whether the nearest came close). */
                             builds?: {
                                 /** @description Opens the full submission in getHackathonSubmission. */
                                 id?: string;
@@ -5481,7 +5538,7 @@ export interface operations {
                                 basis?: string;
                             };
                             priorArt?: {
-                                /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads (it skips generic words such as app, so a one-word idea's builds match that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
                                 builds?: {
                                     id?: string;
                                     name?: string;
@@ -5498,6 +5555,8 @@ export interface operations {
                                  * @enum {string|null}
                                  */
                                 buildsMode?: "keyword" | "meaning" | "hybrid" | null;
+                                /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
+                                buildsBelowEvidenceRule?: number | null;
                                 repos?: {
                                     fullName?: string;
                                     hackathonWinner?: boolean;

@@ -433,6 +433,70 @@ const EVENT_PROFILE_SCHEMA = {
 	},
 };
 
+/** VetIdeaReport["priorArt"]: vetIdea's `report.priorArt` and the vet block
+ * every composite embeds, so the two cannot declare different fields. */
+const VET_PRIOR_ART_SCHEMA = {
+	type: "object",
+	properties: {
+		builds: {
+			type: "array",
+			nullable: true,
+			description:
+				"null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads (it skips generic words such as app, so a one-word idea's builds match that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it.",
+			items: {
+				type: "object",
+				properties: {
+					id: { type: "string" },
+					name: { type: "string" },
+					hackathon: { type: "string" },
+					placement: { type: "string", nullable: true },
+					isWinner: { type: "boolean" },
+					githubUrl: { type: "string", nullable: true },
+					matchedTerms: {
+						type: "array",
+						items: { type: "string" },
+					},
+					similarity: {
+						type: "number",
+						description:
+							"Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run.",
+					},
+				},
+			},
+		},
+		buildsMode: {
+			type: "string",
+			nullable: true,
+			enum: [...BUILD_SEARCH_MODES],
+			description:
+				"The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.",
+		},
+		buildsBelowEvidenceRule: {
+			type: "integer",
+			nullable: true,
+			description:
+				"How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read.",
+		},
+		repos: {
+			type: "array",
+			items: {
+				type: "object",
+				properties: {
+					fullName: { type: "string" },
+					hackathonWinner: { type: "boolean" },
+					activityState: { type: "string" },
+					lastCommitAt: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+					},
+				},
+			},
+		},
+		note: { type: "string" },
+	},
+};
+
 /** The vet block (VetIdeaReport minus idea/vertical/funding) — the same
  * computation /api/vet-idea serves, embedded by scf-pitch + hackathon-brief. */
 const VET_BLOCK_SCHEMA = {
@@ -495,28 +559,7 @@ const VET_BLOCK_SCHEMA = {
 				basis: { type: "string" },
 			},
 		},
-		priorArt: {
-			type: "object",
-			properties: {
-				repos: {
-					type: "array",
-					items: {
-						type: "object",
-						properties: {
-							fullName: { type: "string" },
-							hackathonWinner: { type: "boolean" },
-							activityState: { type: "string" },
-							lastCommitAt: {
-								type: "string",
-								format: "date-time",
-								nullable: true,
-							},
-						},
-					},
-				},
-				note: { type: "string" },
-			},
-		},
+		priorArt: VET_PRIOR_ART_SCHEMA,
 		gap: {
 			type: "object",
 			nullable: true,
@@ -5791,7 +5834,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													nullable: true,
 													description:
-														"Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners matching at least half of the idea's words, then the builds vetIdea lists from the same top five, five at most; every build listed, winners included, has a meaning score of at least 0.7 or two matched words. null = the submissions index could not be read (not checked), [] = checked, none.",
+														"Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners matching at least half of the idea's words, then the builds vetIdea lists from the same top five, five at most; every build listed, winners included, has a meaning score of at least 0.7, two matched words, or every word of the idea the search reads. null = the submissions index could not be read (not checked), [] = checked, none listed (vet.priorArt.buildsBelowEvidenceRule says whether the nearest came close).",
 													items: {
 														type: "object",
 														properties: {
@@ -6144,61 +6187,7 @@ export const spec: OpenAPISpec = {
 														basis: { type: "string" },
 													},
 												},
-												priorArt: {
-													type: "object",
-													properties: {
-														builds: {
-															type: "array",
-															nullable: true,
-															description:
-																"null = the submissions index could not be read (not checked; the note says so), [] = checked, none. Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7 or two matched words are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it.",
-															items: {
-																type: "object",
-																properties: {
-																	id: { type: "string" },
-																	name: { type: "string" },
-																	hackathon: { type: "string" },
-																	placement: { type: "string", nullable: true },
-																	isWinner: { type: "boolean" },
-																	githubUrl: { type: "string", nullable: true },
-																	matchedTerms: {
-																		type: "array",
-																		items: { type: "string" },
-																	},
-																	similarity: {
-																		type: "number",
-																		description:
-																			"Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run.",
-																	},
-																},
-															},
-														},
-														buildsMode: {
-															type: "string",
-															nullable: true,
-															enum: [...BUILD_SEARCH_MODES],
-															description:
-																"The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.",
-														},
-														repos: {
-															type: "array",
-															items: {
-																type: "object",
-																properties: {
-																	fullName: { type: "string" },
-																	hackathonWinner: { type: "boolean" },
-																	activityState: { type: "string" },
-																	lastCommitAt: {
-																		type: "string",
-																		format: "date-time",
-																		nullable: true,
-																	},
-																},
-															},
-														},
-														note: { type: "string" },
-													},
-												},
+												priorArt: VET_PRIOR_ART_SCHEMA,
 												gap: {
 													type: "object",
 													nullable: true,

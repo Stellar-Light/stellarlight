@@ -31,6 +31,26 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.90",
+		type: "fixed",
+		summary:
+			"vetIdea lists prior-art builds for short ideas: a build that matches every word of the idea the search reads now counts as evidence, so 'remittance app' lists remittance builds instead of an empty priorArt.builds. The same holds in the vet block of scfPitch, hackathonBrief and reviewSubmission, and in hackathonBrief's builds.",
+		detail:
+			"The search reads 'remittance app' as one word (app is generic), and a build had to match two words or score 0.7 by meaning, which so few words rarely reach, so vetIdea served [] while searchHackathonBuilds matched 16. On 36 short ideas written down before any result was read, the 23 used while building the fix went from 47 builds listed with 10 ideas empty to 75 listed with 3 empty, and the 13 held out from 22 listed with 5 empty to 39 with 1 empty. Blind labels on the 45 added builds: 25 the same idea, 11 related, 9 sharing only the word; 6 of those 9 are prize winners that only mention a word such as stablecoin or oracle: on a one-word idea every match ties, and the search breaks ties for winners. On the 15 longer ideas in vetIdea's own tests nothing was added or lost.",
+	},
+	{
+		date: "2026-10-22",
+		surfaces: ["api"],
+		version: "spec@1.9.90",
+		type: "added",
+		summary:
+			"vetIdea's priorArt.buildsBelowEvidenceRule counts the five nearest submissions left out of builds for falling short of the evidence rule: builds [] with a count above 0 means submissions came close but none met the rule, not that nobody built the idea, and the note then says so. null when the index could not be read.",
+		detail:
+			"An empty builds list read as checked and none even when the nearest submissions matched part of the idea; every empty list left on the 36 short ideas carries a count above 0. The vet block that scfPitch, hackathonBrief and reviewSubmission embed now declares priorArt.builds, buildsMode and buildsBelowEvidenceRule, which it serves.",
+	},
+	{
 		date: "2026-10-20",
 		surfaces: ["api"],
 		version: "spec@1.9.87",

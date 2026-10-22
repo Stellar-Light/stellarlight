@@ -124,11 +124,20 @@ export function rankPriorArt<T extends PriorArtCandidate>(
 
 /**
  * Whether a build from hybrid search counts as prior art: its meaning score
- * clears PRIOR_ART_MIN_SIMILARITY, or it matched two of the idea's words. On
- * the 40-idea labeled set (2026-10-20, top 5 per idea) this kept all 56
+ * clears PRIOR_ART_MIN_SIMILARITY, it matched two of the idea's words, or it
+ * matched every word of the idea the search reads (`share` 1). On the
+ * 40-idea labeled set (2026-10-20, top 5 per idea) the first two kept all 56
  * same-idea builds found, cut wrong builds from 22% to 18%, and cut builds
  * shown for ideas with no real match from 60 to 47. With search by meaning
- * down there is no score, so only two-word matches count.
+ * down there is no score, so only word matches count.
+ *
+ * The third is for an idea the search reads as one word ("remittance app":
+ * "app" is generic), where two matched words cannot happen and so few words
+ * rarely reach the meaning floor: such ideas got no builds at all. On 36
+ * short ideas (2026-10-22, blind labels) it added 45 builds, 25 of them the
+ * same idea and 9 sharing only the word. 6 of those 9 are winners that only
+ * mention the word ("stablecoin", "oracle"): on a one-word idea every match
+ * ties, and the search breaks ties for winners.
  * ponytail: one fixed floor tuned on draft labels; re-measure it when the
  * embedding model or the labels change.
  */
@@ -137,11 +146,18 @@ export const PRIOR_ART_MIN_SIMILARITY = 0.7;
 export function isPriorArtEvidence(s: {
 	similarity?: number;
 	matched: string[];
+	/** The share of the idea's words the build matched, 0 to 1. */
+	share?: number;
 }): boolean {
 	return (
-		(s.similarity ?? 0) >= PRIOR_ART_MIN_SIMILARITY || s.matched.length >= 2
+		(s.similarity ?? 0) >= PRIOR_ART_MIN_SIMILARITY ||
+		s.matched.length >= 2 ||
+		(s.share ?? 0) >= 1
 	);
 }
+
+/** How many of a ranked list's builds priorArtTop reads. */
+export const PRIOR_ART_TOP = 5;
 
 /**
  * The builds of a ranked list's top `k` that count as prior art. The window
@@ -150,7 +166,7 @@ export function isPriorArtEvidence(s: {
  * (outside review, 2026-10-20).
  */
 export function priorArtTop<
-	T extends { similarity?: number; matched: string[] },
->(ranked: T[], k = 5): T[] {
+	T extends { similarity?: number; matched: string[]; share?: number },
+>(ranked: T[], k = PRIOR_ART_TOP): T[] {
 	return ranked.slice(0, k).filter(isPriorArtEvidence);
 }

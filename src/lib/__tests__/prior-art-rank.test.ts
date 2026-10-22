@@ -167,6 +167,19 @@ describe("isPriorArtEvidence", () => {
 		expect(isPriorArtEvidence({ matched: ["x", "y"] })).toBe(true);
 		expect(isPriorArtEvidence({ matched: ["x"] })).toBe(false);
 	});
+
+	it("counts a build that matches every word of the idea, so a one-word idea gets prior art", () => {
+		// The search reads "remittance app" as one word ("app" is generic), so
+		// two matched words could never happen: vetIdea served [] while
+		// searchHackathonBuilds matched 16 (live probe, 2026-10-22).
+		expect(isPriorArtEvidence({ matched: ["remittance"], share: 1 })).toBe(
+			true,
+		);
+		// Half of a two-word idea is still not prior art.
+		expect(isPriorArtEvidence({ matched: ["multisig"], share: 0.5 })).toBe(
+			false,
+		);
+	});
 });
 
 describe("priorArtTop", () => {
