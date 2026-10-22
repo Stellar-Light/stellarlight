@@ -316,6 +316,14 @@ const BUILD_AFTER_EVENT_PROPERTIES = {
 	},
 };
 
+/** A win named by a page off DoraHacks (src/data/winner-overlay.ts): on
+ * getHackathon's winner rows and on a submission's detail and entries. */
+const BUILD_WINNER_SOURCE_SCHEMA = {
+	type: "string",
+	description:
+		"Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win.",
+};
+
 /** The filters searchHackathonBuilds and analyzeHackathonSubmissions share, parsed by
  * src/lib/hackathon-build-query.ts: one list, so the two cannot drift. */
 const buildFilterParams = (
@@ -727,6 +735,7 @@ const BUILD_DETAIL_SCHEMA = {
 		award: { type: "string", nullable: true },
 		prizeUsd: { type: "number", nullable: true },
 		isWinner: { type: "boolean" },
+		winnerSource: BUILD_WINNER_SOURCE_SCHEMA,
 		entries: {
 			type: "array",
 			description:
@@ -747,6 +756,7 @@ const BUILD_DETAIL_SCHEMA = {
 					award: { type: "string", nullable: true },
 					prizeUsd: { type: "number", nullable: true },
 					isWinner: { type: "boolean" },
+					winnerSource: BUILD_WINNER_SOURCE_SCHEMA,
 				},
 			},
 		},
@@ -10609,7 +10619,7 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										nullable: true,
 										description:
-											"Non-null when hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award, so a missing winner is explained rather than silent.",
+											"Why the winners are what they are, so a missing winner or a 0 is explained rather than silent. When hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award. On an event off DoraHacks: a dated note that its winners are published only in part, or not announced upstream. When winners carry winnerSource: the page that names them and which named winners are not served. On an ended DoraHacks event with no winner served: DoraHacks' winner_announced flag, from its event listing (refreshed hourly), says not announced upstream, or announced but not recorded here. Not announced is never a claim that no one won. null = nothing to add, or the flag could not be read.",
 									},
 									coverageNote: {
 										type: "string",
@@ -10647,7 +10657,7 @@ export const spec: OpenAPISpec = {
 								id: {
 									type: "string",
 									description:
-										"Stable row id (dorahacks-buidl-{id} for live rows, winner-{event}-{name} for a curated roster, from the winner's name).",
+										"Stable row id (dorahacks-buidl-{id} for live rows, curated-{event}-{name} for a stored submission from an event off DoraHacks, winner-{event}-{name} for a curated roster, from the winner's name).",
 								},
 								name: { type: "string" },
 								hackathonPlacement: { type: "string", nullable: true },
@@ -10673,12 +10683,14 @@ export const spec: OpenAPISpec = {
 										"What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250); on curated roster rows, the roster's own figure. null when the placement carries no amount (tier-labelled winners like 'Track Winner'), never 0, which would assert a prize of nothing.",
 								},
 								isWinner: { type: "boolean" },
+								winnerSource: BUILD_WINNER_SOURCE_SCHEMA,
 								githubUrl: { type: "string", nullable: true },
 								demoUrl: { type: "string", nullable: true },
 								videoUrl: { type: "string", nullable: true },
 								url: {
 									type: "string",
-									description: "The submission's DoraHacks buidl page.",
+									description:
+										"The submission's DoraHacks buidl page; on a curated-{event}-{name} row, the page the win was verified against.",
 								},
 								voteCount: {
 									type: "integer",

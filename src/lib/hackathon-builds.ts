@@ -8,6 +8,7 @@
  * cold fan-out.
  */
 import { unstable_cache } from "next/cache";
+import { WINNER_OVERLAY } from "@/data/winner-overlay";
 import { withReadTimeout } from "@/lib/degraded-read";
 import {
 	BUILD_SEARCH_MODES,
@@ -48,6 +49,34 @@ export interface IndexedBuild extends DoraHacksSubmission {
 	activity?: { lastCommitAt: string | null; archived: boolean };
 	/** The repo answered not found the last time it was read. */
 	repoMissing?: boolean;
+	/** Present only on a winner that a page off DoraHacks names
+	 * (src/data/winner-overlay.ts): that page, the evidence of the win. */
+	winnerSource?: string;
+}
+
+/** Winners announced off DoraHacks, by build id and event. */
+const OVERLAY = new Map(
+	WINNER_OVERLAY.flatMap((e) =>
+		e.winners.map(
+			(w) =>
+				[
+					`${w.buildId}@${e.hackathonSlug}`,
+					{ placement: w.placement, winnerSource: e.url },
+				] as const,
+		),
+	),
+);
+
+/** The off-DoraHacks win of a stored entry DoraHacks did not place, or null.
+ * Read here, never written: the sync stays the one writer of the stored
+ * isWinner, and a placement DoraHacks assigned always wins. */
+function overlayWinner(
+	buildId: string,
+	hackathonSlug: string,
+	placedByDoraHacks: boolean,
+): { placement: string; winnerSource: string } | null {
+	if (placedByDoraHacks) return null;
+	return OVERLAY.get(`${buildId}@${hackathonSlug}`) ?? null;
 }
 
 /** One project type a build was sorted into; score 0 to 1 (the share of its
@@ -108,11 +137,21 @@ async function buildLiveIndex(): Promise<IndexedBuild[]> {
 	const perHack = await pool(ended, 6, async (h) => {
 		const subs = await fetchHackathonSubmissions(h);
 		const hackathon = doraEventRef(h);
-		return subs.map((s) => ({
-			...s,
-			hackathon,
-			haystack: haystackOf(s.name, s.description, s.track, s.award),
-		}));
+		return subs.map((s) => {
+			const won = overlayWinner(s.id, hackathon.slug, s.isWinner);
+			return {
+				...s,
+				...(won
+					? {
+							isWinner: true,
+							hackathonPlacement: won.placement,
+							winnerSource: won.winnerSource,
+						}
+					: {}),
+				hackathon,
+				haystack: haystackOf(s.name, s.description, s.track, s.award),
+			};
+		});
 	});
 	return perHack.flat();
 }
@@ -180,6 +219,7 @@ export function indexedFromStored(
 	facts?: ProjectFacts,
 ): IndexedBuild {
 	const description = d.vision ?? null;
+	const won = overlayWinner(d.buildId, d.hackathonSlug, !!d.isWinner);
 	return {
 		id: d.buildId,
 		name: d.name,
@@ -189,9 +229,10 @@ export function indexedFromStored(
 		demoUrl: d.demoUrl ?? null,
 		videoUrl: d.videoUrl ?? null,
 		track: d.track ?? null,
-		hackathonPlacement: d.placement ?? null,
+		hackathonPlacement: won?.placement ?? d.placement ?? null,
 		award: d.award ?? null,
-		isWinner: !!d.isWinner,
+		isWinner: !!d.isWinner || !!won,
+		...(won ? { winnerSource: won.winnerSource } : {}),
 		voteCount: null,
 		url: d.url,
 		source: "dorahacks",
@@ -238,6 +279,8 @@ export interface BuildDetail {
 	award: string | null;
 	prizeUsd: number | null;
 	isWinner: boolean;
+	/** Present only when the best entry's win is named off DoraHacks. */
+	winnerSource?: string;
 	links: {
 		dorahacks: string;
 		github: string | null;
@@ -275,6 +318,8 @@ export interface BuildEntry {
 	award: string | null;
 	prizeUsd: number | null;
 	isWinner: boolean;
+	/** Present only when a page off DoraHacks names this entry's win. */
+	winnerSource?: string;
 }
 
 /** A submission's event entries, best first: a placed one, then the latest
@@ -306,6 +351,8 @@ export function onePerSubmission(builds: IndexedBuild[]): IndexedBuild[] {
 }
 
 function entryOf(d: HackathonBuild): BuildEntry {
+	const won = overlayWinner(d.buildId, d.hackathonSlug, !!d.isWinner);
+	const placement = won?.placement ?? d.placement ?? null;
 	return {
 		hackathon: {
 			title: d.hackathonTitle,
@@ -313,10 +360,11 @@ function entryOf(d: HackathonBuild): BuildEntry {
 			endedAt: d.endedAt ?? null,
 		},
 		track: d.track ?? null,
-		placement: d.placement ?? null,
+		placement,
 		award: d.award ?? null,
-		prizeUsd: parsePlacement(d.placement ?? null).prizeUsd || null,
-		isWinner: !!d.isWinner,
+		prizeUsd: parsePlacement(placement).prizeUsd || null,
+		isWinner: !!d.isWinner || !!won,
+		...(won ? { winnerSource: won.winnerSource } : {}),
 	};
 }
 
@@ -327,7 +375,12 @@ export function buildDetailFromStored(
 	rows: HackathonBuild[],
 	facts?: ProjectFacts,
 ): BuildDetail {
-	const sorted = [...rows].sort(entryOrder);
+	// Ordered by the entries as served, so a win named off DoraHacks counts.
+	const key = (r: HackathonBuild) => ({
+		isWinner: entryOf(r).isWinner,
+		endedAt: r.endedAt,
+	});
+	const sorted = [...rows].sort((a, b) => entryOrder(key(a), key(b)));
 	const d = sorted[0];
 	// Submission-level dates span every row: an entry restored later must not
 	// make the submission look new.
@@ -454,8 +507,9 @@ export const getHackathonBuildsIndex = unstable_cache(
 	// Bump when IndexedBuild's shape changes: the cache outlives deploys, and
 	// an old-shape index serves every new field as unknown for up to an hour.
 	// v4: an empty index is no longer cached, so one cached before this
-	// deploy must not outlive it.
-	["hackathon-builds-index:v4"],
+	// deploy must not outlive it. v5: winners named off DoraHacks
+	// (winnerSource), which a v4 index serves as unplaced.
+	["hackathon-builds-index:v5"],
 	{
 		revalidate: 3600,
 		tags: ["hackathons"],

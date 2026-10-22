@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { indexProjectRepos, repoFullNameOf } from "@/lib/hackathon-build-links";
 import {
+	buildDetailFromStored,
 	dedupeBuilds,
 	type IndexedBuild,
 	indexedFromStored,
@@ -12,7 +13,12 @@ import {
 	doraEventRef,
 	endedDoraHacksEvents,
 } from "@/lib/integrations/dorahacks";
+import { spec } from "@/lib/openapi-spec";
 import type { HackathonBuild } from "@/payload-types";
+import {
+	responseSchema,
+	undeclaredInServed,
+} from "../../../scripts/contract/served-shape";
 
 const build = (
 	name: string,
@@ -172,6 +178,79 @@ describe("stored rows", () => {
 		expect(b.hackathon.slug).toBe("stellar-agents-x402-stripe-mpp");
 		expect(b.description).toBe("Toll is Stripe for MCP Servers.");
 		expect(b.isWinner).toBe(true);
+	});
+
+	// Hack+ Alebrije: DoraHacks assigned no winners; BAF's newsletter names
+	// GIBBOR (src/data/winner-overlay.ts).
+	const BAF =
+		"https://bafs-newsletter.beehiiv.com/p/b-news-from-mexico-city-to-lima-this-month-s-web3-route";
+	const gibbor = row({
+		buildId: "dorahacks-buidl-41502",
+		name: "GIBBOR",
+		hackathonSlug: "alebrije2026",
+		hackathonTitle: "Hack+ Alebrije | CDMX 2026",
+		endedAt: "2026-03-22",
+		placement: null,
+		isWinner: false,
+		url: "https://dorahacks.io/buidl/41502",
+	});
+
+	it("serves a win named off DoraHacks on the stored row it names, by build id and event", () => {
+		const b = indexedFromStored(gibbor);
+		expect([b.isWinner, b.hackathonPlacement, b.winnerSource]).toEqual([
+			true,
+			"Winner",
+			BAF,
+		]);
+		// The row's own link stays the DoraHacks page.
+		expect(b.url).toBe("https://dorahacks.io/buidl/41502");
+		// The same id in another event is not that win.
+		const elsewhere = indexedFromStored({ ...gibbor, hackathonSlug: "other" });
+		expect(elsewhere.isWinner).toBe(false);
+		expect("winnerSource" in elsewhere).toBe(false);
+		// A placement DoraHacks assigned replaces it.
+		const placed = indexedFromStored({
+			...gibbor,
+			isWinner: true,
+			placement: "1st Place",
+		});
+		expect(placed.hackathonPlacement).toBe("1st Place");
+		expect("winnerSource" in placed).toBe(false);
+		// A row no source names stays unplaced.
+		const other = indexedFromStored({
+			...gibbor,
+			buildId: "dorahacks-buidl-1",
+		});
+		expect([other.isWinner, other.hackathonPlacement]).toEqual([false, null]);
+	});
+
+	it("the submission's detail serves that win too, its entry first, as declared", () => {
+		// The same submission in a later event, unplaced: a later event leads
+		// an unplaced submission, so only the win puts Alebrije first.
+		const later = {
+			...gibbor,
+			id: "y",
+			hackathonSlug: "later-event",
+			hackathonTitle: "Later",
+			endedAt: "2026-09-01",
+		};
+		const d = buildDetailFromStored([later, gibbor]);
+		expect([d.hackathon.slug, d.isWinner, d.placement, d.winnerSource]).toEqual(
+			["alebrije2026", true, "Winner", BAF],
+		);
+		expect(
+			d.entries.map((e) => [e.hackathon.slug, e.isWinner, e.winnerSource]),
+		).toEqual([
+			["alebrije2026", true, BAF],
+			["later-event", false, undefined],
+		]);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/builds/{id}"),
+				{ build: d },
+			),
+		).toEqual([]);
 	});
 
 	it("keeps 'not checked' apart from 'no project'", () => {

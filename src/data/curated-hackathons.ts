@@ -199,3 +199,16 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		kind: "hackathon",
 	},
 ];
+
+/** getHackathon's stats.winnersNote for a curated event whose winners are
+ * published only in part or not at all, with the day its pages were
+ * checked, so 0 or 1 winners never reads as "none won". A test keeps an
+ * event with a "not announced" note free of curated winners. */
+export const CURATED_WINNERS_NOTES: Record<string, string> = {
+	"stellar-journey-to-mastery-2026":
+		"Not announced upstream: no page we could read names this program's winners (checked 2026-10-22). This is not a claim that no one won.",
+	"stellar-builders-camp-jaipur-2026":
+		"Not announced upstream: no page we could read names this residency's winners (checked 2026-10-22). This is not a claim that no one won.",
+	"apac-stellar-hackathon-2026":
+		"Winners published for one track only: Rise In's builder spotlight (2026-09-01) names Olio 1st in Payment & Consumer Application. No page we could read names the other tracks' winners (checked 2026-10-22), so they are not served; this is not a claim that those tracks had none.",
+};

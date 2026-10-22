@@ -23,7 +23,9 @@ export interface DoraHacksHackathon {
 	end_time: number; // Unix timestamp
 	bonus_price: number; // Prize pool in USD
 	hackers_count: number;
-	winner_announced: boolean;
+	/** DoraHacks' own flag; null when its listing did not carry one (not
+	 * checked, never "not announced"). Set by hand on curated rows. */
+	winner_announced: boolean | null;
 	status: number; // 1 = active, 2 = ended
 	field?: string; // Comma-separated tags
 	ecosystem?: string;
@@ -146,7 +148,8 @@ async function fetchHubHackathons(
 				bonus_price: typeof r.bonus_price === "number" ? r.bonus_price : 0,
 				hackers_count:
 					typeof r.hackers_count === "number" ? r.hackers_count : 0,
-				winner_announced: !!r.winner_announced,
+				winner_announced:
+					r.winner_announced == null ? null : !!r.winner_announced,
 				status:
 					typeof r.timeline_end === "number" && r.timeline_end <= now ? 2 : 1,
 				field: typeof r.tags === "string" ? r.tags : undefined,

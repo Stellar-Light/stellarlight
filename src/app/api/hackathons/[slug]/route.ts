@@ -10,7 +10,9 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { CURATED_WINNERS_NOTES } from "@/data/curated-hackathons";
 import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
+import { WINNER_OVERLAY } from "@/data/winner-overlay";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { afterEventFields, eventProfile } from "@/lib/hackathon-analytics";
@@ -119,6 +121,10 @@ function placementRank(label?: string | null): number | null {
 	for (const [m, r] of Object.entries(MEDALS)) if (label.includes(m)) return r;
 	// Lowercase + strip accents so "séptimo"/"1º" match.
 	const s = label.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+	// "1st Runner-Up" is second place, behind a "Champion": the plain ordinal
+	// below read it as first.
+	const runnerUp = s.match(/\b(\d+)\s*(?:st|nd|rd|th)?\s*runner.?up/);
+	if (runnerUp) return Number(runnerUp[1]) + 1;
 	// English "1st" + Spanish "1er/2do/3ro/4to" + "1º/1°".
 	const ordinal = s.match(
 		/\b(\d+)\s*(?:st|nd|rd|th|er|do|ro|to|mo|vo|no|º|°)\b/,
@@ -131,7 +137,7 @@ function placementRank(label?: string | null): number | null {
 	for (const [word, rank] of Object.entries(SPANISH_ORDINALS)) {
 		if (new RegExp(`\\b${word}\\b`).test(s)) return rank;
 	}
-	if (/grand|overall|gran premio|mejor proyecto/.test(s)) return 1;
+	if (/grand|overall|champion|gran premio|mejor proyecto/.test(s)) return 1;
 	if (/track.?winner|category winner|ganador de categoria/.test(s)) return 100;
 	if (/honorable|mention|finalist|mencion/.test(s)) return 900;
 	// A bare "Winner"/"Winners" bucket has no ordinal → unranked, not rank 1.
@@ -225,6 +231,17 @@ function staticWinnersForSlug(slug: string): SubmissionRow[] {
 		builder: w.builder,
 		url: getWinnerLink(w),
 	}));
+}
+
+/** Why an ended DoraHacks event serves no winner, from DoraHacks' own
+ * winner_announced flag: not announced is said as that, never as "none
+ * won". null when the listing did not carry the flag (not checked). */
+function noWinnersNote(announced: boolean | null): string | null {
+	if (announced === false)
+		return "Not announced upstream: DoraHacks lists this event's winners as not announced (winner_announced false in its event listing, which Scout refreshes hourly), and no submission served here carries a prize. This is not a claim that no one won: an organizer can name winners off DoraHacks.";
+	if (announced === true)
+		return "DoraHacks lists this event's winners as announced (winner_announced true), but no submission served here carries a prize, so its winners are not recorded here. This is not a claim that no one won.";
+	return null;
 }
 
 /** The directory slug a roster link points at (a stellarlight.xyz project
@@ -441,10 +458,23 @@ export async function GET(
 							...w,
 							prizeUsd: parsePlacement(w.hackathonPlacement).prizeUsd || null,
 							...(b?.project !== undefined ? { project: b.project } : {}),
+							// A win named off DoraHacks: the page that names it.
+							...(b?.winnerSource ? { winnerSource: b.winnerSource } : {}),
 							...(b ? afterEventFields(b) : {}),
 						};
 					})
 				: rankAndSort(curatedWinners);
+			// Why the winners are what they are, when that needs saying: a
+			// winner hidden upstream, a curated event's dated note, winners
+			// named off DoraHacks, or an ended DoraHacks event with none.
+			let winnersNote = hiddenWinnersNote(hidden);
+			if (dora.source === "curated")
+				winnersNote ??= CURATED_WINNERS_NOTES[slug] ?? null;
+			else if (winners.some((w) => "winnerSource" in w))
+				winnersNote ??=
+					WINNER_OVERLAY.find((e) => e.hackathonSlug === slug)?.note ?? null;
+			else if (!winners.length && status === "completed")
+				winnersNote ??= noWinnersNote(dora.winner_announced);
 			const trackMap = new Map<
 				string,
 				{ name: string; submissionCount: number; winnerCount: number }
@@ -536,7 +566,7 @@ export async function GET(
 								liveSubmissions.length || null,
 							),
 							hiddenWinners: hidden,
-							winnersNote: hiddenWinnersNote(hidden),
+							winnersNote,
 							// null, not 0, when no USD figure is known: a prize not yet
 							// announced or a non-cash prize read as "no prize" (PULSO).
 							totalPrizeUSD: dora.bonus_price || totalPrizeUSD || null,

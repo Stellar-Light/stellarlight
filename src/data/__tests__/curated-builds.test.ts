@@ -31,6 +31,55 @@ describe("curated hackathon builds", () => {
 		expect(w.every((b) => b.githubUrl === null)).toBe(true);
 	});
 
+	it("carries Build on Stellar Philippines' five winners as BitPinas heads them", () => {
+		const w = CURATED_BUILDS.filter(
+			(b) => b.hackathonSlug === "build-on-stellar-philippines-2026",
+		);
+		expect(w.map((b) => `${b.placement}: ${b.name}`)).toEqual([
+			"Champion: AbotPera",
+			"1st Runner-Up: PinkRaft",
+			"2nd Runner-Up: Axial",
+			"Best Use of Stellar: Sobre",
+			"Best Use of Stellar: TyFi",
+		]);
+		expect(w[0].id).toBe("curated-build-on-stellar-philippines-2026-abotpera");
+		for (const b of w) {
+			expect(b.url).toBe(
+				"https://bitpinas.com/feature/stellar-rise-in-ph-hackathon-concludes/",
+			);
+			expect(b.isWinner).toBe(true);
+			// BitPinas says what each built; it names no track and links nothing.
+			expect(b.description).toBeTruthy();
+			expect([b.track, b.githubUrl, b.demoUrl]).toEqual([null, null, null]);
+		}
+	});
+
+	it("carries the APAC hackathon's one published winner with its track", () => {
+		expect(
+			CURATED_BUILDS.filter(
+				(b) => b.hackathonSlug === "apac-stellar-hackathon-2026",
+			),
+		).toEqual([
+			{
+				id: "curated-apac-stellar-hackathon-2026-olio",
+				name: "Olio",
+				hackathonSlug: "apac-stellar-hackathon-2026",
+				track: "Payment & Consumer Application",
+				placement: "1st Place",
+				isWinner: true,
+				description: "Confidential USDC payments app on Stellar.",
+				githubUrl: null,
+				// The spotlight links Olio's site, and no repo.
+				demoUrl: "https://oliopay.xyz/",
+				url: "https://www.risein.com/blog/builder-spotlight-from-hackathon-curiosity-to-building-olio-on-stellar",
+			},
+		]);
+	});
+
+	it("writes no em or en dash", () => {
+		expect(JSON.stringify(CURATED_BUILDS)).not.toMatch(/[\u2013\u2014]/);
+	});
+
 	it("a curated id opens its submission, as a DoraHacks id does", () => {
 		expect(parseBuildId("curated-hackmeridian-2025-the-simple-fund")).toBe(
 			"curated-hackmeridian-2025-the-simple-fund",
