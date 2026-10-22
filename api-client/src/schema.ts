@@ -822,9 +822,11 @@ export interface components {
         RetryableError: {
             /** @description What failed, in one line. */
             error: string;
+            /** @description On a 429: the wait and the next step in words, the same number as retryAfterSeconds ('Wait 37 seconds, then resend the same request.'), for a consumer that keeps only error and hint. */
+            hint?: string;
             /** @description What the failure is not a claim about, and what to do (retry after Retry-After, or where else to look). */
             advisory?: string;
-            /** @description Seconds to wait before resending; the same value as the Retry-After header. 2 on database reads, 60 or 300 on the skills registry. */
+            /** @description Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait (at most 3600, 60 when it sent no usable number); on a 503, 2 on database reads and 60 or 300 on the skills registry. */
             retryAfterSeconds: number;
         };
         /** @description The request itself was wrong (a 400): fix the call, do not retry it as is. */
@@ -3019,6 +3021,21 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     getChangelog: {
@@ -3586,7 +3603,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
+                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -3631,12 +3648,13 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description Present only when something limited this answer, e.g. search by meaning could not run. */
+                            /** @description Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), or the event listing could not be read to check a hackathon value ('could not check hackathon ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. */
                             warnings?: string[];
                             /** @description The filters as applied: an echo, so a caller can see what was honoured. */
                             filters?: {
                                 q?: string | null;
                                 winnersOnly?: boolean;
+                                /** @description The slugs the hackathon values resolved to; a value that could not be checked against the event listing (meta.warnings names it) is echoed as sent, lowercased. null = no hackathon filter. */
                                 hackathon?: string[] | null;
                                 track?: string | null;
                                 category?: string | null;
@@ -3737,6 +3755,39 @@ export interface operations {
                             similarity?: number;
                         }[];
                     };
+                };
+            };
+            /** @description A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event getHackathons lists. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @description What was wrong, naming the value. */
+                        error: string;
+                        /** @description How to correct the call. */
+                        hint?: string;
+                        /** @description Every parameter the operation reads; sent with an unknown parameter. */
+                        supportedParams?: string[];
+                        /** @description The values the named parameter accepts. */
+                        validValues?: string[];
+                        /** @description The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value names no event getHackathons lists. Pass one of these, or the event's exact title. getHackathons lists every event; one whose submissions are not stored is accepted and matches nothing, with a meta.warnings line. */
+                        validHackathons?: string[];
+                    };
+                };
+            };
+            /** @description The submissions index could not be built: the stored submissions could not be read, or the read came back empty. An outage, not a claim that nothing similar was built: retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };
@@ -3917,7 +3968,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: one slug or up to 10, comma-separated (the slugs getHackathons lists). A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
+                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -3952,6 +4003,7 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
+                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. */
                             warnings?: string[];
                             source?: string;
                             upstream?: string;
@@ -3961,6 +4013,7 @@ export interface operations {
                             filters?: {
                                 q?: string | null;
                                 winnersOnly?: boolean;
+                                /** @description The slugs the hackathon values resolved to; a value that could not be checked against the event listing (meta.warnings names it) is echoed as sent, lowercased. null = no hackathon filter. */
                                 hackathon?: string[] | null;
                                 track?: string | null;
                                 category?: string | null;
@@ -4052,12 +4105,25 @@ export interface operations {
                     };
                 };
             };
-            /** @description An unknown parameter, facet, by, category, mode or winnersOnly value; the body names the valid ones. */
+            /** @description A parameter or value the operation cannot honour; fix the call, do not retry it as is. The body names it and lists what would work: supportedParams for an unknown parameter, validValues for a value outside an enumerated parameter's set, validHackathons for a hackathon value that names no event getHackathons lists. */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": {
+                        /** @description What was wrong, naming the value. */
+                        error: string;
+                        /** @description How to correct the call. */
+                        hint?: string;
+                        /** @description Every parameter the operation reads; sent with an unknown parameter. */
+                        supportedParams?: string[];
+                        /** @description The values the named parameter accepts. */
+                        validValues?: string[];
+                        /** @description The slug of every event with stored submissions, alphabetical (the order means nothing); sent when a hackathon value names no event getHackathons lists. Pass one of these, or the event's exact title. getHackathons lists every event; one whose submissions are not stored is accepted and matches nothing, with a meta.warnings line. */
+                        validHackathons?: string[];
+                    };
+                };
             };
             /** @description The index could not be built; retry after Retry-After. */
             503: {
@@ -4701,12 +4767,20 @@ export interface operations {
                     };
                 };
             };
-            /** @description Rate limited */
+            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
             /** @description AI backend unavailable — fall back to GET /api/partners */
             503: {
@@ -4788,12 +4862,20 @@ export interface operations {
                     };
                 };
             };
-            /** @description Rate limited */
+            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
             /** @description AI backend unavailable */
             503: {
@@ -4866,12 +4948,20 @@ export interface operations {
                     };
                 };
             };
-            /** @description Rate limited */
+            /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
             /** @description AI backend unavailable */
             503: {
@@ -4956,12 +5046,20 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Rate limited */
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
         };
     };
@@ -5214,6 +5312,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
         };
     };
@@ -5490,12 +5603,20 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Rate limited (30/min/IP). */
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
             /** @description Index unavailable. */
             503: {
@@ -5615,6 +5736,21 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
             };
         };
     };
@@ -5743,6 +5879,21 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     listContracts: {
@@ -5842,6 +5993,21 @@ export interface operations {
                     };
                 };
             };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     listAudits: {
@@ -5937,6 +6103,21 @@ export interface operations {
                             engagementId?: string | null;
                         }[];
                     };
+                };
+            };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };
@@ -6045,10 +6226,10 @@ export interface operations {
                     "application/json": components["schemas"]["RequestError"];
                 };
             };
-            /** @description This instance's per-minute window is spent. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from these headers is approximate; wait Retry-After and resend. */
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
-                    /** @description Seconds until this instance's window resets. */
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
                     "Retry-After"?: number;
                     /** @description Always `instance`: the counter is per serverless instance, not global. */
                     "X-RateLimit-Scope"?: "instance";
@@ -6648,13 +6829,19 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description Rate limit exceeded */
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };

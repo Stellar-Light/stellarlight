@@ -20,7 +20,7 @@
 import { createHash } from "node:crypto";
 import { NextRequest, NextResponse } from "next/server";
 import type { Where } from "payload";
-import { apiError } from "@/lib/api-error";
+import { apiError, rateLimited } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { normalizeIdentityText } from "@/lib/audit-identity";
 import { SCORE_MODEL_VERSION } from "@/lib/confidence";
@@ -1282,18 +1282,7 @@ function tooMany(
 	limit: RateLimitResult,
 ): NextResponse {
 	logApiHit({ req, startedAt, status: 429, endpoint: "/api/research" });
-	return apiError({
-		status: 429,
-		error: "rate limit exceeded",
-		advisory:
-			"This instance's per-minute window is spent; the limit is counted per serverless instance (X-RateLimit-Scope). Wait Retry-After and resend.",
-		retryAfterSeconds: Math.max(
-			1,
-			Math.ceil((limit.resetAt - Date.now()) / 1000),
-		),
-		startedAt,
-		headers: rateLimitHeaders(limit),
-	});
+	return rateLimited(limit, { startedAt });
 }
 
 export async function GET(req: NextRequest) {

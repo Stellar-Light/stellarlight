@@ -3,6 +3,26 @@ import { describe, expect, it, vi } from "vitest";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
+// What getHackathons lists: one DoraHacks event the index holds, and a
+// curated one whose submissions are not stored.
+vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
+	...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
+	fetchAllDoraHacksHackathonsChecked: vi.fn(async () => ({
+		hackathons: [
+			{ id: 1, uname: "e", title: "E", source: "dorahacks" },
+			{
+				id: -1007,
+				uname: "hackmeridian-2025",
+				title: "HackMeridian 2025",
+				source: "curated",
+			},
+		],
+		complete: true,
+	})),
+}));
+vi.mock("@/lib/payload-client", () => ({
+	getPayloadSafe: vi.fn(async () => ({ find: async () => ({ docs: [] }) })),
+}));
 
 const DAY = 86_400_000;
 const build = (id: string, over: Partial<IndexedBuild> = {}): IndexedBuild => ({
@@ -47,8 +67,70 @@ vi.mock("@/lib/hackathon-builds", async (orig) => ({
 			hackathon: { title: "R", slug: "r", endedAt: recentEnd },
 			activity: { lastCommitAt: null, archived: false },
 		}),
+		build("titled", {
+			hackathon: {
+				title: "Stellar Hacks: Agents",
+				slug: "stellar-agents-x402-stripe-mpp",
+				endedAt: "2026-04-13",
+			},
+		}),
 	]),
 }));
+
+describe("GET /api/hackathons/builds hackathon filter", () => {
+	const get = async (qs: string) => {
+		const { GET } = await import("../route");
+		const res = await GET(
+			new NextRequest(`https://x.test/api/hackathons/builds?${qs}`),
+		);
+		return { status: res.status, body: await res.json() };
+	};
+
+	it("takes an event's exact title as its slug", async () => {
+		const { status, body } = await get("hackathon=Stellar%20Hacks:%20Agents");
+		expect(status).toBe(200);
+		expect(body.meta.filters.hackathon).toEqual([
+			"stellar-agents-x402-stripe-mpp",
+		]);
+		expect(body.meta.counts.matched).toBe(1);
+	});
+
+	it("answers a value that names no listed event with 400 and the valid slugs", async () => {
+		const { status, body } = await get("hackathon=Stellar%20Hacks:%20Agent,e");
+		expect(status).toBe(400);
+		expect(body.error).toBe(
+			"hackathon value(s) name no event getHackathons lists: 'Stellar Hacks: Agent'.",
+		);
+		expect(body.validHackathons).toEqual([
+			"b",
+			"e",
+			"n",
+			"r",
+			"stellar-agents-x402-stripe-mpp",
+		]);
+	});
+
+	it("answers a listed event with no stored submissions with 0 matched and a warning", async () => {
+		const { status, body } = await get("hackathon=hackmeridian-2025");
+		expect(status).toBe(200);
+		expect(body.meta.counts.matched).toBe(0);
+		expect(body.meta.filters.hackathon).toEqual(["hackmeridian-2025"]);
+		expect(body.meta.warnings).toEqual([
+			"no submissions are stored for hackmeridian-2025; 0 matched from it is not evidence that nothing was built",
+		]);
+	});
+
+	it("says a value could not be checked when the listing cannot be read", async () => {
+		const { getPayloadSafe } = await import("@/lib/payload-client");
+		vi.mocked(getPayloadSafe).mockResolvedValueOnce(null);
+		const { status, body } = await get("hackathon=nope");
+		expect(status).toBe(200);
+		expect(body.meta.counts.matched).toBe(0);
+		expect(body.meta.warnings?.[0]).toMatch(
+			/^could not check hackathon 'nope'/,
+		);
+	});
+});
 
 describe("GET /api/hackathons/builds rows say what the repo did after the event", () => {
 	it("serves analyze's activity value and the last commit, absent when unknown", async () => {

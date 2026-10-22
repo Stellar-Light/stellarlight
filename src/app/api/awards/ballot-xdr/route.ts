@@ -22,6 +22,7 @@
 
 import { StrKey } from "@stellar/stellar-sdk";
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import {
 	buildAuthorizationTx,
 	newAuthorizationNonce,
@@ -50,12 +51,7 @@ export async function POST(req: NextRequest) {
 		limit: 300,
 		windowMs: 10 * 60 * 1000,
 	});
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{ error: "rate limit exceeded" },
-			{ status: 429, headers: rateLimitHeaders(limit) },
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 
 	let body: {
 		address?: unknown;

@@ -2,6 +2,7 @@
 
 import { Check, Loader2, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { tooManyMessage } from "@/lib/rate-limit-message";
 
 interface Props {
 	open: boolean;
@@ -136,6 +137,9 @@ export function SkillSubmissionModal({ open, onClose }: Props) {
 			const data = await res.json();
 			if (res.ok) {
 				setSuccess(true);
+			} else if (res.status === 429) {
+				// The 429's error and hint are written for agents.
+				setError(tooManyMessage(data, "submissions"));
 			} else {
 				setError(data.error ?? "Submission failed");
 				if (Array.isArray(data.details)) setErrorDetails(data.details);

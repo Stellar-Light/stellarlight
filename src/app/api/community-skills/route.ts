@@ -23,6 +23,7 @@
 
 import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
+import { rateLimited } from "@/lib/api-error";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
@@ -89,15 +90,7 @@ export async function POST(req: NextRequest) {
 		limit: 4,
 		windowMs: 60_000,
 	});
-	if (!limit.allowed) {
-		return NextResponse.json(
-			{
-				error: "rate-limited",
-				hint: "Submissions are rate-limited to 4 / minute / IP.",
-			},
-			{ status: 429, headers: rateLimitHeaders(limit) },
-		);
-	}
+	if (!limit.allowed) return rateLimited(limit);
 
 	let body: SubmissionBody;
 	try {

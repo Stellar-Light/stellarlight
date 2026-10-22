@@ -42,6 +42,7 @@ import {
 	DrawerTitle,
 } from "@/components/ui/drawer";
 import { useIsMobile } from "@/hooks/use-is-mobile";
+import { tooManyMessage } from "@/lib/rate-limit-message";
 import { NomineeHighlightsModal } from "./nominee-highlights-modal";
 import {
 	AWARDS_WALLETS,
@@ -1368,8 +1369,12 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 				return;
 			}
 			if (!xdrRes.ok) {
+				// A 429's error and hint are written for agents; the venue
+				// shares one IP, so say whose limit it is and how long to wait.
 				throw new Error(
-					apiErrorMessage(xdrBody, "could not prepare the ballot"),
+					xdrRes.status === 429
+						? tooManyMessage(xdrBody, "requests from this network")
+						: apiErrorMessage(xdrBody, "could not prepare the ballot"),
 				);
 			}
 
@@ -1410,7 +1415,9 @@ function OpenBallot({ data }: { data: AwardsRoundData }) {
 			}
 			if (!submitRes.ok) {
 				throw new Error(
-					apiErrorMessage(submitBody, "the vote could not be submitted"),
+					submitRes.status === 429
+						? tooManyMessage(submitBody, "requests from this network")
+						: apiErrorMessage(submitBody, "the vote could not be submitted"),
 				);
 			}
 			setTxHash(submitBody.hash);

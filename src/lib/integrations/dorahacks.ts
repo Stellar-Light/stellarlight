@@ -118,12 +118,9 @@ async function fetchHubHackathons(
 			signal: AbortSignal.timeout(5000),
 		});
 
-		if (!response.ok) {
-			console.error(
-				`Failed to fetch hackathons for org ${orgId}: ${response.status}`,
-			);
-			return [];
-		}
+		// A failed read throws so fetchAllDoraHacksHackathonsChecked can tell it
+		// from a listing that is really empty.
+		if (!response.ok) throw new Error(`DoraHacks answered ${response.status}`);
 
 		// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 		const data: any = await response.json();
@@ -161,7 +158,7 @@ async function fetchHubHackathons(
 			}));
 	} catch (error) {
 		console.error(`Error fetching hackathons for org ${orgId}:`, error);
-		return [];
+		throw error;
 	}
 }
 
@@ -171,6 +168,16 @@ async function fetchHubHackathons(
 export async function fetchAllDoraHacksHackathons(): Promise<
 	DoraHacksHackathon[]
 > {
+	return (await fetchAllDoraHacksHackathonsChecked()).hackathons;
+}
+
+/** The same list, and whether every DoraHacks read succeeded: a failed or
+ * timed-out read leaves its events out, so an event missing from a list
+ * with `complete` false was not checked. */
+export async function fetchAllDoraHacksHackathonsChecked(): Promise<{
+	hackathons: DoraHacksHackathon[];
+	complete: boolean;
+}> {
 	// Fetch every known organizer plus an ecosystem-wide title search, in parallel
 	const results = await Promise.allSettled([
 		...STELLAR_ORG_IDS.map((orgId) => fetchOrgHackathons(orgId)),
@@ -202,12 +209,16 @@ export async function fetchAllDoraHacksHackathons(): Promise<
 	uniqueHackathons.push(...curated);
 
 	// Sort: active first (status === 1), then by end_time descending
-	return uniqueHackathons.sort((a, b) => {
+	const hackathons = uniqueHackathons.sort((a, b) => {
 		if (a.status !== b.status) {
 			return a.status === 1 ? -1 : 1; // Active hackathons first
 		}
 		return b.end_time - a.end_time; // Most recent first
 	});
+	return {
+		hackathons,
+		complete: results.every((r) => r.status === "fulfilled"),
+	};
 }
 
 /**
