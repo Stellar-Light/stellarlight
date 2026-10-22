@@ -1,0 +1,55 @@
+score grade words gap-to-best idea name
+0.781  2  0  0.006  i20  GiveChain
+0.781  1  0  0.000  i22  Ai2wallet
+0.779  1  0  0.001  i07  Streamr
+0.774  1  1  0.006  i07  StealthPayroll
+0.773  1  1  0.008  i22  M.I.A. Make it Agentic
+0.768  2  0  0.000  i08  ClaimProof
+0.765  2  0  0.022  i20  Stellar Donate-Safe
+0.764  2  0  0.000  i02  Veil
+0.763  1  0  0.005  i08  Alusa
+0.763  1  0  0.006  i10  ZK-Tix
+0.759  2  0  0.000  i17  x402-Ramp
+0.759  2  0  0.028  i20  Trace
+0.757  2  0  0.008  i11  Pasanaku Global
+0.757  1  0  0.000  i40  Stellar-Tipz
+0.756  1  0  0.013  i10  Twin Ticket
+0.755  2  0  0.002  i40  SuperTip
+0.754  2  0  0.011  i11  Confianza Colectiva: Securing Dreams with Stellar 
+0.750  2  0  0.007  i40  Tipchain
+0.749  1  0  0.020  i10  TicketReal
+0.747  1  1  0.017  i02  Passkey-Kit integration
+0.744  0  0  0.000  i38  Stellarealize
+0.743  2  0  0.022  i11  PULSO Tanda
+0.742  0  0  0.002  i38  Kale-Pulse
+0.739  1  0  0.000  i26  Secureflow
+0.737  0  0  0.007  i38  StellarPay
+0.736  1  0  0.000  i04  PropChain
+0.736  1  0  0.000  i19  Pact
+0.733  0  0  0.032  i11  Stellar Automations Studio
+0.733  2  0  0.011  i37  Stellar Vault
+0.732  1  0  0.027  i17  PeerPesa
+0.730  0  0  0.034  i02  DeFi Quest - From Zero to DeFi in Minutes
+0.728  1  0  0.000  i25  Vaquita v2
+0.727  1  0  0.037  i02  Stelakey
+0.727  0  0  0.009  i04  QR Mint
+0.726  1  0  0.033  i17  Mammon App
+0.724  0  1  0.020  i38  Crimate Crisis Dashboard
+0.723  0  0  0.005  i25  Pacto
+0.723  2  1  0.021  i37  Nexus - Fully Private And Non-Custodial Multisig
+0.722  1  0  0.042  i02  Accesly
+0.722  1  0  0.037  i17  Pollar
+0.720  1  0  0.016  i04  PropertyRescue
+0.720  1  0  0.000  i05  Neko Protocol
+0.718  1  0  0.002  i05  Orion
+0.717  1  0  0.003  i05  Stellar Bits
+0.715  0  0  0.000  i35  MemeEco: Greedy World
+0.713  0  0  0.055  i08  AgroFactoring
+0.711  1  0  0.033  i37  Stratum
+0.710  2  0  0.049  i17  CBRprotocolo
+0.709  1  0  0.027  i19  Be A Stellar
+0.709  0  0  0.000  i32  Dropsland
+0.708  0  0  0.028  i19  ImpactPools
+0.704  1  0  0.032  i19  Trustless Work
+0.702  1  0  0.034  i19  Hive
+0.701  2  0  0.000  i31  Loyal Local

@@ -1,0 +1,91 @@
+
+i03 [holdout] cross-border remittance app cashing out through local anchors  words: remittance(df 16, w 4.37) cashing(df 0, w 7.20) out(df 22, w 4.07) local(df 45, w 3.38) anchors(df 13, w 4.57) cross-border(df 27, w 3.87)
+  LIST g=1 SM  sim=0.760 cov=0.30 own=0.30 typed=0.30 [remittance^,cross-border^] CrossBorder Pay: Global Remittances with Stellar and Soroban
+  LIST g=1 SM  sim=0.720 cov=0.42 own=0.42 typed=0.42 [remittance,local,cross-border] W Tukar
+  LIST g=1 SM  sim=0.735 cov=0.47 own=0.47 typed=0.47 [remittance^,anchors^,cross-border] AnchorVault: Trustless On-Chain Remittance Liquidity Routing
+  LIST g=1 S   sim=0.757 cov=0.00 own=0.00 typed=0.00 [] Link2Pay
+  LIST g=0 S   sim=0.755 cov=0.00 own=0.00 typed=0.00 [] RemitLend
+
+i06 [holdout] DEX aggregator that routes swaps across Stellar AMMs  words: dex(df 63, w 3.05) aggregator(df 4, w 5.59) routes(df 10, w 4.81) swaps(df 25, w 3.95) amms(df 3, w 5.82)
+  LIST g=2 SM  sim=0.758 cov=0.75 own=0.75 typed=0.62 [dex^,aggregator,routes,swaps^] SwaptoX
+  LIST g=1 SM  sim=0.728 cov=0.55 own=0.55 typed=0.42 [dex^,swaps^,amms] Klaberos Swap
+  LIST g=0 S   sim=0.737 cov=0.24 own=0.24 typed=0.24 [aggregator^] DUST AGGREGATOR
+  LIST g=0 S   sim=0.747 cov=0.00 own=0.00 typed=0.00 [] Calypso: x402 Bot Swarm
+  LIST g=0 SM  sim=0.720 cov=0.30 own=0.30 typed=0.17 [dex^,swaps^] Socio - AI-generated swap signals for Stellar & Soroban
+
+i09 [holdout] carbon credit marketplace  words: carbon(df 9, w 4.90) credit(df 34, w 3.65) marketplace(df 44, w 3.40)
+  LIST g=0 S   sim=0.711 cov=0.41 own=0.41 typed=0.41 [carbon^] CarbonXO
+  LIST g=1 M   sim=0.693 cov=0.72 own=0.72 typed=0.72 [carbon,credit] Zucane
+  LIST g=1 S   sim=0.717 cov=0.00 own=0.00 typed=0.00 [] Co2 Green
+       g=1     sim=0.686 cov=0.41 own=0.41 typed=0.41 [carbon^] CarbonChain Morelos
+       g=0     sim=0.697 cov=0.00 own=0.00 typed=0.00 [] Tropik
+
+i12 [holdout] merchant QR code payments for small shops  words: merchant(df 7, w 5.12) qr(df 10, w 4.81) code(df 22, w 4.07) payments(df 270, w 1.60) small(df 10, w 4.81) shops(df 4, w 5.59)
+  LIST g=0 SM  sim=0.722 cov=0.34 own=0.34 typed=0.34 [qr^,code^] Blitz - QR Code Auction Platform
+  LIST g=0 S   sim=0.708 cov=0.18 own=0.18 typed=0.18 [qr^] QR Mint
+  LIST g=1 M   sim=0.682 cov=0.62 own=0.62 typed=0.62 [qr,code,payments,shops] CryptoCart
+  LIST g=0 S   sim=0.701 cov=0.06 own=0.06 typed=0.06 [payments^] Stellar Micro payment for AI prompt
+  LIST g=1 S   sim=0.702 cov=0.00 own=0.00 typed=0.00 [] Airpay
+
+i15 [holdout] DAO treasury voting on Soroban  words: dao(df 14, w 4.50) treasury(df 10, w 4.81) voting(df 10, w 4.81) soroban(df 198, w 1.91)
+  LIST g=2 SM  sim=0.727 cov=0.70 own=0.70 typed=0.70 [dao^,treasury^,soroban^] Soroban Community Treasury DAO para Microbecas Transfronteri
+  LIST g=1 M   sim=0.689 cov=0.88 own=0.88 typed=0.88 [dao,treasury^,voting^] Obscura - Payroll · Voting · Credentials · Treasury · Compli
+  LIST g=1 SM  sim=0.707 cov=0.40 own=0.40 typed=0.40 [dao,soroban] VeilVote
+  LIST g=2 M   sim=0.696 cov=0.58 own=0.58 typed=0.58 [dao,treasury^] Stellar Campus Treasury
+  LIST g=1 M   sim=0.693 cov=0.42 own=0.42 typed=0.42 [voting,soroban] Stellar Vote
+
+i18 [holdout] invoice financing for small businesses  words: invoice(df 9, w 4.90) financing(df 2, w 6.11) small(df 10, w 4.81) businesses(df 23, w 4.03)
+  LIST g=2 SM  sim=0.761 cov=0.45 own=0.45 typed=0.45 [invoice^,businesses] StellarInvoice
+  LIST g=0 SM  sim=0.700 cov=0.45 own=0.45 typed=0.45 [invoice^,businesses] InvoiceVeil
+  LIST g=1 S   sim=0.717 cov=0.00 own=0.00 typed=0.00 [] Kryon Network
+  LIST g=0 M   sim=0.000 cov=0.45 own=0.45 typed=0.45 [invoice,businesses] SettleZK
+  LIST g=1 M   sim=0.000 cov=0.45 own=0.45 typed=0.45 [small,businesses] Micro Lending
+
+i21 [holdout] microloans for small businesses in emerging markets  words: microloans(df 1, w 6.51) small(df 10, w 4.81) businesses(df 23, w 4.03) emerging(df 3, w 5.82) markets(df 92, w 2.67)
+  LIST g=2 S   sim=0.744 cov=0.00 own=0.00 typed=0.00 [] Micro Lending
+  LIST g=0 M   sim=0.000 cov=0.56 own=0.56 typed=0.56 [small,emerging,markets] Stellar Rent
+  LIST g=0 M   sim=0.000 cov=0.48 own=0.48 typed=0.48 [small,businesses,markets] PayOnProof
+  LIST g=1 S   sim=0.711 cov=0.00 own=0.00 typed=0.00 [] Minerchant
+  LIST g=1 S   sim=0.710 cov=0.00 own=0.00 typed=0.00 [] Calificación Crediticia con IA en Soroban para Microfinanzas
+
+i24 [holdout] yield vault that auto-compounds DeFi rewards  words: yield(df 31, w 3.74) vault(df 24, w 3.99) defi(df 124, w 2.38) rewards(df 30, w 3.77) auto-compounds(df 1, w 6.51)
+  LIST g=1 SMT sim=0.749 cov=1.00 own=1.00 typed=1.00 [yield,vault,defi,rewards,auto-compounds] xLP Farm Protocol
+  LIST g=1 SM  sim=0.760 cov=0.50 own=0.50 typed=0.50 [yield^,vault^,defi^] YieldShield - Dynamic Risk‑Aware Vault Protector
+  LIST g=1 SM  sim=0.750 cov=0.50 own=0.50 typed=0.38 [yield,vault^,defi] Stellar-vaults-app
+  LIST g=1 SM  sim=0.741 cov=0.50 own=0.50 typed=0.38 [yield,vault^,defi] KaleGuardVaults
+  LIST g=1 SM  sim=0.753 cov=0.30 own=0.30 typed=0.18 [yield^,defi^] YieldZap
+
+i27 [holdout] play-to-earn game with on-chain rewards  words: game(df 80, w 2.81) rewards(df 30, w 3.77) play-to-earn(df 2, w 6.11) on-chain(df 238, w 1.73)
+  LIST g=2 SM  sim=0.737 cov=0.62 own=0.62 typed=0.62 [game,play-to-earn] Stellar Tea
+  LIST g=2 SM  sim=0.724 cov=0.62 own=0.62 typed=0.62 [game,play-to-earn] VIVO-RUN
+  LIST g=1 S   sim=0.783 cov=0.00 own=0.00 typed=0.00 [] Playlumen
+  LIST g=2 S   sim=0.772 cov=0.00 own=0.00 typed=0.00 [] Zeta-Playground
+  LIST g=1 SM  sim=0.719 cov=0.31 own=0.31 typed=0.31 [game^,on-chain^] W xray.games - The Arcade Evolved | skill proven onchain
+
+i30 [holdout] supply chain traceability for agricultural products  words: supply(df 2, w 6.11) chain(df 452, w 1.09) traceability(df 4, w 5.59) agricultural(df 3, w 5.82) products(df 75, w 2.87)
+  LIST g=2 S   sim=0.765 cov=0.00 own=0.00 typed=0.00 [] Guacamole
+  LIST g=2 S   sim=0.758 cov=0.00 own=0.00 typed=0.00 [] AgroTrace
+  LIST g=1 S   sim=0.737 cov=0.00 own=0.00 typed=0.00 [] Huella
+  LIST g=1 M   sim=0.000 cov=0.60 own=0.60 typed=0.60 [supply,chain,traceability^] Mineral Gateway: Agent-Powered Critical Minerals Traceabilit
+  LIST g=0 M   sim=0.685 cov=0.32 own=0.32 typed=0.32 [chain^,agricultural] AgroChain LATAM
+
+i33 [holdout] bill and utility payments with stablecoins  words: bill(df 17, w 4.31) utility(df 4, w 5.59) payments(df 270, w 1.60) stablecoins(df 27, w 3.87)
+  LIST g=2 SM  sim=0.735 cov=0.90 own=0.90 typed=0.90 [bill,utility,stablecoins] CriPay
+  LIST g=0 SM  sim=0.733 cov=0.36 own=0.36 typed=0.36 [payments,stablecoins] W Streamr
+  LIST g=0 SM  sim=0.728 cov=0.36 own=0.36 typed=0.36 [payments,stablecoins] Why Stellar Feels Boring
+  LIST g=1 SM  sim=0.722 cov=0.38 own=0.38 typed=0.38 [bill,payments] Stellar Autopay X402
+  LIST g=1 SM  sim=0.718 cov=0.36 own=0.36 typed=0.36 [payments^,stablecoins] CosmosPay | Wallet & Payment Gateway for Stellar Developers
+
+i36 [holdout] tokenized treasury bills or bonds  words: tokenized(df 11, w 4.72) treasury(df 10, w 4.81) bills(df 17, w 4.31) bonds(df 2, w 6.11)
+       g=1     sim=0.687 cov=0.00 own=0.00 typed=0.00 [] Orion
+       g=1     sim=0.683 cov=0.00 own=0.00 typed=0.00 [] W YieldBack.Cash
+       g=0     sim=0.000 cov=0.31 own=0.31 typed=0.31 [bonds^] Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based 
+       g=0     sim=0.000 cov=0.24 own=0.24 typed=0.24 [treasury^] Soroban Community Treasury DAO para Microbecas Transfronteri
+       g=0     sim=0.000 cov=0.24 own=0.24 typed=0.24 [treasury^] Stellar Campus Treasury
+
+i39 [holdout] streaming salary payments by the second  words: streaming(df 1, w 6.51) salary(df 12, w 4.64) payments(df 270, w 1.60) second(df 23, w 4.03)
+  LIST g=1 S   sim=0.736 cov=0.00 own=0.00 typed=0.00 [] W Streamr
+  LIST g=1 M   sim=0.699 cov=0.37 own=0.37 typed=0.37 [salary,payments] ZeroWage
+  LIST g=0 M   sim=0.000 cov=0.48 own=0.48 typed=0.48 [streaming,payments] W clevercon
+  LIST g=1 S   sim=0.705 cov=0.00 own=0.00 typed=0.00 [] Sobrecito
+  LIST g=1 S   sim=0.702 cov=0.00 own=0.00 typed=0.00 [] Nomilar

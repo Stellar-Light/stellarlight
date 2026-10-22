@@ -1,0 +1,5388 @@
+{
+	"rubric": {
+		"version": "v1",
+		"status": "draft labels, owner review pending",
+		"question": "A hacker describes this idea. Which past hackathon builds are prior art they must see?",
+		"2": "SAME IDEA: the build's core product does what the idea describes, for the same user problem, with the same core mechanism.",
+		"1": "RELATED: same domain or a real component of the idea, useful context but a different product.",
+		"0": "NOT PRIOR ART: shares words only, or a different product.",
+		"rules": [
+			"Judge from the name and description only. Placement and isWinner never change a grade.",
+			"When torn between 2 and 1, choose 1. When torn between 1 and 0, choose 0.",
+			"If the description is empty or too vague to tell, grade from the name alone.",
+			"A build that does the idea as one feature among many unrelated features is a 1, not a 2."
+		]
+	},
+	"labels": [
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42435",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42773",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42825",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42534",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42804",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42334",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42778",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42771",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42567",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42803",
+			"grade": 2
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42606",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42658",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-46450",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42807",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42724",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42579",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42637",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42683",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42816",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42710",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42714",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-45982",
+			"grade": 1
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42516",
+			"grade": 0
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42765",
+			"grade": 0
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42791",
+			"grade": 0
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42594",
+			"grade": 0
+		},
+		{
+			"ideaId": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"buildId": "dorahacks-buidl-42820",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-42401",
+			"grade": 2
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46229",
+			"grade": 1
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46264",
+			"grade": 1
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-30911",
+			"grade": 1
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-42507",
+			"grade": 1
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-25341",
+			"grade": 1
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46093",
+			"grade": 1
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-42714",
+			"grade": 1
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-36779",
+			"grade": 1
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-45996",
+			"grade": 1
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46373",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-42819",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-32712",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46205",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46248",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-45901",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46426",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46541",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-30648",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-28456",
+			"grade": 0
+		},
+		{
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-45983",
+			"grade": 0
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-25268",
+			"grade": 2
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-46460",
+			"grade": 2
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-46418",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-45260",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-30786",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-38027",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-25168",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-32591",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-38085",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-45591",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-46474",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-46217",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-30961",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-46202",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-30965",
+			"grade": 1
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-46373",
+			"grade": 0
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-46292",
+			"grade": 0
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-42666",
+			"grade": 0
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-42645",
+			"grade": 0
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-25159",
+			"grade": 0
+		},
+		{
+			"ideaId": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"buildId": "dorahacks-buidl-36062",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-36773",
+			"grade": 2
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-38046",
+			"grade": 1
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-31761",
+			"grade": 1
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-30905",
+			"grade": 1
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-27453",
+			"grade": 1
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-26545",
+			"grade": 1
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-46476",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-45593",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-39887",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-46117",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-32678",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-46374",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-25342",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-45983",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-40067",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-46341",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-37998",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-39834",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-46070",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-14609",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-46065",
+			"grade": 0
+		},
+		{
+			"ideaId": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"buildId": "dorahacks-buidl-24497",
+			"grade": 0
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-32691",
+			"grade": 2
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-46273",
+			"grade": 2
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-42516",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-27438",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-33712",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-46498",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-36293",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-46421",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-30845",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-37961",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-36794",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-36340",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-27426",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-27230",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-36267",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-45988",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-36797",
+			"grade": 1
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-27417",
+			"grade": 0
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-28426",
+			"grade": 0
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-46541",
+			"grade": 0
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-30677",
+			"grade": 0
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-32593",
+			"grade": 0
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-27456",
+			"grade": 0
+		},
+		{
+			"ideaId": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"buildId": "dorahacks-buidl-46108",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-33220",
+			"grade": 2
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-30635",
+			"grade": 1
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-25240",
+			"grade": 1
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-38088",
+			"grade": 1
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-27446",
+			"grade": 1
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-36341",
+			"grade": 1
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-36739",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-27417",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-25283",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-46402",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-30659",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-46541",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-32593",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-27427",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-29964",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-40033",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-42791",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-42589",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-24527",
+			"grade": 0
+		},
+		{
+			"ideaId": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"buildId": "dorahacks-buidl-30702",
+			"grade": 0
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46468",
+			"grade": 2
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46453",
+			"grade": 2
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46318",
+			"grade": 2
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46108",
+			"grade": 2
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46041",
+			"grade": 2
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-42752",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46405",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46564",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-25141",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-41513",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46403",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46526",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-35590",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46557",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-26908",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-32149",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46355",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-36799",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46337",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-36317",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-30887",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-27442",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46448",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46455",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46110",
+			"grade": 1
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46393",
+			"grade": 0
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-46228",
+			"grade": 0
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-32675",
+			"grade": 0
+		},
+		{
+			"ideaId": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"buildId": "dorahacks-buidl-42659",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-46105",
+			"grade": 2
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-42373",
+			"grade": 1
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-25263",
+			"grade": 1
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-32713",
+			"grade": 1
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-32658",
+			"grade": 1
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-46284",
+			"grade": 1
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-42387",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-36739",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-46007",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-46117",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-46141",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-32618",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-46402",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-45999",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-45921",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-30962",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-38223",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-38839",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-31166",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-30895",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-41505",
+			"grade": 0
+		},
+		{
+			"ideaId": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"buildId": "dorahacks-buidl-30949",
+			"grade": 0
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35610",
+			"grade": 2
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35624",
+			"grade": 1
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35601",
+			"grade": 1
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35587",
+			"grade": 1
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35598",
+			"grade": 1
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35621",
+			"grade": 1
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35632",
+			"grade": 1
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35524",
+			"grade": 1
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35564",
+			"grade": 1
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-30845",
+			"grade": 0
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35635",
+			"grade": 0
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-41499",
+			"grade": 0
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-46443",
+			"grade": 0
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-36766",
+			"grade": 0
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-42703",
+			"grade": 0
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-46321",
+			"grade": 0
+		},
+		{
+			"ideaId": "i09",
+			"idea": "carbon credit marketplace",
+			"buildId": "dorahacks-buidl-35579",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-25336",
+			"grade": 1
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-31793",
+			"grade": 1
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-30874",
+			"grade": 1
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-42810",
+			"grade": 1
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-40067",
+			"grade": 1
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-34006",
+			"grade": 1
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-30930",
+			"grade": 1
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-46429",
+			"grade": 1
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-14618",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-30961",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-39855",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-42573",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-14609",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-35616",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-46545",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-38055",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-46199",
+			"grade": 0
+		},
+		{
+			"ideaId": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"buildId": "dorahacks-buidl-30913",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-30877",
+			"grade": 2
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-46235",
+			"grade": 2
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-46509",
+			"grade": 2
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-33718",
+			"grade": 2
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-30943",
+			"grade": 2
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-38223",
+			"grade": 1
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-46382",
+			"grade": 1
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-46257",
+			"grade": 1
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-46393",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-36313",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-46124",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-46284",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-32673",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-46011",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-46478",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-42610",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-42776",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-42770",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-42632",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-27458",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-39315",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-27412",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-25160",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-41499",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-30700",
+			"grade": 0
+		},
+		{
+			"ideaId": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"buildId": "dorahacks-buidl-36339",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-24491",
+			"grade": 1
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-30890",
+			"grade": 1
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-36313",
+			"grade": 1
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-46330",
+			"grade": 1
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-24867",
+			"grade": 1
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-42524",
+			"grade": 1
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-24827",
+			"grade": 1
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-36785",
+			"grade": 1
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-28393",
+			"grade": 1
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-31669",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-39826",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-42666",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-42831",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-14609",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-42759",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-36272",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-42574",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-46480",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-46062",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-42492",
+			"grade": 0
+		},
+		{
+			"ideaId": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"buildId": "dorahacks-buidl-35585",
+			"grade": 0
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-46378",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-32032",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-32678",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-46439",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-46440",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-46438",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-46484",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-39288",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-36332",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-46362",
+			"grade": 2
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-32654",
+			"grade": 1
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-32653",
+			"grade": 1
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-32676",
+			"grade": 1
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-36320",
+			"grade": 1
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-42459",
+			"grade": 1
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-46375",
+			"grade": 1
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-46005",
+			"grade": 1
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-42741",
+			"grade": 0
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-32695",
+			"grade": 0
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-46311",
+			"grade": 0
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-32593",
+			"grade": 0
+		},
+		{
+			"ideaId": "i13",
+			"idea": "prediction market on Soroban",
+			"buildId": "dorahacks-buidl-27582",
+			"grade": 0
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46506",
+			"grade": 2
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46188",
+			"grade": 2
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46355",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46405",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46436",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46455",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46468",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46453",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46318",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46448",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46526",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46108",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46110",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46487",
+			"grade": 1
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-39826",
+			"grade": 0
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-36774",
+			"grade": 0
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-35563",
+			"grade": 0
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-45591",
+			"grade": 0
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-45075",
+			"grade": 0
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46539",
+			"grade": 0
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-45311",
+			"grade": 0
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-46474",
+			"grade": 0
+		},
+		{
+			"ideaId": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"buildId": "dorahacks-buidl-39622",
+			"grade": 0
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-30848",
+			"grade": 2
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-34110",
+			"grade": 2
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-46544",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-42765",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-18773",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-46300",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-46405",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-46254",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-46204",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-25321",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-25344",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-46565",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-46361",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-46183",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-38056",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-46364",
+			"grade": 1
+		},
+		{
+			"ideaId": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"buildId": "dorahacks-buidl-45075",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 2
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42739",
+			"grade": 2
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-45930",
+			"grade": 1
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-25168",
+			"grade": 1
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-25159",
+			"grade": 1
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42724",
+			"grade": 1
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42524",
+			"grade": 1
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42723",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42776",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-36796",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-46219",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42807",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42745",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42804",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42488",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-46474",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42747",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42610",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42275",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42773",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42657",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42706",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42713",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42753",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42801",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42695",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42823",
+			"grade": 0
+		},
+		{
+			"ideaId": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42771",
+			"grade": 0
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-46504",
+			"grade": 2
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-45584",
+			"grade": 2
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-41487",
+			"grade": 2
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-30902",
+			"grade": 2
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-45260",
+			"grade": 1
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-24804",
+			"grade": 1
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-46221",
+			"grade": 1
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-46460",
+			"grade": 1
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-28426",
+			"grade": 1
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-46474",
+			"grade": 1
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-18558",
+			"grade": 1
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-36269",
+			"grade": 0
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-40205",
+			"grade": 0
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-42718",
+			"grade": 0
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-28416",
+			"grade": 0
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-34215",
+			"grade": 0
+		},
+		{
+			"ideaId": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"buildId": "dorahacks-buidl-24548",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-38101",
+			"grade": 2
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-41513",
+			"grade": 2
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-36316",
+			"grade": 2
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-45921",
+			"grade": 1
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-30621",
+			"grade": 1
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-33712",
+			"grade": 1
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-46109",
+			"grade": 1
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-46332",
+			"grade": 1
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-36771",
+			"grade": 1
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-46476",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-46468",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-46536",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-25240",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-46206",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-32653",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-46011",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-30659",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-36774",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-46337",
+			"grade": 0
+		},
+		{
+			"ideaId": "i18",
+			"idea": "invoice financing for small businesses",
+			"buildId": "dorahacks-buidl-45883",
+			"grade": 0
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-41491",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-31797",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-46214",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-31167",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-31154",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-31165",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-46333",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-19680",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-31161",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-36772",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-35590",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-36312",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-38039",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-36748",
+			"grade": 1
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-27449",
+			"grade": 0
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-46256",
+			"grade": 0
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-46284",
+			"grade": 0
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-45841",
+			"grade": 0
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-27445",
+			"grade": 0
+		},
+		{
+			"ideaId": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"buildId": "dorahacks-buidl-40069",
+			"grade": 0
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-28420",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-31797",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-28455",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-28416",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-34215",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-38059",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-28402",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-30941",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-40039",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-31161",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-28434",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-35605",
+			"grade": 2
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-46535",
+			"grade": 1
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-24827",
+			"grade": 1
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-41499",
+			"grade": 1
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-27445",
+			"grade": 1
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-28453",
+			"grade": 1
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-31156",
+			"grade": 1
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-46022",
+			"grade": 1
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-25334",
+			"grade": 0
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-46444",
+			"grade": 0
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-36318",
+			"grade": 0
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-30929",
+			"grade": 0
+		},
+		{
+			"ideaId": "i20",
+			"idea": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-45841",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-33712",
+			"grade": 2
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-45891",
+			"grade": 2
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-36274",
+			"grade": 1
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-45988",
+			"grade": 1
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-30845",
+			"grade": 1
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-35580",
+			"grade": 1
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-30925",
+			"grade": 1
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-21031",
+			"grade": 1
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-31794",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-46378",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-42748",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-32695",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-32032",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-46438",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-46206",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-25342",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-26545",
+			"grade": 0
+		},
+		{
+			"ideaId": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"buildId": "dorahacks-buidl-42703",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42675",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-46414",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42787",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42802",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42759",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42524",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42574",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42530",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42662",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-38103",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42831",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42830",
+			"grade": 1
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42657",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42739",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42661",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-30677",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-32593",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42703",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42544",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42774",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42705",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42664",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-46450",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-46390",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42753",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42822",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42814",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42771",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42620",
+			"grade": 0
+		},
+		{
+			"ideaId": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"buildId": "dorahacks-buidl-42650",
+			"grade": 0
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-25271",
+			"grade": 2
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-25251",
+			"grade": 2
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42653",
+			"grade": 2
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-29614",
+			"grade": 2
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42803",
+			"grade": 2
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-24850",
+			"grade": 2
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42453",
+			"grade": 2
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42819",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42801",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42780",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42764",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-30677",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42579",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42662",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-27171",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42683",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42825",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42566",
+			"grade": 1
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 0
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42807",
+			"grade": 0
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-32593",
+			"grade": 0
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-46481",
+			"grade": 0
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42788",
+			"grade": 0
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42449",
+			"grade": 0
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42087",
+			"grade": 0
+		},
+		{
+			"ideaId": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"buildId": "dorahacks-buidl-42574",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-32618",
+			"grade": 1
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-30284",
+			"grade": 1
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-30703",
+			"grade": 1
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-30701",
+			"grade": 1
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-27427",
+			"grade": 1
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-42286",
+			"grade": 1
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-30629",
+			"grade": 1
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-30457",
+			"grade": 1
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-42387",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-39945",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-42381",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-40203",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-36214",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-32653",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-46454",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-42614",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-42579",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-27456",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-41492",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-42730",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-42770",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-46393",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-46485",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-46382",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-46377",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-42406",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-42499",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-46098",
+			"grade": 0
+		},
+		{
+			"ideaId": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"buildId": "dorahacks-buidl-36196",
+			"grade": 0
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-46393",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-46162",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-42669",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-46382",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-40203",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-41505",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-36214",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-46235",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-46257",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-30877",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-35594",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-36687",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-24575",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-45988",
+			"grade": 1
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-46453",
+			"grade": 0
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-33711",
+			"grade": 0
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-46509",
+			"grade": 0
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-33766",
+			"grade": 0
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-27456",
+			"grade": 0
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-30701",
+			"grade": 0
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-24804",
+			"grade": 0
+		},
+		{
+			"ideaId": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"buildId": "dorahacks-buidl-28397",
+			"grade": 0
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-46214",
+			"grade": 2
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-35590",
+			"grade": 2
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-42752",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-36778",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-41515",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-46333",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-39224",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-46234",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-42796",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-45883",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-36317",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-36748",
+			"grade": 1
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 0
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-42684",
+			"grade": 0
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-42807",
+			"grade": 0
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-41522",
+			"grade": 0
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-31161",
+			"grade": 0
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-46474",
+			"grade": 0
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-46206",
+			"grade": 0
+		},
+		{
+			"ideaId": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"buildId": "dorahacks-buidl-41513",
+			"grade": 0
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-36222",
+			"grade": 2
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-36334",
+			"grade": 2
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-31466",
+			"grade": 2
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-36315",
+			"grade": 2
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-31775",
+			"grade": 1
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-36343",
+			"grade": 1
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-36159",
+			"grade": 1
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-39622",
+			"grade": 1
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-39826",
+			"grade": 1
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-32677",
+			"grade": 1
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-32481",
+			"grade": 1
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-36217",
+			"grade": 1
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-46062",
+			"grade": 0
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-28437",
+			"grade": 0
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-36796",
+			"grade": 0
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-36318",
+			"grade": 0
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-46154",
+			"grade": 0
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-39419",
+			"grade": 0
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-36272",
+			"grade": 0
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-46385",
+			"grade": 0
+		},
+		{
+			"ideaId": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"buildId": "dorahacks-buidl-25331",
+			"grade": 0
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39808",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39809",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39902",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39894",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39897",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39834",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39912",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39828",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39840",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39861",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39830",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39867",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39905",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39875",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39832",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39911",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39671",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39831",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39853",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39790",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39825",
+			"grade": 2
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39754",
+			"grade": 1
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39622",
+			"grade": 1
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39628",
+			"grade": 1
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39786",
+			"grade": 1
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39863",
+			"grade": 1
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-39770",
+			"grade": 0
+		},
+		{
+			"ideaId": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"buildId": "dorahacks-buidl-46110",
+			"grade": 0
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46373",
+			"grade": 2
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46377",
+			"grade": 2
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-36782",
+			"grade": 2
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46457",
+			"grade": 2
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46073",
+			"grade": 2
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46510",
+			"grade": 2
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46126",
+			"grade": 2
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-45931",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-27412",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-25160",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46405",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-45855",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46079",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46119",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46488",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-45517",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-40156",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46425",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46271",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-28433",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46349",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-36310",
+			"grade": 1
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46450",
+			"grade": 0
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46231",
+			"grade": 0
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-36777",
+			"grade": 0
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46163",
+			"grade": 0
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-45591",
+			"grade": 0
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-25231",
+			"grade": 0
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-41524",
+			"grade": 0
+		},
+		{
+			"ideaId": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"buildId": "dorahacks-buidl-46447",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-30962",
+			"grade": 2
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-41511",
+			"grade": 2
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-46320",
+			"grade": 1
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-34078",
+			"grade": 1
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-41521",
+			"grade": 1
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-38106",
+			"grade": 1
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-42159",
+			"grade": 1
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-35524",
+			"grade": 1
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-34197",
+			"grade": 1
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-40159",
+			"grade": 1
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-30959",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-37998",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-32700",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-46070",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-29550",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-34215",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-35590",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-39622",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-46060",
+			"grade": 0
+		},
+		{
+			"ideaId": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"buildId": "dorahacks-buidl-35610",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-40205",
+			"grade": 2
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-46062",
+			"grade": 1
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-36272",
+			"grade": 1
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-41507",
+			"grade": 1
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-35628",
+			"grade": 1
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-36253",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-42658",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-28437",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-36796",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-42159",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-46285",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-46190",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-46154",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-25325",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-39419",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-42796",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-42577",
+			"grade": 0
+		},
+		{
+			"ideaId": "i31",
+			"idea": "loyalty points issued as tokens",
+			"buildId": "dorahacks-buidl-46385",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-24827",
+			"grade": 1
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-46444",
+			"grade": 1
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-35628",
+			"grade": 1
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-46522",
+			"grade": 1
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-14609",
+			"grade": 1
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-46535",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-31794",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-25334",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-36318",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-42807",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-38216",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-46474",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-42579",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-36289",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-42624",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-36219",
+			"grade": 0
+		},
+		{
+			"ideaId": "i32",
+			"idea": "airdrop and token distribution tool",
+			"buildId": "dorahacks-buidl-27427",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-42669",
+			"grade": 2
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-36270",
+			"grade": 2
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-42701",
+			"grade": 1
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-42724",
+			"grade": 1
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-46174",
+			"grade": 1
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-42723",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-42776",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-46371",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-32591",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-24804",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-42807",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-24548",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-36275",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-46474",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-38108",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-38072",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-36325",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-36316",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-30913",
+			"grade": 0
+		},
+		{
+			"ideaId": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"buildId": "dorahacks-buidl-37932",
+			"grade": 0
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-27454",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-36274",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-27230",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-46498",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-36293",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-45988",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-46321",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-46421",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-46350",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-36062",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-36797",
+			"grade": 1
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-46504",
+			"grade": 0
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-46476",
+			"grade": 0
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-38007",
+			"grade": 0
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-28397",
+			"grade": 0
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-42767",
+			"grade": 0
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-46130",
+			"grade": 0
+		},
+		{
+			"ideaId": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"buildId": "dorahacks-buidl-46089",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-42159",
+			"grade": 1
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-46376",
+			"grade": 1
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-45392",
+			"grade": 1
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-35591",
+			"grade": 1
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-46062",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-34078",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-46444",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-46248",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-46442",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-31779",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-38216",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-30688",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-36739",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-32661",
+			"grade": 0
+		},
+		{
+			"ideaId": "i35",
+			"idea": "tokenized gold or commodities",
+			"buildId": "dorahacks-buidl-10366",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46248",
+			"grade": 1
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46442",
+			"grade": 1
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46376",
+			"grade": 1
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-27456",
+			"grade": 1
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-45392",
+			"grade": 1
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-36340",
+			"grade": 1
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-36739",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46062",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46544",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46444",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46300",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46405",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46204",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-30848",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-34110",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46297",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-42412",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-35624",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-35587",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-35613",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46411",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46098",
+			"grade": 0
+		},
+		{
+			"ideaId": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"buildId": "dorahacks-buidl-46208",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-46544",
+			"grade": 2
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-46300",
+			"grade": 2
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-46098",
+			"grade": 2
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-40203",
+			"grade": 1
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-38049",
+			"grade": 1
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-42611",
+			"grade": 1
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-45930",
+			"grade": 1
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-32404",
+			"grade": 1
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-42647",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-39870",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-45901",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-46426",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-42507",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-42693",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-46541",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-46342",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-42699",
+			"grade": 0
+		},
+		{
+			"ideaId": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"buildId": "dorahacks-buidl-46188",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-30700",
+			"grade": 1
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-32671",
+			"grade": 1
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-42653",
+			"grade": 1
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-32665",
+			"grade": 1
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-27460",
+			"grade": 1
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-27337",
+			"grade": 1
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-25251",
+			"grade": 1
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-27002",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-45260",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-46493",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-22506",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-37970",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-46402",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-32681",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-39848",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-27582",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-39622",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-46110",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-46229",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-32700",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-30337",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-24839",
+			"grade": 0
+		},
+		{
+			"ideaId": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"buildId": "dorahacks-buidl-42401",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 1
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-46455",
+			"grade": 1
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-41339",
+			"grade": 1
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-46564",
+			"grade": 1
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-41508",
+			"grade": 1
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-46041",
+			"grade": 1
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-46174",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-42664",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-42779",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-42807",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-36317",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-41513",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-38216",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-42488",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-46474",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-42579",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-36327",
+			"grade": 0
+		},
+		{
+			"ideaId": "i39",
+			"idea": "streaming salary payments by the second",
+			"buildId": "dorahacks-buidl-24796",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-46308",
+			"grade": 2
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-36251",
+			"grade": 2
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-25330",
+			"grade": 2
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-24807",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-25334",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-25338",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-36309",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-46566",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-27390",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-36308",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-42523",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-30688",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-36312",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-40073",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-36338",
+			"grade": 1
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-27438",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-46529",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-25337",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-46466",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-36739",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-46482",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-30874",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-36197",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-30968",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-42393",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-36275",
+			"grade": 0
+		},
+		{
+			"ideaId": "i40",
+			"idea": "tipping and payments for content creators",
+			"buildId": "dorahacks-buidl-22963",
+			"grade": 0
+		}
+	]
+}

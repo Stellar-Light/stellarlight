@@ -1,0 +1,297 @@
+improvements/audits/2026-10-22-prior-art-precision/windows-40.json: api 1.9.91 -> 1.9.91; corpus 1344; 27 ideas
+
+[working] current: ideas 27, listed 123 (g2 45, g1 61, g0 17, unlabeled 0), wrong share 13.8%, ideas with a wrong build 13, empty 0
+   wrong: i01 Delibera (similarity+two words+every word in own text)
+   wrong: i02 DeFi Quest - From Zero to DeFi in Minutes (similarity)
+   wrong: i04 QR Mint (similarity)
+   wrong: i08 AgroFactoring (similarity)
+   wrong: i11 Stellar Automations Studio (similarity)
+   wrong: i16 StellarAgent (similarity+two words)
+   wrong: i16 AgentCompute (similarity+two words)
+   wrong: i19 ImpactPools (similarity)
+   wrong: i22 Stellar Agent marketplace (similarity+two words)
+   wrong: i25 Pacto (similarity)
+   wrong: i32 Dropsland (similarity)
+   wrong: i35 MemeEco: Greedy World (similarity)
+   wrong: i38 Crimate Crisis Dashboard (similarity)
+   wrong: i38 Stellarealize (similarity)
+   wrong: i38 Kale-Pulse (similarity)
+   wrong: i38 StellarPay (similarity)
+   wrong: i40 TikCoin (similarity+two words)
+
+[working] A cov>=0.5: ideas 27, listed 123 (g2 45, g1 61, g0 17, unlabeled 0), wrong share 13.8%, ideas with a wrong build 13, empty 0
+
+[working] B cov>=0.5+rare: ideas 27, listed 123 (g2 45, g1 61, g0 17, unlabeled 0), wrong share 13.8%, ideas with a wrong build 13, empty 0
+
+[working] C own2: ideas 27, listed 123 (g2 45, g1 61, g0 17, unlabeled 0), wrong share 13.8%, ideas with a wrong build 13, empty 0
+
+[working] D typed2: ideas 27, listed 123 (g2 45, g1 61, g0 17, unlabeled 0), wrong share 13.8%, ideas with a wrong build 13, empty 0
+
+[working] E own2 cov>=0.5: ideas 27, listed 123 (g2 45, g1 61, g0 17, unlabeled 0), wrong share 13.8%, ideas with a wrong build 13, empty 0
+
+[working] M meaning-only>=0.72: ideas 27, listed 111 (g2 43, g1 55, g0 13, unlabeled 0), wrong share 11.7%, ideas with a wrong build 9, empty 3
+   lost: i05 Orion g=1
+   lost: i05 Stellar Bits g=1
+   lost: i08 AgroFactoring g=0
+   lost: i17 CBRprotocolo g=2
+   lost: i19 Be A Stellar g=1
+   lost: i19 ImpactPools g=0
+   lost: i19 Hive g=1
+   lost: i19 Trustless Work g=1
+   lost: i31 Loyal Local g=2
+   lost: i32 Dropsland g=0
+   lost: i35 MemeEco: Greedy World g=0
+   lost: i37 Stratum g=1
+
+[working] M meaning-only>=0.73: ideas 27, listed 100 (g2 42, g1 48, g0 10, unlabeled 0), wrong share 10.0%, ideas with a wrong build 7, empty 3
+   lost: i02 Stelakey g=1
+   lost: i02 Accesly g=1
+   lost: i04 QR Mint g=0
+   lost: i04 PropertyRescue g=1
+   lost: i05 Neko Protocol g=1
+   lost: i05 Orion g=1
+   lost: i05 Stellar Bits g=1
+   lost: i08 AgroFactoring g=0
+   lost: i17 Mammon App g=1
+   lost: i17 Pollar g=1
+   lost: i17 CBRprotocolo g=2
+   lost: i19 Be A Stellar g=1
+   lost: i19 ImpactPools g=0
+   lost: i19 Hive g=1
+   lost: i19 Trustless Work g=1
+   lost: i25 Pacto g=0
+   lost: i25 Vaquita v2 g=1
+   lost: i31 Loyal Local g=2
+   lost: i32 Dropsland g=0
+   lost: i35 MemeEco: Greedy World g=0
+   lost: i37 Nexus - Fully Private And Non-Custodial Multisig g=2
+   lost: i37 Stratum g=1
+   lost: i38 Crimate Crisis Dashboard g=0
+
+[working] M meaning-only>=0.735: ideas 27, listed 96 (g2 41, g1 47, g0 8, unlabeled 0), wrong share 8.3%, ideas with a wrong build 5, empty 3
+   lost: i02 DeFi Quest - From Zero to DeFi in Minutes g=0
+   lost: i02 Stelakey g=1
+   lost: i02 Accesly g=1
+   lost: i04 QR Mint g=0
+   lost: i04 PropertyRescue g=1
+   lost: i05 Neko Protocol g=1
+   lost: i05 Orion g=1
+   lost: i05 Stellar Bits g=1
+   lost: i08 AgroFactoring g=0
+   lost: i11 Stellar Automations Studio g=0
+   lost: i17 PeerPesa g=1
+   lost: i17 Mammon App g=1
+   lost: i17 Pollar g=1
+   lost: i17 CBRprotocolo g=2
+   lost: i19 Be A Stellar g=1
+   lost: i19 ImpactPools g=0
+   lost: i19 Hive g=1
+   lost: i19 Trustless Work g=1
+   lost: i25 Pacto g=0
+   lost: i25 Vaquita v2 g=1
+   lost: i31 Loyal Local g=2
+   lost: i32 Dropsland g=0
+   lost: i35 MemeEco: Greedy World g=0
+   lost: i37 Nexus - Fully Private And Non-Custodial Multisig g=2
+   lost: i37 Stellar Vault g=2
+   lost: i37 Stratum g=1
+   lost: i38 Crimate Crisis Dashboard g=0
+
+[working] M meaning-only>=0.74: ideas 27, listed 92 (g2 41, g1 44, g0 7, unlabeled 0), wrong share 7.6%, ideas with a wrong build 5, empty 4
+   lost: i02 DeFi Quest - From Zero to DeFi in Minutes g=0
+   lost: i02 Stelakey g=1
+   lost: i02 Accesly g=1
+   lost: i04 PropChain g=1
+   lost: i04 QR Mint g=0
+   lost: i04 PropertyRescue g=1
+   lost: i05 Neko Protocol g=1
+   lost: i05 Orion g=1
+   lost: i05 Stellar Bits g=1
+   lost: i08 AgroFactoring g=0
+   lost: i11 Stellar Automations Studio g=0
+   lost: i17 PeerPesa g=1
+   lost: i17 Mammon App g=1
+   lost: i17 Pollar g=1
+   lost: i17 CBRprotocolo g=2
+   lost: i19 Pact g=1
+   lost: i19 Be A Stellar g=1
+   lost: i19 ImpactPools g=0
+   lost: i19 Hive g=1
+   lost: i19 Trustless Work g=1
+   lost: i25 Pacto g=0
+   lost: i25 Vaquita v2 g=1
+   lost: i26 Secureflow g=1
+   lost: i31 Loyal Local g=2
+   lost: i32 Dropsland g=0
+   lost: i35 MemeEco: Greedy World g=0
+   lost: i37 Nexus - Fully Private And Non-Custodial Multisig g=2
+   lost: i37 Stellar Vault g=2
+   lost: i37 Stratum g=1
+   lost: i38 Crimate Crisis Dashboard g=0
+   lost: i38 StellarPay g=0
+
+[working] M meaning-only>=0.745: ideas 27, listed 89 (g2 40, g1 44, g0 5, unlabeled 0), wrong share 5.6%, ideas with a wrong build 4, empty 4
+   lost: i02 DeFi Quest - From Zero to DeFi in Minutes g=0
+   lost: i02 Stelakey g=1
+   lost: i02 Accesly g=1
+   lost: i04 PropChain g=1
+   lost: i04 QR Mint g=0
+   lost: i04 PropertyRescue g=1
+   lost: i05 Neko Protocol g=1
+   lost: i05 Orion g=1
+   lost: i05 Stellar Bits g=1
+   lost: i08 AgroFactoring g=0
+   lost: i11 PULSO Tanda g=2
+   lost: i11 Stellar Automations Studio g=0
+   lost: i17 PeerPesa g=1
+   lost: i17 Mammon App g=1
+   lost: i17 Pollar g=1
+   lost: i17 CBRprotocolo g=2
+   lost: i19 Pact g=1
+   lost: i19 Be A Stellar g=1
+   lost: i19 ImpactPools g=0
+   lost: i19 Hive g=1
+   lost: i19 Trustless Work g=1
+   lost: i25 Pacto g=0
+   lost: i25 Vaquita v2 g=1
+   lost: i26 Secureflow g=1
+   lost: i31 Loyal Local g=2
+   lost: i32 Dropsland g=0
+   lost: i35 MemeEco: Greedy World g=0
+   lost: i37 Nexus - Fully Private And Non-Custodial Multisig g=2
+   lost: i37 Stellar Vault g=2
+   lost: i37 Stratum g=1
+   lost: i38 Crimate Crisis Dashboard g=0
+   lost: i38 Stellarealize g=0
+   lost: i38 Kale-Pulse g=0
+   lost: i38 StellarPay g=0
+
+[working] M meaning-only>=0.75: ideas 27, listed 87 (g2 40, g1 42, g0 5, unlabeled 0), wrong share 5.7%, ideas with a wrong build 4, empty 4
+   lost: i02 Passkey-Kit integration g=1
+   lost: i02 DeFi Quest - From Zero to DeFi in Minutes g=0
+   lost: i02 Stelakey g=1
+   lost: i02 Accesly g=1
+   lost: i04 PropChain g=1
+   lost: i04 QR Mint g=0
+   lost: i04 PropertyRescue g=1
+   lost: i05 Neko Protocol g=1
+   lost: i05 Orion g=1
+   lost: i05 Stellar Bits g=1
+   lost: i08 AgroFactoring g=0
+   lost: i10 TicketReal g=1
+   lost: i11 PULSO Tanda g=2
+   lost: i11 Stellar Automations Studio g=0
+   lost: i17 PeerPesa g=1
+   lost: i17 Mammon App g=1
+   lost: i17 Pollar g=1
+   lost: i17 CBRprotocolo g=2
+   lost: i19 Pact g=1
+   lost: i19 Be A Stellar g=1
+   lost: i19 ImpactPools g=0
+   lost: i19 Hive g=1
+   lost: i19 Trustless Work g=1
+   lost: i25 Pacto g=0
+   lost: i25 Vaquita v2 g=1
+   lost: i26 Secureflow g=1
+   lost: i31 Loyal Local g=2
+   lost: i32 Dropsland g=0
+   lost: i35 MemeEco: Greedy World g=0
+   lost: i37 Nexus - Fully Private And Non-Custodial Multisig g=2
+   lost: i37 Stellar Vault g=2
+   lost: i37 Stratum g=1
+   lost: i38 Crimate Crisis Dashboard g=0
+   lost: i38 Stellarealize g=0
+   lost: i38 Kale-Pulse g=0
+   lost: i38 StellarPay g=0
+
+[working] N no-word>=0.735: ideas 27, listed 98 (g2 42, g1 47, g0 9, unlabeled 0), wrong share 9.2%, ideas with a wrong build 5, empty 3
+   lost: i02 DeFi Quest - From Zero to DeFi in Minutes g=0
+   lost: i02 Stelakey g=1
+   lost: i02 Accesly g=1
+   lost: i04 QR Mint g=0
+   lost: i04 PropertyRescue g=1
+   lost: i05 Neko Protocol g=1
+   lost: i05 Orion g=1
+   lost: i05 Stellar Bits g=1
+   lost: i08 AgroFactoring g=0
+   lost: i11 Stellar Automations Studio g=0
+   lost: i17 PeerPesa g=1
+   lost: i17 Mammon App g=1
+   lost: i17 Pollar g=1
+   lost: i17 CBRprotocolo g=2
+   lost: i19 Be A Stellar g=1
+   lost: i19 ImpactPools g=0
+   lost: i19 Hive g=1
+   lost: i19 Trustless Work g=1
+   lost: i25 Pacto g=0
+   lost: i25 Vaquita v2 g=1
+   lost: i31 Loyal Local g=2
+   lost: i32 Dropsland g=0
+   lost: i35 MemeEco: Greedy World g=0
+   lost: i37 Stellar Vault g=2
+   lost: i37 Stratum g=1
+
+[working] N no-word>=0.74: ideas 27, listed 94 (g2 42, g1 44, g0 8, unlabeled 0), wrong share 8.5%, ideas with a wrong build 5, empty 4
+   lost: i02 DeFi Quest - From Zero to DeFi in Minutes g=0
+   lost: i02 Stelakey g=1
+   lost: i02 Accesly g=1
+   lost: i04 PropChain g=1
+   lost: i04 QR Mint g=0
+   lost: i04 PropertyRescue g=1
+   lost: i05 Neko Protocol g=1
+   lost: i05 Orion g=1
+   lost: i05 Stellar Bits g=1
+   lost: i08 AgroFactoring g=0
+   lost: i11 Stellar Automations Studio g=0
+   lost: i17 PeerPesa g=1
+   lost: i17 Mammon App g=1
+   lost: i17 Pollar g=1
+   lost: i17 CBRprotocolo g=2
+   lost: i19 Pact g=1
+   lost: i19 Be A Stellar g=1
+   lost: i19 ImpactPools g=0
+   lost: i19 Hive g=1
+   lost: i19 Trustless Work g=1
+   lost: i25 Pacto g=0
+   lost: i25 Vaquita v2 g=1
+   lost: i26 Secureflow g=1
+   lost: i31 Loyal Local g=2
+   lost: i32 Dropsland g=0
+   lost: i35 MemeEco: Greedy World g=0
+   lost: i37 Stellar Vault g=2
+   lost: i37 Stratum g=1
+   lost: i38 StellarPay g=0
+
+[working] N no-word>=0.745: ideas 27, listed 91 (g2 41, g1 44, g0 6, unlabeled 0), wrong share 6.6%, ideas with a wrong build 5, empty 4
+   lost: i02 DeFi Quest - From Zero to DeFi in Minutes g=0
+   lost: i02 Stelakey g=1
+   lost: i02 Accesly g=1
+   lost: i04 PropChain g=1
+   lost: i04 QR Mint g=0
+   lost: i04 PropertyRescue g=1
+   lost: i05 Neko Protocol g=1
+   lost: i05 Orion g=1
+   lost: i05 Stellar Bits g=1
+   lost: i08 AgroFactoring g=0
+   lost: i11 PULSO Tanda g=2
+   lost: i11 Stellar Automations Studio g=0
+   lost: i17 PeerPesa g=1
+   lost: i17 Mammon App g=1
+   lost: i17 Pollar g=1
+   lost: i17 CBRprotocolo g=2
+   lost: i19 Pact g=1
+   lost: i19 Be A Stellar g=1
+   lost: i19 ImpactPools g=0
+   lost: i19 Hive g=1
+   lost: i19 Trustless Work g=1
+   lost: i25 Pacto g=0
+   lost: i25 Vaquita v2 g=1
+   lost: i26 Secureflow g=1
+   lost: i31 Loyal Local g=2
+   lost: i32 Dropsland g=0
+   lost: i35 MemeEco: Greedy World g=0
+   lost: i37 Stellar Vault g=2
+   lost: i37 Stratum g=1
+   lost: i38 Stellarealize g=0
+   lost: i38 Kale-Pulse g=0
+   lost: i38 StellarPay g=0

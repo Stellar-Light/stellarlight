@@ -1,0 +1,186 @@
+
+i01 [working] AI agent that pays for API calls with USDC using x402  words: ai(df 262, w 1.63) agent(df 258, w 1.65) pays(df 132, w 2.31) api(df 67, w 2.98) calls(df 58, w 3.13) usdc(df 97, w 2.62) x402(df 133, w 2.31)
+  LIST g=2 SMT sim=0.821 cov=1.00 own=1.00 typed=1.00 [ai,agent^,pays,api,calls,usdc,x402] StellarAgent
+  LIST g=2 SM  sim=0.814 cov=0.90 own=0.90 typed=0.90 [agent^,pays,api,calls,usdc,x402] AgentPay
+  LIST g=1 SM  sim=0.785 cov=0.68 own=0.68 typed=0.68 [ai,agent,pays,calls,usdc] W TollPay
+  LIST g=2 SM  sim=0.816 cov=0.81 own=0.81 typed=0.81 [ai^,agent^,pays,api,usdc,x402^] Stellar Agent Gateway - x402 Micropayment Marketplace for AI
+  LIST g=0 SMT sim=0.788 cov=1.00 own=1.00 typed=1.00 [ai,agent,pays,api,calls,usdc,x402] Delibera
+
+i02 [working] passkey smart wallet so users never handle a seed phrase  words: passkey(df 4, w 5.59) smart(df 86, w 2.74) wallet(df 73, w 2.90) so(df 43, w 3.42) users(df 127, w 2.35) never(df 16, w 4.37) handle(df 10, w 4.81) seed(df 2, w 6.11) phrase(df 1, w 6.51)
+  LIST g=2 S   sim=0.764 cov=0.00 own=0.00 typed=0.00 [] Veil
+  LIST g=1 S   sim=0.747 cov=0.14 own=0.14 typed=0.14 [passkey^] Passkey-Kit integration
+  LIST g=0 S   sim=0.730 cov=0.00 own=0.00 typed=0.00 [] W DeFi Quest - From Zero to DeFi in Minutes
+  LIST g=1 S   sim=0.727 cov=0.00 own=0.00 typed=0.00 [] Stelakey
+  LIST g=1 S   sim=0.722 cov=0.00 own=0.00 typed=0.00 [] Accesly
+
+i04 [working] tokenized real estate with fractional ownership  words: tokenized(df 11, w 4.72) real(df 192, w 1.94) estate(df 4, w 5.59) fractional(df 1, w 6.51) ownership(df 10, w 4.81)
+  LIST g=2 SM  sim=0.732 cov=0.52 own=0.52 typed=0.52 [real,estate,ownership] BLOCKI
+  LIST g=1 SM  sim=0.719 cov=0.32 own=0.32 typed=0.32 [real^,estate^] Real Estate Pool
+  LIST g=1 S   sim=0.736 cov=0.00 own=0.00 typed=0.00 [] PropChain
+  LIST g=0 S   sim=0.727 cov=0.00 own=0.00 typed=0.00 [] QR Mint
+  LIST g=1 S   sim=0.720 cov=0.00 own=0.00 typed=0.00 [] PropertyRescue
+
+i05 [working] borrow stablecoins against crypto collateral  words: borrow(df 14, w 4.50) stablecoins(df 27, w 3.87) against(df 6, w 5.26) collateral(df 13, w 4.57)
+  LIST g=1 SM  sim=0.716 cov=0.50 own=0.50 typed=0.50 [borrow,collateral] Steal-App
+  LIST g=2 SM  sim=0.709 cov=0.50 own=0.50 typed=0.50 [borrow,collateral] Kale Deal Done
+  LIST g=1 S   sim=0.720 cov=0.00 own=0.00 typed=0.00 [] Neko Protocol
+  LIST g=1 S   sim=0.718 cov=0.00 own=0.00 typed=0.00 [] Orion
+  LIST g=1 S   sim=0.717 cov=0.00 own=0.00 typed=0.00 [] Stellar Bits
+
+i07 [working] stablecoin payroll for freelancers and contractors  words: stablecoin(df 123, w 2.38) payroll(df 23, w 4.03) freelancers(df 15, w 4.43) contractors(df 1, w 6.51)
+  LIST g=1 SM  sim=0.780 cov=0.39 own=0.39 typed=0.26 [stablecoin,freelancers] WorkOn
+  LIST g=1 S   sim=0.779 cov=0.00 own=0.00 typed=0.00 [] W Streamr
+  LIST g=1 SM  sim=0.758 cov=0.39 own=0.39 typed=0.26 [stablecoin,freelancers] GigPay
+  LIST g=1 S   sim=0.774 cov=0.23 own=0.23 typed=0.23 [payroll^] StealthPayroll
+  LIST g=2 SM  sim=0.758 cov=0.37 own=0.37 typed=0.23 [stablecoin,payroll] ShieldPay
+
+i08 [working] parametric insurance paid out automatically by an oracle  words: parametric(df 1, w 6.51) insurance(df 8, w 5.01) paid(df 40, w 3.49) out(df 22, w 4.07) automatically(df 12, w 4.64) oracle(df 22, w 4.07)
+  LIST g=1 SM  sim=0.764 cov=0.71 own=0.71 typed=0.71 [parametric,insurance^,out^,oracle] LumenSure - Private Proof-Backed Insurance Payouts on Stella
+  LIST g=2 S   sim=0.768 cov=0.00 own=0.00 typed=0.00 [] ClaimProof
+  LIST g=1 SM  sim=0.739 cov=0.33 own=0.33 typed=0.33 [insurance^,out] FireBastion - Decentralized Fire Damage Insurance for Homes
+  LIST g=1 S   sim=0.763 cov=0.00 own=0.00 typed=0.00 [] Alusa
+  LIST g=0 S   sim=0.713 cov=0.00 own=0.00 typed=0.00 [] AgroFactoring
+
+i10 [working] NFT event ticketing with resale royalties  words: nft(df 35, w 3.62) event(df 38, w 3.54) ticketing(df 3, w 5.82) resale(df 0, w 7.20) royalties(df 1, w 6.51)
+  LIST g=1 SM  sim=0.769 cov=0.27 own=0.27 typed=0.13 [nft^,event] Mint Up
+  LIST g=1 SM  sim=0.742 cov=0.49 own=0.49 typed=0.49 [nft,event,ticketing] KaizenX
+  LIST g=1 S   sim=0.749 cov=0.00 own=0.00 typed=0.00 [] W TicketReal
+  LIST g=1 S   sim=0.763 cov=0.00 own=0.00 typed=0.00 [] ZK-Tix
+  LIST g=1 S   sim=0.756 cov=0.00 own=0.00 typed=0.00 [] Twin Ticket
+
+i11 [working] savings circle (ROSCA, tanda) with automatic payouts  words: savings(df 12, w 4.64) circle(df 7, w 5.12) (rosca,(df 0, w 7.20) tanda)(df 0, w 7.20) automatic(df 19, w 4.21) payouts(df 18, w 4.26)
+  LIST g=2 SM  sim=0.765 cov=0.43 own=0.43 typed=0.43 [savings,circle,payouts] Sharibo
+  LIST g=2 S   sim=0.757 cov=0.00 own=0.00 typed=0.00 [] Pasanaku Global
+  LIST g=2 S   sim=0.754 cov=0.00 own=0.00 typed=0.00 [] Confianza Colectiva: Securing Dreams with Stellar & Soroban 
+  LIST g=2 S   sim=0.743 cov=0.00 own=0.00 typed=0.00 [] PULSO Tanda
+  LIST g=0 S   sim=0.733 cov=0.00 own=0.00 typed=0.00 [] Stellar Automations Studio
+
+i13 [working] prediction market on Soroban  words: prediction(df 17, w 4.31) market(df 92, w 2.67) soroban(df 198, w 1.91)
+  LIST g=2 SM  sim=0.720 cov=0.79 own=0.79 typed=0.79 [prediction,market] Molfi
+  LIST g=1 M   sim=0.688 cov=1.00 own=1.00 typed=0.79 [prediction,market,soroban] W Reflector TradeBet
+  LIST g=2 M   sim=0.697 cov=1.00 own=1.00 typed=0.79 [prediction,market,soroban] SpectraBet
+  LIST g=2 SM  sim=0.704 cov=0.79 own=0.79 typed=0.79 [prediction,market^] Move Markets
+  LIST g=2 M   sim=0.697 cov=0.79 own=0.79 typed=0.79 [prediction^,market^] KALE-ndar: A Prediction Market for Real-World Events
+
+i14 [working] zero-knowledge proof of income without revealing salary  words: proof(df 229, w 1.77) income(df 10, w 4.81) without(df 157, w 2.14) revealing(df 73, w 2.90) salary(df 12, w 4.64) zero-knowledge(df 144, w 2.23)
+  LIST g=1 SM  sim=0.825 cov=0.74 own=0.74 typed=0.74 [proof,without,revealing,salary,zero-knowledge] ZeroWage
+  LIST g=1 SM  sim=0.809 cov=0.74 own=0.74 typed=0.74 [proof,without,revealing,salary,zero-knowledge] MeritPay
+  LIST g=2 SM  sim=0.787 cov=0.75 own=0.75 typed=0.75 [proof,income,without,revealing,zero-knowledge] zkTrustline
+  LIST g=2 SM  sim=0.778 cov=0.75 own=0.75 typed=0.75 [proof,income,without,revealing,zero-knowledge] Nullpass
+  LIST g=1 SM  sim=0.817 cov=0.47 own=0.47 typed=0.47 [proof,salary,zero-knowledge] Cloakpay
+
+i16 [working] subscription billing with recurring stablecoin payments  words: subscription(df 32, w 3.71) billing(df 3, w 5.82) recurring(df 4, w 5.59) stablecoin(df 123, w 2.38) payments(df 270, w 1.60)
+  LIST g=2 SM  sim=0.773 cov=0.70 own=0.70 typed=0.70 [subscription,recurring,stablecoin,payments] W Streamr
+  LIST g=1 SM  sim=0.743 cov=0.28 own=0.28 typed=0.28 [subscription^,payments^] FixedRateX Tagline: A Stellar-powered payment gateway for cr
+  LIST g=0 SM  sim=0.731 cov=0.40 own=0.40 typed=0.28 [subscription,stablecoin,payments] StellarAgent
+  LIST g=0 SM  sim=0.720 cov=0.51 own=0.51 typed=0.39 [billing,stablecoin,payments] AgentCompute
+  LIST g=1 SM  sim=0.741 cov=0.28 own=0.28 typed=0.28 [subscription,payments^] Stellar Payment API (PLUTO)
+
+i17 [working] fiat on-ramp and off-ramp for a local currency  words: fiat(df 9, w 4.90) local(df 45, w 3.38) currency(df 8, w 5.01) on-ramp(df 0, w 7.20) off-ramp(df 5, w 5.41)
+  LIST g=2 S   sim=0.759 cov=0.00 own=0.00 typed=0.00 [] x402-Ramp
+  LIST g=1 S   sim=0.732 cov=0.00 own=0.00 typed=0.00 [] PeerPesa
+  LIST g=1 S   sim=0.726 cov=0.00 own=0.00 typed=0.00 [] Mammon App
+  LIST g=1 S   sim=0.722 cov=0.00 own=0.00 typed=0.00 [] Pollar
+  LIST g=2 S   sim=0.710 cov=0.00 own=0.00 typed=0.00 [] CBRprotocolo
+
+i19 [working] crowdfunding with milestone-based payouts  words: crowdfunding(df 5, w 5.41) payouts(df 18, w 4.26) milestone-based(df 1, w 6.51)
+  LIST g=1 S   sim=0.736 cov=0.00 own=0.00 typed=0.00 [] Pact
+  LIST g=1 S   sim=0.709 cov=0.00 own=0.00 typed=0.00 [] Be A Stellar
+  LIST g=0 S   sim=0.708 cov=0.00 own=0.00 typed=0.00 [] ImpactPools
+  LIST g=1 S   sim=0.702 cov=0.00 own=0.00 typed=0.00 [] W Hive
+  LIST g=1 S   sim=0.704 cov=0.00 own=0.00 typed=0.00 [] Trustless Work
+
+i20 [working] transparent donation platform for charities  words: transparent(df 83, w 2.77) donation(df 8, w 5.01) charities(df 0, w 7.20)
+  LIST g=2 SM  sim=0.787 cov=0.52 own=0.52 typed=0.52 [transparent,donation^] Donation Management
+  LIST g=2 SM  sim=0.749 cov=0.52 own=0.52 typed=0.52 [transparent,donation] DonarIA
+  LIST g=2 S   sim=0.781 cov=0.00 own=0.00 typed=0.00 [] GiveChain
+  LIST g=2 S   sim=0.765 cov=0.00 own=0.00 typed=0.00 [] Stellar Donate-Safe
+  LIST g=2 S   sim=0.759 cov=0.00 own=0.00 typed=0.00 [] Trace
+
+i22 [working] AI shopping agent that pays merchants on behalf of the user  words: ai(df 262, w 1.63) shopping(df 1, w 6.51) agent(df 258, w 1.65) pays(df 132, w 2.31) merchants(df 7, w 5.12) behalf(df 1, w 6.51) user(df 127, w 2.35)
+  LIST g=0 SM  sim=0.767 cov=0.22 own=0.22 typed=0.22 [ai,agent^,user] Stellar Agent marketplace
+  LIST g=1 SM  sim=0.763 cov=0.21 own=0.21 typed=0.21 [ai,agent^,pays] AgentRail
+  LIST g=1 S   sim=0.781 cov=0.00 own=0.00 typed=0.00 [] Ai2wallet
+  LIST g=1 S   sim=0.773 cov=0.06 own=0.06 typed=0.06 [agent^] M.I.A. Make it Agentic
+  LIST g=1 SM  sim=0.737 cov=0.41 own=0.41 typed=0.41 [ai,agent,pays,merchants] Stellar Payment API (PLUTO)
+
+i23 [working] MCP server that lets AI agents use Stellar  words: mcp(df 19, w 4.21) server(df 23, w 4.03) lets(df 88, w 2.72) ai(df 262, w 1.63) agents(df 258, w 1.65)
+  LIST g=2 SM  sim=0.805 cov=0.81 own=0.81 typed=0.81 [mcp^,server^,ai,agents] W Soroban to MCP Server in seconds + Policy Signers Playground
+  LIST g=1 SM  sim=0.744 cov=0.81 own=0.81 typed=0.81 [mcp,server,ai,agents] W TollPay
+  LIST g=2 SM  sim=0.791 cov=0.69 own=0.69 typed=0.69 [mcp^,server,agents] x402 Stellar MCP
+  LIST g=2 SM  sim=0.759 cov=0.81 own=0.81 typed=0.81 [mcp,server,ai,agents] StellarScope
+  LIST g=1 SM  sim=0.764 cov=0.72 own=0.72 typed=0.72 [mcp^,lets,ai,agents] solva-mcp
+
+i25 [working] stablecoin savings app that earns yield  words: stablecoin(df 123, w 2.38) savings(df 12, w 4.64) earns(df 68, w 2.97) yield(df 31, w 3.74)
+  LIST g=1 SM  sim=0.712 cov=0.49 own=0.49 typed=0.49 [earns,yield] Vyn
+  LIST g=0 S   sim=0.723 cov=0.00 own=0.00 typed=0.00 [] W Pacto
+  LIST g=1 SM  sim=0.708 cov=0.51 own=0.51 typed=0.34 [stablecoin,savings] Autopilot: AI-Powered Financial Automation on the Stellar Ne
+  LIST g=1 S   sim=0.728 cov=0.00 own=0.00 typed=0.00 [] Vaquita v2
+  LIST g=1 M   sim=0.691 cov=0.66 own=0.66 typed=0.49 [stablecoin,earns,yield] KipuFi
+
+i26 [working] escrow for freelance work with milestone releases  words: escrow(df 34, w 3.65) freelance(df 18, w 4.26) milestone(df 4, w 5.59) releases(df 7, w 5.12)
+  LIST g=2 SM  sim=0.727 cov=0.72 own=0.72 typed=0.53 [escrow,freelance,milestone] FlowLock Protocol
+  LIST g=2 SM  sim=0.724 cov=0.72 own=0.72 typed=0.72 [escrow,freelance,milestone] WorkOn
+  LIST g=1 SM  sim=0.713 cov=0.77 own=0.77 typed=0.77 [escrow,milestone,releases] Pact
+  LIST g=1 SM  sim=0.716 cov=0.70 own=0.70 typed=0.70 [escrow,freelance,releases] GigPay
+  LIST g=1 S   sim=0.739 cov=0.00 own=0.00 typed=0.00 [] W Secureflow
+
+i28 [working] zero-knowledge multiplayer game with hidden information  words: multiplayer(df 8, w 5.01) game(df 80, w 2.81) hidden(df 44, w 3.40) information(df 23, w 4.03) zero-knowledge(df 144, w 2.23)
+  LIST g=2 SM  sim=0.809 cov=0.71 own=0.71 typed=0.71 [game,hidden,information,zero-knowledge] ZK Scottland Yard
+  LIST g=2 SM  sim=0.808 cov=0.71 own=0.71 typed=0.71 [game,hidden,information,zero-knowledge] zk-UNO
+  LIST g=2 SM  sim=0.816 cov=0.59 own=0.59 typed=0.59 [game,hidden^,information^] Dead Drop: ZK-Powered Hidden-Information Hunt on Stellar
+  LIST g=2 SM  sim=0.794 cov=0.71 own=0.71 typed=0.71 [game,hidden,information,zero-knowledge] Obsidossier
+  LIST g=2 SM  sim=0.812 cov=0.58 own=0.58 typed=0.58 [multiplayer^,game,zero-knowledge] ZeroWar - Trustless Multiplayer Gaming on Stellar
+
+i29 [working] reusable KYC identity credentials across apps  words: reusable(df 6, w 5.26) kyc(df 28, w 3.84) identity(df 117, w 2.43) credentials(df 19, w 4.21)
+  LIST g=2 SM  sim=0.756 cov=0.42 own=0.42 typed=0.42 [identity,credentials] Identizy
+  LIST g=2 SM  sim=0.739 cov=0.49 own=0.49 typed=0.49 [reusable,identity] ZkKYC
+  LIST g=2 SM  sim=0.713 cov=0.73 own=0.73 typed=0.73 [reusable,kyc^,identity^] SAK Stellar Anchor KYC
+  LIST g=1 SM  sim=0.738 cov=0.40 own=0.40 typed=0.40 [kyc,identity] ZKID Stellar
+  LIST g=1 SM  sim=0.716 cov=0.42 own=0.42 typed=0.27 [identity,credentials] StarProof
+
+i31 [working] loyalty points issued as tokens  words: loyalty(df 0, w 7.20) points(df 10, w 4.81) issued(df 0, w 7.20)
+  LIST g=2 S   sim=0.701 cov=0.00 own=0.00 typed=0.00 [] Loyal Local
+       g=0     sim=0.000 cov=0.25 own=0.25 typed=0.25 [points^] Stellar Health Point
+
+i32 [working] airdrop and token distribution tool  words: airdrop(df 1, w 6.51) distribution(df 5, w 5.41)
+  LIST g=0 S   sim=0.709 cov=0.00 own=0.00 typed=0.00 [] Dropsland
+       g=1     sim=0.683 cov=0.55 own=0.55 typed=0.55 [airdrop] TIANKAWARDS
+       g=0     sim=0.000 cov=0.45 own=0.45 typed=0.45 [distribution] Celestium
+       g=0     sim=0.000 cov=0.45 own=0.45 typed=0.45 [distribution] CALCY ( EduChain)
+       g=0     sim=0.000 cov=0.45 own=0.45 typed=0.45 [distribution] Hornero Hub
+
+i34 [working] peer-to-peer lending with on-chain credit scores  words: lending(df 60, w 3.09) credit(df 34, w 3.65) scores(df 14, w 4.50) peer-to-peer(df 4, w 5.59) on-chain(df 238, w 1.73)
+  LIST g=1 SM  sim=0.791 cov=0.70 own=0.70 typed=0.70 [lending^,credit,scores^,on-chain] BlendScore
+  LIST g=1 SM  sim=0.815 cov=0.46 own=0.46 typed=0.29 [lending^,credit,on-chain] Loanet
+  LIST g=1 SM  sim=0.781 cov=0.46 own=0.46 typed=0.46 [lending,credit,on-chain] Riskon
+  LIST g=1 SM  sim=0.760 cov=0.61 own=0.61 typed=0.44 [lending,credit,scores] Steal-App
+  LIST g=1 SM  sim=0.787 cov=0.36 own=0.36 typed=0.20 [lending^,credit] RemitLend
+
+i35 [working] tokenized gold or commodities  words: tokenized(df 11, w 4.72) gold(df 0, w 7.20) commodities(df 0, w 7.20)
+  LIST g=0 S   sim=0.715 cov=0.00 own=0.00 typed=0.00 [] MemeEco: Greedy World
+       g=0     sim=0.693 cov=0.00 own=0.00 typed=0.00 [] fKALE
+       g=1     sim=0.688 cov=0.00 own=0.00 typed=0.00 [] Tokenización de caña y azúcar
+       g=1     sim=0.686 cov=0.00 own=0.00 typed=0.00 [] Mineral Gateway: Agent-Powered Critical Minerals Traceabilit
+       g=0     sim=0.684 cov=0.00 own=0.00 typed=0.00 [] Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based 
+
+i37 [working] multisig wallet for team treasuries  words: multisig(df 4, w 5.59) wallet(df 73, w 2.90) team(df 9, w 4.90) treasuries(df 3, w 5.82)
+  LIST g=2 SM  sim=0.744 cov=0.55 own=0.55 typed=0.55 [multisig,team] Cluster
+  LIST g=2 S   sim=0.723 cov=0.29 own=0.29 typed=0.29 [multisig^] Nexus - Fully Private And Non-Custodial Multisig
+  LIST g=2 S   sim=0.733 cov=0.00 own=0.00 typed=0.00 [] Stellar Vault
+  LIST g=1 SM  sim=0.701 cov=0.44 own=0.44 typed=0.44 [multisig,wallet] Safe.xlm
+  LIST g=1 S   sim=0.711 cov=0.00 own=0.00 typed=0.00 [] W Stratum
+
+i38 [working] on-chain analytics dashboard for Stellar  words: analytics(df 5, w 5.41) dashboard(df 7, w 5.12) on-chain(df 238, w 1.73)
+  LIST g=0 S   sim=0.724 cov=0.42 own=0.42 typed=0.42 [dashboard^] Crimate Crisis Dashboard
+  LIST g=0 S   sim=0.744 cov=0.00 own=0.00 typed=0.00 [] Stellarealize
+  LIST g=0 S   sim=0.742 cov=0.00 own=0.00 typed=0.00 [] Kale-Pulse
+  LIST g=0 S   sim=0.737 cov=0.00 own=0.00 typed=0.00 [] StellarPay
+  LIST g=1 M   sim=0.000 cov=0.86 own=0.86 typed=0.86 [analytics,dashboard] Soroscan
+
+i40 [working] tipping and payments for content creators  words: tipping(df 1, w 6.51) payments(df 270, w 1.60) content(df 18, w 4.26) creators(df 20, w 4.16)
+  LIST g=0 SM  sim=0.720 cov=0.51 own=0.51 typed=0.51 [content,creators] TikCoin
+  LIST g=1 S   sim=0.757 cov=0.00 own=0.00 typed=0.00 [] Stellar-Tipz
+  LIST g=2 S   sim=0.755 cov=0.00 own=0.00 typed=0.00 [] SuperTip
+  LIST g=1 SM  sim=0.714 cov=0.51 own=0.51 typed=0.51 [content,creators] StellarVideos
+  LIST g=2 S   sim=0.750 cov=0.00 own=0.00 typed=0.00 [] Tipchain

@@ -1,0 +1,204 @@
+{
+	"ideas": [
+		{
+			"id": "i01",
+			"idea": "AI agent that pays for API calls with USDC using x402",
+			"slice": "working"
+		},
+		{
+			"id": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"slice": "working"
+		},
+		{
+			"id": "i03",
+			"idea": "cross-border remittance app cashing out through local anchors",
+			"slice": "holdout"
+		},
+		{
+			"id": "i04",
+			"idea": "tokenized real estate with fractional ownership",
+			"slice": "working"
+		},
+		{
+			"id": "i05",
+			"idea": "borrow stablecoins against crypto collateral",
+			"slice": "working"
+		},
+		{
+			"id": "i06",
+			"idea": "DEX aggregator that routes swaps across Stellar AMMs",
+			"slice": "holdout"
+		},
+		{
+			"id": "i07",
+			"idea": "stablecoin payroll for freelancers and contractors",
+			"slice": "working"
+		},
+		{
+			"id": "i08",
+			"idea": "parametric insurance paid out automatically by an oracle",
+			"slice": "working"
+		},
+		{
+			"id": "i09",
+			"idea": "carbon credit marketplace",
+			"slice": "holdout"
+		},
+		{
+			"id": "i10",
+			"idea": "NFT event ticketing with resale royalties",
+			"slice": "working"
+		},
+		{
+			"id": "i11",
+			"idea": "savings circle (ROSCA, tanda) with automatic payouts",
+			"slice": "working"
+		},
+		{
+			"id": "i12",
+			"idea": "merchant QR code payments for small shops",
+			"slice": "holdout"
+		},
+		{
+			"id": "i13",
+			"idea": "prediction market on Soroban",
+			"slice": "working"
+		},
+		{
+			"id": "i14",
+			"idea": "zero-knowledge proof of income without revealing salary",
+			"slice": "working"
+		},
+		{
+			"id": "i15",
+			"idea": "DAO treasury voting on Soroban",
+			"slice": "holdout"
+		},
+		{
+			"id": "i16",
+			"idea": "subscription billing with recurring stablecoin payments",
+			"slice": "working"
+		},
+		{
+			"id": "i17",
+			"idea": "fiat on-ramp and off-ramp for a local currency",
+			"slice": "working"
+		},
+		{
+			"id": "i18",
+			"idea": "invoice financing for small businesses",
+			"slice": "holdout"
+		},
+		{
+			"id": "i19",
+			"idea": "crowdfunding with milestone-based payouts",
+			"slice": "working"
+		},
+		{
+			"id": "i20",
+			"idea": "transparent donation platform for charities",
+			"slice": "working"
+		},
+		{
+			"id": "i21",
+			"idea": "microloans for small businesses in emerging markets",
+			"slice": "holdout"
+		},
+		{
+			"id": "i22",
+			"idea": "AI shopping agent that pays merchants on behalf of the user",
+			"slice": "working"
+		},
+		{
+			"id": "i23",
+			"idea": "MCP server that lets AI agents use Stellar",
+			"slice": "working"
+		},
+		{
+			"id": "i24",
+			"idea": "yield vault that auto-compounds DeFi rewards",
+			"slice": "holdout"
+		},
+		{
+			"id": "i25",
+			"idea": "stablecoin savings app that earns yield",
+			"slice": "working"
+		},
+		{
+			"id": "i26",
+			"idea": "escrow for freelance work with milestone releases",
+			"slice": "working"
+		},
+		{
+			"id": "i27",
+			"idea": "play-to-earn game with on-chain rewards",
+			"slice": "holdout"
+		},
+		{
+			"id": "i28",
+			"idea": "zero-knowledge multiplayer game with hidden information",
+			"slice": "working"
+		},
+		{
+			"id": "i29",
+			"idea": "reusable KYC identity credentials across apps",
+			"slice": "working"
+		},
+		{
+			"id": "i30",
+			"idea": "supply chain traceability for agricultural products",
+			"slice": "holdout"
+		},
+		{
+			"id": "i31",
+			"idea": "loyalty points issued as tokens",
+			"slice": "working"
+		},
+		{
+			"id": "i32",
+			"idea": "airdrop and token distribution tool",
+			"slice": "working"
+		},
+		{
+			"id": "i33",
+			"idea": "bill and utility payments with stablecoins",
+			"slice": "holdout"
+		},
+		{
+			"id": "i34",
+			"idea": "peer-to-peer lending with on-chain credit scores",
+			"slice": "working"
+		},
+		{
+			"id": "i35",
+			"idea": "tokenized gold or commodities",
+			"slice": "working"
+		},
+		{
+			"id": "i36",
+			"idea": "tokenized treasury bills or bonds",
+			"slice": "holdout"
+		},
+		{
+			"id": "i37",
+			"idea": "multisig wallet for team treasuries",
+			"slice": "working"
+		},
+		{
+			"id": "i38",
+			"idea": "on-chain analytics dashboard for Stellar",
+			"slice": "working"
+		},
+		{
+			"id": "i39",
+			"idea": "streaming salary payments by the second",
+			"slice": "holdout"
+		},
+		{
+			"id": "i40",
+			"idea": "tipping and payments for content creators",
+			"slice": "working"
+		}
+	]
+}
