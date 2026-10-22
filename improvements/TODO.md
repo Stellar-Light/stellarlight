@@ -180,7 +180,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    listed for those two ideas.
 
 10. **vetIdea and hackathonBrief list builds admitted on two matched words
-    that the meaning search did not find close.**
+    that have no meaning score (not close in meaning, or not embedded yet).**
     Probe: `/api/vet-idea?q=marketplace for renting out tools and equipment
     with deposits held in escrow contracts` lists LumenSure
     (`dorahacks-buidl-46284`, matched words "out" and "contracts") and

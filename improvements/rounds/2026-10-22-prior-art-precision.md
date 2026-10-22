@@ -188,6 +188,13 @@ reading only the sheet).
   escrow contracts` lists LumenSure (`dorahacks-buidl-46284`) and
   ContractForge (`dorahacks-buidl-36190`) with matched words and no
   similarity, `buildsMode` hybrid.
+- Review (Claude Fable 5.1, effort high, fresh context, read-only clone at
+  c0fa6e33): every number recomputed from the committed data matched.
+  GATE: push with four low findings, all fixed: a build without a meaning
+  score may also not be embedded yet (coverage was not checked), now said in
+  the README and the queue item's title; the freeze time is as recorded in
+  this log, since git keeps no modification times; a stray line break in
+  this outcome; one awkward README sentence.
 
 ### Outcome
 
@@ -199,7 +206,6 @@ On part 1's 40 ideas G1 removes 4 graded 0 and 3 graded 1 and none graded
 ideas get few meaning scores (7 builds scored for "recurring subscription
 payments"), so a same-idea build matching two words can have none. G2 also
 drops 39 graded 2 there, 38 of them kept by G1 only through the one-word
-path. Only
-G1 and G2 were measured. Evidence in
+path. Only G1 and G2 were measured. Evidence in
 `improvements/audits/2026-10-22-words-need-meaning/`; moved to
 `improvements/TODO.md` Now 10.

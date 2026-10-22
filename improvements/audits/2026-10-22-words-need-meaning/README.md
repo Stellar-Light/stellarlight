@@ -19,7 +19,8 @@ own name or description uses every word of the idea the search reads
 (`src/lib/prior-art-rank.ts`). The meaning search reads up to 300
 neighbours above 0.68 (`MEANING_NEIGHBOURS`, `BUILD_SEMANTIC_FLOOR`), so a
 build with no meaning score in a hybrid result was not close in meaning,
-unless that read stopped at the cap. Part 1 saw, after its holdout was
+unless that read stopped at the cap or the build is not embedded yet
+(embedding coverage of the stored submissions was not checked). Part 1 saw, after its holdout was
 opened, that 4 of the 5 wrong builds admitted on two words alone had no
 meaning score. This tests that on a fresh set:
 
@@ -37,7 +38,7 @@ candidate frees can pull in another build, so the brief can also gain.
   short, 10 medium and 10 long, written by a separate agent (Claude Sonnet
   5.5) that was not told the rule. sha256
   `0c8b95f967c908aee6535631bcf643a004419e3a0b947ca7ff49cdd8f5afa3e5`.
-  The file was frozen at 2026-10-22T21:26:20Z (its modification time); its
+  The file was frozen at 2026-10-22T21:26:20Z (as recorded in the lane log; git keeps no modification times); its
   `writtenAt` field (17:00:00Z) is the writer's guess. No idea was edited or
   dropped.
 - Ship criteria, fixed in the lane brief before the capture: on the fresh
@@ -208,9 +209,9 @@ from the cap.
 - `evaluate.mts`, `evaluate-labeler1.txt`, `evaluate-labeler2.txt`: the
   tables above and the earlier sets, per labeler.
 
-The scripts and the JSON they write are biome-formatted (the scripts write
-the same data); `fresh-ideas.frozen.json` is left as frozen, so its hash
-holds, and is not.
+The scripts and the JSON they write are biome-formatted.
+`fresh-ideas.frozen.json` is kept byte for byte as frozen, so its hash holds;
+it is not biome-formatted.
 
 ## Rerun
 
