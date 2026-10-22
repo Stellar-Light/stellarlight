@@ -76,9 +76,9 @@ const STELLAR_RE = /stellar|soroban/i;
  * derived from `timeline_end` (past end = 2/ended, else 1/active).
  */
 /**
- * A timed-out upstream read must not be mistaken for a complete one: the
- * callers that cache an index rethrow it, so a stale complete index beats a
- * fresh partial one.
+ * A timed-out upstream read must not be mistaken for a complete one: it is
+ * rethrown, so a caller leaves that event out (the sync, the index's live
+ * fallback) instead of reading it as empty.
  */
 const isAbortError = (e: unknown): boolean =>
 	e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");

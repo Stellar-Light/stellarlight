@@ -44,3 +44,25 @@ export const WINNER_OVERLAY: OverlayEvent[] = [
 		],
 	},
 ];
+
+const BY_ENTRY = new Map(
+	WINNER_OVERLAY.flatMap((e) =>
+		e.winners.map(
+			(w) =>
+				[
+					`${w.buildId}@${e.hackathonSlug}`,
+					{ placement: w.placement, winnerSource: e.url },
+				] as const,
+		),
+	),
+);
+
+/** The named win of one stored entry (its build id in that event), or null.
+ * Every reader looks a win up here, so they agree; a win at one event never
+ * goes on the same submission's entry in another. */
+export function overlayWinnerOf(
+	buildId: string,
+	hackathonSlug: string,
+): { placement: string; winnerSource: string } | null {
+	return BY_ENTRY.get(`${buildId}@${hackathonSlug}`) ?? null;
+}

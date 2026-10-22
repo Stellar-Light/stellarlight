@@ -354,7 +354,7 @@ const buildFilterParams = (
 		in: "query",
 		required: false,
 		description:
-			"Set to 1 for prize winners only: the winners DoraHacks assigned and those a page off DoraHacks names (getHackathon shows these with winnerSource). Search by meaning reads only DoraHacks' own winner flags, so with mode=meaning a winner named off DoraHacks is left out, and hybrid lists it only when its words match. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored.",
+			"Set to 1 for prize winners only: the winners DoraHacks assigned and those a page off DoraHacks names (getHackathon shows these with winnerSource), by words and by meaning alike. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored.",
 		schema: {
 			type: "string",
 			enum: [...BOOL_TRUE_VALUES, ...BOOL_FALSE_VALUES],

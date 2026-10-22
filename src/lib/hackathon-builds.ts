@@ -8,7 +8,7 @@
  * cold fan-out.
  */
 import { unstable_cache } from "next/cache";
-import { WINNER_OVERLAY } from "@/data/winner-overlay";
+import { overlayWinnerOf } from "@/data/winner-overlay";
 import { withReadTimeout } from "@/lib/degraded-read";
 import {
 	BUILD_SEARCH_MODES,
@@ -54,19 +54,6 @@ export interface IndexedBuild extends DoraHacksSubmission {
 	winnerSource?: string;
 }
 
-/** Winners announced off DoraHacks, by build id and event. */
-const OVERLAY = new Map(
-	WINNER_OVERLAY.flatMap((e) =>
-		e.winners.map(
-			(w) =>
-				[
-					`${w.buildId}@${e.hackathonSlug}`,
-					{ placement: w.placement, winnerSource: e.url },
-				] as const,
-		),
-	),
-);
-
 /** The off-DoraHacks win of a stored entry DoraHacks did not place, or null.
  * Read here, never written: the sync stays the one writer of the stored
  * isWinner, and a placement DoraHacks assigned always wins. */
@@ -75,8 +62,7 @@ function overlayWinner(
 	hackathonSlug: string,
 	placedByDoraHacks: boolean,
 ): { placement: string; winnerSource: string } | null {
-	if (placedByDoraHacks) return null;
-	return OVERLAY.get(`${buildId}@${hackathonSlug}`) ?? null;
+	return placedByDoraHacks ? null : overlayWinnerOf(buildId, hackathonSlug);
 }
 
 /** One project type a build was sorted into; score 0 to 1 (the share of its
@@ -128,15 +114,29 @@ const haystackOf = (
 
 /** Live read of the most recent ended DoraHacks events: the fallback when the
  * store has nothing to serve. Capped to bound cold-rebuild cost; the store has
- * no cap. An event whose winners cannot be read fails it, as a timeout does:
- * an index cached for an hour must not serve its winners as unplaced. */
+ * no cap. Each event settles on its own: one that cannot be read (its winner
+ * list unreadable, a timeout) is left out and named in the log, never served
+ * with its winners unplaced, and the rest are served. Routes treat a left-out
+ * event as one whose submissions are not held: getHackathon reads it live or
+ * says its winners could not be checked, and a hackathon filter naming it
+ * warns that 0 matched from it is not evidence. None read: the index is
+ * empty, and buildHackathonBuildsIndex throws. */
 async function buildLiveIndex(): Promise<IndexedBuild[]> {
 	const ended = endedDoraHacksEvents(await fetchAllDoraHacksHackathons()).slice(
 		0,
 		40,
 	);
+	const unread: string[] = [];
+	// Settled per event inside the 6-wide pool: Promise.allSettled over all 40
+	// at once would drop the cap and invite the rate limits that fail reads.
 	const perHack = await pool(ended, 6, async (h) => {
-		const subs = await fetchHackathonSubmissions(h);
+		let subs: DoraHacksSubmission[];
+		try {
+			subs = await fetchHackathonSubmissions(h);
+		} catch (e) {
+			unread.push(`${h.uname} (${(e as Error).message})`);
+			return [];
+		}
 		const hackathon = doraEventRef(h);
 		return subs.map((s) => {
 			const won = overlayWinner(s.id, hackathon.slug, s.isWinner);
@@ -154,6 +154,10 @@ async function buildLiveIndex(): Promise<IndexedBuild[]> {
 			};
 		});
 	});
+	if (unread.length)
+		console.error(
+			`hackathon builds live read: ${unread.length} of ${ended.length} events could not be read and are left out: ${unread.join("; ")}`,
+		);
 	return perHack.flat();
 }
 

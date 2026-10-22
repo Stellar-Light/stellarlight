@@ -29,12 +29,12 @@ describe("the skill reference on winners", () => {
 		);
 	});
 
-	it("lists winnerSource on a submission's detail, and the meaning-search gap", () => {
+	it("lists winnerSource on a submission's detail, and winnersOnly in every mode", () => {
 		expect(section("## `GET /api/hackathons/builds/{id}`")).toMatch(
 			/winnerSource/,
 		);
 		expect(section("## `GET /api/hackathons/builds`\n")).toMatch(
-			/winner named off DoraHacks is left out/,
+			/those a page off DoraHacks names, in every mode/,
 		);
 		// The spec's winnersOnly, shared by search and analyze, says it too.
 		const search = spec.paths["/api/hackathons/builds"] as {
@@ -44,7 +44,7 @@ describe("the skill reference on winners", () => {
 			(p) => p.name === "winnersOnly",
 		);
 		expect(winnersOnly?.description).toMatch(
-			/with mode=meaning a winner named off DoraHacks is left out/,
+			/those a page off DoraHacks names .*by words and by meaning alike/,
 		);
 	});
 });
