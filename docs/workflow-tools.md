@@ -1,10 +1,13 @@
 # Workflow tools — token efficiency
 
-Adopted from Tyler van der Hoeven (@kalepail)'s 2026-07-15 stack for cutting
-agent token burn ("I've burned around 15b tokens… installing: headroom /
-caveman / ponytail"). Three tools, three different jobs — with the honest fit
-for _our_ stack (Vercel-serverless Next.js/Payload app + the Scout API/MCP data
-layer that Raven consumes).
+Three tools aimed at agent token cost, each with a different job, and the
+fit for our stack (a Vercel-serverless Next.js and Payload app, plus the
+Scout API and MCP data layer that Raven consumes). Decided 2026-10-22: keep
+ponytail; do not adopt caveman-shrink or headroom. Trials reported at the
+Stellar developer meeting of 2026-07-16
+(https://developers.stellar.org/meetings/2026/07/16) found that compressed
+tool output made agents loop and spend more tokens, and that terse prose
+made them reason more to rebuild the missing context.
 
 ## 1. ponytail — write less code · **install this**
 
@@ -28,7 +31,7 @@ Needs `node` on PATH (two tiny lifecycle hooks). Why us: it's the mechanical
 guard against over-building — the exact "you're doing too much" pattern we keep
 catching in our own diffs.
 
-## 2. caveman-shrink — compress MCP tool catalogs · opt-in, **not on our own MCP**
+## 2. caveman-shrink: compress MCP tool catalogs · **not adopted**
 
 [`caveman-shrink`](https://github.com/JuliusBrussee/caveman) (npm, MIT, v0.1.0)
 is a stdio MCP proxy that shrinks the `description` prose in an upstream MCP's
@@ -49,7 +52,7 @@ deliberately-tuned Raven routing surface (≤600 chars, routing-tested by the
 tuned. Use caveman-shrink only where catalog tokens actually hurt — and treat it
 as experimental (pre-1.0).
 
-## 3. headroom — compress tool/DB/RAG outputs · Scout-product follow-up, **needs a vendor call**
+## 3. headroom: compress tool, DB and RAG outputs · **not adopted**
 
 [`headroom-ai`](https://www.npmjs.com/package/headroom-ai) (npm, Apache-2.0,
 v0.22.4) — `compress(messages, { model })` cuts input tokens on large payloads,
@@ -70,9 +73,10 @@ API that means one of:
 Highest-leverage target if adopted: compress the large payloads Scout returns
 (`search_projects` / `search_repos` / `search_research`) before they reach
 Raven, so agents burn fewer tokens on our data — a real differentiator.
-**Blocked on an owner decision:** pick proxy-vs-cloud (account/key creation is
-the owner's, not Claude's). Until then, our own `?fields=` selection (planned)
-is the self-contained lever with zero external dependency.
+**Decision 2026-10-22: not adopted.** Compressed output risks agents looping
+to recover what was cut, and either hosting choice adds a dependency in the
+request path. The lever for smaller Scout responses is our own `?fields=`
+selection: fewer fields, not compressed ones.
 
 ## 4. Jev: typed decisions over our data · **wired in, needs a gateway key**
 

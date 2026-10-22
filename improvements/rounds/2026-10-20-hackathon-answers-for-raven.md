@@ -1,4 +1,4 @@
-# 2026-10-20: Copilot v2 parity for Raven
+# 2026-10-20: hackathon answers for Raven
 
 Reconstruction: this ledger was written at the end of the round from the
 lane reports and the orchestrator's own commands, before the rounds
@@ -12,9 +12,9 @@ change.
 
 ## Scope
 
-Can Raven answer, from Scout data, the questions Colosseum Copilot v2
-answers for Solana (review a project, check an idea against every hackathon,
-what winners built, previous attempts, what to read, trends, feedback, tools),
+Can Raven answer, from Scout data, the questions builders ask about
+hackathons (review a project, check an idea against every hackathon, what
+winners built, previous attempts, what to read, trends, feedback, tools),
 and where does Scout feed it wrong or padded data?
 
 ## Lanes

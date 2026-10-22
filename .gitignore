@@ -51,7 +51,8 @@ node_modules/
 
 # Payload import map (generated during build based on active plugins)
 src/app/(payload)/admin/importMap.js
-.claude/
+.claude/*
+!.claude/skills/
 package-lock.json
 
 # Session scratch / debug output — never commit
