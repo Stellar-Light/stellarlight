@@ -14,6 +14,7 @@ cd "$WT" || exit 2
 git fetch -q origin
 MB=$(git merge-base HEAD origin/main); PR=$(git rev-parse HEAD)
 LOG=${TMPDIR:-/tmp}/merge-train-merge.out
+git rev-parse -q --verify MERGE_HEAD > /dev/null && { echo "STOP: a merge is already in progress here; finish or abort it first"; exit 1; }
 if ! git merge -q --no-edit origin/main > "$LOG" 2>&1; then
   # A conflict leaves MERGE_HEAD; a refused merge (dirty tree) does not.
   git rev-parse -q --verify MERGE_HEAD > /dev/null || { echo "STOP: the merge did not start (see $LOG)"; exit 1; }
