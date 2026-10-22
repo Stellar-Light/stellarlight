@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-21T13:07:04.123Z",
+ "generatedAt": "2026-10-22T13:08:30.097Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 90,
+   "oldestDays": 91,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -364,9 +364,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 169,
-     "recurred": 142,
-     "ratePct": 84
+     "newFindings": 166,
+     "recurred": 140,
+     "ratePct": 84.3
     },
     "lifetime": {
      "newFindings": 860,
@@ -383,8 +383,8 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 169,
-     "repeats": 169,
+     "newFindings": 166,
+     "repeats": 166,
      "ratePct": 100
     },
     "lifetime": {
@@ -9489,9 +9489,9 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5835,
+    "pool": 5834,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 132
+    "joined": 133
    }
   },
   "curatedShape": {
@@ -9541,15 +9541,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1387
+     "count": 1388
     },
     {
      "label": "slowing",
-     "count": 1065
+     "count": 1067
     },
     {
      "label": "active",
-     "count": 1022
+     "count": 1019
     },
     {
      "label": "unknown",
@@ -9563,19 +9563,19 @@
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1298
+     "count": 1299
     },
     {
      "label": "unknown",
-     "count": 597
+     "count": 594
     },
     {
      "label": "Rust",
-     "count": 539
+     "count": 538
     },
     {
      "label": "JavaScript",
-     "count": 401
+     "count": 404
     },
     {
      "label": "Python",
@@ -9606,7 +9606,7 @@
   },
   "withCodeDepth": 11345,
   "withNotes": 1064,
-  "withMainnet": 132,
+  "withMainnet": 133,
   "top": [
    {
     "fullName": "stellar/go-stellar-sdk",
@@ -11080,7 +11080,7 @@
     "missing": 357,
     "of": 380,
     "share": 93.9,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5455 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5454 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 357,
