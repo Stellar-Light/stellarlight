@@ -60,9 +60,16 @@ export function undeclaredInServed(
 		}
 		return isObject(node) ? node : {};
 	};
-	const branches = (s: Node, key: "allOf" | "oneOf" | "anyOf", at: string) =>
+	const branches = (
+		s: Node,
+		key: "allOf" | "oneOf" | "anyOf",
+		at: string,
+	): Node[] =>
 		Array.isArray(s[key])
-			? (s[key] as unknown[]).flatMap((b) => resolve(b, at) ?? [])
+			? (s[key] as unknown[]).flatMap((b) => {
+					const r = resolve(b, at);
+					return r ? [r] : [];
+				})
 			: [];
 	const nullable = (s: Node, at: string): boolean =>
 		s.nullable === true ||
