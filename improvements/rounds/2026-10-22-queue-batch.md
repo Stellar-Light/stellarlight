@@ -16,12 +16,12 @@ protection, the Raven issue note, Grok credits.
 Orchestrator: Claude Opus 5.5. Each lane gets the common brief plus its own,
 in its own worktree, and returns results and evidence, not a transcript.
 
-| lane | model | write set | version |
+| lane | model and effort | write set | version |
 | --- | --- | --- | --- |
-| A: errors agents can act on | Claude Opus 5.5 | `src/lib/hackathon-build-query.ts`, `src/lib/api-error.ts`, 429 routes, spec error schemas, tests | 1.9.88 |
-| B: the spec says what we serve | Claude Opus 5.5 | `src/lib/openapi-spec.ts` response schemas, `scripts/contract/`, tests | 1.9.89 |
-| C: short ideas, honest prior art | Claude Opus 5.5 | `src/lib/vet-idea.ts`, tests, its spec block | 1.9.90 |
-| D: announced winners served as 0 | Claude Sonnet 5.5 | none (report only) | none |
+| A: errors agents can act on | Claude Opus 5.5, default effort (not set) | `src/lib/hackathon-build-query.ts`, `src/lib/api-error.ts`, 429 routes, spec error schemas, tests | 1.9.88 |
+| B: the spec says what we serve | Claude Opus 5.5, default effort (not set) | `src/lib/openapi-spec.ts` response schemas, `scripts/contract/`, tests | 1.9.89 |
+| C: short ideas, honest prior art | Claude Opus 5.5, default effort (not set) | `src/lib/vet-idea.ts`, tests, its spec block | 1.9.90 |
+| D: announced winners served as 0 | Claude Sonnet 5.5, default effort (not set) | none (report only) | none |
 
 Versions are provisional; the merge train renumbers them.
 
@@ -33,7 +33,7 @@ exhausted) until its credits are restored; reviews say so.
 
 ## Log
 
-- 16:15 UTC (orch): #1848 merged as 5c589e06 (16:11:45Z) after its five
+- 16:15 UTC (orch): #1848 merged as 5c589e06 (16:11:44Z) after its five
   check-runs read success on head 9602b399. Lanes A, B and C started in
   their own worktrees from 5c589e06 (Claude Opus 5.5 each); lane D started
   read-only (Claude Sonnet 5.5).
@@ -68,7 +68,7 @@ exhausted) until its credits are restored; reviews say so.
   Queue item 7's "stellar-pulso-hackathon says winners were announced" was
   a planned timeline row on its DoraHacks page, not an announcement.
 
-- 17:14 UTC (reviews, Claude Fable 5.1 each, fresh context, read-only
+- 17:14 UTC (reviews, Claude Fable 5.1 each at default effort, fresh context, read-only
   clones): A "push" with fixes (a listed event with no stored submissions
   should answer 200 with a warning, not a 400 that calls it unrecognised;
   an unbounded model Retry-After; a form showing people the agent hint);
@@ -106,25 +106,35 @@ exhausted) until its credits are restored; reviews say so.
   matched on builds); `hackathon=hackmeridian-2025` answers 200 with the
   "no submissions are stored" warning; `hackathon=nope` answers 400 with 20
   `validHackathons`.
-- 18:34:25 UTC (orch): #1850 merged as 439da909 at head
-  0a6e077fb5c494f2fd097efd96c848970d77fe8c, after main was merged in (its
+- 18:34:25 UTC (orch): `gh pr merge 1850 --repo Stellar-Light/stellarlight --squash --match-head-commit 0a6e077fb5c494f2fd097efd96c848970d77fe8c`;
+  merged as 439da909, after main was merged in (its
   spec diff against main equal to its own change: 94 lines added, 1
   removed) and its eight check-runs read success; deployed 18:37:14. Live
   on 1.9.89: matchPartners declares `x-side-effecting: false`; no non-GET
   operation lacks the flag; getHackathon declares `voteCount` nullable and
   `stats.outcomes` with its four buckets; vetIdea declares `via`.
-- 18:41:03 UTC (orch): #1851 merged as ef82a1fb at head
-  5f3dade6a26246b20705206359cdac222f9a7dfd, after main was merged in. One
+- 18:41:02 UTC (orch): `gh pr merge 1851 --repo Stellar-Light/stellarlight --squash --match-head-commit 5f3dade6a26246b20705206359cdac222f9a7dfd`;
+  merged as ef82a1fb, after main was merged in. One
   hunk conflicted in the vet block's `priorArt`; it was resolved to the
   shared `VET_PRIOR_ART_SCHEMA`, which declares every field #1850's inline
   block did plus `buildsBelowEvidenceRule`, and #1850's served-shape tests
-  passed on the merged tree (60 of 60 in the five related files). Deployed
+  passed on the merged tree (vitest reported 60 passed in the five related files). Deployed
   18:44:23. Live on 1.9.90, vetIdea builds listed: "remittance app" 5 (was
   []), "payroll" 5, "escrow" 4 with 1 below the rule, "stablecoin" 1 with 4
   below the rule, "send money home" 2; one-word ideas carry the note; a
   longer idea is unchanged. `pnpm raven:gate --raven <clone> --spec <live
   1.9.90>`: ACCEPT, 220/298/326/112, skills 17, holdout at 10 forbidden
   captures.
+
+- (orch) Times in this log are commit timestamps from `git log` unless a
+  line says otherwise. The queue edit at the end of this round renumbered
+  its Now items: old 3 (hackathon filter) and 4 (short ideas) closed, and
+  old 5, 6, 7, 8, 9 and 10 became 3, 4, 5, 6, 7 and 8. Item numbers above
+  this line are the old ones. Evidence: lane C's ideas, rubric, labels,
+  captures and replays are in
+  `improvements/audits/2026-10-22-short-idea-prior-art/`; lane D's findings
+  and the orchestrator's confirmations are in
+  `improvements/audits/2026-10-22-missing-winners.md`.
 
 ## Outcome
 

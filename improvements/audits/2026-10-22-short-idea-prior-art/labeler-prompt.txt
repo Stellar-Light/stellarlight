@@ -1,0 +1,15 @@
+Prompt given to the blind labeler (Sonnet, medium effort, fresh context, read only tmp/label-sheet.md):
+
+You are a blind labeler for a relevance measurement. Read only this one file and nothing else (no repo files, no web, no other tools beyond reading it): label-sheet.md
+
+It holds 188 numbered rows. Each row pairs a short product idea (what a builder wants to build on Stellar) with one hackathon submission (its name, event, track and summary). Grade each row on whether the submission is prior art for the idea, using this rubric and nothing else:
+
+- 2 = the same idea: the submission builds the thing the idea names (for "payroll": a payroll product; for "remittance app": an app for sending remittances; for "chess game": a chess game).
+- 1 = related: the same space or a close neighbour, but a different product (for "payroll": a general payments app that mentions salaries in passing; for "chess game": a different board game).
+- 0 = shares words only: the match is on a word, not on the idea (for "block explorer": a space exploration game; for "send money home": a home-rental app).
+
+Rules: judge from the row's own text only. When unsure between two grades, give the stricter (lower) one. An empty summary is judged on the name and track alone. Do not try to guess how the rows were chosen or ranked.
+
+Your final report must be exactly one JSON array and nothing else, one object per row in row order, like [{"n":1,"label":2},{"n":2,"label":0}], covering all 188 rows.
+
+The sheet was built by tmp/sheet.mjs (every build in each idea's top-five window, shuffled with a fixed seed, no matched words, scores, ranks or served flags); tmp/label-key.json maps row numbers to (idea, build id); tmp/labels.json is the labeler's answer, unedited.

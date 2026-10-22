@@ -1,0 +1,172 @@
+payroll                    gained            label=2 W text=1.00 [payroll] PayZoll_Stellar
+payroll                    gained            label=2   text=1.00 [payroll] Zebra — Confidential Stablecoin Payroll on Stellar (Complian
+payroll                    gained            label=2   text=1.00 [payroll] StealthPayroll
+payroll                    gained            label=1   text=1.00 [payroll] Obscura - Payroll · Voting · Credentials · Treasury · Compli
+payroll                    gained            label=2   text=1.00 [payroll] Tecta - ZK-Proof Powered Payroll for Enterprise
+merchant payments          kept              label=2   text=1.00 [merchant,payments] Stellar Payment API (PLUTO)
+merchant payments          kept              label=1   text=1.00 [merchant,payments] SpendGuard - AI Agent Governance
+merchant payments          kept              label=1   text=0.50 [merchant,payments] Turista
+merchant payments          kept              label=1   text=0.50 [merchant,payments] MicoPay Protocol
+merchant payments          kept              label=1   text=1.00 [merchant,payments] PaywitAI
+recurring subscription payments kept              label=2 W text=1.00 [recurring,subscription,payments] Streamr
+recurring subscription payments kept              label=2   text=0.67 [subscription,payments] FixedRateX Tagline: A Stellar-powered payment gateway for cr
+recurring subscription payments kept              label=2   text=0.67 [recurring,payments] Decrow Finance
+recurring subscription payments kept              label=0   text=0.33 [recurring,payments] RADOX
+recurring subscription payments kept              label=1   text=0.67 [subscription,payments] Stellar Payment API (PLUTO)
+invoicing                  gained            label=2   text=1.00 [invoicing] Link2Pay
+microloans                 kept              label=2   text=1.00 [microloans] Vyn
+microloans                 kept              label=2   text=0.00 [] Micro Lending
+microloans                 kept              label=1   text=0.00 [] Loanet
+microloans                 kept              label=1   text=0.00 [] Minerchant
+microloans                 kept              label=1   text=0.00 [] Calificación Crediticia con IA en Soroban para Microfinanzas
+p2p lending                below             label=1   text=0.00 [lending] RemitLend
+p2p lending                below             label=2   text=0.00 [lending] Loanet
+p2p lending                below             label=0 W text=0.50 [p2p] Pacto
+p2p lending                below             label=0   text=0.50 [p2p] Mammon App
+p2p lending                below             label=1   text=0.50 [p2p] AgroLink
+undercollateralized loans  below             label=2   text=0.50 [undercollateralized] Riskon
+undercollateralized loans  below             label=1   text=0.50 [loans] Fund402 — Just-In-Time Loans for AI Agents
+undercollateralized loans  below             label=1   text=0.50 [loans] Loanet
+undercollateralized loans  below             label=1   text=0.50 [loans] Blend Leveraged Positions
+undercollateralized loans  below             label=1   text=0.50 [loans] Yanapay Labs
+crowdfunding               gained            label=1   text=1.00 [crowdfunding] Project Merlin
+crowdfunding               gained            label=2   text=1.00 [crowdfunding] Lumencito
+crowdfunding               gained            label=2   text=1.00 [crowdfunding] NovaFund
+crowdfunding               gained            label=2   text=1.00 [crowdfunding] Impuls(ar)
+crowdfunding               gained            label=2   text=1.00 [crowdfunding] Bimex
+multisig wallet            kept              label=2   text=1.00 [multisig,wallet] Safe.xlm
+multisig wallet            kept              label=0   text=0.50 [wallet] Nexagrid
+multisig wallet            kept              label=0   text=0.50 [wallet] Ai2wallet
+multisig wallet            below             label=2   text=0.50 [multisig] Nexus — Fully Private And Non-Custodial Multisig
+multisig wallet            kept              label=0   text=0.00 [] 1LLET
+passkey wallet             kept              label=1   text=1.00 [passkey,wallet] Buckspay SDK
+passkey wallet             kept              label=1   text=1.00 [passkey,wallet] Tornado-style privacy pools on Stellar Soroban
+passkey wallet             below             label=1   text=0.50 [passkey] Passkey-Kit integration
+passkey wallet             below             label=1   text=0.50 [passkey] lumengate
+passkey wallet             below             label=2   text=0.00 [] Veil
+mobile wallet              kept              label=1   text=1.00 [mobile,wallet] PeerPesa
+mobile wallet              kept              label=2   text=1.00 [mobile,wallet] Econova stellar
+mobile wallet              below             label=0   text=0.50 [mobile] Stellar Mobile Agents
+mobile wallet              below             label=1   text=0.50 [mobile] EazeFi
+mobile wallet              below             label=1   text=0.50 [mobile] ClearSwap
+nft marketplace            kept              label=2   text=1.00 [nft,marketplace] APTOSPACE - NFT Marketplace Website
+nft marketplace            kept              label=2   text=0.50 [nft] Aniverse
+nft marketplace            kept              label=1   text=1.00 [nft,marketplace] Turista
+nft marketplace            below             label=2   text=0.50 [nft] Celestium
+nft marketplace            below             label=1 W text=0.50 [nft] Splicers
+music nfts                 below             label=1   text=0.50 [nfts] Twin Ticket
+music nfts                 kept              label=1   text=1.00 [music,nfts] APTOSPACE - NFT Marketplace Website
+music nfts                 below             label=1 W text=0.50 [music] SAMPLED - The Producer and Music Martketplace on Stellar
+music nfts                 below             label=1   text=0.50 [music] StellarVideos
+music nfts                 below             label=1   text=0.50 [music] StemMarket
+event ticketing            kept              label=2   text=0.50 [ticketing] ZK-Tix
+event ticketing            below             label=2 W text=0.50 [event] TicketReal
+event ticketing            kept              label=2   text=1.00 [event,ticketing] KaizenX
+event ticketing            kept              label=2   text=1.00 [event,ticketing] BlockFest
+event ticketing            below             label=1   text=0.00 [] Stellar Tickets
+yield aggregator           kept              label=2   text=1.00 [yield,aggregator] Yieldspan Protocol
+yield aggregator           below             label=0   text=0.50 [aggregator] DUST AGGREGATOR
+yield aggregator           below             label=0   text=0.50 [aggregator] Prism : An on-chain batch aggregator + compliance oracle
+yield aggregator           below             label=1   text=0.50 [aggregator] SwaptoX
+yield aggregator           below             label=1 W text=0.50 [yield] YieldBack.Cash
+perpetual futures          kept              label=2   text=1.00 [perpetual,futures] Cerida
+perpetual futures          below             label=2 W text=0.50 [perpetual] Kale on Zenex
+perpetual futures          below             label=2   text=0.50 [perpetual] Obscura - ZK Leverage
+perpetual futures          below             label=0   text=0.50 [futures] Career Plug AI – Smart Careers, Strong Identities
+perpetual futures          below             label=1   text=0.50 [futures] Rei
+escrow                     gained            label=2   text=1.00 [escrow] Stellar AI Escrow Commerce
+escrow                     DROPPED-BY-GUARD  label=1   text=0.00 [escrow] Trace
+escrow                     gained            label=1   text=1.00 [escrow] WorkOn
+escrow                     gained            label=1   text=1.00 [escrow] GrantFox
+escrow                     gained            label=1   text=1.00 [escrow] Tanko
+prediction market          kept              label=1 W text=1.00 [prediction,market] Reflector TradeBet
+prediction market          kept              label=2   text=1.00 [prediction,market] Cypher Markets
+prediction market          kept              label=2   text=1.00 [prediction,market] KALE Markets
+prediction market          kept              label=2   text=1.00 [prediction,market] Move Markets
+prediction market          kept              label=2   text=1.00 [prediction,market] KALE-ndar: A Prediction Market for Real-World Events
+chess game                 kept              label=1   text=1.00 [chess,game] Divine Wrath
+chess game                 below             label=1   text=0.50 [game] Double Cross
+chess game                 below             label=2   text=0.50 [chess] Lantern Chess
+chess game                 below             label=0   text=0.50 [chess] StellarOrchestra
+chess game                 below             label=0   text=0.50 [chess] Project Merlin
+lottery                    gained            label=2 W text=1.00 [lottery] No Loss Lottery
+lottery                    gained            label=2   text=1.00 [lottery] LuckyLedgers
+play to earn               kept              label=1   text=1.00 [play,earn] Zeta-Playground
+play to earn               kept              label=2   text=1.00 [play,earn] Playlumen
+play to earn               kept              label=1   text=1.00 [play,earn] Stellar Odyssey
+play to earn               kept              label=1   text=1.00 [play,earn] Aniverse
+play to earn               kept              label=1   text=1.00 [play,earn] Kale Farm Re-Design
+decentralized identity     kept              label=2   text=1.00 [decentralized,identity] StellarID
+decentralized identity     kept              label=1   text=0.50 [decentralized,identity] EduChain-Decentralized-LearningCredentials
+decentralized identity     kept              label=1   text=0.50 [decentralized,identity] StarProof
+decentralized identity     kept              label=1   text=0.50 [decentralized,identity] TrustArk
+decentralized identity     kept              label=1   text=0.50 [decentralized,identity] Skillotav
+kyc                        gained            label=2 W text=1.00 [kyc] ANCHORSHIELD
+kyc                        gained            label=2   text=1.00 [kyc] SAK Stellar Anchor KYC
+kyc                        gained            label=2   text=1.00 [kyc] ZK-KYC-PASSPORT
+kyc                        gained            label=2   text=1.00 [kyc] ACBU-KYC-ZK
+kyc                        gained            label=1   text=1.00 [kyc] SAVIA
+verifiable credentials     kept              label=2   text=1.00 [verifiable,credentials] ACTA
+verifiable credentials     kept              label=2   text=0.50 [credentials] Identizy
+verifiable credentials     kept              label=2   text=1.00 [verifiable,credentials] EduChain-Decentralized-LearningCredentials
+verifiable credentials     kept              label=2   text=0.50 [credentials] StarProof
+verifiable credentials     kept              label=2   text=1.00 [verifiable,credentials] EduChain-Decentralized-LearningCredentials
+remittance app             gained            label=2 W text=1.00 [remittance] Tukar
+remittance app             gained            label=2   text=1.00 [remittance] CrossBorder Pay: Global Remittances with Stellar and Soroban
+remittance app             gained            label=1   text=1.00 [remittance] AnchorVault: Trustless On-Chain Remittance Liquidity Routing
+remittance app             gained            label=2   text=1.00 [remittance] EazeFi
+remittance app             gained            label=2   text=1.00 [remittance] KaleConnect
+cross border remittances   kept              label=2   text=1.00 [cross,border,remittances] CrossBorder Pay: Global Remittances with Stellar and Soroban
+cross border remittances   kept              label=2 W text=1.00 [cross,border,remittances] Tukar
+cross border remittances   kept              label=2   text=1.00 [cross,border,remittances] zkRemit
+cross border remittances   kept              label=2   text=1.00 [cross,border,remittances] Private cross-border payments on Stellar with zero-knowledge
+cross border remittances   kept              label=2   text=1.00 [cross,border,remittances] EazeFi
+send money home            gained            label=0   text=1.00 [home] FireBastion - Decentralized Fire Damage Insurance for Homes
+send money home            gained            label=0   text=1.00 [home] 131,044 XLM Home Page
+stablecoin                 gained            label=1 W text=1.00 [stablecoin] Streamr
+stablecoin                 DROPPED-BY-GUARD  label=0 W text=0.00 [stablecoin] VETCHAIN
+stablecoin                 DROPPED-BY-GUARD  label=0 W text=0.00 [stablecoin] x402-mcp-stellar-template
+stablecoin                 DROPPED-BY-GUARD  label=0 W text=0.00 [stablecoin] TollPay
+stablecoin                 DROPPED-BY-GUARD  label=0 W text=0.00 [stablecoin] clevercon
+stablecoin savings         below             label=1   text=0.50 [stablecoin] Econova stellar
+stablecoin savings         kept              label=0   text=1.00 [stablecoin,savings] Onboard
+stablecoin savings         kept              label=1   text=0.50 [stablecoin,savings] Autopilot: AI-Powered Financial Automation on the Stellar Ne
+stablecoin savings         below             label=1   text=0.50 [stablecoin] cowrie
+stablecoin savings         below             label=0 W text=0.00 [] Pacto
+usdc payroll               kept              label=1   text=1.00 [usdc,payroll] Contextio
+usdc payroll               kept              label=2   text=1.00 [usdc,payroll] ShieldPay
+usdc payroll               kept              label=2   text=1.00 [usdc,payroll] Cloakpay
+usdc payroll               below             label=2 W text=0.50 [payroll] PayZoll_Stellar
+usdc payroll               below             label=2   text=0.50 [payroll] Zebra — Confidential Stablecoin Payroll on Stellar (Complian
+block explorer             below             label=0   text=0.50 [explorer] Stellar Explorer
+block explorer             below             label=0   text=0.50 [explorer] ZK Paycheck Shield
+block explorer             below             label=0 W text=0.50 [block] ByeSiduos ♻️⚡ — Blockchain para un planeta limpio.
+block explorer             below             label=0 W text=0.50 [block] StellarFinance
+block explorer             below             label=0 W text=0.50 [block] Reflector TradeBet
+soroban sdk                kept              label=1   text=0.50 [sdk] Buckspay SDK
+soroban sdk                kept              label=1   text=0.50 [sdk] Accesly
+soroban sdk                kept              label=1   text=1.00 [soroban,sdk] Nova Registry SDK
+soroban sdk                kept              label=1   text=0.50 [soroban] Sorobanhooks
+soroban sdk                kept              label=1   text=0.50 [soroban] Soride
+testing framework          below             label=1   text=0.50 [testing] x402 Testing Tool
+testing framework          below             label=0   text=0.50 [framework] StellAIr
+testing framework          below             label=0   text=0.50 [framework] Afri Assets
+oracle                     gained            label=0 W text=1.00 [oracle] Reflector TradeBet
+oracle                     gained            label=0 W text=1.00 [oracle] Splicers
+oracle                     gained            label=0   text=1.00 [oracle] Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based 
+oracle                     gained            label=1   text=1.00 [oracle] AgentOracle — The Trust Layer for AI Agents
+oracle                     gained            label=2   text=1.00 [oracle] Blind Oracle
+insurance                  gained            label=2   text=1.00 [insurance] FireBastion - Decentralized Fire Damage Insurance for Homes
+insurance                  gained            label=2   text=1.00 [insurance] LumenSure - Private Proof-Backed Insurance Payouts on Stella
+insurance                  gained            label=1   text=1.00 [insurance] KaleGuardVaults
+insurance                  gained            label=2   text=1.00 [insurance] KaleShield
+insurance                  gained            label=2   text=1.00 [insurance] Kaleidofi
+carbon credits             below             label=2   text=0.50 [carbon] EcoCarbon
+carbon credits             below             label=1   text=0.50 [carbon] CarbonXO
+carbon credits             kept              label=2   text=1.00 [carbon,credits] Zucane
+carbon credits             below             label=2   text=0.50 [carbon] Co2 Green
+carbon credits             below             label=2   text=0.50 [carbon] CarbonChain Morelos
+api 1.9.87 -> 1.9.87; parity failures (before != live vetIdea): 0
+label arrays are [0 words only, 1 related, 2 same idea, unlabelled]
+tune {"ideas":23,"oneWordIdeas":8,"beforeServed":47,"unguardServed":75,"guardedServed":70,"beforeEmpty":10,"guardedEmpty":3,"guardedEmptyBelowRule":3,"gainedVsBefore":23,"lostVsBefore":0,"droppedByGuard":5,"labelsGuarded":[5,27,38,0],"labelsGainedVsBefore":[2,7,14,0],"labelsBefore":[3,20,24,0],"labelsDroppedByGuard":[4,1,0,0]}
+held-out {"ideas":13,"oneWordIdeas":4,"beforeServed":22,"unguardServed":39,"guardedServed":39,"beforeEmpty":5,"guardedEmpty":1,"guardedEmptyBelowRule":1,"gainedVsBefore":17,"lostVsBefore":0,"droppedByGuard":0,"labelsBefore":[2,10,10,0],"labelsGuarded":[5,13,21,0],"labelsGainedVsBefore":[3,3,11,0]}

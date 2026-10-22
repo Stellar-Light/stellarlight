@@ -216,6 +216,14 @@ unless noted.
 - Routing vocabulary for outcome and reading-intent questions, only through
   the Raven gate replica.
 
+- Events seen in sources but absent from getHackathons: Argentina Builder
+  Challenge (2026-09-12 to 09-27), Stellar Pro Hackathon and Stellar Hack
+  Pera (Istanbul), Tellus Find Your Way (2026-09-01 to 10-12) (found
+  2026-10-22 while checking winners).
+- apac-stellar-hackathon-2026 serves endDate 2026-07-24, but its
+  organizer's 2026-07-29 post puts the grand finale on 31 July (found
+  2026-10-22).
+
 Found 2026-10-22 by reading how Raven calls and reads Scout
 (stellar-experimental/stellar-raven at b1dc866: `src/adapters/scout.ts`,
 `src/executor/providers.ts`, `src/policy/truncate.ts`,
@@ -225,7 +233,8 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   the status and any `valid*` lists, and drops the rest, headers included
   (a 503 marked `unavailable` gets Raven's own hint instead). Every 429 now
   states the wait in `hint` (#1849); our 503s still carry it only in
-  `retryAfterSeconds` and Retry-After.
+  `retryAfterSeconds` and Retry-After, or in the header alone
+  (`src/app/api/community-skills/route.ts`).
 - Most responses carry no data date. Raven reads freshness only from a
   top-level or `meta` `dataAsOf` or `asOf`, and otherwise labels the answer
   with its own fetch time. Of 14 endpoints probed live, 3 serve one
@@ -254,13 +263,6 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   users likely share one per-IP limit [inferred]. See the owner decision on
   a key below.
 
-- Events seen in sources but absent from getHackathons: Argentina Builder
-  Challenge (2026-09-12 to 09-27), Stellar Pro Hackathon and Stellar Hack
-  Pera (Istanbul), Tellus Find Your Way (2026-09-01 to 10-12) (found
-  2026-10-22 while checking winners).
-- apac-stellar-hackathon-2026 serves endDate 2026-07-24, but its
-  organizer's 2026-07-29 post puts the grand finale on 31 July (found
-  2026-10-22).
 
 ## Owner decisions (safe default in brackets)
 
