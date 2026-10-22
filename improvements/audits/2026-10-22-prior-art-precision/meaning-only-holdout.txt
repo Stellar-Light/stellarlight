@@ -1,0 +1,22 @@
+score grade words gap-to-best idea name
+0.783  1  0  0.000  i27  Playlumen
+0.772  2  0  0.011  i27  Zeta-Playground
+0.765  2  0  0.000  i30  Guacamole
+0.758  2  0  0.007  i30  AgroTrace
+0.757  1  0  0.003  i03  Link2Pay
+0.755  0  0  0.005  i03  RemitLend
+0.747  0  0  0.011  i06  Calypso: x402 Bot Swarm
+0.744  2  0  0.000  i21  Micro Lending
+0.737  0  1  0.021  i06  DUST AGGREGATOR
+0.737  1  0  0.028  i30  Huella
+0.736  1  0  0.000  i39  Streamr
+0.717  1  0  0.000  i09  Co2 Green
+0.717  1  0  0.044  i18  Kryon Network
+0.711  0  1  0.006  i09  CarbonXO
+0.711  1  0  0.033  i21  Minerchant
+0.710  1  0  0.034  i21  Calificación Crediticia con IA en Soroban para Mic
+0.708  0  1  0.014  i12  QR Mint
+0.705  1  0  0.031  i39  Sobrecito
+0.702  1  0  0.020  i12  Airpay
+0.702  1  0  0.034  i39  Nomilar
+0.701  0  1  0.021  i12  Stellar Micro payment for AI prompt

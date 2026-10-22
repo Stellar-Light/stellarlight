@@ -1,0 +1,356 @@
+improvements/audits/2026-10-22-prior-art-precision/windows-40.json: api 1.9.91 -> 1.9.91; corpus 1344; 13 ideas
+
+[holdout] current: ideas 13, listed 58 (g2 11, g1 31, g0 16, unlabeled 0), wrong share 27.6%, ideas with a wrong build 9, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i09 CarbonXO (similarity)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i12 QR Mint (similarity)
+   wrong: i12 Stellar Micro payment for AI prompt (similarity)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+
+[holdout] A cov>=0.5: ideas 13, listed 51 (g2 11, g1 28, g0 12, unlabeled 0), wrong share 23.5%, ideas with a wrong build 7, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i09 CarbonXO (similarity)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i12 QR Mint (similarity)
+   wrong: i12 Stellar Micro payment for AI prompt (similarity)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   lost: i15 Stellar Vote g=1
+   lost: i18 SettleZK g=0
+   lost: i18 Micro Lending g=1
+   lost: i21 PayOnProof g=0
+   lost: i30 AgroChain LATAM g=0
+   lost: i39 ZeroWage g=1
+   lost: i39 clevercon g=0
+
+[holdout] B cov>=0.5+rare: ideas 13, listed 51 (g2 11, g1 28, g0 12, unlabeled 0), wrong share 23.5%, ideas with a wrong build 7, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i09 CarbonXO (similarity)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i12 QR Mint (similarity)
+   wrong: i12 Stellar Micro payment for AI prompt (similarity)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   lost: i15 Stellar Vote g=1
+   lost: i18 SettleZK g=0
+   lost: i18 Micro Lending g=1
+   lost: i21 PayOnProof g=0
+   lost: i30 AgroChain LATAM g=0
+   lost: i39 ZeroWage g=1
+   lost: i39 clevercon g=0
+
+[holdout] C own2: ideas 13, listed 58 (g2 11, g1 31, g0 16, unlabeled 0), wrong share 27.6%, ideas with a wrong build 9, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i09 CarbonXO (similarity)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i12 QR Mint (similarity)
+   wrong: i12 Stellar Micro payment for AI prompt (similarity)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+
+[holdout] D typed2: ideas 13, listed 58 (g2 11, g1 31, g0 16, unlabeled 0), wrong share 27.6%, ideas with a wrong build 9, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i09 CarbonXO (similarity)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i12 QR Mint (similarity)
+   wrong: i12 Stellar Micro payment for AI prompt (similarity)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+
+[holdout] E own2 cov>=0.5: ideas 13, listed 51 (g2 11, g1 28, g0 12, unlabeled 0), wrong share 23.5%, ideas with a wrong build 7, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i09 CarbonXO (similarity)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i12 QR Mint (similarity)
+   wrong: i12 Stellar Micro payment for AI prompt (similarity)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   lost: i15 Stellar Vote g=1
+   lost: i18 SettleZK g=0
+   lost: i18 Micro Lending g=1
+   lost: i21 PayOnProof g=0
+   lost: i30 AgroChain LATAM g=0
+   lost: i39 ZeroWage g=1
+   lost: i39 clevercon g=0
+
+[holdout] M meaning-only>=0.72: ideas 13, listed 48 (g2 11, g1 24, g0 13, unlabeled 0), wrong share 27.1%, ideas with a wrong build 8, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+   lost: i09 CarbonXO g=0
+   lost: i09 Co2 Green g=1
+   lost: i12 QR Mint g=0
+   lost: i12 Stellar Micro payment for AI prompt g=0
+   lost: i12 Airpay g=1
+   lost: i18 Kryon Network g=1
+   lost: i21 Minerchant g=1
+   lost: i21 Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: i39 Sobrecito g=1
+   lost: i39 Nomilar g=1
+
+[holdout] M meaning-only>=0.73: ideas 13, listed 48 (g2 11, g1 24, g0 13, unlabeled 0), wrong share 27.1%, ideas with a wrong build 8, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+   lost: i09 CarbonXO g=0
+   lost: i09 Co2 Green g=1
+   lost: i12 QR Mint g=0
+   lost: i12 Stellar Micro payment for AI prompt g=0
+   lost: i12 Airpay g=1
+   lost: i18 Kryon Network g=1
+   lost: i21 Minerchant g=1
+   lost: i21 Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: i39 Sobrecito g=1
+   lost: i39 Nomilar g=1
+
+[holdout] M meaning-only>=0.735: ideas 13, listed 48 (g2 11, g1 24, g0 13, unlabeled 0), wrong share 27.1%, ideas with a wrong build 8, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+   lost: i09 CarbonXO g=0
+   lost: i09 Co2 Green g=1
+   lost: i12 QR Mint g=0
+   lost: i12 Stellar Micro payment for AI prompt g=0
+   lost: i12 Airpay g=1
+   lost: i18 Kryon Network g=1
+   lost: i21 Minerchant g=1
+   lost: i21 Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: i39 Sobrecito g=1
+   lost: i39 Nomilar g=1
+
+[holdout] M meaning-only>=0.74: ideas 13, listed 45 (g2 11, g1 22, g0 12, unlabeled 0), wrong share 26.7%, ideas with a wrong build 8, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+   lost: i06 DUST AGGREGATOR g=0
+   lost: i09 CarbonXO g=0
+   lost: i09 Co2 Green g=1
+   lost: i12 QR Mint g=0
+   lost: i12 Stellar Micro payment for AI prompt g=0
+   lost: i12 Airpay g=1
+   lost: i18 Kryon Network g=1
+   lost: i21 Minerchant g=1
+   lost: i21 Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: i30 Huella g=1
+   lost: i39 Streamr g=1
+   lost: i39 Sobrecito g=1
+   lost: i39 Nomilar g=1
+
+[holdout] M meaning-only>=0.745: ideas 13, listed 44 (g2 10, g1 22, g0 12, unlabeled 0), wrong share 27.3%, ideas with a wrong build 8, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+   lost: i06 DUST AGGREGATOR g=0
+   lost: i09 CarbonXO g=0
+   lost: i09 Co2 Green g=1
+   lost: i12 QR Mint g=0
+   lost: i12 Stellar Micro payment for AI prompt g=0
+   lost: i12 Airpay g=1
+   lost: i18 Kryon Network g=1
+   lost: i21 Micro Lending g=2
+   lost: i21 Minerchant g=1
+   lost: i21 Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: i30 Huella g=1
+   lost: i39 Streamr g=1
+   lost: i39 Sobrecito g=1
+   lost: i39 Nomilar g=1
+
+[holdout] M meaning-only>=0.75: ideas 13, listed 43 (g2 10, g1 22, g0 11, unlabeled 0), wrong share 25.6%, ideas with a wrong build 8, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+   lost: i06 DUST AGGREGATOR g=0
+   lost: i06 Calypso: x402 Bot Swarm g=0
+   lost: i09 CarbonXO g=0
+   lost: i09 Co2 Green g=1
+   lost: i12 QR Mint g=0
+   lost: i12 Stellar Micro payment for AI prompt g=0
+   lost: i12 Airpay g=1
+   lost: i18 Kryon Network g=1
+   lost: i21 Micro Lending g=2
+   lost: i21 Minerchant g=1
+   lost: i21 Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: i30 Huella g=1
+   lost: i39 Streamr g=1
+   lost: i39 Sobrecito g=1
+   lost: i39 Nomilar g=1
+
+[holdout] N no-word>=0.735: ideas 13, listed 51 (g2 11, g1 24, g0 16, unlabeled 0), wrong share 31.4%, ideas with a wrong build 9, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i09 CarbonXO (similarity)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i12 QR Mint (similarity)
+   wrong: i12 Stellar Micro payment for AI prompt (similarity)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+   lost: i09 Co2 Green g=1
+   lost: i12 Airpay g=1
+   lost: i18 Kryon Network g=1
+   lost: i21 Minerchant g=1
+   lost: i21 Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: i39 Sobrecito g=1
+   lost: i39 Nomilar g=1
+
+[holdout] N no-word>=0.74: ideas 13, listed 49 (g2 11, g1 22, g0 16, unlabeled 0), wrong share 32.7%, ideas with a wrong build 9, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i09 CarbonXO (similarity)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i12 QR Mint (similarity)
+   wrong: i12 Stellar Micro payment for AI prompt (similarity)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+   lost: i09 Co2 Green g=1
+   lost: i12 Airpay g=1
+   lost: i18 Kryon Network g=1
+   lost: i21 Minerchant g=1
+   lost: i21 Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: i30 Huella g=1
+   lost: i39 Streamr g=1
+   lost: i39 Sobrecito g=1
+   lost: i39 Nomilar g=1
+
+[holdout] N no-word>=0.745: ideas 13, listed 48 (g2 10, g1 22, g0 16, unlabeled 0), wrong share 33.3%, ideas with a wrong build 9, empty 1
+   wrong: i03 RemitLend (similarity)
+   wrong: i06 DUST AGGREGATOR (similarity)
+   wrong: i06 Calypso: x402 Bot Swarm (similarity)
+   wrong: i06 Socio - AI-generated swap signals for Stellar & So (similarity+two words)
+   wrong: i09 CarbonXO (similarity)
+   wrong: i12 Blitz - QR Code Auction Platform (similarity+two words)
+   wrong: i12 QR Mint (similarity)
+   wrong: i12 Stellar Micro payment for AI prompt (similarity)
+   wrong: i18 InvoiceVeil (similarity+two words)
+   wrong: i18 SettleZK (two words)
+   wrong: i21 Stellar Rent (two words)
+   wrong: i21 PayOnProof (two words)
+   wrong: i30 AgroChain LATAM (two words)
+   wrong: i33 Streamr (similarity+two words)
+   wrong: i33 Why Stellar Feels Boring (similarity+two words)
+   wrong: i39 clevercon (two words)
+   lost: i09 Co2 Green g=1
+   lost: i12 Airpay g=1
+   lost: i18 Kryon Network g=1
+   lost: i21 Micro Lending g=2
+   lost: i21 Minerchant g=1
+   lost: i21 Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: i30 Huella g=1
+   lost: i39 Streamr g=1
+   lost: i39 Sobrecito g=1
+   lost: i39 Nomilar g=1

@@ -1,0 +1,165 @@
+improvements/audits/2026-10-22-prior-art-precision/windows-short.json: api 1.9.87 -> 1.9.87; corpus 1344; 36 ideas
+
+[tune] current: ideas 23, listed 70 (g2 38, g1 27, g0 5, unlabeled 0), wrong share 7.1%, ideas with a wrong build 2, empty 3
+   wrong: multisig wallet Nexagrid (similarity)
+   wrong: multisig wallet Ai2wallet (similarity)
+   wrong: multisig wallet 1LLET (similarity)
+   wrong: send money home FireBastion - Decentralized Fire Damage Insurance  (every word in own text)
+   wrong: send money home 131,044 XLM Home Page (every word in own text)
+
+[tune] A cov>=0.5: ideas 23, listed 70 (g2 38, g1 27, g0 5, unlabeled 0), wrong share 7.1%, ideas with a wrong build 2, empty 3
+
+[tune] B cov>=0.5+rare: ideas 23, listed 70 (g2 38, g1 27, g0 5, unlabeled 0), wrong share 7.1%, ideas with a wrong build 2, empty 3
+
+[tune] C own2: ideas 23, listed 70 (g2 38, g1 27, g0 5, unlabeled 0), wrong share 7.1%, ideas with a wrong build 2, empty 3
+
+[tune] D typed2: ideas 23, listed 68 (g2 38, g1 25, g0 5, unlabeled 0), wrong share 7.4%, ideas with a wrong build 2, empty 3
+   lost: merchant payments Turista g=1
+   lost: merchant payments MicoPay Protocol g=1
+
+[tune] E own2 cov>=0.5: ideas 23, listed 70 (g2 38, g1 27, g0 5, unlabeled 0), wrong share 7.1%, ideas with a wrong build 2, empty 3
+
+[tune] M meaning-only>=0.72: ideas 23, listed 67 (g2 36, g1 27, g0 4, unlabeled 0), wrong share 6.0%, ideas with a wrong build 2, empty 3
+   lost: multisig wallet Ai2wallet g=0
+   lost: nft marketplace Aniverse g=2
+   lost: event ticketing ZK-Tix g=2
+
+[tune] M meaning-only>=0.73: ideas 23, listed 64 (g2 36, g1 25, g0 3, unlabeled 0), wrong share 4.7%, ideas with a wrong build 2, empty 3
+   lost: microloans Minerchant g=1
+   lost: microloans Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: multisig wallet Ai2wallet g=0
+   lost: multisig wallet 1LLET g=0
+   lost: nft marketplace Aniverse g=2
+   lost: event ticketing ZK-Tix g=2
+
+[tune] M meaning-only>=0.735: ideas 23, listed 61 (g2 35, g1 24, g0 2, unlabeled 0), wrong share 3.3%, ideas with a wrong build 1, empty 3
+   lost: microloans Loanet g=1
+   lost: microloans Minerchant g=1
+   lost: microloans Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: multisig wallet Nexagrid g=0
+   lost: multisig wallet Ai2wallet g=0
+   lost: multisig wallet 1LLET g=0
+   lost: nft marketplace Aniverse g=2
+   lost: event ticketing ZK-Tix g=2
+   lost: verifiable credentials StarProof g=2
+
+[tune] M meaning-only>=0.74: ideas 23, listed 61 (g2 35, g1 24, g0 2, unlabeled 0), wrong share 3.3%, ideas with a wrong build 1, empty 3
+   lost: microloans Loanet g=1
+   lost: microloans Minerchant g=1
+   lost: microloans Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: multisig wallet Nexagrid g=0
+   lost: multisig wallet Ai2wallet g=0
+   lost: multisig wallet 1LLET g=0
+   lost: nft marketplace Aniverse g=2
+   lost: event ticketing ZK-Tix g=2
+   lost: verifiable credentials StarProof g=2
+
+[tune] M meaning-only>=0.745: ideas 23, listed 60 (g2 34, g1 24, g0 2, unlabeled 0), wrong share 3.3%, ideas with a wrong build 1, empty 3
+   lost: microloans Loanet g=1
+   lost: microloans Minerchant g=1
+   lost: microloans Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: multisig wallet Nexagrid g=0
+   lost: multisig wallet Ai2wallet g=0
+   lost: multisig wallet 1LLET g=0
+   lost: nft marketplace Aniverse g=2
+   lost: event ticketing ZK-Tix g=2
+   lost: verifiable credentials Identizy g=2
+   lost: verifiable credentials StarProof g=2
+
+[tune] M meaning-only>=0.75: ideas 23, listed 59 (g2 33, g1 24, g0 2, unlabeled 0), wrong share 3.4%, ideas with a wrong build 1, empty 3
+   lost: microloans Micro Lending g=2
+   lost: microloans Loanet g=1
+   lost: microloans Minerchant g=1
+   lost: microloans Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: multisig wallet Nexagrid g=0
+   lost: multisig wallet Ai2wallet g=0
+   lost: multisig wallet 1LLET g=0
+   lost: nft marketplace Aniverse g=2
+   lost: event ticketing ZK-Tix g=2
+   lost: verifiable credentials Identizy g=2
+   lost: verifiable credentials StarProof g=2
+
+[tune] N no-word>=0.735: ideas 23, listed 66 (g2 38, g1 24, g0 4, unlabeled 0), wrong share 6.1%, ideas with a wrong build 2, empty 3
+   lost: microloans Loanet g=1
+   lost: microloans Minerchant g=1
+   lost: microloans Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: multisig wallet 1LLET g=0
+
+[tune] N no-word>=0.74: ideas 23, listed 66 (g2 38, g1 24, g0 4, unlabeled 0), wrong share 6.1%, ideas with a wrong build 2, empty 3
+   lost: microloans Loanet g=1
+   lost: microloans Minerchant g=1
+   lost: microloans Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: multisig wallet 1LLET g=0
+
+[tune] N no-word>=0.745: ideas 23, listed 66 (g2 38, g1 24, g0 4, unlabeled 0), wrong share 6.1%, ideas with a wrong build 2, empty 3
+   lost: microloans Loanet g=1
+   lost: microloans Minerchant g=1
+   lost: microloans Calificación Crediticia con IA en Soroban para Mic g=1
+   lost: multisig wallet 1LLET g=0
+
+[held-out] current: ideas 13, listed 39 (g2 21, g1 13, g0 5, unlabeled 0), wrong share 12.8%, ideas with a wrong build 3, empty 1
+   wrong: recurring subscription payments RADOX (two words)
+   wrong: stablecoin savings Onboard (two words+every word in own text)
+   wrong: oracle Reflector TradeBet (every word in own text)
+   wrong: oracle Splicers (every word in own text)
+   wrong: oracle Astro-Shiba: SAC Factory + Bonding Curve AMM + Ora (every word in own text)
+
+[held-out] A cov>=0.5: ideas 13, listed 37 (g2 20, g1 12, g0 5, unlabeled 0), wrong share 13.5%, ideas with a wrong build 3, empty 1
+   lost: recurring subscription payments FixedRateX Tagline: A Stellar-powered payment gate g=2
+   lost: recurring subscription payments Stellar Payment API (PLUTO) g=1
+
+[held-out] B cov>=0.5+rare: ideas 13, listed 37 (g2 20, g1 12, g0 5, unlabeled 0), wrong share 13.5%, ideas with a wrong build 3, empty 1
+   lost: recurring subscription payments FixedRateX Tagline: A Stellar-powered payment gate g=2
+   lost: recurring subscription payments Stellar Payment API (PLUTO) g=1
+
+[held-out] C own2: ideas 13, listed 39 (g2 21, g1 13, g0 5, unlabeled 0), wrong share 12.8%, ideas with a wrong build 3, empty 1
+
+[held-out] D typed2: ideas 13, listed 37 (g2 21, g1 12, g0 4, unlabeled 0), wrong share 10.8%, ideas with a wrong build 2, empty 1
+   lost: recurring subscription payments RADOX g=0
+   lost: stablecoin savings Autopilot: AI-Powered Financial Automation on the  g=1
+
+[held-out] E own2 cov>=0.5: ideas 13, listed 37 (g2 20, g1 12, g0 5, unlabeled 0), wrong share 13.5%, ideas with a wrong build 3, empty 1
+   lost: recurring subscription payments FixedRateX Tagline: A Stellar-powered payment gate g=2
+   lost: recurring subscription payments Stellar Payment API (PLUTO) g=1
+
+[held-out] M meaning-only>=0.72: ideas 13, listed 35 (g2 21, g1 9, g0 5, unlabeled 0), wrong share 14.3%, ideas with a wrong build 3, empty 1
+   lost: soroban sdk Buckspay SDK g=1
+   lost: soroban sdk Accesly g=1
+   lost: soroban sdk Sorobanhooks g=1
+   lost: soroban sdk Soride g=1
+
+[held-out] M meaning-only>=0.73: ideas 13, listed 35 (g2 21, g1 9, g0 5, unlabeled 0), wrong share 14.3%, ideas with a wrong build 3, empty 1
+   lost: soroban sdk Buckspay SDK g=1
+   lost: soroban sdk Accesly g=1
+   lost: soroban sdk Sorobanhooks g=1
+   lost: soroban sdk Soride g=1
+
+[held-out] M meaning-only>=0.735: ideas 13, listed 35 (g2 21, g1 9, g0 5, unlabeled 0), wrong share 14.3%, ideas with a wrong build 3, empty 1
+   lost: soroban sdk Buckspay SDK g=1
+   lost: soroban sdk Accesly g=1
+   lost: soroban sdk Sorobanhooks g=1
+   lost: soroban sdk Soride g=1
+
+[held-out] M meaning-only>=0.74: ideas 13, listed 35 (g2 21, g1 9, g0 5, unlabeled 0), wrong share 14.3%, ideas with a wrong build 3, empty 1
+   lost: soroban sdk Buckspay SDK g=1
+   lost: soroban sdk Accesly g=1
+   lost: soroban sdk Sorobanhooks g=1
+   lost: soroban sdk Soride g=1
+
+[held-out] M meaning-only>=0.745: ideas 13, listed 35 (g2 21, g1 9, g0 5, unlabeled 0), wrong share 14.3%, ideas with a wrong build 3, empty 1
+   lost: soroban sdk Buckspay SDK g=1
+   lost: soroban sdk Accesly g=1
+   lost: soroban sdk Sorobanhooks g=1
+   lost: soroban sdk Soride g=1
+
+[held-out] M meaning-only>=0.75: ideas 13, listed 35 (g2 21, g1 9, g0 5, unlabeled 0), wrong share 14.3%, ideas with a wrong build 3, empty 1
+   lost: soroban sdk Buckspay SDK g=1
+   lost: soroban sdk Accesly g=1
+   lost: soroban sdk Sorobanhooks g=1
+   lost: soroban sdk Soride g=1
+
+[held-out] N no-word>=0.735: ideas 13, listed 39 (g2 21, g1 13, g0 5, unlabeled 0), wrong share 12.8%, ideas with a wrong build 3, empty 1
+
+[held-out] N no-word>=0.74: ideas 13, listed 39 (g2 21, g1 13, g0 5, unlabeled 0), wrong share 12.8%, ideas with a wrong build 3, empty 1
+
+[held-out] N no-word>=0.745: ideas 13, listed 39 (g2 21, g1 13, g0 5, unlabeled 0), wrong share 12.8%, ideas with a wrong build 3, empty 1

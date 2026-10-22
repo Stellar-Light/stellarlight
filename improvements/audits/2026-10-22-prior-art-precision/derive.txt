@@ -1,0 +1,3 @@
+40 ideas (api 1.9.91 -> 1.9.91): vetIdea parity failures 0; window rows whose replayed matched words differ from live 0
+live-short.json (api 1.9.87 -> 1.9.87): 36 ideas; 1.9.87 vetIdea parity failures 0; window rows whose replayed matched words differ from the capture 0; window rows not in today's corpus 0
+live-tests.json (api 1.9.87 -> 1.9.87): 34 ideas; 1.9.87 vetIdea parity failures 0; window rows whose replayed matched words differ from the capture 0; window rows not in today's corpus 0

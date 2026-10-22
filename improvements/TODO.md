@@ -152,6 +152,30 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    below it, and the golden case accepts Protocol 30 once its mainnet vote
    passes.
 
+9. **vetIdea lists prior-art builds that share only words, admitted by the
+   meaning score.**
+   Probe: `/api/vet-idea?q=tokenized real estate with fractional ownership`
+   lists QR Mint (`dorahacks-buidl-14609`, similarity 0.727, no matched
+   word) in `priorArt.builds`; `q=savings circle (ROSCA, tanda) with
+   automatic payouts` lists Stellar Automations Studio
+   (`dorahacks-buidl-36339`, 0.733, no matched word). Both are graded 0
+   (words only) in the draft labels. Found by the 2026-10-22 battery on
+   1.9.90 (i01, i04, i11) and measured on 1.9.91 over all 40 labeled ideas
+   (`improvements/audits/2026-10-22-prior-art-precision/`): of 17 wrong
+   builds listed for the 27 working ideas, 12 pass on the meaning score
+   alone, 5 on the meaning score with two words, none on words alone.
+   State: not fixed. No filter-only rule met the ship criteria. Weighing the
+   word path by rarity removes 4 of 16 wrong builds on the 13 held-out ideas
+   but none on working and drops a same-idea build on the short-idea set;
+   a higher meaning floor for meaning-only builds drops same-idea builds on
+   every set (a same-idea build scores 0.701, and one ties a wrong build at
+   0.733). i01's Delibera uses every word of the idea and scores 0.788, so
+   no rule over words or the meaning score removes it. Labels are drafts.
+   Done when: a rule, measured as in that directory on a fresh held-out
+   slice, lists fewer builds graded 0 with no build graded 2 lost on any
+   labeled set, and QR Mint and Stellar Automations Studio are no longer
+   listed for those two ideas.
+
 ## Next
 
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
