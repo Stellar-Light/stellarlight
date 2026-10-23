@@ -1,6 +1,7 @@
 import config from "@payload-config";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
+import { isAdminRequest } from "@/lib/admin-auth";
 
 /**
  * Relevance scoring algorithm for projects.
@@ -204,9 +205,8 @@ function scoreProject(
 	return Math.min(score, 100);
 }
 
-export async function GET(request: NextRequest) {
-	const secret = request.nextUrl.searchParams.get("secret");
-	if (secret !== "tag123") {
+export async function POST(request: NextRequest) {
+	if (!(await isAdminRequest(request.headers))) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
