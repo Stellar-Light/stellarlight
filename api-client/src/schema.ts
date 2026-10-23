@@ -3609,7 +3609,7 @@ export interface operations {
     searchHackathonBuilds: {
         parameters: {
             query?: {
-                /** @description Topic to search build names + descriptions (prior-art lookup). */
+                /** @description Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). */
                 q?: string;
                 /** @description How q matches (default: hybrid). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";
@@ -3682,7 +3682,7 @@ export interface operations {
                                 indexedBuilds?: number;
                                 /** @description Unique submissions that match: the rows this search pages through. */
                                 matched?: number;
-                                /** @description Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched. */
+                                /** @description Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze. */
                                 entries?: number;
                                 returned?: number;
                             };
@@ -3764,7 +3764,7 @@ export interface operations {
                             stack?: string[];
                             /** @description Directory project types this build was sorted into, best first. Present only when categorized; scores and method are on getHackathonSubmission. */
                             categories?: string[];
-                            /** @description Which query terms this build matched — the evidence behind its inclusion. */
+                            /** @description Which query terms this build matched: the evidence behind its inclusion. A term matches in the name, summary, track, award or a package in `stack`, except the Stellar JS SDK, Soroban Rust SDK, Freighter API, Stellar Wallets Kit and x402 packages, which more than a tenth of read repos declare. A package says what a build was made with, not what it does, so only this operation matches packages: prior art in vetIdea and hackathonBrief, and analyzeHackathonSubmissions' q, read the text alone. */
                             matchedTerms?: string[];
                             /** @description Vector similarity to the query (0 to 1), present when mode was meaning or hybrid and the build cleared the floor. A row with similarity and no matchedTerms was found by meaning alone: verify it. */
                             similarity?: number;
@@ -3981,7 +3981,7 @@ export interface operations {
                 value?: string;
                 /** @description Most values to report per set (default 10, or 5 with by; max 30). */
                 top?: number;
-                /** @description Topic: count only the submissions that match it, the way searchHackathonBuilds matches. Empty = every submission. */
+                /** @description Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. Empty = every submission. */
                 q?: string;
                 /** @description How q matches (default: keyword). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";

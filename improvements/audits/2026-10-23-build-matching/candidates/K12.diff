@@ -1,0 +1,50 @@
+--- base/src/lib/hackathon-builds.ts
++++ K12/src/lib/hackathon-builds.ts
+@@ -593,6 +593,15 @@
+ 
+ /** A term of three letters or fewer ("ai", "zk", "nft") matches as a whole
+  * word only: as a substring, "ai" hit every "chain", "paid" and "maintain". */
++/** K2: the name as words, camelCase and punctuation split. */
++const nameWords = (name: string) =>
++	` ${name.replace(/([a-z0-9])([A-Z])/g, "$1 $2").replace(/[^\p{L}\p{N}]+/gu, " ").toLowerCase()}`;
++function nameStart(v: string): (name: string) => boolean {
++	const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/[-\s]+/g, " ");
++	const re = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}${v.length > 3 ? "" : "(?![\\p{L}\\p{N}])"}`, "u");
++	return (name) => re.test(name);
++}
++
+ function termMatcher(v: string): (hay: string) => boolean {
+ 	if (v.length > 3) return (hay) => hay.includes(v);
+ 	const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+@@ -692,6 +701,7 @@
+ 		return {
+ 			t,
+ 			variants: [...expandBuildTerm(t), ...joined].map(termMatcher),
++			names: [...expandBuildTerm(t), ...joined].map(nameStart),
+ 			// The word as typed, without synonyms: what textShare reads.
+ 			own: [...wordForms(t), ...joined].map(termMatcher),
+ 		};
+@@ -715,10 +725,11 @@
+ 		// Concepts the build's own name or description uses as typed.
+ 		const inText = new Set<string>();
+ 		const name = b.name.toLowerCase();
++		const words = nameWords(b.name);
+ 		const text = `${name} ${b.description ?? ""}`.toLowerCase();
+-		for (const { t, variants, own } of terms) {
+-			for (const hit of variants) {
+-				if (hit(name)) {
++		for (const { t, variants, own, names } of terms) {
++			for (const [i, hit] of variants.entries()) {
++				if (names[i](words)) {
+ 					score += 3;
+ 					matched.add(t);
+ 					nameMatched = true;
+@@ -731,7 +742,7 @@
+ 		}
+ 		if (
+ 			score > 0 &&
+-			(nameMatched || matched.size >= Math.ceil(tokens.length / 2))
++			matched.size >= Math.ceil(tokens.length / 2)
+ 		) {
+ 			score += b.isWinner ? 2 : 0;
+ 			score += Math.min(b.voteCount ?? 0, 20) * 0.05;

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.93",
+		type: "fixed",
+		summary:
+			"searchHackathonBuilds matches the packages a build's repo declares: q=passkey&winnersOnly=1 lists Tukar and DeFi Quest, whose repos declare passkey-kit, where it listed none. Packages of the five libraries more than a tenth of read repos declare (Stellar JS SDK, Soroban Rust SDK, Freighter API, Stellar Wallets Kit, x402) do not count.",
+		detail:
+			"On searchHackathonBuilds only, a query word now also matches a package in a build's `stack` (read repos only); matchedTerms names the word, and `stack` shows the package. meta.counts.entries uses the same matching, so where q matches a package it can exceed analyze's total for the same filters. Of the 1,013 repos read on 2026-10-23, 77% declare the Stellar JS SDK, 66% the Soroban Rust SDK, 36% the Freighter API, 27% Stellar Wallets Kit and 12% x402; the next, @stellar/design-system, 5%. q=passkey matches 15 builds, was 4. A word inside a package name counts, so wallet matches stellar-hd-wallet, sdk matches @defindex/sdk, and tooling packages answer plain words too (design and system match @stellar/design-system, xdr the XDR packages, utils stellar-contract-utils). Measured by replaying all 1,344 stored submissions with each idea's live meaning scores (1.9.91): on 140 labeled ideas no build graded the same idea left the matched list or the top 20, in keyword or hybrid mode. Prior art (vetIdea, and the vet blocks of hackathonBrief, scfPitch and reviewSubmission), hackathonBrief's builds and analyzeHackathonSubmissions' q do not match packages and are unchanged: on the 140 ideas their rankings are identical, row for row. Matched there too, packages changed vetIdea's five for 3 of the 140 ideas, adding 3 builds a blind labeler graded not prior art and moving a same-idea build to sixth. Unchanged: a build named for one word of a longer query is still listed (q=quantum llama sandwich lists 2); holding name matches to the half-of-words rule removed 8 same-idea builds from labeled ideas' keyword matches, so it did not ship.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.92",
 		type: "fixed",
 		summary:

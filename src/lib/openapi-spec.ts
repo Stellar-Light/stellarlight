@@ -3620,7 +3620,7 @@ export const spec: OpenAPISpec = {
 				},
 				parameters: [
 					...buildFilterParams(
-						"Topic to search build names + descriptions (prior-art lookup).",
+						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup).",
 						"hybrid",
 					),
 					{
@@ -3706,7 +3706,7 @@ export const spec: OpenAPISpec = {
 														entries: {
 															type: "integer",
 															description:
-																"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched.",
+																"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze.",
 														},
 														returned: { type: "integer" },
 													},
@@ -3806,7 +3806,7 @@ export const spec: OpenAPISpec = {
 														type: "array",
 														items: { type: "string" },
 														description:
-															"Which query terms this build matched — the evidence behind its inclusion.",
+															"Which query terms this build matched: the evidence behind its inclusion. A term matches in the name, summary, track, award or a package in `stack`, except the Stellar JS SDK, Soroban Rust SDK, Freighter API, Stellar Wallets Kit and x402 packages, which more than a tenth of read repos declare. A package says what a build was made with, not what it does, so only this operation matches packages: prior art in vetIdea and hackathonBrief, and analyzeHackathonSubmissions' q, read the text alone.",
 													},
 													similarity: {
 														type: "number",
@@ -4012,7 +4012,7 @@ export const spec: OpenAPISpec = {
 						schema: { type: "integer", default: 10, maximum: 30 },
 					},
 					...buildFilterParams(
-						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches. Empty = every submission.",
+						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. Empty = every submission.",
 						"keyword",
 					),
 				],

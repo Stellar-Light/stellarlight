@@ -1,0 +1,24 @@
+--- base/src/lib/hackathon-builds.ts
++++ K1W/src/lib/hackathon-builds.ts
+@@ -594,7 +594,11 @@
+ /** A term of three letters or fewer ("ai", "zk", "nft") matches as a whole
+  * word only: as a substring, "ai" hit every "chain", "paid" and "maintain". */
+ function termMatcher(v: string): (hay: string) => boolean {
+-	if (v.length > 3) return (hay) => hay.includes(v);
++	if (v.length > 5) return (hay) => hay.includes(v);
++	if (v.length > 3) {
++		const re = new RegExp(`\\b${v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`);
++		return (hay) => re.test(hay);
++	}
+ 	const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ 	const re = new RegExp(`\\b${escaped}\\b`);
+ 	return (hay) => re.test(hay);
+@@ -731,7 +735,7 @@
+ 		}
+ 		if (
+ 			score > 0 &&
+-			(nameMatched || matched.size >= Math.ceil(tokens.length / 2))
++			matched.size >= Math.ceil(tokens.length / 2)
+ 		) {
+ 			score += b.isWinner ? 2 : 0;
+ 			score += Math.min(b.voteCount ?? 0, 20) * 0.05;

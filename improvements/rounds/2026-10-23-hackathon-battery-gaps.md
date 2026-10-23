@@ -221,3 +221,25 @@ contract:check` exit 0; `pnpm raven:gate` exit 0, ACCEPT 1.9.92; biome
 check (formatter, linter off) on every changed ts and json file clean; the
 scripts ratchet GREEN. Verified only after deploy, by someone other than
 the author, with the live checks above.
+
+## Live verification (orchestrator, not the author)
+
+#1856 merged as 4430f803; https://www.stellarlight.xyz served apiVersion
+1.9.92 at 01:57:01Z on 2026-10-23. The live checks above, run read-only:
+13 of 13 pass.
+- 1: `value=soroban-sdk` counts 682 under Soroban Rust SDK, the same as
+  `value=Soroban Rust SDK`, with no warning; `facet=package&value=no-such-pkg`
+  warns.
+- 2: `type=on-off-ramp&region=latam` lists Etherfuse, CLPX, Anclap and Bitso;
+  `region=asia` is empty and points to `type=anchor`.
+- 3 and 8b: the spec carries both texts.
+- 4: both HackMeridian events are `curated`, and the note names them.
+- 5: `hackmeridian-2024` names hackmeridian-2026 and hackmeridian-2025;
+  `stellar-qqq-zzz` names none; `stellar-defi-summit-2024` names only
+  stellar-builder-summit-2026.
+- 6: `builds?category=RWA` serves matched 64 and entries 65, and analyze's
+  RWA count is 65. Correction to check 6 above: that count is
+  `total.values[0].builds` for `value=RWA`; `total.builds` is the field size
+  (1371).
+- 7: categoryNote served with a null categoryContext.
+- 8a: `sdfSkills.lastUpdatedAt` is 2026-10-21T14:31:05.000Z.

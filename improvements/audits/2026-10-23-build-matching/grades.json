@@ -1,0 +1,79 @@
+{
+	"about": "Blind grades for the builds the first version (commit ae098cd1, packages matched everywhere) added to or removed from vetIdea's five or the brief's picks that no earlier label covered; the shipped version changes neither. The labeler read only a sheet: rubric v1 of ../2026-10-22-prior-art-precision/labels.json, then per row the idea, the build's name, event and description cut to 600 characters, shuffled, with no status, rank, score or stack. Draft labels, owner review pending.",
+	"labeler": "Claude Sonnet 5.5, effort high",
+	"rubric": "v1: 2 same idea, 1 related, 0 not prior art; when torn, the stricter grade; judged from name and description only",
+	"grades": [
+		{
+			"set": "short",
+			"ideaId": "passkey wallet",
+			"buildId": "dorahacks-buidl-45967",
+			"name": "TalkToStellar",
+			"change": "vet and brief gained",
+			"grade": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "passkey wallet",
+			"buildId": "dorahacks-buidl-45983",
+			"name": "Stellaro",
+			"change": "vet and brief gained",
+			"grade": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "passkey wallet",
+			"buildId": "dorahacks-buidl-45981",
+			"name": "Prism",
+			"change": "vet and brief gained",
+			"grade": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "soroban sdk",
+			"buildId": "dorahacks-buidl-46202",
+			"name": "Ponte Pay",
+			"change": "vet and brief gained",
+			"grade": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin wallet for remittances",
+			"buildId": "dorahacks-buidl-32591",
+			"name": "KaleConnect",
+			"change": "vet and brief gained",
+			"grade": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin wallet for remittances",
+			"buildId": "dorahacks-buidl-24819",
+			"name": "StellarRemit",
+			"change": "vet and brief lost",
+			"grade": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "an overcollateralized stablecoin for lending",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"change": "brief gained",
+			"grade": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "an overcollateralized stablecoin for lending",
+			"buildId": "dorahacks-buidl-27454",
+			"name": "BlendScore",
+			"change": "brief lost",
+			"grade": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i13",
+			"buildId": "dorahacks-buidl-42656",
+			"name": "clevercon",
+			"change": "brief lost",
+			"grade": 0
+		}
+	]
+}

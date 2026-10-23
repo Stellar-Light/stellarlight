@@ -686,6 +686,58 @@ describe("what a build's repo declares", () => {
 		expect(d.stackReadAt).toBeNull();
 		expect(d.repoMissingAt).toBe("2026-10-05T00:00:00.000Z");
 	});
+
+	// The 2026-10-22 battery: q=passkey&winnersOnly=1 found no winner, though
+	// Tukar's repo declares passkey-kit.
+	it("matches a package the repo declares when asked, never as the build's own words", () => {
+		const tukar = indexedFromStored(
+			stored({
+				name: "Tukar",
+				vision: "Cross-border transfers in local currencies.",
+				isWinner: true,
+				stack: ["passkey-kit", "@blend-capital/blend-sdk", "soroban-sdk"],
+				stackReadAt: "2026-10-05T00:00:00.000Z",
+			}),
+		);
+		const out = searchHackathonBuilds([tukar], "passkey", {
+			winnersOnly: true,
+			packages: true,
+		});
+		expect(out.map((s) => [s.b.name, s.matched, s.textShare])).toEqual([
+			["Tukar", ["passkey"], 0],
+		]);
+		expect(
+			searchHackathonBuilds([tukar], "passkey-kit", { packages: true }),
+		).toHaveLength(1);
+		// Prior art and analyze do not ask: a package is not what a build does.
+		expect(searchHackathonBuilds([tukar], "passkey")).toEqual([]);
+	});
+
+	it("leaves out the libraries most repos declare, and a stack not read", () => {
+		const common = indexedFromStored(
+			stored({
+				vision: "Pay per call.",
+				stack: [
+					"@stellar/stellar-sdk",
+					"soroban-sdk",
+					"@stellar/freighter-api",
+					"@creit.tech/stellar-wallets-kit",
+					"@x402/fetch",
+				],
+				stackReadAt: "2026-10-05T00:00:00.000Z",
+			}),
+		);
+		const unread = indexedFromStored(
+			stored({ vision: "Pay per call.", stack: ["passkey-kit"] }),
+		);
+		for (const q of ["soroban", "freighter", "wallets", "x402", "sdk"])
+			expect(searchHackathonBuilds([common], q, { packages: true })).toEqual(
+				[],
+			);
+		expect(
+			searchHackathonBuilds([unread], "passkey", { packages: true }),
+		).toEqual([]);
+	});
 });
 
 describe("package filter", () => {

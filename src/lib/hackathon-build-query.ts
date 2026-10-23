@@ -271,8 +271,14 @@ export async function queryBuilds(
 	indexed: IndexedBuild[],
 	f: BuildFilters,
 	/** searchHackathonBuilds: one result per submission. analyze leaves it
-	 * off and counts every event entry (sls-092). */
-	opts: { perSubmission?: boolean; countEntries?: boolean } = {},
+	 * off and counts every event entry (sls-092). `packages`: q also matches
+	 * declared packages; only the searchHackathonBuilds route passes it.
+	 * `countEntries`: also count matching event entries (meta.counts.entries). */
+	opts: {
+		perSubmission?: boolean;
+		packages?: boolean;
+		countEntries?: boolean;
+	} = {},
 ): Promise<BuildQuery> {
 	const structural = {
 		winnersOnly: f.winnersOnly,
@@ -328,12 +334,17 @@ export async function queryBuilds(
 		...structural,
 		mode: served,
 		semantic,
+		packages: opts.packages,
 	});
 	return {
 		scored,
 		field,
 		served,
 		warnings,
-		entries: entriesOf(f.q, scored, { mode: served, semantic }),
+		entries: entriesOf(f.q, scored, {
+			mode: served,
+			semantic,
+			packages: opts.packages,
+		}),
 	};
 }

@@ -1,0 +1,159 @@
+before: base; after: W
+capture: api 1.9.91 -> 1.9.91, 2026-10-23T01:14:29.183Z to 2026-10-23T01:24:27.460Z; corpus 1344
+
+== Labeled builds graded 2 (same idea): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 99 | 58 -> 57 | 51 -> 51 | 29 -> 29
+40 working | hybrid | 99 | 95 -> 95 | 78 -> 78 | 45 -> 45
+40 holdout | keyword | 19 | 8 -> 8 | 8 -> 8 | 7 -> 7
+40 holdout | hybrid | 19 | 16 -> 16 | 15 -> 15 | 11 -> 11
+short | keyword | 73 | 71 -> 71 | 70 -> 70 | 62 -> 63
+short | hybrid | 73 | 73 -> 73 | 73 -> 73 | 72 -> 72
+tests | keyword | 3 | 1 -> 1 | 1 -> 1 | 1 -> 1
+tests | hybrid | 3 | 3 -> 3 | 3 -> 3 | 3 -> 3
+fresh | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+  LOST matched | 40 working keyword | i28 "zero-knowledge multiplayer game with hidden inform" | DeegaGames ZK (rank 22 -> none)
+  gained top 5 | 40 working hybrid | i01 "AI agent that pays for API calls with USDC using x" | AgStell (rank 6 -> 4)
+  LOST top 5 | 40 working hybrid | i01 "AI agent that pays for API calls with USDC using x" | Stellar Agent Gateway - x402 Micropayment Marketplace for AI (rank 4 -> 6)
+  gained top 5 | short keyword | event ticketing "event ticketing" | TicketReal (rank 6 -> 5)
+
+== Labeled builds graded 1 (related): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 249 | 104 -> 102 | 82 -> 81 | 46 -> 47
+40 working | hybrid | 249 | 213 -> 213 | 145 -> 146 | 64 -> 64
+40 holdout | keyword | 100 | 42 -> 39 | 41 -> 38 | 26 -> 26
+40 holdout | hybrid | 100 | 82 -> 81 | 71 -> 68 | 33 -> 35
+short | keyword | 65 | 61 -> 61 | 55 -> 53 | 51 -> 49
+short | hybrid | 65 | 65 -> 65 | 65 -> 63 | 63 -> 61
+tests | keyword | 6 | 4 -> 4 | 4 -> 4 | 4 -> 4
+tests | hybrid | 6 | 6 -> 6 | 6 -> 6 | 6 -> 6
+fresh | keyword | 15 | 9 -> 8 | 9 -> 8 | 9 -> 8
+fresh | hybrid | 15 | 15 -> 15 | 15 -> 15 | 15 -> 15
+  gained top 5 | 40 working keyword | i01 "AI agent that pays for API calls with USDC using x" | TollPay (rank 6 -> 5)
+  LOST matched | 40 working keyword | i22 "AI shopping agent that pays merchants on behalf of" | MagentiX (rank 23 -> none)
+  gained top 5 | 40 working keyword | i34 "peer-to-peer lending with on-chain credit scores" | Riskon (rank 6 -> 5)
+  LOST top 5 | 40 working keyword | i34 "peer-to-peer lending with on-chain credit scores" | Vyn (rank 5 -> 6)
+  LOST matched | 40 working keyword | i34 "peer-to-peer lending with on-chain credit scores" | RemitLend (rank 8 -> none)
+  LOST top 20 | 40 working keyword | i34 "peer-to-peer lending with on-chain credit scores" | RemitLend (rank 8 -> none)
+  LOST top 20 | 40 working hybrid | i01 "AI agent that pays for API calls with USDC using x" | clevercon (rank 20 -> 21)
+  gained top 20 | 40 working hybrid | i01 "AI agent that pays for API calls with USDC using x" | Stellar Autopay X402 (rank 23 -> 18)
+  gained top 20 | 40 working hybrid | i14 "zero-knowledge proof of income without revealing s" | Tecta - ZK-Proof Powered Payroll for Enterprise (rank 21 -> 20)
+  gained top 20 | 40 working hybrid | i22 "AI shopping agent that pays merchants on behalf of" | clevercon (rank 21 -> 20)
+  LOST top 20 | 40 working hybrid | i22 "AI shopping agent that pays merchants on behalf of" | MagentiX (rank 13 -> 43)
+  gained top 5 | 40 working hybrid | i25 "stablecoin savings app that earns yield" | KipuFi (rank 6 -> 5)
+  LOST top 5 | 40 working hybrid | i25 "stablecoin savings app that earns yield" | OrbitSave (rank 5 -> 6)
+  gained top 5 | 40 working hybrid | i34 "peer-to-peer lending with on-chain credit scores" | StellarTrust (rank 6 -> 5)
+  LOST top 5 | 40 working hybrid | i34 "peer-to-peer lending with on-chain credit scores" | RemitLend (rank 5 -> 10)
+  gained top 5 | 40 holdout keyword | i03 "cross-border remittance app cashing out through lo" | Private cross-border payments on Stellar with zero-knowledge (rank 6 -> 5)
+  LOST matched | 40 holdout keyword | i06 "DEX aggregator that routes swaps across Stellar AM" | ClearSwap (rank 7 -> none)
+  LOST top 20 | 40 holdout keyword | i06 "DEX aggregator that routes swaps across Stellar AM" | ClearSwap (rank 7 -> none)
+  LOST matched | 40 holdout keyword | i30 "supply chain traceability for agricultural product" | ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. (rank 6 -> none)
+  LOST top 20 | 40 holdout keyword | i30 "supply chain traceability for agricultural product" | ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. (rank 6 -> none)
+  LOST matched | 40 holdout keyword | i30 "supply chain traceability for agricultural product" | LotChain (rank 5 -> none)
+  LOST top 20 | 40 holdout keyword | i30 "supply chain traceability for agricultural product" | LotChain (rank 5 -> none)
+  LOST top 5 | 40 holdout keyword | i30 "supply chain traceability for agricultural product" | LotChain (rank 5 -> none)
+  LOST top 20 | 40 holdout hybrid | i03 "cross-border remittance app cashing out through lo" | AnchorFX (rank 20 -> 22)
+  gained top 5 | 40 holdout hybrid | i12 "merchant QR code payments for small shops" | Airpay (rank 6 -> 5)
+  LOST matched | 40 holdout hybrid | i30 "supply chain traceability for agricultural product" | ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. (rank 14 -> none)
+  LOST top 20 | 40 holdout hybrid | i30 "supply chain traceability for agricultural product" | ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. (rank 14 -> none)
+  LOST top 20 | 40 holdout hybrid | i30 "supply chain traceability for agricultural product" | LotChain (rank 8 -> 23)
+  gained top 5 | 40 holdout hybrid | i30 "supply chain traceability for agricultural product" | CertiForest (rank 6 -> 5)
+  LOST top 20 | short keyword | chess game "chess game" | Divine Wrath (rank 1 -> 59)
+  LOST top 5 | short keyword | chess game "chess game" | Divine Wrath (rank 1 -> 59)
+  LOST top 20 | short keyword | play to earn "play to earn" | Stellar Odyssey (rank 3 -> 57)
+  LOST top 5 | short keyword | play to earn "play to earn" | Stellar Odyssey (rank 3 -> 57)
+  LOST top 20 | short hybrid | chess game "chess game" | Divine Wrath (rank 1 -> 59)
+  LOST top 5 | short hybrid | chess game "chess game" | Divine Wrath (rank 1 -> 59)
+  LOST top 20 | short hybrid | play to earn "play to earn" | Stellar Odyssey (rank 3 -> 57)
+  LOST top 5 | short hybrid | play to earn "play to earn" | Stellar Odyssey (rank 3 -> 57)
+  LOST matched | fresh keyword | f30 "DAO tool that lets members delegate votes to exper" | VeilVote (rank 1 -> none)
+  LOST top 20 | fresh keyword | f30 "DAO tool that lets members delegate votes to exper" | VeilVote (rank 1 -> none)
+  LOST top 5 | fresh keyword | f30 "DAO tool that lets members delegate votes to exper" | VeilVote (rank 1 -> none)
+
+== vetIdea's five and the brief's picks (hybrid), every change ==
+  vet lost | 40 i01 | Stellar Agent Gateway - x402 Micropayment Marketplace for AI (grade 2)
+  vet gained | 40 i01 | AgStell (grade 2)
+  brief lost | 40 i01 | Stellar Agent Gateway - x402 Micropayment Marketplace for AI (grade 2)
+  brief gained | 40 i01 | AgStell (grade 2)
+  vet gained | 40 i12 | Airpay (grade 1)
+  brief gained | 40 i12 | Airpay (grade 1)
+  vet lost | 40 i25 | OrbitSave (grade 1)
+  vet gained | 40 i25 | KipuFi (grade 1)
+  brief lost | 40 i25 | OrbitSave (grade 1)
+  brief gained | 40 i25 | KipuFi (grade 1)
+  vet lost | 40 i30 | AgroChain LATAM (grade 0)
+  vet gained | 40 i30 | CertiForest (grade 1)
+  brief lost | 40 i30 | AgroChain LATAM (grade 0)
+  brief gained | 40 i30 | CertiForest (grade 1)
+  vet lost | 40 i34 | RemitLend (grade 1)
+  vet gained | 40 i34 | StellarTrust (grade 1)
+  brief lost | 40 i34 | RemitLend (grade 1)
+  brief gained | 40 i34 | StellarTrust (grade 1)
+  vet lost | short chess game | Divine Wrath (grade 1)
+  brief lost | short chess game | Divine Wrath (grade 1)
+  vet lost | short play to earn | Stellar Odyssey (grade 1)
+  vet gained | short play to earn | Stellar Tea (grade unlabeled)
+  brief lost | short play to earn | Stellar Odyssey (grade 1)
+  brief gained | short play to earn | Stellar Tea (grade unlabeled)
+  vet lost | tests an overcollateralized stablecoin for lending | BlendScore (grade unlabeled)
+  vet gained | tests an overcollateralized stablecoin for lending | Steal-App (grade unlabeled)
+  brief lost | tests an overcollateralized stablecoin for lending | BlendScore (grade unlabeled)
+  brief gained | tests an overcollateralized stablecoin for lending | Steal-App (grade unlabeled)
+  vet lost | fresh f04 | deedao (grade 0)
+  brief lost | fresh f04 | deedao (grade 0)
+  vet lost | fresh f05 | Poison-Game (grade 0)
+  brief lost | fresh f05 | Poison-Game (grade 0)
+  vet lost | fresh f28 | LumenSure - Private Proof-Backed Insurance Payouts on Stella (grade 0)
+  brief lost | fresh f28 | LumenSure - Private Proof-Backed Insurance Payouts on Stella (grade 0)
+
+== nonsense: builds returned, before -> after ==
+purple elephant trampoline | keyword | 0 -> 0
+purple elephant trampoline | hybrid | 0 -> 0
+volcano knitting subscription | keyword | 1 -> 1
+volcano knitting subscription | hybrid | 1 -> 1
+haunted spoon orchestra | keyword | 1 -> 1
+haunted spoon orchestra | hybrid | 1 -> 1
+telepathic cactus insurance | keyword | 2 -> 2
+telepathic cactus insurance | hybrid | 2 -> 2
+submarine pancake festival | keyword | 0 -> 0
+submarine pancake festival | hybrid | 0 -> 0
+invisible giraffe tax | keyword | 0 -> 0
+invisible giraffe tax | hybrid | 0 -> 0
+moon cheese lottery | keyword | 2 -> 2
+moon cheese lottery | hybrid | 2 -> 2
+dancing penguin mortgage | keyword | 0 -> 0
+dancing penguin mortgage | hybrid | 0 -> 0
+banana origami parliament | keyword | 0 -> 0
+banana origami parliament | hybrid | 0 -> 0
+time travel sock exchange | keyword | 9 -> 9
+time travel sock exchange | hybrid | 9 -> 9
+underwater bicycle courier | keyword | 0 -> 0
+underwater bicycle courier | hybrid | 0 -> 0
+whispering teapot ledger | keyword | 4 -> 4
+whispering teapot ledger | hybrid | 4 -> 4
+glitter dinosaur karaoke | keyword | 0 -> 0
+glitter dinosaur karaoke | hybrid | 0 -> 0
+sleepy walrus accountant | keyword | 0 -> 0
+sleepy walrus accountant | hybrid | 1 -> 1
+cosmic broccoli wrestling league | keyword | 1 -> 1
+cosmic broccoli wrestling league | hybrid | 1 -> 1
+total | keyword 20 -> 20 | hybrid 21 -> 21
+
+== probe: builds returned, before -> after ==
+quantum llama sandwich | keyword | 2 -> 1 | removed: MellaMate [llama]
+    after, top 5: Quantum Shield Exchange [quantum]
+quantum llama sandwich | hybrid | 2 -> 1 | removed: MellaMate [llama]
+    after, top 5: Quantum Shield Exchange [quantum]
+
+== passkey: builds returned, before -> after ==
+passkey (winnersOnly) | keyword | 0 -> 0
+    after, top 5: 
+passkey (winnersOnly) | hybrid | 0 -> 0
+    after, top 5: 
+passkey | keyword | 4 -> 4
+    after, top 5: Passkey-Kit integration [passkey]; Buckspay SDK [passkey]; Tornado-style privacy pools on Stellar Soroban [passkey]; lumengate [passkey]
+passkey | hybrid | 4 -> 4
+    after, top 5: Passkey-Kit integration [passkey]; Buckspay SDK [passkey]; Tornado-style privacy pools on Stellar Soroban [passkey]; lumengate [passkey]
+
+grade-2 builds lost from the matched list or the top 20 (the ship criterion): 1
