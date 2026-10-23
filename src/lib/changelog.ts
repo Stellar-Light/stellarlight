@@ -33,7 +33,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
-		version: "spec@1.9.96",
+		version: "spec@1.9.95",
 		type: "fixed",
 		summary:
 			"A hackathon submission whose GitHub repo was renamed or transferred now links to the directory project that lists the repo it moved to (`project.basis: moved-repo`), or by owner and name read on that repo (`moved-owner-and-name`). clevercon (2nd place, Stellar Hacks: Agents) links to CleverCon once the sync lane next runs; no other link changes.",
