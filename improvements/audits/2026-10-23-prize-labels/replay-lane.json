@@ -1,0 +1,190 @@
+{
+ "capturedNow": "2026-10-23T20:45:00.000Z",
+ "results": {
+  "event/stellar-hacks-zk": {
+   "status": 200,
+   "chars": 213786,
+   "sha256": "6302aae90043d993a22c37362a7c1bd9433561a49ca67fc27bc08bfcff75340b"
+  },
+  "builds?hackathon=stellar-hacks-zk&limit=100&offset=0": {
+   "status": 200,
+   "chars": 79318,
+   "sha256": "10cd7887b8d74e699d9a4fa6a7b5376ba4659fc6f4bfa132c31b92af3dd5ff45"
+  },
+  "builds?hackathon=stellar-hacks-zk&limit=100&offset=100": {
+   "status": 200,
+   "chars": 79319,
+   "sha256": "24fee114abfbc42d477a4e65235a73ca647431da78757f0c45483ee0f2000f4e"
+  },
+  "builds?hackathon=stellar-hacks-zk&limit=100&offset=200": {
+   "status": 200,
+   "chars": 79283,
+   "sha256": "78dc058a0e84f5965621d56d4fed3df44be6041b7923172a8992319ed11631a8"
+  },
+  "builds?hackathon=stellar-hacks-zk&limit=100&offset=300": {
+   "status": 200,
+   "chars": 16223,
+   "sha256": "e43ff5c8187ab6ae3cbd3aa447eb2682a3f27a43e11c70b47e042a374fe9ddbf"
+  },
+  "event/stellar-agents-x402-stripe-mpp": {
+   "status": 200,
+   "chars": 175172,
+   "sha256": "6e1ec2bb137f5ef0d927db45bce5ad12a707d5c057dc08802931f4455f9d3825"
+  },
+  "builds?hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=0": {
+   "status": 200,
+   "chars": 81651,
+   "sha256": "d4fd0cfd5ef677ff86ba73a8ed0b7b71ce0f27c60ddf4aee2db7e0f865d5e881"
+  },
+  "builds?hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=100": {
+   "status": 200,
+   "chars": 82628,
+   "sha256": "cd50afd32b2ba760166ea70ab0df0d0a4da54fef66803e498fd2588d95855822"
+  },
+  "builds?hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=200": {
+   "status": 200,
+   "chars": 40032,
+   "sha256": "5e92b1a5c3725be7a22ea83c7ac7042fb0d2cc313d999492c6e3e806b0b5d575"
+  },
+  "event/scaffoldstellar": {
+   "status": 200,
+   "chars": 45492,
+   "sha256": "6e61fa357225092b69a7018111988b6938677fd339dcdd7df84400d53da5f9e2"
+  },
+  "builds?hackathon=scaffoldstellar&limit=100&offset=0": {
+   "status": 200,
+   "chars": 51244,
+   "sha256": "0357c0bb9ac1bc7ddadcd17bb5cf80d70e9d630e7fbd9c7ee02fdad036bdc214"
+  },
+  "event/stellar-hacks-blend": {
+   "status": 200,
+   "chars": 34678,
+   "sha256": "394ba6dfd2c0e908a89dffb3cc26476a20066ef9a6df7a0eee9bb352352c4580"
+  },
+  "builds?hackathon=stellar-hacks-blend&limit=100&offset=0": {
+   "status": 200,
+   "chars": 29524,
+   "sha256": "d0525d1c54ba51be85ac695dd23682cfde26bcae452a6a993090ceb14eb707a9"
+  },
+  "event/stellar-hacks-kale-reflector": {
+   "status": 200,
+   "chars": 44984,
+   "sha256": "c69ce07882d8a3029a606be40034aa86f78254b8a6a553d15d3186c5050e193b"
+  },
+  "builds?hackathon=stellar-hacks-kale-reflector&limit=100&offset=0": {
+   "status": 200,
+   "chars": 36452,
+   "sha256": "1e060673bd404c8132f752e5026703c15c78a3beb8da3d2f2af2adff68987b9f"
+  },
+  "event/stellar-hacks-paltalabs": {
+   "status": 200,
+   "chars": 30519,
+   "sha256": "c58ca2badbff172f711dea6ffe88eb4d68ee9218e9b68a7967d2b113edbae58d"
+  },
+  "builds?hackathon=stellar-hacks-paltalabs&limit=100&offset=0": {
+   "status": 200,
+   "chars": 19836,
+   "sha256": "5e406594fb030593b41803b0bd25eb7eae71c144a107e01a49c7a6f76b94989e"
+  },
+  "event/build-on-stellar": {
+   "status": 200,
+   "chars": 57816,
+   "sha256": "476bff74500045a58c7abbf74d5c43889461f58d216cfdda48bdfbc1f6cd8449"
+  },
+  "builds?hackathon=build-on-stellar&limit=100&offset=0": {
+   "status": 200,
+   "chars": 58906,
+   "sha256": "bb845e97d027e1740e67944efb182d0f7c8a76e65b1acfc0844d924dae90751e"
+  },
+  "event/stellar-hacks-zk-gaming": {
+   "status": 200,
+   "chars": 74594,
+   "sha256": "951e251949ea9b4ea2f140b8a15b4b652f5831fde691c3a20687ffdb84efa98e"
+  },
+  "builds?hackathon=stellar-hacks-zk-gaming&limit=100&offset=0": {
+   "status": 200,
+   "chars": 76533,
+   "sha256": "8f3a2dd54b7f063d51b876b15e814592682aa379bf4890494463e5e8a4d07060"
+  },
+  "event/buildonstellarchile": {
+   "status": 200,
+   "chars": 41384,
+   "sha256": "e6ff2c69a3444a362266c0090c08a618c811abbca8d8b06337fec3aaf75e3768"
+  },
+  "builds?hackathon=buildonstellarchile&limit=100&offset=0": {
+   "status": 200,
+   "chars": 31609,
+   "sha256": "f47e43c1c1db83369980067d0c76c279c1955020cbd6188e72b6752270bb8a0f"
+  },
+  "event/stellar-latam": {
+   "status": 200,
+   "chars": 27383,
+   "sha256": "7153ac2f013b6325a43b903951c1a3d1862a2ca8996222433ccf4da8a942c5ae"
+  },
+  "builds?hackathon=stellar-latam&limit=100&offset=0": {
+   "status": 200,
+   "chars": 18464,
+   "sha256": "81285e99e3d98d0c06f63ba225e8d4c300dc798bc01b5783742fde7a57a3e5eb"
+  },
+  "builds?winnersOnly=1&limit=100": {
+   "status": 200,
+   "chars": 47081,
+   "sha256": "e9ca7996229c50640e1528c29c5848074a7e26a290e3a07e31b8e06decace42b"
+  },
+  "builds?q=xlm%20prize&hackathon=stellar-hacks-zk&limit=100": {
+   "status": 200,
+   "chars": 12210,
+   "sha256": "56dcf2170f2d2f5ceec1d778c2bb023876b501db0d59ec695c75f8deeaf3ed60"
+  },
+  "build/dorahacks-buidl-46541": {
+   "status": 200,
+   "chars": 2828,
+   "sha256": "b4970dc82a717c04565464d816e0fb1c2c17dcf749bdfee72cd7be9401ab3661"
+  },
+  "build/dorahacks-buidl-42585": {
+   "status": 200,
+   "chars": 5879,
+   "sha256": "1f49b4cff82d71e115df6093cd2ebbe37037e4f0c7aa626828c267d11776dc4b"
+  },
+  "build/dorahacks-buidl-36328": {
+   "status": 200,
+   "chars": 2984,
+   "sha256": "f5e9e8a3d389fab651d15bba77532b7cabe434d6442ccc5a47d33e7a38f34941"
+  },
+  "build/dorahacks-buidl-27456": {
+   "status": 200,
+   "chars": 7049,
+   "sha256": "746ec829f5bfc5c6d58d5ef7d8886a3965ed0a7b506175262cb6cf6fd8114667"
+  },
+  "build/dorahacks-buidl-32712": {
+   "status": 200,
+   "chars": 2545,
+   "sha256": "f8a899e499d749027020a9535b6361f158034590883039bdaee36df63d12e2e3"
+  },
+  "build/dorahacks-buidl-30677": {
+   "status": 200,
+   "chars": 7012,
+   "sha256": "49017d61543d8c29cfc8df0f5df394747e5c4a5fcbe681360e484107922201d2"
+  },
+  "build/dorahacks-buidl-25335": {
+   "status": 200,
+   "chars": 7703,
+   "sha256": "63f29df56ca0b420cfac4cba93ba9421bb4e5a414073c1cf74300b70d47b6bfa"
+  },
+  "build/dorahacks-buidl-39840": {
+   "status": 200,
+   "chars": 3524,
+   "sha256": "a63fd46428d9d991a77fb95498adc172fed6f32cdb23a4728ef98dae035ebeba"
+  },
+  "build/dorahacks-buidl-40191": {
+   "status": 200,
+   "chars": 3837,
+   "sha256": "e449be91534f6a8e18c7aab2e4571ddbb7c589cfe21110dfe7c458b00c8699d8"
+  },
+  "build/dorahacks-buidl-28436": {
+   "status": 200,
+   "chars": 2479,
+   "sha256": "c3b733eb4b2ac3ce2d845c81d8a9bffefae60cac75ecd797cebf8ed9960b5c67"
+  }
+ }
+}

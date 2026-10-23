@@ -223,3 +223,52 @@ describe("how crowded a category is, across every stored submission", () => {
 		}
 	});
 });
+
+describe("a submission placed in an award its event's other placements share", () => {
+	it("serves the award's title as awardCategory, read from the event's winners in the index", async () => {
+		// Stellar Hacks: Agents: five placements in one award, "10K Prize Pool".
+		const s = stored as Record<string, unknown>;
+		const saved = [...index];
+		const placed: Record<string, string> = {
+			"dorahacks-buidl-42585": "5th Place",
+			"dorahacks-buidl-7": "3rd Place",
+		};
+		try {
+			s.award = "10K Prize Pool";
+			index.splice(
+				0,
+				index.length,
+				...saved.map((b) =>
+					placed[b.id]
+						? {
+								...b,
+								hackathonPlacement: placed[b.id],
+								award: "10K Prize Pool",
+							}
+						: b,
+				),
+			);
+			const { body } = await get("link=github.com/rajkaria/toll");
+			const sub = body.review.submission;
+			expect([sub.placement, sub.award, sub.awardCategory]).toEqual([
+				"5th Place",
+				null,
+				"10K Prize Pool",
+			]);
+			expect(sub.entries[0]).toMatchObject({
+				award: null,
+				awardCategory: "10K Prize Pool",
+			});
+			expect(
+				undeclaredInServed(
+					spec,
+					responseSchema(spec, "/api/hackathons/review"),
+					body,
+				),
+			).toEqual([]);
+		} finally {
+			delete s.award;
+			index.splice(0, index.length, ...saved);
+		}
+	});
+});

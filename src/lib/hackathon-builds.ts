@@ -27,6 +27,7 @@ import {
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 	parsePlacement,
+	prizeLabels,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { contentTokens } from "@/lib/repo-search";
@@ -305,7 +306,10 @@ export interface BuildDetail {
 	hackathon: { title: string; slug: string; endedAt: string | null };
 	track: string | null;
 	placement: string | null;
+	/** This entry's own award; null when its text names a category other
+	 * placements share (awardCategory). */
 	award: string | null;
+	awardCategory: string | null;
 	prizeUsd: number | null;
 	isWinner: boolean;
 	/** Present only when the best entry's win is named off DoraHacks. */
@@ -345,6 +349,7 @@ export interface BuildEntry {
 	track: string | null;
 	placement: string | null;
 	award: string | null;
+	awardCategory: string | null;
 	prizeUsd: number | null;
 	isWinner: boolean;
 	/** Present only when a page off DoraHacks names this entry's win. */
@@ -379,7 +384,10 @@ export function onePerSubmission(builds: IndexedBuild[]): IndexedBuild[] {
 	return builds.filter((b) => best.get(b.id) === b);
 }
 
-function entryOf(d: HackathonBuild): BuildEntry {
+function entryOf(
+	d: HackathonBuild,
+	categories: ReadonlySet<string>,
+): BuildEntry {
 	const won = overlayWinner(d.buildId, d.hackathonSlug, !!d.isWinner);
 	const placement = won?.placement ?? d.placement ?? null;
 	return {
@@ -390,7 +398,10 @@ function entryOf(d: HackathonBuild): BuildEntry {
 		},
 		track: d.track ?? null,
 		placement,
-		award: d.award ?? null,
+		...prizeLabels(categories, {
+			award: d.award,
+			hackathon: { slug: d.hackathonSlug },
+		}),
 		prizeUsd: parsePlacement(placement).prizeUsd || null,
 		isWinner: !!d.isWinner || !!won,
 		...(won ? { winnerSource: won.winnerSource } : {}),
@@ -399,14 +410,16 @@ function entryOf(d: HackathonBuild): BuildEntry {
 
 /** One submission from its stored rows, one per event it entered (sls-092:
  * a submission entered in two events is two rows). The top-level event
- * fields are its best entry: a placed one first, then the latest event. */
+ * fields are its best entry: a placed one first, then the latest event.
+ * `categories`: prizeCategories over its events' winners. */
 export function buildDetailFromStored(
 	rows: HackathonBuild[],
+	categories: ReadonlySet<string>,
 	facts?: ProjectFacts,
 ): BuildDetail {
 	// Ordered by the entries as served, so a win named off DoraHacks counts.
 	const key = (r: HackathonBuild) => ({
-		isWinner: entryOf(r).isWinner,
+		isWinner: entryOf(r, categories).isWinner,
 		endedAt: r.endedAt,
 	});
 	const sorted = [...rows].sort((a, b) => entryOrder(key(a), key(b)));
@@ -421,8 +434,8 @@ export function buildDetailFromStored(
 		summary: d.vision ?? null,
 		writeUp: d.description ?? null,
 		selfTags: d.selfTags ?? [],
-		...entryOf(d),
-		entries: sorted.map(entryOf),
+		...entryOf(d, categories),
+		entries: sorted.map((r) => entryOf(r, categories)),
 		links: {
 			dorahacks: d.url,
 			github: d.githubUrl ?? null,

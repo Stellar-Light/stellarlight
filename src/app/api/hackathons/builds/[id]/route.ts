@@ -15,6 +15,7 @@ import {
 	buildDetailFromStored,
 	readProjectFacts,
 } from "@/lib/hackathon-builds";
+import { prizeCategories } from "@/lib/integrations/dorahacks";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { serverTiming } from "@/lib/server-timing";
@@ -58,6 +59,7 @@ export async function GET(
 			startedAt,
 		});
 	let docs: HackathonBuild[] = [];
+	let winners: HackathonBuild[] = [];
 	try {
 		const res = await withReadTimeout(
 			payload.find({
@@ -77,6 +79,28 @@ export async function GET(
 			DEFAULT_READ_TIMEOUT_MS,
 		);
 		docs = res.docs as HackathonBuild[];
+		// Its events' served winners: an award text several placements share
+		// names their category, never this submission's prize. Read, or 503:
+		// never an award served unchecked.
+		if (docs.length)
+			winners = (
+				await withReadTimeout(
+					payload.find({
+						collection: "hackathon-builds",
+						where: {
+							and: [
+								{ hackathonSlug: { in: docs.map((d) => d.hackathonSlug) } },
+								{ isWinner: { equals: true } },
+								{ hiddenUpstream: { not_equals: true } },
+							],
+						},
+						pagination: false,
+						depth: 0,
+						select: { hackathonSlug: true, placement: true, award: true },
+					}),
+					DEFAULT_READ_TIMEOUT_MS,
+				)
+			).docs as HackathonBuild[];
 	} catch {
 		return apiError({
 			status: 503,
@@ -117,7 +141,17 @@ export async function GET(
 				generatedAt: new Date().toISOString(),
 				note: "One stored submission in full. writeUp is the team's own text as published (markdown): a claim about what they built, not evidence that it shipped. Check the repo, the demo and `project`.",
 			},
-			build: buildDetailFromStored(docs, facts),
+			build: buildDetailFromStored(
+				docs,
+				prizeCategories(
+					winners.map((w) => ({
+						award: w.award,
+						hackathonPlacement: w.placement,
+						hackathon: { slug: w.hackathonSlug },
+					})),
+				),
+				facts,
+			),
 		},
 		{ headers: serverTiming(startedAt) },
 	);

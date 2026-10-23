@@ -34,7 +34,11 @@ import {
 } from "@/lib/hackathon-builds";
 import { heldSecurity } from "@/lib/held-repos";
 import { clampLimit, clampOffset } from "@/lib/http-params";
-import { parsePlacement } from "@/lib/integrations/dorahacks";
+import {
+	parsePlacement,
+	prizeCategories,
+	prizeLabels,
+} from "@/lib/integrations/dorahacks";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { serverTiming } from "@/lib/server-timing";
@@ -142,6 +146,9 @@ export async function GET(req: NextRequest) {
 			: textlessEventWarning(ev.inferredFilter, q, scored.length, indexed);
 	if (textless) warnings.push(textless);
 
+	// Award text several placements of one event share names their category,
+	// never one build's prize: read over every event's winners, not the page.
+	const categories = prizeCategories(indexed);
 	const builds = scored
 		.slice(offset, offset + limit)
 		.map(({ b, matched, similarity }) => ({
@@ -154,14 +161,8 @@ export async function GET(req: NextRequest) {
 			endedAt: b.hackathon.endedAt,
 			track: b.track,
 			placement: b.hackathonPlacement,
-			award: b.award,
+			...prizeLabels(categories, b),
 			// What this project actually won, parsed from its own placement string.
-			// `award` is the CATEGORY title and is shared by every placement inside
-			// it: DoraHacks nests prizes under an award_list entry, so all five
-			// winners of Stellar Hacks: Real-World ZK carry award "$10,000 XLM
-			// Prize" while placing 1st ($5,000) through 5th ($750) — the five sum
-			// to that pool. Reading `award` as one winner's prize overstates 3rd
-			// place by 8x and makes the winners sum to 5x the pot.
 			prizeUsd: parsePlacement(b.hackathonPlacement).prizeUsd || null,
 			isWinner: b.isWinner,
 			votes: b.voteCount,
