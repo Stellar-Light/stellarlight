@@ -287,7 +287,7 @@ export const FACETS = {
 	},
 	project: {
 		label:
-			"became a directory project: a project lists the submission's exact repo, or the submission's demo site is the project's own website. A submission we could not link counts as none here, so this is a floor.",
+			"became a directory project, by one of the rules project.basis names: a project lists the submission's exact repo (or the repo it moved to), its demo site is the project's own website, its repo sits under the project's GitHub owner and carries its name, or, for a winner, it carries the name of exactly one project whose SCF page links it or whose website or X account its own page lists. A submission we could not link counts as none here, so this is a floor.",
 		unknown: "link not checked",
 		values: (b) =>
 			b.project === undefined ? null : b.project ? ["directory project"] : [],

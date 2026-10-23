@@ -18,7 +18,10 @@
  *      tags) when it has not been read in the last 30 days
  *   3. the project link: the one directory project that lists the exact repo
  *      (src/lib/hackathon-build-links.ts; a shared GitHub owner never counts),
- *      or the repo it was renamed or transferred to; runs after step 6
+ *      or the repo it was renamed or transferred to; runs after step 6. A
+ *      winner still unlinked and named for exactly one project links when
+ *      the project's SCF page links its DoraHacks page, or its page lists
+ *      the project's website or X account (both pages read here)
  *   4. embeddings for search by meaning, only for rows whose text changed
  *      (voyage-3 via src/lib/embed.ts), and the vector index they need
  *   5. the stack: the Stellar packages each submission's repo declares in its
@@ -64,13 +67,21 @@ import {
 } from "../src/lib/hackathon-build-embedding";
 import {
 	currentRepoFor,
+	indexProjectNames,
 	indexProjectOwners,
 	indexProjectRepos,
 	indexProjectSites,
 	type LinkedProject,
 	linkBuild,
+	linkChangeLine,
+	linkDropReason,
+	type NamedProject,
+	namedCandidate,
+	PAGE_LINK_BASES,
 	type ProjectRepoRow,
+	pageRuleLink,
 	repoFullNameOf,
+	scfSiteUrlsBuidls,
 	siteKeyOf,
 } from "../src/lib/hackathon-build-links";
 import {
@@ -90,6 +101,7 @@ import {
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 import type { HackathonBuild, HackathonEvent } from "../src/payload-types";
+import { rebuildFlight } from "./eval/scf-official";
 import {
 	createGh,
 	fetchRepoActivity,
@@ -399,6 +411,74 @@ events: ${dora.length} Stellar events on DoraHacks, ${read} pages read, ${failed
 	return { read, failed, written: sent.size };
 }
 
+/** Step 3's page rules (src/lib/hackathon-build-links.ts pageRuleLink) for
+ * the winners named for one project that no other rule linked: read the
+ * project's SCF page and the submission's own page (reusing step 2's read),
+ * then link every row of the submission alike. A page that could not be
+ * read decides nothing; pageRuleLink keeps a page link stored for the same
+ * project. Reads run one at a time, 1 s apart. */
+async function linkByPages(
+	named: Map<string, { p: NamedProject; rows: Row[] }>,
+	pageLinks: Map<string, string[] | undefined>,
+	stored: Map<string, HackathonBuild>,
+) {
+	const scfPages = new Map<string, Set<string> | undefined>();
+	const tally = { linked: 0, unread: 0 };
+	for (const [buildId, { p, rows: entries }] of named) {
+		if (p.scfPage && !scfPages.has(p.scfPage)) {
+			await sleep(1000);
+			try {
+				const res = await fetch(p.scfPage, {
+					headers: { "User-Agent": "stellarlight-sync-hackathon-builds" },
+					signal: AbortSignal.timeout(20_000),
+				});
+				// Only the page's own siteUrls record counts; a page without it is
+				// not the page we know how to read (a format change): could not
+				// check, never "links none".
+				const txt = res.ok ? rebuildFlight(await res.text()) : "";
+				scfPages.set(p.scfPage, scfSiteUrlsBuidls(txt));
+			} catch {
+				scfPages.set(p.scfPage, undefined);
+			}
+		}
+		const scfBuidls = p.scfPage ? scfPages.get(p.scfPage) : null;
+		const n = buildId.replace(/^dorahacks-buidl-/, "");
+		// The submission's own page (step 2's read, a 404 included), unless
+		// the SCF page already decided. A 404 or an empty links list is a page
+		// that could not be read: it decides nothing.
+		let listed = pageLinks.get(buildId);
+		if (!pageLinks.has(buildId) && !scfBuidls?.has(n)) {
+			await sleep(1000);
+			try {
+				const d = await fetchBuidlDetail(Number(n));
+				listed = d?.links ?? undefined;
+			} catch {
+				listed = undefined;
+			}
+		}
+		const ev = { scfBuidls, pageLinks: listed };
+		const unread =
+			!scfBuidls?.has(n) && ((!!p.scfPage && !scfBuidls) || !listed?.length);
+		if (unread) tally.unread++;
+		for (const r of entries) {
+			const link = pageRuleLink(buildId, p, ev, stored.get(r.entryKey));
+			if (!link) continue;
+			r.projectSlug = link.slug;
+			r.projectName = link.name;
+			r.projectLinkBasis = link.basis;
+		}
+		const basis =
+			entries[0].projectSlug === p.slug ? entries[0].projectLinkBasis : null;
+		if (basis) tally.linked++;
+		console.log(
+			`  page rules: ${(entries[0].name ?? "").slice(0, 40).padEnd(40)} named for ${p.slug}: ${basis ? `${basis}${basis === "scf-page-and-name" ? ` (${p.scfPage})` : ""}` : "no page says so"}${unread ? " (a page could not be read)" : ""}`,
+		);
+	}
+	console.log(
+		`\npage rules: ${named.size} winners named for exactly one project and linked by no other rule; ${tally.linked} linked; ${tally.unread} with a page that could not be read (a stored page link to the same project kept)`,
+	);
+}
+
 async function main() {
 	const payload = await getPayload({ config: await configPromise });
 	const now = new Date().toISOString();
@@ -497,10 +577,15 @@ async function main() {
 			due.set(r.buildId, [...(due.get(r.buildId) ?? []), r]);
 	}
 	const detail = { read: 0, notFound: 0, failed: 0 };
+	// The links each page read this run lists, by buildId, for step 3's page
+	// rules; undefined for a 404 or a record without its links list (could
+	// not check). A read that threw is left out, so step 3 tries again.
+	const pageLinks = new Map<string, string[] | undefined>();
 	await pool([...due.values()], 3, async (group) => {
 		const id = Number(group[0].buildId.replace(/^dorahacks-buidl-/, ""));
 		try {
 			const d = Number.isFinite(id) ? await fetchBuidlDetail(id) : null;
+			pageLinks.set(group[0].buildId, d?.links ?? undefined);
 			if (!d) {
 				detail.notFound++;
 				return;
@@ -579,6 +664,7 @@ async function main() {
 	let links: Map<string, LinkedProject | null> | null = null;
 	let sites: Map<string, LinkedProject | null> | null = null;
 	let owners: Map<string, LinkedProject[]> | null = null;
+	let names: Map<string, NamedProject | null> | null = null;
 	try {
 		const projects = await payload.find({
 			collection: "projects",
@@ -591,11 +677,14 @@ async function main() {
 				canonicalSlug: true,
 				links: true,
 				github: true,
+				aliases: true,
+				scf: true,
 			},
 		});
 		links = indexProjectRepos(projects.docs as unknown as ProjectRepoRow[]);
 		sites = indexProjectSites(projects.docs as unknown as ProjectRepoRow[]);
 		owners = indexProjectOwners(projects.docs as unknown as ProjectRepoRow[]);
+		names = indexProjectNames(projects.docs as unknown as ProjectRepoRow[]);
 		console.log(
 			`\n${projects.docs.length} directory projects read; ${links.size} repos listed by a project`,
 		);
@@ -605,18 +694,46 @@ async function main() {
 		);
 	}
 	let ambiguous = 0;
-	if (links && sites && owners) {
+	// Every stored link this run leaves unlinked, by entryKey, and why.
+	const dropWhy = new Map<string, string>();
+	if (links && sites && owners && names) {
+		const idx = { repos: links, sites, owners };
+		// A submission that won any of its entries, so all its rows link alike.
+		const won = new Set(
+			[...rows.values()].filter((r) => r.isWinner).map((r) => r.buildId),
+		);
+		const named = new Map<string, { p: NamedProject; rows: Row[] }>();
 		for (const r of rows.values()) {
-			const { project, ambiguous: listedTwice } = linkBuild(r, {
-				repos: links,
-				sites,
-				owners,
-			});
+			const { project, ambiguous: listedTwice } = linkBuild(r, idx);
 			if (listedTwice) ambiguous++;
 			r.projectSlug = project?.slug ?? null;
 			r.projectName = project?.name ?? null;
 			r.projectLinkBasis = project?.basis ?? null;
 			r.linkCheckedAt = now;
+			const p = namedCandidate(
+				{ ...r, isWinner: won.has(r.buildId) },
+				idx,
+				names,
+			);
+			if (p)
+				named.set(r.buildId, {
+					p,
+					rows: [...(named.get(r.buildId)?.rows ?? []), r],
+				});
+		}
+		await linkByPages(named, pageLinks, stored);
+		for (const r of rows.values()) {
+			const old = stored.get(r.entryKey);
+			if (old?.projectSlug && !r.projectSlug)
+				dropWhy.set(
+					r.entryKey,
+					linkDropReason(
+						{ ...r, isWinner: won.has(r.buildId) },
+						old,
+						idx,
+						names,
+					),
+				);
 		}
 	}
 
@@ -885,15 +1002,45 @@ async function main() {
 		.filter((r) => r.projectSlug)
 		.sort((a, b) => Number(!!b.isWinner) - Number(!!a.isWinner));
 	console.log(
-		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, ${linked.filter((r) => r.projectLinkBasis === "owner-and-name").length} by owner and name, ${linked.filter((r) => r.projectLinkBasis?.startsWith("moved-")).length} through a renamed or transferred repo, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
+		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, ${linked.filter((r) => r.projectLinkBasis === "owner-and-name").length} by owner and name, ${linked.filter((r) => r.projectLinkBasis?.startsWith("moved-")).length} through a renamed or transferred repo, ${linked.filter((r) => r.projectLinkBasis === "scf-page-and-name").length} by name and SCF page, ${linked.filter((r) => r.projectLinkBasis === "submission-links-and-name").length} by name and the submission's own links, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
 	);
-	// The newest rules first: links through a moved repo, then owner and name.
+	// Every link change from the diff above, old to new, for every rule; a
+	// stored link left unlinked is named as dropped, with why. A drop never
+	// fails the run: a page edit is a normal reading, read it here.
+	const linkLines = updates
+		.filter(
+			(u) =>
+				u.changed.includes("projectSlug") ||
+				u.changed.includes("projectLinkBasis"),
+		)
+		.map((u) =>
+			linkChangeLine(
+				u.data.entryKey,
+				stored.get(u.data.entryKey) ?? {},
+				u.data,
+				dropWhy.get(u.data.entryKey),
+			),
+		)
+		.filter((l): l is string => !!l);
+	console.log(
+		`link changes: ${linkLines.length} rows; ${linkLines.filter((l) => l.startsWith("  dropped ")).length} stored links dropped`,
+	);
+	for (const l of linkLines) console.log(l);
+	// The newest rules first: page rules, a moved repo, then owner and name.
+	const isPage = (b?: string | null) =>
+		(PAGE_LINK_BASES as readonly unknown[]).includes(b);
 	const rank = (b?: string | null) =>
-		b?.startsWith("moved-") ? 2 : b === "owner-and-name" ? 1 : 0;
+		isPage(b)
+			? 3
+			: b?.startsWith("moved-")
+				? 2
+				: b === "owner-and-name"
+					? 1
+					: 0;
 	linked.sort((a, b) => rank(b.projectLinkBasis) - rank(a.projectLinkBasis));
 	for (const r of linked.slice(0, 80))
 		console.log(
-			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.projectLinkBasis === "owner-and-name" ? `owner+name ${r.githubUrl}` : r.projectLinkBasis?.startsWith("moved-") ? `${r.projectLinkBasis} ${r.repoFullName} now ${r.repoCurrentFullName}` : r.repoFullName} -> ${r.projectSlug}`,
+			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${isPage(r.projectLinkBasis) ? `${r.projectLinkBasis}` : r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.projectLinkBasis === "owner-and-name" ? `owner+name ${r.githubUrl}` : r.projectLinkBasis?.startsWith("moved-") ? `${r.projectLinkBasis} ${r.repoFullName} now ${r.repoCurrentFullName}` : r.repoFullName} -> ${r.projectSlug}`,
 		);
 
 	if (!EXECUTE) {

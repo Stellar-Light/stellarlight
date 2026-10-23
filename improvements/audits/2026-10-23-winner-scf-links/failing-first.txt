@@ -1,0 +1,47 @@
+# src/lib/__tests__/hackathon-winner-links.test.ts (final text, 18 tests) run with the
+# base versions of src/lib/hackathon-build-links.ts, src/lib/integrations/dorahacks.ts
+# and src/lib/openapi-spec.ts (origin/main 85843791) in place:
+#   npx vitest run src/lib/__tests__/hackathon-winner-links.test.ts --maxWorkers=2 --minWorkers=1
+# With this branch's sources: 18 passed.
+
+   × winner names > compares names as one product, a trailing chain word aside 2ms
+   × winner names > indexes names and aliases; a key two projects carry names neither 0ms
+   × winner names > reads only X profile links as an account 0ms
+   × winner names > reads an SCF project page link and the submissions a page links 0ms
+   × which winners the page rules consider > a winner no other rule links, named for exactly one project 0ms
+   × which winners the page rules consider > never a submission that did not win 0ms
+   × which winners the page rules consider > never a name two projects carry, or a name no project carries 0ms
+   × which winners the page rules consider > never a winner another rule links or finds ambiguous 0ms
+   × links the page rules make > links when the project's SCF page links the submission 0ms
+   × links the page rules make > links when the submission's page lists the project's X account or site 0ms
+   × links the page rules make > links nothing on another site, a post, a shared platform or another number 0ms
+   × links the page rules make > a project with no SCF page needs only the submission's page 0ms
+   × links the page rules make > a page it could not read decides nothing: a stored page link to the same project is kept 0ms
+   × links the page rules make > never a submission off DoraHacks 0ms
+   × the page rules' bases are served and declared > serves each page basis on a stored link 0ms
+   × the page rules' bases are served and declared > declares every basis in the spec, with no null, and describes each 0ms
+   × the submission page's own links > reads every link the page lists, once each 0ms
+   × the submission page's own links > a record with no links list is a format it does not know: null, never none 0ms
+ Test Files  1 failed (1)
+      Tests  18 failed (18)
+
+# Review and fix: the five tests in "review fixes" (23 tests in the file now)
+# run with this branch's sources at 32801488, before the fixes:
+#   npx vitest run src/lib/__tests__/hackathon-winner-links.test.ts --maxWorkers=2 --minWorkers=1
+# Findings: 1 and 2 (an empty links list), 5 (a shared site or X account),
+# 7 (siteUrls only), 2 and 6 (why a stored link is dropped), 3 (the change
+# lines). The one changed case in the older tests ("both pages read")
+# passed before and after. With the fixes: 23 passed.
+
+   × review fixes > an empty links list (a 404, a private or archived record) is could-not-check: a stored page link is kept
+     → expected null to deeply equal { slug: 'payzoll', …(2) }
+   × review fixes > a site or X account two projects hold never corroborates
+     → expected 'sharedx' to be null
+   × review fixes > reads buidl numbers from the SCF page's siteUrls record only
+     TypeError: (0 , scfSiteUrlsBuidls) is not a function
+   × review fixes > names why a stored link is dropped, for every rule
+     TypeError: (0 , linkDropReason) is not a function
+   × review fixes > prints one line per link change, old to new, and names a dropped link with its reason
+     TypeError: (0 , linkChangeLine) is not a function
+ Test Files  1 failed (1)
+      Tests  5 failed | 18 passed (23)

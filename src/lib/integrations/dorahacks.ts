@@ -474,6 +474,33 @@ export interface DoraHacksBuidlDetail {
 	selfTags: string[];
 	/** Deleted or made private on DoraHacks. */
 	hidden: boolean;
+	/** Every link the page lists (pageLinksOf); null when the record carries
+	 * no links list, a format this reader does not know. */
+	links: string[] | null;
+}
+
+/** Every link a submission's page record lists (its links, social links,
+ * demo, repo and video), trimmed, once each, in page order. null when the
+ * record carries no `links` list: a format this reader does not know, so
+ * could not check, never "lists none". */
+export function pageLinksOf(d: unknown): string[] | null {
+	if (!d || typeof d !== "object") return null;
+	const r = d as Record<string, unknown>;
+	if (!Array.isArray(r.links)) return null;
+	const all = [
+		r.links,
+		r.social_urls,
+		r.demo_url,
+		r.github_url,
+		r.demo_video_url,
+	].flatMap((v) => (Array.isArray(v) ? v : [v]));
+	return [
+		...new Set(
+			all
+				.filter((v): v is string => typeof v === "string" && !!v.trim())
+				.map((v) => v.trim()),
+		),
+	];
 }
 
 /**
@@ -506,6 +533,7 @@ export async function fetchBuidlDetail(
 			.map((t) => t.trim())
 			.slice(0, 30),
 		hidden: !!d?.is_deleted || !!d?.is_private,
+		links: pageLinksOf(d),
 	};
 }
 
