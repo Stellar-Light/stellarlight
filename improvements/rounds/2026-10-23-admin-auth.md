@@ -90,8 +90,7 @@ are in the lane report; no route was called against production.
 ## Review
 
 - Independent security review, Claude Fable 5.1, effort high, on the two
-  commits: GATE push. Verified POST-only admin routes and failed forged
-  collection tokens; the secret path (SHA-256 then timingSafeEqual, never
+  commits: GATE push. Verified POST-only admin routes and forged collection tokens rejected by construction (reasoned from Payload's JWT strategy, which reads the collection from the signed token; no forged token was sent); the secret path (SHA-256 then timingSafeEqual, never
   echoed); CSRF (Lax cookies, every admin UI caller a same-origin POST);
   the job runner on the local API with the REST jobs endpoints admin-only;
   every collection refusing partner writes; consumer reports carrying
