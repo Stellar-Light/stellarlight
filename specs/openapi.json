@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.9.94",
+		"version": "1.9.96",
 		"summary": "Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nRate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it — matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -4394,7 +4394,7 @@
 													"project": {
 														"type": "object",
 														"nullable": true,
-														"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+														"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 														"properties": {
 															"slug": {
 																"type": "string"
@@ -4407,9 +4407,11 @@
 																"enum": [
 																	"repo",
 																	"website",
-																	"owner-and-name"
+																	"owner-and-name",
+																	"moved-repo",
+																	"moved-owner-and-name"
 																],
-																"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo)."
+																"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo)."
 															},
 															"status": {
 																"type": "string",
@@ -4777,7 +4779,7 @@
 												"project": {
 													"type": "object",
 													"nullable": true,
-													"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+													"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 													"properties": {
 														"slug": {
 															"type": "string"
@@ -4790,9 +4792,11 @@
 															"enum": [
 																"repo",
 																"website",
-																"owner-and-name"
+																"owner-and-name",
+																"moved-repo",
+																"moved-owner-and-name"
 															],
-															"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo)."
+															"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo)."
 														},
 														"status": {
 															"type": "string",
@@ -5796,7 +5800,7 @@
 														"project": {
 															"type": "object",
 															"nullable": true,
-															"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+															"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 															"properties": {
 																"slug": {
 																	"type": "string"
@@ -5809,9 +5813,11 @@
 																	"enum": [
 																		"repo",
 																		"website",
-																		"owner-and-name"
+																		"owner-and-name",
+																		"moved-repo",
+																		"moved-owner-and-name"
 																	],
-																	"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo)."
+																	"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo)."
 																},
 																"status": {
 																	"type": "string",
@@ -6018,7 +6024,7 @@
 																	"project": {
 																		"type": "object",
 																		"nullable": true,
-																		"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+																		"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 																		"properties": {
 																			"slug": {
 																				"type": "string"
@@ -6031,9 +6037,11 @@
 																				"enum": [
 																					"repo",
 																					"website",
-																					"owner-and-name"
+																					"owner-and-name",
+																					"moved-repo",
+																					"moved-owner-and-name"
 																				],
-																				"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo)."
+																				"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo)."
 																			},
 																			"status": {
 																				"type": "string",
@@ -9224,7 +9232,7 @@
 															"project": {
 																"type": "object",
 																"nullable": true,
-																"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+																"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 																"properties": {
 																	"slug": {
 																		"type": "string"
@@ -9237,9 +9245,11 @@
 																		"enum": [
 																			"repo",
 																			"website",
-																			"owner-and-name"
+																			"owner-and-name",
+																			"moved-repo",
+																			"moved-owner-and-name"
 																		],
-																		"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo)."
+																		"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo)."
 																	},
 																	"status": {
 																		"type": "string",
@@ -16322,7 +16332,7 @@
 								"project": {
 									"type": "object",
 									"nullable": true,
-									"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+									"description": "The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 									"properties": {
 										"slug": {
 											"type": "string"
@@ -16335,9 +16345,11 @@
 											"enum": [
 												"repo",
 												"website",
-												"owner-and-name"
+												"owner-and-name",
+												"moved-repo",
+												"moved-owner-and-name"
 											],
-											"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo)."
+											"description": "repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo)."
 										},
 										"status": {
 											"type": "string",

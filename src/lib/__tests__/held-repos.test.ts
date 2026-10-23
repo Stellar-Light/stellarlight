@@ -29,11 +29,13 @@ describe("held repos on hackathon builds", () => {
 				name: "Example Build",
 				githubUrl: "https://github.com/Some-Team/Infected-App",
 				repoFullName: "Some-Team/Infected-App",
+				repoCurrentFullName: "other-team/infected-app",
 			},
 			held,
 		);
 		expect(doc.githubUrl).toBeNull();
 		expect(doc.repoFullName).toBeNull();
+		expect(doc.repoCurrentFullName).toBeNull();
 		expect(doc.security).toEqual(BUILD_HOLD);
 		expect(heldSecurity(doc)).toEqual({ security: BUILD_HOLD });
 		// A row the lane marked held is withheld even when the list is empty

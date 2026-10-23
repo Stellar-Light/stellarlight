@@ -175,10 +175,17 @@ export type RepoStack =
 	| { state: "missing" }
 	| { state: "error"; note: string };
 
-/** A repo's activity: the last commit on its default branch, and whether it
- * is archived. Absent from the result map = could not be read this time. */
+/** A repo's activity: the last commit on its default branch, whether it is
+ * archived, and the owner/name GitHub answers it under, lowercased (GraphQL
+ * follows a rename or transfer, so after a move it is not the name asked
+ * for). Absent from the result map = could not be read this time. */
 export type RepoActivity =
-	| { state: "read"; lastCommitAt: string | null; archived: boolean }
+	| {
+			state: "read";
+			lastCommitAt: string | null;
+			archived: boolean;
+			fullName?: string;
+	  }
 	| { state: "missing" };
 
 const ACTIVITY_BATCH = 50;
@@ -199,12 +206,13 @@ export async function fetchRepoActivity(
 		const batch = repos.slice(i, i + ACTIVITY_BATCH);
 		const fields = batch.map((full, j) => {
 			const [owner, name] = full.split("/");
-			return `r${j}: repository(owner: ${JSON.stringify(owner ?? "")}, name: ${JSON.stringify(name ?? "")}) { isArchived defaultBranchRef { target { ... on Commit { committedDate } } } }`;
+			return `r${j}: repository(owner: ${JSON.stringify(owner ?? "")}, name: ${JSON.stringify(name ?? "")}) { nameWithOwner isArchived defaultBranchRef { target { ... on Commit { committedDate } } } }`;
 		});
 		let body: {
 			data?: Record<
 				string,
 				{
+					nameWithOwner?: string;
 					isArchived: boolean;
 					defaultBranchRef: {
 						target: { committedDate?: string } | null;
@@ -241,6 +249,9 @@ export async function fetchRepoActivity(
 					state: "read",
 					lastCommitAt: r.defaultBranchRef?.target?.committedDate ?? null,
 					archived: !!r.isArchived,
+					...(r.nameWithOwner
+						? { fullName: r.nameWithOwner.toLowerCase() }
+						: {}),
 				});
 			else if (notFound.has(`r${j}`)) out.set(full, { state: "missing" });
 		});

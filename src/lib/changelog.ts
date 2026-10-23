@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.96",
+		type: "fixed",
+		summary:
+			"A hackathon submission whose GitHub repo was renamed or transferred now links to the directory project that lists the repo it moved to (`project.basis: moved-repo`), or by owner and name read on that repo (`moved-owner-and-name`). clevercon (2nd place, Stellar Hacks: Agents) links to CleverCon once the sync lane next runs; no other link changes.",
+		detail:
+			"The sync lane now reads, with each repo's activity, the owner/name GitHub answers the repo under, and stores it when the repo moved. The two repo rules read it only when the stored repo finds nothing: a link the stored repo, the demo site or the stored owner makes is unchanged, a repo two projects list stays unlinked, and a repo GitHub could not find (private and deleted look the same) is never taken as moved. Measured read-only on live 1.9.94: of 1,344 stored submissions, 1,185 carry a repo link (1,173 repos). Following github.com's redirects, 62 repos (63 submissions) moved, 930 did not, and 181 could not be resolved (177 answered 404). This release's linker over the 1,137 directory rows the lane reads reproduces all 1,344 links served today without the moves; with them it gains 1 link (clevercon, by the exact repo it moved to) and loses or changes none. 60 of the 63 moved submissions stay unlinked because no directory project lists their new repo or sits under their new owner; 1 has a project under its new owner with another name, and owner alone never links.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.94",
 		type: "fixed",
 		summary:

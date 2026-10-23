@@ -1145,7 +1145,7 @@ export interface Repo {
 	 */
 	tierRunId?: string | null;
 	/**
-	 * Held: the default branch carried malware indicators. Kept out of every read but trust and explain, which serve it with a warning.
+	 * Held: the default branch carried malware. Kept out of every read but trust and explain, which serve it with a warning. Set and cleared by the repo-security lane.
 	 */
 	securityHeld?: boolean | null;
 	/**
@@ -1461,12 +1461,16 @@ export interface HackathonBuild {
 	 */
 	repoFullName?: string | null;
 	/**
+	 * owner/name GitHub answers repoFullName under now, lowercased, when the repo was renamed or transferred. Empty = not moved when last read (activityCheckedAt), or never read. A read that fails or finds nothing keeps the last value for the same repo.
+	 */
+	repoCurrentFullName?: string | null;
+	/**
 	 * The directory project that lists this exact repo as its own. Empty after a check = no project lists it. A shared GitHub owner never counts.
 	 */
 	projectSlug?: string | null;
 	projectName?: string | null;
 	/**
-	 * Which rule linked projectSlug: repo (the project lists this exact repo) or website (the submission's demo site is the project's website).
+	 * Which rule linked projectSlug: repo (the project lists this exact repo), website (the submission's demo site is the project's website), owner-and-name (the repo sits under the project's GitHub owner and the submission carries the project's name), or moved-repo and moved-owner-and-name (the same two repo rules, read on repoCurrentFullName, where the repo was renamed or transferred to).
 	 */
 	projectLinkBasis?: string | null;
 	/**
@@ -1563,8 +1567,6 @@ export interface HackathonBuild {
 	createdAt: string;
 }
 /**
- * Every Stellar hackathon event on DoraHacks, as its organizer published it.
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hackathon-events".
  */
@@ -3704,6 +3706,7 @@ export interface RwaAssetsSelect<T extends boolean = true> {
  */
 export interface HackathonBuildsSelect<T extends boolean = true> {
 	buildId?: T;
+	entryKey?: T;
 	name?: T;
 	vision?: T;
 	description?: T;
@@ -3720,6 +3723,7 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	demoUrl?: T;
 	videoUrl?: T;
 	repoFullName?: T;
+	repoCurrentFullName?: T;
 	projectSlug?: T;
 	projectName?: T;
 	projectLinkBasis?: T;
