@@ -618,6 +618,24 @@ describe("a repo named in q", () => {
 		// "stellar contracts" in prose names no repo
 		expect(ask("how stellar contracts store data").repos).toEqual([]);
 	});
+
+	it("a bare common-word alias lifts by 3; owner/name and hyphenated aliases by 8", () => {
+		const rows = [
+			row("stellar/quickstart", "README.md", "heading", "Deploy"),
+			row("stellar/stellar-cli", "src/deploy.rs", "symbol", "deploy"),
+		];
+		// "quickstart guide" is docs prose: the exact deploy symbol stays first
+		expect(at("quickstart guide to deploy a contract", rows, "deploy")).toBe(1);
+		expect(ask("quickstart guide").repoLift).toEqual({
+			"stellar/quickstart": 3,
+		});
+		// the owner/name names the repo outright
+		expect(at("stellar/quickstart deploy", rows, "Deploy")).toBe(1);
+		expect(ask("stellar-rpc and stellar/quickstart").repoLift).toEqual({
+			"stellar/stellar-rpc": 8,
+			"stellar/quickstart": 8,
+		});
+	});
 });
 
 describe("OpenZeppelin/stellar-contracts in the allowlist", () => {
@@ -698,6 +716,43 @@ describe("a stellar-cli command path typed in q", () => {
 		expect(where("stellar contract invoke")).not.toContain(
 			"contract/mod.rs Cmd",
 		);
+	});
+
+	it("punctuation or a stopword ends the command; build still counts", () => {
+		expect(ask("stellar contract invoke, then read the docs").command).toEqual([
+			"contract",
+			"invoke",
+		]);
+		expect(ask("run stellar keys generate in the shell").command).toEqual([
+			"keys",
+			"generate",
+		]);
+		expect(ask("soroban contract build in the CLI").command).toEqual([
+			"contract",
+			"build",
+		]);
+	});
+
+	it("an alias naming the CLI starts a command; the alias and filler words are skipped", () => {
+		expect(ask("stellar cli contract invoke").command).toEqual([
+			"contract",
+			"invoke",
+		]);
+		expect(
+			ask("where does the stellar cli implement contract invoke").command,
+		).toEqual(["contract", "invoke"]);
+	});
+
+	it("a command no module implements adds nothing, not even to the score's maximum", () => {
+		const prose = [
+			row("stellar/rs-soroban-sdk", "src/storage.rs", "symbol", "store_data"),
+		];
+		const p = ask("how stellar contracts store data");
+		expect(p.command).toEqual(["contracts", "store", "data"]);
+		const [read] = rankRows(p, prose);
+		const [noCommand] = rankRows({ ...p, command: null }, prose);
+		expect(read.score).toBe(noCommand.score);
+		expect(read.factors).toContain("cmd:0");
 	});
 });
 
@@ -819,6 +874,26 @@ describe("synonym map: each entry reaches the name the code uses", () => {
 				rival: row("stellar/stellar-core", "src/a.cpp", "symbol", "Pairing"),
 			},
 		};
+
+	it("a synonym in identifier form does not saturate the score: q=sac", () => {
+		const rows = [
+			row(
+				ENV,
+				"soroban-env-host/src/builtin_contracts/stellar_asset_contract/contract.rs",
+				"symbol",
+				"StellarAssetContract",
+			),
+			row(
+				SDK,
+				"soroban-sdk/src/testutils.rs",
+				"symbol",
+				"StellarAssetContract",
+			),
+		];
+		const [first, second] = top("sac", rows);
+		expect(first.score).toBe(100);
+		expect(second.score).toBeLessThan(first.score);
+	});
 
 	it("every entry has a case", () => {
 		expect(Object.keys(CASES).sort()).toEqual([...SYNONYMS.keys()].sort());

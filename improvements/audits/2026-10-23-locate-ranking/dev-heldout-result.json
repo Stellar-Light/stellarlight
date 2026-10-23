@@ -164,21 +164,21 @@
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "start",
-					"score": 34,
+					"score": 27,
 					"matchReason": "symbol start, path too; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "init_friendbot",
-					"score": 34,
+					"score": 27,
 					"matchReason": "path has start; symbol has init; symbol has friendbot; symbol initialize friendbot; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "common/friendbot/bin/start",
 					"locator": null,
-					"score": 34,
+					"score": 27,
 					"matchReason": "file start, path too; path has friendbot; repo named in q"
 				}
 			]

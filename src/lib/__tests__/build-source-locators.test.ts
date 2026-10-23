@@ -286,6 +286,10 @@ describe("build-source-locators", () => {
 		expect(r.out).toContain("no state row yet");
 		expect(r.writes).toEqual([]);
 		expect(rows.size).toBe(0);
+		// The summary counts only what this run writes and names the skipped repo.
+		expect(r.out).toMatch(
+			/writes planned: 0; skipped, no state row yet: stellar\/quickstart \(\d+ planned\)$/m,
+		);
 		await run("--execute");
 		tarball = serve([
 			...TREE,

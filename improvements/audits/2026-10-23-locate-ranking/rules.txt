@@ -34,3 +34,7 @@ f-syn-sep0041    rule moves down (on vs off): none | helps: none | sym top10 fli
 f-syn-sac        rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
 f-syn-signature  rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
 f-syn-bls        rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+
+Review fixes, single-change ablations against the fixed library (21:57Z):
+r-noshow         show removed from the stopwords that may join or continue a command: no measured case moves (dev, both frozen batteries, priority six).
+r-lift8          quickstart lifting by 8 again instead of 3: only f15 moves, 102 to 25 (outside the top 10 either way; base 25); nothing else moves.

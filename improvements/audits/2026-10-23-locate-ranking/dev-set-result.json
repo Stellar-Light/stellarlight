@@ -130,21 +130,21 @@
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/builtin_contracts/stellar_asset_contract/contract.rs",
 					"locator": "StellarAssetContract",
-					"score": 38,
+					"score": 33,
 					"matchReason": "SAC as symbol StellarAssetContract, path too; path has soroban; path has host"
 				},
 				{
 					"repo": "stellar/rs-soroban-sdk",
 					"path": "soroban-sdk/src/testutils.rs",
 					"locator": "StellarAssetContract",
-					"score": 34,
+					"score": 30,
 					"matchReason": "SAC as symbol StellarAssetContract; path has soroban"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/builtin_contracts/stellar_asset_contract/metadata.rs",
 					"locator": "StellarAssetContractMetadata",
-					"score": 26,
+					"score": 23,
 					"matchReason": "SAC as symbol holds StellarAssetContract, path too; path has soroban; path has host"
 				}
 			]
@@ -368,21 +368,21 @@
 					"repo": "stellar/soroban-examples",
 					"path": "bls_signature/src/lib.rs",
 					"locator": "__check_auth",
-					"score": 26,
+					"score": 24,
 					"matchReason": "path has example; symbol has check; path has bls; path has signature; symbol __check_auth"
 				},
 				{
 					"repo": "stellar/soroban-examples",
 					"path": "multisig_1_of_n_account/contract/src/lib.rs",
 					"locator": "__check_auth",
-					"score": 26,
+					"score": 24,
 					"matchReason": "path has example; path has account; path has contract; symbol has check; symbol __check_auth"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/multisig-smart-account/account/src/contract.rs",
 					"locator": "__check_auth",
-					"score": 26,
+					"score": 24,
 					"matchReason": "path has example; path has account; path has contract; symbol has check; symbol __check_auth"
 				}
 			]
@@ -470,21 +470,21 @@
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "packages/contract-utils/src/crypto/keccak.rs",
 					"locator": "Keccak256",
-					"score": 48,
+					"score": 42,
 					"matchReason": "keccak as symbol keccak256; repo named in q"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "packages/contract-utils/src/crypto/hasher.rs",
 					"locator": "Hasher",
-					"score": 35,
+					"score": 30,
 					"matchReason": "symbol hasher, path too; repo named in q"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "packages/contract-utils/src/crypto/keccak.rs",
 					"locator": "impl Hasher for Keccak256",
-					"score": 34,
+					"score": 29,
 					"matchReason": "keccak as symbol has keccak256; symbol has hasher; repo named in q"
 				}
 			]

@@ -62,21 +62,21 @@
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/alias/add.rs",
 					"locator": "Cmd",
-					"score": 40,
+					"score": 45,
 					"matchReason": "implements contract alias add; path has contract; path has alia; path has add"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/alias/add.rs",
 					"locator": "--overwrite",
-					"score": 40,
+					"score": 45,
 					"matchReason": "implements contract alias add; path has contract; path has alia; path has add"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/alias/add.rs",
 					"locator": "--id",
-					"score": 40,
+					"score": 45,
 					"matchReason": "implements contract alias add; path has contract; path has alia; path has add"
 				}
 			]

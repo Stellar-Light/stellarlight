@@ -35,70 +35,70 @@
 					"repo": "stellar/rs-soroban-sdk",
 					"path": "soroban-sdk/src/token.rs",
 					"locator": "TokenInterface",
-					"score": 36,
+					"score": 33,
 					"matchReason": "SEP-41 as symbol TokenInterface, path too; symbol has token, path too; symbol has interface; path h…"
 				},
 				{
 					"repo": "stellar/soroban-examples",
 					"path": "token/src/contract.rs",
 					"locator": "impl TokenInterface for Token",
-					"score": 27,
+					"score": 25,
 					"matchReason": "SEP-41 as symbol holds TokenInterface, path too; symbol has token, path too; symbol has interface; …"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/fungible-governor/token/src/token.rs",
 					"locator": "TokenContract",
-					"score": 16,
+					"score": 15,
 					"matchReason": "SEP-41 as symbol has token, path too; symbol has token, path too; path has example; symbol has cont…"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/fungible-governor-timelock/token/src/token.rs",
 					"locator": "TokenContract",
-					"score": 16,
+					"score": 15,
 					"matchReason": "SEP-41 as symbol has token, path too; symbol has token, path too; path has example; symbol has cont…"
 				},
 				{
 					"repo": "stellar/soroban-examples",
 					"path": "token/src/contract.rs",
 					"locator": "Token",
-					"score": 15,
+					"score": 14,
 					"matchReason": "SEP-41 as symbol has token, path too; symbol token, path too; path has soroban; path has example; p…"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/fungible-votes/src/contract.rs",
 					"locator": "impl FungibleToken for ExampleContract",
-					"score": 13,
+					"score": 12,
 					"matchReason": "SEP-41 as symbol has token; symbol has token; symbol has example, path too; symbol has contract, pa…"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/fungible-vault/src/contract.rs",
 					"locator": "impl FungibleToken for ExampleContract",
-					"score": 13,
+					"score": 12,
 					"matchReason": "SEP-41 as symbol has token; symbol has token; symbol has example, path too; symbol has contract, pa…"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/upgradeable/v1/src/contract.rs",
 					"locator": "impl FungibleToken for ExampleContract",
-					"score": 13,
+					"score": 12,
 					"matchReason": "SEP-41 as symbol has token; symbol has token; symbol has example, path too; symbol has contract, pa…"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/upgradeable/v2/src/contract.rs",
 					"locator": "impl FungibleToken for ExampleContract",
-					"score": 13,
+					"score": 12,
 					"matchReason": "SEP-41 as symbol has token; symbol has token; symbol has example, path too; symbol has contract, pa…"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/fungible-capped/src/contract.rs",
 					"locator": "impl FungibleToken for ExampleContract",
-					"score": 13,
+					"score": 12,
 					"matchReason": "SEP-41 as symbol has token; symbol has token; symbol has example, path too; symbol has contract, pa…"
 				}
 			]
@@ -359,70 +359,70 @@
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/benches/common/cost_types/verify_ecdsa_secp256r1_sig.rs",
 					"locator": "VerifyEcdsaSecp256r1SigMeasure",
-					"score": 24,
+					"score": 22,
 					"matchReason": "symbol has verify, path too; passkey as symbol has secp256r1, path too; WebAuthn as symbol has secp…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/cost_runner/cost_types/verify_ecdsa_secp256r1_sig.rs",
 					"locator": "VerifyEcdsaSecp256r1SigRun",
-					"score": 24,
+					"score": 22,
 					"matchReason": "symbol has verify, path too; passkey as symbol has secp256r1, path too; WebAuthn as symbol has secp…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/cost_runner/cost_types/verify_ecdsa_secp256r1_sig.rs",
 					"locator": "VerifyEcdsaSecp256r1SigSample",
-					"score": 24,
+					"score": 22,
 					"matchReason": "symbol has verify, path too; passkey as symbol has secp256r1, path too; WebAuthn as symbol has secp…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/cost_runner/cost_types/verify_ecdsa_secp256r1_sig.rs",
 					"locator": "impl CostRunner for VerifyEcdsaSecp256r1SigRun",
-					"score": 24,
+					"score": 22,
 					"matchReason": "symbol has verify, path too; passkey as symbol has secp256r1, path too; WebAuthn as symbol has secp…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/benches/common/cost_types/verify_ecdsa_secp256r1_sig.rs",
 					"locator": "impl HostCostMeasurement for VerifyEcdsaSecp256r1SigMeasure",
-					"score": 24,
+					"score": 22,
 					"matchReason": "symbol has verify, path too; passkey as symbol has secp256r1, path too; WebAuthn as symbol has secp…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/benches/common/experimental/decode_secp256r1_sig.rs",
 					"locator": "DecodeSecp256r1SigMeasure",
-					"score": 20,
+					"score": 19,
 					"matchReason": "passkey as symbol has secp256r1, path too; WebAuthn as symbol has secp256r1, path too; signatures a…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/cost_runner/experimental/decode_secp256r1_sig.rs",
 					"locator": "DecodeSecp256r1SigRun",
-					"score": 20,
+					"score": 19,
 					"matchReason": "passkey as symbol has secp256r1, path too; WebAuthn as symbol has secp256r1, path too; signatures a…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/cost_runner/experimental/decode_secp256r1_sig.rs",
 					"locator": "impl CostRunner for DecodeSecp256r1SigRun",
-					"score": 20,
+					"score": 19,
 					"matchReason": "passkey as symbol has secp256r1, path too; WebAuthn as symbol has secp256r1, path too; signatures a…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/benches/common/experimental/decode_secp256r1_sig.rs",
 					"locator": "impl HostCostMeasurement for DecodeSecp256r1SigMeasure",
-					"score": 20,
+					"score": 19,
 					"matchReason": "passkey as symbol has secp256r1, path too; WebAuthn as symbol has secp256r1, path too; signatures a…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/crypto/mod.rs",
 					"locator": "secp256r1_verify_signature",
-					"score": 20,
+					"score": 19,
 					"matchReason": "symbol has verify; passkey as symbol has secp256r1; WebAuthn as symbol has secp256r1; symbol has si…"
 				}
 			]
@@ -472,49 +472,49 @@
 					"repo": "stellar/rs-soroban-sdk",
 					"path": "soroban-sdk/src/crypto.rs",
 					"locator": "keccak256",
-					"score": 22,
+					"score": 21,
 					"matchReason": "Ethereum-signed as symbol keccak256; symbol keccak256; path has soroban; path has sdk"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "packages/contract-utils/src/crypto/keccak.rs",
 					"locator": "Keccak256",
-					"score": 22,
+					"score": 20,
 					"matchReason": "Ethereum-signed as symbol keccak256; symbol keccak256; path has contract"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/benches/common/cost_types/compute_keccak256_hash.rs",
 					"locator": "impl HostCostMeasurement for ComputeKeccak256HashMeasure",
-					"score": 18,
+					"score": 17,
 					"matchReason": "Ethereum-signed as symbol has keccak256, path too; symbol has keccak256, path too; symbol has hash,…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/benches/common/cost_types/compute_keccak256_hash.rs",
 					"locator": "ComputeKeccak256HashMeasure",
-					"score": 16,
+					"score": 15,
 					"matchReason": "Ethereum-signed as symbol has keccak256, path too; symbol has keccak256, path too; symbol has hash,…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/cost_runner/cost_types/compute_keccak256_hash.rs",
 					"locator": "ComputeKeccak256HashRun",
-					"score": 16,
+					"score": 15,
 					"matchReason": "Ethereum-signed as symbol has keccak256, path too; symbol has keccak256, path too; symbol has hash,…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/cost_runner/cost_types/compute_keccak256_hash.rs",
 					"locator": "impl CostRunner for ComputeKeccak256HashRun",
-					"score": 16,
+					"score": 15,
 					"matchReason": "Ethereum-signed as symbol has keccak256, path too; symbol has keccak256, path too; symbol has hash,…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/benches/common/experimental/ecdsa_secp256k1_verify.rs",
 					"locator": "impl HostCostMeasurement for EcdsaSecp256k1VerifyMeasure",
-					"score": 15,
+					"score": 14,
 					"matchReason": "symbol has verify, path too; Ethereum-signed as symbol has secp256k1, path too; symbol has secp256k…"
 				},
 				{
@@ -528,14 +528,14 @@
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/crypto/mod.rs",
 					"locator": "keccak256_hash_from_bytes_raw",
-					"score": 14,
+					"score": 13,
 					"matchReason": "Ethereum-signed as symbol has keccak256; symbol has keccak256; symbol has hash; path has soroban; p…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/crypto/mod.rs",
 					"locator": "keccak256_hash_from_bytesobj_input",
-					"score": 14,
+					"score": 13,
 					"matchReason": "Ethereum-signed as symbol has keccak256; symbol has keccak256; symbol has hash; path has soroban; p…"
 				}
 			]
@@ -570,70 +570,70 @@
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/builtin_contracts/stellar_asset_contract/contract.rs",
 					"locator": "StellarAssetContract",
-					"score": 27,
+					"score": 25,
 					"matchReason": "symbol has asset, path too; symbol has contract, path too; path has soroban; symbol has contract, p…"
 				},
 				{
 					"repo": "stellar/rs-soroban-sdk",
 					"path": "soroban-sdk/src/testutils.rs",
 					"locator": "StellarAssetContract",
-					"score": 23,
+					"score": 22,
 					"matchReason": "symbol has asset; symbol has contract; path has soroban; symbol has contract; SAC as symbol Stellar…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/builtin_contracts/stellar_asset_contract/metadata.rs",
 					"locator": "StellarAssetContractMetadata",
-					"score": 20,
+					"score": 19,
 					"matchReason": "symbol has asset, path too; symbol has contract, path too; path has soroban; symbol has contract, p…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/builtin_contracts/stellar_asset_contract/test_stellar_asset_contract.rs",
 					"locator": "TestStellarAssetContract",
-					"score": 20,
+					"score": 19,
 					"matchReason": "symbol has asset, path too; symbol has contract, path too; path has soroban; symbol has contract, p…"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/utils.rs",
 					"locator": "get_name_from_stellar_asset_contract_storage",
-					"score": 17,
+					"score": 16,
 					"matchReason": "symbol has asset; symbol has contract; path has soroban; symbol has contract; SAC as symbol holds S…"
 				},
 				{
 					"repo": "stellar/rs-soroban-sdk",
 					"path": "soroban-sdk/src/env.rs",
 					"locator": "register_stellar_asset_contract",
-					"score": 17,
+					"score": 16,
 					"matchReason": "symbol has asset; symbol has contract; path has soroban; symbol has contract; SAC as symbol holds S…"
 				},
 				{
 					"repo": "stellar/rs-soroban-sdk",
 					"path": "soroban-sdk/src/env.rs",
 					"locator": "register_stellar_asset_contract_v2",
-					"score": 17,
+					"score": 16,
 					"matchReason": "symbol has asset; symbol has contract; path has soroban; symbol has contract; SAC as symbol holds S…"
 				},
 				{
 					"repo": "stellar/rs-soroban-env",
 					"path": "soroban-env-host/src/host/lifecycle.rs",
 					"locator": "maybe_initialize_stellar_asset_contract",
-					"score": 17,
+					"score": 16,
 					"matchReason": "symbol has asset; symbol has contract; path has soroban; symbol has contract; SAC as symbol holds S…"
 				},
 				{
 					"repo": "stellar/js-stellar-sdk",
 					"path": "src/bindings/wasm_fetcher.ts",
 					"locator": "isStellarAssetContract",
-					"score": 16,
+					"score": 15,
 					"matchReason": "symbol has asset; symbol has contract; symbol has contract; SAC as symbol holds StellarAssetContrac…"
 				},
 				{
 					"repo": "stellar/js-stellar-sdk",
 					"path": "src/base/operations/invoke_host_function.ts",
 					"locator": "createStellarAssetContract",
-					"score": 16,
+					"score": 15,
 					"matchReason": "symbol has asset; symbol has contract; symbol has contract; SAC as symbol holds StellarAssetContrac…"
 				}
 			]

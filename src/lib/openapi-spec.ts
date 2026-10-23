@@ -7026,7 +7026,7 @@ export const spec: OpenAPISpec = {
 					"Scored pointers into allowlisted repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples, OpenZeppelin/stellar-contracts): the file, symbol or heading, line, commit and blob sha where a CLI flag or command, config option default, SDK or host function, contract interface or trait implementation is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read. pointers [] = no match in the indexed repos; null = could not search.",
 				"x-routing": {
 					purpose:
-						"Point to the exact file, line and commit in Stellar's own repos where a symbol, CLI flag, config option, default value or doc section is defined.",
+						"Point to the exact file, line and commit in the allowlisted repos where a symbol, CLI flag, config option, default value or doc section is defined.",
 					keywords: [
 						"where is it defined",
 						"which file defines",
@@ -7059,7 +7059,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: true,
 						description:
-							"What to locate: a symbol, flag, option, config key, stellar-cli command or topic words (at most 300 characters), e.g. --enable-core-manual-close, getTransactions default limit or stellar contract invoke. A repo named in q (stellar-rpc, quickstart, OpenZeppelin) strongly lifts its pointers; a typed stellar-cli command lifts the module that implements it.",
+							"What to locate: a symbol, flag, option, config key, stellar-cli command or topic words (at most 300 characters), e.g. --enable-core-manual-close, getTransactions default limit or stellar contract invoke. A repo named in q by owner/name or a hyphenated name (stellar-rpc, soroban-sdk) or as OpenZeppelin lifts its pointers strongly, the bare word quickstart less; a typed stellar-cli command lifts the module that implements it.",
 						schema: { type: "string", maxLength: 300 },
 					},
 					{

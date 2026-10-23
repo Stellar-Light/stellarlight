@@ -2509,7 +2509,7 @@ export interface ResearchDoc {
 	createdAt: string;
 }
 /**
- * Pointers into Stellar's own repos (path, symbol or heading, line, blob sha). Managed by scripts/build-source-locators.ts.
+ * Pointers into the allowlisted repos, Stellar's own and OpenZeppelin's Soroban contracts (path, symbol or heading, line, blob sha). Managed by scripts/build-source-locators.ts.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "source-locators".

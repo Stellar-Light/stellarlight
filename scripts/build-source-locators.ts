@@ -135,6 +135,8 @@ async function run() {
 	let plannedWrites = 0;
 	let refusedWrites = 0;
 	const refused: string[] = [];
+	// Repos a scheduled run leaves dry (no state row yet): named apart, never counted as planned.
+	const skipped: string[] = [];
 	let failures = 0;
 	for (const repo of repos) {
 		const started = Date.now();
@@ -203,14 +205,19 @@ async function run() {
 				failures++;
 				continue;
 			}
-			plannedWrites += writes;
-			if (!execute) continue;
-			if (scheduled && !(await models.repos.findOne({ repo }).lean())) {
+			if (
+				execute &&
+				scheduled &&
+				!(await models.repos.findOne({ repo }).lean())
+			) {
 				console.log(
 					`  ${repo}: no state row yet, so this scheduled run stays dry for it. Its first fill is a hand-dispatched execute, after its dry run is read.`,
 				);
+				skipped.push(`${repo} (${writes} planned)`);
 				continue;
 			}
+			plannedWrites += writes;
+			if (!execute) continue;
 
 			for (let i = 0; i < upserts.length; i += 1000)
 				await models.rows.bulkWrite(
@@ -289,7 +296,7 @@ async function run() {
 	if (models && replan) console.log(`\nreplan: writes=${replanWrites}`);
 	else if (models)
 		console.log(
-			`\nwrites planned: ${plannedWrites}${refused.length ? `; refused, nothing written: ${refused.join(", ")}` : ""}`,
+			`\nwrites planned: ${plannedWrites}${refused.length ? `; refused, nothing written: ${refused.join(", ")}` : ""}${skipped.length ? `; skipped, no state row yet: ${skipped.join(", ")}` : ""}`,
 		);
 	if (failures) process.exitCode = 1;
 	else if (replan && replanWrites > 0) {

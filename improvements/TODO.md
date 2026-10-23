@@ -345,6 +345,16 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   User-Agent, no timeout and no retries, from Cloudflare's network, so its
   users likely share one per-IP limit [inferred]. See the owner decision on
   a key below.
+- scout-mcp `locate_source` trails the API from spec 1.9.105 (found in the
+  review of `lane/l3-locate-ranking`, 2026-10-23): its `repo` enum
+  (`scout-mcp/src/index.ts`, "keep in sync with SOURCE_REPOS") lacks
+  OpenZeppelin/stellar-contracts, so an MCP client cannot filter to it;
+  its description and README row say eight repos and "Stellar's own code",
+  and its q text says a named repo "lifts" where it now weighs owner/name
+  and hyphenated names 8 and quickstart 3. For the next scout-mcp release.
+- api-client: the schema regenerated for 1.9.105 (locateSource `repo` enum
+  with OpenZeppelin/stellar-contracts, the factors and locatorKind texts)
+  reaches npm users only with the next api-client release (same review).
 
 
 ## Owner decisions (safe default in brackets)

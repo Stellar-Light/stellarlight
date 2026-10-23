@@ -1,26 +1,26 @@
-scripts/build-source-locators.ts in dry mode (no --execute), driven by builder-dry-run.test.ts: in-memory stores filled by the base extraction (origin/main d9bd53b5) over the tarballs at the pinned refs, the fetch stub serving those tarballs. Every plan: update 0, delete 0; the creates in the eight indexed repos are all impl locators (asserted in the test).
+scripts/build-source-locators.ts in dry mode (no --execute), driven by builder-dry-run.test.ts: in-memory stores filled by the base extraction (origin/main d9bd53b5) over the tarballs at the pinned refs, the fetch stub serving those tarballs. Every plan: update 0, delete 0; the creates in the eight indexed repos are all impl locators (asserted in the test). Re-run after the review fixes, on the branch at 497e0353 plus those fixes.
 
 DRY RUN MODE
 database: yes
-stellar/stellar-core@05c6328c13b5: 658 files, 7254 pointers (file 658, symbol 6245, heading 351), 2.94 MiB as JSON, 393 ms
+stellar/stellar-core@05c6328c13b5: 658 files, 7254 pointers (file 658, symbol 6245, heading 351), 2.94 MiB as JSON, 218 ms
   plan: writes=26 (create 26, update 0, delete 0); stored 7228
-stellar/rs-soroban-sdk@8e5b425dce5f: 66 files, 1079 pointers (file 66, symbol 1002, heading 11), 0.37 MiB as JSON, 16 ms
+stellar/rs-soroban-sdk@8e5b425dce5f: 66 files, 1079 pointers (file 66, symbol 1002, heading 11), 0.37 MiB as JSON, 9 ms
   plan: writes=205 (create 205, update 0, delete 0); stored 874
-stellar/rs-soroban-env@0c99950e9612: 257 files, 3593 pointers (file 257, symbol 3320, heading 16), 1.42 MiB as JSON, 126 ms
+stellar/rs-soroban-env@0c99950e9612: 257 files, 3593 pointers (file 257, symbol 3320, heading 16), 1.42 MiB as JSON, 90 ms
   plan: writes=502 (create 502, update 0, delete 0); stored 3091
-stellar/js-stellar-sdk@0f2fd40ba6db: 253 files, 3789 pointers (file 253, symbol 1551, heading 1985), 1.38 MiB as JSON, 66 ms
+stellar/js-stellar-sdk@0f2fd40ba6db: 253 files, 3789 pointers (file 253, symbol 1551, heading 1985), 1.38 MiB as JSON, 41 ms
   plan: writes=0 (create 0, update 0, delete 0); stored 3789
-stellar/stellar-rpc@ec4171d970ac: 263 files, 3258 pointers (file 263, symbol 2766, heading 229), 1.26 MiB as JSON, 46 ms
+stellar/stellar-rpc@ec4171d970ac: 263 files, 3258 pointers (file 263, symbol 2766, heading 229), 1.26 MiB as JSON, 29 ms
   plan: writes=0 (create 0, update 0, delete 0); stored 3258
 stellar/quickstart@0ff76e336a43: 31 files, 410 pointers (file 31, symbol 342, heading 37), 0.14 MiB as JSON, 3 ms
   plan: writes=0 (create 0, update 0, delete 0); stored 410
-stellar/stellar-cli@4ff88b7ea11d: 251 files, 2105 pointers (file 251, symbol 1612, heading 242), 0.75 MiB as JSON, 21 ms
+stellar/stellar-cli@4ff88b7ea11d: 251 files, 2105 pointers (file 251, symbol 1612, heading 242), 0.75 MiB as JSON, 16 ms
   plan: writes=128 (create 128, update 0, delete 0); stored 1977
-stellar/soroban-examples@03d42aa6b973: 92 files, 824 pointers (file 92, symbol 493, heading 239), 0.28 MiB as JSON, 22 ms
+stellar/soroban-examples@03d42aa6b973: 92 files, 824 pointers (file 92, symbol 493, heading 239), 0.28 MiB as JSON, 13 ms
   plan: writes=11 (create 11, update 0, delete 0); stored 813
-OpenZeppelin/stellar-contracts@ddc327eb92d6: 324 files, 3591 pointers (file 324, symbol 2632, heading 635), 1.47 MiB as JSON, 46 ms
+OpenZeppelin/stellar-contracts@ddc327eb92d6: 324 files, 3591 pointers (file 324, symbol 2632, heading 635), 1.47 MiB as JSON, 34 ms
   plan: writes=3591 (create 3591, update 0, delete 0); stored 0
 writes planned: 4463
- ✓ improvements/audits/2026-10-23-locate-ranking/builder-dry-run.test.ts (1 test) 2409ms
-   ✓ builder dry run over pinned tarballs > plans creates only: impl locators in the eight repos, every row of the new repo  2408ms
+ ✓ improvements/audits/2026-10-23-locate-ranking/builder-dry-run.test.ts (1 test) 1453ms
+   ✓ builder dry run over pinned tarballs > plans creates only: impl locators in the eight repos, every row of the new repo  1452ms
       Tests  1 passed (1)

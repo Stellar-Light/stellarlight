@@ -250,3 +250,60 @@ dispatch a dry run with repo empty before then.
 ## Bar 3 reading (orchestrator, 2026-10-23)
 
 Bar 3 ("any synonym or joining rule that moves a frozen battery case down is dropped") is read against the base ranks: no frozen case may end below the rank it has on main today. Under that reading every rule passes (no frozen case below its base file or symbol rank; the only moves down against the branch's own other rules, f05 1 to 4, f19 1 to 2, f01 3 to 15, all stay at or above base: f05 base 4, f19 base 2, f01 base 40). The bar's intent when written was no regression against live behaviour; the stricter per-rule ablation reading is recorded above and in rules.txt for anyone who wants to apply it. Main merged in; version kept at the 1.9.105 placeholder for review.
+
+## Correction (2026-10-23, after the independent review)
+
+Bar 3 not met as written; waived by the orchestrator because no frozen case ends below its main rank, and the joins carry f01 25 to 15, f04 8 to 4 and two priority items.
+
+## Log, continued (review fixes)
+
+- Review of the branch merged with main at `497e0353`: GATE, fix first.
+  Fixes on top of `497e0353`, main not merged again.
+- 21:51Z, tests first: six tests for the findings fail on the branch as
+  reviewed (6 failed, 62 passed); the command-score test was rewritten
+  once (it compared two queries whose joined runs differ) and fails on
+  `497e0353` too (21:53Z, `failing-first.txt`). Then the fixes:
+  1. the score's maximum counts each unit at its strongest form (a synonym
+     in identifier form counts as typed): q=sac serves 100, 94, 65 at ranks
+     1 to 3, where ranks 1 to 10 all served 100;
+  2. `rankRows` drops a command no pooled pointer implements, so "how
+     stellar contracts store data" adds no command words to the maximum;
+     the command scan skips alias and filler words, stops at punctuation, a
+     quote or a stopword (build and show excepted, as for joins; show is
+     new on that list and moves no measured case), and starts after an
+     alias naming stellar-cli ("stellar cli contract invoke" and "where
+     does the stellar cli implement contract invoke" read contract invoke);
+  3. a repo named only by the bare alias quickstart lifts by 3, by
+     owner/name or a hyphenated alias (and OpenZeppelin) by 8;
+  4. the builder's summary counts only repos a run writes and names the
+     ones a scheduled run leaves dry ("skipped, no state row yet:
+     OpenZeppelin/stellar-contracts (3591 planned)").
+- 21:53Z, re-measured (rows from the same tarballs): dev tuned symbol
+  6/9/14, held-out cases 3/5/7 (dev-heldout 2/3/5 and amendment 1/2/2,
+  d21 after its fix; a re-run, no longer a clean held-out read), both
+  frozen batteries and the priority six unchanged at every reported
+  number. One case moves: f15 file 25 to
+  102 (outside the top 10 both ways), which the quickstart split causes
+  (`rules.txt`: r-lift8 restores 25). It names quickstart by the bare word
+  and also names stellar-rpc and stellar-core. So after the split one
+  frozen case ends below its main rank; the waiver above predates it.
+- 21:56Z, `pnpm raven:gate`: the first rewording of the routing purpose
+  ("allowlisted repos (Stellar's own and OpenZeppelin's Soroban
+  contracts)") HOLD 1.9.105, exit 1: legacy cardHit5 112 to 111,
+  q-soroban-reentrancy lost scout.searchResearch from its top 5 when
+  locateSource was admitted on "soroban contracts". Reworded to "the
+  allowlisted repos": ACCEPT 1.9.105, exit 0, output identical to the
+  1.9.101 run apart from the version.
+- 21:57Z, builder dry run over the pinned tarballs: unchanged, create 872
+  impl locators in the eight repos and 3,591 for OpenZeppelin, update 0,
+  delete 0.
+- 21:59Z, checks: `tsc --noEmit -p tsconfig.json` exit 0; the full set
+  `npx vitest run src/lib/ src/components/ src/app/ src/collections/
+  src/data/ --maxWorkers=4 --minWorkers=1` once: 217 files, 2,723 tests,
+  exit 0, `rate-limited-429.test.ts` 32 of 32 in 1.2 s (no timeout this
+  run); `pnpm contract:write` then `CONTRACT_BASE=origin/main pnpm
+  contract:check` exit 0; writer conformance exit 0; scripts types exit 0
+  (28 baselined); biome clean on every changed file. Stale "Stellar's own
+  repos" wording fixed in the routing purpose and the collection
+  description (and its generated type comment); scout-mcp and api-client
+  left as they are and queued in `improvements/TODO.md`.

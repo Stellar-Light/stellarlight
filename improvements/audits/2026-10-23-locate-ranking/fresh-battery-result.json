@@ -130,21 +130,21 @@
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/fungible-governor/token/src/token.rs",
 					"locator": "TokenContract",
-					"score": 8,
+					"score": 10,
 					"matchReason": "symbol has token, path too; symbol has contract, path too; symbol has token, path too; symbol token…"
 				},
 				{
 					"repo": "OpenZeppelin/stellar-contracts",
 					"path": "examples/fungible-governor-timelock/token/src/token.rs",
 					"locator": "TokenContract",
-					"score": 8,
+					"score": 10,
 					"matchReason": "symbol has token, path too; symbol has contract, path too; symbol has token, path too; symbol token…"
 				},
 				{
 					"repo": "stellar/soroban-examples",
 					"path": "token/src/contract.rs",
 					"locator": "Token",
-					"score": 8,
+					"score": 10,
 					"matchReason": "symbol token, path too; path has soroban; path has contract; symbol has token, path too"
 				}
 			]
@@ -436,21 +436,21 @@
 					"repo": "stellar/stellar-rpc",
 					"path": "cmd/stellar-rpc/internal/rpcv1/config/options.go",
 					"locator": "classic-fee-stats-retention-window",
-					"score": 19,
+					"score": 25,
 					"matchReason": "symbol has classic; symbol holds fee-stats; symbol has retention; symbol has window; symbol holds r…"
 				},
 				{
 					"repo": "stellar/stellar-rpc",
 					"path": "cmd/stellar-rpc/internal/rpcv1/config/options.go",
 					"locator": "soroban-fee-stats-retention-window",
-					"score": 19,
+					"score": 25,
 					"matchReason": "symbol has soroban; symbol holds fee-stats; symbol has retention; symbol has window; symbol holds r…"
 				},
 				{
 					"repo": "stellar/stellar-rpc",
 					"path": "cmd/stellar-rpc/internal/limits/limits.go",
 					"locator": "MaxFeeStatsRetentionWindow",
-					"score": 17,
+					"score": 22,
 					"matchReason": "symbol holds fee-stats; symbol has retention; symbol has window; symbol holds retention windows; re…"
 				}
 			]
@@ -492,21 +492,14 @@
 		{
 			"id": "f15",
 			"q": "Which port in the quickstart container serves horizon, stellar-rpc, friendbot and lab, and which ports are the admin and stellar-core ports? Where is this documented?",
-			"fileRank": 25,
-			"symbolRank": 25,
+			"fileRank": 102,
+			"symbolRank": 102,
 			"partialRank": null,
 			"misleadingRank": null,
 			"candidates": 366,
 			"overCap": false,
 			"matched": 365,
 			"top3": [
-				{
-					"repo": "stellar/quickstart",
-					"path": "common/lab/bin/start",
-					"locator": "PORT",
-					"score": 24,
-					"matchReason": "symbol port; path has lab; symbol has port; repo named in q"
-				},
 				{
 					"repo": "stellar/stellar-rpc",
 					"path": "cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go",
@@ -518,6 +511,13 @@
 					"repo": "stellar/stellar-rpc",
 					"path": "cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go",
 					"locator": "fillContainerPorts",
+					"score": 20,
+					"matchReason": "symbol has port; symbol has container; symbol has port; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go",
+					"locator": "inContainerCorePort",
 					"score": 20,
 					"matchReason": "symbol has port; symbol has container; symbol has port; repo named in q"
 				}
@@ -538,21 +538,21 @@
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/deploy/wasm.rs",
 					"locator": "build_create_contract_tx",
-					"score": 38,
+					"score": 49,
 					"matchReason": "implements contract deploy; symbol has contract, path too; path has deploy; repo named in q"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/deploy.rs",
 					"locator": "Cmd",
-					"score": 34,
+					"score": 43,
 					"matchReason": "implements contract deploy; path has contract; path has deploy; repo named in q"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/deploy.rs",
 					"locator": "Error",
-					"score": 34,
+					"score": 43,
 					"matchReason": "implements contract deploy; path has contract; path has deploy; repo named in q"
 				}
 			]

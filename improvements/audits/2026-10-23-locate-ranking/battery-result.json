@@ -28,21 +28,21 @@
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "ENABLE_CORE_MANUAL_CLOSE",
-					"score": 43,
+					"score": 38,
 					"matchReason": "path has start; symbol --enable-core-manual-close; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "--enable-core-manual-close",
-					"score": 43,
+					"score": 38,
 					"matchReason": "path has start; symbol --enable-core-manual-close; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "start",
-					"score": 30,
+					"score": 23,
 					"matchReason": "symbol start, path too; repo named in q"
 				}
 			]
@@ -402,21 +402,21 @@
 					"repo": "stellar/quickstart",
 					"path": "README.md",
 					"locator": "Ephemeral mode",
-					"score": 39,
+					"score": 34,
 					"matchReason": "path has readme; heading has ephemeral; heading has mode; heading ephemeral mode; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "README.md",
 					"locator": "Persistent mode",
-					"score": 39,
+					"score": 34,
 					"matchReason": "path has readme; heading has mode; heading has persistent; heading persistent mode; repo named in q"
 				},
 				{
 					"repo": "stellar/stellar-rpc",
 					"path": "cmd/stellar-rpc/internal/cli/mode.go",
 					"locator": "Mode",
-					"score": 16,
+					"score": 18,
 					"matchReason": "symbol mode, path too"
 				}
 			]
@@ -470,21 +470,21 @@
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/deploy/wasm.rs",
 					"locator": "--wasm-hash",
-					"score": 42,
+					"score": 51,
 					"matchReason": "implements contract deploy; path has contract; path has deploy; symbol --wasm-hash, path too"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/deploy/wasm.rs",
 					"locator": "build_create_contract_tx",
-					"score": 26,
+					"score": 32,
 					"matchReason": "implements contract deploy; symbol has contract, path too; path has deploy; path has wasm"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/deploy/wasm.rs",
 					"locator": "--wasm",
-					"score": 25,
+					"score": 30,
 					"matchReason": "implements contract deploy; path has contract; path has deploy; symbol has wasm, path too"
 				}
 			]
@@ -504,21 +504,21 @@
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "LIMITS",
-					"score": 71,
+					"score": 67,
 					"matchReason": "symbol --limits; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "--limits",
-					"score": 71,
+					"score": 67,
 					"matchReason": "symbol --limits; repo named in q"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/container/start.rs",
 					"locator": "--limits",
-					"score": 49,
+					"score": 57,
 					"matchReason": "symbol --limits"
 				}
 			]
