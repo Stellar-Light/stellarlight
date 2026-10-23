@@ -1,0 +1,396 @@
+# Failing-first run, 2026-10-23T14:45Z, before the implementation: src/lib/event-in-query.ts
+# held only its types and an eventInQuery that returns { kind: "none" }; the route was
+# unchanged (origin/main eb9ef225).
+# npx vitest run src/lib/__tests__/event-in-query.test.ts src/app/api/hackathons/builds/__tests__/route.test.ts --maxWorkers=2 --minWorkers=1
+
+
+ RUN  v3.2.3 /Users/shubhbrar/Downloads/stellarlight-main/.claude/worktrees/agent-aa03ccf7de100689a
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+ ❯ src/lib/__tests__/event-in-query.test.ts (12 tests | 9 failed) 10ms
+   × eventInQuery finds an event named in full > by its title, in any case and punctuation 5ms
+     → expected { kind: 'none' } to deeply equal { kind: 'event', …(3) }
+   × eventInQuery finds an event named in full > without its accents, and with the en dash in its title 2ms
+     → expected { kind: 'none' } to match object { kind: 'event', …(2) }
+   × eventInQuery finds an event named in full > by its slug as typed, hyphens included 1ms
+     → expected { kind: 'none' } to match object { kind: 'event', …(2) }
+   ✓ eventInQuery finds an event named in full > never by a slug of common words with its hyphens dropped 0ms
+   × eventInQuery finds an event named in full > on whole words only 0ms
+     → expected { kind: 'none' } to match object { slug: 'stellar-hacks-zk-gaming' }
+(1 matching property omitted from actual)
+   × eventInQuery finds an event named in full > preferring the longest name 0ms
+     → expected { kind: 'none' } to match object { kind: 'event', …(2) }
+   × eventInQuery finds an event named in full > keeps the rest of q as typed, without the separators beside the name 0ms
+     → expected undefined to be 'café payments' // Object.is equality
+   × eventInQuery finds an event named in full > leaves nothing when the rest only asks for the event's entries 0ms
+     → expected { kind: 'none' } to match object { kind: 'event', rest: '' }
+   × eventInQuery infers nothing from a partial or shared name > names the events whose titles start with the words q holds 0ms
+     → expected { kind: 'none' } to deeply equal { kind: 'partial', …(2) }
+   ✓ eventInQuery infers nothing from a partial or shared name > says nothing for stopwords, the middle of a title or one event's start 0ms
+   × eventInQuery infers nothing from a partial or shared name > names every event when q holds the full names of several 0ms
+     → expected { kind: 'none' } to deeply equal { kind: 'several', …(2) }
+   ✓ eventInQuery infers nothing from a partial or shared name > reads an empty or punctuation-only q as naming nothing 0ms
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts (20 tests | 6 failed) 194ms
+   ✓ GET /api/hackathons/builds matches declared packages > finds a winner by a package its repo declares 164ms
+   ✓ GET /api/hackathons/builds says when most of q matches no build > keeps the rows and warns that they match only part of q 4ms
+   ✓ GET /api/hackathons/builds says when most of q matches no build > says nothing when every build listed by words was also found by meaning 1ms
+   ✓ GET /api/hackathons/builds says when most of q matches no build > counts a word found only inside a longer one as in no submission 1ms
+   ✓ GET /api/hackathons/builds says when most of q matches no build > says nothing when at most half of q's words are in no submission 2ms
+   ✓ GET /api/hackathons/builds says when most of q matches no build > reads a word with a trailing comma or an accent as the build's own 2ms
+   ✓ GET /api/hackathons/builds says when most of q matches no build > words the line for a one-word q 1ms
+   ✓ GET /api/hackathons/builds hackathon filter > takes an event's exact title as its slug 0ms
+   ✓ GET /api/hackathons/builds hackathon filter > answers a value that names no listed event with 400 and the valid slugs 1ms
+   ✓ GET /api/hackathons/builds hackathon filter > answers a listed event with no stored submissions with 0 matched and a warning 1ms
+   ✓ GET /api/hackathons/builds hackathon filter > says a value could not be checked when the listing cannot be read 0ms
+   ✓ GET /api/hackathons/builds rows say what the repo did after the event > serves analyze's activity value and the last commit, absent when unknown 1ms
+   ✓ GET /api/hackathons/builds counts both units > serves event entries beside unique submissions, the unit analyze counts 1ms
+   × GET /api/hackathons/builds reads an event named in q as the filter > applies the event and serves its builds when q is only its name 5ms
+     → expected undefined to deeply equal { Object (hackathon, matched) }
+   × GET /api/hackathons/builds reads an event named in q as the filter > reads words that ask for the event's entries as nothing left to search 1ms
+     → expected undefined to be 'hackmeridian-2025' // Object.is equality
+   × GET /api/hackathons/builds reads an event named in q as the filter > searches the rest of q inside the event 2ms
+     → expected undefined to be 'HackMeridian 2025' // Object.is equality
+   × GET /api/hackathons/builds reads an event named in q as the filter > infers nothing from a name start several events share, and says which 1ms
+     → expected undefined to be 'q holds \'hackmeridian\', the start o…' // Object.is equality
+   × GET /api/hackathons/builds reads an event named in q as the filter > lets an explicit hackathon win and says when q names another event 3ms
+     → expected 'search by meaning could not run this …' to be 'q names the event \'HackMeridian 2025…' // Object.is equality
+   ✓ GET /api/hackathons/builds reads an event named in q as the filter > searches q as text in every event when hackathon is sent empty 0ms
+   × GET /api/hackathons/builds reads an event named in q as the filter > serves an inferred event with no stored submissions as its filter does 2ms
+     → expected undefined to deeply equal { Object (hackathon, matched) }
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery finds an event named in full > by its title, in any case and punctuation
+AssertionError: expected { kind: 'none' } to deeply equal { kind: 'event', …(3) }
+
+- Expected
++ Received
+
+  {
+-   "kind": "event",
+-   "matched": "HackMeridian 2025",
+-   "rest": "",
+-   "slug": "hackmeridian-2025",
++   "kind": "none",
+  }
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:52:37
+     50| describe("eventInQuery finds an event named in full", () => {
+     51|  it("by its title, in any case and punctuation", () => {
+     52|   expect(find("HackMeridian 2025")).toEqual({
+       |                                     ^
+     53|    kind: "event",
+     54|    slug: "hackmeridian-2025",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/15]⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery finds an event named in full > without its accents, and with the en dash in its title
+AssertionError: expected { kind: 'none' } to match object { kind: 'event', …(2) }
+
+- Expected
++ Received
+
+  {
+-   "kind": "event",
+-   "rest": "",
+-   "slug": "hackaton-ejemplo",
++   "kind": "none",
+  }
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:73:57
+     71| 
+     72|  it("without its accents, and with the en dash in its title", () => {
+     73|   expect(find("Hackaton Ano Nuevo Powered by Ejemplo")).toMatchObject({
+       |                                                         ^
+     74|    kind: "event",
+     75|    slug: "hackaton-ejemplo",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/15]⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery finds an event named in full > by its slug as typed, hyphens included
+AssertionError: expected { kind: 'none' } to match object { kind: 'event', …(2) }
+
+- Expected
++ Received
+
+  {
+-   "kind": "event",
+-   "matched": "hackmeridian-2025",
+-   "slug": "hackmeridian-2025",
++   "kind": "none",
+  }
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:84:37
+     82| 
+     83|  it("by its slug as typed, hyphens included", () => {
+     84|   expect(find("hackmeridian-2025")).toMatchObject({
+       |                                     ^
+     85|    kind: "event",
+     86|    slug: "hackmeridian-2025",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/15]⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery finds an event named in full > on whole words only
+AssertionError: expected { kind: 'none' } to match object { slug: 'stellar-hacks-zk-gaming' }
+(1 matching property omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "slug": "stellar-hacks-zk-gaming",
++   "kind": "none",
+  }
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:110:43
+    108|   expect(find("hackmeridian2025 vault")).toEqual({ kind: "none" });
+    109|   // The slug stellar-hacks-zk inside another slug is not that slug.
+    110|   expect(find("stellar-hacks-zk-gaming")).toMatchObject({
+       |                                           ^
+    111|    slug: "stellar-hacks-zk-gaming",
+    112|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/15]⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery finds an event named in full > preferring the longest name
+AssertionError: expected { kind: 'none' } to match object { kind: 'event', …(2) }
+
+- Expected
++ Received
+
+  {
+-   "kind": "event",
+-   "matched": "stellar-hacks-zk gaming",
+-   "slug": "stellar-hacks-zk-gaming",
++   "kind": "none",
+  }
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:117:43
+    115|  it("preferring the longest name", () => {
+    116|   // "stellar-hacks-zk" is the start of this run, the title is all of …
+    117|   expect(find("stellar-hacks-zk gaming")).toMatchObject({
+       |                                           ^
+    118|    kind: "event",
+    119|    slug: "stellar-hacks-zk-gaming",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/15]⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery finds an event named in full > keeps the rest of q as typed, without the separators beside the name
+AssertionError: expected undefined to be 'café payments' // Object.is equality
+
+- Expected: 
+"café payments"
+
++ Received: 
+undefined
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:125:56
+    123| 
+    124|  it("keeps the rest of q as typed, without the separators beside the n…
+    125|   expect(find("HackMeridian 2025 café payments").rest).toBe(
+       |                                                        ^
+    126|    "café payments",
+    127|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/15]⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery finds an event named in full > leaves nothing when the rest only asks for the event's entries
+AssertionError: expected { kind: 'none' } to match object { kind: 'event', rest: '' }
+
+- Expected
++ Received
+
+  {
+-   "kind": "event",
+-   "rest": "",
++   "kind": "none",
+  }
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:144:20
+    142|    "Stellar Hacks: Blend!",
+    143|   ])
+    144|    expect(find(q)).toMatchObject({ kind: "event", rest: "" });
+       |                    ^
+    145|   expect(find("HackMeridian 2025 payments app").rest).toBe("payments a…
+    146|  });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/15]⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery infers nothing from a partial or shared name > names the events whose titles start with the words q holds
+AssertionError: expected { kind: 'none' } to deeply equal { kind: 'partial', …(2) }
+
+- Expected
++ Received
+
+  {
+-   "kind": "partial",
+-   "matched": "hackmeridian",
+-   "slugs": [
+-     "hackmeridian-2025",
+-     "hackmeridian-2026",
+-   ],
++   "kind": "none",
+  }
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:151:32
+    149| describe("eventInQuery infers nothing from a partial or shared name", …
+    150|  it("names the events whose titles start with the words q holds", () =…
+    151|   expect(find("hackmeridian")).toEqual({
+       |                                ^
+    152|    kind: "partial",
+    153|    slugs: ["hackmeridian-2025", "hackmeridian-2026"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/15]⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery infers nothing from a partial or shared name > names every event when q holds the full names of several
+AssertionError: expected { kind: 'none' } to deeply equal { kind: 'several', …(2) }
+
+- Expected
++ Received
+
+  {
+-   "kind": "several",
+-   "matched": [
+-     "HackMeridian 2025",
+-     "HackMeridian 2026",
+-   ],
+-   "slugs": [
+-     "hackmeridian-2025",
+-     "hackmeridian-2026",
+-   ],
++   "kind": "none",
+  }
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:187:58
+    185| 
+    186|  it("names every event when q holds the full names of several", () => {
+    187|   expect(find("HackMeridian 2025 vs HackMeridian 2026")).toEqual({
+       |                                                          ^
+    188|    kind: "several",
+    189|    slugs: ["hackmeridian-2025", "hackmeridian-2026"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/15]⎯
+
+ FAIL  src/app/api/hackathons/builds/__tests__/route.test.ts > GET /api/hackathons/builds reads an event named in q as the filter > applies the event and serves its builds when q is only its name
+AssertionError: expected undefined to deeply equal { Object (hackathon, matched) }
+
+- Expected: 
+{
+  "hackathon": "hackmeridian-2025",
+  "matched": "HackMeridian 2025",
+}
+
++ Received: 
+undefined
+
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts:373:36
+    371|   const { status, body } = await get("q=HackMeridian%202025&limit=20");
+    372|   expect(status).toBe(200);
+    373|   expect(body.meta.inferredFilter).toEqual({
+       |                                    ^
+    374|    hackathon: "hackmeridian-2025",
+    375|    matched: "HackMeridian 2025",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/15]⎯
+
+ FAIL  src/app/api/hackathons/builds/__tests__/route.test.ts > GET /api/hackathons/builds reads an event named in q as the filter > reads words that ask for the event's entries as nothing left to search
+AssertionError: expected undefined to be 'hackmeridian-2025' // Object.is equality
+
+- Expected: 
+"hackmeridian-2025"
+
++ Received: 
+undefined
+
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts:399:47
+    397|   const { logApiHit } = await import("@/lib/api-usage");
+    398|   const { body } = await get("q=HackMeridian%202025%20winners");
+    399|   expect(body.meta.inferredFilter?.hackathon).toBe("hackmeridian-2025"…
+       |                                               ^
+    400|   expect(body.meta.filters.q).toBeNull();
+    401|   expect(ids(body)).toEqual(["lance", "simple-fund"]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/15]⎯
+
+ FAIL  src/app/api/hackathons/builds/__tests__/route.test.ts > GET /api/hackathons/builds reads an event named in q as the filter > searches the rest of q inside the event
+AssertionError: expected undefined to be 'HackMeridian 2025' // Object.is equality
+
+- Expected: 
+"HackMeridian 2025"
+
++ Received: 
+undefined
+
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts:412:45
+    410|    "q=HackMeridian%202025%20simple%20fund&mode=keyword",
+    411|   );
+    412|   expect(body.meta.inferredFilter?.matched).toBe("HackMeridian 2025");
+       |                                             ^
+    413|   expect(body.meta.filters).toMatchObject({
+    414|    q: "simple fund",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/15]⎯
+
+ FAIL  src/app/api/hackathons/builds/__tests__/route.test.ts > GET /api/hackathons/builds reads an event named in q as the filter > infers nothing from a name start several events share, and says which
+AssertionError: expected undefined to be 'q holds \'hackmeridian\', the start o…' // Object.is equality
+
+- Expected: 
+"q holds 'hackmeridian', the start of the names of 2 events (hackmeridian-2025, hackmeridian-2026); nothing was inferred and q was searched as text; to search one of them, send hackathon=<slug>"
+
++ Received: 
+undefined
+
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts:424:35
+    422|   expect(body.meta.inferredFilter).toBeUndefined();
+    423|   expect(body.meta.filters.hackathon).toBeNull();
+    424|   expect(body.meta.warnings?.[0]).toBe(
+       |                                   ^
+    425|    "q holds 'hackmeridian', the start of the names of 2 events (hackme…
+    426|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/15]⎯
+
+ FAIL  src/app/api/hackathons/builds/__tests__/route.test.ts > GET /api/hackathons/builds reads an event named in q as the filter > lets an explicit hackathon win and says when q names another event
+AssertionError: expected 'search by meaning could not run this …' to be 'q names the event \'HackMeridian 2025…' // Object.is equality
+
+Expected: "q names the event 'HackMeridian 2025' (hackmeridian-2025), which hackathon= does not select; nothing was inferred and q was searched as text inside the selected events"
+Received: "search by meaning could not run this request (embedding or vector index unavailable); these are keyword matches, not a statement that nothing close exists"
+
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts:436:35
+    434|    hackathon: ["e"],
+    435|   });
+    436|   expect(body.meta.warnings?.[0]).toBe(
+       |                                   ^
+    437|    "q names the event 'HackMeridian 2025' (hackmeridian-2025), which h…
+    438|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/15]⎯
+
+ FAIL  src/app/api/hackathons/builds/__tests__/route.test.ts > GET /api/hackathons/builds reads an event named in q as the filter > serves an inferred event with no stored submissions as its filter does
+AssertionError: expected undefined to deeply equal { Object (hackathon, matched) }
+
+- Expected: 
+{
+  "hackathon": "hackmeridian-2026",
+  "matched": "HackMeridian 2026",
+}
+
++ Received: 
+undefined
+
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts:457:36
+    455|   const { status, body } = await get("q=HackMeridian%202026");
+    456|   expect(status).toBe(200);
+    457|   expect(body.meta.inferredFilter).toEqual({
+       |                                    ^
+    458|    hackathon: "hackmeridian-2026",
+    459|    matched: "HackMeridian 2026",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/15]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  15 failed | 17 passed (32)
+   Start at  10:45:22
+   Duration  974ms (transform 139ms, setup 20ms, collect 116ms, tests 204ms, environment 696ms, prepare 92ms)
+

@@ -1,0 +1,316 @@
+{
+	"writtenAt": "2026-10-23T14:45:00Z",
+	"extendedAt": "2026-10-23T15:47:00Z",
+	"extension": "After the independent review and before any re-run: p24 to p29 (the review's six failing q) added, and p04's expected warnings extended with textless = the line saying the rest matched none of an inferred event's stored submissions, which hold no description. A warning value may list several kinds, in order.",
+	"note": "The probes of improvements/rounds/2026-10-23-event-in-q.md with their expected outcome, written before any capture or replay. warning: inferred = the line saying what was inferred and how to opt out; partial = a name start shared by several events; multiple = full names of more than one event; explicit = q names another event than an explicit hackathon filter; none = no line from event inference (other warnings may still appear). candidatesTitlePrefix: every event whose title starts with these words. filtersQ and filtersHackathon: meta.filters.q and meta.filters.hackathon as served; omitted where not checked.",
+	"probes": [
+		{
+			"id": "p01",
+			"q": "HackMeridian 2025",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"matched": "HackMeridian 2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p02",
+			"q": "hackmeridian-2025",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"matched": "hackmeridian-2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p03",
+			"q": "HackMeridian 2025 winners",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"matched": "HackMeridian 2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p04",
+			"q": "HackMeridian 2025 payments app",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"matched": "HackMeridian 2025",
+				"warning": ["inferred", "textless"],
+				"filtersQ": "payments app",
+				"filtersHackathon": ["hackmeridian-2025"]
+			}
+		},
+		{
+			"id": "p05",
+			"q": "hackmeridian",
+			"expect": {
+				"inferred": null,
+				"warning": "partial",
+				"candidates": ["hackmeridian-2025", "hackmeridian-2026"],
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p06",
+			"q": "Stellar Hacks",
+			"expect": {
+				"inferred": null,
+				"warning": "partial",
+				"candidatesTitlePrefix": "stellar hacks",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p07",
+			"q": "blend lending vault",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p08",
+			"q": "Stellar Hacks: Blend",
+			"expect": {
+				"inferred": "stellar-hacks-blend",
+				"matched": "Stellar Hacks: Blend",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["stellar-hacks-blend"]
+			}
+		},
+		{
+			"id": "p09",
+			"q": "stellar hacks blend",
+			"expect": {
+				"inferred": "stellar-hacks-blend",
+				"matched": "stellar hacks blend",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["stellar-hacks-blend"]
+			}
+		},
+		{
+			"id": "p10",
+			"q": "ZK Gaming",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p11",
+			"q": "Ideaton Fin de Ano Powered by Stellar Chile",
+			"expect": {
+				"inferred": "ideaton2026",
+				"matched": "Ideaton Fin de Ano Powered by Stellar Chile",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["ideaton2026"]
+			}
+		},
+		{
+			"id": "p12",
+			"q": "HackMeridian 2024",
+			"expect": {
+				"inferred": null,
+				"warning": "partial",
+				"candidates": ["hackmeridian-2025", "hackmeridian-2026"],
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p13",
+			"q": "HackMeridian 2025",
+			"params": { "hackathon": "stellar-hacks-zk" },
+			"expect": {
+				"inferred": null,
+				"warning": "explicit",
+				"candidates": ["hackmeridian-2025"],
+				"filtersQ": "hackmeridian 2025",
+				"filtersHackathon": ["stellar-hacks-zk"]
+			}
+		},
+		{
+			"id": "p14",
+			"q": "",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p15a",
+			"q": "!!!",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p15b",
+			"q": ": , |",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p16",
+			"q": "build on stellar lending app",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p17",
+			"q": "stellar latam remittances",
+			"expect": {
+				"inferred": null,
+				"warning": "partial",
+				"candidatesTitlePrefix": "stellar latam",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p18",
+			"q": "real world assets tokenization",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p19",
+			"q": "Meridian",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p20",
+			"q": "KALE Markets",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p21",
+			"q": "scaffold stellar templates",
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p22",
+			"q": "HackMeridian 2025 vs HackMeridian 2026",
+			"expect": {
+				"inferred": null,
+				"warning": "multiple",
+				"candidates": ["hackmeridian-2025", "hackmeridian-2026"],
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p23",
+			"q": "HackMeridian 2025",
+			"params": { "hackathon": "" },
+			"expect": {
+				"inferred": null,
+				"warning": "none",
+				"filtersQ": "hackmeridian 2025",
+				"filtersHackathon": null
+			}
+		},
+		{
+			"id": "p24",
+			"q": "HackMeridian 2025 top three",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": ["inferred", "textless"],
+				"filtersQ": "top three",
+				"filtersHackathon": ["hackmeridian-2025"]
+			}
+		},
+		{
+			"id": "p25",
+			"q": "HackMeridian 2025 awards",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p26",
+			"q": "HackMeridian 2025 first place",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p27",
+			"q": "HackMeridian 2025 leaderboard",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p28",
+			"q": "HackMeridian 2025 participants",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p29",
+			"q": "HackMeridian 2025 give me",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": ["inferred", "textless"],
+				"filtersQ": "give me",
+				"filtersHackathon": ["hackmeridian-2025"]
+			}
+		}
+	],
+	"restQueries": ["payments app", "winners", "top three", "give me"]
+}
