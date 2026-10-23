@@ -60,6 +60,12 @@
 			"lane": "curate-projects",
 			"what": "A July STATUS_FIX entry for blend (Live\u2192Live, basis site-liveness) re-stamped site-liveness on every execute, erasing the onchain-activity the basis lane awards; 16 entries carry a weak basis. Fixed: a weak curated basis never overwrites a strong lane-earned one when the status is unchanged.",
 			"source": "basis-from-onchain dry run 2026-09-05 (AWARD blend site-liveness \u2192 onchain-activity, again); fix PR in this session"
+		},
+		{
+			"date": "2026-10-23",
+			"lane": "enrich-tvl",
+			"what": "The lane stores tvlUSD 0 for allbridge (slug allbridge-core, tvlAsOf 2026-10-19) while DefiLlama serves that protocol's tvl as null (deprecated, deadFrom 2026-08-31; read 2026-10-23): a missing figure was coerced to 0, against the lane's own rule that null means not tracked, never zero. Fixed: a row with neither a Stellar slice nor a total is null; allbridge is repointed to allbridge-next (no TVL figure upstream), and a figure stored under slugs the map no longer names is cleared; the lane also records DefiLlama's listing verdict (llamaListing) for the status checks.",
+			"source": "lane DQ1 branch lane/dq1-dead-protocol-guard (improvements/rounds/2026-10-23-dead-protocol-guard.md); PR number added when it is opened"
 		}
 	]
 }

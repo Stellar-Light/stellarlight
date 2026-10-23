@@ -61,6 +61,7 @@ import {
 	SOURCE_REPO_NAMES,
 } from "./source-locator";
 import { PRICE_BASES } from "./stablecoins";
+import { CHECK_RESULTS, STATUS_CHECKS } from "./status-checks";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
 
@@ -2097,7 +2098,7 @@ export const spec: OpenAPISpec = {
 										evidence: {
 											type: "array",
 											description:
-												"Typed evidence rows — discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source).",
+												"Typed evidence rows; discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source); status-check = a check of a Live label that hit (note, source, asOf), the same check searchProjects serves in statusChecks: the verdict stays supported, the statement carries the caveat and confidence is halved.",
 											items: {
 												type: "object",
 												properties: {
@@ -2108,6 +2109,7 @@ export const spec: OpenAPISpec = {
 															"status-record",
 															"code-activity",
 															"curated-note",
+															"status-check",
 														],
 													},
 													auditor: { type: "string", nullable: true },
@@ -10602,12 +10604,48 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Deterministic trust score for the lifecycle status fact: basis-class weight \u00d7 stepwise freshness decay. score 0\u20131, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance \u21d2 same score \u2014 cacheable.",
+							"Deterministic trust score for the lifecycle status fact: basis-class weight times stepwise freshness decay. score 0 to 1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). The same provenance gives the same score, so it can be cached. Halved on a Live row when a statusChecks entry is a hit (statusCaveat says why).",
 						properties: {
 							score: { type: "number" },
 							label: { type: "string", enum: ["high", "medium", "low"] },
 							ageDays: { type: "integer", nullable: true },
 						},
+					},
+					statusChecks: {
+						type: "array",
+						description:
+							"Checks of the status label against stored upstream facts, present only on rows with a DefiLlama link (llamaSlugs); absent means the row has no DefiLlama link, so neither check applies. defillama-listing: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for DEX, Lending, Bridge and Yield rows: hit when a DefiLlama TVL of 0 read within the last 14 days meets 60 or more days of observed time in which no tracked contract emitted an event or took a sub-call, clear when a fresh TVL is above 0 or a contract moved in the latest window, could-not-check otherwise (no TVL figure, a TVL reading older than 14 days, no tracked contract, or under 60 days observed). A could-not-check result is not a clean bill.",
+						items: {
+							type: "object",
+							required: ["check", "result", "detail", "asOf", "sourceUrl"],
+							properties: {
+								check: { type: "string", enum: [...STATUS_CHECKS] },
+								result: { type: "string", enum: [...CHECK_RESULTS] },
+								detail: {
+									type: "string",
+									description:
+										"What was read, or why it could not be read, in plain words with dates.",
+								},
+								asOf: {
+									type: "string",
+									nullable: true,
+									description:
+										"Date (YYYY-MM-DD) of the reading the result rests on; null when there was none.",
+								},
+								sourceUrl: {
+									type: "string",
+									format: "uri",
+									description:
+										"Where to check the fact: the first linked protocol's DefiLlama page (its listing and TVL figure); the contract readings behind the TVL check are the row's onchain block.",
+								},
+							},
+						},
+					},
+					statusCaveat: {
+						type: "string",
+						nullable: true,
+						description:
+							"Present only with statusChecks. On a Live row with a hit, one sentence to relay with the status: the label may describe a product that stopped or moved (a protocol deprecated upstream can have a successor), so treat Live as unconfirmed. A check never changes the status itself. Null = no check hit, or the row is not Live; read statusChecks for what was checked.",
 					},
 					statusBasis: {
 						type: "string",
@@ -10972,7 +11010,7 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'). Refreshed weekly; see tvlAsOf.",
+							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf.",
 					},
 					tvlAsOf: {
 						type: "string",

@@ -165,6 +165,32 @@ describe("liveVerdict — the status record IS the evidence", () => {
 		expect(r.verdict).toBe("unsupported");
 		expect(r.statement).toContain("gap in our record");
 	});
+	// Lane DQ1: /api/verify?type=live&subject=allbridge answered supported,
+	// 0.9 high, on 1.9.101 while DefiLlama marks allbridge-core deprecated.
+	it("Live on record with a dead upstream protocol: supported, caveated, confidence halved", () => {
+		const plain = liveVerdict(facts("Live"));
+		const r = liveVerdict({
+			...facts("Live"),
+			types: ["Bridge"],
+			tvlUSD: 0,
+			llamaSlugs: ["allbridge-core"],
+			llamaListing: {
+				state: "deprecated",
+				deadFrom: "2026-08-31",
+				checkedAt: "2026-10-26",
+			},
+		});
+		expect(r.verdict).toBe("supported");
+		expect(r.statement).toMatch(/allbridge-core deprecated/);
+		expect(r.evidence.map((e) => e.kind)).toEqual([
+			"status-record",
+			"status-check",
+		]);
+		expect(r.confidence?.score).toBe(
+			Math.round((plain.confidence?.score ?? 0) * 50) / 100,
+		);
+		expect(r.confidence?.label).toBe("low");
+	});
 });
 
 describe("maintainedVerdict — code activity + curated notes", () => {

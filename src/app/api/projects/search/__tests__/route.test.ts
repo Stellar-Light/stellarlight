@@ -256,3 +256,71 @@ describe("GET /api/projects/search view param", () => {
 		);
 	});
 });
+
+// Lane DQ1 (2026-10-23): a Live row whose DefiLlama protocol is deprecated
+// serves a caveat and a halved statusConfidence; a row with no DefiLlama
+// link serves exactly the keys it served before.
+describe("GET /api/projects/search status checks (DQ1)", () => {
+	const allbridge = {
+		id: "p3",
+		name: "Allbridge",
+		slug: "allbridge",
+		category: "Protocol/Contract",
+		shortDescription: "Cross-chain bridge.",
+		status: "Live",
+		statusBasis: "human-verified",
+		statusAsOf: "2026-09-05T00:00:00.000Z",
+		types: ["Bridge"],
+		tvlUSD: 0,
+		tvlAsOf: "2026-10-19T10:38:57.354Z",
+		llamaSlugs: ["allbridge-core"],
+		llamaListing: {
+			state: "deprecated",
+			deadFrom: "2026-08-31",
+			checkedAt: "2026-10-26T05:00:00.000Z",
+		},
+	};
+	const spacewalk = {
+		id: "p4",
+		name: "Spacewalk",
+		slug: "spacewalk",
+		category: "Protocol/Contract",
+		shortDescription: "Bridge between Stellar and Polkadot.",
+		status: "Live",
+		statusBasis: "human-verified",
+		statusAsOf: "2026-09-05T00:00:00.000Z",
+		types: ["Bridge"],
+	};
+	beforeEach(() => {
+		vi.useFakeTimers({ now: new Date("2026-10-26T12:00:00.000Z") });
+		vi.stubEnv("VOYAGE_API_KEY", "");
+		candidateCalls = 0;
+		read = (a) => (isCandidate(a) ? [allbridge, spacewalk] : []);
+	});
+	afterEach(() => {
+		vi.useRealTimers();
+		vi.unstubAllEnvs();
+	});
+
+	it("caveats the deprecated row and leaves the unlinked row as it was", async () => {
+		const { status, body } = await search("q=bridge");
+		expect(status).toBe(200);
+		const by = Object.fromEntries(
+			body.projects.map((p: { slug: string }) => [p.slug, p]),
+		);
+		expect(by.allbridge.statusCaveat).toMatch(/allbridge-core deprecated/);
+		expect(by.allbridge.statusConfidence).toMatchObject({
+			score: 0.45,
+			label: "low",
+		});
+		expect(
+			by.allbridge.statusChecks.map((c: { check: string }) => c.check),
+		).toEqual(["defillama-listing", "tvl-zero-onchain-quiet"]);
+		expect(by.spacewalk).not.toHaveProperty("statusCaveat");
+		expect(by.spacewalk).not.toHaveProperty("statusChecks");
+		expect(by.spacewalk.statusConfidence).toMatchObject({
+			score: 0.9,
+			label: "high",
+		});
+	});
+});

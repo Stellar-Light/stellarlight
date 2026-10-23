@@ -1,11 +1,19 @@
 # Weekly DefiLlama TVL refresh (F8 serving depends on fresh tvlAsOf — class 8).
 # Report sections (liveness/discovery candidates) land in the job log for the
 # Part-3 liveness wave; writes are mapped-protocols-only (see enrich-tvl.ts).
+# Scheduled runs execute; a dispatch is a dry run unless execute is set
+# (2026-10-23, lane DQ1: the lane also writes llamaListing, so a dispatch can
+# show its plan before an execute).
 name: enrich-tvl
 on:
   schedule:
     - cron: "0 5 * * 1"
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write? Leave false for a dry run."
+        type: boolean
+        default: false
 concurrency:
   group: enrich-tvl
   cancel-in-progress: false
@@ -25,8 +33,8 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Refresh TVL (execute)
+      - name: Refresh TVL (scheduled runs execute; dispatch honors the input)
         # shell: bash = pipefail; GitHub's default bash -e has none, so `| tee`
         # masked this step's exit code (2026-08-12 lesson).
         shell: bash
-        run: pnpm exec tsx scripts/enrich-tvl.ts --execute | tee $GITHUB_STEP_SUMMARY
+        run: pnpm exec tsx scripts/enrich-tvl.ts ${{ (github.event_name == 'schedule' || inputs.execute) && '--execute' || '' }} | tee $GITHUB_STEP_SUMMARY

@@ -28,6 +28,7 @@ import "../load-env";
 import { getPayload } from "payload";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
 import { STABLECOIN_REGISTRY } from "../../src/data/stablecoin-registry";
+import { quietSinceFor } from "../../src/lib/status-checks";
 import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
 import { domainOf, fetchText, parseStellarToml } from "../lib/stellar-toml";
@@ -395,6 +396,7 @@ async function run() {
 	let updated = 0;
 	let skipped = 0;
 	let fetchSkipped = 0; // projects left stale because stellar.expert did not answer
+	let projectReadBackFailed = 0; // onchain writes that did not persist as sent
 	for (const [slug, keys] of bySlug) {
 		const proj = await payload.find({
 			collection: "projects",
@@ -515,6 +517,11 @@ async function run() {
 						(c.subinvocations as number) - old.subinvocations;
 			}
 		}
+		// DQ1: the start of the run of readings in which no contract moved,
+		// carried across runs; the status checks need 60 observed days of it.
+		const quietSince = contracts.length
+			? quietSinceFor(contracts, prior)
+			: null;
 		const assetHoldersDelta =
 			priorAsOf &&
 			typeof prior?.assetHolders === "number" &&
@@ -573,7 +580,9 @@ async function run() {
 		]
 			.filter(Boolean)
 			.join(", ");
-		console.log(`${execute ? "WRITE" : "would write"} ${slug}: ${summary}`);
+		console.log(
+			`${execute ? "WRITE" : "would write"} ${slug}: ${summary}${quietSince ? ` (contracts quiet since ${quietSince.slice(0, 10)})` : ""}`,
+		);
 		for (const c of contracts) {
 			console.log(
 				`    ${String(c.label)}: events=${c.events} subinv=${c.subinvocations}${c.verifiedRepo ? " repo-verified" : ""}`,
@@ -601,9 +610,30 @@ async function run() {
 						asOf,
 						prevAsOf: priorAsOf ? new Date(priorAsOf).toISOString() : null,
 						deltaDays,
+						quietSince,
 					},
 				},
 			});
+			// DQ1 review: read back what the status checks depend on. A field
+			// the schema lacks is dropped silently by payload.update (#615).
+			const projectId = (proj.docs[0] as { id: string | number }).id;
+			const back = await payload.findByID({
+				collection: "projects",
+				id: projectId,
+				depth: 0,
+			});
+			const mm = diffWritten(
+				slug,
+				{ asOf, quietSince },
+				// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+				(back as any).onchain,
+				["asOf", "quietSince"],
+			);
+			if (mm.length) {
+				console.error(formatMismatches(mm));
+				projectReadBackFailed += 1;
+				continue;
+			}
 			updated += 1;
 		}
 	}
@@ -685,6 +715,12 @@ async function run() {
 	console.log(
 		`\n${execute ? "Updated" : "Would update"}: ${execute ? updated : bySlug.size - skipped} | skipped: ${skipped} (${fetchSkipped} by fetch failure)`,
 	);
+	if (projectReadBackFailed) {
+		console.error(
+			`RED: ${projectReadBackFailed} project onchain write(s) did not read back as sent (asOf, quietSince).`,
+		);
+		process.exitCode = 1;
+	}
 	if (fetchSkipped) {
 		// A stale row is a silent failure; the run says so with its exit code.
 		console.error(

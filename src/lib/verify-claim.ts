@@ -19,6 +19,7 @@
  * Pure module — the route supplies rows; everything here is unit-testable.
  */
 import { factConfidence } from "./fact-confidence";
+import { statusChecksFor } from "./status-checks";
 
 export type ClaimType = "audited" | "live" | "maintained" | "issued";
 export type AuditClaim = {
@@ -169,6 +170,14 @@ export type EvidenceItem =
 			note: string;
 			source: string;
 			asOf: string | null;
+	  }
+	| {
+			/** A status check that hit (src/lib/status-checks.ts): a stored fact
+			 * that says the Live label may not describe what runs today. */
+			kind: "status-check";
+			note: string;
+			source: string;
+			asOf: string | null;
 	  };
 
 export interface VerifyResult {
@@ -280,6 +289,14 @@ export interface SubjectFacts {
 	statusBasis: string | null;
 	statusAsOf: string | null;
 	statusSourceUrl: string | null;
+	/** The facts the status checks read (DQ1); absent on a row with no
+	 * DefiLlama link, which then answers exactly as before. */
+	types?: string[] | null;
+	tvlUSD?: number | null;
+	tvlAsOf?: string | null;
+	llamaSlugs?: string[] | null;
+	llamaListing?: unknown;
+	onchain?: unknown;
 }
 
 /** "is X live" — answered from the status record and its provenance tier.
@@ -295,12 +312,30 @@ export function liveVerdict(f: SubjectFacts): VerifyResult {
 		statusAsOf: f.statusAsOf,
 		statusSourceUrl: f.statusSourceUrl,
 	};
-	const conf = factConfidence(f.statusBasis, f.statusAsOf);
+	// DQ1: the same checks the search rows serve. A hit keeps the verdict
+	// (the record says Live) but caveats it and halves the confidence.
+	const checked = statusChecksFor(f);
+	const conf = checked.statusConfidence;
+	const hits = (checked.statusChecks ?? []).filter((c) => c.result === "hit");
 	if (f.status === "Live")
 		return {
 			verdict: "supported",
-			statement: `${f.name} is Live on record (basis: ${f.statusBasis ?? "unrecorded"}${f.statusAsOf ? `, as of ${f.statusAsOf.slice(0, 10)}` : ""}).`,
-			evidence: [rec],
+			statement: `${f.name} is Live on record (basis: ${f.statusBasis ?? "unrecorded"}${f.statusAsOf ? `, as of ${f.statusAsOf.slice(0, 10)}` : ""})${
+				checked.statusCaveat
+					? `. ${checked.statusCaveat.replace(/^Live on record, but /, "But ")}`
+					: "."
+			}`,
+			evidence: [
+				rec,
+				...hits.map(
+					(h): EvidenceItem => ({
+						kind: "status-check",
+						note: h.detail,
+						source: h.sourceUrl,
+						asOf: h.asOf,
+					}),
+				),
+			],
 			confidence: conf,
 		};
 	if (

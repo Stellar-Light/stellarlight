@@ -1,0 +1,1059 @@
+{
+	"A": {
+		"queries": 30,
+		"rowsServed": 514,
+		"unlinkedRows": 467,
+		"unlinkedIdentical": 467,
+		"unlinkedChanged": [],
+		"pagesWithoutLinkedRow": 10,
+		"pagesWithoutLinkedRowIdentical": 10,
+		"pagesChanged": [],
+		"rowSetsDiffer": [],
+		"linkedRows": {
+			"allbridge": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.9,
+						"label": "high",
+						"ageDays": 48
+					},
+					"lane": {
+						"score": 0.9,
+						"label": "high",
+						"ageDays": 48
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: could-not-check"
+				]
+			},
+			"blend": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"soroswap": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"aquarius": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"scopuly": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"defindex": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"spectra-finance": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"etherfuse": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: could-not-check"]
+			},
+			"spiko": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: could-not-check"]
+			},
+			"gami-labs": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					},
+					"lane": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: could-not-check"]
+			},
+			"upshift": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: could-not-check"]
+			},
+			"sushi": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"templar-protocol": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"sentora": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.6,
+						"label": "medium",
+						"ageDays": 100
+					},
+					"lane": {
+						"score": 0.6,
+						"label": "medium",
+						"ageDays": 100
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: could-not-check"]
+			},
+			"defa-invoicemate": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					},
+					"lane": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"excellar": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: could-not-check"]
+			},
+			"slender": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Inactive",
+				"statusConfidence": {
+					"base": {
+						"score": 0.8,
+						"label": "high",
+						"ageDays": 106
+					},
+					"lane": {
+						"score": 0.8,
+						"label": "high",
+						"ageDays": 106
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			}
+		}
+	},
+	"B": {
+		"queries": 30,
+		"rowsServed": 514,
+		"unlinkedRows": 467,
+		"unlinkedIdentical": 467,
+		"unlinkedChanged": [],
+		"pagesWithoutLinkedRow": 10,
+		"pagesWithoutLinkedRowIdentical": 10,
+		"pagesChanged": [],
+		"rowSetsDiffer": [],
+		"linkedRows": {
+			"allbridge": {
+				"changedKeys": ["statusConfidence", "statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.9,
+						"label": "high",
+						"ageDays": 48
+					},
+					"lane": {
+						"score": 0.45,
+						"label": "low",
+						"ageDays": 48
+					}
+				},
+				"statusCaveat": "Live on record, but DefiLlama marks allbridge-core deprecated, dead from 2026-08-31 (checked 2026-10-23). Treat the Live label as unconfirmed: the product may have stopped or moved. Check the project's own channels before relying on it.",
+				"statusChecks": [
+					"defillama-listing: hit",
+					"tvl-zero-onchain-quiet: could-not-check"
+				]
+			},
+			"blend": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"soroswap": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"aquarius": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"scopuly": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"defindex": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"spectra-finance": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"etherfuse": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"spiko": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"gami-labs": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					},
+					"lane": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"upshift": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"sushi": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"templar-protocol": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"sentora": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.6,
+						"label": "medium",
+						"ageDays": 100
+					},
+					"lane": {
+						"score": 0.6,
+						"label": "medium",
+						"ageDays": 100
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: could-not-check"]
+			},
+			"defa-invoicemate": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					},
+					"lane": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"excellar": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"slender": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Inactive",
+				"statusConfidence": {
+					"base": {
+						"score": 0.8,
+						"label": "high",
+						"ageDays": 106
+					},
+					"lane": {
+						"score": 0.8,
+						"label": "high",
+						"ageDays": 106
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			}
+		}
+	},
+	"C": {
+		"queries": 30,
+		"rowsServed": 514,
+		"unlinkedRows": 467,
+		"unlinkedIdentical": 467,
+		"unlinkedChanged": [],
+		"pagesWithoutLinkedRow": 10,
+		"pagesWithoutLinkedRowIdentical": 10,
+		"pagesChanged": [],
+		"rowSetsDiffer": [],
+		"linkedRows": {
+			"allbridge": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.9,
+						"label": "high",
+						"ageDays": 48
+					},
+					"lane": {
+						"score": 0.9,
+						"label": "high",
+						"ageDays": 48
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: could-not-check"
+				]
+			},
+			"blend": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"soroswap": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: could-not-check",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"aquarius": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"scopuly": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"defindex": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"spectra-finance": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"etherfuse": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					},
+					"lane": {
+						"score": 0.85,
+						"label": "high",
+						"ageDays": 3
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"spiko": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"gami-labs": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					},
+					"lane": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"upshift": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"sushi": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"templar-protocol": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"sentora": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.6,
+						"label": "medium",
+						"ageDays": 100
+					},
+					"lane": {
+						"score": 0.6,
+						"label": "medium",
+						"ageDays": 100
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: could-not-check"]
+			},
+			"defa-invoicemate": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					},
+					"lane": {
+						"score": 0.68,
+						"label": "medium",
+						"ageDays": 99
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			},
+			"excellar": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Live",
+				"statusConfidence": {
+					"base": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					},
+					"lane": {
+						"score": 0.77,
+						"label": "high",
+						"ageDays": 53
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": ["defillama-listing: clear"]
+			},
+			"slender": {
+				"changedKeys": ["statusChecks", "statusCaveat"],
+				"status": "Inactive",
+				"statusConfidence": {
+					"base": {
+						"score": 0.8,
+						"label": "high",
+						"ageDays": 106
+					},
+					"lane": {
+						"score": 0.8,
+						"label": "high",
+						"ageDays": 106
+					}
+				},
+				"statusCaveat": null,
+				"statusChecks": [
+					"defillama-listing: clear",
+					"tvl-zero-onchain-quiet: clear"
+				]
+			}
+		}
+	},
+	"baseIgnoresListing": true
+}
