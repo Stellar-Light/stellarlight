@@ -14,7 +14,7 @@ Raven checkout <stellar-raven checkout>
   reproduces acceptedTotals exactly: yes
   rebuilds committed Scout + stellarDocs entries from inventory (Scout 1.9.61): identical (provenance aside)
 
-Candidate spec 1.9.98 (src/lib/openapi-spec.ts)
+Candidate spec 1.9.99 (src/lib/openapi-spec.ts)
   exposed Scout ops 33 (added scout.analyzeHackathonSubmissions, scout.getHackathonSubmission, scout.locateSource; removed none); 30 Scout/stellarDocs entries differ from the committed catalog
   catalog build guards: pass
   legacy: n 338, top1 220, top3 298, top5 326, cardN 182, cardHit5 112   (accepted: n 338, top1 219, top3 298, top5 326, cardN 182, cardHit5 112)
@@ -24,7 +24,7 @@ Candidate spec 1.9.98 (src/lib/openapi-spec.ts)
   protocol: positives 8, top1 7, top3 7, top5 7, controls 4, controlTop5Captures 3   (diagnostic; baseline: positives 8, top1 7, top3 7, top5 7, controls 4, controlTop5Captures 3)
   mechanical gate (run-routing.mjs --gate): pass
   accepted totals kept: yes
-  questions moved: 2 (0 hit->miss, 2 gains only); top-5 lists changed: 65
+  questions moved: 2 (0 hit->miss, 2 gains only); top-5 lists changed: 63
 
   gain [legacy] q-defi-stellarx-what-is: "What is StellarX and is it built by the Stellar Development Foundation?"
     labelled lumenloop (lumenloop_get_project); top1 miss->hit
@@ -46,4 +46,4 @@ Candidate spec 1.9.98 (src/lib/openapi-spec.ts)
     cause: lumenloop.find_similar_scf_submissions #4 -> #5 (displaced; its own score did not change)
     cause: scout.scfPitch #5 -> #2: gated out, backfill 217 -> gated out, backfill 237; words +routingKeywords[take]
 
-VERDICT: Raven would ACCEPT 1.9.98
+VERDICT: Raven would ACCEPT 1.9.99

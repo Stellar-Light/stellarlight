@@ -293,3 +293,7 @@ routing reaches the operation mostly for short, intent-worded questions.
   0 (193 files, 2438 tests); `pnpm contract:write` 0 (no snapshot change);
   `CONTRACT_BASE=origin/main pnpm contract:check` 0; writer conformance 0;
   biome clean on the changed files.
+
+## Renumbered at merge (2026-10-23)
+
+#1864 (rerank) took 1.9.98 first, so main (0735c116) was merged in again and this lane ships as **spec 1.9.99**. The Raven gate was re-run on the merged tree: ACCEPT 1.9.99, legacy totals 220/298/326/112, 2 questions moved (0 hit to miss), and `raven-gate.txt` now holds that run. The entries above keep the number they were written with.
