@@ -1,0 +1,508 @@
+{
+	"summary": {
+		"apiVersion": {
+			"start": {
+				"at": "2026-10-23T12:58:04.759Z",
+				"apiVersion": "1.9.94"
+			},
+			"end": {
+				"at": "2026-10-23T12:58:56.895Z",
+				"apiVersion": "1.9.94"
+			}
+		},
+		"directoryRows": 1137,
+		"submissions": 1344,
+		"dorahacks": 1344,
+		"curatedLeftOut": 0,
+		"withRepo": 1185,
+		"heldWithoutLink": 1,
+		"repos": 1173,
+		"reposMoved": 62,
+		"reposUnknown": 181,
+		"repos404": 177,
+		"submissionsMoved": 63,
+		"movedBy": {
+			"renamed": 12,
+			"transferred": 51
+		},
+		"movedOutcome": {
+			"linked before": 1,
+			"linked now": 1,
+			"unlinked, a project sits under the new owner": 1,
+			"unlinked, no project lists the new repo or owner": 60
+		},
+		"linkedBefore": 32,
+		"parity": {
+			"same": 1344,
+			"differ": 0
+		},
+		"gained": 1,
+		"lost": 0,
+		"changed": 0
+	},
+	"gained": [
+		{
+			"id": "dorahacks-buidl-42656",
+			"name": "clevercon",
+			"storedRepo": "bosun-josh121/clevercon",
+			"currentRepo": "clevercon-protocol/clevercon",
+			"before": "none",
+			"after": "clevercon|moved-repo",
+			"project": {
+				"slug": "clevercon",
+				"name": "CleverCon",
+				"basis": "moved-repo",
+				"status": "Pre-Release",
+				"listing": [
+					"clevercon links.github https://github.com/clevercon-protocol/clevercon"
+				]
+			}
+		}
+	],
+	"lost": [],
+	"changed": [],
+	"parityDiffers": [],
+	"moved": [
+		{
+			"id": "dorahacks-buidl-40198",
+			"stored": "dno8/vaquitas",
+			"current": "dno8/vaquita",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-40210",
+			"stored": "kelermc/v0-star-remit-web3-app-2",
+			"current": "kelermc/ecoxport-project",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42656",
+			"stored": "bosun-josh121/clevercon",
+			"current": "clevercon-protocol/clevercon",
+			"move": "transferred",
+			"outcome": "linked now"
+		},
+		{
+			"id": "dorahacks-buidl-24233",
+			"stored": "tadashijei/orbityield.cc",
+			"current": "hitazuranahiro/orbityield.cc",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-25287",
+			"stored": "spyder11a/nova",
+			"current": "oxkai/nova",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-25289",
+			"stored": "claucondor/guardwallet",
+			"current": "claucondor/nueralwalet",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-25301",
+			"stored": "praveen836845/blind.com",
+			"current": "harpreetgill04070/blind.com",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-25334",
+			"stored": "juinsoft/celestium",
+			"current": "jdisbusy/celestium",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-27459",
+			"stored": "sooraj281/position_maker",
+			"current": "soorajdotk/position_maker",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-34193",
+			"stored": "tucara01/agrocoop",
+			"current": "micoh18/agrocoop",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-35576",
+			"stored": "rtorres-star/casatlacuatzincontract",
+			"current": "rtorresrocio/casatlacuatzincontract",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-35579",
+			"stored": "trinnity030/tropik",
+			"current": "trinnityodyssey/tropik",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-35572",
+			"stored": "andresillodev/certificationsid-stellarbased",
+			"current": "ander-tsx/certificationsid-stellarbased",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-35609",
+			"stored": "val1-boop/proyecto-hakatoon",
+			"current": "val1-boop/edutoken",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-35611",
+			"stored": "erickemilianomoralesvelazquez/canacero-contracts",
+			"current": "erickvelazz/canacero-contracts",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-35616",
+			"stored": "leomv123/springnfts-backend",
+			"current": "leonardomv03/springnfts-backend",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-35618",
+			"stored": "elchavodelbronx/hackathon_proyecto",
+			"current": "santiaggo-salamanca/hackathon_proyecto",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-36270",
+			"stored": "mackenzie-oo7/lockedin",
+			"current": "lokt-in/loktin",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-36281",
+			"stored": "joaquinsoza/luckyledgers",
+			"current": "yripper/luckyledgers",
+			"move": "transferred",
+			"outcome": "unlinked, a project sits under the new owner"
+		},
+		{
+			"id": "dorahacks-buidl-36286",
+			"stored": "aaditya1273/stellar-sphira",
+			"current": "aaditya1273/ava-echo-the-infinite-village",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-36770",
+			"stored": "slicehub/slice",
+			"current": "sliceprotocol/slice",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-36772",
+			"stored": "lober-org/welovedogs",
+			"current": "wld-org/welovedogs",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-36775",
+			"stored": "stellarweek-winefi1/wine-fi",
+			"current": "stellarweek-winefi1/vinifica",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-10366",
+			"stored": "greedyworld/game",
+			"current": "snake-ai-agent/snakeai",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-38066",
+			"stored": "noufalthecoder/trustgenome-ai",
+			"current": "kvmeghaa/trustgenome-ai",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-29550",
+			"stored": "noufalthecoder/proofchain--the-truth-ledger",
+			"current": "kvmeghaa/safelink-guard-ai",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-39568",
+			"stored": "clash-of-pirates/clash-of-pirates",
+			"current": "clash-studio/clash",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-39768",
+			"stored": "xbull-corp/guess-the-xbull",
+			"current": "xbullcorp/guess-the-xbull",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-39844",
+			"stored": "sphinxbsd/aether-grid",
+			"current": "sphinxar/aether-grid",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-39857",
+			"stored": "aqilarifti/zkhiderseeker",
+			"current": "aqilathebuilder/zkhiderseeker",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-39898",
+			"stored": "leocagli/human-vs-bots",
+			"current": "bitcoindefi/human-vs-bots",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-41487",
+			"stored": "ericmt-98/micopay-mvp",
+			"current": "micopay/micopay-protocol",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-41507",
+			"stored": "nallely-lopez/rizodao",
+			"current": "rizodao/rizodao",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-41515",
+			"stored": "elegidokawai2/hackaton--ajolote-en-ingles-",
+			"current": "ander-tsx/nuup",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42413",
+			"stored": "karagozemin/fortexa",
+			"current": "fortexa-stellar/fortexa",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42492",
+			"stored": "suhailvs/stellar_hackaton2",
+			"current": "suhailvs-archive/stellar_hackaton2",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42521",
+			"stored": "velikanghost/heekowave",
+			"current": "velkang/heekowave",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42613",
+			"stored": "boxkit-labs/flare",
+			"current": "codeze-us/flare",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42666",
+			"stored": "ericmt-98/micopay-protocol",
+			"current": "micopay/micopay-protocol",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42687",
+			"stored": "eras256/nirium",
+			"current": "nirium-protocol/nirium-core",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42714",
+			"stored": "sorobanhooks/freighter",
+			"current": "sorobanhooks/aptopia-wallet",
+			"move": "renamed",
+			"outcome": "linked before"
+		},
+		{
+			"id": "dorahacks-buidl-42742",
+			"stored": "leojay-net/stellar-agent-flow",
+			"current": "pridex-org/stellar-agent-flow",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42747",
+			"stored": "t0k1dev/vendly",
+			"current": "tokidev-ai/vendly",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42749",
+			"stored": "ritik4ever/lodestar",
+			"current": "stellar-ecosystem/lodestar",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42765",
+			"stored": "leomanza/near-shade-coordination",
+			"current": "leomanza/delibera.xyz",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-42787",
+			"stored": "benpaymaster/pharma",
+			"current": "benpaymaster/dosepath",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46162",
+			"stored": "eras256/contextio",
+			"current": "contextio/contextio",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46216",
+			"stored": "diegoveme/payfi",
+			"current": "diegoveme/grow",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46237",
+			"stored": "ericmt-98/micopay-protocol",
+			"current": "micopay/micopay-protocol",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-45473",
+			"stored": "leocagli/open-stellar-passport",
+			"current": "bitcoindefi/open-stellar-passport",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-45514",
+			"stored": "jinggaworld/alphine",
+			"current": "indonesianviking/alphine",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-45981",
+			"stored": "bekirerdem/prism",
+			"current": "eunomia-finance/eunomia",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46002",
+			"stored": "karanjadavi/stellarproof",
+			"current": "onchain-jojo/stellarproof",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46060",
+			"stored": "squidbob18/stellar-zk-bridge",
+			"current": "jamesonchain/stellar-zk-bridge",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46385",
+			"stored": "yungthacreator/zeroseal",
+			"current": "opeyemiakinbohun/zeroseal",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46387",
+			"stored": "wheval/nullmoney",
+			"current": "nullmoney-org/nullmoney",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46451",
+			"stored": "psalmuel01/lucent",
+			"current": "tolulabs/lucent",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46455",
+			"stored": "mj-rwa/zerowage",
+			"current": "zerowage-protocol/zerowage",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46460",
+			"stored": "shivannsh/shadowwire",
+			"current": "shivannsh/cerida",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-36321",
+			"stored": "thisyearnofear/trustfall",
+			"current": "thisyearnofear/latep",
+			"move": "renamed",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46482",
+			"stored": "quantum3-labs/glint",
+			"current": "gianalarcon/glint",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46504",
+			"stored": "eseslabs/anyramp",
+			"current": "naisu-one/anyramp",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		},
+		{
+			"id": "dorahacks-buidl-46510",
+			"stored": "psalmuel01/stellarcred",
+			"current": "tolulabs/stellarcred",
+			"move": "transferred",
+			"outcome": "unlinked, no project lists the new repo or owner"
+		}
+	]
+}

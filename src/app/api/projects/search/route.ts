@@ -19,6 +19,7 @@ import {
 	DEFAULT_READ_TIMEOUT_MS,
 	degradedRead,
 	degradedWarning,
+	failedReadsOf,
 	isDegraded,
 	partialFor,
 	REQUEST_READ_BUDGET_MS,
@@ -2620,6 +2621,7 @@ async function handle(req: NextRequest) {
 		},
 		resultCount: returnedCount,
 		matchMode,
+		partial: failedReadsOf(warnings).length > 0,
 	});
 
 	return NextResponse.json(
