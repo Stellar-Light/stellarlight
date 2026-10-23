@@ -643,6 +643,19 @@ describe("GET /api/hackathons/builds reads an event named in q as the filter", (
 		]);
 	});
 
+	// Re-check 2026-10-23: under another filter a 0 can mean the filter
+	// excluded the row the rest matched (lance sits in Composability).
+	it("says nothing about the rows when another filter narrowed the search", async () => {
+		const { body } = await get(
+			"q=HackMeridian%202025%20lance&track=Open%20Innovation&mode=keyword",
+		);
+		expect(body.meta.inferredFilter?.hackathon).toBe("hackmeridian-2025");
+		expect(body.meta.counts.matched).toBe(0);
+		expect(JSON.stringify(body.meta.warnings)).not.toContain(
+			"matched no stored submission",
+		);
+	});
+
 	it("says nothing more when the event's rows hold text to search", async () => {
 		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
 		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([

@@ -134,12 +134,12 @@ export async function GET(req: NextRequest) {
 	// Any of q's words in no submission: say which, and what the rows are.
 	const unused = q ? unusedWordsWarning(indexed, q, scored, withheld) : null;
 	if (unused) warnings.push(unused);
-	const textless = textlessEventWarning(
-		ev.inferredFilter,
-		q,
-		scored.length,
-		indexed,
-	);
+	// Only with no other filter: under track, package, category or
+	// winnersOnly a 0 can mean the filter excluded the row the rest matched.
+	const textless =
+		f.track || f.package || f.category || f.winnersOnly
+			? null
+			: textlessEventWarning(ev.inferredFilter, q, scored.length, indexed);
 	if (textless) warnings.push(textless);
 
 	const builds = scored
