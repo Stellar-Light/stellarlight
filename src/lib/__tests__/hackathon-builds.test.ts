@@ -401,6 +401,13 @@ describe("words no build uses", () => {
 			concepts: 3,
 		});
 	});
+
+	it("does not count a token with no letter or digit as a word", () => {
+		expect(wordsNoBuildUses(pool, "agents !!! ???")).toEqual({
+			absent: [],
+			concepts: 1,
+		});
+	});
 });
 
 describe("brief picks winners first, then broadens", () => {

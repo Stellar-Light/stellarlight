@@ -379,3 +379,14 @@ fresh battery written by a separate agent that was told no rule.
   line fires did not change anywhere measured.
 - Spec: prizePoolUSD clause; meta.warnings names the all-absent wordings.
   Changelog 1.9.94: the wordings and the whole-word rule.
+- Re-check (same reviewer) of db1ff05d: GATE: push. Rankings cannot move,
+  since termMatcher is byte-identical to base. Every earlier probe now
+  reports nothing absent.
+  - One low residual: a token with no letter or digit ("!!!") counted as a
+    word and read as absent through its plural form, so q=`agents !!! ???`
+    would warn about "2 of the 3 words".
+  - Fixed by the orchestrator: wordsNoBuildUses drops such tokens before
+    counting.
+  - Test first: `wordsNoBuildUses(pool, "agents !!! ???")` gave absent
+    ['!!!', '???'] on db1ff05d, and absent [] with 1 concept after the fix.
+    The two touched test files pass (59).

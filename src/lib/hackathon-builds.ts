@@ -686,7 +686,11 @@ export function wordsNoBuildUses(
 	indexed: IndexedBuild[],
 	q: string,
 ): { absent: string[]; concepts: number } {
-	const terms = queryTerms(q.trim().toLowerCase());
+	// A token with no letter or digit ("!!!") is not a word: it neither counts
+	// as one nor reads as absent.
+	const terms = queryTerms(q.trim().toLowerCase()).filter(({ t }) =>
+		/[\p{L}\p{N}]/u.test(t),
+	);
 	const hays = indexed.map(withPackages);
 	const absent = terms
 		.filter(({ forms }) => {
