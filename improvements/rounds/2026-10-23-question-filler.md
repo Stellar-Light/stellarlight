@@ -130,3 +130,17 @@ by two independent Claude Sonnet passes; the stricter grade is kept.
 ## Log
 
 - 2026-10-23T23:25Z live 1.9.108; candidates pinned; no replay has run.
+- 2026-10-23T23:29Z fresh set (d) written and labelled by Claude Sonnet,
+  blind to the search system, the candidates and every result, from the
+  submission summaries (as published on DoraHacks or curated event pages;
+  DoraHacks itself answers this agent with a human-verification page, so
+  the summaries were read from the stored corpus, 1,356 submissions, live
+  1.9.108, unchanged from the frozen captures' corpus):
+  `../audits/2026-10-23-question-filler/fresh-set.json`, sha256
+  278ceeee773540b05c3ac9278682ff2a106f497b7344440ee5e37f80315c48d0. 20 questions: f01 to f15 winners only, f16 to
+  f20 over all submissions; f01, f13 and f16 are about a prize, a win or a
+  winner as the topic itself. Committed before its capture; no query of it
+  has run.
+- 2026-10-23T23:28Z battery questions captured (3, winners only, live
+  1.9.108 at both ends, 6 pages, all 200). Base replays of every frozen
+  capture run; no candidate replay has run.
