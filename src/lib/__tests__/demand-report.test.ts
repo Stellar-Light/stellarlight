@@ -91,6 +91,30 @@ describe("queryTerms", () => {
 		const key = `s${"a1".repeat(27)}`;
 		expect(queryTerms(`blend ${key} sk1234abcd5678ef`)).toEqual(["blend"]);
 	});
+
+	it("judges a key on the whole word, not on its punctuation pieces", () => {
+		for (const w of [
+			"550e8400-e29b-41d4-a716-446655440000",
+			"sl_live_k9f3h2j8d7s6a5",
+			"sl_live_k9f3h2",
+			"gaazi4tcr3ty5ojhctjc2a4qsy6cjwjh5iajtgkin2er7lbnvkoccwn7",
+			"cdlzfc3syjydzt7k67vz75hpjvieuvnixf47zg2fb2rmqqvu2hhgcysc",
+			"dev@example.com",
+			"https://github.com/acme/vault",
+			"github.com/acme/vault",
+			"café",
+		]) {
+			expect(queryTerms(`blend ${w}`), w).toEqual(["blend"]);
+		}
+	});
+
+	it("keeps an ordinary hyphenated word", () => {
+		expect(queryTerms("pay-per-call pricing")).toEqual([
+			"pay",
+			"call",
+			"pricing",
+		]);
+	});
 });
 
 const g = (over: Partial<UsageGroup>): UsageGroup => ({

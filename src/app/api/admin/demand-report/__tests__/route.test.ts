@@ -8,6 +8,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 let user: { collection?: string } | null = null;
 const pipelines: unknown[][] = [];
+const aggregateOptions: unknown[] = [];
 const groups = [
 	{
 		_id: {
@@ -32,8 +33,9 @@ vi.mock("@/lib/payload-client", () => ({
 					collection: (name: string) => {
 						if (name !== "api-usage") throw new Error(name);
 						return {
-							aggregate: (p: unknown[]) => {
+							aggregate: (p: unknown[], o?: unknown) => {
 								pipelines.push(p);
+								aggregateOptions.push(o);
 								return { toArray: async () => groups };
 							},
 						};
@@ -51,6 +53,7 @@ const get = async (qs = "") => {
 
 beforeEach(() => {
 	pipelines.length = 0;
+	aggregateOptions.length = 0;
 });
 
 describe("GET /api/admin/demand-report", () => {
@@ -98,6 +101,14 @@ describe("GET /api/admin/demand-report", () => {
 		const match = (pipelines[0][0] as { $match: unknown }).$match;
 		expect(JSON.stringify(match)).toContain("2026-10-01T00:00:00.000Z");
 		expect(JSON.stringify(match)).toContain("2026-10-08T00:00:00.000Z");
+		// A $group keyed on query over a long window may pass 100 MB in memory.
+		expect(aggregateOptions[0]).toEqual({ allowDiskUse: true });
+	});
+
+	it("holds minTermCount at its floor of 2", async () => {
+		user = { collection: "users" };
+		const body = await (await get("?minTermCount=0")).json();
+		expect(body.meta.minTermCount).toBe(2);
 	});
 
 	it("answers 400 to an admin for a bad or oversized window", async () => {

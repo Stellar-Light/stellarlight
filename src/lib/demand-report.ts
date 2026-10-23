@@ -35,12 +35,31 @@ export function clientClass(row: {
 const keyShaped = (t: string) =>
 	t.length > 24 || (t.length >= 12 && /\d/.test(t) && /[a-z]/.test(t));
 
+/**
+ * A whitespace-separated word that may identify someone or something: an
+ * email, a URL or path, non-ASCII text, any key-shaped piece, or a key once
+ * its punctuation is removed (a UUID, `sl_live_k9f3h2`). Judged on the
+ * whole word, so a key split by dashes or underscores cannot slip through
+ * piece by piece. Random keys alternate letters and digits; four or more
+ * switches at length 12+ reads as one, so `sep-10-challenge` survives.
+ */
+const identifying = (w: string) => {
+	if (/[@/]|^www\./.test(w) || /[^\x20-\x7e]/.test(w)) return true;
+	const pieces = w.split(/[^a-z0-9]+/);
+	if (pieces.some(keyShaped)) return true;
+	const joined = pieces.join("");
+	const switches = joined.match(/[a-z](?=\d)|\d(?=[a-z])/g)?.length ?? 0;
+	return joined.length > 24 || (joined.length >= 12 && switches >= 4);
+};
+
 /** Distinct content terms of a stored (already lowercased) query, in order. */
 export function queryTerms(q: string): string[] {
 	const terms = q
 		.toLowerCase()
-		.split(/[^a-z0-9]+/)
-		.filter((t) => t.length >= 2 && !isContentStopword(t) && !keyShaped(t));
+		.split(/\s+/)
+		.filter((w) => w && !identifying(w))
+		.flatMap((w) => w.split(/[^a-z0-9]+/))
+		.filter((t) => t.length >= 2 && !isContentStopword(t));
 	return [...new Set(terms)];
 }
 

@@ -75,36 +75,43 @@ export async function GET(req: NextRequest) {
 	const coll = (payload.db as any)?.connection?.db?.collection("api-usage");
 	if (!coll) return json({ error: "database unavailable" }, 503);
 	const raw = (await coll
-		.aggregate([
-			{
-				$match: {
-					$or: [
-						{ createdAt: { $gte: from, $lt: end } },
-						{ createdAt: { $gte: from.toISOString(), $lt: end.toISOString() } },
-					],
-				},
-			},
-			{
-				$group: {
-					_id: {
-						cfWorker: "$cfWorker",
-						uaBucket: "$uaBucket",
-						endpoint: "$endpoint",
-						query: "$query",
-						status: "$status",
-						empty: {
-							$cond: [
-								{ $isNumber: "$resultCount" },
-								{ $eq: ["$resultCount", 0] },
-								null,
-							],
-						},
-						partial: "$partial",
+		.aggregate(
+			[
+				{
+					$match: {
+						$or: [
+							{ createdAt: { $gte: from, $lt: end } },
+							{
+								createdAt: { $gte: from.toISOString(), $lt: end.toISOString() },
+							},
+						],
 					},
-					n: { $sum: 1 },
 				},
-			},
-		])
+				{
+					$group: {
+						_id: {
+							cfWorker: "$cfWorker",
+							uaBucket: "$uaBucket",
+							endpoint: "$endpoint",
+							query: "$query",
+							status: "$status",
+							empty: {
+								$cond: [
+									{ $isNumber: "$resultCount" },
+									{ $eq: ["$resultCount", 0] },
+									null,
+								],
+							},
+							partial: "$partial",
+						},
+						n: { $sum: 1 },
+					},
+				},
+			],
+			// Keyed on query, 92 days of groups could pass the 100 MB in-memory
+			// stage limit; let the stage spill to disk where the tier allows it.
+			{ allowDiskUse: true },
+		)
 		.toArray()) as Array<{ _id: Omit<UsageGroup, "n">; n: number }>;
 	const groups: UsageGroup[] = raw.map((r) => ({ ...r._id, n: r.n }));
 

@@ -116,15 +116,28 @@ that rule is not added until the header exists.
   outcome, so the read is one bucket per distinct combination instead of
   one document per call (the consumer report counted 124,173 `other` calls
   in 30 days). A Payload `count` over the same window is the reference; a
-  mismatch is a warning in `meta`, not a silent short report.
+  mismatch is a warning in `meta`, not a silent short report. The
+  aggregate runs with `allowDiskUse: true`, because a `$group` keyed on
+  query over 92 days could pass Mongo's 100 MB in-memory stage limit.
+  Neither the window cap nor a pre-reduce was added. Two caveats, not
+  measured: a shared or Flex Atlas tier may not honour `allowDiskUse`, and
+  at about 124k calls a month the group count should sit far below the
+  limit (one small bucket per distinct client, operation, query and
+  outcome). `createdAt` is indexed by Payload's own timestamp field
+  (`index: true` in its collection sanitizer, stored as a Date), so the
+  `$match` can use it; whether the index exists on the production
+  collection was not checked.
 
 ## 3. Privacy
 
 What is stored, where and for how long:
 
-- Two new fields per `api-usage` row: `cfWorker`, the calling Worker's zone
-  (a domain name that Cloudflare sets, not text from the caller), and
-  `partial`, a boolean. Same collection, same production database, same
+- Two new fields per `api-usage` row: `cfWorker` and `partial`, a boolean.
+  `cfWorker` is the `CF-Worker` request header, kept only when it is a
+  hostname of 100 characters or fewer. On a Worker's subrequest Cloudflare
+  sets it to the Worker's zone, but any client outside Cloudflare can send
+  the header with any hostname in it: it is caller-supplied text, so it is
+  attribution, not identity (section 1). Same collection, same production database, same
   access rules (admin read, append-only), same retention: none set, rows
   stay until an admin deletes them.
 - No new query text. `query` is stored exactly as before (lowercased,
@@ -139,11 +152,24 @@ What the report hands back:
   recorded that outcome.
 - Single words, never a query string. A word is listed only when at least
   `minTermCount` calls (default 5, floor 2) asked it of that operation.
-  Stopwords are the shared search stopwords. A token longer than 24
-  characters, or 12 or more characters mixing letters and digits, is
-  dropped before counting: callers paste keys, seeds, addresses and hashes
-  into query text. Tests assert that no fixture query string, no
-  below-threshold word and no key-shaped token appears in the output.
+  Stopwords are the shared search stopwords. Callers paste keys, seeds,
+  addresses and hashes into query text, so each whitespace-separated word
+  is judged whole before it is split on punctuation, and dropped when it:
+  holds `@` or `/` or starts with `www.` (emails, URLs, paths); holds any
+  non-ASCII character; has a punctuation piece longer than 24 characters
+  or of 12 or more mixing letters and digits; or, with its punctuation
+  removed, is longer than 24 characters, or 12 or more with four or more
+  switches between letters and digits (a UUID, `sl_live_k9f3h2`, a Stellar
+  G or C strkey). An ordinary word such as `pay-per-call` or `sep-10`
+  survives. Tests assert that no fixture query string, no below-threshold
+  word and none of those shapes appears in the output.
+- Limits. A single word can still carry an identifier when it is repeated
+  at or above the floor: a long letters-only token (a name, a handle, a
+  letters-only key) passes every shape test. Emails and repository URLs,
+  which split into innocent-looking pieces, are now dropped whole. A word
+  dropped for non-ASCII or shape vanishes from the terms, but its call
+  still counts in that operation's `termBasis`, so the basis reads as
+  calls that carried a query, not as calls whose words are listed.
 
 Who can read it:
 
@@ -196,6 +222,11 @@ threshold.
 - After: `npx tsc --noEmit -p tsconfig.json` exit 0;
   `npx vitest run src/lib/__tests__ src/app/api --maxWorkers=4 --minWorkers=1`
   exit 0, 181 files, 2,267 tests; `pnpm contract:check` exit 0.
+- Review fixes, failing first: the whole-word key test (UUID first) and
+  the `allowDiskUse` assertion failed, 2 of 18; the `minTermCount=0` floor
+  test and the `pay-per-call` test passed already and pin that behaviour.
+  After: tsc exit 0; vitest exit 0, 181 files, 2,270 tests;
+  `CONTRACT_BASE=02d7deba pnpm contract:check` exit 0; biome exit 0.
 
 ## 6. Open items
 
