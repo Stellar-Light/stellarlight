@@ -83,6 +83,8 @@ export const PROJECT_COMPACT: CompactPlan = {
 		scfTotalAwardedUSD: true,
 		audits: true,
 		score: true,
+		// semantic marks a vector-fallback guess, not a match
+		via: true,
 		confidence: ["score", "label"],
 	},
 	counts: { reposCount: "repos", onchainContractsCount: "onchain.contracts" },

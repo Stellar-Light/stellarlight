@@ -6,6 +6,7 @@ import {
 	viewParamError,
 	withView,
 } from "@/lib/compact-view";
+import { spec } from "@/lib/openapi-spec";
 
 /** The view and fields values a route reads from a query string. */
 const q = (qs: string) => new URLSearchParams(qs);
@@ -132,5 +133,34 @@ describe("viewParamError", () => {
 	it("compact with fields is an error rather than two projections", () => {
 		expect(check("view=compact&fields=name")?.error).toMatch(/fields/);
 		expect(check("view=full&fields=name")).toBeNull();
+	});
+});
+
+describe("compact project rows keep via", () => {
+	it("a semantic fallback row stays tagged; a row without via reads null", () => {
+		const out = withView("compact", { projects: PROJECT_COMPACT })({
+			meta: {},
+			projects: [
+				{ id: "a", slug: "a", via: "semantic" },
+				{ id: "b", slug: "b" },
+			],
+		}) as { projects: Record<string, unknown>[] };
+		expect(out.projects.map((p) => p.via)).toEqual(["semantic", null]);
+		expect(Object.keys(out.projects[1])).toEqual(Object.keys(out.projects[0]));
+	});
+});
+
+describe("the spec declares the 400 a view can answer", () => {
+	const responses = (path: string) =>
+		(
+			spec.paths[path] as {
+				get: { responses: Record<string, { description: string }> };
+			}
+		).get.responses;
+	it.each(["/api/projects/search", "/api/repos/search"])("%s", (path) => {
+		const bad = responses(path)["400"];
+		expect(bad).toBeDefined();
+		expect(bad.description).toMatch(/view/);
+		expect(bad.description).toMatch(/validValues/);
 	});
 });

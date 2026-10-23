@@ -106,3 +106,44 @@ page of long descriptions can exceed it (`limit=10` halves it); the six list
 endpoints over the cap (skills, partners, leaderboard, builders, audits,
 stablecoins) can adopt the helper later; not deployed, so the compact sizes
 are computed from live bodies, not served.
+
+## Review
+
+Independent review: Claude Fable 5.1, high, on a checkout of the branch at
+5cb0f8fe. Verified: default identity (replay matches on HEAD and on a fresh
+base checkout), compact correctness on every row type, the counts, the 400
+bodies and the contract. GATE: fix, two findings.
+
+1. Medium: searchProjects and searchRepos declared only 200 and 503, while
+   `view` and the existing status, type, category, scfAwarded, activity,
+   capability and domain filters answer 400. Fixed: both operations declare
+   a 400 built on the shared RequestError schema, naming each case and its
+   body (error plus validValues; on searchProjects also validStatuses,
+   validTypes, validCategories or acceptedValues). Checked against the
+   routes: every case runs before any read.
+2. Low: compact project rows dropped `via`, so a semantic-fallback guess lost
+   its tag. Fixed: `via` added to PROJECT_COMPACT.keep (null under the
+   same-keys rule when absent). The spec's Project.via said its values were
+   keyword or vector; the route serves keyword or semantic, so the
+   description now says semantic, and via is nullable for the compact null.
+
+Tests first: a semantic row keeps `via` in compact and a row without it reads
+null; both operations declare a 400 naming view and validValues. Before the
+fix: 3 failed, 7 passed (`failing-first-review.txt`).
+
+Re-measure after the fix (`measure.ts`, apiVersion 1.9.95 at start and end,
+14:03:29Z to 14:05:00Z): projects compact 17,646 to 23,091 over 7 default
+requests, `q=lending` 23,091 (was 22,771; 909 under the cap); repos
+unchanged, 12,803 to 13,096.
+
+| check | exit |
+| --- | --- |
+| `pnpm exec tsc --noEmit -p tsconfig.json` | 0 |
+| `npx vitest run src/lib/__tests__ src/app/api --maxWorkers=4 --minWorkers=1` (181 files, 2269 tests) | 0 |
+| replay on the fixed code, `cmp` with `replay-base.json` | 0 |
+| `pnpm contract:write`, then `CONTRACT_BASE=02d7deba pnpm contract:check` | 0 |
+| `pnpm raven:gate --raven <checkout>` | 0 (ACCEPT 1.9.98; same totals, same 2 moved, top-5 changed 59) |
+| `pnpm exec biome check` on the changed files | 0 |
+
+Version stays 1.9.98; the orchestrator renumbers at merge (main is at
+1.9.95).

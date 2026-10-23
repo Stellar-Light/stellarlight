@@ -1,9 +1,9 @@
 {
   "base": "https://www.stellarlight.xyz",
-  "startedAt": "2026-10-23T13:45:12.116Z",
-  "finishedAt": "2026-10-23T13:46:37.791Z",
-  "apiVersionStart": "1.9.94",
-  "apiVersionEnd": "1.9.94",
+  "startedAt": "2026-10-23T14:03:29.755Z",
+  "finishedAt": "2026-10-23T14:05:00.832Z",
+  "apiVersionStart": "1.9.95",
+  "apiVersionEnd": "1.9.95",
   "capChars": 24000,
   "rows": [
     {
@@ -11,7 +11,7 @@
       "path": "/api/projects/search?q=lending",
       "status": 200,
       "fullChars": 87157,
-      "compactChars": 22771,
+      "compactChars": 23091,
       "compactMetaFirst": true,
       "rows": 20
     },
@@ -20,7 +20,7 @@
       "path": "/api/projects/search?q=wallet",
       "status": 200,
       "fullChars": 76872,
-      "compactChars": 21386,
+      "compactChars": 21706,
       "compactMetaFirst": true,
       "rows": 20
     },
@@ -29,7 +29,7 @@
       "path": "/api/projects/search?q=oracle",
       "status": 200,
       "fullChars": 84071,
-      "compactChars": 21400,
+      "compactChars": 21720,
       "compactMetaFirst": true,
       "rows": 20
     },
@@ -38,7 +38,7 @@
       "path": "/api/projects/search?q=anchor",
       "status": 200,
       "fullChars": 74021,
-      "compactChars": 19188,
+      "compactChars": 19508,
       "compactMetaFirst": true,
       "rows": 20
     },
@@ -46,8 +46,8 @@
       "op": "searchProjects",
       "path": "/api/projects/search?q=payments",
       "status": 200,
-      "fullChars": 66016,
-      "compactChars": 20192,
+      "fullChars": 52110,
+      "compactChars": 17646,
       "compactMetaFirst": true,
       "rows": 20
     },
@@ -55,8 +55,8 @@
       "op": "searchProjects",
       "path": "/api/projects/search?q=dex",
       "status": 200,
-      "fullChars": 70528,
-      "compactChars": 18084,
+      "fullChars": 94602,
+      "compactChars": 21035,
       "compactMetaFirst": true,
       "rows": 20
     },
@@ -65,7 +65,7 @@
       "path": "/api/projects/search?q=lending&limit=5",
       "status": 200,
       "fullChars": 40870,
-      "compactChars": 9474,
+      "compactChars": 9554,
       "compactMetaFirst": true,
       "rows": 5
     },
@@ -74,7 +74,7 @@
       "path": "/api/projects/search?type=Wallet",
       "status": 200,
       "fullChars": 60316,
-      "compactChars": 17770,
+      "compactChars": 18090,
       "compactMetaFirst": true,
       "rows": 20
     },
@@ -163,7 +163,7 @@
       "op": "searchHackathonBuilds",
       "path": "/api/hackathons/builds?q=payments",
       "status": 200,
-      "fullChars": 19935,
+      "fullChars": 19067,
       "compactChars": null,
       "compactMetaFirst": null,
       "rows": 20
@@ -190,7 +190,7 @@
       "op": "searchHackathonBuilds",
       "path": "/api/hackathons/builds?q=payments&limit=50",
       "status": 200,
-      "fullChars": 44748,
+      "fullChars": 43978,
       "compactChars": null,
       "compactMetaFirst": null,
       "rows": 50

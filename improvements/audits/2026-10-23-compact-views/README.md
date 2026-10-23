@@ -17,21 +17,22 @@ the start and the end. Full = the live body's length in characters (the unit
 the sandbox cuts at). Compact = the same body passed through the exact
 function the routes apply for `view=compact` (`src/lib/compact-view.ts`),
 so it is what `view=compact` serves for that body once deployed. Output:
-`sizes.md` (table) and `results.json` (raw). Run: apiVersion 1.9.94 at start
-and end, 2026-10-23T13:45:12Z to 13:46:37Z.
+`sizes.md` (table) and `results.json` (raw). Final run, after the review
+added `via` to compact project rows: apiVersion 1.9.95 at start and end,
+2026-10-23T14:03:29Z to 14:05:00Z.
 
 ### Operations that take view=compact
 
 | Operation | Request | Rows | Full chars | Compact chars | Cut |
 |---|---|---|---|---|---|
-| searchProjects | `q=lending` | 20 | 87,157 | 22,771 | 74% |
-| searchProjects | `q=wallet` | 20 | 76,872 | 21,386 | 72% |
-| searchProjects | `q=oracle` | 20 | 84,071 | 21,400 | 75% |
-| searchProjects | `q=anchor` | 20 | 74,021 | 19,188 | 74% |
-| searchProjects | `q=payments` | 20 | 66,016 | 20,192 | 69% |
-| searchProjects | `q=dex` | 20 | 70,528 | 18,084 | 74% |
-| searchProjects | `type=Wallet` | 20 | 60,316 | 17,770 | 71% |
-| searchProjects | `q=lending&limit=5` | 5 | 40,870 | 9,474 | 77% |
+| searchProjects | `q=lending` | 20 | 87,157 | 23,091 | 74% |
+| searchProjects | `q=wallet` | 20 | 76,872 | 21,706 | 72% |
+| searchProjects | `q=oracle` | 20 | 84,071 | 21,720 | 74% |
+| searchProjects | `q=anchor` | 20 | 74,021 | 19,508 | 74% |
+| searchProjects | `q=payments` | 20 | 52,110 | 17,646 | 66% |
+| searchProjects | `q=dex` | 20 | 94,602 | 21,035 | 78% |
+| searchProjects | `type=Wallet` | 20 | 60,316 | 18,090 | 70% |
+| searchProjects | `q=lending&limit=5` | 5 | 40,870 | 9,554 | 77% |
 | searchRepos | `q=soroban` | 20 | 77,322 | 13,096 | 83% |
 | searchRepos | `q=oracle` | 20 | 70,124 | 12,806 | 82% |
 | searchRepos | `q=wallet` | 20 | 59,709 | 12,840 | 78% |
@@ -39,14 +40,16 @@ and end, 2026-10-23T13:45:12Z to 13:46:37Z.
 | searchRepos | `q=soroban&limit=5` | 5 | 25,868 | 4,165 | 84% |
 
 Every full page is over 24,000, including both `limit=5` pages. Every compact
-page at the default limit fits: projects 17,770 to 22,771, repos 12,803 to
+page at the default limit fits: projects 17,646 to 23,091, repos 12,803 to
 13,096, each starting `{"meta":{"view":{"mode":"compact"`. The tightest is
-projects `q=lending` at 22,771, 1,229 under the cap: a page whose 20
+projects `q=lending` at 23,091, 909 under the cap: a page whose 20
 `shortDescription`s run longer can still go over, and `limit=10` halves it.
+Keeping `via` cost 320 characters on a 20-row page (q=lending was 22,771
+without it, 13:45Z on 1.9.94).
 
-The same requests run 11 minutes earlier gave `q=oracle` 64,790 full (18,765
-compact) and `q=dex` 94,602 full (20,715 compact): the served rows move between
-runs, so read the numbers as typical, not fixed.
+The served rows move between runs, so read the numbers as typical, not fixed:
+`q=payments` was 66,016 full at 13:45Z and 52,110 at 14:03Z; `q=dex` 94,602
+at 13:34Z, 70,528 at 13:45Z and 94,602 again at 14:03Z.
 
 Where the bytes go in `q=lending` (87,184 chars, captured 13:21Z):
 `codeReferences[].codeVerified` 15,166, `projects[].repos` 10,030,
@@ -100,7 +103,8 @@ and read by searchProjects and searchRepos.
 - `compact`: each row is rebuilt from a fixed key list
   (`PROJECT_COMPACT`, `REPO_COMPACT` in `src/lib/compact-view.ts`): identity
   (id, name, slug, canonicalSlug, url / fullName, url), rank and score
-  (score, confidence score and label, repoScore), and the fields that answer
+  (score, confidence score and label, repoScore, and `via`, which marks a
+  semantic-fallback guess), and the fields that answer
   the usual question (category, types, shortDescription, status and date,
   deployment network, TVL and date, SCF award, audits / description,
   language, stars, last commit, activity, project, tier, kind, Stellar
@@ -112,7 +116,9 @@ and read by searchProjects and searchRepos.
   `fields=<names>`; for `codeReferences`, repos search by fullName), and a
   one-line note.
 - `view=compact&fields=...` and any other `view` value answer 400 with
-  `validValues`.
+  `validValues`. Both operations declare their 400 in the spec (they already
+  answered 400 for bad status, type, category, scfAwarded, activity,
+  capability and domain values, undeclared).
 
 ## Default unchanged
 
