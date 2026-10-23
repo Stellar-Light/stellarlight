@@ -2,7 +2,7 @@
 
 > Stellar Scout, as an MCP server. Use it in Claude desktop, Cursor, ChatGPT, Gemini, Cline, Continue, Zed, or any [Model Context Protocol](https://modelcontextprotocol.io) client.
 
-Exposes 27 tools that wrap [stellarlight.xyz](https://stellarlight.xyz)'s public APIs: the same data that powers the [`stellar-scout`](https://stellarlight.xyz/scout) skill, available as native callable functions for any MCP-compatible AI client.
+Exposes 28 tools that wrap [stellarlight.xyz](https://stellarlight.xyz)'s public APIs: the same data that powers the [`stellar-scout`](https://stellarlight.xyz/scout) skill, available as native callable functions for any MCP-compatible AI client.
 
 ```
 npx @stellar-light/scout-mcp
@@ -68,7 +68,7 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 }
 ```
 
-Restart Claude Desktop. The 19 Scout tools appear in the slash-menu.
+Restart Claude Desktop, and Claude can call every Scout tool.
 
 ### Cursor
 
@@ -107,7 +107,7 @@ pnpm build
 
 ## Tools
 
-All 27 tools wrap stellarlight.xyz public APIs. They're rate-limited but require no API key.
+All 28 tools wrap stellarlight.xyz public APIs. They're rate-limited but require no API key.
 
 | Tool | What it does |
 |------|--------------|
@@ -128,6 +128,7 @@ All 27 tools wrap stellarlight.xyz public APIs. They're rate-limited but require
 | `search_projects` | Prior-art / competitor lookup across the curated project directory (live count in `get_status`). Tiered match-mode (strict → loose → majority) surfaced in `.meta.matchMode`. |
 | `search_repos` | Code-reference index of indexed-and-scored Stellar GitHub repos (live count in `get_status`), ranked by repoScore. Synonym expansion + `language` / `minScore` filters. The repo layer beneath the project directory. |
 | `explain_repo` | Architectural explainer for one Stellar GitHub repo — structure, entry points, and key modules. |
+| `locate_source` | Where in Stellar's own code a CLI flag, config option default, SDK or host function, or contract interface is defined: scored pointers (file, symbol or heading, line, commit, pinned GitHub URL) into eight allowlisted Stellar repos, never file content. `repo` / `kind` / `page` filters. `pointers: []` = searched, no match; `null` = could not search. |
 | `get_rfps` | Open + closed Stellar RFPs (SCF-funded sponsor briefs). Quarter-aware. |
 | `list_skills` | Catalog of Stellar agent skills: the official [skills.stellar.org](https://skills.stellar.org) set plus community and Stellar Light skills. |
 | `get_skill` | Full content of one SDF skill. |
@@ -147,7 +148,7 @@ Optional environment variables:
 
 ```
 SCOUT_API_BASE       # API base URL (default: https://stellarlight.xyz)
-SCOUT_USER_AGENT     # User-Agent sent on each call (default: stellar-scout-mcp/1.0.0)
+SCOUT_USER_AGENT     # User-Agent sent on each call (default: stellar-scout-mcp/<package version>)
 ```
 
 Useful for local dev when running stellarlight against `http://localhost:3000`.

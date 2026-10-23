@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.8.0",
+		type: "added",
+		summary:
+			"scout-mcp 1.8.0 adds locate_source, the MCP tool for locateSource: where in Stellar's own code a CLI flag, config option default, SDK or host function, or contract interface is defined, as scored pointers with a pinned GitHub URL (filters repo, kind, page). search_projects and search_repos take `view` (full or compact rows, for clients that cut long tool outputs). 28 tools.",
+		detail:
+			"locate_source keeps the API's semantics: pointers [] with total 0 means the indexed repos were searched and nothing matched; pointers null means nothing could be searched (a repo not indexed yet, said in meta.note, or an HTTP 503 to retry). Its repo values and page range (1 to 2000) are checked before the call; an API 400 comes back as a tool error. The tool prints JSON indented, so a page is larger than the API's own character count: measured through it on 2026-10-23 over five default pages of search_projects and search_repos, 90,965 to 120,796 characters full and 16,388 to 30,647 compact (search_projects q=lending: 87,157 and 23,091 from the API, 120,796 and 29,514 through the tool).",
+	},
+	{
+		date: "2026-10-23",
 		surfaces: ["api"],
 		version: "spec@1.9.99",
 		type: "added",

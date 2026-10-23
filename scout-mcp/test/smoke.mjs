@@ -9,6 +9,7 @@
  * Run:
  *   node test/smoke.mjs                # against prod (default)
  *   SCOUT_API_BASE=http://localhost:3000 node test/smoke.mjs   # against local
+ *   SMOKE_READ_ONLY=1 node test/smoke.mjs   # skip the one call that writes (the submit_feedback POST)
  */
 
 import { spawn } from "node:child_process";
@@ -16,14 +17,20 @@ import { setTimeout as sleep } from "node:timers/promises";
 
 const SERVER = ["node", "dist/index.js"];
 const TIMEOUT_MS = 45_000;
+const READ_ONLY = process.env.SMOKE_READ_ONLY === "1";
 
 let passed = 0;
 let failed = 0;
+let skipped = 0;
 const failures = [];
 
 function pass(name) {
 	passed += 1;
 	process.stdout.write(`  \x1b[32m✓\x1b[0m ${name}\n`);
+}
+function skip(name, reason) {
+	skipped += 1;
+	process.stdout.write(`  \x1b[33m-\x1b[0m skipped ${name}: ${reason}\n`);
 }
 function fail(name, reason) {
 	failed += 1;
@@ -196,6 +203,7 @@ async function main() {
 			"get_hackathon_submission",
 			"analyze_hackathon_submissions",
 			"review_submission",
+			"locate_source",
 		];
 		const got = tools.map((t) => t.name).sort();
 		const missing = expected.filter((n) => !got.includes(n));
@@ -538,19 +546,26 @@ async function main() {
 
 	// ── Session 19: submit_feedback (real POST to prod) ─────────────────────
 	console.log("\n◆ submit_feedback");
-	try {
-		const { data } = await callTool("submit_feedback", {
-			kind: "other",
-			message:
-				"scout-mcp smoke test — please disregard. This is from the automated test harness.",
-			agentName: "scout-mcp-smoke-test",
-		});
-		if (data?.ok === true) pass(`feedback persisted (id: ${data.id})`);
-		else if (data?.error)
-			fail("feedback POST", JSON.stringify(data).slice(0, 150));
-		else fail("feedback POST", "unexpected response shape");
-	} catch (e) {
-		fail("submit_feedback smoke", e.message);
+	if (READ_ONLY) {
+		skip(
+			"feedback POST",
+			"SMOKE_READ_ONLY=1 (it writes a row to the curator queue)",
+		);
+	} else {
+		try {
+			const { data } = await callTool("submit_feedback", {
+				kind: "other",
+				message:
+					"scout-mcp smoke test: please disregard. This is from the automated test harness.",
+				agentName: "scout-mcp-smoke-test",
+			});
+			if (data?.ok === true) pass(`feedback persisted (id: ${data.id})`);
+			else if (data?.error)
+				fail("feedback POST", JSON.stringify(data).slice(0, 150));
+			else fail("feedback POST", "unexpected response shape");
+		} catch (e) {
+			fail("submit_feedback smoke", e.message);
+		}
 	}
 
 	// ── Session 20: submit_feedback (validation — short message) ────────────
@@ -566,10 +581,176 @@ async function main() {
 		pass("short message rejected by zod");
 	}
 
+	// ── Session 21: locate_source (pointers into Stellar's own source) ──────
+	console.log("\n◆ locate_source");
+	try {
+		const { isError, data } = await callTool("locate_source", {
+			q: "where is require_auth defined",
+		});
+		const pointers = Array.isArray(data?.pointers) ? data.pointers : [];
+		if (!isError && pointers.length > 0)
+			pass(`returns ${pointers.length} pointers of ${data.total}`);
+		else fail("returns pointers", `isError=${isError} total=${data?.total}`);
+		// Ranks can move when the index is rebuilt, so near the top, not first.
+		const hit = pointers
+			.slice(0, 3)
+			.find(
+				(p) =>
+					p.repo === "stellar/rs-soroban-env" &&
+					p.path === "soroban-env-host/src/auth.rs",
+			);
+		if (hit)
+			pass(
+				`rs-soroban-env soroban-env-host/src/auth.rs at rank ${hit.rank} (${hit.locator}, line ${hit.line})`,
+			);
+		else
+			fail(
+				"rs-soroban-env soroban-env-host/src/auth.rs in the top 3",
+				pointers
+					.slice(0, 3)
+					.map((p) => `${p.repo} ${p.path}`)
+					.join("; "),
+			);
+		if (
+			hit?.verificationUrl?.startsWith(
+				`https://github.com/stellar/rs-soroban-env/blob/${hit.ref}/`,
+			)
+		)
+			pass("pointer carries a verificationUrl pinned to its commit");
+		else fail("verificationUrl pinned to its commit", hit?.verificationUrl);
+	} catch (e) {
+		fail("locate_source smoke", e.message);
+	}
+
+	// ── Session 22: locate_source forwards repo, kind and page ──────────────
+	try {
+		const { data } = await callTool("locate_source", {
+			q: "require_auth",
+			repo: "stellar/rs-soroban-env",
+			kind: "symbol",
+			page: 2,
+		});
+		const f = data?.meta?.filters ?? {};
+		if (
+			f.repo === "stellar/rs-soroban-env" &&
+			f.kind === "symbol" &&
+			f.page === 2
+		)
+			pass("forwards repo, kind and page (meta.filters)");
+		else fail("forwards repo, kind and page", JSON.stringify(f));
+		const rows = Array.isArray(data?.pointers) ? data.pointers : [];
+		if (
+			rows[0]?.rank === 11 &&
+			rows.every(
+				(p) =>
+					p.repo === "stellar/rs-soroban-env" && p.locatorKind === "symbol",
+			)
+		)
+			pass("page 2 starts at rank 11, one repo, symbols only");
+		else fail("page 2 rows", JSON.stringify(rows[0] ?? null).slice(0, 150));
+	} catch (e) {
+		fail("locate_source filters", e.message);
+	}
+
+	// ── Session 23: no match is pointers [] with total 0, never null ────────
+	try {
+		const { isError, data } = await callTool("locate_source", {
+			q: "qzxjvwk",
+		});
+		if (
+			!isError &&
+			Array.isArray(data?.pointers) &&
+			data.pointers.length === 0 &&
+			data.total === 0
+		)
+			pass("no match: pointers [] with total 0 (checked, none)");
+		else
+			fail(
+				"no match: pointers [] with total 0",
+				`isError=${isError} pointers=${JSON.stringify(data?.pointers)} total=${data?.total}`,
+			);
+	} catch (e) {
+		fail("locate_source no match", e.message);
+	}
+
+	// ── Session 24: an out-of-range page is refused, naming page ────────────
+	// The schema holds the spec's 1 to 2000, so page 0 never reaches the API.
+	try {
+		const resp = await callMcp("tools/call", {
+			name: "locate_source",
+			arguments: { q: "require_auth", page: 0 },
+		});
+		const text = resp.error?.message ?? resp.result?.content?.[0]?.text ?? "";
+		if ((resp.error || resp.result?.isError) && text.includes("page"))
+			pass("page 0 refused, naming page");
+		else fail("page 0 refused, naming page", text.slice(0, 150));
+	} catch (e) {
+		fail("locate_source page 0", e.message);
+	}
+
+	// ── Session 25: an API 400 comes back as a clean tool error ─────────────
+	// Every word of this q is filler, a 400 the schema cannot catch.
+	try {
+		const { isError, raw } = await callTool("locate_source", {
+			q: "where is the file defined",
+		});
+		if (isError && raw.includes("HTTP 400") && raw.includes('"error"'))
+			pass(
+				`API 400 passed through as a tool error (${raw.match(/"error":"([^"]*)"/)?.[1]})`,
+			);
+		else
+			fail("API 400 passed through", `isError=${isError} ${raw.slice(0, 150)}`);
+	} catch (e) {
+		fail("locate_source 400 passthrough", e.message);
+	}
+
+	// ── Session 26: view=compact on search_projects and search_repos ────────
+	console.log("\n◆ view=compact");
+	try {
+		const full = await callTool("search_projects", { q: "lending" });
+		const compact = await callTool("search_projects", {
+			q: "lending",
+			view: "compact",
+		});
+		if (compact.data?.meta?.view?.mode === "compact")
+			pass("search_projects forwards view=compact (meta.view.mode)");
+		else
+			fail(
+				"search_projects forwards view=compact",
+				JSON.stringify(compact.data?.meta?.view ?? null).slice(0, 100),
+			);
+		if (compact.raw.length * 2 < full.raw.length)
+			pass(`compact page ${compact.raw.length} chars, full ${full.raw.length}`);
+		else
+			fail(
+				"compact page under half the full page",
+				`${compact.raw.length} vs ${full.raw.length}`,
+			);
+	} catch (e) {
+		fail("search_projects view=compact", e.message);
+	}
+	try {
+		const { data } = await callTool("search_repos", {
+			q: "soroban",
+			view: "compact",
+		});
+		if (data?.meta?.view?.mode === "compact")
+			pass("search_repos forwards view=compact (meta.view.mode)");
+		else
+			fail(
+				"search_repos forwards view=compact",
+				JSON.stringify(data?.meta?.view ?? null).slice(0, 100),
+			);
+	} catch (e) {
+		fail("search_repos view=compact", e.message);
+	}
+
 	// ── Summary ─────────────────────────────────────────────────────────────
 	const elapsed = ((Date.now() - startedAt) / 1000).toFixed(1);
 	console.log(`\n${"─".repeat(60)}`);
-	console.log(`  ${passed} passed · ${failed} failed · ${elapsed}s`);
+	console.log(
+		`  ${passed} passed · ${failed} failed · ${skipped} skipped · ${elapsed}s`,
+	);
 	if (failed > 0) {
 		console.log(`\n  Failures:`);
 		for (const f of failures) console.log(`    • ${f.name}: ${f.reason}`);

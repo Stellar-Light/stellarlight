@@ -581,6 +581,15 @@ server.registerTool(
 	},
 );
 
+// view on search_projects and search_repos (API spec 1.9.96). Keep in sync
+// with VIEW_VALUES in src/lib/compact-view.ts.
+const viewInput = z
+	.enum(["full", "compact"])
+	.optional()
+	.describe(
+		"Row shape. full (the default) returns every row field, unchanged. compact is for clients whose tool output is capped or cut: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. Measured through this tool on 2026-10-23 (five default pages of search_projects and search_repos): 90,965 to 120,796 characters full, 16,388 to 30,647 compact. Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. meta.view (first in meta) says the page is compact and where the left-out detail is read: repeat the call without view. Cannot be combined with fields (400).",
+	);
+
 // 6. search_projects — prior-art / competitor lookup
 server.registerTool(
 	"search_projects",
@@ -614,9 +623,10 @@ server.registerTool(
 				.max(100)
 				.optional()
 				.describe("Max results (default 20)."),
+			view: viewInput,
 		},
 	},
-	async ({ q, category, hackathon, status, scfAwarded, limit }) => {
+	async ({ q, category, hackathon, status, scfAwarded, limit, view }) => {
 		const params = new URLSearchParams();
 		if (q) params.set("q", q);
 		if (category) params.set("category", category);
@@ -624,6 +634,7 @@ server.registerTool(
 		if (status) params.set("status", status);
 		if (scfAwarded) params.set("scfAwarded", "1");
 		if (limit !== undefined) params.set("limit", String(limit));
+		if (view) params.set("view", view);
 		const qs = params.toString();
 		const result = await callScout(`/api/projects/search${qs ? `?${qs}` : ""}`);
 		return asToolResult(result);
@@ -676,15 +687,17 @@ server.registerTool(
 				.min(0)
 				.optional()
 				.describe("Pagination offset (default 0)."),
+			view: viewInput,
 		},
 	},
-	async ({ q, language, minScore, limit, offset }) => {
+	async ({ q, language, minScore, limit, offset, view }) => {
 		const params = new URLSearchParams();
 		if (q) params.set("q", q);
 		if (language) params.set("language", language);
 		if (minScore !== undefined) params.set("minScore", String(minScore));
 		if (limit !== undefined) params.set("limit", String(limit));
 		if (offset !== undefined) params.set("offset", String(offset));
+		if (view) params.set("view", view);
 		const qs = params.toString();
 		const result = await callScout(`/api/repos/search${qs ? `?${qs}` : ""}`);
 		return asToolResult(result);
@@ -718,6 +731,65 @@ server.registerTool(
 		if (repo) params.set("repo", repo);
 		const result = await callScout(`/api/repos/explain?${params.toString()}`);
 		return asToolResult(result);
+	},
+);
+
+// 6d. locate_source: scored pointers into Stellar's own source (API spec 1.9.99)
+server.registerTool(
+	"locate_source",
+	{
+		title:
+			"Locate where a flag, option default, function or interface is defined in Stellar's own source",
+		description:
+			"Where in Stellar's own code is X defined or implemented: scored pointers into eight allowlisted Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples). Each pointer gives the file, symbol or heading, line, commit and blob sha where a CLI flag, config option default, SDK or host function, or contract interface is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read and cite it. Ten a page, best first; truncated true means a later page holds more. `pointers: []` with total 0 = the indexed repos were searched and nothing matched; `pointers: null` = could not search (the repo is not indexed yet, which meta.note says, or the index could not be read, an HTTP 503 to retry), so never read null as no match. Not for docs, protocol text, SEPs or CAPs → use search_research; how a repo works, in prose → explain_repo; ecosystem projects' repos or code examples → search_repos.",
+		inputSchema: {
+			q: z
+				.string()
+				.min(1)
+				.max(300)
+				.describe(
+					"What to locate: a symbol, flag, option, config key or topic words (at most 300 characters), e.g. --enable-core-manual-close or getTransactions default limit. Naming a repo in q (stellar-rpc, quickstart) lifts its pointers.",
+				),
+			repo: z
+				.enum([
+					// Keep in sync with SOURCE_REPOS in src/lib/source-locator.ts
+					// (the route answers 400 for any other value).
+					"stellar/stellar-core",
+					"stellar/rs-soroban-sdk",
+					"stellar/rs-soroban-env",
+					"stellar/js-stellar-sdk",
+					"stellar/stellar-rpc",
+					"stellar/quickstart",
+					"stellar/stellar-cli",
+					"stellar/soroban-examples",
+				])
+				.optional()
+				.describe(
+					"Only this allowlisted repo, as owner/name (e.g. stellar/quickstart).",
+				),
+			kind: z
+				.enum(["file", "symbol", "heading"])
+				.optional()
+				.describe(
+					"Only this locator kind: file = the whole file; symbol = a named definition (function, type, constant, CLI flag, config option or key, environment variable); heading = a Markdown section.",
+				),
+			page: z
+				.number()
+				.int()
+				.min(1)
+				.max(2000)
+				.optional()
+				.describe(
+					"Page of 10 pointers: a whole number from 1 to 2000 (default 1).",
+				),
+		},
+	},
+	async ({ q, repo, kind, page }) => {
+		const params = new URLSearchParams({ q });
+		if (repo) params.set("repo", repo);
+		if (kind) params.set("kind", kind);
+		if (page !== undefined) params.set("page", String(page));
+		return asToolResult(await callScout(`/api/sources/locate?${params}`));
 	},
 );
 
