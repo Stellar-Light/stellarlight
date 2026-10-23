@@ -1,0 +1,4773 @@
+{
+	"about": "Blind grades this round's criteria and reports read (measure.py sheet): rows from two independent passes over one shuffled sheet, each in its own order, the stricter answer kept (source 'this round'); and lane Z3's grades for rows its file already held (source 'lane Z3', 'lane Z' or 'lane Z2', from ../2026-10-23-smart-wallet-oneway/grades.json at 7f698e75, the stricter where two hold a row). Labels of the labeled sets are read from their own files. Graders saw queries, ideas, build names, summaries and, for parts A and B, declared packages; never which variant listed a build. A battery question is named by its id.",
+	"graders": "two agents, Claude Sonnet (the Agent tool's sonnet model), one per pass, prompt grader-prompt.txt (lane Z's, unchanged)",
+	"agreement": "10 of 10 (this round's rows)",
+	"grades": [
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-45981",
+			"name": "Prism",
+			"source": "this round",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-45901",
+			"name": "Shield-Wallet",
+			"source": "this round",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-39831",
+			"name": "ZK Pass",
+			"source": "this round",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-42714",
+			"name": "x402 Smart Wallet - By Sorobanhooks",
+			"source": "this round",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-45983",
+			"name": "Stellaro",
+			"source": "this round",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46103",
+			"name": "StellarPass",
+			"source": "this round",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-46426",
+			"name": "Stella - Private Payments Wallet",
+			"source": "this round",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46424",
+			"name": "Econova stellar",
+			"source": "this round",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-46461",
+			"name": "Zelyo",
+			"source": "this round",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-31772",
+			"name": "StellarVote",
+			"source": "this round",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "A",
+			"buildId": "dorahacks-buidl-30648",
+			"name": "DeFi Quest - From Zero to DeFi in Minutes",
+			"uses": true,
+			"evidence": "packages",
+			"passA": [true, "packages"],
+			"passB": [true, "packages"],
+			"source": "lane Z"
+		},
+		{
+			"part": "A",
+			"buildId": "dorahacks-buidl-46348",
+			"name": "Wraith",
+			"uses": false,
+			"evidence": "none",
+			"passA": [false, "none"],
+			"passB": [false, "none"],
+			"source": "lane Z"
+		},
+		{
+			"part": "A",
+			"buildId": "dorahacks-buidl-46373",
+			"name": "ANCHORSHIELD",
+			"uses": false,
+			"evidence": "none",
+			"passA": [false, "none"],
+			"passB": [false, "none"],
+			"source": "lane Z"
+		},
+		{
+			"part": "A",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"uses": true,
+			"evidence": "packages",
+			"passA": [true, "packages"],
+			"passB": [true, "packages"],
+			"source": "lane Z"
+		},
+		{
+			"part": "A",
+			"buildId": "dorahacks-buidl-46541",
+			"name": "Umbra Wallet",
+			"uses": false,
+			"evidence": "none",
+			"passA": [false, "none"],
+			"passB": [false, "none"],
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "held out sa02-verbatim",
+			"buildId": "dorahacks-buidl-32695",
+			"name": "Kale Farmers Market",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa02-verbatim",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-verbatim",
+			"buildId": "dorahacks-buidl-24502",
+			"name": "KiSMATI (Smart Public Transport App)",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-verbatim",
+			"buildId": "dorahacks-buidl-27458",
+			"name": "Blend AI Powered Smart Monitoring By Sorobanhook",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-verbatim",
+			"buildId": "dorahacks-buidl-31318",
+			"name": "Career Plug AI - Smart Careers, Strong Identitie",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-24577",
+			"name": "StellAIr",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-25218",
+			"name": "Druid",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-25271",
+			"name": "Soroban to MCP Server in seconds + Policy Signer",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-25341",
+			"name": "StellaX AI Wallet",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-27230",
+			"name": "Riskon",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-28426",
+			"name": "Stellar Onboarding Hub",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-30648",
+			"name": "DeFi Quest - From Zero to DeFi in Minutes",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-30681",
+			"name": "Onboardr(SoroAI)",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-30911",
+			"name": "Passkey-Kit integration",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-30924",
+			"name": "Accesly",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-32677",
+			"name": "Kale Farm Re-Design",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-33970",
+			"name": "Accesly",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-36196",
+			"name": "Syft",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-36752",
+			"name": "Stellar on Boarding Hub",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-36779",
+			"name": "Accesly",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-41491",
+			"name": "Bimex",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-42401",
+			"name": "Veil",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-42428",
+			"name": "FLASH",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-42507",
+			"name": "Stellar Smart Wallets",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-42714",
+			"name": "x402 Smart Wallet - By Sorobanhooks",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-45568",
+			"name": "Stella Pass",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-45967",
+			"name": "TalkToStellar",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 2,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-45981",
+			"name": "Prism",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-45983",
+			"name": "Stellaro",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 2,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-45996",
+			"name": "Stelakey",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-46093",
+			"name": "Tornado-style privacy pools on Stellar Soroban",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-46221",
+			"name": "Pollar",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-46229",
+			"name": "Buckspay SDK",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-46264",
+			"name": "lumengate",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-46295",
+			"name": "ShieldPass",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-46348",
+			"name": "Wraith",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-46461",
+			"name": "Zelyo",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey or smart-wallet onboarding",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-24502",
+			"name": "KiSMATI (Smart Public Transport App)",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-24527",
+			"name": "DUST AGGREGATOR",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-25218",
+			"name": "Druid",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-25289",
+			"name": "NeuralWallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-25341",
+			"name": "StellaX AI Wallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-27230",
+			"name": "Riskon",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-27458",
+			"name": "Blend AI Powered Smart Monitoring By Sorobanhook",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-30648",
+			"name": "DeFi Quest - From Zero to DeFi in Minutes",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-30911",
+			"name": "Passkey-Kit integration",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-31318",
+			"name": "Career Plug AI - Smart Careers, Strong Identitie",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-32677",
+			"name": "Kale Farm Re-Design",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-38049",
+			"name": "Safe.xlm",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-39224",
+			"name": "Stellar AI Escrow Commerce",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-41491",
+			"name": "Bimex",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-42401",
+			"name": "Veil",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-42507",
+			"name": "Stellar Smart Wallets",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-42662",
+			"name": "Ai2wallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-42714",
+			"name": "x402 Smart Wallet - By Sorobanhooks",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-42794",
+			"name": "Agent Rep",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-45568",
+			"name": "Stella Pass",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-45855",
+			"name": "ProofPass | Privacy-Preserving Age Verification ",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-45901",
+			"name": "Shield-Wallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-45967",
+			"name": "TalkToStellar",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-45981",
+			"name": "Prism",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-45996",
+			"name": "Stelakey",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46062",
+			"name": "BairrouApp! Wallet",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46093",
+			"name": "Tornado-style privacy pools on Stellar Soroban",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46174",
+			"name": "CosmosPay | Wallet & Payment Gateway for Stellar",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46229",
+			"name": "Buckspay SDK",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46248",
+			"name": "NARTHEX",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46264",
+			"name": "lumengate",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46295",
+			"name": "ShieldPass",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46348",
+			"name": "Wraith",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46373",
+			"name": "ANCHORSHIELD",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46426",
+			"name": "Stella - Private Payments Wallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46461",
+			"name": "Zelyo",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey smart wallet",
+			"buildId": "dorahacks-buidl-46541",
+			"name": "Umbra Wallet",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-25341",
+			"name": "StellaX AI Wallet",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-28426",
+			"name": "Stellar Onboarding Hub",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-30648",
+			"name": "DeFi Quest - From Zero to DeFi in Minutes",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-30911",
+			"name": "Passkey-Kit integration",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-45967",
+			"name": "TalkToStellar",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-45981",
+			"name": "Prism",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-45983",
+			"name": "Stellaro",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-46093",
+			"name": "Tornado-style privacy pools on Stellar Soroban",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-46221",
+			"name": "Pollar",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-46229",
+			"name": "Buckspay SDK",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey wallet onboarding",
+			"buildId": "dorahacks-buidl-46541",
+			"name": "Umbra Wallet",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-24502",
+			"name": "KiSMATI (Smart Public Transport App)",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-25271",
+			"name": "Soroban to MCP Server in seconds + Policy Signer",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-25289",
+			"name": "NeuralWallet",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-25341",
+			"name": "StellaX AI Wallet",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-27458",
+			"name": "Blend AI Powered Smart Monitoring By Sorobanhook",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-30702",
+			"name": "Socio - AI-generated swap signals for Stellar & ",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-30911",
+			"name": "Passkey-Kit integration",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-31318",
+			"name": "Career Plug AI - Smart Careers, Strong Identitie",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-36190",
+			"name": "ContractForge",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-36196",
+			"name": "Syft",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-36795",
+			"name": "TralaContract",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-38062",
+			"name": "dorahacks-buidl-38062",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-39224",
+			"name": "Stellar AI Escrow Commerce",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-41491",
+			"name": "Bimex",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-42507",
+			"name": "Stellar Smart Wallets",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-42660",
+			"name": "Soroban Node 0",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-42662",
+			"name": "Ai2wallet",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-42818",
+			"name": "AutoLayer - Soroban & Stellar Automation",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-45075",
+			"name": "Stellar Proof of Reserves",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-45967",
+			"name": "TalkToStellar",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-45983",
+			"name": "Stellaro",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-45996",
+			"name": "Stelakey",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-46062",
+			"name": "BairrouApp! Wallet",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 1,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-46093",
+			"name": "Tornado-style privacy pools on Stellar Soroban",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-46174",
+			"name": "CosmosPay | Wallet & Payment Gateway for Stellar",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-46248",
+			"name": "NARTHEX",
+			"source": "lane Z3",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-46295",
+			"name": "ShieldPass",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "held out sa01-topic",
+			"buildId": "dorahacks-buidl-46541",
+			"name": "Umbra Wallet",
+			"source": "lane Z3",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-25218",
+			"name": "Druid",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-27230",
+			"name": "Riskon",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-30648",
+			"name": "DeFi Quest - From Zero to DeFi in Minutes",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-30911",
+			"name": "Passkey-Kit integration",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-32677",
+			"name": "Kale Farm Re-Design",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-41491",
+			"name": "Bimex",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-45967",
+			"name": "TalkToStellar",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-45983",
+			"name": "Stellaro",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-46229",
+			"name": "Buckspay SDK",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-25218",
+			"name": "Druid",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-27230",
+			"name": "Riskon",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-30648",
+			"name": "DeFi Quest - From Zero to DeFi in Minutes",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-30911",
+			"name": "Passkey-Kit integration",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-32677",
+			"name": "Kale Farm Re-Design",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-41491",
+			"name": "Bimex",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-45967",
+			"name": "TalkToStellar",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-45981",
+			"name": "Prism",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-45983",
+			"name": "Stellaro",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "passkey-kit",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-24502",
+			"name": "KiSMATI (Smart Public Transport App)",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-25271",
+			"name": "Soroban to MCP Server in seconds + Policy Signer",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-27458",
+			"name": "Blend AI Powered Smart Monitoring By Sorobanhook",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-30911",
+			"name": "Passkey-Kit integration",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-31318",
+			"name": "Career Plug AI - Smart Careers, Strong Identitie",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-42507",
+			"name": "Stellar Smart Wallets",
+			"grade": 1,
+			"passA": 2,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-42668",
+			"name": "AgentCard",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-42714",
+			"name": "x402 Smart Wallet - By Sorobanhooks",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-42794",
+			"name": "Agent Rep",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-45075",
+			"name": "Stellar Proof of Reserves",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-45996",
+			"name": "Stelakey",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account policy signers",
+			"buildId": "dorahacks-buidl-46264",
+			"name": "lumengate",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-18558",
+			"name": "PeerPesa",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-19599",
+			"name": "ChainLab",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-24502",
+			"name": "KiSMATI (Smart Public Transport App)",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-24527",
+			"name": "DUST AGGREGATOR",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-24548",
+			"name": "Senti",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-24753",
+			"name": "Agrosurge",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-24827",
+			"name": "Airpay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-25218",
+			"name": "Druid",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-25271",
+			"name": "Soroban to MCP Server in seconds + Policy Signer",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-25331",
+			"name": "Stellar Odyssey",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-25334",
+			"name": "Celestium",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-27230",
+			"name": "Riskon",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-27435",
+			"name": "BlendX- Defi Manager for Stellar",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-27450",
+			"name": "Blend Sentinel",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-27458",
+			"name": "Blend AI Powered Smart Monitoring By Sorobanhook",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-28416",
+			"name": "Stellar Donate-Safe",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-28437",
+			"name": "GoLazy",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-30284",
+			"name": "Stellar-vaults-app",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-30648",
+			"name": "DeFi Quest - From Zero to DeFi in Minutes",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-30688",
+			"name": "StellarVideos",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-30700",
+			"name": "Soroscan",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-30702",
+			"name": "Socio - AI-generated swap signals for Stellar & ",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-30911",
+			"name": "Passkey-Kit integration",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-31161",
+			"name": "Trace",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-31318",
+			"name": "Career Plug AI - Smart Careers, Strong Identitie",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-31887",
+			"name": "Edge Traders",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-32653",
+			"name": "Reflector TradeBet",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-32677",
+			"name": "Kale Farm Re-Design",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-33712",
+			"name": "Micro Lending",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-35524",
+			"name": "Zucane",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-35590",
+			"name": "WorkOn",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36190",
+			"name": "ContractForge",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36228",
+			"name": "Afri Assets",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36253",
+			"name": "ArtChain-AI",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36309",
+			"name": "LumenPass",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36313",
+			"name": "CirclePay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36332",
+			"name": "SpectraBet",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36341",
+			"name": "LumenFX",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36343",
+			"name": "BalloonFly",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36735",
+			"name": "Meet.xlm",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36784",
+			"name": "VisionMe",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36785",
+			"name": "Human",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36795",
+			"name": "TralaContract",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-36799",
+			"name": "PayDay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-37538",
+			"name": "VibeNet",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-38049",
+			"name": "Safe.xlm",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-38050",
+			"name": "CertiX",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-38056",
+			"name": "Colectiva",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-38062",
+			"name": "dorahacks-buidl-38062",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-38216",
+			"name": "Stellar Map",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-39224",
+			"name": "Stellar AI Escrow Commerce",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-39821",
+			"name": "ZK Battleship",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-39896",
+			"name": "Poison-Game",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-39912",
+			"name": "Obsidossier",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-39914",
+			"name": "ZKMON",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-39945",
+			"name": "AndesMaaS 3.0",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-40203",
+			"name": "KipuFi",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-41344",
+			"name": "OL'TAS",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-41491",
+			"name": "Bimex",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-41512",
+			"name": "Centurion-Pay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42161",
+			"name": "Risk Pulse AI",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42401",
+			"name": "Veil",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42474",
+			"name": "Nulucre Agents",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42507",
+			"name": "Stellar Smart Wallets",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42510",
+			"name": "The Signaler",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42516",
+			"name": "Autorepay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42547",
+			"name": "Ai Bora",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42607",
+			"name": "Stellar Search",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42610",
+			"name": "AGENT TONTINE",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42611",
+			"name": "StellarGuard",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42617",
+			"name": "Nova Registry SDK",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42643",
+			"name": "Payflow",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42660",
+			"name": "Soroban Node 0",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42666",
+			"name": "MicoPay Protocol",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42682",
+			"name": "Stellar Security Audit Agent",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42706",
+			"name": "Datavend",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42714",
+			"name": "x402 Smart Wallet - By Sorobanhooks",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42723",
+			"name": "AgentCompute",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42765",
+			"name": "Delibera",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42771",
+			"name": "Sentryx402",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42774",
+			"name": "AutoBooks: The AI CFO That Charges Other Bots fo",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42782",
+			"name": "Shield Stellar",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42787",
+			"name": "PharmaFind",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42788",
+			"name": "NyayaMitra AI - Legal Intelligence MCP Network o",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42794",
+			"name": "Agent Rep",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42804",
+			"name": "StellarAgent",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42806",
+			"name": "Soundstake",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42809",
+			"name": "Xioma",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-42818",
+			"name": "AutoLayer - Soroban & Stellar Automation",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45075",
+			"name": "Stellar Proof of Reserves",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45311",
+			"name": "StellarSpend: Private Spending Limits with Zero-",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45514",
+			"name": "Alphine",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45841",
+			"name": "zkNemo",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45930",
+			"name": "Decrow Finance",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45958",
+			"name": "Attestar",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45967",
+			"name": "TalkToStellar",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45976",
+			"name": "Proof of Reserve",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45981",
+			"name": "Prism",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45983",
+			"name": "Stellaro",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-45996",
+			"name": "Stelakey",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46002",
+			"name": "StellarProof",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46007",
+			"name": "Blind Oracle",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46072",
+			"name": "TaskLoop",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46093",
+			"name": "Tornado-style privacy pools on Stellar Soroban",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46141",
+			"name": "GitScout Oracle",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46204",
+			"name": "ShieldFund",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46217",
+			"name": "Link2Pay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46229",
+			"name": "Buckspay SDK",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46248",
+			"name": "NARTHEX",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46256",
+			"name": "Lumen",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46258",
+			"name": "Binalyst",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46264",
+			"name": "lumengate",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46269",
+			"name": "Stellar ZK AidPass",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46289",
+			"name": "ZK-TRP",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46295",
+			"name": "ShieldPass",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46305",
+			"name": "Trexure",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46327",
+			"name": "zkAudit",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46380",
+			"name": "Lumenveil",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46395",
+			"name": "Umbra",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46401",
+			"name": "ZeroPath",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46411",
+			"name": "Nulth",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46417",
+			"name": "ZkOrigin",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46431",
+			"name": "VeilGate",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46434",
+			"name": "Cloakwork",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46454",
+			"name": "Shadow-Vault",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46535",
+			"name": "AidOS",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46549",
+			"name": "ZKReserve",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart account",
+			"buildId": "dorahacks-buidl-46561",
+			"name": "IDIO",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-14618",
+			"name": "APTOSPACE - NFT Marketplace Website",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-18558",
+			"name": "PeerPesa",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-19599",
+			"name": "ChainLab",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-22506",
+			"name": "DeFi-DashBoard",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-24502",
+			"name": "KiSMATI (Smart Public Transport App)",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-24527",
+			"name": "DUST AGGREGATOR",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-24548",
+			"name": "Senti",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-24753",
+			"name": "Agrosurge",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-24827",
+			"name": "Airpay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-24829",
+			"name": "Nexagrid",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-25218",
+			"name": "Druid",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-25271",
+			"name": "Soroban to MCP Server in seconds + Policy Signer",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-25289",
+			"name": "NeuralWallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-25331",
+			"name": "Stellar Odyssey",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-25334",
+			"name": "Celestium",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-25340",
+			"name": "CelestX",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-25341",
+			"name": "StellaX AI Wallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-27230",
+			"name": "Riskon",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-27435",
+			"name": "BlendX- Defi Manager for Stellar",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-27449",
+			"name": "BlendXBT",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-27450",
+			"name": "Blend Sentinel",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-27458",
+			"name": "Blend AI Powered Smart Monitoring By Sorobanhook",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-28416",
+			"name": "Stellar Donate-Safe",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-28420",
+			"name": "DonarIA",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-28437",
+			"name": "GoLazy",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-30284",
+			"name": "Stellar-vaults-app",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-30343",
+			"name": "Soroswapv2",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-30629",
+			"name": "mini-app-defindex",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-30648",
+			"name": "DeFi Quest - From Zero to DeFi in Minutes",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-30659",
+			"name": "Soroswap Pro Trader",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-30688",
+			"name": "StellarVideos",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-30700",
+			"name": "Soroscan",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-30702",
+			"name": "Socio - AI-generated swap signals for Stellar & ",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-30911",
+			"name": "Passkey-Kit integration",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-31161",
+			"name": "Trace",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-31318",
+			"name": "Career Plug AI - Smart Careers, Strong Identitie",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-31887",
+			"name": "Edge Traders",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-32481",
+			"name": "Kale Grab Rush",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-32591",
+			"name": "KaleConnect",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-32653",
+			"name": "Reflector TradeBet",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-32677",
+			"name": "Kale Farm Re-Design",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-32698",
+			"name": "Kalebound",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-32704",
+			"name": "Stellar Stake House",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-32712",
+			"name": "CouvePIX",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-33712",
+			"name": "Micro Lending",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-35524",
+			"name": "Zucane",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-35590",
+			"name": "WorkOn",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36190",
+			"name": "ContractForge",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36228",
+			"name": "Afri Assets",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36253",
+			"name": "ArtChain-AI",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36284",
+			"name": "Klyra - MVP",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36293",
+			"name": "StellarTrust",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36298",
+			"name": "Stellar x402",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36309",
+			"name": "LumenPass",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36313",
+			"name": "CirclePay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36319",
+			"name": "SoroSocial",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36325",
+			"name": "PayPulse: Offline-First Bluetooth Payments on St",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 1,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36330",
+			"name": "Nexar - Next-Gen AI-Powered Stellar Payments and",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36332",
+			"name": "SpectraBet",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36341",
+			"name": "LumenFX",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36343",
+			"name": "BalloonFly",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36735",
+			"name": "Meet.xlm",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36784",
+			"name": "VisionMe",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36785",
+			"name": "Human",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36795",
+			"name": "TralaContract",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-36799",
+			"name": "PayDay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-37538",
+			"name": "VibeNet",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-38009",
+			"name": "PayByLink",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-38049",
+			"name": "Safe.xlm",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-38050",
+			"name": "CertiX",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-38051",
+			"name": "DAPP.SPOT",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-38056",
+			"name": "Colectiva",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-38062",
+			"name": "dorahacks-buidl-38062",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-38066",
+			"name": "TrustGenome AI",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-38162",
+			"name": "Cachay",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-38216",
+			"name": "Stellar Map",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-39224",
+			"name": "Stellar AI Escrow Commerce",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-39821",
+			"name": "ZK Battleship",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-39896",
+			"name": "Poison-Game",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-39912",
+			"name": "Obsidossier",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-39914",
+			"name": "ZKMON",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-39945",
+			"name": "AndesMaaS 3.0",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-40203",
+			"name": "KipuFi",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-40208",
+			"name": "MIMO App",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-41344",
+			"name": "OL'TAS",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-41491",
+			"name": "Bimex",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42161",
+			"name": "Risk Pulse AI",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42401",
+			"name": "Veil",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42413",
+			"name": "FORTEXA",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 1,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42474",
+			"name": "Nulucre Agents",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42507",
+			"name": "Stellar Smart Wallets",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42509",
+			"name": "SignalPass",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42510",
+			"name": "The Signaler",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42516",
+			"name": "Autorepay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42547",
+			"name": "Ai Bora",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42552",
+			"name": "Genesis402",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42567",
+			"name": "x402 Autopilot",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42606",
+			"name": "AAEK",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42611",
+			"name": "StellarGuard",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42616",
+			"name": "OrbitSafe",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42617",
+			"name": "Nova Registry SDK",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42633",
+			"name": "Wraith",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42637",
+			"name": "Agent Market",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42639",
+			"name": "SpendGuard",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42644",
+			"name": "SentinelShield",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42660",
+			"name": "Soroban Node 0",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42662",
+			"name": "Ai2wallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42682",
+			"name": "Stellar Security Audit Agent",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42699",
+			"name": "Walt",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42706",
+			"name": "Datavend",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42714",
+			"name": "x402 Smart Wallet - By Sorobanhooks",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42782",
+			"name": "Shield Stellar",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42786",
+			"name": "AXIS: Autonomous X-border Interchange System",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42787",
+			"name": "PharmaFind",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42794",
+			"name": "Agent Rep",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42803",
+			"name": "x402 Stellar MCP",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42806",
+			"name": "Soundstake",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42818",
+			"name": "AutoLayer - Soroban & Stellar Automation",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42819",
+			"name": "Cards402.com",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-42824",
+			"name": "Forge402",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45075",
+			"name": "Stellar Proof of Reserves",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45311",
+			"name": "StellarSpend: Private Spending Limits with Zero-",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45514",
+			"name": "Alphine",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45901",
+			"name": "Shield-Wallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45958",
+			"name": "Attestar",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45967",
+			"name": "TalkToStellar",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45976",
+			"name": "Proof of Reserve",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45980",
+			"name": "zkCred",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45981",
+			"name": "Prism",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45983",
+			"name": "Stellaro",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-45996",
+			"name": "Stelakey",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46002",
+			"name": "StellarProof",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46007",
+			"name": "Blind Oracle",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46062",
+			"name": "BairrouApp! Wallet",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46093",
+			"name": "Tornado-style privacy pools on Stellar Soroban",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46136",
+			"name": "Cyphras",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46141",
+			"name": "GitScout Oracle",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46174",
+			"name": "CosmosPay | Wallet & Payment Gateway for Stellar",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46198",
+			"name": "Compass",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46206",
+			"name": "PayOnProof",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46216",
+			"name": "Grow",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46217",
+			"name": "Link2Pay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46221",
+			"name": "Pollar",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46229",
+			"name": "Buckspay SDK",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46233",
+			"name": "STELLITA: Build on Stellar in minutes with zero ",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46248",
+			"name": "NARTHEX",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46250",
+			"name": "Veilum",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46264",
+			"name": "lumengate",
+			"source": "lane Z2",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46269",
+			"name": "Stellar ZK AidPass",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46289",
+			"name": "ZK-TRP",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46295",
+			"name": "ShieldPass",
+			"source": "lane Z3",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46308",
+			"name": "Growthip",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46321",
+			"name": "ZK Credit Score",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46327",
+			"name": "zkAudit",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46373",
+			"name": "ANCHORSHIELD",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46377",
+			"name": "Immunis Protocol",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46395",
+			"name": "Umbra",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46400",
+			"name": "ZK-Balance",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46401",
+			"name": "ZeroPath",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46424",
+			"name": "Econova stellar",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46426",
+			"name": "Stella - Private Payments Wallet",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46428",
+			"name": "zk-utxo",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46431",
+			"name": "VeilGate",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46432",
+			"name": "Aegis - Provable Clean-Funds Compliance Coproces",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46434",
+			"name": "Cloakwork",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46454",
+			"name": "Shadow-Vault",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46458",
+			"name": "Inter Stellar",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46462",
+			"name": "OZKY",
+			"source": "lane Z2",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46474",
+			"name": "Tukar",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46480",
+			"name": "ZeroGate",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46505",
+			"name": "ProofMatch",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46541",
+			"name": "Umbra Wallet",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46552",
+			"name": "Nebula Relay",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46559",
+			"name": "PrismZK(PrismFlashZK)",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "B",
+			"query": "smart wallet",
+			"buildId": "dorahacks-buidl-46561",
+			"name": "IDIO",
+			"source": "lane Z2",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"part": "C",
+			"set": "40",
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-24502",
+			"name": "KiSMATI (Smart Public Transport App)",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "C",
+			"set": "40",
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-25289",
+			"name": "NeuralWallet",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		},
+		{
+			"part": "C",
+			"set": "40",
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-27458",
+			"name": "Blend AI Powered Smart Monitoring By Sorobanhook",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "C",
+			"set": "40",
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-31318",
+			"name": "Career Plug AI - Smart Careers, Strong Identitie",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "C",
+			"set": "40",
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-42662",
+			"name": "Ai2wallet",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "C",
+			"set": "40",
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46062",
+			"name": "BairrouApp! Wallet",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "C",
+			"set": "40",
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46174",
+			"name": "CosmosPay | Wallet & Payment Gateway for Stellar",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0,
+			"source": "lane Z"
+		},
+		{
+			"part": "C",
+			"set": "40",
+			"ideaId": "i02",
+			"idea": "passkey smart wallet so users never handle a seed phrase",
+			"buildId": "dorahacks-buidl-46501",
+			"name": "Pollar private payment",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1,
+			"source": "lane Z"
+		}
+	]
+}

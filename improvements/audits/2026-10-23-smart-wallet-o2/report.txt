@@ -1,0 +1,1834 @@
+== this round's base, h and o1h replays against lane Z3's ==
+base probes: 27 of 27 queries equal to lane Z3's base; note lines equal: True
+base labeled: 158 of 158 queries equal to lane Z3's base; note lines equal: True
+base fresh2: 25 of 25 queries equal to lane Z3's base; note lines equal: True
+base adv: 34 of 34 queries equal to lane Z3's base; note lines equal: True
+base review: 23 of 23 queries equal to lane Z3's base; note lines equal: True
+base eventq: 34 of 34 queries equal to lane Z3's base; note lines equal: True
+base battery: 4 of 4 queries equal to lane Z3's base; note lines equal: True
+base all: 305 of 305
+h probes: 27 of 27 queries equal to lane Z3's h-final; note lines equal: True
+h labeled: 158 of 158 queries equal to lane Z3's h-final; note lines equal: True
+h fresh2: 25 of 25 queries equal to lane Z3's h-final; note lines equal: True
+h adv: 34 of 34 queries equal to lane Z3's h-final; note lines equal: True
+h review: 23 of 23 queries equal to lane Z3's h-final; note lines equal: True
+h eventq: 34 of 34 queries equal to lane Z3's h-final; note lines equal: True
+h battery: 4 of 4 queries equal to lane Z3's h-final; note lines equal: True
+h all: 305 of 305
+o1h probes: 27 of 27 queries equal to lane Z3's o1h-final; note lines equal: True
+o1h labeled: 158 of 158 queries equal to lane Z3's o1h-final; note lines equal: True
+o1h fresh2: 25 of 25 queries equal to lane Z3's o1h-final; note lines equal: True
+o1h adv: 34 of 34 queries equal to lane Z3's o1h-final; note lines equal: True
+o1h review: 23 of 23 queries equal to lane Z3's o1h-final; note lines equal: True
+o1h eventq: 34 of 34 queries equal to lane Z3's o1h-final; note lines equal: True
+o1h battery: 4 of 4 queries equal to lane Z3's o1h-final; note lines equal: True
+o1h all: 305 of 305
+
+== (b) byte identity, per variant and capture ==
+h probes: api 1.9.99 -> 1.9.99, corpus 1356; queries 27: byte-identical 26, changed 1; without a phrase or hyphen 15, of them changed 0; with one 12, of them unchanged 11
+h labeled: api 1.9.99 -> 1.9.99, corpus 1356; queries 158: byte-identical 158, changed 0; without a phrase or hyphen 146, of them changed 0; with one 12, of them unchanged 12
+h fresh2: api 1.9.100 -> 1.9.100, corpus 1356; queries 25: byte-identical 25, changed 0; without a phrase or hyphen 25, of them changed 0; with one 0, of them unchanged 0
+h adv: api 1.9.100 -> 1.9.100, corpus 1356; queries 34: byte-identical 33, changed 1; without a phrase or hyphen 27, of them changed 0; with one 7, of them unchanged 6
+h review: api 1.9.100 -> 1.9.100, corpus 1356; queries 23: byte-identical 23, changed 0; without a phrase or hyphen 23, of them changed 0; with one 0, of them unchanged 0
+h eventq: api 1.9.99 -> 1.9.99, corpus 1356; queries 34: byte-identical 34, changed 0; without a phrase or hyphen 33, of them changed 0; with one 1, of them unchanged 1
+h battery: api 1.9.101 -> 1.9.101, corpus 1356; queries 4: byte-identical 4, changed 0; without a phrase or hyphen 0, of them changed 0; with one 4, of them unchanged 4
+o1h probes: api 1.9.99 -> 1.9.99, corpus 1356; queries 27: byte-identical 17, changed 10; without a phrase or hyphen 15, of them changed 0; with one 12, of them unchanged 2
+o1h labeled: api 1.9.99 -> 1.9.99, corpus 1356; queries 158: byte-identical 157, changed 1; without a phrase or hyphen 146, of them changed 0; with one 12, of them unchanged 11
+o1h fresh2: api 1.9.100 -> 1.9.100, corpus 1356; queries 25: byte-identical 25, changed 0; without a phrase or hyphen 25, of them changed 0; with one 0, of them unchanged 0
+o1h adv: api 1.9.100 -> 1.9.100, corpus 1356; queries 34: byte-identical 33, changed 1; without a phrase or hyphen 27, of them changed 0; with one 7, of them unchanged 6
+o1h review: api 1.9.100 -> 1.9.100, corpus 1356; queries 23: byte-identical 23, changed 0; without a phrase or hyphen 23, of them changed 0; with one 0, of them unchanged 0
+o1h eventq: api 1.9.99 -> 1.9.99, corpus 1356; queries 34: byte-identical 34, changed 0; without a phrase or hyphen 33, of them changed 0; with one 1, of them unchanged 1
+o1h battery: api 1.9.101 -> 1.9.101, corpus 1356; queries 4: byte-identical 0, changed 4; without a phrase or hyphen 0, of them changed 0; with one 4, of them unchanged 0
+o2 probes: api 1.9.99 -> 1.9.99, corpus 1356; queries 27: byte-identical 18, changed 9; without a phrase or hyphen 15, of them changed 0; with one 12, of them unchanged 3
+o2 labeled: api 1.9.99 -> 1.9.99, corpus 1356; queries 158: byte-identical 157, changed 1; without a phrase or hyphen 146, of them changed 0; with one 12, of them unchanged 11
+o2 fresh2: api 1.9.100 -> 1.9.100, corpus 1356; queries 25: byte-identical 25, changed 0; without a phrase or hyphen 25, of them changed 0; with one 0, of them unchanged 0
+o2 adv: api 1.9.100 -> 1.9.100, corpus 1356; queries 34: byte-identical 33, changed 1; without a phrase or hyphen 27, of them changed 0; with one 7, of them unchanged 6
+o2 review: api 1.9.100 -> 1.9.100, corpus 1356; queries 23: byte-identical 23, changed 0; without a phrase or hyphen 23, of them changed 0; with one 0, of them unchanged 0
+o2 eventq: api 1.9.99 -> 1.9.99, corpus 1356; queries 34: byte-identical 34, changed 0; without a phrase or hyphen 33, of them changed 0; with one 1, of them unchanged 1
+o2 battery: api 1.9.101 -> 1.9.101, corpus 1356; queries 4: byte-identical 2, changed 2; without a phrase or hyphen 0, of them changed 0; with one 4, of them unchanged 2
+
+== (d) lane Z's adversarial probes z09 to z13 ==
+h: 10 of 10 byte-identical
+o1h: 10 of 10 byte-identical
+o2: 10 of 10 byte-identical
+
+== (b)(i) and (b)(ii): base -> o2, the changed queries of every capture, every move graded ==
+
+probes adversarial|z01|winners: "passkey smart wallet" (winners only); matched keyword 1 -> 2, hybrid 4 -> 4
+  left route keyword top 5: Umbra Wallet | grade 1 (blind) | rank 1 -> none
+  entered route keyword top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword top 5: Tukar | grade 2 (blind) | rank none -> 2
+  left route keyword top 20: Umbra Wallet | grade 1 (blind) | rank 1 -> none
+  entered route keyword top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword top 20: Tukar | grade 2 (blind) | rank none -> 2
+  left route keyword matched: Umbra Wallet | grade 1 (blind) | rank 1 -> none
+  entered route keyword matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword matched: Tukar | grade 2 (blind) | rank none -> 2
+  left route hybrid top 5: Umbra Wallet | grade 1 (blind) | rank 3 -> none
+  entered route hybrid top 5: Tukar | grade 2 (blind) | rank none -> 3
+  left route hybrid top 20: Umbra Wallet | grade 1 (blind) | rank 3 -> none
+  entered route hybrid top 20: Tukar | grade 2 (blind) | rank none -> 3
+  left route hybrid matched: Umbra Wallet | grade 1 (blind) | rank 3 -> none
+  entered route hybrid matched: Tukar | grade 2 (blind) | rank none -> 3
+
+probes adversarial|z01|all: "passkey smart wallet"; matched keyword 26 -> 21, hybrid 63 -> 57
+  left route keyword top 5: Prism | grade 2 (blind) | rank 1 -> 18
+  left route keyword top 5: Zelyo | grade 2 (blind) | rank 3 -> 21
+  left route keyword top 5: TalkToStellar | grade 2 (blind) | rank 4 -> 16
+  left route keyword top 5: Buckspay SDK | grade 2 (blind) | rank 5 -> 11
+  entered route keyword top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 2
+  entered route keyword top 5: Tukar | grade 2 (blind) | rank none -> 3
+  entered route keyword top 5: Stellar Smart Wallets | grade 2 (blind) | rank 8 -> 4
+  entered route keyword top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind) | rank 9 -> 5
+  left route keyword top 20: Zelyo | grade 2 (blind) | rank 3 -> 21
+  left route keyword top 20: DUST AGGREGATOR | grade 0 (blind) | rank 10 -> none
+  left route keyword top 20: NARTHEX | grade 0 (blind) | rank 12 -> none
+  left route keyword top 20: Stellar AI Escrow Commerce | grade 0 (blind) | rank 13 -> none
+  left route keyword top 20: Umbra Wallet | grade 1 (blind) | rank 16 -> none
+  left route keyword top 20: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 17 -> none
+  left route keyword top 20: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 18 -> none
+  left route keyword top 20: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 19 -> none
+  left route keyword top 20: NeuralWallet | grade 1 (blind) | rank 20 -> none
+  entered route keyword top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 2
+  entered route keyword top 20: Tukar | grade 2 (blind) | rank none -> 3
+  entered route keyword top 20: Agent Rep | grade 2 (blind) | rank none -> 7
+  entered route keyword top 20: Veil | grade 2 (blind) | rank none -> 8
+  entered route keyword top 20: Druid | grade 2 (blind) | rank none -> 12
+  entered route keyword top 20: Riskon | grade 2 (blind) | rank none -> 13
+  entered route keyword top 20: Kale Farm Re-Design | grade 2 (blind) | rank none -> 14
+  entered route keyword top 20: Bimex | grade 2 (blind) | rank none -> 15
+  entered route keyword top 20: ShieldPass | grade 2 (blind) | rank none -> 20
+  left route keyword matched: DUST AGGREGATOR | grade 0 (blind) | rank 10 -> none
+  left route keyword matched: NARTHEX | grade 0 (blind) | rank 12 -> none
+  left route keyword matched: Stellar AI Escrow Commerce | grade 0 (blind) | rank 13 -> none
+  left route keyword matched: Umbra Wallet | grade 1 (blind) | rank 16 -> none
+  left route keyword matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 17 -> none
+  left route keyword matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 18 -> none
+  left route keyword matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 19 -> none
+  left route keyword matched: NeuralWallet | grade 1 (blind) | rank 20 -> none
+  left route keyword matched: StellaX AI Wallet | grade 1 (blind) | rank 21 -> none
+  left route keyword matched: Ai2wallet | grade 1 (blind) | rank 22 -> none
+  left route keyword matched: CosmosPay | Wallet & Payment Gateway for Stellar | grade 1 (blind) | rank 23 -> none
+  left route keyword matched: BairrouApp! Wallet | grade 0 (blind) | rank 24 -> none
+  left route keyword matched: Shield-Wallet | grade 1 (blind) | rank 25 -> none
+  left route keyword matched: Stella - Private Payments Wallet | grade 1 (blind) | rank 26 -> none
+  entered route keyword matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 2
+  entered route keyword matched: Tukar | grade 2 (blind) | rank none -> 3
+  entered route keyword matched: Agent Rep | grade 2 (blind) | rank none -> 7
+  entered route keyword matched: Veil | grade 2 (blind) | rank none -> 8
+  entered route keyword matched: Druid | grade 2 (blind) | rank none -> 12
+  entered route keyword matched: Riskon | grade 2 (blind) | rank none -> 13
+  entered route keyword matched: Kale Farm Re-Design | grade 2 (blind) | rank none -> 14
+  entered route keyword matched: Bimex | grade 2 (blind) | rank none -> 15
+  entered route keyword matched: ShieldPass | grade 2 (blind) | rank none -> 20
+  left route hybrid top 5: Buckspay SDK | grade 2 (blind) | rank 1 -> 6
+  left route hybrid top 5: Prism | grade 2 (blind) | rank 4 -> 26
+  entered route hybrid top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank 14 -> 4
+  entered route hybrid top 5: lumengate | grade 2 (blind) | rank 7 -> 5
+  left route hybrid top 20: Prism | grade 2 (blind) | rank 4 -> 26
+  left route hybrid top 20: Zelyo | grade 2 (blind) | rank 10 -> 27
+  left route hybrid top 20: TalkToStellar | grade 2 (blind) | rank 11 -> 24
+  left route hybrid top 20: Stellaro | grade 2 (blind) | rank 12 -> 25
+  left route hybrid top 20: Stella - Private Payments Wallet | grade 1 (blind) | rank 13 -> 29
+  left route hybrid top 20: DUST AGGREGATOR | grade 0 (blind) | rank 18 -> none
+  left route hybrid top 20: NARTHEX | grade 0 (blind) | rank 20 -> none
+  entered route hybrid top 20: Tukar | grade 2 (blind) | rank none -> 10
+  entered route hybrid top 20: Agent Rep | grade 2 (blind) | rank none -> 15
+  entered route hybrid top 20: StellarPass | grade 0 (blind) | rank 22 -> 16
+  entered route hybrid top 20: ShieldPass | grade 2 (blind) | rank 61 -> 17
+  entered route hybrid top 20: ZK Pass | grade 0 (blind) | rank 23 -> 18
+  entered route hybrid top 20: Econova stellar | grade 1 (blind) | rank 24 -> 19
+  entered route hybrid top 20: Druid | grade 2 (blind) | rank none -> 20
+  left route hybrid matched: DUST AGGREGATOR | grade 0 (blind) | rank 18 -> none
+  left route hybrid matched: NARTHEX | grade 0 (blind) | rank 20 -> none
+  left route hybrid matched: Stellar AI Escrow Commerce | grade 0 (blind) | rank 21 -> none
+  left route hybrid matched: Umbra Wallet | grade 1 (blind) | rank 28 -> none
+  left route hybrid matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 33 -> none
+  left route hybrid matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 34 -> none
+  left route hybrid matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 35 -> none
+  left route hybrid matched: NeuralWallet | grade 1 (blind) | rank 38 -> none
+  left route hybrid matched: StellaX AI Wallet | grade 1 (blind) | rank 39 -> none
+  left route hybrid matched: Ai2wallet | grade 1 (blind) | rank 40 -> none
+  left route hybrid matched: CosmosPay | Wallet & Payment Gateway for Stellar | grade 1 (blind) | rank 41 -> none
+  left route hybrid matched: BairrouApp! Wallet | grade 0 (blind) | rank 42 -> none
+  entered route hybrid matched: Tukar | grade 2 (blind) | rank none -> 10
+  entered route hybrid matched: Agent Rep | grade 2 (blind) | rank none -> 15
+  entered route hybrid matched: Druid | grade 2 (blind) | rank none -> 20
+  entered route hybrid matched: Riskon | grade 2 (blind) | rank none -> 21
+  entered route hybrid matched: Kale Farm Re-Design | grade 2 (blind) | rank none -> 22
+  entered route hybrid matched: Bimex | grade 2 (blind) | rank none -> 23
+  left vet top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank 4 -> none
+  entered vet top 5: lumengate | grade 2 (blind) | rank none -> 5
+  left brief top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank 4 -> none
+  entered brief top 5: lumengate | grade 2 (blind) | rank none -> 5
+
+probes adversarial|z03|winners: "smart wallet" (winners only); matched keyword 12 -> 2, hybrid 12 -> 2
+  left route keyword top 5: Umbra Wallet | grade 1 (blind) | rank 1 -> none
+  left route keyword top 5: Cards402.com | grade 1 (blind) | rank 2 -> none
+  left route keyword top 5: ANCHORSHIELD | grade 0 (blind) | rank 3 -> none
+  left route keyword top 5: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 4 -> none
+  left route keyword top 5: GoLazy | grade 0 (blind) | rank 5 -> none
+  entered route keyword top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword top 5: Tukar | grade 2 (blind) | rank none -> 2
+  left route keyword top 20: Umbra Wallet | grade 1 (blind) | rank 1 -> none
+  left route keyword top 20: Cards402.com | grade 1 (blind) | rank 2 -> none
+  left route keyword top 20: ANCHORSHIELD | grade 0 (blind) | rank 3 -> none
+  left route keyword top 20: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 4 -> none
+  left route keyword top 20: GoLazy | grade 0 (blind) | rank 5 -> none
+  left route keyword top 20: Soroswap Pro Trader | grade 0 (blind) | rank 6 -> none
+  left route keyword top 20: Kale Grab Rush | grade 0 (blind) | rank 7 -> none
+  left route keyword top 20: Reflector TradeBet | grade 0 (blind) | rank 8 -> none
+  left route keyword top 20: CouvePIX | grade 1 (blind) | rank 9 -> none
+  left route keyword top 20: dorahacks-buidl-38062 | grade 0 (blind) | rank 10 -> none
+  left route keyword top 20: Stellar Map | grade 0 (blind) | rank 11 -> none
+  left route keyword top 20: AndesMaaS 3.0 | grade 0 (blind) | rank 12 -> none
+  entered route keyword top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword top 20: Tukar | grade 2 (blind) | rank none -> 2
+  left route keyword matched: Umbra Wallet | grade 1 (blind) | rank 1 -> none
+  left route keyword matched: Cards402.com | grade 1 (blind) | rank 2 -> none
+  left route keyword matched: ANCHORSHIELD | grade 0 (blind) | rank 3 -> none
+  left route keyword matched: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 4 -> none
+  left route keyword matched: GoLazy | grade 0 (blind) | rank 5 -> none
+  left route keyword matched: Soroswap Pro Trader | grade 0 (blind) | rank 6 -> none
+  left route keyword matched: Kale Grab Rush | grade 0 (blind) | rank 7 -> none
+  left route keyword matched: Reflector TradeBet | grade 0 (blind) | rank 8 -> none
+  left route keyword matched: CouvePIX | grade 1 (blind) | rank 9 -> none
+  left route keyword matched: dorahacks-buidl-38062 | grade 0 (blind) | rank 10 -> none
+  left route keyword matched: Stellar Map | grade 0 (blind) | rank 11 -> none
+  left route keyword matched: AndesMaaS 3.0 | grade 0 (blind) | rank 12 -> none
+  entered route keyword matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword matched: Tukar | grade 2 (blind) | rank none -> 2
+  left route hybrid top 5: Umbra Wallet | grade 1 (blind) | rank 1 -> none
+  left route hybrid top 5: Cards402.com | grade 1 (blind) | rank 2 -> none
+  left route hybrid top 5: ANCHORSHIELD | grade 0 (blind) | rank 3 -> none
+  left route hybrid top 5: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 4 -> none
+  left route hybrid top 5: GoLazy | grade 0 (blind) | rank 5 -> none
+  entered route hybrid top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route hybrid top 5: Tukar | grade 2 (blind) | rank none -> 2
+  left route hybrid top 20: Umbra Wallet | grade 1 (blind) | rank 1 -> none
+  left route hybrid top 20: Cards402.com | grade 1 (blind) | rank 2 -> none
+  left route hybrid top 20: ANCHORSHIELD | grade 0 (blind) | rank 3 -> none
+  left route hybrid top 20: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 4 -> none
+  left route hybrid top 20: GoLazy | grade 0 (blind) | rank 5 -> none
+  left route hybrid top 20: Soroswap Pro Trader | grade 0 (blind) | rank 6 -> none
+  left route hybrid top 20: Kale Grab Rush | grade 0 (blind) | rank 7 -> none
+  left route hybrid top 20: Reflector TradeBet | grade 0 (blind) | rank 8 -> none
+  left route hybrid top 20: CouvePIX | grade 1 (blind) | rank 9 -> none
+  left route hybrid top 20: dorahacks-buidl-38062 | grade 0 (blind) | rank 10 -> none
+  left route hybrid top 20: Stellar Map | grade 0 (blind) | rank 11 -> none
+  left route hybrid top 20: AndesMaaS 3.0 | grade 0 (blind) | rank 12 -> none
+  entered route hybrid top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route hybrid top 20: Tukar | grade 2 (blind) | rank none -> 2
+  left route hybrid matched: Umbra Wallet | grade 1 (blind) | rank 1 -> none
+  left route hybrid matched: Cards402.com | grade 1 (blind) | rank 2 -> none
+  left route hybrid matched: ANCHORSHIELD | grade 0 (blind) | rank 3 -> none
+  left route hybrid matched: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 4 -> none
+  left route hybrid matched: GoLazy | grade 0 (blind) | rank 5 -> none
+  left route hybrid matched: Soroswap Pro Trader | grade 0 (blind) | rank 6 -> none
+  left route hybrid matched: Kale Grab Rush | grade 0 (blind) | rank 7 -> none
+  left route hybrid matched: Reflector TradeBet | grade 0 (blind) | rank 8 -> none
+  left route hybrid matched: CouvePIX | grade 1 (blind) | rank 9 -> none
+  left route hybrid matched: dorahacks-buidl-38062 | grade 0 (blind) | rank 10 -> none
+  left route hybrid matched: Stellar Map | grade 0 (blind) | rank 11 -> none
+  left route hybrid matched: AndesMaaS 3.0 | grade 0 (blind) | rank 12 -> none
+  entered route hybrid matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route hybrid matched: Tukar | grade 2 (blind) | rank none -> 2
+
+probes adversarial|z03|all: "smart wallet"; matched keyword 167 -> 21, hybrid 167 -> 21
+  left route keyword top 5: DUST AGGREGATOR | grade 0 (blind) | rank 3 -> none
+  left route keyword top 5: Safe.xlm | grade 2 (blind) | rank 4 -> 7
+  left route keyword top 5: NARTHEX | grade 0 (blind) | rank 5 -> none
+  entered route keyword top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword top 5: Tukar | grade 2 (blind) | rank none -> 2
+  entered route keyword top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  left route keyword top 20: DUST AGGREGATOR | grade 0 (blind) | rank 3 -> none
+  left route keyword top 20: NARTHEX | grade 0 (blind) | rank 5 -> none
+  left route keyword top 20: Stellar AI Escrow Commerce | grade 0 (blind) | rank 6 -> none
+  left route keyword top 20: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 9 -> none
+  left route keyword top 20: GoLazy | grade 0 (blind) | rank 10 -> none
+  left route keyword top 20: Reflector TradeBet | grade 0 (blind) | rank 11 -> none
+  left route keyword top 20: dorahacks-buidl-38062 | grade 0 (blind) | rank 12 -> none
+  left route keyword top 20: Stellar Map | grade 0 (blind) | rank 13 -> none
+  left route keyword top 20: AndesMaaS 3.0 | grade 0 (blind) | rank 14 -> none
+  left route keyword top 20: Umbra Wallet | grade 1 (blind) | rank 15 -> none
+  left route keyword top 20: Cards402.com | grade 1 (blind) | rank 16 -> none
+  left route keyword top 20: ANCHORSHIELD | grade 0 (blind) | rank 17 -> none
+  left route keyword top 20: Soroswap Pro Trader | grade 0 (blind) | rank 18 -> none
+  left route keyword top 20: Kale Grab Rush | grade 0 (blind) | rank 19 -> none
+  left route keyword top 20: CouvePIX | grade 1 (blind) | rank 20 -> none
+  entered route keyword top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword top 20: Tukar | grade 2 (blind) | rank none -> 2
+  entered route keyword top 20: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route keyword top 20: lumengate | grade 2 (blind) | rank 83 -> 6
+  entered route keyword top 20: Agent Rep | grade 2 (blind) | rank 72 -> 8
+  entered route keyword top 20: Buckspay SDK | grade 2 (blind) | rank 149 -> 9
+  entered route keyword top 20: Druid | grade 2 (blind) | rank none -> 10
+  entered route keyword top 20: Riskon | grade 2 (blind) | rank none -> 11
+  entered route keyword top 20: Kale Farm Re-Design | grade 2 (blind) | rank none -> 12
+  entered route keyword top 20: Bimex | grade 2 (blind) | rank none -> 13
+  entered route keyword top 20: Veil | grade 2 (blind) | rank none -> 14
+  entered route keyword top 20: TalkToStellar | grade 2 (blind) | rank 107 -> 15
+  entered route keyword top 20: Stellaro | grade 2 (blind) | rank 145 -> 16
+  entered route keyword top 20: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank 152 -> 19
+  entered route keyword top 20: ShieldPass | grade 2 (blind) | rank none -> 20
+  left route keyword matched: DUST AGGREGATOR | grade 0 (blind) | rank 3 -> none
+  left route keyword matched: NARTHEX | grade 0 (blind) | rank 5 -> none
+  left route keyword matched: Stellar AI Escrow Commerce | grade 0 (blind) | rank 6 -> none
+  left route keyword matched: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 9 -> none
+  left route keyword matched: GoLazy | grade 0 (blind) | rank 10 -> none
+  left route keyword matched: Reflector TradeBet | grade 0 (blind) | rank 11 -> none
+  left route keyword matched: dorahacks-buidl-38062 | grade 0 (blind) | rank 12 -> none
+  left route keyword matched: Stellar Map | grade 0 (blind) | rank 13 -> none
+  left route keyword matched: AndesMaaS 3.0 | grade 0 (blind) | rank 14 -> none
+  left route keyword matched: Umbra Wallet | grade 1 (blind) | rank 15 -> none
+  left route keyword matched: Cards402.com | grade 1 (blind) | rank 16 -> none
+  left route keyword matched: ANCHORSHIELD | grade 0 (blind) | rank 17 -> none
+  left route keyword matched: Soroswap Pro Trader | grade 0 (blind) | rank 18 -> none
+  left route keyword matched: Kale Grab Rush | grade 0 (blind) | rank 19 -> none
+  left route keyword matched: CouvePIX | grade 1 (blind) | rank 20 -> none
+  left route keyword matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 21 -> none
+  left route keyword matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 22 -> none
+  left route keyword matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 23 -> none
+  left route keyword matched: Senti | grade 0 (blind) | rank 24 -> none
+  left route keyword matched: Agrosurge | grade 0 (blind) | rank 25 -> none
+  left route keyword matched: Airpay | grade 0 (blind) | rank 26 -> none
+  left route keyword matched: Stellar Odyssey | grade 0 (blind) | rank 27 -> none
+  left route keyword matched: Celestium | grade 0 (blind) | rank 28 -> none
+  left route keyword matched: BlendX- Defi Manager for Stellar | grade 0 (blind) | rank 29 -> none
+  left route keyword matched: Blend Sentinel | grade 0 (blind) | rank 30 -> none
+  left route keyword matched: Stellar-vaults-app | grade 0 (blind) | rank 31 -> none
+  left route keyword matched: StellarVideos | grade 0 (blind) | rank 32 -> none
+  left route keyword matched: Soroscan | grade 0 (blind) | rank 33 -> none
+  left route keyword matched: Socio - AI-generated swap signals for Stellar &  | grade 0 (blind) | rank 34 -> none
+  left route keyword matched: ChainLab | grade 0 (blind) | rank 35 -> none
+  left route keyword matched: Trace | grade 0 (blind) | rank 36 -> none
+  left route keyword matched: Edge Traders | grade 0 (blind) | rank 37 -> none
+  left route keyword matched: Micro Lending | grade 0 (blind) | rank 38 -> none
+  left route keyword matched: WorkOn | grade 0 (blind) | rank 39 -> none
+  left route keyword matched: Zucane | grade 0 (blind) | rank 40 -> none
+  left route keyword matched: ContractForge | grade 0 (blind) | rank 41 -> none
+  left route keyword matched: Afri Assets | grade 0 (blind) | rank 42 -> none
+  left route keyword matched: ArtChain-AI | grade 0 (blind) | rank 43 -> none
+  left route keyword matched: LumenPass | grade 0 (blind) | rank 44 -> none
+  left route keyword matched: CirclePay | grade 0 (blind) | rank 45 -> none
+  left route keyword matched: SpectraBet | grade 0 (blind) | rank 46 -> none
+  left route keyword matched: LumenFX | grade 0 (blind) | rank 47 -> none
+  left route keyword matched: Meet.xlm | grade 0 (blind) | rank 48 -> none
+  left route keyword matched: VisionMe | grade 0 (blind) | rank 49 -> none
+  left route keyword matched: Human | grade 0 (blind) | rank 50 -> none
+  left route keyword matched: TralaContract | grade 0 (blind) | rank 51 -> none
+  left route keyword matched: PayDay | grade 0 (blind) | rank 52 -> none
+  left route keyword matched: VibeNet | grade 0 (blind) | rank 53 -> none
+  left route keyword matched: Colectiva | grade 0 (blind) | rank 54 -> none
+  left route keyword matched: BalloonFly | grade 0 (blind) | rank 55 -> none
+  left route keyword matched: ZK Battleship | grade 0 (blind) | rank 56 -> none
+  left route keyword matched: Poison-Game | grade 0 (blind) | rank 57 -> none
+  left route keyword matched: Obsidossier | grade 0 (blind) | rank 58 -> none
+  left route keyword matched: ZKMON | grade 0 (blind) | rank 59 -> none
+  left route keyword matched: CertiX | grade 0 (blind) | rank 60 -> none
+  left route keyword matched: KipuFi | grade 0 (blind) | rank 61 -> none
+  left route keyword matched: OL'TAS | grade 0 (blind) | rank 62 -> none
+  left route keyword matched: Risk Pulse AI | grade 0 (blind) | rank 63 -> none
+  left route keyword matched: Autorepay | grade 0 (blind) | rank 64 -> none
+  left route keyword matched: Ai Bora | grade 0 (blind) | rank 65 -> none
+  left route keyword matched: StellarGuard | grade 1 (blind) | rank 66 -> none
+  left route keyword matched: Nova Registry SDK | grade 0 (blind) | rank 67 -> none
+  left route keyword matched: Soroban Node 0 | grade 0 (blind) | rank 68 -> none
+  left route keyword matched: Stellar Security Audit Agent | grade 0 (blind) | rank 69 -> none
+  left route keyword matched: Shield Stellar | grade 0 (blind) | rank 70 -> none
+  left route keyword matched: PharmaFind | grade 0 (blind) | rank 71 -> none
+  left route keyword matched: Soundstake | grade 0 (blind) | rank 73 -> none
+  left route keyword matched: AutoLayer - Soroban & Stellar Automation | grade 0 (blind) | rank 74 -> none
+  left route keyword matched: Stellar Proof of Reserves | grade 0 (blind) | rank 75 -> none
+  left route keyword matched: StellarSpend: Private Spending Limits with Zero- | grade 1 (blind) | rank 76 -> none
+  left route keyword matched: Alphine | grade 0 (blind) | rank 77 -> none
+  left route keyword matched: Attestar | grade 0 (blind) | rank 78 -> none
+  left route keyword matched: Proof of Reserve | grade 0 (blind) | rank 79 -> none
+  left route keyword matched: StellarProof | grade 0 (blind) | rank 80 -> none
+  left route keyword matched: Blind Oracle | grade 0 (blind) | rank 81 -> none
+  left route keyword matched: GitScout Oracle | grade 0 (blind) | rank 82 -> none
+  left route keyword matched: Stellar ZK AidPass | grade 0 (blind) | rank 84 -> none
+  left route keyword matched: ZK-TRP | grade 0 (blind) | rank 85 -> none
+  left route keyword matched: zkAudit | grade 0 (blind) | rank 86 -> none
+  left route keyword matched: Umbra | grade 0 (blind) | rank 87 -> none
+  left route keyword matched: ZeroPath | grade 0 (blind) | rank 88 -> none
+  left route keyword matched: Cloakwork | grade 0 (blind) | rank 89 -> none
+  left route keyword matched: Shadow-Vault | grade 0 (blind) | rank 90 -> none
+  left route keyword matched: IDIO | grade 0 (blind) | rank 92 -> none
+  left route keyword matched: NeuralWallet | grade 1 (blind) | rank 93 -> none
+  left route keyword matched: StellaX AI Wallet | grade 1 (blind) | rank 94 -> none
+  left route keyword matched: Ai2wallet | grade 1 (blind) | rank 95 -> none
+  left route keyword matched: CosmosPay | Wallet & Payment Gateway for Stellar | grade 1 (blind) | rank 96 -> none
+  left route keyword matched: BairrouApp! Wallet | grade 0 (blind) | rank 97 -> none
+  left route keyword matched: Shield-Wallet | grade 1 (blind) | rank 98 -> none
+  left route keyword matched: Stella - Private Payments Wallet | grade 1 (blind) | rank 99 -> none
+  left route keyword matched: PeerPesa | grade 0 (blind) | rank 100 -> none
+  left route keyword matched: DeFi-DashBoard | grade 0 (blind) | rank 101 -> none
+  left route keyword matched: APTOSPACE - NFT Marketplace Website | grade 0 (blind) | rank 102 -> none
+  left route keyword matched: PayPulse: Offline-First Bluetooth Payments on St | grade 0 (blind) | rank 103 -> none
+  left route keyword matched: SignalPass | grade 0 (blind) | rank 104 -> none
+  left route keyword matched: x402 Autopilot | grade 1 (blind) | rank 105 -> none
+  left route keyword matched: SentinelShield | grade 1 (blind) | rank 106 -> none
+  left route keyword matched: Compass | grade 1 (blind) | rank 108 -> none
+  left route keyword matched: Pollar | grade 1 (blind) | rank 109 -> none
+  left route keyword matched: Immunis Protocol | grade 0 (blind) | rank 110 -> none
+  left route keyword matched: Nexagrid | grade 1 (blind) | rank 111 -> none
+  left route keyword matched: CelestX | grade 0 (blind) | rank 112 -> none
+  left route keyword matched: BlendXBT | grade 0 (blind) | rank 113 -> none
+  left route keyword matched: Stellar Donate-Safe | grade 0 (blind) | rank 114 -> none
+  left route keyword matched: DonarIA | grade 0 (blind) | rank 115 -> none
+  left route keyword matched: Soroswapv2 | grade 0 (blind) | rank 116 -> none
+  left route keyword matched: mini-app-defindex | grade 1 (blind) | rank 117 -> none
+  left route keyword matched: KaleConnect | grade 0 (blind) | rank 118 -> none
+  left route keyword matched: Kalebound | grade 0 (blind) | rank 119 -> none
+  left route keyword matched: Stellar Stake House | grade 0 (blind) | rank 120 -> none
+  left route keyword matched: Klyra - MVP | grade 0 (blind) | rank 121 -> none
+  left route keyword matched: StellarTrust | grade 0 (blind) | rank 122 -> none
+  left route keyword matched: Stellar x402 | grade 0 (blind) | rank 123 -> none
+  left route keyword matched: SoroSocial | grade 0 (blind) | rank 124 -> none
+  left route keyword matched: Nexar - Next-Gen AI-Powered Stellar Payments and | grade 0 (blind) | rank 125 -> none
+  left route keyword matched: PayByLink | grade 0 (blind) | rank 126 -> none
+  left route keyword matched: DAPP.SPOT | grade 0 (blind) | rank 127 -> none
+  left route keyword matched: TrustGenome AI | grade 0 (blind) | rank 128 -> none
+  left route keyword matched: Cachay | grade 1 (blind) | rank 129 -> none
+  left route keyword matched: MIMO App | grade 0 (blind) | rank 130 -> none
+  left route keyword matched: FORTEXA | grade 0 (blind) | rank 131 -> none
+  left route keyword matched: Nulucre Agents | grade 0 (blind) | rank 132 -> none
+  left route keyword matched: The Signaler | grade 0 (blind) | rank 133 -> none
+  left route keyword matched: Genesis402 | grade 0 (blind) | rank 134 -> none
+  left route keyword matched: AAEK | grade 1 (blind) | rank 135 -> none
+  left route keyword matched: OrbitSafe | grade 1 (blind) | rank 136 -> none
+  left route keyword matched: Wraith | grade 1 (blind) | rank 137 -> none
+  left route keyword matched: Agent Market | grade 0 (blind) | rank 138 -> none
+  left route keyword matched: SpendGuard | grade 1 (blind) | rank 139 -> none
+  left route keyword matched: Walt | grade 0 (blind) | rank 140 -> none
+  left route keyword matched: Datavend | grade 0 (blind) | rank 141 -> none
+  left route keyword matched: AXIS: Autonomous X-border Interchange System | grade 0 (blind) | rank 142 -> none
+  left route keyword matched: x402 Stellar MCP | grade 0 (blind) | rank 143 -> none
+  left route keyword matched: Forge402 | grade 0 (blind) | rank 144 -> none
+  left route keyword matched: PayOnProof | grade 0 (blind) | rank 146 -> none
+  left route keyword matched: Grow | grade 0 (blind) | rank 147 -> none
+  left route keyword matched: Link2Pay | grade 0 (blind) | rank 148 -> none
+  left route keyword matched: STELLITA: Build on Stellar in minutes with zero  | grade 0 (blind) | rank 150 -> none
+  left route keyword matched: zkCred | grade 0 (blind) | rank 151 -> none
+  left route keyword matched: Veilum | grade 0 (blind) | rank 153 -> none
+  left route keyword matched: Cyphras | grade 1 (blind) | rank 154 -> none
+  left route keyword matched: Growthip | grade 0 (blind) | rank 155 -> none
+  left route keyword matched: ZK Credit Score | grade 0 (blind) | rank 156 -> none
+  left route keyword matched: ZK-Balance | grade 0 (blind) | rank 157 -> none
+  left route keyword matched: Econova stellar | grade 1 (blind) | rank 158 -> none
+  left route keyword matched: zk-utxo | grade 0 (blind) | rank 159 -> none
+  left route keyword matched: VeilGate | grade 0 (blind) | rank 160 -> none
+  left route keyword matched: Aegis - Provable Clean-Funds Compliance Coproces | grade 0 (blind) | rank 161 -> none
+  left route keyword matched: Inter Stellar | grade 0 (blind) | rank 162 -> none
+  left route keyword matched: OZKY | grade 1 (blind) | rank 163 -> none
+  left route keyword matched: ZeroGate | grade 0 (blind) | rank 164 -> none
+  left route keyword matched: ProofMatch | grade 0 (blind) | rank 165 -> none
+  left route keyword matched: Nebula Relay | grade 0 (blind) | rank 166 -> none
+  left route keyword matched: PrismZK(PrismFlashZK) | grade 0 (blind) | rank 167 -> none
+  entered route keyword matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword matched: Tukar | grade 2 (blind) | rank none -> 2
+  entered route keyword matched: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route keyword matched: Druid | grade 2 (blind) | rank none -> 10
+  entered route keyword matched: Riskon | grade 2 (blind) | rank none -> 11
+  entered route keyword matched: Kale Farm Re-Design | grade 2 (blind) | rank none -> 12
+  entered route keyword matched: Bimex | grade 2 (blind) | rank none -> 13
+  entered route keyword matched: Veil | grade 2 (blind) | rank none -> 14
+  entered route keyword matched: ShieldPass | grade 2 (blind) | rank none -> 20
+  left route hybrid top 5: DUST AGGREGATOR | grade 0 (blind) | rank 3 -> none
+  left route hybrid top 5: Safe.xlm | grade 2 (blind) | rank 4 -> 7
+  left route hybrid top 5: NARTHEX | grade 0 (blind) | rank 5 -> none
+  entered route hybrid top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route hybrid top 5: Tukar | grade 2 (blind) | rank none -> 2
+  entered route hybrid top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  left route hybrid top 20: DUST AGGREGATOR | grade 0 (blind) | rank 3 -> none
+  left route hybrid top 20: NARTHEX | grade 0 (blind) | rank 5 -> none
+  left route hybrid top 20: Stellar AI Escrow Commerce | grade 0 (blind) | rank 6 -> none
+  left route hybrid top 20: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 9 -> none
+  left route hybrid top 20: GoLazy | grade 0 (blind) | rank 10 -> none
+  left route hybrid top 20: Reflector TradeBet | grade 0 (blind) | rank 11 -> none
+  left route hybrid top 20: dorahacks-buidl-38062 | grade 0 (blind) | rank 12 -> none
+  left route hybrid top 20: Stellar Map | grade 0 (blind) | rank 13 -> none
+  left route hybrid top 20: AndesMaaS 3.0 | grade 0 (blind) | rank 14 -> none
+  left route hybrid top 20: Umbra Wallet | grade 1 (blind) | rank 15 -> none
+  left route hybrid top 20: Cards402.com | grade 1 (blind) | rank 16 -> none
+  left route hybrid top 20: ANCHORSHIELD | grade 0 (blind) | rank 17 -> none
+  left route hybrid top 20: Soroswap Pro Trader | grade 0 (blind) | rank 18 -> none
+  left route hybrid top 20: Kale Grab Rush | grade 0 (blind) | rank 19 -> none
+  left route hybrid top 20: CouvePIX | grade 1 (blind) | rank 20 -> none
+  entered route hybrid top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route hybrid top 20: Tukar | grade 2 (blind) | rank none -> 2
+  entered route hybrid top 20: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route hybrid top 20: lumengate | grade 2 (blind) | rank 83 -> 6
+  entered route hybrid top 20: Agent Rep | grade 2 (blind) | rank 72 -> 8
+  entered route hybrid top 20: Buckspay SDK | grade 2 (blind) | rank 149 -> 9
+  entered route hybrid top 20: Druid | grade 2 (blind) | rank none -> 10
+  entered route hybrid top 20: Riskon | grade 2 (blind) | rank none -> 11
+  entered route hybrid top 20: Kale Farm Re-Design | grade 2 (blind) | rank none -> 12
+  entered route hybrid top 20: Bimex | grade 2 (blind) | rank none -> 13
+  entered route hybrid top 20: Veil | grade 2 (blind) | rank none -> 14
+  entered route hybrid top 20: TalkToStellar | grade 2 (blind) | rank 107 -> 15
+  entered route hybrid top 20: Stellaro | grade 2 (blind) | rank 145 -> 16
+  entered route hybrid top 20: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank 152 -> 19
+  entered route hybrid top 20: ShieldPass | grade 2 (blind) | rank none -> 20
+  left route hybrid matched: DUST AGGREGATOR | grade 0 (blind) | rank 3 -> none
+  left route hybrid matched: NARTHEX | grade 0 (blind) | rank 5 -> none
+  left route hybrid matched: Stellar AI Escrow Commerce | grade 0 (blind) | rank 6 -> none
+  left route hybrid matched: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 9 -> none
+  left route hybrid matched: GoLazy | grade 0 (blind) | rank 10 -> none
+  left route hybrid matched: Reflector TradeBet | grade 0 (blind) | rank 11 -> none
+  left route hybrid matched: dorahacks-buidl-38062 | grade 0 (blind) | rank 12 -> none
+  left route hybrid matched: Stellar Map | grade 0 (blind) | rank 13 -> none
+  left route hybrid matched: AndesMaaS 3.0 | grade 0 (blind) | rank 14 -> none
+  left route hybrid matched: Umbra Wallet | grade 1 (blind) | rank 15 -> none
+  left route hybrid matched: Cards402.com | grade 1 (blind) | rank 16 -> none
+  left route hybrid matched: ANCHORSHIELD | grade 0 (blind) | rank 17 -> none
+  left route hybrid matched: Soroswap Pro Trader | grade 0 (blind) | rank 18 -> none
+  left route hybrid matched: Kale Grab Rush | grade 0 (blind) | rank 19 -> none
+  left route hybrid matched: CouvePIX | grade 1 (blind) | rank 20 -> none
+  left route hybrid matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 21 -> none
+  left route hybrid matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 22 -> none
+  left route hybrid matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 23 -> none
+  left route hybrid matched: Senti | grade 0 (blind) | rank 24 -> none
+  left route hybrid matched: Agrosurge | grade 0 (blind) | rank 25 -> none
+  left route hybrid matched: Airpay | grade 0 (blind) | rank 26 -> none
+  left route hybrid matched: Stellar Odyssey | grade 0 (blind) | rank 27 -> none
+  left route hybrid matched: Celestium | grade 0 (blind) | rank 28 -> none
+  left route hybrid matched: BlendX- Defi Manager for Stellar | grade 0 (blind) | rank 29 -> none
+  left route hybrid matched: Blend Sentinel | grade 0 (blind) | rank 30 -> none
+  left route hybrid matched: Stellar-vaults-app | grade 0 (blind) | rank 31 -> none
+  left route hybrid matched: StellarVideos | grade 0 (blind) | rank 32 -> none
+  left route hybrid matched: Soroscan | grade 0 (blind) | rank 33 -> none
+  left route hybrid matched: Socio - AI-generated swap signals for Stellar &  | grade 0 (blind) | rank 34 -> none
+  left route hybrid matched: ChainLab | grade 0 (blind) | rank 35 -> none
+  left route hybrid matched: Trace | grade 0 (blind) | rank 36 -> none
+  left route hybrid matched: Edge Traders | grade 0 (blind) | rank 37 -> none
+  left route hybrid matched: Micro Lending | grade 0 (blind) | rank 38 -> none
+  left route hybrid matched: WorkOn | grade 0 (blind) | rank 39 -> none
+  left route hybrid matched: Zucane | grade 0 (blind) | rank 40 -> none
+  left route hybrid matched: ContractForge | grade 0 (blind) | rank 41 -> none
+  left route hybrid matched: Afri Assets | grade 0 (blind) | rank 42 -> none
+  left route hybrid matched: ArtChain-AI | grade 0 (blind) | rank 43 -> none
+  left route hybrid matched: LumenPass | grade 0 (blind) | rank 44 -> none
+  left route hybrid matched: CirclePay | grade 0 (blind) | rank 45 -> none
+  left route hybrid matched: SpectraBet | grade 0 (blind) | rank 46 -> none
+  left route hybrid matched: LumenFX | grade 0 (blind) | rank 47 -> none
+  left route hybrid matched: Meet.xlm | grade 0 (blind) | rank 48 -> none
+  left route hybrid matched: VisionMe | grade 0 (blind) | rank 49 -> none
+  left route hybrid matched: Human | grade 0 (blind) | rank 50 -> none
+  left route hybrid matched: TralaContract | grade 0 (blind) | rank 51 -> none
+  left route hybrid matched: PayDay | grade 0 (blind) | rank 52 -> none
+  left route hybrid matched: VibeNet | grade 0 (blind) | rank 53 -> none
+  left route hybrid matched: Colectiva | grade 0 (blind) | rank 54 -> none
+  left route hybrid matched: BalloonFly | grade 0 (blind) | rank 55 -> none
+  left route hybrid matched: ZK Battleship | grade 0 (blind) | rank 56 -> none
+  left route hybrid matched: Poison-Game | grade 0 (blind) | rank 57 -> none
+  left route hybrid matched: Obsidossier | grade 0 (blind) | rank 58 -> none
+  left route hybrid matched: ZKMON | grade 0 (blind) | rank 59 -> none
+  left route hybrid matched: CertiX | grade 0 (blind) | rank 60 -> none
+  left route hybrid matched: KipuFi | grade 0 (blind) | rank 61 -> none
+  left route hybrid matched: OL'TAS | grade 0 (blind) | rank 62 -> none
+  left route hybrid matched: Risk Pulse AI | grade 0 (blind) | rank 63 -> none
+  left route hybrid matched: Autorepay | grade 0 (blind) | rank 64 -> none
+  left route hybrid matched: Ai Bora | grade 0 (blind) | rank 65 -> none
+  left route hybrid matched: StellarGuard | grade 1 (blind) | rank 66 -> none
+  left route hybrid matched: Nova Registry SDK | grade 0 (blind) | rank 67 -> none
+  left route hybrid matched: Soroban Node 0 | grade 0 (blind) | rank 68 -> none
+  left route hybrid matched: Stellar Security Audit Agent | grade 0 (blind) | rank 69 -> none
+  left route hybrid matched: Shield Stellar | grade 0 (blind) | rank 70 -> none
+  left route hybrid matched: PharmaFind | grade 0 (blind) | rank 71 -> none
+  left route hybrid matched: Soundstake | grade 0 (blind) | rank 73 -> none
+  left route hybrid matched: AutoLayer - Soroban & Stellar Automation | grade 0 (blind) | rank 74 -> none
+  left route hybrid matched: Stellar Proof of Reserves | grade 0 (blind) | rank 75 -> none
+  left route hybrid matched: StellarSpend: Private Spending Limits with Zero- | grade 1 (blind) | rank 76 -> none
+  left route hybrid matched: Alphine | grade 0 (blind) | rank 77 -> none
+  left route hybrid matched: Attestar | grade 0 (blind) | rank 78 -> none
+  left route hybrid matched: Proof of Reserve | grade 0 (blind) | rank 79 -> none
+  left route hybrid matched: StellarProof | grade 0 (blind) | rank 80 -> none
+  left route hybrid matched: Blind Oracle | grade 0 (blind) | rank 81 -> none
+  left route hybrid matched: GitScout Oracle | grade 0 (blind) | rank 82 -> none
+  left route hybrid matched: Stellar ZK AidPass | grade 0 (blind) | rank 84 -> none
+  left route hybrid matched: ZK-TRP | grade 0 (blind) | rank 85 -> none
+  left route hybrid matched: zkAudit | grade 0 (blind) | rank 86 -> none
+  left route hybrid matched: Umbra | grade 0 (blind) | rank 87 -> none
+  left route hybrid matched: ZeroPath | grade 0 (blind) | rank 88 -> none
+  left route hybrid matched: Cloakwork | grade 0 (blind) | rank 89 -> none
+  left route hybrid matched: Shadow-Vault | grade 0 (blind) | rank 90 -> none
+  left route hybrid matched: IDIO | grade 0 (blind) | rank 92 -> none
+  left route hybrid matched: NeuralWallet | grade 1 (blind) | rank 93 -> none
+  left route hybrid matched: StellaX AI Wallet | grade 1 (blind) | rank 94 -> none
+  left route hybrid matched: Ai2wallet | grade 1 (blind) | rank 95 -> none
+  left route hybrid matched: CosmosPay | Wallet & Payment Gateway for Stellar | grade 1 (blind) | rank 96 -> none
+  left route hybrid matched: BairrouApp! Wallet | grade 0 (blind) | rank 97 -> none
+  left route hybrid matched: Shield-Wallet | grade 1 (blind) | rank 98 -> none
+  left route hybrid matched: Stella - Private Payments Wallet | grade 1 (blind) | rank 99 -> none
+  left route hybrid matched: PeerPesa | grade 0 (blind) | rank 100 -> none
+  left route hybrid matched: DeFi-DashBoard | grade 0 (blind) | rank 101 -> none
+  left route hybrid matched: APTOSPACE - NFT Marketplace Website | grade 0 (blind) | rank 102 -> none
+  left route hybrid matched: PayPulse: Offline-First Bluetooth Payments on St | grade 0 (blind) | rank 103 -> none
+  left route hybrid matched: SignalPass | grade 0 (blind) | rank 104 -> none
+  left route hybrid matched: x402 Autopilot | grade 1 (blind) | rank 105 -> none
+  left route hybrid matched: SentinelShield | grade 1 (blind) | rank 106 -> none
+  left route hybrid matched: Compass | grade 1 (blind) | rank 108 -> none
+  left route hybrid matched: Pollar | grade 1 (blind) | rank 109 -> none
+  left route hybrid matched: Immunis Protocol | grade 0 (blind) | rank 110 -> none
+  left route hybrid matched: Nexagrid | grade 1 (blind) | rank 111 -> none
+  left route hybrid matched: CelestX | grade 0 (blind) | rank 112 -> none
+  left route hybrid matched: BlendXBT | grade 0 (blind) | rank 113 -> none
+  left route hybrid matched: Stellar Donate-Safe | grade 0 (blind) | rank 114 -> none
+  left route hybrid matched: DonarIA | grade 0 (blind) | rank 115 -> none
+  left route hybrid matched: Soroswapv2 | grade 0 (blind) | rank 116 -> none
+  left route hybrid matched: mini-app-defindex | grade 1 (blind) | rank 117 -> none
+  left route hybrid matched: KaleConnect | grade 0 (blind) | rank 118 -> none
+  left route hybrid matched: Kalebound | grade 0 (blind) | rank 119 -> none
+  left route hybrid matched: Stellar Stake House | grade 0 (blind) | rank 120 -> none
+  left route hybrid matched: Klyra - MVP | grade 0 (blind) | rank 121 -> none
+  left route hybrid matched: StellarTrust | grade 0 (blind) | rank 122 -> none
+  left route hybrid matched: Stellar x402 | grade 0 (blind) | rank 123 -> none
+  left route hybrid matched: SoroSocial | grade 0 (blind) | rank 124 -> none
+  left route hybrid matched: Nexar - Next-Gen AI-Powered Stellar Payments and | grade 0 (blind) | rank 125 -> none
+  left route hybrid matched: PayByLink | grade 0 (blind) | rank 126 -> none
+  left route hybrid matched: DAPP.SPOT | grade 0 (blind) | rank 127 -> none
+  left route hybrid matched: TrustGenome AI | grade 0 (blind) | rank 128 -> none
+  left route hybrid matched: Cachay | grade 1 (blind) | rank 129 -> none
+  left route hybrid matched: MIMO App | grade 0 (blind) | rank 130 -> none
+  left route hybrid matched: FORTEXA | grade 0 (blind) | rank 131 -> none
+  left route hybrid matched: Nulucre Agents | grade 0 (blind) | rank 132 -> none
+  left route hybrid matched: The Signaler | grade 0 (blind) | rank 133 -> none
+  left route hybrid matched: Genesis402 | grade 0 (blind) | rank 134 -> none
+  left route hybrid matched: AAEK | grade 1 (blind) | rank 135 -> none
+  left route hybrid matched: OrbitSafe | grade 1 (blind) | rank 136 -> none
+  left route hybrid matched: Wraith | grade 1 (blind) | rank 137 -> none
+  left route hybrid matched: Agent Market | grade 0 (blind) | rank 138 -> none
+  left route hybrid matched: SpendGuard | grade 1 (blind) | rank 139 -> none
+  left route hybrid matched: Walt | grade 0 (blind) | rank 140 -> none
+  left route hybrid matched: Datavend | grade 0 (blind) | rank 141 -> none
+  left route hybrid matched: AXIS: Autonomous X-border Interchange System | grade 0 (blind) | rank 142 -> none
+  left route hybrid matched: x402 Stellar MCP | grade 0 (blind) | rank 143 -> none
+  left route hybrid matched: Forge402 | grade 0 (blind) | rank 144 -> none
+  left route hybrid matched: PayOnProof | grade 0 (blind) | rank 146 -> none
+  left route hybrid matched: Grow | grade 0 (blind) | rank 147 -> none
+  left route hybrid matched: Link2Pay | grade 0 (blind) | rank 148 -> none
+  left route hybrid matched: STELLITA: Build on Stellar in minutes with zero  | grade 0 (blind) | rank 150 -> none
+  left route hybrid matched: zkCred | grade 0 (blind) | rank 151 -> none
+  left route hybrid matched: Veilum | grade 0 (blind) | rank 153 -> none
+  left route hybrid matched: Cyphras | grade 1 (blind) | rank 154 -> none
+  left route hybrid matched: Growthip | grade 0 (blind) | rank 155 -> none
+  left route hybrid matched: ZK Credit Score | grade 0 (blind) | rank 156 -> none
+  left route hybrid matched: ZK-Balance | grade 0 (blind) | rank 157 -> none
+  left route hybrid matched: Econova stellar | grade 1 (blind) | rank 158 -> none
+  left route hybrid matched: zk-utxo | grade 0 (blind) | rank 159 -> none
+  left route hybrid matched: VeilGate | grade 0 (blind) | rank 160 -> none
+  left route hybrid matched: Aegis - Provable Clean-Funds Compliance Coproces | grade 0 (blind) | rank 161 -> none
+  left route hybrid matched: Inter Stellar | grade 0 (blind) | rank 162 -> none
+  left route hybrid matched: OZKY | grade 1 (blind) | rank 163 -> none
+  left route hybrid matched: ZeroGate | grade 0 (blind) | rank 164 -> none
+  left route hybrid matched: ProofMatch | grade 0 (blind) | rank 165 -> none
+  left route hybrid matched: Nebula Relay | grade 0 (blind) | rank 166 -> none
+  left route hybrid matched: PrismZK(PrismFlashZK) | grade 0 (blind) | rank 167 -> none
+  entered route hybrid matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route hybrid matched: Tukar | grade 2 (blind) | rank none -> 2
+  entered route hybrid matched: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route hybrid matched: Druid | grade 2 (blind) | rank none -> 10
+  entered route hybrid matched: Riskon | grade 2 (blind) | rank none -> 11
+  entered route hybrid matched: Kale Farm Re-Design | grade 2 (blind) | rank none -> 12
+  entered route hybrid matched: Bimex | grade 2 (blind) | rank none -> 13
+  entered route hybrid matched: Veil | grade 2 (blind) | rank none -> 14
+  entered route hybrid matched: ShieldPass | grade 2 (blind) | rank none -> 20
+  left vet top 5: DUST AGGREGATOR | grade 0 (blind) | rank 3 -> none
+  left vet top 5: NARTHEX | grade 0 (blind) | rank 5 -> none
+  entered vet top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 2
+  entered vet top 5: lumengate | grade 2 (blind) | rank none -> 4
+  left brief top 5: DUST AGGREGATOR | grade 0 (blind) | rank 3 -> none
+  left brief top 5: NARTHEX | grade 0 (blind) | rank 5 -> none
+  entered brief top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 2
+  entered brief top 5: lumengate | grade 2 (blind) | rank none -> 4
+
+probes adversarial|z04|winners: "smart account" (winners only); matched keyword 7 -> 2, hybrid 7 -> 2
+  left route keyword top 5: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 2 -> none
+  left route keyword top 5: GoLazy | grade 0 (blind) | rank 3 -> none
+  left route keyword top 5: Reflector TradeBet | grade 0 (blind) | rank 4 -> none
+  left route keyword top 5: dorahacks-buidl-38062 | grade 0 (blind) | rank 5 -> none
+  entered route keyword top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  left route keyword top 20: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 2 -> none
+  left route keyword top 20: GoLazy | grade 0 (blind) | rank 3 -> none
+  left route keyword top 20: Reflector TradeBet | grade 0 (blind) | rank 4 -> none
+  left route keyword top 20: dorahacks-buidl-38062 | grade 0 (blind) | rank 5 -> none
+  left route keyword top 20: Stellar Map | grade 0 (blind) | rank 6 -> none
+  left route keyword top 20: AndesMaaS 3.0 | grade 0 (blind) | rank 7 -> none
+  entered route keyword top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  left route keyword matched: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 2 -> none
+  left route keyword matched: GoLazy | grade 0 (blind) | rank 3 -> none
+  left route keyword matched: Reflector TradeBet | grade 0 (blind) | rank 4 -> none
+  left route keyword matched: dorahacks-buidl-38062 | grade 0 (blind) | rank 5 -> none
+  left route keyword matched: Stellar Map | grade 0 (blind) | rank 6 -> none
+  left route keyword matched: AndesMaaS 3.0 | grade 0 (blind) | rank 7 -> none
+  entered route keyword matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  left route hybrid top 5: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 2 -> none
+  left route hybrid top 5: GoLazy | grade 0 (blind) | rank 3 -> none
+  left route hybrid top 5: Reflector TradeBet | grade 0 (blind) | rank 4 -> none
+  left route hybrid top 5: dorahacks-buidl-38062 | grade 0 (blind) | rank 5 -> none
+  entered route hybrid top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  left route hybrid top 20: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 2 -> none
+  left route hybrid top 20: GoLazy | grade 0 (blind) | rank 3 -> none
+  left route hybrid top 20: Reflector TradeBet | grade 0 (blind) | rank 4 -> none
+  left route hybrid top 20: dorahacks-buidl-38062 | grade 0 (blind) | rank 5 -> none
+  left route hybrid top 20: Stellar Map | grade 0 (blind) | rank 6 -> none
+  left route hybrid top 20: AndesMaaS 3.0 | grade 0 (blind) | rank 7 -> none
+  entered route hybrid top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  left route hybrid matched: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 2 -> none
+  left route hybrid matched: GoLazy | grade 0 (blind) | rank 3 -> none
+  left route hybrid matched: Reflector TradeBet | grade 0 (blind) | rank 4 -> none
+  left route hybrid matched: dorahacks-buidl-38062 | grade 0 (blind) | rank 5 -> none
+  left route hybrid matched: Stellar Map | grade 0 (blind) | rank 6 -> none
+  left route hybrid matched: AndesMaaS 3.0 | grade 0 (blind) | rank 7 -> none
+  entered route hybrid matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+
+probes adversarial|z04|all: "smart account"; matched keyword 120 -> 21, hybrid 120 -> 21
+  left route keyword top 5: Agent Rep | grade 2 (blind) | rank 2 -> 8
+  left route keyword top 5: lumengate | grade 2 (blind) | rank 3 -> 6
+  left route keyword top 5: Stellar Proof of Reserves | grade 0 (blind) | rank 4 -> none
+  left route keyword top 5: Stelakey | grade 2 (blind) | rank 5 -> 18
+  entered route keyword top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword top 5: Tukar | grade 2 (blind) | rank 6 -> 2
+  entered route keyword top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route keyword top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind) | rank 49 -> 5
+  left route keyword top 20: Stellar Proof of Reserves | grade 0 (blind) | rank 4 -> none
+  left route keyword top 20: PeerPesa | grade 0 (blind) | rank 7 -> none
+  left route keyword top 20: Nulucre Agents | grade 0 (blind) | rank 8 -> none
+  left route keyword top 20: The Signaler | grade 0 (blind) | rank 9 -> none
+  left route keyword top 20: Stellar Search | grade 0 (blind) | rank 10 -> none
+  left route keyword top 20: AGENT TONTINE | grade 0 (blind) | rank 11 -> none
+  left route keyword top 20: Payflow | grade 0 (blind) | rank 12 -> none
+  left route keyword top 20: MicoPay Protocol | grade 0 (blind) | rank 13 -> none
+  left route keyword top 20: Datavend | grade 0 (blind) | rank 14 -> none
+  left route keyword top 20: AgentCompute | grade 0 (blind) | rank 15 -> none
+  left route keyword top 20: Delibera | grade 0 (blind) | rank 16 -> none
+  left route keyword top 20: NyayaMitra AI - Legal Intelligence MCP Network o | grade 0 (blind) | rank 17 -> none
+  left route keyword top 20: StellarAgent | grade 0 (blind) | rank 18 -> none
+  left route keyword top 20: VeilGate | grade 0 (blind) | rank 19 -> none
+  left route keyword top 20: Stellar Donate-Safe | grade 0 (blind) | rank 20 -> none
+  entered route keyword top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword top 20: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route keyword top 20: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind) | rank 49 -> 5
+  entered route keyword top 20: Safe.xlm | grade 2 (blind) | rank 80 -> 7
+  entered route keyword top 20: Buckspay SDK | grade 2 (blind) | rank 28 -> 9
+  entered route keyword top 20: Druid | grade 2 (blind) | rank none -> 10
+  entered route keyword top 20: Riskon | grade 2 (blind) | rank none -> 11
+  entered route keyword top 20: Kale Farm Re-Design | grade 2 (blind) | rank none -> 12
+  entered route keyword top 20: Bimex | grade 2 (blind) | rank none -> 13
+  entered route keyword top 20: Veil | grade 2 (blind) | rank none -> 14
+  entered route keyword top 20: TalkToStellar | grade 2 (blind) | rank none -> 15
+  entered route keyword top 20: Stellaro | grade 2 (blind) | rank none -> 16
+  entered route keyword top 20: Prism | grade 2 (blind) | rank 107 -> 17
+  entered route keyword top 20: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank none -> 19
+  entered route keyword top 20: ShieldPass | grade 2 (blind) | rank 33 -> 20
+  left route keyword matched: Stellar Proof of Reserves | grade 0 (blind) | rank 4 -> none
+  left route keyword matched: PeerPesa | grade 0 (blind) | rank 7 -> none
+  left route keyword matched: Nulucre Agents | grade 0 (blind) | rank 8 -> none
+  left route keyword matched: The Signaler | grade 0 (blind) | rank 9 -> none
+  left route keyword matched: Stellar Search | grade 0 (blind) | rank 10 -> none
+  left route keyword matched: AGENT TONTINE | grade 0 (blind) | rank 11 -> none
+  left route keyword matched: Payflow | grade 0 (blind) | rank 12 -> none
+  left route keyword matched: MicoPay Protocol | grade 0 (blind) | rank 13 -> none
+  left route keyword matched: Datavend | grade 0 (blind) | rank 14 -> none
+  left route keyword matched: AgentCompute | grade 0 (blind) | rank 15 -> none
+  left route keyword matched: Delibera | grade 0 (blind) | rank 16 -> none
+  left route keyword matched: NyayaMitra AI - Legal Intelligence MCP Network o | grade 0 (blind) | rank 17 -> none
+  left route keyword matched: StellarAgent | grade 0 (blind) | rank 18 -> none
+  left route keyword matched: VeilGate | grade 0 (blind) | rank 19 -> none
+  left route keyword matched: Stellar Donate-Safe | grade 0 (blind) | rank 20 -> none
+  left route keyword matched: Centurion-Pay | grade 0 (blind) | rank 21 -> none
+  left route keyword matched: Sentryx402 | grade 0 (blind) | rank 22 -> none
+  left route keyword matched: AutoBooks: The AI CFO That Charges Other Bots fo | grade 0 (blind) | rank 23 -> none
+  left route keyword matched: Xioma | grade 0 (blind) | rank 24 -> none
+  left route keyword matched: Decrow Finance | grade 0 (blind) | rank 25 -> none
+  left route keyword matched: TaskLoop | grade 0 (blind) | rank 26 -> none
+  left route keyword matched: Link2Pay | grade 0 (blind) | rank 27 -> none
+  left route keyword matched: zkNemo | grade 0 (blind) | rank 29 -> none
+  left route keyword matched: ShieldFund | grade 0 (blind) | rank 30 -> none
+  left route keyword matched: Lumen | grade 0 (blind) | rank 31 -> none
+  left route keyword matched: Binalyst | grade 0 (blind) | rank 32 -> none
+  left route keyword matched: Trexure | grade 0 (blind) | rank 34 -> none
+  left route keyword matched: Lumenveil | grade 0 (blind) | rank 35 -> none
+  left route keyword matched: Nulth | grade 1 (blind) | rank 36 -> none
+  left route keyword matched: ZkOrigin | grade 0 (blind) | rank 37 -> none
+  left route keyword matched: AidOS | grade 0 (blind) | rank 38 -> none
+  left route keyword matched: ZKReserve | grade 0 (blind) | rank 39 -> none
+  left route keyword matched: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 40 -> none
+  left route keyword matched: GoLazy | grade 0 (blind) | rank 41 -> none
+  left route keyword matched: Reflector TradeBet | grade 0 (blind) | rank 42 -> none
+  left route keyword matched: dorahacks-buidl-38062 | grade 0 (blind) | rank 43 -> none
+  left route keyword matched: Stellar Map | grade 0 (blind) | rank 44 -> none
+  left route keyword matched: AndesMaaS 3.0 | grade 0 (blind) | rank 45 -> none
+  left route keyword matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 46 -> none
+  left route keyword matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 47 -> none
+  left route keyword matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 48 -> none
+  left route keyword matched: DUST AGGREGATOR | grade 0 (blind) | rank 50 -> none
+  left route keyword matched: Senti | grade 0 (blind) | rank 51 -> none
+  left route keyword matched: Agrosurge | grade 0 (blind) | rank 52 -> none
+  left route keyword matched: Airpay | grade 0 (blind) | rank 53 -> none
+  left route keyword matched: Stellar Odyssey | grade 0 (blind) | rank 54 -> none
+  left route keyword matched: Celestium | grade 0 (blind) | rank 55 -> none
+  left route keyword matched: BlendX- Defi Manager for Stellar | grade 0 (blind) | rank 56 -> none
+  left route keyword matched: Blend Sentinel | grade 0 (blind) | rank 57 -> none
+  left route keyword matched: Stellar-vaults-app | grade 0 (blind) | rank 58 -> none
+  left route keyword matched: StellarVideos | grade 0 (blind) | rank 59 -> none
+  left route keyword matched: Soroscan | grade 0 (blind) | rank 60 -> none
+  left route keyword matched: Socio - AI-generated swap signals for Stellar &  | grade 0 (blind) | rank 61 -> none
+  left route keyword matched: ChainLab | grade 0 (blind) | rank 62 -> none
+  left route keyword matched: Trace | grade 0 (blind) | rank 63 -> none
+  left route keyword matched: Edge Traders | grade 0 (blind) | rank 64 -> none
+  left route keyword matched: Micro Lending | grade 0 (blind) | rank 65 -> none
+  left route keyword matched: WorkOn | grade 0 (blind) | rank 66 -> none
+  left route keyword matched: Zucane | grade 0 (blind) | rank 67 -> none
+  left route keyword matched: ContractForge | grade 0 (blind) | rank 68 -> none
+  left route keyword matched: Afri Assets | grade 0 (blind) | rank 69 -> none
+  left route keyword matched: ArtChain-AI | grade 0 (blind) | rank 70 -> none
+  left route keyword matched: LumenPass | grade 0 (blind) | rank 71 -> none
+  left route keyword matched: CirclePay | grade 0 (blind) | rank 72 -> none
+  left route keyword matched: SpectraBet | grade 0 (blind) | rank 73 -> none
+  left route keyword matched: LumenFX | grade 0 (blind) | rank 74 -> none
+  left route keyword matched: Meet.xlm | grade 0 (blind) | rank 75 -> none
+  left route keyword matched: VisionMe | grade 0 (blind) | rank 76 -> none
+  left route keyword matched: Human | grade 0 (blind) | rank 77 -> none
+  left route keyword matched: TralaContract | grade 0 (blind) | rank 78 -> none
+  left route keyword matched: PayDay | grade 0 (blind) | rank 79 -> none
+  left route keyword matched: VibeNet | grade 0 (blind) | rank 81 -> none
+  left route keyword matched: Colectiva | grade 0 (blind) | rank 82 -> none
+  left route keyword matched: BalloonFly | grade 0 (blind) | rank 83 -> none
+  left route keyword matched: ZK Battleship | grade 0 (blind) | rank 84 -> none
+  left route keyword matched: Poison-Game | grade 0 (blind) | rank 85 -> none
+  left route keyword matched: Obsidossier | grade 0 (blind) | rank 86 -> none
+  left route keyword matched: ZKMON | grade 0 (blind) | rank 87 -> none
+  left route keyword matched: Stellar AI Escrow Commerce | grade 0 (blind) | rank 88 -> none
+  left route keyword matched: CertiX | grade 0 (blind) | rank 89 -> none
+  left route keyword matched: KipuFi | grade 0 (blind) | rank 90 -> none
+  left route keyword matched: OL'TAS | grade 0 (blind) | rank 91 -> none
+  left route keyword matched: Risk Pulse AI | grade 0 (blind) | rank 92 -> none
+  left route keyword matched: Autorepay | grade 0 (blind) | rank 93 -> none
+  left route keyword matched: Ai Bora | grade 0 (blind) | rank 94 -> none
+  left route keyword matched: StellarGuard | grade 1 (blind) | rank 95 -> none
+  left route keyword matched: Nova Registry SDK | grade 0 (blind) | rank 96 -> none
+  left route keyword matched: Soroban Node 0 | grade 0 (blind) | rank 97 -> none
+  left route keyword matched: Stellar Security Audit Agent | grade 0 (blind) | rank 98 -> none
+  left route keyword matched: Shield Stellar | grade 0 (blind) | rank 99 -> none
+  left route keyword matched: PharmaFind | grade 0 (blind) | rank 100 -> none
+  left route keyword matched: Soundstake | grade 0 (blind) | rank 101 -> none
+  left route keyword matched: AutoLayer - Soroban & Stellar Automation | grade 0 (blind) | rank 102 -> none
+  left route keyword matched: StellarSpend: Private Spending Limits with Zero- | grade 1 (blind) | rank 103 -> none
+  left route keyword matched: Alphine | grade 0 (blind) | rank 104 -> none
+  left route keyword matched: Attestar | grade 0 (blind) | rank 105 -> none
+  left route keyword matched: Proof of Reserve | grade 0 (blind) | rank 106 -> none
+  left route keyword matched: StellarProof | grade 0 (blind) | rank 108 -> none
+  left route keyword matched: Blind Oracle | grade 0 (blind) | rank 109 -> none
+  left route keyword matched: GitScout Oracle | grade 0 (blind) | rank 110 -> none
+  left route keyword matched: NARTHEX | grade 0 (blind) | rank 111 -> none
+  left route keyword matched: Stellar ZK AidPass | grade 0 (blind) | rank 112 -> none
+  left route keyword matched: ZK-TRP | grade 0 (blind) | rank 113 -> none
+  left route keyword matched: zkAudit | grade 0 (blind) | rank 114 -> none
+  left route keyword matched: Umbra | grade 0 (blind) | rank 115 -> none
+  left route keyword matched: ZeroPath | grade 0 (blind) | rank 116 -> none
+  left route keyword matched: Cloakwork | grade 0 (blind) | rank 117 -> none
+  left route keyword matched: Shadow-Vault | grade 0 (blind) | rank 118 -> none
+  left route keyword matched: IDIO | grade 0 (blind) | rank 120 -> none
+  entered route keyword matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route keyword matched: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route keyword matched: Druid | grade 2 (blind) | rank none -> 10
+  entered route keyword matched: Riskon | grade 2 (blind) | rank none -> 11
+  entered route keyword matched: Kale Farm Re-Design | grade 2 (blind) | rank none -> 12
+  entered route keyword matched: Bimex | grade 2 (blind) | rank none -> 13
+  entered route keyword matched: Veil | grade 2 (blind) | rank none -> 14
+  entered route keyword matched: TalkToStellar | grade 2 (blind) | rank none -> 15
+  entered route keyword matched: Stellaro | grade 2 (blind) | rank none -> 16
+  entered route keyword matched: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank none -> 19
+  left route hybrid top 5: Agent Rep | grade 2 (blind) | rank 2 -> 8
+  left route hybrid top 5: lumengate | grade 2 (blind) | rank 3 -> 6
+  left route hybrid top 5: Stellar Proof of Reserves | grade 0 (blind) | rank 4 -> none
+  left route hybrid top 5: Stelakey | grade 2 (blind) | rank 5 -> 18
+  entered route hybrid top 5: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route hybrid top 5: Tukar | grade 2 (blind) | rank 6 -> 2
+  entered route hybrid top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route hybrid top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind) | rank 49 -> 5
+  left route hybrid top 20: Stellar Proof of Reserves | grade 0 (blind) | rank 4 -> none
+  left route hybrid top 20: PeerPesa | grade 0 (blind) | rank 7 -> none
+  left route hybrid top 20: Nulucre Agents | grade 0 (blind) | rank 8 -> none
+  left route hybrid top 20: The Signaler | grade 0 (blind) | rank 9 -> none
+  left route hybrid top 20: Stellar Search | grade 0 (blind) | rank 10 -> none
+  left route hybrid top 20: AGENT TONTINE | grade 0 (blind) | rank 11 -> none
+  left route hybrid top 20: Payflow | grade 0 (blind) | rank 12 -> none
+  left route hybrid top 20: MicoPay Protocol | grade 0 (blind) | rank 13 -> none
+  left route hybrid top 20: Datavend | grade 0 (blind) | rank 14 -> none
+  left route hybrid top 20: AgentCompute | grade 0 (blind) | rank 15 -> none
+  left route hybrid top 20: Delibera | grade 0 (blind) | rank 16 -> none
+  left route hybrid top 20: NyayaMitra AI - Legal Intelligence MCP Network o | grade 0 (blind) | rank 17 -> none
+  left route hybrid top 20: StellarAgent | grade 0 (blind) | rank 18 -> none
+  left route hybrid top 20: VeilGate | grade 0 (blind) | rank 19 -> none
+  left route hybrid top 20: Stellar Donate-Safe | grade 0 (blind) | rank 20 -> none
+  entered route hybrid top 20: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route hybrid top 20: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route hybrid top 20: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind) | rank 49 -> 5
+  entered route hybrid top 20: Safe.xlm | grade 2 (blind) | rank 80 -> 7
+  entered route hybrid top 20: Buckspay SDK | grade 2 (blind) | rank 28 -> 9
+  entered route hybrid top 20: Druid | grade 2 (blind) | rank none -> 10
+  entered route hybrid top 20: Riskon | grade 2 (blind) | rank none -> 11
+  entered route hybrid top 20: Kale Farm Re-Design | grade 2 (blind) | rank none -> 12
+  entered route hybrid top 20: Bimex | grade 2 (blind) | rank none -> 13
+  entered route hybrid top 20: Veil | grade 2 (blind) | rank none -> 14
+  entered route hybrid top 20: TalkToStellar | grade 2 (blind) | rank none -> 15
+  entered route hybrid top 20: Stellaro | grade 2 (blind) | rank none -> 16
+  entered route hybrid top 20: Prism | grade 2 (blind) | rank 107 -> 17
+  entered route hybrid top 20: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank none -> 19
+  entered route hybrid top 20: ShieldPass | grade 2 (blind) | rank 33 -> 20
+  left route hybrid matched: Stellar Proof of Reserves | grade 0 (blind) | rank 4 -> none
+  left route hybrid matched: PeerPesa | grade 0 (blind) | rank 7 -> none
+  left route hybrid matched: Nulucre Agents | grade 0 (blind) | rank 8 -> none
+  left route hybrid matched: The Signaler | grade 0 (blind) | rank 9 -> none
+  left route hybrid matched: Stellar Search | grade 0 (blind) | rank 10 -> none
+  left route hybrid matched: AGENT TONTINE | grade 0 (blind) | rank 11 -> none
+  left route hybrid matched: Payflow | grade 0 (blind) | rank 12 -> none
+  left route hybrid matched: MicoPay Protocol | grade 0 (blind) | rank 13 -> none
+  left route hybrid matched: Datavend | grade 0 (blind) | rank 14 -> none
+  left route hybrid matched: AgentCompute | grade 0 (blind) | rank 15 -> none
+  left route hybrid matched: Delibera | grade 0 (blind) | rank 16 -> none
+  left route hybrid matched: NyayaMitra AI - Legal Intelligence MCP Network o | grade 0 (blind) | rank 17 -> none
+  left route hybrid matched: StellarAgent | grade 0 (blind) | rank 18 -> none
+  left route hybrid matched: VeilGate | grade 0 (blind) | rank 19 -> none
+  left route hybrid matched: Stellar Donate-Safe | grade 0 (blind) | rank 20 -> none
+  left route hybrid matched: Centurion-Pay | grade 0 (blind) | rank 21 -> none
+  left route hybrid matched: Sentryx402 | grade 0 (blind) | rank 22 -> none
+  left route hybrid matched: AutoBooks: The AI CFO That Charges Other Bots fo | grade 0 (blind) | rank 23 -> none
+  left route hybrid matched: Xioma | grade 0 (blind) | rank 24 -> none
+  left route hybrid matched: Decrow Finance | grade 0 (blind) | rank 25 -> none
+  left route hybrid matched: TaskLoop | grade 0 (blind) | rank 26 -> none
+  left route hybrid matched: Link2Pay | grade 0 (blind) | rank 27 -> none
+  left route hybrid matched: zkNemo | grade 0 (blind) | rank 29 -> none
+  left route hybrid matched: ShieldFund | grade 0 (blind) | rank 30 -> none
+  left route hybrid matched: Lumen | grade 0 (blind) | rank 31 -> none
+  left route hybrid matched: Binalyst | grade 0 (blind) | rank 32 -> none
+  left route hybrid matched: Trexure | grade 0 (blind) | rank 34 -> none
+  left route hybrid matched: Lumenveil | grade 0 (blind) | rank 35 -> none
+  left route hybrid matched: Nulth | grade 1 (blind) | rank 36 -> none
+  left route hybrid matched: ZkOrigin | grade 0 (blind) | rank 37 -> none
+  left route hybrid matched: AidOS | grade 0 (blind) | rank 38 -> none
+  left route hybrid matched: ZKReserve | grade 0 (blind) | rank 39 -> none
+  left route hybrid matched: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind) | rank 40 -> none
+  left route hybrid matched: GoLazy | grade 0 (blind) | rank 41 -> none
+  left route hybrid matched: Reflector TradeBet | grade 0 (blind) | rank 42 -> none
+  left route hybrid matched: dorahacks-buidl-38062 | grade 0 (blind) | rank 43 -> none
+  left route hybrid matched: Stellar Map | grade 0 (blind) | rank 44 -> none
+  left route hybrid matched: AndesMaaS 3.0 | grade 0 (blind) | rank 45 -> none
+  left route hybrid matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 46 -> none
+  left route hybrid matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 47 -> none
+  left route hybrid matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 48 -> none
+  left route hybrid matched: DUST AGGREGATOR | grade 0 (blind) | rank 50 -> none
+  left route hybrid matched: Senti | grade 0 (blind) | rank 51 -> none
+  left route hybrid matched: Agrosurge | grade 0 (blind) | rank 52 -> none
+  left route hybrid matched: Airpay | grade 0 (blind) | rank 53 -> none
+  left route hybrid matched: Stellar Odyssey | grade 0 (blind) | rank 54 -> none
+  left route hybrid matched: Celestium | grade 0 (blind) | rank 55 -> none
+  left route hybrid matched: BlendX- Defi Manager for Stellar | grade 0 (blind) | rank 56 -> none
+  left route hybrid matched: Blend Sentinel | grade 0 (blind) | rank 57 -> none
+  left route hybrid matched: Stellar-vaults-app | grade 0 (blind) | rank 58 -> none
+  left route hybrid matched: StellarVideos | grade 0 (blind) | rank 59 -> none
+  left route hybrid matched: Soroscan | grade 0 (blind) | rank 60 -> none
+  left route hybrid matched: Socio - AI-generated swap signals for Stellar &  | grade 0 (blind) | rank 61 -> none
+  left route hybrid matched: ChainLab | grade 0 (blind) | rank 62 -> none
+  left route hybrid matched: Trace | grade 0 (blind) | rank 63 -> none
+  left route hybrid matched: Edge Traders | grade 0 (blind) | rank 64 -> none
+  left route hybrid matched: Micro Lending | grade 0 (blind) | rank 65 -> none
+  left route hybrid matched: WorkOn | grade 0 (blind) | rank 66 -> none
+  left route hybrid matched: Zucane | grade 0 (blind) | rank 67 -> none
+  left route hybrid matched: ContractForge | grade 0 (blind) | rank 68 -> none
+  left route hybrid matched: Afri Assets | grade 0 (blind) | rank 69 -> none
+  left route hybrid matched: ArtChain-AI | grade 0 (blind) | rank 70 -> none
+  left route hybrid matched: LumenPass | grade 0 (blind) | rank 71 -> none
+  left route hybrid matched: CirclePay | grade 0 (blind) | rank 72 -> none
+  left route hybrid matched: SpectraBet | grade 0 (blind) | rank 73 -> none
+  left route hybrid matched: LumenFX | grade 0 (blind) | rank 74 -> none
+  left route hybrid matched: Meet.xlm | grade 0 (blind) | rank 75 -> none
+  left route hybrid matched: VisionMe | grade 0 (blind) | rank 76 -> none
+  left route hybrid matched: Human | grade 0 (blind) | rank 77 -> none
+  left route hybrid matched: TralaContract | grade 0 (blind) | rank 78 -> none
+  left route hybrid matched: PayDay | grade 0 (blind) | rank 79 -> none
+  left route hybrid matched: VibeNet | grade 0 (blind) | rank 81 -> none
+  left route hybrid matched: Colectiva | grade 0 (blind) | rank 82 -> none
+  left route hybrid matched: BalloonFly | grade 0 (blind) | rank 83 -> none
+  left route hybrid matched: ZK Battleship | grade 0 (blind) | rank 84 -> none
+  left route hybrid matched: Poison-Game | grade 0 (blind) | rank 85 -> none
+  left route hybrid matched: Obsidossier | grade 0 (blind) | rank 86 -> none
+  left route hybrid matched: ZKMON | grade 0 (blind) | rank 87 -> none
+  left route hybrid matched: Stellar AI Escrow Commerce | grade 0 (blind) | rank 88 -> none
+  left route hybrid matched: CertiX | grade 0 (blind) | rank 89 -> none
+  left route hybrid matched: KipuFi | grade 0 (blind) | rank 90 -> none
+  left route hybrid matched: OL'TAS | grade 0 (blind) | rank 91 -> none
+  left route hybrid matched: Risk Pulse AI | grade 0 (blind) | rank 92 -> none
+  left route hybrid matched: Autorepay | grade 0 (blind) | rank 93 -> none
+  left route hybrid matched: Ai Bora | grade 0 (blind) | rank 94 -> none
+  left route hybrid matched: StellarGuard | grade 1 (blind) | rank 95 -> none
+  left route hybrid matched: Nova Registry SDK | grade 0 (blind) | rank 96 -> none
+  left route hybrid matched: Soroban Node 0 | grade 0 (blind) | rank 97 -> none
+  left route hybrid matched: Stellar Security Audit Agent | grade 0 (blind) | rank 98 -> none
+  left route hybrid matched: Shield Stellar | grade 0 (blind) | rank 99 -> none
+  left route hybrid matched: PharmaFind | grade 0 (blind) | rank 100 -> none
+  left route hybrid matched: Soundstake | grade 0 (blind) | rank 101 -> none
+  left route hybrid matched: AutoLayer - Soroban & Stellar Automation | grade 0 (blind) | rank 102 -> none
+  left route hybrid matched: StellarSpend: Private Spending Limits with Zero- | grade 1 (blind) | rank 103 -> none
+  left route hybrid matched: Alphine | grade 0 (blind) | rank 104 -> none
+  left route hybrid matched: Attestar | grade 0 (blind) | rank 105 -> none
+  left route hybrid matched: Proof of Reserve | grade 0 (blind) | rank 106 -> none
+  left route hybrid matched: StellarProof | grade 0 (blind) | rank 108 -> none
+  left route hybrid matched: Blind Oracle | grade 0 (blind) | rank 109 -> none
+  left route hybrid matched: GitScout Oracle | grade 0 (blind) | rank 110 -> none
+  left route hybrid matched: NARTHEX | grade 0 (blind) | rank 111 -> none
+  left route hybrid matched: Stellar ZK AidPass | grade 0 (blind) | rank 112 -> none
+  left route hybrid matched: ZK-TRP | grade 0 (blind) | rank 113 -> none
+  left route hybrid matched: zkAudit | grade 0 (blind) | rank 114 -> none
+  left route hybrid matched: Umbra | grade 0 (blind) | rank 115 -> none
+  left route hybrid matched: ZeroPath | grade 0 (blind) | rank 116 -> none
+  left route hybrid matched: Cloakwork | grade 0 (blind) | rank 117 -> none
+  left route hybrid matched: Shadow-Vault | grade 0 (blind) | rank 118 -> none
+  left route hybrid matched: IDIO | grade 0 (blind) | rank 120 -> none
+  entered route hybrid matched: DeFi Quest - From Zero to DeFi in Minutes | grade 2 (blind) | rank none -> 1
+  entered route hybrid matched: Passkey-Kit integration | grade 2 (blind) | rank none -> 4
+  entered route hybrid matched: Druid | grade 2 (blind) | rank none -> 10
+  entered route hybrid matched: Riskon | grade 2 (blind) | rank none -> 11
+  entered route hybrid matched: Kale Farm Re-Design | grade 2 (blind) | rank none -> 12
+  entered route hybrid matched: Bimex | grade 2 (blind) | rank none -> 13
+  entered route hybrid matched: Veil | grade 2 (blind) | rank none -> 14
+  entered route hybrid matched: TalkToStellar | grade 2 (blind) | rank none -> 15
+  entered route hybrid matched: Stellaro | grade 2 (blind) | rank none -> 16
+  entered route hybrid matched: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank none -> 19
+  left vet top 5: Agent Rep | grade 2 (blind) | rank 2 -> none
+  left vet top 5: Stellar Proof of Reserves | grade 0 (blind) | rank 4 -> none
+  left vet top 5: Stelakey | grade 2 (blind) | rank 5 -> none
+  entered vet top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 2
+  entered vet top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind) | rank none -> 3
+  entered vet top 5: Safe.xlm | grade 2 (blind) | rank none -> 5
+  left brief top 5: Agent Rep | grade 2 (blind) | rank 2 -> none
+  left brief top 5: Stellar Proof of Reserves | grade 0 (blind) | rank 4 -> none
+  left brief top 5: Stelakey | grade 2 (blind) | rank 5 -> none
+  entered brief top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 2
+  entered brief top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind) | rank none -> 3
+  entered brief top 5: Safe.xlm | grade 2 (blind) | rank none -> 5
+
+probes adversarial|z05|winners: "passkey-kit" (winners only); matched keyword 2 -> 2, hybrid 2 -> 2; byte-identical
+
+probes adversarial|z05|all: "passkey-kit"; matched keyword 12 -> 12, hybrid 19 -> 19; byte-identical
+
+probes adversarial|z07|winners: "smart account policy signers" (winners only); matched keyword 1 -> 1, hybrid 1 -> 1
+
+probes adversarial|z07|all: "smart account policy signers"; matched keyword 10 -> 4, hybrid 11 -> 5
+  left route keyword top 5: Agent Rep | grade 1 (blind) | rank 3 -> none
+  left route keyword top 5: lumengate | grade 1 (blind) | rank 4 -> none
+  left route keyword top 5: Stellar Proof of Reserves | grade 0 (blind) | rank 5 -> none
+  entered route keyword top 5: Passkey-Kit integration | grade 1 (blind) | rank none -> 3
+  entered route keyword top 5: x402 Smart Wallet - By Sorobanhooks | grade 1 (blind) | rank 10 -> 4
+  left route keyword top 20: Agent Rep | grade 1 (blind) | rank 3 -> none
+  left route keyword top 20: lumengate | grade 1 (blind) | rank 4 -> none
+  left route keyword top 20: Stellar Proof of Reserves | grade 0 (blind) | rank 5 -> none
+  left route keyword top 20: Stelakey | grade 1 (blind) | rank 6 -> none
+  left route keyword top 20: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 7 -> none
+  left route keyword top 20: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 8 -> none
+  left route keyword top 20: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 9 -> none
+  entered route keyword top 20: Passkey-Kit integration | grade 1 (blind) | rank none -> 3
+  left route keyword matched: Agent Rep | grade 1 (blind) | rank 3 -> none
+  left route keyword matched: lumengate | grade 1 (blind) | rank 4 -> none
+  left route keyword matched: Stellar Proof of Reserves | grade 0 (blind) | rank 5 -> none
+  left route keyword matched: Stelakey | grade 1 (blind) | rank 6 -> none
+  left route keyword matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 7 -> none
+  left route keyword matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 8 -> none
+  left route keyword matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 9 -> none
+  entered route keyword matched: Passkey-Kit integration | grade 1 (blind) | rank none -> 3
+  left route hybrid top 5: Agent Rep | grade 1 (blind) | rank 4 -> none
+  left route hybrid top 5: lumengate | grade 1 (blind) | rank 5 -> none
+  entered route hybrid top 5: Passkey-Kit integration | grade 1 (blind) | rank none -> 4
+  entered route hybrid top 5: x402 Smart Wallet - By Sorobanhooks | grade 1 (blind) | rank 11 -> 5
+  left route hybrid top 20: Agent Rep | grade 1 (blind) | rank 4 -> none
+  left route hybrid top 20: lumengate | grade 1 (blind) | rank 5 -> none
+  left route hybrid top 20: Stellar Proof of Reserves | grade 0 (blind) | rank 6 -> none
+  left route hybrid top 20: Stelakey | grade 1 (blind) | rank 7 -> none
+  left route hybrid top 20: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 8 -> none
+  left route hybrid top 20: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 9 -> none
+  left route hybrid top 20: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 10 -> none
+  entered route hybrid top 20: Passkey-Kit integration | grade 1 (blind) | rank none -> 4
+  left route hybrid matched: Agent Rep | grade 1 (blind) | rank 4 -> none
+  left route hybrid matched: lumengate | grade 1 (blind) | rank 5 -> none
+  left route hybrid matched: Stellar Proof of Reserves | grade 0 (blind) | rank 6 -> none
+  left route hybrid matched: Stelakey | grade 1 (blind) | rank 7 -> none
+  left route hybrid matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 8 -> none
+  left route hybrid matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 9 -> none
+  left route hybrid matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 10 -> none
+  entered route hybrid matched: Passkey-Kit integration | grade 1 (blind) | rank none -> 4
+  left vet top 5: Stellar Smart Wallets | grade 1 (blind) | rank 2 -> none
+  left vet top 5: Agent Rep | grade 1 (blind) | rank 3 -> none
+  left vet top 5: lumengate | grade 1 (blind) | rank 4 -> none
+  left brief top 5: Stellar Smart Wallets | grade 1 (blind) | rank 2 -> none
+  left brief top 5: Agent Rep | grade 1 (blind) | rank 3 -> none
+  left brief top 5: lumengate | grade 1 (blind) | rank 4 -> none
+
+probes adversarial|z08|winners: "passkey or smart-wallet onboarding" (winners only); matched keyword 2 -> 2, hybrid 4 -> 4; byte-identical
+
+probes adversarial|z08|all: "passkey or smart-wallet onboarding"; matched keyword 5 -> 6, hybrid 65 -> 65
+  left route keyword top 5: Passkey-Kit integration | grade 2 (blind) | rank 5 -> 6
+  entered route keyword top 5: lumengate | grade 1 (blind) | rank none -> 2
+  entered route keyword top 20: lumengate | grade 1 (blind) | rank none -> 2
+  entered route keyword matched: lumengate | grade 1 (blind) | rank none -> 2
+  left route hybrid top 5: Veil | grade 2 (blind) | rank 5 -> 6
+  entered route hybrid top 5: lumengate | grade 1 (blind) | rank 15 -> 4
+  left vet top 5: Veil | grade 2 (blind) | rank 5 -> none
+  entered vet top 5: lumengate | grade 1 (blind) | rank none -> 4
+  left brief top 5: Veil | grade 2 (blind) | rank 5 -> none
+  entered brief top 5: lumengate | grade 1 (blind) | rank none -> 4
+
+labeled idea|40|i02: "passkey smart wallet so users never handle a seed phrase"; matched keyword 15 -> 5, hybrid 81 -> 73
+  left route keyword top 5: StellaX AI Wallet | grade 1 (label) | rank 3 -> none
+  entered route keyword top 5: Veil | grade 2 (label) | rank none -> 1
+  left route keyword top 20: StellaX AI Wallet | grade 1 (label) | rank 3 -> none
+  left route keyword top 20: Umbra Wallet | grade 0 (label) | rank 6 -> none
+  left route keyword top 20: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 7 -> none
+  left route keyword top 20: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 8 -> none
+  left route keyword top 20: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 9 -> none
+  left route keyword top 20: NeuralWallet | grade 1 (blind) | rank 10 -> none
+  left route keyword top 20: Ai2wallet | grade 0 (blind) | rank 11 -> none
+  left route keyword top 20: CosmosPay | Wallet & Payment Gateway for Stellar | grade 0 (blind) | rank 12 -> none
+  left route keyword top 20: BairrouApp! Wallet | grade 0 (blind) | rank 13 -> none
+  left route keyword top 20: Shield-Wallet | grade 0 (label) | rank 14 -> none
+  left route keyword top 20: Stella - Private Payments Wallet | grade 0 (label) | rank 15 -> none
+  entered route keyword top 20: Veil | grade 2 (label) | rank none -> 1
+  left route keyword matched: StellaX AI Wallet | grade 1 (label) | rank 3 -> none
+  left route keyword matched: Umbra Wallet | grade 0 (label) | rank 6 -> none
+  left route keyword matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 7 -> none
+  left route keyword matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 8 -> none
+  left route keyword matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 9 -> none
+  left route keyword matched: NeuralWallet | grade 1 (blind) | rank 10 -> none
+  left route keyword matched: Ai2wallet | grade 0 (blind) | rank 11 -> none
+  left route keyword matched: CosmosPay | Wallet & Payment Gateway for Stellar | grade 0 (blind) | rank 12 -> none
+  left route keyword matched: BairrouApp! Wallet | grade 0 (blind) | rank 13 -> none
+  left route keyword matched: Shield-Wallet | grade 0 (label) | rank 14 -> none
+  left route keyword matched: Stella - Private Payments Wallet | grade 0 (label) | rank 15 -> none
+  entered route keyword matched: Veil | grade 2 (label) | rank none -> 1
+  left route hybrid top 20: Shield-Wallet | grade 0 (label) | rank 17 -> 30
+  entered route hybrid top 20: Pollar private payment | grade 1 (blind) | rank 21 -> 20
+  left route hybrid matched: StellaX AI Wallet | grade 1 (label) | rank 30 -> none
+  left route hybrid matched: Umbra Wallet | grade 0 (label) | rank 40 -> none
+  left route hybrid matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 46 -> none
+  left route hybrid matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 47 -> none
+  left route hybrid matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 48 -> none
+  left route hybrid matched: NeuralWallet | grade 1 (blind) | rank 49 -> none
+  left route hybrid matched: Ai2wallet | grade 0 (blind) | rank 50 -> none
+  left route hybrid matched: CosmosPay | Wallet & Payment Gateway for Stellar | grade 0 (blind) | rank 51 -> none
+
+labeled idea|40|i03: "cross-border remittance app cashing out through local anchors"; matched keyword 12 -> 12, hybrid 122 -> 122; byte-identical
+
+labeled idea|40|i14: "zero-knowledge proof of income without revealing salary"; matched keyword 100 -> 100, hybrid 299 -> 299; byte-identical
+
+labeled idea|40|i17: "fiat on-ramp and off-ramp for a local currency"; matched keyword 1 -> 1, hybrid 26 -> 26; byte-identical
+
+labeled idea|40|i19: "crowdfunding with milestone-based payouts"; matched keyword 1 -> 1, hybrid 35 -> 35; byte-identical
+
+labeled idea|40|i24: "yield vault that auto-compounds DeFi rewards"; matched keyword 30 -> 30, hybrid 127 -> 127; byte-identical
+
+labeled idea|40|i27: "play-to-earn game with on-chain rewards"; matched keyword 38 -> 38, hybrid 255 -> 255; byte-identical
+
+labeled idea|40|i28: "zero-knowledge multiplayer game with hidden information"; matched keyword 26 -> 26, hybrid 285 -> 285; byte-identical
+
+labeled idea|40|i34: "peer-to-peer lending with on-chain credit scores"; matched keyword 34 -> 34, hybrid 193 -> 193; byte-identical
+
+labeled idea|40|i38: "on-chain analytics dashboard for Stellar"; matched keyword 9 -> 9, hybrid 287 -> 287; byte-identical
+
+labeled idea|tests|a non-custodial wallet for Stellar: "a non-custodial wallet for Stellar"; matched keyword 92 -> 92, hybrid 326 -> 326; byte-identical
+
+labeled idea|tests|fiat-backed stablecoin for payments: "fiat-backed stablecoin for payments"; matched keyword 83 -> 83, hybrid 224 -> 224; byte-identical
+
+adv adversarial|p28|all: "pay-per-call"; matched keyword 5 -> 5, hybrid 5 -> 5; byte-identical
+
+adv adversarial|p29|all: "zero-knowledge pogo stick"; matched keyword 0 -> 0, hybrid 220 -> 220; byte-identical
+
+adv adversarial|p30|all: "cross-border remittance"; matched keyword 35 -> 35, hybrid 37 -> 37
+
+adv adversarial|p31|all: "passkey-kit"; matched keyword 12 -> 12, hybrid 19 -> 19; byte-identical
+
+adv adversarial|p32|all: "soroban-sdk"; matched keyword 0 -> 0, hybrid 57 -> 57; byte-identical
+
+adv adversarial|p33|all: "@creit.tech/stellar-wallets-kit"; matched keyword 0 -> 0, hybrid 284 -> 284; byte-identical
+
+adv adversarial|p34|all: "stellar-hd-wallet"; matched keyword 7 -> 7, hybrid 286 -> 286; byte-identical
+
+eventq event-in-q|p02|all: "hackmeridian-2025"; matched keyword 0 -> 0, hybrid 0 -> 0; byte-identical
+
+battery adversarial|sa01-verbatim|all: "held out sa01-verbatim"; matched keyword 14 -> 11, hybrid 296 -> 293
+  left route keyword top 20: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 6 -> none
+  left route keyword top 20: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 7 -> none
+  left route keyword top 20: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 8 -> none
+  left route keyword matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 6 -> none
+  left route keyword matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 7 -> none
+  left route keyword matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 8 -> none
+  left route hybrid matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 291 -> none
+  left route hybrid matched: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 292 -> none
+  left route hybrid matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 293 -> none
+
+battery adversarial|sa01-topic|all: "held out sa01-topic"; matched keyword 41 -> 35, hybrid 167 -> 161
+  left route keyword top 5: Prism | grade 2 (blind) | rank 2 -> 7
+  entered route keyword top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind) | rank 9 -> 5
+  left route keyword top 20: Zelyo | grade 2 (blind) | rank 6 -> none
+  left route keyword top 20: Stellar Proof of Reserves | grade 0 (blind) | rank 8 -> none
+  left route keyword top 20: NARTHEX | grade 0 (blind) | rank 10 -> none
+  left route keyword top 20: Stellar AI Escrow Commerce | grade 0 (blind) | rank 11 -> none
+  left route keyword top 20: Blend AI Powered Smart Monitoring By Sorobanhook | grade 0 (blind) | rank 14 -> 25
+  left route keyword top 20: ContractForge | grade 0 (blind) | rank 17 -> 22
+  left route keyword top 20: TralaContract | grade 0 (blind) | rank 18 -> 23
+  left route keyword top 20: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 19 -> none
+  left route keyword top 20: Socio - AI-generated swap signals for Stellar &  | grade 0 (blind) | rank 20 -> 26
+  entered route keyword top 20: Passkey-Kit integration | grade 2 (blind) | rank 21 -> 8
+  entered route keyword top 20: Umbra Wallet | grade 1 (blind) | rank 22 -> 9
+  entered route keyword top 20: NeuralWallet | grade 1 (blind) | rank 24 -> 10
+  entered route keyword top 20: StellaX AI Wallet | grade 1 (blind) | rank 25 -> 11
+  entered route keyword top 20: Ai2wallet | grade 1 (blind) | rank 26 -> 12
+  entered route keyword top 20: CosmosPay | Wallet & Payment Gateway for Stellar | grade 1 (blind) | rank 27 -> 13
+  entered route keyword top 20: BairrouApp! Wallet | grade 0 (blind) | rank 28 -> 14
+  entered route keyword top 20: Shield-Wallet | grade 1 (blind) | rank 29 -> 15
+  entered route keyword top 20: Stella - Private Payments Wallet | grade 1 (blind) | rank 30 -> 16
+  left route keyword matched: Zelyo | grade 2 (blind) | rank 6 -> none
+  left route keyword matched: Stellar Proof of Reserves | grade 0 (blind) | rank 8 -> none
+  left route keyword matched: NARTHEX | grade 0 (blind) | rank 10 -> none
+  left route keyword matched: Stellar AI Escrow Commerce | grade 0 (blind) | rank 11 -> none
+  left route keyword matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 19 -> none
+  left route keyword matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 23 -> none
+  left route hybrid top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank 5 -> 7
+  entered route hybrid top 5: Passkey-Kit integration | grade 2 (blind) | rank 6 -> 5
+  left route hybrid top 20: Zelyo | grade 2 (blind) | rank 14 -> none
+  left route hybrid top 20: Stellar Proof of Reserves | grade 0 (blind) | rank 18 -> none
+  left route hybrid top 20: NARTHEX | grade 0 (blind) | rank 20 -> none
+  entered route hybrid top 20: StellarVote | grade 0 (blind) | rank 24 -> 18
+  entered route hybrid top 20: NeuralWallet | grade 1 (blind) | rank 22 -> 19
+  entered route hybrid top 20: Shield-Wallet | grade 1 (blind) | rank 23 -> 20
+  left route hybrid matched: Zelyo | grade 2 (blind) | rank 14 -> none
+  left route hybrid matched: Stellar Proof of Reserves | grade 0 (blind) | rank 18 -> none
+  left route hybrid matched: NARTHEX | grade 0 (blind) | rank 20 -> none
+  left route hybrid matched: Stellar AI Escrow Commerce | grade 0 (blind) | rank 21 -> none
+  left route hybrid matched: Career Plug AI - Smart Careers, Strong Identitie | grade 0 (blind) | rank 45 -> none
+  left route hybrid matched: KiSMATI (Smart Public Transport App) | grade 0 (blind) | rank 75 -> none
+  left vet top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank 5 -> none
+  entered vet top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 5
+  left brief top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind) | rank 5 -> none
+  entered brief top 5: Passkey-Kit integration | grade 2 (blind) | rank none -> 5
+
+battery adversarial|sa02-verbatim|winners: "held out sa02-verbatim" (winners only); matched keyword 0 -> 0, hybrid 31 -> 31; byte-identical
+
+battery adversarial|sa02-topic|winners: "held out sa02-topic" (winners only); matched keyword 2 -> 2, hybrid 9 -> 9; byte-identical
+
+ALL SEVEN CAPTURES (the binding scope): base -> o2: ungraded moves 0; bar (i) builds graded 2 that left a top 5, top 20 or matched list: 37 list rows, 15 query and build pairs; bar (ii) grade-0 top-5 entries 0, exits 23, net -23
+  LOST probes adversarial|z01|all route keyword top 5: Prism (rank 1 -> 18)
+  LOST probes adversarial|z01|all route keyword top 5: Zelyo (rank 3 -> 21)
+  LOST probes adversarial|z01|all route keyword top 5: TalkToStellar (rank 4 -> 16)
+  LOST probes adversarial|z01|all route keyword top 5: Buckspay SDK (rank 5 -> 11)
+  LOST probes adversarial|z01|all route keyword top 20: Zelyo (rank 3 -> 21)
+  LOST probes adversarial|z01|all route hybrid top 5: Buckspay SDK (rank 1 -> 6)
+  LOST probes adversarial|z01|all route hybrid top 5: Prism (rank 4 -> 26)
+  LOST probes adversarial|z01|all route hybrid top 20: Prism (rank 4 -> 26)
+  LOST probes adversarial|z01|all route hybrid top 20: Zelyo (rank 10 -> 27)
+  LOST probes adversarial|z01|all route hybrid top 20: TalkToStellar (rank 11 -> 24)
+  LOST probes adversarial|z01|all route hybrid top 20: Stellaro (rank 12 -> 25)
+  LOST probes adversarial|z01|all vet top 5: Tornado-style privacy pools on Stellar Soroban (rank 4 -> none)
+  LOST probes adversarial|z01|all brief top 5: Tornado-style privacy pools on Stellar Soroban (rank 4 -> none)
+  LOST probes adversarial|z03|all route keyword top 5: Safe.xlm (rank 4 -> 7)
+  LOST probes adversarial|z03|all route hybrid top 5: Safe.xlm (rank 4 -> 7)
+  LOST probes adversarial|z04|all route keyword top 5: Agent Rep (rank 2 -> 8)
+  LOST probes adversarial|z04|all route keyword top 5: lumengate (rank 3 -> 6)
+  LOST probes adversarial|z04|all route keyword top 5: Stelakey (rank 5 -> 18)
+  LOST probes adversarial|z04|all route hybrid top 5: Agent Rep (rank 2 -> 8)
+  LOST probes adversarial|z04|all route hybrid top 5: lumengate (rank 3 -> 6)
+  LOST probes adversarial|z04|all route hybrid top 5: Stelakey (rank 5 -> 18)
+  LOST probes adversarial|z04|all vet top 5: Agent Rep (rank 2 -> none)
+  LOST probes adversarial|z04|all vet top 5: Stelakey (rank 5 -> none)
+  LOST probes adversarial|z04|all brief top 5: Agent Rep (rank 2 -> none)
+  LOST probes adversarial|z04|all brief top 5: Stelakey (rank 5 -> none)
+  LOST probes adversarial|z08|all route keyword top 5: Passkey-Kit integration (rank 5 -> 6)
+  LOST probes adversarial|z08|all route hybrid top 5: Veil (rank 5 -> 6)
+  LOST probes adversarial|z08|all vet top 5: Veil (rank 5 -> none)
+  LOST probes adversarial|z08|all brief top 5: Veil (rank 5 -> none)
+  LOST battery adversarial|sa01-topic|all route keyword top 5: Prism (rank 2 -> 7)
+  LOST battery adversarial|sa01-topic|all route keyword top 20: Zelyo (rank 6 -> none)
+  LOST battery adversarial|sa01-topic|all route keyword matched: Zelyo (rank 6 -> none)
+  LOST battery adversarial|sa01-topic|all route hybrid top 5: Tornado-style privacy pools on Stellar Soroban (rank 5 -> 7)
+  LOST battery adversarial|sa01-topic|all route hybrid top 20: Zelyo (rank 14 -> none)
+  LOST battery adversarial|sa01-topic|all route hybrid matched: Zelyo (rank 14 -> none)
+  LOST battery adversarial|sa01-topic|all vet top 5: Tornado-style privacy pools on Stellar Soroban (rank 5 -> none)
+  LOST battery adversarial|sa01-topic|all brief top 5: Tornado-style privacy pools on Stellar Soroban (rank 5 -> none)
+
+THE SIX SETS LANE Z3'S BAR READ (no battery): base -> o2: ungraded moves 0; bar (i) builds graded 2 that left a top 5, top 20 or matched list: 29 list rows, 12 query and build pairs; bar (ii) grade-0 top-5 entries 0, exits 23, net -23
+  LOST probes adversarial|z01|all route keyword top 5: Prism (rank 1 -> 18)
+  LOST probes adversarial|z01|all route keyword top 5: Zelyo (rank 3 -> 21)
+  LOST probes adversarial|z01|all route keyword top 5: TalkToStellar (rank 4 -> 16)
+  LOST probes adversarial|z01|all route keyword top 5: Buckspay SDK (rank 5 -> 11)
+  LOST probes adversarial|z01|all route keyword top 20: Zelyo (rank 3 -> 21)
+  LOST probes adversarial|z01|all route hybrid top 5: Buckspay SDK (rank 1 -> 6)
+  LOST probes adversarial|z01|all route hybrid top 5: Prism (rank 4 -> 26)
+  LOST probes adversarial|z01|all route hybrid top 20: Prism (rank 4 -> 26)
+  LOST probes adversarial|z01|all route hybrid top 20: Zelyo (rank 10 -> 27)
+  LOST probes adversarial|z01|all route hybrid top 20: TalkToStellar (rank 11 -> 24)
+  LOST probes adversarial|z01|all route hybrid top 20: Stellaro (rank 12 -> 25)
+  LOST probes adversarial|z01|all vet top 5: Tornado-style privacy pools on Stellar Soroban (rank 4 -> none)
+  LOST probes adversarial|z01|all brief top 5: Tornado-style privacy pools on Stellar Soroban (rank 4 -> none)
+  LOST probes adversarial|z03|all route keyword top 5: Safe.xlm (rank 4 -> 7)
+  LOST probes adversarial|z03|all route hybrid top 5: Safe.xlm (rank 4 -> 7)
+  LOST probes adversarial|z04|all route keyword top 5: Agent Rep (rank 2 -> 8)
+  LOST probes adversarial|z04|all route keyword top 5: lumengate (rank 3 -> 6)
+  LOST probes adversarial|z04|all route keyword top 5: Stelakey (rank 5 -> 18)
+  LOST probes adversarial|z04|all route hybrid top 5: Agent Rep (rank 2 -> 8)
+  LOST probes adversarial|z04|all route hybrid top 5: lumengate (rank 3 -> 6)
+  LOST probes adversarial|z04|all route hybrid top 5: Stelakey (rank 5 -> 18)
+  LOST probes adversarial|z04|all vet top 5: Agent Rep (rank 2 -> none)
+  LOST probes adversarial|z04|all vet top 5: Stelakey (rank 5 -> none)
+  LOST probes adversarial|z04|all brief top 5: Agent Rep (rank 2 -> none)
+  LOST probes adversarial|z04|all brief top 5: Stelakey (rank 5 -> none)
+  LOST probes adversarial|z08|all route keyword top 5: Passkey-Kit integration (rank 5 -> 6)
+  LOST probes adversarial|z08|all route hybrid top 5: Veil (rank 5 -> 6)
+  LOST probes adversarial|z08|all vet top 5: Veil (rank 5 -> none)
+  LOST probes adversarial|z08|all brief top 5: Veil (rank 5 -> none)
+
+THE BATTERY ALONE: base -> o2: ungraded moves 0; bar (i) builds graded 2 that left a top 5, top 20 or matched list: 8 list rows, 3 query and build pairs; bar (ii) grade-0 top-5 entries 0, exits 0, net +0
+  LOST battery adversarial|sa01-topic|all route keyword top 5: Prism (rank 2 -> 7)
+  LOST battery adversarial|sa01-topic|all route keyword top 20: Zelyo (rank 6 -> none)
+  LOST battery adversarial|sa01-topic|all route keyword matched: Zelyo (rank 6 -> none)
+  LOST battery adversarial|sa01-topic|all route hybrid top 5: Tornado-style privacy pools on Stellar Soroban (rank 5 -> 7)
+  LOST battery adversarial|sa01-topic|all route hybrid top 20: Zelyo (rank 14 -> none)
+  LOST battery adversarial|sa01-topic|all route hybrid matched: Zelyo (rank 14 -> none)
+  LOST battery adversarial|sa01-topic|all vet top 5: Tornado-style privacy pools on Stellar Soroban (rank 5 -> none)
+  LOST battery adversarial|sa01-topic|all brief top 5: Tornado-style privacy pools on Stellar Soroban (rank 5 -> none)
+
+== reported apart: bar (i)'s rows split into same-grade swaps and real losses (base -> o2) ==
+  window battery adversarial|sa01-topic|all brief top 5: graded 2 left 1 (Tornado-style privacy pools on Stellar Soroban), entered 1 (Passkey-Kit integration): swaps 1, real losses 0
+  window battery adversarial|sa01-topic|all route hybrid matched: graded 2 left 1 (Zelyo), entered 0 (none): swaps 0, real losses 1
+  window battery adversarial|sa01-topic|all route hybrid top 20: graded 2 left 1 (Zelyo), entered 0 (none): swaps 0, real losses 1
+  window battery adversarial|sa01-topic|all route hybrid top 5: graded 2 left 1 (Tornado-style privacy pools on Stellar Soroban), entered 1 (Passkey-Kit integration): swaps 1, real losses 0
+  window battery adversarial|sa01-topic|all route keyword matched: graded 2 left 1 (Zelyo), entered 0 (none): swaps 0, real losses 1
+  window battery adversarial|sa01-topic|all route keyword top 20: graded 2 left 1 (Zelyo), entered 1 (Passkey-Kit integration): swaps 1, real losses 0
+  window battery adversarial|sa01-topic|all route keyword top 5: graded 2 left 1 (Prism), entered 1 (x402 Smart Wallet - By Sorobanhooks): swaps 1, real losses 0
+  window battery adversarial|sa01-topic|all vet top 5: graded 2 left 1 (Tornado-style privacy pools on Stellar Soroban), entered 1 (Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z01|all brief top 5: graded 2 left 1 (Tornado-style privacy pools on Stellar Soroban), entered 1 (lumengate): swaps 1, real losses 0
+  window probes adversarial|z01|all route hybrid top 20: graded 2 left 4 (Prism; Zelyo; TalkToStellar; Stellaro), entered 4 (Tukar; Agent Rep; ShieldPass; Druid): swaps 4, real losses 0
+  window probes adversarial|z01|all route hybrid top 5: graded 2 left 2 (Buckspay SDK; Prism), entered 2 (DeFi Quest - From Zero to DeFi in Minutes; lumengate): swaps 2, real losses 0
+  window probes adversarial|z01|all route keyword top 20: graded 2 left 1 (Zelyo), entered 9 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Agent Rep; Veil; Druid; Riskon; Kale Farm Re-Design; Bimex; ShieldPass): swaps 1, real losses 0
+  window probes adversarial|z01|all route keyword top 5: graded 2 left 4 (Prism; Zelyo; TalkToStellar; Buckspay SDK), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks): swaps 4, real losses 0
+  window probes adversarial|z01|all vet top 5: graded 2 left 1 (Tornado-style privacy pools on Stellar Soroban), entered 1 (lumengate): swaps 1, real losses 0
+  window probes adversarial|z03|all route hybrid top 5: graded 2 left 1 (Safe.xlm), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z03|all route keyword top 5: graded 2 left 1 (Safe.xlm), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z04|all brief top 5: graded 2 left 2 (Agent Rep; Stelakey), entered 3 (Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; Safe.xlm): swaps 2, real losses 0
+  window probes adversarial|z04|all route hybrid top 5: graded 2 left 3 (Agent Rep; lumengate; Stelakey), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks): swaps 3, real losses 0
+  window probes adversarial|z04|all route keyword top 5: graded 2 left 3 (Agent Rep; lumengate; Stelakey), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks): swaps 3, real losses 0
+  window probes adversarial|z04|all vet top 5: graded 2 left 2 (Agent Rep; Stelakey), entered 3 (Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; Safe.xlm): swaps 2, real losses 0
+  window probes adversarial|z08|all brief top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all route hybrid top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all route keyword top 5: graded 2 left 1 (Passkey-Kit integration), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all vet top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+all seven captures: 37 rows = 30 same-grade swaps + 7 real losses; 15 pairs = 12 swaps only + 3 with a real loss
+  REAL LOSS battery adversarial|sa01-topic|all route hybrid matched: Zelyo (rank 14 -> none)
+  REAL LOSS battery adversarial|sa01-topic|all route hybrid top 20: Zelyo (rank 14 -> none)
+  REAL LOSS battery adversarial|sa01-topic|all route keyword matched: Zelyo (rank 6 -> none)
+  REAL LOSS probes adversarial|z08|all brief top 5: Veil (rank 5 -> none)
+  REAL LOSS probes adversarial|z08|all route hybrid top 5: Veil (rank 5 -> 6)
+  REAL LOSS probes adversarial|z08|all route keyword top 5: Passkey-Kit integration (rank 5 -> 6)
+  REAL LOSS probes adversarial|z08|all vet top 5: Veil (rank 5 -> none)
+
+  window probes adversarial|z01|all brief top 5: graded 2 left 1 (Tornado-style privacy pools on Stellar Soroban), entered 1 (lumengate): swaps 1, real losses 0
+  window probes adversarial|z01|all route hybrid top 20: graded 2 left 4 (Prism; Zelyo; TalkToStellar; Stellaro), entered 4 (Tukar; Agent Rep; ShieldPass; Druid): swaps 4, real losses 0
+  window probes adversarial|z01|all route hybrid top 5: graded 2 left 2 (Buckspay SDK; Prism), entered 2 (DeFi Quest - From Zero to DeFi in Minutes; lumengate): swaps 2, real losses 0
+  window probes adversarial|z01|all route keyword top 20: graded 2 left 1 (Zelyo), entered 9 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Agent Rep; Veil; Druid; Riskon; Kale Farm Re-Design; Bimex; ShieldPass): swaps 1, real losses 0
+  window probes adversarial|z01|all route keyword top 5: graded 2 left 4 (Prism; Zelyo; TalkToStellar; Buckspay SDK), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks): swaps 4, real losses 0
+  window probes adversarial|z01|all vet top 5: graded 2 left 1 (Tornado-style privacy pools on Stellar Soroban), entered 1 (lumengate): swaps 1, real losses 0
+  window probes adversarial|z03|all route hybrid top 5: graded 2 left 1 (Safe.xlm), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z03|all route keyword top 5: graded 2 left 1 (Safe.xlm), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z04|all brief top 5: graded 2 left 2 (Agent Rep; Stelakey), entered 3 (Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; Safe.xlm): swaps 2, real losses 0
+  window probes adversarial|z04|all route hybrid top 5: graded 2 left 3 (Agent Rep; lumengate; Stelakey), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks): swaps 3, real losses 0
+  window probes adversarial|z04|all route keyword top 5: graded 2 left 3 (Agent Rep; lumengate; Stelakey), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks): swaps 3, real losses 0
+  window probes adversarial|z04|all vet top 5: graded 2 left 2 (Agent Rep; Stelakey), entered 3 (Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; Safe.xlm): swaps 2, real losses 0
+  window probes adversarial|z08|all brief top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all route hybrid top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all route keyword top 5: graded 2 left 1 (Passkey-Kit integration), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all vet top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+the six sets: 29 rows = 25 same-grade swaps + 4 real losses; 12 pairs = 10 swaps only + 2 with a real loss
+  REAL LOSS probes adversarial|z08|all brief top 5: Veil (rank 5 -> none)
+  REAL LOSS probes adversarial|z08|all route hybrid top 5: Veil (rank 5 -> 6)
+  REAL LOSS probes adversarial|z08|all route keyword top 5: Passkey-Kit integration (rank 5 -> 6)
+  REAL LOSS probes adversarial|z08|all vet top 5: Veil (rank 5 -> none)
+
+== reported apart: vetIdea's five, its size, for every changed query (base, o1h, o2) ==
+probes adversarial|z01|winners "passkey smart wallet": 1 -> o1h 1 -> o2 1
+probes adversarial|z01|all "passkey smart wallet": 5 -> o1h 5 -> o2 5
+probes adversarial|z03|winners "smart wallet": 0 -> o1h 0 -> o2 0
+probes adversarial|z03|all "smart wallet": 5 -> o1h 3 -> o2 5
+probes adversarial|z04|winners "smart account": 0 -> o1h 0 -> o2 0
+probes adversarial|z04|all "smart account": 5 -> o1h 1 -> o2 5
+probes adversarial|z05|winners "passkey-kit": 0 -> o1h 0 -> o2 0
+probes adversarial|z05|all "passkey-kit": 3 -> o1h 3 -> o2 3
+probes adversarial|z07|winners "smart account policy signers": 1 -> o1h 1 -> o2 1
+probes adversarial|z07|all "smart account policy signers": 4 -> o1h 1 -> o2 1  (o2 smaller than base)
+probes adversarial|z08|winners "passkey or smart-wallet onboarding": 2 -> o1h 2 -> o2 2
+probes adversarial|z08|all "passkey or smart-wallet onboarding": 5 -> o1h 5 -> o2 5
+labeled idea|40|i02 "passkey smart wallet so users never handle a seed phrase": 5 -> o1h 5 -> o2 5
+labeled idea|40|i03 "cross-border remittance app cashing out through local anchors": 5 -> o1h 5 -> o2 5
+labeled idea|40|i14 "zero-knowledge proof of income without revealing salary": 5 -> o1h 5 -> o2 5
+labeled idea|40|i17 "fiat on-ramp and off-ramp for a local currency": 5 -> o1h 5 -> o2 5
+labeled idea|40|i19 "crowdfunding with milestone-based payouts": 5 -> o1h 5 -> o2 5
+labeled idea|40|i24 "yield vault that auto-compounds DeFi rewards": 5 -> o1h 5 -> o2 5
+labeled idea|40|i27 "play-to-earn game with on-chain rewards": 5 -> o1h 5 -> o2 5
+labeled idea|40|i28 "zero-knowledge multiplayer game with hidden information": 5 -> o1h 5 -> o2 5
+labeled idea|40|i34 "peer-to-peer lending with on-chain credit scores": 5 -> o1h 5 -> o2 5
+labeled idea|40|i38 "on-chain analytics dashboard for Stellar": 5 -> o1h 5 -> o2 5
+labeled idea|tests|a non-custodial wallet for Stellar "a non-custodial wallet for Stellar": 5 -> o1h 5 -> o2 5
+labeled idea|tests|fiat-backed stablecoin for payments "fiat-backed stablecoin for payments": 5 -> o1h 5 -> o2 5
+adv adversarial|p28|all "pay-per-call": 5 -> o1h 5 -> o2 5
+adv adversarial|p29|all "zero-knowledge pogo stick": 5 -> o1h 5 -> o2 5
+adv adversarial|p30|all "cross-border remittance": 5 -> o1h 5 -> o2 5
+adv adversarial|p31|all "passkey-kit": 3 -> o1h 3 -> o2 3
+adv adversarial|p32|all "soroban-sdk": 5 -> o1h 5 -> o2 5
+adv adversarial|p33|all "@creit.tech/stellar-wallets-kit": 5 -> o1h 5 -> o2 5
+adv adversarial|p34|all "stellar-hd-wallet": 5 -> o1h 5 -> o2 5
+eventq event-in-q|p02|all "hackmeridian-2025": 0 -> o1h 0 -> o2 0
+battery adversarial|sa01-verbatim|all "held out sa01-verbatim": 5 -> o1h 5 -> o2 5
+battery adversarial|sa01-topic|all "held out sa01-topic": 5 -> o1h 5 -> o2 5
+battery adversarial|sa02-verbatim|winners "held out sa02-verbatim": 5 -> o1h 5 -> o2 5
+battery adversarial|sa02-topic|winners "held out sa02-topic": 1 -> o1h 1 -> o2 1
+
+== reference: base -> o1h (lane Z3's candidate) under the same grades, and its split ==
+
+all seven captures: base -> o1h: ungraded moves 0; bar (i) builds graded 2 that left a top 5, top 20 or matched list: 32 list rows, 14 query and build pairs; bar (ii) grade-0 top-5 entries 0, exits 24, net -24
+  LOST probes adversarial|z01|all route keyword top 5: Prism (rank 1 -> 12)
+  LOST probes adversarial|z01|all route keyword top 5: Zelyo (rank 3 -> 15)
+  LOST probes adversarial|z01|all route keyword top 5: TalkToStellar (rank 4 -> 10)
+  LOST probes adversarial|z01|all route keyword top 20: Stelakey (rank 14 -> 21)
+  LOST probes adversarial|z01|all route hybrid top 5: Stelakey (rank 2 -> 7)
+  LOST probes adversarial|z01|all route hybrid top 5: Prism (rank 4 -> 16)
+  LOST probes adversarial|z01|all route hybrid top 20: Stellar Smart Wallets (rank 16 -> 22)
+  LOST probes adversarial|z01|all route hybrid top 20: x402 Smart Wallet - By Sorobanhooks (rank 17 -> 23)
+  LOST probes adversarial|z01|all vet top 5: Stelakey (rank 3 -> none)
+  LOST probes adversarial|z01|all brief top 5: Stelakey (rank 3 -> none)
+  LOST probes adversarial|z03|all route keyword top 5: Safe.xlm (rank 4 -> 7)
+  LOST probes adversarial|z03|all route hybrid top 5: Safe.xlm (rank 4 -> 7)
+  LOST probes adversarial|z04|all route keyword top 5: Agent Rep (rank 2 -> 8)
+  LOST probes adversarial|z04|all route keyword top 5: lumengate (rank 3 -> 6)
+  LOST probes adversarial|z04|all route keyword top 5: Stelakey (rank 5 -> 18)
+  LOST probes adversarial|z04|all route hybrid top 5: Agent Rep (rank 2 -> 8)
+  LOST probes adversarial|z04|all route hybrid top 5: lumengate (rank 3 -> 6)
+  LOST probes adversarial|z04|all route hybrid top 5: Stelakey (rank 5 -> 18)
+  LOST probes adversarial|z04|all vet top 5: Stellar Smart Wallets (rank 1 -> none)
+  LOST probes adversarial|z04|all vet top 5: Agent Rep (rank 2 -> none)
+  LOST probes adversarial|z04|all vet top 5: Stelakey (rank 5 -> none)
+  LOST probes adversarial|z04|all brief top 5: Stellar Smart Wallets (rank 1 -> none)
+  LOST probes adversarial|z04|all brief top 5: Agent Rep (rank 2 -> none)
+  LOST probes adversarial|z04|all brief top 5: Stelakey (rank 5 -> none)
+  LOST probes adversarial|z08|all route hybrid top 5: Veil (rank 5 -> 18)
+  LOST probes adversarial|z08|all vet top 5: Veil (rank 5 -> none)
+  LOST probes adversarial|z08|all brief top 5: Veil (rank 5 -> none)
+  LOST battery adversarial|sa01-topic|all route keyword top 5: Stellar Smart Wallets (rank 3 -> 6)
+  LOST battery adversarial|sa01-topic|all route keyword top 5: Stelakey (rank 5 -> 10)
+  LOST battery adversarial|sa01-topic|all route hybrid top 5: Stellar Smart Wallets (rank 4 -> 6)
+  LOST battery adversarial|sa01-topic|all vet top 5: Stellar Smart Wallets (rank 4 -> none)
+  LOST battery adversarial|sa01-topic|all brief top 5: Stellar Smart Wallets (rank 4 -> none)
+  window battery adversarial|sa01-topic|all brief top 5: graded 2 left 1 (Stellar Smart Wallets), entered 1 (Passkey-Kit integration): swaps 1, real losses 0
+  window battery adversarial|sa01-topic|all route hybrid top 5: graded 2 left 1 (Stellar Smart Wallets), entered 1 (Passkey-Kit integration): swaps 1, real losses 0
+  window battery adversarial|sa01-topic|all route keyword top 5: graded 2 left 2 (Stellar Smart Wallets; Stelakey), entered 2 (Tukar; Tornado-style privacy pools on Stellar Soroban): swaps 2, real losses 0
+  window battery adversarial|sa01-topic|all vet top 5: graded 2 left 1 (Stellar Smart Wallets), entered 1 (Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z01|all brief top 5: graded 2 left 1 (Stelakey), entered 1 (lumengate): swaps 1, real losses 0
+  window probes adversarial|z01|all route hybrid top 20: graded 2 left 2 (Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks), entered 6 (Tukar; ShieldPass; Druid; Riskon; Kale Farm Re-Design; Bimex): swaps 2, real losses 0
+  window probes adversarial|z01|all route hybrid top 5: graded 2 left 2 (Stelakey; Prism), entered 2 (DeFi Quest - From Zero to DeFi in Minutes; Tukar): swaps 2, real losses 0
+  window probes adversarial|z01|all route keyword top 20: graded 2 left 1 (Stelakey), entered 9 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Druid; Riskon; Kale Farm Re-Design; Bimex; ShieldPass; Agent Rep; Veil): swaps 1, real losses 0
+  window probes adversarial|z01|all route keyword top 5: graded 2 left 3 (Prism; Zelyo; TalkToStellar), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 3, real losses 0
+  window probes adversarial|z01|all vet top 5: graded 2 left 1 (Stelakey), entered 1 (lumengate): swaps 1, real losses 0
+  window probes adversarial|z03|all route hybrid top 5: graded 2 left 1 (Safe.xlm), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z03|all route keyword top 5: graded 2 left 1 (Safe.xlm), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z04|all brief top 5: graded 2 left 3 (Stellar Smart Wallets; Agent Rep; Stelakey), entered 0 (none): swaps 0, real losses 3
+  window probes adversarial|z04|all route hybrid top 5: graded 2 left 3 (Agent Rep; lumengate; Stelakey), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks): swaps 3, real losses 0
+  window probes adversarial|z04|all route keyword top 5: graded 2 left 3 (Agent Rep; lumengate; Stelakey), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks): swaps 3, real losses 0
+  window probes adversarial|z04|all vet top 5: graded 2 left 3 (Stellar Smart Wallets; Agent Rep; Stelakey), entered 0 (none): swaps 0, real losses 3
+  window probes adversarial|z08|all brief top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all route hybrid top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all vet top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+o1h, all seven captures: 32 rows = 23 same-grade swaps + 9 real losses; 14 pairs = 10 swaps only + 4 with a real loss
+  REAL LOSS probes adversarial|z04|all brief top 5: Stellar Smart Wallets (rank 1 -> none)
+  REAL LOSS probes adversarial|z04|all brief top 5: Agent Rep (rank 2 -> none)
+  REAL LOSS probes adversarial|z04|all brief top 5: Stelakey (rank 5 -> none)
+  REAL LOSS probes adversarial|z04|all vet top 5: Stellar Smart Wallets (rank 1 -> none)
+  REAL LOSS probes adversarial|z04|all vet top 5: Agent Rep (rank 2 -> none)
+  REAL LOSS probes adversarial|z04|all vet top 5: Stelakey (rank 5 -> none)
+  REAL LOSS probes adversarial|z08|all brief top 5: Veil (rank 5 -> none)
+  REAL LOSS probes adversarial|z08|all route hybrid top 5: Veil (rank 5 -> 18)
+  REAL LOSS probes adversarial|z08|all vet top 5: Veil (rank 5 -> none)
+  window probes adversarial|z01|all brief top 5: graded 2 left 1 (Stelakey), entered 1 (lumengate): swaps 1, real losses 0
+  window probes adversarial|z01|all route hybrid top 20: graded 2 left 2 (Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks), entered 6 (Tukar; ShieldPass; Druid; Riskon; Kale Farm Re-Design; Bimex): swaps 2, real losses 0
+  window probes adversarial|z01|all route hybrid top 5: graded 2 left 2 (Stelakey; Prism), entered 2 (DeFi Quest - From Zero to DeFi in Minutes; Tukar): swaps 2, real losses 0
+  window probes adversarial|z01|all route keyword top 20: graded 2 left 1 (Stelakey), entered 9 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Druid; Riskon; Kale Farm Re-Design; Bimex; ShieldPass; Agent Rep; Veil): swaps 1, real losses 0
+  window probes adversarial|z01|all route keyword top 5: graded 2 left 3 (Prism; Zelyo; TalkToStellar), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 3, real losses 0
+  window probes adversarial|z01|all vet top 5: graded 2 left 1 (Stelakey), entered 1 (lumengate): swaps 1, real losses 0
+  window probes adversarial|z03|all route hybrid top 5: graded 2 left 1 (Safe.xlm), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z03|all route keyword top 5: graded 2 left 1 (Safe.xlm), entered 3 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration): swaps 1, real losses 0
+  window probes adversarial|z04|all brief top 5: graded 2 left 3 (Stellar Smart Wallets; Agent Rep; Stelakey), entered 0 (none): swaps 0, real losses 3
+  window probes adversarial|z04|all route hybrid top 5: graded 2 left 3 (Agent Rep; lumengate; Stelakey), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks): swaps 3, real losses 0
+  window probes adversarial|z04|all route keyword top 5: graded 2 left 3 (Agent Rep; lumengate; Stelakey), entered 4 (DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks): swaps 3, real losses 0
+  window probes adversarial|z04|all vet top 5: graded 2 left 3 (Stellar Smart Wallets; Agent Rep; Stelakey), entered 0 (none): swaps 0, real losses 3
+  window probes adversarial|z08|all brief top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all route hybrid top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+  window probes adversarial|z08|all vet top 5: graded 2 left 1 (Veil), entered 0 (none): swaps 0, real losses 1
+o1h, the six sets: 27 rows = 18 same-grade swaps + 9 real losses; 12 pairs = 8 swaps only + 4 with a real loss
+  REAL LOSS probes adversarial|z04|all brief top 5: Stellar Smart Wallets (rank 1 -> none)
+  REAL LOSS probes adversarial|z04|all brief top 5: Agent Rep (rank 2 -> none)
+  REAL LOSS probes adversarial|z04|all brief top 5: Stelakey (rank 5 -> none)
+  REAL LOSS probes adversarial|z04|all vet top 5: Stellar Smart Wallets (rank 1 -> none)
+  REAL LOSS probes adversarial|z04|all vet top 5: Agent Rep (rank 2 -> none)
+  REAL LOSS probes adversarial|z04|all vet top 5: Stelakey (rank 5 -> none)
+  REAL LOSS probes adversarial|z08|all brief top 5: Veil (rank 5 -> none)
+  REAL LOSS probes adversarial|z08|all route hybrid top 5: Veil (rank 5 -> 18)
+  REAL LOSS probes adversarial|z08|all vet top 5: Veil (rank 5 -> none)
+
+== reference: base -> h ==
+
+all seven captures: base -> h: ungraded moves 0; bar (i) builds graded 2 that left a top 5, top 20 or matched list: 0 list rows, 0 query and build pairs; bar (ii) grade-0 top-5 entries 0, exits 0, net +0
+
+== reported apart: o1h -> o2, the changed queries where they differ ==
+probes adversarial|z01|winners "passkey smart wallet": matched keyword 2 -> 2, hybrid 4 -> 4
+probes adversarial|z01|all "passkey smart wallet": matched keyword 21 -> 21, hybrid 57 -> 57
+  left route keyword top 5: Passkey-Kit integration | grade 2 (blind)
+  left route keyword top 5: Buckspay SDK | grade 2 (blind)
+  entered route keyword top 5: Stellar Smart Wallets | grade 2 (blind)
+  entered route keyword top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind)
+  left route keyword top 20: Zelyo | grade 2 (blind)
+  entered route keyword top 20: Stelakey | grade 2 (blind)
+  left route hybrid top 5: Buckspay SDK | grade 2 (blind)
+  left route hybrid top 5: Tukar | grade 2 (blind)
+  entered route hybrid top 5: Stelakey | grade 2 (blind)
+  entered route hybrid top 5: lumengate | grade 2 (blind)
+  left route hybrid top 20: Riskon | grade 2 (blind)
+  left route hybrid top 20: Kale Farm Re-Design | grade 2 (blind)
+  left route hybrid top 20: Bimex | grade 2 (blind)
+  left route hybrid top 20: TalkToStellar | grade 2 (blind)
+  left route hybrid top 20: Stellaro | grade 2 (blind)
+  left route hybrid top 20: Prism | grade 2 (blind)
+  left route hybrid top 20: Zelyo | grade 2 (blind)
+  entered route hybrid top 20: Stellar Smart Wallets | grade 2 (blind)
+  entered route hybrid top 20: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind)
+  entered route hybrid top 20: Safe.xlm | grade 1 (blind)
+  entered route hybrid top 20: Agent Rep | grade 2 (blind)
+  entered route hybrid top 20: StellarPass | grade 0 (blind)
+  entered route hybrid top 20: ZK Pass | grade 0 (blind)
+  entered route hybrid top 20: Econova stellar | grade 1 (blind)
+  left vet top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind)
+  entered vet top 5: Stelakey | grade 2 (blind)
+  left brief top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind)
+  entered brief top 5: Stelakey | grade 2 (blind)
+probes adversarial|z03|all "smart wallet": matched keyword 21 -> 21, hybrid 21 -> 21
+  entered vet top 5: Passkey-Kit integration | grade 2 (blind)
+  entered vet top 5: lumengate | grade 2 (blind)
+  entered brief top 5: Passkey-Kit integration | grade 2 (blind)
+  entered brief top 5: lumengate | grade 2 (blind)
+probes adversarial|z04|all "smart account": matched keyword 21 -> 21, hybrid 21 -> 21
+  entered vet top 5: Stellar Smart Wallets | grade 2 (blind)
+  entered vet top 5: Passkey-Kit integration | grade 2 (blind)
+  entered vet top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind)
+  entered vet top 5: Safe.xlm | grade 2 (blind)
+  entered brief top 5: Stellar Smart Wallets | grade 2 (blind)
+  entered brief top 5: Passkey-Kit integration | grade 2 (blind)
+  entered brief top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind)
+  entered brief top 5: Safe.xlm | grade 2 (blind)
+probes adversarial|z07|all "smart account policy signers": matched keyword 4 -> 4, hybrid 5 -> 5
+probes adversarial|z08|winners "passkey or smart-wallet onboarding": matched keyword 3 -> 2, hybrid 5 -> 4
+  left route keyword top 5: Tukar | grade 1 (blind)
+  left route keyword top 20: Tukar | grade 1 (blind)
+  left route keyword matched: Tukar | grade 1 (blind)
+  left route hybrid top 5: Tukar | grade 1 (blind)
+  left route hybrid top 20: Tukar | grade 1 (blind)
+  left route hybrid matched: Tukar | grade 1 (blind)
+probes adversarial|z08|all "passkey or smart-wallet onboarding": matched keyword 18 -> 6, hybrid 73 -> 65
+  left route keyword top 5: Tukar | grade 1 (blind)
+  left route keyword top 5: Passkey-Kit integration | grade 2 (blind)
+  left route keyword top 5: Buckspay SDK | grade 1 (blind)
+  entered route keyword top 5: Stellar Onboarding Hub | grade 0 (blind)
+  entered route keyword top 5: Stellar Smart Wallets | grade 1 (blind)
+  entered route keyword top 5: x402 Smart Wallet - By Sorobanhooks | grade 1 (blind)
+  left route keyword top 20: Tukar | grade 1 (blind)
+  left route keyword top 20: Buckspay SDK | grade 1 (blind)
+  left route keyword top 20: Druid | grade 1 (blind)
+  left route keyword top 20: Riskon | grade 1 (blind)
+  left route keyword top 20: Kale Farm Re-Design | grade 1 (blind)
+  left route keyword top 20: Bimex | grade 1 (blind)
+  left route keyword top 20: TalkToStellar | grade 1 (blind)
+  left route keyword top 20: Stellaro | grade 1 (blind)
+  left route keyword top 20: Prism | grade 1 (blind)
+  left route keyword top 20: Tornado-style privacy pools on Stellar Soroban | grade 1 (blind)
+  left route keyword top 20: ShieldPass | grade 1 (blind)
+  left route keyword top 20: Zelyo | grade 1 (blind)
+  left route keyword matched: Tukar | grade 1 (blind)
+  left route keyword matched: Buckspay SDK | grade 1 (blind)
+  left route keyword matched: Druid | grade 1 (blind)
+  left route keyword matched: Riskon | grade 1 (blind)
+  left route keyword matched: Kale Farm Re-Design | grade 1 (blind)
+  left route keyword matched: Bimex | grade 1 (blind)
+  left route keyword matched: TalkToStellar | grade 1 (blind)
+  left route keyword matched: Stellaro | grade 1 (blind)
+  left route keyword matched: Prism | grade 1 (blind)
+  left route keyword matched: Tornado-style privacy pools on Stellar Soroban | grade 1 (blind)
+  left route keyword matched: ShieldPass | grade 1 (blind)
+  left route keyword matched: Zelyo | grade 1 (blind)
+  left route hybrid top 5: Buckspay SDK | grade 1 (blind)
+  entered route hybrid top 5: Accesly | grade 1 (blind)
+  left route hybrid top 20: Tukar | grade 1 (blind)
+  left route hybrid top 20: Riskon | grade 1 (blind)
+  left route hybrid top 20: TalkToStellar | grade 1 (blind)
+  left route hybrid top 20: Tornado-style privacy pools on Stellar Soroban | grade 1 (blind)
+  left route hybrid top 20: Druid | grade 1 (blind)
+  left route hybrid top 20: Kale Farm Re-Design | grade 1 (blind)
+  left route hybrid top 20: Bimex | grade 1 (blind)
+  left route hybrid top 20: Stellaro | grade 1 (blind)
+  left route hybrid top 20: Prism | grade 1 (blind)
+  left route hybrid top 20: ShieldPass | grade 1 (blind)
+  left route hybrid top 20: Zelyo | grade 1 (blind)
+  entered route hybrid top 20: Stella Pass | grade 0 (blind)
+  entered route hybrid top 20: Stelakey | grade 1 (blind)
+  entered route hybrid top 20: Stellar Smart Wallets | grade 1 (blind)
+  entered route hybrid top 20: x402 Smart Wallet - By Sorobanhooks | grade 1 (blind)
+  entered route hybrid top 20: Pollar | grade 1 (blind)
+  entered route hybrid top 20: StellaX AI Wallet | grade 1 (blind)
+  entered route hybrid top 20: StellAIr | grade 0 (blind)
+  entered route hybrid top 20: Onboardr(SoroAI) | grade 0 (blind)
+  entered route hybrid top 20: Accesly | grade 0 (blind)
+  entered route hybrid top 20: Syft | grade 0 (blind)
+  entered route hybrid top 20: FLASH | grade 0 (blind)
+  left route hybrid matched: Tukar | grade 1 (blind)
+  left route hybrid matched: Druid | grade 1 (blind)
+  left route hybrid matched: Kale Farm Re-Design | grade 1 (blind)
+  left route hybrid matched: Bimex | grade 1 (blind)
+  left route hybrid matched: Stellaro | grade 1 (blind)
+  left route hybrid matched: Prism | grade 1 (blind)
+  left route hybrid matched: ShieldPass | grade 1 (blind)
+  left route hybrid matched: Zelyo | grade 1 (blind)
+  left vet top 5: Buckspay SDK | grade 1 (blind)
+  entered vet top 5: Accesly | grade 1 (blind)
+  left brief top 5: Buckspay SDK | grade 1 (blind)
+  entered brief top 5: Accesly | grade 1 (blind)
+labeled idea|40|i02 "passkey smart wallet so users never handle a seed phrase": matched keyword 5 -> 5, hybrid 73 -> 73
+battery adversarial|sa01-verbatim|all "held out sa01-verbatim": matched keyword 11 -> 11, hybrid 293 -> 293
+battery adversarial|sa01-topic|all "held out sa01-topic": matched keyword 41 -> 35, hybrid 166 -> 161
+  left route keyword top 5: Tukar | grade 2 (blind)
+  left route keyword top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind)
+  left route keyword top 5: Prism | grade 2 (blind)
+  entered route keyword top 5: Stellar Smart Wallets | grade 2 (blind)
+  entered route keyword top 5: Stelakey | grade 2 (blind)
+  entered route keyword top 5: x402 Smart Wallet - By Sorobanhooks | grade 2 (blind)
+  left route keyword top 20: Tukar | grade 2 (blind)
+  left route keyword top 20: ShieldPass | grade 2 (blind)
+  left route keyword top 20: TalkToStellar | grade 2 (blind)
+  left route keyword top 20: Stellaro | grade 2 (blind)
+  left route keyword top 20: Zelyo | grade 2 (blind)
+  left route keyword top 20: Bimex | grade 2 (blind)
+  entered route keyword top 20: Shield-Wallet | grade 1 (blind)
+  entered route keyword top 20: Stella - Private Payments Wallet | grade 1 (blind)
+  entered route keyword top 20: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind)
+  entered route keyword top 20: dorahacks-buidl-38062 | grade 0 (blind)
+  entered route keyword top 20: Soroban Node 0 | grade 0 (blind)
+  entered route keyword top 20: AutoLayer - Soroban & Stellar Automation | grade 0 (blind)
+  left route keyword matched: Tukar | grade 2 (blind)
+  left route keyword matched: ShieldPass | grade 2 (blind)
+  left route keyword matched: TalkToStellar | grade 2 (blind)
+  left route keyword matched: Stellaro | grade 2 (blind)
+  left route keyword matched: Zelyo | grade 2 (blind)
+  left route keyword matched: Bimex | grade 2 (blind)
+  left route hybrid top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind)
+  entered route hybrid top 5: Stellar Smart Wallets | grade 2 (blind)
+  left route hybrid top 20: TalkToStellar | grade 2 (blind)
+  left route hybrid top 20: Tukar | grade 2 (blind)
+  left route hybrid top 20: ShieldPass | grade 2 (blind)
+  left route hybrid top 20: Stellaro | grade 2 (blind)
+  left route hybrid top 20: Zelyo | grade 2 (blind)
+  left route hybrid top 20: Bimex | grade 2 (blind)
+  entered route hybrid top 20: Ai2wallet | grade 1 (blind)
+  entered route hybrid top 20: Syft | grade 0 (blind)
+  entered route hybrid top 20: Soroban to MCP Server in seconds + Policy Signer | grade 1 (blind)
+  entered route hybrid top 20: StellarVote | grade 0 (blind)
+  entered route hybrid top 20: NeuralWallet | grade 1 (blind)
+  entered route hybrid top 20: Shield-Wallet | grade 1 (blind)
+  left route hybrid matched: Tukar | grade 2 (blind)
+  left route hybrid matched: ShieldPass | grade 2 (blind)
+  left route hybrid matched: Stellaro | grade 2 (blind)
+  left route hybrid matched: Zelyo | grade 2 (blind)
+  left route hybrid matched: Bimex | grade 2 (blind)
+  left vet top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind)
+  entered vet top 5: Stellar Smart Wallets | grade 2 (blind)
+  left brief top 5: Tornado-style privacy pools on Stellar Soroban | grade 2 (blind)
+  entered brief top 5: Stellar Smart Wallets | grade 2 (blind)
+battery adversarial|sa02-verbatim|winners "held out sa02-verbatim": matched keyword 1 -> 0, hybrid 32 -> 31
+  left route keyword top 5: Tukar | grade 1 (blind)
+  left route keyword top 20: Tukar | grade 1 (blind)
+  left route keyword matched: Tukar | grade 1 (blind)
+  left route hybrid top 20: Tukar | grade 1 (blind)
+  entered route hybrid top 20: Kale Farmers Market | grade 0 (blind)
+  left route hybrid matched: Tukar | grade 1 (blind)
+battery adversarial|sa02-topic|winners "held out sa02-topic": matched keyword 2 -> 2, hybrid 9 -> 9
+
+== (a) L1-02: q=passkey smart wallet, winners only ==
+base hybrid: matched 4: DeFi Quest - From Zero to DeFi in Minutes [on-topic, packages; matched [], similarity 0.7]; Wraith [not on-topic; matched [], similarity 0.692]; Umbra Wallet [not on-topic; matched ['wallet'], similarity None]; ANCHORSHIELD [not on-topic; matched [], similarity 0.683]
+    on-topic winners in the first 10: 1; in the matched list 1; by name or summary alone 0
+base keyword: matched 1: Umbra Wallet [not on-topic; matched ['wallet'], similarity None]
+    on-topic winners in the first 10: 0; in the matched list 0; by name or summary alone 0
+o1h hybrid: matched 4: DeFi Quest - From Zero to DeFi in Minutes [on-topic, packages; matched ['passkey', 'smart-wallet'], similarity 0.7]; Tukar [on-topic, packages; matched ['passkey', 'smart-wallet'], similarity None]; Wraith [not on-topic; matched [], similarity 0.692]; ANCHORSHIELD [not on-topic; matched [], similarity 0.683]
+    on-topic winners in the first 10: 2; in the matched list 2; by name or summary alone 0
+o1h keyword: matched 2: DeFi Quest - From Zero to DeFi in Minutes [on-topic, packages; matched ['passkey', 'smart-wallet'], similarity None]; Tukar [on-topic, packages; matched ['passkey', 'smart-wallet'], similarity None]
+    on-topic winners in the first 10: 2; in the matched list 2; by name or summary alone 0
+o2 hybrid: matched 4: DeFi Quest - From Zero to DeFi in Minutes [on-topic, packages; matched ['passkey'], similarity 0.7]; Wraith [not on-topic; matched [], similarity 0.692]; Tukar [on-topic, packages; matched ['passkey'], similarity None]; ANCHORSHIELD [not on-topic; matched [], similarity 0.683]
+    on-topic winners in the first 10: 2; in the matched list 2; by name or summary alone 0
+o2 keyword: matched 2: DeFi Quest - From Zero to DeFi in Minutes [on-topic, packages; matched ['passkey'], similarity None]; Tukar [on-topic, packages; matched ['passkey'], similarity None]
+    on-topic winners in the first 10: 2; in the matched list 2; by name or summary alone 0
+
+== probes: top 10, base -> o1h -> o2; hybrid graded ==
+z01 "passkey smart wallet" hybrid: matched 63 -> o1h 57 -> o2 57
+    base: Buckspay SDK; Stelakey; Passkey-Kit integration; Prism; Veil; Tornado-style privacy pools on Stellar Soroban; lumengate; ProofPass | Privacy-Preserving Age Verification ; Stella Pass; Zelyo
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Passkey-Kit integration; Buckspay SDK; Veil; Tukar; Tornado-style privacy pools on Stellar Soroban; Stelakey; lumengate; ShieldPass; Druid
+    o2:   Veil; Stelakey; Passkey-Kit integration; DeFi Quest - From Zero to DeFi in Minutes; lumengate; Buckspay SDK; ProofPass | Privacy-Preserving Age Verification ; Stella Pass; Tornado-style privacy pools on Stellar Soroban; Tukar
+z01 "passkey smart wallet" keyword: matched 26 -> o1h 21 -> o2 21
+    base: Prism; lumengate; Zelyo; TalkToStellar; Buckspay SDK; Stellaro; Tornado-style privacy pools on Stellar Soroban; Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks; DUST AGGREGATOR
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; Buckspay SDK; lumengate; Druid; Riskon; Kale Farm Re-Design; Bimex; TalkToStellar
+    o2:   lumengate; DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks; Safe.xlm; Agent Rep; Veil; Stelakey; Passkey-Kit integration
+z01 "passkey smart wallet" winners hybrid: matched 4 -> o1h 4 -> o2 4
+    base: DeFi Quest - From Zero to DeFi in Minutes; Wraith; Umbra Wallet; ANCHORSHIELD
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar; Wraith; ANCHORSHIELD
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Wraith; Tukar; ANCHORSHIELD
+z01 "passkey smart wallet" winners keyword: matched 1 -> o1h 2 -> o2 2
+    base: Umbra Wallet
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Tukar
+z02 "passkey" hybrid: matched 15 -> o1h 15 -> o2 15; o2 byte-identical to base
+z02 "passkey" keyword: matched 15 -> o1h 15 -> o2 15; o2 byte-identical to base
+z02 "passkey" winners hybrid: matched 2 -> o1h 2 -> o2 2; o2 byte-identical to base
+z02 "passkey" winners keyword: matched 2 -> o1h 2 -> o2 2; o2 byte-identical to base
+z03 "smart wallet" hybrid: matched 167 -> o1h 21 -> o2 21
+    base: Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks; DUST AGGREGATOR; Safe.xlm; NARTHEX; Stellar AI Escrow Commerce; Prism; Stelakey; Soroban to MCP Server in seconds + Policy Signer; GoLazy
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; lumengate; Safe.xlm; Agent Rep; Buckspay SDK; Druid
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; lumengate; Safe.xlm; Agent Rep; Buckspay SDK; Druid
+z03 "smart wallet" keyword: matched 167 -> o1h 21 -> o2 21
+    base: Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks; DUST AGGREGATOR; Safe.xlm; NARTHEX; Stellar AI Escrow Commerce; Prism; Stelakey; Soroban to MCP Server in seconds + Policy Signer; GoLazy
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; lumengate; Safe.xlm; Agent Rep; Buckspay SDK; Druid
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; lumengate; Safe.xlm; Agent Rep; Buckspay SDK; Druid
+z03 "smart wallet" winners hybrid: matched 12 -> o1h 2 -> o2 2
+    base: Umbra Wallet; Cards402.com; ANCHORSHIELD; Soroban to MCP Server in seconds + Policy Signer; GoLazy; Soroswap Pro Trader; Kale Grab Rush; Reflector TradeBet; CouvePIX; dorahacks-buidl-38062
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Tukar
+z03 "smart wallet" winners keyword: matched 12 -> o1h 2 -> o2 2
+    base: Umbra Wallet; Cards402.com; ANCHORSHIELD; Soroban to MCP Server in seconds + Policy Signer; GoLazy; Soroswap Pro Trader; Kale Grab Rush; Reflector TradeBet; CouvePIX; dorahacks-buidl-38062
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Tukar
+z04 "smart account" hybrid: matched 120 -> o1h 21 -> o2 21
+    base: Stellar Smart Wallets; Agent Rep; lumengate; Stellar Proof of Reserves; Stelakey; Tukar; PeerPesa; Nulucre Agents; The Signaler; Stellar Search
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; lumengate; Safe.xlm; Agent Rep; Buckspay SDK; Druid
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; lumengate; Safe.xlm; Agent Rep; Buckspay SDK; Druid
+z04 "smart account" keyword: matched 120 -> o1h 21 -> o2 21
+    base: Stellar Smart Wallets; Agent Rep; lumengate; Stellar Proof of Reserves; Stelakey; Tukar; PeerPesa; Nulucre Agents; The Signaler; Stellar Search
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; lumengate; Safe.xlm; Agent Rep; Buckspay SDK; Druid
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Tukar; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks; lumengate; Safe.xlm; Agent Rep; Buckspay SDK; Druid
+z04 "smart account" winners hybrid: matched 7 -> o1h 2 -> o2 2
+    base: Tukar; Soroban to MCP Server in seconds + Policy Signer; GoLazy; Reflector TradeBet; dorahacks-buidl-38062; Stellar Map; AndesMaaS 3.0
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Tukar
+z04 "smart account" winners keyword: matched 7 -> o1h 2 -> o2 2
+    base: Tukar; Soroban to MCP Server in seconds + Policy Signer; GoLazy; Reflector TradeBet; dorahacks-buidl-38062; Stellar Map; AndesMaaS 3.0
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Tukar
+z05 "passkey-kit" hybrid: matched 19 -> o1h 19 -> o2 19; o2 byte-identical to base
+z05 "passkey-kit" keyword: matched 12 -> o1h 12 -> o2 12; o2 byte-identical to base
+z05 "passkey-kit" winners hybrid: matched 2 -> o1h 2 -> o2 2; o2 byte-identical to base
+z05 "passkey-kit" winners keyword: matched 2 -> o1h 2 -> o2 2; o2 byte-identical to base
+z06 "passkey wallet onboarding" hybrid: matched 36 -> o1h 36 -> o2 36; o2 byte-identical to base
+z06 "passkey wallet onboarding" keyword: matched 19 -> o1h 19 -> o2 19; o2 byte-identical to base
+z06 "passkey wallet onboarding" winners hybrid: matched 3 -> o1h 3 -> o2 3; o2 byte-identical to base
+z06 "passkey wallet onboarding" winners keyword: matched 3 -> o1h 3 -> o2 3; o2 byte-identical to base
+z07 "smart account policy signers" hybrid: matched 11 -> o1h 5 -> o2 5
+    base: Soroban to MCP Server in seconds + Policy Signer; AgentCard; Stellar Smart Wallets; Agent Rep; lumengate; Stellar Proof of Reserves; Stelakey; KiSMATI (Smart Public Transport App); Blend AI Powered Smart Monitoring By Sorobanhook; Career Plug AI - Smart Careers, Strong Identitie
+    o1h:  Soroban to MCP Server in seconds + Policy Signer; AgentCard; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks
+    o2:   Soroban to MCP Server in seconds + Policy Signer; AgentCard; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks
+z07 "smart account policy signers" keyword: matched 10 -> o1h 4 -> o2 4
+    base: Soroban to MCP Server in seconds + Policy Signer; Stellar Smart Wallets; Agent Rep; lumengate; Stellar Proof of Reserves; Stelakey; KiSMATI (Smart Public Transport App); Blend AI Powered Smart Monitoring By Sorobanhook; Career Plug AI - Smart Careers, Strong Identitie; x402 Smart Wallet - By Sorobanhooks
+    o1h:  Soroban to MCP Server in seconds + Policy Signer; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks
+    o2:   Soroban to MCP Server in seconds + Policy Signer; Stellar Smart Wallets; Passkey-Kit integration; x402 Smart Wallet - By Sorobanhooks
+z07 "smart account policy signers" winners hybrid: matched 1 -> o1h 1 -> o2 1
+    base: Soroban to MCP Server in seconds + Policy Signer
+    o1h:  Soroban to MCP Server in seconds + Policy Signer
+    o2:   Soroban to MCP Server in seconds + Policy Signer
+z07 "smart account policy signers" winners keyword: matched 1 -> o1h 1 -> o2 1
+    base: Soroban to MCP Server in seconds + Policy Signer
+    o1h:  Soroban to MCP Server in seconds + Policy Signer
+    o2:   Soroban to MCP Server in seconds + Policy Signer
+z08 "passkey or smart-wallet onboarding" hybrid: matched 65 -> o1h 73 -> o2 65
+    base: DeFi Quest - From Zero to DeFi in Minutes; Passkey-Kit integration; Stellar Onboarding Hub; Accesly; Veil; Accesly; Stellar on Boarding Hub; Stella Pass; Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Passkey-Kit integration; Stellar Onboarding Hub; Buckspay SDK; lumengate; Tukar; Riskon; TalkToStellar; Tornado-style privacy pools on Stellar Soroban; Druid
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; Passkey-Kit integration; Stellar Onboarding Hub; lumengate; Accesly; Veil; Accesly; Stellar on Boarding Hub; Stella Pass; Stelakey
+z08 "passkey or smart-wallet onboarding" keyword: matched 5 -> o1h 18 -> o2 6
+    base: DeFi Quest - From Zero to DeFi in Minutes; Stellar Onboarding Hub; Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks; Passkey-Kit integration
+    o1h:  DeFi Quest - From Zero to DeFi in Minutes; Tukar; Passkey-Kit integration; Buckspay SDK; lumengate; Druid; Riskon; Kale Farm Re-Design; Bimex; TalkToStellar
+    o2:   DeFi Quest - From Zero to DeFi in Minutes; lumengate; Stellar Onboarding Hub; Stellar Smart Wallets; x402 Smart Wallet - By Sorobanhooks; Passkey-Kit integration
+z08 "passkey or smart-wallet onboarding" winners hybrid: matched 4 -> o1h 5 -> o2 4; o2 byte-identical to base
+z08 "passkey or smart-wallet onboarding" winners keyword: matched 2 -> o1h 3 -> o2 2; o2 byte-identical to base
+z09 "smart contract" hybrid: matched 244 -> o1h 244 -> o2 244; o2 byte-identical to base
+z09 "smart contract" keyword: matched 244 -> o1h 244 -> o2 244; o2 byte-identical to base
+z09 "smart contract" winners hybrid: matched 11 -> o1h 11 -> o2 11; o2 byte-identical to base
+z09 "smart contract" winners keyword: matched 11 -> o1h 11 -> o2 11; o2 byte-identical to base
+z10 "wallet for remittances" hybrid: matched 115 -> o1h 115 -> o2 115; o2 byte-identical to base
+z10 "wallet for remittances" keyword: matched 105 -> o1h 105 -> o2 105; o2 byte-identical to base
+z10 "wallet for remittances" winners hybrid: matched 8 -> o1h 8 -> o2 8; o2 byte-identical to base
+z10 "wallet for remittances" winners keyword: matched 8 -> o1h 8 -> o2 8; o2 byte-identical to base
+z11 "account abstraction" hybrid: matched 39 -> o1h 39 -> o2 39; o2 byte-identical to base
+z11 "account abstraction" keyword: matched 39 -> o1h 39 -> o2 39; o2 byte-identical to base
+z11 "account abstraction" winners hybrid: matched 1 -> o1h 1 -> o2 1; o2 byte-identical to base
+z11 "account abstraction" winners keyword: matched 1 -> o1h 1 -> o2 1; o2 byte-identical to base
+z12 "smart" hybrid: matched 86 -> o1h 86 -> o2 86; o2 byte-identical to base
+z12 "smart" keyword: matched 86 -> o1h 86 -> o2 86; o2 byte-identical to base
+z12 "smart" winners hybrid: matched 6 -> o1h 6 -> o2 6; o2 byte-identical to base
+z12 "smart" winners keyword: matched 6 -> o1h 6 -> o2 6; o2 byte-identical to base
+z13 "wallet" hybrid: matched 89 -> o1h 89 -> o2 89; o2 byte-identical to base
+z13 "wallet" keyword: matched 89 -> o1h 89 -> o2 89; o2 byte-identical to base
+z13 "wallet" winners hybrid: matched 6 -> o1h 6 -> o2 6; o2 byte-identical to base
+z13 "wallet" winners keyword: matched 6 -> o1h 6 -> o2 6; o2 byte-identical to base
+z14 "savings circle with automatic payouts" hybrid: matched 16 -> o1h 16 -> o2 16; o2 byte-identical to base
+z14 "savings circle with automatic payouts" keyword: matched 6 -> o1h 6 -> o2 6; o2 byte-identical to base
+
+probe | all: matched | all: grade 2 | all: grade 0 | winners: matched | winners: grade 2 | winners: grade 0 (hybrid top 10, base -> o1h -> o2; ungraded counted apart)
+z01 passkey smart wallet | 63 -> 57 -> 57 | 8 -> 10 -> 8 | 2 -> 0 -> 2 | 4 -> 4 -> 4 | 1 -> 2 -> 2 | 2 -> 2 -> 2
+z02 passkey | 15 -> 15 -> 15 | 10 -> 10 -> 10 | 0 -> 0 -> 0 | 2 -> 2 -> 2 | 2 -> 2 -> 2 | 0 -> 0 -> 0
+z03 smart wallet | 167 -> 21 -> 21 | 5 -> 10 -> 10 | 4 -> 0 -> 0 | 12 -> 2 -> 2 | 0 -> 2 -> 2 | 6 -> 0 -> 0
+z04 smart account | 120 -> 21 -> 21 | 5 -> 10 -> 10 | 5 -> 0 -> 0 | 7 -> 2 -> 2 | 1 -> 2 -> 2 | 5 -> 0 -> 0
+z05 passkey-kit | 19 -> 19 -> 19 | 10 -> 10 -> 10 | 0 -> 0 -> 0 | 2 -> 2 -> 2 | 2 -> 2 -> 2 | 0 -> 0 -> 0
+z06 passkey wallet onboarding | 36 -> 36 -> 36 | 2 -> 2 -> 2 | 1 -> 1 -> 1 | 3 -> 3 -> 3 | 1 -> 1 -> 1 | 1 -> 1 -> 1
+z07 smart account policy signers | 11 -> 5 -> 5 | 0 -> 0 -> 0 | 4 -> 0 -> 0 | 1 -> 1 -> 1 | 0 -> 0 -> 0 | 0 -> 0 -> 0
+z08 passkey or smart-wallet onboarding | 65 -> 73 -> 65 | 3 -> 2 -> 3 | 3 -> 1 -> 3 | 4 -> 5 -> 4 | 1 -> 1 -> 1 | 2 -> 2 -> 2
+
+== battery questions: the battery's named builds (base, o1h, o2) ==
+
+sa01-topic (all builds): o2 changed
+  hybrid base: matched 167; must_any 4 of (11): first 10 7, first 20 8, matched 8 [Veil 8, Stellar Smart Wallets 4, Buckspay SDK 2, lumengate 3, Stelakey 1, DeFi Quest - From Zero to DeFi in Minutes 10, Soroban to MCP Server in seconds + Policy Signer 11, Passkey-Kit integration 6]
+  hybrid o1h: matched 166; must_any 4 of (11): first 10 6, first 20 7, matched 8 [Veil 10, Stellar Smart Wallets 6, Buckspay SDK 2, lumengate 3, Stelakey 1, DeFi Quest - From Zero to DeFi in Minutes 13, Soroban to MCP Server in seconds + Policy Signer 23, Passkey-Kit integration 4]
+  hybrid o2: matched 161; must_any 4 of (11): first 10 7, first 20 8, matched 8 [Veil 6, Stellar Smart Wallets 4, Buckspay SDK 3, lumengate 2, Stelakey 1, DeFi Quest - From Zero to DeFi in Minutes 9, Soroban to MCP Server in seconds + Policy Signer 17, Passkey-Kit integration 5]
+  keyword base: matched 41; must_any 4 of (11): first 10 4, first 20 5, matched 6 [Stellar Smart Wallets 3, Buckspay SDK 4, lumengate 1, Stelakey 5, Soroban to MCP Server in seconds + Policy Signer 12, Passkey-Kit integration 21]
+  keyword o1h: matched 41; must_any 4 of (11): first 10 4, first 20 5, matched 6 [Stellar Smart Wallets 6, Buckspay SDK 2, lumengate 3, Stelakey 10, Soroban to MCP Server in seconds + Policy Signer 23, Passkey-Kit integration 14]
+  keyword o2: matched 35; must_any 4 of (11): first 10 5, first 20 6, matched 6 [Stellar Smart Wallets 2, Buckspay SDK 4, lumengate 1, Stelakey 3, Soroban to MCP Server in seconds + Policy Signer 17, Passkey-Kit integration 8]
+
+sa01-verbatim (all builds): o2 changed
+  hybrid base: matched 296; must_any 4 of (11): first 10 4, first 20 5, matched 10 [Veil 22, Stellar Smart Wallets 6, Buckspay SDK 9, lumengate 26, Stelakey 4, Stellar Vault 84, DeFi Quest - From Zero to DeFi in Minutes 13, Soroban to MCP Server in seconds + Policy Signer 115, Stellar Onboarding Hub 165, Passkey-Kit integration 2]
+  hybrid o1h: matched 293; must_any 4 of (11): first 10 4, first 20 5, matched 10 [Veil 22, Stellar Smart Wallets 7, Buckspay SDK 9, lumengate 26, Stelakey 4, Stellar Vault 84, DeFi Quest - From Zero to DeFi in Minutes 13, Soroban to MCP Server in seconds + Policy Signer 115, Stellar Onboarding Hub 165, Passkey-Kit integration 1]
+  hybrid o2: matched 293; must_any 4 of (11): first 10 4, first 20 5, matched 10 [Veil 22, Stellar Smart Wallets 6, Buckspay SDK 9, lumengate 26, Stelakey 4, Stellar Vault 84, DeFi Quest - From Zero to DeFi in Minutes 13, Soroban to MCP Server in seconds + Policy Signer 115, Stellar Onboarding Hub 165, Passkey-Kit integration 2]
+  keyword base: matched 14; must_any 4 of (11): first 10 2, first 20 2, matched 2 [Stellar Smart Wallets 1, Passkey-Kit integration 4]
+  keyword o1h: matched 11; must_any 4 of (11): first 10 2, first 20 2, matched 2 [Stellar Smart Wallets 1, Passkey-Kit integration 2]
+  keyword o2: matched 11; must_any 4 of (11): first 10 2, first 20 2, matched 2 [Stellar Smart Wallets 1, Passkey-Kit integration 4]
+
+sa02-topic (winners only): o2 byte-identical to base
+  hybrid base: matched 9; must (2): first 10 1, first 20 1, matched 1 [DeFi Quest - From Zero to DeFi in Minutes 1]; should (1): first 10 0, first 20 0, matched 0 []; acceptable (3): first 10 1, first 20 1, matched 1 [Stratum 8]
+  hybrid o1h: matched 9; must (2): first 10 1, first 20 1, matched 1 [DeFi Quest - From Zero to DeFi in Minutes 1]; should (1): first 10 0, first 20 0, matched 0 []; acceptable (3): first 10 1, first 20 1, matched 1 [Stratum 8]
+  hybrid o2: matched 9; must (2): first 10 1, first 20 1, matched 1 [DeFi Quest - From Zero to DeFi in Minutes 1]; should (1): first 10 0, first 20 0, matched 0 []; acceptable (3): first 10 1, first 20 1, matched 1 [Stratum 8]
+  keyword base: matched 2; must (2): first 10 1, first 20 1, matched 1 [DeFi Quest - From Zero to DeFi in Minutes 1]; should (1): first 10 0, first 20 0, matched 0 []; acceptable (3): first 10 0, first 20 0, matched 0 []
+  keyword o1h: matched 2; must (2): first 10 1, first 20 1, matched 1 [DeFi Quest - From Zero to DeFi in Minutes 1]; should (1): first 10 0, first 20 0, matched 0 []; acceptable (3): first 10 0, first 20 0, matched 0 []
+  keyword o2: matched 2; must (2): first 10 1, first 20 1, matched 1 [DeFi Quest - From Zero to DeFi in Minutes 1]; should (1): first 10 0, first 20 0, matched 0 []; acceptable (3): first 10 0, first 20 0, matched 0 []
+
+sa02-verbatim (winners only): o2 byte-identical to base
+  hybrid base: matched 31; must (2): first 10 1, first 20 1, matched 1 [DeFi Quest - From Zero to DeFi in Minutes 10]; should (1): first 10 1, first 20 1, matched 1 [Stellar Onboarding Hub 7]; acceptable (3): first 10 0, first 20 0, matched 0 []
+  hybrid o1h: matched 32; must (2): first 10 1, first 20 1, matched 1 [DeFi Quest - From Zero to DeFi in Minutes 10]; should (1): first 10 1, first 20 1, matched 1 [Stellar Onboarding Hub 7]; acceptable (3): first 10 0, first 20 0, matched 0 []
+  hybrid o2: matched 31; must (2): first 10 1, first 20 1, matched 1 [DeFi Quest - From Zero to DeFi in Minutes 10]; should (1): first 10 1, first 20 1, matched 1 [Stellar Onboarding Hub 7]; acceptable (3): first 10 0, first 20 0, matched 0 []
+  keyword base: matched 0; must (2): first 10 0, first 20 0, matched 0 []; should (1): first 10 0, first 20 0, matched 0 []; acceptable (3): first 10 0, first 20 0, matched 0 []
+  keyword o1h: matched 1; must (2): first 10 0, first 20 0, matched 0 []; should (1): first 10 0, first 20 0, matched 0 []; acceptable (3): first 10 0, first 20 0, matched 0 []
+  keyword o2: matched 0; must (2): first 10 0, first 20 0, matched 0 []; should (1): first 10 0, first 20 0, matched 0 []; acceptable (3): first 10 0, first 20 0, matched 0 []

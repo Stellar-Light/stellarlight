@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.107",
+		type: "fixed",
+		summary:
+			"searchHackathonBuilds reads smart wallet and smart account as one concept: either phrase (spaced, hyphenated, underscored or joined, singular or plural) or a passkey mention (passkey, passkeys, webauthn) satisfies it, and smart or wallet alone no longer does. q=smart wallet matched 167 submissions, 4 of its first 10 off-topic; it matches 21, all of its first 10 on-topic. q=passkey smart wallet with winnersOnly=1 lists two on-topic winners (DeFi Quest and Tukar, both declaring passkey-kit) where it listed one. vetIdea's prior art reads the same concept.",
+		detail:
+			"A passkey in q is never widened. When a build satisfies another concept of q with its passkey mention, that concept takes it, and in that build the smart concept needs one of the phrases; a q holding both phrases has one concept. vetIdea's one-word evidence rule counts either phrase, and an untaken passkey mention, in the build's own name or description, and its note names what satisfies the concept. Measured by replaying the real search, prior-art and brief code over 305 frozen queries captured from live 1.9.99 to 1.9.101, before the reranker (a live page's order can differ), with every moved row graded by this round's and earlier rounds' blind grades or the labeled set's labels: the 269 queries holding neither phrase nor a hyphen are byte-identical; q=smart account matched 120 and matches 21, its first 10 on-topic 5 to 10 and off-topic 5 to 0; 23 off-topic builds leave a top 5 and none enters; the unused-words claims stay true (0 false of 529); 10 adversarial probes are unchanged. Trade-off: in 37 list rows an on-topic build leaves a top 5, a top 20 or a matched list. 30 are swaps, another on-topic build taking the place. 7 are real losses on 3 query and build pairs: on q=passkey or smart-wallet onboarding, Veil and Passkey-Kit integration fall from 5th to 6th, passed by a build that writes passkey smart accounts and says nothing of onboarding; on one held-out evaluation question, Zelyo leaves the matched list it entered partly on the word smart in smart contracts. vetIdea's prior art for q=smart account policy signers lists 1 build where it listed 4; the three that leave were graded partly on-topic. Not measured: a q holding the phrase and one other word now has two concepts, so, as for any two-word q, a build holding either one matches: q=smart wallet payments matches 290 builds where it matched 71, the builds holding the phrase or a passkey first.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.106",
 		type: "changed",
 		summary:

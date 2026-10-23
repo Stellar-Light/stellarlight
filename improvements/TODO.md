@@ -483,6 +483,18 @@ Found 2026-10-23 by the dead-protocol guard round
   `codeInUse` is verified).
 
 
+Found 2026-10-23 in review of the smart wallet O2 ship
+(`improvements/rounds/2026-10-23-smart-wallet-o2.md`):
+
+- searchHackathonBuilds: a q holding smart wallet (or smart account) and one
+  other word has two concepts, so the half rule admits a build holding
+  either one, and meta.counts grows: q=smart wallet payments matches 290
+  where it matched 71 before spec 1.9.112 (a smart wallet for agents 274
+  and 107, smart wallet game 100 and 28). The first rows hold the phrase or
+  a passkey. No frozen set holds this shape. Measure it (a frozen set of
+  phrase-plus-one-word queries, graded blind) before any rule, for example
+  requiring the smart concept when q names it.
+
 ## Owner decisions (safe default in brackets)
 
 - Run the gone-repos execute before 2026-10-27 10:59 UTC [run].

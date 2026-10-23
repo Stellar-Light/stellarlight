@@ -653,7 +653,9 @@ export interface ScoredBuild {
 	 * uses as typed (or in the plural or singular), 0 to 1; set on word
 	 * matches. A synonym does not count ("usdc" is not "stablecoin"), nor does
 	 * track or award text, which names a category every entry in it shares
-	 * ("Best Stablecoin Integration"). */
+	 * ("Best Stablecoin Integration"). A smart wallet or smart account counts
+	 * either phrase, and passkey evidence no other concept of q took
+	 * (heldTerms): they name one thing. */
 	textShare?: number;
 	/** Vector similarity to the query, when search by meaning ran. */
 	similarity?: number;
@@ -713,12 +715,50 @@ const otherNumber = (w: string) =>
 					? [`${w}es`]
 					: [];
 
+/** A hyphenated phrase in both numbers, hyphenated, spaced and joined. */
+const spellings = (t: string) =>
+	wordForms(t).flatMap((f) => [f, f.replace(/-/g, " "), f.replace(/-/g, "")]);
+
+/** "smart wallet" or "smart account" in q, spaced, underscored, hyphenated
+ * or joined, either number, with no letter, digit or hyphen against an edge:
+ * read as the singular hyphenated phrase, one concept. */
+const SMART_PHRASE =
+	/(?<![\p{L}\p{N}-])smart[\s_-]*(wallet|account)s?(?![\p{L}\p{N}-])/gu;
+
+/** The concept a smart wallet or smart account in q becomes. */
+export const SMART_CONCEPT = /^smart-(wallet|account)$/;
+
+/** What satisfies a smart-wallet or smart-account concept. A passkey (a
+ * WebAuthn credential) cannot sign for a classic Stellar account, only
+ * through a contract account, which builders call a smart wallet
+ * (passkey-kit) or a smart account (smart-account-kit): so either phrase
+ * also matches the other, and so does passkey evidence (passkey-kit and
+ * passkey-kit-sdk hold passkey). One way only: not every smart wallet uses
+ * passkeys, so passkey in q is never expanded. As three words, q=passkey
+ * smart wallet dropped the winner Tukar, whose declared passkey-kit covered
+ * one of them (live 1.9.101). Smart and wallet apart are not evidence: the 3
+ * submissions holding only them say smart contract beside a wallet. */
+const SMART_FORMS = [
+	...spellings("smart-wallet"),
+	...spellings("smart-account"),
+];
+const PASSKEY_FORMS = ["passkey", "passkeys", "webauthn"];
+
+type Term = {
+	t: string;
+	forms: string[];
+	variants: ((hay: string) => boolean)[];
+	own: ((hay: string) => boolean)[];
+	/** A smart-wallet or smart-account concept's passkey evidence. */
+	passkey?: ((hay: string) => boolean)[];
+};
+
 /** The concepts a query is searched by: its words less query filler and the
  * generic words every submission says, each with the forms it matches. */
-function queryTerms(query: string) {
+function queryTerms(query: string): Term[] {
 	const raw = [
 		...new Set(
-			contentTokens(query).filter(
+			contentTokens(query.replace(SMART_PHRASE, "smart-$1")).filter(
 				(t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t),
 			),
 		),
@@ -729,9 +769,24 @@ function queryTerms(query: string) {
 	const parts = new Set(
 		raw.filter((t) => t.includes("-")).flatMap((t) => t.split("-")),
 	);
-	return raw
-		.filter((t) => !parts.has(t))
+	const kept = raw.filter((t) => !parts.has(t));
+	// The two phrases name one thing, so a q holding both has one such
+	// concept, named by the first: as two, one mention covered both.
+	const smart = kept.find((t) => SMART_CONCEPT.test(wordCore(t)));
+	return kept
+		.filter((t) => t === smart || !SMART_CONCEPT.test(wordCore(t)))
 		.map((t) => {
+			if (t === smart)
+				return {
+					t: wordCore(t),
+					forms: [...SMART_FORMS, ...PASSKEY_FORMS],
+					variants: SMART_FORMS.map(termMatcher),
+					// Either phrase counts as typed: vetIdea's evidence rule took
+					// only q's own, so q=smart account dropped builds that write
+					// smart wallet (lane Z3, 2026-10-23).
+					own: SMART_FORMS.map(termMatcher),
+					passkey: PASSKEY_FORMS.map(termMatcher),
+				};
 			const joined = t.includes("-")
 				? phraseForms(t).flatMap((f) => [
 						f.replace(/-/g, " "),
@@ -747,6 +802,34 @@ function queryTerms(query: string) {
 				own: [...wordForms(t), ...joined].map(termMatcher),
 			};
 		});
+}
+
+/** The terms one build is held to. Passkey evidence is one fact, whichever
+ * word says it, so it satisfies at most one concept of q: a build that
+ * satisfies another concept of q with a passkey form (q=passkey smart wallet:
+ * its passkey) needs the phrase for the smart wallet; otherwise its passkey
+ * evidence satisfies the smart wallet, as typed too. Counted for both, it
+ * put passkey builds that miss the rest of q above builds that do it (lane
+ * Z3, 2026-10-23). */
+function heldTerms(terms: Term[], hay: string): Term[] {
+	const smart = terms.find((x) => x.passkey);
+	const passkey = smart?.passkey;
+	if (!passkey) return terms;
+	const taken = terms.some(
+		(x) =>
+			x !== smart &&
+			x.forms.some((f, i) => /passkey|webauthn/.test(f) && x.variants[i](hay)),
+	);
+	if (taken) return terms;
+	return terms.map((x) =>
+		x === smart
+			? {
+					...x,
+					variants: [...x.variants, ...passkey],
+					own: [...x.own, ...passkey],
+				}
+			: x,
+	);
 }
 
 /**
@@ -1124,17 +1207,20 @@ export function searchHackathonBuilds(
 		opts.packages ? pool.map((b) => [b, withPackages(b)] as const) : [],
 	);
 	const haystack = (b: IndexedBuild) => hay.get(b) ?? b.haystack;
+	const held = new Map(
+		pool.map((b) => [b, heldTerms(terms, haystack(b))] as const),
+	);
 	// Rarer words say more. In an agents hackathon "agents" is everywhere and
 	// "x402" is not, so a build is weighed by WHICH words it covers, not how
 	// many: counting words let descriptions padded with common ones ("per",
 	// "api", "agents") outrank the winners that built the idea.
 	const weight = new Map<string, number>();
-	for (const { t, variants } of terms) {
+	terms.forEach(({ t }, i) => {
 		const df = pool.filter((b) =>
-			variants.some((hit) => hit(haystack(b))),
+			(held.get(b) ?? terms)[i].variants.some((hit) => hit(haystack(b))),
 		).length;
 		weight.set(t, Math.log((pool.length + 1) / (df + 1)));
-	}
+	});
 	const scored: ScoredBuild[] = [];
 	for (const b of pool) {
 		let score = 0;
@@ -1144,7 +1230,7 @@ export function searchHackathonBuilds(
 		const inText = new Set<string>();
 		const name = b.name.toLowerCase();
 		const text = `${name} ${b.description ?? ""}`.toLowerCase();
-		for (const { t, variants, own } of terms) {
+		for (const { t, variants, own } of held.get(b) ?? terms) {
 			for (const hit of variants) {
 				if (hit(name)) {
 					score += 3;
