@@ -14,6 +14,12 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
+import {
+	CODE_REFERENCE_COMPACT,
+	PROJECT_COMPACT,
+	viewParamError,
+	withView,
+} from "@/lib/compact-view";
 import { projectConfidence, semanticProjectConfidence } from "@/lib/confidence";
 import {
 	DEFAULT_READ_TIMEOUT_MS,
@@ -891,6 +897,13 @@ export function GET(req: NextRequest) {
 async function handle(req: NextRequest) {
 	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
+	const viewError = viewParamError(sp.get("view"), sp.get("fields"));
+	if (viewError) return NextResponse.json(viewError, { status: 400 });
+	// ?view=compact rows (src/lib/compact-view.ts); the default passes through.
+	const view = withView(sp.get("view"), {
+		projects: PROJECT_COMPACT,
+		codeReferences: CODE_REFERENCE_COMPACT,
+	});
 	// Accept `query`/`keyword`/`search` as aliases for `q`. Agents (and adapters)
 	// frequently send the search term under `query` — the field name many other
 	// tools use. An unrecognized param silently drops the term and the endpoint
@@ -918,7 +931,7 @@ async function handle(req: NextRequest) {
 	if (scfRaw && !SCF_TRUE.includes(scfRaw) && !SCF_FALSE.includes(scfRaw)) {
 		return NextResponse.json(
 			{
-				error: `Invalid scfAwarded value '${scfRaw}' — it is a boolean filter.`,
+				error: `Invalid scfAwarded value '${scfRaw}': it is a boolean filter.`,
 				acceptedValues: { true: SCF_TRUE, false: SCF_FALSE },
 			},
 			{ status: 400 },
@@ -987,6 +1000,7 @@ async function handle(req: NextRequest) {
 		"offset",
 		"exp",
 		"fields",
+		"view",
 	]);
 	const unknownParams = [...new Set([...sp.keys()])].filter(
 		(k) => !KNOWN_PARAMS.has(k),
@@ -1036,7 +1050,7 @@ async function handle(req: NextRequest) {
 			filters: { category, scfAwarded: scfAwardedOnly, limit },
 		});
 		return NextResponse.json(
-			{
+			view({
 				meta: withProjectsPartial({
 					source: "https://stellarlight.xyz/directory",
 					generatedAt: new Date().toISOString(),
@@ -1060,7 +1074,7 @@ async function handle(req: NextRequest) {
 				}),
 				projects: [],
 				codeReferences: [],
-			},
+			}),
 			{
 				headers: {
 					"Cache-Control": "no-store",
@@ -2625,7 +2639,7 @@ async function handle(req: NextRequest) {
 	});
 
 	return NextResponse.json(
-		{
+		view({
 			meta: withProjectsPartial({
 				source: "https://stellarlight.xyz/directory",
 				generatedAt: new Date().toISOString(),
@@ -2799,7 +2813,7 @@ async function handle(req: NextRequest) {
 			// consumers get existing-repo prior-art without a separate tool call.
 			// Each carries the repo url + homepage to cite. See /api/repos/search.
 			codeReferences,
-		},
+		}),
 		{
 			headers: {
 				...serverTiming(startedAt),
