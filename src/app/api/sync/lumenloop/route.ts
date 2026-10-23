@@ -5,6 +5,7 @@ import { headers } from "next/headers";
 import { join } from "path";
 import { getPayload } from "payload";
 import { simpleGit } from "simple-git";
+import { isAdmin } from "@/collections/access";
 import {
 	extractEntryId,
 	type LumenloopEntry,
@@ -33,9 +34,9 @@ export async function POST(request: Request) {
 	const headersList = await headers();
 	const payload = await getPayload({ config: configPromise });
 
-	// Authenticate admin user
+	// Admins only: a signed-in partner also sets user (src/collections/access.ts)
 	const { user } = await payload.auth({ headers: headersList });
-	if (!user) {
+	if (!isAdmin(user)) {
 		return Response.json({ error: "Unauthorized" }, { status: 401 });
 	}
 

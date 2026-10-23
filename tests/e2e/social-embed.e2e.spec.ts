@@ -1,17 +1,29 @@
 import { expect, test } from "@playwright/test";
 
 const BASE_URL = "http://localhost:3000";
-const PAYLOAD_SECRET = process.env.PAYLOAD_SECRET || "fd84c413aaba141bcc9f31c8";
+// Preview needs an admin session. A local test admin from the `users`
+// collection; never commit its values.
+const ADMIN_EMAIL = process.env.E2E_ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.E2E_ADMIN_PASSWORD;
 
 // The TEST draft blog post has a socialEmbed block with an X/Twitter URL
 const TEST_SLUG = "test";
 
 test.describe("Social Embed Block (Blog Rich Text)", () => {
+	test.skip(
+		!ADMIN_EMAIL || !ADMIN_PASSWORD,
+		"Set E2E_ADMIN_EMAIL and E2E_ADMIN_PASSWORD (a local test admin) to preview the draft post",
+	);
+
 	test.beforeEach(async ({ page }) => {
+		// Sign in; page.request shares the page's cookie jar, so the session
+		// cookie rides on the preview request.
+		const login = await page.request.post(`${BASE_URL}/api/users/login`, {
+			data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
+		});
+		expect(login.ok()).toBe(true);
 		// Enable draft mode and navigate to the TEST blog post
-		const response = await page.goto(
-			`${BASE_URL}/api/preview?secret=${PAYLOAD_SECRET}&slug=${TEST_SLUG}`,
-		);
+		await page.goto(`${BASE_URL}/api/preview?slug=${TEST_SLUG}`);
 		// Should redirect to /blog/test
 		await page.waitForURL(`${BASE_URL}/blog/${TEST_SLUG}`);
 	});
