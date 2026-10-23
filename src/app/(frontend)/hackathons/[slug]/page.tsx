@@ -9,15 +9,99 @@ import {
 	XCircle,
 } from "lucide-react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { cache, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
+import { getHackathonDetail } from "@/lib/hackathon-detail";
+import { parsePlacement } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { clampSentences, plainText } from "@/lib/quality-text";
 
 export const dynamic = "force-dynamic";
 
 type Params = Promise<{ slug: string }>;
+
+/** A winner or submission as GET /api/hackathons/{slug} serves it: the
+ * DoraHacks shape, the curated roster's or the hackathons collection's. */
+type Row = {
+	id: string;
+	name: string;
+	url: string;
+	slug?: string | null;
+	project?: { slug: string } | null;
+	category?: string | null;
+	track?: string | null;
+	hackathonPrizeTrack?: string | null;
+	shortDescription?: string | null;
+	description?: string | null;
+	hackathonStatus?: string | null;
+	hackathonPlacement?: string | null;
+	placementRank?: number | null;
+	prizeUsd?: number | null;
+	hackathonPrize?: number | null;
+};
+
+/** The event as the API serves it; a null count is not known, never 0. */
+type Hackathon = {
+	name: string;
+	slug: string;
+	description: string | null;
+	startDate: string | null;
+	endDate: string | null;
+	status: string;
+	externalUrl: string | null;
+	organizer: { name: string } | null;
+	source?: string;
+	coverage?: string;
+	stats: {
+		totalSubmissions: number | null;
+		coverageNote: string | null;
+		winnersNote: string | null;
+		outcomes: {
+			built: number;
+			inProgress: number;
+			abandoned: number;
+		} | null;
+	};
+};
+
+const NOT_KNOWN = "not known";
+
+/** The API's answer for this slug, read once per request (the metadata and
+ * the page share it). */
+const load = cache(async (slug: string) => {
+	const payload = await getPayloadSafe();
+	// The API answers 503 here: an outage, never "no such event".
+	if (!payload) throw new Error("hackathon store unavailable");
+	return getHackathonDetail(payload, slug);
+});
+
+/** A DoraHacks event's description is its event page in markdown (23,058
+ * characters for Real-World ZK); the page shows its first paragraph of prose
+ * as plain text, or nothing when the page has none. Any other event's
+ * description is plain text, shown whole. */
+function leadOf(h: Hackathon): string | null {
+	if (h.source !== "dorahacks") return h.description;
+	const prose = h.description
+		?.split(/\n\s*\n/)
+		.filter((b) => !/^\s*(#|!\[|>|[-*+] |\d+\. |\||<|```|---)/.test(b))
+		.map((b) =>
+			plainText(
+				b
+					.replace(/!\[[^\]]*\]\([^)]*\)/g, "")
+					.replace(/\[([^\]]*)\]\([^)]*\)/g, "$1")
+					.replace(/__/g, "")
+					.replace(
+						/(^|[\s(])[*_]([^*_\s][^*_]*?)[*_](?=[\s).,;:!?]|$)/g,
+						"$1$2",
+					),
+			),
+		)
+		// A sentence, not a label ("Formação de equipe") or a list of terms.
+		.find((t) => t.length >= 60 && /[.!?](\s|$)/.test(t));
+	return prose ? clampSentences(prose, 600).text : null;
+}
 
 const STATUS_META = {
 	Built: {
@@ -45,58 +129,60 @@ export async function generateMetadata({
 	params: Params;
 }): Promise<Metadata> {
 	const { slug } = await params;
-	const payload = await getPayloadSafe();
-	if (!payload) return { title: "Hackathon Not Found" };
-
-	try {
-		const result = await payload.find({
-			collection: "hackathons",
-			where: { slug: { equals: slug } },
-			limit: 1,
-			depth: 0,
-		});
-		const h = result.docs[0] as any;
-		if (!h) return { title: "Hackathon Not Found" };
-		return {
-			title: h.name,
-			description:
-				h.description?.slice(0, 160) ??
-				`Stellar hackathon: ${h.name}. See submitted projects and which ones shipped.`,
-		};
-	} catch {
-		return { title: "Hackathon Not Found" };
-	}
+	// An outage renders the error page, under the site's default title.
+	const detail = await load(slug).catch(() => null);
+	if (!detail) return {};
+	if (!detail.found) return { title: "Hackathon Not Found" };
+	const h: Hackathon = detail.body.hackathon;
+	const lead = leadOf(h);
+	return {
+		title: h.name,
+		description: lead
+			? clampSentences(lead, 160).text
+			: `Dates, winners and submissions of ${h.name}, a Stellar hackathon.`,
+		alternates: { canonical: `/hackathons/${h.slug}` },
+	};
 }
 
-function formatDate(d?: string | null) {
-	if (!d) return "-";
-	return new Date(d).toLocaleDateString("en-US", {
-		month: "short",
-		day: "numeric",
-		year: "numeric",
-	});
+// The API serves calendar dates in UTC; read in the server's zone, a date
+// west of UTC printed the day before.
+const DAY = { month: "short", day: "numeric", timeZone: "UTC" } as const;
+
+function formatDate(d: string) {
+	return new Date(d).toLocaleDateString("en-US", { ...DAY, year: "numeric" });
 }
 
 function formatDateRange(start?: string | null, end?: string | null) {
 	if (!start || !end) return "";
 	const s = new Date(start);
 	const e = new Date(end);
-	const sameYear = s.getFullYear() === e.getFullYear();
-	const sameMonth = sameYear && s.getMonth() === e.getMonth();
+	const sameYear = s.getUTCFullYear() === e.getUTCFullYear();
+	const sameMonth = sameYear && s.getUTCMonth() === e.getUTCMonth();
 	if (sameMonth) {
-		return `${s.toLocaleDateString("en-US", { month: "short", day: "numeric" })}-${e.getDate()}, ${e.getFullYear()}`;
+		return `${s.toLocaleDateString("en-US", DAY)}-${e.getUTCDate()}, ${e.getUTCFullYear()}`;
 	}
 	if (sameYear) {
-		return `${s.toLocaleDateString("en-US", { month: "short", day: "numeric" })} to ${e.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${e.getFullYear()}`;
+		return `${s.toLocaleDateString("en-US", DAY)} to ${e.toLocaleDateString("en-US", DAY)}, ${e.getUTCFullYear()}`;
 	}
 	return `${formatDate(start)} to ${formatDate(end)}`;
 }
 
-function getLogoUrl(logo: any): string | null {
-	if (!logo || typeof logo !== "object") return null;
-	if (logo.url) return logo.url;
-	if (logo.filename) return `/media/${logo.filename}`;
-	return null;
+const CARD =
+	"group block rounded-2xl border border-border/50 hover:border-border bg-card p-5 transition-colors";
+
+/** A row with a directory project opens its page; any other opens its own
+ * url (its DoraHacks page, or the page that names the win) in a new tab. */
+function RowLink({ p, children }: { p: Row; children: ReactNode }) {
+	const slug = p.slug ?? p.project?.slug;
+	return slug ? (
+		<Link href={`/project/${slug}`} className={CARD}>
+			{children}
+		</Link>
+	) : (
+		<a href={p.url} target="_blank" rel="noopener noreferrer" className={CARD}>
+			{children}
+		</a>
+	);
 }
 
 function StatusBadge({ status }: { status: HackathonStatusKey }) {
@@ -135,78 +221,74 @@ function StatBlock({
 	);
 }
 
-const PLACEMENT_META: Record<
-	string,
-	{ label: string; classes: string; rank: number }
-> = {
+const PLACEMENT_META: Record<string, { label: string; classes: string }> = {
 	"grand-prize": {
 		label: "Grand Prize",
 		classes: "bg-[#FDDA24] text-[#171717] border-[#FDDA24]",
-		rank: 0,
 	},
 	"1st": {
 		label: "1st",
 		classes: "bg-[#FDDA24]/20 text-[#FDDA24] border-[#FDDA24]/40",
-		rank: 1,
 	},
 	"2nd": {
 		label: "2nd",
 		classes: "bg-zinc-300/15 text-zinc-200 border-zinc-300/30",
-		rank: 2,
 	},
 	"3rd": {
 		label: "3rd",
 		classes: "bg-amber-700/20 text-amber-400 border-amber-700/40",
-		rank: 3,
 	},
 	"track-winner": {
 		label: "Track Winner",
 		classes: "bg-purple-500/15 text-purple-300 border-purple-500/30",
-		rank: 4,
 	},
 	"honorable-mention": {
 		label: "Honorable Mention",
 		classes: "bg-white/5 text-muted-foreground border-border/50",
-		rank: 5,
 	},
 };
 
-function WinnerCard({ p }: { p: any }) {
-	const logo = getLogoUrl(p.logo);
-	const placement = p.hackathonPlacement as keyof typeof PLACEMENT_META;
-	const meta = PLACEMENT_META[placement];
+/** The badge style of a placement rank as the API parses it (900 is an
+ * honorable mention or finalist); any other rank, or none, a track winner's. */
+const RANK_STYLE: Record<number, string> = {
+	1: "1st",
+	2: "2nd",
+	3: "3rd",
+	900: "honorable-mention",
+};
+
+/** The collection's placement values by name; any other label (DoraHacks',
+ * the curated roster's) styled by its rank, and shown without the prize
+ * after " - ", which the card's footer shows. */
+function placementMeta(p: Row) {
+	if (!p.hackathonPlacement) return null;
+	const known = PLACEMENT_META[p.hackathonPlacement];
+	if (known) return known;
+	const style = RANK_STYLE[p.placementRank ?? 0] ?? "track-winner";
+	return {
+		label: parsePlacement(p.hackathonPlacement).label,
+		classes: PLACEMENT_META[style].classes,
+	};
+}
+
+function WinnerCard({ p }: { p: Row }) {
+	const meta = placementMeta(p);
+	const prize = p.prizeUsd ?? p.hackathonPrize;
+	const track = p.track ?? p.hackathonPrizeTrack;
+	const blurb = p.shortDescription ?? p.description;
 	return (
-		<Link
-			href={`/project/${p.slug}`}
-			className="group block rounded-2xl border border-border/50 hover:border-border bg-card p-5 transition-colors"
-		>
+		<RowLink p={p}>
 			<div className="flex items-start justify-between gap-3 mb-3">
 				<div className="flex items-center gap-3 min-w-0 flex-1">
-					{logo ? (
-						<Image
-							src={logo}
-							alt={p.name}
-							width={48}
-							height={48}
-							className="w-12 h-12 rounded-xl object-cover border border-border/50 flex-shrink-0"
-						/>
-					) : (
-						<div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-border/50 flex items-center justify-center flex-shrink-0">
-							<Trophy className="w-5 h-5 text-[#FDDA24]" />
-						</div>
-					)}
+					<div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-border/50 flex items-center justify-center flex-shrink-0">
+						<Trophy className="w-5 h-5 text-[#FDDA24]" />
+					</div>
 					<div className="min-w-0">
 						<h3 className="text-base font-semibold text-foreground group-hover:text-white transition-colors leading-tight truncate">
 							{p.name}
 						</h3>
 						<div className="text-xs text-muted-foreground truncate">
 							{p.category}
-							{p.types && p.types.length > 0 && (
-								<>
-									<span className="mx-1">·</span>
-									{p.types.slice(0, 2).join(", ")}
-								</>
-							)}
 						</div>
 					</div>
 				</div>
@@ -219,54 +301,41 @@ function WinnerCard({ p }: { p: any }) {
 				)}
 			</div>
 
-			{p.shortDescription && (
+			{blurb && (
 				<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-					{p.shortDescription}
+					{blurb}
 				</p>
 			)}
 
 			<div className="flex items-center justify-between text-xs pt-3 border-t border-border/50">
-				{p.hackathonPrize ? (
+				{prize ? (
 					<span className="inline-flex items-center gap-1 text-foreground font-semibold">
 						<Trophy className="w-3.5 h-3.5 text-[#FDDA24]" />$
-						{p.hackathonPrize.toLocaleString()}
+						{prize.toLocaleString()}
 					</span>
 				) : (
-					<span className="text-muted-foreground">Prize awarded</span>
+					<span className="text-muted-foreground">Prize not stated</span>
 				)}
-				{p.hackathonPrizeTrack && (
-					<span className="text-muted-foreground truncate ml-2">
-						{p.hackathonPrizeTrack}
-					</span>
+				{track && (
+					<span className="text-muted-foreground truncate ml-2">{track}</span>
 				)}
 			</div>
-		</Link>
+		</RowLink>
 	);
 }
 
-function ProjectCard({ p }: { p: any }) {
-	const logo = getLogoUrl(p.logo);
-	const status = p.hackathonStatus as HackathonStatusKey | undefined;
+function ProjectCard({ p }: { p: Row }) {
+	const status = (p.hackathonStatus ?? undefined) as
+		| HackathonStatusKey
+		| undefined;
+	const blurb = p.shortDescription ?? p.description;
 
 	return (
-		<Link
-			href={`/project/${p.slug}`}
-			className="group block rounded-2xl border border-border/50 hover:border-border bg-card p-5 transition-colors"
-		>
+		<RowLink p={p}>
 			<div className="flex items-start gap-4 mb-3">
-				{logo ? (
-					<Image
-						src={logo}
-						alt={p.name}
-						width={48}
-						height={48}
-						className="w-12 h-12 rounded-xl object-cover border border-border/50 flex-shrink-0"
-					/>
-				) : (
-					<div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-border/50 flex items-center justify-center flex-shrink-0">
-						<Activity className="w-5 h-5 text-muted-foreground" />
-					</div>
-				)}
+				<div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-border/50 flex items-center justify-center flex-shrink-0">
+					<Activity className="w-5 h-5 text-muted-foreground" />
+				</div>
 				<div className="flex-1 min-w-0">
 					<div className="flex items-start justify-between gap-2 mb-1">
 						<h3 className="text-base font-semibold text-foreground group-hover:text-white transition-colors leading-tight truncate">
@@ -275,22 +344,14 @@ function ProjectCard({ p }: { p: any }) {
 						{status && <StatusBadge status={status} />}
 					</div>
 					<div className="text-xs text-muted-foreground">
-						{p.category}
-						{p.types && p.types.length > 0 && (
-							<>
-								<span className="mx-1">·</span>
-								{p.types.slice(0, 2).join(", ")}
-							</>
-						)}
+						{p.category ?? p.track}
 					</div>
 				</div>
 			</div>
-			{p.shortDescription && (
-				<p className="text-sm text-muted-foreground line-clamp-2">
-					{p.shortDescription}
-				</p>
+			{blurb && (
+				<p className="text-sm text-muted-foreground line-clamp-2">{blurb}</p>
 			)}
-		</Link>
+		</RowLink>
 	);
 }
 
@@ -300,59 +361,34 @@ export default async function HackathonDetailPage({
 	params: Params;
 }) {
 	const { slug } = await params;
-	const payload = await getPayloadSafe();
-	if (!payload) notFound();
+	const detail = await load(slug);
+	if (!detail.found) notFound();
+	const hackathon: Hackathon = detail.body.hackathon;
+	const { stats } = hackathon;
+	// Ranked best first by the API; placementRank says when that is a ranking.
+	const winners: readonly Row[] = detail.body.winners;
+	const winnersOnly = hackathon.coverage === "winners-only";
+	// Only its winners on record: they show above, never as its submissions.
+	const projects: readonly Row[] = winnersOnly ? [] : detail.body.submissions;
+	const submitted = stats.totalSubmissions;
+	const coverageLine = winnersOnly
+		? "Only this event's winners are on record here, listed above. Its other submissions are not stored, so how many projects were submitted is not known."
+		: stats.coverageNote;
 
-	const hackResult = await payload.find({
-		collection: "hackathons",
-		where: { slug: { equals: slug } },
-		limit: 1,
-		depth: 2,
-	});
-	const hackathon = hackResult.docs[0] as any;
-	if (!hackathon) notFound();
-
-	// Fetch projects linked to this hackathon. Use a direct query (not the join field)
-	// so we can apply our standard "show only approved-ish statuses" filter.
-	const projectsResult = await payload.find({
-		collection: "projects",
-		where: {
-			hackathon: { equals: hackathon.id },
-		},
-		limit: 200,
-		depth: 1,
-		sort: "-relevanceScore",
-	});
-	const projects = projectsResult.docs as any[];
-
-	const totalProjects = projects.length;
-	const byStatus = projects.reduce<Record<string, number>>((acc, p) => {
-		const s = p.hackathonStatus ?? "Unknown";
-		acc[s] = (acc[s] ?? 0) + 1;
-		return acc;
-	}, {});
-	const builtCount = byStatus["Built"] ?? 0;
-	const inProgressCount = byStatus["In Progress"] ?? 0;
-	const abandonedCount = byStatus["Abandoned"] ?? 0;
+	// Beside a count of unknowns, built, in progress and abandoned all 0 say
+	// nothing was classified, not that nothing survived: not known, not 0.
+	const builtCount = stats.outcomes?.built ?? 0;
+	const inProgressCount = stats.outcomes?.inProgress ?? 0;
+	const abandonedCount = stats.outcomes?.abandoned ?? 0;
 	const trackedCount = builtCount + inProgressCount + abandonedCount;
-	const shippedPct =
-		trackedCount > 0
-			? Math.round(((builtCount + inProgressCount) / trackedCount) * 100)
-			: 0;
+	const tracked = trackedCount > 0;
+	const shippedPct = tracked
+		? Math.round(((builtCount + inProgressCount) / trackedCount) * 100)
+		: 0;
+	const ifTracked = (n: number) => (tracked ? n.toString() : NOT_KNOWN);
 
-	// Winners — projects with a `hackathonPlacement` set, ordered by placement rank.
-	const winners = projects
-		.filter((p: any) => !!p.hackathonPlacement)
-		.sort(
-			(a: any, b: any) =>
-				(PLACEMENT_META[a.hackathonPlacement]?.rank ?? 99) -
-				(PLACEMENT_META[b.hackathonPlacement]?.rank ?? 99),
-		);
-
-	const organizer =
-		typeof hackathon.organizer === "object" && hackathon.organizer
-			? hackathon.organizer
-			: null;
+	const organizer = hackathon.organizer;
+	const lead = leadOf(hackathon);
 
 	const status = hackathon.status as
 		| "upcoming"
@@ -418,60 +454,70 @@ export default async function HackathonDetailPage({
 							</a>
 						)}
 					</div>
-					{hackathon.description && (
+					{lead && (
 						<p className="text-base text-muted-foreground leading-relaxed max-w-3xl">
-							{hackathon.description}
+							{lead}
 						</p>
 					)}
 				</div>
 
 				{/* Winners highlight */}
-				{winners.length > 0 && (
+				{(winners.length > 0 || stats.winnersNote) && (
 					<section className="mb-12">
 						<div className="flex items-baseline gap-3 mb-5">
 							<h2 className="text-2xl font-bold text-foreground tracking-tight inline-flex items-center gap-2">
 								<Trophy className="w-5 h-5 text-[#FDDA24]" />
 								Winners
 							</h2>
-							<span className="text-sm text-muted-foreground">
-								{winners.length} {winners.length === 1 ? "project" : "projects"}
-							</span>
+							{winners.length > 0 && (
+								<span className="text-sm text-muted-foreground">
+									{winners.length}{" "}
+									{winners.length === 1 ? "project" : "projects"}
+								</span>
+							)}
 						</div>
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-							{winners.slice(0, 6).map((p: any) => (
-								<WinnerCard key={p.id} p={p} />
-							))}
-						</div>
+						{stats.winnersNote && (
+							<p className="text-sm text-muted-foreground leading-relaxed max-w-3xl mb-5">
+								{stats.winnersNote}
+							</p>
+						)}
+						{winners.length > 0 && (
+							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+								{winners.map((p) => (
+									<WinnerCard key={p.id} p={p} />
+								))}
+							</div>
+						)}
 					</section>
 				)}
 
 				{/* Stats banner */}
-				{totalProjects > 0 && (
+				{(submitted !== null || tracked) && (
 					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
 						<StatBlock
 							label="Submitted projects"
-							value={totalProjects.toString()}
+							value={submitted === null ? NOT_KNOWN : submitted.toString()}
 						/>
 						<StatBlock
 							label="Still building"
-							value={(builtCount + inProgressCount).toString()}
-							sub={`${shippedPct}% of tracked`}
+							value={ifTracked(builtCount + inProgressCount)}
+							sub={tracked ? `${shippedPct}% of tracked` : undefined}
 						/>
 						<StatBlock
 							label="Shipped"
-							value={builtCount.toString()}
+							value={ifTracked(builtCount)}
 							sub="status: Built"
 						/>
 						<StatBlock
 							label="Abandoned"
-							value={abandonedCount.toString()}
+							value={ifTracked(abandonedCount)}
 							sub="status: Abandoned"
 						/>
 					</div>
 				)}
 
 				{/* Conversion funnel */}
-				{trackedCount > 0 && (
+				{tracked && (
 					<div className="mb-12">
 						<h2 className="text-xl font-bold text-foreground mb-4">
 							Outcomes funnel
@@ -505,23 +551,29 @@ export default async function HackathonDetailPage({
 						<h2 className="text-2xl font-bold text-foreground tracking-tight">
 							Projects
 						</h2>
-						{totalProjects > 0 && (
+						{projects.length > 0 && submitted !== null && (
 							<span className="text-sm text-muted-foreground">
-								{totalProjects} submitted
+								{submitted} submitted
 							</span>
 						)}
 					</div>
+					{coverageLine && (
+						<p className="text-sm text-muted-foreground leading-relaxed max-w-3xl mb-5">
+							{coverageLine}
+						</p>
+					)}
 
-					{totalProjects === 0 ? (
-						<div className="rounded-2xl border border-border/50 bg-card p-8 text-center">
-							<Trophy className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
-							<p className="text-sm text-muted-foreground mb-1">
-								No projects from this hackathon are tracked yet.
-							</p>
-							<p className="text-xs text-muted-foreground/60">
-								Projects appear here once linked from the main directory.
-							</p>
-						</div>
+					{projects.length === 0 ? (
+						!winnersOnly && (
+							<div className="rounded-2xl border border-border/50 bg-card p-8 text-center">
+								<Trophy className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
+								<p className="text-sm text-muted-foreground">
+									{status === "completed"
+										? "No submissions from this event are on record."
+										: "No submissions from this event are on record yet."}
+								</p>
+							</div>
+						)
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 							{projects.map((p) => (

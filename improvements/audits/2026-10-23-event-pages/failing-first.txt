@@ -1,0 +1,27 @@
+The page test and the sitemap test of this branch, run on the base tree
+(git archive d9bd53b5, so the page, the route and the sitemap are
+origin/main's and src/lib/hackathon-detail.ts does not exist):
+
+  vitest run src/app/__tests__/sitemap.test.ts \
+    'src/app/(frontend)/hackathons/[slug]/__tests__/page.test.tsx'
+
+   × /hackathons/<slug> > renders an upcoming curated event from the API's body, with no count it does not hold
+   × /hackathons/<slug> > a winners-only event: its winners once, never as its submissions
+   × /hackathons/<slug> > a DoraHacks event: unclassified outcomes are not known, its page's first prose is the description
+   × /hackathons/<slug> > a collection event: classified outcomes, the funnel and directory links
+   × /hackathons/<slug> > says why there are no winners when the API says why
+   ✓ /hackathons/<slug> > 404s only for a slug the API does not know
+   × /hackathons/<slug> > a store outage is an error, not a 404
+   × /hackathons/<slug> > metadata: the event's name, its description's first prose and a canonical
+   × sitemap event pages > lists every event the API opens, once
+   ✓ sitemap event pages > a failed listing read drops the events, not the sitemap
+ Test Files  2 failed (2)
+      Tests  8 failed | 2 passed (10)
+
+The five render failures are the bug itself: the base page throws
+NEXT_HTTP_ERROR_FALLBACK;404 for every event. The outage test fails on the
+same 404 (digest NEXT_HTTP_ERROR_FALLBACK;404 where none is expected), the
+metadata test on "Hackathon Not Found". The two that pass hold on the base
+by construction: it 404s every slug, and it lists no event at all.
+
+On this branch: 10 passed (8 page, 2 sitemap).
