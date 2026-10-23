@@ -314,7 +314,56 @@ describe("ranking", () => {
 			row("stellar/stellar-cli", "src/a.rs", "symbol", "networking"),
 		];
 		expect(rankRows(q("netwo"), rows)).toEqual([]);
-		expect(rankRows(q("network"), rows)[0].factors).toContain("prefix:1");
+		// Six letters or more may match inside a name, but never above a word match.
+		expect(rankRows(q("network"), rows)[0].factors).toContain("word:1");
+	});
+
+	it("a plain word that is a whole part of a name is a word match, not a held identifier", () => {
+		const rows = [
+			row(
+				"stellar/stellar-rpc",
+				"cfg/config.go",
+				"symbol",
+				"DefaultGetFeeStatsQueueLimit",
+			),
+		];
+		const [s] = rankRows(q("default"), rows);
+		expect(s.factors).toContain("word:1");
+		expect(s.factors).toContain("prefix:0");
+	});
+
+	it("an identifier of several parts held inside a longer name keeps the held tier", () => {
+		const rows = [
+			row(
+				"stellar/stellar-rpc",
+				"methods/get_events.go",
+				"symbol",
+				"NewGetEventsHandler",
+			),
+		];
+		expect(rankRows(q("getEvents"), rows)[0].factors).toContain("prefix:1");
+	});
+
+	it("between equal matches, the name the query explains more fully ranks first", () => {
+		const rows = [
+			row(
+				"stellar/stellar-rpc",
+				"config/options.go",
+				"symbol",
+				"request-backlog-default-transactions-queue-limit",
+				10,
+			),
+			row(
+				"stellar/stellar-rpc",
+				"config/options.go",
+				"symbol",
+				"default-transactions-limit",
+				20,
+			),
+		];
+		expect(rankRows(q("default transactions limit"), rows)[0].row.locator).toBe(
+			"default-transactions-limit",
+		);
 	});
 
 	it("a named repo lifts its pointers; a filter keeps one repo or kind", () => {

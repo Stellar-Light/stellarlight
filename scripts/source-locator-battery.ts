@@ -10,7 +10,8 @@
  * battery's refs instead (same buildRows the builder runs).
  *
  * A case is found at k when a top-k pointer has the expected repo and one of
- * the expected paths; the symbol column is reported beside it.
+ * the expected (full-answer) paths; the symbol column, and a partial-answer
+ * path (partialPaths) when a case lists one, are reported beside it.
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -31,6 +32,8 @@ interface Case {
 	q: string;
 	repo: string;
 	paths: string[];
+	/** Files that answer part of the question: reported, never counted as found. */
+	partialPaths?: string[];
 	symbols?: string[];
 }
 
@@ -78,11 +81,17 @@ const results = battery.cases.map((c) => {
 				c.paths.includes(s.row.path) &&
 				(c.symbols ?? []).includes(s.row.locator ?? ""),
 		) + 1 || null;
+	const partialRank =
+		ranked.findIndex(
+			(s) =>
+				s.row.repo === c.repo && (c.partialPaths ?? []).includes(s.row.path),
+		) + 1 || null;
 	return {
 		id: c.id,
 		q: c.q,
 		fileRank,
 		symbolRank,
+		partialRank,
 		candidates: pool.length,
 		overCap: pool.length > CANDIDATE_CAP,
 		matched: ranked.length,
@@ -109,6 +118,15 @@ const summary = {
 	).length,
 	missedTop10: results
 		.filter((r) => r.fileRank === null || r.fileRank > 10)
+		.map((r) => r.id),
+	/** Missed in the top 10 by full-answer paths, with a partial-answer path there. */
+	partialOnlyTop10: results
+		.filter(
+			(r) =>
+				(r.fileRank === null || r.fileRank > 10) &&
+				r.partialRank !== null &&
+				r.partialRank <= 10,
+		)
 		.map((r) => r.id),
 };
 for (const r of results)

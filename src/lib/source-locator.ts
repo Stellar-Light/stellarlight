@@ -11,11 +11,13 @@
  *
  * Ranking is lexical and the same for every query. Each word of q scores by
  * its best match against a pointer: the whole symbol (or file name) 8, a
- * symbol holding the word (six letters or more) 5, else the word's parts
- * inside a symbol or heading 3 times the share found; the word's parts in
- * the path or repo name add 1 times the share. A repo named in q adds 3 to
- * its pointers. Ties: symbols and headings before files, then the shorter
- * path, the repo name, the line.
+ * symbol holding an identifier of several parts (getEvents in
+ * NewGetEventsHandler, six letters or more) 5, else the word's parts that
+ * are parts of the symbol or heading 3 times the share found; the word's
+ * parts in the path or repo name add 1 times the share. The share of the
+ * name's own parts that q accounts for adds up to 1, so a tighter name wins
+ * a near tie. A repo named in q adds 3 to its pointers. Ties: symbols and
+ * headings before files, then the shorter path, the repo name, the line.
  */
 
 export const LOCATOR_KINDS = ["file", "symbol", "heading"] as const;
@@ -339,11 +341,13 @@ export const WEIGHTS = {
 	word: 3,
 	path: 1,
 	repo: 3,
+	/** Times the share of the name's own words that q accounts for: a tighter name wins a tie. */
+	name: 1,
 } as const;
 
 export interface Scored {
 	row: IndexRow;
-	/** How many of q's words this pointer matched at all: the first sort key. */
+	/** How many of q's words this pointer matched at all. */
 	matched: number;
 	total: number;
 	score: number;
@@ -366,12 +370,19 @@ export function scoreRow(pq: ParsedQuery, row: IndexRow): Scored | null {
 	const reasons: string[] = [];
 	let total = 0;
 	let matched = 0;
+	const nameHits = new Set<string>();
 	for (const u of pq.units) {
-		// The locator's own match: the whole name, its start or inside it (a
-		// word of six letters or more only), else the share of u's words in it.
+		// The locator's own match: the whole name; an identifier of several
+		// parts held inside it (getEvents in NewGetEventsHandler); else the
+		// share of u's words that are parts of it. A single word held inside
+		// a name without being one of its parts (six letters or more only)
+		// counts as a word, never above one.
 		let loc = 0;
 		let hit: Hit | null = null;
 		let why = "";
+		const held = isSymbol && u.key.length >= 6 && locKey.includes(u.key);
+		const inLoc = u.words.filter((w) => locWords.has(w));
+		for (const w of inLoc) nameHits.add(w);
 		if (
 			isFile
 				? u.raw.toLowerCase() === base
@@ -380,17 +391,18 @@ export function scoreRow(pq: ParsedQuery, row: IndexRow): Scored | null {
 			loc = WEIGHTS.exact;
 			hit = "exact";
 			why = `${isFile ? "file" : "symbol"} ${u.raw}`;
-		} else if (isSymbol && u.key.length >= 6 && locKey.includes(u.key)) {
+		} else if (held && u.words.length > 1) {
 			loc = WEIGHTS.prefix;
 			hit = "prefix";
 			why = `symbol holds ${u.raw}`;
-		} else {
-			const inLoc = u.words.filter((w) => locWords.has(w));
-			if (inLoc.length) {
-				loc = (WEIGHTS.word * inLoc.length) / u.words.length;
-				hit = "word";
-				why = `${row.locatorKind} has ${inLoc.join(" ")}`;
-			}
+		} else if (inLoc.length) {
+			loc = (WEIGHTS.word * inLoc.length) / u.words.length;
+			hit = "word";
+			why = `${row.locatorKind} has ${inLoc.join(" ")}`;
+		} else if (held) {
+			loc = WEIGHTS.word;
+			hit = "word";
+			why = `symbol holds ${u.raw}`;
 		}
 		// The path's words add to it: a symbol in a file named for the same thing is stronger.
 		const inPath = u.words.filter((w) => pWords.has(w));
@@ -409,6 +421,8 @@ export function scoreRow(pq: ParsedQuery, row: IndexRow): Scored | null {
 		}
 	}
 	if (!matched) return null;
+	const nameShare = locWords.size ? nameHits.size / locWords.size : 0;
+	total += WEIGHTS.name * nameShare;
 	const repoNamed = pq.repos.includes(row.repo);
 	if (repoNamed) {
 		total += WEIGHTS.repo;
@@ -416,6 +430,7 @@ export function scoreRow(pq: ParsedQuery, row: IndexRow): Scored | null {
 	}
 	const max =
 		(WEIGHTS.exact + WEIGHTS.path) * pq.units.length +
+		WEIGHTS.name +
 		(pq.repos.length ? WEIGHTS.repo : 0);
 	const matchReason = reasons.join("; ");
 	return {
@@ -425,7 +440,7 @@ export function scoreRow(pq: ParsedQuery, row: IndexRow): Scored | null {
 		score: Math.min(100, Math.round((100 * total) / max)),
 		matchReason:
 			matchReason.length > 100 ? `${matchReason.slice(0, 99)}…` : matchReason,
-		factors: `words:${matched}/${pq.units.length} exact:${counts.exact} prefix:${counts.prefix} word:${counts.word} path:${counts.path} repo:${repoNamed ? 1 : 0}`,
+		factors: `words:${matched}/${pq.units.length} exact:${counts.exact} prefix:${counts.prefix} word:${counts.word} path:${counts.path} repo:${repoNamed ? 1 : 0} name:${nameShare.toFixed(2)}`,
 	};
 }
 

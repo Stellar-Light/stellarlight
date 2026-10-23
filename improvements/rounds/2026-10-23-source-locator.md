@@ -93,3 +93,57 @@ Owner decision, safe default first:
    does, the criteria pass as measured (m2 rank 1), and the lane can build
    the operation; the holds-tier defect should then be fixed and measured
    on a fresh held-out battery, not on this one.
+
+## Log, continued (second pass)
+
+- 13:57Z: blind ruling on m2 (an independent judge, Claude Sonnet 5.5,
+  high effort, saw no ranks, read both files at the pinned commit): rpcv1
+  `config/options.go` YES, it defines `max-transactions-limit` (200) and
+  `default-transactions-limit` (50) as operator options of the released
+  rpcv1 daemon; rpcv2 `config/config.go` PARTIAL, the compiled defaults of
+  the unreleased rpcv2 daemon, which operators override through TOML, not
+  there. The frozen label stands and the first gate failed as fixed.
+  Option 2 above is closed by this ruling.
+- 13:57Z: orchestrator brief for this pass. Fix the holds-tier defect,
+  designed on the dev set and the old battery only (the old battery is a
+  dev set now: it has been read). A fresh held-out battery of 20 questions
+  is written by a separate agent that has not seen the code; it is not
+  read until the orchestrator says go, then it runs once. Ship criteria,
+  fixed: m1 and m2 in the top 3 by their frozen labels; at least 14 of 20
+  fresh questions found in the top 10 (a top-10 pointer with the expected
+  repo and one of the full-answer paths); partial-path hits reported
+  separately.
+- 13:58Z, tests first: three new ranking tests fail on the old code (3
+  failed, 17 passed): a plain word that is a whole part of a name scored
+  as held (`prefix:1` for `default` in `DefaultGetFeeStatsQueueLimit`); a
+  six-letter word inside a name it is not a part of outranked a word match
+  (`network` in `networking`); between equal matches the longer name won
+  on line order.
+- 13:59Z, the fix in `scoreRow`: the held tier (5) only for a q word of
+  several parts (`getEvents`); a single word held inside a name without
+  being one of its parts scores as a word (3), never above one; and the
+  share of the name's own parts that q accounts for adds up to 1. 20 of 20
+  tests pass.
+- 14:00Z, measured on the dev data only (the 8 dev cases and the 20 read
+  battery cases, rows from the 13:41Z build):
+  | variant | old battery top 1/3/10 | m1 | m2 (file, symbol) | dev top 1/3/10 |
+  | --- | --- | --- | --- | --- |
+  | first pass (gate run) | 13/18/19 | 2 | 8, 8 | 8/8/8 |
+  | held tier fix only | 15/20/20 | 2 | 3, 10 | 8/8/8 |
+  | fix and name share (kept) | 16/20/20 | 1 | 2, 4 | 8/8/8 |
+  m2's margin is thin: rank 2 is `max-get-transactions-execution-duration`
+  in the right file (total 12.6), ranks 3 to 6 tie at 12.5
+  (`DefaultGetTransactionsDefaultItemsPerResponse` in rpcv2, then
+  `max-transactions-limit` and `default-transactions-limit`); rank 1 stays
+  rpcv2 `DefaultGetTransactionsMaxItemsPerResponse` (15.6). Saved as
+  `pass2-old-battery-as-dev.json` and `pass2-dev-set.json`.
+- Released versus unreleased code, considered and not built: rpcv2 is
+  compiled into the default build and chosen at run time by
+  `--enable-rpcv2` (off by default; `main.go` says so in a comment, and a
+  build can hide the flag through ldflags). No build tag, cargo feature or
+  path convention in the tree marks it, so telling it apart would take a
+  rule for this one repo, which the brief rules out. Go build tags and
+  non-default cargo features are generic signals, but neither applies to
+  any battery case, so they were left out (no evidence either way).
+- Harness: cases may list `partialPaths`; partial hits are reported
+  (`partialRank`, `partialOnlyTop10`) and never counted as found.
