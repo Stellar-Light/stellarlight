@@ -1,0 +1,3759 @@
+{
+	"about": "Blind grades for builds a rerank variant gained or lost in a top 5 against its base (evaluate.mts sheet), 469 rows. Rubric v1 of ../2026-10-22-prior-art-precision/labels.json. Judged from the idea and the build's name, event and one-line summary only.",
+	"labelers": "two independent blind passes per row (Claude Sonnet 5.5, effort high), each reading its chunk of the shuffled sheet; grade is the stricter of the two",
+	"agreement": "430 of 469",
+	"grades": [
+		{
+			"set": "40",
+			"ideaId": "i01",
+			"buildId": "dorahacks-buidl-42643",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i01",
+			"buildId": "dorahacks-buidl-42747",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i01",
+			"buildId": "dorahacks-buidl-42779",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i02",
+			"buildId": "dorahacks-buidl-46425",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i04",
+			"buildId": "dorahacks-buidl-30895",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i04",
+			"buildId": "dorahacks-buidl-34223",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i04",
+			"buildId": "dorahacks-buidl-36340",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i07",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i10",
+			"buildId": "dorahacks-buidl-25334",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i13",
+			"buildId": "dorahacks-buidl-42449",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i13",
+			"buildId": "dorahacks-buidl-42798",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i15",
+			"buildId": "dorahacks-buidl-31772",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i16",
+			"buildId": "dorahacks-buidl-36270",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i16",
+			"buildId": "dorahacks-buidl-42664",
+			"grade": 0,
+			"passA": 1,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i16",
+			"buildId": "dorahacks-buidl-42669",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i19",
+			"buildId": "dorahacks-buidl-28437",
+			"grade": 0,
+			"passA": 1,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i20",
+			"buildId": "dorahacks-buidl-30931",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i21",
+			"buildId": "dorahacks-buidl-36062",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i22",
+			"buildId": "dorahacks-buidl-42520",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i22",
+			"buildId": "dorahacks-buidl-42626",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i22",
+			"buildId": "dorahacks-buidl-42666",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i24",
+			"buildId": "dorahacks-buidl-24233",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i25",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i26",
+			"buildId": "dorahacks-buidl-46154",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i28",
+			"buildId": "dorahacks-buidl-39857",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i29",
+			"buildId": "dorahacks-buidl-36789",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i30",
+			"buildId": "dorahacks-buidl-34193",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i30",
+			"buildId": "dorahacks-buidl-35587",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i30",
+			"buildId": "dorahacks-buidl-35631",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i33",
+			"buildId": "dorahacks-buidl-24491",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i33",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i34",
+			"buildId": "dorahacks-buidl-30845",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "40",
+			"ideaId": "i35",
+			"buildId": "dorahacks-buidl-35598",
+			"grade": 0,
+			"passA": 1,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i35",
+			"buildId": "dorahacks-buidl-35621",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "40",
+			"ideaId": "i38",
+			"buildId": "dorahacks-buidl-42396",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "40",
+			"ideaId": "i40",
+			"buildId": "dorahacks-buidl-36327",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f01",
+			"buildId": "dorahacks-buidl-27022",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f01",
+			"buildId": "dorahacks-buidl-36259",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f01",
+			"buildId": "dorahacks-buidl-36302",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f01",
+			"buildId": "dorahacks-buidl-39945",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f01",
+			"buildId": "dorahacks-buidl-42769",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f01",
+			"buildId": "dorahacks-buidl-46110",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f01",
+			"buildId": "dorahacks-buidl-46523",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-24691",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-36316",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-42141",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-42334",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-42393",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-42594",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-42765",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-46109",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-46476",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f02",
+			"buildId": "dorahacks-buidl-46536",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f03",
+			"buildId": "dorahacks-buidl-25268",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f03",
+			"buildId": "dorahacks-buidl-25329",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f03",
+			"buildId": "dorahacks-buidl-34223",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f03",
+			"buildId": "dorahacks-buidl-36340",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f03",
+			"buildId": "dorahacks-buidl-42159",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f03",
+			"buildId": "dorahacks-buidl-45392",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f03",
+			"buildId": "dorahacks-buidl-46248",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f04",
+			"buildId": "dorahacks-buidl-24565",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f04",
+			"buildId": "dorahacks-buidl-30848",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f04",
+			"buildId": "dorahacks-buidl-35618",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f04",
+			"buildId": "dorahacks-buidl-36778",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f04",
+			"buildId": "dorahacks-buidl-39770",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f04",
+			"buildId": "dorahacks-buidl-46171",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f05",
+			"buildId": "dorahacks-buidl-14618",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f05",
+			"buildId": "dorahacks-buidl-36064",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f05",
+			"buildId": "dorahacks-buidl-39622",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f05",
+			"buildId": "dorahacks-buidl-42534",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f06",
+			"buildId": "dorahacks-buidl-25263",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f06",
+			"buildId": "dorahacks-buidl-32618",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f06",
+			"buildId": "dorahacks-buidl-32658",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f06",
+			"buildId": "dorahacks-buidl-32713",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f06",
+			"buildId": "dorahacks-buidl-42373",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f06",
+			"buildId": "dorahacks-buidl-46105",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f06",
+			"buildId": "dorahacks-buidl-46284",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f07",
+			"buildId": "dorahacks-buidl-42606",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f07",
+			"buildId": "dorahacks-buidl-42616",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f07",
+			"buildId": "dorahacks-buidl-42639",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f07",
+			"buildId": "dorahacks-buidl-42668",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-28397",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-28455",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-32676",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-36269",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-41512",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-45075",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-45517",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-46200",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f08",
+			"buildId": "dorahacks-buidl-46376",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f09",
+			"buildId": "dorahacks-buidl-46304",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f09",
+			"buildId": "dorahacks-buidl-46471",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f10",
+			"buildId": "dorahacks-buidl-32681",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f10",
+			"buildId": "dorahacks-buidl-39631",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f10",
+			"buildId": "dorahacks-buidl-42401",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f10",
+			"buildId": "dorahacks-buidl-42820",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f10",
+			"buildId": "dorahacks-buidl-45643",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f11",
+			"buildId": "dorahacks-buidl-24491",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f11",
+			"buildId": "dorahacks-buidl-24804",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f11",
+			"buildId": "dorahacks-buidl-27417",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f11",
+			"buildId": "dorahacks-buidl-30621",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f11",
+			"buildId": "dorahacks-buidl-33711",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f11",
+			"buildId": "dorahacks-buidl-40203",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f11",
+			"buildId": "dorahacks-buidl-46295",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f12",
+			"buildId": "dorahacks-buidl-27341",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f12",
+			"buildId": "dorahacks-buidl-27454",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f12",
+			"buildId": "dorahacks-buidl-42428",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f13",
+			"buildId": "dorahacks-buidl-25334",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f13",
+			"buildId": "dorahacks-buidl-30688",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f13",
+			"buildId": "dorahacks-buidl-30964",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f13",
+			"buildId": "dorahacks-buidl-36289",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f13",
+			"buildId": "dorahacks-buidl-36302",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f13",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f13",
+			"buildId": "dorahacks-buidl-40194",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f13",
+			"buildId": "dorahacks-buidl-42806",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f14",
+			"buildId": "dorahacks-buidl-22963",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f14",
+			"buildId": "dorahacks-buidl-28438",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f14",
+			"buildId": "dorahacks-buidl-36274",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f14",
+			"buildId": "dorahacks-buidl-36317",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f14",
+			"buildId": "dorahacks-buidl-42680",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f14",
+			"buildId": "dorahacks-buidl-42794",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f14",
+			"buildId": "dorahacks-buidl-46154",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f15",
+			"buildId": "dorahacks-buidl-42523",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f15",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f15",
+			"buildId": "dorahacks-buidl-42608",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f15",
+			"buildId": "dorahacks-buidl-42652",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f15",
+			"buildId": "dorahacks-buidl-42661",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f15",
+			"buildId": "dorahacks-buidl-42788",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f16",
+			"buildId": "dorahacks-buidl-24233",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f16",
+			"buildId": "dorahacks-buidl-24562",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f16",
+			"buildId": "dorahacks-buidl-30677",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f16",
+			"buildId": "dorahacks-buidl-32708",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f16",
+			"buildId": "dorahacks-buidl-42589",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f16",
+			"buildId": "dorahacks-buidl-42726",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f16",
+			"buildId": "dorahacks-buidl-42789",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f17",
+			"buildId": "dorahacks-buidl-32691",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f17",
+			"buildId": "dorahacks-buidl-33550",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f17",
+			"buildId": "dorahacks-buidl-46235",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f18",
+			"buildId": "dorahacks-buidl-18773",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f18",
+			"buildId": "dorahacks-buidl-30848",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f18",
+			"buildId": "dorahacks-buidl-35618",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f18",
+			"buildId": "dorahacks-buidl-46405",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f19",
+			"buildId": "dorahacks-buidl-25263",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f19",
+			"buildId": "dorahacks-buidl-25325",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f19",
+			"buildId": "dorahacks-buidl-31600",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f19",
+			"buildId": "dorahacks-buidl-41508",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f19",
+			"buildId": "dorahacks-buidl-42703",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f19",
+			"buildId": "dorahacks-buidl-42801",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f19",
+			"buildId": "dorahacks-buidl-46284",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f20",
+			"buildId": "dorahacks-buidl-28422",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f20",
+			"buildId": "dorahacks-buidl-35585",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f20",
+			"buildId": "dorahacks-buidl-36761",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f20",
+			"buildId": "dorahacks-buidl-42451",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f21",
+			"buildId": "dorahacks-buidl-38027",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f21",
+			"buildId": "dorahacks-buidl-46216",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f22",
+			"buildId": "dorahacks-buidl-32691",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f22",
+			"buildId": "dorahacks-buidl-36316",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f22",
+			"buildId": "dorahacks-buidl-36340",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f23",
+			"buildId": "dorahacks-buidl-27457",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f23",
+			"buildId": "dorahacks-buidl-30702",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f23",
+			"buildId": "dorahacks-buidl-36284",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f23",
+			"buildId": "dorahacks-buidl-38066",
+			"grade": 1,
+			"passA": 2,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f23",
+			"buildId": "dorahacks-buidl-40211",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f23",
+			"buildId": "dorahacks-buidl-42509",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f23",
+			"buildId": "dorahacks-buidl-42769",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f23",
+			"buildId": "dorahacks-buidl-42782",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f24",
+			"buildId": "dorahacks-buidl-24534",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f24",
+			"buildId": "dorahacks-buidl-28402",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f24",
+			"buildId": "dorahacks-buidl-28439",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f24",
+			"buildId": "dorahacks-buidl-46196",
+			"grade": 1,
+			"passA": 2,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f24",
+			"buildId": "dorahacks-buidl-46256",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f24",
+			"buildId": "dorahacks-buidl-46512",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f24",
+			"buildId": "dorahacks-buidl-46535",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f25",
+			"buildId": "dorahacks-buidl-32481",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f25",
+			"buildId": "dorahacks-buidl-32676",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f25",
+			"buildId": "dorahacks-buidl-33869",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f25",
+			"buildId": "dorahacks-buidl-36281",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f25",
+			"buildId": "dorahacks-buidl-36332",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f25",
+			"buildId": "dorahacks-buidl-39826",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f25",
+			"buildId": "dorahacks-buidl-42785",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f25",
+			"buildId": "dorahacks-buidl-46483",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f26",
+			"buildId": "dorahacks-buidl-42459",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f26",
+			"buildId": "dorahacks-buidl-42621",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f26",
+			"buildId": "dorahacks-buidl-42693",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f26",
+			"buildId": "dorahacks-buidl-42711",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-24575",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-28397",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-30457",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-35594",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-36687",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-46157",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-46216",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-46393",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f27",
+			"buildId": "dorahacks-buidl-46509",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f28",
+			"buildId": "dorahacks-buidl-34609",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f28",
+			"buildId": "dorahacks-buidl-36748",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f28",
+			"buildId": "dorahacks-buidl-42721",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f29",
+			"buildId": "dorahacks-buidl-30621",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f29",
+			"buildId": "dorahacks-buidl-36190",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f29",
+			"buildId": "dorahacks-buidl-38085",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f29",
+			"buildId": "dorahacks-buidl-46202",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f30",
+			"buildId": "dorahacks-buidl-25321",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f30",
+			"buildId": "dorahacks-buidl-25343",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f30",
+			"buildId": "dorahacks-buidl-25344",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f30",
+			"buildId": "dorahacks-buidl-31772",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f30",
+			"buildId": "dorahacks-buidl-36786",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "fresh",
+			"ideaId": "f30",
+			"buildId": "dorahacks-buidl-46124",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "block explorer",
+			"buildId": "dorahacks-buidl-30890",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "block explorer",
+			"buildId": "dorahacks-buidl-30895",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "block explorer",
+			"buildId": "dorahacks-buidl-35599",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "block explorer",
+			"buildId": "dorahacks-buidl-40195",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "carbon credits",
+			"buildId": "dorahacks-buidl-35564",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "carbon credits",
+			"buildId": "dorahacks-buidl-35601",
+			"grade": 1,
+			"passA": 2,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "carbon credits",
+			"buildId": "dorahacks-buidl-35610",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "chess game",
+			"buildId": "dorahacks-buidl-39804",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "chess game",
+			"buildId": "dorahacks-buidl-39861",
+			"grade": 0,
+			"passA": 1,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "chess game",
+			"buildId": "dorahacks-buidl-39912",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "chess game",
+			"buildId": "dorahacks-buidl-46518",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "cross border remittances",
+			"buildId": "dorahacks-buidl-45260",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "decentralized identity",
+			"buildId": "dorahacks-buidl-36310",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "decentralized identity",
+			"buildId": "dorahacks-buidl-46457",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "decentralized identity",
+			"buildId": "dorahacks-buidl-46555",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "escrow",
+			"buildId": "dorahacks-buidl-39878",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "escrow",
+			"buildId": "dorahacks-buidl-41503",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "escrow",
+			"buildId": "dorahacks-buidl-45600",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "escrow",
+			"buildId": "dorahacks-buidl-46065",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "event ticketing",
+			"buildId": "dorahacks-buidl-30874",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "insurance",
+			"buildId": "dorahacks-buidl-45999",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "kyc",
+			"buildId": "dorahacks-buidl-46409",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "merchant payments",
+			"buildId": "dorahacks-buidl-42547",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "merchant payments",
+			"buildId": "dorahacks-buidl-46231",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "microloans",
+			"buildId": "dorahacks-buidl-30925",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "microloans",
+			"buildId": "dorahacks-buidl-30929",
+			"grade": 1,
+			"passA": 2,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "mobile wallet",
+			"buildId": "dorahacks-buidl-46062",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "mobile wallet",
+			"buildId": "dorahacks-buidl-46426",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "multisig wallet",
+			"buildId": "dorahacks-buidl-32404",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "multisig wallet",
+			"buildId": "dorahacks-buidl-42611",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "multisig wallet",
+			"buildId": "dorahacks-buidl-46544",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "music nfts",
+			"buildId": "dorahacks-buidl-42806",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "nft marketplace",
+			"buildId": "dorahacks-buidl-46311",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "oracle",
+			"buildId": "dorahacks-buidl-42655",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "oracle",
+			"buildId": "dorahacks-buidl-42774",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "oracle",
+			"buildId": "dorahacks-buidl-46141",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "p2p lending",
+			"buildId": "dorahacks-buidl-27447",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "p2p lending",
+			"buildId": "dorahacks-buidl-38046",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "passkey wallet",
+			"buildId": "dorahacks-buidl-46377",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "payroll",
+			"buildId": "dorahacks-buidl-46337",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "payroll",
+			"buildId": "dorahacks-buidl-46468",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "perpetual futures",
+			"buildId": "dorahacks-buidl-32661",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "perpetual futures",
+			"buildId": "dorahacks-buidl-41505",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "play to earn",
+			"buildId": "dorahacks-buidl-36222",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "play to earn",
+			"buildId": "dorahacks-buidl-36334",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "prediction market",
+			"buildId": "dorahacks-buidl-36320",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "prediction market",
+			"buildId": "dorahacks-buidl-36332",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "prediction market",
+			"buildId": "dorahacks-buidl-39288",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "prediction market",
+			"buildId": "dorahacks-buidl-46439",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "recurring subscription payments",
+			"buildId": "dorahacks-buidl-42724",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "recurring subscription payments",
+			"buildId": "dorahacks-buidl-42764",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "recurring subscription payments",
+			"buildId": "dorahacks-buidl-46064",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "remittance app",
+			"buildId": "dorahacks-buidl-36062",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "remittance app",
+			"buildId": "dorahacks-buidl-46169",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "soroban sdk",
+			"buildId": "dorahacks-buidl-33550",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "soroban sdk",
+			"buildId": "dorahacks-buidl-38045",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "soroban sdk",
+			"buildId": "dorahacks-buidl-42660",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "stablecoin",
+			"buildId": "dorahacks-buidl-45075",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "stablecoin",
+			"buildId": "dorahacks-buidl-45931",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "stablecoin",
+			"buildId": "dorahacks-buidl-46108",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "stablecoin",
+			"buildId": "dorahacks-buidl-46174",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "stablecoin",
+			"buildId": "dorahacks-buidl-46250",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "stablecoin savings",
+			"buildId": "dorahacks-buidl-42669",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "stablecoin savings",
+			"buildId": "dorahacks-buidl-45075",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "stablecoin savings",
+			"buildId": "dorahacks-buidl-45975",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "stablecoin savings",
+			"buildId": "dorahacks-buidl-46200",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "undercollateralized loans",
+			"buildId": "dorahacks-buidl-33712",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "undercollateralized loans",
+			"buildId": "dorahacks-buidl-45988",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "undercollateralized loans",
+			"buildId": "dorahacks-buidl-46506",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "usdc payroll",
+			"buildId": "dorahacks-buidl-35590",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "usdc payroll",
+			"buildId": "dorahacks-buidl-42333",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "short",
+			"ideaId": "verifiable credentials",
+			"buildId": "dorahacks-buidl-25231",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "verifiable credentials",
+			"buildId": "dorahacks-buidl-41524",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "yield aggregator",
+			"buildId": "dorahacks-buidl-24233",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "yield aggregator",
+			"buildId": "dorahacks-buidl-27398",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "short",
+			"ideaId": "yield aggregator",
+			"buildId": "dorahacks-buidl-30457",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "short",
+			"ideaId": "yield aggregator",
+			"buildId": "dorahacks-buidl-46162",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a depegged stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-28397",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a depegged stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a depegged stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-37932",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a depegged stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-42333",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a depegged stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-42664",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a depegged stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-46250",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-36269",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-37932",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-42333",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-42573",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-46174",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-46250",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a minted stablecoin for payments",
+			"buildId": "dorahacks-buidl-46330",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a non-custodial wallet for Stellar",
+			"buildId": "dorahacks-buidl-46300",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a non-custodial wallet for Stellar",
+			"buildId": "dorahacks-buidl-46541",
+			"grade": 1,
+			"passA": 2,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin minter for merchant payments",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin minter for merchant payments",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin minter for merchant payments",
+			"buildId": "dorahacks-buidl-42333",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin minter for merchant payments",
+			"buildId": "dorahacks-buidl-42524",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin minter for merchant payments",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin minter for merchant payments",
+			"buildId": "dorahacks-buidl-42664",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin pegging the dollar for payments",
+			"buildId": "dorahacks-buidl-24491",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin pegging the dollar for payments",
+			"buildId": "dorahacks-buidl-28397",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin pegging the dollar for payments",
+			"buildId": "dorahacks-buidl-36269",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin pegging the dollar for payments",
+			"buildId": "dorahacks-buidl-37932",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin pegging the dollar for payments",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin pegging the dollar for payments",
+			"buildId": "dorahacks-buidl-42669",
+			"grade": 0,
+			"passA": 1,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin pegging the dollar for payments",
+			"buildId": "dorahacks-buidl-46229",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin pegging the dollar for payments",
+			"buildId": "dorahacks-buidl-46330",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin that anchors its peg to gold",
+			"buildId": "dorahacks-buidl-38001",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin that anchors its peg to gold",
+			"buildId": "dorahacks-buidl-45075",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin that anchors its peg to gold",
+			"buildId": "dorahacks-buidl-46108",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin that anchors its peg to gold",
+			"buildId": "dorahacks-buidl-46418",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with 1:1 backing for merchant payments",
+			"buildId": "dorahacks-buidl-28397",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with 1:1 backing for merchant payments",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with 1:1 backing for merchant payments",
+			"buildId": "dorahacks-buidl-36269",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with 1:1 backing for merchant payments",
+			"buildId": "dorahacks-buidl-36737",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with 1:1 backing for merchant payments",
+			"buildId": "dorahacks-buidl-40207",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with 1:1 backing for merchant payments",
+			"buildId": "dorahacks-buidl-42524",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with 1:1 backing for merchant payments",
+			"buildId": "dorahacks-buidl-42664",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with 1:1 backing for merchant payments",
+			"buildId": "dorahacks-buidl-46174",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with daily redemptions for payroll",
+			"buildId": "dorahacks-buidl-25141",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with daily redemptions for payroll",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with daily redemptions for payroll",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with daily redemptions for payroll",
+			"buildId": "dorahacks-buidl-36799",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with daily redemptions for payroll",
+			"buildId": "dorahacks-buidl-46041",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with daily redemptions for payroll",
+			"buildId": "dorahacks-buidl-46108",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with daily redemptions for payroll",
+			"buildId": "dorahacks-buidl-46162",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with daily redemptions for payroll",
+			"buildId": "dorahacks-buidl-46468",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with dollar collateral for payments",
+			"buildId": "dorahacks-buidl-24491",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with dollar collateral for payments",
+			"buildId": "dorahacks-buidl-28397",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with dollar collateral for payments",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with dollar collateral for payments",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with dollar collateral for payments",
+			"buildId": "dorahacks-buidl-37932",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with dollar collateral for payments",
+			"buildId": "dorahacks-buidl-42669",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with dollar collateral for payments",
+			"buildId": "dorahacks-buidl-46229",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "a stablecoin with dollar collateral for payments",
+			"buildId": "dorahacks-buidl-46330",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "accept donations in crypto",
+			"buildId": "dorahacks-buidl-24827",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "accept donations in crypto",
+			"buildId": "dorahacks-buidl-28416",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "accept donations in crypto",
+			"buildId": "dorahacks-buidl-28420",
+			"grade": 1,
+			"passA": 2,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "accept donations in crypto",
+			"buildId": "dorahacks-buidl-28455",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "accept donations in crypto",
+			"buildId": "dorahacks-buidl-33711",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "accept donations in crypto",
+			"buildId": "dorahacks-buidl-42579",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "an algorithmic stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "an algorithmic stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-42333",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "an algorithmic stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-42656",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "an algorithmic stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-42664",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "an algorithmic stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-42666",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "an algorithmic stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-42831",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "an overcollateralized stablecoin for lending",
+			"buildId": "dorahacks-buidl-37961",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "an overcollateralized stablecoin for lending",
+			"buildId": "dorahacks-buidl-45988",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "an overcollateralized stablecoin for lending",
+			"buildId": "dorahacks-buidl-46273",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "charity auctions",
+			"buildId": "dorahacks-buidl-27445",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "charity auctions",
+			"buildId": "dorahacks-buidl-46325",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "charity auctions",
+			"buildId": "dorahacks-buidl-46353",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "charity auctions",
+			"buildId": "dorahacks-buidl-46386",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "charity auctions",
+			"buildId": "dorahacks-buidl-46561",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "donation matching for nonprofits",
+			"buildId": "dorahacks-buidl-28402",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "donation matching for nonprofits",
+			"buildId": "dorahacks-buidl-28416",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "donation matching for nonprofits",
+			"buildId": "dorahacks-buidl-28434",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "donation matching for nonprofits",
+			"buildId": "dorahacks-buidl-30933",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "donation matching for nonprofits",
+			"buildId": "dorahacks-buidl-31797",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "donation matching for nonprofits",
+			"buildId": "dorahacks-buidl-40039",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "fans fund artists",
+			"buildId": "dorahacks-buidl-28434",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "fans fund artists",
+			"buildId": "dorahacks-buidl-31165",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "fans fund artists",
+			"buildId": "dorahacks-buidl-36771",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "fans fund artists",
+			"buildId": "dorahacks-buidl-46432",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "fiat-backed stablecoin for payments",
+			"buildId": "dorahacks-buidl-24491",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "fiat-backed stablecoin for payments",
+			"buildId": "dorahacks-buidl-28397",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "fiat-backed stablecoin for payments",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "fiat-backed stablecoin for payments",
+			"buildId": "dorahacks-buidl-37932",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "fiat-backed stablecoin for payments",
+			"buildId": "dorahacks-buidl-46174",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "fiat-backed stablecoin for payments",
+			"buildId": "dorahacks-buidl-46229",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "fiat-backed stablecoin for payments",
+			"buildId": "dorahacks-buidl-46250",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "fiat-backed stablecoin for payments",
+			"buildId": "dorahacks-buidl-46504",
+			"grade": 0,
+			"passA": 0,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "lending artists insurance",
+			"buildId": "dorahacks-buidl-25263",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "lending artists insurance",
+			"buildId": "dorahacks-buidl-27002",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "lending artists insurance",
+			"buildId": "dorahacks-buidl-27438",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "lending artists insurance",
+			"buildId": "dorahacks-buidl-27447",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "lending artists insurance",
+			"buildId": "dorahacks-buidl-32618",
+			"grade": 0,
+			"passA": 1,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "lending artists insurance",
+			"buildId": "dorahacks-buidl-33712",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "lending artists insurance",
+			"buildId": "dorahacks-buidl-42748",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "lending artists insurance",
+			"buildId": "dorahacks-buidl-46000",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "lending artists insurance",
+			"buildId": "dorahacks-buidl-46284",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "loans for farmers",
+			"buildId": "dorahacks-buidl-33712",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "loans for farmers",
+			"buildId": "dorahacks-buidl-39419",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "loans for farmers",
+			"buildId": "dorahacks-buidl-46443",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microfinance platform",
+			"buildId": "dorahacks-buidl-35594",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "microfinance platform",
+			"buildId": "dorahacks-buidl-35617",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloan app",
+			"buildId": "dorahacks-buidl-30845",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloan app",
+			"buildId": "dorahacks-buidl-30925",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloan app",
+			"buildId": "dorahacks-buidl-35580",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloan app",
+			"buildId": "dorahacks-buidl-36274",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloans for small businesses",
+			"buildId": "dorahacks-buidl-21031",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloans for small businesses",
+			"buildId": "dorahacks-buidl-35580",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloans for small businesses",
+			"buildId": "dorahacks-buidl-35617",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloans for small businesses",
+			"buildId": "dorahacks-buidl-45891",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloans for small businesses",
+			"buildId": "dorahacks-buidl-45988",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "microloans for small businesses",
+			"buildId": "dorahacks-buidl-46206",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "non custodial wallet",
+			"buildId": "dorahacks-buidl-25289",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "non custodial wallet",
+			"buildId": "dorahacks-buidl-46162",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "non custodial wallet",
+			"buildId": "dorahacks-buidl-46206",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "non custodial wallet",
+			"buildId": "dorahacks-buidl-46300",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "non custodial wallet",
+			"buildId": "dorahacks-buidl-46348",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "non custodial wallet",
+			"buildId": "dorahacks-buidl-46426",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "payroll for remote teams",
+			"buildId": "dorahacks-buidl-46108",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "payroll for remote teams",
+			"buildId": "dorahacks-buidl-46405",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "payroll for remote teams",
+			"buildId": "dorahacks-buidl-46526",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "perpetuals / derivatives trading protocol on Stellar",
+			"buildId": "dorahacks-buidl-27426",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "perpetuals / derivatives trading protocol on Stellar",
+			"buildId": "dorahacks-buidl-32669",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "perpetuals / derivatives trading protocol on Stellar",
+			"buildId": "dorahacks-buidl-32713",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "perpetuals / derivatives trading protocol on Stellar",
+			"buildId": "dorahacks-buidl-46514",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "redeemable stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-40207",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "redeemable stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-42524",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "redeemable stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-46229",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "redeemable stablecoin for merchant payments",
+			"buildId": "dorahacks-buidl-46231",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuance for payroll",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuance for payroll",
+			"buildId": "dorahacks-buidl-46041",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuance for payroll",
+			"buildId": "dorahacks-buidl-46403",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuance for payroll",
+			"buildId": "dorahacks-buidl-46557",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuances for payroll",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuances for payroll",
+			"buildId": "dorahacks-buidl-46041",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuances for payroll",
+			"buildId": "dorahacks-buidl-46162",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuances for payroll",
+			"buildId": "dorahacks-buidl-46403",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuer for merchant payments",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuer for merchant payments",
+			"buildId": "dorahacks-buidl-36328",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuer for merchant payments",
+			"buildId": "dorahacks-buidl-42333",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuer for merchant payments",
+			"buildId": "dorahacks-buidl-42524",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuer for merchant payments",
+			"buildId": "dorahacks-buidl-42585",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuer for merchant payments",
+			"buildId": "dorahacks-buidl-42831",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuer for merchant payments",
+			"buildId": "dorahacks-buidl-45075",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin issuer for merchant payments",
+			"buildId": "dorahacks-buidl-46117",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin payroll for freelancers",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin payroll for freelancers",
+			"buildId": "dorahacks-buidl-46108",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin payroll for freelancers",
+			"buildId": "dorahacks-buidl-46403",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin payroll for freelancers",
+			"buildId": "dorahacks-buidl-46468",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin reserves dashboard for payments teams",
+			"buildId": "dorahacks-buidl-45392",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin reserves dashboard for payments teams",
+			"buildId": "dorahacks-buidl-46162",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin reserves dashboard for payments teams",
+			"buildId": "dorahacks-buidl-46376",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin reserves dashboard for payments teams",
+			"buildId": "dorahacks-buidl-46507",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin wallet for remittances",
+			"buildId": "dorahacks-buidl-30786",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin wallet for remittances",
+			"buildId": "dorahacks-buidl-30961",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin wallet for remittances",
+			"buildId": "dorahacks-buidl-31390",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin wallet for remittances",
+			"buildId": "dorahacks-buidl-46292",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "stablecoin wallet for remittances",
+			"buildId": "dorahacks-buidl-46474",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-25159",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-36270",
+			"grade": 1,
+			"passA": 1,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42524",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42664",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42669",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "subscription billing with recurring stablecoin payments",
+			"buildId": "dorahacks-buidl-42723",
+			"grade": 0,
+			"passA": 0,
+			"passB": 0
+		},
+		{
+			"set": "tests",
+			"ideaId": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-27445",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-28402",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-28416",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-30931",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-31797",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "transparent donation platform for charities",
+			"buildId": "dorahacks-buidl-40039",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "wallet",
+			"buildId": "dorahacks-buidl-25289",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		},
+		{
+			"set": "tests",
+			"ideaId": "wallet",
+			"buildId": "dorahacks-buidl-38162",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "wallet",
+			"buildId": "dorahacks-buidl-46062",
+			"grade": 1,
+			"passA": 1,
+			"passB": 1
+		},
+		{
+			"set": "tests",
+			"ideaId": "wallet",
+			"buildId": "dorahacks-buidl-46426",
+			"grade": 2,
+			"passA": 2,
+			"passB": 2
+		}
+	]
+}

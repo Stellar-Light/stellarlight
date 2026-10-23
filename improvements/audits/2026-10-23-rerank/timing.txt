@@ -1,0 +1,20 @@
+status start 1.9.96 14:38:57Z
+builds keyword 0.43s server-timing=total;dur=188 | AI agent that pays for API calls with USDC using x402
+builds hybrid 0.50s server-timing=total;dur=287 | AI agent that pays for API calls with USDC using x402
+vet-idea 1.99s server-timing=None | AI agent that pays for API calls with USDC using x402
+builds keyword 0.36s server-timing=total;dur=159 | passkey smart wallet so users never handle a seed phrase
+builds hybrid 0.65s server-timing=total;dur=359 | passkey smart wallet so users never handle a seed phrase
+vet-idea 1.89s server-timing=None | passkey smart wallet so users never handle a seed phrase
+builds keyword 0.27s server-timing=total;dur=77 | prediction market on Soroban
+builds hybrid 0.43s server-timing=total;dur=213 | prediction market on Soroban
+vet-idea 1.45s server-timing=None | prediction market on Soroban
+builds keyword 0.25s server-timing=total;dur=53 | remittance app
+builds hybrid 0.39s server-timing=total;dur=201 | remittance app
+vet-idea 1.38s server-timing=None | remittance app
+builds keyword 0.29s server-timing=total;dur=87 | tokenized real estate with fractional ownership
+builds hybrid 0.59s server-timing=total;dur=350 | tokenized real estate with fractional ownership
+vet-idea 1.59s server-timing=None | tokenized real estate with fractional ownership
+builds keyword 0.28s server-timing=total;dur=81 | savings circle with automatic payouts
+builds hybrid 0.45s server-timing=total;dur=207 | savings circle with automatic payouts
+vet-idea 1.65s server-timing=None | savings circle with automatic payouts
+status end 1.9.96 14:39:39Z
