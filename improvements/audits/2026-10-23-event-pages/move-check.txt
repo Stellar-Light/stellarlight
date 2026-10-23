@@ -1,0 +1,97 @@
+--- replace
+  base: DB \u2014
+  lib:  DB:
+--- replace
+  base: \u2014 instead
+  lib:  (instead
+--- replace
+  base: sentinel \u2014
+  lib:  sentinel)
+--- replace
+  base: ordinals \u2014
+  lib:  ordinals:
+--- replace
+  base: /
+  lib:  or
+--- replace
+  base: lugar \u2013 Mejor Proyecto",
+  lib:  lugar" and a category,
+--- replace
+  base: title \u2014
+  lib:  title:
+--- replace
+  base: string-mining \u2014
+  lib:  string-mining;
+--- replace
+  base: /(?:\*\*)?\s*([A-Za-z]+|\d+(?:st|nd|rd|th))\s+place\s*(?:\*\*)?\s*[:\-\u2013\u2014]?\s*(?:\*\*)?\s*\$\s*([\d,]+(?:\.\d+)?)\s*(?:in\s+([A-Za-z]{2,6}))?/i;
+  lib:  /(?:\*\*)?\s*([A-Za-z]+|\d+(?:st|nd|rd|th))\s+place\s*(?:\*\*)?\s*[:\-\u2013\u2014]?\s*(?:\*\*)?\s*\$\s*([\d,]+(?:\.\d+)?)\s*(?:in\s+([A-Za-z]{2,6}))?/i;
+--- replace
+  base: winners \u2014
+  lib:  winners,
+--- insert
+  base: 
+  lib:  /** The answer for one slug: the 404 body when no event has it, else the 200 * body and the store the event came from (the `hackathons` collection, or * the DoraHacks listing with the curated events). */
+--- replace
+  base: GET( req: NextRequest, { params }: { params: Promise<{
+  lib:  getHackathonDetail( payload: NonNullable<Awaited<ReturnType<typeof getPayloadSafe>>>,
+--- replace
+  base: string }> },
+  lib:  string,
+--- delete
+  base: { const startedAt = Date.now(); const { slug } = await params; const payload = await getPayloadSafe(); if (!payload) { return apiError({ status: 503, error: "hackathon store unavailable", advisory: "The hackathon store did not answer. This is an outage, not a statement that the hackathon is unknown. Retry after Retry-After.", retryAfterSeconds: 2, startedAt, }); } try
+  lib:  
+--- replace
+  base: slug \u2014
+  lib:  slug;
+--- replace
+  base: NextResponse.json(
+  lib:  { found: false as const, body:
+--- replace
+  base: { status: 404 }, );
+  lib:  };
+--- delete
+  base: logApiHit({ req, endpoint: "/api/hackathons/[slug]", filters: { slug, source: "dorahacks" }, });
+  lib:  
+--- replace
+  base: event) \u2014
+  lib:  event):
+--- replace
+  base: NextResponse.json(
+  lib:  { found: true as const, source: "dorahacks" as const, body:
+--- replace
+  base: dora.organization.name .toLowerCase() .replace(/\s+/g,
+  lib:  dora.organization.name.toLowerCase().replace(/\s+/g,
+--- replace
+  base: `unknown` \u2014
+  lib:  `unknown`,
+--- replace
+  base: signal \u2014
+  lib:  signal;
+--- replace
+  base: { headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200", }, }, );
+  lib:  };
+--- replace
+  base: submissions \u2014
+  lib:  submissions:
+--- replace
+  base: logApiHit({ req, endpoint: "/api/hackathons/[slug]", filters:
+  lib:  return
+--- replace
+  base: slug } }); return NextResponse.json(
+  lib:  found: true as const, source: "collection" as const, body:
+--- replace
+  base: winners \u2014
+  lib:  winners:
+--- replace
+  base: above \u2014
+  lib:  above;
+--- replace
+  base: #12) \u2014
+  lib:  #12):
+--- replace
+  base: { headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=7200", }, }, );
+  lib:  };
+--- delete
+  base: catch (err) { console.error("hackathon detail failed", err); return NextResponse.json({ error: "internal error" }, { status: 500 }); } } // sls-004: method misuse answers JSON (Next's automatic 405 has an empty body). export const POST = methodNotAllowed(["GET"]); export const PUT = methodNotAllowed(["GET"]); export const DELETE = methodNotAllowed(["GET"]); export const PATCH = methodNotAllowed(["GET"]);
+  lib:  
+changed spans: 32 equal tokens: 4026 of 4233
