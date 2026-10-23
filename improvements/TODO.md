@@ -313,7 +313,7 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   endpoints checked, so the cut drops rows, not metadata. The owner parked
   response-size changes on 2026-08-18; ask before changing any response
   shape. Opt-in `view=compact` on searchProjects and searchRepos (spec
-  1.9.98, `improvements/rounds/2026-10-23-compact-views.md`) brings their
+  1.9.96, `improvements/rounds/2026-10-23-compact-views.md`) brings their
   default pages under the cap with defaults unchanged; the list endpoints
   over it (skills, partners, leaderboard, builders, audits, stablecoins)
   are not covered.

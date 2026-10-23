@@ -2,7 +2,7 @@ import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 import { REPO_COMPACT } from "@/lib/compact-view";
 
-// view=compact (spec 1.9.98): opt-in compact rows; the default is unchanged.
+// view=compact (spec 1.9.96): opt-in compact rows; the default is unchanged.
 const fullRow = (name: string, notes: number) => ({
 	fullName: `org/${name}`,
 	owner: "org",

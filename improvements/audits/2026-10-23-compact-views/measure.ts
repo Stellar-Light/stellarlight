@@ -1,6 +1,6 @@
 /**
  * Response sizes for the Scout operations an agent script calls, full and
- * compact (lane R, spec 1.9.98).
+ * compact (lane R, spec 1.9.96).
  *
  *   pnpm exec tsx improvements/audits/2026-10-23-compact-views/measure.ts > out.md
  *

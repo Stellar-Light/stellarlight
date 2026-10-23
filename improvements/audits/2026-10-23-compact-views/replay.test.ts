@@ -1,5 +1,5 @@
 /**
- * Default-unchanged replay (lane R, spec 1.9.98).
+ * Default-unchanged replay (lane R, spec 1.9.96).
  *
  * Runs the real GET handlers of /api/projects/search and /api/repos/search
  * over live-shaped fixtures (response rows captured from the live API on

@@ -147,3 +147,7 @@ unchanged, 12,803 to 13,096.
 
 Version stays 1.9.98; the orchestrator renumbers at merge (main is at
 1.9.95).
+
+## Renumbered at merge (2026-10-23)
+
+Main was at 1.9.95 when this lane merged, so the change ships as **spec 1.9.96**, not 1.9.98. The changelog entry, `version.ts`, the generated artifacts and the code comments say 1.9.96; the entries above keep the number they were written with. The same commit also drops a pre-existing em dash from the scfAwarded 400 message (`Invalid scfAwarded value '...': it is a boolean filter.`), which the re-check noted.

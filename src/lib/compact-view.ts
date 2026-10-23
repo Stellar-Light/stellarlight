@@ -1,5 +1,5 @@
 /**
- * Opt-in compact rows (?view=compact, spec 1.9.98).
+ * Opt-in compact rows (?view=compact, spec 1.9.96).
  *
  * Agents calling Scout from a sandboxed script often have their result cut
  * at about 24,000 characters, front kept. A default projects/search page was

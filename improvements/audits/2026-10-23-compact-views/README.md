@@ -1,4 +1,4 @@
-# Compact views for agent scripts (spec 1.9.98)
+# Compact views for agent scripts (spec 1.9.96)
 
 Lane R, 2026-10-23. Round ledger: `improvements/rounds/2026-10-23-compact-views.md`.
 

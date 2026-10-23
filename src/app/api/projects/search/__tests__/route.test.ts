@@ -200,7 +200,7 @@ describe("GET /api/projects/search after a typo recovery (sls-094)", () => {
 	});
 });
 
-// view=compact (spec 1.9.98): opt-in compact rows; the default is unchanged.
+// view=compact (spec 1.9.96): opt-in compact rows; the default is unchanged.
 describe("GET /api/projects/search view param", () => {
 	beforeEach(() => {
 		vi.useFakeTimers({ now: new Date("2026-10-23T12:00:00.000Z") });
