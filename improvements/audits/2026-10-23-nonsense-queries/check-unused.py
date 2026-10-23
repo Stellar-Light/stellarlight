@@ -6,14 +6,15 @@ output it reads back:
   letter or digit beside it, any script) in every stored submission's name,
   summary, track, award and every declared package; it must have 0 uses;
 - each related form named after "used:": it must have at least 1 use;
-- each spelling named ("X is the used word one edit from w"): it must
+- each spelling named ("X is a used word one edit from w"): it must
   have at least 1 use and be one edit from w (a letter added, dropped or
   changed, or two adjacent letters swapped);
-- each "N builds matched by name for W are not listed", when the two
-  replays (replay.mts) before and after rule L are given: exactly N builds
-  the before replay listed are missing after, and the words they matched
-  are W (for a labeled idea, whose replay keeps no matched words, the count
-  alone).
+- each "N builds matched by name for W, or inside a longer word for V,
+  are not listed", when the two replays (replay.mts) before and after rule L
+  are given: exactly N builds the before replay listed are missing after,
+  the words they matched are W and V (for a labeled idea, whose replay
+  keeps no matched words, the count alone), and no name among them holds a
+  word of V, or V with s added or dropped, as a whole word.
 
 Usage, from the repository root:
   python3 -I improvements/audits/2026-10-23-nonsense-queries/check-unused.py <capture.json> <note-output.txt> [<before.json> <after.json>]
@@ -25,6 +26,7 @@ import sys
 
 capture, note = sys.argv[1], sys.argv[2]
 corpus = json.load(open(capture))["corpus"]
+name_of = {r["id"]: (r["name"] or "").lower() for r in corpus}
 replays = [json.load(open(f)) for f in sys.argv[3:5]]
 
 
@@ -84,10 +86,29 @@ for line in open(note):
             for form in re.split(r", | and ", forms):
                 n = uses(form)
                 checks.append((f"related: {form} for {word}", n > 0, f"{n} uses"))
-    held = re.search(r"; (\d+) builds? matched by name for (.+?) (?:is|are) not listed", text)
+    held = re.search(r"; (\d+) builds? matched (.+?),? (?:is|are) not listed", text)
     if held:
         gone = removed(cells[1], cells[2])
-        words = set(re.split(r", | or ", held.group(2)))
+        parts = held.group(2).split(", or ")
+        inside = [
+            w
+            for p in parts
+            if p.startswith("inside a longer word for ")
+            for w in re.split(r", | or ", p[len("inside a longer word for ") :])
+        ]
+        words = {
+            w
+            for p in parts
+            for w in re.split(r", | or ", re.sub(r"^(by name|inside a longer word) for ", "", p))
+        }
+        for w in inside:
+            forms = {w, w + "s", w[:-1] if w.endswith("s") else w}
+            whole = [
+                i
+                for i, _ in (gone or [])
+                if any(re.search(r"(?<![^\W_])" + re.escape(f) + r"(?![^\W_])", name_of.get(i, "")) for f in forms)
+            ]
+            checks.append((f"inside a longer word: {w}", not whole, f"{len(whole)} names hold it whole"))
         if gone is None:
             checks.append((f"withheld: {held.group(0)[2:]}", True, "unchecked, no replays given"))
         else:
@@ -96,7 +117,7 @@ for line in open(note):
             ok = len(gone) == int(held.group(1)) and (got == words or all(m is None for _, m in gone))
             checks.append((f"withheld: {held.group(1)} for {', '.join(sorted(words))}", ok, f"{len(gone)} removed, matched {sorted(got) or 'not kept'}"))
     for form, word in re.findall(
-        r"\(?([^\s(;]+) is the used word one edit from ([^\s);]+)", text
+        r"\(?([^\s(;]+) is a used word one edit from ([^\s);]+)", text
     ):
         n, d = uses(form), edits(form, word)
         checks.append((f"spelling: {form} for {word}", n > 0 and d == 1, f"{n} uses, {d} edits"))

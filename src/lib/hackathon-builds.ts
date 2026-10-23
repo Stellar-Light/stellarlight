@@ -771,18 +771,26 @@ function usedCounts(indexed: IndexedBuild[]): Map<string, number> {
  * (themes and theme are not them), er is never grown (stick is not
  * sticker) and ers never stripped (vouchers is not vouch). Review,
  * 2026-10-23. */
-const GROW_ANY = ["", "e", "s", "es", "ed", "ing", "al", "als", "ic", "ion"];
-const GROW_VERB = ["e", "es", "ed", "ing"];
-const STEM_GROWS: [string, string[]][] = [
-	...["ing", "est", "ed", "es", "s"].map((x): [string, string[]] => [
-		x,
-		GROW_ANY,
-	]),
-	["e", ["ed", "ing", "al", "als", "ic", "ion"]],
-	["er", GROW_VERB],
-	["or", GROW_VERB],
-	["ic", ["", "s"]],
-];
+/** What a stem takes back, by the ending stripped to find it. An
+ * inflection's stem takes back inflections only, e only after ing or ed
+ * (staking is stake, hedging hedge; strips is not stripe) and es only after
+ * ss, x, z, ch or sh (planning is not planes): with al, ic or ion it named
+ * portal for ports, million for mills and formal for forming (re-check,
+ * 2026-10-23). */
+function growsFor(suffix: string, stem: string): string[] {
+	if (suffix === "e") return ["ed", "ing", "al", "als", "ic", "ion"];
+	if (suffix === "ic") return ["", "s"];
+	if (suffix === "er" || suffix === "or") return ["e", "es", "ed", "ing"];
+	return [
+		"",
+		"s",
+		"ed",
+		"ing",
+		...(suffix === "ing" || suffix === "ed" ? ["e"] : []),
+		...(/(ss|x|z|ch|sh)$/.test(stem) ? ["es"] : []),
+	];
+}
+const STRIPPED = ["ing", "est", "ed", "es", "s", "e", "er", "or", "ic"];
 const GROW_WORD = ["s", "es", "ed", "ing"];
 
 /** Forms of `w` some build uses, most used first, at most 3: a stem of at
@@ -791,17 +799,19 @@ const GROW_WORD = ["s", "es", "ed", "ing"];
 function relatedUsed(w: string, used: Map<string, number>): string[] {
 	if (!/^\p{L}+$/u.test(w)) return [];
 	const stems = new Map<string, string[]>();
-	for (const [suffix, grow] of STEM_GROWS) {
+	for (const suffix of STRIPPED) {
 		const stem = w.slice(0, -suffix.length);
 		if (!w.endsWith(suffix) || stem.length < 4) continue;
 		if (suffix === "es" && !/(ss|x|z|ch|sh)es$/.test(w)) continue;
-		stems.set(stem, grow);
+		stems.set(stem, growsFor(suffix, stem));
 		// shopping is shop.
-		if (stem.length > 4 && /([^aeiou])\1$/.test(stem))
+		if (stem.length > 4 && /([^aeiou])\1$/.test(stem)) {
+			const undone = stem.slice(0, -1);
 			stems.set(
-				stem.slice(0, -1),
-				grow.filter((g) => g !== "e"),
+				undone,
+				growsFor(suffix, undone).filter((g) => g !== "e"),
 			);
+		}
 	}
 	if (w.length >= 4) stems.set(w, GROW_WORD);
 	const own = new Set([w, ...wordForms(w), ...otherNumber(w)]);
@@ -883,7 +893,7 @@ export function unusedWordsWarning(
 	q: string,
 	scored: ScoredBuild[],
 	/** Builds rule L held back: their name matched, most of q is unused. */
-	withheld: { matched: string[] }[] = [],
+	withheld: { b: IndexedBuild; matched: string[] }[] = [],
 ): string | null {
 	const { absent, concepts } = wordsNoBuildUses(indexed, q);
 	if (!absent.length) return null;
@@ -908,17 +918,32 @@ export function unusedWordsWarning(
 		? []
 		: related.flatMap(([w, r]) => {
 				const s = r.length ? null : oneSpelling(w, used);
-				return s ? [`${s} is the used word one edit from ${w}`] : [];
+				return s ? [`${s} is a used word one edit from ${w}`] : [];
 			});
 	// Withheld by name, never "no match": church tithe donations app held
 	// back Donation Management, and the line asked to check the spelling.
+	// A word only inside a longer word of every name it matched is said so
+	// (llama in MellaMate), as the listed-row sentence does.
 	const n = withheld.length;
-	const held = queryTerms(q.trim().toLowerCase())
-		.map(({ t }) => t)
-		.filter((t) => withheld.some((w) => w.matched.includes(t)))
-		.map(wordCore);
+	const byName: string[] = [];
+	const inLonger: string[] = [];
+	for (const { t, forms } of queryTerms(q.trim().toLowerCase())) {
+		const names = withheld
+			.filter((w) => w.matched.includes(t))
+			.map((w) => w.b.name.toLowerCase());
+		if (!names.length) continue;
+		const hits = forms.flatMap((f) => anyScriptWord(f) ?? []);
+		const whole = names.some((nm) => hits.some((hit) => hit(nm)));
+		(whole ? byName : inLonger).push(wordCore(t));
+	}
+	const how = [
+		...(byName.length ? [`by name for ${andList(byName, "or")}`] : []),
+		...(inLonger.length
+			? [`inside a longer word for ${andList(inLonger, "or")}`]
+			: []),
+	];
 	const heldText = n
-		? `; ${n === 1 ? "1 build" : `${n} builds`} matched by name for ${andList(held, "or")} ${n === 1 ? "is" : "are"} not listed, because most of the words searched in q occur in no submission`
+		? `; ${n === 1 ? "1 build" : `${n} builds`} matched ${how.length > 1 ? `${how.join(", or ")},` : how.join("")} ${n === 1 ? "is" : "are"} not listed, because most of the words searched in q occur in no submission`
 		: "";
 	// Conditional: a dictionary sweep of the first wording named corrections
 	// for 70 words spelled right (gamer, routine, discard).

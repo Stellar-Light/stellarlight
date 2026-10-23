@@ -457,7 +457,10 @@ describe("the warning names related forms submissions do use", () => {
 		build("Keys", "Revocable keys."),
 		build("Misc", "Reliable, forever, vouch, sticker, traction."),
 		// Review 2026-10-23: words these were said to be related forms of.
-		build("Look", "Portal, portion, million, mineral, minerals, stripe."),
+		build(
+			"Look",
+			"Portal, portion, million, mineral, minerals, stripe, formal, billion, planes.",
+		),
 		build("Alike", "Cent, stale, with."),
 		build("Short", "Them, not, plan, hop, mod."),
 	];
@@ -471,7 +474,8 @@ describe("the warning names related forms submissions do use", () => {
 			// (center is not cent), only its inflections are.
 			["minter", "minting for minter"],
 			["hedging", "hedge for hedging"],
-			["renting", "rent, rental and rentals for renting"],
+			// An inflection's stem takes back no al (renting is not rental).
+			["renting", "rent for renting"],
 			["shops", "shopping for shops"],
 			["backing", "back and backed for backing"],
 			["algorithmic", "algorithms for algorithmic"],
@@ -506,8 +510,21 @@ describe("the warning names related forms submissions do use", () => {
 			"planes",
 			"hopes",
 			"modes",
+			// Re-check 2026-10-23: a word's own inflection let these back in
+			// (ports portal, mills million, forming formal, billed billion).
+			"ports",
+			"mills",
+			"forming",
+			"strips",
+			"miners",
+			"billed",
 		])
 			expect(line(word), word).not.toMatch(/related form/);
+	});
+
+	it("names plan for planning but never planes", () => {
+		expect(line("planning")).toContain("used: plan for planning");
+		expect(line("planning")).not.toContain("planes");
 	});
 });
 
@@ -520,7 +537,7 @@ describe("the warning names a spelling only when one is clear", () => {
 			build(`Typo ${i}`, "Remmitance app."),
 		),
 	];
-	const suggestion = "(remittance is the used word one edit from remitance)";
+	const suggestion = "(remittance is a used word one edit from remitance)";
 
 	it("names a word five times as used as any other one edit away", () => {
 		expect(unusedWordsWarning(remit(5, 1), "remitance", [])).toContain(

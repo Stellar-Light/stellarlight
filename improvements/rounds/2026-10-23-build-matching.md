@@ -563,3 +563,36 @@ fresh battery written by a separate agent that was told no rule.
 ### Renumbered at merge (2026-10-23)
 
 #1862 (compact views) took 1.9.96 first, so `update_pr_branch.sh <worktree> 1.9.97` merged origin/main at eb9ef225 into this line (88d7160b) and the change ships as **spec 1.9.97**. The entries above keep the number they were written with.
+
+### Lane L2 re-check of 5023b236 and fourth commit (spec 1.9.97)
+
+- The re-check (same reviewer) confirmed the six fixes; GATE: fix first on
+  four new findings. The orchestrator merged main (88d7160b, #1862 took
+  1.9.96, renumbered to 1.9.97) and noted it (838e6706).
+  1. Medium: a word's own inflection bypassed the bare-word fix: ports
+     named portal and portion (83 rows), mills million, forming and formed
+     formal, strips stripe, miners mineral and minerals; with no rows,
+     milling and billed billion, porting and ported portal, planning
+     planes.
+  2. Low: in meaning mode the withheld clause fired for a build the mode
+     never lists by name.
+  3. Nit: "the used word" claimed one candidate; the rule allows a second
+     used a fifth as often.
+  4. Nit: "matched by name for llama" when llama was inside MellaMate.
+- Tests first, against 838e6706: 7 failed (the nread line, the meaning-mode
+  withheldByName, the spelling wording twice, `renting` named rental,
+  `ports` named a related form, planning did not name plan alone), 72
+  passed. With the fixes, 114 of 114 in the hackathon files.
+- Fixes: (1) `growsFor`: a stem from s, ing, ed or est grows "", s, ed,
+  ing, e only after ing or ed, es only after ss, x, z, ch or sh; the e, ic,
+  er and or stems keep theirs. (2) queryBuilds passes no withheld list when
+  meaning served. (3) "is a used word one edit from". (4) a withheld word
+  is "by name for" when some held name holds it whole, else "inside a
+  longer word for".
+- Re-measured: rows identical to 5023b236 on lane K's capture, the fresh
+  battery, the 34 probes and the 23 review examples. Related forms gone
+  from those sets' lines: issues for issued, rental and rentals for
+  renting. On the live corpus (keyword, `shipped/recheck-words.txt`) the
+  re-check's words name only form, bill, bills, billing, plan and plans.
+  `check-unused.py` checks every claim, now including each "inside a
+  longer word": 0 false on all four sets.

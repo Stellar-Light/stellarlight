@@ -228,7 +228,7 @@ submission, and every related form named is used.
 | savings circle (ROSCA, tanda) with automatic payouts | rosca | none |
 | merchant QR code payments for small shops | shops | shopping |
 | fiat on-ramp and off-ramp for a local currency | on-ramp | none (nor onramp, on ramp) |
-| loyalty points issued as tokens (0 rows keyword, meaning only hybrid) | loyalty, issued | issue, issues, issuing |
+| loyalty points issued as tokens (0 rows keyword, meaning only hybrid) | loyalty, issued | issue, issuing |
 | tokenized gold or commodities (0 rows keyword, meaning only hybrid) | gold, commodities | none |
 | a stablecoin with 1:1 backing for merchant payments | backing | backed, back |
 | fiat-backed stablecoin for payments | fiat-backed | none |
@@ -252,7 +252,7 @@ submission, and every related form named is used.
 | NGO tool to track disaster relief cash transfers ... | relief | none |
 | onchain fantasy sports game where winners are paid ... | fantasy | none |
 | round up savings app that sweeps spare change ... | sweeps, spare | none |
-| marketplace for renting out tools and equipment ... | renting, held | rent, rental, rentals |
+| marketplace for renting out tools and equipment ... | renting, held | rent |
 | forex hedging tool for exporters ... | forex, hedging | hedge, hedged |
 | DAO tool that lets members delegate votes ... revoke any time | delegate, revoke | delegation, delegating |
 
@@ -398,6 +398,32 @@ second commit (32 / 32 ideas, 24 / 24 battery, 16 / 16 probes); the review's
 examples fire 19 of 23. `check-unused.py` now also checks each withheld
 count against the builds the before and after replays differ by: 0 false
 claims on all four sets.
+
+**Fourth commit: re-check of the third (spec 1.9.97 after main's 1.9.96).**
+The re-check confirmed the six fixes and found four more, all fixed:
+
+- A word's own inflection let unrelated forms back in: ports named portal
+  and portion, mills million, forming and formed formal, strips stripe,
+  miners mineral, billed billion, planning planes. A stem found by dropping
+  s, ing, ed or est now takes back only "", s, ed and ing, e only after ing
+  or ed (hedging is hedge), es only after ss, x, z, ch or sh. Gone from the
+  measured sets' lines: issues for issued, rental and rentals for renting
+  (issue, issuing and rent stay). On the live corpus the re-check's words
+  now name only form (forming, formed), bill, bills and billing (billed),
+  and plan and plans (planning), all their own inflections.
+- In meaning mode the withheld clause fired for a build the mode never
+  lists by name. Meaning mode now holds back nothing: withheldByName 0, no
+  clause.
+- "X is the used word one edit from W" claimed one candidate where the rule
+  allows a second used a fifth as often: now "a used word".
+- A withheld build that held the word only inside a longer word of its name
+  is said so: "2 builds matched by name for quantum, or inside a longer
+  word for llama, are not listed".
+
+Rows are identical to the third commit's on all four sets. Where the line
+fires is unchanged. `check-unused.py` also checks each "inside a longer
+word" claim (no withheld name holds the word whole): 0 false claims on all
+four sets.
 
 ## Open risks
 

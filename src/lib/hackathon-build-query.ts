@@ -340,7 +340,8 @@ export async function queryBuilds(
 		mode: served,
 		semantic,
 		packages: opts.packages,
-		withheld: held,
+		// Meaning mode never lists a build by its name: nothing is withheld.
+		withheld: served === "meaning" ? undefined : held,
 	});
 	const listed = new Set(scored.map((s) => s.b.id));
 	return {
