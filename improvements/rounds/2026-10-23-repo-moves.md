@@ -152,3 +152,8 @@ move says so.
   exit 0 and `CONTRACT_BASE=02d7deba pnpm contract:check` exit 0 (no
   contract change: the field is not served); biome on the two changed
   files: clean.
+
+## Merge (orchestrator)
+
+- Renumbered to spec 1.9.95 with the merge-train script (`update_pr_branch.sh <worktree> 1.9.95`), because this lane merges before the lane that held 1.9.95. The log above records 1.9.96 as it was at the time.
+- Review re-check of c3ba8af4 (Claude Fable 5.1, effort high): GATE: push. The field access covers REST and GraphQL, and a partner login gets neither the field nor a `where` on it.
