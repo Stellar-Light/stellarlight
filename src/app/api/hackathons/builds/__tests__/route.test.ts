@@ -627,6 +627,8 @@ describe("GET /api/hackathons/builds reads an event named in q as the filter", (
 			"q holds the event name 'HackMeridian 2026', so hackathon=hackmeridian-2026 was applied and the name removed from q (meta.inferredFilter); to search q's words as text in every event instead, send hackathon= with no value",
 			"no submissions are stored for hackmeridian-2026; 0 matched from it is not evidence that nothing was built",
 		]);
+	});
+});
 
 // 2026-10-23: in hybrid mode the top 50 are reordered by a reranker that
 // reads q with each build's name and summary; meta.reranked says whether it
