@@ -181,7 +181,7 @@ export const HackathonBuilds: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Which rule linked projectSlug: repo (the project lists this exact repo), website (the submission's demo site is the project's website), owner-and-name (the repo sits under the project's GitHub owner and the submission carries the project's name), or moved-repo and moved-owner-and-name (the same two repo rules, read on repoCurrentFullName, where the repo was renamed or transferred to).",
+					"Which rule linked projectSlug: repo (the project lists this exact repo), website (the submission's demo site is the project's website), owner-and-name (the repo sits under the project's GitHub owner and the submission carries the project's name), moved-repo and moved-owner-and-name (the same two repo rules, read on repoCurrentFullName, where the repo was renamed or transferred to), or, for a winner named for exactly one project, scf-page-and-name (the project's SCF page links this submission's DoraHacks page) and submission-links-and-name (the submission's DoraHacks page lists the project's website or X account).",
 			},
 		},
 		{

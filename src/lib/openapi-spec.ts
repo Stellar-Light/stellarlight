@@ -279,7 +279,7 @@ const BUILD_PROJECT_SCHEMA = {
 	type: "object",
 	nullable: true,
 	description:
-		"The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+		"The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A winner none of those link can still link when its name is the name of exactly one project and a page says so too: the project's SCF page links this build's DoraHacks page, or the build's DoraHacks page lists the project's website or X account. A shared GitHub owner alone, a name alone, or a shared platform never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 	properties: {
 		slug: { type: "string" },
 		name: { type: "string" },
@@ -287,7 +287,7 @@ const BUILD_PROJECT_SCHEMA = {
 			type: "string",
 			enum: [...LINK_BASES],
 			description:
-				"repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo).",
+				"repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. The last two link winners only, when the build's name (a trailing 'Stellar' aside) is the name or an alias of exactly one project: scf-page-and-name: the project's SCF page (scfSourceUrl on searchProjects) links this build's DoraHacks page. submission-links-and-name: this build's DoraHacks page lists the project's website or X account. Absent on links stored before the basis was recorded (all by repo).",
 		},
 		status: {
 			type: "string",

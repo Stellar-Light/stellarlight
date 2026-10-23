@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.108",
+		type: "added",
+		summary:
+			"A hackathon winner that no other rule links now links to the one directory project whose name or alias it carries (a trailing 'Stellar' aside) when a page says so too: the project's SCF page links the winner's DoraHacks page (`project.basis: scf-page-and-name`), or the winner's DoraHacks page lists the project's website or X account (`submission-links-and-name`). After the sync lane's next run, YieldBack.Cash (3rd place, Stellar Hacks: Blend; later SCF round 38) and PayZoll (first place, Stellar Build Better; later SCF round 36) link to their projects; no other link changes.",
+		detail:
+			"The sync lane reads both pages for each such winner, reusing the DoraHacks read it already makes, and reads nothing new for anyone else. A name alone never links (a name-only rule was right 3 times in 15 in an earlier check), and neither does a shared account alone. A page it could not read decides nothing: a link these rules stored for the same project is kept. A submission that did not win, or one off DoraHacks, is not considered. Measured read-only on live 1.9.101 (1,356 stored submissions, 1,137 directory rows, every winner's DoraHacks page and every SCF page the directory names): of the 68 DoraHacks winners, 6 are linked today and the lane's next run adds clevercon through 1.9.95's moved-repo rule; of the 61 left, 2 carry the name of exactly one project and both are linked by these rules, each checked by hand against its DoraHacks page, its SCF page and the directory row. The other 59 carry no directory project's name. Without the winner limit the rules would consider 17 more submissions, generic names among them, and link none. This release's linker reproduces what all 1,344 stored DoraHacks submissions serve today (32 linked), and the new rules lose or change none, since they act only where every other rule found nothing. Every operation that serves a build's `project` serves these links (getHackathonSubmission, searchHackathonBuilds, getHackathon winners, reviewSubmission, hackathonBrief), and analyzeHackathonSubmissions counts them in its project, projectStatus and scf facets, whose project label now names every link rule.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.107",
 		type: "fixed",
 		summary:

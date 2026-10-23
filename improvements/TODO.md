@@ -63,7 +63,16 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    host (PayZoll); only the name matches (Juntta). Broad rules measured badly
    in that lane: name-only links were right 3 of 15 times, indexed-repo
    links about 1 of 5.
-   State: not started.
+   State: 2026-10-23, branch `lane/lk-winner-scf-links` (not merged): two
+   measured rules link a winner by name plus a page signal, in place of a
+   curated basis for two of the five: YieldBack.Cash (its SCF page links
+   the submission, `scf-page-and-name`) and PayZoll (its page lists the
+   project's X account, `submission-links-and-name`), each on the sync
+   lane's next run; clevercon links on that run through 1.9.95's
+   `moved-repo`. Still unlinked: Comet x Hoops (its name is not the
+   project's name, though its page lists the project's X account) and
+   Juntta (not a winner; the page rules read winners only).
+   `improvements/audits/2026-10-23-winner-scf-links/`.
    Done when: the five verified links are recorded as a curated link basis
    the link lane reads (a spec enum entry for the basis), the lane re-ran
    (dry run, then execute), and the five links are live.
@@ -313,6 +322,15 @@ unless noted.
   (`src/data/curated-hackathons.ts`).
 - Routing vocabulary for outcome and reading-intent questions, only through
   the Raven gate replica.
+
+- The link rules' shared-platform list (`SHARED_SITES` in
+  `src/lib/hackathon-build-links.ts`) misses link-in-bio hosts: the
+  directory's noticias-trading website is a beacons.ai page, so any
+  submission whose demo is on beacons.ai would link to it by website. None
+  does in the 2026-10-23 capture; a winner's page listing a beacons.ai
+  page matched it in the winner-scf-links recall view. The SCF lane's
+  `THIRD_PARTY_LINK` (`scripts/eval/scf-official.ts`) already lists
+  beacons.ai, bio.link, bento.me, carrd.co, about.me and lu.ma.
 
 - Events seen in sources but absent from getHackathons: Argentina Builder
   Challenge (2026-09-12 to 09-27), Stellar Pro Hackathon and Stellar Hack
