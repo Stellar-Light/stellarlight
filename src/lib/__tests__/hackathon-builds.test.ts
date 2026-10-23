@@ -384,6 +384,27 @@ describe("rarity and phrases", () => {
 		expect(out[0].matched).toEqual(["pay-per-call"]);
 		expect(out.map((s) => s.b.name)).not.toContain("Parts");
 	});
+
+	// On main a hyphenated phrase spelled only q's own number spaced or
+	// joined: q=pay-per-calls missed "pay per call", and the whole-word check
+	// called pay-per-call unused beside "pay per calls" (2026-10-23).
+	it("matches a hyphenated phrase in both numbers, spaced or joined", () => {
+		const pool = [
+			build("Meter", "Pay per call for data."),
+			build("Joined", "Paypercall billing."),
+		];
+		expect(
+			searchHackathonBuilds(pool, "pay-per-calls")
+				.map((s) => s.b.name)
+				.sort(),
+		).toEqual(["Joined", "Meter"]);
+		expect(
+			wordsNoBuildUses(
+				[build("Meters", "Pay per calls for data.")],
+				"pay-per-call",
+			),
+		).toEqual({ absent: [], concepts: 1 });
+	});
 });
 
 describe("words no build uses", () => {

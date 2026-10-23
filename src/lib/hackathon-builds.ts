@@ -669,8 +669,8 @@ function queryTerms(query: string) {
 		),
 	];
 	// A hyphenated phrase is one concept: "pay-per-call" also matches
-	// "pay per call" and "paypercall", and its parts stop counting on their
-	// own (they made one phrase weigh three times).
+	// "pay per call", "paypercall" and the plural, and its parts stop
+	// counting on their own (they made one phrase weigh three times).
 	const parts = new Set(
 		raw.filter((t) => t.includes("-")).flatMap((t) => t.split("-")),
 	);
@@ -678,7 +678,10 @@ function queryTerms(query: string) {
 		.filter((t) => !parts.has(t))
 		.map((t) => {
 			const joined = t.includes("-")
-				? [t.replace(/-/g, " "), t.replace(/-/g, "")]
+				? wordForms(t).flatMap((f) => [
+						f.replace(/-/g, " "),
+						f.replace(/-/g, ""),
+					])
 				: [];
 			const forms = [...expandBuildTerm(t), ...joined];
 			return {

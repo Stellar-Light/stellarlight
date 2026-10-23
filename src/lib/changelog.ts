@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
+		surfaces: ["api"],
+		version: "spec@1.9.102",
+		type: "fixed",
+		summary:
+			"searchHackathonBuilds: a hyphenated phrase in q now matches its other number too, spaced or joined. q=smart-accounts missed one of the three submissions that write the phrase as smart account, and the unused-words line read q=smart-account as used by one of them.",
+		detail:
+			"A hyphenated phrase is one concept, matched spaced (smart account) or joined (smartaccount); it matched only the number typed. It now matches both, the same way single words already did. Replayed over every frozen builds query that holds a hyphen (23 runs): 21 are byte-identical, 2 change order only (no build enters or leaves any list, and no warning changes).",
+	},
+	{
+		date: "2026-10-23",
 		surfaces: ["mcp"],
 		version: "scout-mcp@1.8.0",
 		type: "added",
