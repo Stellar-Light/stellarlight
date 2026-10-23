@@ -367,7 +367,7 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 			},
 		]);
 		expect(body.hackathon.stats.winnersNote).toBe(
-			"One winning submission is not served here: its team hid or deleted it on DoraHacks (6th Place).",
+			"One winning submission is not served here: its team hid or deleted it on DoraHacks (6th Place in $10,000 XLM Prize).",
 		);
 		expect(
 			undeclaredInServed(
@@ -376,6 +376,38 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 				body,
 			),
 		).toEqual([]);
+	});
+
+	it("reads a hidden winner's placement: a served winner whose sibling is hidden is in a category", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			build("w1", {
+				isWinner: true,
+				hackathonPlacement: "1st Place",
+				award: "Main Pool",
+			}),
+		]);
+		// Its award's 2nd place, hidden by its team.
+		hiddenRows = [
+			{ buildId: "h2", placement: "2nd Place", award: "Main Pool" },
+		];
+		const body = await getEvent();
+		expect([body.winners[0].award, body.winners[0].awardCategory]).toEqual([
+			null,
+			"Main Pool",
+		]);
+		expect(body.submissions[0]).toMatchObject({
+			award: null,
+			awardCategory: "Main Pool",
+		});
+		expect(body.hackathon.stats.hiddenWinners).toEqual([
+			{
+				placement: "2nd Place",
+				award: null,
+				awardCategory: "Main Pool",
+				placementRank: 2,
+			},
+		]);
 	});
 
 	it("keeps an award that is a winner's own prize, on a live roster too", async () => {

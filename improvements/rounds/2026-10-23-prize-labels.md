@@ -30,6 +30,17 @@ separable hunks.
 Not yet reviewed. The orchestrator holds the push; an independent review
 on another model is due before it.
 
+- 2026-10-23, review of 0a11309a (independent reviewer, relayed by the
+  orchestrator): GATE, fix first. Verified: replay byte-identical with 0
+  unintended differences, 8 of 8 hand checks against DoraHacks live, the
+  sweep identical, the Payload where clause against the real store, every
+  reader of `award` covered, tsc, 2,698 tests, contract and the Raven gate.
+  Findings: two medium (the detail route's winners read ran for every
+  submission and could 503 a non-winner; the rule read co-winners, not the
+  award's structure), three low (the hidden-winner note, `submissions`
+  items not declaring the fields, a stale skill reference line) and a
+  migration note. Fixed in the commit after 0a11309a; see the log.
+
 ## Method and ship criteria (fixed before any replay or hand check was read)
 
 The rule, from the brief: an award text is a category when, within one
@@ -203,6 +214,54 @@ from placements, so different amounts are different placements).
   724f4e6a's for all 37 requests, the lane replay is identical to
   `replay-lane.json` and `diff.txt` to the committed one; the Raven gate
   prints the same output, ACCEPT 1.9.109.
+- 21:38 to 21:53Z, review fixes on 0a11309a (no rebase, as asked). Tests
+  first (`failing-first-review.txt`): 4 files, 6 failed, 51 passed before
+  any fix. Fixes:
+  - getHackathonSubmission reads its events' winners only when a row
+    carries award text (`docs.some((d) => d.award)`); a failed read still
+    answers 503 for those rows, and the spec's 503 text now says so and
+    why (award has no honest could-not-check value). The read moved into
+    `readAwardCategories` (`src/lib/hackathon-builds.ts`), which
+    reviewSubmission now uses too in place of the index, so both detail
+    surfaces read the same winners; its 503 text names the read.
+  - Hidden winners count: getHackathon folds the event's hidden winners
+    into `prizeCategories`, and the detail read drops its `hiddenUpstream`
+    filter (served rows keep theirs).
+  - The probe `[row("$10,000 XLM Prize", "1st Place - $5,000 in XLM")]`:
+    a title that states more money than a winner's own placement now marks
+    the award a category, siblings or not. This goes one step past the
+    review's cheap fix, so the probe is a passing test, not a pinned gap:
+    the title cannot be the prize of a placement that states less. A lone
+    winner whose title names no amount still reads as its own until the
+    sync stores each award's prize count: the durable plan is a Next item
+    in `improvements/TODO.md`, with the `prizeUsd` gap beside it. The
+    awardCategory descriptions say exactly what null checked.
+  - `hiddenWinnersNote` names a category as "6th Place in $10,000 XLM
+    Prize"; `award` and `awardCategory` declared on getHackathon
+    `submissions` items (the open map kept for the rest); the skill
+    reference says winners come from DoraHacks' winner assignments, not
+    `winner_prizes`; the changelog detail carries the migration (34 of the
+    66 served winners with award text get award null; read
+    `awardCategory ?? award` for the old value).
+  - Ledger-only notes from the review's probes 6 and 7, not reachable from
+    today's sync: `prizeCategories` does not check isWinner (the sync
+    writes award only on winners), and one title repeated over separate
+    one-prize awards with different prize names would read as one category
+    (today every repeated title, Chile's, holds only "Winners" prizes).
+- Fix reverted (`fix-reverted-review.txt`): the final 8 test files on
+  0a11309a's code: 8 failed, 163 passed, one per fix.
+- Re-runs after the fixes: the lane replay is byte-identical to
+  `replay-lane.json` and `diff.mjs` (exit 0) to `diff.txt`; the hand check
+  (21:45Z) passes 10 of 10 with the same table; the sweep (live 1.9.102 at
+  both ends) prints the same lines but the version.
+- Checks: tsc exit 0; `npx vitest run src/lib/ src/components/ src/app/
+  src/collections/ src/data/ --maxWorkers=4 --minWorkers=1`: 218 files,
+  2,703 tests passed; `pnpm contract:write`;
+  `CONTRACT_BASE=origin/main pnpm contract:check` (85843791) exit 0; the
+  Raven gate exit 0, ACCEPT 1.9.109, the same output as origin/main's but
+  the version lines; biome on the 18 changed code and evidence files: no
+  findings. Added lines: no em or en dashes, no barred names, no local
+  paths.
 
 ## Outcome
 
@@ -213,3 +272,10 @@ award names the amount (zk-gaming 5, ideatontelluscoop 3,
 buildonstellarchile 14), and vetIdea and hackathonBrief serve those
 winners' placement "Winners" with no amount; getHackathon `submissions`
 items are still an open map.
+
+2026-10-23 21:53Z, superseding the lines above: two commits on
+`lane/pl-prize-labels-b`, not pushed: the fix (0a11309a) and the review
+fixes on top of it. Reviewed once (GATE, fix first; findings fixed, a
+re-review is due); not deployed, no receipt. The `prizeUsd` gap and the
+sync-time prize count are queued in `improvements/TODO.md` (Next); the
+getHackathon `submissions` items now declare `award` and `awardCategory`.

@@ -9,7 +9,7 @@
  */
 import { unstable_cache } from "next/cache";
 import { overlayWinnerOf } from "@/data/winner-overlay";
-import { withReadTimeout } from "@/lib/degraded-read";
+import { DEFAULT_READ_TIMEOUT_MS, withReadTimeout } from "@/lib/degraded-read";
 import { libraryOf } from "@/lib/hackathon-analytics";
 import {
 	BUILD_SEARCH_MODES,
@@ -27,6 +27,7 @@ import {
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 	parsePlacement,
+	prizeCategories,
 	prizeLabels,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -228,6 +229,39 @@ export async function readProjectFacts(
 	} catch {
 		return null;
 	}
+}
+
+/** The award categories of a submission's events (prizeCategories), read
+ * from their stored winners, hidden ones too: a hidden winner's placement is
+ * in its award though not served. Read only when a row carries award text;
+ * a failed read throws, since award has no honest could-not-check value. */
+export async function readAwardCategories(
+	payload: NonNullable<Awaited<ReturnType<typeof getPayloadSafe>>>,
+	rows: HackathonBuild[],
+): Promise<Set<string>> {
+	if (!rows.some((r) => r.award)) return new Set();
+	const res = await withReadTimeout(
+		payload.find({
+			collection: "hackathon-builds",
+			where: {
+				and: [
+					{ hackathonSlug: { in: rows.map((r) => r.hackathonSlug) } },
+					{ isWinner: { equals: true } },
+				],
+			},
+			pagination: false,
+			depth: 0,
+			select: { hackathonSlug: true, placement: true, award: true },
+		}),
+		DEFAULT_READ_TIMEOUT_MS,
+	);
+	return prizeCategories(
+		(res.docs as HackathonBuild[]).map((w) => ({
+			award: w.award,
+			hackathonPlacement: w.placement,
+			hackathon: { slug: w.hackathonSlug },
+		})),
+	);
 }
 
 const linkedProject = (d: HackathonBuild, facts?: ProjectFacts) =>

@@ -1,5 +1,5 @@
-# pnpm raven:gate --raven <scratch>/raven-src/stellar-raven, lane tree (spec 1.9.109), 2026-10-23T21:05Z.
-# The same command on origin/main 724f4e6a (spec 1.9.101) printed the same 49 lines but the candidate version line: no routing movement from this change.
+# pnpm raven:gate --raven <scratch>/raven-src/stellar-raven, lane tree (spec 1.9.109) after the review fixes, 2026-10-23T21:50Z.
+# The same command on origin/main (spec 1.9.101) printed the same lines but the two version lines: no routing movement from this change.
 
  WARN  Unsupported engine: wanted: {"node":"24.12.0"} (current: {"node":"v22.23.1","pnpm":"10.32.1"})
 

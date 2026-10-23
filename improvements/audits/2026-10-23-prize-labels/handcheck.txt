@@ -1,4 +1,4 @@
-Read 2026-10-23T20:59:27.850Z: DoraHacks winner assignments for 10 events.
+Read 2026-10-23T21:45:52.243Z: DoraHacks winner assignments for 10 events.
 
 | event | buidl | name | DoraHacks award | prizes in it | prize this buidl holds | served placement | served award | served awardCategory | served prizeUsd | verdict |
 | --- | ---: | --- | --- | --- | --- | --- | --- | --- | ---: | --- |

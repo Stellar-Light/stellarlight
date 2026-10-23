@@ -613,25 +613,32 @@ const categoryKey = (r: PrizeRow) => `${r.hackathon?.slug ?? ""}\n${r.award}`;
 
 /**
  * The award texts that name a category, not a winner's prize: within one
- * event, the same text on winners of different placements. DoraHacks nests
- * prizes under an award and the sync stores the award's title on each
- * winner, so all five Real-World ZK winners carry "$10,000 XLM Prize" while
- * placing 1st ($5,000) to 5th ($750). The same text on winners of one
- * placement is each one's own prize (co-winners, or one prize given ten
- * times), as is an award holding a single winner.
- * ponytail: reads only the winners a caller holds; a hidden winner of
- * another placement does not count. Add hidden rows if one ever does.
+ * event, the same text on winners of different placements, or a title that
+ * states more money than a winner's own placement ("$10,000 XLM Prize" on
+ * "1st Place - $5,000 in XLM"). DoraHacks nests prizes under an award and
+ * the sync stores the award's title on each winner, so all five Real-World
+ * ZK winners carry "$10,000 XLM Prize" while placing 1st ($5,000) to 5th
+ * ($750). The same text on winners of one placement is each one's own prize
+ * (co-winners, or one prize given ten times).
+ * ponytail: reads the winners a caller holds. An award whose other
+ * placements are not on record and whose title states no amount reads as
+ * the winner's own until the sync stores each award's prize count
+ * (improvements/TODO.md).
  */
 export function prizeCategories(rows: Iterable<PrizeRow>): Set<string> {
 	const places = new Map<string, Set<string>>();
+	const pools = new Set<string>();
 	for (const r of rows) {
 		if (!r.award) continue;
 		const key = categoryKey(r);
 		const seen = places.get(key) ?? new Set<string>();
 		seen.add((r.hackathonPlacement ?? "").trim().toLowerCase());
 		places.set(key, seen);
+		const own = parsePlacement(r.hackathonPlacement ?? null).prizeUsd;
+		if (own > 0 && parsePlacement(r.award).prizeUsd > own) pools.add(key);
 	}
-	return new Set([...places].filter(([, p]) => p.size > 1).map(([k]) => k));
+	for (const [key, p] of places) if (p.size > 1) pools.add(key);
+	return pools;
 }
 
 /** A row's award as served: its own award text, or, when the text names a

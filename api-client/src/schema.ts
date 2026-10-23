@@ -1769,9 +1769,9 @@ export interface components {
                 /** @description Project blurb from the submission (markdown stripped). */
                 description?: string | null;
                 track?: string | null;
-                /** @description This winner's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = no award named, or an award this event's winners of other placements share: that title is `awardCategory`, and what this winner won is `hackathonPlacement` and `prizeUsd`. */
+                /** @description This winner's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = no award named, or an award that names a category (`awardCategory`); what this winner won is then `hackathonPlacement` and `prizeUsd`. */
                 award?: string | null;
-                /** @description The award this winner placed in, when this event's winners of other placements share it. DoraHacks nests placements under one award, and its title names that category or its whole pool, never this winner's prize: all five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750), and reading it as a winner's prize overstates 3rd place 8 times. null = the winner's award, if any, is its own (`award`). */
+                /** @description The award this winner placed in, when its title names a category or pool, never this winner's prize: this event's winners of other placements share it (a hidden winner's placement counts), or the title states more than this winner's placement. All five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750); reading it as a winner's prize overstates 3rd place 8 times. null = no other placement of this event is on record under the award and its title states no more than this winner's placement, so the award, if any, reads as the winner's own. */
                 awardCategory?: string | null;
                 /** @description What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250); on curated roster rows, the roster's own figure. null when the placement carries no amount (tier-labelled winners like 'Track Winner'), never 0, which would assert a prize of nothing. */
                 prizeUsd?: number | null;
@@ -1842,9 +1842,12 @@ export interface components {
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
             /** @description Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`. */
-            submissions?: {
+            submissions?: ({
+                award?: string | null;
+                awardCategory?: string | null;
+            } & {
                 [key: string]: unknown;
-            }[];
+            })[];
             /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which. */
             tracks?: ({
                 name?: string;
@@ -3982,9 +3985,9 @@ export interface operations {
                             track?: string | null;
                             /** @description This build's own placement inside its award category ('1st Place', '3rd Place') as DoraHacks published it; null = placed without a rank or not a winner. */
                             placement?: string | null;
-                            /** @description This build's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award its event's winners of other placements share: that title is `awardCategory`, and what this build won is `placement` and `prizeUsd`. */
+                            /** @description This build's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what this build won is then `placement` and `prizeUsd`. */
                             award?: string | null;
-                            /** @description The award this build placed in, when its event's winners of other placements share it. DoraHacks nests placements under one award, and its title ('$10,000 XLM Prize', '10K Prize Pool', 'Blend Composability Award') names that category or its whole pool, never this build's prize: all five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750). null = the build's award, if any, is its own (`award`). */
+                            /** @description The award this build placed in, when its title names a category or pool, never this build's prize: its event's winners of other placements share it, or the title states more than this build's placement. All five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750). null = no other placement of this event is served under the award and its title states no more than this build's placement, so the award, if any, reads as the build's own. */
                             awardCategory?: string | null;
                             /** @description Placed in the event; absence of a win is not a quality judgement. */
                             isWinner?: boolean;
@@ -4114,9 +4117,9 @@ export interface operations {
                             };
                             track?: string | null;
                             placement?: string | null;
-                            /** @description This entry's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award its event's winners of other placements share: that title is `awardCategory`, and what it won is `placement` and `prizeUsd`. */
+                            /** @description This entry's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what it won is then `placement` and `prizeUsd`. */
                             award?: string | null;
-                            /** @description The award this entry placed in, when its event's winners of other placements share it. DoraHacks nests placements under one award, and its title ('$10,000 XLM Prize') names that category or its whole pool, never this submission's prize. null = the entry's award, if any, is its own (`award`). */
+                            /** @description The award this entry placed in, when its title names a category or pool, never this submission's prize: its event's winners of other placements share it (a hidden winner's placement counts), or the title states more than the entry's placement ('$10,000 XLM Prize' on '3rd Place - $1,250 in XLM'). null = no other placement of the event is on record under the award and its title states no more than the placement, so the award, if any, reads as the entry's own. */
                             awardCategory?: string | null;
                             prizeUsd?: number | null;
                             isWinner?: boolean;
@@ -4229,7 +4232,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The store did not answer; retry after Retry-After. */
+            /** @description The store did not answer; retry after Retry-After. Also when the submission carries award text and its events' winners cannot be read: whether that text is its own award or a category other placements share cannot be told, and `award` has no honest could-not-check value. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -4474,9 +4477,9 @@ export interface operations {
                                 };
                                 track?: string | null;
                                 placement?: string | null;
-                                /** @description This entry's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award its event's winners of other placements share: that title is `awardCategory`, and what it won is `placement` and `prizeUsd`. */
+                                /** @description This entry's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what it won is then `placement` and `prizeUsd`. */
                                 award?: string | null;
-                                /** @description The award this entry placed in, when its event's winners of other placements share it. DoraHacks nests placements under one award, and its title ('$10,000 XLM Prize') names that category or its whole pool, never this submission's prize. null = the entry's award, if any, is its own (`award`). */
+                                /** @description The award this entry placed in, when its title names a category or pool, never this submission's prize: its event's winners of other placements share it (a hidden winner's placement counts), or the title states more than the entry's placement ('$10,000 XLM Prize' on '3rd Place - $1,250 in XLM'). null = no other placement of the event is on record under the award and its title states no more than the placement, so the award, if any, reads as the entry's own. */
                                 awardCategory?: string | null;
                                 prizeUsd?: number | null;
                                 isWinner?: boolean;
@@ -4753,7 +4756,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The store did not answer; retry. */
+            /** @description The store did not answer, including the read of the submission's events' winners that decides `award` and `awardCategory`; retry. */
             503: {
                 headers: {
                     [name: string]: unknown;

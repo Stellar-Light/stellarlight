@@ -473,8 +473,15 @@ export async function getHackathonDetail(
 					() => [] as DoraHacksSubmission[],
 				);
 		// Award text this event's winners of different placements share
-		// names their category, never one winner's prize.
-		const categories = prizeCategories(liveSubmissions);
+		// names their category, never one winner's prize. A hidden winner's
+		// placement counts: it is in the award though not served.
+		const categories = prizeCategories([
+			...liveSubmissions,
+			...(hiddenWinners ?? []).map((h) => ({
+				award: h.award,
+				hackathonPlacement: h.placement,
+			})),
+		]);
 		// Hidden winners this page does not serve. The index is cached for
 		// an hour and its live fallback still lists hidden submissions, so
 		// a row flagged hidden can be on this page. [] claims a stored

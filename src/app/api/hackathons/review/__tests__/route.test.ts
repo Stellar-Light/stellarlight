@@ -36,14 +36,31 @@ const stored = {
 	updatedAt: "2026-10-05T00:00:00Z",
 	createdAt: "2026-10-05T00:00:00Z",
 };
+// The event's stored winners, when the submission carries award text.
+let winners: Array<{
+	hackathonSlug: string;
+	placement: string;
+	award: string;
+}> = [];
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({
-		find: vi.fn(async ({ collection }: { collection: string }) =>
-			collection === "projects"
-				? {
-						docs: [{ slug: "tollpay", status: "Live", scf: { awarded: true } }],
-					}
-				: { docs: [stored] },
+		find: vi.fn(
+			async ({
+				collection,
+				where,
+			}: {
+				collection: string;
+				where?: { and?: Array<Record<string, unknown>> };
+			}) =>
+				collection === "projects"
+					? {
+							docs: [
+								{ slug: "tollpay", status: "Live", scf: { awarded: true } },
+							],
+						}
+					: where?.and?.[0]?.hackathonSlug
+						? { docs: winners }
+						: { docs: [stored] },
 		),
 	})),
 }));
@@ -225,29 +242,23 @@ describe("how crowded a category is, across every stored submission", () => {
 });
 
 describe("a submission placed in an award its event's other placements share", () => {
-	it("serves the award's title as awardCategory, read from the event's winners in the index", async () => {
+	it("serves the award's title as awardCategory, read from the event's stored winners", async () => {
 		// Stellar Hacks: Agents: five placements in one award, "10K Prize Pool".
 		const s = stored as Record<string, unknown>;
-		const saved = [...index];
-		const placed: Record<string, string> = {
-			"dorahacks-buidl-42585": "5th Place",
-			"dorahacks-buidl-7": "3rd Place",
-		};
 		try {
 			s.award = "10K Prize Pool";
-			index.splice(
-				0,
-				index.length,
-				...saved.map((b) =>
-					placed[b.id]
-						? {
-								...b,
-								hackathonPlacement: placed[b.id],
-								award: "10K Prize Pool",
-							}
-						: b,
-				),
-			);
+			winners = [
+				{
+					hackathonSlug: "agents",
+					placement: "5th Place",
+					award: "10K Prize Pool",
+				},
+				{
+					hackathonSlug: "agents",
+					placement: "3rd Place",
+					award: "10K Prize Pool",
+				},
+			];
 			const { body } = await get("link=github.com/rajkaria/toll");
 			const sub = body.review.submission;
 			expect([sub.placement, sub.award, sub.awardCategory]).toEqual([
@@ -268,7 +279,7 @@ describe("a submission placed in an award its event's other placements share", (
 			).toEqual([]);
 		} finally {
 			delete s.award;
-			index.splice(0, index.length, ...saved);
+			winners = [];
 		}
 	});
 });

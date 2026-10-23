@@ -40,25 +40,30 @@ named for the whole pool ("$10,000 XLM Prize", "10K Prize Pool").
 Rule (from the brief): within one event, the same award text on winners of
 different placements names their category. Amounts are parsed from
 placements, so different amounts are different placements. The same text
-on winners of one placement is each one's own prize, as is an award that
-holds a single winner.
+on winners of one placement is each one's own prize. After review: a title
+that states more money than a winner's own placement ("$10,000 XLM Prize"
+on "1st Place - $5,000 in XLM") is a category too, siblings or not.
 
 Fix: `prizeCategories` and `prizeLabels` (`src/lib/integrations/dorahacks.ts`)
-apply the rule at read time over the winners each surface holds (the index
-for search, review and the builder page; the event's roster for
-getHackathon; a read of the submission's events' winners for
-getHackathonSubmission, which answers 503 when that read fails). Every row
-that serves `award` also serves `awardCategory`. On a category row `award`
-is null and the title is `awardCategory`; otherwise `award` is unchanged and
-`awardCategory` null. Stored data, the sync and search matching are
-unchanged (matchedTerms still reads the title's words). Additive key; one
-semantic narrowing of `award`, declared in the spec field descriptions and
-the changelog.
+apply the rule at read time over the winners each surface holds: the index
+(served rows) for search and the builder page; the event's roster plus its
+hidden winners for getHackathon; and, for getHackathonSubmission and
+reviewSubmission, a read of every stored winner of the submission's events,
+hidden ones included (`readAwardCategories`, `src/lib/hackathon-builds.ts`),
+made only when a row carries award text and answered with 503 when it
+fails. Every row that serves `award` also serves `awardCategory`. On a
+category row `award` is null and the title is `awardCategory`; otherwise
+`award` is unchanged and `awardCategory` null. Stored data, the sync and
+search matching are unchanged (matchedTerms still reads the title's
+words). Additive key; one semantic narrowing of `award`, declared in the
+spec field descriptions and the changelog, with the migration
+`awardCategory ?? award`.
 
 ## Sweep (`sweep.mjs`, `sweep.txt`)
 
 Every listed event's getHackathon, read-only, 2 s apart, 27 events,
-apiVersion 1.9.101 at the start and the end (21:01 to 21:02Z). Same award
+apiVersion 1.9.101 at the start and the end (21:01 to 21:02Z); re-run after
+the review fixes on live 1.9.102, the same lines but the version. Same award
 text on winners of different placements: 7 events, 34 winners.
 
 | event | award text | winners | placements |
@@ -99,8 +104,8 @@ prize has two co-winners). No award text: 5 events with winners
    base replay against the live bodies.
 4. `handcheck.mjs`: 10 winners' served fields (the lane replay's
    getHackathonSubmission bodies) against DoraHacks' winner assignments for
-   their events, read live at 20:59Z: the data behind each event's winner
-   page.
+   their events, read live at 20:59Z and again at 21:45Z after the review
+   fixes: the data behind each event's winner page.
 
 ## Results
 
@@ -134,6 +139,24 @@ prize has two co-winners). No award text: 5 events with winners
   22 winners whose own award names the amount (zk-gaming 5,
   ideatontelluscoop 3, buildonstellarchile 14); their `award` serves it as
   text. vetIdea and hackathonBrief serve `placement` only, "Winners" for
-  those.
-- A hidden winner's placement does not count toward the rule (search reads
-  only served rows). No event has a hidden winner in a category today.
+  those. Queued in `improvements/TODO.md`.
+- The award's structure is inferred, not stored: a lone winner of a
+  multi-prize award whose title names no amount, with its other placements
+  not on record, reads as its own award; search and the builder page do not
+  read hidden winners. No live row has either shape on 2026-10-23. The
+  durable fix (store each award's prize count at sync time) is planned in
+  `improvements/TODO.md`.
+
+## Review round (after 0a11309a)
+
+An independent review asked for: the detail route's winners read only when
+a row carries award text (503 kept for those, now said in the spec); hidden
+winners counted on getHackathon and the detail; the lone-winner probe and
+the hidden-sibling case as tests; the hidden-winner note naming the
+category; `award` and `awardCategory` declared on getHackathon
+`submissions` items; a skill reference line fixed; the migration note.
+Tests first: `failing-first-review.txt` (6 failed, 51 passed before the
+fixes); `fix-reverted-review.txt` (the final 8 test files on 0a11309a's
+code: 8 failed). The replay, `diff.txt` and the hand check are byte
+identical after the fixes; the sweep is identical but for the live API
+version (1.9.102 by then).

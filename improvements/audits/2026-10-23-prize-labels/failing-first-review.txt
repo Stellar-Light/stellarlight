@@ -1,0 +1,34 @@
+# Tests first for the review fixes (round 2): the changed tests on 0a11309a's code, before any fix
+# 2026-10-23T21:41Z, HEAD 0a11309a, working tree: test files only
+# npx vitest run <4 files> --maxWorkers=4 --minWorkers=1
+
+ ❯ src/lib/__tests__/hackathon-events.test.ts (13 tests | 1 failed) 12ms
+   × hiddenWinnersNote > names the award category a hidden winner placed in, never as its prize 5ms
+ ❯ src/lib/__tests__/dorahacks-rosters.test.ts (9 tests | 1 failed) 18ms
+   × an award several placements share is a category, not a prize > reads an award as a category when its title states more than the winner's own placement 4ms
+ ❯ src/app/api/hackathons/builds/[id]/__tests__/route.test.ts (4 tests | 2 failed) 483ms
+   × GET /api/hackathons/builds/{id} award labels > serves an award its event's winners of different placements share as awardCategory, a hidden one counted 473ms
+   × GET /api/hackathons/builds/{id} award labels > reads no winners for a submission with no award text, so a failing read can not fail it 4ms
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts (31 tests | 2 failed) 125ms
+   × GET /api/hackathons/{slug} for a DoraHacks event > serves an award its winners of different placements share as their category, never as a winner's award 9ms
+   × GET /api/hackathons/{slug} for a DoraHacks event > reads a hidden winner's placement: a served winner whose sibling is hidden is in a category 5ms
+ FAIL  src/lib/__tests__/dorahacks-rosters.test.ts > an award several placements share is a category, not a prize > reads an award as a category when its title states more than the winner's own placement
+AssertionError: expected { award: '$10,000 XLM Prize', …(1) } to deeply equal { award: null, …(1) }
+ ❯ src/lib/__tests__/dorahacks-rosters.test.ts:181:55
+ FAIL  src/lib/__tests__/hackathon-events.test.ts > hiddenWinnersNote > names the award category a hidden winner placed in, never as its prize
+AssertionError: expected 'One winning submission is not served …' to be 'One winning submission is not served …' // Object.is equality
+ ❯ src/lib/__tests__/hackathon-events.test.ts:169:5
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > serves an award its winners of different placements share as their category, never as a winner's award
+AssertionError: expected 'One winning submission is not served …' to be 'One winning submission is not served …' // Object.is equality
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:369:44
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > reads a hidden winner's placement: a served winner whose sibling is hidden is in a category
+AssertionError: expected [ 'Main Pool', null ] to deeply equal [ null, 'Main Pool' ]
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:393:66
+ FAIL  src/app/api/hackathons/builds/[id]/__tests__/route.test.ts > GET /api/hackathons/builds/{id} award labels > serves an award its event's winners of different placements share as awardCategory, a hidden one counted
+AssertionError: expected { Object (collection, where, ...) } to match object { …(2) }
+ ❯ src/app/api/hackathons/builds/[id]/__tests__/route.test.ts:81:24
+ FAIL  src/app/api/hackathons/builds/[id]/__tests__/route.test.ts > GET /api/hackathons/builds/{id} award labels > reads no winners for a submission with no award text, so a failing read can not fail it
+AssertionError: expected 503 to be 200 // Object.is equality
+ ❯ src/app/api/hackathons/builds/[id]/__tests__/route.test.ts:111:22
+ Test Files  4 failed (4)
+      Tests  6 failed | 51 passed (57)

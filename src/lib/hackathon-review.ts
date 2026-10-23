@@ -29,9 +29,9 @@ import {
 	buildDetailFromStored,
 	type IndexedBuild,
 	onePerSubmission,
+	readAwardCategories,
 	readProjectFacts,
 } from "@/lib/hackathon-builds";
-import { prizeCategories } from "@/lib/integrations/dorahacks";
 import { buildScfPitch, type ScfPitchReport } from "@/lib/scf-pitch";
 import type { HackathonBuild } from "@/payload-types";
 
@@ -301,11 +301,11 @@ export async function buildHackathonReview(
 	const facts = doc.projectSlug
 		? (await readProjectFacts(payload, [doc.projectSlug]))?.get(doc.projectSlug)
 		: undefined;
-	// Its events' winners in the index: an award several placements share is
-	// their category, as search and getHackathon serve it.
+	// An award several placements share is their category, read from its
+	// events' stored winners as getHackathonSubmission reads it.
 	const submission = buildDetailFromStored(
 		res.docs as HackathonBuild[],
-		prizeCategories(index),
+		await readAwardCategories(payload, res.docs as HackathonBuild[]),
 		facts,
 	);
 	const idea = reviewIdea(submission);

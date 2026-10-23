@@ -826,13 +826,13 @@ const BUILD_DETAIL_SCHEMA = {
 			type: "string",
 			nullable: true,
 			description:
-				"This entry's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award its event's winners of other placements share: that title is `awardCategory`, and what it won is `placement` and `prizeUsd`.",
+				"This entry's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what it won is then `placement` and `prizeUsd`.",
 		},
 		awardCategory: {
 			type: "string",
 			nullable: true,
 			description:
-				"The award this entry placed in, when its event's winners of other placements share it. DoraHacks nests placements under one award, and its title ('$10,000 XLM Prize') names that category or its whole pool, never this submission's prize. null = the entry's award, if any, is its own (`award`).",
+				"The award this entry placed in, when its title names a category or pool, never this submission's prize: its event's winners of other placements share it (a hidden winner's placement counts), or the title states more than the entry's placement ('$10,000 XLM Prize' on '3rd Place - $1,250 in XLM'). null = no other placement of the event is on record under the award and its title states no more than the placement, so the award, if any, reads as the entry's own.",
 		},
 		prizeUsd: { type: "number", nullable: true },
 		isWinner: { type: "boolean" },
@@ -4015,13 +4015,13 @@ export const spec: OpenAPISpec = {
 														type: "string",
 														nullable: true,
 														description:
-															"This build's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award its event's winners of other placements share: that title is `awardCategory`, and what this build won is `placement` and `prizeUsd`.",
+															"This build's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what this build won is then `placement` and `prizeUsd`.",
 													},
 													awardCategory: {
 														type: "string",
 														nullable: true,
 														description:
-															"The award this build placed in, when its event's winners of other placements share it. DoraHacks nests placements under one award, and its title ('$10,000 XLM Prize', '10K Prize Pool', 'Blend Composability Award') names that category or its whole pool, never this build's prize: all five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750). null = the build's award, if any, is its own (`award`).",
+															"The award this build placed in, when its title names a category or pool, never this build's prize: its event's winners of other placements share it, or the title states more than this build's placement. All five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750). null = no other placement of this event is served under the award and its title states no more than this build's placement, so the award, if any, reads as the build's own.",
 													},
 													isWinner: {
 														type: "boolean",
@@ -4164,7 +4164,8 @@ export const spec: OpenAPISpec = {
 							"Not in Scout's store (absence of a record, not proof the submission never existed).",
 					},
 					"503": {
-						description: "The store did not answer; retry after Retry-After.",
+						description:
+							"The store did not answer; retry after Retry-After. Also when the submission carries award text and its events' winners cannot be read: whether that text is its own award or a category other placements share cannot be told, and `award` has no honest could-not-check value.",
 					},
 				},
 			},
@@ -4594,7 +4595,10 @@ export const spec: OpenAPISpec = {
 						description:
 							"No stored submission matches the link (not proof it was never submitted).",
 					},
-					"503": { description: "The store did not answer; retry." },
+					"503": {
+						description:
+							"The store did not answer, including the read of the submission's events' winners that decides `award` and `awardCategory`; retry.",
+					},
 				},
 			},
 		},
@@ -11445,13 +11449,13 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									nullable: true,
 									description:
-										"This winner's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = no award named, or an award this event's winners of other placements share: that title is `awardCategory`, and what this winner won is `hackathonPlacement` and `prizeUsd`.",
+										"This winner's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = no award named, or an award that names a category (`awardCategory`); what this winner won is then `hackathonPlacement` and `prizeUsd`.",
 								},
 								awardCategory: {
 									type: "string",
 									nullable: true,
 									description:
-										"The award this winner placed in, when this event's winners of other placements share it. DoraHacks nests placements under one award, and its title names that category or its whole pool, never this winner's prize: all five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750), and reading it as a winner's prize overstates 3rd place 8 times. null = the winner's award, if any, is its own (`award`).",
+										"The award this winner placed in, when its title names a category or pool, never this winner's prize: this event's winners of other placements share it (a hidden winner's placement counts), or the title states more than this winner's placement. All five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750); reading it as a winner's prize overstates 3rd place 8 times. null = no other placement of this event is on record under the award and its title states no more than this winner's placement, so the award, if any, reads as the winner's own.",
 								},
 								prizeUsd: {
 									type: "number",
@@ -11537,7 +11541,14 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						description:
 							"Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`.",
-						items: { type: "object", additionalProperties: true },
+						items: {
+							type: "object",
+							additionalProperties: true,
+							properties: {
+								award: { type: "string", nullable: true },
+								awardCategory: { type: "string", nullable: true },
+							},
+						},
 					},
 					tracks: HACKATHON_TRACKS_SCHEMA,
 				},

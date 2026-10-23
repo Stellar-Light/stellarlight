@@ -174,6 +174,24 @@ describe("an award several placements share is a category, not a prize", () => {
 		expect(prizeCategories(rows).size).toBe(0);
 	});
 
+	it("reads an award as a category when its title states more than the winner's own placement", () => {
+		// The only winner of its award on record (its siblings not stored):
+		// "$10,000" can not be the prize of a placement that says "$5,000".
+		const lone = [row("$10,000 XLM Prize", "1st Place - $5,000 in XLM")];
+		expect(prizeLabels(prizeCategories(lone), lone[0])).toEqual({
+			award: null,
+			awardCategory: "$10,000 XLM Prize",
+		});
+		// A title that states no more than the placement, or a placement that
+		// states no amount, gives no such evidence.
+		const own = [
+			row("Grand Prize $500", "1st Place - $500", "a"),
+			row("1st Place - $5,000", "Winners", "b"),
+			row("10K Prize Pool", "1st Place", "c"),
+		];
+		expect(prizeCategories(own).size).toBe(0);
+	});
+
 	it("reads rows of one event that carry no event", () => {
 		const roster = zk.map(({ award, hackathonPlacement }) => ({
 			award,

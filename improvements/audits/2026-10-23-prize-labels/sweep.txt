@@ -1,4 +1,4 @@
-apiVersion 1.9.101 at the start, 1.9.101 at the end; 27 listed events.
+apiVersion 1.9.102 at the start, 1.9.102 at the end; 27 listed events.
 
 ## Same award text on winners of different placements (7 awards)
 
