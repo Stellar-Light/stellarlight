@@ -117,3 +117,38 @@ move says so.
   old name.
 - Measurement and outputs: `../audits/2026-10-23-repo-moves/README.md`.
 - Not verified live: nothing is deployed from this lane.
+
+## Review and fix
+
+- Review (Claude Fable 5.1, effort high, independent, of bec7a3c3): GATE
+  fix. Verified the sync lane's data safety, the linker, the contract and
+  the clevercon claim. One medium privacy finding:
+  - The read hook returns a doc untouched when it carries neither
+    `githubUrl` nor `repoFullName`, and `withholdHeldRepo` keys only on
+    those and `securityHeld`. The collection's REST read is public and
+    honours `select` and `where` unauthenticated: the reviewer showed
+    `GET /api/hackathon-builds?select[name]=true&where[securityHeld][equals]=true`
+    returns the one held row on production. After this change,
+    `select[repoCurrentFullName]=true` with that `where` would return a
+    held repo's new owner/name, and a `where` on the field would test a
+    guess.
+- Fix: `repoCurrentFullName` gets field read access, as `embedding` has:
+  `isAdmin(req.user) || req.context?.includeSecurityHeld === true`, the
+  flag the sync lane's stored read and read-back already pass. Those are
+  local API reads, which also skip field access by default, so the lane
+  still reads and writes the field.
+- Tests first (`held-repos.test.ts`, Payload's own `sanitizeConfig`, field
+  read access in `afterReadTraverseFields` and `validateQueryPaths` over
+  the real collection config): before the fix, 2 failed and 6 passed (a
+  public read returned the field on a held row the hook passes by; a public
+  `where` on it was allowed). With the fix: 8 of 8 pass. Public read: the
+  field is absent. Public `where`: `QueryError` (as for `embedding`, the
+  harness control), while `where` on `name` runs. A read or `where` with
+  `includeSecurityHeld`, or as an admin, still gets it.
+- Checks: `pnpm exec tsc --noEmit -p tsconfig.json` exit 0;
+  `pnpm exec tsx scripts/check-scripts-types.ts` exit 0 (GREEN, 28
+  baselined); `npx vitest run src/lib/__tests__ src/app/api --maxWorkers=4
+  --minWorkers=1` exit 0, 179 files and 2,261 tests; `pnpm contract:write`
+  exit 0 and `CONTRACT_BASE=02d7deba pnpm contract:check` exit 0 (no
+  contract change: the field is not served); biome on the two changed
+  files: clean.

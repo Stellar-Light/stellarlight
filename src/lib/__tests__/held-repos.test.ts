@@ -109,3 +109,111 @@ describe("the HackathonBuilds read hook", async () => {
 		).toBe("https://github.com/Some-Team/Infected-App");
 	});
 });
+
+describe("where a build's repo moved: read only by an admin or the lanes", async () => {
+	// Payload's own field read access and query validation, over the real
+	// collection config. The collection's REST read is public and honours
+	// select and where, and the read hook leaves a doc with no githubUrl or
+	// repoFullName alone, so the field itself must be unreadable.
+	const {
+		afterReadTraverseFields,
+		sanitizeConfig,
+		validateQueryPaths,
+		// biome-ignore lint/suspicious/noExplicitAny: Payload internals, untyped here
+	} = (await import("payload")) as any;
+	const { HackathonBuilds } = await import("@/collections/HackathonBuilds");
+	const config = await sanitizeConfig({
+		collections: [HackathonBuilds],
+		secret: "test",
+		// biome-ignore lint/suspicious/noExplicitAny: no database is touched
+		db: { defaultIDType: "text", init: () => ({}) } as any,
+	});
+	const collection = config.collections.find(
+		(c: { slug: string }) => c.slug === "hackathon-builds",
+	);
+	const reqOf = (over: Record<string, unknown>) => ({
+		payload: {
+			config,
+			collections: { "hackathon-builds": { config: collection } },
+		},
+		user: null,
+		context: {},
+		...over,
+	});
+	const readAs = async (over: Record<string, unknown>) => {
+		const doc = {
+			id: "x",
+			name: "Example Build",
+			repoCurrentFullName: "other-team/infected-app",
+			securityHeld: true,
+		};
+		const fieldPromises: Promise<void>[] = [];
+		const populationPromises: Promise<void>[] = [];
+		const req = reqOf(over);
+		afterReadTraverseFields({
+			collection,
+			context: req.context,
+			currentDepth: 1,
+			depth: 0,
+			doc,
+			draft: false,
+			fallbackLocale: null,
+			fieldPromises,
+			fields: collection.fields,
+			findMany: true,
+			flattenLocales: true,
+			global: null,
+			locale: null,
+			overrideAccess: false,
+			parentIndexPath: "",
+			parentPath: "",
+			parentSchemaPath: "",
+			populationPromises,
+			req,
+			showHiddenFields: false,
+			siblingDoc: doc,
+		});
+		while (fieldPromises.length || populationPromises.length) {
+			await Promise.all(fieldPromises.splice(0));
+			await Promise.all(populationPromises.splice(0));
+		}
+		return doc as Record<string, unknown>;
+	};
+	const whereAs = (path: string, over: Record<string, unknown>) =>
+		validateQueryPaths({
+			collectionConfig: collection,
+			overrideAccess: false,
+			req: reqOf(over),
+			where: { [path]: { equals: "other-team/infected-app" } },
+		}).then(
+			() => "allowed",
+			(e: Error) => e.name,
+		);
+
+	it("a public read does not return it, even on a held row the read hook passes by", async () => {
+		const doc = await readAs({});
+		expect("repoCurrentFullName" in doc).toBe(false);
+		expect(doc.name).toBe("Example Build");
+	});
+
+	it("a public where on it is refused, not used as a filter", async () => {
+		expect(await whereAs("repoCurrentFullName", {})).toBe("QueryError");
+		// The same query on a public field still runs, and the admin-read
+		// embedding is refused the same way (the harness sees field access).
+		expect(await whereAs("name", {})).toBe("allowed");
+		expect(await whereAs("embedding", {})).toBe("QueryError");
+	});
+
+	it("the lanes' reads (includeSecurityHeld) and an admin still read and query it", async () => {
+		const lane = { context: { includeSecurityHeld: true } };
+		const admin = { user: { collection: "users" } };
+		expect((await readAs(lane)).repoCurrentFullName).toBe(
+			"other-team/infected-app",
+		);
+		expect((await readAs(admin)).repoCurrentFullName).toBe(
+			"other-team/infected-app",
+		);
+		expect(await whereAs("repoCurrentFullName", lane)).toBe("allowed");
+		expect(await whereAs("repoCurrentFullName", admin)).toBe("allowed");
+	});
+});
