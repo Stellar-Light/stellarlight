@@ -2,7 +2,7 @@
 /**
  * Stellar Scout MCP Server
  *
- * Exposes stellarlight.xyz's 19 public APIs as MCP tools so any MCP-compatible
+ * Exposes stellarlight.xyz's public APIs as MCP tools so any MCP-compatible
  * client (Claude desktop, Cursor, ChatGPT custom GPTs, Gemini, Cline, Continue,
  * Zed, etc.) can call them as native function calls.
  *
@@ -90,10 +90,17 @@ function asToolResult(
 	result:
 		| { ok: true; data: unknown }
 		| { ok: false; error: string; status?: number },
+	// true for a view=compact call: the JSON without indentation.
+	compact = false,
 ): { content: { type: "text"; text: string }[]; isError?: boolean } {
 	if (result.ok) {
 		return {
-			content: [{ type: "text", text: JSON.stringify(result.data, null, 2) }],
+			content: [
+				{
+					type: "text",
+					text: JSON.stringify(result.data, null, compact ? 0 : 2),
+				},
+			],
 		};
 	}
 	return {
@@ -587,7 +594,7 @@ const viewInput = z
 	.enum(["full", "compact"])
 	.optional()
 	.describe(
-		"Row shape. full (the default) returns every row field, unchanged. compact is for clients whose tool output is capped or cut: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. Measured through this tool on 2026-10-23 (five default pages of search_projects and search_repos): 90,965 to 120,796 characters full, 16,388 to 30,647 compact. Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. meta.view (first in meta) says the page is compact and where the left-out detail is read: repeat the call without view. Cannot be combined with fields (400).",
+		"Row shape. full (the default) returns every row field, unchanged. compact is for clients whose tool output is capped or cut: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. This tool returns a compact page as unindented JSON; measured through it on 2026-10-23 over four default pages of search_projects and search_repos: 90,918 to 120,796 characters full, 12,806 to 24,433 compact. Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. meta.view (first in meta) says the page is compact and where the left-out detail is read: repeat the call without view. Cannot be combined with fields (400).",
 	);
 
 // 6. search_projects — prior-art / competitor lookup
@@ -637,7 +644,7 @@ server.registerTool(
 		if (view) params.set("view", view);
 		const qs = params.toString();
 		const result = await callScout(`/api/projects/search${qs ? `?${qs}` : ""}`);
-		return asToolResult(result);
+		return asToolResult(result, view === "compact");
 	},
 );
 
@@ -660,10 +667,11 @@ server.registerTool(
 				.optional()
 				.describe("Filter by primary language (e.g. 'Rust', 'TypeScript')."),
 			activity: z
-				.enum(["active", "dormant", "archived", "unknown"])
+				// Keep in sync with REPO_ACTIVITY_STATES in src/lib/repo-grade.ts.
+				.enum(["active", "maintained", "dormant", "archived", "unknown"])
 				.optional()
 				.describe(
-					"Derived liveness filter. dormant/unknown are observations (stale/no commit date), never death verdicts.",
+					"Derived liveness filter: active (a commit within 45 days), maintained (within 180 days), dormant (a known commit older than 180 days), archived (the owner's own verdict), unknown (no commit date held). dormant and unknown are observations, never death verdicts.",
 				),
 			minScore: z
 				.number()
@@ -690,17 +698,18 @@ server.registerTool(
 			view: viewInput,
 		},
 	},
-	async ({ q, language, minScore, limit, offset, view }) => {
+	async ({ q, language, activity, minScore, limit, offset, view }) => {
 		const params = new URLSearchParams();
 		if (q) params.set("q", q);
 		if (language) params.set("language", language);
+		if (activity) params.set("activity", activity);
 		if (minScore !== undefined) params.set("minScore", String(minScore));
 		if (limit !== undefined) params.set("limit", String(limit));
 		if (offset !== undefined) params.set("offset", String(offset));
 		if (view) params.set("view", view);
 		const qs = params.toString();
 		const result = await callScout(`/api/repos/search${qs ? `?${qs}` : ""}`);
-		return asToolResult(result);
+		return asToolResult(result, view === "compact");
 	},
 );
 
@@ -890,9 +899,12 @@ server.registerTool(
 				),
 		},
 	},
-	async ({ include }) => {
-		const qs = include ? `?include=${encodeURIComponent(include)}` : "";
-		const result = await callScout(`/api/leaderboard${qs}`);
+	async ({ type, include }) => {
+		const params = new URLSearchParams();
+		if (type) params.set("type", type);
+		if (include) params.set("include", include);
+		const qs = params.toString();
+		const result = await callScout(`/api/leaderboard${qs ? `?${qs}` : ""}`);
 		return asToolResult(result);
 	},
 );

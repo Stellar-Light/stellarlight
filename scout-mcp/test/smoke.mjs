@@ -139,6 +139,65 @@ async function callTool(name, args = {}) {
 	}
 }
 
+/**
+ * One server process for many sequential requests, against apiBase. The
+ * forwarding audit sends about 130, too many for a process each.
+ */
+function openSession(apiBase) {
+	const child = spawn(SERVER[0], SERVER.slice(1), {
+		stdio: ["pipe", "pipe", "pipe"],
+		env: { ...process.env, SCOUT_API_BASE: apiBase },
+	});
+	const send = (msg) =>
+		child.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", ...msg })}\n`);
+	const waiting = new Map();
+	let buf = "";
+	child.stdout.on("data", (chunk) => {
+		buf += chunk.toString();
+		let nl = buf.indexOf("\n");
+		while (nl !== -1) {
+			const line = buf.slice(0, nl);
+			buf = buf.slice(nl + 1);
+			nl = buf.indexOf("\n");
+			let msg;
+			try {
+				msg = JSON.parse(line);
+			} catch {
+				continue;
+			}
+			waiting.get(msg.id)?.(msg);
+		}
+	});
+	send({
+		id: 0,
+		method: "initialize",
+		params: {
+			protocolVersion: "2024-11-05",
+			capabilities: {},
+			clientInfo: { name: "smoke", version: "1.0.0" },
+		},
+	});
+	send({ method: "notifications/initialized" });
+	let nextId = 1;
+	return {
+		request: (method, params) =>
+			new Promise((resolve, reject) => {
+				const id = nextId++;
+				const timer = setTimeout(
+					() => reject(new Error(`${method} timed out after ${TIMEOUT_MS}ms`)),
+					TIMEOUT_MS,
+				);
+				waiting.set(id, (msg) => {
+					clearTimeout(timer);
+					waiting.delete(id);
+					resolve(msg);
+				});
+				send({ id, method, params });
+			}),
+		close: () => child.kill(),
+	};
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Tests
 // ─────────────────────────────────────────────────────────────────────────────
@@ -224,6 +283,88 @@ async function main() {
 		}
 	} catch (e) {
 		fail("tools/list smoke", e.message);
+	}
+
+	// ── Session 1b: every declared parameter reaches the request ────────────
+	// Offline: the server talks to a local stub that records each request, so
+	// this checks forwarding, never data. A parameter whose value leaves the
+	// request unchanged is declared but dropped, as search_repos activity and
+	// get_leaderboard type were until 1.8.0.
+	console.log("\n◆ Parameter forwarding (local stub, no network)");
+	{
+		const { createServer } = await import("node:http");
+		const seen = [];
+		const stub = createServer((req, res) => {
+			let body = "";
+			req.on("data", (c) => {
+				body += c;
+			});
+			req.on("end", () => {
+				seen.push(`${req.method} ${req.url} ${body}`);
+				res.writeHead(200, { "content-type": "application/json" });
+				res.end("{}");
+			});
+		});
+		await new Promise((resolve) => stub.listen(0, "127.0.0.1", resolve));
+		const session = openSession(`http://127.0.0.1:${stub.address().port}`);
+		// Two valid, different values for a JSON-schema property.
+		const values = (name, s) => {
+			if (s.enum) return [s.enum[0], s.enum[1] ?? s.enum[0]];
+			if (s.type === "boolean") return [true, true];
+			if (s.type === "integer" || s.type === "number") {
+				const lo = s.minimum ?? (s.exclusiveMinimum ?? 0) + 1;
+				return [lo, Math.min(lo + 1, s.maximum ?? lo + 1)];
+			}
+			if (s.type === "array")
+				return [
+					["probe-a", "probe-b"],
+					["probe-a", "probe-c"],
+				];
+			return [`probe-${name}-a`, `probe-${name}-b`];
+		};
+		const sent = async (name, args) => {
+			seen.length = 0;
+			await session.request("tools/call", { name, arguments: args });
+			return seen.join("\n");
+		};
+		try {
+			const { result } = await session.request("tools/list", {});
+			const dropped = [];
+			let declared = 0;
+			for (const tool of result.tools) {
+				const props = tool.inputSchema?.properties ?? {};
+				const required = tool.inputSchema?.required ?? [];
+				const base = Object.fromEntries(
+					required.map((n) => [n, values(n, props[n])[0]]),
+				);
+				const baseSent = await sent(tool.name, base);
+				if (!baseSent) {
+					dropped.push(`${tool.name} (sent no request)`);
+					continue;
+				}
+				for (const [name, s] of Object.entries(props)) {
+					declared += 1;
+					const [a, b] = values(name, s);
+					const args = { ...base, [name]: required.includes(name) ? b : a };
+					if ((await sent(tool.name, args)) === baseSent)
+						dropped.push(`${tool.name}.${name}`);
+				}
+			}
+			if (dropped.length === 0)
+				pass(
+					`all ${declared} declared parameters of ${result.tools.length} tools reach the request`,
+				);
+			else
+				fail(
+					"every declared parameter reaches the request",
+					`dropped: ${dropped.join(", ")}`,
+				);
+		} catch (e) {
+			fail("parameter forwarding audit", e.message);
+		} finally {
+			session.close();
+			stub.close();
+		}
 	}
 
 	// ── Session 2: search_research (vector mode) ────────────────────────────
@@ -726,6 +867,17 @@ async function main() {
 				"compact page under half the full page",
 				`${compact.raw.length} vs ${full.raw.length}`,
 			);
+		// The budget the API's compact view was sized for; indenting the JSON
+		// would push this page past it.
+		if (compact.raw.length < 24_000)
+			pass(`compact q=lending under 24,000 characters (${compact.raw.length})`);
+		else
+			fail(
+				"compact q=lending under 24,000 characters",
+				`${compact.raw.length}`,
+			);
+		if (full.raw.startsWith('{\n  "')) pass("full page keeps indented JSON");
+		else fail("full page keeps indented JSON", full.raw.slice(0, 40));
 	} catch (e) {
 		fail("search_projects view=compact", e.message);
 	}
@@ -743,6 +895,56 @@ async function main() {
 			);
 	} catch (e) {
 		fail("search_repos view=compact", e.message);
+	}
+
+	// ── Session 27: filters reach the API: search_repos activity, ──────────
+	// get_leaderboard type. Both were declared and silently dropped before 1.8.0.
+	console.log("\n◆ search_repos activity + get_leaderboard type");
+	try {
+		const { isError, data } = await callTool("search_repos", {
+			q: "soroban",
+			activity: "maintained",
+			limit: 5,
+		});
+		const rows = Array.isArray(data?.repos) ? data.repos : [];
+		if (
+			!isError &&
+			data?.meta?.filters?.activity === "maintained" &&
+			rows.length > 0 &&
+			rows.every((r) => r.activityState === "maintained")
+		)
+			pass(
+				`search_repos activity=maintained echoed and applied (${rows.length} rows, all maintained)`,
+			);
+		else
+			fail(
+				"search_repos activity=maintained echoed and applied",
+				`isError=${isError} filters=${JSON.stringify(data?.meta?.filters ?? null)}`,
+			);
+	} catch (e) {
+		fail("search_repos activity", e.message);
+	}
+	try {
+		const { isError, data } = await callTool("get_leaderboard", {
+			type: "DEX",
+		});
+		const rows = Array.isArray(data?.projects) ? data.projects : [];
+		if (
+			!isError &&
+			data?.meta?.filters?.type?.includes?.("DEX") &&
+			rows.length > 0 &&
+			rows.every((p) => p.types?.includes("DEX"))
+		)
+			pass(
+				`get_leaderboard type=DEX echoed and applied (${rows.length} projects, all typed DEX)`,
+			);
+		else
+			fail(
+				"get_leaderboard type=DEX echoed and applied",
+				`isError=${isError} filters=${JSON.stringify(data?.meta?.filters ?? null)}`,
+			);
+	} catch (e) {
+		fail("get_leaderboard type", e.message);
 	}
 
 	// ── Summary ─────────────────────────────────────────────────────────────
