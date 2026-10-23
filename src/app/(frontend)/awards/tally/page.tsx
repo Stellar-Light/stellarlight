@@ -240,7 +240,7 @@ export default async function AwardsTallyPage({
 								{categories.map((c) => (
 									<td key={c.key} className="p-3">
 										{(r.picks[c.key] ?? []).length === 0 ? (
-											<span className="text-muted-foreground">–</span>
+											<span className="text-muted-foreground">-</span>
 										) : (
 											<div className="flex flex-wrap gap-1">
 												{(r.picks[c.key] ?? []).map((s) => (
@@ -256,7 +256,7 @@ export default async function AwardsTallyPage({
 									</td>
 								))}
 								<td className="p-3 text-muted-foreground tabular-nums whitespace-nowrap">
-									{r.at ? r.at.replace("T", " ").slice(0, 16) : "–"}
+									{r.at ? r.at.replace("T", " ").slice(0, 16) : "-"}
 								</td>
 								<td className="p-3 font-mono text-xs">
 									{r.txHash ? (
@@ -269,7 +269,7 @@ export default async function AwardsTallyPage({
 											{r.txHash.slice(0, 8)}…
 										</a>
 									) : (
-										<span className="text-muted-foreground">–</span>
+										<span className="text-muted-foreground">-</span>
 									)}
 								</td>
 							</tr>

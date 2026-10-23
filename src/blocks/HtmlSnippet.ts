@@ -15,7 +15,7 @@ export const HtmlSnippetBlock: Block = {
 			admin: {
 				language: "html",
 				description:
-					"Paste raw HTML to embed in this post. Rendered as-is on the frontend — use with care.",
+					"Paste raw HTML to embed in this post. Rendered as-is on the frontend. Use with care.",
 			},
 		},
 	],

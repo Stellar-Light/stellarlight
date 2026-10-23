@@ -34,7 +34,7 @@ export function PartnerClaimProfile({ orgName }: { orgName: string }) {
 			});
 			const d = await r.json().catch(() => ({}));
 			if (!r.ok) {
-				setError(d.error ?? "Couldn't send the claim — try again shortly.");
+				setError(d.error ?? "Couldn't send the claim. Try again shortly.");
 				return;
 			}
 			setDone(true);

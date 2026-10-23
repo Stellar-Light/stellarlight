@@ -362,7 +362,7 @@ export function AskSearch() {
 											})}
 										</p>
 										<p className="text-[11px] text-muted-foreground/60 mt-2.5">
-											synthesized only from the sources below — every sentence
+											synthesized only from the sources below; every sentence
 											cites one
 										</p>
 									</div>
@@ -542,9 +542,9 @@ export function AskSearch() {
 						)}
 
 						<p className="text-[11px] text-muted-foreground/60 pt-2">
-							grounded results from the live stellarlight index — semantic
-							search over the knowledge corpus + project directory. every card
-							links to a primary source.
+							grounded results from the live stellarlight index: semantic search
+							over the knowledge corpus + project directory. every card links to
+							a primary source.
 						</p>
 					</div>
 				)}

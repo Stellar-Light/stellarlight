@@ -188,7 +188,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error:
-					"The assistant isn't available right now — browse /partners or use the form.",
+					"The assistant isn't available right now. Browse /partners or use the form.",
 				unavailable: true,
 			},
 			{
@@ -330,7 +330,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json(
 				{
 					error:
-						"The assistant isn't available right now — browse /partners or use the form.",
+						"The assistant isn't available right now. Browse /partners or use the form.",
 					unavailable: true,
 				},
 				{
@@ -341,7 +341,7 @@ export async function POST(req: NextRequest) {
 		}
 		if (err instanceof Anthropic.APIError) {
 			return NextResponse.json(
-				{ error: "The assistant hit a snag — browse /partners instead." },
+				{ error: "The assistant hit a snag. Browse /partners instead." },
 				{ status: 502, headers: rateLimitHeaders(limit) },
 			);
 		}

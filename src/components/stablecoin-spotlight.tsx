@@ -59,7 +59,7 @@ export function StablecoinSpotlight({
 			)}
 			<Link href={href} className="flex-1 min-w-0 text-sm leading-relaxed">
 				<span className="font-semibold text-foreground">{lead}</span>
-				<span className="text-muted-foreground"> — {body} </span>
+				<span className="text-muted-foreground">: {body} </span>
 				<span className="font-medium text-foreground">{highlight}</span>
 			</Link>
 			<button

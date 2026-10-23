@@ -78,7 +78,7 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error: `Repo '${repo}' is not in the index.`,
-				note: "Absence here is NOT a claim the repo doesn't exist on GitHub — only that we hold no verified data for it.",
+				note: "Absence here is NOT a claim the repo doesn't exist on GitHub; only that we hold no verified data for it.",
 			},
 			{ status: 404, headers: rateLimitHeaders(limit) },
 		);
@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: `${getAppUrl()}/api/repos/trust`,
 				generatedAt: new Date().toISOString(),
-				note: "Every field is evidence-grounded (scanner, on-chain enrichment, audits registry); signals is a closed deterministic vocabulary — absence of a signal means the evidence doesn't hold, not that the opposite is proven. codeTruth.contractInterface carries the real scanned signatures: verify generated calls against it before shipping code that invokes this contract.",
+				note: "Every field is evidence-grounded (scanner, on-chain enrichment, audits registry); signals is a closed deterministic vocabulary; absence of a signal means the evidence doesn't hold, not that the opposite is proven. codeTruth.contractInterface carries the real scanned signatures: verify generated calls against it before shipping code that invokes this contract.",
 			},
 			report,
 		},

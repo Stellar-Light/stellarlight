@@ -121,15 +121,15 @@ const FRESHNESS_BADGE: Record<string, { label: string; cls: string }> = {
 		cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
 	},
 	aging: {
-		label: "Aging — update soon",
+		label: "Aging: update soon",
 		cls: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
 	},
 	stale: {
-		label: "Stale — please update",
+		label: "Stale: please update",
 		cls: "bg-orange-500/15 text-orange-400 border-orange-500/30",
 	},
 	archived: {
-		label: "Archived — hidden from matches",
+		label: "Archived: hidden from matches",
 		cls: "bg-red-500/15 text-red-400 border-red-500/30",
 	},
 };
@@ -175,9 +175,9 @@ export function PartnerPortal() {
 					</h1>
 				</div>
 				<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-					Keep your profile current so builders — and their AI agents — find
-					you. Update it by chatting with the assistant, or edit the fields
-					directly. Facts marked{" "}
+					Keep your profile current so builders, and their AI agents, find you.
+					Update it by chatting with the assistant, or edit the fields directly.
+					Facts marked{" "}
 					<span className="text-foreground font-medium">verified</span> are
 					measured by Stellar Light and can&apos;t be edited.
 				</p>
@@ -223,7 +223,7 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 				body: JSON.stringify({ email }),
 			});
 			if (res.status === 429) {
-				setError("Too many requests — try again in a few minutes.");
+				setError("Too many requests. Try again in a few minutes.");
 				return;
 			}
 			if (!res.ok) {
@@ -293,7 +293,7 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 					<p className="text-sm text-muted-foreground mt-1">
 						{usePassword
 							? "Sign in with your email and password."
-							: "Enter your work email — if it matches your company's listing we'll email you a sign-in link. Also how you claim an unclaimed profile."}
+							: "Enter your work email: if it matches your company's listing we'll email you a sign-in link. Also how you claim an unclaimed profile."}
 					</p>
 				</div>
 				<Field label="Email">
@@ -322,7 +322,7 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 				{linkSent && !usePassword && (
 					<div className="text-xs text-emerald-400">
 						If that email matches a partner account, a sign-in link is on its
-						way — check your inbox (and spam). Links expire in 7 days.
+						way. Check your inbox (and spam). Links expire in 7 days.
 					</div>
 				)}
 				{resetSent && usePassword && (
@@ -372,8 +372,8 @@ function LoginCard({ onSuccess }: { onSuccess: () => void }) {
 					className="text-foreground underline underline-offset-2 hover:no-underline"
 				>
 					Get listed
-				</Link>{" "}
-				— tell us what you do in a quick chat, no account needed to start.
+				</Link>
+				: tell us what you do in a quick chat, no account needed to start.
 			</p>
 		</div>
 	);
@@ -504,7 +504,7 @@ function Dashboard({
 							{form.status === "published" ? (
 								<span className="text-emerald-400">published</span>
 							) : (
-								<span>draft — visible once Stellar Light publishes it</span>
+								<span>draft: visible once Stellar Light publishes it</span>
 							)}
 						</div>
 					</div>
@@ -524,7 +524,7 @@ function Dashboard({
 					<span>
 						Next reminder:{" "}
 						<span className="text-foreground/80">
-							{fmtDate(form.nextReminderAt) || "—"}
+							{fmtDate(form.nextReminderAt) || "-"}
 						</span>
 					</span>
 				</div>
@@ -547,11 +547,11 @@ function Dashboard({
 						<>
 							<Verified
 								label="Last GitHub commit"
-								value={fmtDate(v.githubLastCommitAt) || "—"}
+								value={fmtDate(v.githubLastCommitAt) || "-"}
 							/>
 							<Verified
 								label="Commits (90d)"
-								value={v.githubCommits90d ?? "—"}
+								value={v.githubCommits90d ?? "-"}
 							/>
 						</>
 					) : null}
@@ -559,18 +559,18 @@ function Dashboard({
 						label="On-chain activity"
 						value={
 							v.onchainActive == null
-								? "—"
+								? "-"
 								: v.onchainActive
 									? "active"
 									: "none detected"
 						}
 					/>
-					<Verified label="SCF involvement" value={v.scfInvolvement ?? "—"} />
+					<Verified label="SCF involvement" value={v.scfInvolvement ?? "-"} />
 				</div>
 				<p className="text-[11px] text-muted-foreground mt-2.5">
 					{form.githubOrg
 						? "GitHub activity comes from your public org. On-chain and SCF signals populate as we detect them."
-						: "These populate as we detect your on-chain footprint and SCF history. Open-source? Add a GitHub org below to show code activity too — optional, skip it if you're not."}
+						: "These populate as we detect your on-chain footprint and SCF history. Open-source? Add a GitHub org below to show code activity too. Optional, skip it if you're not."}
 				</p>
 			</section>
 
@@ -616,12 +616,12 @@ function Dashboard({
 							{chatBanner > 0 ? (
 								<span>
 									The assistant drafted {chatBanner} update
-									{chatBanner === 1 ? "" : "s"} from your chat — review the
+									{chatBanner === 1 ? "" : "s"} from your chat. Review the
 									highlighted fields and hit Save.
 								</span>
 							) : (
 								<span>
-									Nothing new to change from that chat — your profile already
+									Nothing new to change from that chat. Your profile already
 									covers it.
 								</span>
 							)}
@@ -716,7 +716,7 @@ function MaintenanceChat({
 			}
 			if (!res.ok) {
 				setError(
-					"The assistant hit a snag — edit your profile directly instead.",
+					"The assistant hit a snag. Edit your profile directly instead.",
 				);
 				return null;
 			}
@@ -735,7 +735,7 @@ function MaintenanceChat({
 			if (cancelled) return;
 			setGreeting(
 				reply ??
-					`Hi! Let's keep ${partner.name}'s profile current. What's changed since you last updated — new services, regions, pricing, or availability?`,
+					`Hi! Let's keep ${partner.name}'s profile current. What's changed since you last updated: new services, regions, pricing, or availability?`,
 			);
 			setBusy(false);
 			scrollToEnd();
@@ -775,14 +775,14 @@ function MaintenanceChat({
 			});
 			if (!res.ok) {
 				setError(
-					"Couldn't read the changes from that chat — try editing directly.",
+					"Couldn't read the changes from that chat. Try editing directly.",
 				);
 				return;
 			}
 			const data = await res.json();
 			if (data.fields) onApply(data.fields as Record<string, unknown>);
 		} catch {
-			setError("Couldn't read the changes — try editing directly.");
+			setError("Couldn't read the changes. Try editing directly.");
 		} finally {
 			setApplying(false);
 		}
@@ -791,7 +791,7 @@ function MaintenanceChat({
 	if (unavailable) {
 		return (
 			<div className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
-				The chat assistant isn&apos;t available right now — switch to{" "}
+				The chat assistant isn&apos;t available right now. Switch to{" "}
 				<span className="text-foreground font-medium">Your profile</span> and
 				edit the fields directly.
 			</div>
@@ -905,7 +905,7 @@ function ProfileEditor({
 				label="Tagline"
 				value={form.tagline ?? ""}
 				onChange={(x) => set("tagline", x)}
-				hint="≤140 chars — the first line a builder sees"
+				hint="≤140 chars: the first line a builder sees"
 				changed={changed.has("tagline")}
 			/>
 			<TextArea
@@ -931,7 +931,7 @@ function ProfileEditor({
 					label="GitHub org"
 					value={form.githubOrg ?? ""}
 					onChange={(x) => set("githubOrg", x)}
-					hint="optional — open-source only"
+					hint="optional: open-source only"
 					changed={changed.has("githubOrg")}
 				/>
 				<Input
@@ -958,7 +958,7 @@ function ProfileEditor({
 
 			<TagEditor
 				label="Services"
-				hint="Granular tags the AI matchmaker matches on — e.g. sep-24-ngn, soroban-audit-rust"
+				hint="Granular tags the AI matchmaker matches on: e.g. sep-24-ngn, soroban-audit-rust"
 				tags={(form.services ?? []).map((s) => s.tag)}
 				onChange={(tags) =>
 					set(
@@ -1179,7 +1179,7 @@ function Select({
 				onChange={(e) => onChange(e.target.value)}
 				className={inputCls(changed)}
 			>
-				<option value="">—</option>
+				<option value="">-</option>
 				{options.map((o) => (
 					<option key={o} value={o}>
 						{o}
@@ -1419,7 +1419,7 @@ function ProfileStrength({ partner }: { partner: Partner }) {
 			<p className="text-xs text-muted-foreground mt-2.5">
 				{missing.length === 0 ? (
 					<>
-						Complete profiles rank higher in concierge matches — yours is all
+						Complete profiles rank higher in concierge matches. Yours is all
 						set.
 					</>
 				) : (
@@ -1551,7 +1551,7 @@ function CompletenessRank({
 			</span>
 			<span className="text-muted-foreground">
 				of {state.total} {label} by profile completeness
-				{top ? " — you're leading 🎉" : ". Fill the gaps above to climb."}
+				{top ? ". You're leading 🎉" : ". Fill the gaps above to climb."}
 			</span>
 		</div>
 	);
@@ -1623,7 +1623,7 @@ function LeadsPanel({ slug }: { slug?: string }) {
 				))}
 			</ul>
 			<p className="text-[11px] text-muted-foreground/60 mt-3">
-				Anonymous searches from the partner concierge — shown so you know the
+				Anonymous searches from the partner concierge, shown so you know the
 				demand is real. Keep your services current to catch more of them.
 			</p>
 		</div>

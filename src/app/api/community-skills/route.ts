@@ -112,13 +112,13 @@ export async function POST(req: NextRequest) {
 	if (!body.slug || !isKebab(body.slug))
 		errs.push("'slug' is required (kebab-case, e.g. 'my-cool-skill')");
 	if (!body.tagline || body.tagline.length < 10 || body.tagline.length > 160)
-		errs.push("'tagline' must be 10–160 chars");
+		errs.push("'tagline' must be 10-160 chars");
 	if (
 		!body.description ||
 		body.description.length < 30 ||
 		body.description.length > 2000
 	)
-		errs.push("'description' must be 30–2000 chars");
+		errs.push("'description' must be 30-2000 chars");
 	if (!body.kind || !VALID_KINDS.includes(body.kind as never))
 		errs.push(`'kind' must be one of: ${VALID_KINDS.join(", ")}`);
 	if (!body.install || body.install.trim().length < 5)
@@ -237,8 +237,8 @@ export async function GET() {
 			body: {
 				name: "string · required · ≥ 2 chars",
 				slug: "kebab-case slug · required · unique",
-				tagline: "string · 10–160 chars",
-				description: "string · 30–2000 chars",
+				tagline: "string · 10-160 chars",
+				description: "string · 30-2000 chars",
 				kind: VALID_KINDS,
 				install: "string · the install command shown on the card",
 				repository: "URL · optional",

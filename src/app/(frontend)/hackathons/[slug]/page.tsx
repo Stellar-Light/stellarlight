@@ -69,7 +69,7 @@ export async function generateMetadata({
 }
 
 function formatDate(d?: string | null) {
-	if (!d) return "—";
+	if (!d) return "-";
 	return new Date(d).toLocaleDateString("en-US", {
 		month: "short",
 		day: "numeric",
@@ -84,12 +84,12 @@ function formatDateRange(start?: string | null, end?: string | null) {
 	const sameYear = s.getFullYear() === e.getFullYear();
 	const sameMonth = sameYear && s.getMonth() === e.getMonth();
 	if (sameMonth) {
-		return `${s.toLocaleDateString("en-US", { month: "short", day: "numeric" })}–${e.getDate()}, ${e.getFullYear()}`;
+		return `${s.toLocaleDateString("en-US", { month: "short", day: "numeric" })}-${e.getDate()}, ${e.getFullYear()}`;
 	}
 	if (sameYear) {
-		return `${s.toLocaleDateString("en-US", { month: "short", day: "numeric" })} – ${e.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${e.getFullYear()}`;
+		return `${s.toLocaleDateString("en-US", { month: "short", day: "numeric" })} to ${e.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${e.getFullYear()}`;
 	}
-	return `${formatDate(start)} – ${formatDate(end)}`;
+	return `${formatDate(start)} to ${formatDate(end)}`;
 }
 
 function getLogoUrl(logo: any): string | null {

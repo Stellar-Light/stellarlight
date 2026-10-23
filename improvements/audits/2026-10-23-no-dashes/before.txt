@@ -1,0 +1,133 @@
+dash audit: before (git 08dd388c)
+served text only (strings, templates, JSX text); comments and test files skipped
+
+area                             lines  dashes  listed  unlisted
+repo-knowledge                     760     875       0       760
+frontend                           124     128       0       124
+components                          91      93       0        91
+integrations                        28      35       0        28
+quality-artifacts                   22      22       0        22
+blocks                               1       1       0         1
+api (not hackathons)               140     167       0       140
+PART A TOTAL                      1166    1321       0      1166
+
+part A dashes left on purpose (listed), by kind:
+  none
+listed entries that match no dash (stale): 0 of 0
+
+not in part A (information only):
+api/hackathons                       5       5
+hackathon libs                      11      11
+spec, changelog, skill text        833    1117
+collections                         77      77
+data                                20      22
+payload-types                        0       0
+other src                          100     110
+test files (all areas)             253     280
+
+per file, part A (lines, dashes):
+   760   875  src/lib/repo-knowledge.ts
+    30    31  src/components/partner-portal.tsx
+    27    34  src/lib/integrations/curated-skills.ts
+    24    24  src/app/(frontend)/scout/page.tsx
+    22    22  src/lib/quality-artifacts.ts
+    19    23  src/app/(frontend)/scout/examples/page.tsx
+    17    17  src/app/(frontend)/quality/page.tsx
+    17    21  src/app/api/builders/route.ts
+    15    15  src/app/(frontend)/stablecoins/[assetId]/page.tsx
+    13    14  src/app/api/partners/onboard/route.ts
+    11    11  src/app/api/projects/search/route.ts
+    11    11  src/components/partner-concierge-chat.tsx
+    11    11  src/components/stablecoin-explorer.tsx
+    10    10  src/app/(frontend)/analytics/page.tsx
+    10    11  src/app/api/partners/match/route.ts
+     8    11  src/app/api/analyze/route.ts
+     8    12  src/app/api/leaderboard/route.ts
+     7     7  src/app/(frontend)/partners/[slug]/page.tsx
+     7     7  src/app/api/feedback/route.ts
+     7     8  src/app/api/partners/assistant/route.ts
+     7     8  src/app/api/partners/route.ts
+     5     6  src/app/api/repos/explain/route.ts
+     4     4  src/app/(frontend)/hackathons/[slug]/page.tsx
+     4     4  src/app/(frontend)/leaderboard/page.tsx
+     4     4  src/app/(frontend)/project/[slug]/page.tsx
+     4     4  src/app/api/ask/answer/route.ts
+     4     4  src/app/api/community-skills/route.ts
+     4     4  src/app/api/rfps/route.ts
+     4     7  src/app/api/rwa/route.ts
+     4     4  src/components/skills-marketplace.tsx
+     4     4  src/components/stablecoin-charts.tsx
+     3     3  src/app/(frontend)/awards/tally/page.tsx
+     3     3  src/app/(frontend)/partners/chat/page.tsx
+     3     4  src/app/api/changes/route.ts
+     3     3  src/app/api/partners/submit-listing/route.ts
+     3     3  src/app/api/repos/search/route.ts
+     3     3  src/app/api/research/route.ts
+     3     3  src/app/api/status/route.ts
+     3     3  src/components/base-fee-display.tsx
+     3     3  src/components/partner-reset-password.tsx
+     3     3  src/components/partners-directory.tsx
+     3     3  src/components/stablecoin-reconciliation-note.tsx
+     2     2  src/app/(frontend)/ask/page.tsx
+     2     2  src/app/(frontend)/digest/[yearMonth]/page.tsx
+     2     2  src/app/(frontend)/experiments/page.tsx
+     2     2  src/app/(frontend)/hackathons/page.tsx
+     2     2  src/app/api/audits/route.ts
+     2     3  src/app/api/clusters/route.ts
+     2     4  src/app/api/quality/route.ts
+     2     2  src/app/api/repos/trust/route.ts
+     2     5  src/app/api/stablecoins/defi/route.ts
+     2     2  src/components/ask-search.tsx
+     2     2  src/components/directory-filters.tsx
+     2     2  src/components/idea-submission-modal.tsx
+     2     2  src/components/partner-matchmaker.tsx
+     2     2  src/components/quality/charts.tsx
+     2     2  src/components/scout-install-picker.tsx
+     1     1  src/app/(frontend)/entities/page.tsx
+     1     1  src/app/(frontend)/ideas/[id]/page.tsx
+     1     1  src/app/(frontend)/not-found.tsx
+     1     1  src/app/(frontend)/scout/api-reference/page.tsx
+     1     1  src/app/(frontend)/skills/[slug]/page.tsx
+     1     1  src/app/(frontend)/stablecoins/page.tsx
+     1     1  src/app/api/admin/fix-descriptions/route.ts
+     1     1  src/app/api/admin/fix-entities/route.ts
+     1     1  src/app/api/contracts/route.ts
+     1     2  src/app/api/hackathon-brief/route.ts
+     1     1  src/app/api/partners/magic-link/route.ts
+     1     1  src/app/api/people/route.ts
+     1     1  src/blocks/HtmlSnippet.ts
+     1     1  src/components/dotcut/dot-cut.tsx
+     1     1  src/components/entities-directory.tsx
+     1     1  src/components/ideas-listing.tsx
+     1     1  src/components/partner-claim-profile.tsx
+     1     2  src/components/partner-finder.tsx
+     1     1  src/components/stablecoin-history-chart.tsx
+     1     1  src/components/stablecoin-spotlight.tsx
+     1     1  src/lib/integrations/dorahacks.ts
+
+per file, not in part A (lines, dashes), top 25:
+   365   565  src/lib/changelog.ts
+   350   407  src/lib/openapi-spec.ts
+   118   145  src/lib/stellar-scout-skill.ts
+    17    17  src/collections/Projects.ts
+    14    14  src/collections/Repos.ts
+    13    15  src/lib/repair-lane.ts
+    12    12  src/data/recent-hackathon-winners.ts
+    10    10  src/collections/Partners.ts
+    10    10  src/lib/verify-claim.ts
+     9     9  src/lib/canonical-pages.ts
+     8     8  src/lib/hackathon-brief.ts
+     8    13  src/lib/task-lanes.ts
+     7     7  src/collections/LinkChecks.ts
+     6     6  src/collections/Stablecoins.ts
+     6     6  src/lib/resolve-project.ts
+     6     6  src/lib/scf-pitch.ts
+     5     5  src/collections/ResearchDocs.ts
+     5     7  src/data/ideas.ts
+     5     5  src/lib/corpus-mirrors.ts
+     4     4  src/collections/AwardRounds.ts
+     4     4  src/collections/IdeaSubmissions.ts
+     4     4  src/lib/match-mode.ts
+     4     5  src/lib/repo-relations.ts
+     4     4  src/lib/stablecoin-view.ts
+     4     4  src/lib/stellar-developer-activity-skill.ts

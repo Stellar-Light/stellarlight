@@ -1010,7 +1010,7 @@ async function handle(req: NextRequest) {
 	// instead of falling through to a quiet empty or thinner page.
 	const warnings: string[] = unknownParams.length
 		? [
-				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, type, status, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria) — structured coverage is matched from query text.`,
+				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, type, status, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria); structured coverage is matched from query text.`,
 			]
 		: [];
 
@@ -1063,7 +1063,7 @@ async function handle(req: NextRequest) {
 					error: "no_query",
 					advisory: {
 						summary:
-							"No search query or filter was supplied, so nothing was searched — this is NOT a signal that the directory lacks matching projects. Re-call with ?q=<terms> (e.g. ?q=escrow+vault). If the term was sent under a different field name, note this endpoint keys off `q` (aliases: query/keyword/search).",
+							"No search query or filter was supplied, so nothing was searched; this is NOT a signal that the directory lacks matching projects. Re-call with ?q=<terms> (e.g. ?q=escrow+vault). If the term was sent under a different field name, note this endpoint keys off `q` (aliases: query/keyword/search).",
 						suggestions: [
 							{
 								action: "retry-with-q",
@@ -2664,7 +2664,7 @@ async function handle(req: NextRequest) {
 								from: didYouMean.from,
 								to: didYouMean.to,
 								slug: didYouMean.slug,
-								note: `No project is spelled '${didYouMean.from}'. These results are for '${didYouMean.to}', the only project within a typo's distance of it — say so rather than presenting them as a match for what was asked.`,
+								note: `No project is spelled '${didYouMean.from}'. These results are for '${didYouMean.to}', the only project within a typo's distance of it; say so rather than presenting them as a match for what was asked.`,
 							},
 						}
 					: {}),
@@ -2700,7 +2700,7 @@ async function handle(req: NextRequest) {
 						? `matched via a typo-distance name recovery: no project is spelled '${didYouMean.from}', so these rows are for '${didYouMean.to}'; verify the identity before relying on it`
 						: "matched via a known spelling correction: the query token does not occur in these rows; verify the identity before relying on it",
 					semantic:
-						"no keyword match — semantically similar results (verify relevance before relying on them)",
+						"no keyword match: semantically similar results (verify relevance before relying on them)",
 					all: "no keyword filter",
 				}[matchMode],
 				...(typeParam && q
@@ -2732,13 +2732,13 @@ async function handle(req: NextRequest) {
 				// (it can exceed the sum of round budgets: top-ups / components SCF
 				// doesn't itemize per round).
 				scfCountBasis:
-					"scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure). scfRoundAwards is its reconciling basis: each awarded round's official submission record (published budget in USD + award type). The total can exceed the sum of round budgets — SCF applies top-ups/components it doesn't itemize per round; see scfAmountStatus for undisclosed cases. Full per-round breakdown: /api/analyze?dimension=funding.",
+					"scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure). scfRoundAwards is its reconciling basis: each awarded round's official submission record (published budget in USD + award type). The total can exceed the sum of round budgets; SCF applies top-ups/components it doesn't itemize per round; see scfAmountStatus for undisclosed cases. Full per-round breakdown: /api/analyze?dimension=funding.",
 				// sls-049: empty-field semantics for the anchorProfile join — only
 				// emitted when the page actually carries anchor rows.
 				...(projectsWithOrg.some((p) => p.anchorProfile)
 					? {
 							anchorProfileBasis:
-								"anchorProfile capability arrays (assets/seps/rampTypes) fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs). Empty arrays mean not-yet-profiled (see profileState) — NOT that the anchor lacks the capability; never turn an empty array into a negative claim when the description asserts live corridors.",
+								"anchorProfile capability arrays (assets/seps/rampTypes) fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs). Empty arrays mean not-yet-profiled (see profileState); NOT that the anchor lacks the capability; never turn an empty array into a negative claim when the description asserts live corridors.",
 						}
 					: {}),
 				// Semantic-only page: NOT a match, and it must not read like one.
@@ -2761,12 +2761,12 @@ async function handle(req: NextRequest) {
 				...(matchMode === "semantic" && q
 					? {
 							advisory: {
-								summary: `No project matches '${q}' by name, description or category. The rows below are the closest entries by embedding similarity — NEIGHBOURS, not matches. Do not report them as '${q}' or as evidence that '${q}' exists on Stellar; if the question was whether we hold a project by that name, the answer is no.`,
+								summary: `No project matches '${q}' by name, description or category. The rows below are the closest entries by embedding similarity: NEIGHBOURS, not matches. Do not report them as '${q}' or as evidence that '${q}' exists on Stellar; if the question was whether we hold a project by that name, the answer is no.`,
 								suggestions: [
 									{
 										action: "repo-search",
 										url: `/api/repos/search?q=${encodeURIComponent(q)}&limit=5`,
-										why: "A named thing absent from the project directory may still exist as indexed code — repo search matches on GitHub org/repo names the directory doesn't carry.",
+										why: "A named thing absent from the project directory may still exist as indexed code; repo search matches on GitHub org/repo names the directory doesn't carry.",
 									},
 									{
 										action: "research-corpus",
@@ -2776,7 +2776,7 @@ async function handle(req: NextRequest) {
 									{
 										action: "report-a-gap",
 										url: "https://stellarlight.xyz/submit",
-										why: "If it IS a live Stellar project, it's a genuine coverage gap — submitting it is what closes it.",
+										why: "If it IS a live Stellar project, it's a genuine coverage gap; submitting it is what closes it.",
 									},
 								],
 							},
@@ -2795,11 +2795,11 @@ async function handle(req: NextRequest) {
 									{
 										action: "research-corpus",
 										url: `/api/research?q=${encodeURIComponent(q)}&limit=5`,
-										why: "If the question is design / feasibility / 'has this concept been discussed', /api/research surfaces SEPs, papers, audit findings, SCF Handbook chunks — content the project directory doesn't index.",
+										why: "If the question is design / feasibility / 'has this concept been discussed', /api/research surfaces SEPs, papers, audit findings, SCF Handbook chunks: content the project directory doesn't index.",
 									},
 									{
 										action: "synonym-retry",
-										why: `Try a single-word category or technology synonym (e.g. 'oracle' instead of 'price feed', 'soroban' instead of 'smart contract') — projects tend to be tagged by category, not by application descriptions.`,
+										why: `Try a single-word category or technology synonym (e.g. 'oracle' instead of 'price feed', 'soroban' instead of 'smart contract'); projects tend to be tagged by category, not by application descriptions.`,
 									},
 								],
 							},

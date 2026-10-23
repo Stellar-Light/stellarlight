@@ -154,7 +154,7 @@ export async function GET(req: NextRequest) {
 		["dimension", "category", "type", "q", "key", "minSize"],
 		{
 			advertise: ["dimension", "category", "type", "q", "key", "minSize"],
-			hint: "Clusters group the directory along `dimension` — narrow with category/type/q rather than a new filter name.",
+			hint: "Clusters group the directory along `dimension`; narrow with category/type/q rather than a new filter name.",
 		},
 	);
 	const rawDimension = sp.get("dimension")?.trim() ?? "";
@@ -292,7 +292,7 @@ export async function GET(req: NextRequest) {
 				dimensions: VALID_DIMENSIONS,
 				notes: {
 					crowdedness:
-						"Score 1–10, log-scaled: round(log₂(size+1) + log₂(scfFunded+1) + 0.5×log₂(winners+1)), clipped to [1,10]. Log scaling means a cluster of 200 projects ≈ 8/10 vs 6 projects ≈ 3/10 — actually differentiates, unlike a linear formula. Use to identify saturated vs underbuilt lanes; cross-reference .size and .scfFundedCount for the raw numbers.",
+						"Score 1-10, log-scaled: round(log₂(size+1) + log₂(scfFunded+1) + 0.5×log₂(winners+1)), clipped to [1,10]. Log scaling means a cluster of 200 projects ≈ 8/10 vs 6 projects ≈ 3/10: actually differentiates, unlike a linear formula. Use to identify saturated vs underbuilt lanes; cross-reference .size and .scfFundedCount for the raw numbers.",
 				},
 				// When a value filter matched nothing, tell the caller what IS
 				// available instead of returning a bare empty list.

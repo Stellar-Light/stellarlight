@@ -577,22 +577,22 @@ export async function GET(req: NextRequest) {
 				// read the issues rollup as an activity/quality ranking.
 				metricDefinitions: {
 					activity:
-						"sort=activity orders by github.commits90d — default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window. The sum counts only linked repos whose scanned code proves Stellar use (stellarProof other than none) — a company's unrelated repositories do not count — read github.repos for the full linked set. This service's own rows (stellar-light) are excluded from every ranking: the directory is the instrument, not a subject.",
+						"sort=activity orders by github.commits90d: default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window. The sum counts only linked repos whose scanned code proves Stellar use (stellarProof other than none): a company's unrelated repositories do not count; read github.repos for the full linked set. This service's own rows (stellar-light) are excluded from every ranking: the directory is the instrument, not a subject.",
 					stars:
 						"github.totalStars = sum of GitHub stargazer counts across the project's indexed repos, as of the last index refresh.",
 					issues:
-						"github.openIssuesTotal = sum of OPEN issues across the project's indexed repos — an issue-only count (GitHub GraphQL issues(states:OPEN); EXCLUDES pull requests, so it will not match GitHub's REST open_issues_count, which includes PRs). This is a BACKLOG snapshot, not an activity or quality ranking.",
+						"github.openIssuesTotal = sum of OPEN issues across the project's indexed repos: an issue-only count (GitHub GraphQL issues(states:OPEN); EXCLUDES pull requests, so it will not match GitHub's REST open_issues_count, which includes PRs). This is a BACKLOG snapshot, not an activity or quality ranking.",
 					repoCount:
-						"github.repoCount = how many indexed repos are attributed to the project — our index's coverage, not the project's total GitHub footprint.",
+						"github.repoCount = how many indexed repos are attributed to the project; our index's coverage, not the project's total GitHub footprint.",
 					lastActivityAt:
-						"Latest default-branch commit (fallback: last push) across the project's indexed repos, as of the last index refresh — a dated repo-source timestamp, not a live GitHub read.",
+						"Latest default-branch commit (fallback: last push) across the project's indexed repos, as of the last index refresh: a dated repo-source timestamp, not a live GitHub read.",
 					range:
-						"range=7d/30d/90d/1y keeps only projects whose lastActivityAt falls inside the window. stars/issues totals remain all-time rollups — they are NOT recomputed within the window.",
+						"range=7d/30d/90d/1y keeps only projects whose lastActivityAt falls inside the window. stars/issues totals remain all-time rollups; they are NOT recomputed within the window.",
 					dataAsOf:
-						"meta.dataAsOf = the most recent index-refresh timestamp across the repo rows this response aggregated — every github.* number is as-of this moment, NOT a live GitHub read. Distinct from meta.generatedAt (when the response was serialized). Null when no indexed repos matched the filter.",
-					tvl: "sort=tvl orders by tvlUSD — DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = NOT TRACKED on DefiLlama (never 'zero TVL'); untracked projects sort below every tracked one. TVL covers DeFi-style protocols only — most projects are legitimately untracked.",
+						"meta.dataAsOf = the most recent index-refresh timestamp across the repo rows this response aggregated; every github.* number is as-of this moment, NOT a live GitHub read. Distinct from meta.generatedAt (when the response was serialized). Null when no indexed repos matched the filter.",
+					tvl: "sort=tvl orders by tvlUSD: DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = NOT TRACKED on DefiLlama (never 'zero TVL'); untracked projects sort below every tracked one. TVL covers DeFi-style protocols only; most projects are legitimately untracked.",
 					supply:
-						"sort=supply orders by assetSupply — circulating supply of the project's issued asset in WHOLE ASSET UNITS of its own denomination (assetCode names it: USDC, CETES, …), from stellar.expert. This is NOT USD-comparable across assets — a JPY or ARS coin's unit count dwarfs a USD coin's without being larger in value. For a USD-comparable stablecoin ranking (market cap, complete set incl. USDY/Ondo), use getStablecoins (/api/stablecoins) instead. assetSupply null = NOT TRACKED (no verified issued asset in our on-chain seed set), never 'zero supply'; untracked projects sort below every tracked one. assetHolders = trustline holder count.",
+						"sort=supply orders by assetSupply: circulating supply of the project's issued asset in WHOLE ASSET UNITS of its own denomination (assetCode names it: USDC, CETES, …), from stellar.expert. This is NOT USD-comparable across assets; a JPY or ARS coin's unit count dwarfs a USD coin's without being larger in value. For a USD-comparable stablecoin ranking (market cap, complete set incl. USDY/Ondo), use getStablecoins (/api/stablecoins) instead. assetSupply null = NOT TRACKED (no verified issued asset in our on-chain seed set), never 'zero supply'; untracked projects sort below every tracked one. assetHolders = trustline holder count.",
 				},
 			},
 			ecosystem: {

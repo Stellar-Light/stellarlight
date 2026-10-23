@@ -35,7 +35,7 @@ export const revalidate = 3600;
 const SUPPORTED_PARAMS = ["q", "section", "limit", "offset"] as const;
 
 const MATCH_BASIS =
-	"Name/role/org text match over the SDF roster (leadership, board of directors, advisors) quoted from stellar.org/foundation/team. This is an ORG/PEOPLE reference index, NOT a builder/contributor index — for GitHub builders use /api/builders, for doc/spec authorship use /api/research. Rows are roster facts, not verified availability or contact info.";
+	"Name/role/org text match over the SDF roster (leadership, board of directors, advisors) quoted from stellar.org/foundation/team. This is an ORG/PEOPLE reference index, NOT a builder/contributor index: for GitHub builders use /api/builders, for doc/spec authorship use /api/research. Rows are roster facts, not verified availability or contact info.";
 
 export async function GET(req: NextRequest) {
 	const sp = req.nextUrl.searchParams;

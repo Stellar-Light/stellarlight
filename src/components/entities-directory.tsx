@@ -39,7 +39,7 @@ const SORTS = [
 	{ key: "scf", label: "Most funded" },
 	{ key: "active", label: "Most active" },
 	{ key: "projects", label: "Most projects" },
-	{ key: "name", label: "A–Z" },
+	{ key: "name", label: "A-Z" },
 ] as const;
 type SortKey = (typeof SORTS)[number]["key"];
 

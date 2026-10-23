@@ -142,7 +142,7 @@ export function SkillsMarketplace({
 					<p className="text-base md:text-lg text-muted-foreground max-w-2xl mb-10 leading-relaxed">
 						Install SKILL.md files, MCP servers, and SDKs for Stellar in one
 						command. SDF's official skills, Stellarlight tools, lumenloop's MCP
-						+ 8 companion skills, and the broader Stellar ecosystem — all in one
+						+ 8 companion skills, and the broader Stellar ecosystem, all in one
 						marketplace.
 					</p>
 
@@ -191,7 +191,7 @@ export function SkillsMarketplace({
 				<p className="text-xs text-muted-foreground leading-relaxed mb-12 max-w-3xl">
 					<span className="text-foreground font-medium">New to AI skills?</span>{" "}
 					A skill is a small file your AI agent loads to gain a specific
-					capability — researching Stellar projects, swapping on Soroswap,
+					capability: researching Stellar projects, swapping on Soroswap,
 					writing Soroban contracts. Install with{" "}
 					<code className="text-foreground font-mono text-[11px] px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
 						npx skills add …
@@ -230,8 +230,8 @@ export function SkillsMarketplace({
 									"Research corpus of 9,000+ chunks across 9 primary sources",
 									"Severity-tagged Soroban audit findings (Certora · OtterSec · Halborn · Code4rena · 9 more)",
 									"Electric Capital macro data + SCF Handbook + Mazières SCP paper",
-									"Open REST API (see /api/openapi.json) — anyone can build on stellarlight's data layer",
-									"Both SKILL.md and MCP — install in Claude Code, Cursor, Claude.ai, ChatGPT, Gemini, Continue, Zed",
+									"Open REST API (see /api/openapi.json): anyone can build on stellarlight's data layer",
+									"Both SKILL.md and MCP: install in Claude Code, Cursor, Claude.ai, ChatGPT, Gemini, Continue, Zed",
 									"8-step Deep Dive workflow with gap classification + evidence floor",
 								].map((line) => (
 									<li

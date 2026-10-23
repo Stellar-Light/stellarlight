@@ -73,7 +73,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		registryName: "stellar-scout",
 		name: "Stellar Scout",
 		tagline:
-			"Vet ideas, match SCF RFPs, scan audits, map competitors, connect with builders — your AI analyst for building on Stellar.",
+			"Vet ideas, match SCF RFPs, scan audits, map competitors, connect with builders. Your AI analyst for building on Stellar.",
 		description:
 			"AI skill that turns your coding agent into a Stellar ecosystem analyst. Vets ideas against existing projects, matches open SCF-funded RFPs, surfaces audit findings with severity, cites primary sources (SEPs, papers, lumenloop, EC reports). 8-step Deep Dive workflow with gap classification.",
 		source: "stellarlight",
@@ -109,7 +109,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		slug: "stellar-scout-mcp",
 		name: "Stellar Scout MCP",
 		tagline:
-			"Idea vetting, SCF radar, audit intel, competitor & repo search, builder discovery — Scout's full API as native MCP tools for Claude.ai, ChatGPT, Gemini, Cursor.",
+			"Idea vetting, SCF radar, audit intel, competitor & repo search, builder discovery: Scout's full API as native MCP tools for Claude.ai, ChatGPT, Gemini, Cursor.",
 		description:
 			"MCP server wrapping Scout's full public API as native callable tools, each with use-case-driven descriptions so agents know when to reach for which. Reach the AI clients that don't load SKILL.md (Claude desktop, Cursor MCP mode, ChatGPT custom GPTs, Gemini, Cline, Continue, Zed). Same backend as the SKILL.md version.",
 		source: "stellarlight",
@@ -134,9 +134,9 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		slug: "lumenloop-mcp",
 		name: "LumenLoop MCP",
 		tagline:
-			"Read-only Stellar ecosystem MCP — 18 tools over projects, SCF, news, media.",
+			"Read-only Stellar ecosystem MCP: 18 tools over projects, SCF, news, media.",
 		description:
-			"Free read-only MCP server at https://mcp.lumenloop.com indexing 756+ Stellar projects, 912+ SCF submissions, editorial content, talks, and events. 18 query tools — projects, submissions, articles, media, events. Any MCP-capable client connects (Claude, ChatGPT, Gemini, Cursor). One-time sign-in.",
+			"Free read-only MCP server at https://mcp.lumenloop.com indexing 756+ Stellar projects, 912+ SCF submissions, editorial content, talks, and events. 18 query tools: projects, submissions, articles, media, events. Any MCP-capable client connects (Claude, ChatGPT, Gemini, Cursor). One-time sign-in.",
 		source: "lumenloop",
 		kind: "mcp-server",
 		install:
@@ -189,7 +189,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Map a sector or topic into a landscape of Stellar projects + content.",
 		description:
-			'Given a sector (e.g. "RWA", "agentic payments", "stablecoin off-ramps") or topic, this skill orchestrates the LumenLoop MCP tools to produce a landscape map — every relevant project, related SCF submissions, editorial coverage, and media. Useful for ecosystem-wide *"who\'s building in X"* questions.',
+			'Given a sector (e.g. "RWA", "agentic payments", "stablecoin off-ramps") or topic, this skill orchestrates the LumenLoop MCP tools to produce a landscape map: every relevant project, related SCF submissions, editorial coverage, and media. Useful for ecosystem-wide *"who\'s building in X"* questions.',
 		source: "lumenloop",
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
@@ -212,7 +212,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		name: "LumenLoop: Project Dossier",
 		tagline: "Build a due-diligence profile of a single Stellar project.",
 		description:
-			"Given a project slug, the agent pulls every signal from LumenLoop's MCP — basic info, SCF history, associated team, recent activity, content coverage — and assembles a structured due-diligence dossier. Useful before integrations, partnerships, or vetting an unknown project.",
+			"Given a project slug, the agent pulls every signal from LumenLoop's MCP (basic info, SCF history, associated team, recent activity, content coverage) and assembles a structured due-diligence dossier. Useful before integrations, partnerships, or vetting an unknown project.",
 		source: "lumenloop",
 		kind: "skill-md",
 		install: "/plugin marketplace add lumenloop/lumenloop-skills",
@@ -327,7 +327,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		registryName: "stellar-content-auditor",
 		name: "LumenLoop: Content Auditor",
 		tagline:
-			"Audit a draft against the ecosystem — fix handles, add citations, flag bad claims.",
+			"Audit a draft against the ecosystem: fix handles, add citations, flag bad claims.",
 		description:
 			"Given a draft article, blog post, tweet, or pitch, the skill cross-references it against LumenLoop's ecosystem data to fix mis-attributed @handles, add citations to relevant projects, and flag claims that don't hold up against indexed reality.",
 		source: "stellarlight",
@@ -363,7 +363,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Check the claims in an SCF submission against live ecosystem data before you score it.",
 		description:
-			"For SCF reviewers — Pilots, Navigators, anyone scoring a round. Turns the assertions in a submission into checks against live data: prior art and duplication, the applicant's own SCF funding history, whether a linked repo is real and recent Soroban code (from a source scan, not stars), whether a project is still alive, and whether a mainnet claim shows on-chain activity. Runs standalone or inside Raven, which calls the same data layer. Ships measured coverage and honesty rules, because absence of a record is never evidence of absence.",
+			"For SCF reviewers: Pilots, Navigators, anyone scoring a round. Turns the assertions in a submission into checks against live data: prior art and duplication, the applicant's own SCF funding history, whether a linked repo is real and recent Soroban code (from a source scan, not stars), whether a project is still alive, and whether a mainnet claim shows on-chain activity. Runs standalone or inside Raven, which calls the same data layer. Ships measured coverage and honesty rules, because absence of a record is never evidence of absence.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -411,7 +411,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Draft a complete SCF Build Award application interactively, section by section.",
 		description:
-			"Walks you through a full Stellar Community Fund Build Award application one section at a time — problem, solution, integration, team, traction, budget, and ecosystem commitment — producing submission-ready copy grounded in what SCF reviewers actually score.",
+			"Walks you through a full Stellar Community Fund Build Award application one section at a time (problem, solution, integration, team, traction, budget, and ecosystem commitment), producing submission-ready copy grounded in what SCF reviewers actually score.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -434,7 +434,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		name: "SCF Interest Form Drafter",
 		tagline: "Draft a strong SCF Interest Form to get invited to apply.",
 		description:
-			"Drafts a compelling Stellar Community Fund Interest Form — the gate to a Build Award invitation. Sharpens the one-liner, problem framing, and Stellar-fit so the SCF team invites you to the full application.",
+			"Drafts a compelling Stellar Community Fund Interest Form, the gate to a Build Award invitation. Sharpens the one-liner, problem framing, and Stellar-fit so the SCF team invites you to the full application.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -458,7 +458,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Simulate the SCF team's manual prescreen (completeness + eligibility) before you submit.",
 		description:
-			"Runs your draft through a simulation of the Stellar Community Fund's manual prescreen — the completeness and eligibility pass an application must clear before review — so you catch disqualifiers and gaps before you submit, not after.",
+			"Runs your draft through a simulation of the Stellar Community Fund's manual prescreen (the completeness and eligibility pass an application must clear before review), so you catch disqualifiers and gaps before you submit, not after.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -482,7 +482,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Build bottom-up SCF budgets with rates, per-deliverable breakdowns, and tranche mapping.",
 		description:
-			"Builds a defensible Stellar Community Fund budget from the bottom up — hourly/role rates, per-deliverable cost breakdowns, and mapping to the award's tranche structure — so the numbers hold up under reviewer scrutiny.",
+			"Builds a defensible Stellar Community Fund budget from the bottom up (hourly/role rates, per-deliverable cost breakdowns, and mapping to the award's tranche structure), so the numbers hold up under reviewer scrutiny.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -506,7 +506,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Research the competitive landscape and articulate your differentiation for SCF.",
 		description:
-			"Maps the competitive landscape for your Stellar Community Fund idea — who else is building this on Stellar and beyond — and helps you articulate crisp differentiation, the section SCF reviewers use to judge whether an award is additive.",
+			"Maps the competitive landscape for your Stellar Community Fund idea (who else is building this on Stellar and beyond) and helps you articulate crisp differentiation, the section SCF reviewers use to judge whether an award is additive.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -529,7 +529,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		name: "SCF Referral Preparer",
 		tagline: "Prepare materials for an SCF referral from an approved Referrer.",
 		description:
-			"Prepares the materials an approved Stellar Community Fund Referrer (Ambassador, Navigator, Pilot, partner, or SDF personnel) needs to refer you — a tight brief that makes the referral easy to give and credible to the SCF team.",
+			"Prepares the materials an approved Stellar Community Fund Referrer (Ambassador, Navigator, Pilot, partner, or SDF personnel) needs to refer you: a tight brief that makes the referral easy to give and credible to the SCF team.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -553,7 +553,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Write SCF tranche submission reports with deliverable evidence and completion docs.",
 		description:
-			"Writes the tranche submission reports a funded Stellar Community Fund project owes between payments — deliverable-by-deliverable evidence and completion documentation formatted the way the SCF team expects, so your next tranche clears cleanly.",
+			"Writes the tranche submission reports a funded Stellar Community Fund project owes between payments: deliverable-by-deliverable evidence and completion documentation formatted the way the SCF team expects, so your next tranche clears cleanly.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -577,7 +577,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Review a single SCF Build Award application with structured, calibrated scoring.",
 		description:
-			"For reviewers: evaluates one Stellar Community Fund Build Award application with structured scoring across integration fit, architecture, team, traction, budget, and ecosystem commitment — the same axes SCF weighs — for consistent, defensible verdicts.",
+			"For reviewers: evaluates one Stellar Community Fund Build Award application with structured scoring across integration fit, architecture, team, traction, budget, and ecosystem commitment (the same axes SCF weighs) for consistent, defensible verdicts.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -623,9 +623,9 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		slug: "scf-fetch-external-doc",
 		name: "SCF Fetch External Doc",
 		tagline:
-			"Fetch external docs linked in SCF submissions — Google Docs/Drive, GitHub, Notion, IPFS.",
+			"Fetch external docs linked in SCF submissions: Google Docs/Drive, GitHub, Notion, IPFS.",
 		description:
-			"A utility for SCF reviewers and applicants: reliably fetches the external documents submissions link out to — Google Docs, Google Drive PDFs, GitHub, Notion, IPFS — using curl for the Google cases that normally fail, so review context is never missing.",
+			"A utility for SCF reviewers and applicants: reliably fetches the external documents submissions link out to (Google Docs, Google Drive PDFs, GitHub, Notion, IPFS), using curl for the Google cases that normally fail, so review context is never missing.",
 		source: "stellarlight",
 		kind: "skill-md",
 		install: "npx skills add Stellar-Light/awesome-stellar-community-fund",
@@ -650,7 +650,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		slug: "openzeppelin-stellar-contracts",
 		name: "OpenZeppelin Stellar Contracts",
 		tagline:
-			"Audited Soroban contract primitives — tokens, ownership, governance.",
+			"Audited Soroban contract primitives: tokens, ownership, governance.",
 		description:
 			"OpenZeppelin's official Stellar contracts library for Soroban. Provides audited building blocks: fungible tokens, non-fungible tokens, access control (Ownable, AccessControl), upgradeability, governance, and pausable mechanisms. Reduces audit surface area by using battle-tested primitives instead of writing your own.",
 		source: "external",
@@ -668,7 +668,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		name: "Soroswap SDK",
 		tagline: "TypeScript SDK for the Soroswap AMM (DEX on Soroban).",
 		description:
-			"Official TypeScript SDK from Soroswap for interacting with their automated market maker. Quote prices, execute swaps, add or remove liquidity, query pair reserves and pool stats — all from JavaScript / TypeScript agents.",
+			"Official TypeScript SDK from Soroswap for interacting with their automated market maker. Quote prices, execute swaps, add or remove liquidity, query pair reserves and pool stats, all from JavaScript / TypeScript agents.",
 		source: "external",
 		kind: "sdk",
 		install: "npm install @soroswap/sdk",
@@ -702,7 +702,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Official command-line tool for Stellar + Soroban contract deploy.",
 		description:
-			"The official `stellar` CLI — build, deploy, and invoke Soroban contracts; manage accounts; sign and submit transactions; inspect network state. Required for almost every Soroban dev workflow.",
+			"The official `stellar` CLI: build, deploy, and invoke Soroban contracts; manage accounts; sign and submit transactions; inspect network state. Required for almost every Soroban dev workflow.",
 		source: "external",
 		kind: "cli",
 		install: "cargo install --locked stellar-cli",
@@ -732,7 +732,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		name: "Reflector Oracle",
 		tagline: "Decentralized price feed contracts on Soroban.",
 		description:
-			"Reflector Network's Soroban oracle contracts — fetch verified price data for crypto assets and forex pairs. Critical infrastructure for any lending market, derivative, or RWA protocol on Stellar that needs reliable on-chain pricing.",
+			"Reflector Network's Soroban oracle contracts: fetch verified price data for crypto assets and forex pairs. Critical infrastructure for any lending market, derivative, or RWA protocol on Stellar that needs reliable on-chain pricing.",
 		source: "external",
 		kind: "tool",
 		install: "See https://reflector.network/docs",
@@ -764,7 +764,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Multi-wallet connector for Stellar dapps (Freighter, xBull, Albedo, Lobstr, …).",
 		description:
-			"@creit.tech/stellar-wallets-kit — community-maintained one-shot integration for every major Stellar wallet (Freighter, xBull, Albedo, Lobstr, Hana, Rabet, Walletconnect, Hardware wallets). Drop-in modal UI + a clean unified API. The fastest way to ship a Stellar dapp with wallet support.",
+			"@creit.tech/stellar-wallets-kit: community-maintained one-shot integration for every major Stellar wallet (Freighter, xBull, Albedo, Lobstr, Hana, Rabet, Walletconnect, Hardware wallets). Drop-in modal UI + a clean unified API. The fastest way to ship a Stellar dapp with wallet support.",
 		source: "external",
 		kind: "sdk",
 		install: "npm install @creit.tech/stellar-wallets-kit",
@@ -780,7 +780,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Real-time Soroban indexer + GraphQL API for contract events and state.",
 		description:
-			"Mercury (by Xycloo Labs) — production-grade Soroban indexer. Subscribes to mainnet events, indexes contract storage, and exposes structured GraphQL + REST endpoints. Use it when you need a real-time activity feed, contract event stream, or state queries from a JavaScript / TypeScript backend.",
+			"Mercury (by Xycloo Labs): production-grade Soroban indexer. Subscribes to mainnet events, indexes contract storage, and exposes structured GraphQL + REST endpoints. Use it when you need a real-time activity feed, contract event stream, or state queries from a JavaScript / TypeScript backend.",
 		source: "external",
 		kind: "tool",
 		install: "See https://mercurydata.app/get-started",
@@ -794,7 +794,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		slug: "allbridge-sdk",
 		name: "Allbridge SDK",
 		tagline:
-			"Cross-chain bridge SDK — move USDC between Stellar and 14+ chains.",
+			"Cross-chain bridge SDK: move USDC between Stellar and 14+ chains.",
 		description:
 			"Allbridge Core SDK for bridging USDC and other stablecoins between Stellar and EVM chains (Ethereum, Polygon, BNB, Avalanche, etc.) plus Solana and Tron. Quote, sign, and execute bridge transfers from JavaScript / TypeScript.",
 		source: "external",
@@ -813,7 +813,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Drop-in React button to accept USDC + EURC on Stellar from any chain.",
 		description:
-			"@rozoai/intent-pay — a React SDK that ships a <RozoPayButton/> component. Customers pay from any supported chain (Ethereum, Arbitrum, Base, BSC, Polygon, HyperEVM, Solana, Stellar) and the merchant receives the exact asset they want. On Stellar, Rozo runs its own SEP-24 anchor with USDC (issuer GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN) and EURC (issuer GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2). Built on stellar-sdk + @creit.tech/stellar-wallets-kit + wagmi/viem.",
+			"@rozoai/intent-pay: a React SDK that ships a <RozoPayButton/> component. Customers pay from any supported chain (Ethereum, Arbitrum, Base, BSC, Polygon, HyperEVM, Solana, Stellar) and the merchant receives the exact asset they want. On Stellar, Rozo runs its own SEP-24 anchor with USDC (issuer GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN) and EURC (issuer GDHU6WRG4IEQXM5NZ4BMPKOXHW76MZM4Y2IEMFDVXBSDP6SJY4ITNPP2). Built on stellar-sdk + @creit.tech/stellar-wallets-kit + wagmi/viem.",
 		source: "external",
 		kind: "sdk",
 		install: "npm install @rozoai/intent-pay @rozoai/intent-common",
@@ -835,7 +835,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		slug: "stellar-typescript-wallet-sdk",
 		name: "Stellar TypeScript Wallet SDK",
 		tagline:
-			"High-level wallet SDK — accounts, SEP-24 deposits, SEP-31 transfers.",
+			"High-level wallet SDK: accounts, SEP-24 deposits, SEP-31 transfers.",
 		description:
 			"Official @stellar/typescript-wallet-sdk. Higher-level abstraction over Stellar SDK for building wallet apps: create + recover accounts, interact with anchors via SEP-1/6/10/12/24/31 standards, build payments and asset trustlines. The recommended starting point for a Stellar consumer wallet.",
 		source: "external",

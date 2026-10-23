@@ -104,7 +104,7 @@ export async function GET(req: NextRequest) {
 			roundTrip.toISOString().slice(0, 10) !== since
 		) {
 			return NextResponse.json(
-				{ error: `invalid \`since\` date: '${since}' — use a real YYYY-MM-DD` },
+				{ error: `invalid \`since\` date: '${since}'. Use a real YYYY-MM-DD` },
 				{ status: 400, headers: rateLimitHeaders(limit) },
 			);
 		}
@@ -267,7 +267,7 @@ export async function GET(req: NextRequest) {
 				filters: { project, auditor, q, since, limit: limitParam, offset },
 				counts: { total, matched, returned: rows.length },
 				...(didYouMean ? { didYouMean } : {}),
-				note: "One row per audit report from stellarsecurityportal.com. A project absent here has no audit on record at our source — NOT a claim that it is unaudited. findingsTotal/severityCounts null = not extracted, NOT zero. Full report text: /api/research?source=audit.",
+				note: "One row per audit report from stellarsecurityportal.com. A project absent here has no audit on record at our source; NOT a claim that it is unaudited. findingsTotal/severityCounts null = not extracted, NOT zero. Full report text: /api/research?source=audit.",
 			},
 			audits: rows,
 		},

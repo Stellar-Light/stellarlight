@@ -33,12 +33,12 @@ const BUCKET_LABELS: Record<string, string> = {
 };
 
 function fmt(n: number | null | undefined): string {
-	if (n == null) return "—";
+	if (n == null) return "-";
 	return n.toLocaleString("en-US");
 }
 
 function fmtUSD(n: number | null | undefined): string {
-	if (n == null) return "—";
+	if (n == null) return "-";
 	if (n >= 1_000_000) return `$${(n / 1_000_000).toFixed(1)}M`;
 	if (n >= 1_000) return `$${Math.round(n / 1_000)}K`;
 	return `$${n}`;
@@ -216,8 +216,8 @@ export default async function AnalyticsPage() {
 					</h1>
 					<p className="text-sm text-muted-foreground mt-2 max-w-2xl">
 						Live, public numbers for this data layer: who is consuming it and
-						what it maintains. Served fresh from the same database the API reads
-						— machine-readable at{" "}
+						what it maintains. Served fresh from the same database the API
+						reads: machine-readable at{" "}
 						<a href="/api/status" className="underline hover:text-foreground">
 							/api/status
 						</a>{" "}
@@ -245,7 +245,7 @@ export default async function AnalyticsPage() {
 				{series && series.length > 1 && (
 					<div className="mb-12">
 						<Card
-							title="API calls — all time"
+							title="API calls: all time"
 							description="Cumulative total of every request to the public API. Hover a day for its new calls (UTC)."
 							right={<span>Last 30 days</span>}
 						>
@@ -335,9 +335,9 @@ export default async function AnalyticsPage() {
 						</div>
 						<p className="text-[11px] text-muted-foreground mt-4 leading-relaxed">
 							User agents are bucketed coarsely at log time (no IPs, no full UA
-							strings), which limits attribution: server-side agent systems —
-							including SDF&apos;s Raven, which grounds its ecosystem answers on
-							this data — send generic clients and appear under
+							strings), which limits attribution: server-side agent systems
+							(including SDF&apos;s Raven, which grounds its ecosystem answers
+							on this data) send generic clients and appear under
 							&quot;Other&quot;, while the named agent buckets only catch
 							interactive AI tools. &quot;Monitoring probes&quot; is largely our
 							own automated quality checks auditing the service daily.
@@ -348,7 +348,7 @@ export default async function AnalyticsPage() {
 				{/* The maintained dataset */}
 				<Card
 					title="The maintained dataset"
-					description="What the verification engine keeps true — live collection counts."
+					description="What the verification engine keeps true: live collection counts."
 					className="mb-12"
 				>
 					<div className="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-8 pt-1">
@@ -367,7 +367,7 @@ export default async function AnalyticsPage() {
 						<Stat
 							label="SCF funding tracked"
 							value={fmtUSD(eco?.scfTotalUSD)}
-							sub="In-house reconstruction — see /api/analyze"
+							sub="In-house reconstruction: see /api/analyze"
 						/>
 					</div>
 				</Card>
@@ -376,8 +376,8 @@ export default async function AnalyticsPage() {
 					Methodology: usage counts come from the API&apos;s own request log
 					(append-only; queries truncated, user agents bucketed, no IPs stored).
 					Daily series is UTC-bucketed. Dataset figures are live collection
-					counts. SCF totals are an in-house reconstruction — some award amounts
-					are unpublished — and can differ from SDF&apos;s submission-based
+					counts. SCF totals are an in-house reconstruction (some award amounts
+					are unpublished) and can differ from SDF&apos;s submission-based
 					counters; full basis at{" "}
 					<a
 						href="/api/analyze?dimension=funding"

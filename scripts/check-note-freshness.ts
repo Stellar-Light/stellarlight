@@ -97,13 +97,13 @@ const AFTER = [
 	),
 	new RegExp(String.raw`\x60?\s*\([^()]{0,120}\)\s*[—–:-]\s*(${VER})`, "y"),
 	new RegExp(
-		String.raw`\s*[—–-]\s*\d+\s+versions\s+from\s+${VER}(?:\s*\([^()]*\))?\s+to\s+(${VER})`,
+		String.raw`\s*[\u2014\u2013:-]\s*\d+\s+versions\s+from\s+${VER}(?:\s*\([^()]*\))?\s+to\s+(${VER})`,
 		"y",
 	),
 ];
 const CHAIN = /(?:\s*\([^()]*\))?\s*(?:,\s*(?:and\s+)?|\s+and\s+)/y;
 const SHARED = new RegExp(
-	String.raw`(?:\s*[—–-]\s*|\s*\(\s*|\s+)(?:both|all)(?:\s+at)?\s+(${VER})`,
+	String.raw`(?:\s*[\u2014\u2013:-]\s*|\s*\(\s*|\s+)(?:both|all)(?:\s+at)?\s+(${VER})`,
 	"y",
 );
 const GRADLE = new RegExp(
@@ -522,6 +522,24 @@ function selfTest() {
 				name: `@stellarpay-sdk/${n}`,
 				cited: "0.1.0",
 			})),
+		],
+		[
+			"npm @stellarpay-sdk/core, @stellarpay-sdk/client and @stellarpay-sdk/mcp: all 0.1.0 (2026-08-04)",
+			["core", "client", "mcp"].map((n) => ({
+				registry: "npm" as const,
+				name: `@stellarpay-sdk/${n}`,
+				cited: "0.1.0",
+			})),
+		],
+		[
+			"Maven Central coordinates network.lightsail:stellar-sdk: 34 versions from 0.43.1 (2024-03-31) to 5.0.0 (2026-09-01)",
+			[
+				{
+					registry: "maven",
+					name: "network.lightsail:stellar-sdk",
+					cited: "5.0.0",
+				},
+			],
 		],
 		[
 			"npm soroban-client is deprecated and frozen at 1.0.1 (2024-01-03; 33 versions)",

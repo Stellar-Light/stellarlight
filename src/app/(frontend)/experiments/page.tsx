@@ -16,7 +16,7 @@ import { EXPERIMENTS, type ExperimentStatus } from "@/lib/experiments";
 export const metadata: Metadata = {
 	title: "Experiments · Stellar Light",
 	description:
-		"In-flight experiments on the Stellar Light data layer — try a variant, measure it against baseline, graduate the winners.",
+		"In-flight experiments on the Stellar Light data layer: try a variant, measure it against baseline, graduate the winners.",
 };
 
 const STATUS_STYLE: Record<ExperimentStatus, string> = {
@@ -48,8 +48,8 @@ export default function ExperimentsPage() {
 					</div>
 					<p className="text-sm text-muted-foreground mt-3 max-w-2xl">
 						Where we try new things safely. Each experiment runs behind a flag
-						that&apos;s <span className="text-foreground">off by default</span>{" "}
-						— the variant is testable per-request (append{" "}
+						that&apos;s <span className="text-foreground">off by default</span>:
+						the variant is testable per-request (append{" "}
 						<code className="text-foreground">?exp=&lt;id&gt;</code> or send an{" "}
 						<code className="text-foreground">X-Experiments</code> header)
 						without changing what agents or prod see. We score each against a

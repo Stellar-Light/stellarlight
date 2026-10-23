@@ -404,7 +404,7 @@ export default async function HackathonsPage({
 						stellar hackathons
 					</h1>
 					<p className="text-muted-foreground">
-						Build the future of finance on Stellar — every hackathon tracked
+						Build the future of finance on Stellar: every hackathon tracked
 						through to whether the projects actually shipped.
 					</p>
 				</div>
@@ -755,7 +755,7 @@ export default async function HackathonsPage({
 											<div className="text-xs text-muted-foreground flex items-center gap-1.5 mb-3">
 												<Building2 className="w-3 h-3" />
 												<span className="truncate">
-													{hackathon.organization?.name ?? "—"}
+													{hackathon.organization?.name ?? "-"}
 												</span>
 												{hackathon.kind && hackathon.kind !== "hackathon" && (
 													<span className="flex-shrink-0 rounded-full border border-border px-1.5 py-0.5 text-[10px] font-medium">

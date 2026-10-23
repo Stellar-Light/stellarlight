@@ -73,7 +73,7 @@ export default async function IdeaDetailPage({ params }: { params: Params }) {
 									variant="secondary"
 									className="px-3 py-1 text-xs font-medium rounded-lg bg-amber-500/10 text-amber-500 border border-amber-500/30"
 								>
-									Closed — past round
+									Closed: past round
 								</Badge>
 							) : (
 								<Badge

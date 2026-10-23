@@ -370,7 +370,7 @@ export async function GET(req: NextRequest) {
 	// sources.deepWikiUrl and is named, not embedded.
 	const noteAnswer = directNote
 		? dwAnswer
-			? `${directNote.note}\n\n(A fuller mechanism walkthrough exists via sources.deepWikiUrl — an undated index that can LAG the dated fact above; where they disagree, the dated fact wins.)`
+			? `${directNote.note}\n\n(A fuller mechanism walkthrough exists via sources.deepWikiUrl: an undated index that can LAG the dated fact above; where they disagree, the dated fact wins.)`
 			: directNote.note
 		: null;
 	const finalAnswer = noteAnswer ?? dwAnswer ?? scanAnswer;
@@ -387,17 +387,17 @@ export async function GET(req: NextRequest) {
 				...(noteAnswer
 					? {
 							warnings: [
-								"The answer IS a curated, dated, source-cited fact (answerSource: knowledge-note, dated by answerAsOf) because it directly names what was asked. The DeepWiki walkthrough is deliberately NOT embedded in this dated answer — it is an undated index that can lag or contradict the dated fact; reach it via sources.deepWikiUrl, and where they disagree, the dated fact wins.",
+								"The answer IS a curated, dated, source-cited fact (answerSource: knowledge-note, dated by answerAsOf) because it directly names what was asked. The DeepWiki walkthrough is deliberately NOT embedded in this dated answer; it is an undated index that can lag or contradict the dated fact; reach it via sources.deepWikiUrl, and where they disagree, the dated fact wins.",
 							],
 						}
 					: dwAnswer
 						? {
 								warnings: [
-									"answerAsOf is null: DeepWiki exposes no index date, so the age of this answer is UNKNOWN. `codeVerified.scannedAt`, `codeVerified.scannedRef` and `repoMeta.lastCommitAt` date OUR SOURCE SCAN, not this answer — a DeepWiki answer can be older than the scanned ref and disagree with it. Verify any specific value (version numbers, constants, addresses) against repoUrl at scannedRef before relying on it.",
+									"answerAsOf is null: DeepWiki exposes no index date, so the age of this answer is UNKNOWN. `codeVerified.scannedAt`, `codeVerified.scannedRef` and `repoMeta.lastCommitAt` date OUR SOURCE SCAN, not this answer; a DeepWiki answer can be older than the scanned ref and disagree with it. Verify any specific value (version numbers, constants, addresses) against repoUrl at scannedRef before relying on it.",
 								],
 							}
 						: {}),
-				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `knowledge-note` = a curated, dated, source-cited fact that directly names what was asked (leads over any walkthrough; answerAsOf dates it); `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo — narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical. `knowledgeNotes` lists every public dated fact we hold for the routed repo (deprecations, renames, registry identity, advisories) whether or not one of them led the answer — read them even when answerSource is 'deepwiki'.",
+				note: "Repo routed by the StellarLight canonical/repo index. `answerSource` states the grounding: `knowledge-note` = a curated, dated, source-cited fact that directly names what was asked (leads over any walkthrough; answerAsOf dates it); `deepwiki` = an AI-generated mechanism walkthrough of the repo (deepwiki.com); `stellarlight-code-scan` = facts derived from OUR scan of the actual source (entry-point symbols, soroban-sdk version, deployability, mainnet id) used when DeepWiki hasn't indexed the repo: narrower than a walkthrough, but code-grounded, never a guess. Cite repoUrl as the source of truth and verify against the code for anything safety-critical. `knowledgeNotes` lists every public dated fact we hold for the routed repo (deprecations, renames, registry identity, advisories) whether or not one of them led the answer; read them even when answerSource is 'deepwiki'.",
 			},
 			q,
 			repo,
@@ -479,7 +479,7 @@ export async function GET(req: NextRequest) {
 				? {}
 				: {
 						note2:
-							"DeepWiki has no answer for this repo (not indexed there yet, or briefly unavailable) AND it hasn't been code-scanned by us yet, so there is no grounded answer to give — `answer` is null rather than an empty string, making this a stated gap, not a silent one. The routed repo above is still the authoritative source: read it directly, or retry once the code scan lands.",
+							"DeepWiki has no answer for this repo (not indexed there yet, or briefly unavailable) AND it hasn't been code-scanned by us yet, so there is no grounded answer to give; `answer` is null rather than an empty string, making this a stated gap, not a silent one. The routed repo above is still the authoritative source: read it directly, or retry once the code scan lands.",
 					}),
 		},
 		{

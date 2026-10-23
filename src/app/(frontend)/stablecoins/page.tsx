@@ -187,7 +187,7 @@ export default async function StablecoinsPage() {
 								path: "/stablecoins",
 								name: "Stellar Stablecoins",
 								items: coins.map((c) => ({
-									name: `${c.ticker}${c.name && c.name !== c.ticker ? ` — ${c.name}` : ""}`,
+									name: `${c.ticker}${c.name && c.name !== c.ticker ? `: ${c.name}` : ""}`,
 									url: `/stablecoins/${c.id}`,
 								})),
 							}),

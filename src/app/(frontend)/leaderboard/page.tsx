@@ -47,7 +47,7 @@ interface LeaderboardEntry {
 }
 
 function formatDate(dateString: string | null): string {
-	if (!dateString) return "—";
+	if (!dateString) return "-";
 	const diffMs = Date.now() - new Date(dateString).getTime();
 	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 	if (diffDays === 0) return "Today";
@@ -373,18 +373,18 @@ export default async function LeaderboardPage({
 																</span>
 															) : (
 																<span className="text-sm tabular-nums text-muted-foreground/50">
-																	—
+																	-
 																</span>
 															)}
 														</td>
 														<td className="px-4 sm:px-6 py-3.5 text-right align-middle hidden md:table-cell">
 															<span className="text-sm tabular-nums text-muted-foreground">
-																{entry.hasSignals ? entry.openIssuesTotal : "—"}
+																{entry.hasSignals ? entry.openIssuesTotal : "-"}
 															</span>
 														</td>
 														<td className="px-4 sm:px-6 py-3.5 text-right align-middle hidden md:table-cell">
 															<span className="text-sm tabular-nums text-muted-foreground">
-																{entry.hasSignals ? entry.repoCount : "—"}
+																{entry.hasSignals ? entry.repoCount : "-"}
 															</span>
 														</td>
 														<td className="px-4 sm:px-6 py-3.5 text-right align-middle hidden sm:table-cell">

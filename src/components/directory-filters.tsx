@@ -71,8 +71,8 @@ const scfRounds = [
 
 const sortOptions = [
 	{ id: "featured", label: "Relevant" },
-	{ id: "name-asc", label: "Name (A\u2013Z)" },
-	{ id: "name-desc", label: "Name (Z\u2013A)" },
+	{ id: "name-asc", label: "Name (A-Z)" },
+	{ id: "name-desc", label: "Name (Z-A)" },
 	{ id: "newest", label: "Newest" },
 ];
 

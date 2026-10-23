@@ -116,7 +116,7 @@ async function getShowcaseProjects(): Promise<ShowcaseProject[]> {
 }
 
 export const metadata: Metadata = {
-	title: "Stellar Scout — Ecosystem API for Agents",
+	title: "Stellar Scout: Ecosystem API for Agents",
 	description:
 		"A REST API and MCP server that gives AI agents cited answers about Stellar projects, repositories, builders, audits and funding.",
 	alternates: { canonical: "/scout" },
@@ -136,7 +136,7 @@ const SAMPLE_PROMPTS = [
 	{
 		title: "Spot Stellar builders",
 		prompt:
-			'"Find Stellar builders who\'ve shipped Soroban contracts (small directory — flag any gaps)."',
+			'"Find Stellar builders who\'ve shipped Soroban contracts (small directory: flag any gaps)."',
 	},
 	{
 		title: "Surface SCF history",
@@ -164,7 +164,7 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
 					SKILL.md
 				</code>{" "}
-				files — Claude (claude.ai), Claude Code, Codex, Cursor, OpenClaw, and
+				files: Claude (claude.ai), Claude Code, Codex, Cursor, OpenClaw, and
 				dozens more (the underlying{" "}
 				<a
 					href="https://github.com/vercel-labs/skills"
@@ -183,8 +183,8 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "Does Scout write code for me?",
 		a: (
 			<>
-				No. Scout is a <strong>research skill</strong> — it tells you what's
-				been built, who's building it, what got funded, and which SDK skill to
+				No. Scout is a <strong>research skill</strong>: it tells you what's been
+				built, who's building it, what got funded, and which SDK skill to
 				install next. For the actual code work, install the relevant skill from{" "}
 				<a
 					href="https://skills.stellar.org/"
@@ -194,7 +194,7 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 				>
 					skills.stellar.org
 				</a>{" "}
-				(soroban, dapp, assets, etc.) — those are the technical execution layer.
+				(soroban, dapp, assets, etc.); those are the technical execution layer.
 			</>
 		),
 	},
@@ -209,7 +209,7 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 				</code>
 				), or check that the topic is one we index (curated Stellar projects,
 				hackathons, SCF rounds, RFPs, dev stats). For raw GitHub searches across
-				all of Stellar, use GitHub directly — Scout only covers projects in the
+				all of Stellar, use GitHub directly; Scout only covers projects in the
 				stellarlight directory.
 			</>
 		),
@@ -218,7 +218,7 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "How does Scout differ from just asking ChatGPT/Claude about Stellar?",
 		a: (
 			<>
-				Scout doesn't bring its own brain — it brings{" "}
+				Scout doesn't bring its own brain; it brings{" "}
 				<strong>structured Stellar data</strong>. The skill teaches whatever
 				agent you use (Claude, ChatGPT, etc.) how to query our public APIs to
 				get cited, evidence-backed answers grounded in real numbers: SCF dollars
@@ -254,11 +254,11 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "Is the API really free? No auth, no rate limits?",
 		a: (
 			<>
-				Yes — all endpoints are public, read-only, no auth, no rate limits.
-				Edge- cached for 5 minutes (24h for the SDF skill proxy). Hit them from
-				your agent, your Dune query, your dashboard, or anywhere else. If usage
-				ever gets large enough to need rate limiting, we'll publish that ahead
-				of time on the API reference page.
+				Yes. All endpoints are public, read-only, no auth, no rate limits. Edge-
+				cached for 5 minutes (24h for the SDF skill proxy). Hit them from your
+				agent, your Dune query, your dashboard, or anywhere else. If usage ever
+				gets large enough to need rate limiting, we'll publish that ahead of
+				time on the API reference page.
 			</>
 		),
 	},
@@ -267,11 +267,11 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		a: (
 			<>
 				They compose. <strong>Scout</strong> answers{" "}
-				<em>"what should I build, with whom, for what funding?"</em> — strategy.{" "}
+				<em>"what should I build, with whom, for what funding?"</em>: strategy.{" "}
 				<strong>skills.stellar.org</strong> (the Stellar Development
-				Foundation's 7 official skills — soroban, dapp, assets, data,
+				Foundation's 7 official skills: soroban, dapp, assets, data,
 				agentic-payments, zk-proofs, standards) answers{" "}
-				<em>"how do I actually build it?"</em> — execution. Scout cross-links to
+				<em>"how do I actually build it?"</em>: execution. Scout cross-links to
 				those skills in its responses; install both when you move from research
 				into building.
 			</>
@@ -306,9 +306,9 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		a: (
 			<>
 				It tells you. Scout classifies every idea as a <strong>full gap</strong>{" "}
-				(zero prior projects), <strong>partial gap</strong> (1–3 adjacent
+				(zero prior projects), <strong>partial gap</strong> (1-3 adjacent
 				projects), or <strong>false gap</strong> (4+ direct competitors or a
-				funded category leader), with a crowdedness score (1–10) and a list of
+				funded category leader), with a crowdedness score (1-10) and a list of
 				the existing players. If the gap is false, it'll suggest where the
 				whitespace actually is rather than just affirming your idea.
 			</>
@@ -318,9 +318,9 @@ const FAQ: Array<{ q: string; a: React.ReactNode }> = [
 		q: "What if there's no RFP / sponsor brief matching my idea?",
 		a: (
 			<>
-				Zero RFPs in a category doesn't mean <em>"no opportunity"</em> — it
-				means no sponsor brief in the current SCF round covers that lane yet.
-				Anyone can propose an RFP at{" "}
+				Zero RFPs in a category doesn't mean <em>"no opportunity"</em>; it means
+				no sponsor brief in the current SCF round covers that lane yet. Anyone
+				can propose an RFP at{" "}
 				<a
 					href="https://stellarlight.xyz/ideas"
 					target="_blank"
@@ -410,7 +410,7 @@ export default async function ScoutPage() {
 					{/* Tight positioning paragraph */}
 					<p className="text-base md:text-lg text-muted-foreground max-w-2xl mb-10 leading-relaxed">
 						An AI tool for Stellar builders. Validate ideas, surface prior art,
-						and match open SCF-funded briefs — whether you're entering a
+						and match open SCF-funded briefs, whether you're entering a
 						hackathon, applying for a grant, or shipping independently. Works as
 						a SKILL.md or an MCP server.
 					</p>
@@ -493,8 +493,8 @@ export default async function ScoutPage() {
 				<Section title="What's inside">
 					<p className="text-sm text-muted-foreground mb-6 max-w-2xl">
 						Curated Stellar ecosystem data + the Stellar Foundation's official
-						skill catalog — all queryable from inside Claude Code, Codex,
-						Cursor, or any agent that loads SKILL.md.
+						skill catalog: all queryable from inside Claude Code, Codex, Cursor,
+						or any agent that loads SKILL.md.
 					</p>
 
 					{/* Top row: count cards */}
@@ -663,7 +663,7 @@ export default async function ScoutPage() {
 								))}
 							</div>
 							<p className="text-xs text-muted-foreground leading-relaxed">
-								The Stellar Foundation's 7 official skills — the "how to build"
+								The Stellar Foundation's 7 official skills: the "how to build"
 								layer. Scout chains into them via{" "}
 								<code className="text-[11px] px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
 									/api/skills
@@ -715,21 +715,21 @@ export default async function ScoutPage() {
 						<div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-border/40">
 							{[
 								{
-									range: "0–2",
+									range: "0-2",
 									title: "Full gap",
 									signal: "Highest opportunity",
 									blurb:
 										"Zero prior projects on Stellar. No winning hackathon submissions. No SCF-funded teams in this lane.",
 								},
 								{
-									range: "3–5",
+									range: "3-5",
 									title: "Partial gap",
 									signal: "Medium opportunity",
 									blurb:
-										"1–3 adjacent projects exist but none cover the specific angle. The user's wedge is fresh.",
+										"1-3 adjacent projects exist but none cover the specific angle. The user's wedge is fresh.",
 								},
 								{
-									range: "7–10",
+									range: "7-10",
 									title: "False gap",
 									signal: "Low opportunity",
 									blurb:
@@ -759,7 +759,7 @@ export default async function ScoutPage() {
 						<strong className="text-foreground">Evidence floor:</strong> if the
 						data doesn't support a claim, Scout says so. It won't invent
 						competitors, prize amounts, or builder profiles. Missing data is
-						reported as <em>"not indexed"</em> — never papered over.
+						reported as <em>"not indexed"</em>, never papered over.
 					</p>
 				</Section>
 
@@ -883,7 +883,7 @@ export default async function ScoutPage() {
 									{method}
 								</span>
 								<span className="text-foreground w-56 truncate">{path}</span>
-								<span className="text-muted-foreground">— {blurb}</span>
+								<span className="text-muted-foreground">· {blurb}</span>
 							</div>
 						))}
 						<div className="text-muted-foreground/60 pt-1">
@@ -933,7 +933,7 @@ export default async function ScoutPage() {
 							Ready to validate your hackathon idea?
 						</h3>
 						<p className="text-sm text-muted-foreground">
-							Install Scout, ask <em>"should I build X on Stellar?"</em> — get
+							Install Scout, ask <em>"should I build X on Stellar?"</em>, get
 							evidence.
 						</p>
 					</div>
