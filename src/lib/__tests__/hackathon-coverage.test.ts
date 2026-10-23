@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { CURATED_BUILDS } from "@/data/curated-builds";
 import {
@@ -104,6 +106,13 @@ describe("no ratio over incomplete rows", () => {
 		);
 		expect(incompleteRows("stellar-hacks-zk", "full")).toBeNull();
 		expect(incompleteRows("stellar-hacks-zk", null)).toBeNull();
+		// A note that says not announced gives that reason, not "in part".
+		expect(incompleteRows("stellar-builders-camp-jaipur-2026", null)).toBe(
+			"its winners are not announced upstream (getHackathon stats.winnersNote)",
+		);
+		expect(incompleteRows("stellar-journey-to-mastery-2026", null)).toBe(
+			"its winners are not announced upstream (getHackathon stats.winnersNote)",
+		);
 	});
 
 	it("a winners note is kept only for curated events, so any rows it covers are curated winners", () => {
@@ -254,5 +263,34 @@ describe("the spec declares coverage and the nulls it brings", () => {
 	it("declares the row notes that say why a ratio is null", () => {
 		const row = body("/api/hackathons/compare").properties?.hackathons?.items;
 		expect(row?.properties?.notes?.items).toMatchObject({ type: "string" });
+	});
+
+	// Review: all-event q=lance gave builds entries 60 against analyze's 59,
+	// while both texts said the two are equal but for declared packages.
+	it("says where builds' entries and analyze's total differ: declared packages and left-out rows", () => {
+		const entries = (
+			body("/api/hackathons/builds").properties?.meta?.properties?.counts
+				?.properties?.entries as { description?: string } | undefined
+		)?.description;
+		expect(entries).toMatch(/declared package/);
+		expect(entries).toMatch(/winners-only event's rows/);
+		const ref = readFileSync(
+			join(process.cwd(), "public/skills/references/api-reference.md"),
+			"utf8",
+		);
+		const units = ref.slice(ref.indexOf("**Units:**")).split("\n")[0];
+		expect(units).toMatch(/declared package/);
+		expect(units).toMatch(/winners-only event's rows/);
+	});
+
+	it("says across every event that the left-out events are not listed", () => {
+		const warnings = (
+			body("/api/hackathons/analyze").properties?.meta?.properties?.warnings as
+				| { description?: string }
+				| undefined
+		)?.description;
+		expect(warnings).toMatch(
+			/facet=event and by=event do not list those events/,
+		);
 	});
 });

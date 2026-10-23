@@ -2742,6 +2742,24 @@
    "chars": 1908,
    "sha256": "80498a308d299b0290c8d3b2575ecdbf5beee4674caa656e02c9a1c94c28285d"
   },
+  "analyze?facet=event&value=hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1366,
+   "sha256": "1545e4c69797f4ad4f81da626fa2a5067d05a37168e0da6e07061b1d3987159f"
+  },
+  "analyze?facet=track&value=Open%20Innovation": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1353,
+   "sha256": "acbba80803b9e4fecd550bb27ebe79c89ce5fd1fef4037a63e0987d3dc00ba77"
+  },
+  "analyze?facet=event&value=stellar-hacks-zk": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1371,
+   "sha256": "5ef6a0ac042d99e77783594918d6b091c4cb494267418a1f567a5a0e42cc9021"
+  },
   "analyze?track=open%20innovation&facet=placement": {
    "class": "names-winners-only",
    "status": 200,

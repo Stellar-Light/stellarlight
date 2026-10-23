@@ -24,6 +24,7 @@ import {
 	eventProfile,
 	winnersOnlyNote,
 } from "@/lib/hackathon-analytics";
+import { CURATED_BUILD_ID } from "@/lib/hackathon-build-links";
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
@@ -465,7 +466,13 @@ export async function GET(
 			const winnersOnly = eventCoverage(stored) === "winners-only";
 			// Served in the submission shape this endpoint has always served:
 			// the stored row's other facts live on search, detail and analyze.
-			const liveSubmissions: DoraHacksSubmission[] = fromStore
+			// Each row's own source: a curated winner is curated, never
+			// dorahacks beside a page that says it is off DoraHacks.
+			const liveSubmissions: Array<
+				Omit<DoraHacksSubmission, "source"> & {
+					source: "dorahacks" | "curated";
+				}
+			> = fromStore
 				? stored.map((b) => ({
 						id: b.id,
 						name: b.name,
@@ -480,7 +487,9 @@ export async function GET(
 						isWinner: b.isWinner,
 						voteCount: b.voteCount,
 						url: b.url,
-						source: "dorahacks" as const,
+						source: CURATED_BUILD_ID.test(b.id)
+							? ("curated" as const)
+							: ("dorahacks" as const),
 					}))
 				: // A failed live read (its winners unreadable, a timeout)
 					// serves no roster; the winners note then says they could

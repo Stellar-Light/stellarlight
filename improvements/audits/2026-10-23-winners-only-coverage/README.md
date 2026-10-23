@@ -71,21 +71,23 @@ row a winner until a partial curated listing gets its own value.
 2. `replay.test.ts` (config `vitest.replay.config.mts`): the real GET
    handlers of compare, getHackathon, analyze and builds over an index
    rebuilt from the capture, the clock pinned at 2026-10-23T15:10:00Z, the
-   store and DoraHacks mocked from the capture. 455 requests: compare over
+   store and DoraHacks mocked from the capture. 458 requests: compare over
    every pair of the 27 listed events plus the three winners-only events
    together; every event page; per indexed event, analyze with the
    hackathon filter in one dimension (`facet=category`) and two
-   (`facet=library&by=track`) and a builds search with the filter; four
+   (`facet=library&by=track`) and a builds search with the filter; seven
    analyze requests across every event (`facet=event`,
    `facet=category&by=event`, `facet=placement`,
-   `winnersOnly=1&facet=package`); and three sets reached by a track or a
-   hackathon value (`track=open innovation`, winners-only rows alone;
-   `track=composability` and `hackathon=stellar-hacks-zk,hackmeridian-2025`,
-   mixed). Each request is classed by the events it names: full,
-   names-unstored or names-winners-only. Each body's sha256 and length:
-   `replay-base.json` (bf8262db, run from an archive of that commit
-   extracted to scratch) and `replay-lane.json` (final tree); each run
-   twice, identical.
+   `winnersOnly=1&facet=package`, and `facet=event&value=hackmeridian-2025`,
+   `facet=track&value=Open Innovation` and `facet=event&value=stellar-hacks-zk`);
+   and three sets reached by a track or a hackathon value
+   (`track=open innovation`, winners-only rows alone; `track=composability`
+   and `hackathon=stellar-hacks-zk,hackmeridian-2025`, mixed). Each request
+   is classed by the events it names: full, names-unstored or
+   names-winners-only. Each body's sha256 and length: `replay-base.json`
+   (bf8262db, run from an archive of that commit extracted to scratch;
+   main at e196cea1, spec 1.9.100, replays all 458 identically) and
+   `replay-lane.json` (final tree); each run twice, identical.
 3. Fidelity: on the base tree the replay reproduces all 27 live event pages
    exactly (generatedAt aside), and the live compare of the three
    winners-only events and the live `analyze?facet=event`.
@@ -94,8 +96,9 @@ row a winner until a partial curated listing gets its own value.
    writes `sweep-lane.txt`; `sweep-base-summary.txt` is the same sweep over
    the base bodies, failures counted by field.
 5. Tests run before each implementation: `failing-first.txt` (coverage),
-   `failing-first-followup.txt` (ratios over incomplete rows) and
-   `failing-first-tracks.txt` (tracks, tiers, judging).
+   `failing-first-followup.txt` (ratios over incomplete rows),
+   `failing-first-tracks.txt` (tracks, tiers, judging) and
+   `failing-first-review.txt` (the review's six findings).
 
 ## Results
 
@@ -104,7 +107,7 @@ row a winner until a partial curated listing gets its own value.
   requests with the hackathon filter, 20 builds searches). The 86 compare
   pairs naming an event with nothing stored are identical too. PASS.
 - Changed, as intended: the 4 pages of events with nothing stored (only
-  tracks, prizeTiers, notes and rules), and all 95 requests naming a
+  tracks, prizeTiers, notes and rules), and all 98 requests naming a
   winners-only event.
 - (b) The three events: compare `submissionCount` null and
   `profile.submissions` null on all 81 rows naming them, `winnerCount` 6,
@@ -145,6 +148,13 @@ row a winner until a partial curated listing gets its own value.
     field 325 to 319, unknown 6 to 0; both warning lines.
   - `track=open innovation` (its rows alone): counts kept, share 1 to null,
     the winners-only line.
+  - A value only left-out rows carry (review finding 1):
+    `facet=event&value=hackmeridian-2025` builds 6 to 0 with share 0.004
+    to null and winnersVsOthers' winnersShare 0.075 to null (it served 0
+    before this fix); `facet=track&value=Open Innovation` the same (3 to
+    0, share null); each with the line "value '...': only rows left out
+    above carry it". `facet=event&value=stellar-hacks-zk` keeps a share
+    over the full listings (0.231 to 0.233) and no such line.
   PASS.
 - (g) Tracks and tiers: no curated event serves `tracks: []` or
   `prizeTiers: []`. hackmeridian-2026 serves Genesis and Scale (category)
@@ -153,8 +163,15 @@ row a winner until a partial curated listing gets its own value.
   Mastery its builder and startup tracks; the Jaipur camp and the Builder
   Summit `tracks: null` with a note; all seven curated events
   `prizeTiers: null` with a note. PASS.
-- (d) Sweep: 1,562 field checks over the lane bodies pass; the same sweep
-  fails 710 of them on the base bodies. Fields checked are listed in
+- Review findings 3 to 5: a declared track is backed only when its name
+  and description sit side by side in one clause of the record's
+  description (Genesis and Scale with swapped descriptions, and Scale
+  described as "Stellar", now fail the data test); a winners note that says
+  not announced gives that reason, not "published in part"; a winners-only
+  page's submissions and winners rows serve `source: curated`, DoraHacks
+  rows `dorahacks`.
+- (d) Sweep: 1,582 field checks over the lane bodies pass; the same sweep
+  fails 726 of them on the base bodies. Fields checked are listed in
   `sweep-lane.txt`.
 - Readers the replay cannot run (they need the store), read live,
   read-only, at 1.9.99 (15:35Z): getHackathons for q=meridian,

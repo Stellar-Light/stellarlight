@@ -693,4 +693,43 @@ describe("events whose stored rows are their winners only", () => {
 			["apac-stellar-hackathon-2026", "winners-only", null],
 		]);
 	});
+
+	// Review of the merged branch: a value only left-out rows carry read as a
+	// measured 0 (facet=event&value=hackmeridian-2025 served share 0 over the
+	// full listings, for an event holding 6 stored rows).
+	it("a value only left-out rows carry serves no share, and says why", async () => {
+		const event = await get("analyze", "facet=event&value=hackmeridian-2025");
+		expect(event.body.total.values).toEqual([
+			{ value: "hackmeridian-2025", builds: 0, winners: 0, share: null },
+		]);
+		expect(event.body.meta.warnings).toEqual([
+			LEFT_OUT,
+			"value 'hackmeridian-2025': only rows left out above carry it (6 winners-only rows), so its 0 is not a count of it and its share is null",
+		]);
+		// Winners against the rest: no share of 0 either.
+		expect(event.body.winnersVsOthers.values).toEqual([
+			{
+				value: "hackmeridian-2025",
+				winners: 0,
+				others: 0,
+				winnersShare: null,
+				othersShare: null,
+				lift: null,
+			},
+		]);
+		const track = await get("analyze", "facet=track&value=Open%20Innovation");
+		expect(track.body.total.values).toEqual([
+			{ value: "Open Innovation", builds: 0, winners: 0, share: null },
+		]);
+		expect(track.body.meta.warnings).toEqual([
+			LEFT_OUT,
+			"value 'Open Innovation': only rows left out above carry it (3 winners-only rows), so its 0 is not a count of it and its share is null",
+		]);
+		// A value the full listings carry keeps its share.
+		const kale = await get("analyze", "facet=event&value=kale");
+		expect(kale.body.total.values).toEqual([
+			{ value: "kale", builds: 2, winners: 0, share: 0.333 },
+		]);
+		expect(kale.body.meta.warnings).toEqual([LEFT_OUT]);
+	});
 });

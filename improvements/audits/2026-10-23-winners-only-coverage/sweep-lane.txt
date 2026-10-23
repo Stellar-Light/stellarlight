@@ -1,8 +1,11 @@
 benchmark (c): hackmeridian-2025 submissionCount = null
-checked analyze (mixed set) left-out line names the events: 6
-checked analyze (mixed set) no winners-only event in any value, group or lift: 6
-checked analyze (every event) left-out line counts 12 rows: 4
-checked analyze (every event) total.field over full listings only: 4
+checked analyze (mixed set) left-out line names the events: 9
+checked analyze (mixed set) no winners-only event in any value, group or lift: 9
+checked analyze (every event) left-out line counts 12 rows: 7
+checked analyze (every event) total.field over full listings only: 7
+checked analyze (value only left-out rows carry) its 0 with share null, and the line: 2
+checked analyze (value only left-out rows carry) winnersVsOthers shares null: 2
+checked analyze (value the full listings carry) a share over the full listings, no value line: 1
 checked analyze (every event) winners 68 of 1,371: 1
 checked analyze (hackathon filter) meta.warnings (winners-only line): 7
 checked analyze (winners-only rows alone) every share null: 7
@@ -49,6 +52,7 @@ checked getHackathon hackathon.tracks[].winnerCount: 2
 checked getHackathon tracks[].submissionCount: 2
 checked getHackathon tracks[].winnerCount: 2
 checked getHackathon winners[] (listed): 3
+checked getHackathon submissions[] and winners[] source curated: 3
 checked getHackathon meta.note: 3
 checked getHackathon hackathon.tracks null: winners name no track: 1
 checked getHackathon tracks null: winners name no track: 1
@@ -57,4 +61,4 @@ checked getHackathon declared tracks: kind, description, counts null: 2
 checked getHackathon rules: judging from the record, with source and day: 1
 checked getHackathon tracks null with the note: 2
 checked getHackathon no rules without a judging sentence: 3
-PASS: 1562 checks
+PASS: 1582 checks

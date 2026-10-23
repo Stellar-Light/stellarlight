@@ -1782,7 +1782,7 @@ export interface components {
                 url?: string;
                 /** @description null on every row since 2026-08: the DoraHacks v1 hub API no longer exposes vote counts. Kept for shape stability; null is unknown, never zero votes. */
                 voteCount?: number | null;
-                /** @description 'dorahacks' for live rows. */
+                /** @description 'dorahacks' for a DoraHacks submission; 'curated' for a winner stored from a curated record (a curated-{event}-{name} id, an event off DoraHacks). The submissions rows carry the same. Absent on curated roster and directory rows. */
                 source?: string;
                 /** @description Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe. */
                 security?: {
@@ -3938,7 +3938,7 @@ export interface operations {
                                 indexedBuilds?: number;
                                 /** @description Unique submissions that match: the rows this search pages through. */
                                 matched?: number;
-                                /** @description Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze. */
+                                /** @description Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows analyze leaves out beside full listings (its meta.warnings names them). */
                                 entries?: number;
                                 /** @description Builds whose name matched q but that are not listed, because most of the words searched in q occur as a whole word in no submission; meta.warnings names the words they matched. Not counted in matched or entries. 0 = none held back; always 0 in meaning mode, which never lists a build by its name. */
                                 withheldByName?: number;
@@ -4280,7 +4280,7 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. No rate is computed over incomplete rows (an event whose stored rows are its winners only). When the set also holds full listings, those rows are left out of every count and share, and one line names the events and the rows left out ('left out of every count and share: 12 rows of <slug> (6), ...'). When they are all the set holds (a hackathon value naming only such events, or filters that leave only them), their counts stay, every share is null, and a line names them ('only the winners of <slug> are stored ...'). */
+                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. No rate is computed over incomplete rows (an event whose stored rows are its winners only). When the set also holds full listings, those rows are left out of every count and share, and one line names the events and the rows left out ('left out of every count and share: 12 rows of <slug> (6), ...'), so facet=event and by=event do not list those events. A value only left-out rows carry serves its 0 with every share null (in total, in a group holding those rows and in winnersVsOthers), and a line names it (value '<v>': only rows left out above carry it ...). When they are all the set holds (a hackathon value naming only such events, or filters that leave only them), their counts stay, every share is null, and a line names them ('only the winners of <slug> are stored ...'). */
                             warnings?: string[];
                             source?: string;
                             upstream?: string;

@@ -100,6 +100,21 @@ describe("tracks and judging a curated record declares", () => {
 	// Case, a hyphen and the final period aside.
 	const plain = (s: string) =>
 		s.toLowerCase().replace(/-/g, " ").replace(/\.$/, "");
+	/** Whether the record's description states this track as declared: the
+	 * name and its description side by side in one clause, the description
+	 * right after the name ("Genesis takes ..."), in brackets after it
+	 * ("Stellar Unlocked (new uses ..."), or right before it ("belt-progression
+	 * builder track"). Containment alone passed swapped descriptions. */
+	const backed = (
+		description: string,
+		t: { name: string; description: string },
+	) => {
+		const text = plain(description);
+		const [name, said] = [plain(t.name), plain(t.description)];
+		return [`${name} ${said}`, `${name} (${said}`, `${said} ${name}`].some(
+			(clause) => text.includes(clause),
+		);
+	};
 
 	it("come from the record's own description, with no new claim", () => {
 		const declaring = CURATED_HACKATHONS.filter((h) => h.tracks || h.judging);
@@ -108,10 +123,10 @@ describe("tracks and judging a curated record declares", () => {
 			"stellar-journey-to-mastery-2026",
 		]);
 		for (const h of declaring) {
-			const text = plain(h.description ?? "");
 			for (const t of h.tracks ?? []) {
-				expect(text, `${h.uname}: ${t.name}`).toContain(plain(t.name));
-				expect(text, `${h.uname}: ${t.name}`).toContain(plain(t.description));
+				expect(backed(h.description ?? "", t), `${h.uname}: ${t.name}`).toBe(
+					true,
+				);
 				expect(t.description, t.name).not.toMatch(/[\u2013\u2014]/);
 			}
 			if (h.judging) {
@@ -121,6 +136,21 @@ describe("tracks and judging a curated record declares", () => {
 				expect(h.judging.checkedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 			}
 		}
+	});
+
+	// Review: containment alone passed Genesis and Scale with their
+	// descriptions swapped, and Scale described as "Stellar".
+	it("rejects a description from another track's clause, or a word lifted from elsewhere", () => {
+		const h = CURATED_HACKATHONS.find((x) => x.uname === "hackmeridian-2026");
+		const [genesis, scale] = h?.tracks ?? [];
+		const text = h?.description ?? "";
+		expect(backed(text, { ...genesis, description: scale.description })).toBe(
+			false,
+		);
+		expect(backed(text, { ...scale, description: genesis.description })).toBe(
+			false,
+		);
+		expect(backed(text, { name: "Scale", description: "Stellar" })).toBe(false);
 	});
 
 	it("names HackMeridian 2026's two categories and two thematic tracks", () => {

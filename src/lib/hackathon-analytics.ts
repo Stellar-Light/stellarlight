@@ -130,19 +130,24 @@ export type EventProfile = ReturnType<typeof eventProfile>;
  * one may. The one rule for every ratio served over stored rows (a share, a
  * winner share, a rate, a prize per winner): its denominator never comes
  * from incomplete rows. Incomplete: only the winners are stored (coverage
- * winners-only), or the winners are published only in part, which today
- * only a curated event's dated winners note records. */
+ * winners-only), or the winners are published only in part or not at all,
+ * which today only a curated event's dated winners note records. */
 export function incompleteRows(
 	slug: string,
 	coverage: ReturnType<typeof eventCoverage> | undefined,
 ): string | null {
+	const note = CURATED_WINNERS_NOTES[slug];
 	const why = [
 		...(coverage === "winners-only"
 			? ["only its winners are stored (coverage winners-only)"]
 			: []),
-		...(CURATED_WINNERS_NOTES[slug]
+		// Each note's own kind: a test keeps "Not announced upstream" the
+		// prefix of every note that says so.
+		...(note
 			? [
-					"its winners are published only in part (getHackathon stats.winnersNote)",
+					note.startsWith("Not announced upstream")
+						? "its winners are not announced upstream (getHackathon stats.winnersNote)"
+						: "its winners are published only in part (getHackathon stats.winnersNote)",
 				]
 			: []),
 	];

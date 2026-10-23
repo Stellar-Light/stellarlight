@@ -743,6 +743,27 @@ describe("an event whose stored rows are its winners only", () => {
 		).toEqual([]);
 	});
 
+	// Review: the page said "Event off DoraHacks" while every submission and
+	// winner row claimed source dorahacks.
+	it("each stored row serves its own source: a curated winner is curated", async () => {
+		const body = await serve("hackmeridian-2025", 400);
+		const sources = (rows: Array<{ source: string }>) =>
+			[...new Set(rows.map((r) => r.source))].sort();
+		expect(sources(body.submissions)).toEqual(["curated"]);
+		expect(sources(body.winners)).toEqual(["curated"]);
+		// A DoraHacks event's stored rows stay dorahacks.
+		const dora = await getEvent();
+		expect(sources(dora.submissions)).toEqual(["dorahacks"]);
+		expect(sources(dora.winners)).toEqual(["dorahacks"]);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
+	});
+
 	it("its profile counts the winners and serves no share over them", async () => {
 		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
 		const { fetchAllDoraHacksHackathons } = await import(

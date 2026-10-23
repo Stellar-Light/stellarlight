@@ -224,7 +224,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     not stored; `/api/hackathons/hackmeridian-2026` serves `tracks: []` and
     `prizeTiers: []` beside two categories and two tracks its record states.
     State: all three fixed on branch `lane/v-winners-only-coverage` (spec
-    placeholder 1.9.102), not pushed. Replay and sweep:
+    1.9.101), not pushed. Replay and sweep:
     `improvements/audits/2026-10-23-winners-only-coverage/`.
     Done when: merged and deployed, and live, re-checked by someone other
     than the author: the probe serves `submissionCount` null with

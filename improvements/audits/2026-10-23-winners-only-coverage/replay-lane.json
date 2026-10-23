@@ -2181,14 +2181,14 @@
   "event/build-on-stellar-philippines-2026": {
    "class": "names-winners-only",
    "status": 200,
-   "chars": 6985,
-   "sha256": "7a0f69de19528dfc537ba9a58addd0dfc2c782f56c7fe1289cbbadca8208f6a1"
+   "chars": 6965,
+   "sha256": "bd48c0735eda3f1bb7633901446addd947fd75199dda2685a31844038a9f9fc0"
   },
   "event/apac-stellar-hackathon-2026": {
    "class": "names-winners-only",
    "status": 200,
-   "chars": 3677,
-   "sha256": "8659569f8262e3d6e35f7b192258780d4489b863bfe2246e03637848a9558705"
+   "chars": 3673,
+   "sha256": "4e2f8a3583a399fb56aa5eb915693a864b69ca3a90e9e96129d3249cc6a7e2e8"
   },
   "event/stellar-agents-x402-stripe-mpp": {
    "class": "full",
@@ -2253,8 +2253,8 @@
   "event/hackmeridian-2025": {
    "class": "names-winners-only",
    "status": 200,
-   "chars": 7161,
-   "sha256": "c1e05bc1ace2058f9d9b94945b5829331237a0f45dc5ae5fd74345537f7abb0f"
+   "chars": 7137,
+   "sha256": "799b9ad42321eeb4a1d34a4fc9d99a7836f0830cfe2b71a5d48c87536117ff87"
   },
   "event/buildonstellarhack": {
    "class": "full",
@@ -2741,6 +2741,24 @@
    "status": 200,
    "chars": 2161,
    "sha256": "c85aba369427217023b30084e3419e25dcc391783085dd3f657c40e6cf800f53"
+  },
+  "analyze?facet=event&value=hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1758,
+   "sha256": "eaa8dc66c1d5b9633a3a1947707b94bf5a17120d2fba853c44016d867fa55ad8"
+  },
+  "analyze?facet=track&value=Open%20Innovation": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1743,
+   "sha256": "9f39e8bf7bce400345d5367c70f4838b236becfdce4c4a5590a3e80f28af38bd"
+  },
+  "analyze?facet=event&value=stellar-hacks-zk": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1624,
+   "sha256": "651372688e0460964e40ee0a120911b182d1ca7363fdffd18db85bdc4ffd4fc4"
   },
   "analyze?track=open%20innovation&facet=placement": {
    "class": "names-winners-only",

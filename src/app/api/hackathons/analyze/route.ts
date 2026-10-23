@@ -179,6 +179,39 @@ export async function GET(req: NextRequest) {
 		: [];
 	if (unwarned.length) warnings.push(winnersOnlyWarning(unwarned));
 	const lift = noShares ? null : winnersVsOthers(matched, facet, opts);
+	// A value only left-out rows carry: its 0 counts the full listings, not
+	// the value, so it serves no share, nor does a group holding those rows,
+	// nor winners against the rest (facet=event&value=hackmeridian-2025
+	// served share 0 for an event with 6 stored rows).
+	const carriers =
+		value && !total.values[0]?.builds
+			? left.filter(
+					(b) => distribution([b], facet, { value }).values[0]?.builds,
+				)
+			: [];
+	if (carriers.length) {
+		const unshare = (d: Distribution) => {
+			if (d.values[0]) d.values[0] = { ...d.values[0], share: null };
+		};
+		unshare(total);
+		// The group facets (event, year, placement, track) read no clock.
+		for (const g of groups ?? [])
+			if (
+				by &&
+				carriers.some((b) => (FACETS[by].values(b) ?? []).includes(g.value))
+			)
+				unshare(g);
+		if (lift?.values[0])
+			lift.values[0] = {
+				...lift.values[0],
+				winnersShare: null,
+				othersShare: null,
+				lift: null,
+			};
+		warnings.push(
+			`value '${value}': only rows left out above carry it (${carriers.length} winners-only ${carriers.length === 1 ? "row" : "rows"}), so its 0 is not a count of it and its share is null`,
+		);
+	}
 	// How far each reported type's count can be trusted, from the lane's own
 	// measurement on the hand-typed directory.
 	let measured:

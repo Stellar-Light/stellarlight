@@ -419,6 +419,14 @@ for (const file of readdirSync(dir).sort()) {
 		);
 		check(
 			"getHackathon",
+			"submissions[] and winners[] source curated",
+			[...(body.submissions as J[]), ...(body.winners as J[])].every(
+				(r) => r.source === "curated",
+			),
+			slug,
+		);
+		check(
+			"getHackathon",
 			"meta.note",
 			String(meta.note).startsWith(
 				"Event off DoraHacks with only its winners on record",
@@ -480,12 +488,43 @@ for (const file of readdirSync(dir).sort()) {
 			expectLeft.every((s) => line.includes(s)),
 			`${file} ${line}`,
 		);
+		// A value asked for by name is the one row allowed to name an event.
+		const asked = /value=([^&]+)\.json$/.exec(file)?.[1]?.replace(/_20/g, " ");
 		check(
 			"analyze (mixed set)",
 			"no winners-only event in any value, group or lift",
-			!slugsIn([total, groups, lift]).some((s) => s in WINNERS),
+			!slugsIn([total, groups, lift]).some((s) => s in WINNERS && s !== asked),
 			file,
 		);
+		if (asked) {
+			const row = (total.values as J[])[0];
+			const onlyLeftOut = asked in WINNERS || asked === "Open Innovation";
+			const valueLine = strings(meta.warnings).some((w) =>
+				w.startsWith(`value '${asked}': only rows left out above carry it`),
+			);
+			if (onlyLeftOut) {
+				check(
+					"analyze (value only left-out rows carry)",
+					"its 0 with share null, and the line",
+					row?.builds === 0 && row?.share === null && valueLine,
+					`${file} ${JSON.stringify(row)}`,
+				);
+				const liftRow = ((lift?.values as J[] | undefined) ?? [])[0];
+				check(
+					"analyze (value only left-out rows carry)",
+					"winnersVsOthers shares null",
+					!liftRow ||
+						(liftRow.winnersShare === null && liftRow.othersShare === null),
+					`${file} ${JSON.stringify(liftRow)}`,
+				);
+			} else
+				check(
+					"analyze (value the full listings carry)",
+					"a share over the full listings, no value line",
+					typeof row?.share === "number" && !valueLine,
+					`${file} ${JSON.stringify(row)}`,
+				);
+		}
 		if (!filter && !file.includes("track=")) {
 			check(
 				"analyze (every event)",

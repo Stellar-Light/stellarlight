@@ -364,3 +364,82 @@ Criteria, fixed before any result:
   the winners served; their notes record a different state and they are
   full events, which had to stay byte identical. The Builder Summit's
   bounty tracks live only in its winners roster's labels.
+
+## Review of the merged branch and the fixes
+
+- The coordinator merged main into the branch (d5d0e0f8, main at e196cea1,
+  spec 1.9.100) and renumbered it to spec 1.9.101. Version note: the
+  lines above, and TODO, said spec 1.9.102; it ships as 1.9.101. TODO now
+  says 1.9.101; the lines above stay as written.
+- Independent review of d5d0e0f8: GATE, fix first. It verified tsc, 2,568
+  tests, the contract and the Raven gate, the replay (270 of 270 full
+  requests identical, the merge changed none of the 455 bodies), the sweep
+  (1,562 pass), that the coverage rule cannot misfire on DoraHacks rows,
+  the merge text and 10 hand spot-checks. Six findings:
+  1. MEDIUM: a value only left-out rows carry served a share of 0
+     (`facet=event&value=hackmeridian-2025`: builds 0, share 0 over 1,371;
+     `facet=track&value=Open Innovation`: share 0, while
+     `track=open innovation` counts 3).
+  2. MEDIUM: the builds `counts.entries` description and the skill
+     reference's Units sentence state that analyze's total.builds equals
+     entries but for declared packages; all-event `q=lance` gives 60
+     against 59.
+  3. LOW: the track data test was containment only; swapped Genesis and
+     Scale descriptions, and Scale described as "Stellar", passed.
+  4. LOW: `incompleteRows` said "published only in part" for the two
+     notes that say not announced.
+  5. LOW: getHackathon mapped stored rows with source dorahacks, so a
+     winners-only page off DoraHacks served dorahacks rows.
+  6. LOW: the version text above.
+  Plus: say in the spec that all-event facet=event no longer lists the
+  three events.
+- Tests first, on d5d0e0f8 before any fix: 4 files, 6 failed, 71 passed
+  (`failing-first-review.txt`). A seventh case found while fixing 1:
+  winnersVsOthers served the same value with winnersShare 0; its test
+  failed before its fix (appended to the same file).
+- Fixes:
+  1. analyze: when no counted row carries the requested value and
+     left-out rows do, its row serves share null, as does a group holding
+     those rows and the winnersVsOthers row, and a line says so ("value
+     '<v>': only rows left out above carry it (6 winners-only rows), so its
+     0 is not a count of it and its share is null").
+  2. Both texts name the second exception: a winners-only event's rows
+     analyze leaves out beside full listings. The analyze warnings
+     description says facet=event and by=event then do not list those
+     events. No operation description, summary, parameter or x-routing
+     changed (checked against main e196cea1).
+  3. The data test's `backed` holds the name and its description side by
+     side in one clause: description after the name, in brackets after it,
+     or right before it. The two bad cases now fail.
+  4. `incompleteRows` gives "its winners are not announced upstream" for a
+     note with that prefix (a data test keeps the prefix), "published only
+     in part" for the others.
+  5. getHackathon serves each stored row's own source: curated for a
+     `curated-` id, dorahacks otherwise; the winners `source` description
+     names both (no enum exists).
+  6. TODO's version.
+- First tsc run failed (TS2554 at the new group check: the group facets'
+  values take one argument), after vitest had passed; fixed by calling it
+  with one. The replay was unchanged by that fix (`cmp` exit 0).
+- Replay, 458 requests (three value requests added across every event).
+  Base rerun on bf8262db; main at e196cea1 replays all 458 identically to
+  it (`cmp` exit 0). Lane run twice, `cmp` exit 0. `diff.mts`: full 270 of
+  270 identical; names-unstored 86 compare identical and the 4 pages
+  changed as before; names-winners-only 98 of 98 changed. The value
+  requests against the base: hackmeridian-2025 builds 6 to 0 with share
+  0.004 to null and winnersShare 0.075 to null; Open Innovation 3 to 0,
+  share 0.002 to null; stellar-hacks-zk share 0.231 to 0.233, no value
+  line.
+- `sweep.mts` extended (value rows and their winnersVsOthers rows, the
+  source of winners-only rows): 1,582 checks pass on the lane, 726 fail on
+  the base.
+- Checks: `pnpm exec tsc --noEmit -p tsconfig.json` exit 0; `npx vitest
+  run src/lib/__tests__ src/app/api --maxWorkers=4 --minWorkers=1` exit 0,
+  195 files, 2,541 tests; `npx vitest run src/data/__tests__` exit 0, 4
+  files, 32 tests; `pnpm contract:write` exit 0; `CONTRACT_BASE=origin/main
+  pnpm contract:check` exit 0 (98 hand-typed enums, 64 spread); `pnpm
+  raven:gate --raven <scratch>/raven-src/stellar-raven` exit 0, ACCEPT
+  1.9.101 (legacy 220/298/326 and 112, skills 17/23/23, holdout 24 passed
+  with 10 forbidden captures, 0 hit-to-miss); biome on the 10 changed code
+  files: no errors; added lines: no em or en dashes, no barred names, no
+  local paths.

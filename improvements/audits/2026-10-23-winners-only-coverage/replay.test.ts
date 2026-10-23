@@ -310,6 +310,10 @@ for (const qs of [
 	"facet=category&by=event",
 	"facet=placement",
 	"winnersOnly=1&facet=package",
+	// A value only left-out rows carry, and one the full listings carry.
+	"facet=event&value=hackmeridian-2025",
+	"facet=track&value=Open%20Innovation",
+	"facet=event&value=stellar-hacks-zk",
 ])
 	reqs.push({ key: `analyze?${qs}`, route: "analyze", qs, names: indexed });
 // Sets that mix full and winners-only rows, or hold winners-only rows alone,
