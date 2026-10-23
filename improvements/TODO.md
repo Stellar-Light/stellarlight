@@ -322,7 +322,11 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   24,000 characters and keeps the front; `meta` already comes first on the 9
   endpoints checked, so the cut drops rows, not metadata. The owner parked
   response-size changes on 2026-08-18; ask before changing any response
-  shape.
+  shape. Opt-in `view=compact` on searchProjects and searchRepos (spec
+  1.9.96, `improvements/rounds/2026-10-23-compact-views.md`) brings their
+  default pages under the cap with defaults unchanged; the list endpoints
+  over it (skills, partners, leaderboard, builders, audits, stablecoins)
+  are not covered.
 - Raven's calls are anonymous. It sends plain GETs with no key, no
   User-Agent, no timeout and no retries, from Cloudflare's network, so its
   users likely share one per-IP limit [inferred]. See the owner decision on
@@ -339,3 +343,13 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
 - Post handoffs to Raven [drafts only until approved].
 - Ask Raven to send a key and User-Agent, so its traffic is not held to
   per-IP limits [draft only].
+- Rewrite git history to purge the raw query texts that commits before the
+  admin-auth round left in `improvements/consumers/` (the files now hold
+  counts only; see `rounds/2026-10-23-admin-auth.md`) [no rewrite].
+- Set `ADMIN_ROUTE_SECRET` (32 or more characters) in the production environment, for scripted
+  calls to the five `/api/admin/*` routes and `/api/import/airtable` through
+  the `x-admin-secret` header [unset: admin session only].
+- Rotate `PAYLOAD_SECRET`: until the admin-auth round, every blog preview
+  put it in a URL (request logs, browser history). It signs every session,
+  so rotating logs every admin and partner out [no rotation unless a log
+  holding it is known to be readable by others].

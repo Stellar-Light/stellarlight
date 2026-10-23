@@ -1,9 +1,7 @@
 {
 	"consumer": "raven",
 	"label": "Raven (agents.stellar.buzz)",
-	"buckets": [
-		"other"
-	],
+	"buckets": ["other"],
 	"caveat": "Raven's adapter sends no User-Agent, so its traffic is the residual `other` bucket — other UA-less clients land here too. Figures are an upper bound on Raven's own traffic.",
 	"generatedAt": "2026-09-01T12:35:43.948Z",
 	"window": {
@@ -192,337 +190,51 @@
 			"avgResultCount": null
 		}
 	],
-	"topQueriesReplayed": [
-		{
-			"endpoint": "/api/research",
-			"query": "test",
-			"hits": 165,
-			"lastSeen": "2026-09-01T10:30:40.054Z",
-			"today": {
-				"status": "weak",
-				"returned": 10,
-				"matchMode": "vector",
-				"topConfidence": 0.4,
-				"advisoryNote": null
-			}
-		},
+	"queryTerms": null,
+	"redaction": "Query texts removed on 2026-10-23: this report is public and the texts were sent by agents on behalf of users. The replay grades are kept as counts per endpoint. This run predates the term aggregate, so no term counts exist for it (queryTerms is null: not computed).",
+	"replayByEndpoint": [
 		{
 			"endpoint": "/api/projects/search",
-			"query": "test",
-			"hits": 164,
-			"lastSeen": "2026-09-01T10:30:38.631Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.92,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "wallet",
-			"hits": 158,
-			"lastSeen": "2026-09-01T10:29:39.722Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "blend",
-			"hits": 141,
-			"lastSeen": "2026-09-01T02:43:44.234Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
+			"graded": 12,
+			"ok": 12,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 0,
+			"failed": 0
 		},
 		{
 			"endpoint": "/api/research",
-			"query": "stellar",
-			"hits": 136,
-			"lastSeen": "2026-09-01T10:29:41.113Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "vector",
-				"topConfidence": 0.5,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "lending",
-			"hits": 127,
-			"lastSeen": "2026-09-01T02:43:43.876Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "infrastructure",
-			"hits": 127,
-			"lastSeen": "2026-09-01T02:43:43.798Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "liquidity award",
-			"hits": 126,
-			"lastSeen": "2026-09-01T02:43:43.916Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "vector",
-				"topConfidence": 0.65,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "build award budget cap",
-			"hits": 126,
-			"lastSeen": "2026-09-01T02:43:43.872Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "vector",
-				"topConfidence": 0.64,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "growth program",
-			"hits": 126,
-			"lastSeen": "2026-09-01T02:43:01.085Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "vector",
-				"topConfidence": 0.84,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "neural quorum governance",
-			"hits": 123,
-			"lastSeen": "2026-09-01T02:43:44.001Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "vector",
-				"topConfidence": 0.85,
-				"advisoryNote": null
-			}
+			"graded": 9,
+			"ok": 8,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 1,
+			"failed": 0
 		},
 		{
 			"endpoint": "/api/repos/search",
-			"query": "oracle",
-			"hits": 99,
-			"lastSeen": "2026-09-01T10:29:40.444Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": null,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "soroswap",
-			"hits": 52,
-			"lastSeen": "2026-08-31T02:09:23.276Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/repos/search",
-			"query": "soroswap",
-			"hits": 42,
-			"lastSeen": "2026-09-01T04:55:37.643Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": null,
-				"advisoryNote": null
-			}
+			"graded": 3,
+			"ok": 3,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 0,
+			"failed": 0
 		},
 		{
 			"endpoint": "/api/partners",
-			"query": "smart contract audit firms for soroban",
-			"hits": 39,
-			"lastSeen": "2026-09-01T04:55:56.367Z",
-			"today": {
-				"status": "ok",
-				"returned": 6,
-				"matchMode": "scored",
-				"topConfidence": null,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "stellar",
-			"hits": 38,
-			"lastSeen": "2026-09-01T04:56:11.700Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "allbridge",
-			"hits": 38,
-			"lastSeen": "2026-08-31T20:09:46.857Z",
-			"today": {
-				"status": "ok",
-				"returned": 4,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "freighter",
-			"hits": 37,
-			"lastSeen": "2026-08-31T15:18:20.920Z",
-			"today": {
-				"status": "ok",
-				"returned": 6,
-				"matchMode": "strict",
-				"topConfidence": 0.92,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "phoenix",
-			"hits": 35,
-			"lastSeen": "2026-08-30T13:09:18.340Z",
-			"today": {
-				"status": "ok",
-				"returned": 6,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "strupey",
-			"hits": 32,
-			"lastSeen": "2026-09-01T04:56:09.047Z",
-			"today": {
-				"status": "ok",
-				"returned": 1,
-				"matchMode": "corrected",
-				"topConfidence": 0.92,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/repos/search",
-			"query": "oracle price feed",
-			"hits": 32,
-			"lastSeen": "2026-09-01T04:55:36.048Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": null,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "tell me about the blend protocol on stellar — is it safe to build on?",
-			"hits": 32,
-			"lastSeen": "2026-09-01T04:55:26.008Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "vector",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "which sep should an anchor implement for hosted deposits and withdrawals, and how does authenticatio",
-			"hits": 32,
-			"lastSeen": "2026-09-01T04:55:24.578Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "vector",
-				"topConfidence": 0.93,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "lobstr",
-			"hits": 31,
-			"lastSeen": "2026-09-01T04:56:14.917Z",
-			"today": {
-				"status": "ok",
-				"returned": 4,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "v-sor-app-vul-003",
-			"hits": 31,
-			"lastSeen": "2026-09-01T04:56:02.745Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "vector",
-				"topConfidence": 0.77,
-				"advisoryNote": null
-			}
+			"graded": 1,
+			"ok": 1,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 0,
+			"failed": 0
 		}
 	],
 	"replaySummary": {
 		"graded": 25,
 		"ok": 24,
-		"okRate": 96
+		"okRate": 96,
+		"misses": 1
 	},
 	"contractChangesInWindow": 100
 }

@@ -1,0 +1,26 @@
+   ✓ GET /api/projects/search when a read fails (sls-089) > a timed-out candidate fetch, retried, serves a partial page with no total 213ms
+   ✓ GET /api/projects/search when a read fails (sls-089) > both candidate fetches timed out: a 503 to retry, not an empty page 11ms
+   ✓ GET /api/projects/search when a read fails (sls-089) > a failed decoration read leaves the page partial but its total known 7ms
+   ✓ GET /api/projects/search when a read fails (sls-089) > a search that finds nothing is a confirmed empty page, not partial 9ms
+   ✓ GET /api/projects/search when a read fails (sls-089) > an ignored param is a warning, not a failed read 7ms
+   ✓ GET /api/projects/search after a typo recovery (sls-094) > labels the recovered page corrected and names the project 7ms
+   ✓ GET /api/projects/search after a typo recovery (sls-094) > the right spelling stays strict, with no correction 7ms
+   × GET /api/projects/search view param > default is unchanged: full rows, no meta.view, view=full identical 21ms
+   × GET /api/projects/search view param > view=compact serves compact rows and says so 7ms
+   × GET /api/projects/search view param > a content-less call in compact view still says it is compact 10ms
+   × GET /api/projects/search view param > rejects an unknown view and view=compact with fields 6ms
+ FAIL  src/lib/__tests__/compact-view.test.ts [ src/lib/__tests__/compact-view.test.ts ]
+Error: Failed to resolve import "@/lib/compact-view" from "src/lib/__tests__/compact-view.test.ts". Does the file exist?
+ FAIL  src/app/api/repos/search/__tests__/route.test.ts [ src/app/api/repos/search/__tests__/route.test.ts ]
+Error: Failed to resolve import "@/lib/compact-view" from "src/app/api/repos/search/__tests__/route.test.ts". Does the file exist?
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/app/api/projects/search/__tests__/route.test.ts > GET /api/projects/search view param > default is unchanged: full rows, no meta.view, view=full identical
+AssertionError: expected '{"meta":{"source":"https://stellarlig…' to be '{"meta":{"source":"https://stellarlig…' // Object.is equality
+ FAIL  src/app/api/projects/search/__tests__/route.test.ts > GET /api/projects/search view param > view=compact serves compact rows and says so
+AssertionError: expected 'source' to be 'view' // Object.is equality
+ FAIL  src/app/api/projects/search/__tests__/route.test.ts > GET /api/projects/search view param > a content-less call in compact view still says it is compact
+TypeError: Cannot read properties of undefined (reading 'mode')
+ FAIL  src/app/api/projects/search/__tests__/route.test.ts > GET /api/projects/search view param > rejects an unknown view and view=compact with fields
+AssertionError: expected 200 to be 400 // Object.is equality
+ Test Files  3 failed (3)
+      Tests  4 failed | 7 passed (11)

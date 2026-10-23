@@ -1,0 +1,5499 @@
+{
+	"label": "rule-l",
+	"apiVersionStart": "1.9.93",
+	"apiVersionEnd": "1.9.93",
+	"ideas": [],
+	"extra": [
+		{
+			"kind": "nonsense",
+			"q": "crimson accordion volcano",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 0,
+				"hybridMatched": 0
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "sleepy giraffe bakery",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 0,
+				"hybridMatched": 0
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "marmalade thunderstorm trombone",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 0,
+				"hybridMatched": 0
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "polka dot submarine",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 0,
+				"hybridMatched": 0
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "gargling penguin lighthouse",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 0,
+				"hybridMatched": 0
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "knitted cactus parliament",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 0,
+				"hybridMatched": 0
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "yodeling teapot glacier",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 0,
+				"hybridMatched": 0
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "bashful pineapple tractor",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 0,
+				"hybridMatched": 0
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "blockchain sourdough starter",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 7,
+				"hybridMatched": 103
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [],
+			"hybrid": [
+				{
+					"id": "dorahacks-buidl-36228",
+					"name": "Afri Assets",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-34223",
+					"name": "TerraLedger",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-19599",
+					"name": "ChainLab",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-28433",
+					"name": "StarProof",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-28434",
+					"name": "trustfundchain",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-31761",
+					"name": "PropChain",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36253",
+					"name": "ArtChain-AI",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30899",
+					"name": "Devslaunch",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36220",
+					"name": "litus",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-15629",
+					"name": "DcodeBlock",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-35591",
+					"name": "Tokenización de caña y azúcar",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36196",
+					"name": "Syft",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-35598",
+					"name": "Co2 Green",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36251",
+					"name": "Tipchain",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36773",
+					"name": "BLOCKI",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-40195",
+					"name": "Mycoregen",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-27408",
+					"name": "ArtChain: Collaborative Digital Art Platform on Stellar Blockchain",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30967",
+					"name": "TITA Path",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-35564",
+					"name": "AgroCane",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-25229",
+					"name": "ArtChain: Collaborative Digital Art Platform on Stellar Blockchain",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-31765",
+					"name": "XyraFin",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36329",
+					"name": "EventStellar",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-35590",
+					"name": "WorkOn",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36190",
+					"name": "ContractForge",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36197",
+					"name": "PromptHash",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36219",
+					"name": "Stellar Studio",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46222",
+					"name": "Coin Conut",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36761",
+					"name": "Edu&Chain",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-27412",
+					"name": "EduChain-Decentralized-LearningCredentials",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-38177",
+					"name": "Stellar-IDE",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-41522",
+					"name": "Tanko",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36323",
+					"name": "STAR (StrApp)",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46374",
+					"name": "NoShake",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-25334",
+					"name": "Celestium",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30895",
+					"name": "InverBlocks",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30911",
+					"name": "Passkey-Kit integration",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36159",
+					"name": "Playlumen",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-28406",
+					"name": "Taskly",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-35580",
+					"name": "Minerchant",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36272",
+					"name": "Turista",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46233",
+					"name": "STELLITA: Build on Stellar in minutes with zero coding",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36222",
+					"name": "Stellar Tea",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36318",
+					"name": "Hornero Hub",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36319",
+					"name": "SoroSocial",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-22963",
+					"name": "web3lancer",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-28431",
+					"name": "Oikos",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-28438",
+					"name": "TrustArk",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30868",
+					"name": "Sinatum",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-35588",
+					"name": "AdultiFy",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-24764",
+					"name": "Soride",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-27455",
+					"name": "TrustBridge",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36341",
+					"name": "LumenFX",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-40069",
+					"name": "TrulyLedger",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46554",
+					"name": "Prova",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-34215",
+					"name": "VETCHAIN",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36317",
+					"name": "Secureflow",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-25343",
+					"name": "SkillTokenDAO",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-31794",
+					"name": "CALCY ( EduChain)",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-41524",
+					"name": "Tonalli",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46562",
+					"name": "KaizenYard",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-32691",
+					"name": "Kale Deal Done",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-38050",
+					"name": "CertiX",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46118",
+					"name": "Minga",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-25160",
+					"name": "EduChain-Decentralized-LearningCredentials",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30702",
+					"name": "Socio - AI-generated swap signals for Stellar & Soroban",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30962",
+					"name": "AgroTrace",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36316",
+					"name": "StellarInvoice",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-38827",
+					"name": "Vizinhança Cuidadora",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39900",
+					"name": "ZKonfess",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-24738",
+					"name": "La Technologie Blockchain en Afrique Francophone",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30693",
+					"name": "Stellar Run Club",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-35587",
+					"name": "CarbonChain Morelos",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36267",
+					"name": "Stellar Bits",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36770",
+					"name": "Slice",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-38055",
+					"name": "La comunidad como puerta de entrada a Web3: aprendiendo y creciendo con Stellar",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-42393",
+					"name": "Soko",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-31775",
+					"name": "Aniverse",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-32654",
+					"name": "Kaleracle",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-25344",
+					"name": "Stellar.Gov",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-31161",
+					"name": "Trace",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36294",
+					"name": "DashClash",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-40205",
+					"name": "Loyal Local",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-25338",
+					"name": "CreatorFi",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30440",
+					"name": "HardBlock",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-35586",
+					"name": "SustenGO",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36289",
+					"name": "Dropsland",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36778",
+					"name": "GrantFox",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-42404",
+					"name": "A2A Protocol",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-32673",
+					"name": "Not Circle of Trust",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-41502",
+					"name": "GIBBOR",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-27445",
+					"name": "ImpactPools",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-27447",
+					"name": "Stellar Blend",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-37970",
+					"name": "Onchain Boys",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-42451",
+					"name": "ACREDIA",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-40211",
+					"name": "TrustVox",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-33970",
+					"name": "Accesly",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36739",
+					"name": "Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based Graduation en Stellar Soroban (Stellar Scale)",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36343",
+					"name": "BalloonFly",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46241",
+					"name": "HumanVouch",
+					"matched": []
+				}
+			]
+		},
+		{
+			"kind": "nonsense",
+			"q": "NFT lawnmower marathon",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 7,
+				"hybridMatched": 7
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "smart contract hamster wheel",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 80,
+				"hybridMatched": 85
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": false
+			},
+			"keyword": [
+				{
+					"id": "dorahacks-buidl-25271",
+					"name": "Soroban to MCP Server in seconds + Policy Signers Playground",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-38062",
+					"name": "Qué es Stellar? - Desarrollo en Soroban | Fabian Sanchez",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-28437",
+					"name": "GoLazy",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-32653",
+					"name": "Reflector TradeBet",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-38216",
+					"name": "Stellar Map",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-27458",
+					"name": "Blend AI Powered Smart Monitoring By Sorobanhooks",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42660",
+					"name": "Soroban Node 0",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42714",
+					"name": "x402 Smart Wallet - By Sorobanhooks",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36190",
+					"name": "ContractForge",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36795",
+					"name": "TralaContract",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-25334",
+					"name": "Celestium",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-31161",
+					"name": "Trace",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-31318",
+					"name": "Career Plug AI \u2013 Smart Careers, Strong Identities",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-33712",
+					"name": "Micro Lending",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36735",
+					"name": "Meet.xlm",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36784",
+					"name": "VisionMe",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-38050",
+					"name": "CertiX",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-40203",
+					"name": "KipuFi",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42507",
+					"name": "Stellar Smart Wallets",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42547",
+					"name": "Ai Bora",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42617",
+					"name": "Nova Registry SDK",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42782",
+					"name": "Shield Stellar",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45311",
+					"name": "StellarSpend: Private Spending Limits with Zero-Knowledge Proofs",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45514",
+					"name": "Alphine",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46141",
+					"name": "GitScout Oracle",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46454",
+					"name": "Shadow-Vault",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46461",
+					"name": "Zelyo",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-24753",
+					"name": "Agrosurge",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-24827",
+					"name": "Airpay",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-25331",
+					"name": "Stellar Odyssey",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30688",
+					"name": "StellarVideos",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30702",
+					"name": "Socio - AI-generated swap signals for Stellar & Soroban",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-19599",
+					"name": "ChainLab",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-35524",
+					"name": "Zucane",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36228",
+					"name": "Afri Assets",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36253",
+					"name": "ArtChain-AI",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36309",
+					"name": "LumenPass",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36332",
+					"name": "SpectraBet",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-38056",
+					"name": "Colectiva",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36343",
+					"name": "BalloonFly",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-39821",
+					"name": "ZK Battleship",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-39912",
+					"name": "Obsidossier",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-39914",
+					"name": "ZKMON",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-39224",
+					"name": "Stellar AI Escrow Commerce",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42161",
+					"name": "Risk Pulse AI",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42516",
+					"name": "Autorepay",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42611",
+					"name": "StellarGuard",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42806",
+					"name": "Soundstake",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45075",
+					"name": "Stellar Proof of Reserves",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45976",
+					"name": "Proof of Reserve",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46002",
+					"name": "StellarProof",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46007",
+					"name": "Blind Oracle",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46248",
+					"name": "NARTHEX",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46269",
+					"name": "Stellar ZK AidPass",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46289",
+					"name": "ZK-TRP",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46434",
+					"name": "Cloakwork",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46561",
+					"name": "IDIO",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-35590",
+					"name": "WorkOn",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36341",
+					"name": "LumenFX",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42682",
+					"name": "Stellar Security Audit Agent",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45958",
+					"name": "Attestar",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45981",
+					"name": "Prism",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46395",
+					"name": "Umbra",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46401",
+					"name": "ZeroPath",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46264",
+					"name": "lumengate",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46327",
+					"name": "zkAudit",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-24502",
+					"name": "KiSMATI (Smart Public Transport App)",
+					"matched": ["smart"]
+				},
+				{
+					"id": "dorahacks-buidl-46361",
+					"name": "ZK contracts and factory",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-24772",
+					"name": "Sorobanhooks",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30845",
+					"name": "Calificación Crediticia con IA en Soroban para Microfinanzas Globales",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30846",
+					"name": "Enrutador de FX Basado en Intenciones con Soroban para Pagos Transfronterizos",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30848",
+					"name": "Soroban Community Treasury DAO para Microbecas Transfronterizas",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-33550",
+					"name": "Sorobancontroladores",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-33718",
+					"name": "Confianza Colectiva: Securing Dreams with Stellar & Soroban for Latin America",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36739",
+					"name": "Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based Graduation en Stellar Soroban (Stellar Scale)",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46093",
+					"name": "Tornado-style privacy pools on Stellar Soroban",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46456",
+					"name": "soroban-zk-std",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46489",
+					"name": "soroban-prove-age",
+					"matched": ["contract"]
+				}
+			],
+			"hybrid": [
+				{
+					"id": "dorahacks-buidl-36190",
+					"name": "ContractForge",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36196",
+					"name": "Syft",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46341",
+					"name": "UrbanRentisha TrustLayer",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-42617",
+					"name": "Nova Registry SDK",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-25271",
+					"name": "Soroban to MCP Server in seconds + Policy Signers Playground",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-38062",
+					"name": "Qué es Stellar? - Desarrollo en Soroban | Fabian Sanchez",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-28437",
+					"name": "GoLazy",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-32653",
+					"name": "Reflector TradeBet",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-38216",
+					"name": "Stellar Map",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-27458",
+					"name": "Blend AI Powered Smart Monitoring By Sorobanhooks",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42660",
+					"name": "Soroban Node 0",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42714",
+					"name": "x402 Smart Wallet - By Sorobanhooks",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36795",
+					"name": "TralaContract",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-25334",
+					"name": "Celestium",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-31161",
+					"name": "Trace",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-31318",
+					"name": "Career Plug AI \u2013 Smart Careers, Strong Identities",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-33712",
+					"name": "Micro Lending",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36735",
+					"name": "Meet.xlm",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36784",
+					"name": "VisionMe",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-38050",
+					"name": "CertiX",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-40203",
+					"name": "KipuFi",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42507",
+					"name": "Stellar Smart Wallets",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42547",
+					"name": "Ai Bora",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42782",
+					"name": "Shield Stellar",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45311",
+					"name": "StellarSpend: Private Spending Limits with Zero-Knowledge Proofs",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45514",
+					"name": "Alphine",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46141",
+					"name": "GitScout Oracle",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46454",
+					"name": "Shadow-Vault",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46461",
+					"name": "Zelyo",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-24753",
+					"name": "Agrosurge",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-24827",
+					"name": "Airpay",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-25331",
+					"name": "Stellar Odyssey",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30688",
+					"name": "StellarVideos",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30702",
+					"name": "Socio - AI-generated swap signals for Stellar & Soroban",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-19599",
+					"name": "ChainLab",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-35524",
+					"name": "Zucane",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36228",
+					"name": "Afri Assets",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36253",
+					"name": "ArtChain-AI",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36309",
+					"name": "LumenPass",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36332",
+					"name": "SpectraBet",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-38056",
+					"name": "Colectiva",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36343",
+					"name": "BalloonFly",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-39821",
+					"name": "ZK Battleship",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-39912",
+					"name": "Obsidossier",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-39914",
+					"name": "ZKMON",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-39224",
+					"name": "Stellar AI Escrow Commerce",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42161",
+					"name": "Risk Pulse AI",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42516",
+					"name": "Autorepay",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42611",
+					"name": "StellarGuard",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42806",
+					"name": "Soundstake",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45075",
+					"name": "Stellar Proof of Reserves",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45976",
+					"name": "Proof of Reserve",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46002",
+					"name": "StellarProof",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46007",
+					"name": "Blind Oracle",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46248",
+					"name": "NARTHEX",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46269",
+					"name": "Stellar ZK AidPass",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46289",
+					"name": "ZK-TRP",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46434",
+					"name": "Cloakwork",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46561",
+					"name": "IDIO",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-35590",
+					"name": "WorkOn",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36341",
+					"name": "LumenFX",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42682",
+					"name": "Stellar Security Audit Agent",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45958",
+					"name": "Attestar",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-45981",
+					"name": "Prism",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46395",
+					"name": "Umbra",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46401",
+					"name": "ZeroPath",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46264",
+					"name": "lumengate",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46327",
+					"name": "zkAudit",
+					"matched": ["smart", "contract"]
+				},
+				{
+					"id": "dorahacks-buidl-42695",
+					"name": "Paygent Bazar",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-24502",
+					"name": "KiSMATI (Smart Public Transport App)",
+					"matched": ["smart"]
+				},
+				{
+					"id": "dorahacks-buidl-46374",
+					"name": "NoShake",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46361",
+					"name": "ZK contracts and factory",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-24772",
+					"name": "Sorobanhooks",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30845",
+					"name": "Calificación Crediticia con IA en Soroban para Microfinanzas Globales",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30846",
+					"name": "Enrutador de FX Basado en Intenciones con Soroban para Pagos Transfronterizos",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-30848",
+					"name": "Soroban Community Treasury DAO para Microbecas Transfronterizas",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-33550",
+					"name": "Sorobancontroladores",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-33718",
+					"name": "Confianza Colectiva: Securing Dreams with Stellar & Soroban for Latin America",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-36739",
+					"name": "Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based Graduation en Stellar Soroban (Stellar Scale)",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46093",
+					"name": "Tornado-style privacy pools on Stellar Soroban",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46456",
+					"name": "soroban-zk-std",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-46489",
+					"name": "soroban-prove-age",
+					"matched": ["contract"]
+				},
+				{
+					"id": "dorahacks-buidl-39798",
+					"name": "CTM",
+					"matched": []
+				}
+			]
+		},
+		{
+			"kind": "nonsense",
+			"q": "DeFi pancake flipping",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 18,
+				"hybridMatched": 18
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "bitcoin origami zeppelin",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 2,
+				"hybridMatched": 13
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [],
+			"hybrid": [
+				{
+					"id": "dorahacks-buidl-46273",
+					"name": "Writz Protocol",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46010",
+					"name": "Aero",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46230",
+					"name": "Writz Protocol",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-45996",
+					"name": "Stelakey",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-42718",
+					"name": "PayPer Card",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36739",
+					"name": "Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based Graduation en Stellar Soroban (Stellar Scale)",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-36343",
+					"name": "BalloonFly",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46332",
+					"name": "Kryon Network",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30795",
+					"name": "INFINITO",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39419",
+					"name": "T2T",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-42415",
+					"name": "AetherBridge: Sovereign Agentic Rails",
+					"matched": []
+				}
+			]
+		},
+		{
+			"kind": "nonsense",
+			"q": "ethereum bagpipe tuner",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 6,
+				"hybridMatched": 6
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "AI toaster opera",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 47,
+				"hybridMatched": 47
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [
+				{
+					"id": "dorahacks-buidl-24796",
+					"name": "FlezPay",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42540",
+					"name": "Watchdog",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42608",
+					"name": "Agent Paywall Router",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42639",
+					"name": "SpendGuard",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42650",
+					"name": "Stellar Agent marketplace",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42675",
+					"name": "MagentiX",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42693",
+					"name": "Telos",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42824",
+					"name": "Forge402",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42829",
+					"name": "Meridian",
+					"matched": ["ai", "opera"]
+				}
+			],
+			"hybrid": [
+				{
+					"id": "dorahacks-buidl-24796",
+					"name": "FlezPay",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42540",
+					"name": "Watchdog",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42608",
+					"name": "Agent Paywall Router",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42639",
+					"name": "SpendGuard",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42650",
+					"name": "Stellar Agent marketplace",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42675",
+					"name": "MagentiX",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42693",
+					"name": "Telos",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42824",
+					"name": "Forge402",
+					"matched": ["ai", "opera"]
+				},
+				{
+					"id": "dorahacks-buidl-42829",
+					"name": "Meridian",
+					"matched": ["ai", "opera"]
+				}
+			]
+		},
+		{
+			"kind": "nonsense",
+			"q": "zero knowledge pogo stick",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 156,
+				"hybridMatched": 188
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": false
+			},
+			"keyword": [
+				{
+					"id": "dorahacks-buidl-39622",
+					"name": "xray.games \u2013 The Arcade Evolved | skill proven onchain",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39826",
+					"name": "Cosmic Coders",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46373",
+					"name": "ANCHORSHIELD",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45311",
+					"name": "StellarSpend: Private Spending Limits with Zero-Knowledge Proofs",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-40033",
+					"name": "Zero-Knowledge Encrypted Unified Swaps (ZEUS)",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45591",
+					"name": "Private cross-border payments on Stellar with zero-knowledge proofs",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45855",
+					"name": "ProofPass | Privacy-Preserving Age Verification with Zero-Knowledge Proofs on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39809",
+					"name": "BattleZero",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39875",
+					"name": "ZeroWar - Trustless Multiplayer Gaming on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46401",
+					"name": "ZeroPath",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46455",
+					"name": "ZeroWage",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-36310",
+					"name": "ZKID Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-36735",
+					"name": "Meet.xlm",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-36789",
+					"name": "Spectra",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-36791",
+					"name": "ASTRA",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39628",
+					"name": "Zk Roulette",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39786",
+					"name": "Cubeathon \u2014 ZK-Powered Provable Speed Run",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39787",
+					"name": "ZKMind",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39804",
+					"name": "ZKnight",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39808",
+					"name": "AlphaDuel - ZK Multiplayer Word Guessing Game",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39821",
+					"name": "ZK Battleship",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39829",
+					"name": "VoidIA: ZK-Compliance Quest",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39830",
+					"name": "ZK Seep",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39831",
+					"name": "ZK Pass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39834",
+					"name": "Liar's Dice",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39846",
+					"name": "Le Coup",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39849",
+					"name": "ZKombat",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39857",
+					"name": "ZKHiderSeeker",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39861",
+					"name": "ZK Scottland Yard",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39867",
+					"name": "zk-UNO",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39871",
+					"name": "ZK Trap Grid",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39876",
+					"name": "ZKachi",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39879",
+					"name": "ZK RPS Battle Royale",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39895",
+					"name": "Proof of Life",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39900",
+					"name": "ZKonfess",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39901",
+					"name": "HeistDuel",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39902",
+					"name": "Court Of Shadows",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39912",
+					"name": "Obsidossier",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39913",
+					"name": "Stellar Minewars",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39905",
+					"name": "DarkWater ZK",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39847",
+					"name": "Zkgram",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46180",
+					"name": "Zolvency Proofs",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45075",
+					"name": "Stellar Proof of Reserves",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45268",
+					"name": "VELLUM",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45473",
+					"name": "Open Stellar Passport",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45514",
+					"name": "Alphine",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45568",
+					"name": "Stella Pass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45652",
+					"name": "Vouch",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45893",
+					"name": "StellarShield",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45958",
+					"name": "Attestar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45980",
+					"name": "zkCred",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45999",
+					"name": "ZK Reserve",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46005",
+					"name": "ZKLease",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46022",
+					"name": "Project Veil",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46041",
+					"name": "Sobrecito",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46071",
+					"name": "Forg3t Proof of Forgetting on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46073",
+					"name": "Identizy",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46089",
+					"name": "ZKPass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46098",
+					"name": "Stellar Vault",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46101",
+					"name": "dallas buyers club",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46106",
+					"name": "Obscura",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46113",
+					"name": "KAGE",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46114",
+					"name": "ZK-Med Portal",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46115",
+					"name": "Sotto \u2014 Sealed-Bid Procurement Auctions Settled with ZK Winner Proofs on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46119",
+					"name": "Wisp",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46125",
+					"name": "SolvencyProof",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46126",
+					"name": "StellarID",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46128",
+					"name": "Warden ZK Receipts",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45901",
+					"name": "Shield-Wallet",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46131",
+					"name": "ForgePass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46169",
+					"name": "zkRemit",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46188",
+					"name": "zkTrustline",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46204",
+					"name": "ShieldFund",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46248",
+					"name": "NARTHEX",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46250",
+					"name": "Veilum",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46264",
+					"name": "lumengate",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46271",
+					"name": "PadrónZK",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46282",
+					"name": "DeadDrop",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46284",
+					"name": "LumenSure - Private Proof-Backed Insurance Payouts on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46136",
+					"name": "Cyphras",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46289",
+					"name": "ZK-TRP",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46292",
+					"name": "Compliant Privacy Pool",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46294",
+					"name": "Zloak",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46312",
+					"name": "ARCANUM",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46315",
+					"name": "Zentra Protocol",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46318",
+					"name": "ShieldPay",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46321",
+					"name": "ZK Credit Score",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46325",
+					"name": "SealedStellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46331",
+					"name": "Halo",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46338",
+					"name": "Sorostamp",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46339",
+					"name": "Starlit Pay",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46343",
+					"name": "Zk Access PassPort",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46349",
+					"name": "Zikuani - The Private Identity Layer for Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46350",
+					"name": "Guava",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46353",
+					"name": "Astraea",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46355",
+					"name": "MeritPay",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46374",
+					"name": "NoShake",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46376",
+					"name": "Surevo Labs",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46377",
+					"name": "Immunis Protocol",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46386",
+					"name": "Zk Sealed",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46395",
+					"name": "Umbra",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46405",
+					"name": "Obscura - Payroll · Voting · Credentials · Treasury · Compliance",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46408",
+					"name": "Obol",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46409",
+					"name": "Parani",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46412",
+					"name": "Aperture",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46415",
+					"name": "Opaque Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46416",
+					"name": "Xorr",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46420",
+					"name": "Solvent",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46431",
+					"name": "VeilGate",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46434",
+					"name": "Cloakwork",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46439",
+					"name": "Molfi",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46440",
+					"name": "Moros",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46442",
+					"name": "Pool Pass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46444",
+					"name": "Confidia",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46443",
+					"name": "Mizizi - ZK Credit Rails",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46448",
+					"name": "syncpay-zk",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46451",
+					"name": "Lucent",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46452",
+					"name": "zkNexus: Private Multilateral Settlement on Stellar (Stellar Hacks)",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46454",
+					"name": "Shadow-Vault",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46456",
+					"name": "soroban-zk-std",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46347",
+					"name": "SHIELD",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46458",
+					"name": "Inter Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46459",
+					"name": "Veilance",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46461",
+					"name": "Zelyo",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46464",
+					"name": "Segel",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46466",
+					"name": "ZkBadge",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46468",
+					"name": "Cloakpay",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46471",
+					"name": "AidShield",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46478",
+					"name": "Shade",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46485",
+					"name": "Ciphermit",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46489",
+					"name": "soroban-prove-age",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46499",
+					"name": "Orbis",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46504",
+					"name": "AnyRamp",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46506",
+					"name": "Nullpass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46515",
+					"name": "Verum",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46518",
+					"name": "zkTable",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46520",
+					"name": "Drongo AI",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46536",
+					"name": "InvoiceVeil",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46538",
+					"name": "Nullis",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46544",
+					"name": "Cluster",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46546",
+					"name": "Sanctum",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46556",
+					"name": "VCARI",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46561",
+					"name": "IDIO",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46565",
+					"name": "StellarSeal",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-30648",
+					"name": "DeFi Quest - From Zero to DeFi in Minutes",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46385",
+					"name": "ZeroSeal",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-30889",
+					"name": "Tokenización CAPA ZERO (Contenido)",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-39862",
+					"name": "ZERO SHOT",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-39889",
+					"name": "Zero Trust",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46232",
+					"name": "Zeroblankeo",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46233",
+					"name": "STELLITA: Build on Stellar in minutes with zero coding",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-45982",
+					"name": "X402 ZK Mesh: Zero-Trust Agent Guild",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46215",
+					"name": "Zerolyn",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46268",
+					"name": "NodeZero.Social",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46432",
+					"name": "Aegis \u2014 Provable Clean-Funds Compliance Coprocessor (RISC Zero zkVM)",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46480",
+					"name": "ZeroGate",
+					"matched": ["zero"]
+				}
+			],
+			"hybrid": [
+				{
+					"id": "dorahacks-buidl-39904",
+					"name": "Cipher Command",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39875",
+					"name": "ZeroWar - Trustless Multiplayer Gaming on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39804",
+					"name": "ZKnight",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39895",
+					"name": "Proof of Life",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39809",
+					"name": "BattleZero",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39798",
+					"name": "CTM",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39879",
+					"name": "ZK RPS Battle Royale",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39847",
+					"name": "Zkgram",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39622",
+					"name": "xray.games \u2013 The Arcade Evolved | skill proven onchain",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39867",
+					"name": "zk-UNO",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39901",
+					"name": "HeistDuel",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39787",
+					"name": "ZKMind",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39912",
+					"name": "Obsidossier",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39839",
+					"name": "Dark Fleet",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39885",
+					"name": "Batship",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39872",
+					"name": "Serpent's Gambit",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39873",
+					"name": "Pirate's Treasure",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39894",
+					"name": "Dead Drop: ZK-Powered Hidden-Information Hunt on Stellar",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39808",
+					"name": "AlphaDuel - ZK Multiplayer Word Guessing Game",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39913",
+					"name": "Stellar Minewars",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39905",
+					"name": "DarkWater ZK",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39829",
+					"name": "VoidIA: ZK-Compliance Quest",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39828",
+					"name": "Phantom Chase",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39830",
+					"name": "ZK Seep",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39849",
+					"name": "ZKombat",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39754",
+					"name": "SMOL Labs - ZK Dungeon",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39848",
+					"name": "Stellar Explorer",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39889",
+					"name": "Zero Trust",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-39857",
+					"name": "ZKHiderSeeker",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39217",
+					"name": "SUBAN TREASURE HUNT",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39790",
+					"name": "ZK-Porrinha",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39831",
+					"name": "ZK Pass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39877",
+					"name": "Herbal Moonlight",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39826",
+					"name": "Cosmic Coders",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46373",
+					"name": "ANCHORSHIELD",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-36321",
+					"name": "Trustfall",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39902",
+					"name": "Court Of Shadows",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39631",
+					"name": "Treasure Recovery",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39853",
+					"name": "ZK TEXAS HOLD'EM Poker",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39861",
+					"name": "ZK Scottland Yard",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45311",
+					"name": "StellarSpend: Private Spending Limits with Zero-Knowledge Proofs",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-40033",
+					"name": "Zero-Knowledge Encrypted Unified Swaps (ZEUS)",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45591",
+					"name": "Private cross-border payments on Stellar with zero-knowledge proofs",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45855",
+					"name": "ProofPass | Privacy-Preserving Age Verification with Zero-Knowledge Proofs on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46401",
+					"name": "ZeroPath",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46455",
+					"name": "ZeroWage",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-36310",
+					"name": "ZKID Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-36735",
+					"name": "Meet.xlm",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-36789",
+					"name": "Spectra",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-36791",
+					"name": "ASTRA",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39628",
+					"name": "Zk Roulette",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39786",
+					"name": "Cubeathon \u2014 ZK-Powered Provable Speed Run",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39821",
+					"name": "ZK Battleship",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39834",
+					"name": "Liar's Dice",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39846",
+					"name": "Le Coup",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39871",
+					"name": "ZK Trap Grid",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39876",
+					"name": "ZKachi",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39900",
+					"name": "ZKonfess",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46180",
+					"name": "Zolvency Proofs",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45075",
+					"name": "Stellar Proof of Reserves",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45268",
+					"name": "VELLUM",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45473",
+					"name": "Open Stellar Passport",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45514",
+					"name": "Alphine",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45568",
+					"name": "Stella Pass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45652",
+					"name": "Vouch",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45893",
+					"name": "StellarShield",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45958",
+					"name": "Attestar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45980",
+					"name": "zkCred",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45999",
+					"name": "ZK Reserve",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46005",
+					"name": "ZKLease",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46022",
+					"name": "Project Veil",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46041",
+					"name": "Sobrecito",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46071",
+					"name": "Forg3t Proof of Forgetting on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46073",
+					"name": "Identizy",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46089",
+					"name": "ZKPass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46098",
+					"name": "Stellar Vault",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46101",
+					"name": "dallas buyers club",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46106",
+					"name": "Obscura",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46113",
+					"name": "KAGE",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46114",
+					"name": "ZK-Med Portal",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46115",
+					"name": "Sotto \u2014 Sealed-Bid Procurement Auctions Settled with ZK Winner Proofs on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46119",
+					"name": "Wisp",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46125",
+					"name": "SolvencyProof",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46126",
+					"name": "StellarID",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46128",
+					"name": "Warden ZK Receipts",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-45901",
+					"name": "Shield-Wallet",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46131",
+					"name": "ForgePass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46169",
+					"name": "zkRemit",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46188",
+					"name": "zkTrustline",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46204",
+					"name": "ShieldFund",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46248",
+					"name": "NARTHEX",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46250",
+					"name": "Veilum",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46264",
+					"name": "lumengate",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46271",
+					"name": "PadrónZK",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46282",
+					"name": "DeadDrop",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46284",
+					"name": "LumenSure - Private Proof-Backed Insurance Payouts on Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46136",
+					"name": "Cyphras",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46289",
+					"name": "ZK-TRP",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46292",
+					"name": "Compliant Privacy Pool",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46294",
+					"name": "Zloak",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46312",
+					"name": "ARCANUM",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46315",
+					"name": "Zentra Protocol",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46318",
+					"name": "ShieldPay",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46321",
+					"name": "ZK Credit Score",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46325",
+					"name": "SealedStellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46331",
+					"name": "Halo",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46338",
+					"name": "Sorostamp",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46339",
+					"name": "Starlit Pay",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46343",
+					"name": "Zk Access PassPort",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46349",
+					"name": "Zikuani - The Private Identity Layer for Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46350",
+					"name": "Guava",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46353",
+					"name": "Astraea",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46355",
+					"name": "MeritPay",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46374",
+					"name": "NoShake",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46376",
+					"name": "Surevo Labs",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46377",
+					"name": "Immunis Protocol",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46386",
+					"name": "Zk Sealed",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46395",
+					"name": "Umbra",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46405",
+					"name": "Obscura - Payroll · Voting · Credentials · Treasury · Compliance",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46408",
+					"name": "Obol",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46409",
+					"name": "Parani",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46412",
+					"name": "Aperture",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46415",
+					"name": "Opaque Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46416",
+					"name": "Xorr",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46420",
+					"name": "Solvent",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46431",
+					"name": "VeilGate",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46434",
+					"name": "Cloakwork",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46439",
+					"name": "Molfi",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46440",
+					"name": "Moros",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46442",
+					"name": "Pool Pass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46444",
+					"name": "Confidia",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46443",
+					"name": "Mizizi - ZK Credit Rails",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46448",
+					"name": "syncpay-zk",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46451",
+					"name": "Lucent",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46452",
+					"name": "zkNexus: Private Multilateral Settlement on Stellar (Stellar Hacks)",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46454",
+					"name": "Shadow-Vault",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46456",
+					"name": "soroban-zk-std",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46347",
+					"name": "SHIELD",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46458",
+					"name": "Inter Stellar",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46459",
+					"name": "Veilance",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46461",
+					"name": "Zelyo",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46464",
+					"name": "Segel",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46466",
+					"name": "ZkBadge",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46468",
+					"name": "Cloakpay",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46471",
+					"name": "AidShield",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46478",
+					"name": "Shade",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46485",
+					"name": "Ciphermit",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46489",
+					"name": "soroban-prove-age",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46499",
+					"name": "Orbis",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46504",
+					"name": "AnyRamp",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46506",
+					"name": "Nullpass",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46515",
+					"name": "Verum",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46518",
+					"name": "zkTable",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46520",
+					"name": "Drongo AI",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46536",
+					"name": "InvoiceVeil",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46538",
+					"name": "Nullis",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46544",
+					"name": "Cluster",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46546",
+					"name": "Sanctum",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46556",
+					"name": "VCARI",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46561",
+					"name": "IDIO",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-46565",
+					"name": "StellarSeal",
+					"matched": ["zero", "knowledge"]
+				},
+				{
+					"id": "dorahacks-buidl-39845",
+					"name": "Veilstar Brawl",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39818",
+					"name": "Veilgrid",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39884",
+					"name": "ZK Wordle Duel",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39568",
+					"name": "Clash of Pirates",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39825",
+					"name": "🚢 ZK Battleship on Stellar",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39823",
+					"name": "Sea Battle by Interlinked",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-30648",
+					"name": "DeFi Quest - From Zero to DeFi in Minutes",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-39863",
+					"name": "Divine Wrath",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46385",
+					"name": "ZeroSeal",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-30889",
+					"name": "Tokenización CAPA ZERO (Contenido)",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-39862",
+					"name": "ZERO SHOT",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46232",
+					"name": "Zeroblankeo",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46233",
+					"name": "STELLITA: Build on Stellar in minutes with zero coding",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-45982",
+					"name": "X402 ZK Mesh: Zero-Trust Agent Guild",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46215",
+					"name": "Zerolyn",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46268",
+					"name": "NodeZero.Social",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46432",
+					"name": "Aegis \u2014 Provable Clean-Funds Compliance Coprocessor (RISC Zero zkVM)",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-46480",
+					"name": "ZeroGate",
+					"matched": ["zero"]
+				},
+				{
+					"id": "dorahacks-buidl-39844",
+					"name": "Aether",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39315",
+					"name": "Cangkulan Lite",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39761",
+					"name": "Stellar Pocker",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39878",
+					"name": "GrassTrapZK",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-42785",
+					"name": "FanForge",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39789",
+					"name": "Lantern Chess",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39858",
+					"name": "zk-THRONE",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39906",
+					"name": "Oppia zkArcade",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-39909",
+					"name": "Stealth Battleship",
+					"matched": []
+				}
+			]
+		},
+		{
+			"kind": "nonsense",
+			"q": "soroban pickle juggling",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 21,
+				"hybridMatched": 21
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [
+				{
+					"id": "dorahacks-buidl-25271",
+					"name": "Soroban to MCP Server in seconds + Policy Signers Playground",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-38062",
+					"name": "Qué es Stellar? - Desarrollo en Soroban | Fabian Sanchez",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42660",
+					"name": "Soroban Node 0",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-24772",
+					"name": "Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-27458",
+					"name": "Blend AI Powered Smart Monitoring By Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36190",
+					"name": "ContractForge",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36795",
+					"name": "TralaContract",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42714",
+					"name": "x402 Smart Wallet - By Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30702",
+					"name": "Socio - AI-generated swap signals for Stellar & Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30845",
+					"name": "Calificación Crediticia con IA en Soroban para Microfinanzas Globales",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30846",
+					"name": "Enrutador de FX Basado en Intenciones con Soroban para Pagos Transfronterizos",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30848",
+					"name": "Soroban Community Treasury DAO para Microbecas Transfronterizas",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-33550",
+					"name": "Sorobancontroladores",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-33718",
+					"name": "Confianza Colectiva: Securing Dreams with Stellar & Soroban for Latin America",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36739",
+					"name": "Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based Graduation en Stellar Soroban (Stellar Scale)",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46093",
+					"name": "Tornado-style privacy pools on Stellar Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46361",
+					"name": "ZK contracts and factory",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46456",
+					"name": "soroban-zk-std",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46489",
+					"name": "soroban-prove-age",
+					"matched": ["soroban"]
+				}
+			],
+			"hybrid": [
+				{
+					"id": "dorahacks-buidl-25271",
+					"name": "Soroban to MCP Server in seconds + Policy Signers Playground",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-38062",
+					"name": "Qué es Stellar? - Desarrollo en Soroban | Fabian Sanchez",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42660",
+					"name": "Soroban Node 0",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-24772",
+					"name": "Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-27458",
+					"name": "Blend AI Powered Smart Monitoring By Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36190",
+					"name": "ContractForge",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36795",
+					"name": "TralaContract",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42714",
+					"name": "x402 Smart Wallet - By Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30702",
+					"name": "Socio - AI-generated swap signals for Stellar & Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30845",
+					"name": "Calificación Crediticia con IA en Soroban para Microfinanzas Globales",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30846",
+					"name": "Enrutador de FX Basado en Intenciones con Soroban para Pagos Transfronterizos",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30848",
+					"name": "Soroban Community Treasury DAO para Microbecas Transfronterizas",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-33550",
+					"name": "Sorobancontroladores",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-33718",
+					"name": "Confianza Colectiva: Securing Dreams with Stellar & Soroban for Latin America",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36739",
+					"name": "Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based Graduation en Stellar Soroban (Stellar Scale)",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46093",
+					"name": "Tornado-style privacy pools on Stellar Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46361",
+					"name": "ZK contracts and factory",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46456",
+					"name": "soroban-zk-std",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46489",
+					"name": "soroban-prove-age",
+					"matched": ["soroban"]
+				}
+			]
+		},
+		{
+			"kind": "nonsense",
+			"q": "stellar mattress comparison",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 0,
+				"hybridMatched": 0
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "wallet for pet iguanas",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 10,
+				"hybridMatched": 10
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "lumen bowling alley scheduler",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 10,
+				"hybridMatched": 10
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "anchor ship knot tutorial",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 14,
+				"hybridMatched": 15
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [
+				{
+					"id": "dorahacks-buidl-46373",
+					"name": "ANCHORSHIELD",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-45260",
+					"name": "AnchorVault: Trustless On-Chain Remittance Liquidity Routing",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-30902",
+					"name": "x402-Ramp",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-46504",
+					"name": "AnyRamp",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-36782",
+					"name": "SAK Stellar Anchor KYC",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-42645",
+					"name": "Nexa - The native payment infrastructure for Stellar Agents, anchored by decentralized AI consensus.",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-46418",
+					"name": "AnchorFX",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-39821",
+					"name": "ZK Battleship",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39825",
+					"name": "🚢 ZK Battleship on Stellar",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39832",
+					"name": "ZK BATTLE SHIP",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39885",
+					"name": "Batship",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39907",
+					"name": "stellarship",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39909",
+					"name": "Stealth Battleship",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39910",
+					"name": "Provably Fair Battleship",
+					"matched": ["ship"]
+				}
+			],
+			"hybrid": [
+				{
+					"id": "dorahacks-buidl-39825",
+					"name": "🚢 ZK Battleship on Stellar",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39809",
+					"name": "BattleZero",
+					"matched": []
+				},
+				{
+					"id": "dorahacks-buidl-46373",
+					"name": "ANCHORSHIELD",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-45260",
+					"name": "AnchorVault: Trustless On-Chain Remittance Liquidity Routing",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-30902",
+					"name": "x402-Ramp",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-46504",
+					"name": "AnyRamp",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-36782",
+					"name": "SAK Stellar Anchor KYC",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-42645",
+					"name": "Nexa - The native payment infrastructure for Stellar Agents, anchored by decentralized AI consensus.",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-46418",
+					"name": "AnchorFX",
+					"matched": ["anchor"]
+				},
+				{
+					"id": "dorahacks-buidl-39821",
+					"name": "ZK Battleship",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39832",
+					"name": "ZK BATTLE SHIP",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39885",
+					"name": "Batship",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39907",
+					"name": "stellarship",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39909",
+					"name": "Stealth Battleship",
+					"matched": ["ship"]
+				},
+				{
+					"id": "dorahacks-buidl-39910",
+					"name": "Provably Fair Battleship",
+					"matched": ["ship"]
+				}
+			]
+		},
+		{
+			"kind": "nonsense",
+			"q": "pay per yodel",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 132,
+				"hybridMatched": 132
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [
+				{
+					"id": "dorahacks-buidl-42585",
+					"name": "TollPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42656",
+					"name": "clevercon",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42807",
+					"name": "RenderGate",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-30904",
+					"name": "Stellar Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-41508",
+					"name": "PayStream",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-41512",
+					"name": "Centurion-Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42703",
+					"name": "Zap402 \u2014 Pay-per-Query AI Agent Marketplace on Stellar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42801",
+					"name": "Pay-per-Query Web Search MCP Server",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46202",
+					"name": "Ponte Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46339",
+					"name": "Starlit Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42704",
+					"name": "cardentic",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42747",
+					"name": "VENDLY",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42765",
+					"name": "Delibera",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42788",
+					"name": "NyayaMitra AI \u2014 Legal Intelligence MCP Network on Stellar x402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42798",
+					"name": "AXON-Micropayment-Platform-for-Decentralized-AI-Services-DeAI-",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-24491",
+					"name": "Abroad",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-24867",
+					"name": "CryptoCart",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-27171",
+					"name": "BlendMCP",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-36801",
+					"name": "Big Black Box",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-40203",
+					"name": "KipuFi",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42141",
+					"name": "StellarMind",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42154",
+					"name": "AgentBazaar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42161",
+					"name": "Risk Pulse AI",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42305",
+					"name": "AgentMesh",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42334",
+					"name": "AgentPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42387",
+					"name": "AgentOracle \u2014 The Trust Layer for AI Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42393",
+					"name": "Soko",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42406",
+					"name": "Lumen Trust",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42438",
+					"name": "HivePayAI",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42449",
+					"name": "StellarPay402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42453",
+					"name": "StellarMCP",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42474",
+					"name": "Nulucre Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42480",
+					"name": "Query402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42509",
+					"name": "SignalPass",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42510",
+					"name": "The Signaler",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42511",
+					"name": "runbox",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42516",
+					"name": "Autorepay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42520",
+					"name": "Agentex",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42521",
+					"name": "Heekowave",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42469",
+					"name": "Stellar Oxide Gateway",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42523",
+					"name": "StellarRead",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42524",
+					"name": "Stellar Payment API (PLUTO)",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42530",
+					"name": "AgentRail",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42534",
+					"name": "Stellar Agent Gateway \u2014 x402 Micropayment Marketplace for AI Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42541",
+					"name": "PennyAgent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42546",
+					"name": "DevAsign",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42566",
+					"name": "XLMTools",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42567",
+					"name": "x402 Autopilot",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42592",
+					"name": "Hive",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42606",
+					"name": "AAEK",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42607",
+					"name": "Stellar Search",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42608",
+					"name": "Agent Paywall Router",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42611",
+					"name": "StellarGuard",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42614",
+					"name": "Signal Vault",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42620",
+					"name": "SignalForge Agent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42621",
+					"name": "Stellar Chaos Swarm",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42624",
+					"name": "Stellar Mobile Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42628",
+					"name": "GeoTruth",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42630",
+					"name": "Stellar Autotask",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42641",
+					"name": "Metered",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42643",
+					"name": "Payflow",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42645",
+					"name": "Nexa - The native payment infrastructure for Stellar Agents, anchored by decentralized AI consensus.",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42648",
+					"name": "Halot",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42653",
+					"name": "StellarScope",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42655",
+					"name": "Stellar-tokensentry",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42657",
+					"name": "ChatPay Tallent AI",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42658",
+					"name": "Beacon",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42660",
+					"name": "Soroban Node 0",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42661",
+					"name": "Stellar Resume Analyzer",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42664",
+					"name": "Kairos",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42669",
+					"name": "CriPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42675",
+					"name": "MagentiX",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42683",
+					"name": "PUMAx402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42684",
+					"name": "NextForge",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42693",
+					"name": "Telos",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42695",
+					"name": "Paygent Bazar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42697",
+					"name": "Paygent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42702",
+					"name": "LILA",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42706",
+					"name": "Datavend",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42711",
+					"name": "Mogause",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42712",
+					"name": "StellarFeed",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42713",
+					"name": "ero.",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42721",
+					"name": "Bear Protocol",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42723",
+					"name": "AgentCompute",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42724",
+					"name": "Stellar Autopay X402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42727",
+					"name": "x402kit",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42745",
+					"name": "SearchPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42748",
+					"name": "Fund402 \u2014 Just-In-Time Loans for AI Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42749",
+					"name": "Lodestar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42753",
+					"name": "Ocean Request",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42756",
+					"name": "RouteDock",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42764",
+					"name": "Stexio",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42768",
+					"name": "Underworld",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42771",
+					"name": "Sentryx402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42773",
+					"name": "AgStell",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42780",
+					"name": "solva-mcp",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42781",
+					"name": "x4tella",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42782",
+					"name": "Shield Stellar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42791",
+					"name": "Calypso: x402 Bot Swarm",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42796",
+					"name": "Verdikt",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42797",
+					"name": "Nexus",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42802",
+					"name": "SARA: Stellar Autonomous Research Agent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42803",
+					"name": "x402 Stellar MCP",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42804",
+					"name": "StellarAgent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42808",
+					"name": "AutoX420",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42816",
+					"name": "Stellar-x402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42823",
+					"name": "SentinelX",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42824",
+					"name": "Forge402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42825",
+					"name": "Starlane",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46154",
+					"name": "QuestBoard",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46162",
+					"name": "Contextio",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46217",
+					"name": "Link2Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-45473",
+					"name": "Open Stellar Passport",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46022",
+					"name": "Project Veil",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46041",
+					"name": "Sobrecito",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46105",
+					"name": "ClaimProof",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46108",
+					"name": "Zebra \u2014 Confidential Stablecoin Payroll on Stellar (Compliant Privacy for the Web3 Workforce)",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46318",
+					"name": "ShieldPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46325",
+					"name": "SealedStellar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46403",
+					"name": "StealthPayroll",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46416",
+					"name": "Xorr",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46431",
+					"name": "VeilGate",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46447",
+					"name": "VeriCompute \u2014 verifiable compute on Stellar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46450",
+					"name": "Micopay \"Private Resource Access for AI Agents\"",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46459",
+					"name": "Veilance",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46480",
+					"name": "ZeroGate",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46487",
+					"name": "ZK-Disburse",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46501",
+					"name": "Pollar private payment",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46505",
+					"name": "ProofMatch",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46511",
+					"name": "sotto",
+					"matched": ["pay"]
+				}
+			],
+			"hybrid": [
+				{
+					"id": "dorahacks-buidl-42585",
+					"name": "TollPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42656",
+					"name": "clevercon",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42807",
+					"name": "RenderGate",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-30904",
+					"name": "Stellar Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-41508",
+					"name": "PayStream",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-41512",
+					"name": "Centurion-Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42703",
+					"name": "Zap402 \u2014 Pay-per-Query AI Agent Marketplace on Stellar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42801",
+					"name": "Pay-per-Query Web Search MCP Server",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46202",
+					"name": "Ponte Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46339",
+					"name": "Starlit Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42704",
+					"name": "cardentic",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42747",
+					"name": "VENDLY",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42765",
+					"name": "Delibera",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42788",
+					"name": "NyayaMitra AI \u2014 Legal Intelligence MCP Network on Stellar x402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42798",
+					"name": "AXON-Micropayment-Platform-for-Decentralized-AI-Services-DeAI-",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-24491",
+					"name": "Abroad",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-24867",
+					"name": "CryptoCart",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-27171",
+					"name": "BlendMCP",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-36801",
+					"name": "Big Black Box",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-40203",
+					"name": "KipuFi",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42141",
+					"name": "StellarMind",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42154",
+					"name": "AgentBazaar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42161",
+					"name": "Risk Pulse AI",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42305",
+					"name": "AgentMesh",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42334",
+					"name": "AgentPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42387",
+					"name": "AgentOracle \u2014 The Trust Layer for AI Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42393",
+					"name": "Soko",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42406",
+					"name": "Lumen Trust",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42438",
+					"name": "HivePayAI",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42449",
+					"name": "StellarPay402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42453",
+					"name": "StellarMCP",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42474",
+					"name": "Nulucre Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42480",
+					"name": "Query402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42509",
+					"name": "SignalPass",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42510",
+					"name": "The Signaler",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42511",
+					"name": "runbox",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42516",
+					"name": "Autorepay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42520",
+					"name": "Agentex",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42521",
+					"name": "Heekowave",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42469",
+					"name": "Stellar Oxide Gateway",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42523",
+					"name": "StellarRead",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42524",
+					"name": "Stellar Payment API (PLUTO)",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42530",
+					"name": "AgentRail",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42534",
+					"name": "Stellar Agent Gateway \u2014 x402 Micropayment Marketplace for AI Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42541",
+					"name": "PennyAgent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42546",
+					"name": "DevAsign",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42566",
+					"name": "XLMTools",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42567",
+					"name": "x402 Autopilot",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42592",
+					"name": "Hive",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42606",
+					"name": "AAEK",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42607",
+					"name": "Stellar Search",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42608",
+					"name": "Agent Paywall Router",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42611",
+					"name": "StellarGuard",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42614",
+					"name": "Signal Vault",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42620",
+					"name": "SignalForge Agent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42621",
+					"name": "Stellar Chaos Swarm",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42624",
+					"name": "Stellar Mobile Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42628",
+					"name": "GeoTruth",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42630",
+					"name": "Stellar Autotask",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42641",
+					"name": "Metered",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42643",
+					"name": "Payflow",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42645",
+					"name": "Nexa - The native payment infrastructure for Stellar Agents, anchored by decentralized AI consensus.",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42648",
+					"name": "Halot",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42653",
+					"name": "StellarScope",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42655",
+					"name": "Stellar-tokensentry",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42657",
+					"name": "ChatPay Tallent AI",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42658",
+					"name": "Beacon",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42660",
+					"name": "Soroban Node 0",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42661",
+					"name": "Stellar Resume Analyzer",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42664",
+					"name": "Kairos",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42669",
+					"name": "CriPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42675",
+					"name": "MagentiX",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42683",
+					"name": "PUMAx402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42684",
+					"name": "NextForge",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42693",
+					"name": "Telos",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42695",
+					"name": "Paygent Bazar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42697",
+					"name": "Paygent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42702",
+					"name": "LILA",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42706",
+					"name": "Datavend",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42711",
+					"name": "Mogause",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42712",
+					"name": "StellarFeed",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42713",
+					"name": "ero.",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42721",
+					"name": "Bear Protocol",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42723",
+					"name": "AgentCompute",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42724",
+					"name": "Stellar Autopay X402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42727",
+					"name": "x402kit",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42745",
+					"name": "SearchPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42748",
+					"name": "Fund402 \u2014 Just-In-Time Loans for AI Agents",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42749",
+					"name": "Lodestar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42753",
+					"name": "Ocean Request",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42756",
+					"name": "RouteDock",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42764",
+					"name": "Stexio",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42768",
+					"name": "Underworld",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42771",
+					"name": "Sentryx402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42773",
+					"name": "AgStell",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42780",
+					"name": "solva-mcp",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42781",
+					"name": "x4tella",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42782",
+					"name": "Shield Stellar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42791",
+					"name": "Calypso: x402 Bot Swarm",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42796",
+					"name": "Verdikt",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42797",
+					"name": "Nexus",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42802",
+					"name": "SARA: Stellar Autonomous Research Agent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42803",
+					"name": "x402 Stellar MCP",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42804",
+					"name": "StellarAgent",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42808",
+					"name": "AutoX420",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42816",
+					"name": "Stellar-x402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42823",
+					"name": "SentinelX",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42824",
+					"name": "Forge402",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-42825",
+					"name": "Starlane",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46154",
+					"name": "QuestBoard",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46162",
+					"name": "Contextio",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46217",
+					"name": "Link2Pay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-45473",
+					"name": "Open Stellar Passport",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46022",
+					"name": "Project Veil",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46041",
+					"name": "Sobrecito",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46105",
+					"name": "ClaimProof",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46108",
+					"name": "Zebra \u2014 Confidential Stablecoin Payroll on Stellar (Compliant Privacy for the Web3 Workforce)",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46318",
+					"name": "ShieldPay",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46325",
+					"name": "SealedStellar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46403",
+					"name": "StealthPayroll",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46416",
+					"name": "Xorr",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46431",
+					"name": "VeilGate",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46447",
+					"name": "VeriCompute \u2014 verifiable compute on Stellar",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46450",
+					"name": "Micopay \"Private Resource Access for AI Agents\"",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46459",
+					"name": "Veilance",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46480",
+					"name": "ZeroGate",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46487",
+					"name": "ZK-Disburse",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46501",
+					"name": "Pollar private payment",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46505",
+					"name": "ProofMatch",
+					"matched": ["pay"]
+				},
+				{
+					"id": "dorahacks-buidl-46511",
+					"name": "sotto",
+					"matched": ["pay"]
+				}
+			]
+		},
+		{
+			"kind": "nonsense",
+			"q": "stellar kazoo orchestra tickets",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 5,
+				"hybridMatched": 5
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [],
+			"hybrid": []
+		},
+		{
+			"kind": "nonsense",
+			"q": "soroban garden gnome registry",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 23,
+				"hybridMatched": 23
+			},
+			"parity": {
+				"keywordOrder": true,
+				"hybridOrder": true
+			},
+			"keyword": [
+				{
+					"id": "dorahacks-buidl-42617",
+					"name": "Nova Registry SDK",
+					"matched": ["soroban", "registry"]
+				},
+				{
+					"id": "dorahacks-buidl-36190",
+					"name": "ContractForge",
+					"matched": ["soroban", "registry"]
+				},
+				{
+					"id": "dorahacks-buidl-42449",
+					"name": "StellarPay402",
+					"matched": ["soroban", "registry"]
+				},
+				{
+					"id": "dorahacks-buidl-25271",
+					"name": "Soroban to MCP Server in seconds + Policy Signers Playground",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-38062",
+					"name": "Qué es Stellar? - Desarrollo en Soroban | Fabian Sanchez",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42660",
+					"name": "Soroban Node 0",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-24772",
+					"name": "Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-27458",
+					"name": "Blend AI Powered Smart Monitoring By Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36795",
+					"name": "TralaContract",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42714",
+					"name": "x402 Smart Wallet - By Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30702",
+					"name": "Socio - AI-generated swap signals for Stellar & Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30845",
+					"name": "Calificación Crediticia con IA en Soroban para Microfinanzas Globales",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30846",
+					"name": "Enrutador de FX Basado en Intenciones con Soroban para Pagos Transfronterizos",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30848",
+					"name": "Soroban Community Treasury DAO para Microbecas Transfronterizas",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-33550",
+					"name": "Sorobancontroladores",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-33718",
+					"name": "Confianza Colectiva: Securing Dreams with Stellar & Soroban for Latin America",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36739",
+					"name": "Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based Graduation en Stellar Soroban (Stellar Scale)",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46093",
+					"name": "Tornado-style privacy pools on Stellar Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46361",
+					"name": "ZK contracts and factory",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46456",
+					"name": "soroban-zk-std",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46489",
+					"name": "soroban-prove-age",
+					"matched": ["soroban"]
+				}
+			],
+			"hybrid": [
+				{
+					"id": "dorahacks-buidl-42617",
+					"name": "Nova Registry SDK",
+					"matched": ["soroban", "registry"]
+				},
+				{
+					"id": "dorahacks-buidl-36190",
+					"name": "ContractForge",
+					"matched": ["soroban", "registry"]
+				},
+				{
+					"id": "dorahacks-buidl-42449",
+					"name": "StellarPay402",
+					"matched": ["soroban", "registry"]
+				},
+				{
+					"id": "dorahacks-buidl-25271",
+					"name": "Soroban to MCP Server in seconds + Policy Signers Playground",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-38062",
+					"name": "Qué es Stellar? - Desarrollo en Soroban | Fabian Sanchez",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42660",
+					"name": "Soroban Node 0",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42818",
+					"name": "AutoLayer \u2014 Soroban & Stellar Automation",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-24772",
+					"name": "Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-27458",
+					"name": "Blend AI Powered Smart Monitoring By Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36795",
+					"name": "TralaContract",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-42714",
+					"name": "x402 Smart Wallet - By Sorobanhooks",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30702",
+					"name": "Socio - AI-generated swap signals for Stellar & Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30786",
+					"name": "CrossBorder Pay: Global Remittances with Stellar and Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30845",
+					"name": "Calificación Crediticia con IA en Soroban para Microfinanzas Globales",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30846",
+					"name": "Enrutador de FX Basado en Intenciones con Soroban para Pagos Transfronterizos",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-30848",
+					"name": "Soroban Community Treasury DAO para Microbecas Transfronterizas",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-33550",
+					"name": "Sorobancontroladores",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-33718",
+					"name": "Confianza Colectiva: Securing Dreams with Stellar & Soroban for Latin America",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-36739",
+					"name": "Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based Graduation en Stellar Soroban (Stellar Scale)",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46093",
+					"name": "Tornado-style privacy pools on Stellar Soroban",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46361",
+					"name": "ZK contracts and factory",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46456",
+					"name": "soroban-zk-std",
+					"matched": ["soroban"]
+				},
+				{
+					"id": "dorahacks-buidl-46489",
+					"name": "soroban-prove-age",
+					"matched": ["soroban"]
+				}
+			]
+		},
+		{
+			"kind": "probe",
+			"q": "quantum llama sandwich",
+			"winnersOnly": false,
+			"live": {
+				"keywordMatched": 2,
+				"hybridMatched": 2
+			},
+			"parity": {
+				"keywordOrder": false,
+				"hybridOrder": false
+			},
+			"keyword": [],
+			"hybrid": []
+		}
+	]
+}

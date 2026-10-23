@@ -1,5 +1,6 @@
 import { headers } from "next/headers";
 import { getPayload } from "payload";
+import { isAdmin } from "@/collections/access";
 import configPromise from "@/payload.config";
 
 export async function POST(
@@ -10,9 +11,9 @@ export async function POST(
 	const payload = await getPayload({ config: configPromise });
 	const resolvedParams = await params;
 
-	// Authenticate admin user
+	// Admins only: a signed-in partner also sets user (src/collections/access.ts)
 	const { user } = await payload.auth({ headers: headersList });
-	if (!user) {
+	if (!isAdmin(user)) {
 		return Response.json({ error: "Unauthorized" }, { status: 401 });
 	}
 

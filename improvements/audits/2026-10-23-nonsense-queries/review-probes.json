@@ -1,0 +1,29 @@
+{
+	"writtenAt": "2026-10-23",
+	"writer": "Claude Opus 5.5 (lane L2), from the review of b63a697a (Claude Fable 5.1, high): its examples, run as queries",
+	"queries": [
+		{ "id": "r01", "group": "related form", "q": "port" },
+		{ "id": "r02", "group": "related form", "q": "mill" },
+		{ "id": "r03", "group": "related form", "q": "miner" },
+		{ "id": "r04", "group": "related form", "q": "strip" },
+		{ "id": "r05", "group": "related form", "q": "center" },
+		{ "id": "r06", "group": "related form", "q": "stalling" },
+		{ "id": "r07", "group": "related form", "q": "wither" },
+		{ "id": "r08", "group": "plural", "q": "notes" },
+		{ "id": "r09", "group": "plural", "q": "modes" },
+		{ "id": "r10", "group": "plural", "q": "planes" },
+		{ "id": "r11", "group": "plural", "q": "themes" },
+		{ "id": "r12", "group": "plural", "q": "hopes" },
+		{ "id": "r13", "group": "plural", "q": "toes" },
+		{ "id": "r14", "group": "spelling", "q": "gamer" },
+		{ "id": "r15", "group": "spelling", "q": "routine" },
+		{ "id": "r16", "group": "spelling", "q": "discard" },
+		{ "id": "r17", "group": "spelling", "q": "monkey" },
+		{ "id": "r18", "group": "spelling", "q": "thorough" },
+		{ "id": "r19", "group": "spelling", "q": "inventor" },
+		{ "id": "r20", "group": "spelling", "q": "garantie" },
+		{ "id": "r21", "group": "withheld", "q": "church tithe donations app" },
+		{ "id": "r22", "group": "withheld", "q": "Sorobix IDE plugin" },
+		{ "id": "r23", "group": "withheld", "q": "quantum llama sandwich" }
+	]
+}

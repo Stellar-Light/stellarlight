@@ -7,6 +7,7 @@ import {
 	indexedFromStored,
 	onePerSubmission,
 	searchHackathonBuilds,
+	unusedWordsWarning,
 	wordsNoBuildUses,
 } from "@/lib/hackathon-builds";
 import {
@@ -402,11 +403,181 @@ describe("words no build uses", () => {
 		});
 	});
 
+	// Review 2026-10-23: notes read as used through not, uses through us.
+	it("drops es only after s, x, z, ch or sh", () => {
+		const short = [build("Short", "not mod plan them hop to do us tax")];
+		for (const w of [
+			"notes",
+			"modes",
+			"planes",
+			"themes",
+			"hopes",
+			"toes",
+			"does",
+			"uses",
+		])
+			expect(wordsNoBuildUses(short, w).absent, w).toEqual([w]);
+		expect(wordsNoBuildUses(short, "taxes").absent).toEqual([]);
+	});
+
 	it("does not count a token with no letter or digit as a word", () => {
 		expect(wordsNoBuildUses(pool, "agents !!! ???")).toEqual({
 			absent: [],
 			concepts: 1,
 		});
+	});
+
+	// 140 labeled ideas, 2026-10-23: charities and family were called unused
+	// beside charity and families, soroban-sdk beside 66% of read repos.
+	it("reads charity for charities, a common library as used, and names a word bare", () => {
+		const more = [
+			build("Give", "A charity drive for families."),
+			{ ...build("Vault", "A vault."), stack: ["soroban-sdk"] },
+		];
+		expect(
+			wordsNoBuildUses(more, "charities family soroban-sdk (rosca,"),
+		).toEqual({ absent: ["rosca"], concepts: 4 });
+	});
+});
+
+describe("the warning names related forms submissions do use", () => {
+	// The 12 words on 140 labeled ideas (2026-10-23) whose related form is
+	// used, and look-alikes that are not related forms.
+	const pool = [
+		build("Cash", "Cash out, with cashback."),
+		build("Mint", "Mint and minting tools."),
+		build("Hedge", "Hedge positions."),
+		build("Rent", "Rent, rental and rentals."),
+		build("Cart", "A shopping cart."),
+		build("Office", "Back office, backed by assets, background jobs."),
+		build("Algo", "Trading algorithms."),
+		build("Fees", "Cheap and cheaper fees."),
+		build("Gen", "Generate a generation."),
+		build("Votes", "Delegation and delegating."),
+		build("Keys", "Revocable keys."),
+		build("Misc", "Reliable, forever, vouch, sticker, traction."),
+		// Review 2026-10-23: words these were said to be related forms of.
+		build(
+			"Look",
+			"Portal, portion, million, mineral, minerals, stripe, formal, billion, planes.",
+		),
+		build("Alike", "Cent, stale, with."),
+		build("Short", "Them, not, plan, hop, mod."),
+	];
+	const line = (q: string) => unusedWordsWarning(pool, q, []) ?? "";
+
+	it("names each related form that is used", () => {
+		for (const [word, clause] of [
+			["cashing", "cash for cashing"],
+			["minted", "mint and minting for minted"],
+			// mint is not grown back on a stem minter gives by dropping er
+			// (center is not cent), only its inflections are.
+			["minter", "minting for minter"],
+			["hedging", "hedge for hedging"],
+			// An inflection's stem takes back no al (renting is not rental).
+			["renting", "rent for renting"],
+			["shops", "shopping for shops"],
+			["backing", "back and backed for backing"],
+			["algorithmic", "algorithms for algorithmic"],
+			["cheapest", "cheap for cheapest"],
+			["generator", "generate for generator"],
+			["delegate", "delegating and delegation for delegate"],
+		])
+			expect(line(word), word).toContain(`used: ${clause}`);
+	});
+
+	it("claims no related form a shared prefix only looks like", () => {
+		// revocable is related to revoke, but k to c is past the rule.
+		for (const word of [
+			"revoke",
+			"relief",
+			"forex",
+			"vouchers",
+			"stick",
+			"tractor",
+			"port",
+			"mill",
+			"miner",
+			"center",
+			"strip",
+			"stalling",
+			"wither",
+			// es and e dropped where they are not an ending: them is not
+			// themes or theme.
+			"themes",
+			"theme",
+			"notes",
+			"planes",
+			"hopes",
+			"modes",
+			// Re-check 2026-10-23: a word's own inflection let these back in
+			// (ports portal, mills million, forming formal, billed billion).
+			"ports",
+			"mills",
+			"forming",
+			"strips",
+			"miners",
+			"billed",
+		])
+			expect(line(word), word).not.toMatch(/related form/);
+	});
+
+	it("names plan for planning but never planes", () => {
+		expect(line("planning")).toContain("used: plan for planning");
+		expect(line("planning")).not.toContain("planes");
+	});
+});
+
+describe("the warning names a spelling only when one is clear", () => {
+	const remit = (n: number, typo: number) => [
+		...Array.from({ length: n }, (_, i) =>
+			build(`Remit ${i}`, "Remittance app."),
+		),
+		...Array.from({ length: typo }, (_, i) =>
+			build(`Typo ${i}`, "Remmitance app."),
+		),
+	];
+	const suggestion = "(remittance is a used word one edit from remitance)";
+
+	it("names a word five times as used as any other one edit away", () => {
+		expect(unusedWordsWarning(remit(5, 1), "remitance", [])).toContain(
+			suggestion,
+		);
+	});
+
+	it("names none when two are close in use", () => {
+		expect(unusedWordsWarning(remit(5, 2), "remitance", [])).not.toContain(
+			suggestion,
+		);
+	});
+});
+
+describe("a name alone does not list a build when most of q is in no build", () => {
+	const pool = [
+		build("Quantum Shield Exchange", "Post-quantum key custody."),
+		build("MellaMate", "A companion app for daily habits."),
+		build("Escrow Hub", "Escrow for freelancers on Soroban."),
+		build("Café Pay", "Tap to pay at a café."),
+	];
+	const names = (q: string) =>
+		searchHackathonBuilds(pool, q).map((s) => s.b.name);
+
+	it("drops a build named for one word, or holding one inside its name", () => {
+		expect(names("quantum llama sandwich")).toEqual([]);
+	});
+
+	it("keeps name matches when at most half of q is in no build", () => {
+		expect(names("quantum escrow sandwich").sort()).toEqual([
+			"Escrow Hub",
+			"Quantum Shield Exchange",
+		]);
+		// An accented word is a word some build uses.
+		expect(names("café sandwich")).toEqual(["Café Pay"]);
+	});
+
+	it("keeps a build that covers half of q, and every one-word match", () => {
+		expect(names("escrow freelancers pogo stick")).toEqual(["Escrow Hub"]);
+		expect(names("llama")).toEqual(["MellaMate"]);
 	});
 });
 
@@ -1147,5 +1318,222 @@ describe("a submission entered in two events", () => {
 			at("newer", "2025-08-07"),
 		]);
 		expect(pick.map((b) => b.hackathon.slug)).toEqual(["newer"]);
+	});
+});
+
+describe("links through a repo that was renamed or transferred", () => {
+	const indexes = async () => {
+		const links = await import("@/lib/hackathon-build-links");
+		const rows = [
+			{
+				slug: "widget",
+				name: "Widget",
+				status: "Live",
+				links: { github: "https://github.com/widget-labs/widget" },
+			},
+			{
+				slug: "gadget",
+				name: "Gadget",
+				status: "Live",
+				links: { github: "https://github.com/gadget-org" },
+			},
+			{
+				slug: "doohickey",
+				name: "Doohickey",
+				status: "Live",
+				links: { website: "https://doohickey.app" },
+				github: { repos: [{ owner: "doohickey-org", name: "core" }] },
+			},
+			{
+				slug: "shared-a",
+				name: "Shared A",
+				status: "Live",
+				github: { repos: [{ owner: "both", name: "shared" }] },
+			},
+			{
+				slug: "shared-b",
+				name: "Shared B",
+				status: "Live",
+				github: { repos: [{ owner: "both", name: "shared" }] },
+			},
+		];
+		return {
+			links,
+			idx: {
+				repos: links.indexProjectRepos(rows),
+				sites: links.indexProjectSites(rows),
+				owners: links.indexProjectOwners(rows),
+			},
+		};
+	};
+
+	it("links by exact repo when the project lists the repo it moved to", async () => {
+		const { links, idx } = await indexes();
+		const b = {
+			name: "Widget",
+			githubUrl: "https://github.com/a-builder/widget",
+			repoFullName: "a-builder/widget",
+		};
+		expect(links.linkBuild(b, idx).project).toBeNull();
+		expect(
+			links.linkBuild({ ...b, repoCurrentFullName: "widget-labs/widget" }, idx)
+				.project,
+		).toEqual({ slug: "widget", name: "Widget", basis: "moved-repo" });
+	});
+
+	it("links by owner and name read on the repo it moved to", async () => {
+		const { links, idx } = await indexes();
+		const b = {
+			name: "Gadget Pay",
+			githubUrl: "https://github.com/a-builder/gadget-pay",
+			repoFullName: "a-builder/gadget-pay",
+		};
+		expect(links.linkBuild(b, idx).project).toBeNull();
+		expect(
+			links.linkBuild(
+				{ ...b, repoCurrentFullName: "gadget-org/gadget-pay" },
+				idx,
+			).project,
+		).toEqual({
+			slug: "gadget",
+			name: "Gadget",
+			basis: "moved-owner-and-name",
+		});
+		// The owner alone is never enough: another name under it stays unlinked.
+		expect(
+			links.linkBuild(
+				{
+					name: "Sprocket",
+					githubUrl: "https://github.com/a-builder/sprocket",
+					repoFullName: "a-builder/sprocket",
+					repoCurrentFullName: "gadget-org/sprocket",
+				},
+				idx,
+			).project,
+		).toBeNull();
+	});
+
+	it("adds no link when the repo could not be resolved or did not move", async () => {
+		const { links, idx } = await indexes();
+		const b = {
+			name: "Widget",
+			githubUrl: "https://github.com/a-builder/widget",
+			repoFullName: "a-builder/widget",
+		};
+		for (const repoCurrentFullName of [undefined, null, "a-builder/widget"])
+			expect(links.linkBuild({ ...b, repoCurrentFullName }, idx)).toEqual({
+				project: null,
+				ambiguous: false,
+			});
+		// The sync lane's value for a repo GitHub did not answer (404 or a
+		// failed read): the last one read for this same repo, or nothing.
+		expect(links.currentRepoFor("a-builder/widget", undefined)).toBeNull();
+		expect(
+			links.currentRepoFor("a-builder/widget", undefined, {
+				repoFullName: "a-builder/widget",
+				repoCurrentFullName: "widget-labs/widget",
+			}),
+		).toBe("widget-labs/widget");
+		// A stored value names where another repo went: never carried over.
+		expect(
+			links.currentRepoFor("a-builder/widget-v2", undefined, {
+				repoFullName: "a-builder/widget",
+				repoCurrentFullName: "widget-labs/widget",
+			}),
+		).toBeNull();
+		// A read: the repo it answers under, or null when that is the same repo.
+		expect(links.currentRepoFor("a-builder/widget", "widget-labs/widget")).toBe(
+			"widget-labs/widget",
+		);
+		expect(
+			links.currentRepoFor("a-builder/widget", "a-builder/widget", {
+				repoFullName: "a-builder/widget",
+				repoCurrentFullName: "widget-labs/widget",
+			}),
+		).toBeNull();
+	});
+
+	it("changes no link the stored repo, the site or the stored owner already decides", async () => {
+		const { links, idx } = await indexes();
+		// Listed by its stored repo: the move is not read.
+		expect(
+			links.linkBuild(
+				{
+					name: "Widget",
+					repoFullName: "widget-labs/widget",
+					repoCurrentFullName: "doohickey-org/core",
+				},
+				idx,
+			).project,
+		).toEqual({ slug: "widget", name: "Widget", basis: "repo" });
+		// A stored repo two projects list stays unlinked, moved or not.
+		expect(
+			links.linkBuild(
+				{
+					name: "Shared",
+					repoFullName: "both/shared",
+					repoCurrentFullName: "widget-labs/widget",
+				},
+				idx,
+			),
+		).toEqual({ project: null, ambiguous: true });
+		// The repo it moved to is listed by two projects: unlinked.
+		expect(
+			links.linkBuild(
+				{
+					name: "Doohickey",
+					demoUrl: "https://doohickey.app",
+					repoFullName: "a-builder/x",
+					repoCurrentFullName: "both/shared",
+				},
+				idx,
+			),
+		).toEqual({ project: null, ambiguous: true });
+		// The site rule still comes before owner and name on the moved repo.
+		expect(
+			links.linkBuild(
+				{
+					name: "Gadget Pay",
+					demoUrl: "https://www.doohickey.app",
+					repoFullName: "a-builder/gadget-pay",
+					repoCurrentFullName: "gadget-org/gadget-pay",
+				},
+				idx,
+			).project,
+		).toEqual({ slug: "doohickey", name: "Doohickey", basis: "website" });
+		// Owner and name on the stored repo comes before the moved one.
+		expect(
+			links.linkBuild(
+				{
+					name: "Gadget Pay",
+					githubUrl: "https://github.com/gadget-org/gadget-pay",
+					repoFullName: "gadget-org/gadget-pay",
+					repoCurrentFullName: "a-builder/gadget-pay",
+				},
+				idx,
+			).project,
+		).toEqual({ slug: "gadget", name: "Gadget", basis: "owner-and-name" });
+	});
+
+	it("serves the moved bases", () => {
+		for (const basis of ["moved-repo", "moved-owner-and-name"]) {
+			const b = indexedFromStored({
+				id: "x",
+				buildId: "dorahacks-buidl-1",
+				name: "X",
+				hackathonSlug: "e",
+				hackathonTitle: "E",
+				url: "https://dorahacks.io/buidl/1",
+				linkCheckedAt: "2026-10-23T00:00:00.000Z",
+				projectSlug: "widget",
+				projectName: "Widget",
+				projectLinkBasis: basis,
+				firstSeenAt: "2026-10-23T00:00:00.000Z",
+				lastSeenAt: "2026-10-23T00:00:00.000Z",
+				updatedAt: "2026-10-23T00:00:00.000Z",
+				createdAt: "2026-10-23T00:00:00.000Z",
+			});
+			expect(b.project?.basis).toBe(basis);
+		}
 	});
 });

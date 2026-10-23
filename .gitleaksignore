@@ -21,3 +21,5 @@
 7c636ad89d0c48370875b403f445d23cdaec5725:airtable_import.csv:generic-api-key:75
 # an Airtable attachment URL (v5.airtableusercontent.com), not a key
 0af24d6a0f6ebf49534f22350103b5c1f515c8e4:scripts/airtable_import.csv:generic-api-key:75
+# a fake Stripe-shaped key in a test fixture (the consumer report must never echo raw query text); the fixture now joins it at runtime
+4cb9d1c4f3059427d2a17f00a1bbfea02b086f84:src/lib/__tests__/consumer-report.test.ts:stripe-access-token:15

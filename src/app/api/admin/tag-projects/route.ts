@@ -1,6 +1,7 @@
 import config from "@payload-config";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
+import { isAdminRequest } from "@/lib/admin-auth";
 
 // Explicit name-to-type overrides (audited)
 const EXPLICIT_OVERRIDES: Record<string, string[]> = {
@@ -862,10 +863,8 @@ function inferTypes(name: string, desc: string): string[] {
 	return Array.from(types);
 }
 
-export async function GET(request: NextRequest) {
-	// Simple secret check — use query param ?secret=tag123
-	const secret = request.nextUrl.searchParams.get("secret");
-	if (secret !== "tag123") {
+export async function POST(request: NextRequest) {
+	if (!(await isAdminRequest(request.headers))) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 

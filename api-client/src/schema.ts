@@ -1105,6 +1105,24 @@ export interface components {
             /** Format: uri */
             skill?: string;
         };
+        /** @description Present in meta only when the request had view=compact; absent means full rows. Compact project rows (projects/search `projects`) carry exactly: id, name, slug, canonicalSlug, url, category, types, shortDescription, status, statusAsOf, deployment, tvlUSD, tvlAsOf, scfAwarded, scfTotalAwardedUSD, audits, score, via, confidence, reposCount, onchainContractsCount; deployment keeps only network, confidence only score and label. Compact repo rows (repos/search `repos`, projects/search `codeReferences`) carry exactly: fullName, url, description, primaryLanguage, stars, lastCommitAt, isArchived, activityState, project, hackathonWinner, scfAwarded, repoScore, repoScoreLabel, tier, kind, stellarEvidence, score, knowledgeNotesCount. Every key is on every row, null where there is no value. */
+        CompactView: {
+            /** @description Always `compact`: this page carries compact rows. */
+            mode: string;
+            /** @description One entry per compacted row array, keyed by its name in the response (projects, codeReferences, repos). */
+            rows: {
+                [key: string]: {
+                    /** @description Each count key on these rows, mapped to the left-out field it counts (a dotted path into the full row). */
+                    counts: {
+                        [key: string]: string;
+                    };
+                    /** @description Where the left-out fields of these rows are read, as a request to make. */
+                    detail: string;
+                };
+            };
+            /** @description How to read compact rows, in one line. */
+            note: string;
+        };
         Project: {
             id: string;
             name: string;
@@ -1361,6 +1379,10 @@ export interface components {
                 authority?: number;
                 ageDays?: number | null;
             } | null;
+            /** @description view=compact rows only: how many entries the left-out `repos` list has (0 = that list is empty on the full row). Null = not known. Absent on full rows, which carry `repos` itself. */
+            reposCount?: number | null;
+            /** @description view=compact rows only: how many entries the left-out `onchain.contracts` list has. Null = no on-chain record was read for this project, not zero contracts. Absent on full rows, which carry `onchain` itself. */
+            onchainContractsCount?: number | null;
             /** @description This project’s top indexed GitHub repos, surfaced inline (same shape as /api/repos/search items). Cite as the project’s code references. */
             repos?: components["schemas"]["Repo"][];
             /**
@@ -1368,8 +1390,8 @@ export interface components {
              * @description Most recent commit across the project's own indexed repos — attach as the as-of date for 'is this project active?' answers. Null = no indexed repo with a known commit date (an INDEX gap — e.g. a closed-source product), never 'no activity'.
              */
             lastActivityAt?: string | null;
-            /** @description How this result was matched: keyword (token/synonym overlap) or vector (semantic fallback). */
-            via?: string;
+            /** @description How this result was matched: keyword (token or synonym overlap) or semantic (vector-similarity fallback, a guess to verify, not a match). Null only on a view=compact row whose full row had no via. */
+            via?: string | null;
             /** Format: uri */
             url?: string;
             /** @description Editorial ranking boost (0-100); higher = more canonical for its category. */
@@ -1398,6 +1420,7 @@ export interface components {
         };
         ProjectSearchResponse: {
             meta: components["schemas"]["Meta"] & {
+                view?: components["schemas"]["CompactView"];
                 /**
                  * @description Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched: every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium), so verify relevance before relying on them. `corrected` means the rows matched only through a spelling correction, either a known one (e.g. strupey to stroopy) or a typo-distance name recovery reported in `didYouMean` (e.g. frieghter to Freighter): the query token does not occur in them, so verify the identity before treating them as evidence about the queried name.
                  * @enum {string}
@@ -1651,15 +1674,15 @@ export interface components {
                     held?: boolean;
                     note?: string;
                 };
-                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                 project?: {
                     slug: string;
                     name: string;
                     /**
-                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
+                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo).
                      * @enum {string}
                      */
-                    basis?: "repo" | "website" | "owner-and-name";
+                    basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name";
                     /**
                      * @description The project's directory status today. Absent when it could not be read (unknown).
                      * @enum {string|null}
@@ -1771,6 +1794,8 @@ export interface components {
                 subinvocationsDelta?: number | null;
                 asOf?: string;
             } | null;
+            /** @description view=compact rows only: how many entries the left-out `knowledgeNotes` list has (0 = none on record). Null = not known. Absent on full rows, which carry `knowledgeNotes` itself. */
+            knowledgeNotesCount?: number | null;
             /** @description Dated FACTS about this repo with named sources — curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record. */
             knowledgeNotes?: {
                 note?: string;
@@ -1879,6 +1904,7 @@ export interface components {
                 canonical?: string | null;
                 /** @description How to read the results (e.g. code references graded by repoScore 0-100). */
                 note?: string;
+                view?: components["schemas"]["CompactView"];
                 /**
                  * @description How well this page matched the query, judged by its best row. strict = the best row matched every query term (other rows may match fewer; counts.total counts every row that matched at least one term, plus curated canonical and flagship repos and exact owner or name matches); partial = the best row matched some terms; corrected = the best rows matched only through a known spelling correction (e.g. strupey → stroopy), so the query token does not occur in them: verify the identity before treating them as evidence about the queried name; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat corrected/weak/none rows as candidates requiring verification, never as findings.
                  * @enum {string}
@@ -2284,6 +2310,8 @@ export interface components {
         offset: number;
         /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
         fields: string;
+        /** @description Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues. */
+        view: "full" | "compact";
     };
     requestBodies: never;
     headers: never;
@@ -3131,6 +3159,8 @@ export interface operations {
                 offset?: components["parameters"]["offset"];
                 /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
+                /** @description Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues. */
+                view?: components["parameters"]["view"];
             };
             header?: never;
             path?: never;
@@ -3145,6 +3175,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectSearchResponse"];
+                };
+            };
+            /** @description The call is wrong; fix it, do not retry it as is. Answered before any read when: view is not full or compact (validValues), view=compact is sent with fields (validValues), status is not a resolvable status (validStatuses), type is not a product type (validTypes), category is not a category (validCategories), or scfAwarded is not a boolean form (acceptedValues). An unknown parameter is not a 400: it is named in meta.warnings. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestError"] & {
+                        validValues?: string[];
+                        validStatuses?: string[];
+                        validTypes?: string[];
+                        validCategories?: string[];
+                        /** @description The boolean forms scfAwarded takes. */
+                        acceptedValues?: {
+                            true?: string[];
+                            false?: string[];
+                        };
+                    };
                 };
             };
             /** @description A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead. */
@@ -3177,6 +3226,8 @@ export interface operations {
                 offset?: components["parameters"]["offset"];
                 /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
+                /** @description Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues. */
+                view?: components["parameters"]["view"];
             };
             header?: never;
             path?: never;
@@ -3191,6 +3242,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RepoSearchResponse"];
+                };
+            };
+            /** @description The call is wrong; fix it, do not retry it as is. Answered before any read, with error and validValues, when: view is not full or compact, view=compact is sent with fields, or activity, capability or domain is not one of its values. An unknown parameter is not a 400: it is named in meta.warnings. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestError"] & {
+                        validValues: string[];
+                    };
                 };
             };
             /** @description A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead. */
@@ -3611,7 +3673,7 @@ export interface operations {
     searchHackathonBuilds: {
         parameters: {
             query?: {
-                /** @description Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when its name holds one of q's words or it covers half of them, and a word of four letters or more also matches inside a longer word, so one word of a longer q can list a build; when most of q's words occur as a whole word in no submission and a build is listed by its words alone, meta.warnings says so. */
+                /** @description Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when it covers half of q's words, or when its name holds one of them unless most of q's words occur as a whole word in no submission (text or declared packages). A word of four letters or more also matches inside a longer word. When any of q's words occurs as a whole word in no submission, meta.warnings names those words and says what the listed builds are, and says when a build whose name matched was held back (meta.counts.withheldByName). */
                 q?: string;
                 /** @description How q matches (default: hybrid). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";
@@ -3664,7 +3726,7 @@ export interface operations {
                             };
                             /** @description Present only with q when hybrid served and a build matched. true = the first 50 of the hybrid ranking (word coverage blended with meaning, winners first among near equals) were reordered by a reranker, a cross-encoder that reads q with each build's name and summary together; it does not read placement, so a winner keeps no edge there except on a tie, and rows past 50 keep the hybrid order. false = the reranker failed, took longer than 2 s, or was skipped because search by meaning had already taken longer than 3 s, so every row is in hybrid order (meta.warnings says which). Absent = not attempted: no q, keyword or meaning mode, no matched build, or no reranker configured. Each page is ranked by its own request: when paging, read this flag on every page, since a page served after a failure is in hybrid order and its rows can repeat or skip rows of a reranked page. */
                             reranked?: boolean;
-                            /** @description Present only when something limited this answer: search by meaning could not run, the reranker could not run or was skipped ('the reranker could not run this request ...' or 'the reranker was skipped because search by meaning took longer than 3 s ...'; rows are then in hybrid order), a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or most of the words searched in q occur as a whole word in no submission while a build is listed by its words alone ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built; the q line means a build listed by its words alone, with no similarity, matches only part of q and is not evidence that the idea was built. */
+                            /** @description Present only when something limited this answer: search by meaning could not run, the reranker could not run or was skipped ('the reranker could not run this request ...' or 'the reranker was skipped because search by meaning took longer than 3 s ...'; rows are then in hybrid order), a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other. */
                             warnings?: string[];
                             /** @description The filters as applied: an echo, so a caller can see what was honoured. */
                             filters?: {
@@ -3688,6 +3750,8 @@ export interface operations {
                                 matched?: number;
                                 /** @description Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze. */
                                 entries?: number;
+                                /** @description Builds whose name matched q but that are not listed, because most of the words searched in q occur as a whole word in no submission; meta.warnings names the words they matched. Not counted in matched or entries. 0 = none held back; always 0 in meaning mode, which never lists a build by its name. */
+                                withheldByName?: number;
                                 returned?: number;
                             };
                             /** @description Which Stellar packages the matched builds' repos declare, over every matched build (not just this page). winnersOnly=1 with no q = what winners build on; add q for a topic. */
@@ -3732,15 +3796,15 @@ export interface operations {
                             prizeUsd?: number | null;
                             votes?: number | null;
                             endedAt?: string | null;
-                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                             project?: {
                                 slug: string;
                                 name: string;
                                 /**
-                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
+                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo).
                                  * @enum {string}
                                  */
-                                basis?: "repo" | "website" | "owner-and-name";
+                                basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name";
                                 /**
                                  * @description The project's directory status today. Absent when it could not be read (unknown).
                                  * @enum {string|null}
@@ -3887,15 +3951,15 @@ export interface operations {
                                 held?: boolean;
                                 note?: string;
                             };
-                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                            /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                             project?: {
                                 slug: string;
                                 name: string;
                                 /**
-                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
+                                 * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo).
                                  * @enum {string}
                                  */
-                                basis?: "repo" | "website" | "owner-and-name";
+                                basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name";
                                 /**
                                  * @description The project's directory status today. Absent when it could not be read (unknown).
                                  * @enum {string|null}
@@ -3985,7 +4049,7 @@ export interface operations {
                 value?: string;
                 /** @description Most values to report per set (default 10, or 5 with by; max 30). */
                 top?: number;
-                /** @description Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. Empty = every submission. */
+                /** @description Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. A word only a declared package uses still counts as used when deciding whether most of q's words occur in no submission, which holds back builds matched by name alone. Empty = every submission. */
                 q?: string;
                 /** @description How q matches (default: keyword). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";
@@ -4238,15 +4302,15 @@ export interface operations {
                                     held?: boolean;
                                     note?: string;
                                 };
-                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                 project?: {
                                     slug: string;
                                     name: string;
                                     /**
-                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
+                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo).
                                      * @enum {string}
                                      */
-                                    basis?: "repo" | "website" | "owner-and-name";
+                                    basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name";
                                     /**
                                      * @description The project's directory status today. Absent when it could not be read (unknown).
                                      * @enum {string|null}
@@ -4318,15 +4382,15 @@ export interface operations {
                                     isWinner?: boolean;
                                     placement?: string | null;
                                     similarity?: number;
-                                    /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                    /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                     project?: {
                                         slug: string;
                                         name: string;
                                         /**
-                                         * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
+                                         * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo).
                                          * @enum {string}
                                          */
-                                        basis?: "repo" | "website" | "owner-and-name";
+                                        basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name";
                                         /**
                                          * @description The project's directory status today. Absent when it could not be read (unknown).
                                          * @enum {string|null}
@@ -5487,15 +5551,15 @@ export interface operations {
                                     note?: string;
                                 };
                                 url?: string | null;
-                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
+                                /** @description The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null. */
                                 project?: {
                                     slug: string;
                                     name: string;
                                     /**
-                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).
+                                     * @description repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo).
                                      * @enum {string}
                                      */
-                                    basis?: "repo" | "website" | "owner-and-name";
+                                    basis?: "repo" | "website" | "owner-and-name" | "moved-repo" | "moved-owner-and-name";
                                     /**
                                      * @description The project's directory status today. Absent when it could not be read (unknown).
                                      * @enum {string|null}

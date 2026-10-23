@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
+import { isAdmin } from "@/collections/access";
+import { secretMatches } from "@/lib/admin-auth";
 import {
 	fetchAllBuilders,
 	fetchBuilder,
@@ -13,20 +15,39 @@ import config from "@/payload.config";
  *
  * GET /api/sync/builders - Sync all builders
  * GET /api/sync/builders?username=xyz - Sync specific builder
+ *
+ * GET takes only the env Bearer token (the daily cron in vercel.json). An
+ * admin session must use POST (the admin panel button does), so a cross-site
+ * link cannot start a sync from an admin's browser.
  */
 export async function GET(request: NextRequest) {
+	return sync(request, false);
+}
+
+/**
+ * POST endpoint to trigger manual sync from admin panel
+ */
+export async function POST(request: NextRequest) {
+	return sync(request, true);
+}
+
+async function sync(request: NextRequest, allowSession: boolean) {
 	try {
 		const headersList = await headers();
 		const payload = await getPayload({ config });
 
-		// Check authorization: accept Bearer token OR admin session cookie
+		// Check authorization: accept the env Bearer token OR an admin session
 		const authHeader = headersList.get("authorization");
 		const expectedKey = process.env.CRON_SECRET || process.env.SYNC_API_KEY;
-		const hasBearerAuth = expectedKey && authHeader === `Bearer ${expectedKey}`;
+		const hasBearerAuth = secretMatches(
+			authHeader,
+			expectedKey ? `Bearer ${expectedKey}` : null,
+		);
 
-		// Check Payload admin session
-		const { user } = await payload.auth({ headers: headersList });
-		const hasSessionAuth = !!user;
+		// Admins only: a signed-in partner also sets user (src/collections/access.ts)
+		const hasSessionAuth =
+			allowSession &&
+			isAdmin((await payload.auth({ headers: headersList })).user);
 
 		if (!hasBearerAuth && !hasSessionAuth) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -128,11 +149,4 @@ export async function GET(request: NextRequest) {
 			{ status: 500 },
 		);
 	}
-}
-
-/**
- * POST endpoint to trigger manual sync from admin panel
- */
-export async function POST(request: NextRequest) {
-	return GET(request);
 }

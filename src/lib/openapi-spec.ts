@@ -18,6 +18,7 @@ import {
 	RWA_VERIFICATION_LEVELS,
 } from "../data/rwa-registry";
 import { CODE_DOMAINS } from "./code-domains";
+import { PROJECT_COMPACT, REPO_COMPACT, VIEW_VALUES } from "./compact-view";
 import {
 	AFTER_EVENT_VALUES,
 	FACET_IDS,
@@ -266,7 +267,7 @@ const BUILD_PROJECT_SCHEMA = {
 	type: "object",
 	nullable: true,
 	description:
-		"The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
+		"The directory project this build became, or null when none is found. Linked when a project lists the build's exact GitHub repo; when none does, when the build's demo site is a project's own website; and when neither, when the build's repo sits under the project's GitHub owner and the build carries the project's name (`basis` says which). The two repo rules also read the repo GitHub now redirects githubUrl to, when the team renamed or transferred it. A shared GitHub owner alone, or a shared platform, never counts. Absent = not checked (served from a live DoraHacks read), which is not the same as null.",
 	properties: {
 		slug: { type: "string" },
 		name: { type: "string" },
@@ -274,7 +275,7 @@ const BUILD_PROJECT_SCHEMA = {
 			type: "string",
 			enum: [...LINK_BASES],
 			description:
-				"repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. Absent on links stored before the basis was recorded (all by repo).",
+				"repo: the project lists this exact repo. website: the demo site is the project's website. owner-and-name: the repo sits under the project's GitHub owner and the build's name is the project's name, or starts with it. moved-repo: the repo was renamed or transferred (githubUrl redirects on GitHub), and the project lists the repo it moved to. moved-owner-and-name: owner-and-name, read on the repo it moved to. A repo GitHub could not find is never taken as moved. Absent on links stored before the basis was recorded (all by repo).",
 		},
 		status: {
 			type: "string",
@@ -2765,8 +2766,51 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
 					{ $ref: "#/components/parameters/fields" },
+					{ $ref: "#/components/parameters/view" },
 				],
 				responses: {
+					"400": {
+						description:
+							"The call is wrong; fix it, do not retry it as is. Answered before any read when: view is not full or compact (validValues), view=compact is sent with fields (validValues), status is not a resolvable status (validStatuses), type is not a product type (validTypes), category is not a category (validCategories), or scfAwarded is not a boolean form (acceptedValues). An unknown parameter is not a 400: it is named in meta.warnings.",
+						content: {
+							"application/json": {
+								schema: {
+									allOf: [
+										{ $ref: "#/components/schemas/RequestError" },
+										{
+											type: "object",
+											properties: {
+												validValues: {
+													type: "array",
+													items: { type: "string" },
+												},
+												validStatuses: {
+													type: "array",
+													items: { type: "string" },
+												},
+												validTypes: {
+													type: "array",
+													items: { type: "string" },
+												},
+												validCategories: {
+													type: "array",
+													items: { type: "string" },
+												},
+												acceptedValues: {
+													type: "object",
+													description: "The boolean forms scfAwarded takes.",
+													properties: {
+														true: { type: "array", items: { type: "string" } },
+														false: { type: "array", items: { type: "string" } },
+													},
+												},
+											},
+										},
+									],
+								},
+							},
+						},
+					},
 					"503": {
 						description:
 							"A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead.",
@@ -2898,8 +2942,32 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
 					{ $ref: "#/components/parameters/fields" },
+					{ $ref: "#/components/parameters/view" },
 				],
 				responses: {
+					"400": {
+						description:
+							"The call is wrong; fix it, do not retry it as is. Answered before any read, with error and validValues, when: view is not full or compact, view=compact is sent with fields, or activity, capability or domain is not one of its values. An unknown parameter is not a 400: it is named in meta.warnings.",
+						content: {
+							"application/json": {
+								schema: {
+									allOf: [
+										{ $ref: "#/components/schemas/RequestError" },
+										{
+											type: "object",
+											required: ["validValues"],
+											properties: {
+												validValues: {
+													type: "array",
+													items: { type: "string" },
+												},
+											},
+										},
+									],
+								},
+							},
+						},
+					},
 					"503": {
 						description:
 							"A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead.",
@@ -3638,7 +3706,7 @@ export const spec: OpenAPISpec = {
 				},
 				parameters: [
 					...buildFilterParams(
-						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when its name holds one of q's words or it covers half of them, and a word of four letters or more also matches inside a longer word, so one word of a longer q can list a build; when most of q's words occur as a whole word in no submission and a build is listed by its words alone, meta.warnings says so.",
+						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when it covers half of q's words, or when its name holds one of them unless most of q's words occur as a whole word in no submission (text or declared packages). A word of four letters or more also matches inside a longer word. When any of q's words occurs as a whole word in no submission, meta.warnings names those words and says what the listed builds are, and says when a build whose name matched was held back (meta.counts.withheldByName).",
 						"hybrid",
 					),
 					{
@@ -3708,7 +3776,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Present only when something limited this answer: search by meaning could not run, the reranker could not run or was skipped ('the reranker could not run this request ...' or 'the reranker was skipped because search by meaning took longer than 3 s ...'; rows are then in hybrid order), a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or most of the words searched in q occur as a whole word in no submission while a build is listed by its words alone ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built; the q line means a build listed by its words alone, with no similarity, matches only part of q and is not evidence that the idea was built.",
+														"Present only when something limited this answer: search by meaning could not run, the reranker could not run or was skipped ('the reranker could not run this request ...' or 'the reranker was skipped because search by meaning took longer than 3 s ...'; rows are then in hybrid order), a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other.",
 												},
 												filters: BUILD_FILTERS_ECHO_SCHEMA,
 												counts: {
@@ -3730,6 +3798,11 @@ export const spec: OpenAPISpec = {
 															type: "integer",
 															description:
 																"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze.",
+														},
+														withheldByName: {
+															type: "integer",
+															description:
+																"Builds whose name matched q but that are not listed, because most of the words searched in q occur as a whole word in no submission; meta.warnings names the words they matched. Not counted in matched or entries. 0 = none held back; always 0 in meaning mode, which never lists a build by its name.",
 														},
 														returned: { type: "integer" },
 													},
@@ -4035,7 +4108,7 @@ export const spec: OpenAPISpec = {
 						schema: { type: "integer", default: 10, maximum: 30 },
 					},
 					...buildFilterParams(
-						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. Empty = every submission.",
+						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. A word only a declared package uses still counts as used when deciding whether most of q's words occur in no submission, which holds back builds matched by name alone. Empty = every submission.",
 						"keyword",
 					),
 				],
@@ -9331,6 +9404,13 @@ export const spec: OpenAPISpec = {
 					"Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths).",
 				schema: { type: "string" },
 			},
+			view: {
+				name: "view",
+				in: "query",
+				description:
+					"Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues.",
+				schema: { type: "string", enum: [...VIEW_VALUES], default: "full" },
+			},
 		},
 		schemas: {
 			RetryableError: {
@@ -9896,6 +9976,43 @@ export const spec: OpenAPISpec = {
 					skill: { type: "string", format: "uri" },
 				},
 			},
+			CompactView: {
+				type: "object",
+				description: `Present in meta only when the request had view=compact; absent means full rows. Compact project rows (projects/search \`projects\`) carry exactly: ${[...Object.keys(PROJECT_COMPACT.keep), ...Object.keys(PROJECT_COMPACT.counts)].join(", ")}; deployment keeps only network, confidence only score and label. Compact repo rows (repos/search \`repos\`, projects/search \`codeReferences\`) carry exactly: ${[...Object.keys(REPO_COMPACT.keep), ...Object.keys(REPO_COMPACT.counts)].join(", ")}. Every key is on every row, null where there is no value.`,
+				required: ["mode", "rows", "note"],
+				properties: {
+					mode: {
+						type: "string",
+						description: "Always `compact`: this page carries compact rows.",
+					},
+					rows: {
+						type: "object",
+						description:
+							"One entry per compacted row array, keyed by its name in the response (projects, codeReferences, repos).",
+						additionalProperties: {
+							type: "object",
+							required: ["counts", "detail"],
+							properties: {
+								counts: {
+									type: "object",
+									description:
+										"Each count key on these rows, mapped to the left-out field it counts (a dotted path into the full row).",
+									additionalProperties: { type: "string" },
+								},
+								detail: {
+									type: "string",
+									description:
+										"Where the left-out fields of these rows are read, as a request to make.",
+								},
+							},
+						},
+					},
+					note: {
+						type: "string",
+						description: "How to read compact rows, in one line.",
+					},
+				},
+			},
 			Project: {
 				type: "object",
 				required: ["id", "name", "slug", "category", "status"],
@@ -10422,6 +10539,18 @@ export const spec: OpenAPISpec = {
 							ageDays: { type: "integer", nullable: true },
 						},
 					},
+					reposCount: {
+						type: "integer",
+						nullable: true,
+						description:
+							"view=compact rows only: how many entries the left-out `repos` list has (0 = that list is empty on the full row). Null = not known. Absent on full rows, which carry `repos` itself.",
+					},
+					onchainContractsCount: {
+						type: "integer",
+						nullable: true,
+						description:
+							"view=compact rows only: how many entries the left-out `onchain.contracts` list has. Null = no on-chain record was read for this project, not zero contracts. Absent on full rows, which carry `onchain` itself.",
+					},
 					repos: {
 						type: "array",
 						description:
@@ -10437,8 +10566,9 @@ export const spec: OpenAPISpec = {
 					},
 					via: {
 						type: "string",
+						nullable: true,
 						description:
-							"How this result was matched: keyword (token/synonym overlap) or vector (semantic fallback).",
+							"How this result was matched: keyword (token or synonym overlap) or semantic (vector-similarity fallback, a guess to verify, not a match). Null only on a view=compact row whose full row had no via.",
 					},
 					url: { type: "string", format: "uri" },
 					prominence: {
@@ -10499,6 +10629,7 @@ export const spec: OpenAPISpec = {
 							{
 								type: "object",
 								properties: {
+									view: { $ref: "#/components/schemas/CompactView" },
 									matchMode: {
 										type: "string",
 										enum: [...PROJECT_MATCH_MODES],
@@ -10932,6 +11063,12 @@ export const spec: OpenAPISpec = {
 							asOf: { type: "string" },
 						},
 					},
+					knowledgeNotesCount: {
+						type: "integer",
+						nullable: true,
+						description:
+							"view=compact rows only: how many entries the left-out `knowledgeNotes` list has (0 = none on record). Null = not known. Absent on full rows, which carry `knowledgeNotes` itself.",
+					},
 					knowledgeNotes: {
 						type: "array",
 						description:
@@ -11161,6 +11298,7 @@ export const spec: OpenAPISpec = {
 										description:
 											"How to read the results (e.g. code references graded by repoScore 0-100).",
 									},
+									view: { $ref: "#/components/schemas/CompactView" },
 									matchMode: {
 										type: "string",
 										enum: [...REPO_MATCH_MODES],

@@ -10,12 +10,14 @@
  * convention every other engine uses (and what /quality may later render).
  *
  *   DATABASE_URI=… pnpm exec tsx scripts/consumer-report.ts \
- *     [--consumer=raven] [--days=30] [--top=25] [--outdir=improvements/consumers]
+ *     [--consumer=raven] [--days=30] [--top=25] [--min-term=5] [--outdir=improvements/consumers]
  *
  * Runs in CI (consumer-report.yml, monthly + dispatch) because the api-usage
  * log lives in the prod DB. Read-only on the DB; the only write is the
- * artifact pair. Privacy: the log stores no IPs and no raw UAs — endpoint,
- * query, coarse country, result counts (see src/collections/ApiUsage.ts).
+ * artifact pair. Privacy: the log stores no IPs and no raw UAs (endpoint,
+ * query, coarse country, result counts; see src/collections/ApiUsage.ts), and
+ * the report is public, so it publishes no query text: single terms with
+ * counts and replay grades as counts (src/lib/consumer-report.ts).
  */
 
 import "./load-env";
@@ -23,6 +25,12 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import { getPayload } from "payload";
+import {
+	buildConsumerReport,
+	type ReplayResult,
+	topDemand,
+	type UsageRow,
+} from "../src/lib/consumer-report";
 
 // Dynamic import AFTER dotenv — a static import hoists above loadEnv() and
 // payload.config reads PAYLOAD_SECRET at eval time (the seed scripts' pattern).
@@ -41,6 +49,8 @@ const CONSUMER = argOf("consumer", "raven");
 const DAYS = Number.parseInt(argOf("days", "30"), 10) || 30;
 const TOP = Number.parseInt(argOf("top", "25"), 10) || 25;
 const OUTDIR = argOf("outdir", "improvements/consumers");
+/** A term is published only when at least this many calls asked it. */
+const MIN_TERM_COUNT = Number.parseInt(argOf("min-term", "5"), 10) || 5;
 
 /**
  * Consumer → uaBucket mapping. `raven` is the residual `other` bucket:
@@ -79,34 +89,6 @@ const REPLAYABLE = new Set([
 ]);
 const WEAK_CONFIDENCE = 0.45;
 
-interface UsageRow {
-	endpoint?: string;
-	query?: string;
-	resultCount?: number | null;
-	matchMode?: string | null;
-	scoutVersion?: string | null;
-	createdAt?: string;
-}
-
-interface ReplayResult {
-	/**
-	 * ok        — rows returned at healthy confidence
-	 * advisory  — zero rows BUT the response answered honestly out-of-scope:
-	 *             a concrete advisory answer (e.g. the person's SDF record) or
-	 *             an explicit scope note + tryInstead redirect. Counts as ok —
-	 *             report #1 mis-graded these as misses (justin rice / tyler on
-	 *             /api/builders) when the endpoint had fully handled them; a
-	 *             grader that only counts rows manufactures findings.
-	 * empty     — zero rows and no advisory handling: a real miss
-	 * weak      — rows but top confidence below the "low" line
-	 */
-	status: "ok" | "advisory" | "empty" | "weak";
-	returned: number;
-	matchMode: string | null;
-	topConfidence: number | null;
-	advisoryNote: string | null;
-}
-
 async function replayQuery(
 	endpoint: string,
 	q: string,
@@ -137,18 +119,11 @@ async function replayQuery(
 				: topConfidence !== null && topConfidence < WEAK_CONFIDENCE
 					? "weak"
 					: "ok";
-		const advisoryNote: string | null =
-			status === "advisory"
-				? (advisory.sdfPeople?.length ?? 0) > 0
-					? `answered via advisory (${advisory.sdfPeople[0].name ?? "SDF record"})`
-					: `scoped out + redirected (${advisory.tryInstead[0]?.endpoint ?? "tryInstead"})`
-				: null;
 		return {
 			status,
 			returned: rows.length,
 			matchMode,
 			topConfidence,
-			advisoryNote,
 		};
 	} catch {
 		return null;
@@ -207,65 +182,15 @@ async function main() {
 	}
 	console.log(`  ${rows.length} calls in window`);
 
-	// ── aggregate ───────────────────────────────────────────────────────────
-	const byEndpoint = new Map<
-		string,
-		{ calls: number; zero: number; withCount: number; sumCount: number }
-	>();
-	const demand = new Map<
-		string,
-		{ endpoint: string; query: string; hits: number; lastSeen: string }
-	>();
-	const activeDays = new Set<string>();
-
-	for (const r of rows) {
-		const ep = r.endpoint ?? "?";
-		const e = byEndpoint.get(ep) ?? {
-			calls: 0,
-			zero: 0,
-			withCount: 0,
-			sumCount: 0,
-		};
-		e.calls += 1;
-		if (typeof r.resultCount === "number") {
-			e.withCount += 1;
-			e.sumCount += r.resultCount;
-			if (r.resultCount === 0) e.zero += 1;
-		}
-		byEndpoint.set(ep, e);
-		if (r.createdAt) activeDays.add(r.createdAt.slice(0, 10));
-
-		const q = (r.query ?? "").trim();
-		if (q && REPLAYABLE.has(ep)) {
-			const key = `${ep} ${q.toLowerCase()}`;
-			const d = demand.get(key) ?? {
-				endpoint: ep,
-				query: q,
-				hits: 0,
-				lastSeen: "",
-			};
-			d.hits += 1;
-			if (r.createdAt && r.createdAt > d.lastSeen) d.lastSeen = r.createdAt;
-			demand.set(key, d);
-		}
-	}
-
 	// ── replay the top distinct queries against the LIVE api ───────────────
-	const top = [...demand.values()]
-		.sort((a, b) => b.hits - a.hits || (a.lastSeen < b.lastSeen ? 1 : -1))
-		.slice(0, TOP);
-	const replayed: Array<
-		(typeof top)[number] & { replay: ReplayResult | null }
-	> = [];
-	for (const t of top) {
-		replayed.push({ ...t, replay: await replayQuery(t.endpoint, t.query) });
+	// The query texts stay in memory; the report gets only the grades.
+	const replayed: Array<{ endpoint: string; replay: ReplayResult | null }> = [];
+	for (const t of topDemand(rows, REPLAYABLE, TOP)) {
+		replayed.push({
+			endpoint: t.endpoint,
+			replay: await replayQuery(t.endpoint, t.query),
+		});
 	}
-	// "advisory" counts as ok: the consumer received an honest, concrete
-	// handling (answer or scoped redirect) — only empty/weak are misses.
-	const replayOk = replayed.filter(
-		(r) => r.replay?.status === "ok" || r.replay?.status === "advisory",
-	).length;
-	const replayGraded = replayed.filter((r) => r.replay !== null).length;
 
 	// ── contract changes in the window ─────────────────────────────────────
 	let changelog: Array<{
@@ -285,95 +210,26 @@ async function main() {
 	}
 
 	// ── artifacts ───────────────────────────────────────────────────────────
-	const report = {
+	const { report, md } = buildConsumerReport({
 		consumer: CONSUMER,
-		label: consumer.label,
-		buckets: consumer.buckets,
-		caveat: consumer.caveat,
-		generatedAt: now.toISOString(),
-		window: { since: since.toISOString(), days: DAYS },
-		totals: {
-			calls: rows.length,
-			activeDays: activeDays.size,
-			endpoints: byEndpoint.size,
-			distinctReplayableQueries: demand.size,
-		},
-		byEndpoint: [...byEndpoint.entries()]
-			.map(([endpoint, e]) => ({
-				endpoint,
-				calls: e.calls,
-				zeroResultCalls: e.zero,
-				avgResultCount: e.withCount
-					? Math.round((e.sumCount / e.withCount) * 10) / 10
-					: null,
-			}))
-			.sort((a, b) => b.calls - a.calls),
-		topQueriesReplayed: replayed.map((r) => ({
-			endpoint: r.endpoint,
-			query: r.query,
-			hits: r.hits,
-			lastSeen: r.lastSeen,
-			today: r.replay,
-		})),
-		replaySummary: {
-			graded: replayGraded,
-			ok: replayOk,
-			okRate: replayGraded ? Math.round((replayOk / replayGraded) * 100) : null,
-		},
-		contractChangesInWindow: changelog.length,
-	};
+		meta: consumer,
+		rows,
+		replayed,
+		changelog,
+		now,
+		since,
+		days: DAYS,
+		base: BASE,
+		minTermCount: MIN_TERM_COUNT,
+		topTerms: 20,
+	});
 
 	mkdirSync(OUTDIR, { recursive: true });
 	const base = join(OUTDIR, `${CONSUMER}-${runDate}`);
 	writeFileSync(`${base}.json`, `${JSON.stringify(report, null, "\t")}\n`);
-
-	const misses = replayed.filter(
-		(r) =>
-			r.replay && (r.replay.status === "empty" || r.replay.status === "weak"),
-	);
-	const md = `# ${consumer.label} — workload quality report, ${runDate}
-
-Window: last ${DAYS} days (from ${since.toISOString().slice(0, 10)}). Consumer bucket: \`${consumer.buckets.join("`, `")}\`.
-> ${consumer.caveat}
-
-## Headline
-
-- **${rows.length} calls** across **${byEndpoint.size} endpoints** on **${activeDays.size} active days**
-- Top ${replayGraded} distinct queries replayed against the live API **today**: **${replayOk}/${replayGraded} ok**${report.replaySummary.okRate !== null ? ` (${report.replaySummary.okRate}%)` : ""}
-- **${changelog.length} contract changes** shipped during the window ([changelog](${BASE}/api/changelog?since=${since.toISOString().slice(0, 10)}))
-
-## What you asked (by endpoint)
-
-| Endpoint | Calls | Zero-result calls | Avg rows |
-|---|---|---|---|
-${report.byEndpoint.map((e) => `| \`${e.endpoint}\` | ${e.calls} | ${e.zeroResultCalls} | ${e.avgResultCount ?? "—"} |`).join("\n")}
-
-## Your top queries — do they work TODAY?
-
-Replayed live (a miss fixed since you sent it doesn't count against us; a live miss does):
-
-| Query | Endpoint | Hits | Today |
-|---|---|---|---|
-${replayed.map((r) => `| ${r.query.slice(0, 60)} | \`${r.endpoint}\` | ${r.hits} | ${r.replay ? (r.replay.status === "ok" ? `✓ ${r.replay.returned} rows` : r.replay.status === "advisory" ? `✓ ${r.replay.advisoryNote}` : r.replay.status === "empty" ? "✗ EMPTY" : `⚠ weak (top conf ${r.replay.topConfidence})`) : "(replay failed)"} |`).join("\n")}
-
-Grading: ✓ rows = answered; ✓ advisory = zero rows but the response answered honestly out-of-scope (concrete advisory record or explicit scope + redirect — counts as ok); ✗/⚠ are the misses.
-
-${
-	misses.length > 0
-		? `### Open misses (${misses.length}) — our fix queue\n\n${misses.map((m) => `- \`${m.endpoint}?q=${encodeURIComponent(m.query)}\` — ${m.replay?.status} (asked ${m.hits}×, last ${m.lastSeen.slice(0, 10)})`).join("\n")}`
-		: "### No open misses in your top queries 🎯"
-}
-
-## What changed for you this window
-
-${changelog.length === 0 ? "No contract changes in the window." : changelog.map((c) => `- ${c.date} \`${c.version ?? ""}\` **[${c.type}]** ${c.summary}`).join("\n")}
-
----
-*Generated by \`scripts/consumer-report.ts\` from the api-usage log (no IPs, no raw UAs stored) + a live replay. JSON twin: \`${CONSUMER}-${runDate}.json\`.*
-`;
 	writeFileSync(`${base}.md`, md);
 	console.log(
-		`  wrote ${base}.md + .json — replay ok ${replayOk}/${replayGraded}, misses ${misses.length}`,
+		`  wrote ${base}.md + .json: replay ok ${report.replaySummary.ok}/${report.replaySummary.graded}, misses ${report.replaySummary.misses}`,
 	);
 	process.exit(0);
 }

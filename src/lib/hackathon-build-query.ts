@@ -275,6 +275,9 @@ export interface BuildQuery {
 	 * says so. Absent = not attempted (keyword or meaning mode, no q, no
 	 * matched build, or the reranker is not configured). */
 	rerank?: Map<string, number> | null;
+	/** Builds whose name matched q but that rule L held back, as most of q
+	 * is in no submission, and that meaning did not list either. */
+	withheld: { b: IndexedBuild; matched: string[] }[];
 }
 
 /** Run the filters over the index. Search by meaning that cannot run serves
@@ -329,6 +332,7 @@ export async function queryBuilds(
 			served: f.mode,
 			warnings: [],
 			entries: entriesOf("", browse),
+			withheld: [],
 		};
 	const warnings: string[] = [];
 	let served = f.mode;
@@ -346,11 +350,14 @@ export async function queryBuilds(
 			);
 		}
 	}
+	const held: BuildQuery["withheld"] = [];
 	const hybrid = searchHackathonBuilds(indexed, f.q, {
 		...structural,
 		mode: served,
 		semantic,
 		packages: opts.packages,
+		// Meaning mode never lists a build by its name: nothing is withheld.
+		withheld: served === "meaning" ? undefined : held,
 	});
 	// Nothing matched: nothing to rerank, so it is not attempted. Search by
 	// meaning already slow: the rerank is skipped, not stacked on top.
@@ -369,12 +376,14 @@ export async function queryBuilds(
 		warnings.push(
 			`the reranker could not run this request (failed or slower than ${RERANK_TIMEOUT_MS / 1000} s), so rows are in hybrid order`,
 		);
+	const listed = new Set(scored.map((s) => s.b.id));
 	return {
 		...(rerank !== undefined ? { rerank } : {}),
 		scored,
 		field,
 		served,
 		warnings,
+		withheld: held.filter((w) => !listed.has(w.b.id)),
 		entries: entriesOf(f.q, scored, {
 			mode: served,
 			semantic,
