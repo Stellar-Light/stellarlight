@@ -86,3 +86,36 @@ are in the lane report; no route was called against production.
 - `PAYLOAD_SECRET`: if it was ever exposed in logs, rotating it is an owner
   decision (it signs every session; rotating logs everyone out). Added to
   `improvements/TODO.md`.
+
+## Review
+
+- Independent security review, Claude Fable 5.1, effort high, on the two
+  commits: GATE push. Verified POST-only admin routes and failed forged
+  collection tokens; the secret path (SHA-256 then timingSafeEqual, never
+  echoed); CSRF (Lax cookies, every admin UI caller a same-origin POST);
+  the job runner on the local API with the REST jobs endpoints admin-only;
+  every collection refusing partner writes; consumer reports carrying
+  counts only. Confirmed 13 tests fail on the old handlers. Two low
+  findings, fixed in a third commit below.
+
+## Log, third commit (review findings)
+
+- `tests/e2e/social-embed.e2e.spec.ts` still opened the preview with the
+  signing secret in the query (now a 401, timing out `beforeEach`) and
+  carried a hardcoded hex fallback for it. Removed both. `beforeEach` now
+  signs in through `POST /api/users/login` with `E2E_ADMIN_EMAIL` and
+  `E2E_ADMIN_PASSWORD` from the env (the e2e setup had no test-admin
+  credentials) and opens `/api/preview?slug=test`; the suite skips with a
+  message when either is unset. Not run: e2e needs a dev server and a
+  seeded test admin.
+- `src/collections/Blog.ts`: the preview URL is now relative
+  (`/api/preview?slug=...`), so the admin panel's anchor resolves it
+  against its own origin instead of an env base URL. The preview test now
+  asserts the exact relative URL.
+- `.env.example`: `ADMIN_ROUTE_SECRET=` beside `CRON_SECRET`, with its
+  rules (optional, 32 or more characters, `x-admin-secret` header).
+- `pnpm exec tsc --noEmit -p tsconfig.json`: exit 0.
+- `npx vitest run src/lib/__tests__ src/app/api src/collections/__tests__ --maxWorkers=4 --minWorkers=1`:
+  186 files, 2346 tests passed, exit 0.
+- `npx biome check` on the changed files: exit 0 (two warnings on
+  untouched lines).

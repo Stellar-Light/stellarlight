@@ -69,7 +69,8 @@ describe("Blog preview URL", () => {
 		const { Blog } = await import("@/collections/Blog");
 		const preview = Blog.admin?.preview as (doc: unknown) => string | null;
 		const url = preview({ slug: "post" }) ?? "";
-		expect(url).toContain("/api/preview?slug=post");
+		// Relative: resolves against the admin page origin, not an env base URL.
+		expect(url).toBe("/api/preview?slug=post");
 		expect(url).not.toContain("secret");
 		expect(url).not.toContain(SIGNING);
 	});
