@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { computeEcosystemGaps, GAP_PROJECT_SELECT } from "@/lib/ecosystem-gaps";
 import { buildHackathonBrief } from "@/lib/hackathon-brief";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
@@ -32,6 +32,14 @@ vi.mock("@/lib/hackathon-build-semantic", async (orig) => ({
 		async () => new Map([["dorahacks-buidl-1", 0.82]]),
 	),
 }));
+// Search by meaning is mocked to run, so vetIdea would call the reranker if
+// the shell exported VOYAGE_API_KEY: keep these cases off the live API.
+beforeEach(() => {
+	vi.stubEnv("VOYAGE_API_KEY", "");
+});
+afterEach(() => {
+	vi.unstubAllEnvs();
+});
 
 describe("funded peers count every funded project", () => {
 	const docs = Array.from({ length: 12 }, (_, i) => ({

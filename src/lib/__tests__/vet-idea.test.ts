@@ -28,6 +28,14 @@ vi.mock("@/lib/hackathon-builds", async (orig) => ({
 	...(await orig<typeof import("@/lib/hackathon-builds")>()),
 	getHackathonBuildsIndex: vi.fn(async () => buildsIndex),
 }));
+// Every case runs without the reranker unless it stubs one: a shell that
+// exports VOYAGE_API_KEY must not reach the live API from these tests.
+beforeEach(() => {
+	vi.stubEnv("VOYAGE_API_KEY", "");
+});
+afterEach(() => {
+	vi.unstubAllEnvs();
+});
 
 describe("vet-idea vertical map", () => {
 	it("every VERTICAL_TOKENS value is a real GAP_VERTICALS member", () => {
@@ -660,7 +668,8 @@ describe("vet-idea prior-art builds, reranked", () => {
 	const priorArt = async (q: string) =>
 		(await buildVetIdea(payload, q)).priorArt;
 
-	// First: the reranker caches what it scored, and a failure is not cached.
+	// The reranker caches by idea and candidates, so every case that reaches
+	// it asks its own idea: the cases hold in any order.
 	it("falls back to the hybrid order and the evidence rule when the reranker fails, and says so", async () => {
 		vi.mocked(fetch).mockRejectedValueOnce(new Error("network"));
 		const p = await priorArt("remittance app");
@@ -685,9 +694,19 @@ describe("vet-idea prior-art builds, reranked", () => {
 
 	it("leaves out a build the reranker scores below its floor", async () => {
 		scoreOf = (d) => (d.startsWith("corridor.") ? 0.9 : 0.2);
-		const p = await priorArt("remittance app");
+		const p = await priorArt("remittances");
 		expect(p.builds?.map((b) => b.id)).toEqual(["corridor"]);
 		expect(p.buildsBelowEvidenceRule).toBe(1);
+	});
+
+	// Review 2026-10-23: an idea no build matched served buildsReranked true
+	// with builds [] and a note naming the reranker.
+	it("does not claim a rerank when nothing matched", async () => {
+		const p = await priorArt("quantum teleportation");
+		expect(p.builds).toEqual([]);
+		expect(p.buildsReranked).toBe(false);
+		expect(p.note).not.toMatch(/reranker/);
+		expect(fetch).not.toHaveBeenCalled();
 	});
 
 	it("says the reranker scored the nearest below its floor instead of claiming none", async () => {

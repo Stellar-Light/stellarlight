@@ -415,27 +415,76 @@ describe("brief picks winners first, then broadens", () => {
 	// list after its winner slots instead of re-deriving the hybrid top five.
 	it("after its winner slots lists the builds vetIdea lists, in vetIdea's order", async () => {
 		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
+		const pool = [
+			build(
+				"RenderGate",
+				"Pay-per-render browser API for agents with x402.",
+				true,
+			),
+			build("Exact phrase", "x402 pay-per-call API for AI agents."),
+			build("Second", "x402 API for agents paying per call."),
+		];
 		const scored = searchHackathonBuilds(
-			[
-				build(
-					"RenderGate",
-					"Pay-per-render browser API for agents with x402.",
-					true,
-				),
-				build("Exact phrase", "x402 pay-per-call API for AI agents."),
-				build("Second", "x402 API for agents paying per call."),
-			],
+			pool,
 			"x402 pay-per-call API for AI agents",
 			{ perSubmission: true },
 		);
 		expect(
-			pickBriefBuilds(scored, ["Second", "RenderGate"]).map((s) => s.b.name),
+			pickBriefBuilds(scored, [pool[2], pool[0]]).map((s) => s.b.name),
 		).toEqual(["RenderGate", "Second"]);
 		// No list from vetIdea (its read failed): the evidence rule, as before.
 		expect(pickBriefBuilds(scored, undefined)).toEqual(pickBriefBuilds(scored));
 		expect(pickBriefBuilds(scored).map((s) => s.b.name)).toContain(
 			"Exact phrase",
 		);
+	});
+
+	// Review 2026-10-23: the brief looked vetIdea's ids up in its own ranking
+	// and dropped, in silence, one its own search did not hold (vetIdea served
+	// hybrid, the brief keyword).
+	it("lists a build vetIdea lists that its own ranking does not hold", async () => {
+		const { pickBriefBuilds, vetBuildsIn } = await import(
+			"@/lib/hackathon-brief"
+		);
+		const pool = [
+			build("Words", "x402 pay-per-call API for AI agents."),
+			build("Meaning only", "Agents settle usage per request in stablecoins."),
+		];
+		// Keyword served: the meaning-only build is not in the ranking.
+		const scored = searchHackathonBuilds(
+			pool,
+			"x402 pay-per-call API for AI agents",
+			{ perSubmission: true },
+		);
+		expect(scored.map((s) => s.b.name)).toEqual(["Words"]);
+		const vetRows = [
+			{ id: "Meaning only", hackathon: "Stellar Hacks: Agents" },
+			{ id: "Words", hackathon: "Stellar Hacks: Agents" },
+		];
+		const listed = vetBuildsIn(vetRows, scored, pool);
+		expect(pickBriefBuilds(scored, listed.builds).map((s) => s.b.name)).toEqual(
+			["Meaning only", "Words"],
+		);
+		expect(listed.missing).toEqual([]);
+	});
+
+	it("takes vetIdea's event entry from the index, and names a build it cannot find", async () => {
+		const { vetBuildsIn } = await import("@/lib/hackathon-brief");
+		const twin = build("Twin", "A wallet.", false, "twin");
+		const other = {
+			...twin,
+			hackathon: { title: "Other", slug: "other", endedAt: null },
+		};
+		const listed = vetBuildsIn(
+			[
+				{ id: "twin", hackathon: "Other" },
+				{ id: "gone", hackathon: "Stellar Hacks: Agents" },
+			],
+			[],
+			[twin, other],
+		);
+		expect(listed.builds).toEqual([other]);
+		expect(listed.missing).toEqual(["gone"]);
 	});
 
 	it("puts covering winners first and leaves out a one-word winner", async () => {

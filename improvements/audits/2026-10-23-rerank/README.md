@@ -222,14 +222,25 @@ against 17. The winner slots are unchanged.
   - `rerankBuilds(q, ranked)` reorders the first `RERANK_TOP` (50) by the
     reranker's score; a tie keeps the hybrid order, and the rest are
     unchanged.
-  - If it fails, times out (`RERANK_TIMEOUT_MS`, 2 s) or leaves a candidate
-    unscored, it returns today's order with `scores` null. Without a key it
-    is not attempted (`scores` undefined).
-  - It keeps a per-instance cache of 200 entries, keyed by q and the
-    candidate ids (a `ponytail:` comment marks it).
+  - If it fails, times out (`RERANK_TIMEOUT_MS`, 2 s), or its answer is not
+    exactly one finite score per candidate (malformed JSON, a duplicate,
+    out-of-range, negative or non-integer index, a null, string, NaN or
+    infinite score, too few scores), it returns today's order with `scores`
+    null. Without a key, or with nothing to rerank, it is not attempted
+    (`scores` undefined).
+  - It keeps a per-instance cache of 200 entries, keyed by
+    `JSON.stringify([q, ids])` (a `ponytail:` comment marks it).
 - **`queryBuilds`** takes `rerank` and runs the stage only when hybrid
-  served. It returns `rerank` (scores, null or absent) and adds a warning
-  when the stage did not run.
+  served and a build matched. It returns `rerank` (scores, null or absent)
+  and adds a warning when the stage did not run. It skips the stage
+  (`rerank` null, a warning naming the budget) when search by meaning has
+  already taken longer than `RERANK_SKIP_AFTER_MS` (3 s).
+  - Live on 1.9.96 (six ideas, read-only), meaning added 0.10 to 0.26 s to
+    the builds route's server time, and a whole vetIdea request took 1.4 to
+    2.0 s (1.7 to 2.8 s in the orchestrator's earlier probe).
+  - So a healthy request never skips, and the rerank never pushes external
+    waiting past about 5 s (the embedding alone may wait 5 s, the vector
+    read 4 s).
 - **vetIdea:**
   - When reranked, it lists the builds of the reranked top five that score
     at least `RERANK_FLOOR` (0.45), and the near-miss note names the
@@ -239,8 +250,13 @@ against 17. The winner slots are unchanged.
 - **The builds route:** reranked order in hybrid mode; `meta.reranked`;
   `meta.note` says so.
 - **`pickBriefBuilds(scored, vetListed)`:** the winner slots, then vetIdea's
-  ids in vetIdea's order. Without vetIdea's list it falls back to
+  builds in vetIdea's order. Without vetIdea's list it falls back to
   `priorArtTop`, as before.
+- **`vetBuildsIn`** resolves each of vetIdea's builds in the brief's own
+  ranking, then in the index (vetIdea's event entry first). The brief
+  therefore lists a build vetIdea found by meaning even when its own search
+  served keyword. A build neither holds (the index was rebuilt between the
+  two reads) is named in whatNotToClaim.
 - **Parity (`shipped.mts`, `shipped.txt`).** The shipped stage, answered
   from the recorded scores, gives vetIdea's listed builds equal to (c) and
   the route's top 5 equal to (a) on 140 of 140 ideas.
@@ -262,17 +278,19 @@ against 17. The winner slots are unchanged.
   unrelated, which is likely behind the known same-idea losses above.
   Reading the write-up was not measured.
 - **Winners in the top 50.** The reranker does not read placement, so
-  winners keep no edge inside the top 50 (the operation still says "winners
-  first among equals", which holds only for ties). Not measured:
-  `winnersOnly`, track, package, hackathon and category filters with
-  hybrid. The stage runs there too.
+  winners keep no edge inside the top 50 except on a tie. The operation now
+  says so: "Winners first among equals; in hybrid mode a reranker orders the
+  top 50". Not measured: `winnersOnly`, track, package, hackathon and
+  category filters with hybrid. The stage runs there too.
 - **Rough fallback.** A reranker failure on one page and success on the
-  next would order two pages differently. Each page's `meta.reranked` says
-  which order it holds.
+  next would order two pages differently, so rows can repeat or be skipped
+  across them. Each page's `meta.reranked` says which order it holds, and
+  the spec tells a caller paging to read it on every page.
 - **The floor.** It was tuned on 27 ideas and is set by one build
   (0.4563).
 - **Latency.** Each hybrid vetIdea and builds request adds one rerank call,
-  up to 2 s, unless the cache answers.
+  up to 2 s, unless the cache answers or search by meaning already took
+  over 3 s.
 
 ## Files
 
@@ -286,6 +304,7 @@ against 17. The winner slots are unchanged.
 | `pairs-working-before-labels.txt`, `pairs-working-after-labels.txt` | the model-choice tables |
 | `report.txt` | every table and every swap by name and grade (one build, dorahacks-buidl-42589, is printed as its id because its name carries a product name the repo's text rules bar) |
 | `grades.json` | the 469 blind grades: set, idea id, build id, both passes and the grade |
+| `timing.py`, `timing.txt` | read-only live timings behind the 3 s budget: wall time and Server-Timing of the builds route in keyword and hybrid mode and of vetIdea, six ideas, apiVersion at start and end |
 
 ## Rerun
 

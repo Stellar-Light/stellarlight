@@ -2,7 +2,11 @@
  * The filters every hackathon-submission operation takes, parsed and applied
  * once, so search, analyze and compare read the same set the same way.
  */
-import { RERANK_TIMEOUT_MS, rerankBuilds } from "@/lib/build-rerank";
+import {
+	RERANK_SKIP_AFTER_MS,
+	RERANK_TIMEOUT_MS,
+	rerankBuilds,
+} from "@/lib/build-rerank";
 import { semanticBuildScores } from "@/lib/hackathon-build-semantic";
 import {
 	BUILD_SEARCH_MODES,
@@ -265,10 +269,11 @@ export interface BuildQuery {
 	 * event), however perSubmission folded the rows. */
 	entries?: number;
 	/** With rerank, in hybrid mode: the reranker's score per build of the
-	 * first RERANK_TOP, which `scored` is then ordered by; null = it could not
-	 * run (failed or slow), so `scored` keeps the hybrid order and warnings
-	 * says so. Absent = not attempted (keyword or meaning mode, no q, or the
-	 * reranker is not configured). */
+	 * first RERANK_TOP, which `scored` is then ordered by; null = it did not
+	 * run (failed, slow, or skipped because search by meaning used up
+	 * RERANK_SKIP_AFTER_MS), so `scored` keeps the hybrid order and warnings
+	 * says so. Absent = not attempted (keyword or meaning mode, no q, no
+	 * matched build, or the reranker is not configured). */
 	rerank?: Map<string, number> | null;
 }
 
@@ -290,6 +295,7 @@ export async function queryBuilds(
 		rerank?: boolean;
 	} = {},
 ): Promise<BuildQuery> {
+	const startedAt = Date.now();
 	const structural = {
 		winnersOnly: f.winnersOnly,
 		track: f.track,
@@ -346,11 +352,20 @@ export async function queryBuilds(
 		semantic,
 		packages: opts.packages,
 	});
-	const { ranked: scored, scores: rerank } =
-		opts.rerank && served === "hybrid"
-			? await rerankBuilds(f.q, hybrid)
-			: { ranked: hybrid, scores: undefined };
-	if (rerank === null)
+	// Nothing matched: nothing to rerank, so it is not attempted. Search by
+	// meaning already slow: the rerank is skipped, not stacked on top.
+	const attempt = opts.rerank && served === "hybrid" && hybrid.length > 0;
+	const slow = attempt && Date.now() - startedAt > RERANK_SKIP_AFTER_MS;
+	const { ranked: scored, scores: rerank } = !attempt
+		? { ranked: hybrid, scores: undefined }
+		: slow
+			? { ranked: hybrid, scores: null }
+			: await rerankBuilds(f.q, hybrid);
+	if (slow)
+		warnings.push(
+			`the reranker was skipped because search by meaning took longer than ${RERANK_SKIP_AFTER_MS / 1000} s, the time budget before a rerank, so rows are in hybrid order`,
+		);
+	else if (rerank === null)
 		warnings.push(
 			`the reranker could not run this request (failed or slower than ${RERANK_TIMEOUT_MS / 1000} s), so rows are in hybrid order`,
 		);

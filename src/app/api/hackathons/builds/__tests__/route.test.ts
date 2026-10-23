@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
@@ -28,6 +28,15 @@ vi.mock("@/lib/hackathon-build-semantic", async (orig) => ({
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({ find: async () => ({ docs: [] }) })),
 }));
+
+// No reranker unless a case stubs one: a shell that exports VOYAGE_API_KEY
+// must not reach the live API from the hybrid cases here.
+beforeEach(() => {
+	vi.stubEnv("VOYAGE_API_KEY", "");
+});
+afterEach(() => {
+	vi.unstubAllEnvs();
+});
 
 const DAY = 86_400_000;
 const build = (id: string, over: Partial<IndexedBuild> = {}): IndexedBuild => ({
@@ -325,12 +334,15 @@ describe("GET /api/hackathons/builds reranks hybrid results", () => {
 		const { semanticBuildScores } = await import(
 			"@/lib/hackathon-build-semantic"
 		);
-		vi.mocked(semanticBuildScores).mockResolvedValueOnce(
-			new Map([
-				["kept", 0.8],
-				["quiet", 0.7],
-			]),
-		);
+		// Queued only where it is read: a keyword request leaves it for the
+		// next case.
+		if (mode === "hybrid")
+			vi.mocked(semanticBuildScores).mockResolvedValueOnce(
+				new Map([
+					["kept", 0.8],
+					["quiet", 0.7],
+				]),
+			);
 		const { GET } = await import("../route");
 		return (
 			await GET(
@@ -377,7 +389,9 @@ describe("GET /api/hackathons/builds reranks hybrid results", () => {
 
 	it("orders the top by the reranker and says it ran", async () => {
 		reranker();
-		const body = await get("kept quiet", "hybrid");
+		// Its own q: the reranker caches what it scored, and the failure case
+		// above must not find this answer in any order.
+		const body = await get("quiet kept", "hybrid");
 		expect(ids(body)).toEqual(["quiet", "kept"]);
 		expect(body.meta.reranked).toBe(true);
 		expect(body.meta.warnings).toBeUndefined();

@@ -104,19 +104,6 @@ describe("rerankBuilds", () => {
 		expect(out.scores).toBeNull();
 	});
 
-	it("serves today's order when an answer leaves a candidate unscored", async () => {
-		const { rerankBuilds } = await import("../build-rerank");
-		vi.mocked(fetch).mockResolvedValueOnce({
-			ok: true,
-			status: 200,
-			json: async () => ({ data: [{ index: 1, relevance_score: 0.9 }] }),
-		} as Response);
-		const ranked = [row("a"), row("b")];
-		const out = await rerankBuilds("partial query", ranked);
-		expect(out.ranked).toEqual(ranked);
-		expect(out.scores).toBeNull();
-	});
-
 	it("gives up after RERANK_TIMEOUT_MS and serves today's order", async () => {
 		vi.useFakeTimers();
 		const { rerankBuilds, RERANK_TIMEOUT_MS } = await import("../build-rerank");
@@ -164,13 +151,110 @@ describe("rerankBuilds", () => {
 		expect(calls).toHaveLength(0);
 	});
 
-	it("reranks an empty list without a call", async () => {
+	// Review 2026-10-23: an empty Map read as "reranked" with nothing reranked.
+	it("is not attempted for an empty list: undefined scores, no call", async () => {
 		const { rerankBuilds } = await import("../build-rerank");
 		const out = await rerankBuilds("empty query", []);
 		expect(out.ranked).toEqual([]);
-		expect(out.scores?.size).toBe(0);
+		expect(out.scores).toBeUndefined();
 		expect(calls).toHaveLength(0);
 	});
+
+	it("reranks a single candidate with one call", async () => {
+		const { rerankBuilds } = await import("../build-rerank");
+		const out = await rerankBuilds("single query", [row("only")]);
+		expect(calls).toHaveLength(1);
+		expect(calls[0].documents).toEqual(["only. about only"]);
+		expect(out.ranked.map((s) => s.b.id)).toEqual(["only"]);
+		expect(out.scores?.get("only")).toBe(0.5);
+	});
+
+	// Review 2026-10-23: the key `q\nids` let ("foo", [A, B]) answer
+	// ("foo\nA", [B]).
+	it("keys its cache on q and the candidates apart: a newline in q collides with nothing", async () => {
+		const { rerankBuilds } = await import("../build-rerank");
+		await rerankBuilds("foo", [row("A"), row("B")]);
+		await rerankBuilds("foo\nA", [row("B")]);
+		expect(calls).toHaveLength(2);
+		expect(calls[1]).toMatchObject({
+			query: "foo\nA",
+			documents: ["B. about B"],
+		});
+	});
+
+	// Each answer below is not a score for every candidate exactly once.
+	const answers: [string, () => Promise<unknown>][] = [
+		[
+			"malformed JSON",
+			async () => {
+				throw new SyntaxError("Unexpected token");
+			},
+		],
+		["no data", async () => ({})],
+		[
+			"a duplicate index, every candidate covered",
+			async () => ({
+				data: [
+					{ index: 0, relevance_score: 0.9 },
+					{ index: 0, relevance_score: 0.1 },
+					{ index: 1, relevance_score: 0.5 },
+				],
+			}),
+		],
+		[
+			"out-of-range and negative indices",
+			async () => ({
+				data: [
+					{ index: 5, relevance_score: 0.9 },
+					{ index: -1, relevance_score: 0.8 },
+				],
+			}),
+		],
+		[
+			"a string index",
+			async () => ({
+				data: [
+					{ index: "0", relevance_score: 0.9 },
+					{ index: 1, relevance_score: 0.8 },
+				],
+			}),
+		],
+		[
+			"null and string scores",
+			async () => ({
+				data: [
+					{ index: 0, relevance_score: null },
+					{ index: 1, relevance_score: "0.9" },
+				],
+			}),
+		],
+		[
+			"NaN and Infinity scores",
+			async () => ({
+				data: [
+					{ index: 0, relevance_score: Number.NaN },
+					{ index: 1, relevance_score: Number.POSITIVE_INFINITY },
+				],
+			}),
+		],
+		[
+			"fewer scores than documents",
+			async () => ({ data: [{ index: 1, relevance_score: 0.9 }] }),
+		],
+	];
+	for (const [label, json] of answers)
+		it(`serves today's order and null scores on ${label}`, async () => {
+			const { rerankBuilds } = await import("../build-rerank");
+			vi.mocked(fetch).mockResolvedValueOnce({
+				ok: true,
+				status: 200,
+				json,
+			} as unknown as Response);
+			const ranked = [row("a"), row("b")];
+			const out = await rerankBuilds(`answer: ${label}`, ranked);
+			expect(out.ranked).toEqual(ranked);
+			expect(out.scores).toBeNull();
+		});
 });
 
 describe("queryBuilds with rerank", () => {
@@ -235,5 +319,58 @@ describe("queryBuilds with rerank", () => {
 		const out = await queryBuilds(index, filters("keyword"), { rerank: true });
 		expect(out.rerank).toBeUndefined();
 		expect(calls).toHaveLength(0);
+	});
+
+	// Review 2026-10-23: q matching nothing served meta.reranked true.
+	it("is not attempted when nothing matched", async () => {
+		const { queryBuilds } = await import("../hackathon-build-query");
+		const out = await queryBuilds(
+			index,
+			{ ...filters("hybrid"), q: "quantum teleportation" },
+			{ rerank: true },
+		);
+		expect(out.scored).toEqual([]);
+		expect(out.rerank).toBeUndefined();
+		expect(out.warnings).toEqual([]);
+		expect(calls).toHaveLength(0);
+	});
+
+	// Review 2026-10-23: a rerank call after a slow embedding added up to 2 s
+	// to a request already waiting on search by meaning.
+	const slowMeaning = async (ms: number) => {
+		vi.useFakeTimers();
+		const { semanticBuildScores } = await import(
+			"@/lib/hackathon-build-semantic"
+		);
+		vi.mocked(semanticBuildScores).mockImplementationOnce(async () => {
+			vi.advanceTimersByTime(ms);
+			return new Map<string, number>();
+		});
+	};
+
+	it("skips the reranker when search by meaning used up its time budget, and says so", async () => {
+		const { queryBuilds } = await import("../hackathon-build-query");
+		const { RERANK_SKIP_AFTER_MS } = await import("../build-rerank");
+		await slowMeaning(RERANK_SKIP_AFTER_MS + 1);
+		const f = { ...filters("hybrid"), q: "remittance app" };
+		const out = await queryBuilds(index, f, { rerank: true });
+		expect(out.rerank).toBeNull();
+		expect(calls).toHaveLength(0);
+		expect(out.scored.map((s) => s.b.id)).toEqual(["alpha", "beta"]);
+		expect(out.warnings).toEqual([
+			"the reranker was skipped because search by meaning took longer than 3 s, the time budget before a rerank, so rows are in hybrid order",
+		]);
+	});
+
+	it("still reranks inside the time budget", async () => {
+		const { queryBuilds } = await import("../hackathon-build-query");
+		const { RERANK_SKIP_AFTER_MS } = await import("../build-rerank");
+		await slowMeaning(RERANK_SKIP_AFTER_MS - 1);
+		scoreOf = (d) => (d.startsWith("beta.") ? 0.9 : 0.2);
+		const f = { ...filters("hybrid"), q: "remittance service" };
+		const out = await queryBuilds(index, f, { rerank: true });
+		expect(calls).toHaveLength(1);
+		expect(out.rerank?.get("beta")).toBe(0.9);
+		expect(out.warnings).toEqual([]);
 	});
 });
