@@ -437,7 +437,7 @@ async function main() {
 				if ((await text(label.split(" ")[0], args)) !== want) off.push(label);
 			if (off.length === 0)
 				pass(
-					`compact pages come back byte for byte as the API sent them (${STUB_BODY.length} of ${STUB_BODY.length} chars); other output stays indented`,
+					`compact pages come back as unindented JSON, equal to the stub's minified page (${STUB_BODY.length} of ${STUB_BODY.length} chars); other output stays indented`,
 				);
 			else
 				fail(
@@ -952,12 +952,12 @@ async function main() {
 				"compact page under half the full page",
 				`${compact.raw.length} vs ${full.raw.length}`,
 			);
-		// The tool adds no whitespace, so the page is the API's own size (the
-		// stub session checks it byte for byte). The 24,000 characters the
+		// The tool re-serializes without indentation, so it adds no whitespace
+		// (the stub session checks a minified page round-trips unchanged). The 24,000 characters the
 		// compact view was sized for rides on live data: SMOKE_STRICT=1 only.
 		if (compact.raw === JSON.stringify(JSON.parse(compact.raw)))
 			pass(
-				`compact page carries no added whitespace, the API's own size (${compact.raw.length} chars)`,
+				`compact page carries no added whitespace (${compact.raw.length} chars)`,
 			);
 		else
 			fail(
