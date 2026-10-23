@@ -2380,6 +2380,11 @@ export interface ApiUsage {
 	status?: number | null;
 	durationMs?: number | null;
 	/**
+	 * CF-Worker header: zone of the calling Cloudflare Worker
+	 */
+	cfWorker?: string | null;
+	partial?: boolean | null;
+	/**
 	 * Match tier / retrieval mode served
 	 */
 	matchMode?: string | null;
@@ -4126,6 +4131,8 @@ export interface ApiUsageSelect<T extends boolean = true> {
 	resultCount?: T;
 	status?: T;
 	durationMs?: T;
+	cfWorker?: T;
+	partial?: T;
 	matchMode?: T;
 	updatedAt?: T;
 	createdAt?: T;

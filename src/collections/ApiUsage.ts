@@ -10,6 +10,8 @@ import { adminOnly } from "./access";
  * - No IP address logged
  * - Query string is truncated to 100 chars + lowercased
  * - User-Agent is bucketed into a coarse category, not stored raw
+ * - cfWorker: the zone name a CF-Worker header carries (calls made by a
+ *   Cloudflare Worker), a domain, not a person
  * - No request body / response body
  *
  * Access:
@@ -118,6 +120,22 @@ export const ApiUsage: CollectionConfig = {
 			// the start of the handler to the moment the hit is logged.
 			name: "durationMs",
 			type: "number",
+		},
+		{
+			// Zone of the Cloudflare Worker that made the call (its CF-Worker
+			// header). Attributes a keyless, UA-less gateway's calls to it.
+			name: "cfWorker",
+			type: "text",
+			index: true,
+			admin: {
+				description: "CF-Worker header: zone of the calling Cloudflare Worker",
+			},
+		},
+		{
+			// meta.partial served: a backend read failed and the page is
+			// incomplete. Absent = the route does not log it.
+			name: "partial",
+			type: "checkbox",
 		},
 		{
 			// Match tier served (projects: strict/loose-1/majority/semantic/all;
