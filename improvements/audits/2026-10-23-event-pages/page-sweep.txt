@@ -1,27 +1,27 @@
-hackmeridian-2026; winners 0; projects 0; submitted -; stats []; description 1601 chars; markup 4977 chars, 1979 bytes gzipped
-stellar-builders-camp-jaipur-2026; winners 0; projects 0; submitted -; stats []; description 190 chars; markup 4519 chars, 1397 bytes gzipped
-stellar-builder-summit-2026; winners 12; projects 0; submitted -; stats []; description 185 chars; markup 31777 chars, 2500 bytes gzipped
-stellar-hacks-zk; winners 5; projects 319; submitted 319; stats [319 | not known | not known | not known]; description 377 chars; markup 432493 chars, 34888 bytes gzipped
-stellar-pulso-hackathon; winners 0; projects 66; submitted 66; stats [66 | not known | not known | not known]; description 291 chars; markup 91466 chars, 9454 bytes gzipped
-stellar-journey-to-mastery-2026; winners 0; projects 0; submitted -; stats []; description 216 chars; markup 4635 chars, 1445 bytes gzipped
-build-on-stellar-philippines-2026; winners 5; projects 0; submitted -; stats []; description 171 chars; markup 12820 chars, 2165 bytes gzipped
-apac-stellar-hackathon-2026; winners 1; projects 0; submitted -; stats []; description 331 chars; markup 6250 chars, 1938 bytes gzipped
-stellar-agents-x402-stripe-mpp; winners 5; projects 249; submitted 249; stats [249 | not known | not known | not known]; description 526 chars; markup 339998 chars, 27648 bytes gzipped
-alebrije2026; winners 2; projects 28; submitted 28; stats [28 | not known | not known | not known]; description 297 chars; markup 46482 chars, 5430 bytes gzipped
-buildonstellarchile; winners 14; projects 41; submitted 41; stats [41 | not known | not known | not known]; description 175 chars; markup 86136 chars, 7793 bytes gzipped
-stellar-hacks-zk-gaming; winners 5; projects 95; submitted 95; stats [95 | not known | not known | not known]; description 357 chars; markup 136129 chars, 11048 bytes gzipped
-mqcstellar; winners 0; projects 6; submitted 6; stats [6 | not known | not known | not known]; description 0 chars; markup 12597 chars, 2344 bytes gzipped
-ideaton2026; winners 6; projects 67; submitted 67; stats [67 | not known | not known | not known]; description 219 chars; markup 103962 chars, 9852 bytes gzipped
-stellarhack; winners 0; projects 42; submitted 42; stats [42 | not known | not known | not known]; description 308 chars; markup 59852 chars, 6293 bytes gzipped
-codigoraiz2025; winners 0; projects 59; submitted 59; stats [59 | not known | not known | not known]; description 105 chars; markup 82688 chars, 7512 bytes gzipped
-scaffoldstellar; winners 5; projects 63; submitted 63; stats [63 | not known | not known | not known]; description 210 chars; markup 94587 chars, 8339 bytes gzipped
-ideatontelluscoop; winners 3; projects 22; submitted 22; stats [22 | not known | not known | not known]; description 133 chars; markup 39463 chars, 4710 bytes gzipped
-hackmeridian-2025; winners 6; projects 0; submitted -; stats []; description 558 chars; markup 14397 chars, 2002 bytes gzipped
-buildonstellarhack; winners 0; projects 21; submitted 21; stats [21 | not known | not known | not known]; description 169 chars; markup 31890 chars, 4031 bytes gzipped
-stellar-hacks-kale-reflector; winners 10; projects 45; submitted 45; stats [45 | not known | not known | not known]; description 322 chars; markup 81259 chars, 6794 bytes gzipped
-give-hackathon-argentina; winners 0; projects 6; submitted 6; stats [6 | not known | not known | not known]; description 240 chars; markup 13118 chars, 2594 bytes gzipped
-telluscoop-ideaton; winners 0; projects 73; submitted 73; stats [73 | not known | not known | not known]; description 82 chars; markup 99217 chars, 9308 bytes gzipped
-stellar-hacks-paltalabs; winners 3; projects 26; submitted 26; stats [26 | not known | not known | not known]; description 313 chars; markup 43119 chars, 4545 bytes gzipped
-stellar-latam; winners 4; projects 22; submitted 22; stats [22 | not known | not known | not known]; description 251 chars; markup 42460 chars, 4462 bytes gzipped
-stellar-hacks-blend; winners 3; projects 39; submitted 39; stats [39 | not known | not known | not known]; description 312 chars; markup 60072 chars, 5690 bytes gzipped
-build-on-stellar; winners 3; projects 82; submitted 82; stats [82 | not known | not known | not known]; description 292 chars; markup 116423 chars, 10443 bytes gzipped
+hackmeridian-2026; winners 0; badges 0; projects 0; submitted -; stats []; description 1601 chars; markup 4977 chars, 1979 bytes gzipped
+stellar-builders-camp-jaipur-2026; winners 0; badges 0; projects 0; submitted -; stats []; description 190 chars; markup 4519 chars, 1397 bytes gzipped
+stellar-builder-summit-2026; winners 12; badges 12; projects 0; submitted -; stats []; description 185 chars; markup 32425 chars, 2529 bytes gzipped
+stellar-hacks-zk; winners 5; badges 5; projects 319; submitted 319; stats [319 | not known | not known | not known]; description 377 chars; markup 432493 chars, 34888 bytes gzipped
+stellar-pulso-hackathon; winners 0; badges 0; projects 66; submitted 66; stats [66 | not known | not known | not known]; description 291 chars; markup 91466 chars, 9454 bytes gzipped
+stellar-journey-to-mastery-2026; winners 0; badges 0; projects 0; submitted -; stats []; description 216 chars; markup 4635 chars, 1445 bytes gzipped
+build-on-stellar-philippines-2026; winners 5; badges 5; projects 0; submitted -; stats []; description 171 chars; markup 12749 chars, 2128 bytes gzipped
+apac-stellar-hackathon-2026; winners 1; badges 1; projects 0; submitted -; stats []; description 331 chars; markup 6122 chars, 1891 bytes gzipped
+stellar-agents-x402-stripe-mpp; winners 5; badges 5; projects 249; submitted 249; stats [249 | not known | not known | not known]; description 526 chars; markup 339713 chars, 27629 bytes gzipped
+alebrije2026; winners 2; badges 2; projects 28; submitted 28; stats [28 | not known | not known | not known]; description 297 chars; markup 46368 chars, 5410 bytes gzipped
+buildonstellarchile; winners 14; badges 14; projects 41; submitted 41; stats [41 | not known | not known | not known]; description 175 chars; markup 85338 chars, 7760 bytes gzipped
+stellar-hacks-zk-gaming; winners 5; badges 5; projects 95; submitted 95; stats [95 | not known | not known | not known]; description 357 chars; markup 135844 chars, 11031 bytes gzipped
+mqcstellar; winners 0; badges 0; projects 6; submitted 6; stats [6 | not known | not known | not known]; description 0 chars; markup 12597 chars, 2344 bytes gzipped
+ideaton2026; winners 6; badges 6; projects 67; submitted 67; stats [67 | not known | not known | not known]; description 219 chars; markup 103620 chars, 9829 bytes gzipped
+stellarhack; winners 0; badges 0; projects 42; submitted 42; stats [42 | not known | not known | not known]; description 308 chars; markup 59852 chars, 6293 bytes gzipped
+codigoraiz2025; winners 0; badges 0; projects 59; submitted 59; stats [59 | not known | not known | not known]; description 105 chars; markup 82688 chars, 7512 bytes gzipped
+scaffoldstellar; winners 5; badges 5; projects 63; submitted 63; stats [63 | not known | not known | not known]; description 210 chars; markup 94302 chars, 8322 bytes gzipped
+ideatontelluscoop; winners 3; badges 3; projects 22; submitted 22; stats [22 | not known | not known | not known]; description 133 chars; markup 39292 chars, 4696 bytes gzipped
+hackmeridian-2025; winners 6; badges 6; projects 0; submitted -; stats []; description 558 chars; markup 13984 chars, 1952 bytes gzipped
+buildonstellarhack; winners 0; badges 0; projects 21; submitted 21; stats [21 | not known | not known | not known]; description 169 chars; markup 31890 chars, 4031 bytes gzipped
+stellar-hacks-kale-reflector; winners 10; badges 10; projects 45; submitted 45; stats [45 | not known | not known | not known]; description 322 chars; markup 80689 chars, 6768 bytes gzipped
+give-hackathon-argentina; winners 0; badges 0; projects 6; submitted 6; stats [6 | not known | not known | not known]; description 240 chars; markup 13118 chars, 2594 bytes gzipped
+telluscoop-ideaton; winners 0; badges 0; projects 73; submitted 73; stats [73 | not known | not known | not known]; description 82 chars; markup 99217 chars, 9308 bytes gzipped
+stellar-hacks-paltalabs; winners 3; badges 3; projects 26; submitted 26; stats [26 | not known | not known | not known]; description 313 chars; markup 43119 chars, 4545 bytes gzipped
+stellar-latam; winners 4; badges 4; projects 22; submitted 22; stats [22 | not known | not known | not known]; description 251 chars; markup 42232 chars, 4444 bytes gzipped
+stellar-hacks-blend; winners 3; badges 3; projects 39; submitted 39; stats [39 | not known | not known | not known]; description 312 chars; markup 59901 chars, 5675 bytes gzipped
+build-on-stellar; winners 3; badges 3; projects 82; submitted 82; stats [82 | not known | not known | not known]; description 292 chars; markup 116252 chars, 10431 bytes gzipped

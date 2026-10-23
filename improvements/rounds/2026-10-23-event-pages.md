@@ -28,6 +28,16 @@ and the independent review.
 Pending: the orchestrator's independent review, on a model other than the
 author's.
 
+- 2026-10-23, review of c9f1a516 by the orchestrator's independent reviewer
+  (its model and effort were not stated to this lane): GATE, fix first.
+  Verified on its own: its capture and replay byte identical on 42 lines;
+  the move's token diff and the regex equivalence; the only logging delta is
+  the one stated; the 28 route tests pass unedited; failing first
+  reproduced; the 27-body sweep passes; no injection path (no
+  dangerouslySetInnerHTML, all text escaped); tsc, 2,679 tests and
+  contract:check pass. Findings: 2 MEDIUM, 3 LOW, fixed in the commit after
+  c9f1a516 (log below). The reviewer's re-check is pending.
+
 ## Design (fixed before implementation)
 
 - **One function for both.** The detail route's whole body, from the
@@ -183,6 +193,95 @@ author's.
   (replay above), and the changelog's surfaces are the API, MCP, client and
   skill, not site pages.
 
+- 20:30Z, the review's findings, each fixed with a test written first:
+  1. MEDIUM: the winners-only line said "how many projects were submitted is
+     not known" while the hero prints the record's own figure ("32
+     submissions", "110+ submissions"). Now: "Only this event's winners are
+     stored here, not its full list of submissions."
+  2. MEDIUM: no deadline on the page's read. A cold read chains DoraHacks
+     reads (5 s timeouts), the store reads and a live roster read; every
+     event with no stored submissions, four of the seven curated ones
+     (HackMeridian 2026 among them), takes the live branch on every view.
+     Now the page races `getHackathonDetail` against 6 s, the bound
+     `/hackathons` puts on the same reads. Measured first, read-only,
+     20:30:59Z, a cache-busting query on six events, x-vercel-cache MISS:
+     0.73 to 1.56 s (hackmeridian-2026 the slowest), so 6 s is about four
+     times the warm read. Past it the page renders the event's facts, from
+     the curated record (no DoraHacks read) or the listing row (read in
+     parallel, only for a slug not curated), with "This event's winners and
+     submissions could not be loaded right now. Reload the page to try
+     again." A slug neither knows is an error, never a 404; nothing waits on
+     the platform's timeout. The read runs on and warms the caches, as on
+     `/hackathons`. Not done: skipping the live roster read for curated
+     events inside `getHackathonDetail` (it always yields none for a
+     curated event, so the bytes would not change); that changes the API's
+     code path, which this lane leaves to the orchestrator.
+  3. LOW: the Builder Summit's roster badges read "1st", an em dash and the
+     category, as one pill. The page now splits a placement at a spaced
+     hyphen, en dash or em dash (the two dashes written as escapes): the
+     place in the badge; what follows in the footer's track slot unless it
+     names a prize ("$"), which the footer shows from prizeUsd.
+     `parsePlacement` is unchanged: its four callers are the detail lib, the
+     builds route and `hackathon-builds.ts` (prizeUsd only) and the
+     `/hackathons` winners carousel (its label). Lib, API and data diff
+     against c9f1a516: 0 lines.
+  4. LOW: a DoraHacks winner's category line was empty; it falls back to the
+     track, as the project cards do, and the footer's track slot shows only
+     the collection's prize track or the roster's category, so a track does
+     not show twice.
+  5. LOW: the move's delta, in full. Besides comment punctuation (em and en
+     dashes to commas, colons, semicolons or parentheses), the move holds one
+     reworded comment (`hackathon-detail.ts` lines 93 to 94: the quoted
+     Spanish placement now reads `"Primer lugar" and a category`, not the
+     label with its en dash), the prize-tier regex's two dash characters
+     written as `\u2013` and `\u2014` (the same pattern), one line biome
+     joined (`dora.organization.name.toLowerCase().replace(...)`) and the
+     `logApiHit` move stated under Design.
+- Failing first, the page test on `git archive c9f1a516` with this test
+  file: 6 failed, 7 passed (one per finding; the three deadline tests time
+  out at vitest's 5 s). On this branch: 13 passed (`failing-first.txt`).
+- Sweep: two checks added, a winners-only page says nothing is "not known"
+  and no placement badge holds an em or en dash. Passes on this branch over
+  the 27 captured bodies; on c9f1a516's page the badge check fails (12
+  Builder Summit badges).
+- Noted, left as the review said: page size (comparable to `/hackathons`);
+  the curated description printing whole; the 4th to 10th place badge style.
+  Track names and descriptions served from DoraHacks still hold em dashes
+  on some pages (buildonstellarchile's track, for one): quoted upstream
+  text, as the no-dashes lane leaves it.
+- CI: `tests.yml` runs `pnpm exec vitest run src/lib/ src/components/`
+  only, so the page and sitemap tests, like the route's own tests, do not
+  run in CI. A separate follow-up.
+- Checks after the fixes (origin/main moved to 724f4e6a meanwhile: the
+  workflow-health JSON and the Electric Capital snapshot, which no file the
+  route, the page or the sitemap imports reads; not merged here): replay on
+  this tree `cmp` against the 7457e0c8 base, exit 0, sha256 dc6feaea... as
+  before; sweep passes; `pnpm exec tsc --noEmit -p tsconfig.json` exit 0;
+  `npx vitest run src/lib/ src/components/ src/app/ src/collections/
+  src/data/ --maxWorkers=4 --minWorkers=1` exit 0, 217 files, 2,684 tests;
+  `CONTRACT_BASE=origin/main pnpm contract:check` exit 0; `pnpm exec biome
+  check` on the 11 changed files exit 0 (the one existing warning at
+  `src/app/sitemap.ts:162`).
+
+- Supersedes the finding 2 entry, the failing-first counts and the
+  checks above: written while checking finding 2, the store's start
+  (`getPayloadSafe`, which retries once and has no bound of its own) now
+  sits inside the 6 s race too, since a slow start could still reach the
+  platform's timeout. The store down (the API's 503) now renders a known
+  event's facts with the same line instead of the error page; a slug
+  nothing knows is still an error, never a 404. Two tests for it: a store
+  that never starts, and the outage test, which now expects the curated
+  record and the error. Failing first on `git archive c9f1a516` with this
+  test file: 8 failed, 6 passed; on this branch 14 passed
+  (`failing-first.txt`). Checks after it: replay `cmp` against the 7457e0c8
+  base exit 0 (sha256 dc6feaea...), lib, API and data diff against
+  c9f1a516 0 lines; sweep passes; `pnpm exec tsc --noEmit -p
+  tsconfig.json` exit 0; `npx vitest run src/lib/ src/components/ src/app/
+  src/collections/ src/data/ --maxWorkers=4 --minWorkers=1` exit 0, 217
+  files, 2,685 tests; `CONTRACT_BASE=origin/main pnpm contract:check` exit
+  0; `pnpm exec biome check` on the 11 changed files exit 0 (the existing
+  warning at `src/app/sitemap.ts:162`).
+
 ## Outcome
 
 One commit on `lane/ep-event-pages`, not pushed. Verified locally only: the
@@ -204,3 +303,10 @@ lane):
   empty in production.
 - The detail read has no deadline: a cold DoraHacks listing (six reads, 5 s
   timeout each, cached an hour) delays the page as it does the API.
+
+After the review: a second commit on `lane/ep-event-pages`, on top of
+c9f1a516, not pushed. The API's bytes are unchanged (replay above); the
+receipt is still the PR preview, now also with a read past the deadline
+seen to render rather than wait.
+That supersedes the open item above on the detail read's deadline: the page
+now bounds it at 6 s; the API's own read is still unbounded.

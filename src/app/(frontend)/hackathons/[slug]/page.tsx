@@ -13,8 +13,13 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache, type ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
+import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
 import { getHackathonDetail } from "@/lib/hackathon-detail";
-import { parsePlacement } from "@/lib/integrations/dorahacks";
+import {
+	type DoraHacksHackathon,
+	fetchAllDoraHacksHackathons,
+	getHackathonUrl,
+} from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { clampSentences, plainText } from "@/lib/quality-text";
 
@@ -68,13 +73,97 @@ type Hackathon = {
 
 const NOT_KNOWN = "not known";
 
+/** How long the page waits for the API's answer, the store's start
+ * included: the bound /hackathons puts on the same DoraHacks reads.
+ * Uncached, the answer took 0.7 to 1.6 s for six events (2026-10-23); a cold
+ * one chains DoraHacks reads with 5 s timeouts, the store reads and, for an
+ * event with no stored submissions (four of the seven curated events,
+ * HackMeridian 2026 among them), a live roster read. Past it, or with the
+ * store down (the API's 503), the page renders the event's own facts, and
+ * the read runs on to warm the caches. */
+const DEADLINE_MS = 6000;
+
+/** What the page renders: the API's answer, or without it the event's
+ * facts with its winners and submissions not loaded. */
+type Loaded =
+	| { found: false }
+	| {
+			found: true;
+			late: boolean;
+			hackathon: Hackathon;
+			winners: readonly Row[];
+			submissions: readonly Row[];
+	  };
+
+/** An event's facts from its listing row (a curated event's is its record,
+ * no DoraHacks read), as the API's DoraHacks branch derives them. */
+function factsOf(h: DoraHacksHackathon): Hackathon {
+	const now = Math.floor(Date.now() / 1000);
+	const day = (t: number) => new Date(t * 1000).toISOString().slice(0, 10);
+	return {
+		name: h.title,
+		slug: h.uname,
+		description: h.description ?? null,
+		startDate: day(h.start_time),
+		endDate: day(h.end_time),
+		status:
+			h.start_time > now
+				? "upcoming"
+				: h.end_time < now
+					? "completed"
+					: "active",
+		externalUrl: getHackathonUrl(h),
+		organizer: h.organization ? { name: h.organization.name } : null,
+		source: h.source === "curated" ? "curated" : "dorahacks",
+		stats: {
+			totalSubmissions: null,
+			coverageNote: null,
+			winnersNote: null,
+			outcomes: null,
+		},
+	};
+}
+
 /** The API's answer for this slug, read once per request (the metadata and
  * the page share it). */
-const load = cache(async (slug: string) => {
-	const payload = await getPayloadSafe();
-	// The API answers 503 here: an outage, never "no such event".
-	if (!payload) throw new Error("hackathon store unavailable");
-	return getHackathonDetail(payload, slug);
+const load = cache(async (slug: string): Promise<Loaded> => {
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	const deadline = new Promise<null>((done) => {
+		timer = setTimeout(() => done(null), DEADLINE_MS);
+	});
+	try {
+		const curated = CURATED_HACKATHONS.find((h) => h.uname === slug);
+		// A DoraHacks event's facts, in case the answer does not come.
+		const listing = curated
+			? null
+			: fetchAllDoraHacksHackathons().catch(() => null);
+		const detail = await Promise.race([
+			// The store down is the API's 503: an outage, never "no such event".
+			getPayloadSafe().then((payload) =>
+				payload ? getHackathonDetail(payload, slug) : null,
+			),
+			deadline,
+		]);
+		if (detail) {
+			if (!detail.found) return { found: false };
+			const { hackathon, winners, submissions } = detail.body;
+			return { found: true, late: false, hackathon, winners, submissions };
+		}
+		const row =
+			curated ??
+			(await Promise.race([listing, deadline]))?.find((h) => h.uname === slug);
+		// Nothing known is not "no such event": an error, never a 404.
+		if (!row) throw new Error(`hackathon ${slug}: no answer, and no facts`);
+		return {
+			found: true,
+			late: true,
+			hackathon: factsOf(row),
+			winners: [],
+			submissions: [],
+		};
+	} finally {
+		clearTimeout(timer);
+	}
 });
 
 /** A DoraHacks event's description is its event page in markdown (23,058
@@ -130,10 +219,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
 	const { slug } = await params;
 	// An outage renders the error page, under the site's default title.
-	const detail = await load(slug).catch(() => null);
-	if (!detail) return {};
-	if (!detail.found) return { title: "Hackathon Not Found" };
-	const h: Hackathon = detail.body.hackathon;
+	const loaded = await load(slug).catch(() => null);
+	if (!loaded) return {};
+	if (!loaded.found) return { title: "Hackathon Not Found" };
+	const h = loaded.hackathon;
 	const lead = leadOf(h);
 	return {
 		title: h.name,
@@ -257,24 +346,32 @@ const RANK_STYLE: Record<number, string> = {
 	900: "honorable-mention",
 };
 
-/** The collection's placement values by name; any other label (DoraHacks',
- * the curated roster's) styled by its rank, and shown without the prize
- * after " - ", which the card's footer shows. */
+/** The collection's placement values by name. Any other label (DoraHacks',
+ * the curated roster's) is styled by its rank and split at a spaced hyphen,
+ * en dash or em dash: the place goes in the badge, and what follows is a
+ * prize ("1st Place - $5,000 in XLM", which the footer shows from prizeUsd)
+ * or the roster's category ("1st", then "Confidential Wallets"). */
 function placementMeta(p: Row) {
 	if (!p.hackathonPlacement) return null;
 	const known = PLACEMENT_META[p.hackathonPlacement];
-	if (known) return known;
+	if (known) return { ...known, category: null };
+	const [place, ...rest] = p.hackathonPlacement.split(/\s+[-\u2013\u2014]\s+/);
+	const after = rest.join(" ");
 	const style = RANK_STYLE[p.placementRank ?? 0] ?? "track-winner";
 	return {
-		label: parsePlacement(p.hackathonPlacement).label,
+		label: place,
 		classes: PLACEMENT_META[style].classes,
+		category: after && !after.includes("$") ? after : null,
 	};
 }
 
 function WinnerCard({ p }: { p: Row }) {
 	const meta = placementMeta(p);
 	const prize = p.prizeUsd ?? p.hackathonPrize;
-	const track = p.track ?? p.hackathonPrizeTrack;
+	// The track a prize was won in: the collection's, or the roster's
+	// category from its placement. A DoraHacks track shows on the category
+	// line instead.
+	const track = p.hackathonPrizeTrack ?? meta?.category;
 	const blurb = p.shortDescription ?? p.description;
 	return (
 		<RowLink p={p}>
@@ -288,7 +385,7 @@ function WinnerCard({ p }: { p: Row }) {
 							{p.name}
 						</h3>
 						<div className="text-xs text-muted-foreground truncate">
-							{p.category}
+							{p.category ?? p.track}
 						</div>
 					</div>
 				</div>
@@ -361,19 +458,23 @@ export default async function HackathonDetailPage({
 	params: Params;
 }) {
 	const { slug } = await params;
-	const detail = await load(slug);
-	if (!detail.found) notFound();
-	const hackathon: Hackathon = detail.body.hackathon;
+	const loaded = await load(slug);
+	if (!loaded.found) notFound();
+	// Winners ranked best first by the API; placementRank says when that is
+	// a ranking.
+	const { hackathon, winners, late } = loaded;
 	const { stats } = hackathon;
-	// Ranked best first by the API; placementRank says when that is a ranking.
-	const winners: readonly Row[] = detail.body.winners;
 	const winnersOnly = hackathon.coverage === "winners-only";
 	// Only its winners on record: they show above, never as its submissions.
-	const projects: readonly Row[] = winnersOnly ? [] : detail.body.submissions;
+	const projects = winnersOnly ? [] : loaded.submissions;
 	const submitted = stats.totalSubmissions;
-	const coverageLine = winnersOnly
-		? "Only this event's winners are on record here, listed above. Its other submissions are not stored, so how many projects were submitted is not known."
-		: stats.coverageNote;
+	// A record can state the field's size ("110+ submissions") that is not
+	// stored here, so the line says what is stored, not that it is unknown.
+	const coverageLine = late
+		? "This event's winners and submissions could not be loaded right now. Reload the page to try again."
+		: winnersOnly
+			? "Only this event's winners are stored here, not its full list of submissions."
+			: stats.coverageNote;
 
 	// Beside a count of unknowns, built, in progress and abandoned all 0 say
 	// nothing was classified, not that nothing survived: not known, not 0.
@@ -564,7 +665,8 @@ export default async function HackathonDetailPage({
 					)}
 
 					{projects.length === 0 ? (
-						!winnersOnly && (
+						!winnersOnly &&
+						!late && (
 							<div className="rounded-2xl border border-border/50 bg-card p-8 text-center">
 								<Trophy className="w-10 h-10 text-muted-foreground/30 mx-auto mb-3" />
 								<p className="text-sm text-muted-foreground">

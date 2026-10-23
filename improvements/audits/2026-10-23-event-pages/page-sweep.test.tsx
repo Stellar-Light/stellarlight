@@ -6,8 +6,10 @@
  * criterion (b) on each: no stat block prints 0 (no captured event has a
  * classified outcome, so every 0 would stand for a null or an unknown), the
  * Submitted block and the Projects count say only what totalSubmissions
- * says, a winners-only event lists no submissions, and every served winner
- * and submission has its card. Writes one line per event to SWEEP_OUT,
+ * says, a winners-only event lists no submissions and says nothing is not
+ * known, no placement badge holds an em or en dash, and every served
+ * winner and submission has its card. Writes one line per event to
+ * SWEEP_OUT,
  * with the length of the description the hero shows and of the markup.
  *
  *   REPLAY_LIVE=<capture.json> SWEEP_OUT=<out.txt> pnpm exec vitest run \
@@ -48,6 +50,8 @@ vi.mock("@/lib/hackathon-detail", () => ({
 	})),
 }));
 
+/** A placement badge's text. */
+const BADGE = /font-bold rounded-full border [^"]*">([^<]*)</g;
 const STAT =
 	/text-2xl sm:text-3xl font-bold text-foreground tracking-tight">([^<]*)</g;
 const text = (html: string) =>
@@ -84,13 +88,18 @@ describe("event pages sweep", () => {
 				expect(stat[0]).toBe(String(stats.totalSubmissions));
 				expect(submittedLabel).toBe(String(stats.totalSubmissions));
 			}
-			if (coverage === "winners-only") expect(projectCards).toBe(0);
-			else expect(projectCards).toBe(r.body.submissions.length);
+			if (coverage === "winners-only") {
+				expect(projectCards).toBe(0);
+				expect(html).not.toContain("not known");
+			} else expect(projectCards).toBe(r.body.submissions.length);
+			const badges = [...html.matchAll(BADGE)].map((m) => m[1]);
+			expect(badges.filter((b) => /[\u2013\u2014]/.test(b))).toEqual([]);
 
 			lines.push(
 				[
 					slug,
 					`winners ${winnerCards}`,
+					`badges ${badges.length}`,
 					`projects ${projectCards}`,
 					`submitted ${submittedLabel ?? "-"}`,
 					`stats [${stat.join(" | ")}]`,
