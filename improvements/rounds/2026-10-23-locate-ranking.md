@@ -349,3 +349,15 @@ Bar 3 not met as written; waived by the orchestrator because no frozen case ends
      a name (failed on 848a9f3c), show still counts inside a command.
   2. The scout-mcp TODO entry said the API weighs owner/name and hyphenated
      names 8 and quickstart 3; every repo named in q weighs 8.
+
+## Merge (2026-10-23)
+
+- main merged in at 7278358a (spec 1.9.105 there, the dead-protocol guard);
+  this change is spec 1.9.106. One conflict, in improvements/TODO.md, where
+  both sides appended items at the same place: both kept. Checks on the
+  merged tree: tsc exit 0; vitest (src/lib, src/components, src/app,
+  src/collections, src/data) 219 files, 2,794 tests passed; contract:write
+  no diff; contract:check exit 0; Raven gate ACCEPT 1.9.106; scripts types
+  GREEN (28 baselined); no em or en dash and no barred name in the added
+  lines.
+

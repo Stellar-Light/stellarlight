@@ -240,8 +240,8 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     supported, 0.9 high (live 1.9.101, 2026-10-23).
     Found by the owner's read of the row; measured in
     `improvements/rounds/2026-10-23-dead-protocol-guard.md`.
-    State: fixed on branch `lane/dq1-dead-protocol-guard` (spec 1.9.105),
-    in review as a pull request. The guard needs the enrich-tvl lane to store
+    State: merged as #1876 (spec 1.9.105); the enrich-tvl and curate-projects
+    runs are next. The guard needs the enrich-tvl lane to store
     `llamaListing`; the Allbridge description and routes need a curate-projects
     execute; the dispatch steps are in the ledger.
     Done when: merged and deployed; the enrich-tvl and curate-projects lanes
@@ -365,14 +365,14 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   User-Agent, no timeout and no retries, from Cloudflare's network, so its
   users likely share one per-IP limit [inferred]. See the owner decision on
   a key below.
-- scout-mcp `locate_source` trails the API from spec 1.9.105 (found in the
+- scout-mcp `locate_source` trails the API from spec 1.9.106 (found in the
   review of `lane/l3-locate-ranking`, 2026-10-23): its `repo` enum
   (`scout-mcp/src/index.ts`, "keep in sync with SOURCE_REPOS") lacks
   OpenZeppelin/stellar-contracts, so an MCP client cannot filter to it;
   its description and README row say eight repos and "Stellar's own code",
   and its q text says a named repo "lifts" where it now weighs 8 for every
   repo named in q. For the next scout-mcp release.
-- api-client: the schema regenerated for 1.9.105 (locateSource `repo` enum
+- api-client: the schema regenerated for 1.9.106 (locateSource `repo` enum
   with OpenZeppelin/stellar-contracts, the factors and locatorKind texts)
   reaches npm users only with the next api-client release (same review).
 - locateSource lifts stellar/quickstart by 8 when q says "quickstart" as a

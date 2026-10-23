@@ -1,7 +1,7 @@
 # locateSource ranking: natural questions to exact symbols (2026-10-23)
 
 Evidence for `improvements/rounds/2026-10-23-locate-ranking.md`. Spec
-placeholder 1.9.105.
+1.9.106 (the placeholder 1.9.105 in review).
 
 **Verdict: bars 1 and 2 met. Bar 3 not met as written; waived by the
 orchestrator because no frozen case ends below its main rank, and the joins
