@@ -596,7 +596,7 @@ const viewInput = z
 	.enum(["full", "compact"])
 	.optional()
 	.describe(
-		"Row shape. full (the default) returns every row field, unchanged. compact is for clients whose tool output is capped or cut: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. This tool returns a compact page as unindented JSON; measured through it on 2026-10-23 over four default pages of search_projects and search_repos: 90,918 to 120,796 characters full, 12,806 to 24,433 compact. Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. meta.view (first in meta) says the page is compact and where the left-out detail is read: repeat the call without view. Cannot be combined with fields (400).",
+		"Row shape. full (the default) returns every row field, unchanged. compact is for clients whose tool output is capped or cut: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. This tool returns a compact page as unindented JSON; measured through it on 2026-10-23 over four default pages of search_projects and search_repos: 90,918 to 120,796 characters full, 12,806 to 24,433 compact. Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. meta.view (first in meta) says the page is compact and where the left-out detail is read: repeat the call without view.",
 	);
 
 // 6. search_projects — prior-art / competitor lookup
@@ -614,12 +614,44 @@ server.registerTool(
 				.describe(
 					"Filter by category (Infrastructure, Tooling, User-Facing App, Asset, Protocol/Contract, Anchor, Partner Integration).",
 				),
-			hackathon: z.string().optional().describe("Filter by hackathon slug."),
+			type: z
+				.enum([
+					// Keep in sync with PROJECT_TYPES in src/lib/project-types.ts.
+					"Wallet",
+					"DEX",
+					"Lending",
+					"Bridge",
+					"Infrastructure",
+					"Payments",
+					"Anchor",
+					"SDK",
+					"Indexer",
+					"Explorer",
+					"Analytics",
+					"AI",
+					"Gaming",
+					"Education",
+					"Security",
+					"NFT",
+					"RWA",
+					"Stablecoin",
+					"Social Impact",
+					"RPC",
+					"Faucet",
+					"Card Issuing",
+					"Exchange",
+					"Oracle",
+					"Yield",
+				])
+				.optional()
+				.describe(
+					"Only projects whose types[] includes this product type (exact membership). type=Wallet alone lists Wallet-typed projects; combine it with q or status to scope further. Distinct from category: a project has one category but can carry several types.",
+				),
 			status: z
 				.string()
 				.optional()
 				.describe(
-					"Filter by lifecycle status (Live, Inactive, Development, Pre-Release, Pre-Development). status=Inactive lists retired/defunct projects — useful for 'is X still alive' and post-mortem queries.",
+					"Filter by lifecycle status (Live, Inactive, Development, Pre-Release). status=Inactive lists retired/defunct projects, useful for 'is X still alive' and post-mortem queries.",
 				),
 			scfAwarded: z
 				.boolean()
@@ -635,11 +667,11 @@ server.registerTool(
 			view: viewInput,
 		},
 	},
-	async ({ q, category, hackathon, status, scfAwarded, limit, view }) => {
+	async ({ q, category, type, status, scfAwarded, limit, view }) => {
 		const params = new URLSearchParams();
 		if (q) params.set("q", q);
 		if (category) params.set("category", category);
-		if (hackathon) params.set("hackathon", hackathon);
+		if (type) params.set("type", type);
 		if (status) params.set("status", status);
 		if (scfAwarded) params.set("scfAwarded", "1");
 		if (limit !== undefined) params.set("limit", String(limit));
@@ -893,18 +925,11 @@ server.registerTool(
 				.describe(
 					"Exact project-type filter, repeatable via comma ('DEX,Lending'). Resolved filter echoed in meta.filters.type.",
 				),
-			include: z
-				.string()
-				.optional()
-				.describe(
-					"Optional comma-separated includes (e.g. 'hackathons' to surface hackathon context).",
-				),
 		},
 	},
-	async ({ type, include }) => {
+	async ({ type }) => {
 		const params = new URLSearchParams();
 		if (type) params.set("type", type);
-		if (include) params.set("include", include);
 		const qs = params.toString();
 		const result = await callScout(`/api/leaderboard${qs ? `?${qs}` : ""}`);
 		return asToolResult(result);

@@ -98,6 +98,10 @@ jobs:
       - name: Build + verify (smoke test against the live API)
         if: steps.sel.outputs.go == 'true' && steps.state.outputs.published == 'false'
         working-directory: ${{ matrix.pkg }}
+        # Read-only: scout-mcp's suite skips its one write (a feedback row in
+        # the production curator queue). Run it without this to test the POST.
+        env:
+          SMOKE_READ_ONLY: "1"
         run: |
           pnpm install --frozen-lockfile
           pnpm build

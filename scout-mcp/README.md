@@ -125,14 +125,14 @@ All 28 tools wrap stellarlight.xyz public APIs. They're rate-limited but require
 | `compare_hackathons` | Side-by-side comparison of 2–5 hackathons with delta notes. |
 | `get_builders` | Stellar Passport builder directory (GitHub contributors). Filter by location or skill. |
 | `get_people` | SDF team/people index — leadership, board of directors, advisors (name → role → org). Filter by `q` or `section`. |
-| `search_projects` | Prior-art / competitor lookup across the curated project directory (live count in `get_status`). Tiered match-mode (strict → loose → majority) surfaced in `.meta.matchMode`. |
-| `search_repos` | Code-reference index of indexed-and-scored Stellar GitHub repos (live count in `get_status`), ranked by repoScore. Synonym expansion + `language` / `minScore` filters. The repo layer beneath the project directory. |
+| `search_projects` | Prior-art / competitor lookup across the curated project directory (live count in `get_status`). Tiered match-mode (strict → loose → majority) surfaced in `.meta.matchMode`. `category` / `type` / `status` / `scfAwarded` filters; `view=compact` for clients that cut long outputs. |
+| `search_repos` | Code-reference index of indexed-and-scored Stellar GitHub repos (live count in `get_status`), ranked by repoScore. Synonym expansion + `language` / `activity` / `minScore` filters; `view=compact` for clients that cut long outputs. The repo layer beneath the project directory. |
 | `explain_repo` | Architectural explainer for one Stellar GitHub repo — structure, entry points, and key modules. |
 | `locate_source` | Where in Stellar's own code a CLI flag, config option default, SDK or host function, or contract interface is defined: scored pointers (file, symbol or heading, line, commit, pinned GitHub URL) into eight allowlisted Stellar repos, never file content. `repo` / `kind` / `page` filters. `pointers: []` = searched, no match; `null` = could not search. |
 | `get_rfps` | Open + closed Stellar RFPs (SCF-funded sponsor briefs). Quarter-aware. |
 | `list_skills` | Catalog of Stellar agent skills: the official [skills.stellar.org](https://skills.stellar.org) set plus community and Stellar Light skills. |
 | `get_skill` | Full content of one SDF skill. |
-| `get_leaderboard` | Ecosystem dev activity (28-day active devs, commits, peer L1 comparison). |
+| `get_leaderboard` | Ecosystem dev activity (28-day active devs, commits, peer L1 comparison). `type` filter (project types, comma-separated). |
 | `get_status` | Scout API health + freshness per data source + endpoint enumeration. |
 | `submit_feedback` | In-skill feedback loop. Lands in stellarlight's curator queue. |
 | `get_clusters` | Project topic clusters with log-scaled crowdedness scores 1–10. |

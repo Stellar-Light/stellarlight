@@ -10,14 +10,23 @@
  *   node test/smoke.mjs                # against prod (default)
  *   SCOUT_API_BASE=http://localhost:3000 node test/smoke.mjs   # against local
  *   SMOKE_READ_ONLY=1 node test/smoke.mjs   # skip the one call that writes (the submit_feedback POST)
+ *   SMOKE_STRICT=1 node test/smoke.mjs      # also the checks that ride on live-data margins
+ *
+ * The publish workflow runs it with SMOKE_READ_ONLY=1 and without SMOKE_STRICT.
  */
 
 import { spawn } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 
 const SERVER = ["node", "dist/index.js"];
 const TIMEOUT_MS = 45_000;
 const READ_ONLY = process.env.SMOKE_READ_ONLY === "1";
+const STRICT = process.env.SMOKE_STRICT === "1";
+// Declared parameters across all tools. The forwarding audit asserts this
+// exactly, so it cannot pass having probed less: change it with any tool
+// parameter change.
+const DECLARED_PARAMETERS = 88;
 
 let passed = 0;
 let failed = 0;
@@ -270,6 +279,33 @@ async function main() {
 		else
 			fail("every expected tool registered", `missing: ${missing.join(", ")}`);
 
+		// The API ignores these, with an "Unknown parameter(s) ignored" warning,
+		// so no tool declares them; searchProjects' type filter is declared.
+		const declaredOf = (n) =>
+			Object.keys(
+				tools.find((t) => t.name === n)?.inputSchema?.properties ?? {},
+			);
+		const dead = [
+			["get_leaderboard", "include"],
+			["search_projects", "hackathon"],
+		].filter(([t, p]) => declaredOf(t).includes(p));
+		if (dead.length === 0)
+			pass(
+				"no tool declares a parameter the API ignores (get_leaderboard include, search_projects hackathon)",
+			);
+		else
+			fail(
+				"no tool declares a parameter the API ignores",
+				dead.map(([t, p]) => `${t}.${p}`).join(", "),
+			);
+		if (declaredOf("search_projects").includes("type"))
+			pass("search_projects declares type");
+		else
+			fail(
+				"search_projects declares type",
+				declaredOf("search_projects").join(", "),
+			);
+
 		// Verify each tool has a description + input schema
 		for (const t of tools) {
 			if (!t.description || t.description.length < 40) {
@@ -289,11 +325,15 @@ async function main() {
 	// Offline: the server talks to a local stub that records each request, so
 	// this checks forwarding, never data. A parameter whose value leaves the
 	// request unchanged is declared but dropped, as search_repos activity and
-	// get_leaderboard type were until 1.8.0.
+	// get_leaderboard type were until 1.8.0; a probe the schema refuses sends
+	// nothing and counts as dropped too.
 	console.log("\n◆ Parameter forwarding (local stub, no network)");
 	{
 		const { createServer } = await import("node:http");
 		const seen = [];
+		// The stub's answer to every request: unindented JSON, as the API serves.
+		const STUB_BODY =
+			'{"meta":{"view":{"mode":"compact"}},"projects":[{"id":"p1","name":"Probe","reposCount":2}]}';
 		const stub = createServer((req, res) => {
 			let body = "";
 			req.on("data", (c) => {
@@ -302,7 +342,7 @@ async function main() {
 			req.on("end", () => {
 				seen.push(`${req.method} ${req.url} ${body}`);
 				res.writeHead(200, { "content-type": "application/json" });
-				res.end("{}");
+				res.end(STUB_BODY);
 			});
 		});
 		await new Promise((resolve) => stub.listen(0, "127.0.0.1", resolve));
@@ -329,6 +369,11 @@ async function main() {
 		};
 		try {
 			const { result } = await session.request("tools/list", {});
+			const registered = (
+				readFileSync(new URL("../src/index.ts", import.meta.url), "utf8").match(
+					/registerTool\(/g,
+				) ?? []
+			).length;
 			const dropped = [];
 			let declared = 0;
 			for (const tool of result.tools) {
@@ -338,16 +383,19 @@ async function main() {
 					required.map((n) => [n, values(n, props[n])[0]]),
 				);
 				const baseSent = await sent(tool.name, base);
-				if (!baseSent) {
-					dropped.push(`${tool.name} (sent no request)`);
-					continue;
-				}
+				if (!baseSent && Object.keys(props).length === 0)
+					dropped.push(`${tool.name} (no request)`);
 				for (const [name, s] of Object.entries(props)) {
 					declared += 1;
 					const [a, b] = values(name, s);
-					const args = { ...base, [name]: required.includes(name) ? b : a };
-					if ((await sent(tool.name, args)) === baseSent)
-						dropped.push(`${tool.name}.${name}`);
+					const probe = await sent(tool.name, {
+						...base,
+						[name]: required.includes(name) ? b : a,
+					});
+					// No request proves nothing, so it counts as dropped.
+					if (!baseSent || !probe)
+						dropped.push(`${tool.name}.${name} (no request)`);
+					else if (probe === baseSent) dropped.push(`${tool.name}.${name}`);
 				}
 			}
 			if (dropped.length === 0)
@@ -358,6 +406,43 @@ async function main() {
 				fail(
 					"every declared parameter reaches the request",
 					`dropped: ${dropped.join(", ")}`,
+				);
+			// Exact coverage, so the audit cannot pass having probed less.
+			if (
+				result.tools.length === registered &&
+				declared === DECLARED_PARAMETERS
+			)
+				pass(
+					`audit covered ${result.tools.length} tools (the registerTool calls in src) and ${declared} parameters (DECLARED_PARAMETERS)`,
+				);
+			else
+				fail(
+					"audit covered every tool and parameter",
+					`${result.tools.length} tools of ${registered} registered, ${declared} parameters of ${DECLARED_PARAMETERS}; update DECLARED_PARAMETERS with a parameter change`,
+				);
+			// A compact page is the API's own bytes, so its size is the API's
+			// own; every other output stays indented.
+			const text = async (name, args) =>
+				(await session.request("tools/call", { name, arguments: args })).result
+					?.content?.[0]?.text;
+			const indented = JSON.stringify(JSON.parse(STUB_BODY), null, 2);
+			const outputs = [
+				["search_projects compact", { view: "compact" }, STUB_BODY],
+				["search_repos compact", { view: "compact" }, STUB_BODY],
+				["search_projects full", {}, indented],
+				["get_status", {}, indented],
+			];
+			const off = [];
+			for (const [label, args, want] of outputs)
+				if ((await text(label.split(" ")[0], args)) !== want) off.push(label);
+			if (off.length === 0)
+				pass(
+					`compact pages come back byte for byte as the API sent them (${STUB_BODY.length} of ${STUB_BODY.length} chars); other output stays indented`,
+				);
+			else
+				fail(
+					"compact pages byte for byte, other output indented",
+					off.join(", "),
 				);
 		} catch (e) {
 			fail("parameter forwarding audit", e.message);
@@ -732,9 +817,11 @@ async function main() {
 		if (!isError && pointers.length > 0)
 			pass(`returns ${pointers.length} pointers of ${data.total}`);
 		else fail("returns pointers", `isError=${isError} total=${data?.total}`);
-		// Ranks can move when the index is rebuilt, so near the top, not first.
+		// Ranks can move when the index is rebuilt: the publish run asks for the
+		// first page, SMOKE_STRICT=1 for the top 3.
+		const within = STRICT ? "in the top 3" : "on the first page";
 		const hit = pointers
-			.slice(0, 3)
+			.slice(0, STRICT ? 3 : pointers.length)
 			.find(
 				(p) =>
 					p.repo === "stellar/rs-soroban-env" &&
@@ -742,16 +829,14 @@ async function main() {
 			);
 		if (hit)
 			pass(
-				`rs-soroban-env soroban-env-host/src/auth.rs at rank ${hit.rank} (${hit.locator}, line ${hit.line})`,
+				`rs-soroban-env soroban-env-host/src/auth.rs ${within}: rank ${hit.rank} (${hit.locator}, line ${hit.line})`,
 			);
 		else
 			fail(
-				"rs-soroban-env soroban-env-host/src/auth.rs in the top 3",
-				pointers
-					.slice(0, 3)
-					.map((p) => `${p.repo} ${p.path}`)
-					.join("; "),
+				`rs-soroban-env soroban-env-host/src/auth.rs ${within}`,
+				pointers.map((p) => `${p.rank} ${p.repo} ${p.path}`).join("; "),
 			);
+		if (!STRICT) skip("auth.rs in the top 3", "SMOKE_STRICT=1 only");
 		if (
 			hit?.verificationUrl?.startsWith(
 				`https://github.com/stellar/rs-soroban-env/blob/${hit.ref}/`,
@@ -867,9 +952,21 @@ async function main() {
 				"compact page under half the full page",
 				`${compact.raw.length} vs ${full.raw.length}`,
 			);
-		// The budget the API's compact view was sized for; indenting the JSON
-		// would push this page past it.
-		if (compact.raw.length < 24_000)
+		// The tool adds no whitespace, so the page is the API's own size (the
+		// stub session checks it byte for byte). The 24,000 characters the
+		// compact view was sized for rides on live data: SMOKE_STRICT=1 only.
+		if (compact.raw === JSON.stringify(JSON.parse(compact.raw)))
+			pass(
+				`compact page carries no added whitespace, the API's own size (${compact.raw.length} chars)`,
+			);
+		else
+			fail(
+				"compact page carries no added whitespace",
+				compact.raw.slice(0, 40),
+			);
+		if (!STRICT)
+			skip("compact q=lending under 24,000 characters", "SMOKE_STRICT=1 only");
+		else if (compact.raw.length < 24_000)
 			pass(`compact q=lending under 24,000 characters (${compact.raw.length})`);
 		else
 			fail(
@@ -898,8 +995,11 @@ async function main() {
 	}
 
 	// ── Session 27: filters reach the API: search_repos activity, ──────────
-	// get_leaderboard type. Both were declared and silently dropped before 1.8.0.
-	console.log("\n◆ search_repos activity + get_leaderboard type");
+	// get_leaderboard type (declared and silently dropped before 1.8.0) and
+	// search_projects type (not declared before 1.8.0).
+	console.log(
+		"\n◆ filters applied: search_repos activity, get_leaderboard and search_projects type",
+	);
 	try {
 		const { isError, data } = await callTool("search_repos", {
 			q: "soroban",
@@ -945,6 +1045,29 @@ async function main() {
 			);
 	} catch (e) {
 		fail("get_leaderboard type", e.message);
+	}
+	try {
+		const { isError, data } = await callTool("search_projects", {
+			type: "Wallet",
+			limit: 5,
+		});
+		const rows = Array.isArray(data?.projects) ? data.projects : [];
+		if (
+			!isError &&
+			data?.meta?.filters?.type === "Wallet" &&
+			rows.length > 0 &&
+			rows.every((p) => p.types?.includes("Wallet"))
+		)
+			pass(
+				`search_projects type=Wallet echoed and applied (${rows.length} projects, all typed Wallet)`,
+			);
+		else
+			fail(
+				"search_projects type=Wallet echoed and applied",
+				`isError=${isError} filters=${JSON.stringify(data?.meta?.filters ?? null)}`,
+			);
+	} catch (e) {
+		fail("search_projects type", e.message);
 	}
 
 	// ── Summary ─────────────────────────────────────────────────────────────
