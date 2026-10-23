@@ -106,11 +106,13 @@ export async function GET(req: NextRequest) {
 		scored,
 		served: mode,
 		warnings,
+		entries,
 	} = await queryBuilds(indexed, f, {
 		perSubmission: true,
 		// Here only: a declared package matches q (q=passkey finds builds on
 		// passkey-kit); prior art and analyze's counts read the text alone.
 		packages: true,
+		countEntries: true,
 	});
 	warnings.unshift(...parsed.warnings);
 
@@ -198,6 +200,8 @@ export async function GET(req: NextRequest) {
 				counts: {
 					indexedBuilds: indexedTotal,
 					matched: scored.length,
+					// Event entries that match: analyze's unit for the same filter.
+					entries,
 					returned: builds.length,
 				},
 				// Over every matched build, not just this page: "which SDKs do

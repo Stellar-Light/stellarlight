@@ -132,3 +132,26 @@ author's.
 - The measurement and the leads are in
   `../audits/2026-10-23-build-matching/README.md`.
 - Not verified live: nothing is deployed from this lane.
+
+## Merge with main (orchestrator)
+
+- `update_pr_branch.sh` stopped on six conflicts with #1856 (1.9.92):
+  - The builds route, `queryBuilds`' options and the builds route test
+    fixtures: both changes kept.
+  - The changelog: both entries kept, 1.9.93 above 1.9.92.
+  - version.ts: 1.9.93.
+  - The generated spec: rebuilt with `pnpm contract:write`.
+- Found at the merge: #1856's `meta.counts.entries` re-runs the match without
+  this lane's `packages` option, so on the builds route a package match
+  counted in matched but not in entries.
+  - Fix: the entries pass uses the same `packages` option.
+  - The entries description and this changelog entry now say that where q
+    matches a package, entries can exceed analyze's total.
+  - The test `q=passkey` gives matched 1 and entries 1. It fails with the
+    fix reverted.
+  - The browse expectation moves from 9 and 10 to 10 and 11 for the added
+    tukar fixture.
+- Checks on the merged tree: `pnpm exec tsc --noEmit -p tsconfig.json` exit
+  0; `npx vitest run src/lib/__tests__ src/app/api` exit 0, 179 files and
+  2242 tests; `CONTRACT_BASE=4430f803 pnpm contract:check` exit 0;
+  `pnpm raven:gate` exit 0, ACCEPT 1.9.93.

@@ -83,7 +83,12 @@ function withStored(
 	};
 }
 
-async function loadOne(slug: string): Promise<HackathonSnapshot> {
+/** One event's snapshot. A read that failed is said in `notes`, never
+ * swallowed: a failed read is not an absent event or a zero count. */
+async function loadOne(
+	slug: string,
+	notes: string[],
+): Promise<HackathonSnapshot> {
 	const payload = await getPayloadSafe();
 
 	// 1. Try curated
@@ -163,7 +168,9 @@ async function loadOne(slug: string): Promise<HackathonSnapshot> {
 				};
 			}
 		} catch {
-			// fall through to DoraHacks
+			notes.push(
+				`${slug}: the curated event record could not be read, so its directory counts (submissions, winners, still active) are missing, not zero; the event listing fills what it can`,
+			);
 		}
 	}
 
@@ -179,7 +186,7 @@ async function loadOne(slug: string): Promise<HackathonSnapshot> {
 			else status = "active";
 			return {
 				slug,
-				source: "dorahacks",
+				source: d.source ?? "dorahacks",
 				name: d.title,
 				startDate: new Date(d.start_time * 1000).toISOString().slice(0, 10),
 				endDate: new Date(d.end_time * 1000).toISOString().slice(0, 10),
@@ -190,7 +197,9 @@ async function loadOne(slug: string): Promise<HackathonSnapshot> {
 			};
 		}
 	} catch {
-		// fall through
+		notes.push(
+			`${slug}: the event listing could not be read, so not-found here is unchecked, not a finding that the event does not exist`,
+		);
 	}
 
 	return { slug, source: "not-found" };
@@ -309,8 +318,9 @@ async function compare(slugs: string[], req: NextRequest) {
 	// The stored submissions give every event, DoraHacks ones included, its
 	// submission and winner counts and a profile; a failed index read keeps
 	// the comparison and says so.
+	const readNotes: string[] = [];
 	const [loaded, index] = await Promise.all([
-		Promise.all(slugs.map(loadOne)),
+		Promise.all(slugs.map((slug) => loadOne(slug, readNotes))),
 		getHackathonBuildsIndex().catch(() => null),
 	]);
 	const byEvent = new Map(
@@ -321,6 +331,14 @@ async function compare(slugs: string[], req: NextRequest) {
 	);
 	const snapshots = loaded.map((s) => withStored(s, byEvent.get(s.slug) ?? []));
 	const deltas = computeDeltas(snapshots);
+	deltas.notes.push(...readNotes);
+	const uncounted = snapshots.filter(
+		(s) => s.source !== "not-found" && s.submissionCount === undefined,
+	);
+	if (uncounted.length && index)
+		deltas.notes.push(
+			`submission and winner counts unavailable for ${uncounted.map((s) => s.slug).join(", ")}: none of their submissions are stored, so the counts are absent, not zero`,
+		);
 	const shifts = facetShifts(byEvent);
 	if (shifts.length) {
 		deltas.facetShifts = shifts;

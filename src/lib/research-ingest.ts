@@ -361,6 +361,26 @@ function normalizeDate(d: string | null | undefined): string | null {
 	return Number.isFinite(ts) ? new Date(ts).toISOString().slice(0, 10) : null;
 }
 
+/** Advance observedAt on unchanged research-docs chunks in one bulk $set:
+ * content and embedding untouched. A no-op when the database adapter exposes
+ * no mongoose model; throws when the write itself fails. */
+export async function restampObservedAt(
+	payload: Payload,
+	ids: (string | number)[],
+	at: string,
+): Promise<void> {
+	if (!ids.length) return;
+	// The mongoose MODEL (not the raw driver collection) auto-casts the
+	// hex-string ids to ObjectId, so no `mongoose` import (a transitive dep)
+	// and no manual ObjectId conversion. Same handle other scripts use
+	// (eval-research-retrieval.ts). $set only observedAt; content + embedding
+	// untouched.
+	// biome-ignore lint/suspicious/noExplicitAny: payload.db mongoose internals
+	const model = (payload.db as any)?.collections?.["research-docs"];
+	if (model?.updateMany)
+		await model.updateMany({ _id: { $in: ids } }, { $set: { observedAt: at } });
+}
+
 /**
  * Embed and upsert a batch of chunks against the existing collection.
  * Skips chunks whose content hash hasn't changed — EXCEPT when metadata
@@ -507,19 +527,7 @@ export async function upsertChunks(opts: {
 			`  Re-stamping observedAt on ${restampIds.length} unchanged chunk(s) (bulk)…`,
 		);
 		try {
-			// The mongoose MODEL (not the raw driver collection) auto-casts the
-			// hex-string ids to ObjectId — so no `mongoose` import (a transitive dep)
-			// and no manual ObjectId conversion. Same handle other scripts use
-			// (eval-research-retrieval.ts). $set only observedAt; content + embedding
-			// untouched.
-			// biome-ignore lint/suspicious/noExplicitAny: payload.db mongoose internals
-			const model = (payload.db as any)?.collections?.["research-docs"];
-			if (model?.updateMany) {
-				await model.updateMany(
-					{ _id: { $in: restampIds } },
-					{ $set: { observedAt: runObservedAt } },
-				);
-			}
+			await restampObservedAt(payload, restampIds, runObservedAt);
 		} catch (err) {
 			console.error(
 				`    ✗ observedAt bulk re-stamp: ${(err as Error).message}`,

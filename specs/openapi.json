@@ -3410,11 +3410,30 @@
 						}
 					},
 					"404": {
-						"description": "Hackathon not found",
+						"description": "Hackathon not found. `error` itself carries the way forward (getHackathons with q, and the closest known slugs), since some clients keep only `error`.",
 						"content": {
 							"application/json": {
 								"schema": {
-									"$ref": "#/components/schemas/ErrorResponse"
+									"type": "object",
+									"required": [
+										"error"
+									],
+									"properties": {
+										"error": {
+											"type": "string"
+										},
+										"hint": {
+											"type": "string",
+											"description": "How to find the slug: GET /api/hackathons?q=<one word of the event's name>."
+										},
+										"closestSlugs": {
+											"type": "array",
+											"items": {
+												"type": "string"
+											},
+											"description": "Up to three listed slugs sharing the most distinguishing words with the one asked for. A word more than half the listed slugs carry (stellar) does not count, so [] means no listed slug shares a distinguishing word; the error text then names none."
+										}
+									}
 								}
 							}
 						}
@@ -3556,7 +3575,8 @@
 														"description": "null when the source publishes none: unknown, never zero."
 													},
 													"source": {
-														"type": "string"
+														"type": "string",
+														"description": "curated, dorahacks or not-found: where the event's row came from, as getHackathons labels it: curated (a hand-kept event) or dorahacks. not-found = no listing holds the slug; when the listing could not be read, deltas.notes says so and the miss is unchecked."
 													},
 													"hackersCount": {
 														"type": "integer",
@@ -3565,7 +3585,7 @@
 													"submissionCount": {
 														"type": "integer",
 														"nullable": true,
-														"description": "Curated events: directory projects tied to the event. DoraHacks events: stored submissions."
+														"description": "Curated events: directory projects tied to the event. DoraHacks events: stored submissions. Absent when neither is held; deltas.notes then names the event, and absent is not zero."
 													},
 													"winnerCount": {
 														"type": "integer",
@@ -3892,7 +3912,8 @@
 													"type": "array",
 													"items": {
 														"type": "string"
-													}
+													},
+													"description": "Plain-language differences, plus every gap: an event whose counts are unavailable, and any read that failed (a failed read is never served as an absent event or a zero)."
 												},
 												"facetShifts": {
 													"type": "array",
@@ -3948,7 +3969,7 @@
 					"Hackathons"
 				],
 				"summary": "Search what was BUILT at Stellar hackathons (prior-art over prototypes)",
-				"description": "Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; `track` filters. Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.",
+				"description": "Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals. Unit: submissions (counts.entries = event entries). Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.",
 				"x-routing": {
 					"purpose": "Prior-art over hackathon PROTOTYPES — has this idea already been hacked together at a Stellar hackathon?",
 					"keywords": [
@@ -4238,7 +4259,12 @@
 															"description": "Submissions in the index. A submission entered in several events counts once."
 														},
 														"matched": {
-															"type": "integer"
+															"type": "integer",
+															"description": "Unique submissions that match: the rows this search pages through."
+														},
+														"entries": {
+															"type": "integer",
+															"description": "Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze."
 														},
 														"returned": {
 															"type": "integer"
@@ -4929,7 +4955,7 @@
 					"Hackathons"
 				],
 				"summary": "Trends and counts across Stellar hackathon submissions, with lift",
-				"description": "Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. A submission entered in several events counts once in each. For the builds themselves → use searchHackathonBuilds.",
+				"description": "Counts over every stored Stellar hackathon submission, during and after its event. `facet`: category (project types), library or package (Stellar SDKs declared), activity (commits 90+ days after), project (became a directory project), projectStatus (its status today) and its grant funding, placement, event or year. `by=event` or `by=year` makes a trend; every answer compares winners with the rest (lift). Shares are over known values. Unit: event entries (a submission in two events counts twice). Same filters as searchHackathonBuilds; for the builds themselves → use searchHackathonBuilds.",
 				"x-routing": {
 					"purpose": "Spot trends across Stellar hackathons: what share of submissions do X, which SDKs winners use, how a category moved event by event, what the winners did differently, and who kept building.",
 					"keywords": [
@@ -5017,7 +5043,7 @@
 						"name": "value",
 						"in": "query",
 						"required": false,
-						"description": "Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value.",
+						"description": "Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value. With facet=library a package name counts as the library it belongs to (soroban-sdk = Soroban Rust SDK). A value no stored submission carries adds a meta.warnings line naming the values seen: its 0 is a miss, not a measured count.",
 						"schema": {
 							"type": "string"
 						}
@@ -6041,7 +6067,7 @@
 												"categoryContext": {
 													"type": "object",
 													"nullable": true,
-													"description": "How crowded the submission's top category is across every stored submission. null when it is not categorized.",
+													"description": "How crowded the submission's top category is across every stored submission. null when it has no confident category or is not categorized yet; categoryNote says which.",
 													"properties": {
 														"type": {
 															"type": "string",
@@ -6084,6 +6110,11 @@
 															"nullable": true
 														}
 													}
+												},
+												"categoryNote": {
+													"type": "string",
+													"nullable": true,
+													"description": "Why categoryContext is null: the submission has no confident category (uncertain, not missing), or it is not categorized yet. null when categoryContext is served."
 												},
 												"pitch": {
 													"type": "object",
@@ -6816,7 +6847,7 @@
 					{
 						"name": "type",
 						"in": "query",
-						"description": "Filter by partner type",
+						"description": "Filter by partner type. on-off-ramp also takes anchors whose rampTypes record a ramp (most ramp providers are typed anchor); an anchor with no ramp recorded is left out and a meta.warnings line says so, so type=anchor is the full anchor list.",
 						"schema": {
 							"type": "string",
 							"enum": [
@@ -15813,11 +15844,13 @@
 									},
 									"requirements": {
 										"type": "string",
-										"nullable": true
+										"nullable": true,
+										"description": "The page's submission-requirements section, in markdown. null = the page was read (readAt) and has no requirements section: the organizer published none there."
 									},
 									"judgingCriteria": {
 										"type": "string",
-										"nullable": true
+										"nullable": true,
+										"description": "The page's judging section, in markdown. null = the page was read (readAt) and has no judging section: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all."
 									},
 									"readAt": {
 										"type": "string",

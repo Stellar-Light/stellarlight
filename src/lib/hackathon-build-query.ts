@@ -259,6 +259,10 @@ export interface BuildQuery {
 	field: IndexedBuild[];
 	served: BuildSearchMode;
 	warnings: string[];
+	/** With countEntries: the event entries that match, the unit analyze
+	 * counts (a submission entered in several events is one entry per
+	 * event), however perSubmission folded the rows. */
+	entries?: number;
 }
 
 /** Run the filters over the index. Search by meaning that cannot run serves
@@ -268,8 +272,13 @@ export async function queryBuilds(
 	f: BuildFilters,
 	/** searchHackathonBuilds: one result per submission. analyze leaves it
 	 * off and counts every event entry (sls-092). `packages`: q also matches
-	 * declared packages; only the searchHackathonBuilds route passes it. */
-	opts: { perSubmission?: boolean; packages?: boolean } = {},
+	 * declared packages; only the searchHackathonBuilds route passes it.
+	 * `countEntries`: also count matching event entries (meta.counts.entries). */
+	opts: {
+		perSubmission?: boolean;
+		packages?: boolean;
+		countEntries?: boolean;
+	} = {},
 ): Promise<BuildQuery> {
 	const structural = {
 		winnersOnly: f.winnersOnly,
@@ -281,7 +290,30 @@ export async function queryBuilds(
 	};
 	const browse = searchHackathonBuilds(indexed, "", structural);
 	const field = browse.map((s) => s.b);
-	if (!f.q) return { scored: browse, field, served: f.mode, warnings: [] };
+	// The same match over every entry, so a per-submission answer can say
+	// what analyze counts for the same filter.
+	const entriesOf = (
+		q: string,
+		scored: ScoredBuild[],
+		more: Parameters<typeof searchHackathonBuilds>[2] = {},
+	) =>
+		!opts.countEntries
+			? undefined
+			: opts.perSubmission
+				? searchHackathonBuilds(indexed, q, {
+						...structural,
+						...more,
+						perSubmission: false,
+					}).length
+				: scored.length;
+	if (!f.q)
+		return {
+			scored: browse,
+			field,
+			served: f.mode,
+			warnings: [],
+			entries: entriesOf("", browse),
+		};
 	const warnings: string[] = [];
 	let served = f.mode;
 	let semantic: Map<string, number> | undefined;
@@ -304,5 +336,15 @@ export async function queryBuilds(
 		semantic,
 		packages: opts.packages,
 	});
-	return { scored, field, served, warnings };
+	return {
+		scored,
+		field,
+		served,
+		warnings,
+		entries: entriesOf(f.q, scored, {
+			mode: served,
+			semantic,
+			packages: opts.packages,
+		}),
+	};
 }
