@@ -1,9 +1,18 @@
 # Source locator: measured before shipping (2026-10-23)
 
-**Verdict: stopped at the ship gate.** The fixed criteria were both named
-misses in the top 3 and at least 14 of 20 cases in the top 10. 19 of 20 are
-in the top 10, and m1 is at rank 2, but m2 is at rank 8. The operation
-(route, spec, collections, workflow) was not built; see "Not built" below.
+**Verdict: shipped on the second pass.**
+
+- First pass: stopped at the gate. The criteria were both named misses in
+  the top 3 and at least 14 of 20 in the top 10; 19 of 20 were in the top
+  10 and m1 at rank 2, but m2 was at rank 8. A blind judge then ruled the
+  frozen label right (rpcv1 `options.go` YES, rpcv2 `config.go` PARTIAL).
+- Second pass: a ranking defect fixed on dev data only, then a fresh
+  held-out battery written by a separate agent, run once: **15 of 20 in
+  the top 10** (needed 14), and on the same rows **m1 rank 1, m2 rank 2**
+  (needed top 3). The operation was built: see "Second pass" below.
+
+The sections up to "First pass: not built" record the first pass as it
+was measured.
 
 ## What was measured
 
@@ -128,7 +137,7 @@ matched first scored 5 of 8 at top 1 (a path word lifted weak matches
 over exact names: d1, d5, d7) against 8 of 8 for the weighted sum, so it was
 dropped before the gate run.
 
-## Storage plan (not built)
+## Storage (planned in the first pass, built in the second)
 
 Two Payload collections on the existing Mongo cluster, the research-docs
 pattern: `source-locators` (one row per pointer, unique `key`, a multikey
@@ -143,12 +152,101 @@ pointers, so an unchanged HEAD plans 0. A committed JSON artifact was the
 alternative; it was not chosen because bot data commits do not deploy here,
 so the served index would lag every refresh.
 
-## Not built (stopped at the gate)
+## First pass: not built (superseded by the second pass)
 
 The route (`/api/sources/locate`), the spec entry and its routing text,
 the two collections and their Payload registration, the scheduled and
 dispatchable workflow, the writer-conformance entry, the changelog entry
 and version bump, and the Raven gate run on a new operation name.
+
+## Second pass: the fix (dev data only)
+
+The "symbol holds the word" tier (5) now applies only to a q word of
+several parts (`getEvents` in `NewGetEventsHandler`); a single word held
+inside a name without being one of its parts scores as a word (3); and the
+share of the name's own parts that q accounts for adds up to 1. Three tests
+failed first. Measured on the dev set and the read first battery only:
+
+| variant | first battery top 1/3/10 | m1 | m2 (file, symbol) | dev top 1/3/10 |
+| --- | --- | --- | --- | --- |
+| first pass (gate run) | 13/18/19 | 2 | 8, 8 | 8/8/8 |
+| held tier fix only | 15/20/20 | 2 | 3, 10 | 8/8/8 |
+| fix and name share (shipped) | 16/20/20 | 1 | 2, 4 | 8/8/8 |
+
+m2 passes by file with a thin margin: rank 2 is
+`max-get-transactions-execution-duration` in the expected file (total
+12.6) and ranks 3 to 6 tie at 12.5, two of them the expected options.
+Release-versus-unreleased code (rpcv2 behind `--enable-rpcv2`, off by
+default) is not marked in the tree by any build tag, feature or path
+convention, so no generic signal was added.
+
+## Second pass: the fresh held-out battery
+
+`fresh-battery.frozen.json`: 20 questions written by a separate agent
+(Claude Opus 5.5) that never saw the code or ranking, frozen
+2026-10-23T14:05:01Z, sha256
+`b051ae9ebed38ee6200406164a71741c128262ad8a2704484513f9a322637081`, copied
+here unchanged. Its pinned refs are the eight commits above. Run once,
+rows built from tarballs at those refs, with the harness adapted to its
+field names only (`fresh-battery-result.json`).
+
+| | found | of 20 |
+| --- | ---: | ---: |
+| top 1 | 10 | |
+| top 3 | 12 | |
+| top 10 | **15** | misses: f01 (rank 40), f07 (none), f12 (13), f15 (25), f16 (36) |
+| partial path only, in the top 10 | 1 | f12 (a partial path at rank 1); never counted |
+| decoy path in the top 10 | 0 | f14 decoy at 148, f16 at 122 |
+
+| id | kind | expected | file rank | partial | decoy | hard |
+| --- | --- | --- | ---: | ---: | ---: | --- |
+| f01 | symbol | stellar-core `src/util/ProtocolVersion.h` | 40 | 720 | - | yes |
+| f02 | symbol | stellar-core `src/main/CommandLine.cpp`, `src/main/ApplicationUtils.cpp` | 1 | 15 | - | |
+| f03 | heading | stellar-core `docs/software/commands.md` | 1 | 2 | - | |
+| f04 | symbol | rs-soroban-sdk `soroban-sdk/src/token.rs` | 7 | - | - | |
+| f05 | symbol | rs-soroban-sdk `soroban-sdk/src/env.rs` | 4 | - | - | |
+| f06 | symbol | rs-soroban-env `soroban-env-host/src/budget/limits.rs` | 1 | 4 | - | |
+| f07 | file | rs-soroban-env `soroban-env-common/env.json` | none | 11 | - | |
+| f08 | heading | rs-soroban-env `docs/GUEST_INTERFACE.md` | 1 | - | - | |
+| f09 | symbol | js-stellar-sdk `src/contract/types.ts` | 8 | 1 | - | |
+| f10 | heading | js-stellar-sdk `docs/guides/05-handle-errors.md` | 1 | 6 | - | |
+| f11 | file | js-stellar-sdk `src/contract/errors.ts` | 1 | 3 | - | |
+| f12 | file | stellar-rpc `cmd/stellar-rpc/internal/rpcv1/config/options.go` | 13 | 1 | - | yes |
+| f13 | symbol | stellar-rpc `cmd/stellar-rpc/internal/limits/limits.go` | 3 | 1 | - | |
+| f14 | file | quickstart `start` | 1 | - | 148 | yes |
+| f15 | heading | quickstart `README.md` | 25 | - | - | |
+| f16 | file | stellar-cli `cmd/soroban-cli/src/commands/contract/deploy/wasm.rs` | 36 | 236 | 122 | yes |
+| f17 | symbol | stellar-cli `cmd/soroban-cli/src/fee.rs` | 1 | 33 | - | |
+| f18 | heading | soroban-examples `multisig_1_of_n_account/README.md` | 1 | - | - | |
+| f19 | symbol | soroban-examples `timelock/src/lib.rs`, `fuzzing/src/lib.rs` | 2 | 132 | - | yes |
+| f20 | symbol | soroban-examples `errors/src/lib.rs` | 1 | - | - | |
+
+f07 is a file type the index has no rule for (JSON); the other four misses
+rank the expected file below 10. Not tuned on: this battery has now been
+read.
+
+**Routing, observed, not a gate.** On the Scout-only replica of Raven's
+scorer, locateSource ranks first for 10 of the 28 dev questions and in the
+top 3 for 22; for the fresh questions, first for 0 and top 3 for 4. The
+question's own topic words (a symbol, a setting) are never in the
+operation's text, so Raven's coverage gate admits it mostly for short,
+intent-worded questions. A client that calls it by name is unaffected.
+
+## Second pass: what was built
+
+- `GET /api/sources/locate` (`locateSource`, spec 1.9.99, x-side-effecting
+  false): q, repo, kind, page of 10; the SourcePointer shape plus rank and
+  line; `pointers []` and `total 0` for no match; `null` with a note when
+  the repo is not indexed yet (200) or the index cannot be read (503).
+- Collections `source-locators` and `source-locator-repos`; the builder
+  writes them through the driver and reads every written row back.
+- `.github/workflows/build-source-locators.yml`: daily and dispatchable,
+  dry run by default, an Idempotence step that must plan 0; the schedule
+  writes only after a hand-dispatched first fill.
+- The Raven gate: ACCEPT 1.9.99, totals unchanged (220/298/326/112), 0
+  hit-to-miss, locateSource top 1 on no gate question. A first draft's
+  example question ("Where is the Map type defined in soroban-sdk?") took a
+  docs question about Instance storage on admission and was dropped.
 
 ## Reproduce
 

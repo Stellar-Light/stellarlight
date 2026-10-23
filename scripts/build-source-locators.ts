@@ -1,15 +1,17 @@
 /**
- * Build the source-locator index for a locateSource operation: per
- * allowlisted repo, resolve the default-branch commit, read the tree from
- * ONE public tarball at that commit, extract locators per file type
- * (src/lib/source-locator-extract.ts) and store pointers: repo, ref, path,
- * locator kind and name, line, git blob sha, match terms. Never a file body.
- * The database modes need the source-locators and source-locator-repos
- * collections, which ship with the operation (not yet built: it stopped at
- * its measurement gate, improvements/audits/2026-10-23-source-locator/).
+ * Build the source-locator index that locateSource (/api/sources/locate)
+ * serves: per allowlisted repo, resolve the default-branch commit, read the
+ * tree from ONE public tarball at that commit, extract locators per file
+ * type (src/lib/source-locator-extract.ts) and store pointers in
+ * source-locators (repo, ref, path, locator kind and name, line, git blob
+ * sha, match terms; never a file body) and each repo's indexed commit in
+ * source-locator-repos.
  *
  *   pnpm exec tsx scripts/build-source-locators.ts                # dry run: plan vs the stored index
  *   pnpm exec tsx scripts/build-source-locators.ts --execute      # write, read back, stamp repo state
+ *   pnpm exec tsx scripts/build-source-locators.ts --execute --scheduled
+ *       # the schedule's form: writes only once the index has been seeded by
+ *       # a hand-dispatched execute (after its dry run was read); dry before
  *   pnpm exec tsx scripts/build-source-locators.ts --replan       # rebuild at each repo's STORED ref; must plan 0
  *   pnpm exec tsx scripts/build-source-locators.ts --no-db --out f.json [--repo quickstart]
  *       # no database at all: counts, plus the rows as JSON for offline evaluation
@@ -40,7 +42,8 @@ const BUILDER_VERSION = "1";
 const args = process.argv.slice(2);
 const flag = (name: string) =>
 	args.includes(name) ? (args[args.indexOf(name) + 1] ?? "") : null;
-const execute = args.includes("--execute");
+let execute = args.includes("--execute");
+const scheduled = args.includes("--scheduled");
 const replan = args.includes("--replan");
 const noDb = args.includes("--no-db");
 const outPath = flag("--out");
@@ -91,10 +94,6 @@ const sameTerms = (a: string[] = [], b: string[] = []) =>
 	a.length === b.length && a.every((t, i) => t === b[i]);
 
 async function run() {
-	console.log(
-		execute ? "EXECUTE MODE" : replan ? "REPLAN (stored refs)" : "DRY RUN MODE",
-	);
-	console.log(noDb ? "database: none (counts only)\n" : "database: yes\n");
 	// biome-ignore lint/suspicious/noExplicitAny: mongoose models behind payload.db
 	let models: { rows: any; repos: any } | null = null;
 	if (!noDb) {
@@ -109,8 +108,21 @@ async function run() {
 		};
 		if (!models.rows || !models.repos)
 			throw new Error("source-locators collections missing from Payload");
-		if (execute) await models.rows.createIndexes();
+		if (execute && scheduled && !(await models.repos.countDocuments())) {
+			console.log(
+				"scheduled run on an unseeded index: dry run only. The first fill is a hand-dispatched execute, after its dry run is read.",
+			);
+			execute = false;
+		}
+		if (execute) {
+			await models.rows.createIndexes();
+			await models.repos.createIndexes();
+		}
 	}
+	console.log(
+		execute ? "EXECUTE MODE" : replan ? "REPLAN (stored refs)" : "DRY RUN MODE",
+	);
+	console.log(noDb ? "database: none (counts only)\n" : "database: yes\n");
 
 	const repos = onlyRepo ? [onlyRepo] : SOURCE_REPO_NAMES;
 	const out: Record<string, unknown> = {};

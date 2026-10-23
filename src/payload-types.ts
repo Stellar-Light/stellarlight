@@ -94,6 +94,8 @@ export interface Config {
 		"idea-submissions": IdeaSubmission;
 		"api-usage": ApiUsage;
 		"research-docs": ResearchDoc;
+		"source-locators": SourceLocator;
+		"source-locator-repos": SourceLocatorRepo;
 		"scout-feedback": ScoutFeedback;
 		"community-skills": CommunitySkill;
 		"partner-accounts": PartnerAccount;
@@ -150,6 +152,10 @@ export interface Config {
 			| IdeaSubmissionsSelect<true>;
 		"api-usage": ApiUsageSelect<false> | ApiUsageSelect<true>;
 		"research-docs": ResearchDocsSelect<false> | ResearchDocsSelect<true>;
+		"source-locators": SourceLocatorsSelect<false> | SourceLocatorsSelect<true>;
+		"source-locator-repos":
+			| SourceLocatorReposSelect<false>
+			| SourceLocatorReposSelect<true>;
 		"scout-feedback": ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
 		"community-skills":
 			| CommunitySkillsSelect<false>
@@ -1145,7 +1151,7 @@ export interface Repo {
 	 */
 	tierRunId?: string | null;
 	/**
-	 * Held: the default branch carried malware indicators. Kept out of every read but trust and explain, which serve it with a warning.
+	 * Held: the default branch carried malware. Kept out of every read but trust and explain, which serve it with a warning. Set and cleared by the repo-security lane.
 	 */
 	securityHeld?: boolean | null;
 	/**
@@ -1466,7 +1472,7 @@ export interface HackathonBuild {
 	projectSlug?: string | null;
 	projectName?: string | null;
 	/**
-	 * Which rule linked projectSlug: repo (the project lists this exact repo) or website (the submission's demo site is the project's website).
+	 * Which rule linked projectSlug: repo (the project lists this exact repo), website (the submission's demo site is the project's website), or owner-and-name (the repo sits under the project's GitHub owner and the submission carries the project's name).
 	 */
 	projectLinkBasis?: string | null;
 	/**
@@ -1563,8 +1569,6 @@ export interface HackathonBuild {
 	createdAt: string;
 }
 /**
- * Every Stellar hackathon event on DoraHacks, as its organizer published it.
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "hackathon-events".
  */
@@ -2496,6 +2500,50 @@ export interface ResearchDoc {
 	createdAt: string;
 }
 /**
+ * Pointers into Stellar's own repos (path, symbol or heading, line, blob sha). Managed by scripts/build-source-locators.ts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-locators".
+ */
+export interface SourceLocator {
+	id: string;
+	key: string;
+	repo: string;
+	/**
+	 * Commit the row was read at. Unchanged files keep their first ref: same blob, same lines.
+	 */
+	ref: string;
+	path: string;
+	locatorKind: "file" | "symbol" | "heading";
+	locator?: string | null;
+	line?: number | null;
+	blobSha: string;
+	/**
+	 * Lowercased words and whole-name keys the route matches q against.
+	 */
+	terms?: string[] | null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-locator-repos".
+ */
+export interface SourceLocatorRepo {
+	id: string;
+	repo: string;
+	ref: string;
+	/**
+	 * End of the last build that read back every row: each stored pointer was confirmed then.
+	 */
+	builtAt: string;
+	files?: number | null;
+	pointers?: number | null;
+	builderVersion?: string | null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
  * Feedback submitted by agents running the stellar-scout skill via POST /api/feedback. Public ingestion; admin-only review.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3179,6 +3227,14 @@ export interface PayloadLockedDocument {
 				value: string | ResearchDoc;
 		  } | null)
 		| ({
+				relationTo: "source-locators";
+				value: string | SourceLocator;
+		  } | null)
+		| ({
+				relationTo: "source-locator-repos";
+				value: string | SourceLocatorRepo;
+		  } | null)
+		| ({
 				relationTo: "scout-feedback";
 				value: string | ScoutFeedback;
 		  } | null)
@@ -3704,6 +3760,7 @@ export interface RwaAssetsSelect<T extends boolean = true> {
  */
 export interface HackathonBuildsSelect<T extends boolean = true> {
 	buildId?: T;
+	entryKey?: T;
 	name?: T;
 	vision?: T;
 	description?: T;
@@ -4159,6 +4216,37 @@ export interface ResearchDocsSelect<T extends boolean = true> {
 	docVersionStatus?: T;
 	observedAt?: T;
 	embedding?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-locators_select".
+ */
+export interface SourceLocatorsSelect<T extends boolean = true> {
+	key?: T;
+	repo?: T;
+	ref?: T;
+	path?: T;
+	locatorKind?: T;
+	locator?: T;
+	line?: T;
+	blobSha?: T;
+	terms?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-locator-repos_select".
+ */
+export interface SourceLocatorReposSelect<T extends boolean = true> {
+	repo?: T;
+	ref?: T;
+	builtAt?: T;
+	files?: T;
+	pointers?: T;
+	builderVersion?: T;
 	updatedAt?: T;
 	createdAt?: T;
 }

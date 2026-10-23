@@ -165,3 +165,27 @@ Owner decision, safe default first:
 - Same rows, frozen labels: m1 rank 1, m2 rank 2 (`pass2-old-battery-as-dev.json`).
 - **Criteria met** (m1 and m2 in the top 3; 15 of 20 fresh in the top
   10, needed 14): build the operation at spec 1.9.99.
+- 14:08Z, tests first: `src/app/api/sources/locate/__tests__/route.test.ts`
+  written before the route; it fails to resolve `../route`. Then the route,
+  the collections (`src/collections/SourceLocators.ts`, registered in
+  `payload.config.ts`, `payload-types.ts` regenerated: the two new types
+  plus three stale descriptions the generator refreshed), the spec entry
+  and `SourcePointer` schema, status endpoints, the 429 route list, the
+  writer-conformance entry, the workflow, version 1.9.99 and the changelog.
+  9 of 9 route tests pass.
+- Raven gate, `locateSource`: ACCEPT, but one gain was a false capture: a
+  docs question on Instance storage went to locateSource top 1, admitted by
+  the example question "Where is the Map type defined in soroban-sdk?".
+  That example was dropped; rerun ACCEPT 1.9.99 at 220/298/326/112, 0
+  hit-to-miss, the 2 gains the base spec already had, locateSource top 1
+  on no gate question (in 5 more top-5 lists).
+- `pnpm contract:check` first failed the enum-literal ratchet (100 against
+  98): matchMode and totalBasis were literals. Both now spread
+  `LOCATE_MATCH_MODES` and `LOCATE_TOTAL_BASES`, the collection spreads
+  `LOCATOR_KINDS`, and `spec-enum-parity.test.ts` pins all five enums.
+  Then exit 0.
+- Routing observed on the Scout-only replica (not a gate): locateSource
+  top 1 for 10 of 28 dev questions, top 3 for 22; fresh questions top 1
+  for 0, top 3 for 4. Topic words are never in the operation's text, so the
+  coverage gate admits it mostly for short, intent-worded questions. Not
+  tuned on the fresh battery.

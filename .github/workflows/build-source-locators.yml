@@ -1,0 +1,49 @@
+name: Build source locators
+
+# Rebuilds the source-locator index that locateSource (/api/sources/locate)
+# serves: pointers (repo, commit, path, symbol or heading, line, git blob
+# sha) into eight allowlisted Stellar repos, read from one public tarball
+# per repo at its default-branch HEAD. Never a file body.
+#
+# Writes only new, gone or changed-blob pointers, then reads every written
+# row back; the Idempotence step rebuilds at the stored commits and must plan
+# 0 writes. Manual dispatch is a dry run unless execute=true. The schedule
+# writes only once the index has been seeded by a hand-dispatched execute
+# whose dry run was read first; on an unseeded index it runs dry.
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Write to the DB? Leave false for a dry run."
+        type: boolean
+        default: false
+  schedule:
+    - cron: "17 5 * * *" # daily; :17 because crons at :00 get dropped under load
+
+concurrency:
+  group: build-source-locators
+  cancel-in-progress: false
+permissions: { contents: read }
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URI: ${{ secrets.DATABASE_URI }}
+      PAYLOAD_SECRET: ${{ secrets.PAYLOAD_SECRET }}
+      # One HEAD lookup per repo through the API; tarballs come from codeload.
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Build the index
+        run: pnpm exec tsx scripts/build-source-locators.ts ${{ github.event_name == 'schedule' && '--execute --scheduled' || (inputs.execute && '--execute' || '') }}
+      - name: Idempotence
+        if: github.event_name == 'schedule' || inputs.execute
+        run: pnpm exec tsx scripts/build-source-locators.ts --replan

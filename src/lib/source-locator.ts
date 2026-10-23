@@ -5,9 +5,9 @@
  * a symbol or heading locator, the git blob sha, the line) and why it
  * matched; the caller fetches the file itself. The index stores names and
  * hashes only, never file bodies (scripts/build-source-locators.ts builds
- * it). The pointer shape follows the SourcePointer design an MCP consumer
- * published, so it can be adopted as is. Measured, not yet served: see
- * improvements/audits/2026-10-23-source-locator/.
+ * it, src/app/api/sources/locate/route.ts serves it). The pointer shape
+ * follows the SourcePointer design an MCP consumer published, so it can be
+ * adopted as is. Measurements: improvements/audits/2026-10-23-source-locator/.
  *
  * Ranking is lexical and the same for every query. Each word of q scores by
  * its best match against a pointer: the whole symbol (or file name) 8, a
@@ -22,6 +22,11 @@
 
 export const LOCATOR_KINDS = ["file", "symbol", "heading"] as const;
 export type PointerKind = (typeof LOCATOR_KINDS)[number];
+
+/** locateSource's meta.matchMode: identifiers split, plurals folded, abbreviations mapped. */
+export const LOCATE_MATCH_MODES = ["expanded"] as const;
+/** meta.counts.totalBasis when total is null. */
+export const LOCATE_TOTAL_BASES = ["not-indexed"] as const;
 
 export const AUTHORITY_ROLES = [
 	"implementation",

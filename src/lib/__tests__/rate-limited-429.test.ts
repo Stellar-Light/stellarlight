@@ -41,6 +41,7 @@ const ROUTES: Record<string, "GET" | "POST"> = {
 	"partners/onboard": "POST",
 	"partners/submit-listing": "POST",
 	"repos/trust": "GET",
+	"sources/locate": "GET",
 	research: "GET",
 	"scf-pitch": "GET",
 	"vet-idea": "GET",
