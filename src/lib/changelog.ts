@@ -32,6 +32,25 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.8.0",
+		type: "added",
+		summary:
+			"scout-mcp 1.8.0 adds locate_source, the MCP tool for locateSource: where in Stellar's own code a CLI flag, config option default, SDK or host function, or contract interface is defined, as scored pointers with a pinned GitHub URL (filters repo, kind, page). search_projects and search_repos take `view` (full or compact rows, for clients that cut long tool outputs). Two declared filters now reach the API: search_repos `activity` (which also takes maintained) and get_leaderboard `type`; before, each call returned the unfiltered list. search_hackathon_builds says that an event named in q becomes the hackathon filter (spec 1.9.100) and forwards hackathon with no value, which searches the words as text in every event. search_projects takes `type` (the 25 project types) and drops `hackathon`, and get_leaderboard drops `include`: the API ignored both. 28 tools.",
+		detail:
+			"locate_source keeps the API's semantics: pointers [] with total 0 means the indexed repos were searched and nothing matched; pointers null means nothing could be searched (a repo not indexed yet, said in meta.note, or an HTTP 503 to retry). Its repo values and page range (1 to 2000) are checked before the call; an API 400 comes back as a tool error. A compact page comes back as unindented JSON and all other output stays indented: through the tool on 2026-10-23, search_projects q=lending was 120,796 characters full and 23,091 compact (29,514 when compact was indented). search_repos activity and get_leaderboard type were declared in the tool schemas but never sent. search_projects hackathon and get_leaderboard include were sent, and the API answered each with an unknown-parameter warning and an unfiltered list; search_projects status no longer lists Pre-Development, which the API refuses. The smoke test now sends every declared parameter of every tool to a local stub and fails on any parameter that leaves the request unchanged or that the schema refuses. Its publish run is read-only and leaves the checks that ride on live-data margins to SMOKE_STRICT=1.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			'getLeaderboard no longer reports `type` as ignored. It applied the filter, but its list of known parameters left type out, so every filtered response also carried the meta.warnings line "Unknown parameter(s) ignored: type. Results are NOT filtered by them."',
+		detail:
+			"Found in review of scout-mcp 1.8.0, whose get_leaderboard sends type on every filtered call. The warning still names any parameter the route does not read (include, for one) and now lists type as supported. No spec change: getLeaderboard already declared type.",
+	},
+	{
+		date: "2026-10-23",
 		surfaces: ["api"],
 		version: "spec@1.9.105",
 		type: "changed",

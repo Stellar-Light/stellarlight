@@ -123,9 +123,9 @@ export async function GET(req: NextRequest) {
 	// reads as filtered. Warned, not 400'd — the contract is additive-only.
 	const paramWarning = unknownParamWarning(
 		sp,
-		["sort", "category", "range", "format", "limit"],
+		["sort", "category", "range", "format", "limit", "type"],
 		{
-			advertise: ["sort", "category", "range", "format", "limit"],
+			advertise: ["sort", "category", "range", "format", "limit", "type"],
 			hint: "Ranking is chosen with `sort`; see meta.metricDefinitions for what each metric means.",
 		},
 	);

@@ -1,0 +1,54 @@
+The page test and the sitemap test of this branch, run on the base tree
+(git archive d9bd53b5, so the page, the route and the sitemap are
+origin/main's and src/lib/hackathon-detail.ts does not exist):
+
+  vitest run src/app/__tests__/sitemap.test.ts \
+    'src/app/(frontend)/hackathons/[slug]/__tests__/page.test.tsx'
+
+   × /hackathons/<slug> > renders an upcoming curated event from the API's body, with no count it does not hold
+   × /hackathons/<slug> > a winners-only event: its winners once, never as its submissions
+   × /hackathons/<slug> > a DoraHacks event: unclassified outcomes are not known, its page's first prose is the description
+   × /hackathons/<slug> > a collection event: classified outcomes, the funnel and directory links
+   × /hackathons/<slug> > says why there are no winners when the API says why
+   ✓ /hackathons/<slug> > 404s only for a slug the API does not know
+   × /hackathons/<slug> > a store outage is an error, not a 404
+   × /hackathons/<slug> > metadata: the event's name, its description's first prose and a canonical
+   × sitemap event pages > lists every event the API opens, once
+   ✓ sitemap event pages > a failed listing read drops the events, not the sitemap
+ Test Files  2 failed (2)
+      Tests  8 failed | 2 passed (10)
+
+The five render failures are the bug itself: the base page throws
+NEXT_HTTP_ERROR_FALLBACK;404 for every event. The outage test fails on the
+same 404 (digest NEXT_HTTP_ERROR_FALLBACK;404 where none is expected), the
+metadata test on "Hackathon Not Found". The two that pass hold on the base
+by construction: it 404s every slug, and it lists no event at all.
+
+On this branch: 10 passed (8 page, 2 sitemap).
+
+Review fixes (after c9f1a516). The page test of the fixing commit, run on
+c9f1a516's tree (an archive of c9f1a516, this test file copied in):
+
+   ✓ /hackathons/<slug> > renders an upcoming curated event from the API's body, with no count it does not hold
+   × /hackathons/<slug> > a winners-only event: its winners once, never as its submissions
+   ✓ /hackathons/<slug> > a DoraHacks event: unclassified outcomes are not known, its page's first prose is the description
+   ✓ /hackathons/<slug> > a collection event: classified outcomes, the funnel and directory links
+   ✓ /hackathons/<slug> > says why there are no winners when the API says why
+   × /hackathons/<slug> > a winner's track fills its category line, and its footer does not repeat it
+   × /hackathons/<slug> > a roster placement shows its place in the badge and its category in the footer, with no em dash
+   × /hackathons/<slug> > an answer past the deadline: a curated event renders from its record, not a 404 or a 504
+   × /hackathons/<slug> > an answer past the deadline: a DoraHacks event renders from its listing row
+   × /hackathons/<slug> > a store that does not start by the deadline is bounded too
+   × /hackathons/<slug> > an answer past the deadline for a slug nothing it holds knows is an error, not a 404
+   ✓ /hackathons/<slug> > 404s only for a slug the API does not know
+   × /hackathons/<slug> > a store outage: a curated event renders from its record, and a slug nothing knows is an error, not a 404
+   ✓ /hackathons/<slug> > metadata: the event's name, its description's first prose and a canonical
+      Tests  8 failed | 6 passed (14)
+
+By finding: the winners-only sentence (1); the category line (4); the
+roster badge (3); the deadline (2): four tests time out at vitest's 5 s,
+because the page waits on a read, or a store start, that never answers, and
+the outage test fails on "hackathon store unavailable", which c9f1a516
+threw even where the curated record knows the event. The sweep's new badge
+check fails on c9f1a516's page too: 12 Builder Summit badges hold an em
+dash. On this branch: 14 passed, and the sweep passes.
