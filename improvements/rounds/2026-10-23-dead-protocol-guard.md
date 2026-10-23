@@ -343,3 +343,15 @@ Unchanged in order and timing; what the dry runs should show changed:
   golden `bridge-evm-to-stellar` (it still expects Allbridge as a current
   EVM to Stellar route), the skill's Allbridge Core SDK advice, compact rows
   and the other leads above.
+
+## Merge (2026-10-23)
+
+- main merged in (cb6c4d63, spec 1.9.104 there); this change is spec
+  1.9.105, renumbered from the 1.9.108 placeholder. Checks on the merged
+  tree: tsc exit 0; contract:write no diff; contract:check exit 0; Raven
+  gate ACCEPT 1.9.105. vitest (src/lib, src/components, the projects and
+  verify routes) failed one test, the eval fingerprint pin: the wording
+  commit c91ac844 edited golden-questions.json without re-baselining its
+  hash. Re-baselined with update-eval-baselines.ts (5f017a8a); the pin
+  passes.
+

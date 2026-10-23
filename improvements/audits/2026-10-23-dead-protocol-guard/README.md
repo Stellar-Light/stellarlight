@@ -1,4 +1,4 @@
-# A dead upstream protocol must not read as plainly Live (spec 1.9.108)
+# A dead upstream protocol must not read as plainly Live (spec 1.9.105)
 
 Lane DQ1, 2026-10-23. Round ledger:
 `improvements/rounds/2026-10-23-dead-protocol-guard.md` (criteria written

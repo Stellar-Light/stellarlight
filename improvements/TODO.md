@@ -240,8 +240,8 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     supported, 0.9 high (live 1.9.101, 2026-10-23).
     Found by the owner's read of the row; measured in
     `improvements/rounds/2026-10-23-dead-protocol-guard.md`.
-    State: fixed on branch `lane/dq1-dead-protocol-guard` (spec 1.9.108,
-    placeholder), not pushed. The guard needs the enrich-tvl lane to store
+    State: fixed on branch `lane/dq1-dead-protocol-guard` (spec 1.9.105),
+    in review as a pull request. The guard needs the enrich-tvl lane to store
     `llamaListing`; the Allbridge description and routes need a curate-projects
     execute; the dispatch steps are in the ledger.
     Done when: merged and deployed; the enrich-tvl and curate-projects lanes
