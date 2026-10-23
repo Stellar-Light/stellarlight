@@ -94,6 +94,8 @@ export interface Config {
 		"idea-submissions": IdeaSubmission;
 		"api-usage": ApiUsage;
 		"research-docs": ResearchDoc;
+		"source-locators": SourceLocator;
+		"source-locator-repos": SourceLocatorRepo;
 		"scout-feedback": ScoutFeedback;
 		"community-skills": CommunitySkill;
 		"partner-accounts": PartnerAccount;
@@ -150,6 +152,10 @@ export interface Config {
 			| IdeaSubmissionsSelect<true>;
 		"api-usage": ApiUsageSelect<false> | ApiUsageSelect<true>;
 		"research-docs": ResearchDocsSelect<false> | ResearchDocsSelect<true>;
+		"source-locators": SourceLocatorsSelect<false> | SourceLocatorsSelect<true>;
+		"source-locator-repos":
+			| SourceLocatorReposSelect<false>
+			| SourceLocatorReposSelect<true>;
 		"scout-feedback": ScoutFeedbackSelect<false> | ScoutFeedbackSelect<true>;
 		"community-skills":
 			| CommunitySkillsSelect<false>
@@ -2503,6 +2509,50 @@ export interface ResearchDoc {
 	createdAt: string;
 }
 /**
+ * Pointers into Stellar's own repos (path, symbol or heading, line, blob sha). Managed by scripts/build-source-locators.ts.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-locators".
+ */
+export interface SourceLocator {
+	id: string;
+	key: string;
+	repo: string;
+	/**
+	 * Commit the row was read at. Unchanged files keep their first ref: same blob, same lines.
+	 */
+	ref: string;
+	path: string;
+	locatorKind: "file" | "symbol" | "heading";
+	locator?: string | null;
+	line?: number | null;
+	blobSha: string;
+	/**
+	 * Lowercased words and whole-name keys the route matches q against.
+	 */
+	terms?: string[] | null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-locator-repos".
+ */
+export interface SourceLocatorRepo {
+	id: string;
+	repo: string;
+	ref: string;
+	/**
+	 * End of the last build that read back every row: each stored pointer was confirmed then.
+	 */
+	builtAt: string;
+	files?: number | null;
+	pointers?: number | null;
+	builderVersion?: string | null;
+	updatedAt: string;
+	createdAt: string;
+}
+/**
  * Feedback submitted by agents running the stellar-scout skill via POST /api/feedback. Public ingestion; admin-only review.
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3184,6 +3234,14 @@ export interface PayloadLockedDocument {
 		| ({
 				relationTo: "research-docs";
 				value: string | ResearchDoc;
+		  } | null)
+		| ({
+				relationTo: "source-locators";
+				value: string | SourceLocator;
+		  } | null)
+		| ({
+				relationTo: "source-locator-repos";
+				value: string | SourceLocatorRepo;
 		  } | null)
 		| ({
 				relationTo: "scout-feedback";
@@ -4170,6 +4228,37 @@ export interface ResearchDocsSelect<T extends boolean = true> {
 	docVersionStatus?: T;
 	observedAt?: T;
 	embedding?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-locators_select".
+ */
+export interface SourceLocatorsSelect<T extends boolean = true> {
+	key?: T;
+	repo?: T;
+	ref?: T;
+	path?: T;
+	locatorKind?: T;
+	locator?: T;
+	line?: T;
+	blobSha?: T;
+	terms?: T;
+	updatedAt?: T;
+	createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "source-locator-repos_select".
+ */
+export interface SourceLocatorReposSelect<T extends boolean = true> {
+	repo?: T;
+	ref?: T;
+	builtAt?: T;
+	files?: T;
+	pointers?: T;
+	builderVersion?: T;
 	updatedAt?: T;
 	createdAt?: T;
 }

@@ -1,0 +1,12 @@
+DRY RUN MODE
+database: none (counts only)
+
+stellar/stellar-core@05c6328c13b5: 658 files, 7228 pointers (file 658, symbol 6219, heading 351), 2.93 MiB as JSON, 5796 ms
+stellar/rs-soroban-sdk@8e5b425dce5f: 66 files, 874 pointers (file 66, symbol 797, heading 11), 0.29 MiB as JSON, 391 ms
+stellar/rs-soroban-env@0c99950e9612: 257 files, 3091 pointers (file 257, symbol 2818, heading 16), 1.20 MiB as JSON, 1554 ms
+stellar/js-stellar-sdk@0f2fd40ba6db: 253 files, 3789 pointers (file 253, symbol 1551, heading 1985), 1.38 MiB as JSON, 546 ms
+stellar/stellar-rpc@ec4171d970ac: 263 files, 3258 pointers (file 263, symbol 2766, heading 229), 1.26 MiB as JSON, 672 ms
+stellar/quickstart@0ff76e336a43: 31 files, 410 pointers (file 31, symbol 342, heading 37), 0.14 MiB as JSON, 268 ms
+stellar/stellar-cli@4ff88b7ea11d: 251 files, 1977 pointers (file 251, symbol 1484, heading 242), 0.70 MiB as JSON, 417 ms
+stellar/soroban-examples@03d42aa6b973: 92 files, 813 pointers (file 92, symbol 482, heading 239), 0.28 MiB as JSON, 429 ms
+

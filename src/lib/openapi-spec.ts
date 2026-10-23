@@ -49,6 +49,15 @@ import { REPO_MATCH_MODES } from "./repo-search";
 import { INDICATOR_KINDS } from "./repo-security";
 import { RESEARCH_SOURCES } from "./research-sources";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
+import {
+	AUTHORITY_ROLES,
+	LOCATE_MATCH_MODES,
+	LOCATE_MAX_PAGE,
+	LOCATE_PAGE_SIZE,
+	LOCATE_TOTAL_BASES,
+	LOCATOR_KINDS,
+	SOURCE_REPO_NAMES,
+} from "./source-locator";
 import { PRICE_BASES } from "./stablecoins";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
@@ -6874,6 +6883,266 @@ export const spec: OpenAPISpec = {
 				},
 			},
 		},
+		"/api/sources/locate": {
+			get: {
+				operationId: "locateSource",
+				tags: ["Repos"],
+				// Reads the pointer index and ranks it; writes nothing beyond the usage log.
+				"x-side-effecting": false,
+				summary:
+					"Locate where a flag, option default, function or interface is defined in Stellar's own source",
+				description:
+					"Scored pointers into allowlisted Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples): the file, symbol or heading, line, commit and blob sha where a CLI flag, config option default, SDK or host function, or contract interface is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read. pointers [] = no match in the indexed repos; null = could not search.",
+				"x-routing": {
+					purpose:
+						"Point to the exact file, line and commit in Stellar's own repos where a symbol, CLI flag, config option, default value or doc section is defined.",
+					keywords: [
+						"where is it defined",
+						"which file defines",
+						"line number",
+						"source location",
+						"symbol definition",
+						"default value in code",
+						"config option default",
+						"cli flag definition",
+						"find in source code",
+						"source pointer",
+					],
+					useWhen: [
+						"an agent needs the file and line where a function, flag, option or constant is defined, to read and cite it",
+						"docs omit a default or flag and the answer lives only in code",
+					],
+					notFor: [
+						"how a repo works, in prose -> explainRepo",
+						"finding ecosystem projects' repos or code examples -> searchRepos",
+						"docs, protocol text, SEPs and CAPs -> searchResearch",
+					],
+					exampleQuestions: [
+						"Which stellar-core file sets the default for TARGET_PEER_CONNECTIONS?",
+						"Which line declares the --network-passphrase flag in stellar-cli?",
+					],
+				},
+				parameters: [
+					{
+						name: "q",
+						in: "query",
+						required: true,
+						description:
+							"What to locate: a symbol, flag, option, config key or topic words (at most 300 characters), e.g. --enable-core-manual-close or getTransactions default limit. Naming a repo in q (stellar-rpc, quickstart) lifts its pointers.",
+						schema: { type: "string", maxLength: 300 },
+					},
+					{
+						name: "repo",
+						in: "query",
+						description:
+							"Only this allowlisted repo, as owner/name (e.g. stellar/quickstart). Anything else answers 400 with the valid values.",
+						schema: { type: "string", enum: [...SOURCE_REPO_NAMES] },
+					},
+					{
+						name: "kind",
+						in: "query",
+						description: "Only this locator kind.",
+						schema: { type: "string", enum: [...LOCATOR_KINDS] },
+					},
+					{
+						name: "page",
+						in: "query",
+						description: `Page of ${LOCATE_PAGE_SIZE} pointers: a whole number from 1 to ${LOCATE_MAX_PAGE} written as plain digits.`,
+						schema: {
+							type: "integer",
+							minimum: 1,
+							maximum: LOCATE_MAX_PAGE,
+							default: 1,
+						},
+					},
+				],
+				responses: {
+					"200": {
+						description:
+							"Ranked pointers. pointers [] with total 0 = searched, no match; pointers null = not indexed yet (meta.note says which).",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									required: [
+										"meta",
+										"pointers",
+										"total",
+										"page",
+										"pageSize",
+										"truncated",
+										"indexAsOf",
+									],
+									properties: {
+										meta: {
+											type: "object",
+											properties: {
+												matchMode: {
+													type: "string",
+													enum: [...LOCATE_MATCH_MODES],
+													description:
+														"Always expanded: identifiers split into words, plurals folded, a few code abbreviations mapped (max, min, config, auth, init, env, tx).",
+												},
+												matchModeLabel: { type: "string" },
+												source: { type: "string", format: "uri" },
+												generatedAt: { type: "string", format: "date-time" },
+												filters: {
+													type: "object",
+													description:
+														"The filters applied (null = not applied).",
+													properties: {
+														q: { type: "string" },
+														repo: { type: "string", nullable: true },
+														kind: { type: "string", nullable: true },
+														page: { type: "integer" },
+													},
+												},
+												counts: {
+													type: "object",
+													properties: {
+														total: {
+															type: "integer",
+															nullable: true,
+															description:
+																"Pointers matching q in the searched repos; null when nothing could be searched (totalBasis says why).",
+														},
+														returned: { type: "integer" },
+														totalBasis: {
+															type: "string",
+															enum: [...LOCATE_TOTAL_BASES],
+															description:
+																"Present only when total is null: no searched repo is indexed yet.",
+														},
+													},
+												},
+												index: {
+													type: "array",
+													description:
+														"Each searched repo: the commit indexed, when, and its pointer count; ref null = not indexed yet.",
+													items: {
+														type: "object",
+														properties: {
+															repo: { type: "string" },
+															ref: { type: "string", nullable: true },
+															builtAt: {
+																type: "string",
+																format: "date-time",
+																nullable: true,
+															},
+															pointers: { type: "integer", nullable: true },
+														},
+													},
+												},
+												note: { type: "string" },
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when there is something to disclose: repos not indexed yet, or a q so broad its candidates were cut.",
+												},
+											},
+										},
+										pointers: {
+											type: "array",
+											nullable: true,
+											items: { $ref: "#/components/schemas/SourcePointer" },
+											description:
+												"This page, best first. [] = no match in the indexed repos; null = could not search.",
+										},
+										total: {
+											type: "integer",
+											nullable: true,
+											description:
+												"Pointers matching q; null when nothing could be searched.",
+										},
+										page: { type: "integer" },
+										pageSize: { type: "integer" },
+										truncated: {
+											type: "boolean",
+											description:
+												"true when a later page holds more pointers.",
+										},
+										indexAsOf: {
+											type: "string",
+											format: "date-time",
+											nullable: true,
+											description:
+												"The oldest build time among the searched, indexed repos.",
+										},
+									},
+								},
+							},
+						},
+					},
+					"400": {
+						description: `q missing, over 300 characters or all filler; an unknown parameter, repo or kind; a page that is not a whole number from 1 to ${LOCATE_MAX_PAGE}. Never silently ignored.`,
+						content: {
+							"application/json": {
+								schema: {
+									allOf: [
+										{ $ref: "#/components/schemas/RequestError" },
+										{
+											type: "object",
+											properties: {
+												validParams: {
+													type: "array",
+													items: { type: "string" },
+												},
+												validValues: {
+													type: "array",
+													items: { type: "string" },
+												},
+												validRange: {
+													type: "array",
+													items: { type: "integer" },
+													description: `For page: the lowest and highest page, [1, ${LOCATE_MAX_PAGE}].`,
+												},
+											},
+										},
+									],
+								},
+							},
+						},
+					},
+					"429": rateLimited429(),
+					"503": {
+						description:
+							"The index could not be read: an outage, NOT a claim that no source matches. pointers and total are null. Retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending.",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: {
+									allOf: [
+										{ $ref: "#/components/schemas/RetryableError" },
+										{
+											type: "object",
+											properties: {
+												pointers: {
+													type: "array",
+													nullable: true,
+													items: { $ref: "#/components/schemas/SourcePointer" },
+													description: "Always null here: could not search.",
+												},
+												total: {
+													type: "integer",
+													nullable: true,
+													description: "Always null here.",
+												},
+											},
+										},
+									],
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 		"/api/audits": {
 			get: {
 				operationId: "listAudits",
@@ -9434,6 +9703,112 @@ export const spec: OpenAPISpec = {
 						type: "integer",
 						description:
 							"Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait (at most 3600, 60 when it sent no usable number); on a 503, 2 on database reads and 60 or 300 on the skills registry.",
+					},
+				},
+			},
+			SourcePointer: {
+				type: "object",
+				description:
+					"Where a fact lives in an allowlisted Stellar repo, never the content: fetch verificationUrl to read it. Names, a line and hashes only.",
+				required: [
+					"id",
+					"rank",
+					"repo",
+					"ref",
+					"path",
+					"locatorKind",
+					"locator",
+					"line",
+					"authorityRole",
+					"matchReason",
+					"verifiedAt",
+					"blobSha",
+					"verificationUrl",
+					"score",
+					"factors",
+				],
+				properties: {
+					id: {
+						type: "string",
+						description:
+							"Short id within this response (s1, s2, ...), the same order as rank.",
+					},
+					rank: {
+						type: "integer",
+						minimum: 1,
+						description:
+							"Position in the full ranking for this q (page 2 starts at 11). Array order is rank order.",
+					},
+					repo: {
+						type: "string",
+						enum: [...SOURCE_REPO_NAMES],
+						description: "owner/name of the repo.",
+					},
+					ref: {
+						type: "string",
+						description:
+							"The 40-hex commit the pointer was read at. An unchanged file keeps its first ref: the same blob and lines hold at later commits up to the repo's indexed ref (meta.index).",
+					},
+					path: { type: "string", description: "Repo-relative file path." },
+					locatorKind: {
+						type: "string",
+						enum: [...LOCATOR_KINDS],
+						description:
+							"file = the whole file; symbol = a named definition (function, type, constant, CLI flag, config option or key, environment variable); heading = a Markdown section.",
+					},
+					locator: {
+						type: "string",
+						nullable: true,
+						description:
+							"The symbol name or heading text as written; null for a file pointer.",
+					},
+					line: {
+						type: "integer",
+						nullable: true,
+						description:
+							"1-based line the locator sits on at ref; null for a file pointer.",
+					},
+					authorityRole: {
+						type: "string",
+						enum: [...AUTHORITY_ROLES],
+						description:
+							"implementation = the repo's code (core, SDKs, host, RPC, quickstart); tooling = stellar-cli; reference-docs = any Markdown file and the soroban-examples contracts. A role, not an endorsement.",
+					},
+					matchReason: {
+						type: "string",
+						maxLength: 100,
+						description:
+							"Which words of q matched and how, at most 100 characters.",
+					},
+					verifiedAt: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+						description:
+							"When the index build last confirmed this pointer's blob and line (its repo's builtAt); null only if that build time is unknown.",
+					},
+					blobSha: {
+						type: "string",
+						description:
+							"git blob id of the file at ref, the id GitHub serves for it: provenance, not security.",
+					},
+					verificationUrl: {
+						type: "string",
+						format: "uri",
+						description:
+							"https://github.com/<repo>/blob/<ref>/<path>#L<line> (no #L for a file pointer).",
+					},
+					score: {
+						type: "integer",
+						minimum: 0,
+						maximum: 100,
+						description:
+							"0 to 100 for this q and this pointer alone; compare within one response, not across queries.",
+					},
+					factors: {
+						type: "string",
+						description:
+							"Compact score parts: words matched of q, exact, prefix (an identifier held in the name), word, path, repo named, name (share of the name's own words q accounts for).",
 					},
 				},
 			},

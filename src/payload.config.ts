@@ -35,6 +35,10 @@ import { RSSFeeds } from "./collections/RSSFeeds";
 import { RwaAssets } from "./collections/RwaAssets";
 import { ScoutFeedback } from "./collections/ScoutFeedback";
 import { Signals } from "./collections/Signals";
+import {
+	SourceLocatorRepos,
+	SourceLocators,
+} from "./collections/SourceLocators";
 import { StablecoinSnapshots } from "./collections/StablecoinSnapshots";
 import { Stablecoins } from "./collections/Stablecoins";
 import { TransparencyLogs } from "./collections/TransparencyLogs";
@@ -111,6 +115,8 @@ export default buildConfig({
 		IdeaSubmissions,
 		ApiUsage,
 		ResearchDocs,
+		SourceLocators,
+		SourceLocatorRepos,
 		ScoutFeedback,
 		CommunitySkills,
 		Partners,

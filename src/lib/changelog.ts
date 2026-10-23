@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.99",
+		type: "added",
+		summary:
+			"New locateSource (GET /api/sources/locate?q=): scored pointers to where a CLI flag, config option default, SDK or host function, contract interface or doc section is defined in eight Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples). Each pointer names the repo, the commit read, the path, the symbol or heading, the line, the git blob sha, why it matched and a pinned GitHub URL; never file content.",
+		detail:
+			"Filters: repo (owner/name, e.g. stellar/quickstart), kind (file, symbol, heading), page (10 a page, 1 to 2000). pointers [] with total 0 means the indexed repos hold no match; pointers null means nothing could be searched: a 503 when the index cannot be read, a 200 with meta.note when the repo is not indexed yet, and meta.warnings names allowlisted repos not indexed yet. Unknown parameters and values answer 400 with the valid set. The index holds names, lines and hashes only (21,440 pointers at the 2026-10-23 HEAD commits) and is rebuilt daily from public tarballs by a lane that writes only new, gone or changed-blob pointers; until its first run every answer is pointers null with a note, never []. Ranking is lexical: an exact symbol or file name first, then an identifier held in a name, words in a symbol or heading, path words; naming a repo in q lifts it. Measured before shipping on a held-out battery of 20 locator questions written by a separate agent: 15 found in the top 10 (a pointer at a full-answer file), 12 in the top 3, 10 at rank 1. Not covered: JSON and other file types without a locator rule (soroban-env-common env.json, for one), content words that appear only in comments or help text, and repos outside the eight.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.98",
 		type: "changed",
 		summary:
