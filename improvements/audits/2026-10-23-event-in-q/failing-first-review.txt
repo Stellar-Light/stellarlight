@@ -1,0 +1,126 @@
+# Failing-first run for the review fixes, 2026-10-23T15:5xZ, on 71802a4f before any code change:
+# the new module test (placement, award and ranking words) and two new route tests (the line for an
+# inferred event whose rows hold no description; a placement word lists the entries) fail; the negative
+# route test (an event whose rows hold text gets no such line) passes, as it should without the change.
+# npx vitest run src/lib/__tests__/event-in-query.test.ts src/app/api/hackathons/builds/__tests__/route.test.ts --maxWorkers=2 --minWorkers=1
+
+[baseline-browser-mapping] The data in this module is over two months old.  To ensure accurate Baseline data, please update: `npm i baseline-browser-mapping@latest -D`
+
+ RUN  v3.2.3 /Users/shubhbrar/Downloads/stellarlight-main/.claude/worktrees/agent-aa03ccf7de100689a
+
+ ❯ src/lib/__tests__/event-in-query.test.ts (13 tests | 1 failed) 23ms
+   ✓ eventInQuery finds an event named in full > by its title, in any case and punctuation 10ms
+   ✓ eventInQuery finds an event named in full > without its accents, and with the en dash in its title 5ms
+   ✓ eventInQuery finds an event named in full > by its slug as typed, hyphens included 0ms
+   ✓ eventInQuery finds an event named in full > never by a slug of common words with its hyphens dropped 0ms
+   ✓ eventInQuery finds an event named in full > on whole words only 0ms
+   ✓ eventInQuery finds an event named in full > preferring the longest name 0ms
+   ✓ eventInQuery finds an event named in full > keeps the rest of q as typed, without the separators beside the name 0ms
+   ✓ eventInQuery finds an event named in full > leaves nothing when the rest only asks for the event's entries 0ms
+   × eventInQuery finds an event named in full > reads placement, award and ranking words as asking for the entries 4ms
+     → expected [ …(2) ] to deeply equal [ 'HackMeridian 2025 first place', '' ]
+   ✓ eventInQuery infers nothing from a partial or shared name > names the events whose titles start with the words q holds 0ms
+   ✓ eventInQuery infers nothing from a partial or shared name > says nothing for stopwords, the middle of a title or one event's start 1ms
+   ✓ eventInQuery infers nothing from a partial or shared name > names every event when q holds the full names of several 1ms
+   ✓ eventInQuery infers nothing from a partial or shared name > reads an empty or punctuation-only q as naming nothing 0ms
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts (32 tests | 2 failed) 194ms
+   ✓ GET /api/hackathons/builds matches declared packages > finds a winner by a package its repo declares 136ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > lists no build by its name alone when most of q's words are in no build 10ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > says a real name match was held back, never that nothing matched 6ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > names only the words a held build matched in its name 2ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > withholds nothing in meaning mode 1ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > still lists a name match when at most half of q's words are in no build, and names the missing one 2ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > lists builds on the words some submission uses and names the rest 3ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > says nothing when every word of q is used 2ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > says what builds found by meaning are, alone or beside builds listed by words 1ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > names a related form submissions use, and only a real one 2ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > suggests a spelling only when one used word is that close 4ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > reads a word with a trailing comma or an accent as the build's own 2ms
+   ✓ GET /api/hackathons/builds when q's words are in no build > words the line for a one-word q and for a q none of whose words is used 1ms
+   ✓ GET /api/hackathons/builds hackathon filter > takes an event's exact title as its slug 0ms
+   ✓ GET /api/hackathons/builds hackathon filter > answers a value that names no listed event with 400 and the valid slugs 0ms
+   ✓ GET /api/hackathons/builds hackathon filter > answers a listed event with no stored submissions with 0 matched and a warning 0ms
+   ✓ GET /api/hackathons/builds hackathon filter > says a value could not be checked when the listing cannot be read 0ms
+   ✓ GET /api/hackathons/builds rows say what the repo did after the event > serves analyze's activity value and the last commit, absent when unknown 0ms
+   ✓ GET /api/hackathons/builds counts both units > serves event entries beside unique submissions, the unit analyze counts 1ms
+   ✓ GET /api/hackathons/builds reads an event named in q as the filter > applies the event and serves its builds when q is only its name 1ms
+   ✓ GET /api/hackathons/builds reads an event named in q as the filter > reads words that ask for the event's entries as nothing left to search 1ms
+   ✓ GET /api/hackathons/builds reads an event named in q as the filter > searches the rest of q inside the event 2ms
+   ✓ GET /api/hackathons/builds reads an event named in q as the filter > infers nothing from a name start several events share, and says which 1ms
+   ✓ GET /api/hackathons/builds reads an event named in q as the filter > lets an explicit hackathon win and says when q names another event 2ms
+   ✓ GET /api/hackathons/builds reads an event named in q as the filter > searches q as text in every event when hackathon is sent empty 0ms
+   ✓ GET /api/hackathons/builds reads an event named in q as the filter > serves an inferred event with no stored submissions as its filter does 0ms
+   × GET /api/hackathons/builds reads an event named in q as the filter > says when the rest matched none of an event's rows, which hold no description 5ms
+     → expected [ Array(1) ] to deeply equal [ …(2) ]
+   ✓ GET /api/hackathons/builds reads an event named in q as the filter > says nothing more when the event's rows hold text to search 0ms
+   × GET /api/hackathons/builds reads an event named in q as the filter > lists the event's entries for a placement word after its name 2ms
+     → expected 'first place' to be null
+   ✓ GET /api/hackathons/builds reranks hybrid results > serves the hybrid order and says the reranker did not run when it fails 2ms
+   ✓ GET /api/hackathons/builds reranks hybrid results > orders the top by the reranker and says it ran 1ms
+   ✓ GET /api/hackathons/builds reranks hybrid results > leaves meta.reranked out in keyword mode 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/__tests__/event-in-query.test.ts > eventInQuery finds an event named in full > reads placement, award and ranking words as asking for the entries
+AssertionError: expected [ …(2) ] to deeply equal [ 'HackMeridian 2025 first place', '' ]
+
+- Expected
++ Received
+
+  [
+    "HackMeridian 2025 first place",
+-   "",
++   "first place",
+  ]
+
+ ❯ src/lib/__tests__/event-in-query.test.ts:168:27
+    166|    "HackMeridian 2025 crypto tokens on github",
+    167|   ])
+    168|    expect([q, restOf(q)]).toEqual([q, ""]);
+       |                           ^
+    169|   // A topic word keeps the whole rest, entry words included.
+    170|   expect(restOf("HackMeridian 2025 top three")).toBe("top three");
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/app/api/hackathons/builds/__tests__/route.test.ts > GET /api/hackathons/builds reads an event named in q as the filter > says when the rest matched none of an event's rows, which hold no description
+AssertionError: expected [ Array(1) ] to deeply equal [ …(2) ]
+
+- Expected
++ Received
+
+  [
+    "q holds the event name 'HackMeridian 2025', so hackathon=hackmeridian-2025 was applied and the name removed from q (meta.inferredFilter); to search q's words as text in every event instead, send hackathon= with no value",
+-   "'payroll' matched no stored submission of hackmeridian-2025: its 2 stored submissions hold no description to search; hackathon=hackmeridian-2025 alone lists them",
+  ]
+
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts:642:30
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/app/api/hackathons/builds/__tests__/route.test.ts > GET /api/hackathons/builds reads an event named in q as the filter > lists the event's entries for a placement word after its name
+AssertionError: expected 'first place' to be null
+
+- Expected: 
+null
+
++ Received: 
+"first place"
+
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts:682:31
+    680|  it("lists the event's entries for a placement word after its name", a…
+    681|   const { body } = await get("q=HackMeridian%202025%20first%20place");
+    682|   expect(body.meta.filters.q).toBeNull();
+       |                               ^
+    683|   expect(ids(body)).toEqual(["lance", "simple-fund"]);
+    684|  });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 42 passed (45)
+   Start at  11:48:36
+   Duration  744ms (transform 167ms, setup 21ms, collect 197ms, tests 216ms, environment 662ms, prepare 78ms)
+

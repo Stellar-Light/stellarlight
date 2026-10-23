@@ -3,8 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
-// What getHackathons lists: one DoraHacks event the index holds, and a
-// curated one whose submissions are not stored.
+// What getHackathons lists: one DoraHacks event the index holds, and
+// curated ones whose submissions are not stored.
 vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
 	...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
 	fetchAllDoraHacksHackathonsChecked: vi.fn(async () => ({
@@ -14,6 +14,12 @@ vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
 				id: -1007,
 				uname: "hackmeridian-2025",
 				title: "HackMeridian 2025",
+				source: "curated",
+			},
+			{
+				id: -1001,
+				uname: "hackmeridian-2026",
+				title: "HackMeridian 2026",
 				source: "curated",
 			},
 		],
@@ -466,6 +472,226 @@ describe("GET /api/hackathons/builds counts both units", () => {
 			entries: 1,
 		});
 		expect(await read("hackathon=r")).toMatchObject({ matched: 2, entries: 2 });
+	});
+});
+
+describe("GET /api/hackathons/builds reads an event named in q as the filter", () => {
+	// Two curated winners with no repo text, as the HackMeridian 2025 rows
+	// are, a build elsewhere whose text names the event, and one whose text
+	// holds the rest of q.
+	const winner = (
+		id: string,
+		track: string,
+		over: Partial<IndexedBuild> = {},
+	) =>
+		build(id, {
+			hackathon: {
+				title: "HackMeridian 2025",
+				slug: "hackmeridian-2025",
+				endedAt: "2025-09-16",
+			},
+			description: null,
+			githubUrl: null,
+			isWinner: true,
+			track,
+			haystack: `${id.replace(/-/g, " ")} ${track.toLowerCase()}`,
+			...over,
+		});
+	const index = () => [
+		winner("lance", "Composability", { hackathonPlacement: "1st Place" }),
+		winner("simple-fund", "Open Innovation", {
+			hackathonPlacement: "1st Place",
+		}),
+		build("payroll", {
+			description: "Payroll we started at HackMeridian 2025",
+			haystack: "payroll we started at hackmeridian 2025",
+		}),
+		build("fund-elsewhere", { haystack: "a simple fund for savings" }),
+	];
+	const get = async (qs: string) => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(index());
+		const { GET } = await import("../route");
+		const res = await GET(
+			new NextRequest(`https://x.test/api/hackathons/builds?${qs}`),
+		);
+		return { status: res.status, body: await res.json() };
+	};
+	const ids = (body: { builds: Array<{ id: string }> }) =>
+		body.builds.map((b) => b.id);
+	const INFERRED =
+		"q holds the event name 'HackMeridian 2025', so hackathon=hackmeridian-2025 was applied and the name removed from q (meta.inferredFilter); to search q's words as text in every event instead, send hackathon= with no value";
+
+	// Live 1.9.95: q=HackMeridian 2025 served 5 builds, none from the event.
+	it("applies the event and serves its builds when q is only its name", async () => {
+		const { status, body } = await get("q=HackMeridian%202025&limit=20");
+		expect(status).toBe(200);
+		expect(body.meta.inferredFilter).toEqual({
+			hackathon: "hackmeridian-2025",
+			matched: "HackMeridian 2025",
+		});
+		expect(body.meta.filters).toMatchObject({
+			q: null,
+			hackathon: ["hackmeridian-2025"],
+		});
+		// Served as a filter-only request is: no text query, winners first.
+		expect(body.meta.matchMode).toBe("all");
+		expect(
+			(body.builds as Array<Record<string, unknown>>).map((b) => [
+				b.id,
+				b.hackathonSlug,
+				b.track,
+			]),
+		).toEqual([
+			["lance", "hackmeridian-2025", "Composability"],
+			["simple-fund", "hackmeridian-2025", "Open Innovation"],
+		]);
+		expect(body.meta.warnings).toEqual([INFERRED]);
+	});
+
+	it("reads words that ask for the event's entries as nothing left to search", async () => {
+		const { logApiHit } = await import("@/lib/api-usage");
+		const { body } = await get("q=HackMeridian%202025%20winners");
+		expect(body.meta.inferredFilter?.hackathon).toBe("hackmeridian-2025");
+		expect(body.meta.filters.q).toBeNull();
+		expect(ids(body)).toEqual(["lance", "simple-fund"]);
+		// The usage log keeps the q the caller sent.
+		expect(vi.mocked(logApiHit)).toHaveBeenLastCalledWith(
+			expect.objectContaining({ query: "HackMeridian 2025 winners" }),
+		);
+	});
+
+	it("searches the rest of q inside the event", async () => {
+		const { body } = await get(
+			"q=HackMeridian%202025%20simple%20fund&mode=keyword",
+		);
+		expect(body.meta.inferredFilter?.matched).toBe("HackMeridian 2025");
+		expect(body.meta.filters).toMatchObject({
+			q: "simple fund",
+			hackathon: ["hackmeridian-2025"],
+		});
+		expect(ids(body)).toEqual(["simple-fund"]);
+	});
+
+	it("infers nothing from a name start several events share, and says which", async () => {
+		const { body } = await get("q=hackmeridian&mode=keyword");
+		expect(body.meta.inferredFilter).toBeUndefined();
+		expect(body.meta.filters.hackathon).toBeNull();
+		expect(body.meta.warnings?.[0]).toBe(
+			"q holds 'hackmeridian', the start of the names of 2 events (hackmeridian-2025, hackmeridian-2026); nothing was inferred and q was searched as text; to search one of them, send hackathon=<slug>",
+		);
+	});
+
+	it("lets an explicit hackathon win and says when q names another event", async () => {
+		const { body } = await get("q=HackMeridian%202025&hackathon=e");
+		expect(body.meta.inferredFilter).toBeUndefined();
+		expect(body.meta.filters).toMatchObject({
+			q: "hackmeridian 2025",
+			hackathon: ["e"],
+		});
+		expect(body.meta.warnings?.[0]).toBe(
+			"q names the event 'HackMeridian 2025' (hackmeridian-2025), which hackathon= does not select; nothing was inferred and q was searched as text inside the selected events",
+		);
+		// The same event, by its slug or its exact title: nothing to say.
+		for (const sent of ["hackmeridian-2025", "e,HackMeridian%202025"]) {
+			const same = await get(`q=HackMeridian%202025&hackathon=${sent}`);
+			expect(same.body.meta.inferredFilter).toBeUndefined();
+			expect(
+				(same.body.meta.warnings ?? []).filter((w: string) =>
+					w.startsWith("q names"),
+				),
+			).toEqual([]);
+		}
+	});
+
+	it("searches q as text in every event when hackathon is sent empty", async () => {
+		const { body } = await get("q=HackMeridian%202025&hackathon=&mode=keyword");
+		expect(body.meta.inferredFilter).toBeUndefined();
+		expect(body.meta.warnings).toBeUndefined();
+		expect(body.meta.filters).toMatchObject({
+			q: "hackmeridian 2025",
+			hackathon: null,
+		});
+		expect(ids(body)).toEqual(["payroll"]);
+	});
+
+	it("serves an inferred event with no stored submissions as its filter does", async () => {
+		const { status, body } = await get("q=HackMeridian%202026");
+		expect(status).toBe(200);
+		expect(body.meta.inferredFilter).toEqual({
+			hackathon: "hackmeridian-2026",
+			matched: "HackMeridian 2026",
+		});
+		expect(body.meta.counts.matched).toBe(0);
+		expect(body.meta.warnings).toEqual([
+			"q holds the event name 'HackMeridian 2026', so hackathon=hackmeridian-2026 was applied and the name removed from q (meta.inferredFilter); to search q's words as text in every event instead, send hackathon= with no value",
+			"no submissions are stored for hackmeridian-2026; 0 matched from it is not evidence that nothing was built",
+		]);
+	});
+
+	// Review 2026-10-23: q=HackMeridian 2025 give me answered matched 0 with
+	// only the inference line, though the event's rows hold no description.
+	// (payroll: a word other rows hold, so no unused-word line joins in.)
+	it("says when the rest matched none of an event's rows, which hold no description", async () => {
+		const { body } = await get("q=HackMeridian%202025%20payroll&mode=keyword");
+		expect(body.meta.inferredFilter?.hackathon).toBe("hackmeridian-2025");
+		expect(body.meta.filters.q).toBe("payroll");
+		expect(body.meta.counts.matched).toBe(0);
+		expect(body.meta.warnings).toEqual([
+			"q holds the event name 'HackMeridian 2025', so hackathon=hackmeridian-2025 was applied and the name removed from q (meta.inferredFilter); to search q's words as text in every event instead, send hackathon= with no value",
+			"'payroll' matched no stored submission of hackmeridian-2025: its 2 stored submissions hold no description to search; hackathon=hackmeridian-2025 alone lists them",
+		]);
+	});
+
+	// Re-check 2026-10-23: under another filter a 0 can mean the filter
+	// excluded the row the rest matched (lance sits in Composability).
+	it("says nothing about the rows when another filter narrowed the search", async () => {
+		const { body } = await get(
+			"q=HackMeridian%202025%20lance&track=Open%20Innovation&mode=keyword",
+		);
+		expect(body.meta.inferredFilter?.hackathon).toBe("hackmeridian-2025");
+		expect(body.meta.counts.matched).toBe(0);
+		expect(JSON.stringify(body.meta.warnings)).not.toContain(
+			"matched no stored submission",
+		);
+	});
+
+	it("says nothing more when the event's rows hold text to search", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			...index(),
+			build("agentpay", {
+				hackathon: {
+					title: "Stellar Hacks: Agents",
+					slug: "stellar-agents-x402-stripe-mpp",
+					endedAt: "2026-04-13",
+				},
+				description: "Pays for API calls with USDC",
+				haystack: "agentpay pays for api calls with usdc",
+			}),
+		]);
+		const { GET } = await import("../route");
+		const res = await GET(
+			new NextRequest(
+				"https://x.test/api/hackathons/builds?q=Stellar%20Hacks%3A%20Agents%20payroll&mode=keyword",
+			),
+		);
+		const body = await res.json();
+		expect(body.meta.inferredFilter?.hackathon).toBe(
+			"stellar-agents-x402-stripe-mpp",
+		);
+		expect(body.meta.counts.matched).toBe(0);
+		expect(
+			(body.meta.warnings as string[]).filter((w) =>
+				w.includes("no description"),
+			),
+		).toEqual([]);
+	});
+
+	it("lists the event's entries for a placement word after its name", async () => {
+		const { body } = await get("q=HackMeridian%202025%20first%20place");
+		expect(body.meta.filters.q).toBeNull();
+		expect(ids(body)).toEqual(["lance", "simple-fund"]);
 	});
 });
 
