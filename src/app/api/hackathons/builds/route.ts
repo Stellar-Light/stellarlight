@@ -108,6 +108,7 @@ export async function GET(req: NextRequest) {
 		served: mode,
 		warnings,
 		entries,
+		withheld,
 	} = await queryBuilds(indexed, f, {
 		perSubmission: true,
 		// Here only: a declared package matches q (q=passkey finds builds on
@@ -117,7 +118,7 @@ export async function GET(req: NextRequest) {
 	});
 	warnings.unshift(...parsed.warnings);
 	// Any of q's words in no submission: say which, and what the rows are.
-	const unused = q ? unusedWordsWarning(indexed, q, scored) : null;
+	const unused = q ? unusedWordsWarning(indexed, q, scored, withheld) : null;
 	if (unused) warnings.push(unused);
 
 	const builds = scored
@@ -206,6 +207,8 @@ export async function GET(req: NextRequest) {
 					matched: scored.length,
 					// Event entries that match: analyze's unit for the same filter.
 					entries,
+					// Matched by name, held back: most of q is in no submission.
+					withheldByName: withheld.length,
 					returned: builds.length,
 				},
 				// Over every matched build, not just this page: "which SDKs do

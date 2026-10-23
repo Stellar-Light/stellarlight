@@ -128,18 +128,45 @@ describe("GET /api/hackathons/builds when q's words are in no build", () => {
 	// build, a name no longer lists a build alone (rule L, 2026-10-23).
 	it("lists no build by its name alone when most of q's words are in no build", async () => {
 		const llama = await get("tukar llama sandwich");
-		expect(llama.meta.counts.matched).toBe(0);
-		// Nothing listed: say which words matched no submission.
+		expect(llama.meta.counts).toMatchObject({ matched: 0, withheldByName: 1 });
+		// Nothing listed: say which words matched no submission, and that a
+		// build matched by name and was held back (review, 2026-10-23).
 		expect(llama.meta.warnings).toEqual([
-			"2 of the 3 words searched in q (llama, sandwich) occur as a whole word in no submission in the index, and no build matched q; check the spelling",
+			"2 of the 3 words searched in q (llama, sandwich) occur as a whole word in no submission in the index, and no build is listed; 1 build matched by name for tukar is not listed, because most of the words searched in q occur in no submission; if one of them is misspelled, correct it",
 		]);
 		const nread = await get("tukar nread sandwich");
-		expect(nread.meta.counts.matched).toBe(0);
+		expect(nread.meta.counts).toMatchObject({ matched: 0, withheldByName: 2 });
 		// unread is one edit from nread but starts with another letter: no
-		// suggestion.
+		// spelling is named.
 		expect(nread.meta.warnings).toEqual([
-			"2 of the 3 words searched in q (nread, sandwich) occur as a whole word in no submission in the index, and no build matched q; check the spelling",
+			"2 of the 3 words searched in q (nread, sandwich) occur as a whole word in no submission in the index, and no build is listed; 2 builds matched by name for tukar or nread are not listed, because most of the words searched in q occur in no submission; if one of them is misspelled, correct it",
 		]);
+		expect((await get("tukar twin")).meta.counts.withheldByName).toBe(0);
+	});
+
+	it("says a real name match was held back, never that nothing matched", async () => {
+		await withIndex([
+			build("donations", {
+				name: "Donation Management",
+				haystack: "donation management: track gifts",
+			}),
+		]);
+		const tithe = await get("church tithe donations app");
+		expect(tithe.meta.counts).toMatchObject({ matched: 0, withheldByName: 1 });
+		expect(tithe.meta.warnings).toEqual([
+			"2 of the 3 words searched in q (church, tithe) occur as a whole word in no submission in the index, and no build is listed; 1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission; if one of them is misspelled, correct it",
+		]);
+		await withIndex([
+			build("ide", {
+				name: "Stellar-IDE",
+				haystack: "stellar-ide: an ide for soroban contracts",
+			}),
+		]);
+		const ide = await get("Sorobix IDE plugin");
+		expect(ide.meta.counts).toMatchObject({ matched: 0, withheldByName: 1 });
+		expect(ide.meta.warnings?.[0]).toContain(
+			"; 1 build matched by name for ide is not listed, because most of the words searched in q occur in no submission",
+		);
 	});
 
 	it("still lists a name match when at most half of q's words are in no build, and names the missing one", async () => {
@@ -229,19 +256,19 @@ describe("GET /api/hackathons/builds when q's words are in no build", () => {
 		const typo = await get("remitance app");
 		expect(typo.meta.counts.matched).toBe(0);
 		expect(typo.meta.warnings).toEqual([
-			"the word searched in q (remitance) occurs as a whole word in no submission in the index, and no build matched q; check the spelling (remittance, used in submissions, is one edit from remitance)",
+			"the word searched in q (remitance) occurs as a whole word in no submission in the index, and no build is listed; if it is misspelled, correct it (remittance is the used word one edit from remitance)",
 		]);
 		// Two used words one edit away: neither is named.
 		await withIndex([build("decks", { haystack: "decks: cards and cords" })]);
 		const two = await get("curds");
 		expect(two.meta.warnings).toEqual([
-			"the word searched in q (curds) occurs as a whole word in no submission in the index, and no build matched q; check the spelling",
+			"the word searched in q (curds) occurs as a whole word in no submission in the index, and no build is listed; if it is misspelled, correct it",
 		]);
 		// A swap counts as one edit; sleep is not a typo of sleepy.
 		await withIndex([build("swap", { haystack: "swap: exchange and sleep" })]);
 		const swap = await get("exchnage sleepy");
 		expect(swap.meta.warnings).toEqual([
-			"none of the 2 words searched in q (exchnage, sleepy) occurs as a whole word in any submission in the index, and no build matched q; check the spelling (exchange, used in submissions, is one edit from exchnage)",
+			"none of the 2 words searched in q (exchnage, sleepy) occurs as a whole word in any submission in the index, and no build is listed; if one of them is misspelled, correct it (exchange is the used word one edit from exchnage)",
 		]);
 	});
 

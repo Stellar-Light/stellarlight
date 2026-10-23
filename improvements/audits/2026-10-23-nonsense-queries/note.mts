@@ -97,11 +97,21 @@ for (const x of queries) {
 	);
 	const q = x.q.trim().toLowerCase();
 	const opts = { perSubmission: true, packages: true };
-	const rows = [
-		searchHackathonBuilds(pool, q, { ...opts, mode: "keyword" }),
-		searchHackathonBuilds(pool, q, { ...opts, mode: "hybrid", semantic }),
-	];
-	const lines = rows.map((r) => unusedWordsWarning(pool, q, r));
+	// As the route: builds rule L held back, less any meaning listed.
+	const search = (mode: "keyword" | "hybrid") => {
+		const held: { b: { id: string }; matched: string[] }[] = [];
+		const r = searchHackathonBuilds(pool, q, {
+			...opts,
+			mode,
+			semantic,
+			withheld: held as never,
+		});
+		const listed = new Set(r.map((s) => s.b.id));
+		return { r, held: held.filter((w) => !listed.has(w.b.id)) };
+	};
+	const found = [search("keyword"), search("hybrid")];
+	const rows = found.map((f) => f.r);
+	const lines = found.map((f) => unusedWordsWarning(pool, q, f.r, f.held));
 	const g = x.group.startsWith("idea") ? "idea (all 140)" : x.group;
 	const t = tally.get(g) ?? { n: 0, withRows: [0, 0], fires: [0, 0] };
 	t.n++;

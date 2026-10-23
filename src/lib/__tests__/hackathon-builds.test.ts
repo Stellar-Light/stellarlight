@@ -403,6 +403,23 @@ describe("words no build uses", () => {
 		});
 	});
 
+	// Review 2026-10-23: notes read as used through not, uses through us.
+	it("drops es only after s, x, z, ch or sh", () => {
+		const short = [build("Short", "not mod plan them hop to do us tax")];
+		for (const w of [
+			"notes",
+			"modes",
+			"planes",
+			"themes",
+			"hopes",
+			"toes",
+			"does",
+			"uses",
+		])
+			expect(wordsNoBuildUses(short, w).absent, w).toEqual([w]);
+		expect(wordsNoBuildUses(short, "taxes").absent).toEqual([]);
+	});
+
 	it("does not count a token with no letter or digit as a word", () => {
 		expect(wordsNoBuildUses(pool, "agents !!! ???")).toEqual({
 			absent: [],
@@ -439,6 +456,10 @@ describe("the warning names related forms submissions do use", () => {
 		build("Votes", "Delegation and delegating."),
 		build("Keys", "Revocable keys."),
 		build("Misc", "Reliable, forever, vouch, sticker, traction."),
+		// Review 2026-10-23: words these were said to be related forms of.
+		build("Look", "Portal, portion, million, mineral, minerals, stripe."),
+		build("Alike", "Cent, stale, with."),
+		build("Short", "Them, not, plan, hop, mod."),
 	];
 	const line = (q: string) => unusedWordsWarning(pool, q, []) ?? "";
 
@@ -446,7 +467,9 @@ describe("the warning names related forms submissions do use", () => {
 		for (const [word, clause] of [
 			["cashing", "cash for cashing"],
 			["minted", "mint and minting for minted"],
-			["minter", "mint and minting for minter"],
+			// mint is not grown back on a stem minter gives by dropping er
+			// (center is not cent), only its inflections are.
+			["minter", "minting for minter"],
 			["hedging", "hedge for hedging"],
 			["renting", "rent, rental and rentals for renting"],
 			["shops", "shopping for shops"],
@@ -468,6 +491,21 @@ describe("the warning names related forms submissions do use", () => {
 			"vouchers",
 			"stick",
 			"tractor",
+			"port",
+			"mill",
+			"miner",
+			"center",
+			"strip",
+			"stalling",
+			"wither",
+			// es and e dropped where they are not an ending: them is not
+			// themes or theme.
+			"themes",
+			"theme",
+			"notes",
+			"planes",
+			"hopes",
+			"modes",
 		])
 			expect(line(word), word).not.toMatch(/related form/);
 	});
@@ -482,8 +520,7 @@ describe("the warning names a spelling only when one is clear", () => {
 			build(`Typo ${i}`, "Remmitance app."),
 		),
 	];
-	const suggestion =
-		"(remittance, used in submissions, is one edit from remitance)";
+	const suggestion = "(remittance is the used word one edit from remitance)";
 
 	it("names a word five times as used as any other one edit away", () => {
 		expect(unusedWordsWarning(remit(5, 1), "remitance", [])).toContain(

@@ -358,6 +358,47 @@ of q is in no submission:
 - `check-unused.py` reads back every claim in every line on all three
   sets: 0 false (`shipped/unused-*.txt`).
 
+**Third commit: review fixes (spec 1.9.96, after merging main's 1.9.95).**
+The review (Claude Fable 5.1, high) replayed the second commit on the live
+corpus (1,356 submissions) and found these, all fixed:
+
+- Related forms named unrelated words (port: portal, portion; mill:
+  million; miner: mineral; strip: stripe; center: cent; stalling: stale;
+  wither: with). Now the word itself takes back only inflections, a stem
+  from dropping er or or takes back no bare stem, an undone doubled
+  consonant takes back no e, es is dropped only after s, x, z, ch or sh
+  (themes is not them, found while measuring this fix) and a dropped e is
+  not left off. center still names centered, its own past tense.
+- The zero-row tail read as a correction ("check the spelling", with a used
+  word): the review's sweep of 2,410 dictionary words named one for 70
+  words spelled right. It now reads ", and no build is listed; if it is
+  misspelled, correct it (games is the used word one edit from gamer)". The
+  naming rule is unchanged; gamer, routine, discard, monkey, thorough,
+  inventor and garantie still name games, routing, discord, money, through,
+  investor and garantir, now only as a conditional.
+- Rule L withheld real name matches silently: church tithe donations app
+  held back Donation Management, Sorobix IDE plugin held back Stellar-IDE,
+  and the line asked to check the spelling. The line now adds "1 build
+  matched by name for donations is not listed, because most of the words
+  searched in q occur in no submission", and meta.counts.withheldByName
+  counts them (builds held back and not listed by meaning either).
+- otherNumber read notes, modes, planes, themes, hopes, toes, does and uses
+  as used through not, mod, plan, them, hop, to, do and us. es is now
+  dropped only after ss, x, z, ch or sh.
+- The spec's spelling clause gained the conditions the code applies, and
+  analyze's q says a word only a package uses counts as used for rule L.
+- The used text and its word counts are built once per index (a WeakMap).
+
+Re-measured: rows identical to the second commit's on the 140 ideas, the
+battery, the 34 probes and the review's 23 examples (captured live on
+1.9.95 to 1.9.95, `review-probes.json`, `shipped/review-table.txt`).
+otherNumber feeds rule L's count of unused words, so it could move rows in
+principle; it moved none here. Where the line fires is unchanged from the
+second commit (32 / 32 ideas, 24 / 24 battery, 16 / 16 probes); the review's
+examples fire 19 of 23. `check-unused.py` now also checks each withheld
+count against the builds the before and after replays differ by: 0 false
+claims on all four sets.
+
 ## Open risks
 
 - The battery's rows are unchanged. An agent that ignores meta.warnings still

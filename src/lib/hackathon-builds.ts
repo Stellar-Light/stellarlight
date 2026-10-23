@@ -649,11 +649,12 @@ const wordCore = (v: string) =>
 const otherNumber = (w: string) =>
 	w.endsWith("ies")
 		? [`${w.slice(0, -3)}y`]
-		: w.endsWith("es")
+		: // Only where es is the plural ending: notes is not not, uses not us.
+			/(ss|x|z|ch|sh)es$/.test(w)
 			? [w.slice(0, -2)]
 			: /[^aeiou]y$/.test(w)
 				? [`${w.slice(0, -1)}ies`]
-				: /(s|x|z|ch|sh)$/.test(w)
+				: /(ss|x|z|ch|sh)$/.test(w)
 					? [`${w}es`]
 					: [];
 
@@ -709,7 +710,7 @@ export function wordsNoBuildUses(
 	const terms = queryTerms(q.trim().toLowerCase()).filter(({ t }) =>
 		/[\p{L}\p{N}]/u.test(t),
 	);
-	const hays = indexed.map(usedText);
+	const { hays } = usedHays(indexed);
 	const absent = terms
 		.filter(({ t, forms }) => {
 			const hits = [...forms, ...otherNumber(wordCore(t))].flatMap(
@@ -729,16 +730,60 @@ export function wordsNoBuildUses(
 const usedText = (b: IndexedBuild) =>
 	`${b.haystack} ${(b.stack ?? []).join(" ").toLowerCase()}`;
 
-/** Suffixes stripped to find a word's stem, and grown back onto it, for the
- * related forms the warning names: cashing is cash, hedging is hedge,
- * shops is shopping, algorithmic is algorithms. A stem found by stripping
- * er, or or ic takes back only inflections (generator is generate; tractor
- * is not traction). er is never grown (stick is not sticker), and ers is
- * never stripped (vouchers is not vouch). */
-const INFLECTIONS = ["ing", "est", "ed", "es", "s", "e"];
-const DERIVATIONS = ["er", "or", "ic"];
-const GROW_INFLECTED = ["", "e", "s", "es", "ed", "ing"];
-const GROW_ANY = [...GROW_INFLECTED, "al", "als", "ic", "ion"];
+// ponytail: keyed on the index array, so an index changed in place would
+// read stale; the served index never is. A builds request read the corpus
+// about three times before this.
+const usedCache = new WeakMap<
+	IndexedBuild[],
+	{ hays: string[]; words?: Map<string, number> }
+>();
+
+/** Every build's used text, read once per index. */
+function usedHays(indexed: IndexedBuild[]) {
+	const hit = usedCache.get(indexed);
+	if (hit) return hit;
+	const c = { hays: indexed.map(usedText) };
+	usedCache.set(indexed, c);
+	return c;
+}
+
+/** How often each word occurs in the used text, counted once per index. */
+function usedCounts(indexed: IndexedBuild[]): Map<string, number> {
+	const c: { hays: string[]; words?: Map<string, number> } = usedHays(indexed);
+	if (c.words) return c.words;
+	const words = new Map<string, number>();
+	for (const h of c.hays)
+		for (const w of h.match(/[\p{L}\p{N}]+/gu) ?? [])
+			words.set(w, (words.get(w) ?? 0) + 1);
+	c.words = words;
+	return words;
+}
+
+/** Endings stripped to find a word's stem, and the endings each kind of
+ * stem takes back, for the related forms the warning names: cashing is
+ * cash, hedging is hedge, shops is shopping, renting is rental, delegate is
+ * delegation, algorithmic is algorithms, generator is generate. The word
+ * itself takes back only inflections (port is not portal, mill not
+ * million, strip not stripe), a stem ending er or or drops takes back no
+ * bare stem (center is not cent, wither not with, tractor not traction), a
+ * doubled consonant undone takes back no e (stalling is not stale), es is
+ * dropped only after s, x, z, ch or sh and a dropped e is not left off
+ * (themes and theme are not them), er is never grown (stick is not
+ * sticker) and ers never stripped (vouchers is not vouch). Review,
+ * 2026-10-23. */
+const GROW_ANY = ["", "e", "s", "es", "ed", "ing", "al", "als", "ic", "ion"];
+const GROW_VERB = ["e", "es", "ed", "ing"];
+const STEM_GROWS: [string, string[]][] = [
+	...["ing", "est", "ed", "es", "s"].map((x): [string, string[]] => [
+		x,
+		GROW_ANY,
+	]),
+	["e", ["ed", "ing", "al", "als", "ic", "ion"]],
+	["er", GROW_VERB],
+	["or", GROW_VERB],
+	["ic", ["", "s"]],
+];
+const GROW_WORD = ["s", "es", "ed", "ing"];
 
 /** Forms of `w` some build uses, most used first, at most 3: a stem of at
  * least four letters with a suffix grown back, never `w`'s own plural or
@@ -746,16 +791,19 @@ const GROW_ANY = [...GROW_INFLECTED, "al", "als", "ic", "ion"];
 function relatedUsed(w: string, used: Map<string, number>): string[] {
 	if (!/^\p{L}+$/u.test(w)) return [];
 	const stems = new Map<string, string[]>();
-	for (const suffix of [...INFLECTIONS, ...DERIVATIONS]) {
+	for (const [suffix, grow] of STEM_GROWS) {
 		const stem = w.slice(0, -suffix.length);
 		if (!w.endsWith(suffix) || stem.length < 4) continue;
-		const grow = DERIVATIONS.includes(suffix) ? GROW_INFLECTED : GROW_ANY;
+		if (suffix === "es" && !/(ss|x|z|ch|sh)es$/.test(w)) continue;
 		stems.set(stem, grow);
 		// shopping is shop.
 		if (stem.length > 4 && /([^aeiou])\1$/.test(stem))
-			stems.set(stem.slice(0, -1), grow);
+			stems.set(
+				stem.slice(0, -1),
+				grow.filter((g) => g !== "e"),
+			);
 	}
-	if (w.length >= 4) stems.set(w, GROW_ANY);
+	if (w.length >= 4) stems.set(w, GROW_WORD);
 	const own = new Set([w, ...wordForms(w), ...otherNumber(w)]);
 	const out = new Set<string>();
 	for (const [stem, grows] of stems)
@@ -815,10 +863,10 @@ function oneSpelling(w: string, used: Map<string, number>): string | null {
 		: null;
 }
 
-const andList = (xs: string[]) =>
+const andList = (xs: string[], and = "and") =>
 	xs.length < 2
 		? xs.join("")
-		: `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
+		: `${xs.slice(0, -1).join(", ")} ${and} ${xs[xs.length - 1]}`;
 
 /**
  * The builds route's line when any word of `q` occurs as a whole word in no
@@ -834,13 +882,12 @@ export function unusedWordsWarning(
 	indexed: IndexedBuild[],
 	q: string,
 	scored: ScoredBuild[],
+	/** Builds rule L held back: their name matched, most of q is unused. */
+	withheld: { matched: string[] }[] = [],
 ): string | null {
 	const { absent, concepts } = wordsNoBuildUses(indexed, q);
 	if (!absent.length) return null;
-	const used = new Map<string, number>();
-	for (const b of indexed)
-		for (const w of usedText(b).match(/[\p{L}\p{N}]+/gu) ?? [])
-			used.set(w, (used.get(w) ?? 0) + 1);
+	const used = usedCounts(indexed);
 	const one = absent.length === 1;
 	const all = absent.length === concepts;
 	const words = `searched in q (${absent.join(", ")})`;
@@ -861,10 +908,22 @@ export function unusedWordsWarning(
 		? []
 		: related.flatMap(([w, r]) => {
 				const s = r.length ? null : oneSpelling(w, used);
-				return s ? [`${s}, used in submissions, is one edit from ${w}`] : [];
+				return s ? [`${s} is the used word one edit from ${w}`] : [];
 			});
+	// Withheld by name, never "no match": church tithe donations app held
+	// back Donation Management, and the line asked to check the spelling.
+	const n = withheld.length;
+	const held = queryTerms(q.trim().toLowerCase())
+		.map(({ t }) => t)
+		.filter((t) => withheld.some((w) => w.matched.includes(t)))
+		.map(wordCore);
+	const heldText = n
+		? `; ${n === 1 ? "1 build" : `${n} builds`} matched by name for ${andList(held, "or")} ${n === 1 ? "is" : "are"} not listed, because most of the words searched in q occur in no submission`
+		: "";
+	// Conditional: a dictionary sweep of the first wording named corrections
+	// for 70 words spelled right (gamer, routine, discard).
 	const body = !scored.length
-		? `, and no build matched q; check the spelling${spelling.length ? ` (${spelling.join("; ")})` : ""}`
+		? `, and no build is listed${heldText}; if ${one ? "it is" : "one of them is"} misspelled, correct it${spelling.length ? ` (${spelling.join("; ")})` : ""}`
 		: !byMeaning
 			? all
 				? `: a build listed by its words alone, with no similarity, holds ${inside} and is not evidence that this idea was built`
@@ -879,7 +938,7 @@ export function unusedWordsWarning(
 	const relatedText = forms.length
 		? `; ${formCount === 1 ? "a related form is" : "related forms are"} used: ${forms.map(([w, r]) => `${andList(r)} for ${w}`).join("; ")}`
 		: "";
-	return head + body + relatedText;
+	return head + body + (scored.length ? heldText : "") + relatedText;
 }
 
 /**
@@ -931,6 +990,9 @@ export function searchHackathonBuilds(
 		 * matched for vetIdea it put 3 builds graded not prior art in its five
 		 * for 3 of 140 labeled ideas and pushed a same-idea build to sixth. */
 		packages?: boolean;
+		/** Filled with the builds rule L held back: the name matched, but
+		 * most of q is in no submission. The builds route says so. */
+		withheld?: { b: IndexedBuild; matched: string[] }[];
 	} = {},
 ): ScoredBuild[] {
 	let pool = indexed;
@@ -1027,7 +1089,8 @@ export function searchHackathonBuilds(
 				share: matched.size / (terms.length || 1),
 				textShare: inText.size / (terms.length || 1),
 			});
-		}
+		} else if (score > 0 && nameMatched)
+			opts.withheld?.push({ b, matched: [...matched] });
 	}
 	const mode = opts.mode ?? "keyword";
 	const sem = opts.semantic;

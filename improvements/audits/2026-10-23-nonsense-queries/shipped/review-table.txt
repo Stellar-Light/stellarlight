@@ -1,0 +1,32 @@
+capture: api 1.9.95 -> 1.9.95, corpus 1356
+id | group | q | words read | in no submission | keyword before -> after | hybrid before -> after | warning fires, keyword / hybrid
+r01 | related form | port | 1 | port | 83 -> 83 | 83 -> 83 | yes / yes
+r02 | related form | mill | 1 | mill | 16 -> 16 | 16 -> 16 | yes / yes
+r03 | related form | miner | 1 | miner | 2 -> 2 | 2 -> 2 | yes / yes
+r04 | related form | strip | 1 | strip | 6 -> 6 | 6 -> 6 | yes / yes
+r05 | related form | center | 1 | center | 1 -> 1 | 1 -> 1 | yes / yes
+r06 | related form | stalling | 1 | stalling | 0 -> 0 | 0 -> 0 | yes / yes
+r07 | related form | wither | 1 | wither | 0 -> 0 | 0 -> 0 | yes / yes
+r08 | plural | notes | 1 | none | 6 -> 6 | 6 -> 6 | no / no
+r09 | plural | modes | 1 | none | 26 -> 26 | 26 -> 26 | no / no
+r10 | plural | planes | 1 | none | 5 -> 5 | 5 -> 5 | no / no
+r11 | plural | themes | 1 | themes | 0 -> 0 | 0 -> 0 | yes / yes
+r12 | plural | hopes | 1 | none | 1 -> 1 | 1 -> 1 | no / no
+r13 | plural | toes | 1 | toes | 0 -> 0 | 0 -> 0 | yes / yes
+r14 | spelling | gamer | 1 | gamer | 0 -> 0 | 0 -> 0 | yes / yes
+r15 | spelling | routine | 1 | routine | 0 -> 0 | 0 -> 0 | yes / yes
+r16 | spelling | discard | 1 | discard | 0 -> 0 | 0 -> 0 | yes / yes
+r17 | spelling | monkey | 1 | monkey | 0 -> 0 | 0 -> 0 | yes / yes
+r18 | spelling | thorough | 1 | thorough | 0 -> 0 | 0 -> 0 | yes / yes
+r19 | spelling | inventor | 1 | inventor | 0 -> 0 | 0 -> 0 | yes / yes
+r20 | spelling | garantie | 1 | garantie | 0 -> 0 | 0 -> 0 | yes / yes
+r21 | withheld | church tithe donations app | 3 | church, tithe | 1 -> 0 | 1 -> 0 | yes / yes
+r22 | withheld | Sorobix IDE plugin | 3 | sorobix, plugin | 1 -> 0 | 5 -> 5 | yes / yes
+r23 | withheld | quantum llama sandwich | 3 | llama, sandwich | 2 -> 0 | 2 -> 0 | yes / yes
+
+Builds removed or added:
+r21 keyword: removed Donation Management; added none
+r21 hybrid: removed Donation Management; added none
+r22 keyword: removed Stellar-IDE; added none
+r23 keyword: removed Quantum Shield Exchange; MellaMate; added none
+r23 hybrid: removed Quantum Shield Exchange; MellaMate; added none

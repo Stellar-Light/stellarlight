@@ -514,3 +514,48 @@ fresh battery written by a separate agent that was told no rule.
 - Text: the builds `q` and `meta.warnings` descriptions, the 1.9.95
   changelog entry and api-reference.md describe the line's forms, the
   related-form rule and the spelling rule.
+
+### Lane L2 review (Claude Fable 5.1, effort high) and third commit (spec 1.9.96)
+
+- The review replayed b63a697a on the live corpus (1,356 submissions):
+  GATE: fix. Verified tsc, tests, contract, entries parity, multi-word
+  product names, package queries and the meaning-row sentences. Findings:
+  1. Medium: related forms named unrelated words (port portal, mill
+     million, miner mineral, strip stripe, center cent, stalling stale,
+     wither with).
+  2. Medium: the zero-row tail read as a correction; a 2,410-word
+     dictionary sweep named one for 70 words spelled right (gamer games,
+     routine routing, discard discord, monkey money, thorough through,
+     inventor investor, garantie garantir).
+  3. Medium: rule L withheld real name matches silently (church tithe
+     donations app: Donation Management; Sorobix IDE plugin: Stellar-IDE).
+  4. Low: otherNumber read notes, modes, planes, themes, hopes, toes, does
+     and uses as used through not, mod, plan, them, hop, to, do, us.
+  5. Low: the spec's spelling clause omitted conditions; analyze's q text
+     did not say a package-only word counts as used for rule L.
+  6. Nit: the corpus was tokenized about three times per request.
+- `update_pr_branch.sh <worktree> 1.9.96`: merged origin/main (925f47f9,
+  #1859 took 1.9.95) at c776bb7a; changelog entry renumbered to 1.9.96.
+- Tests first, against b63a697a's code: 7 failed (`withheldByName`
+  missing twice; the zero-row wording; `notes: expected [] to deeply equal
+  [ 'notes' ]`; `minter` named mint; `port` named a related form; the
+  spelling wording), 70 passed. With the fixes all pass.
+- Fixes: (1) the word itself grows only s, es, ed, ing; a stem from er or
+  or grows e, es, ed, ing; an undone double grows no e; while measuring,
+  themes named them, so es is stripped only after ss, x, z, ch or sh and a
+  dropped e is not left off (theme is not them). center keeps centered, its
+  past tense. (2) ", and no build is listed; if it is (one of them is)
+  misspelled, correct it (X is the used word one edit from w)"; the naming
+  rule unchanged. (3) searchHackathonBuilds fills an optional `withheld`
+  list; queryBuilds returns those not listed by meaning; the line adds "N
+  builds matched by name for W are not listed, because most of the words
+  searched in q occur in no submission"; meta.counts.withheldByName
+  (declared). (4) otherNumber as the review asked, with ss in place of s so
+  uses is not us. (5) spec and analyze q text. (6) a WeakMap per index,
+  with a ponytail comment.
+- Re-measured: rows identical to b63a697a on lane K's capture, the fresh
+  battery, the 34 probes, and the review's 23 examples captured live
+  (1.9.95 to 1.9.95, 46 pages, every one 200). Where the line fires is
+  unchanged; the examples fire 19 of 23. `check-unused.py` checks every
+  word, related form, spelling and withheld count (against the builds the
+  replays differ by): 0 false on all four sets.

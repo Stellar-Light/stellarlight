@@ -88,14 +88,18 @@ live.extra.forEach(
 		const opts = { perSubmission: true, packages: true };
 		const { absent, concepts } = wordsNoBuildUses(pool, x.q);
 		const q = x.q.trim().toLowerCase();
-		const fires = (["keyword", "hybrid"] as const).map(
-			(mode) =>
-				unusedWordsWarning(
-					pool,
-					q,
-					searchHackathonBuilds(pool, q, { ...opts, mode, semantic }),
-				) !== null,
-		);
+		const fires = (["keyword", "hybrid"] as const).map((mode) => {
+			const held: { b: { id: string }; matched: string[] }[] = [];
+			const r = searchHackathonBuilds(pool, q, {
+				...opts,
+				mode,
+				semantic,
+				withheld: held as never,
+			});
+			const listed = new Set(r.map((s) => s.b.id));
+			const kept = held.filter((w) => !listed.has(w.b.id));
+			return unusedWordsWarning(pool, q, r, kept) !== null;
+		});
 		const b = before[i];
 		const a = after[i];
 		console.log(
