@@ -1,0 +1,420 @@
+{
+	"writtenAt": "2026-10-23T12:00:00Z",
+	"writer": "Claude Code subagent (claude-opus-5-5), blind dev-set writer",
+	"rule": "The writer was blind to the system under test: it did not call stellarlight.xyz or any Stellar Light or Scout API, did not use any tool whose name contains scout, did not read any file under the stellarlight-main checkout (code, evidence or audits), and read nothing under /private/tmp/claude-501/ except this output path. Answers were verified only from public sources (github.com repo pages and READMEs, developers.stellar.org, docs.openzeppelin.com and other project docs) on 2026-10-23, and only this one file was written. Six topics covered by another set were excluded: audited reusable token/access-control contract libraries, full-stack Soroban dapp scaffolding, passkey smart wallet SDKs, spending limits or M-of-N thresholds on smart accounts, native USDC between Stellar and EVM, and Soroban-to-EVM contract messaging.",
+	"questions": [
+		{
+			"id": "dev-01",
+			"topic": "sdk",
+			"q": "I'm writing a Django backend that needs to build and submit Stellar payments and also call a couple of Soroban contracts through RPC. Which Python library should I use for that?",
+			"expect": { "anyOf": ["StellarCN/py-stellar-base"] },
+			"why": "README: a Python library for communicating with a Stellar Horizon server and Stellar RPC server, used for building Stellar apps on Python; listed as the Python SDK on developers.stellar.org.",
+			"sources": [
+				{
+					"url": "https://github.com/StellarCN/py-stellar-base",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://developers.stellar.org/docs/tools/sdks/client-sdks",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-02",
+			"topic": "sdk",
+			"q": "Our payments service is written in Go. What's the official Go SDK these days for building transactions and talking to Horizon? I remember it used to be the big stellar/go monorepo.",
+			"expect": { "anyOf": ["stellar/go-stellar-sdk"] },
+			"why": "README: official Go SDK maintained by SDF with txnbuild and clients/horizonclient; it previously served as the Go monorepo and was refactored in October 2025 to hold only the developer-facing SDK packages.",
+			"sources": [
+				{
+					"url": "https://github.com/stellar/go-stellar-sdk",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://developers.stellar.org/docs/tools/sdks/client-sdks",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-03",
+			"topic": "sdk",
+			"q": "Is there a Stellar SDK for Flutter that I can use in my cross-platform mobile app? I need to sign transactions, query Horizon and invoke Soroban contracts from Dart.",
+			"expect": { "anyOf": ["Soneso/stellar_flutter_sdk"] },
+			"why": "README: build and sign Stellar transactions, query Horizon, and interact with Soroban smart contracts via RPC, with built-in support for 21 SEPs; listed as the Flutter SDK on developers.stellar.org.",
+			"sources": [
+				{
+					"url": "https://github.com/Soneso/stellar_flutter_sdk",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://developers.stellar.org/docs/tools/sdks/client-sdks",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-04",
+			"topic": "wallet",
+			"q": "I'm building a Soroban dapp and I don't want to write separate connect logic for Freighter, xBull, Lobstr, Albedo and WalletConnect. Is there one library that handles all the Stellar wallets behind a single API?",
+			"expect": { "anyOf": ["Creit-Tech/Stellar-Wallets-Kit"] },
+			"why": "README: a kit to handle all Stellar wallets through a simple API, covering xBull, Albedo, Freighter, Rabet, WalletConnect, Lobstr, Hana, Hot Wallet and others, leaving UI to the developer.",
+			"sources": [
+				{
+					"url": "https://github.com/Creit-Tech/Stellar-Wallets-Kit",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-05",
+			"topic": "wallet",
+			"q": "Our users mostly have the Freighter browser extension. How do I get their public key and ask Freighter to sign a transaction from my web app, and where does that client library live?",
+			"expect": { "anyOf": ["stellar/freighter"] },
+			"why": "The Freighter repo is the non-custodial wallet extension and contains the @stellar/freighter-api workspace (the client-facing SDK); Freighter docs tell dapps to install @stellar/freighter-api.",
+			"sources": [
+				{ "url": "https://github.com/stellar/freighter", "read": "2026-10-23" },
+				{
+					"url": "https://docs.freighter.app/extension-freighter-api/installation.md",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-06",
+			"topic": "wallet",
+			"q": "Some of my users won't install a browser extension. Is there a web-based Stellar signer I can call from my site with a small JS library so they can sign transactions or messages without handing me their secret key?",
+			"expect": { "anyOf": ["stellar-expert/albedo"] },
+			"why": "README: Albedo provides a safe way to use Stellar accounts without trusting anyone with a secret key, and its @albedo-link/intent library is a lightweight promise-based browser wrapper for dapps; commits as recent as Aug 2026.",
+			"sources": [
+				{
+					"url": "https://github.com/stellar-expert/albedo",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/stellar-expert/albedo/commits/master",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-07",
+			"topic": "oracle",
+			"q": "I need XLM and BTC prices inside my Soroban lending contract. Which oracle should I use if I want free on-chain feeds that follow the SEP-40 interface?",
+			"expect": { "anyOf": ["reflector-network/reflector-contract"] },
+			"why": "README: Reflector oracle contracts are SEP-40 compatible; ReflectorPulse gives free feeds with 5-minute updates and the README shows calling lastprice from another contract; listed as an oracle provider on developers.stellar.org.",
+			"sources": [
+				{
+					"url": "https://github.com/reflector-network/reflector-contract",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-08",
+			"topic": "oracle",
+			"q": "We're building an RWA vault on Stellar and need push-model price feeds for tokenized assets plus EURC and USDC. Which oracle has a Soroban connector with Rust and TypeScript examples?",
+			"expect": { "anyOf": ["redstone-finance/redstone-oracles-monorepo"] },
+			"why": "developers.stellar.org lists RedStone push feeds for XLM, BTC, ETH, USDC, EURC and tokenized assets; RedStone's Stellar docs point to the @redstone-finance/stellar-connector package in redstone-oracles-monorepo, which holds the on-chain contracts and a TypeScript client.",
+			"sources": [
+				{
+					"url": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://docs.redstone.finance/docs/technical-reference/non-evm-chains/stellar/",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/redstone-finance/redstone-oracles-monorepo/tree/main/packages/stellar-connector",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-09",
+			"topic": "oracle",
+			"q": "My team already uses Chainlink feeds on EVM. If I want to read Chainlink Data Feeds from a Soroban contract, where's the proxy interface I'm supposed to code against?",
+			"expect": { "anyOf": ["smartcontractkit/chainlink-stellar"] },
+			"why": "Chainlink's Data Feeds on Stellar docs point to chainlink-stellar's contracts/common/interfaces/src/data_feeds_proxy.rs as the reader interface consumers call on the proxy; developers.stellar.org lists the same repo.",
+			"sources": [
+				{
+					"url": "https://docs.chain.link/data-feeds/stellar",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/smartcontractkit/chainlink-stellar",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-10",
+			"topic": "defi",
+			"q": "I'm adding a token swap feature to my Stellar wallet and want the best price across Soroswap, Phoenix and Aqua instead of hitting one AMM. What should I integrate?",
+			"expect": { "anyOf": ["soroswap/aggregator"] },
+			"why": "README: the Soroswap Aggregator aggregates liquidity from different Soroban-based AMMs, with adapters for Soroswap and Phoenix and Aqua in the build steps.",
+			"sources": [
+				{
+					"url": "https://github.com/soroswap/aggregator",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-11",
+			"topic": "defi",
+			"q": "We want users of our app to supply and borrow against Blend lending pools. Is there a JS SDK for Blend, or do I have to call the pool contracts by hand?",
+			"expect": {
+				"anyOf": [
+					"blend-capital/blend-sdk-js",
+					"blend-capital/blend-contracts-v2"
+				]
+			},
+			"why": "blend-sdk-js README: the Blend Protocol SDK for JavaScript to assist in interacting with the Blend Protocol (npm @blend-capital/blend-sdk); blend-contracts-v2 holds the lending pool contracts it talks to.",
+			"sources": [
+				{
+					"url": "https://github.com/blend-capital/blend-sdk-js",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/blend-capital/blend-contracts-v2",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-12",
+			"topic": "defi",
+			"q": "I'd like to offer an auto-compounding yield vault on Stellar where deposits get allocated to strategies like Blend. Is there an open-source vault and strategy contract suite I can build on?",
+			"expect": { "anyOf": ["defindex-io/stellar-contracts"] },
+			"why": "README: DeFindex Soroban contracts with vaults (manager allocates funds to strategies via investVault) and Blend strategies that auto-compound BLND rewards; moved out of the now-archived paltalabs/defindex monorepo.",
+			"sources": [
+				{
+					"url": "https://github.com/defindex-io/stellar-contracts",
+					"read": "2026-10-23"
+				},
+				{ "url": "https://github.com/paltalabs/defindex", "read": "2026-10-23" }
+			]
+		},
+		{
+			"id": "dev-13",
+			"topic": "tooling",
+			"q": "What's the standard command-line tool for building, deploying and invoking Soroban contracts and managing keys and networks from my terminal?",
+			"expect": { "anyOf": ["stellar/stellar-cli"] },
+			"why": "README: Stellar CLI is the command-line multi-tool for running and deploying Stellar contracts on the Stellar network.",
+			"sources": [
+				{
+					"url": "https://github.com/stellar/stellar-cli",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-14",
+			"topic": "tooling",
+			"q": "For our integration tests I want a throwaway local Stellar network in Docker with RPC, Horizon and a friendbot, so CI doesn't depend on testnet. What should I run?",
+			"expect": { "anyOf": ["stellar/quickstart"] },
+			"why": "README: docker run stellar/quickstart --local starts a private network with RPC at /rpc, Horizon at /, and a local friendbot faucet, intended for development.",
+			"sources": [
+				{ "url": "https://github.com/stellar/quickstart", "read": "2026-10-23" }
+			]
+		},
+		{
+			"id": "dev-15",
+			"topic": "tooling",
+			"q": "We're doing analytics on Stellar history and need ledgers, transactions and trades exported into tables we can load into our warehouse. Is there an open-source pipeline for that instead of scraping Horizon?",
+			"expect": { "anyOf": ["stellar/stellar-etl"] },
+			"why": "README: Stellar ETL is a data pipeline that extracts data from the history of the Stellar network with commands like export_ledgers, export_transactions and export_trades; the Hubble BigQuery datasets are built on it.",
+			"sources": [
+				{
+					"url": "https://github.com/stellar/stellar-etl",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-16",
+			"topic": "tooling",
+			"q": "I'm tired of rate limits on public endpoints and want to run my own Soroban RPC node for my dapp backend. Which repo has the server I should deploy?",
+			"expect": { "anyOf": ["stellar/stellar-rpc"] },
+			"why": "README: the stellar-rpc repo produces one binary, stellar-rpc, the RPC server for Stellar.",
+			"sources": [
+				{
+					"url": "https://github.com/stellar/stellar-rpc",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-17",
+			"topic": "bridge",
+			"q": "We issued a token on Stellar and want it to exist on Ethereum and Base too, with flow limits per token. How do I make my Stellar token interchain?",
+			"expect": { "anyOf": ["axelarnetwork/axelar-amplifier-stellar"] },
+			"why": "Axelar docs: Stellar Interchain Token Service lets you register existing Stellar tokens, deploy them to other chains and set flow limits; its contracts (stellar-interchain-token-service, token manager, gateway) live in axelar-amplifier-stellar.",
+			"sources": [
+				{
+					"url": "https://docs.axelar.dev/dev/send-tokens/stellar/intro/",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/axelarnetwork/axelar-amplifier-stellar",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://developers.stellar.org/docs/tools/infra-tools/cross-chain",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-18",
+			"topic": "bridge",
+			"q": "Our token is already a LayerZero OFT on several EVM chains. Is there a reference OFT contract for Stellar so we can add Stellar as another chain in the mesh?",
+			"expect": { "anyOf": ["LayerZero-Labs/monorepo-external"] },
+			"why": "LayerZero's Stellar OFT docs link the Stellar OFT, OFT core, OApp, SAC Manager and protocol contracts in LayerZero-Labs/monorepo-external (apps/oft-app/contracts/stellar/oft).",
+			"sources": [
+				{
+					"url": "https://docs.layerzero.network/v2/developers/stellar/oft/overview",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/LayerZero-Labs/monorepo-external",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-19",
+			"topic": "bridge",
+			"q": "We run a Polkadot parachain and want Stellar assets like USDC and EURC usable on it, with redemption back to Stellar. Is there an existing bridge between Substrate chains and Stellar?",
+			"expect": { "anyOf": ["pendulum-chain/spacewalk"] },
+			"why": "README: Spacewalk is a bridge between Substrate-based parachains and Stellar for asset transfers in both directions using vaults; latest commit March 2026.",
+			"sources": [
+				{
+					"url": "https://github.com/pendulum-chain/spacewalk",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/pendulum-chain/spacewalk/commits/main",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-20",
+			"topic": "smart-account",
+			"q": "I want a contract account where different signers are allowed for different contracts and functions, with rules that expire, and signature checks delegated to verifier contracts like Ed25519. Is there a framework for that on Soroban?",
+			"expect": { "anyOf": ["OpenZeppelin/stellar-contracts"] },
+			"why": "OpenZeppelin docs: the smart account framework splits authorization into context rules, signers (delegated or external via verifier contracts such as Ed25519 and WebAuthn) and policies, hosted in stellar-contracts packages/accounts (crate stellar-accounts).",
+			"sources": [
+				{
+					"url": "https://docs.openzeppelin.com/stellar-contracts/accounts/smart-account",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/OpenZeppelin/stellar-contracts",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://developers.stellar.org/docs/build/guides/contract-accounts/smart-wallets",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-21",
+			"topic": "smart-account",
+			"q": "I'm giving an AI agent access to a user's Stellar smart account. Which smart account contract lets me add a time-limited signer and install plugins with authorization hooks?",
+			"expect": { "anyOf": ["Crossmint/stellar-smart-account"] },
+			"why": "README: Standard signers can carry an expiration timestamp (described for AI agents), and a plugin system with install/uninstall lifecycle and authorization hooks via install_plugin.",
+			"sources": [
+				{
+					"url": "https://github.com/Crossmint/stellar-smart-account",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-22",
+			"topic": "smart-account",
+			"q": "Our smart wallet users don't hold any XLM. Now that Launchtube is retired, what should I use on the backend to sponsor fees and submit their transactions?",
+			"expect": { "anyOf": ["OpenZeppelin/openzeppelin-relayer"] },
+			"why": "developers.stellar.org smart wallets guide: OpenZeppelin Relayer submits transactions and manages fees, channel accounts and sequence numbers, replacing Launchtube for most new projects; its README lists Stellar as a supported network.",
+			"sources": [
+				{
+					"url": "https://developers.stellar.org/docs/build/guides/contract-accounts/smart-wallets",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/OpenZeppelin/openzeppelin-relayer",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-23",
+			"topic": "anchor",
+			"q": "We're a fintech becoming a Stellar anchor and need SEP-10 auth, SEP-24 interactive deposits and withdrawals and SEP-31 receives. Is there a server we can deploy instead of implementing every SEP endpoint ourselves?",
+			"expect": { "anyOf": ["stellar/anchor-platform"] },
+			"why": "README: the easiest and fastest way to deploy a SEP-compatible anchor service; developers.stellar.org Anchor Platform docs list SEP-1, 6, 10, 12, 24, 31, 38 and 45 and link this repo (django-polaris is archived).",
+			"sources": [
+				{
+					"url": "https://github.com/stellar/anchor-platform",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://developers.stellar.org/docs/platforms/anchor-platform",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://github.com/stellar/django-polaris",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-24",
+			"topic": "anchor",
+			"q": "I'm building a TypeScript wallet and want to let users deposit and withdraw through anchors with SEP-10 login and the SEP-24 hosted flow. Which library takes care of the anchor side for me?",
+			"expect": { "anyOf": ["stellar/typescript-wallet-sdk"] },
+			"why": "README: a library to build wallet applications on Stellar faster; the developers.stellar.org SEP-24 wallet guide imports @stellar/typescript-wallet-sdk for the hosted deposit and withdrawal flow.",
+			"sources": [
+				{
+					"url": "https://github.com/stellar/typescript-wallet-sdk",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://developers.stellar.org/docs/build/apps/wallet/sep24",
+					"read": "2026-10-23"
+				}
+			]
+		},
+		{
+			"id": "dev-25",
+			"topic": "anchor",
+			"q": "Before we go live as an anchor I want to check our stellar.toml and SEP-24 and SEP-31 endpoints against the spec. Is there a test suite or CLI I can point at our home domain?",
+			"expect": { "anyOf": ["stellar/stellar-anchor-tests"] },
+			"why": "README: @stellar/anchor-tests is a library and CLI for testing Stellar anchors (live at anchor-tests.stellar.org); the CLI takes --seps and --home-domain and covers SEP-1, 12, 24, 31 and 38.",
+			"sources": [
+				{
+					"url": "https://github.com/stellar/stellar-anchor-tests",
+					"read": "2026-10-23"
+				},
+				{
+					"url": "https://raw.githubusercontent.com/stellar/stellar-anchor-tests/master/%40stellar/anchor-tests/README.md",
+					"read": "2026-10-23"
+				}
+			]
+		}
+	]
+}

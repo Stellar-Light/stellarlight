@@ -1,0 +1,34 @@
+# The new tests in src/lib/__tests__/repo-search-rank.test.ts run against the
+# base sources (origin/main d9bd53b5, a scratch copy of src with this branch's
+# test file), 2026-10-23 21:09Z:
+#   npx vitest run src/lib/__tests__/repo-search-rank.test.ts --reporter=verbose
+# 10 fail on base; on this branch all 68 pass.
+× src/lib/__tests__/repo-search-rank.test.ts > usage-aware ranking (code-truth 5) > usage never lifts a weak match above a better one 9ms
+× src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > a better-matching old generation still sits directly below its successor 2ms
+× src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > the successor takes the old row's place, so a name query keeps the project first 1ms
+× src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > usage on the old generation does not keep it above its successor 1ms
+× src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > the curated map names the successor when the row carries none 1ms
+× src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > trims edge punctuation so stopwords drop and content words match 0ms
+× src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > drops contractions and question filler, keeps c# and hyphenated forms 0ms
+× src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > counts a repeated word once 0ms
+× src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > a query of only filler still searches, without its punctuation 0ms
+× src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > a word followed by punctuation matches, filler no longer outranks it 4ms
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > usage-aware ranking (code-truth 5) > usage never lifts a weak match above a better one
+AssertionError: expected [ 'proto/frontend', …(1) ] to deeply equal [ Array(2) ]
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > a better-matching old generation still sits directly below its successor
+AssertionError: expected 1 to be 3 // Object.is equality
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > the successor takes the old row's place, so a name query keeps the project first
+AssertionError: expected [ 'proto/pool-contracts', …(2) ] to deeply equal [ 'proto/pool-contracts-v2', …(2) ]
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > usage on the old generation does not keep it above its successor
+AssertionError: expected [ 'proto/pool-contracts', …(1) ] to deeply equal [ 'proto/pool-contracts-v2', …(1) ]
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > the curated map names the successor when the row carries none
+AssertionError: expected [ 'kalepail/stellar-raven', …(1) ] to deeply equal [ …(2) ]
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > trims edge punctuation so stopwords drop and content words match
+TypeError: (0 , repoQueryTokens) is not a function
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > drops contractions and question filler, keeps c# and hyphenated forms
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > counts a repeated word once
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > a query of only filler still searches, without its punctuation
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > question tokens (repoQueryTokens, 2026-10-23) > a word followed by punctuation matches, filler no longer outranks it
+AssertionError: expected 'acme/starter' to be 'lib/contract-utils' // Object.is equality
+Test Files  1 failed (1)
+Tests  10 failed | 58 passed (68)

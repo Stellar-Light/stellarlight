@@ -1,0 +1,18 @@
+{
+	"file": "devset.json",
+	"sha256": "4eb55ac510b76d2f49e82ac9e72887756ddff41f84f0d754eb5e5af77db6090f",
+	"writerSha256": "310633b34fa05d1092c63c2ebec4f9c3eca4bae13b8bc26ec73b6fe9ff91deab",
+	"note": "The writer's file (written 17:58:22Z) reformatted by biome for the repo's formatter check; the parsed JSON is identical. Frozen before any replay or live capture of a dev question.",
+	"frozenAt": "2026-10-23T18:00:06Z",
+	"heldOut": [
+		"dev-06",
+		"dev-07",
+		"dev-10",
+		"dev-14",
+		"dev-18",
+		"dev-22",
+		"dev-23",
+		"dev-25"
+	],
+	"heldOutRule": "the 8 ids with the smallest sha256 of the id string, fixed in the ledger before the set was written"
+}
