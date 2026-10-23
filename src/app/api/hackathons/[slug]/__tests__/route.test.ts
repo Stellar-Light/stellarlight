@@ -240,7 +240,12 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 			award: true,
 		});
 		expect(body.hackathon.stats.hiddenWinners).toEqual([
-			{ placement: "Winner", award: "2nd Place", placementRank: 2 },
+			{
+				placement: "Winner",
+				award: "2nd Place",
+				awardCategory: null,
+				placementRank: 2,
+			},
 		]);
 		expect(body.hackathon.stats.winnersNote).toBe(
 			"One winning submission is not served here: its team hid or deleted it on DoraHacks (Winner, 2nd Place).",
@@ -305,10 +310,9 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 			build("x", { activity: after }),
 		]);
 		const body = await getEvent();
-		// award is the category pool; prizeUsd is what this placement won.
+		// prizeUsd is what this placement won.
 		expect(body.winners[0]).toMatchObject({
 			id: "w3",
-			award: "$10,000 XLM Prize",
 			prizeUsd: 1250,
 			project: { slug: "acme", status: "Live", scfAwarded: true },
 			afterEvent: "commits 90+ days after",
@@ -317,6 +321,137 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		for (const s of body.submissions)
 			for (const k of ["prizeUsd", "project", "afterEvent", "lastCommitAt"])
 				expect(k in s).toBe(false);
+	});
+
+	it("serves an award its winners of different placements share as their category, never as a winner's award", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		// Real-World ZK as DoraHacks lists it: five placements in one award.
+		const places = ["1st", "2nd", "3rd", "4th", "5th"];
+		const amounts = ["$5,000", "$2,000", "$1,250", "$1,000", "$750"];
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			...places.map((p, i) =>
+				build(`w${i + 1}`, {
+					isWinner: true,
+					hackathonPlacement: `${p} Place - ${amounts[i]} in XLM`,
+					award: "$10,000 XLM Prize",
+				}),
+			),
+			build("x"),
+		]);
+		// A sixth placement in the same award, hidden by its team.
+		hiddenRows = [
+			{ buildId: "h6", placement: "6th Place", award: "$10,000 XLM Prize" },
+		];
+		const body = await getEvent();
+		const pick = (r: Record<string, unknown>) => [
+			r.id,
+			r.award,
+			r.awardCategory,
+		];
+		expect(body.winners.map(pick)).toEqual(
+			places.map((_, i) => [`w${i + 1}`, null, "$10,000 XLM Prize"]),
+		);
+		expect(body.winners.map((w: { prizeUsd: number }) => w.prizeUsd)).toEqual([
+			5000, 2000, 1250, 1000, 750,
+		]);
+		expect(body.submissions.map(pick)).toEqual([
+			...places.map((_, i) => [`w${i + 1}`, null, "$10,000 XLM Prize"]),
+			["x", null, null],
+		]);
+		expect(body.hackathon.stats.hiddenWinners).toEqual([
+			{
+				placement: "6th Place",
+				award: null,
+				awardCategory: "$10,000 XLM Prize",
+				placementRank: 6,
+			},
+		]);
+		expect(body.hackathon.stats.winnersNote).toBe(
+			"One winning submission is not served here: its team hid or deleted it on DoraHacks (6th Place in $10,000 XLM Prize).",
+		);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("reads a hidden winner's placement: a served winner whose sibling is hidden is in a category", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			build("w1", {
+				isWinner: true,
+				hackathonPlacement: "1st Place",
+				award: "Main Pool",
+			}),
+		]);
+		// Its award's 2nd place, hidden by its team.
+		hiddenRows = [
+			{ buildId: "h2", placement: "2nd Place", award: "Main Pool" },
+		];
+		const body = await getEvent();
+		expect([body.winners[0].award, body.winners[0].awardCategory]).toEqual([
+			null,
+			"Main Pool",
+		]);
+		expect(body.submissions[0]).toMatchObject({
+			award: null,
+			awardCategory: "Main Pool",
+		});
+		expect(body.hackathon.stats.hiddenWinners).toEqual([
+			{
+				placement: "2nd Place",
+				award: null,
+				awardCategory: "Main Pool",
+				placementRank: 2,
+			},
+		]);
+	});
+
+	it("keeps an award that is a winner's own prize, on a live roster too", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
+		const { hackathon: _e, haystack: _h, ...sub } = build("s");
+		live.mockResolvedValueOnce([
+			// Two placements in one award: its title is their category.
+			{
+				...sub,
+				id: "w1",
+				isWinner: true,
+				hackathonPlacement: "1st Place",
+				award: "Main Pool",
+			},
+			{
+				...sub,
+				id: "w2",
+				isWinner: true,
+				hackathonPlacement: "2nd Place",
+				award: "Main Pool",
+			},
+			// One award for one winner, the place in its title (ZK Gaming).
+			{
+				...sub,
+				id: "g1",
+				isWinner: true,
+				hackathonPlacement: "Winners",
+				award: "3rd Place - $1,250",
+			},
+		] as never);
+		const body = await getEvent();
+		expect(
+			body.winners.map((w: Record<string, unknown>) => [
+				w.id,
+				w.award,
+				w.awardCategory,
+				w.placementRank,
+			]),
+		).toEqual([
+			["w1", null, "Main Pool", 1],
+			["w2", null, "Main Pool", 2],
+			["g1", "3rd Place - $1,250", null, 3],
+		]);
 	});
 
 	it("the curated roster gives each winner its own id, its project and its SCF record", async () => {

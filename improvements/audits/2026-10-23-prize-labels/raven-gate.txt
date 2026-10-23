@@ -1,0 +1,52 @@
+# pnpm raven:gate --raven <scratch>/raven-src/stellar-raven, lane tree (spec 1.9.109) after the review fixes, 2026-10-23T21:50Z.
+# The same command on origin/main (spec 1.9.101) printed the same lines but the two version lines: no routing movement from this change.
+
+ WARN  Unsupported engine: wanted: {"node":"24.12.0"} (current: {"node":"v22.23.1","pnpm":"10.32.1"})
+
+> stellarlight@1.0.0 raven:gate <scratch>/pl-wt
+> tsx scripts/eval/raven-gate-replica.ts --raven <scratch>/raven-src/stellar-raven
+
+Raven checkout <scratch>/raven-src/stellar-raven
+  ported sources: identical to b1dc866
+  manifest sha256 4852f62608f1 = gates.json evidence
+  baseline legacy: n 338, top1 219, top3 298, top5 326, cardN 182, cardHit5 112
+  baseline skills: n 23, top1 17, top3 23, top5 23, cardN 23, cardHit5 23
+  baseline holdout: n 49, top1 12, top3 26, top5 29, cardN 49, cardHit5 29, forbiddenCaptures 10, passed 24
+  baseline extended: n 122, top1 93, top3 111, top5 117, cardN 28, cardHit5 16
+  baseline protocol: positives 8, top1 7, top3 7, top5 7, controls 4, controlTop5Captures 3
+  reproduces acceptedTotals exactly: yes
+  rebuilds committed Scout + stellarDocs entries from inventory (Scout 1.9.61): identical (provenance aside)
+
+Candidate spec 1.9.109 (src/lib/openapi-spec.ts)
+  exposed Scout ops 33 (added scout.analyzeHackathonSubmissions, scout.getHackathonSubmission, scout.locateSource; removed none); 31 Scout/stellarDocs entries differ from the committed catalog
+  catalog build guards: pass
+  legacy: n 338, top1 220, top3 298, top5 326, cardN 182, cardHit5 112   (accepted: n 338, top1 219, top3 298, top5 326, cardN 182, cardHit5 112)
+  skills: n 23, top1 17, top3 23, top5 23, cardN 23, cardHit5 23   (accepted: n 23, top1 17, top3 23, top5 23, cardN 23, cardHit5 23)
+  holdout: n 49, top1 12, top3 26, top5 29, cardN 49, cardHit5 29, forbiddenCaptures 10, passed 24   (accepted: n 49, top1 12, top3 26, top5 29, cardN 49, cardHit5 29, forbiddenCaptures 10, passed 24)
+  extended: n 122, top1 93, top3 112, top5 117, cardN 28, cardHit5 16   (diagnostic; baseline: n 122, top1 93, top3 111, top5 117, cardN 28, cardHit5 16)
+  protocol: positives 8, top1 7, top3 7, top5 7, controls 4, controlTop5Captures 3   (diagnostic; baseline: positives 8, top1 7, top3 7, top5 7, controls 4, controlTop5Captures 3)
+  mechanical gate (run-routing.mjs --gate): pass
+  accepted totals kept: yes
+  questions moved: 2 (0 hit->miss, 2 gains only); top-5 lists changed: 63
+
+  gain [legacy] q-defi-stellarx-what-is: "What is StellarX and is it built by the Stellar Development Foundation?"
+    labelled lumenloop (lumenloop_get_project); top1 miss->hit
+    pick scout.searchHackathonBuilds -> lumenloop.search_content_semantic
+    before: scout.searchHackathonBuilds 227, lumenloop.search_content_semantic 217, scout.searchProjects 216, scout.searchResearch 212, lumenloop.search_directory 206
+    after:  lumenloop.search_content_semantic 217, scout.searchProjects 216, scout.searchResearch 212, scout.searchHackathonBuilds 209, lumenloop.search_directory 206
+    cause: scout.searchHackathonBuilds #1 -> #4: score 227 -> score 209; words +keywords[development, foundation]
+    cause: lumenloop.search_content_semantic #2 -> #1 (displaced; its own score did not change)
+    cause: scout.searchProjects #3 -> #2 (displaced; its own score did not change)
+    cause: scout.searchResearch #4 -> #3 (displaced; its own score did not change)
+
+  gain [extended] q-edge-scf-v7-centralization-myths: "Is SCF v7.0 predatory because only 10 percent is upfront, and can SDF block my app from mainnet or take it down?"
+    labelled scout (scout_research); top3 miss->hit
+    pick skills.lumenloop.scf-submission-radar -> skills.lumenloop.scf-submission-radar
+    before: skills.lumenloop.scf-submission-radar 250, lumenloop.find_content_by_entity 226, lumenloop.get_scf_submissions 225, lumenloop.find_similar_scf_submissions 220, scout.scfPitch 217
+    after:  skills.lumenloop.scf-submission-radar 250, scout.scfPitch 237, lumenloop.find_content_by_entity 226, lumenloop.get_scf_submissions 225, lumenloop.find_similar_scf_submissions 220
+    cause: lumenloop.find_content_by_entity #2 -> #3 (displaced; its own score did not change)
+    cause: lumenloop.get_scf_submissions #3 -> #4 (displaced; its own score did not change)
+    cause: lumenloop.find_similar_scf_submissions #4 -> #5 (displaced; its own score did not change)
+    cause: scout.scfPitch #5 -> #2: gated out, backfill 217 -> gated out, backfill 237; words +routingKeywords[take]
+
+VERDICT: Raven would ACCEPT 1.9.109

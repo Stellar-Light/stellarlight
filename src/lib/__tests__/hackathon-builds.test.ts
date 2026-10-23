@@ -236,7 +236,7 @@ describe("stored rows", () => {
 			hackathonTitle: "Later",
 			endedAt: "2026-09-01",
 		};
-		const d = buildDetailFromStored([later, gibbor]);
+		const d = buildDetailFromStored([later, gibbor], new Set());
 		expect([d.hackathon.slug, d.isWinner, d.placement, d.winnerSource]).toEqual(
 			["alebrije2026", true, "Winner", BAF],
 		);
@@ -885,7 +885,7 @@ describe("one submission in full", () => {
 			updatedAt: "2026-10-05T10:20:00.000Z",
 			createdAt: "2026-10-05T10:20:00.000Z",
 		};
-		const d = buildDetailFromStored([blend]);
+		const d = buildDetailFromStored([blend], new Set());
 		expect(d.writeUp).toBe("## Blend Pool Creator\nFull write-up.");
 		expect(d.prizeUsd).toBe(3000);
 		expect(d.hackathon.slug).toBe("stellar-hacks-blend");
@@ -902,7 +902,7 @@ describe("one submission in full", () => {
 			placement: null,
 			isWinner: false,
 		};
-		const both = buildDetailFromStored([palta, blend]);
+		const both = buildDetailFromStored([palta, blend], new Set());
 		expect(both.hackathon.slug).toBe("stellar-hacks-blend");
 		expect(both.placement).toBe("1st Place - $3,000 in XLM");
 		expect(
@@ -914,9 +914,81 @@ describe("one submission in full", () => {
 		// A restored entry is a new row; the submission is not new.
 		const restored = { ...blend, firstSeenAt: "2026-10-15T09:00:00.000Z" };
 		const old = { ...palta, lastSeenAt: "2026-10-15T09:00:00.000Z" };
-		const dated = buildDetailFromStored([old, restored]);
+		const dated = buildDetailFromStored([old, restored], new Set());
 		expect(dated.firstSeenAt).toBe("2026-10-05T10:20:00.000Z");
 		expect(dated.lastSeenAt).toBe("2026-10-15T09:00:00.000Z");
+	});
+
+	it("serves an award its event's winners of other placements share as awardCategory, in every entry", async () => {
+		const { buildDetailFromStored } = await import("@/lib/hackathon-builds");
+		const { prizeCategories } = await import("@/lib/integrations/dorahacks");
+		const umbra = {
+			id: "u",
+			buildId: "dorahacks-buidl-46541",
+			name: "Umbra Wallet",
+			hackathonSlug: "stellar-hacks-zk",
+			hackathonTitle: "Stellar Hacks: Real-World ZK",
+			endedAt: "2025-10-09",
+			placement: "3rd Place - $1,250 in XLM",
+			award: "$10,000 XLM Prize",
+			isWinner: true,
+			url: "https://dorahacks.io/buidl/46541",
+			firstSeenAt: "2026-10-05T10:20:00.000Z",
+			lastSeenAt: "2026-10-05T10:20:00.000Z",
+			updatedAt: "2026-10-05T10:20:00.000Z",
+			createdAt: "2026-10-05T10:20:00.000Z",
+		};
+		// The same award text in a later event, its only winner's own prize.
+		const later = {
+			...umbra,
+			id: "v",
+			hackathonSlug: "later",
+			hackathonTitle: "Later",
+			endedAt: "2026-01-01",
+			placement: "Winners",
+		};
+		const categories = prizeCategories(
+			[
+				{
+					hackathonSlug: "stellar-hacks-zk",
+					placement: "1st Place - $5,000 in XLM",
+				},
+				{
+					hackathonSlug: "stellar-hacks-zk",
+					placement: "3rd Place - $1,250 in XLM",
+				},
+				{ hackathonSlug: "later", placement: "Winners" },
+			].map((w) => ({
+				hackathon: { slug: w.hackathonSlug },
+				hackathonPlacement: w.placement,
+				award: "$10,000 XLM Prize",
+			})),
+		);
+		const d = buildDetailFromStored([later, umbra], categories);
+		expect([d.hackathon.slug, d.award, d.awardCategory, d.prizeUsd]).toEqual([
+			"later",
+			"$10,000 XLM Prize",
+			null,
+			null,
+		]);
+		expect(
+			d.entries.map((e) => [
+				e.hackathon.slug,
+				e.award,
+				e.awardCategory,
+				e.prizeUsd,
+			]),
+		).toEqual([
+			["later", "$10,000 XLM Prize", null, null],
+			["stellar-hacks-zk", null, "$10,000 XLM Prize", 1250],
+		]);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/builds/{id}"),
+				{ build: d },
+			),
+		).toEqual([]);
 	});
 });
 
@@ -999,9 +1071,10 @@ describe("what a build's repo declares", () => {
 			indexedFromStored(stored({ stackReadAt: "2026-10-05T00:00:00.000Z" }))
 				.stack,
 		).toEqual([]);
-		const d = buildDetailFromStored([
-			stored({ repoMissingAt: "2026-10-05T00:00:00.000Z" }),
-		]);
+		const d = buildDetailFromStored(
+			[stored({ repoMissingAt: "2026-10-05T00:00:00.000Z" })],
+			new Set(),
+		);
 		expect("stack" in d).toBe(false);
 		expect(d.stackReadAt).toBeNull();
 		expect(d.repoMissingAt).toBe("2026-10-05T00:00:00.000Z");

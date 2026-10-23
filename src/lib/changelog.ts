@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.104",
+		type: "changed",
+		summary:
+			'An award several placements of one event share is served as `awardCategory`, never as a winner\'s `award`. All five Stellar Hacks: Real-World ZK winners were served award "$10,000 XLM Prize", the title of the award their placements sit in, beside their own prizes of $5,000 to $750, so an agent could report each as having won $10,000. On 34 winners of 7 events (Real-World ZK, Agents, Scaffold Stellar, Blend, KALE x Reflector, PaltaLabs and Build Better) `award` is now null and the title is in the new `awardCategory`: searchHackathonBuilds rows, getHackathon winners, submissions and hidden winners, and getHackathonSubmission and reviewSubmission, top level and entries.',
+		detail:
+			"The rule: within one event, the same award text on winners of different placements names their category, and so does a title that states more money than a winner's own placement ('$10,000 XLM Prize' on '1st Place - $5,000 in XLM'). DoraHacks nests placements under one award, and the sync stores the award's title on each winner. The same text on winners of one placement stays each one's own `award` (Build on Stellar Chile's featured video pitch prizes, given to 10 and 5 winners; Stellar LATAM's two Track 2 co-winners), as does an award per winner (ZK Gaming's '1st Place - $5,000'). getHackathon, getHackathonSubmission and reviewSubmission also count the placements of winners hidden upstream; search reads served winners only. Every row that serves `award` now also serves `awardCategory`, null when nothing on record marks the award as shared. What a winner won is still `placement` (`hackathonPlacement` on getHackathon) and `prizeUsd`. Search still matches the title's words: matchedTerms reads the award or award category. getHackathonSubmission and reviewSubmission read the winners of a submission's events when it carries award text, and answer 503 when that read fails rather than serve an award they could not check. Migration: spec 1.9.26 to 1.9.101 documented `award` as the award category title, so a client that shows it as the category label now gets null on 34 of the 66 served winners with award text; read `awardCategory ?? award` for the old value. Checked: a replay of the real handlers over a live capture of 10 events (37 requests) differs from the base only by the new key and by these 34 winners' award moving to awardCategory; 10 winners hand-checked against DoraHacks' own winner assignments.",
+	},
+	{
+		date: "2026-10-23",
 		surfaces: ["api"],
 		version: "spec@1.9.103",
 		type: "fixed",

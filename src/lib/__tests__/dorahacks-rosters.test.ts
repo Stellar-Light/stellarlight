@@ -3,6 +3,8 @@ import {
 	type DoraHacksHackathon,
 	fetchHackathonSubmissions,
 	fetchLatestHackathonWinners,
+	prizeCategories,
+	prizeLabels,
 	readEventRosters,
 } from "@/lib/integrations/dorahacks";
 
@@ -109,5 +111,96 @@ describe("the winner-assignments read", () => {
 		]);
 		expect(latest?.hackathonUname).toBe("older");
 		expect(latest?.winners.map((w) => w.projectName)).toEqual(["b11"]);
+	});
+});
+
+describe("an award several placements share is a category, not a prize", () => {
+	const row = (
+		award: string | null,
+		hackathonPlacement: string | null,
+		slug = "zk",
+	) => ({ award, hackathonPlacement, hackathon: { slug } });
+	// Stellar Hacks: Real-World ZK as DoraHacks lists it: one award, five
+	// placements, each with its own amount.
+	const zk = [
+		row("$10,000 XLM Prize", "1st Place - $5,000 in XLM"),
+		row("$10,000 XLM Prize", "2nd Place - $2,000 in XLM"),
+		row("$10,000 XLM Prize", "3rd Place - $1,250 in XLM"),
+		row("$10,000 XLM Prize", "4th Place - $1,000 in XLM"),
+		row("$10,000 XLM Prize", "5th Place - $750 in XLM"),
+		row(null, null),
+	];
+
+	it("serves the award's title as the category of every winner placed in it", () => {
+		const categories = prizeCategories(zk);
+		expect(zk.map((r) => prizeLabels(categories, r))).toEqual([
+			...Array(5).fill({ award: null, awardCategory: "$10,000 XLM Prize" }),
+			{ award: null, awardCategory: null },
+		]);
+	});
+
+	it("keeps an award that is each winner's own prize as the award", () => {
+		const rows = [
+			// One award per winner, the place in its title (ZK Gaming).
+			row("1st Place - $5,000", "Winners", "gaming"),
+			row("2nd Place - $2,000", "Winners", "gaming"),
+			// One prize given to several winners, each its own (Chile).
+			row("Featured Video Pitch $50", "Winners", "chile"),
+			row("Featured Video Pitch $50", "Winners", "chile"),
+			row("Featured Video Pitch $100", "Winners", "chile"),
+			// Two co-winners of one track prize (LATAM).
+			row("Track 2 Winner", "Winners", "latam"),
+			row("Track 2 Winner", "Winners", "latam"),
+			// The only winner its award holds.
+			row("Best UX Award", "1st Place", "solo"),
+		];
+		const categories = prizeCategories(rows);
+		expect(categories.size).toBe(0);
+		expect(rows.map((r) => prizeLabels(categories, r).award)).toEqual(
+			rows.map((r) => r.award),
+		);
+		expect(
+			rows.every((r) => prizeLabels(categories, r).awardCategory === null),
+		).toBe(true);
+	});
+
+	it("reads each event apart, and a placement's case and outer spaces as the same placement", () => {
+		const rows = [
+			row("Hackathon Winners", "1st Place", "a"),
+			row("Hackathon Winners", "2nd Place", "b"),
+			row("Track Winner", "Winners ", "c"),
+			row("Track Winner", "winners", "c"),
+		];
+		expect(prizeCategories(rows).size).toBe(0);
+	});
+
+	it("reads an award as a category when its title states more than the winner's own placement", () => {
+		// The only winner of its award on record (its siblings not stored):
+		// "$10,000" can not be the prize of a placement that says "$5,000".
+		const lone = [row("$10,000 XLM Prize", "1st Place - $5,000 in XLM")];
+		expect(prizeLabels(prizeCategories(lone), lone[0])).toEqual({
+			award: null,
+			awardCategory: "$10,000 XLM Prize",
+		});
+		// A title that states no more than the placement, or a placement that
+		// states no amount, gives no such evidence.
+		const own = [
+			row("Grand Prize $500", "1st Place - $500", "a"),
+			row("1st Place - $5,000", "Winners", "b"),
+			row("10K Prize Pool", "1st Place", "c"),
+		];
+		expect(prizeCategories(own).size).toBe(0);
+	});
+
+	it("reads rows of one event that carry no event", () => {
+		const roster = zk.map(({ award, hackathonPlacement }) => ({
+			award,
+			hackathonPlacement,
+		}));
+		const categories = prizeCategories(roster);
+		expect(prizeLabels(categories, roster[2])).toEqual({
+			award: null,
+			awardCategory: "$10,000 XLM Prize",
+		});
 	});
 });

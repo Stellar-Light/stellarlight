@@ -1,0 +1,63 @@
+# The final tests with the fix reverted: the lane's 7 test files copied onto origin/main 724f4e6a (no code change), 2026-10-23T21:11Z
+# npx vitest run <7 files> --maxWorkers=4 --minWorkers=1
+
+ ❯ src/app/api/hackathons/review/__tests__/route.test.ts (6 tests | 1 failed) 168ms
+   × a submission placed in an award its event's other placements share > serves the award's title as awardCategory, read from the event's winners in the index 18ms
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts (30 tests | 3 failed) 244ms
+   × GET /api/hackathons/{slug} for a DoraHacks event > names a winner its team hid upstream instead of leaving a gap 13ms
+   × GET /api/hackathons/{slug} for a DoraHacks event > serves an award its winners of different placements share as their category, never as a winner's award 5ms
+   × GET /api/hackathons/{slug} for a DoraHacks event > keeps an award that is a winner's own prize, on a live roster too 3ms
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts (34 tests | 1 failed) 484ms
+   × GET /api/hackathons/builds labels a shared award as a category > serves an award its winners of different placements share as awardCategory, never as a build's award 20ms
+ ❯ src/lib/__tests__/dorahacks-rosters.test.ts (8 tests | 4 failed) 24ms
+   × an award several placements share is a category, not a prize > serves the award's title as the category of every winner placed in it 4ms
+   × an award several placements share is a category, not a prize > keeps an award that is each winner's own prize as the award 0ms
+   × an award several placements share is a category, not a prize > reads each event apart, and a placement's case and outer spaces as the same placement 0ms
+   × an award several placements share is a category, not a prize > reads rows of one event that carry no event 0ms
+ ❯ src/lib/__tests__/hackathon-builds.test.ts (65 tests | 1 failed) 438ms
+   × one submission in full > serves an award its event's winners of other placements share as awardCategory, in every entry 22ms
+ ❯ src/app/api/hackathons/builds/[id]/__tests__/route.test.ts (3 tests | 3 failed) 86ms
+   × GET /api/hackathons/builds/{id} award labels > serves an award its event's winners of different placements share as awardCategory 80ms
+   × GET /api/hackathons/builds/{id} award labels > keeps the award when it is the only placement its award holds 3ms
+   × GET /api/hackathons/builds/{id} award labels > answers 503 when the event's winners cannot be read, never an unchecked award 2ms
+ FAIL  src/lib/__tests__/dorahacks-rosters.test.ts > an award several placements share is a category, not a prize > serves the award's title as the category of every winner placed in it
+TypeError: (0 , prizeCategories) is not a function
+ ❯ src/lib/__tests__/dorahacks-rosters.test.ts:135:22
+ FAIL  src/lib/__tests__/dorahacks-rosters.test.ts > an award several placements share is a category, not a prize > keeps an award that is each winner's own prize as the award
+TypeError: (0 , prizeCategories) is not a function
+ ❯ src/lib/__tests__/dorahacks-rosters.test.ts:157:22
+ FAIL  src/lib/__tests__/dorahacks-rosters.test.ts > an award several placements share is a category, not a prize > reads each event apart, and a placement's case and outer spaces as the same placement
+TypeError: (0 , prizeCategories) is not a function
+ ❯ src/lib/__tests__/dorahacks-rosters.test.ts:174:10
+ FAIL  src/lib/__tests__/dorahacks-rosters.test.ts > an award several placements share is a category, not a prize > reads rows of one event that carry no event
+TypeError: (0 , prizeCategories) is not a function
+ ❯ src/lib/__tests__/dorahacks-rosters.test.ts:182:22
+ FAIL  src/lib/__tests__/hackathon-builds.test.ts > one submission in full > serves an award its event's winners of other placements share as awardCategory, in every entry
+TypeError: prizeCategories is not a function
+ ❯ src/lib/__tests__/hackathon-builds.test.ts:903:22
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > names a winner its team hid upstream instead of leaving a gap
+AssertionError: expected [ { placement: 'Winner', …(2) } ] to deeply equal [ { placement: 'Winner', …(3) } ]
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:242:46
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > serves an award its winners of different placements share as their category, never as a winner's award
+AssertionError: expected [ Array(5) ] to deeply equal [ [ 'w1', null, …(1) ], …(4) ]
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:351:34
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > keeps an award that is a winner's own prize, on a live roster too
+AssertionError: expected [ [ 'w1', 'Main Pool', …(2) ], …(2) ] to deeply equal [ Array(3) ]
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:418:5
+ FAIL  src/app/api/hackathons/builds/__tests__/route.test.ts > GET /api/hackathons/builds labels a shared award as a category > serves an award its winners of different placements share as awardCategory, never as a build's award
+AssertionError: expected { …(6) } to deeply equal { w1: [ null, …(2) ], …(5) }
+ ❯ src/app/api/hackathons/builds/__tests__/route.test.ts:511:36
+ FAIL  src/app/api/hackathons/review/__tests__/route.test.ts > a submission placed in an award its event's other placements share > serves the award's title as awardCategory, read from the event's winners in the index
+AssertionError: expected [ '5th Place', '10K Prize Pool', …(1) ] to deeply equal [ '5th Place', null, '10K Prize Pool' ]
+ ❯ src/app/api/hackathons/review/__tests__/route.test.ts:253:58
+ FAIL  src/app/api/hackathons/builds/[id]/__tests__/route.test.ts > GET /api/hackathons/builds/{id} award labels > serves an award its event's winners of different placements share as awardCategory
+AssertionError: expected [ Array(3) ] to deeply equal [ null, '$10,000 XLM Prize', 1250 ]
+ ❯ src/app/api/hackathons/builds/[id]/__tests__/route.test.ts:71:62
+ FAIL  src/app/api/hackathons/builds/[id]/__tests__/route.test.ts > GET /api/hackathons/builds/{id} award labels > keeps the award when it is the only placement its award holds
+AssertionError: expected [ '$10,000 XLM Prize', undefined ] to deeply equal [ '$10,000 XLM Prize', null ]
+ ❯ src/app/api/hackathons/builds/[id]/__tests__/route.test.ts:98:46
+ FAIL  src/app/api/hackathons/builds/[id]/__tests__/route.test.ts > GET /api/hackathons/builds/{id} award labels > answers 503 when the event's winners cannot be read, never an unchecked award
+AssertionError: expected 200 to be 503 // Object.is equality
+ ❯ src/app/api/hackathons/builds/[id]/__tests__/route.test.ts:107:22
+ Test Files  6 failed | 1 passed (7)
+      Tests  13 failed | 141 passed (154)

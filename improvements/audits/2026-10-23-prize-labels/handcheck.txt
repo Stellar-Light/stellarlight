@@ -1,0 +1,16 @@
+Read 2026-10-23T21:45:52.243Z: DoraHacks winner assignments for 10 events.
+
+| event | buidl | name | DoraHacks award | prizes in it | prize this buidl holds | served placement | served award | served awardCategory | served prizeUsd | verdict |
+| --- | ---: | --- | --- | --- | --- | --- | --- | --- | ---: | --- |
+| stellar-hacks-zk | 46541 | Umbra Wallet | $10,000 XLM Prize | 5 (5 names) | 3rd Place - $1,250 in XLM | 3rd Place - $1,250 in XLM | null | $10,000 XLM Prize | 1250 | pass |
+| stellar-agents-x402-stripe-mpp | 42585 | TollPay | 10K Prize Pool | 5 (5 names) | 5th Place | 5th Place | null | 10K Prize Pool | null | pass |
+| scaffoldstellar | 36328 | Streamr | Hackathon Winners | 5 (5 names) | 3rd Place | 3rd Place | null | Hackathon Winners | null | pass |
+| stellar-hacks-blend | 27456 | YieldBack.Cash | Blend Composability Award | 3 (3 names) | 3rd Place | 3rd Place | null | Blend Composability Award | null | pass |
+| stellar-hacks-kale-reflector | 32712 | CouvePIX | KALE x Reflector Winners | 10 (10 names) | 10th Place | 10th Place | null | KALE x Reflector Winners | null | pass |
+| stellar-hacks-paltalabs | 30677 | Verbex | Soroswap - Defindex Composability Award | 3 (3 names) | 2nd Place | 2nd Place | null | Soroswap - Defindex Composability Award | null | pass |
+| build-on-stellar | 25335 | StellarFinance | Build Better Prizes | 3 (3 names) | Second Place | Second Place | null | Build Better Prizes | null | pass |
+| stellar-hacks-zk-gaming | 39840 | Stellar Poker | 3rd Place - $1,250 | 1 (1 names) | Winners | Winners | 3rd Place - $1,250 | null | null | pass |
+| buildonstellarchile | 40191 | WanderQuest | Premio Video Pitch Destacado \u2013 $100 | 1 (1 names) | Winners | Winners | Premio Video Pitch Destacado \u2013 $100 | null | null | pass |
+| stellar-latam | 28436 | Kredible | Track 2 Winner - Identidad sin barreras | 1 (1 names) | Winners | Winners | Track 2 Winner - Identidad sin barreras | null | null | pass |
+
+10 of 10 pass.
