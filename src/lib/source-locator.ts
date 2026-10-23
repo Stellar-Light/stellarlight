@@ -330,9 +330,10 @@ const KEBAB = /^[a-z][a-z0-9]+(?:-[a-z][a-z0-9]+){2,}$/;
 /** A plain word, an acronym or letters with digits (poseidon2): may join its neighbours. */
 const JOINABLE = /^(?:[A-Z]?[a-z0-9]+|[A-Z0-9]+)$/;
 // Stopwords for search that still name code, so they may sit inside a
-// joined name or a command: StellarAssetContract, protocol_version,
-// `stellar contract build`, `stellar contract alias show`.
-const JOINS_THOUGH_STOPWORD = new Set(["stellar", "protocol", "build", "show"]);
+// joined name (StellarAssetContract, protocol_version) or a command
+// (`stellar contract build`, `stellar contract alias show`).
+const JOINS_THOUGH_STOPWORD = new Set(["stellar", "protocol", "build"]);
+const COMMAND_THOUGH_STOPWORD = new Set(["build", "show"]);
 const ENDS_RUN = /[,.;:!?)\]}"'`]$/;
 const STARTS_RUN = /^[([{"'`]/;
 const MAX_SPAN = 4;
@@ -477,7 +478,7 @@ export function parseQuery(
 			if (STARTS_RUN.test(parts[i].raw)) break;
 			if (!consumed.has(i) && !FILLER.has(t)) {
 				if (!/^[a-z][a-z0-9-]*$/.test(t)) break;
-				if (isStopword(t) && !JOINS_THOUGH_STOPWORD.has(t)) break;
+				if (isStopword(t) && !COMMAND_THOUGH_STOPWORD.has(t)) break;
 				words.push(t);
 			}
 			if (ENDS_RUN.test(parts[i].raw)) break;

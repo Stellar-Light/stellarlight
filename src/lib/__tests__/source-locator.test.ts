@@ -541,6 +541,12 @@ describe("identifier candidates from q", () => {
 		expect(first.factors).toContain("join:0");
 	});
 
+	it("show is a command word, never part of a joined name", () => {
+		expect(ask("show token interface").joined.map((j) => j.raw)).toEqual([
+			"token interface",
+		]);
+	});
+
 	it("punctuation ends a run too", () => {
 		expect(
 			ask("the token interface trait (transfer, approve, burn)").joined.map(
@@ -712,6 +718,14 @@ describe("a stellar-cli command path typed in q", () => {
 		expect(ask("soroban contract build in the CLI").command).toEqual([
 			"contract",
 			"build",
+		]);
+	});
+
+	it("show still counts inside a command", () => {
+		expect(ask("stellar contract alias show").command).toEqual([
+			"contract",
+			"alias",
+			"show",
 		]);
 	});
 

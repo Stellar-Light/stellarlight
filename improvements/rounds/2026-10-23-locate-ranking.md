@@ -331,3 +331,21 @@ Bar 3 not met as written; waived by the orchestrator because no frozen case ends
   `CONTRACT_BASE=origin/main pnpm contract:check` exit 0.
 - 22:06Z: `tsc --noEmit -p tsconfig.json` exit 0; the full set (4 workers)
   217 files, 2,722 tests, exit 0 (`rate-limited-429.test.ts` 32 of 32).
+
+## Re-check (2026-10-23)
+
+- The independent re-check of 848a9f3c passed (GATE: push): every fix holds
+  against its first-review probe; the split is gone with no reference left;
+  a sweep of all 130 two- and three-word stellar-cli commands in three
+  phrasings detects 390 of 390 at full depth; every battery rank is
+  identical to the committed files. It found two low items, both folded in:
+  1. `show` had been added to JOINS_THOUGH_STOPWORD, which the joined-run
+     rule reads too, so q=show token interface joined show into the run
+     (TokenInterface 43 where token interface scores 59). The command scan
+     now reads its own set (build, show); joined runs are back to stellar,
+     protocol and build. No stellar-cli command word is stellar or protocol
+     (the command tree's module names that are stopwords: build and show),
+     so the scan reads every command as before. Two tests: show never joins
+     a name (failed on 848a9f3c), show still counts inside a command.
+  2. The scout-mcp TODO entry said the API weighs owner/name and hyphenated
+     names 8 and quickstart 3; every repo named in q weighs 8.

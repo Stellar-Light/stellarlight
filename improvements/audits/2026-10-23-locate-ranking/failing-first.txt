@@ -204,3 +204,14 @@ Review pass (21:51Z and 21:53Z): the six tests added for the review's findings (
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
  Test Files  2 failed (2)
       Tests  6 failed | 62 passed (68)
+
+## Re-check items (on 848a9f3c, before the fix)
+
+The two tests added for the re-check's first item, run against 848a9f3c's
+src/lib/source-locator.ts (`-t show`):
+
+   × identifier candidates from q > show is a command word, never part of a joined name
+   ✓ a stellar-cli command path typed in q > show still counts inside a command
+      Tests  1 failed | 1 passed | 54 skipped (56)
+
+With the fix: src/lib/__tests__/source-locator.test.ts 56 of 56.
