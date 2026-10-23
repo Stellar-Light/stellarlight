@@ -46,10 +46,11 @@ interface HackathonSnapshot {
 	endDate?: string;
 	status?: string;
 	externalUrl?: string;
-	prizePoolUSD?: number;
-	hackersCount?: number;
-	submissionCount?: number;
-	winnerCount?: number;
+	// null = no source gave the count (could not check), never zero.
+	prizePoolUSD?: number | null;
+	hackersCount?: number | null;
+	submissionCount?: number | null;
+	winnerCount?: number | null;
 	prizePerWinnerUSD?: number;
 	// Cohort DURABILITY (2026-07-21): of this hackathon's submissions, how many
 	// are STILL ACTIVE in the directory today (status Live/Pre-Release/
@@ -329,15 +330,26 @@ async function compare(slugs: string[], req: NextRequest) {
 			index?.filter((b) => b.hackathon.slug === slug) ?? [],
 		]),
 	);
-	const snapshots = loaded.map((s) => withStored(s, byEvent.get(s.slug) ?? []));
+	// A count no source gave is null on every row, never a missing key: live
+	// 1.9.93 served hackmeridian-2025 no submissionCount key beside a 319.
+	const snapshots = loaded.map((s) => {
+		const t = withStored(s, byEvent.get(s.slug) ?? []);
+		return {
+			...t,
+			prizePoolUSD: t.prizePoolUSD ?? null,
+			hackersCount: t.hackersCount ?? null,
+			submissionCount: t.submissionCount ?? null,
+			winnerCount: t.winnerCount ?? null,
+		};
+	});
 	const deltas = computeDeltas(snapshots);
 	deltas.notes.push(...readNotes);
 	const uncounted = snapshots.filter(
-		(s) => s.source !== "not-found" && s.submissionCount === undefined,
+		(s) => s.source !== "not-found" && s.submissionCount === null,
 	);
 	if (uncounted.length && index)
 		deltas.notes.push(
-			`submission and winner counts unavailable for ${uncounted.map((s) => s.slug).join(", ")}: none of their submissions are stored, so the counts are absent, not zero`,
+			`submission and winner counts unavailable for ${uncounted.map((s) => s.slug).join(", ")}: none of their submissions are stored, so the counts are null, not zero`,
 		);
 	const shifts = facetShifts(byEvent);
 	if (shifts.length) {

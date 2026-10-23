@@ -288,3 +288,52 @@ fresh battery written by a separate agent that was told no rule.
   2, now with the line).
 - Not verified live: nothing is deployed from this lane.
 - Evidence: `../audits/2026-10-23-nonsense-queries/README.md`.
+
+### Lane L, second commit: compareHackathons counts as null (same spec, 1.9.94)
+
+- Found live on 1.9.93 (orchestrator):
+  `/api/hackathons/compare?slugs=stellar-hacks-zk,hackmeridian-2025` gives
+  stellar-hacks-zk `submissionCount` 319, and the hackmeridian-2025 row has
+  no such key, while deltas.notes calls the counts "absent, not zero".
+- Cause: a listed event with no stored submissions and no curated event
+  record gets no count from any source, and the route left the keys out.
+  prizePoolUSD and hackersCount were left out for the same reason (the event
+  listing publishes none, a 0 read as none, or the row comes from a curated
+  event record, which carries neither), so they get the same treatment.
+  stillActiveCount, liveCount and activeRatePct (curated only) and
+  prizePerWinnerUSD (derived) are left out where they do not apply, a
+  different reason, and are unchanged.
+- Tests first (`npx vitest run
+  src/app/api/hackathons/analyze/__tests__/route.test.ts -t "compare:
+  curated events"`), base route: 1 failed (`submissionCount: expected {
+  slug: 'hackmeridian-2025', ...(6) } to have property "submissionCount"
+  with value null`, received undefined), 2 passed. With the change: 13 of 13
+  in the file pass. The old assertion that the key is undefined was removed.
+- Change: every row carries submissionCount, winnerCount, prizePoolUSD and
+  hackersCount, null when no source gave the value; the deltas note now says
+  "null, not zero". Spec: the row description says so, hackersCount and
+  winnerCount gain descriptions of null, submissionCount's says null instead
+  of absent. Skill reference (`public/skills/references/api-reference.md`):
+  the compare paragraph said the keys are absent; it now says null.
+  Changelog: a line in the 1.9.94 entry.
+- Live baseline before deploy (read-only GET, apiVersion 1.9.93,
+  2026-10-23T12:10:07Z):
+  `/api/hackathons/compare?slugs=hackmeridian-2025,hackmeridian-2026`:
+  hackmeridian-2025 has no submissionCount, winnerCount or prizePoolUSD key
+  (hackersCount 400); hackmeridian-2026 has no submissionCount, winnerCount
+  or hackersCount key (prizePoolUSD 30000); deltas.notes names both as
+  absent, not zero.
+- Live check to run after deploy: on the same URL, both rows carry
+  submissionCount and winnerCount as keys, null for hackmeridian-2025.
+  hackmeridian-2026 has no stored submissions today either, so it will
+  also show null unless they are stored by then.
+
+## Live verification of #1857 (orchestrator's check)
+
+- 1.9.93 was live at 02:11:24Z on 2026-10-23.
+- `/api/hackathons/builds?q=passkey&winnersOnly=1&mode=keyword` lists Tukar
+  and "DeFi Quest - From Zero to DeFi in Minutes", each with matchedTerms
+  passkey; it was empty on 1.9.92.
+- meta.counts shows matched 2 and entries 2.
+- vetIdea's priorArt.builds for "passkey wallet", "soroban sdk" and
+  "stablecoin wallet for remittances" equals the 1.9.92 capture, id for id.

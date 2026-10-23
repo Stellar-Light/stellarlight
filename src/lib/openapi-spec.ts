@@ -3486,6 +3486,8 @@ export const spec: OpenAPISpec = {
 											type: "array",
 											items: {
 												type: "object",
+												description:
+													"Every row carries prizePoolUSD, hackersCount, submissionCount and winnerCount; null means no source gave the value (could not check), never zero.",
 												properties: {
 													slug: { type: "string" },
 													name: { type: "string" },
@@ -3504,14 +3506,24 @@ export const spec: OpenAPISpec = {
 														description:
 															"curated, dorahacks or not-found: where the event's row came from, as getHackathons labels it: curated (a hand-kept event) or dorahacks. not-found = no listing holds the slug; when the listing could not be read, deltas.notes says so and the miss is unchecked.",
 													},
-													hackersCount: { type: "integer", nullable: true },
+													hackersCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Registered hackers, from the event listing. null when the listing publishes none (a 0 counts as none) or the row comes from a curated event record, which carries none: unknown, never zero.",
+													},
 													submissionCount: {
 														type: "integer",
 														nullable: true,
 														description:
-															"Curated events: directory projects tied to the event. DoraHacks events: stored submissions. Absent when neither is held; deltas.notes then names the event, and absent is not zero.",
+															"Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event.",
 													},
-													winnerCount: { type: "integer", nullable: true },
+													winnerCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Winners, on the same basis as submissionCount. null when neither is held: could not check, never zero.",
+													},
 													prizePerWinnerUSD: { type: "number", nullable: true },
 													stillActiveCount: {
 														type: "integer",

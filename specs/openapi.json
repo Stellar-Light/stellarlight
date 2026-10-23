@@ -3547,6 +3547,7 @@
 											"type": "array",
 											"items": {
 												"type": "object",
+												"description": "Every row carries prizePoolUSD, hackersCount, submissionCount and winnerCount; null means no source gave the value (could not check), never zero.",
 												"properties": {
 													"slug": {
 														"type": "string"
@@ -3580,16 +3581,18 @@
 													},
 													"hackersCount": {
 														"type": "integer",
-														"nullable": true
+														"nullable": true,
+														"description": "Registered hackers, from the event listing. null when the listing publishes none (a 0 counts as none) or the row comes from a curated event record, which carries none: unknown, never zero."
 													},
 													"submissionCount": {
 														"type": "integer",
 														"nullable": true,
-														"description": "Curated events: directory projects tied to the event. DoraHacks events: stored submissions. Absent when neither is held; deltas.notes then names the event, and absent is not zero."
+														"description": "Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event."
 													},
 													"winnerCount": {
 														"type": "integer",
-														"nullable": true
+														"nullable": true,
+														"description": "Winners, on the same basis as submissionCount. null when neither is held: could not check, never zero."
 													},
 													"prizePerWinnerUSD": {
 														"type": "number",

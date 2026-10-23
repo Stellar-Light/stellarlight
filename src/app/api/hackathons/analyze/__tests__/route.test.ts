@@ -308,13 +308,28 @@ describe("compare: curated events and missing counts", () => {
 		const [kale, meridian] = body.hackathons;
 		expect(kale.source).toBe("dorahacks");
 		expect(meridian.source).toBe("curated");
-		expect(meridian.submissionCount).toBeUndefined();
 		expect(
 			body.deltas.notes.some(
 				(n: string) =>
 					n.includes("hackmeridian-2025") && n.includes("not zero"),
 			),
 		).toBe(true);
+	});
+
+	// Live 1.9.93: hackmeridian-2025 served no submissionCount key at all
+	// beside stellar-hacks-zk's 319; a missing key reads as zero or unknown.
+	it("serves a count it could not read as null, so every row has the same keys", async () => {
+		const { body } = await get("compare", "slugs=kale,hackmeridian-2025");
+		const [kale, meridian] = body.hackathons;
+		for (const key of [
+			"submissionCount",
+			"winnerCount",
+			"prizePoolUSD",
+			"hackersCount",
+		]) {
+			expect(meridian, key).toHaveProperty(key, null);
+			expect(typeof kale[key], key).toBe("number");
+		}
 	});
 
 	it("says so when the curated lookup fails instead of swallowing it", async () => {

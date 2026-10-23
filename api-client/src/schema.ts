@@ -3457,9 +3457,11 @@ export interface operations {
                             prizePoolUSD?: number | null;
                             /** @description curated, dorahacks or not-found: where the event's row came from, as getHackathons labels it: curated (a hand-kept event) or dorahacks. not-found = no listing holds the slug; when the listing could not be read, deltas.notes says so and the miss is unchecked. */
                             source?: string;
+                            /** @description Registered hackers, from the event listing. null when the listing publishes none (a 0 counts as none) or the row comes from a curated event record, which carries none: unknown, never zero. */
                             hackersCount?: number | null;
-                            /** @description Curated events: directory projects tied to the event. DoraHacks events: stored submissions. Absent when neither is held; deltas.notes then names the event, and absent is not zero. */
+                            /** @description Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event. */
                             submissionCount?: number | null;
+                            /** @description Winners, on the same basis as submissionCount. null when neither is held: could not check, never zero. */
                             winnerCount?: number | null;
                             prizePerWinnerUSD?: number | null;
                             /** @description Curated events only: the event's directory projects still active today. */
