@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
+		surfaces: ["api"],
+		version: "spec@1.9.103",
+		type: "fixed",
+		summary:
+			"searchRepos no longer lets a weak match lead because its contract is used on mainnet: verified usage (codeInUse) now breaks ties at equal match score instead of ranking above the score. blend-capital/blend-contracts (Blend v1, score 16) led a question about scaffolding a Soroban dapp over rows scoring 46 and a question about smart account spending limits over rows scoring 41.8, and reflector-network/reflector-contract (score 3) led q=smart account; Heliobond/frontend, Gloriachinedu/lumenflow-contracts and stellar/smart-account-kit lead them now. A repo whose successor is also in the results gives the successor its place and sits directly below it: q=Blend now leads with blend-capital/blend-contracts-v2.",
+		detail:
+			"Usage is an authority signal: two rows in the index carry it today (blend-capital/blend-contracts and reflector-network/reflector-contract, both linked to directory projects), and above the match score either one led any page where it matched one word and tied on Stellar evidence and identity. Every tier above the score is unchanged, so canonical repos, exact names and curated flagships keep their places (reflector-contract still leads q=oracle as the first oracle flagship). The successor of a repo is its successorRepo, else the curated supersededBy; a q that names the old repo itself keeps it first, and a successor not in the results changes nothing. Measured by replaying this tree's searchRepos over the whole repos index (13,698 rows, read from the collection's public REST read on live 1.9.101); the base replay matched live on 145 of 145 first pages. 60 exact-name lookups (30 repos by owner/name and by bare name) keep every rank 1, and q=Reflector keeps a Reflector repo first. Every keyword query whose results hold no used row and no repo with its successor (17 of 52) answers byte for byte as before; 11 first rows change across the 145 replayed queries, each from a used row or a successor. Six HackMeridian tools questions: no expected repo ranks lower (OpenZeppelin/stellar-contracts 71 to 70, stellar-scaffold/cli 111 to 110, the other four unchanged). A dev set of 25 builder questions keeps 9 with an expected repo in the top 5. Not shipped: dropping punctuation and question filler from q, measured in the same round, which made two of those questions rank their repo lower.",
+	},
+	{
+		date: "2026-10-23",
 		surfaces: ["mcp"],
 		version: "scout-mcp@1.8.0",
 		type: "added",
@@ -48,16 +58,6 @@ export const CHANGELOG: ChangelogEntry[] = [
 			'getLeaderboard no longer reports `type` as ignored. It applied the filter, but its list of known parameters left type out, so every filtered response also carried the meta.warnings line "Unknown parameter(s) ignored: type. Results are NOT filtered by them."',
 		detail:
 			"Found in review of scout-mcp 1.8.0, whose get_leaderboard sends type on every filtered call. The warning still names any parameter the route does not read (include, for one) and now lists type as supported. No spec change: getLeaderboard already declared type.",
-	},
-	{
-		date: "2026-10-23",
-		surfaces: ["api"],
-		version: "spec@1.9.106",
-		type: "fixed",
-		summary:
-			"searchRepos no longer lets a weak match lead because its contract is used on mainnet: verified usage (codeInUse) now breaks ties at equal match score instead of ranking above the score. blend-capital/blend-contracts (Blend v1, score 16) led a question about scaffolding a Soroban dapp over rows scoring 46 and a question about smart account spending limits over rows scoring 41.8, and reflector-network/reflector-contract (score 3) led q=smart account; Heliobond/frontend, Gloriachinedu/lumenflow-contracts and stellar/smart-account-kit lead them now. A repo whose successor is also in the results gives the successor its place and sits directly below it: q=Blend now leads with blend-capital/blend-contracts-v2.",
-		detail:
-			"Usage is an authority signal: two rows in the index carry it today (blend-capital/blend-contracts and reflector-network/reflector-contract, both linked to directory projects), and above the match score either one led any page where it matched one word and tied on Stellar evidence and identity. Every tier above the score is unchanged, so canonical repos, exact names and curated flagships keep their places (reflector-contract still leads q=oracle as the first oracle flagship). The successor of a repo is its successorRepo, else the curated supersededBy; a q that names the old repo itself keeps it first, and a successor not in the results changes nothing. Measured by replaying this tree's searchRepos over the whole repos index (13,698 rows, read from the collection's public REST read on live 1.9.101); the base replay matched live on 145 of 145 first pages. 60 exact-name lookups (30 repos by owner/name and by bare name) keep every rank 1, and q=Reflector keeps a Reflector repo first. Every keyword query whose results hold no used row and no repo with its successor (17 of 52) answers byte for byte as before; 11 first rows change across the 145 replayed queries, each from a used row or a successor. Six HackMeridian tools questions: no expected repo ranks lower (OpenZeppelin/stellar-contracts 71 to 70, stellar-scaffold/cli 111 to 110, the other four unchanged). A dev set of 25 builder questions keeps 9 with an expected repo in the top 5. Not shipped: dropping punctuation and question filler from q, measured in the same round, which made two of those questions rank their repo lower.",
 	},
 	{
 		date: "2026-10-23",
