@@ -33,12 +33,32 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
-		version: "spec@1.9.99",
+		version: "spec@1.9.98",
 		type: "added",
 		summary:
 			"New locateSource (GET /api/sources/locate?q=): scored pointers to where a CLI flag, config option default, SDK or host function, contract interface or doc section is defined in eight Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples). Each pointer names the repo, the commit read, the path, the symbol or heading, the line, the git blob sha, why it matched and a pinned GitHub URL; never file content.",
 		detail:
 			"Filters: repo (owner/name or name), kind (file, symbol, heading), page (10 a page). pointers [] with total 0 means the indexed repos hold no match; pointers null means nothing could be searched: a 503 when the index cannot be read, a 200 with meta.note when the repo is not indexed yet, and meta.warnings names allowlisted repos not indexed yet. Unknown parameters and values answer 400 with the valid set. The index holds names, lines and hashes only (21,440 pointers at the 2026-10-23 HEAD commits) and is rebuilt daily from public tarballs by a lane that writes only new, gone or changed-blob pointers; until its first run every answer is pointers null with a note, never []. Ranking is lexical: an exact symbol or file name first, then an identifier held in a name, words in a symbol or heading, path words; naming a repo in q lifts it. Measured before shipping on a held-out battery of 20 locator questions written by a separate agent: 15 found in the top 10 (a pointer at a full-answer file), 12 in the top 3, 10 at rank 1. Not covered: JSON and other file types without a locator rule (soroban-env-common env.json, for one), content words that appear only in comments or help text, and repos outside the eight.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
+		version: "spec@1.9.96",
+		type: "added",
+		summary:
+			"searchProjects and searchRepos take view=compact: rows rebuilt from a fixed key list with left-out lists as counts, so a default page fits a 24,000-character tool output (projects q=lending 87,157 to 23,091 characters, repos q=soroban 77,322 to 13,096). Without view, or with view=full, responses are unchanged.",
+		detail:
+			"For callers whose tool output is cut at about 24,000 characters: on 2026-10-23 every default projects/search and repos/search page measured (13 requests) was over it, 25,868 to 94,602 characters, and limit=5 still was. view=compact keeps identity, rank and score, and the fields that answer the usual question; the key lists are in the CompactView schema. Project rows add reposCount and onchainContractsCount, repo rows (repos and codeReferences) add knowledgeNotesCount; deployment keeps only network and confidence only score and label. Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. meta.view, first in meta, says the page is compact and where the left-out detail is read (the request without view, or with fields=<names>; codeReferences rows from repos search). view=compact with fields, or any view value other than full or compact, answers 400 with validValues. Compact project rows keep via, so a semantic-fallback guess stays tagged. Both operations now declare their 400 (error plus validValues, and on searchProjects validStatuses, validTypes, validCategories or acceptedValues for the filter at fault), which they already answered undeclared. Project.via now names the value it serves, semantic, where it said vector. Measured compact at the default limit: 17,646 to 23,091 characters over 7 projects requests, 12,803 to 13,096 over 4 repos requests. Proof the default is unchanged: the real handlers replayed over live-shaped fixtures give byte-identical bodies (sha256) before and after the change, on 10 requests including fields=, an unknown parameter and the content-less call. Not changed: searchResearch (9,238 to 21,225 at its default of 8) and searchHackathonBuilds (17,444 to 19,935 at 20) already fit, and their size is the passage text and build descriptions an answer quotes, so they take no view parameter.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
+		version: "spec@1.9.95",
+		type: "fixed",
+		summary:
+			"A hackathon submission whose GitHub repo was renamed or transferred now links to the directory project that lists the repo it moved to (`project.basis: moved-repo`), or by owner and name read on that repo (`moved-owner-and-name`). clevercon (2nd place, Stellar Hacks: Agents) links to CleverCon once the sync lane next runs; no other link changes.",
+		detail:
+			"The sync lane now reads, with each repo's activity, the owner/name GitHub answers the repo under, and stores it when the repo moved. The two repo rules read it only when the stored repo finds nothing: a link the stored repo, the demo site or the stored owner makes is unchanged, a repo two projects list stays unlinked, and a repo GitHub could not find (private and deleted look the same) is never taken as moved. Measured read-only on live 1.9.94: of 1,344 stored submissions, 1,185 carry a repo link (1,173 repos). Following github.com's redirects, 62 repos (63 submissions) moved, 930 did not, and 181 could not be resolved (177 answered 404). This release's linker over the 1,137 directory rows the lane reads reproduces all 1,344 links served today without the moves; with them it gains 1 link (clevercon, by the exact repo it moved to) and loses or changes none. 60 of the 63 moved submissions stay unlinked because no directory project lists their new repo or sits under their new owner; 1 has a project under its new owner with another name, and owner alone never links.",
 	},
 	{
 		date: "2026-10-23",

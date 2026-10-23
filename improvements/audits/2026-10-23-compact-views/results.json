@@ -1,0 +1,325 @@
+{
+  "base": "https://www.stellarlight.xyz",
+  "startedAt": "2026-10-23T14:03:29.755Z",
+  "finishedAt": "2026-10-23T14:05:00.832Z",
+  "apiVersionStart": "1.9.95",
+  "apiVersionEnd": "1.9.95",
+  "capChars": 24000,
+  "rows": [
+    {
+      "op": "searchProjects",
+      "path": "/api/projects/search?q=lending",
+      "status": 200,
+      "fullChars": 87157,
+      "compactChars": 23091,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchProjects",
+      "path": "/api/projects/search?q=wallet",
+      "status": 200,
+      "fullChars": 76872,
+      "compactChars": 21706,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchProjects",
+      "path": "/api/projects/search?q=oracle",
+      "status": 200,
+      "fullChars": 84071,
+      "compactChars": 21720,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchProjects",
+      "path": "/api/projects/search?q=anchor",
+      "status": 200,
+      "fullChars": 74021,
+      "compactChars": 19508,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchProjects",
+      "path": "/api/projects/search?q=payments",
+      "status": 200,
+      "fullChars": 52110,
+      "compactChars": 17646,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchProjects",
+      "path": "/api/projects/search?q=dex",
+      "status": 200,
+      "fullChars": 94602,
+      "compactChars": 21035,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchProjects",
+      "path": "/api/projects/search?q=lending&limit=5",
+      "status": 200,
+      "fullChars": 40870,
+      "compactChars": 9554,
+      "compactMetaFirst": true,
+      "rows": 5
+    },
+    {
+      "op": "searchProjects",
+      "path": "/api/projects/search?type=Wallet",
+      "status": 200,
+      "fullChars": 60316,
+      "compactChars": 18090,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchRepos",
+      "path": "/api/repos/search?q=soroban",
+      "status": 200,
+      "fullChars": 77322,
+      "compactChars": 13096,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchRepos",
+      "path": "/api/repos/search?q=oracle",
+      "status": 200,
+      "fullChars": 70124,
+      "compactChars": 12806,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchRepos",
+      "path": "/api/repos/search?q=wallet",
+      "status": 200,
+      "fullChars": 59709,
+      "compactChars": 12840,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchRepos",
+      "path": "/api/repos/search?q=passkey",
+      "status": 200,
+      "fullChars": 70574,
+      "compactChars": 12803,
+      "compactMetaFirst": true,
+      "rows": 20
+    },
+    {
+      "op": "searchRepos",
+      "path": "/api/repos/search?q=soroban&limit=5",
+      "status": 200,
+      "fullChars": 25868,
+      "compactChars": 4165,
+      "compactMetaFirst": true,
+      "rows": 5
+    },
+    {
+      "op": "searchResearch",
+      "path": "/api/research?q=soroban%20lending",
+      "status": 200,
+      "fullChars": 11708,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 8
+    },
+    {
+      "op": "searchResearch",
+      "path": "/api/research?q=passkeys",
+      "status": 200,
+      "fullChars": 9238,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 8
+    },
+    {
+      "op": "searchResearch",
+      "path": "/api/research?q=defi%20lending",
+      "status": 200,
+      "fullChars": 21225,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 8
+    },
+    {
+      "op": "searchResearch",
+      "path": "/api/research?q=passkeys&limit=25",
+      "status": 200,
+      "fullChars": 24509,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 25
+    },
+    {
+      "op": "searchHackathonBuilds",
+      "path": "/api/hackathons/builds?q=payments",
+      "status": 200,
+      "fullChars": 19067,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 20
+    },
+    {
+      "op": "searchHackathonBuilds",
+      "path": "/api/hackathons/builds?q=wallet",
+      "status": 200,
+      "fullChars": 17444,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 20
+    },
+    {
+      "op": "searchHackathonBuilds",
+      "path": "/api/hackathons/builds?q=nft%20marketplace",
+      "status": 200,
+      "fullChars": 18004,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 20
+    },
+    {
+      "op": "searchHackathonBuilds",
+      "path": "/api/hackathons/builds?q=payments&limit=50",
+      "status": 200,
+      "fullChars": 43978,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 50
+    },
+    {
+      "op": "getBuilders",
+      "path": "/api/builders",
+      "status": 200,
+      "fullChars": 50497,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 50
+    },
+    {
+      "op": "getPartners",
+      "path": "/api/partners",
+      "status": 200,
+      "fullChars": 57263,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 43
+    },
+    {
+      "op": "getLeaderboard",
+      "path": "/api/leaderboard",
+      "status": 200,
+      "fullChars": 51727,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 50
+    },
+    {
+      "op": "listAudits",
+      "path": "/api/audits",
+      "status": 200,
+      "fullChars": 39012,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 64
+    },
+    {
+      "op": "getStablecoins",
+      "path": "/api/stablecoins",
+      "status": 200,
+      "fullChars": 27391,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 41
+    },
+    {
+      "op": "getRfps",
+      "path": "/api/rfps",
+      "status": 200,
+      "fullChars": 21513,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 17
+    },
+    {
+      "op": "analyzeEcosystem",
+      "path": "/api/analyze",
+      "status": 200,
+      "fullChars": 17723,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": null
+    },
+    {
+      "op": "listContracts",
+      "path": "/api/contracts",
+      "status": 200,
+      "fullChars": 17623,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 20
+    },
+    {
+      "op": "getHackathons",
+      "path": "/api/hackathons",
+      "status": 200,
+      "fullChars": 16694,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 27
+    },
+    {
+      "op": "getClusters",
+      "path": "/api/clusters",
+      "status": 200,
+      "fullChars": 12069,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 7
+    },
+    {
+      "op": "getPeople",
+      "path": "/api/people",
+      "status": 200,
+      "fullChars": 5539,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 25
+    },
+    {
+      "op": "listSkills",
+      "path": "/api/skills",
+      "status": 200,
+      "fullChars": 83175,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": 82
+    },
+    {
+      "op": "resolveProject",
+      "path": "/api/projects/resolve?q=blend",
+      "status": 200,
+      "fullChars": 1280,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": null
+    },
+    {
+      "op": "getRepoTrust",
+      "path": "/api/repos/trust?repo=blend-capital/blend-contracts-v2",
+      "status": 200,
+      "fullChars": 5413,
+      "compactChars": null,
+      "compactMetaFirst": null,
+      "rows": null
+    }
+  ]
+}

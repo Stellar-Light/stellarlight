@@ -13,6 +13,7 @@ import { AwardBallots } from "./collections/AwardBallots";
 import { AwardNominees } from "./collections/AwardNominees";
 import { AwardRounds } from "./collections/AwardRounds";
 import { AwardVoters } from "./collections/AwardVoters";
+import { isAdmin } from "./collections/access";
 import { Blog } from "./collections/Blog";
 import Builders from "./collections/Builders";
 import { Carousel } from "./collections/Carousel";
@@ -124,6 +125,14 @@ export default buildConfig({
 	],
 	globals: [Banner],
 	jobs: {
+		// Payload's default for these is "any logged-in user", partners
+		// included; run gates GET /api/payload-jobs/run. Local API calls
+		// (payload.jobs.queue and run in the routes) override access.
+		access: {
+			run: ({ req }) => isAdmin(req.user),
+			queue: ({ req }) => isAdmin(req.user),
+			cancel: ({ req }) => isAdmin(req.user),
+		},
 		tasks: [
 			{
 				slug: "sync-rss-feed",
@@ -164,11 +173,14 @@ export default buildConfig({
 					singular: "Sync Job",
 					plural: "Sync Jobs",
 				},
+				// Admins only: a signed-in partner also sets req.user. The job
+				// runner and the cron routes use the local API, which skips
+				// these rules.
 				access: {
-					read: ({ req }) => !!req.user,
+					read: ({ req }) => isAdmin(req.user),
 					create: () => false,
 					update: () => false,
-					delete: ({ req }) => !!req.user,
+					delete: ({ req }) => isAdmin(req.user),
 				},
 			};
 		},

@@ -1467,12 +1467,16 @@ export interface HackathonBuild {
 	 */
 	repoFullName?: string | null;
 	/**
+	 * owner/name GitHub answers repoFullName under now, lowercased, when the repo was renamed or transferred. Empty = not moved when last read (activityCheckedAt), or never read. A read that fails or finds nothing keeps the last value for the same repo.
+	 */
+	repoCurrentFullName?: string | null;
+	/**
 	 * The directory project that lists this exact repo as its own. Empty after a check = no project lists it. A shared GitHub owner never counts.
 	 */
 	projectSlug?: string | null;
 	projectName?: string | null;
 	/**
-	 * Which rule linked projectSlug: repo (the project lists this exact repo), website (the submission's demo site is the project's website), or owner-and-name (the repo sits under the project's GitHub owner and the submission carries the project's name).
+	 * Which rule linked projectSlug: repo (the project lists this exact repo), website (the submission's demo site is the project's website), owner-and-name (the repo sits under the project's GitHub owner and the submission carries the project's name), or moved-repo and moved-owner-and-name (the same two repo rules, read on repoCurrentFullName, where the repo was renamed or transferred to).
 	 */
 	projectLinkBasis?: string | null;
 	/**
@@ -2383,6 +2387,11 @@ export interface ApiUsage {
 	resultCount?: number | null;
 	status?: number | null;
 	durationMs?: number | null;
+	/**
+	 * CF-Worker header: zone of the calling Cloudflare Worker
+	 */
+	cfWorker?: string | null;
+	partial?: boolean | null;
 	/**
 	 * Match tier / retrieval mode served
 	 */
@@ -3777,6 +3786,7 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	demoUrl?: T;
 	videoUrl?: T;
 	repoFullName?: T;
+	repoCurrentFullName?: T;
 	projectSlug?: T;
 	projectName?: T;
 	projectLinkBasis?: T;
@@ -4183,6 +4193,8 @@ export interface ApiUsageSelect<T extends boolean = true> {
 	resultCount?: T;
 	status?: T;
 	durationMs?: T;
+	cfWorker?: T;
+	partial?: T;
 	matchMode?: T;
 	updatedAt?: T;
 	createdAt?: T;

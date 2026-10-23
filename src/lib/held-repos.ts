@@ -77,12 +77,14 @@ export function heldSecurity(doc: unknown): { security?: typeof BUILD_HOLD } {
 }
 
 /** A build doc as served: when its repo is held, the GitHub link and repo
- * name are withheld and `security` says why. Mutates and returns `doc`,
- * as Payload's afterRead hooks do. */
+ * names (where it was submitted and where it moved) are withheld and
+ * `security` says why. Mutates and returns `doc`, as Payload's afterRead
+ * hooks do. */
 export function withholdHeldRepo<
 	T extends {
 		githubUrl?: string | null;
 		repoFullName?: string | null;
+		repoCurrentFullName?: string | null;
 		securityHeld?: boolean | null;
 	},
 >(doc: T, held: Set<string>): T & { security?: typeof BUILD_HOLD } {
@@ -90,5 +92,6 @@ export function withholdHeldRepo<
 	if (doc.securityHeld !== true && !(key && held.has(key))) return doc;
 	if ("githubUrl" in doc) doc.githubUrl = null;
 	if ("repoFullName" in doc) doc.repoFullName = null;
+	if ("repoCurrentFullName" in doc) doc.repoCurrentFullName = null;
 	return Object.assign(doc, { security: BUILD_HOLD });
 }

@@ -1,5 +1,6 @@
 import Airtable from "airtable";
 import { type NextRequest, NextResponse } from "next/server";
+import { isAdminRequest } from "@/lib/admin-auth";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 // Airtable configuration - must be set via environment variables
@@ -8,6 +9,10 @@ const AIRTABLE_TABLE_ID = process.env.AIRTABLE_TABLE_ID;
 const AIRTABLE_VIEW_ID = process.env.AIRTABLE_VIEW_ID;
 
 export async function POST(request: NextRequest) {
+	// Writes projects: admins only (the admin panel button sends the session).
+	if (!(await isAdminRequest(request.headers))) {
+		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+	}
 	try {
 		const apiKey = process.env.AIRTABLE_API_KEY;
 		if (!apiKey) {

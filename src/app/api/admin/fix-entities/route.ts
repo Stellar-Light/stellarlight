@@ -1,6 +1,7 @@
 import config from "@payload-config";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
+import { isAdminRequest } from "@/lib/admin-auth";
 
 const ENTITY_DESCRIPTIONS: Record<string, string> = {
 	"Stellar Development Foundation":
@@ -94,9 +95,8 @@ const ENTITY_DESCRIPTIONS: Record<string, string> = {
 		"Creative technology studio building blockchain-powered applications and experiences.",
 };
 
-export async function GET(request: NextRequest) {
-	const secret = request.nextUrl.searchParams.get("secret");
-	if (secret !== "entity123") {
+export async function POST(request: NextRequest) {
+	if (!(await isAdminRequest(request.headers))) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 
