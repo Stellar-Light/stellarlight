@@ -281,4 +281,24 @@ counts for q's passkey alone. Open for the owner, as after Z3: whether bar
 - Disclosed in the changelog entry: the 3 real-loss pairs and vetIdea's
   prior art for q=smart account policy signers (4 builds to 1, the three
   that leave graded 1). Spec placeholder 1.9.112, renumbered at merge.
+- Review of ab6995df (Claude Fable 5.1, high effort, fresh context, no-remote
+  clone): GATE push. It reproduced the composition (305 of 305 against o2m;
+  the base against hm 305 of 305, so #1874 and #1875 moved nothing) and byte
+  identity (269 of 269), timed the matcher (a plain q 4.3 ms on both trees),
+  and found three low items, answered in the changelog entry:
+  1. A q holding the phrase and one other word has two concepts, so the half
+     rule admits a build holding either: q=smart wallet payments matches 290
+     where the base matched 71 (a smart wallet for agents 274 and 107, smart
+     wallet game 100 and 28), the phrase and passkey holders first. No frozen
+     set holds this shape; disclosed as not measured and queued in TODO.
+  2. "Every moved row graded blind by two independent passes" overstated it:
+     470 of the 480 graded rows reuse lanes Z, Z2 and Z3 grades, 15 rows on
+     i02 carry the labeled set's labels, and both passes are one model. The
+     entry now says so; none of the label rows is an exit of a build graded 2.
+  3. The reranker is not replayed; the entry now says a live page's order can
+     differ.
+  A nit, kept: vetIdea's note names the concept smart-account, as
+  matchedTerms does, though the idea wrote smart account.
+  Grok, the other-family reviewer the review skill asks for, could not run:
+  its API answered 402 (usage balance exhausted).
 
