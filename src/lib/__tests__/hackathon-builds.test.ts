@@ -1073,3 +1073,220 @@ describe("a submission entered in two events", () => {
 		expect(pick.map((b) => b.hackathon.slug)).toEqual(["newer"]);
 	});
 });
+
+describe("links through a repo that was renamed or transferred", () => {
+	const indexes = async () => {
+		const links = await import("@/lib/hackathon-build-links");
+		const rows = [
+			{
+				slug: "widget",
+				name: "Widget",
+				status: "Live",
+				links: { github: "https://github.com/widget-labs/widget" },
+			},
+			{
+				slug: "gadget",
+				name: "Gadget",
+				status: "Live",
+				links: { github: "https://github.com/gadget-org" },
+			},
+			{
+				slug: "doohickey",
+				name: "Doohickey",
+				status: "Live",
+				links: { website: "https://doohickey.app" },
+				github: { repos: [{ owner: "doohickey-org", name: "core" }] },
+			},
+			{
+				slug: "shared-a",
+				name: "Shared A",
+				status: "Live",
+				github: { repos: [{ owner: "both", name: "shared" }] },
+			},
+			{
+				slug: "shared-b",
+				name: "Shared B",
+				status: "Live",
+				github: { repos: [{ owner: "both", name: "shared" }] },
+			},
+		];
+		return {
+			links,
+			idx: {
+				repos: links.indexProjectRepos(rows),
+				sites: links.indexProjectSites(rows),
+				owners: links.indexProjectOwners(rows),
+			},
+		};
+	};
+
+	it("links by exact repo when the project lists the repo it moved to", async () => {
+		const { links, idx } = await indexes();
+		const b = {
+			name: "Widget",
+			githubUrl: "https://github.com/a-builder/widget",
+			repoFullName: "a-builder/widget",
+		};
+		expect(links.linkBuild(b, idx).project).toBeNull();
+		expect(
+			links.linkBuild({ ...b, repoCurrentFullName: "widget-labs/widget" }, idx)
+				.project,
+		).toEqual({ slug: "widget", name: "Widget", basis: "moved-repo" });
+	});
+
+	it("links by owner and name read on the repo it moved to", async () => {
+		const { links, idx } = await indexes();
+		const b = {
+			name: "Gadget Pay",
+			githubUrl: "https://github.com/a-builder/gadget-pay",
+			repoFullName: "a-builder/gadget-pay",
+		};
+		expect(links.linkBuild(b, idx).project).toBeNull();
+		expect(
+			links.linkBuild(
+				{ ...b, repoCurrentFullName: "gadget-org/gadget-pay" },
+				idx,
+			).project,
+		).toEqual({
+			slug: "gadget",
+			name: "Gadget",
+			basis: "moved-owner-and-name",
+		});
+		// The owner alone is never enough: another name under it stays unlinked.
+		expect(
+			links.linkBuild(
+				{
+					name: "Sprocket",
+					githubUrl: "https://github.com/a-builder/sprocket",
+					repoFullName: "a-builder/sprocket",
+					repoCurrentFullName: "gadget-org/sprocket",
+				},
+				idx,
+			).project,
+		).toBeNull();
+	});
+
+	it("adds no link when the repo could not be resolved or did not move", async () => {
+		const { links, idx } = await indexes();
+		const b = {
+			name: "Widget",
+			githubUrl: "https://github.com/a-builder/widget",
+			repoFullName: "a-builder/widget",
+		};
+		for (const repoCurrentFullName of [undefined, null, "a-builder/widget"])
+			expect(links.linkBuild({ ...b, repoCurrentFullName }, idx)).toEqual({
+				project: null,
+				ambiguous: false,
+			});
+		// The sync lane's value for a repo GitHub did not answer (404 or a
+		// failed read): the last one read for this same repo, or nothing.
+		expect(links.currentRepoFor("a-builder/widget", undefined)).toBeNull();
+		expect(
+			links.currentRepoFor("a-builder/widget", undefined, {
+				repoFullName: "a-builder/widget",
+				repoCurrentFullName: "widget-labs/widget",
+			}),
+		).toBe("widget-labs/widget");
+		// A stored value names where another repo went: never carried over.
+		expect(
+			links.currentRepoFor("a-builder/widget-v2", undefined, {
+				repoFullName: "a-builder/widget",
+				repoCurrentFullName: "widget-labs/widget",
+			}),
+		).toBeNull();
+		// A read: the repo it answers under, or null when that is the same repo.
+		expect(links.currentRepoFor("a-builder/widget", "widget-labs/widget")).toBe(
+			"widget-labs/widget",
+		);
+		expect(
+			links.currentRepoFor("a-builder/widget", "a-builder/widget", {
+				repoFullName: "a-builder/widget",
+				repoCurrentFullName: "widget-labs/widget",
+			}),
+		).toBeNull();
+	});
+
+	it("changes no link the stored repo, the site or the stored owner already decides", async () => {
+		const { links, idx } = await indexes();
+		// Listed by its stored repo: the move is not read.
+		expect(
+			links.linkBuild(
+				{
+					name: "Widget",
+					repoFullName: "widget-labs/widget",
+					repoCurrentFullName: "doohickey-org/core",
+				},
+				idx,
+			).project,
+		).toEqual({ slug: "widget", name: "Widget", basis: "repo" });
+		// A stored repo two projects list stays unlinked, moved or not.
+		expect(
+			links.linkBuild(
+				{
+					name: "Shared",
+					repoFullName: "both/shared",
+					repoCurrentFullName: "widget-labs/widget",
+				},
+				idx,
+			),
+		).toEqual({ project: null, ambiguous: true });
+		// The repo it moved to is listed by two projects: unlinked.
+		expect(
+			links.linkBuild(
+				{
+					name: "Doohickey",
+					demoUrl: "https://doohickey.app",
+					repoFullName: "a-builder/x",
+					repoCurrentFullName: "both/shared",
+				},
+				idx,
+			),
+		).toEqual({ project: null, ambiguous: true });
+		// The site rule still comes before owner and name on the moved repo.
+		expect(
+			links.linkBuild(
+				{
+					name: "Gadget Pay",
+					demoUrl: "https://www.doohickey.app",
+					repoFullName: "a-builder/gadget-pay",
+					repoCurrentFullName: "gadget-org/gadget-pay",
+				},
+				idx,
+			).project,
+		).toEqual({ slug: "doohickey", name: "Doohickey", basis: "website" });
+		// Owner and name on the stored repo comes before the moved one.
+		expect(
+			links.linkBuild(
+				{
+					name: "Gadget Pay",
+					githubUrl: "https://github.com/gadget-org/gadget-pay",
+					repoFullName: "gadget-org/gadget-pay",
+					repoCurrentFullName: "a-builder/gadget-pay",
+				},
+				idx,
+			).project,
+		).toEqual({ slug: "gadget", name: "Gadget", basis: "owner-and-name" });
+	});
+
+	it("serves the moved bases", () => {
+		for (const basis of ["moved-repo", "moved-owner-and-name"]) {
+			const b = indexedFromStored({
+				id: "x",
+				buildId: "dorahacks-buidl-1",
+				name: "X",
+				hackathonSlug: "e",
+				hackathonTitle: "E",
+				url: "https://dorahacks.io/buidl/1",
+				linkCheckedAt: "2026-10-23T00:00:00.000Z",
+				projectSlug: "widget",
+				projectName: "Widget",
+				projectLinkBasis: basis,
+				firstSeenAt: "2026-10-23T00:00:00.000Z",
+				lastSeenAt: "2026-10-23T00:00:00.000Z",
+				updatedAt: "2026-10-23T00:00:00.000Z",
+				createdAt: "2026-10-23T00:00:00.000Z",
+			});
+			expect(b.project?.basis).toBe(basis);
+		}
+	});
+});
