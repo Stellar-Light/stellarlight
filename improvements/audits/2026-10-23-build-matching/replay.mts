@@ -2,10 +2,14 @@
 // the captured browse rows become stored rows (indexedFromStored, so the
 // haystack is built the way the store's index builds it, declared stack
 // included), and each hybrid ranking's meaning scores become the meaning map
-// the route would pass. Run it once on the base code and once per candidate;
-// compare.mts reads the outputs.
+// the route would pass. Per idea it keeps the builds route's rankings and a
+// hash of the plain rankings (no package matching) that vetIdea, the brief
+// and analyze read, with vetIdea's five and the brief's picks from them. Run
+// it once on the base code and once per candidate; compare.mts reads the
+// outputs.
 // Usage, from the repository root:
 //   pnpm exec tsx improvements/audits/2026-10-23-build-matching/replay.mts <live.json> <label> <out.json>
+import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { pickBriefBuilds } from "../../../src/lib/hackathon-brief";
 import {
@@ -72,17 +76,21 @@ const semOf = (r: Ranking) =>
 			.filter((x) => x.similarity !== undefined)
 			.map((x) => [x.id, x.similarity as number]),
 	);
+/** `packages`: what the builds route asks for; vetIdea, the brief and
+ * analyze do not (code before the option ignores it). */
 const run = (
 	q: string,
 	mode: "keyword" | "hybrid",
 	semantic?: Map<string, number>,
 	winnersOnly = false,
+	packages = false,
 ) =>
 	searchHackathonBuilds(pool, q, {
 		mode,
 		semantic,
 		winnersOnly,
 		perSubmission: true,
+		packages,
 	});
 const top = (s: ScoredBuild[], n = 20) =>
 	s.slice(0, n).map((x) => ({ id: x.b.id, matched: x.matched }));
@@ -103,8 +111,11 @@ const out = {
 };
 for (const it of live.ideas) {
 	const sem = semOf(it.hybrid);
-	const hybrid = run(it.idea, "hybrid", sem);
-	const keyword = run(it.idea, "keyword");
+	// The builds route's rankings, and the plain ones prior art reads.
+	const hybrid = run(it.idea, "hybrid", sem, false, true);
+	const keyword = run(it.idea, "keyword", undefined, false, true);
+	const plain = run(it.idea, "hybrid", sem);
+	const plainKeyword = run(it.idea, "keyword");
 	out.ideas.push({
 		set: it.set,
 		id: it.id,
@@ -123,13 +134,23 @@ for (const it of live.ideas) {
 		},
 		hybrid: { ids: ids(hybrid), top: top(hybrid) },
 		keyword: { ids: ids(keyword), top: top(keyword) },
-		vet: priorArtTop(hybrid).map((s) => s.b.id),
-		brief: pickBriefBuilds(hybrid).map((s) => s.b.id),
+		// Every field of every row of the plain rankings, hashed.
+		plainHash: createHash("sha256")
+			.update(
+				JSON.stringify(
+					[plain, plainKeyword].map((r) =>
+						r.map(({ b, ...s }) => ({ id: b.id, ...s })),
+					),
+				),
+			)
+			.digest("hex"),
+		vet: priorArtTop(plain).map((s) => s.b.id),
+		brief: pickBriefBuilds(plain).map((s) => s.b.id),
 	});
 }
 for (const x of live.extra) {
-	const keyword = run(x.q, "keyword", undefined, !!x.winnersOnly);
-	const hybrid = run(x.q, "hybrid", semOf(x.hybrid), !!x.winnersOnly);
+	const keyword = run(x.q, "keyword", undefined, !!x.winnersOnly, true);
+	const hybrid = run(x.q, "hybrid", semOf(x.hybrid), !!x.winnersOnly, true);
 	const named = (s: ScoredBuild[]) =>
 		s.map((y) => ({ id: y.b.id, name: y.b.name, matched: y.matched }));
 	out.extra.push({

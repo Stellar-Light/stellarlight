@@ -1,4 +1,4 @@
-before: base; after: after
+before: base; after: scoped
 capture: api 1.9.91 -> 1.9.91, 2026-10-23T01:14:29.183Z to 2026-10-23T01:24:27.460Z; corpus 1344
 
 == Labeled builds graded 2 (same idea): found in the matched list, top 20, top 5 ==
@@ -46,26 +46,7 @@ fresh | hybrid | 15 | 15 -> 15 | 15 -> 15 | 15 -> 15
   LOST top 5 | short hybrid | soroban sdk "soroban sdk" | Soride (rank 5 -> 7)
 
 == vetIdea's five and the brief's picks (hybrid), every change ==
-  brief lost | 40 i13 | clevercon (grade unlabeled)
-  brief lost | 40 i13 | Move Markets (grade 2)
-  brief gained | 40 i13 | ARS Price Arena (grade 1)
-  brief gained | 40 i13 | KALE-ndar: A Prediction Market for Real-World Events (grade 2)
-  vet gained | short passkey wallet | TalkToStellar (grade unlabeled)
-  vet gained | short passkey wallet | Stellaro (grade unlabeled)
-  vet gained | short passkey wallet | Prism (grade unlabeled)
-  brief gained | short passkey wallet | TalkToStellar (grade unlabeled)
-  brief gained | short passkey wallet | Stellaro (grade unlabeled)
-  brief gained | short passkey wallet | Prism (grade unlabeled)
-  vet lost | short soroban sdk | Soride (grade 1)
-  vet gained | short soroban sdk | Ponte Pay (grade unlabeled)
-  brief lost | short soroban sdk | Soride (grade 1)
-  brief gained | short soroban sdk | Ponte Pay (grade unlabeled)
-  vet lost | tests stablecoin wallet for remittances | StellarRemit (grade unlabeled)
-  vet gained | tests stablecoin wallet for remittances | KaleConnect (grade unlabeled)
-  brief lost | tests stablecoin wallet for remittances | StellarRemit (grade unlabeled)
-  brief gained | tests stablecoin wallet for remittances | KaleConnect (grade unlabeled)
-  brief lost | tests an overcollateralized stablecoin for lending | BlendScore (grade unlabeled)
-  brief gained | tests an overcollateralized stablecoin for lending | Tukar (grade unlabeled)
+ideas that differ from before, of 140: vetIdea's five 0, the brief's picks 0, the plain rankings prior art and analyze read (every row and field) 0
 
 == nonsense: builds returned, before -> after ==
 purple elephant trampoline | keyword | 0 -> 0

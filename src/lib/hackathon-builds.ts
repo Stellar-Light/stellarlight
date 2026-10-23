@@ -35,7 +35,7 @@ import type { HackathonBuild } from "@/payload-types";
 
 export interface IndexedBuild extends DoraHacksSubmission {
 	hackathon: { title: string; slug: string; endedAt: string | null };
-	haystack: string; // lowercased name + description + track + award + uncommon declared packages, for matching
+	haystack: string; // lowercased name + description + track + award, for matching
 	/** Only on rows served from the store, where the link was checked: the
 	 * directory project that lists this build's exact repo, or null when none
 	 * does. Absent on a live-read row: not checked, which is not "none". */
@@ -106,8 +106,15 @@ async function pool<T, R>(
 	return out;
 }
 
-/** Libraries declared by more than a tenth of the repos read, left out of
- * the matched text: they say how a build was made, not what it is, and their
+const haystackOf = (
+	name: string,
+	description: string | null,
+	track: string | null,
+	award: string | null,
+) => `${name} ${description ?? ""} ${track ?? ""} ${award ?? ""}`.toLowerCase();
+
+/** Libraries declared by more than a tenth of the repos read, never matched
+ * as packages: they say how a build was made, not what it is, and their
  * names hold sdk, soroban, api, wallet and x402 (2026-10-23, of 1,013 repos
  * read: Stellar JS SDK 77%, Soroban Rust SDK 66%, Freighter API 36%, Stellar
  * Wallets Kit 27%, x402 12%; the next, @stellar/design-system, 5%). With
@@ -121,16 +128,13 @@ const COMMON_LIBRARIES = new Set([
 	"x402",
 ]);
 
-const haystackOf = (
-	name: string,
-	description: string | null,
-	track: string | null,
-	award: string | null,
-	/** The packages the repo declares, when it was read, so "passkey" finds
-	 * the winner Tukar, built on passkey-kit (none matched before). */
-	stack?: string[] | null,
-) =>
-	`${name} ${description ?? ""} ${track ?? ""} ${award ?? ""} ${(stack ?? []).filter((p) => !COMMON_LIBRARIES.has(libraryOf(p))).join(" ")}`.toLowerCase();
+/** A build's matched text with the packages its read repo declares, common
+ * libraries left out. */
+const withPackages = (b: IndexedBuild) =>
+	`${b.haystack} ${(b.stack ?? [])
+		.filter((p) => !COMMON_LIBRARIES.has(libraryOf(p)))
+		.join(" ")
+		.toLowerCase()}`;
 
 /** Live read of the most recent ended DoraHacks events: the fallback when the
  * store has nothing to serve. Capped to bound cold-rebuild cost; the store has
@@ -266,13 +270,7 @@ export function indexedFromStored(
 			slug: d.hackathonSlug,
 			endedAt: d.endedAt ?? null,
 		},
-		haystack: haystackOf(
-			d.name,
-			description,
-			d.track ?? null,
-			d.award ?? null,
-			d.stackReadAt ? d.stack : null,
-		),
+		haystack: haystackOf(d.name, description, d.track ?? null, d.award ?? null),
 		...(d.linkCheckedAt ? { project: linkedProject(d, facts) } : {}),
 		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
 		...(d.categoriesAt && isCategoryList(d.categories)
@@ -539,9 +537,8 @@ export const getHackathonBuildsIndex = unstable_cache(
 	// an old-shape index serves every new field as unknown for up to an hour.
 	// v4: an empty index is no longer cached, so one cached before this
 	// deploy must not outlive it. v5: winners named off DoraHacks
-	// (winnerSource), which a v4 index serves as unplaced. v6: the haystack
-	// holds declared packages, which a v5 index cannot match.
-	["hackathon-builds-index:v6"],
+	// (winnerSource), which a v4 index serves as unplaced.
+	["hackathon-builds-index:v5"],
 	{
 		revalidate: 3600,
 		tags: ["hackathons"],
@@ -665,6 +662,13 @@ export function searchHackathonBuilds(
 		/** One result per submission across events, its best entry
 		 * (sls-092). Off for counting: analyze counts every event entry. */
 		perSubmission?: boolean;
+		/** Also match the packages a build's read repo declares (common
+		 * libraries left out), so "passkey" finds the winner Tukar, built on
+		 * passkey-kit. Only searchHackathonBuilds' own route passes it: a
+		 * package says what a build was made with, not what it does, and
+		 * matched for vetIdea it put 3 builds graded not prior art in its five
+		 * for 3 of 140 labeled ideas and pushed a same-idea build to sixth. */
+		packages?: boolean;
 	} = {},
 ): ScoredBuild[] {
 	let pool = indexed;
@@ -727,6 +731,10 @@ export function searchHackathonBuilds(
 			own: [...wordForms(t), ...joined].map(termMatcher),
 		};
 	});
+	const hay = new Map(
+		opts.packages ? pool.map((b) => [b, withPackages(b)] as const) : [],
+	);
+	const haystack = (b: IndexedBuild) => hay.get(b) ?? b.haystack;
 	// Rarer words say more. In an agents hackathon "agents" is everywhere and
 	// "x402" is not, so a build is weighed by WHICH words it covers, not how
 	// many: counting words let descriptions padded with common ones ("per",
@@ -734,7 +742,7 @@ export function searchHackathonBuilds(
 	const weight = new Map<string, number>();
 	for (const { t, variants } of terms) {
 		const df = pool.filter((b) =>
-			variants.some((hit) => hit(b.haystack)),
+			variants.some((hit) => hit(haystack(b))),
 		).length;
 		weight.set(t, Math.log((pool.length + 1) / (df + 1)));
 	}
@@ -753,7 +761,7 @@ export function searchHackathonBuilds(
 					score += 3;
 					matched.add(t);
 					nameMatched = true;
-				} else if (hit(b.haystack)) {
+				} else if (hit(haystack(b))) {
 					score += 1;
 					matched.add(t);
 				}

@@ -2,13 +2,19 @@
 
 Evidence for `improvements/rounds/2026-10-23-build-matching.md`.
 
-**Verdict: one of two shipped.** Declared packages are now searchable
-(candidate S10): `q=passkey&winnersOnly=1` lists Tukar and DeFi Quest, where
-it listed none, and no build graded the same idea leaves the matched list or
-the top 20 on any labeled set, in keyword or hybrid mode. Nonsense matches
-are not fixed: every candidate that reduced the frozen nonsense battery's
-builds also dropped builds graded the same idea, so none shipped. The labels
-are drafts, pending owner review.
+**Verdict: one of two shipped, scoped to the builds route.** On
+searchHackathonBuilds, a query word now also matches the packages a build's
+repo declares: `q=passkey&winnersOnly=1` lists Tukar and DeFi Quest, where it
+listed none, and no build graded the same idea leaves the matched list or
+the top 20 on any labeled set, in keyword or hybrid mode. Prior art
+(vetIdea, the vet blocks of hackathonBrief, scfPitch and reviewSubmission),
+hackathonBrief's builds and analyzeHackathonSubmissions' q do not match
+packages: on all 140 labeled ideas their rankings are identical to the base,
+row for row and field for field. A first version (commit ae098cd1) matched
+packages everywhere and changed vetIdea's five for 3 ideas the wrong way;
+it was revised, not shipped. Nonsense matches are not fixed: every candidate
+that reduced the frozen nonsense battery's builds also dropped builds
+graded the same idea. The labels are drafts, pending owner review.
 
 ## Method (fixed before any result was read)
 
@@ -34,12 +40,16 @@ are drafts, pending owner review.
   request answered 200 and every idea was served hybrid. `/api/status`
   apiVersion **1.9.91 at the start (01:14:29Z) and 1.9.91 at the end
   (01:24:27Z)**, 2026-10-23 (`capture.txt`). The raw capture (14 MB, with
-  upstream descriptions) is not committed.
+  upstream descriptions) is not committed. Both versions were measured on
+  this one capture.
 - **Replay.** `replay.mts` turns the browse rows into stored rows
   (`indexedFromStored`, so the haystack is built the way the store's index
   builds it) and runs this tree's `searchHackathonBuilds` over all 1,344,
-  with each idea's live meaning scores as the meaning map. Run once on the
-  base and once per candidate.
+  with each idea's live meaning scores as the meaning map. Per idea it keeps
+  the builds route's rankings, vetIdea's five and the brief's picks, and a
+  hash of every row and field of the plain rankings (no package matching)
+  that prior art and analyze read. Run once on the base and once per
+  candidate.
 - **Parity of the base replay with live.** Keyword: order and matched count
   equal on 140 of 140 ideas. Hybrid: matched count equal on 140 of 140; the
   order is equal on 57, the top-5 set on 132 and the top-20 set on 123. The
@@ -53,9 +63,13 @@ are drafts, pending owner review.
   and hybrid (`compare.mts`). Ship criteria: on every labeled set no grade-2
   build leaves the matched list or the top 20; the battery returns fewer
   builds; `q=passkey&winnersOnly=1` returns Tukar; everything lost or gained
-  named. A fix for one problem that passes ships alone.
+  named; and, added with the revision, vetIdea's five and the brief's picks
+  identical to the base on all 140 ideas. A fix for one problem that passes
+  ships alone.
 
 ## Candidates
+
+Measured with package matching everywhere, as the first version did.
 
 | candidate | change | grade-2 losses (matched or top 20) | battery builds, keyword / hybrid | probe | passkey winners |
 | --- | --- | --- | --- | --- | --- |
@@ -71,7 +85,8 @@ are drafts, pending owner review.
 
 Every candidate's diff against the base is in `candidates/<name>.diff` and
 its full comparison, every build lost or gained by name, in
-`candidates/compare-<name>.txt`; S10 is the shipped code, compared in
+`candidates/compare-<name>.txt`. S10 is the first version (commit ae098cd1),
+compared in `compare-v1.txt`; the shipped, scoped version is compared in
 `compare-after.txt`.
 
 - **K1** drops 8 builds graded the same idea from keyword matches, all on
@@ -97,9 +112,44 @@ its full comparison, every build lost or gained by name, in
   chosen after reading i01, a working idea; the held-out ideas, the short,
   test and fresh sets lose nothing under either cut.
 
-## The shipped change (S10): recall, before and after
+## First version (ae098cd1): packages matched everywhere
 
-Builds graded 2, found in the matched list, top 20 and top 5:
+The packages went into every build's matched text, so vetIdea, the brief,
+scfPitch, reviewSubmission and analyze matched them too. Over the 140 ideas,
+vetIdea's five changed for 3 ideas and the brief's picks for 5. Grades in
+parentheses are the earlier labels, or, for builds no earlier label covered,
+blind grades (`grades.json`, one labeler, Claude Sonnet 5.5, from name and
+description only, without the stack):
+
+| idea | vetIdea | brief |
+| --- | --- | --- |
+| passkey wallet | gained TalkToStellar (0), Stellaro (0), Prism (1) | the same |
+| soroban sdk | gained Ponte Pay (0), lost Soride (1) | the same |
+| stablecoin wallet for remittances | gained KaleConnect (1), lost StellarRemit (2, now 6th) | the same |
+| an overcollateralized stablecoin for lending | | gained Tukar (0), lost BlendScore (1) |
+| prediction market on Soroban | | gained ARS Price Arena (1) and KALE-ndar (2), lost Move Markets (2) and clevercon (0) |
+
+Most of these come from a query word found inside a package name: wallet in
+stellar-hd-wallet (KaleConnect), sdk in @defindex/sdk and soroban's synonym
+contract in stellar-contract-utils (Ponte Pay). TalkToStellar and Stellaro
+declare passkey-kit; graded from their descriptions they are not passkey
+wallets. vetIdea's prior-art precision is what the earlier rounds worked to
+improve, so the first version was not shipped.
+
+## Shipped version: packages matched on the builds route only
+
+`searchHackathonBuilds` takes `packages`; only the builds route passes it
+(through `queryBuilds`). The library cut is unchanged (a tenth), and the
+index shape is unchanged, so its cache key stays v5.
+
+**(a) Prior art and analyze are unchanged.** On the 140 ideas, ideas that
+differ from the base: vetIdea's five **0**, the brief's picks **0**, the plain
+rankings prior art and analyze read, every row and field **0**
+(`compare-after.txt`).
+
+**(b) The builds route, same-idea recall** (builds graded 2, found in the
+matched list, top 20 and top 5). The route's rankings equal the first
+version's on all 140 ideas and every extra query.
 
 | set | mode | labeled | matched | top 20 | top 5 |
 | --- | --- | --- | --- | --- | --- |
@@ -123,41 +173,19 @@ integration and lumengate leave the "passkey wallet" top 5; for "soroban sdk"
 Accesly leaves the keyword top 20 (8th to 44th) and Buckspay SDK and Soride
 leave top 5s. Full list: `compare-after.txt`.
 
-Battery: 20 builds in keyword and 21 in hybrid, before and after (the
-change adds no nonsense match). Probe: unchanged, 2. `passkey`: 4 builds, now
-15; winnersOnly 0, now Tukar and DeFi Quest.
+**(c)** `q=passkey&winnersOnly=1` on the route: 0 builds, now Tukar and DeFi
+Quest (keyword and hybrid). `q=passkey`: 4 builds, now 15.
 
-### What vetIdea and the brief list
-
-vetIdea, hackathonBrief, scfPitch and reviewSubmission read the same
-ranking. Over the 140 ideas, vetIdea's five changed for 3 ideas and the
-brief's picks for 5. Grades in parentheses are the earlier labels, or, for
-builds no earlier label covered, blind grades (`grades.json`, one labeler,
-Claude Sonnet 5.5, from name and description only, without the stack):
-
-| idea | vetIdea | brief |
-| --- | --- | --- |
-| passkey wallet | gained TalkToStellar (0), Stellaro (0), Prism (1) | the same |
-| soroban sdk | gained Ponte Pay (0), lost Soride (1) | the same |
-| stablecoin wallet for remittances | gained KaleConnect (1), lost StellarRemit (2, now 6th) | the same |
-| an overcollateralized stablecoin for lending | | gained Tukar (0), lost BlendScore (1) |
-| prediction market on Soroban | | gained ARS Price Arena (1) and KALE-ndar (2), lost Move Markets (2) and clevercon (0) |
-
-Most of these come from a query word found inside a package name: wallet in
-stellar-hd-wallet (KaleConnect), sdk in @defindex/sdk and soroban's synonym
-contract in stellar-contract-utils (Ponte Pay). TalkToStellar and Stellaro
-declare passkey-kit; graded from their descriptions they are not passkey
-wallets.
+Battery: 20 builds in keyword and 21 in hybrid, before and after. Probe:
+unchanged, 2.
 
 ## Open risks and leads
 
-- Generic words inside package names (sdk, wallet, contract, utils) now
-  match. On the labeled sets this cost no grade-2 build its top 20, but it
-  moved one same-idea build (StellarRemit) out of vetIdea's five and added
-  three grade-0 builds to it. Two leads, not measured: index a package by
-  its name without generic words (which would also stop `q=passkey-kit`
-  matching it), or keep package matches out of vetIdea's two-word evidence
-  path.
+- On the builds route, generic words inside package names (sdk, wallet,
+  contract, utils) match: on the labeled sets this cost no grade-2 build its
+  top 20, but it reorders top 5s (Veil, the prediction markets above).
+  Lead, not measured: index a package by its name without generic words,
+  which would also stop `q=passkey-kit` matching it.
 - The battery and the probe are unfixed: a build whose name holds one real
   word of a nonsense query is still listed. A rule that keys on the
   battery's own words (for example turning name matches off when most query
@@ -172,8 +200,12 @@ wallets.
 - `replay.mts`: the replay, run per candidate.
 - `compare.mts`: the comparison; with a slim directory it writes
   `before.json` and `after.json` (per idea and mode the matched count, the
-  top 20 and the rank of every graded build; the extra queries in full).
-- `compare-after.txt`: base against the shipped code.
+  top 20 and the rank of every graded build, vetIdea's five, the brief's
+  picks and the plain rankings' hash; the extra queries in full).
+- `compare-after.txt`: base against the shipped version; `before.json` and
+  `after.json` are its slim replays.
+- `compare-v1.txt`: base against the first version (written before the
+  replay kept the plain rankings, so it has no identity line).
 - `candidates/`: each candidate's diff and comparison.
 - `grades.json`: the blind grades above.
 
@@ -189,5 +221,5 @@ pnpm exec tsx improvements/audits/2026-10-23-build-matching/compare.mts <scratch
 ```
 
 `replay.mts` replays whatever `src/lib/hackathon-builds.ts` holds: run it
-once with the parent commit's file for `out-base.json`, and once per
-candidate with its diff applied to that file.
+once with the parent commit's file (83e134b2) for `out-base.json`, and once
+per candidate with its diff applied to that file.

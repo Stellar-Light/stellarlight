@@ -74,8 +74,31 @@ vi.mock("@/lib/hackathon-builds", async (orig) => ({
 				endedAt: "2026-04-13",
 			},
 		}),
+		build("tukar", {
+			isWinner: true,
+			hackathonPlacement: "1st Place",
+			stack: ["passkey-kit", "@stellar/stellar-sdk"],
+		}),
 	]),
 }));
+
+describe("GET /api/hackathons/builds matches declared packages", () => {
+	// The 2026-10-22 battery: q=passkey&winnersOnly=1 found no winner, though
+	// Tukar's repo declares passkey-kit.
+	it("finds a winner by a package its repo declares", async () => {
+		const { GET } = await import("../route");
+		const res = await GET(
+			new NextRequest(
+				"https://x.test/api/hackathons/builds?q=passkey&winnersOnly=1&mode=keyword",
+			),
+		);
+		expect(res.status).toBe(200);
+		const rows = (await res.json()).builds as Array<Record<string, unknown>>;
+		expect(rows.map((r) => [r.id, r.matchedTerms])).toEqual([
+			["tukar", ["passkey"]],
+		]);
+	});
+});
 
 describe("GET /api/hackathons/builds hackathon filter", () => {
 	const get = async (qs: string) => {

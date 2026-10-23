@@ -90,10 +90,45 @@ author's.
 - Spec 1.9.93 (1.9.92 is another lane's): q and matchedTerms text, changelog
   entry; `pnpm contract:write`: exit 0.
 
+- Commit ae098cd1 (S10, packages in every build's matched text), reported to
+  the orchestrator.
+- Orchestrator decision: not shipped as is. It changes vetIdea's five for 3
+  of 140 ideas the wrong way (TalkToStellar 0, Stellaro 0 and Ponte Pay 0
+  in; StellarRemit, graded 2, to sixth), and vetIdea's prior-art precision
+  is what the round is improving. Revise as a scope change, not a tuning
+  change: package matching opt-in, passed only by the builds route; vetIdea,
+  hackathonBrief, scfPitch, reviewSubmission and analyze's q unchanged;
+  same library cut; re-measure on the same capture with no new thresholds;
+  added ship criterion: vetIdea's five and the brief's picks identical to
+  the base on all 140 ideas.
+- Revision: `searchHackathonBuilds` option `packages`, passed by the builds
+  route through `queryBuilds`; the haystack and the index cache key (v5) are
+  back to the base. Tests first, against the base source of
+  `hackathon-builds.ts`, `hackathon-build-query.ts` and the builds route:
+  the lib test (`expected [] to deeply equal [ [ 'Tukar', [ 'passkey' ], +0 ]
+  ]`) and the new route test (`expected [] to deeply equal [ [ 'tukar', [
+  'passkey' ] ] ]`) fail; with the revision 49 of 49 pass in the two files.
+- Replay of base and revision on the same capture (`replay.mts` now also
+  hashes the plain rankings): ideas that differ from the base, of 140:
+  vetIdea's five 0, the brief's picks 0, plain rankings (every row and
+  field) 0. The builds route's rankings equal the first version's on all 140
+  ideas and every extra query: 0 grade-2 losses from the matched list or the
+  top 20; `q=passkey&winnersOnly=1` returns Tukar and DeFi Quest; battery 20
+  / 21, unchanged.
+- Text: the builds `q` and `matchedTerms` descriptions say packages match
+  there only; analyze's `q` says a declared package does not match there;
+  the changelog no longer says analyze or the vet blocks match packages.
+  vetIdea and hackathonBrief descriptions unchanged.
+
 ## Outcome
 
-- Shipped on branch `lane/k-build-matching` (committed, not pushed): declared
-  packages are matched (S10), spec 1.9.93. Nonsense matches not fixed; the
-  measurement and the leads are in
+- Shipped on branch `lane/k-build-matching` (committed, not pushed), spec
+  1.9.93: declared packages match on searchHackathonBuilds only; prior art
+  and analyze identical to the base on the 140 labeled ideas.
+- Problem 1 (nonsense queries return builds) is unfixed. Every candidate
+  that reduced the frozen battery's builds dropped same-idea builds. Lead: a
+  rule keyed on query words that occur in no build was conceived only after
+  the battery was read, so it needs a fresh battery written before it runs.
+- The measurement and the leads are in
   `../audits/2026-10-23-build-matching/README.md`.
 - Not verified live: nothing is deployed from this lane.

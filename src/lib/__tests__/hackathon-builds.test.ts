@@ -689,7 +689,7 @@ describe("what a build's repo declares", () => {
 
 	// The 2026-10-22 battery: q=passkey&winnersOnly=1 found no winner, though
 	// Tukar's repo declares passkey-kit.
-	it("matches a package the repo declares, but not as the build's own words", () => {
+	it("matches a package the repo declares when asked, never as the build's own words", () => {
 		const tukar = indexedFromStored(
 			stored({
 				name: "Tukar",
@@ -701,11 +701,16 @@ describe("what a build's repo declares", () => {
 		);
 		const out = searchHackathonBuilds([tukar], "passkey", {
 			winnersOnly: true,
+			packages: true,
 		});
 		expect(out.map((s) => [s.b.name, s.matched, s.textShare])).toEqual([
 			["Tukar", ["passkey"], 0],
 		]);
-		expect(searchHackathonBuilds([tukar], "passkey-kit")).toHaveLength(1);
+		expect(
+			searchHackathonBuilds([tukar], "passkey-kit", { packages: true }),
+		).toHaveLength(1);
+		// Prior art and analyze do not ask: a package is not what a build does.
+		expect(searchHackathonBuilds([tukar], "passkey")).toEqual([]);
 	});
 
 	it("leaves out the libraries most repos declare, and a stack not read", () => {
@@ -726,8 +731,12 @@ describe("what a build's repo declares", () => {
 			stored({ vision: "Pay per call.", stack: ["passkey-kit"] }),
 		);
 		for (const q of ["soroban", "freighter", "wallets", "x402", "sdk"])
-			expect(searchHackathonBuilds([common], q)).toEqual([]);
-		expect(searchHackathonBuilds([unread], "passkey")).toEqual([]);
+			expect(searchHackathonBuilds([common], q, { packages: true })).toEqual(
+				[],
+			);
+		expect(
+			searchHackathonBuilds([unread], "passkey", { packages: true }),
+		).toEqual([]);
 	});
 });
 

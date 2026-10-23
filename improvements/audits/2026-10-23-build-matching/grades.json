@@ -1,5 +1,5 @@
 {
-	"about": "Blind grades for the builds the shipped change adds to or removes from vetIdea's five or the brief's picks that no earlier label covered. The labeler read only a sheet: rubric v1 of ../2026-10-22-prior-art-precision/labels.json, then per row the idea, the build's name, event and description cut to 600 characters, shuffled, with no status, rank, score or stack. Draft labels, owner review pending.",
+	"about": "Blind grades for the builds the first version (commit ae098cd1, packages matched everywhere) added to or removed from vetIdea's five or the brief's picks that no earlier label covered; the shipped version changes neither. The labeler read only a sheet: rubric v1 of ../2026-10-22-prior-art-precision/labels.json, then per row the idea, the build's name, event and description cut to 600 characters, shuffled, with no status, rank, score or stack. Draft labels, owner review pending.",
 	"labeler": "Claude Sonnet 5.5, effort high",
 	"rubric": "v1: 2 same idea, 1 related, 0 not prior art; when torn, the stricter grade; judged from name and description only",
 	"grades": [

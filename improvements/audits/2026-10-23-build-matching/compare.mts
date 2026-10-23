@@ -1,8 +1,9 @@
 // Compares two replay outputs (replay.mts) against the labeled sets: per set
 // and mode, where each labeled same-idea build (grade 2) sits in the matched
 // list (anywhere, top 20, top 5), before and after, with every build lost or
-// gained by name; then vetIdea's five and the brief's picks, the frozen
-// nonsense battery, the battery probe and the passkey checks.
+// gained by name; then vetIdea's five and the brief's picks (and how many
+// ideas' plain rankings differ at all), the frozen nonsense battery, the
+// battery probe and the passkey checks.
 // Usage, from the repository root:
 //   pnpm exec tsx improvements/audits/2026-10-23-build-matching/compare.mts <live.json> <before.json> <after.json> [slimDir]
 import { readFileSync, writeFileSync } from "node:fs";
@@ -49,6 +50,8 @@ type Idea = {
 	keyword: { ids: string[] };
 	vet: string[];
 	brief: string[];
+	/** Absent in replays written before the builds route's option. */
+	plainHash?: string;
 };
 const byKey = (o: { ideas: Idea[] }) =>
 	new Map(o.ideas.map((i) => [`${i.set}|${i.id}`, i]));
@@ -123,19 +126,25 @@ for (const grade of [2, 1]) {
 
 say();
 say("== vetIdea's five and the brief's picks (hybrid), every change ==");
+const differ = { vet: 0, brief: 0, plain: 0 };
 for (const k of B.keys()) {
 	const b = B.get(k) as Idea;
 	const a = A.get(k) as Idea;
 	for (const field of ["vet", "brief"] as const) {
 		const lost = b[field].filter((id) => !a[field].includes(id));
 		const gained = a[field].filter((id) => !b[field].includes(id));
+		if (b[field].join() !== a[field].join()) differ[field]++;
 		const g = (id: string) => gradeOf(b.set, b.id, id) ?? "unlabeled";
 		for (const id of lost)
 			say(`  ${field} lost | ${b.set} ${b.id} | ${nm(id)} (grade ${g(id)})`);
 		for (const id of gained)
 			say(`  ${field} gained | ${b.set} ${b.id} | ${nm(id)} (grade ${g(id)})`);
 	}
+	if (b.plainHash !== a.plainHash) differ.plain++;
 }
+say(
+	`ideas that differ from before, of ${B.size}: vetIdea's five ${differ.vet}, the brief's picks ${differ.brief}, the plain rankings prior art and analyze read (every row and field) ${differ.plain}`,
+);
 
 type Extra = {
 	kind: string;
@@ -210,6 +219,7 @@ const slim = (o: { label: string; ideas: Idea[]; extra: Extra[] }) => ({
 			hybrid: mode("hybrid"),
 			vet: i.vet,
 			brief: i.brief,
+			plainHash: i.plainHash,
 		};
 	}),
 	extra: o.extra,
