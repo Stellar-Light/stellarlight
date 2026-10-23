@@ -260,4 +260,36 @@ routing reaches the operation mostly for short, intent-worded questions.
   (base resolved to `eb9ef225`); writer conformance 0; biome clean on the
   changed files; Raven gate ACCEPT 1.9.98 at 220/298/326/112, 0
   hit-to-miss, full output in `../audits/2026-10-23-source-locator/raven-gate.txt`
-  (local paths replaced by placeholders).
+  (local paths replaced by placeholders). Committed as `1208c63b`.
+- Re-check of `1208c63b`: GATE push, with five LOW findings, closed on top
+  of it, tests first (7 tests failed before the change, all pass after):
+  1. The workflow gains a `repo` input (default empty), forwarded as
+     `--repo` so an allowed shrink covers exactly the repo whose plan was
+     read; the Idempotence step replans the same repo. The schedule
+     forwards neither.
+  2. `--allow-shrink` is forwarded only on an execute dispatch, so a dry
+     plan always shows its refusals. Both steps now read the event and
+     inputs through env and build the argument list in bash, so a repo
+     value is one argument, never shell. Tested by running the workflow's
+     own run scripts with bash and a stand-in pnpm that prints its
+     arguments (schedule, dry with allow_shrink, execute with
+     allow_shrink and repo, a repo value holding `; echo pwned`).
+  3. The spec's page maximum and its "1 to 2000" texts now come from
+     `LOCATE_MAX_PAGE` (`CANDIDATE_CAP / LOCATE_PAGE_SIZE`), shared with the
+     route; the parity test pins the schema and both texts to it. The
+     served spec JSON is byte-identical, so the routing text did not change
+     and the Raven gate was not rerun.
+  4. The builder's summary says `replan: writes=N` only under `--replan`
+     (refused plans included, so the Idempotence check still fails on any
+     difference); every other mode prints `writes planned: N`, without the
+     refused repos, and names them (`refused, nothing written: <repo> (<n>
+     planned)`). Tested on the shrink refusal (0 planned, 122 refused), a
+     first fill, and a replan after a stored row drifted (exit 1, `replan:
+     writes=1`).
+  5. A comment beside the shrink cap: below 100 stored rows the floor of 50
+     is the cap; none of the eight is under 410 rows.
+- 15:12Z, checks: `tsc --noEmit -p tsconfig.json` 0; scripts type ratchet
+  0; `vitest run src/lib/__tests__ src/app/api src/collections/__tests__`
+  0 (193 files, 2438 tests); `pnpm contract:write` 0 (no snapshot change);
+  `CONTRACT_BASE=origin/main pnpm contract:check` 0; writer conformance 0;
+  biome clean on the changed files.

@@ -12,7 +12,9 @@ name: Build source locators
 # execute whose dry run was read first; a repo not filled yet stays dry.
 # A tarball with no indexable file, or a plan deleting more than max(50,
 # half) of a repo's pointers, writes nothing and turns the job red; the
-# second needs allow_shrink=true on a manual dispatch.
+# second needs allow_shrink=true on an execute dispatch, best scoped with
+# repo= to the one repo whose plan was read. A dry dispatch never forwards
+# allow_shrink, so its plan always shows what would be refused.
 
 on:
   workflow_dispatch:
@@ -22,9 +24,13 @@ on:
         type: boolean
         default: false
       allow_shrink:
-        description: "Let a plan delete more than max(50, half) of a repo's pointers. Only after reading that plan."
+        description: "Let a plan delete more than max(50, half) of a repo's pointers. Execute only, after reading that plan."
         type: boolean
         default: false
+      repo:
+        description: "Only this repo (owner/name, e.g. stellar/quickstart). Empty = all eight."
+        type: string
+        default: ""
   schedule:
     - cron: "17 5 * * *" # daily; :17 because crons at :00 get dropped under load
 
@@ -49,9 +55,33 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: "24", cache: "pnpm" }
       - run: pnpm install --frozen-lockfile
+      # Inputs reach the scripts through env, never inline: a repo value is
+      # one argument, not shell. The schedule never passes --allow-shrink or
+      # --repo.
       - name: Build the index
-        # The schedule never passes --allow-shrink.
-        run: pnpm exec tsx scripts/build-source-locators.ts ${{ github.event_name == 'schedule' && '--execute --scheduled' || (inputs.execute && '--execute' || '') }} ${{ github.event_name != 'schedule' && inputs.allow_shrink && '--allow-shrink' || '' }}
+        env:
+          EVENT: ${{ github.event_name }}
+          EXECUTE: ${{ inputs.execute }}
+          ALLOW_SHRINK: ${{ inputs.allow_shrink }}
+          REPO: ${{ inputs.repo }}
+        run: |
+          args=()
+          if [ "$EVENT" = schedule ]; then
+            args+=(--execute --scheduled)
+          else
+            if [ "$EXECUTE" = true ]; then
+              args+=(--execute)
+              if [ "$ALLOW_SHRINK" = true ]; then args+=(--allow-shrink); fi
+            fi
+            if [ -n "$REPO" ]; then args+=(--repo "$REPO"); fi
+          fi
+          pnpm exec tsx scripts/build-source-locators.ts "${args[@]}"
       - name: Idempotence
         if: github.event_name == 'schedule' || inputs.execute
-        run: pnpm exec tsx scripts/build-source-locators.ts --replan
+        env:
+          EVENT: ${{ github.event_name }}
+          REPO: ${{ inputs.repo }}
+        run: |
+          args=(--replan)
+          if [ "$EVENT" != schedule ] && [ -n "$REPO" ]; then args+=(--repo "$REPO"); fi
+          pnpm exec tsx scripts/build-source-locators.ts "${args[@]}"

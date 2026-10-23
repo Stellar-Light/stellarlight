@@ -130,7 +130,9 @@ async function run() {
 
 	const repos = onlyRepo ? [onlyRepo] : SOURCE_REPO_NAMES;
 	const out: Record<string, unknown> = {};
-	let totalWrites = 0;
+	let plannedWrites = 0;
+	let refusedWrites = 0;
+	const refused: string[] = [];
 	let failures = 0;
 	for (const repo of repos) {
 		const started = Date.now();
@@ -149,6 +151,7 @@ async function run() {
 				console.error(
 					`${repo}@${ref.slice(0, 12)}: the tarball held no indexable file (empty, or entries outside a top directory). Treated as unreadable, not as an empty repo: nothing written, state kept.`,
 				);
+				refused.push(`${repo} (no indexable file)`);
 				failures++;
 				continue;
 			}
@@ -182,18 +185,23 @@ async function run() {
 			const deletes = [...existing.keys()].filter((k) => !next.has(k));
 			const creates = upserts.filter((r) => !existing.has(r.key)).length;
 			const writes = upserts.length + deletes.length;
-			totalWrites += writes;
 			console.log(
 				`  plan: writes=${writes} (create ${creates}, update ${upserts.length - creates}, delete ${deletes.length}); stored ${existing.size}`,
 			);
+			// Below 100 stored rows the floor of 50 is the cap, so a small repo
+			// could still be emptied by a tarball holding one indexable file.
+			// None of the eight is under 410 rows (2026-10-23).
 			const shrinkCap = Math.max(50, Math.floor(existing.size / 2));
 			if (deletes.length > shrinkCap && !allowShrink) {
 				console.error(
 					`  ✗ ${repo}: the plan deletes ${deletes.length} of ${existing.size} stored pointers, over the cap of ${shrinkCap}. Refused: nothing written, state kept. Read the plan, then rerun with --allow-shrink if the shrink is real.`,
 				);
+				refused.push(`${repo} (${writes} planned)`);
+				refusedWrites += writes;
 				failures++;
 				continue;
 			}
+			plannedWrites += writes;
 			if (!execute) continue;
 			if (scheduled && !(await models.repos.findOne({ repo }).lean())) {
 				console.log(
@@ -273,9 +281,16 @@ async function run() {
 		writeFileSync(outPath, JSON.stringify(out));
 		console.log(`\nrows written to ${outPath}`);
 	}
-	if (models) console.log(`\nreplan: writes=${totalWrites}`);
+	// --replan asks whether anything at all differs, refused plans included;
+	// every other mode counts the writes it planned and names what it refused.
+	const replanWrites = plannedWrites + refusedWrites;
+	if (models && replan) console.log(`\nreplan: writes=${replanWrites}`);
+	else if (models)
+		console.log(
+			`\nwrites planned: ${plannedWrites}${refused.length ? `; refused, nothing written: ${refused.join(", ")}` : ""}`,
+		);
 	if (failures) process.exitCode = 1;
-	else if (replan && totalWrites > 0) {
+	else if (replan && replanWrites > 0) {
 		console.error("✗ replan planned writes right after an execute");
 		process.exitCode = 1;
 	}

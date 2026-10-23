@@ -325,6 +325,9 @@ export function parseQuery(
 
 /** Most candidate rows one query reads before ranking; past it the answer says it was cut. */
 export const CANDIDATE_CAP = 20_000;
+/** Pointers per page, and the last page the candidate cap can fill. */
+export const LOCATE_PAGE_SIZE = 10;
+export const LOCATE_MAX_PAGE = CANDIDATE_CAP / LOCATE_PAGE_SIZE;
 
 /** Terms a candidate row must carry (any one), and key prefixes for symbol-prefix matches. */
 export function candidateTerms(pq: ParsedQuery): {

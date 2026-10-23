@@ -6,7 +6,12 @@
  * reaches, and the data-safety refusals (a tarball with no indexable file,
  * a plan that deletes most of a repo's index, a first fill on a schedule).
  */
+import { execFileSync } from "node:child_process";
+import { chmodSync, mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { gzipSync } from "node:zlib";
+import yaml from "js-yaml";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 type Doc = Record<string, unknown>;
@@ -164,9 +169,11 @@ describe("build-source-locators", () => {
 		expect(dry.out).toMatch(
 			/plan: writes=(\d+) \(create \1, update 0, delete 0\)/,
 		);
+		expect(dry.out).toMatch(/writes planned: \d+$/m);
 		expect(dry.writes).toEqual([]);
 		const ex = await run("--execute");
 		expect(ex.code).toBe(0);
+		expect(ex.out).toContain(`writes planned: ${rows.size}`);
 		expect(repos.get("stellar/quickstart")).toMatchObject({
 			ref: SHA_A,
 			pointers: rows.size,
@@ -220,6 +227,11 @@ describe("build-source-locators", () => {
 		expect(r.out).toContain("--allow-shrink");
 		expect(r.writes).toEqual([]);
 		expect(rows).toEqual(before);
+		// The summary counts what was not refused, and names what was.
+		expect(r.out).toContain(
+			"writes planned: 0; refused, nothing written: stellar/quickstart (122 planned)",
+		);
+		expect(r.out).not.toContain("replan: writes");
 		const allowed = await run("--execute", "--allow-shrink");
 		expect(allowed.code).toBe(0);
 		expect(rows.size).toBe(stored - 120);
@@ -262,6 +274,19 @@ describe("build-source-locators", () => {
 		expect(s.writes).toContain("bulkWrite");
 	});
 
+	it("--replan reports its own count and exits 1 when a stored row drifted", async () => {
+		await run("--execute");
+		const clean = await run("--replan");
+		expect(clean.out).toContain("replan: writes=0");
+		expect(clean.out).not.toContain("writes planned");
+		const [key, doc] = [...rows.entries()][0];
+		rows.set(key, { ...doc, blobSha: "f".repeat(40) });
+		const drifted = await run("--replan");
+		expect(drifted.code).toBe(1);
+		expect(drifted.out).toContain("replan: writes=1");
+		expect(drifted.writes).toEqual([]);
+	});
+
 	it("a failed tarball fetch writes nothing and exits 1", async () => {
 		await run("--execute");
 		const before = new Map(rows);
@@ -270,5 +295,94 @@ describe("build-source-locators", () => {
 		expect(r.code).toBe(1);
 		expect(r.writes).toEqual([]);
 		expect(rows).toEqual(before);
+	});
+});
+
+/** The workflow's own run scripts, executed by bash with a stand-in pnpm that prints its arguments. */
+describe("build-source-locators.yml forwards exactly the intended flags", () => {
+	type Step = { name?: string; env?: Record<string, string>; run?: string };
+	const wf = yaml.load(
+		readFileSync(
+			join(process.cwd(), ".github/workflows/build-source-locators.yml"),
+			"utf8",
+		),
+	) as { jobs: { build: { steps: Step[] } } };
+	const step = (name: string) => {
+		const s = wf.jobs.build.steps.find((x) => x.name === name);
+		if (!s?.run) throw new Error(`no run step named ${name}`);
+		return s as Step & { run: string };
+	};
+	const bin = mkdtempSync(join(tmpdir(), "fake-pnpm-"));
+	writeFileSync(join(bin, "pnpm"), '#!/bin/bash\nprintf "%s\\n" "$@"\n');
+	chmodSync(join(bin, "pnpm"), 0o755);
+	const argsOf = (name: string, env: Record<string, string>) =>
+		execFileSync("bash", ["-e", "-c", step(name).run], {
+			// Only PATH and the step's own env: nothing else from this process leaks in.
+			env: { NODE_ENV: "test", PATH: `${bin}:${process.env.PATH}`, ...env },
+			encoding: "utf8",
+		})
+			.split("\n")
+			.filter(Boolean)
+			// pnpm exec tsx scripts/build-source-locators.ts <flags>
+			.slice(3);
+	const dispatch = (over: Record<string, string>) => ({
+		EVENT: "workflow_dispatch",
+		EXECUTE: "false",
+		ALLOW_SHRINK: "false",
+		REPO: "",
+		...over,
+	});
+
+	it("reads the event and every input through env, never inline", () => {
+		/** A workflow expression, `${{ e }}`, built so no string literal holds one. */
+		const gh = (e: string) => `$${"{{"} ${e} }}`;
+		for (const name of ["Build the index", "Idempotence"]) {
+			expect(step(name).run).not.toContain(`$${"{{"}`);
+			expect(step(name).env).toMatchObject({
+				EVENT: gh("github.event_name"),
+				REPO: gh("inputs.repo"),
+			});
+		}
+		expect(step("Build the index").env).toMatchObject({
+			EXECUTE: gh("inputs.execute"),
+			ALLOW_SHRINK: gh("inputs.allow_shrink"),
+		});
+	});
+
+	it("the schedule runs --execute --scheduled, never --allow-shrink or --repo", () => {
+		expect(
+			argsOf("Build the index", {
+				EVENT: "schedule",
+				EXECUTE: "",
+				ALLOW_SHRINK: "true",
+				REPO: "quickstart",
+			}),
+		).toEqual(["--execute", "--scheduled"]);
+		expect(
+			argsOf("Idempotence", { EVENT: "schedule", REPO: "quickstart" }),
+		).toEqual(["--replan"]);
+	});
+
+	it("a dry dispatch never forwards --allow-shrink, so its plan shows every refusal", () => {
+		expect(
+			argsOf("Build the index", dispatch({ ALLOW_SHRINK: "true" })),
+		).toEqual([]);
+	});
+
+	it("an execute dispatch forwards --allow-shrink and one repo, the repo as a single argument", () => {
+		expect(
+			argsOf(
+				"Build the index",
+				dispatch({ EXECUTE: "true", ALLOW_SHRINK: "true", REPO: "quickstart" }),
+			),
+		).toEqual(["--execute", "--allow-shrink", "--repo", "quickstart"]);
+		expect(
+			argsOf("Build the index", dispatch({ REPO: "quickstart; echo pwned" })),
+		).toEqual(["--repo", "quickstart; echo pwned"]);
+		expect(argsOf("Idempotence", dispatch({ REPO: "quickstart" }))).toEqual([
+			"--replan",
+			"--repo",
+			"quickstart",
+		]);
 	});
 });

@@ -52,6 +52,8 @@ import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
 import {
 	AUTHORITY_ROLES,
 	LOCATE_MATCH_MODES,
+	LOCATE_MAX_PAGE,
+	LOCATE_PAGE_SIZE,
 	LOCATE_TOTAL_BASES,
 	LOCATOR_KINDS,
 	SOURCE_REPO_NAMES,
@@ -6929,9 +6931,13 @@ export const spec: OpenAPISpec = {
 					{
 						name: "page",
 						in: "query",
-						description:
-							"Page of 10 pointers: a whole number from 1 to 2000 written as plain digits.",
-						schema: { type: "integer", minimum: 1, maximum: 2000, default: 1 },
+						description: `Page of ${LOCATE_PAGE_SIZE} pointers: a whole number from 1 to ${LOCATE_MAX_PAGE} written as plain digits.`,
+						schema: {
+							type: "integer",
+							minimum: 1,
+							maximum: LOCATE_MAX_PAGE,
+							default: 1,
+						},
 					},
 				],
 				responses: {
@@ -7053,8 +7059,7 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"400": {
-						description:
-							"q missing, over 300 characters or all filler; an unknown parameter, repo or kind; a page that is not a whole number from 1 to 2000. Never silently ignored.",
+						description: `q missing, over 300 characters or all filler; an unknown parameter, repo or kind; a page that is not a whole number from 1 to ${LOCATE_MAX_PAGE}. Never silently ignored.`,
 						content: {
 							"application/json": {
 								schema: {
@@ -7074,8 +7079,7 @@ export const spec: OpenAPISpec = {
 												validRange: {
 													type: "array",
 													items: { type: "integer" },
-													description:
-														"For page: the lowest and highest page, [1, 2000].",
+													description: `For page: the lowest and highest page, [1, ${LOCATE_MAX_PAGE}].`,
 												},
 											},
 										},

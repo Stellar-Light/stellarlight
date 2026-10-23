@@ -26,7 +26,10 @@ import { REPO_MATCH_MODES } from "../repo-search";
 import { RESEARCH_SOURCES } from "../research-sources";
 import {
 	AUTHORITY_ROLES,
+	CANDIDATE_CAP,
 	LOCATE_MATCH_MODES,
+	LOCATE_MAX_PAGE,
+	LOCATE_PAGE_SIZE,
 	LOCATE_TOTAL_BASES,
 	LOCATOR_KINDS,
 	SOURCE_REPO_NAMES,
@@ -476,6 +479,17 @@ describe("locateSource enums are the code's lists", () => {
 		expect(
 			ok200.properties.meta.properties.counts.properties.totalBasis.enum,
 		).toEqual([...LOCATE_TOTAL_BASES]);
+	});
+	it("page's maximum is the candidate cap over the page size, in the schema and the text", () => {
+		const page = (
+			op.parameters as Array<Param & { schema: { maximum: number } }>
+		).find((p) => p.name === "page");
+		expect(LOCATE_MAX_PAGE).toBe(CANDIDATE_CAP / LOCATE_PAGE_SIZE);
+		expect(page?.schema.maximum).toBe(LOCATE_MAX_PAGE);
+		expect(page?.description).toContain(`1 to ${LOCATE_MAX_PAGE}`);
+		expect(op.responses["400"].description).toContain(
+			`1 to ${LOCATE_MAX_PAGE}`,
+		);
 	});
 	it("the collection stores the same locator kinds", () => {
 		const src = readFileSync(

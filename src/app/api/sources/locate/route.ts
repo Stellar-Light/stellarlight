@@ -31,6 +31,8 @@ import {
 	CANDIDATE_CAP,
 	candidateTerms,
 	LOCATE_MATCH_MODES,
+	LOCATE_MAX_PAGE,
+	LOCATE_PAGE_SIZE,
 	LOCATE_TOTAL_BASES,
 	LOCATOR_KINDS,
 	type PointerKind,
@@ -48,9 +50,8 @@ export const maxDuration = 20;
 
 const ENDPOINT = "/api/sources/locate";
 const VALID_PARAMS = ["q", "repo", "kind", "page"];
-const PAGE_SIZE = 10;
-/** The last page the candidate cap can fill. */
-const MAX_PAGE = CANDIDATE_CAP / PAGE_SIZE;
+const PAGE_SIZE = LOCATE_PAGE_SIZE;
+const MAX_PAGE = LOCATE_MAX_PAGE;
 /** Only what ranking and the pointer read: key and terms are about half of a row. */
 const READ_PROJECTION = Object.fromEntries([
 	["_id", 0],
