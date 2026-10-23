@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.100",
+		type: "changed",
+		summary:
+			"Hackathon prior art is reranked. In hybrid mode, searchHackathonBuilds reorders its first 50 builds with a reranker that reads q with each build's name and summary (new meta.reranked). vetIdea lists the builds of the reranked top five that the reranker scores at least 0.45 (new priorArt.buildsReranked), and hackathonBrief lists its winner slots and then vetIdea's builds. When the reranker fails or takes longer than 2 s, today's order and rule serve, and the answer says so.",
+		detail:
+			"The reranker is a cross-encoder model (rerank-2). It reads the idea and each candidate together, where the hybrid order blends word coverage with meaning scores computed apart. It does not read placement, so within the first 50 a winner keeps no edge; rows past 50 keep the hybrid order. Measured on 140 labeled ideas, replayed over all 1,344 stored submissions with each idea's live meaning scores (1.9.91), with blind grades for every build that moved (two passes, the stricter grade). On 13 held-out ideas, vetIdea's five went from 11 same-idea and 16 wrong builds to 14 and 10, the builds route's top 5 from 11 and 21 to 15 and 17, and hackathonBrief's builds from 11 and 16 to 13 and 11. On 30 fresh ideas vetIdea's wrong builds went from 24 to 21; on 36 short ideas its same-idea builds from 59 to 79, and on 34 test ideas from 15 to 19. The floor of 0.45 is the highest step that kept every same-idea build of the working ideas' reranked top five. Not shipped: listing the reranked top five without a floor (vetIdea's held-out wrong builds 16 to 17), and the reranked top five under the old word and meaning rule (same-idea builds on the test ideas 15 to 9). analyzeHackathonSubmissions counts and is unchanged. meta.reranked is present only with q when hybrid served; false means every row is in hybrid order and meta.warnings says the reranker could not run. priorArt.buildsReranked is false in keyword mode or when the reranker failed or was slow, and null with builds.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.94",
 		type: "fixed",
 		summary:

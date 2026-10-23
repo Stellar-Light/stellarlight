@@ -175,25 +175,28 @@ export interface HackathonBrief {
  * Prior-art builds for a brief: winners first, then broaden, the order
  * prior-art research should take. Up to two prize winners covering at least
  * half of the idea's words (share, the keyword coverage hybrid search keeps;
- * a build found by meaning alone has 0), then the builds vetIdea lists from
- * the same top five (priorArtTop), five at most. Ranking alone can bury a
- * winner under builds whose text repeats the query's exact phrase; a winner
- * matching one word of three is not prior art. Every build listed passes
- * vetIdea's evidence rule (isPriorArtEvidence), so the brief never lists a
- * build vetIdea would reject; it may list a winner ranked below vetIdea's
- * top five. Such a winner needs two matched words or a meaning score of 0.7
- * (twoWordsOrMeaning), not the rule's one-word path: on a one-word idea every
- * winner that mentions the word would qualify, ahead of builds ranked above it.
+ * a build found by meaning alone has 0), then the builds vetIdea lists
+ * (`vetListed`, its priorArt.builds ids, in its order), five at most. Without
+ * vetIdea's list (it could not read the index), the hybrid top five under the
+ * evidence rule (priorArtTop), which is what vetIdea lists when its reranker
+ * does not run. Ranking alone can bury a winner under builds whose text
+ * repeats the query's exact phrase; a winner matching one word of three is
+ * not prior art. A winner may be ranked below vetIdea's top five. It needs
+ * two matched words or a meaning score of 0.7 (twoWordsOrMeaning), not the
+ * evidence rule's one-word path: on a one-word idea every winner that
+ * mentions the word would qualify, ahead of builds ranked above it.
+ * On 13 held-out labeled ideas (2026-10-23), taking vetIdea's reranked list
+ * moved the brief from 11 same-idea and 16 wrong builds to 13 and 11.
  */
-export function pickBriefBuilds(scored: ScoredBuild[]) {
+export function pickBriefBuilds(scored: ScoredBuild[], vetListed?: string[]) {
 	const winners = scored
 		.filter((s) => s.b.isWinner && s.share >= 0.5 && twoWordsOrMeaning(s))
 		.slice(0, 2);
 	const seen = new Set(winners.map((s) => s.b.id));
-	return [
-		...winners,
-		...priorArtTop(scored).filter((s) => !seen.has(s.b.id)),
-	].slice(0, 5);
+	const listed = vetListed
+		? vetListed.flatMap((id) => scored.find((s) => s.b.id === id) ?? [])
+		: priorArtTop(scored);
+	return [...winners, ...listed.filter((s) => !seen.has(s.b.id))].slice(0, 5);
 }
 
 /** Pure: which claims THIS brief would tempt, from its own facts. */
@@ -284,7 +287,10 @@ export async function buildHackathonBrief(
 			).catch(() => null)
 		: null;
 	const builds = buildSearch
-		? pickBriefBuilds(buildSearch.scored).map(({ b }) => ({
+		? pickBriefBuilds(
+				buildSearch.scored,
+				pitch.vet.priorArt.builds?.map((b) => b.id),
+			).map(({ b }) => ({
 				id: b.id,
 				name: b.name,
 				hackathon: b.hackathon.title,

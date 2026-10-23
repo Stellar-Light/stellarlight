@@ -411,6 +411,33 @@ describe("words no build uses", () => {
 });
 
 describe("brief picks winners first, then broadens", () => {
+	// 2026-10-23: vetIdea reranks its prior art, so the brief takes vetIdea's
+	// list after its winner slots instead of re-deriving the hybrid top five.
+	it("after its winner slots lists the builds vetIdea lists, in vetIdea's order", async () => {
+		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
+		const scored = searchHackathonBuilds(
+			[
+				build(
+					"RenderGate",
+					"Pay-per-render browser API for agents with x402.",
+					true,
+				),
+				build("Exact phrase", "x402 pay-per-call API for AI agents."),
+				build("Second", "x402 API for agents paying per call."),
+			],
+			"x402 pay-per-call API for AI agents",
+			{ perSubmission: true },
+		);
+		expect(
+			pickBriefBuilds(scored, ["Second", "RenderGate"]).map((s) => s.b.name),
+		).toEqual(["RenderGate", "Second"]);
+		// No list from vetIdea (its read failed): the evidence rule, as before.
+		expect(pickBriefBuilds(scored, undefined)).toEqual(pickBriefBuilds(scored));
+		expect(pickBriefBuilds(scored).map((s) => s.b.name)).toContain(
+			"Exact phrase",
+		);
+	});
+
 	it("puts covering winners first and leaves out a one-word winner", async () => {
 		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
 		// The brief takes the search's scored list (hybrid in production).

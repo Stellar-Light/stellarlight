@@ -2,6 +2,7 @@
  * The filters every hackathon-submission operation takes, parsed and applied
  * once, so search, analyze and compare read the same set the same way.
  */
+import { RERANK_TIMEOUT_MS, rerankBuilds } from "@/lib/build-rerank";
 import { semanticBuildScores } from "@/lib/hackathon-build-semantic";
 import {
 	BUILD_SEARCH_MODES,
@@ -263,6 +264,12 @@ export interface BuildQuery {
 	 * counts (a submission entered in several events is one entry per
 	 * event), however perSubmission folded the rows. */
 	entries?: number;
+	/** With rerank, in hybrid mode: the reranker's score per build of the
+	 * first RERANK_TOP, which `scored` is then ordered by; null = it could not
+	 * run (failed or slow), so `scored` keeps the hybrid order and warnings
+	 * says so. Absent = not attempted (keyword or meaning mode, no q, or the
+	 * reranker is not configured). */
+	rerank?: Map<string, number> | null;
 }
 
 /** Run the filters over the index. Search by meaning that cannot run serves
@@ -273,11 +280,14 @@ export async function queryBuilds(
 	/** searchHackathonBuilds: one result per submission. analyze leaves it
 	 * off and counts every event entry (sls-092). `packages`: q also matches
 	 * declared packages; only the searchHackathonBuilds route passes it.
-	 * `countEntries`: also count matching event entries (meta.counts.entries). */
+	 * `countEntries`: also count matching event entries (meta.counts.entries).
+	 * `rerank`: in hybrid mode, reorder the first RERANK_TOP by the reranker
+	 * (src/lib/build-rerank.ts); vetIdea and the builds route pass it. */
 	opts: {
 		perSubmission?: boolean;
 		packages?: boolean;
 		countEntries?: boolean;
+		rerank?: boolean;
 	} = {},
 ): Promise<BuildQuery> {
 	const structural = {
@@ -330,13 +340,22 @@ export async function queryBuilds(
 			);
 		}
 	}
-	const scored = searchHackathonBuilds(indexed, f.q, {
+	const hybrid = searchHackathonBuilds(indexed, f.q, {
 		...structural,
 		mode: served,
 		semantic,
 		packages: opts.packages,
 	});
+	const { ranked: scored, scores: rerank } =
+		opts.rerank && served === "hybrid"
+			? await rerankBuilds(f.q, hybrid)
+			: { ranked: hybrid, scores: undefined };
+	if (rerank === null)
+		warnings.push(
+			`the reranker could not run this request (failed or slower than ${RERANK_TIMEOUT_MS / 1000} s), so rows are in hybrid order`,
+		);
 	return {
+		...(rerank !== undefined ? { rerank } : {}),
 		scored,
 		field,
 		served,

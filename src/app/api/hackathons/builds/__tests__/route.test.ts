@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
@@ -310,5 +310,83 @@ describe("GET /api/hackathons/builds counts both units", () => {
 			entries: 1,
 		});
 		expect(await read("hackathon=r")).toMatchObject({ matched: 2, entries: 2 });
+	});
+});
+
+// 2026-10-23: in hybrid mode the top 50 are reordered by a reranker that
+// reads q with each build's name and summary; meta.reranked says whether it
+// ran, and today's order serves when it could not.
+describe("GET /api/hackathons/builds reranks hybrid results", () => {
+	afterEach(() => {
+		vi.unstubAllGlobals();
+		vi.unstubAllEnvs();
+	});
+	const get = async (q: string, mode: string) => {
+		const { semanticBuildScores } = await import(
+			"@/lib/hackathon-build-semantic"
+		);
+		vi.mocked(semanticBuildScores).mockResolvedValueOnce(
+			new Map([
+				["kept", 0.8],
+				["quiet", 0.7],
+			]),
+		);
+		const { GET } = await import("../route");
+		return (
+			await GET(
+				new NextRequest(
+					`https://x.test/api/hackathons/builds?q=${encodeURIComponent(q)}&mode=${mode}`,
+				),
+			)
+		).json();
+	};
+	const reranker = (fail = false) => {
+		vi.stubEnv("VOYAGE_API_KEY", "test");
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (_url: string, init: RequestInit) => {
+				if (fail) throw new Error("network");
+				const { documents } = JSON.parse(String(init.body)) as {
+					documents: string[];
+				};
+				return {
+					ok: true,
+					status: 200,
+					json: async () => ({
+						data: documents.map((d, index) => ({
+							index,
+							relevance_score: d.startsWith("quiet.") ? 0.9 : 0.1,
+						})),
+					}),
+				};
+			}),
+		);
+	};
+	const ids = (body: { builds: { id: string }[] }) =>
+		body.builds.map((b) => b.id);
+
+	it("serves the hybrid order and says the reranker did not run when it fails", async () => {
+		reranker(true);
+		const body = await get("kept quiet", "hybrid");
+		expect(ids(body)).toEqual(["kept", "quiet"]);
+		expect(body.meta.reranked).toBe(false);
+		expect(body.meta.warnings).toContain(
+			"the reranker could not run this request (failed or slower than 2 s), so rows are in hybrid order",
+		);
+	});
+
+	it("orders the top by the reranker and says it ran", async () => {
+		reranker();
+		const body = await get("kept quiet", "hybrid");
+		expect(ids(body)).toEqual(["quiet", "kept"]);
+		expect(body.meta.reranked).toBe(true);
+		expect(body.meta.warnings).toBeUndefined();
+	});
+
+	it("leaves meta.reranked out in keyword mode", async () => {
+		reranker();
+		const body = await get("kept quiet", "keyword");
+		expect(body.meta.reranked).toBeUndefined();
+		expect(fetch).not.toHaveBeenCalled();
 	});
 });

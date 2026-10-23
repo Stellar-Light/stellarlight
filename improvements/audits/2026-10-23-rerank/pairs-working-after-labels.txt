@@ -1,0 +1,5 @@
+Working ideas: 27; pairs among labeled builds in vetIdea's top 50
+base order: all 72.3% of 1912 | 2v0 89.5% of 313 | 2v1 71.4% of 675 | 1v0 67.1% of 924
+rerank-2: all 78.9% of 1912 | 2v0 86.4% of 313 | 2v1 79.1% of 675 | 1v0 76.2% of 924
+rerank-2-lite: all 77.2% of 1912 | 2v0 90.6% of 313 | 2v1 76.0% of 675 | 1v0 73.5% of 924
+working same-idea builds (107) by base rank: {"1-5":45,"6-20":39,"21-50":13,"past 50 or unmatched":10}
