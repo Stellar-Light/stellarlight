@@ -366,7 +366,7 @@ corpus (1,356 submissions) and found these, all fixed:
   million; miner: mineral; strip: stripe; center: cent; stalling: stale;
   wither: with). Now the word itself takes back only inflections, a stem
   from dropping er or or takes back no bare stem, an undone doubled
-  consonant takes back no e, es is dropped only after s, x, z, ch or sh
+  consonant takes back no e, es is dropped only after ss, x, z, ch or sh
   (themes is not them, found while measuring this fix) and a dropped e is
   not left off. center still names centered, its own past tense.
 - The zero-row tail read as a correction ("check the spelling", with a used

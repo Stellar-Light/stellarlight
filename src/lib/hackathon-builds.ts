@@ -767,7 +767,7 @@ function usedCounts(indexed: IndexedBuild[]): Map<string, number> {
  * million, strip not stripe), a stem ending er or or drops takes back no
  * bare stem (center is not cent, wither not with, tractor not traction), a
  * doubled consonant undone takes back no e (stalling is not stale), es is
- * dropped only after s, x, z, ch or sh and a dropped e is not left off
+ * dropped only after ss, x, z, ch or sh and a dropped e is not left off
  * (themes and theme are not them), er is never grown (stick is not
  * sticker) and ers never stripped (vouchers is not vouch). Review,
  * 2026-10-23. */
@@ -928,9 +928,13 @@ export function unusedWordsWarning(
 	const byName: string[] = [];
 	const inLonger: string[] = [];
 	for (const { t, forms } of queryTerms(q.trim().toLowerCase())) {
+		// Only names the word hit at all: a word a held build matched in its
+		// description alone (tracker in "gifts tracker") is not named.
+		const inName = forms.map(termMatcher);
 		const names = withheld
 			.filter((w) => w.matched.includes(t))
-			.map((w) => w.b.name.toLowerCase());
+			.map((w) => w.b.name.toLowerCase())
+			.filter((nm) => inName.some((hit) => hit(nm)));
 		if (!names.length) continue;
 		const hits = forms.flatMap((f) => anyScriptWord(f) ?? []);
 		const whole = names.some((nm) => hits.some((hit) => hit(nm)));

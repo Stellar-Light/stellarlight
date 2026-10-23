@@ -596,3 +596,28 @@ fresh battery written by a separate agent that was told no rule.
   re-check's words name only form, bill, bills, billing, plan and plans.
   `check-unused.py` checks every claim, now including each "inside a
   longer word": 0 false on all four sets.
+
+### Lane L2 third re-check of a042c41d and fifth commit (spec 1.9.97)
+
+- The re-check confirmed the four fixes (a 514-word inflection sweep found
+  no wrong related form; meaning mode serves 0; the wording holds). GATE:
+  fix first on one finding, plus one text error from the orchestrator:
+  1. Medium: a word a held build matched only in its description or
+     packages was called "inside a longer word": index {name Donation
+     Management, description gifts tracker}, q=church tithe zakat donations
+     tracker said "matched by name for donations, or inside a longer word
+     for tracker".
+  2. Text: the 1.9.97 changelog said es is dropped after s, x, z, ch or sh;
+     the code uses ss. The code comment and the README said the same; the
+     spec and api-reference.md did not.
+- Test first, against a042c41d: the probe as a route test failed (received
+  "... matched by name for donations, or inside a longer word for tracker,
+  is not listed ..."). With the fix, 115 of 115 in the hackathon files.
+- Fix: only a word that hits a held build's name at all (termMatcher, as
+  the scorer matches) is classified, whole in a name by name, else inside a
+  longer word; a word matched only outside the name is left out. The
+  withheld count and withheldByName still count the build (1 in the test).
+  Texts say ss.
+- Re-measured: rows identical to a042c41d on all four sets, and every line
+  text identical too. `check-unused.py` now also fails an inside claim
+  unless some held name holds the word: 0 false claims on all four sets.

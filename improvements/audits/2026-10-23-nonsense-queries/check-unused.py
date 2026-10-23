@@ -13,8 +13,9 @@ output it reads back:
   are not listed", when the two replays (replay.mts) before and after rule L
   are given: exactly N builds the before replay listed are missing after,
   the words they matched are W and V (for a labeled idea, whose replay
-  keeps no matched words, the count alone), and no name among them holds a
-  word of V, or V with s added or dropped, as a whole word.
+  keeps no matched words, the count alone), and for each word of V some
+  name among them holds it (or it with s added or dropped) and none holds
+  it as a whole word.
 
 Usage, from the repository root:
   python3 -I improvements/audits/2026-10-23-nonsense-queries/check-unused.py <capture.json> <note-output.txt> [<before.json> <after.json>]
@@ -108,7 +109,9 @@ for line in open(note):
                 for i, _ in (gone or [])
                 if any(re.search(r"(?<![^\W_])" + re.escape(f) + r"(?![^\W_])", name_of.get(i, "")) for f in forms)
             ]
-            checks.append((f"inside a longer word: {w}", not whole, f"{len(whole)} names hold it whole"))
+            inside_any = [i for i, _ in (gone or []) if any(f in name_of.get(i, "") for f in forms)]
+            ok = not whole and bool(inside_any)
+            checks.append((f"inside a longer word: {w}", ok, f"{len(inside_any)} names hold it, {len(whole)} whole"))
         if gone is None:
             checks.append((f"withheld: {held.group(0)[2:]}", True, "unchecked, no replays given"))
         else:

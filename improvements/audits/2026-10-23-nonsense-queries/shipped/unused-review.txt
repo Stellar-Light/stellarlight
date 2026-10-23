@@ -62,11 +62,11 @@ adversarial withheld | Sorobix IDE plugin | hybrid | unused: sorobix | ok (0 use
 adversarial withheld | Sorobix IDE plugin | hybrid | unused: plugin | ok (0 uses)
 adversarial withheld | quantum llama sandwich | keyword | unused: llama | ok (0 uses)
 adversarial withheld | quantum llama sandwich | keyword | unused: sandwich | ok (0 uses)
-adversarial withheld | quantum llama sandwich | keyword | inside a longer word: llama | ok (0 names hold it whole)
+adversarial withheld | quantum llama sandwich | keyword | inside a longer word: llama | ok (1 names hold it, 0 whole)
 adversarial withheld | quantum llama sandwich | keyword | withheld: 2 for llama, quantum | ok (2 removed, matched ['llama', 'quantum'])
 adversarial withheld | quantum llama sandwich | hybrid | unused: llama | ok (0 uses)
 adversarial withheld | quantum llama sandwich | hybrid | unused: sandwich | ok (0 uses)
-adversarial withheld | quantum llama sandwich | hybrid | inside a longer word: llama | ok (0 names hold it whole)
+adversarial withheld | quantum llama sandwich | hybrid | inside a longer word: llama | ok (1 names hold it, 0 whole)
 adversarial withheld | quantum llama sandwich | hybrid | withheld: 2 for llama, quantum | ok (2 removed, matched ['llama', 'quantum'])
 
 false claims: 0

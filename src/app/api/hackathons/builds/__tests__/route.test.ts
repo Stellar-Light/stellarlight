@@ -171,6 +171,22 @@ describe("GET /api/hackathons/builds when q's words are in no build", () => {
 
 	// Re-check 2026-10-23: meaning mode never lists a build by its name, so
 	// none is withheld there and the line does not say so.
+	// Re-check 2026-10-23: tracker, matched in the description only, was
+	// called found inside a longer word of the name.
+	it("names only the words a held build matched in its name", async () => {
+		await withIndex([
+			build("donations", {
+				name: "Donation Management",
+				haystack: "donation management: gifts tracker",
+			}),
+		]);
+		const body = await get("church tithe zakat donations tracker");
+		expect(body.meta.counts).toMatchObject({ matched: 0, withheldByName: 1 });
+		expect(body.meta.warnings).toEqual([
+			"3 of the 5 words searched in q (church, tithe, zakat) occur as a whole word in no submission in the index, and no build is listed; 1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission; if one of them is misspelled, correct it",
+		]);
+	});
+
 	it("withholds nothing in meaning mode", async () => {
 		await withIndex([
 			build("donations", {
