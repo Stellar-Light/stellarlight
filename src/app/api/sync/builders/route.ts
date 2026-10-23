@@ -1,6 +1,8 @@
 import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
+import { isAdmin } from "@/collections/access";
+import { secretMatches } from "@/lib/admin-auth";
 import {
 	fetchAllBuilders,
 	fetchBuilder,
@@ -19,14 +21,17 @@ export async function GET(request: NextRequest) {
 		const headersList = await headers();
 		const payload = await getPayload({ config });
 
-		// Check authorization: accept Bearer token OR admin session cookie
+		// Check authorization: accept the env Bearer token OR an admin session
 		const authHeader = headersList.get("authorization");
 		const expectedKey = process.env.CRON_SECRET || process.env.SYNC_API_KEY;
-		const hasBearerAuth = expectedKey && authHeader === `Bearer ${expectedKey}`;
+		const hasBearerAuth = secretMatches(
+			authHeader,
+			expectedKey ? `Bearer ${expectedKey}` : null,
+		);
 
-		// Check Payload admin session
+		// Admins only: a signed-in partner also sets user (src/collections/access.ts)
 		const { user } = await payload.auth({ headers: headersList });
-		const hasSessionAuth = !!user;
+		const hasSessionAuth = isAdmin(user);
 
 		if (!hasBearerAuth && !hasSessionAuth) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

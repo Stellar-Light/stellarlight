@@ -1,6 +1,7 @@
 import config from "@payload-config";
 import { type NextRequest, NextResponse } from "next/server";
 import { getPayload } from "payload";
+import { isAdminRequest } from "@/lib/admin-auth";
 
 const MAX_DESC_LENGTH = 180;
 
@@ -161,9 +162,8 @@ const REMAINING_TAGS: Record<string, string[]> = {
 	"Stellar Router SDK": ["SDK"],
 };
 
-export async function GET(request: NextRequest) {
-	const secret = request.nextUrl.searchParams.get("secret");
-	if (secret !== "fixdesc123") {
+export async function POST(request: NextRequest) {
+	if (!(await isAdminRequest(request.headers))) {
 		return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 	}
 

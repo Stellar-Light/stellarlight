@@ -329,3 +329,9 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
 - Post handoffs to Raven [drafts only until approved].
 - Ask Raven to send a key and User-Agent, so its traffic is not held to
   per-IP limits [draft only].
+- Rewrite git history to purge the raw query texts that commits before the
+  admin-auth round left in `improvements/consumers/` (the files now hold
+  counts only; see `rounds/2026-10-23-admin-auth.md`) [no rewrite].
+- Set `ADMIN_ROUTE_SECRET` (32 or more characters) in the production environment, for scripted
+  calls to the five `/api/admin/*` routes and `/api/import/airtable` through
+  the `x-admin-secret` header [unset: admin session only].

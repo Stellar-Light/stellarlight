@@ -112,337 +112,51 @@
 			"avgResultCount": null
 		}
 	],
-	"topQueriesReplayed": [
+	"queryTerms": null,
+	"redaction": "Query texts removed on 2026-10-23: this report is public and the texts were sent by agents on behalf of users. The replay grades are kept as counts per endpoint. This run predates the term aggregate, so no term counts exist for it (queryTerms is null: not computed).",
+	"replayByEndpoint": [
 		{
 			"endpoint": "/api/projects/search",
-			"query": "test",
-			"hits": 44,
-			"lastSeen": "2026-07-20T23:03:50.333Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.92,
-				"advisoryNote": null
-			}
+			"graded": 11,
+			"ok": 11,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 0,
+			"failed": 0
 		},
 		{
 			"endpoint": "/api/research",
-			"query": "test",
-			"hits": 42,
-			"lastSeen": "2026-07-20T23:03:51.221Z",
-			"today": {
-				"status": "weak",
-				"returned": 10,
-				"matchMode": null,
-				"topConfidence": 0.4,
-				"advisoryNote": null
-			}
+			"graded": 5,
+			"ok": 4,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 1,
+			"failed": 0
 		},
 		{
-			"endpoint": "/api/projects/search",
-			"query": "wallet",
-			"hits": 38,
-			"lastSeen": "2026-07-21T15:18:01.138Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "stellar",
-			"hits": 33,
-			"lastSeen": "2026-07-21T15:18:01.716Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": null,
-				"topConfidence": 0.5,
-				"advisoryNote": null
-			}
+			"endpoint": "/api/builders",
+			"graded": 5,
+			"ok": 2,
+			"advisory": 2,
+			"empty": 1,
+			"weak": 0,
+			"failed": 0
 		},
 		{
 			"endpoint": "/api/repos/search",
-			"query": "oracle",
-			"hits": 20,
-			"lastSeen": "2026-07-21T15:18:01.293Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": null,
-				"topConfidence": null,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "oracle",
-			"hits": 17,
-			"lastSeen": "2026-07-20T16:33:36.712Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/builders",
-			"query": "strupey",
-			"hits": 17,
-			"lastSeen": "2026-07-14T17:31:27.385Z",
-			"today": {
-				"status": "empty",
-				"returned": 0,
-				"matchMode": null,
-				"topConfidence": null,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "soroswap",
-			"hits": 16,
-			"lastSeen": "2026-07-20T17:57:32.642Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "freighter",
-			"hits": 16,
-			"lastSeen": "2026-07-20T17:57:28.986Z",
-			"today": {
-				"status": "ok",
-				"returned": 6,
-				"matchMode": "strict",
-				"topConfidence": 0.92,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "stablecoin",
-			"hits": 13,
-			"lastSeen": "2026-07-20T16:33:38.453Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.92,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/builders",
-			"query": "rust",
-			"hits": 13,
-			"lastSeen": "2026-07-14T14:20:07.164Z",
-			"today": {
-				"status": "ok",
-				"returned": 5,
-				"matchMode": null,
-				"topConfidence": null,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "justin rice",
-			"hits": 12,
-			"lastSeen": "2026-07-16T18:57:33.854Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": null,
-				"topConfidence": 0.75,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/builders",
-			"query": "tyler van der hoeven",
-			"hits": 11,
-			"lastSeen": "2026-07-19T14:20:09.846Z",
-			"today": {
-				"status": "advisory",
-				"returned": 0,
-				"matchMode": null,
-				"topConfidence": null,
-				"advisoryNote": "scoped out + redirected (/api/people)"
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "fluxity",
-			"hits": 11,
-			"lastSeen": "2026-07-15T16:51:04.235Z",
-			"today": {
-				"status": "ok",
-				"returned": 2,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/builders",
-			"query": "soroban",
-			"hits": 11,
-			"lastSeen": "2026-07-14T14:20:07.105Z",
-			"today": {
-				"status": "ok",
-				"returned": 6,
-				"matchMode": null,
-				"topConfidence": null,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "blend",
-			"hits": 10,
-			"lastSeen": "2026-07-20T22:44:06.332Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "reflector",
-			"hits": 10,
-			"lastSeen": "2026-07-20T17:57:31.909Z",
-			"today": {
-				"status": "ok",
-				"returned": 2,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "tyler van der hoeven",
-			"hits": 10,
-			"lastSeen": "2026-07-14T17:51:34.267Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": null,
-				"topConfidence": 0.78,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/research",
-			"query": "cap-0071 protocol 27",
-			"hits": 10,
-			"lastSeen": "2026-07-13T13:35:18.124Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": null,
-				"topConfidence": 0.94,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/builders",
-			"query": "justin rice",
-			"hits": 9,
-			"lastSeen": "2026-07-18T00:35:19.232Z",
-			"today": {
-				"status": "advisory",
-				"returned": 0,
-				"matchMode": null,
-				"topConfidence": null,
-				"advisoryNote": "answered via advisory (Justin Rice)"
-			}
-		},
-		{
-			"endpoint": "/api/repos/search",
-			"query": "zero-knowledge",
-			"hits": 9,
-			"lastSeen": "2026-07-14T14:07:32.425Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": null,
-				"topConfidence": null,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "streaming payments",
-			"hits": 9,
-			"lastSeen": "2026-07-13T13:22:49.873Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/repos/search",
-			"query": "streaming payments",
-			"hits": 9,
-			"lastSeen": "2026-07-13T13:22:49.441Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": null,
-				"topConfidence": null,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/projects/search",
-			"query": "liquid staking",
-			"hits": 8,
-			"lastSeen": "2026-07-13T13:20:57.311Z",
-			"today": {
-				"status": "ok",
-				"returned": 10,
-				"matchMode": "strict",
-				"topConfidence": 0.97,
-				"advisoryNote": null
-			}
-		},
-		{
-			"endpoint": "/api/repos/search",
-			"query": "erc-8004",
-			"hits": 8,
-			"lastSeen": "2026-07-13T05:30:47.410Z",
-			"today": {
-				"status": "ok",
-				"returned": 2,
-				"matchMode": null,
-				"topConfidence": null,
-				"advisoryNote": null
-			}
+			"graded": 4,
+			"ok": 4,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 0,
+			"failed": 0
 		}
 	],
 	"replaySummary": {
 		"graded": 25,
 		"ok": 23,
-		"okRate": 92
+		"okRate": 92,
+		"misses": 2
 	},
 	"contractChangesInWindow": 36
 }
