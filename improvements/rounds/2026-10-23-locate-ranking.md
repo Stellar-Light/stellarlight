@@ -194,6 +194,12 @@ Bars, fixed here before any result:
   scripts/check-scripts-types.ts` exit 0 (28 baselined). The four dev-set
   files and both earlier batteries hash as frozen.
 
+- 21:23Z: committed as `84221300`. gitleaks 8.30.1 `dir` scans of every
+  changed path (the audit folder, `src/lib`, the route, the builder and
+  harness scripts, the workflow, the ledger, the generated contract
+  files): no leaks. A follow-up commit corrects the library's header
+  comment, which still described the first variant's rank tier.
+
 ## Outcome
 
 Committed on `lane/l3-locate-ranking`, not pushed. Bars 1 and 2 met

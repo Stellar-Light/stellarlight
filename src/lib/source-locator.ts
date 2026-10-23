@@ -17,18 +17,19 @@
  * identifier of several parts (getEvents in NewGetEventsHandler, six
  * letters or more) 5, else the word's parts that are parts of the symbol or
  * heading 3 times the share found; the word's parts in the path or repo
- * name add 1 times the share. Adjacent plain words of q are also read as
- * one name ("token interface" as TokenInterface): per run of such words,
- * the best span adds 8 for the whole symbol or file name, 5 for a name
- * holding it, times the share of the run it covers. The share of the name's
- * own parts that q accounts for adds up to 1, so a tighter name wins a near
- * tie. A repo named in q adds 8 to its pointers. A stellar-cli command
- * typed in q (stellar contract invoke) adds 8 per command word to the
- * module that implements it. A pointer matching an identifier typed in q
- * (camelCase, snake_case, a flag, letters with digits such as secp256k1, or
- * such a synonym of a q word), or the command, ranks above every pointer
- * matching fewer of them. Ties: symbols and headings before files, then the
- * shorter path, the repo name, the line.
+ * name add 1 times the share. An identifier typed in q (camelCase,
+ * snake_case, a flag, kebab-case of three parts, letters with digits such as
+ * secp256k1), or a synonym in that form, found whole in a name counts twice
+ * its tier. Adjacent plain words of q are also read as one name ("token
+ * interface" as TokenInterface): per run of such words, the best span adds 8
+ * for the whole symbol, heading or file name, 5 for a name holding it (a
+ * symbol only when it holds the whole run), times the square of the share
+ * of the run it covers. The share of the name's own parts that q accounts
+ * for adds up to 1, so a tighter name wins a near tie. A repo named in q
+ * adds 8 to its pointers. A stellar-cli command typed in q (stellar contract
+ * invoke) adds 8 per matching command word to the module that implements
+ * it. Ties: symbols and headings before files, then the shorter path, the
+ * repo name, the line.
  */
 
 import { SYNONYMS } from "./source-locator-synonyms";
