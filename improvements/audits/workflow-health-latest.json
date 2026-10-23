@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-10-23T22:28:37.664Z",
+	"asOf": "2026-10-23T22:49:17.506Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 115,
-	"healthy": 109,
+	"checked": 114,
+	"healthy": 108,
 	"broken": [
 		{
 			"file": "enrich-repos.yml",
@@ -32,7 +32,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "49 failed run(s) since its last green 38d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "50 failed run(s) since its last green 38d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -152,10 +152,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-15T22:34:25Z",
-			"ageDays": 68,
+			"ageDays": 69,
 			"graceDays": 45,
 			"runs": 5,
-			"why": "last green 68d ago (manual tool — age not judged)"
+			"why": "last green 69d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-contract-basis.yml",
@@ -207,10 +207,10 @@
 			"cron": null,
 			"state": "ok",
 			"lastSuccessAt": "2026-08-11T22:32:16Z",
-			"ageDays": 72,
+			"ageDays": 73,
 			"graceDays": 45,
 			"runs": 8,
-			"why": "last green 72d ago (manual tool — age not judged)"
+			"why": "last green 73d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "backfill-triage-tags.yml",
@@ -279,17 +279,6 @@
 			"why": "last green 3d ago"
 		},
 		{
-			"file": "build-source-locators.yml",
-			"name": "Build source locators",
-			"cron": "17 5 * * *",
-			"state": "ok",
-			"lastSuccessAt": "2026-10-23T15:43:45Z",
-			"ageDays": 0,
-			"graceDays": 4,
-			"runs": 2,
-			"why": "last green 0d ago"
-		},
-		{
 			"file": "calibrate-semantic.yml",
 			"name": "Calibrate semantic floor (read-only)",
 			"cron": null,
@@ -327,10 +316,10 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T22:25:38Z",
+			"lastSuccessAt": "2026-10-23T22:28:50Z",
 			"ageDays": 0,
 			"graceDays": 21,
-			"runs": 100,
+			"runs": 99,
 			"why": "last green 0d ago"
 		},
 		{
@@ -349,7 +338,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T22:25:38Z",
+			"lastSuccessAt": "2026-10-23T22:46:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -723,7 +712,7 @@
 			"name": "Live canary",
 			"cron": "41 * * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T18:43:10Z",
+			"lastSuccessAt": "2026-10-23T22:37:53Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 99,
@@ -789,7 +778,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T22:21:40Z",
+			"lastSuccessAt": "2026-10-23T22:28:50Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 96,
@@ -811,7 +800,7 @@
 			"name": "OpenAPI lint",
 			"cron": "0 8 * * *",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T22:25:38Z",
+			"lastSuccessAt": "2026-10-23T22:46:38Z",
 			"ageDays": 0,
 			"graceDays": 4,
 			"runs": 100,
@@ -855,10 +844,10 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T22:25:38Z",
+			"lastSuccessAt": "2026-10-23T22:46:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 66,
+			"runs": 67,
 			"why": "last green 0d ago"
 		},
 		{
@@ -866,7 +855,7 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T22:16:26Z",
+			"lastSuccessAt": "2026-10-23T22:25:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 78,
@@ -1020,10 +1009,10 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T22:25:38Z",
+			"lastSuccessAt": "2026-10-23T22:46:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 72,
+			"runs": 74,
 			"why": "last green 0d ago"
 		},
 		{
@@ -1207,7 +1196,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T22:25:38Z",
+			"lastSuccessAt": "2026-10-23T22:46:38Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -1262,7 +1251,7 @@
 			"name": "Verify advertised claims",
 			"cron": "0 7 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-10-23T22:21:40Z",
+			"lastSuccessAt": "2026-10-23T22:28:50Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 100,
@@ -1299,7 +1288,7 @@
 			"ageDays": 38,
 			"graceDays": 21,
 			"runs": 91,
-			"why": "49 failed run(s) since its last green 38d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "50 failed run(s) since its last green 38d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
