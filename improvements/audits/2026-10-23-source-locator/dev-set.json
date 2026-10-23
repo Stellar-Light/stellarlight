@@ -1,0 +1,72 @@
+{
+	"name": "source-locator development set",
+	"rule": "The implementer's own tuning set, written after the frozen battery and disjoint from it. Extraction and ranking were adjusted only against these cases; the frozen battery was run once, as the final gate.",
+	"refs": {
+		"stellar/quickstart": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+		"stellar/stellar-rpc": "ec4171d970ac812d9f4317b3cce2c315baa31320",
+		"stellar/rs-soroban-sdk": "8e5b425dce5fa1dcd5a3fe1d3f3fcd18431586dd",
+		"stellar/stellar-core": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+		"stellar/rs-soroban-env": "0c99950e96128beba3319aa96b116646ce974e69",
+		"stellar/js-stellar-sdk": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+		"stellar/stellar-cli": "4ff88b7ea11dd3c847bb711b80258517148e1529",
+		"stellar/soroban-examples": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2"
+	},
+	"cases": [
+		{
+			"id": "d1",
+			"q": "where is the --network flag defined in stellar-cli",
+			"repo": "stellar/stellar-cli",
+			"paths": ["cmd/soroban-cli/src/config/network.rs"],
+			"symbols": ["--network"]
+		},
+		{
+			"id": "d2",
+			"q": "soroban sdk ledger sequence number function",
+			"repo": "stellar/rs-soroban-sdk",
+			"paths": ["soroban-sdk/src/ledger.rs"],
+			"symbols": ["sequence"]
+		},
+		{
+			"id": "d3",
+			"q": "stellar-rpc getEvents handler",
+			"repo": "stellar/stellar-rpc",
+			"paths": ["cmd/stellar-rpc/internal/methods/get_events.go"],
+			"symbols": ["NewGetEventsHandler"]
+		},
+		{
+			"id": "d4",
+			"q": "Horizon submitTransaction in js-stellar-sdk",
+			"repo": "stellar/js-stellar-sdk",
+			"paths": ["src/horizon/server.ts"],
+			"symbols": ["submitTransaction"]
+		},
+		{
+			"id": "d5",
+			"q": "quickstart --enable-lab option",
+			"repo": "stellar/quickstart",
+			"paths": ["start"],
+			"symbols": ["--enable-lab"]
+		},
+		{
+			"id": "d6",
+			"q": "increment example contract",
+			"repo": "stellar/soroban-examples",
+			"paths": ["increment/src/lib.rs"],
+			"symbols": ["increment"]
+		},
+		{
+			"id": "d7",
+			"q": "stellar-core HTTP_PORT default",
+			"repo": "stellar/stellar-core",
+			"paths": ["src/main/Config.cpp", "docs/stellar-core_example.cfg"],
+			"symbols": ["HTTP_PORT"]
+		},
+		{
+			"id": "d8",
+			"q": "contractimpl macro",
+			"repo": "stellar/rs-soroban-sdk",
+			"paths": ["soroban-sdk-macros/src/lib.rs"],
+			"symbols": ["contractimpl"]
+		}
+	]
+}

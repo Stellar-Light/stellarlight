@@ -1,0 +1,179 @@
+{
+	"name": "source-locator frozen battery",
+	"frozenAt": "2026-10-23T13:25:00Z",
+	"rule": "Written before the builder or the ranking existed and before any result was read. Never tuned on. Each q is sent as is, with no repo or kind filter, against the index of all eight allowlisted repos. A case is found at k when any of the top k pointers has the expected repo and one of the expected paths. The symbol column is reported beside it (a top-k pointer whose locator is one of the expected symbols) and is not part of the ship criteria.",
+	"shipCriteria": "Both named misses (m1, m2) found in the top 3, and at least 14 of 20 found in the top 10. Otherwise stop and report.",
+	"labelBasis": "Expected files and symbols read from the repos at the commits below (public tarballs, 2026-10-23).",
+	"refs": {
+		"stellar/quickstart": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+		"stellar/stellar-rpc": "ec4171d970ac812d9f4317b3cce2c315baa31320",
+		"stellar/rs-soroban-sdk": "8e5b425dce5fa1dcd5a3fe1d3f3fcd18431586dd",
+		"stellar/stellar-core": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+		"stellar/rs-soroban-env": "0c99950e96128beba3319aa96b116646ce974e69",
+		"stellar/js-stellar-sdk": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+		"stellar/stellar-cli": "4ff88b7ea11dd3c847bb711b80258517148e1529",
+		"stellar/soroban-examples": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2"
+	},
+	"cases": [
+		{
+			"id": "m1",
+			"class": "named miss: code-level fact the docs omit",
+			"q": "Where does the quickstart start script set the default for --enable-core-manual-close?",
+			"repo": "stellar/quickstart",
+			"paths": ["start"],
+			"symbols": ["ENABLE_CORE_MANUAL_CLOSE", "--enable-core-manual-close"]
+		},
+		{
+			"id": "m2",
+			"class": "named miss: operator-configurable default",
+			"q": "Where does stellar-rpc configure the default and maximum limit for getTransactions?",
+			"repo": "stellar/stellar-rpc",
+			"paths": ["cmd/stellar-rpc/internal/rpcv1/config/options.go"],
+			"symbols": ["default-transactions-limit", "max-transactions-limit"]
+		},
+		{
+			"id": "c03",
+			"class": "SDK function",
+			"q": "Where is extend_ttl defined for persistent storage in the Soroban Rust SDK?",
+			"repo": "stellar/rs-soroban-sdk",
+			"paths": ["soroban-sdk/src/storage.rs"],
+			"symbols": ["extend_ttl"]
+		},
+		{
+			"id": "c04",
+			"class": "SDK function",
+			"q": "Where does the Soroban SDK implement require_auth on Address?",
+			"repo": "stellar/rs-soroban-sdk",
+			"paths": ["soroban-sdk/src/address.rs"],
+			"symbols": ["require_auth"]
+		},
+		{
+			"id": "c05",
+			"class": "contract interface",
+			"q": "Where is the TokenInterface trait defined in soroban-sdk?",
+			"repo": "stellar/rs-soroban-sdk",
+			"paths": ["soroban-sdk/src/token.rs"],
+			"symbols": ["TokenInterface"]
+		},
+		{
+			"id": "c06",
+			"class": "SDK function",
+			"q": "Where is prepareTransaction implemented in the js-stellar-sdk RPC server?",
+			"repo": "stellar/js-stellar-sdk",
+			"paths": ["src/rpc/server.ts"],
+			"symbols": ["prepareTransaction"]
+		},
+		{
+			"id": "c07",
+			"class": "SDK function",
+			"q": "Which js-stellar-sdk file has assembleTransaction, which applies simulation results to a transaction?",
+			"repo": "stellar/js-stellar-sdk",
+			"paths": ["src/rpc/transaction.ts"],
+			"symbols": ["assembleTransaction"]
+		},
+		{
+			"id": "c08",
+			"class": "SDK function",
+			"q": "Where is signAndSend defined on AssembledTransaction in the JS SDK contract client?",
+			"repo": "stellar/js-stellar-sdk",
+			"paths": ["src/contract/assembled_transaction.ts"],
+			"symbols": ["signAndSend"]
+		},
+		{
+			"id": "c09",
+			"class": "heading",
+			"q": "Where does stellar-core document the HTTP query server commands?",
+			"repo": "stellar/stellar-core",
+			"paths": ["docs/software/commands.md"],
+			"symbols": ["HTTP Query Server"]
+		},
+		{
+			"id": "c10",
+			"class": "RPC option",
+			"q": "Which stellar-rpc option sets the history retention window?",
+			"repo": "stellar/stellar-rpc",
+			"paths": ["cmd/stellar-rpc/internal/rpcv1/config/options.go"],
+			"symbols": ["history-retention-window"]
+		},
+		{
+			"id": "c11",
+			"class": "RPC method",
+			"q": "Where is the simulateTransaction handler implemented in stellar-rpc?",
+			"repo": "stellar/stellar-rpc",
+			"paths": ["cmd/stellar-rpc/internal/methods/simulate_transaction.go"],
+			"symbols": ["NewSimulateTransactionHandler"]
+		},
+		{
+			"id": "c12",
+			"class": "heading",
+			"q": "Which part of the quickstart README explains ephemeral mode versus persistent mode?",
+			"repo": "stellar/quickstart",
+			"paths": ["README.md"],
+			"symbols": ["Ephemeral mode", "Persistent mode"]
+		},
+		{
+			"id": "c13",
+			"class": "CLI flag",
+			"q": "Which file defines the --rpc-url flag of the stellar CLI?",
+			"repo": "stellar/stellar-cli",
+			"paths": ["cmd/soroban-cli/src/config/network.rs"],
+			"symbols": ["--rpc-url"]
+		},
+		{
+			"id": "c14",
+			"class": "CLI flag",
+			"q": "Where does stellar contract deploy define the --wasm-hash option?",
+			"repo": "stellar/stellar-cli",
+			"paths": ["cmd/soroban-cli/src/commands/contract/deploy/wasm.rs"],
+			"symbols": ["--wasm-hash"]
+		},
+		{
+			"id": "c15",
+			"class": "CLI flag",
+			"q": "Where is the quickstart --limits flag parsed?",
+			"repo": "stellar/quickstart",
+			"paths": ["start"],
+			"symbols": ["--limits", "LIMITS"]
+		},
+		{
+			"id": "c16",
+			"class": "contract interface",
+			"q": "Where is the transfer function of the token example contract in soroban-examples?",
+			"repo": "stellar/soroban-examples",
+			"paths": ["token/src/contract.rs"],
+			"symbols": ["transfer"]
+		},
+		{
+			"id": "c17",
+			"class": "contract interface",
+			"q": "Where is the swap function of the atomic swap example contract?",
+			"repo": "stellar/soroban-examples",
+			"paths": ["atomic_swap/src/lib.rs"],
+			"symbols": ["swap"]
+		},
+		{
+			"id": "c18",
+			"class": "core function",
+			"q": "Where does stellar-core compute an account's minimum balance (getMinBalance)?",
+			"repo": "stellar/stellar-core",
+			"paths": ["src/transactions/TransactionUtils.cpp"],
+			"symbols": ["getMinBalance"]
+		},
+		{
+			"id": "c19",
+			"class": "operator config default",
+			"q": "Where is the default PEER_PORT set in stellar-core's configuration?",
+			"repo": "stellar/stellar-core",
+			"paths": ["src/main/Config.cpp", "docs/stellar-core_example.cfg"],
+			"symbols": ["PEER_PORT"]
+		},
+		{
+			"id": "c20",
+			"class": "host function",
+			"q": "Where does the Soroban host implement the extend_contract_data_ttl host function?",
+			"repo": "stellar/rs-soroban-env",
+			"paths": ["soroban-env-host/src/host.rs"],
+			"symbols": ["extend_contract_data_ttl"]
+		}
+	]
+}
