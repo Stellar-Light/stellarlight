@@ -1,0 +1,139 @@
+before: base; after: K2
+capture: api 1.9.91 -> 1.9.91, 2026-10-23T01:14:29.183Z to 2026-10-23T01:24:27.460Z; corpus 1344
+
+== Labeled builds graded 2 (same idea): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 99 | 58 -> 58 | 51 -> 51 | 29 -> 29
+40 working | hybrid | 99 | 95 -> 95 | 78 -> 78 | 45 -> 46
+40 holdout | keyword | 19 | 8 -> 8 | 8 -> 8 | 7 -> 7
+40 holdout | hybrid | 19 | 16 -> 16 | 15 -> 15 | 11 -> 11
+short | keyword | 73 | 71 -> 71 | 70 -> 70 | 62 -> 62
+short | hybrid | 73 | 73 -> 73 | 73 -> 73 | 72 -> 72
+tests | keyword | 3 | 1 -> 1 | 1 -> 1 | 1 -> 1
+tests | hybrid | 3 | 3 -> 3 | 3 -> 3 | 3 -> 3
+fresh | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+  LOST top 20 | 40 working keyword | i01 "AI agent that pays for API calls with USDC using x" | x402 Stellar MCP (rank 20 -> 21)
+  LOST matched | 40 working keyword | i13 "prediction market on Soroban" | zkprediction (rank 24 -> none)
+  gained matched | 40 working keyword | i23 "MCP server that lets AI agents use Stellar" | StellarMCP (rank none -> 12)
+  gained top 20 | 40 working keyword | i23 "MCP server that lets AI agents use Stellar" | StellarMCP (rank none -> 12)
+  gained top 5 | 40 working hybrid | i23 "MCP server that lets AI agents use Stellar" | StellarMCP (rank 19 -> 4)
+
+== Labeled builds graded 1 (related): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 249 | 104 -> 105 | 82 -> 82 | 46 -> 47
+40 working | hybrid | 249 | 213 -> 213 | 145 -> 144 | 64 -> 61
+40 holdout | keyword | 100 | 42 -> 41 | 41 -> 40 | 26 -> 26
+40 holdout | hybrid | 100 | 82 -> 81 | 71 -> 70 | 33 -> 33
+short | keyword | 65 | 61 -> 61 | 55 -> 56 | 51 -> 50
+short | hybrid | 65 | 65 -> 65 | 65 -> 65 | 63 -> 62
+tests | keyword | 6 | 4 -> 4 | 4 -> 4 | 4 -> 4
+tests | hybrid | 6 | 6 -> 6 | 6 -> 6 | 6 -> 6
+fresh | keyword | 15 | 9 -> 9 | 9 -> 9 | 9 -> 9
+fresh | hybrid | 15 | 15 -> 15 | 15 -> 15 | 15 -> 15
+  LOST matched | 40 working keyword | i22 "AI shopping agent that pays merchants on behalf of" | MagentiX (rank 23 -> none)
+  LOST top 20 | 40 working keyword | i22 "AI shopping agent that pays merchants on behalf of" | AgentRail (rank 20 -> 28)
+  gained matched | 40 working keyword | i22 "AI shopping agent that pays merchants on behalf of" | PaywitAI (rank none -> 4)
+  gained top 20 | 40 working keyword | i22 "AI shopping agent that pays merchants on behalf of" | PaywitAI (rank none -> 4)
+  gained top 5 | 40 working keyword | i22 "AI shopping agent that pays merchants on behalf of" | PaywitAI (rank none -> 4)
+  gained matched | 40 working keyword | i23 "MCP server that lets AI agents use Stellar" | BlendMCP (rank none -> 39)
+  LOST top 20 | 40 working hybrid | i22 "AI shopping agent that pays merchants on behalf of" | MagentiX (rank 13 -> 48)
+  LOST top 5 | 40 working hybrid | i22 "AI shopping agent that pays merchants on behalf of" | Stellar Payment API (PLUTO) (rank 5 -> 9)
+  LOST top 5 | 40 working hybrid | i22 "AI shopping agent that pays merchants on behalf of" | Ai2wallet (rank 3 -> 6)
+  LOST top 5 | 40 working hybrid | i22 "AI shopping agent that pays merchants on behalf of" | M.I.A. Make it Agentic (rank 4 -> 8)
+  gained top 5 | 40 working hybrid | i22 "AI shopping agent that pays merchants on behalf of" | PaywitAI (rank 12 -> 1)
+  LOST top 5 | 40 working hybrid | i23 "MCP server that lets AI agents use Stellar" | solva-mcp (rank 5 -> 6)
+  LOST matched | 40 holdout keyword | i30 "supply chain traceability for agricultural product" | ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. (rank 6 -> none)
+  LOST top 20 | 40 holdout keyword | i30 "supply chain traceability for agricultural product" | ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. (rank 6 -> none)
+  LOST matched | 40 holdout hybrid | i30 "supply chain traceability for agricultural product" | ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. (rank 14 -> none)
+  LOST top 20 | 40 holdout hybrid | i30 "supply chain traceability for agricultural product" | ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. (rank 14 -> none)
+  gained top 20 | short keyword | p2p lending "p2p lending" | RemitLend (rank 22 -> 16)
+  LOST top 5 | short keyword | kyc "kyc" | SAVIA (rank 5 -> 6)
+  LOST top 5 | short hybrid | kyc "kyc" | SAVIA (rank 5 -> 6)
+
+== vetIdea's five and the brief's picks (hybrid), every change ==
+  vet lost | 40 i22 | Ai2wallet (grade 1)
+  vet lost | 40 i22 | M.I.A. Make it Agentic (grade 1)
+  vet lost | 40 i22 | Stellar Payment API (PLUTO) (grade 1)
+  vet gained | 40 i22 | PaywitAI (grade 1)
+  vet gained | 40 i22 | MicoPay Protocol (grade unlabeled)
+  vet gained | 40 i22 | StellarPayAgent (grade unlabeled)
+  brief lost | 40 i22 | Ai2wallet (grade 1)
+  brief lost | 40 i22 | M.I.A. Make it Agentic (grade 1)
+  brief lost | 40 i22 | Stellar Payment API (PLUTO) (grade 1)
+  brief gained | 40 i22 | PaywitAI (grade 1)
+  brief gained | 40 i22 | MicoPay Protocol (grade unlabeled)
+  brief gained | 40 i22 | StellarPayAgent (grade unlabeled)
+  vet lost | 40 i23 | solva-mcp (grade 1)
+  vet gained | 40 i23 | StellarMCP (grade 2)
+  brief lost | 40 i23 | solva-mcp (grade 1)
+  brief gained | 40 i23 | StellarMCP (grade 2)
+  vet lost | short kyc | SAVIA (grade 1)
+  brief lost | short kyc | SAVIA (grade 1)
+  vet lost | tests an overcollateralized stablecoin for lending | BlendScore (grade unlabeled)
+  vet gained | tests an overcollateralized stablecoin for lending | RemitLend (grade unlabeled)
+  brief lost | tests an overcollateralized stablecoin for lending | BlendScore (grade unlabeled)
+  brief gained | tests an overcollateralized stablecoin for lending | RemitLend (grade unlabeled)
+  vet gained | fresh f02 | ProofPay (grade unlabeled)
+  brief gained | fresh f02 | ProofPay (grade unlabeled)
+  vet gained | fresh f19 | GigPay (grade unlabeled)
+  vet gained | fresh f19 | PayMint (grade unlabeled)
+  brief gained | fresh f19 | GigPay (grade unlabeled)
+  brief gained | fresh f19 | PayMint (grade unlabeled)
+  vet lost | fresh f22 | Settler (grade unlabeled)
+  vet gained | fresh f22 | CosmosPay | Wallet & Payment Gateway for Stellar Developers (grade unlabeled)
+  brief lost | fresh f22 | Settler (grade unlabeled)
+  brief gained | fresh f22 | CosmosPay | Wallet & Payment Gateway for Stellar Developers (grade unlabeled)
+  vet lost | fresh f28 | LumenSure - Private Proof-Backed Insurance Payouts on Stella (grade 0)
+  brief lost | fresh f28 | LumenSure - Private Proof-Backed Insurance Payouts on Stella (grade 0)
+
+== nonsense: builds returned, before -> after ==
+purple elephant trampoline | keyword | 0 -> 0
+purple elephant trampoline | hybrid | 0 -> 0
+volcano knitting subscription | keyword | 1 -> 1
+volcano knitting subscription | hybrid | 1 -> 1
+haunted spoon orchestra | keyword | 1 -> 1
+haunted spoon orchestra | hybrid | 1 -> 1
+telepathic cactus insurance | keyword | 2 -> 2
+telepathic cactus insurance | hybrid | 2 -> 2
+submarine pancake festival | keyword | 0 -> 0
+submarine pancake festival | hybrid | 0 -> 0
+invisible giraffe tax | keyword | 0 -> 0
+invisible giraffe tax | hybrid | 0 -> 0
+moon cheese lottery | keyword | 2 -> 2
+moon cheese lottery | hybrid | 2 -> 2
+dancing penguin mortgage | keyword | 0 -> 0
+dancing penguin mortgage | hybrid | 0 -> 0
+banana origami parliament | keyword | 0 -> 0
+banana origami parliament | hybrid | 0 -> 0
+time travel sock exchange | keyword | 9 -> 9
+time travel sock exchange | hybrid | 9 -> 9
+underwater bicycle courier | keyword | 0 -> 0
+underwater bicycle courier | hybrid | 0 -> 0
+whispering teapot ledger | keyword | 4 -> 4
+whispering teapot ledger | hybrid | 4 -> 4
+glitter dinosaur karaoke | keyword | 0 -> 0
+glitter dinosaur karaoke | hybrid | 0 -> 0
+sleepy walrus accountant | keyword | 0 -> 0
+sleepy walrus accountant | hybrid | 1 -> 1
+cosmic broccoli wrestling league | keyword | 1 -> 1
+cosmic broccoli wrestling league | hybrid | 1 -> 1
+total | keyword 20 -> 20 | hybrid 21 -> 21
+
+== probe: builds returned, before -> after ==
+quantum llama sandwich | keyword | 2 -> 1 | removed: MellaMate [llama]
+    after, top 5: Quantum Shield Exchange [quantum]
+quantum llama sandwich | hybrid | 2 -> 1 | removed: MellaMate [llama]
+    after, top 5: Quantum Shield Exchange [quantum]
+
+== passkey: builds returned, before -> after ==
+passkey (winnersOnly) | keyword | 0 -> 0
+    after, top 5: 
+passkey (winnersOnly) | hybrid | 0 -> 0
+    after, top 5: 
+passkey | keyword | 4 -> 4
+    after, top 5: Passkey-Kit integration [passkey]; Buckspay SDK [passkey]; Tornado-style privacy pools on Stellar Soroban [passkey]; lumengate [passkey]
+passkey | hybrid | 4 -> 4
+    after, top 5: Passkey-Kit integration [passkey]; Buckspay SDK [passkey]; Tornado-style privacy pools on Stellar Soroban [passkey]; lumengate [passkey]
+
+grade-2 builds lost from the matched list or the top 20 (the ship criterion): 2

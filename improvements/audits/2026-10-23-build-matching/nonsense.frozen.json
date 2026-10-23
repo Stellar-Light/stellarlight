@@ -1,0 +1,21 @@
+{
+	"writer": "Claude Opus 5.5 (lane K), written before any search ran",
+	"note": "15 nonsense multi-word queries; none was run or checked against the corpus before freezing. The battery probe 'quantum llama sandwich' is not in this set.",
+	"queries": [
+		"purple elephant trampoline",
+		"volcano knitting subscription",
+		"haunted spoon orchestra",
+		"telepathic cactus insurance",
+		"submarine pancake festival",
+		"invisible giraffe tax",
+		"moon cheese lottery",
+		"dancing penguin mortgage",
+		"banana origami parliament",
+		"time travel sock exchange",
+		"underwater bicycle courier",
+		"whispering teapot ledger",
+		"glitter dinosaur karaoke",
+		"sleepy walrus accountant",
+		"cosmic broccoli wrestling league"
+	]
+}

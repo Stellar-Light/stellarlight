@@ -3593,7 +3593,7 @@ export const spec: OpenAPISpec = {
 				},
 				parameters: [
 					...buildFilterParams(
-						"Topic to search build names + descriptions (prior-art lookup).",
+						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup).",
 						"hybrid",
 					),
 					{
@@ -3770,7 +3770,7 @@ export const spec: OpenAPISpec = {
 														type: "array",
 														items: { type: "string" },
 														description:
-															"Which query terms this build matched — the evidence behind its inclusion.",
+															"Which query terms this build matched: the evidence behind its inclusion. A term matches in the name, summary, track, award or a package in `stack`, except the Stellar JS SDK, Soroban Rust SDK, Freighter API, Stellar Wallets Kit and x402 packages, which more than a tenth of read repos declare. A package says what a build was made with, not what it does.",
 													},
 													similarity: {
 														type: "number",

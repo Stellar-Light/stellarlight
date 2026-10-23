@@ -1,0 +1,72 @@
+--- base/src/lib/hackathon-builds.ts
++++ K1S/src/lib/hackathon-builds.ts
+@@ -10,6 +10,7 @@
+ import { unstable_cache } from "next/cache";
+ import { overlayWinnerOf } from "@/data/winner-overlay";
+ import { withReadTimeout } from "@/lib/degraded-read";
++import { libraryOf } from "@/lib/hackathon-analytics";
+ import {
+ 	BUILD_SEARCH_MODES,
+ 	type BuildSearchMode,
+@@ -105,12 +106,27 @@
+ 	return out;
+ }
+ 
++/** Libraries too common to say what a build is: of the 1,013 repos read on
++ * 2026-10-23, 77% declare the Stellar JS SDK, 66% the Soroban Rust SDK, 36%
++ * the Freighter API and 27% Stellar Wallets Kit; the next, x402, 12%. Their
++ * package names would match sdk, soroban, api and wallet on most builds. */
++const COMMON_LIBRARIES = new Set([
++	"Stellar JS SDK",
++	"Soroban Rust SDK",
++	"Freighter API",
++	"Stellar Wallets Kit",
++]);
++
+ const haystackOf = (
+ 	name: string,
+ 	description: string | null,
+ 	track: string | null,
+ 	award: string | null,
+-) => `${name} ${description ?? ""} ${track ?? ""} ${award ?? ""}`.toLowerCase();
++	/** Declared packages, when the repo was read: "passkey" finds a build
++	 * built on passkey-kit. */
++	stack?: string[] | null,
++) =>
++	`${name} ${description ?? ""} ${track ?? ""} ${award ?? ""} ${(stack ?? []).filter((p) => !COMMON_LIBRARIES.has(libraryOf(p))).join(" ")}`.toLowerCase();
+ 
+ /** Live read of the most recent ended DoraHacks events: the fallback when the
+  * store has nothing to serve. Capped to bound cold-rebuild cost; the store has
+@@ -246,7 +262,13 @@
+ 			slug: d.hackathonSlug,
+ 			endedAt: d.endedAt ?? null,
+ 		},
+-		haystack: haystackOf(d.name, description, d.track ?? null, d.award ?? null),
++		haystack: haystackOf(
++			d.name,
++			description,
++			d.track ?? null,
++			d.award ?? null,
++			d.stackReadAt ? d.stack : null,
++		),
+ 		...(d.linkCheckedAt ? { project: linkedProject(d, facts) } : {}),
+ 		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
+ 		...(d.categoriesAt && isCategoryList(d.categories)
+@@ -514,7 +536,7 @@
+ 	// v4: an empty index is no longer cached, so one cached before this
+ 	// deploy must not outlive it. v5: winners named off DoraHacks
+ 	// (winnerSource), which a v4 index serves as unplaced.
+-	["hackathon-builds-index:v5"],
++	["hackathon-builds-index:v6"],
+ 	{
+ 		revalidate: 3600,
+ 		tags: ["hackathons"],
+@@ -731,7 +753,7 @@
+ 		}
+ 		if (
+ 			score > 0 &&
+-			(nameMatched || matched.size >= Math.ceil(tokens.length / 2))
++			matched.size >= Math.ceil(tokens.length / 2)
+ 		) {
+ 			score += b.isWinner ? 2 : 0;
+ 			score += Math.min(b.voteCount ?? 0, 20) * 0.05;

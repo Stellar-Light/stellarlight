@@ -1,0 +1,11 @@
+--- base/src/lib/hackathon-builds.ts
++++ K1/src/lib/hackathon-builds.ts
+@@ -731,7 +731,7 @@
+ 		}
+ 		if (
+ 			score > 0 &&
+-			(nameMatched || matched.size >= Math.ceil(tokens.length / 2))
++			matched.size >= Math.ceil(tokens.length / 2)
+ 		) {
+ 			score += b.isWinner ? 2 : 0;
+ 			score += Math.min(b.voteCount ?? 0, 20) * 0.05;
