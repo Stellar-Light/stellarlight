@@ -144,3 +144,33 @@ by two independent Claude Sonnet passes; the stricter grade is kept.
 - 2026-10-23T23:28Z battery questions captured (3, winners only, live
   1.9.108 at both ends, 6 pages, all 200). Base replays of every frozen
   capture run; no candidate replay has run.
+- 2026-10-23T23:32Z fresh set captured (20 questions, live 1.9.108 at
+  both ends, 42 pages, all 200).
+- Base replays equal the O2 round's shipped replays on all 305 frozen
+  queries, byte for byte, note lines too. Then c1 and c2 replays over the
+  frozen captures, the battery capture and the fresh set.
+- 77 moved rows graded blind, two Claude Sonnet passes, agreement 76 of
+  77; stricter grade kept.
+- Rule L claims: `check-unused.py`, 0 false of 592 (c2 and c1).
+
+## Outcome
+
+**C2 ships** (spec@1.9.115 placeholder). Results base to C2, details in
+`../audits/2026-10-23-question-filler/README.md`:
+
+- (a) met: 297 of 297 frozen queries without the words or a question mark
+  byte-identical, and the 5 non-questions holding a word too.
+- (b) met as fixed (replay, before the reranker): 2 to 4 of 6. Live 1.9.107
+  served 1. Read live, 3 of 6 is expected: sa-02's 32 matches all sit in
+  the reranker's 50, and the reranker (name and summary only) already left
+  DeFi Quest out at 1.9.107.
+- (c) met: 6 graded-2 exits on frozen sets, all swaps (x402!!!
+  paywall???), 0 real losses, 0 graded-0 entries into a top 5. Reported
+  apart: on the new battery capture one build graded 0 enters sc-02's top
+  5 in 4 rows ("Blending" holds blend), 11 graded-0 rows leave; on the
+  fresh set 5 enter and 12 leave.
+- (d) met: 33 to 34 of 37 (keyword 5 to 13); no question loses one.
+- (e) met: 0 false claims; z09 to z13 byte-identical.
+
+C1 meets the same criteria and changes 4 more frozen non-questions; by the
+rule fixed above, C2 ships.

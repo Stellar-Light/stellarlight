@@ -1811,3 +1811,72 @@ describe("links through a repo that was renamed or transferred", () => {
 		}
 	});
 });
+
+describe("a question's outcome words are not concepts", () => {
+	// The priority battery's winners questions (live 1.9.107): won, prizes,
+	// hackathons and the question mark counted as concepts, so game builds
+	// with prize pools stood level with the passkey and Blend winners asked
+	// for, and a build naming Blend alone missed the half rule.
+	const pool = [
+		build("Passkey Wallet", "Onboard users with a passkey smart wallet.", true),
+		build(
+			"Arcade Rush",
+			"Players who won rounds take prizes from the pool at Stellar hackathons.",
+			true,
+		),
+		build("YieldBack", "Blend Coupon Bond", true),
+		build("Pool Creator", "Launch custom lending pools on Blend.", true),
+		build(
+			"Fantasy League",
+			"A fantasy sports game where winners split the prize pool.",
+		),
+	];
+
+	it("searches only the topic of a winners question", () => {
+		const out = searchHackathonBuilds(
+			pool,
+			"which passkey or smart-wallet projects have won prizes at stellar hackathons?",
+			{ winnersOnly: true },
+		);
+		expect(out.map((s) => s.b.name)).toEqual(["Passkey Wallet"]);
+		expect(out[0].share).toBe(1);
+	});
+
+	it("drops the question mark, so a stopword before it stays a stopword", () => {
+		const out = searchHackathonBuilds(
+			pool,
+			"which past stellar hackathon winners built on top of the blend lending protocol?",
+			{ winnersOnly: true },
+		);
+		expect(out.map((s) => s.b.name).sort()).toEqual([
+			"Pool Creator",
+			"YieldBack",
+		]);
+	});
+
+	it("keeps the words where they are the idea, not a question", () => {
+		const out = searchHackathonBuilds(
+			pool,
+			"fantasy sports game where winners split the prize pool",
+		);
+		expect(out[0].b.name).toBe("Fantasy League");
+		expect(out[0].matched).toEqual(
+			expect.arrayContaining(["winners", "prize"]),
+		);
+	});
+
+	it("still searches a question made of them alone", () => {
+		const out = searchHackathonBuilds(pool, "who won?");
+		expect(out.map((s) => s.b.name)).toEqual(["Arcade Rush"]);
+		expect(out[0].matched).toEqual(["won"]);
+	});
+
+	it("counts the question's topic words for the unused-words rule", () => {
+		expect(
+			wordsNoBuildUses(
+				pool,
+				"has a cross-chain or bridge project ever won a prize at a stellar hackathon?",
+			),
+		).toEqual({ absent: ["bridge", "cross-chain"], concepts: 2 });
+	});
+});

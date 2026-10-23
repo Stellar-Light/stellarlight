@@ -1,0 +1,655 @@
+{
+ "about": "Blind grades of every row a criterion or report reads that no earlier grade or label answered: builds entering or leaving a top 5, a top 20 or a matched list, base to c1 or c2, on every changed query (frozen sets, the battery questions captured at 1.9.108, the fresh set). Rubric in grader-prompt.txt. A battery question is named by its id (held out <id>); its text stays in scratch. grade is the stricter of the two passes.",
+ "graders": "two independent Claude Sonnet agents, each with its own shuffled order of one sheet, no mark of which variant listed a build",
+ "agreement": "76 of 77 rows",
+ "grades": [
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46233",
+   "name": "STELLITA: Build on Stellar in minutes with zero coding",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Are there winners where people give money to animal care?",
+   "buildId": "dorahacks-buidl-38108",
+   "name": "GlobalCare",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Is there a project offering insurance that pays automatically once conditions are met?",
+   "buildId": "dorahacks-buidl-46105",
+   "name": "ClaimProof",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-27390",
+   "name": "sealit",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-42779",
+   "name": "PayWall.ai",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-39889",
+   "name": "Zero Trust",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-42826",
+   "name": "ClawPay Stellar",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Have any winners rewarded people for returning used batteries for recycling?",
+   "buildId": "dorahacks-buidl-28437",
+   "name": "GoLazy",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "HackMeridian 2025 awards",
+   "buildId": "dorahacks-buidl-35628",
+   "name": "TIANKAWARDS",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46561",
+   "name": "IDIO",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "onchain fantasy sports game where winners are paid in stablecoins from the prize pool",
+   "buildId": "dorahacks-buidl-45517",
+   "name": "ZK-KYC-PASSPORT",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-42627",
+   "name": "Stipend",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "onchain fantasy sports game where winners are paid in stablecoins from the prize pool",
+   "buildId": "dorahacks-buidl-46115",
+   "name": "Sotto \u2014 Sealed-Bid Procurement Auctions Settled with ZK Winner Proofs on Stellar",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46455",
+   "name": "ZeroWage",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46385",
+   "name": "ZeroSeal",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-39901",
+   "name": "HeistDuel",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Which winners are built for people with weak or no internet access?",
+   "buildId": "dorahacks-buidl-40156",
+   "name": "Amaru ID",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-45982",
+   "name": "X402 ZK Mesh: Zero-Trust Agent Guild",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46475",
+   "name": "Limit",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "Is there anything that lets a business turn unpaid bills into immediate cash?",
+   "buildId": "dorahacks-buidl-27456",
+   "name": "YieldBack.Cash",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "HackMeridian 2025 winners",
+   "buildId": "dorahacks-buidl-46115",
+   "name": "Sotto \u2014 Sealed-Bid Procurement Auctions Settled with ZK Winner Proofs on Stellar",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-39622",
+   "name": "xray.games \u2013 The Arcade Evolved | skill proven onchain",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Which prize winners let AI agents pay per request with tiny USDC payments?",
+   "buildId": "dorahacks-buidl-42579",
+   "name": "x402-mcp-stellar-template",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-36214",
+   "name": "No Loss Lottery",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46401",
+   "name": "ZeroPath",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out sa01-verbatim",
+   "buildId": "dorahacks-buidl-46426",
+   "name": "Stella - Private Payments Wallet",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-42727",
+   "name": "x402kit",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "curated-hackmeridian-2025-star-lends",
+   "name": "Star Lends",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-28436",
+   "name": "Kredible",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-42499",
+   "name": "mindVault",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Is there a project offering insurance that pays automatically once conditions are met?",
+   "buildId": "dorahacks-buidl-41508",
+   "name": "PayStream",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out hm26-cc-02",
+   "buildId": "curated-hackmeridian-2025-4bridge",
+   "name": "4Bridge",
+   "grade": 1,
+   "passA": 2,
+   "passB": 1
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-46474",
+   "name": "Tukar",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-39862",
+   "name": "ZERO SHOT",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "HackMeridian 2025 awards",
+   "buildId": "dorahacks-buidl-32712",
+   "name": "CouvePIX",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "HackMeridian 2025 winners",
+   "buildId": "dorahacks-buidl-32712",
+   "name": "CouvePIX",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "held out hm26-sa-02",
+   "buildId": "dorahacks-buidl-32695",
+   "name": "Kale Farmers Market",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out sa02-verbatim",
+   "buildId": "dorahacks-buidl-32695",
+   "name": "Kale Farmers Market",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-40199",
+   "name": "Kuy-fi",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Which prize winners let AI agents pay per request with tiny USDC payments?",
+   "buildId": "dorahacks-buidl-42656",
+   "name": "clevercon",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Are there winners where people give money to animal care?",
+   "buildId": "dorahacks-buidl-34215",
+   "name": "VETCHAIN",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46232",
+   "name": "Zeroblankeo",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-42713",
+   "name": "ero.",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Which prize winners let AI agents pay per request with tiny USDC payments?",
+   "buildId": "dorahacks-buidl-42585",
+   "name": "TollPay",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "held out hm26-sa-02",
+   "buildId": "dorahacks-buidl-30648",
+   "name": "DeFi Quest - From Zero to DeFi in Minutes",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "held out sa02-verbatim",
+   "buildId": "dorahacks-buidl-30648",
+   "name": "DeFi Quest - From Zero to DeFi in Minutes",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Is there anything that lets a business turn unpaid bills into immediate cash?",
+   "buildId": "dorahacks-buidl-30621",
+   "name": "CashAbroad",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "Has anyone built a system where patients control their own medical records?",
+   "buildId": "dorahacks-buidl-46220",
+   "name": "MedVault",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-38105",
+   "name": "Robots que tributan",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "onchain fantasy sports game where winners are paid in stablecoins from the prize pool",
+   "buildId": "dorahacks-buidl-36214",
+   "name": "No Loss Lottery",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "held out sa01-verbatim",
+   "buildId": "dorahacks-buidl-25289",
+   "name": "NeuralWallet",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-30677",
+   "name": "Verbex",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Are there winning projects that prove a person passed identity screening without putting any identity on-chain?",
+   "buildId": "dorahacks-buidl-39622",
+   "name": "xray.games \u2013 The Arcade Evolved | skill proven onchain",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out hm26-cc-02",
+   "buildId": "dorahacks-buidl-39887",
+   "name": "Chickenz.io - Real Time Competitive Platformer",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-32593",
+   "name": "xbid.ai",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-30889",
+   "name": "Tokenizaci\u00f3n CAPA ZERO (Contenido)",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-28426",
+   "name": "Stellar Onboarding Hub",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-46541",
+   "name": "Umbra Wallet",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-39873",
+   "name": "Pirate's Treasure",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "onchain fantasy sports game where winners are paid in stablecoins from the prize pool",
+   "buildId": "dorahacks-buidl-42736",
+   "name": "Agent Passport",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-42608",
+   "name": "Agent Paywall Router",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46464",
+   "name": "Segel",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46353",
+   "name": "Astraea",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-27456",
+   "name": "YieldBack.Cash",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "Has anyone built a system where patients control their own medical records?",
+   "buildId": "dorahacks-buidl-42786",
+   "name": "AXIS: Autonomous X-border Interchange System",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-27417",
+   "name": "Comet x Hoops Finance",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "onchain fantasy sports game where winners are paid in stablecoins from the prize pool",
+   "buildId": "dorahacks-buidl-25240",
+   "name": "Klaberos Swap",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46325",
+   "name": "SealedStellar",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "held out hm26-sc-02",
+   "buildId": "dorahacks-buidl-40207",
+   "name": "SENDA",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out hm26-sa-02",
+   "buildId": "dorahacks-buidl-28437",
+   "name": "GoLazy",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out sa02-verbatim",
+   "buildId": "dorahacks-buidl-28437",
+   "name": "GoLazy",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-42617",
+   "name": "Nova Registry SDK",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "Has a card game where players' hands stay private ever won a prize at a Stellar hackathon?",
+   "buildId": "dorahacks-buidl-42656",
+   "name": "clevercon",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-46439",
+   "name": "Molfi",
+   "grade": 1,
+   "passA": 1,
+   "passB": 1
+  },
+  {
+   "query": "Who won with a way to rein in resale prices for event admissions?",
+   "buildId": "dorahacks-buidl-32676",
+   "name": "ARS Price Arena",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "buildId": "dorahacks-buidl-39875",
+   "name": "ZeroWar - Trustless Multiplayer Gaming on Stellar",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "held out hm26-cc-02",
+   "buildId": "dorahacks-buidl-42656",
+   "name": "clevercon",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "onchain fantasy sports game where winners are paid in stablecoins from the prize pool",
+   "buildId": "dorahacks-buidl-46091",
+   "name": "PigFi",
+   "grade": 0,
+   "passA": 0,
+   "passB": 0
+  },
+  {
+   "query": "x402!!! paywall???",
+   "buildId": "dorahacks-buidl-42521",
+   "name": "Heekowave",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "held out hm26-sa-02",
+   "buildId": "dorahacks-buidl-46474",
+   "name": "Tukar",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  },
+  {
+   "query": "held out sa02-verbatim",
+   "buildId": "dorahacks-buidl-46474",
+   "name": "Tukar",
+   "grade": 2,
+   "passA": 2,
+   "passB": 2
+  }
+ ]
+}

@@ -1,0 +1,27 @@
+# The new tests (src/lib/__tests__/hackathon-builds.test.ts, "a question's outcome words are not concepts") on main 4cb05ea2's src/lib/hackathon-builds.ts, before C2 is applied.
+# Command: npx vitest run src/lib/__tests__/hackathon-builds.test.ts -t "outcome words"
+# 4 fail; the guard (keeps the words where they are the idea) passes, as it must.
+   × a question's outcome words are not concepts > searches only the topic of a winners question 10ms
+     → expected 0.4 to be 1 // Object.is equality
+   × a question's outcome words are not concepts > drops the question mark, so a stopword before it stays a stopword 7ms
+     → expected [] to deeply equal [ 'Pool Creator', 'YieldBack' ]
+   ✓ a question's outcome words are not concepts > keeps the words where they are the idea, not a question 5ms
+   × a question's outcome words are not concepts > still searches a question made of them alone 1ms
+     → expected [] to deeply equal [ 'Arcade Rush' ]
+   × a question's outcome words are not concepts > counts the question's topic words for the unused-words rule 5ms
+     → expected { …(2) } to deeply equal { absent: [ 'bridge', …(1) ], …(1) }
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  4 failed | 1 passed | 73 skipped (78)
+
+# With C2 applied (c2.diff):
+ ✓ src/lib/__tests__/hackathon-builds.test.ts (78 tests | 73 skipped) 19ms
+      Tests  5 passed | 73 skipped (78)
+
+# With C1 (the same words for every q, c1.diff): the guard fails, so it covers the question gate.
+   ✓ a question's outcome words are not concepts > searches only the topic of a winners question 4ms
+   ✓ a question's outcome words are not concepts > drops the question mark, so a stopword before it stays a stopword 3ms
+   × a question's outcome words are not concepts > keeps the words where they are the idea, not a question 10ms
+   ✓ a question's outcome words are not concepts > still searches a question made of them alone 1ms
+   ✓ a question's outcome words are not concepts > counts the question's topic words for the unused-words rule 4ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 4 passed | 73 skipped (78)
