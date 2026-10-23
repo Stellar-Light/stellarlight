@@ -1,0 +1,331 @@
+{
+  "writtenAt": "2026-10-23T14:03:10Z",
+  "writer": "Claude Opus 5.5",
+  "rule": "written before any search result; judged once",
+  "refs": {
+    "stellar/stellar-core": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+    "stellar/rs-soroban-sdk": "8e5b425dce5fa1dcd5a3fe1d3f3fcd18431586dd",
+    "stellar/rs-soroban-env": "0c99950e96128beba3319aa96b116646ce974e69",
+    "stellar/js-stellar-sdk": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+    "stellar/stellar-rpc": "ec4171d970ac812d9f4317b3cce2c315baa31320",
+    "stellar/quickstart": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+    "stellar/stellar-cli": "4ff88b7ea11dd3c847bb711b80258517148e1529",
+    "stellar/soroban-examples": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2"
+  },
+  "questions": [
+    {
+      "id": "f01",
+      "q": "What is the highest ledger protocol version this stellar-core build supports, and where is that number actually set?",
+      "repo": "stellar/stellar-core",
+      "commit": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+      "kind": "symbol",
+      "hard": true,
+      "hardReason": "The obvious name, Config::CURRENT_LEDGER_PROTOCOL_VERSION in Config.cpp, is only an alias; the literal number lives in a util header.",
+      "paths": ["src/util/ProtocolVersion.h"],
+      "symbols": ["MAX_SUPPORTED_PROTOCOL_VERSION"],
+      "partialPaths": ["src/main/Config.cpp", "src/main/Config.h"],
+      "evidence": [
+        {"path": "src/util/ProtocolVersion.h", "line": 13, "note": "MAX_SUPPORTED_PROTOCOL_VERSION is a constexpr set to 30, with one added when built with ENABLE_NEXT_PROTOCOL_VERSION_UNSAFE_FOR_PRODUCTION (lines 14 to 17)."},
+        {"path": "src/main/Config.cpp", "line": 35, "note": "Config::CURRENT_LEDGER_PROTOCOL_VERSION is defined as equal to MAX_SUPPORTED_PROTOCOL_VERSION; it names the concept but holds no number."},
+        {"path": "src/main/Config.h", "line": 153, "note": "Declares the static CURRENT_LEDGER_PROTOCOL_VERSION member without a value."}
+      ]
+    },
+    {
+      "id": "f02",
+      "q": "Where is the stellar-core `calculate-asset-supply` command line subcommand implemented?",
+      "repo": "stellar/stellar-core",
+      "commit": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+      "kind": "symbol",
+      "hard": false,
+      "paths": ["src/main/CommandLine.cpp", "src/main/ApplicationUtils.cpp"],
+      "pathsNote": "Both count as full answers: CommandLine.cpp holds the subcommand's handler and its registration in the command table; ApplicationUtils.cpp holds the body that walks the bucket lists and sums the supply. A developer asking 'where is it implemented' is served by either.",
+      "symbols": ["runCalculateAssetSupply", "calculateAssetSupply"],
+      "partialPaths": ["docs/software/commands.md", "src/main/ApplicationUtils.h"],
+      "evidence": [
+        {"path": "src/main/CommandLine.cpp", "line": 1141, "note": "runCalculateAssetSupply parses --code and --issuer into an Asset and delegates to calculateAssetSupply."},
+        {"path": "src/main/CommandLine.cpp", "line": 2062, "note": "The command table registers the name calculate-asset-supply with its help text and runCalculateAssetSupply."},
+        {"path": "src/main/ApplicationUtils.cpp", "line": 556, "note": "calculateAssetSupply builds an offline Application, loads the last closed ledger, and sums balances, starting from the fee pool for the native asset."},
+        {"path": "docs/software/commands.md", "line": 52, "note": "Describes what calculate-asset-supply does; documentation only."}
+      ]
+    },
+    {
+      "id": "f03",
+      "q": "Where do the stellar-core docs list the HTTP admin commands that are only exposed on test instances, such as generateload, testacc and testtx?",
+      "repo": "stellar/stellar-core",
+      "commit": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+      "kind": "heading",
+      "hard": false,
+      "paths": ["docs/software/commands.md"],
+      "headings": ["The following HTTP commands are exposed on test instances"],
+      "partialPaths": ["src/main/CommandHandler.cpp"],
+      "evidence": [
+        {"path": "docs/software/commands.md", "line": 538, "note": "A level-3 heading opens the list of test-instance HTTP commands: generateload, manualclose, testacc and testtx, each with parameters."},
+        {"path": "src/main/CommandHandler.cpp", "line": 134, "note": "Routes for generateload, testacc, testtx and others are registered only inside an ifdef BUILD_TESTS block. Note that manualclose is registered unconditionally at line 124, although the doc lists it under the test-only heading."}
+      ]
+    },
+    {
+      "id": "f04",
+      "q": "Where is the standard token interface trait (transfer, approve, allowance, burn, balance) that soroban token contracts implement and TokenClient is generated from defined?",
+      "repo": "stellar/rs-soroban-sdk",
+      "commit": "8e5b425dce5fa1dcd5a3fe1d3f3fcd18431586dd",
+      "kind": "symbol",
+      "hard": false,
+      "paths": ["soroban-sdk/src/token.rs"],
+      "symbols": ["TokenInterface"],
+      "partialPaths": [],
+      "evidence": [
+        {"path": "soroban-sdk/src/token.rs", "line": 85, "note": "pub trait TokenInterface is declared, with a contractclient attribute on line 84 that generates TokenClient from it."}
+      ]
+    },
+    {
+      "id": "f05",
+      "q": "In soroban-sdk unit tests, what ledger defaults (protocol version, min persistent and temporary TTL, max TTL) does a fresh Env::default() start with, and where are they set?",
+      "repo": "stellar/rs-soroban-sdk",
+      "commit": "8e5b425dce5fa1dcd5a3fe1d3f3fcd18431586dd",
+      "kind": "symbol",
+      "hard": false,
+      "paths": ["soroban-sdk/src/env.rs"],
+      "symbols": ["Env::new_with_config"],
+      "partialPaths": [],
+      "evidence": [
+        {"path": "soroban-sdk/src/env.rs", "line": 516, "note": "new_with_config builds a LedgerInfo with protocol version 23, sequence 0, min persistent TTL 4096, min temporary TTL 16 and max TTL 6,312,000."},
+        {"path": "soroban-sdk/src/env.rs", "line": 237, "note": "Under the testutils feature, Default for Env calls new_with_config with the default test config, so Env::default() gets those values."}
+      ]
+    },
+    {
+      "id": "f06",
+      "q": "What default CPU instruction and memory byte limits does a soroban-env-host Budget get when the embedder does not apply network config?",
+      "repo": "stellar/rs-soroban-env",
+      "commit": "0c99950e96128beba3319aa96b116646ce974e69",
+      "kind": "symbol",
+      "hard": false,
+      "paths": ["soroban-env-host/src/budget/limits.rs"],
+      "symbols": ["DEFAULT_CPU_INSN_LIMIT", "DEFAULT_MEM_BYTES_LIMIT"],
+      "partialPaths": ["soroban-env-host/src/budget.rs"],
+      "evidence": [
+        {"path": "soroban-env-host/src/budget/limits.rs", "line": 45, "note": "DEFAULT_CPU_INSN_LIMIT is 100 million instructions and DEFAULT_MEM_BYTES_LIMIT (line 46) is 40 MB, with a comment that embedders should normally override them."},
+        {"path": "soroban-env-host/src/budget.rs", "line": 1131, "note": "Inside Default for BudgetImpl (starts line 319) the cpu and mem trackers are reset to those two constants; it applies but does not state the values."}
+      ]
+    },
+    {
+      "id": "f07",
+      "q": "Under which Wasm import module and function name is the host function require_auth exposed to contracts, and where is that mapping defined?",
+      "repo": "stellar/rs-soroban-env",
+      "commit": "0c99950e96128beba3319aa96b116646ce974e69",
+      "kind": "file",
+      "hard": false,
+      "paths": ["soroban-env-common/env.json"],
+      "partialPaths": ["docs/GUEST_INTERFACE.md", "soroban-env-host/src/host.rs"],
+      "evidence": [
+        {"path": "soroban-env-common/env.json", "line": 2865, "note": "The address module has export name a; inside it require_auth has export 0 (line 2885 to 2886) and require_auth_for_args has export _."},
+        {"path": "docs/GUEST_INTERFACE.md", "line": 88, "note": "Says address functions live in module a and points to env.json for the full list; it does not give require_auth's own short name."},
+        {"path": "soroban-env-host/src/host.rs", "line": 3567, "note": "Host-side implementation of require_auth; no export mapping here."}
+      ]
+    },
+    {
+      "id": "f08",
+      "q": "How does a Soroban contract refer to host objects through a Val, and can a guest forge or allocate object handles itself? Which doc section explains it?",
+      "repo": "stellar/rs-soroban-env",
+      "commit": "0c99950e96128beba3319aa96b116646ce974e69",
+      "kind": "heading",
+      "hard": false,
+      "paths": ["docs/GUEST_INTERFACE.md"],
+      "headings": ["Host object handles"],
+      "partialPaths": [],
+      "evidence": [
+        {"path": "docs/GUEST_INTERFACE.md", "line": 58, "note": "Explains that handles sit in the high 32 bits of a Val, are allocated only by the host, and are translated through per-guest tables so guests cannot reach objects not passed to them."}
+      ]
+    },
+    {
+      "id": "f09",
+      "q": "In js-stellar-sdk, how many seconds of validity does a contract.Client / AssembledTransaction put on a transaction by default when timeoutInSeconds is not passed, and where is that value set?",
+      "repo": "stellar/js-stellar-sdk",
+      "commit": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+      "kind": "symbol",
+      "hard": false,
+      "paths": ["src/contract/types.ts"],
+      "symbols": ["DEFAULT_TIMEOUT"],
+      "partialPaths": ["src/contract/assembled_transaction.ts", "docs/reference/contracts-client.md"],
+      "evidence": [
+        {"path": "src/contract/types.ts", "line": 310, "note": "DEFAULT_TIMEOUT is exported as five times sixty, 300 seconds, with a doc comment on the timebounds it sets."},
+        {"path": "src/contract/assembled_transaction.ts", "line": 662, "note": "Falls back to DEFAULT_TIMEOUT when options.timeoutInSeconds is missing; uses but does not define the value."},
+        {"path": "docs/reference/contracts-client.md", "line": 904, "note": "The contract.DEFAULT_TIMEOUT heading describes the constant but gives no number."}
+      ]
+    },
+    {
+      "id": "f10",
+      "q": "Where do the js-stellar-sdk guides explain how to read the transaction-level and operation-level result codes when a Horizon submission fails?",
+      "repo": "stellar/js-stellar-sdk",
+      "commit": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+      "kind": "heading",
+      "hard": false,
+      "paths": ["docs/guides/05-handle-errors.md"],
+      "headings": ["Read a transaction's result codes"],
+      "partialPaths": ["docs/reference/errors.md"],
+      "evidence": [
+        {"path": "docs/guides/05-handle-errors.md", "line": 27, "note": "Section explains that a failed submission rejects with TransactionFailedError whose getResultCodes returns both levels, and lists common codes such as tx_bad_seq and op_underfunded."},
+        {"path": "docs/reference/errors.md", "line": 1134, "note": "API reference entry for getResultCodes only; no walkthrough."}
+      ]
+    },
+    {
+      "id": "f11",
+      "q": "Which js-stellar-sdk file declares the error classes thrown by contract.AssembledTransaction and SentTransaction, such as NeedsMoreSignaturesError and TransactionStillPendingError?",
+      "repo": "stellar/js-stellar-sdk",
+      "commit": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+      "kind": "file",
+      "hard": false,
+      "paths": ["src/contract/errors.ts"],
+      "symbols": ["NeedsMoreSignaturesError", "TransactionStillPendingError"],
+      "partialPaths": ["src/contract/assembled_transaction.ts", "src/contract/sent_transaction.ts"],
+      "evidence": [
+        {"path": "src/contract/errors.ts", "line": 7, "note": "Declares the AssembledTransaction error classes (lines 8 to 20) and then the SentTransaction ones (lines 23 to 25), each a plain Error subclass."},
+        {"path": "src/contract/assembled_transaction.ts", "line": 355, "note": "The static Errors map exposes the classes imported from errors.ts."},
+        {"path": "src/contract/sent_transaction.ts", "line": 54, "note": "The static Errors map exposes the SentTransaction classes imported from errors.ts."}
+      ]
+    },
+    {
+      "id": "f12",
+      "q": "When I run the released stellar-rpc binary, what are the default and maximum page sizes for getLedgers, and where are they set?",
+      "repo": "stellar/stellar-rpc",
+      "commit": "ec4171d970ac812d9f4317b3cce2c315baa31320",
+      "kind": "file",
+      "hard": true,
+      "hardReason": "There are two config layers. rpcv2/config/config.go sets getLedgers to 20 max and 5 default, but rpcv2 is not released: the release build refuses --enable-rpcv2, and rpcv1 is the default mode. The released values (200 and 50) are in the rpcv1 options.",
+      "paths": ["cmd/stellar-rpc/internal/rpcv1/config/options.go"],
+      "symbols": ["max-ledgers-limit", "default-ledgers-limit"],
+      "partialPaths": ["cmd/stellar-rpc/internal/rpcv2/config/config.go"],
+      "evidence": [
+        {"path": "cmd/stellar-rpc/internal/rpcv1/config/options.go", "line": 374, "note": "Option max-ledgers-limit defaults to 200, and default-ledgers-limit (line 380) defaults to 50 with a check that the default cannot exceed the max."},
+        {"path": "cmd/stellar-rpc/internal/rpcv2/config/config.go", "line": 475, "note": "The rpcv2-only constants set getLedgers max 20 and default 5; these apply only with --enable-rpcv2, which needs a RPCV2=true build."},
+        {"path": "cmd/stellar-rpc/internal/cli/mode.go", "line": 13, "note": "Context: ModeRPCv1 is documented as the default mode. Makefile lines 68 to 70 say rpcv2 is not released yet."}
+      ]
+    },
+    {
+      "id": "f13",
+      "q": "Is there an upper cap on stellar-rpc's classic and soroban fee-stats retention windows, and where is the cap value defined and enforced?",
+      "repo": "stellar/stellar-rpc",
+      "commit": "ec4171d970ac812d9f4317b3cce2c315baa31320",
+      "kind": "symbol",
+      "hard": false,
+      "paths": ["cmd/stellar-rpc/internal/limits/limits.go"],
+      "symbols": ["MaxFeeStatsRetentionWindow", "ValidateFeeStatsRetentionWindow"],
+      "partialPaths": ["cmd/stellar-rpc/internal/rpcv1/config/options.go", "cmd/stellar-rpc/internal/rpcv2/config_validate.go"],
+      "evidence": [
+        {"path": "cmd/stellar-rpc/internal/limits/limits.go", "line": 14, "note": "MaxFeeStatsRetentionWindow is 1000 ledgers, with a comment about slow O(n^2) startup; ValidateFeeStatsRetentionWindow at line 20 rejects larger values."},
+        {"path": "cmd/stellar-rpc/internal/rpcv1/config/options.go", "line": 737, "note": "feeStatsRetentionWindowValidator, attached to both fee-stats options (lines 320 and 327), delegates to limits.ValidateFeeStatsRetentionWindow; no number here."},
+        {"path": "cmd/stellar-rpc/internal/rpcv2/config_validate.go", "line": 370, "note": "rpcv2 calls the same validator."}
+      ]
+    },
+    {
+      "id": "f14",
+      "q": "If I run the stellar/quickstart image without any --enable flag, which services start? Is Stellar Lab among them?",
+      "repo": "stellar/quickstart",
+      "commit": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+      "kind": "file",
+      "hard": true,
+      "hardReason": "The README Service Options section says the default is all services and shows core,horizon,rpc,lab. The start script's actual default leaves out lab.",
+      "paths": ["start"],
+      "symbols": ["ENABLE"],
+      "partialPaths": ["action.yml"],
+      "misleadingPaths": ["README.md"],
+      "evidence": [
+        {"path": "start", "line": 33, "note": "ENABLE defaults to core,horizon,rpc when unset; process_args (lines 222 to 240) turns each listed name into an ENABLE_* flag, so lab stays off."},
+        {"path": "action.yml", "line": 16, "note": "The GitHub Action's enable input also defaults to core,horizon,rpc, but that is the Action's own input, not the image's."},
+        {"path": "README.md", "line": 170, "note": "Claims enabling all services is the default and shows core,horizon,rpc,lab, which does not match start."}
+      ]
+    },
+    {
+      "id": "f15",
+      "q": "Which port in the quickstart container serves horizon, stellar-rpc, friendbot and lab, and which ports are the admin and stellar-core ports? Where is this documented?",
+      "repo": "stellar/quickstart",
+      "commit": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+      "kind": "heading",
+      "hard": false,
+      "paths": ["README.md"],
+      "headings": ["Ports"],
+      "partialPaths": [],
+      "evidence": [
+        {"path": "README.md", "line": 475, "note": "The Ports section has a table with 8000 as the main HTTP port for lab, horizon, stellar-rpc and friendbot, then a second table of admin, database and core peer and HTTP ports."}
+      ]
+    },
+    {
+      "id": "f16",
+      "q": "Where is the `stellar contract deploy` subcommand implemented in stellar-cli?",
+      "repo": "stellar/stellar-cli",
+      "commit": "4ff88b7ea11dd3c847bb711b80258517148e1529",
+      "kind": "file",
+      "hard": true,
+      "hardReason": "commands/contract/deploy.rs looks like the answer, but its Asset/Wasm enum is not wired up. contract/mod.rs maps Deploy straight to deploy::wasm::Cmd.",
+      "paths": ["cmd/soroban-cli/src/commands/contract/deploy/wasm.rs"],
+      "symbols": ["Cmd"],
+      "partialPaths": ["cmd/soroban-cli/src/commands/contract/mod.rs"],
+      "misleadingPaths": ["cmd/soroban-cli/src/commands/contract/deploy.rs"],
+      "evidence": [
+        {"path": "cmd/soroban-cli/src/commands/contract/deploy/wasm.rs", "line": 43, "note": "Defines the deploy Cmd args (wasm, wasm-hash, salt, fee and so on); run at line 126 and run_against_rpc_server at line 169 upload if needed and build the create-contract transaction."},
+        {"path": "cmd/soroban-cli/src/commands/contract/mod.rs", "line": 43, "note": "The contract Cmd enum variant Deploy wraps deploy::wasm::Cmd directly; dispatch at line 157."},
+        {"path": "cmd/soroban-cli/src/commands/contract/deploy.rs", "line": 8, "note": "Declares an Asset/Wasm Cmd enum that nothing references as a subcommand."}
+      ]
+    },
+    {
+      "id": "f17",
+      "q": "What default inclusion fee does stellar-cli put on transactions it builds, and which environment variable overrides it?",
+      "repo": "stellar/stellar-cli",
+      "commit": "4ff88b7ea11dd3c847bb711b80258517148e1529",
+      "kind": "symbol",
+      "hard": false,
+      "paths": ["cmd/soroban-cli/src/fee.rs"],
+      "symbols": ["Args"],
+      "partialPaths": ["FULL_HELP_DOCS.md"],
+      "evidence": [
+        {"path": "cmd/soroban-cli/src/fee.rs", "line": 19, "note": "The fee field of the shared fee Args has a clap default of 100 stroops and reads the STELLAR_FEE environment variable; Default for Args (line 65) also uses 100."},
+        {"path": "FULL_HELP_DOCS.md", "line": 471, "note": "Help text for contract deploy shows the --fee default value 100 but does not name the environment variable."}
+      ]
+    },
+    {
+      "id": "f18",
+      "q": "How do I install the CLI plugin that signs auth entries with ed25519 keys for the multisig 1-of-n contract account example?",
+      "repo": "stellar/soroban-examples",
+      "commit": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2",
+      "kind": "heading",
+      "hard": false,
+      "paths": ["multisig_1_of_n_account/README.md"],
+      "headings": ["Install the `stellar sign-auth-ed25519` plugin"],
+      "partialPaths": [],
+      "evidence": [
+        {"path": "multisig_1_of_n_account/README.md", "line": 46, "note": "Section gives two install routes for the sign-auth-ed25519 plugin: cargo install from the Rust subdirectory (line 50) or a Deno JavaScript version (line 59)."}
+      ]
+    },
+    {
+      "id": "f19",
+      "q": "Which soroban-examples contract implements a simplified claimable balance, where a depositor locks tokens for a list of claimants with a before or after time bound?",
+      "repo": "stellar/soroban-examples",
+      "commit": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2",
+      "kind": "symbol",
+      "hard": true,
+      "hardReason": "No directory or crate is named after claimable balances. The example is called timelock, and a fuzzing copy holds the same contract.",
+      "paths": ["timelock/src/lib.rs", "fuzzing/src/lib.rs"],
+      "pathsNote": "Both define ClaimableBalanceContract with deposit and claim. timelock is the canonical example; fuzzing/src/lib.rs says it is the timelock example lightly modified (claim takes an amount) for fuzzing, and it still fully implements the contract.",
+      "symbols": ["ClaimableBalanceContract"],
+      "partialPaths": ["README.md"],
+      "evidence": [
+        {"path": "timelock/src/lib.rs", "line": 42, "note": "Module doc (lines 1 to 6) says it implements a simplified claimable balance; ClaimableBalanceContract has deposit at line 57 and claim at line 93."},
+        {"path": "fuzzing/src/lib.rs", "line": 46, "note": "Same ClaimableBalanceContract, with deposit at line 61 and claim at line 104 taking an amount."},
+        {"path": "README.md", "line": 38, "note": "Repo index describes time_lock as a timelock implementing a simplified claimable balance; it gives no code."}
+      ]
+    },
+    {
+      "id": "f20",
+      "q": "In soroban-examples, where is the contract error code returned when the counter would go past its limit of 5 defined?",
+      "repo": "stellar/soroban-examples",
+      "commit": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2",
+      "kind": "symbol",
+      "hard": false,
+      "paths": ["errors/src/lib.rs"],
+      "symbols": ["Error", "LimitReached"],
+      "partialPaths": [],
+      "evidence": [
+        {"path": "errors/src/lib.rs", "line": 7, "note": "A contracterror enum Error with repr u32 declares LimitReached as 1; MAX is 5 at line 12, and increment returns the error once the count exceeds it (line 38)."}
+      ]
+    }
+  ]
+}

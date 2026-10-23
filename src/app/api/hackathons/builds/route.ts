@@ -18,6 +18,8 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { RERANK_TOP } from "@/lib/build-rerank";
+import { inferEventFilter, textlessEventWarning } from "@/lib/event-in-query";
 import { afterEventFields, distribution } from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
@@ -88,7 +90,14 @@ export async function GET(req: NextRequest) {
 	// top-5 slots to keyword's 40%, and kept exact-name lookups (27 of 30
 	// first, keyword 26) for about 150 ms more at the median (2026-10-20).
 	// After the index read: a hackathon value is checked against its events.
-	const parsed = await parseBuildFilters(sp, "hybrid", indexed, listedEvents);
+	// An event named in q becomes that value (src/lib/event-in-query.ts).
+	const ev = inferEventFilter(sp, indexed);
+	const parsed = await parseBuildFilters(
+		ev.params,
+		"hybrid",
+		indexed,
+		listedEvents,
+	);
 	if ("error" in parsed)
 		return NextResponse.json(parsed.error, { status: 400 });
 	const f = parsed.filters;
@@ -108,6 +117,7 @@ export async function GET(req: NextRequest) {
 		served: mode,
 		warnings,
 		entries,
+		rerank,
 		withheld,
 	} = await queryBuilds(indexed, f, {
 		perSubmission: true,
@@ -115,11 +125,22 @@ export async function GET(req: NextRequest) {
 		// passkey-kit); prior art and analyze's counts read the text alone.
 		packages: true,
 		countEntries: true,
+		// Hybrid's first 50 reordered by the reranker: on 13 held-out labeled
+		// ideas the top 5 held 15 same-idea builds and 17 wrong ones, where
+		// the hybrid order held 11 and 21 (2026-10-23).
+		rerank: true,
 	});
-	warnings.unshift(...parsed.warnings);
+	warnings.unshift(...ev.warnings, ...parsed.warnings);
 	// Any of q's words in no submission: say which, and what the rows are.
 	const unused = q ? unusedWordsWarning(indexed, q, scored, withheld) : null;
 	if (unused) warnings.push(unused);
+	// Only with no other filter: under track, package, category or
+	// winnersOnly a 0 can mean the filter excluded the row the rest matched.
+	const textless =
+		f.track || f.package || f.category || f.winnersOnly
+			? null
+			: textlessEventWarning(ev.inferredFilter, q, scored.length, indexed);
+	if (textless) warnings.push(textless);
 
 	const builds = scored
 		.slice(offset, offset + limit)
@@ -167,7 +188,7 @@ export async function GET(req: NextRequest) {
 	try {
 		logApiHit({
 			endpoint: "/api/hackathons/builds",
-			query: q,
+			query: sp.get("q")?.trim() || undefined,
 			req,
 			startedAt,
 			status: 200,
@@ -187,10 +208,13 @@ export async function GET(req: NextRequest) {
 								: "filtered",
 				),
 				mode: { requested: f.mode, served: mode },
+				// Present only when the reranker was attempted (q, hybrid served).
+				...(rerank !== undefined ? { reranked: rerank !== null } : {}),
 				...(warnings.length ? { warnings } : {}),
 				source: "https://stellarlight.xyz/api/hackathons/builds",
 				upstream: "dorahacks.io",
 				generatedAt: new Date().toISOString(),
+				...(ev.inferredFilter ? { inferredFilter: ev.inferredFilter } : {}),
 				filters: {
 					q: q ?? null,
 					winnersOnly: f.winnersOnly,
@@ -218,7 +242,7 @@ export async function GET(req: NextRequest) {
 					note: "Stellar packages declared in each matched build's repo manifests (package.json, Cargo.toml). Counted over buildsRead; the other matched builds have no repo link, a repo that is not public, or were not read yet: unknown, not 'uses none'.",
 				},
 				note: q
-					? "Prior art over hackathon PROTOTYPES (DoraHacks submissions); most never become directory projects. Ordered by how many of the query's concepts a build covers, then prize winners first. A hit means someone already built something similar at a Stellar hackathon: check `url` or `githubUrl` before rebuilding, and `project` for what it became. No hit is NOT proof it was never tried (DoraHacks-sourced; non-winners can have thin descriptions)."
+					? `Prior art over hackathon PROTOTYPES (DoraHacks submissions); most never become directory projects. Ordered by how many of the query's concepts a build covers, then prize winners first${rerank ? `; the first ${RERANK_TOP} then reordered by a reranker that reads q with each build's name and summary (meta.reranked)` : ""}. A hit means someone already built something similar at a Stellar hackathon: check \`url\` or \`githubUrl\` before rebuilding, and \`project\` for what it became. No hit is NOT proof it was never tried (DoraHacks-sourced; non-winners can have thin descriptions).`
 					: "No q: prize winners first across all Stellar hackathons. Pass q to check prior art ('has anyone built X at a hackathon?').",
 			},
 			builds,

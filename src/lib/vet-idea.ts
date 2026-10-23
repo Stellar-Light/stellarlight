@@ -16,6 +16,7 @@
  */
 
 import type { Payload } from "payload";
+import { RERANK_FLOOR, RERANK_TOP } from "./build-rerank";
 import {
 	computeEcosystemGaps,
 	GAP_PROJECT_SELECT,
@@ -177,6 +178,11 @@ export interface VetIdeaReport {
 		}> | null;
 		/** The search that served builds: hybrid, or keyword when meaning could not run; null with builds. */
 		buildsMode: BuildSearchMode | null;
+		/** true: the hybrid ranking's first RERANK_TOP were reordered by the
+		 * reranker and builds holds the top five it scored at least
+		 * RERANK_FLOOR; false: it did not run (keyword mode, failed or slow),
+		 * so the hybrid order and the evidence rule served; null with builds. */
+		buildsReranked: boolean | null;
 		/** How many of the five nearest builds are not listed because they fell
 		 * short of the evidence rule. builds [] with a count above 0 means
 		 * submissions came close, not that none exist; null with builds. */
@@ -499,6 +505,10 @@ export async function buildVetIdea(
 	// checked": builds is then null, never [], which would say nobody built
 	// it (outside review, 2026-10-20).
 	const index = await getHackathonBuildsIndex().catch(() => null);
+	// Reranked (src/lib/build-rerank.ts): on 13 held-out labeled ideas the
+	// reranked top five, kept at RERANK_FLOOR, listed 14 same-idea builds and
+	// 10 wrong ones where the hybrid five and the evidence rule listed 11 and
+	// 16 (2026-10-23).
 	const buildSearch = index?.length
 		? await queryBuilds(
 				index,
@@ -508,14 +518,20 @@ export async function buildVetIdea(
 					winnersOnly: false,
 					hackathons: [],
 				},
-				{ perSubmission: true },
+				{ perSubmission: true, rerank: true },
 			).catch(() => null)
 		: null;
-	// The window priorArtTop reads. Its builds that fall short of the evidence
+	// The window the evidence rule reads. Its builds that fall short of the
 	// rule are counted, so an empty list cannot pass for "nobody built this"
-	// when submissions came close (live probe, 2026-10-22).
+	// when submissions came close (live probe, 2026-10-22). When the reranker
+	// ran, its floor is the rule; otherwise priorArtTop's.
 	const nearest = buildSearch?.scored.slice(0, PRIOR_ART_TOP) ?? null;
-	const evidence = nearest ? priorArtTop(nearest) : null;
+	const rerank = buildSearch?.rerank;
+	const evidence = !nearest
+		? null
+		: rerank
+			? nearest.filter((s) => (rerank.get(s.b.id) ?? 0) >= RERANK_FLOOR)
+			: priorArtTop(nearest);
 	const buildsBelowEvidenceRule =
 		nearest && evidence ? nearest.length - evidence.length : null;
 	const n = buildsBelowEvidenceRule ?? 0;
@@ -526,13 +542,18 @@ export async function buildVetIdea(
 			: nearest?.some((s) => s.similarity !== undefined)
 				? "no meaning score reached 0.7"
 				: "none came close enough in meaning to be scored";
+	const why = rerank
+		? `the reranker, reading the idea with each one's name and summary, scored them below ${RERANK_FLOOR}`
+		: `too few of the idea's words matched, and ${meaning}`;
 	const nearMisses =
 		evidence?.length === 0 && n > 0
-			? `builds is empty because ${n === 1 ? "the nearest submission" : `the ${n} nearest submissions`} did not meet the evidence rule: too few of the idea's words matched, and ${meaning}. That is not a finding that nobody built this; searchHackathonBuilds with the same q lists them with the words each matched.`
+			? `builds is empty because ${n === 1 ? "the nearest submission" : `the ${n} nearest submissions`} did not meet the evidence rule: ${why}. That is not a finding that nobody built this; searchHackathonBuilds with the same q lists them with the words each matched.`
 			: null;
 	// A listed build that met only the one-word path: the idea reads as one
-	// word, and the build need only use it.
-	const oneWord = evidence?.find((s) => !twoWordsOrMeaning(s))?.matched[0];
+	// word, and the build need only use it. Not a path when reranked.
+	const oneWord = rerank
+		? undefined
+		: evidence?.find((s) => !twoWordsOrMeaning(s))?.matched[0];
 	const oneWordNote = oneWord
 		? `The search reads this idea as one word, "${oneWord}": each listed build need only mention it in its name or description, which does not make it the same idea.`
 		: null;
@@ -620,9 +641,12 @@ export async function buildVetIdea(
 			repos: priorArtRepos,
 			builds: priorArtBuilds,
 			buildsMode: buildSearch?.served ?? null,
+			buildsReranked: buildSearch ? !!rerank : null,
 			buildsBelowEvidenceRule,
 			note: [
-				"builds: stored hackathon submissions matching the idea, best first, by hybrid search (words plus meaning) unless buildsMode says keyword. matchedTerms are the words each matched; similarity is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (not a synonym, track or award; the search skips generic words such as app) are listed, and buildsBelowEvidenceRule counts the rest. One with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words the set uses, cover half their weight, and include one word found in no more than a tenth of the set, so often none. Dead prior art is itself a signal.",
+				rerank
+					? `builds: stored hackathon submissions matching the idea, best first: hybrid search (words plus meaning), its first ${RERANK_TOP} reordered by a reranker that reads the idea with each build's name and summary (buildsReranked true). Of the reranked top five, the builds it scores at least ${RERANK_FLOOR} are listed, and buildsBelowEvidenceRule counts the rest. matchedTerms are the words each matched; similarity is the meaning score; a build with neither was found by meaning or the reranker alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words the set uses, cover half their weight, and include one word found in no more than a tenth of the set, so often none. Dead prior art is itself a signal.`
+					: "builds: stored hackathon submissions matching the idea, best first, by hybrid search (words plus meaning) unless buildsMode says keyword. matchedTerms are the words each matched; similarity is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (not a synonym, track or award; the search skips generic words such as app) are listed, and buildsBelowEvidenceRule counts the rest. One with similarity and no matchedTerms was found by meaning alone, so check it. repos: judged-hackathon repos from our index that match at least two of the idea's words the set uses, cover half their weight, and include one word found in no more than a tenth of the set, so often none. Dead prior art is itself a signal.",
 				...(nearMisses ? [nearMisses] : []),
 				...(oneWordNote ? [oneWordNote] : []),
 				...(buildSearch

@@ -259,7 +259,7 @@ export interface paths {
         };
         /**
          * Search what was BUILT at Stellar hackathons (prior-art over prototypes)
-         * @description Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals. Unit: submissions (counts.entries = event entries). Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.
+         * @description Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event, placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; in hybrid mode a reranker orders the top 50. Unit: submissions (counts.entries = event entries). Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.
          */
         get: operations["searchHackathonBuilds"];
         put?: never;
@@ -610,6 +610,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/sources/locate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Locate where a flag, option default, function or interface is defined in Stellar's own source
+         * @description Scored pointers into allowlisted Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples): the file, symbol or heading, line, commit and blob sha where a CLI flag, config option default, SDK or host function, or contract interface is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read. pointers [] = no match in the indexed repos; null = could not search.
+         */
+        get: operations["locateSource"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/audits": {
         parameters: {
             query?: never;
@@ -828,6 +848,54 @@ export interface components {
             advisory?: string;
             /** @description Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait (at most 3600, 60 when it sent no usable number); on a 503, 2 on database reads and 60 or 300 on the skills registry. */
             retryAfterSeconds: number;
+        };
+        /** @description Where a fact lives in an allowlisted Stellar repo, never the content: fetch verificationUrl to read it. Names, a line and hashes only. */
+        SourcePointer: {
+            /** @description Short id within this response (s1, s2, ...), the same order as rank. */
+            id: string;
+            /** @description Position in the full ranking for this q (page 2 starts at 11). Array order is rank order. */
+            rank: number;
+            /**
+             * @description owner/name of the repo.
+             * @enum {string}
+             */
+            repo: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples";
+            /** @description The 40-hex commit the pointer was read at. An unchanged file keeps its first ref: the same blob and lines hold at later commits up to the repo's indexed ref (meta.index). */
+            ref: string;
+            /** @description Repo-relative file path. */
+            path: string;
+            /**
+             * @description file = the whole file; symbol = a named definition (function, type, constant, CLI flag, config option or key, environment variable); heading = a Markdown section.
+             * @enum {string}
+             */
+            locatorKind: "file" | "symbol" | "heading";
+            /** @description The symbol name or heading text as written; null for a file pointer. */
+            locator: string | null;
+            /** @description 1-based line the locator sits on at ref; null for a file pointer. */
+            line: number | null;
+            /**
+             * @description implementation = the repo's code (core, SDKs, host, RPC, quickstart); tooling = stellar-cli; reference-docs = any Markdown file and the soroban-examples contracts. A role, not an endorsement.
+             * @enum {string}
+             */
+            authorityRole: "implementation" | "tooling" | "reference-docs";
+            /** @description Which words of q matched and how, at most 100 characters. */
+            matchReason: string;
+            /**
+             * Format: date-time
+             * @description When the index build last confirmed this pointer's blob and line (its repo's builtAt); null only if that build time is unknown.
+             */
+            verifiedAt: string | null;
+            /** @description git blob id of the file at ref, the id GitHub serves for it: provenance, not security. */
+            blobSha: string;
+            /**
+             * Format: uri
+             * @description https://github.com/<repo>/blob/<ref>/<path>#L<line> (no #L for a file pointer).
+             */
+            verificationUrl: string;
+            /** @description 0 to 100 for this q and this pointer alone; compare within one response, not across queries. */
+            score: number;
+            /** @description Compact score parts: words matched of q, exact, prefix (an identifier held in the name), word, path, repo named, name (share of the name's own words q accounts for). */
+            factors: string;
         };
         /** @description The request itself was wrong (a 400): fix the call, do not retry it as is. */
         RequestError: {
@@ -3788,7 +3856,7 @@ export interface operations {
     searchHackathonBuilds: {
         parameters: {
             query?: {
-                /** @description Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when it covers half of q's words, or when its name holds one of them unless most of q's words occur as a whole word in no submission (text or declared packages). A word of four letters or more also matches inside a longer word. When any of q's words occurs as a whole word in no submission, meta.warnings names those words and says what the listed builds are, and says when a build whose name matched was held back (meta.counts.withheldByName). */
+                /** @description Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when it covers half of q's words, or when its name holds one of them unless most of q's words occur as a whole word in no submission (text or declared packages). A word of four letters or more also matches inside a longer word. When any of q's words occurs as a whole word in no submission, meta.warnings names those words and says what the listed builds are, and says when a build whose name matched was held back (meta.counts.withheldByName). With no hackathon parameter, an event named in full in q (its title, in any case, accents and punctuation aside, or its slug, hyphens included, in any case) becomes the hackathon filter and leaves q (meta.inferredFilter). The rest of q is searched inside that event; a rest made only of words the search skips (stopwords and generic words such as app, token, crypto, money, stellar, github) and words that ask for the event's entries (winners, builds, projects, places, awards, rankings) lists the event as the filter alone does. When the rest matches none of the event's rows and none of them holds a description, meta.warnings says so. A name start several events share infers nothing; meta.warnings names those events. Any hackathon parameter turns this off: send hackathon= with no value to search the words as text in every event. */
                 q?: string;
                 /** @description How q matches (default: hybrid). keyword: the query's words, stems and synonyms. meaning: vector similarity over each submission's name, summary and write-up, for ideas phrased differently from how teams described them. hybrid: both, blended. If search by meaning cannot run, keyword results are served and meta.warnings says so (meta.mode.served). */
                 mode?: "keyword" | "meaning" | "hybrid";
@@ -3839,8 +3907,17 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. A hackathon value naming an event whose stored rows are its winners only adds 'only the winners of <slug> are stored ...': its rows are its winners, not its field. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other. */
+                            /** @description Present only with q when hybrid served and a build matched. true = the first 50 of the hybrid ranking (word coverage blended with meaning, winners first among near equals) were reordered by a reranker, a cross-encoder that reads q with each build's name and summary together; it does not read placement, so a winner keeps no edge there except on a tie, and rows past 50 keep the hybrid order. false = the reranker failed, took longer than 2 s, or was skipped because search by meaning had already taken longer than 3 s, so every row is in hybrid order (meta.warnings says which). Absent = not attempted: no q, keyword or meaning mode, no matched build, or no reranker configured. Each page is ranked by its own request: when paging, read this flag on every page, since a page served after a failure is in hybrid order and its rows can repeat or skip rows of a reranked page. */
+                            reranked?: boolean;
+                            /** @description Present only when something limited this answer: search by meaning could not run, the reranker could not run or was skipped ('the reranker could not run this request ...' or 'the reranker was skipped because search by meaning took longer than 3 s ...'; rows are then in hybrid order), a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. A hackathon value naming an event whose stored rows are its winners only adds 'only the winners of <slug> are stored ...': its rows are its winners, not its field. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other. An event named in q adds one line, first: 'q holds the event name ...' when it became the filter (meta.inferredFilter), with the opt-out; 'q holds '<words>', the start of the names of <n> events (<slugs>) ...' or 'q names <n> events (<slugs>) ...' when nothing was inferred and q was searched as text; 'q names the event ... which hackathon= does not select ...' when an explicit hackathon filter won. When the rest of q matched none of an inferred event's stored submissions, none of them holds a description and no other filter (track, package, category, winnersOnly) narrowed the search, a line says so ('<rest>' matched no stored submission of <slug>: its <n> stored submissions hold no description to search; hackathon=<slug> alone lists them): that 0 says the rows hold nothing to search, not that nothing of the kind was built. */
                             warnings?: string[];
+                            /** @description Present only when q named one event in full (its title, or its slug with its hyphens, in any case) and no hackathon parameter was sent: that event was applied as the hackathon filter (meta.filters.hackathon) and its name removed from q (meta.filters.q holds the rest, null when nothing was left to search). Absent = nothing was inferred. To search the words as text in every event instead, send hackathon= with no value. */
+                            inferredFilter?: {
+                                /** @description The slug of the event q named. */
+                                hackathon: string;
+                                /** @description The words of q read as its name, as sent. */
+                                matched: string;
+                            };
                             /** @description The filters as applied: an echo, so a caller can see what was honoured. */
                             filters?: {
                                 q?: string | null;
@@ -4599,7 +4676,7 @@ export interface operations {
                                         basis?: string;
                                     };
                                     priorArt?: {
-                                        /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                        /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. When buildsReranked is true, the first 50 of that ranking are reordered by a reranker that reads the idea with each build's name and summary, and of its top five the builds it scores at least 0.45 are listed. When it is false, of the hybrid top five only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build with similarity and no matchedTerms was found by meaning alone, and a reranked build with neither by the reranker alone, so check it. */
                                         builds?: {
                                             id?: string;
                                             name?: string;
@@ -4616,7 +4693,9 @@ export interface operations {
                                          * @enum {string|null}
                                          */
                                         buildsMode?: "keyword" | "meaning" | "hybrid" | null;
-                                        /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
+                                        /** @description true = the hybrid ranking's first 50 were reordered by a reranker (a cross-encoder model) that reads the idea with each build's name and summary, and builds holds the builds of its top five it scored at least 0.45. false = the reranker did not run: buildsMode is keyword, no submission matched, or it failed, took longer than 2 s, or was skipped because search by meaning had already taken longer than 3 s (the note then says which), so builds is the hybrid top five under the word and meaning rule. null with builds when the index could not be read. */
+                                        buildsReranked?: boolean | null;
+                                        /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule (the reranker's 0.45 when buildsReranked is true). builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
                                         buildsBelowEvidenceRule?: number | null;
                                         repos?: {
                                             fullName?: string;
@@ -5475,7 +5554,7 @@ export interface operations {
                                     basis?: string;
                                 };
                                 priorArt?: {
-                                    /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                    /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. When buildsReranked is true, the first 50 of that ranking are reordered by a reranker that reads the idea with each build's name and summary, and of its top five the builds it scores at least 0.45 are listed. When it is false, of the hybrid top five only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build with similarity and no matchedTerms was found by meaning alone, and a reranked build with neither by the reranker alone, so check it. */
                                     builds?: {
                                         id?: string;
                                         name?: string;
@@ -5492,7 +5571,9 @@ export interface operations {
                                      * @enum {string|null}
                                      */
                                     buildsMode?: "keyword" | "meaning" | "hybrid" | null;
-                                    /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
+                                    /** @description true = the hybrid ranking's first 50 were reordered by a reranker (a cross-encoder model) that reads the idea with each build's name and summary, and builds holds the builds of its top five it scored at least 0.45. false = the reranker did not run: buildsMode is keyword, no submission matched, or it failed, took longer than 2 s, or was skipped because search by meaning had already taken longer than 3 s (the note then says which), so builds is the hybrid top five under the word and meaning rule. null with builds when the index could not be read. */
+                                    buildsReranked?: boolean | null;
+                                    /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule (the reranker's 0.45 when buildsReranked is true). builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
                                     buildsBelowEvidenceRule?: number | null;
                                     repos?: {
                                         fullName?: string;
@@ -5607,7 +5688,7 @@ export interface operations {
                                     basis?: string;
                                 };
                                 priorArt?: {
-                                    /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                    /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. When buildsReranked is true, the first 50 of that ranking are reordered by a reranker that reads the idea with each build's name and summary, and of its top five the builds it scores at least 0.45 are listed. When it is false, of the hybrid top five only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build with similarity and no matchedTerms was found by meaning alone, and a reranked build with neither by the reranker alone, so check it. */
                                     builds?: {
                                         id?: string;
                                         name?: string;
@@ -5624,7 +5705,9 @@ export interface operations {
                                      * @enum {string|null}
                                      */
                                     buildsMode?: "keyword" | "meaning" | "hybrid" | null;
-                                    /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
+                                    /** @description true = the hybrid ranking's first 50 were reordered by a reranker (a cross-encoder model) that reads the idea with each build's name and summary, and builds holds the builds of its top five it scored at least 0.45. false = the reranker did not run: buildsMode is keyword, no submission matched, or it failed, took longer than 2 s, or was skipped because search by meaning had already taken longer than 3 s (the note then says which), so builds is the hybrid top five under the word and meaning rule. null with builds when the index could not be read. */
+                                    buildsReranked?: boolean | null;
+                                    /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule (the reranker's 0.45 when buildsReranked is true). builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
                                     buildsBelowEvidenceRule?: number | null;
                                     repos?: {
                                         fullName?: string;
@@ -5647,7 +5730,7 @@ export interface operations {
                                     basis?: string;
                                 } | null;
                             };
-                            /** @description Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners that match at least half of the idea's words and have two matched words or a meaning score of at least 0.7, then the builds vetIdea lists from the same top five, five at most, so every build listed passes vetIdea's evidence rule. null = the submissions index could not be read (not checked), [] = checked, none listed (vet.priorArt.buildsBelowEvidenceRule says whether the nearest came close). */
+                            /** @description Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners that match at least half of the idea's words and have two matched words or a meaning score of at least 0.7, then the builds vetIdea lists (vet.priorArt.builds, reranked when vet.priorArt.buildsReranked is true), five at most. A build vetIdea lists that the submissions index no longer holds (rebuilt between the two reads) is left out here and named in whatNotToClaim. null = the submissions index could not be read (not checked), [] = checked, none listed (vet.priorArt.buildsBelowEvidenceRule says whether the nearest came close). */
                             builds?: {
                                 /** @description Opens the full submission in getHackathonSubmission. */
                                 id?: string;
@@ -5902,7 +5985,7 @@ export interface operations {
                                 basis?: string;
                             };
                             priorArt?: {
-                                /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it. */
+                                /** @description null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. When buildsReranked is true, the first 50 of that ranking are reordered by a reranker that reads the idea with each build's name and summary, and of its top five the builds it scores at least 0.45 are listed. When it is false, of the hybrid top five only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build with similarity and no matchedTerms was found by meaning alone, and a reranked build with neither by the reranker alone, so check it. */
                                 builds?: {
                                     id?: string;
                                     name?: string;
@@ -5919,7 +6002,9 @@ export interface operations {
                                  * @enum {string|null}
                                  */
                                 buildsMode?: "keyword" | "meaning" | "hybrid" | null;
-                                /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
+                                /** @description true = the hybrid ranking's first 50 were reordered by a reranker (a cross-encoder model) that reads the idea with each build's name and summary, and builds holds the builds of its top five it scored at least 0.45. false = the reranker did not run: buildsMode is keyword, no submission matched, or it failed, took longer than 2 s, or was skipped because search by meaning had already taken longer than 3 s (the note then says which), so builds is the hybrid top five under the word and meaning rule. null with builds when the index could not be read. */
+                                buildsReranked?: boolean | null;
+                                /** @description How many of the five nearest submissions are not in builds because they fell short of the evidence rule (the reranker's 0.45 when buildsReranked is true). builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read. */
                                 buildsBelowEvidenceRule?: number | null;
                                 repos?: {
                                     fullName?: string;
@@ -6225,6 +6310,134 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+        };
+    };
+    locateSource: {
+        parameters: {
+            query: {
+                /** @description What to locate: a symbol, flag, option, config key or topic words (at most 300 characters), e.g. --enable-core-manual-close or getTransactions default limit. Naming a repo in q (stellar-rpc, quickstart) lifts its pointers. */
+                q: string;
+                /** @description Only this allowlisted repo, as owner/name (e.g. stellar/quickstart). Anything else answers 400 with the valid values. */
+                repo?: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples";
+                /** @description Only this locator kind. */
+                kind?: "file" | "symbol" | "heading";
+                /** @description Page of 10 pointers: a whole number from 1 to 2000 written as plain digits. */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ranked pointers. pointers [] with total 0 = searched, no match; pointers null = not indexed yet (meta.note says which). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta: {
+                            /**
+                             * @description Always expanded: identifiers split into words, plurals folded, a few code abbreviations mapped (max, min, config, auth, init, env, tx).
+                             * @enum {string}
+                             */
+                            matchMode?: "expanded";
+                            matchModeLabel?: string;
+                            /** Format: uri */
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description The filters applied (null = not applied). */
+                            filters?: {
+                                q?: string;
+                                repo?: string | null;
+                                kind?: string | null;
+                                page?: number;
+                            };
+                            counts?: {
+                                /** @description Pointers matching q in the searched repos; null when nothing could be searched (totalBasis says why). */
+                                total?: number | null;
+                                returned?: number;
+                                /**
+                                 * @description Present only when total is null: no searched repo is indexed yet.
+                                 * @enum {string}
+                                 */
+                                totalBasis?: "not-indexed";
+                            };
+                            /** @description Each searched repo: the commit indexed, when, and its pointer count; ref null = not indexed yet. */
+                            index?: {
+                                repo?: string;
+                                ref?: string | null;
+                                /** Format: date-time */
+                                builtAt?: string | null;
+                                pointers?: number | null;
+                            }[];
+                            note?: string;
+                            /** @description Present only when there is something to disclose: repos not indexed yet, or a q so broad its candidates were cut. */
+                            warnings?: string[];
+                        };
+                        /** @description This page, best first. [] = no match in the indexed repos; null = could not search. */
+                        pointers: components["schemas"]["SourcePointer"][] | null;
+                        /** @description Pointers matching q; null when nothing could be searched. */
+                        total: number | null;
+                        page: number;
+                        pageSize: number;
+                        /** @description true when a later page holds more pointers. */
+                        truncated: boolean;
+                        /**
+                         * Format: date-time
+                         * @description The oldest build time among the searched, indexed repos.
+                         */
+                        indexAsOf: string | null;
+                    };
+                };
+            };
+            /** @description q missing, over 300 characters or all filler; an unknown parameter, repo or kind; a page that is not a whole number from 1 to 2000. Never silently ignored. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestError"] & {
+                        validParams?: string[];
+                        validValues?: string[];
+                        /** @description For page: the lowest and highest page, [1, 2000]. */
+                        validRange?: number[];
+                    };
+                };
+            };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+            /** @description The index could not be read: an outage, NOT a claim that no source matches. pointers and total are null. Retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending. */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"] & {
+                        /** @description Always null here: could not search. */
+                        pointers?: components["schemas"]["SourcePointer"][] | null;
+                        /** @description Always null here. */
+                        total?: number | null;
+                    };
                 };
             };
         };

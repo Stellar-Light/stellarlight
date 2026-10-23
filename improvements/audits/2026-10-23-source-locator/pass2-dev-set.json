@@ -1,0 +1,278 @@
+{
+	"summary": {
+		"cases": 8,
+		"indexPointers": 21440,
+		"top1": 8,
+		"top3": 8,
+		"top10": 8,
+		"symbolTop10": 8,
+		"missedTop10": [],
+		"partialOnlyTop10": []
+	},
+	"results": [
+		{
+			"id": "d1",
+			"q": "where is the --network flag defined in stellar-cli",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"candidates": 433,
+			"overCap": false,
+			"matched": 433,
+			"top3": [
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/config/network.rs",
+					"locator": "--network",
+					"score": 59,
+					"matchReason": "symbol --network, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/config/network.rs",
+					"locator": "Network",
+					"score": 59,
+					"matchReason": "symbol --network, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/fetch.rs",
+					"locator": "network",
+					"score": 55,
+					"matchReason": "symbol --network; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d2",
+			"q": "soroban sdk ledger sequence number function",
+			"fileRank": 1,
+			"symbolRank": 2,
+			"partialRank": null,
+			"candidates": 1629,
+			"overCap": false,
+			"matched": 1624,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/ledger.rs",
+					"locator": "Ledger",
+					"score": 42,
+					"matchReason": "symbol ledger, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/ledger.rs",
+					"locator": "sequence",
+					"score": 42,
+					"matchReason": "path has ledger; symbol sequence; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/env.rs",
+					"locator": "ledger",
+					"score": 39,
+					"matchReason": "symbol ledger; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d3",
+			"q": "stellar-rpc getEvents handler",
+			"fileRank": 1,
+			"symbolRank": 2,
+			"partialRank": null,
+			"candidates": 2131,
+			"overCap": false,
+			"matched": 2130,
+			"top3": [
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/methods/get_events.go",
+					"locator": "getEvents",
+					"score": 59,
+					"matchReason": "symbol getEvents, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/methods/get_events.go",
+					"locator": "NewGetEventsHandler",
+					"score": 58,
+					"matchReason": "symbol holds getEvents, path too; symbol has handler; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv1/sqlitedb/event.go",
+					"locator": "GetEvents",
+					"score": 57,
+					"matchReason": "symbol getEvents, path too; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d4",
+			"q": "Horizon submitTransaction in js-stellar-sdk",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"candidates": 2064,
+			"overCap": false,
+			"matched": 2064,
+			"top3": [
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/horizon/server.ts",
+					"locator": "submitTransaction",
+					"score": 59,
+					"matchReason": "path has horizon; symbol submitTransaction; repo named in q"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/horizon/server.ts",
+					"locator": "SUBMIT_TRANSACTION_TIMEOUT",
+					"score": 44,
+					"matchReason": "path has horizon; symbol holds submitTransaction; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "scripts/settings-helper.sh",
+					"locator": "HORIZON",
+					"score": 41,
+					"matchReason": "symbol Horizon"
+				}
+			]
+		},
+		{
+			"id": "d5",
+			"q": "quickstart --enable-lab option",
+			"fileRank": 1,
+			"symbolRank": 2,
+			"partialRank": null,
+			"candidates": 203,
+			"overCap": false,
+			"matched": 201,
+			"top3": [
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "ENABLE_LAB",
+					"score": 55,
+					"matchReason": "symbol --enable-lab; repo named in q"
+				},
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "--enable-lab",
+					"score": 55,
+					"matchReason": "symbol --enable-lab; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv1/config/option.go",
+					"locator": "Option",
+					"score": 45,
+					"matchReason": "symbol option, path too"
+				}
+			]
+		},
+		{
+			"id": "d6",
+			"q": "increment example contract",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"candidates": 853,
+			"overCap": false,
+			"matched": 853,
+			"top3": [
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "increment/src/lib.rs",
+					"locator": "increment",
+					"score": 39,
+					"matchReason": "symbol increment, path too; path has example"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "deployer/contract/src/lib.rs",
+					"locator": "Contract",
+					"score": 39,
+					"matchReason": "path has example; symbol contract, path too"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "increment_with_fuzz/src/lib.rs",
+					"locator": "increment",
+					"score": 39,
+					"matchReason": "symbol increment, path too; path has example"
+				}
+			]
+		},
+		{
+			"id": "d7",
+			"q": "stellar-core HTTP_PORT default",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"candidates": 314,
+			"overCap": false,
+			"matched": 314,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/Config.cpp",
+					"locator": "HTTP_PORT",
+					"score": 55,
+					"matchReason": "symbol HTTP_PORT; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "docs/stellar-core_testnet.cfg",
+					"locator": "HTTP_PORT",
+					"score": 55,
+					"matchReason": "symbol HTTP_PORT; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "docs/stellar-core_example.cfg",
+					"locator": "HTTP_PORT",
+					"score": 55,
+					"matchReason": "symbol HTTP_PORT; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d8",
+			"q": "contractimpl macro",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"candidates": 37,
+			"overCap": false,
+			"matched": 37,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk-macros/src/lib.rs",
+					"locator": "contractimpl",
+					"score": 53,
+					"matchReason": "symbol contractimpl; path has macro"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-builtin-sdk-macros/src/lib.rs",
+					"locator": "contractimpl",
+					"score": 53,
+					"matchReason": "symbol contractimpl; path has macro"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-macros/src/lib.rs",
+					"locator": "generate_call_macro_with_all_host_functions",
+					"score": 22,
+					"matchReason": "symbol has macro, path too"
+				}
+			]
+		}
+	]
+}

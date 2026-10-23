@@ -165,6 +165,16 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    the holdout from 0.745. i01's Delibera uses every word of the idea and
    scores 0.788, so a floor above that also drops same-idea builds on other
    ideas. Labels are drafts.
+   2026-10-23 (rerank round, `improvements/audits/2026-10-23-rerank/`, on
+   branch `lane/s-rerank`, not merged): reranking the hybrid top 50 with a
+   cross-encoder and listing the top five it scores at least 0.45 removes
+   Delibera (i01), QR Mint (i04) and Stellar Automations Studio (i11) from
+   vetIdea's five. It also loses AgentPay (i01) and BLOCKI (i04), both
+   graded 2, and it loses builds graded 2 on every set but the holdout,
+   against larger gains: working 16 lost and 20 gained, short 12 and 32,
+   tests 13 and 17, fresh 6 and 6, holdout 0 and 3. So the done-when below
+   is not met and the item stays open. Next: the prior-art judge (built,
+   blocked on API credit), then owner review of the draft labels.
    Done when: a rule, measured as in that directory on a fresh held-out
    slice, lists fewer builds graded 0 with no build graded 2 lost on any
    labeled set, and QR Mint and Stellar Automations Studio are no longer
