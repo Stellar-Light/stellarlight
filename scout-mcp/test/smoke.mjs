@@ -836,7 +836,7 @@ async function main() {
 				`rs-soroban-env soroban-env-host/src/auth.rs ${within}`,
 				pointers.map((p) => `${p.rank} ${p.repo} ${p.path}`).join("; "),
 			);
-		if (!STRICT) skip("auth.rs in the top 3", "SMOKE_STRICT=1 only");
+		if (!STRICT) skip("auth.rs in the top 3", "strict mode only (SMOKE_STRICT=1)");
 		if (
 			hit?.verificationUrl?.startsWith(
 				`https://github.com/stellar/rs-soroban-env/blob/${hit.ref}/`,
@@ -965,7 +965,7 @@ async function main() {
 				compact.raw.slice(0, 40),
 			);
 		if (!STRICT)
-			skip("compact q=lending under 24,000 characters", "SMOKE_STRICT=1 only");
+			skip("compact q=lending under 24,000 characters", "strict mode only (SMOKE_STRICT=1)");
 		else if (compact.raw.length < 24_000)
 			pass(`compact q=lending under 24,000 characters (${compact.raw.length})`);
 		else
