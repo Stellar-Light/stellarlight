@@ -122,10 +122,19 @@ export async function GET(req: NextRequest) {
 		q && scored.some((s) => s.matched.length && s.similarity === undefined)
 			? wordsNoBuildUses(indexed, q)
 			: null;
-	if (unused && unused.absent.length * 2 > unused.concepts)
+	if (unused && unused.absent.length * 2 > unused.concepts) {
+		const { absent, concepts } = unused;
+		const words = `searched in q (${absent.join(", ")})`;
+		// Every word in no submission: a words-alone build holds them only
+		// inside longer words ("1 of the 1 words ... part of q" said less).
 		warnings.push(
-			`${unused.absent.length} of the ${unused.concepts} words searched in q (${unused.absent.join(", ")}) occur as a whole word in no submission in the index (a matchedTerms entry naming one was found inside a longer word), so a build listed by its words alone, with no similarity, matches only part of q and is not evidence that this idea was built`,
+			absent.length < concepts
+				? `${absent.length} of the ${concepts} words ${words} occur as a whole word in no submission in the index (a matchedTerms entry naming one was found inside a longer word), so a build listed by its words alone, with no similarity, matches only part of q and is not evidence that this idea was built`
+				: concepts === 1
+					? `the word ${words} occurs as a whole word in no submission in the index: a build listed by its words alone, with no similarity, holds it only inside a longer word and is not evidence that this idea was built`
+					: `none of the ${concepts} words ${words} occurs as a whole word in any submission in the index: a build listed by its words alone, with no similarity, holds them only inside longer words and is not evidence that this idea was built`,
 		);
+	}
 
 	const builds = scored
 		.slice(offset, offset + limit)

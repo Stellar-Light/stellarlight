@@ -7,6 +7,7 @@ import {
 	indexedFromStored,
 	onePerSubmission,
 	searchHackathonBuilds,
+	wordsNoBuildUses,
 } from "@/lib/hackathon-builds";
 import {
 	type DoraHacksHackathon,
@@ -381,6 +382,24 @@ describe("rarity and phrases", () => {
 		expect(out[0].b.name).toBe("Spaced");
 		expect(out[0].matched).toEqual(["pay-per-call"]);
 		expect(out.map((s) => s.b.name)).not.toContain("Parts");
+	});
+});
+
+describe("words no build uses", () => {
+	const pool = [build("Agent Pay", "AI agents, payments at the café.")];
+
+	it("reads a word with edge punctuation or an accent as a whole word", () => {
+		expect(wordsNoBuildUses(pool, "agents, café")).toEqual({
+			absent: [],
+			concepts: 2,
+		});
+	});
+
+	it("still counts a word found only inside a longer one as absent", () => {
+		expect(wordsNoBuildUses(pool, "gents cafés agent")).toEqual({
+			absent: ["gents"],
+			concepts: 3,
+		});
 	});
 });
 

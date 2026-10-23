@@ -112,8 +112,20 @@ and no similarity):
 > built
 
 A build found by meaning is scored on the whole query, so it is not covered.
-The term building moved into `queryTerms`, shared by the scorer and the new
+When every word searched in q is in no submission, the line says so exactly
+("the word searched in q (llama) ..." or "none of the 3 words ..."). The
+term building moved into `queryTerms`, shared by the scorer and the new
 function.
+
+After review, the whole-word test the warning reads is its own: a form
+counts as used when it occurs with no letter or digit on either side, in any
+script, with its edge punctuation dropped. The first version used the
+scorer's ASCII `\b`, so "agents," and "café" were reported in no build while
+matchedTerms named them, and `q=AI agents, payments, café` fired the line
+with both of its clauses false. The scorer's own matching is unchanged.
+Re-run on both captures with this test: rows identical to the base, and
+where the line fires unchanged (the same queries and ideas, the same absent
+words).
 
 **Rows are identical.** The replay with and without the change gives the same
 output, every field of every ranking: on the 140 labeled ideas (the builds

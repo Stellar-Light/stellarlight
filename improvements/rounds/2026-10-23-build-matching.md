@@ -337,3 +337,45 @@ fresh battery written by a separate agent that was told no rule.
 - meta.counts shows matched 2 and entries 2.
 - vetIdea's priorArt.builds for "passkey wallet", "soroban sdk" and
   "stablecoin wallet for remittances" equals the 1.9.92 capture, id for id.
+
+### Lane L review (Claude Fable 5.1, effort high, fresh context)
+
+- GATE: fix. Verified: the term-building refactor is byte-identical, the
+  trigger logic, the compare keys on every row, and that each test fails
+  with its fix reverted. Four findings, all fixed in a fourth commit on top
+  of the orchestrator's comment-only third commit (87be134e):
+  1. Medium: the warning could say something false. Its whole-word test
+     used the scorer's `\b`, ASCII-only and needing a word character beside
+     the token, while the scorer admits a token of four or more letters by
+     substring. `q=agents, payments` lists Agent Pay with matchedTerms
+     ["agents,", "payments"] yet reported "agents," absent; "café" the same;
+     `q=AI agents, payments, café` fired the line with both clauses false.
+     Fix, in the warning path only: a form counts as used when it occurs
+     with no letter or digit on either side (Unicode lookarounds), edge
+     punctuation dropped. termMatcher is back to its base text; rankings
+     do not change.
+  2. Low: prizePoolUSD's description gains "(a 0 counts as none)": the
+     listing's 0 pool is served as null.
+  3. Low: the skill reference said an event with no stored submissions has
+     null counts; a curated record serves directory counts, a real 0
+     included. It now says "no stored submissions and no curated record".
+  4. Low: for a one-word q the line said "1 of the 1 words ... matches only
+     part of q". When every word is in no submission it now says "the word
+     searched in q (...) ... holds it only inside a longer word", or "none
+     of the <m> words ... holds them only inside longer words".
+- Tests first, against 87be134e: `npx vitest run
+  src/lib/__tests__/hackathon-builds.test.ts -t "words no build uses"`: 2
+  failed (`expected { absent: [ 'agents,', 'café' ], ...(1) } to deeply
+  equal { absent: [], concepts: 2 }`; `expected { absent: [ 'gents',
+  'cafés' ], ...(1) } to deeply equal { absent: [ 'gents' ], concepts: 3
+  }`). `npx vitest run src/app/api/hackathons/builds/__tests__/route.test.ts
+  -t "most of q matches no build"`: 2 failed (`expected [ Array(1) ] to be
+  undefined` for `AI agents, payments, café`; the one-word line received
+  "1 of the 1 words searched in q (nread) ..."), 4 passed. With the fixes:
+  58 of 58 in the two files pass.
+- Replay with the fixes on lane K's capture (140 ideas) and the fresh
+  capture: every ranking identical to the base; `note.mts` output identical
+  to the committed `note-fresh.txt` and `note-labeled.txt`, so where the
+  line fires did not change anywhere measured.
+- Spec: prizePoolUSD clause; meta.warnings names the all-absent wordings.
+  Changelog 1.9.94: the wordings and the whole-word rule.

@@ -167,6 +167,35 @@ describe("GET /api/hackathons/builds says when most of q matches no build", () =
 		expect(body.meta.counts.matched).toBe(2);
 		expect(body.meta.warnings).toBeUndefined();
 	});
+
+	// Review 2026-10-23: "agents," and "café" were reported in no submission
+	// while matchedTerms named them, so the line fired with both clauses false.
+	it("reads a word with a trailing comma or an accent as the build's own", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			build("agentpay", {
+				haystack: "agentpay: ai agents, payments, a café",
+			}),
+		]);
+		const body = await get("AI agents, payments, café");
+		expect(
+			(body.builds as Array<Record<string, unknown>>).map((r) => [
+				r.id,
+				r.matchedTerms,
+			]),
+		).toEqual([["agentpay", ["ai", "agents,", "payments,", "café"]]]);
+		expect(body.meta.warnings).toBeUndefined();
+	});
+
+	it("words the line for a one-word q", async () => {
+		const body = await get("nread");
+		expect((body.builds as Array<{ id: string }>).map((r) => r.id)).toEqual([
+			"unread",
+		]);
+		expect(body.meta.warnings).toEqual([
+			"the word searched in q (nread) occurs as a whole word in no submission in the index: a build listed by its words alone, with no similarity, holds it only inside a longer word and is not evidence that this idea was built",
+		]);
+	});
 });
 
 describe("GET /api/hackathons/builds hackathon filter", () => {

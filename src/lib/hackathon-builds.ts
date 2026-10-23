@@ -618,12 +618,23 @@ const QUERY_FILLER = new Set(["like", "similar"]);
 /** A term of three letters or fewer ("ai", "zk", "nft") matches as a whole
  * word only: as a substring, "ai" hit every "chain", "paid" and "maintain". */
 function termMatcher(v: string): (hay: string) => boolean {
-	return v.length > 3 ? (hay) => hay.includes(v) : wholeWord(v);
-}
-
-function wholeWord(v: string): (hay: string) => boolean {
+	if (v.length > 3) return (hay) => hay.includes(v);
 	const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	const re = new RegExp(`\\b${escaped}\\b`);
+	return (hay) => re.test(hay);
+}
+
+/** A form as a whole word in any script, edge punctuation dropped ("agents,"
+ * is agents), or null for a form with no letter or digit. `\b` is ASCII-only
+ * and needs a word character beside the form, so it called "agents," and
+ * "café" in no build while the scorer, matching them by substring, listed
+ * builds that hold them (review, 2026-10-23). The warning reads this; the
+ * scorer's own matching is unchanged. */
+function anyScriptWord(v: string): ((hay: string) => boolean) | null {
+	const core = v.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+	if (!core) return null;
+	const escaped = core.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const re = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "u");
 	return (hay) => re.test(hay);
 }
 
@@ -679,8 +690,10 @@ export function wordsNoBuildUses(
 	const hays = indexed.map(withPackages);
 	const absent = terms
 		.filter(({ forms }) => {
-			const hits = forms.map(wholeWord);
-			return !hays.some((hay) => hits.some((hit) => hit(hay)));
+			const hits = forms.flatMap((f) => anyScriptWord(f) ?? []);
+			return (
+				hits.length > 0 && !hays.some((hay) => hits.some((hit) => hit(hay)))
+			);
 		})
 		.map(({ t }) => t);
 	return { absent, concepts: terms.length };

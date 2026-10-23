@@ -3453,7 +3453,7 @@ export interface operations {
                             startDate?: string | null;
                             endDate?: string | null;
                             externalUrl?: string | null;
-                            /** @description null when the source publishes none: unknown, never zero. */
+                            /** @description null when the source publishes none (a 0 counts as none): unknown, never zero. */
                             prizePoolUSD?: number | null;
                             /** @description curated, dorahacks or not-found: where the event's row came from, as getHackathons labels it: curated (a hand-kept event) or dorahacks. not-found = no listing holds the slug; when the listing could not be read, deltas.notes says so and the miss is unchecked. */
                             source?: string;
@@ -3662,7 +3662,7 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or most of the words searched in q occur as a whole word in no submission while a build is listed by its words alone ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built; the q line means a build listed by its words alone, with no similarity, matches only part of q and is not evidence that the idea was built. */
+                            /** @description Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or most of the words searched in q occur as a whole word in no submission while a build is listed by its words alone ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built; the q line means a build listed by its words alone, with no similarity, matches only part of q and is not evidence that the idea was built. */
                             warnings?: string[];
                             /** @description The filters as applied: an echo, so a caller can see what was honoured. */
                             filters?: {
