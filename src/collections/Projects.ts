@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
 import { PROJECT_TYPES } from "@/lib/project-types";
+import { LLAMA_LISTING_STATES } from "@/lib/status-checks";
 import { generateSlug, normalizeUrlField } from "../lib/utils/normalize";
 import { adminOnly, isAdmin } from "./access";
 
@@ -421,6 +422,16 @@ export const Projects: CollectionConfig = {
 					type: "date",
 					admin: {
 						description: "Timestamp of the snapshot the deltas compare against",
+					},
+				},
+				{
+					// DQ1: written by enrich-onchain (quietSinceFor in
+					// src/lib/status-checks.ts), read by the status checks.
+					name: "quietSince",
+					type: "date",
+					admin: {
+						description:
+							"Start of the unbroken run of snapshots in which no tracked contract's events or subinvocations moved. Null = moved in the latest window, or not measured.",
 					},
 				},
 				{
@@ -910,6 +921,32 @@ export const Projects: CollectionConfig = {
 			name: "llamaSlugs",
 			type: "text",
 			hasMany: true,
+		},
+		{
+			// DQ1 (2026-10-23): DefiLlama's own verdict on the llamaSlugs, read
+			// from its /protocols list by scripts/enrich-tvl.ts (its only
+			// writer). Read by src/lib/status-checks.ts, which serves it as a
+			// status check; it is not served as a field of its own.
+			name: "llamaListing",
+			type: "group",
+			admin: {
+				description:
+					"DefiLlama's verdict on the mapped slugs: listed, deprecated (every slug deprecated or dead), or not-found (renamed or removed upstream, never a death). Written by enrich-tvl.",
+			},
+			fields: [
+				{
+					name: "state",
+					type: "select",
+					options: [...LLAMA_LISTING_STATES],
+				},
+				{
+					// Text, not a date: DefiLlama publishes it as a string and one
+					// upstream value (2022-02-31) is not a valid date.
+					name: "deadFrom",
+					type: "text",
+				},
+				{ name: "checkedAt", type: "date" },
+			],
 		},
 		{
 			name: "provenance",

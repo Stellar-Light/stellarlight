@@ -89,7 +89,7 @@ describe("deployment contract parity", () => {
 			join(process.cwd(), "src/app/api/projects/search/route.ts"),
 			"utf8",
 		);
-		const builders = route.match(/statusConfidence: factConfidence\(/g) ?? [];
+		const builders = route.match(/\.\.\.statusChecksFor\(/g) ?? [];
 		// The serializer must receive the row's slug, or the registry fill
 		// (sls-023) silently never applies — a bare pickDeployment(x.deployment)
 		// would satisfy a looser regex while serving unknown for every issuer.

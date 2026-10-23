@@ -28,6 +28,7 @@ import "../load-env";
 import { getPayload } from "payload";
 import { ONCHAIN_SEEDS } from "../../src/data/onchain-contracts";
 import { STABLECOIN_REGISTRY } from "../../src/data/stablecoin-registry";
+import { quietSinceFor } from "../../src/lib/status-checks";
 import { diffWritten, formatMismatches } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
 import { domainOf, fetchText, parseStellarToml } from "../lib/stellar-toml";
@@ -515,6 +516,11 @@ async function run() {
 						(c.subinvocations as number) - old.subinvocations;
 			}
 		}
+		// DQ1: the start of the run of readings in which no contract moved,
+		// carried across runs; the status checks need 60 observed days of it.
+		const quietSince = contracts.length
+			? quietSinceFor(contracts, prior)
+			: null;
 		const assetHoldersDelta =
 			priorAsOf &&
 			typeof prior?.assetHolders === "number" &&
@@ -573,7 +579,9 @@ async function run() {
 		]
 			.filter(Boolean)
 			.join(", ");
-		console.log(`${execute ? "WRITE" : "would write"} ${slug}: ${summary}`);
+		console.log(
+			`${execute ? "WRITE" : "would write"} ${slug}: ${summary}${quietSince ? ` (contracts quiet since ${quietSince.slice(0, 10)})` : ""}`,
+		);
 		for (const c of contracts) {
 			console.log(
 				`    ${String(c.label)}: events=${c.events} subinv=${c.subinvocations}${c.verifiedRepo ? " repo-verified" : ""}`,
@@ -601,6 +609,7 @@ async function run() {
 						asOf,
 						prevAsOf: priorAsOf ? new Date(priorAsOf).toISOString() : null,
 						deltaDays,
+						quietSince,
 					},
 				},
 			});

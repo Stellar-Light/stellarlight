@@ -4954,6 +4954,18 @@ export const SEEDS: Array<{
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DESCRIPTION_FIXES: Record<string, string> = {
+	// Lane DQ1 (2026-10-23): the row described Allbridge Core as current.
+	// Core was exploited for about $1.65M on 2026-07-19 and paused (The
+	// Block, 2026-07-19); docs-core.allbridge.io says Core's liquidity pools
+	// were discontinued in July 2026 and that Stellar is unavailable on the
+	// relaunched, CCTP-based Core while its Stellar implementation awaits
+	// audit (read 2026-10-23); Allbridge said Core and Classic would stop in
+	// their current form as it moves fully to Allbridge Next. Next's app
+	// (next.allbridge.io, bundle read 2026-10-23) carries Stellar (Horizon,
+	// Freighter) beside EVM wallets, Solana, TRON and TON. DefiLlama marks
+	// allbridge-core deprecated, deadFrom 2026-08-31.
+	allbridge:
+		"Allbridge is a cross-chain bridge provider. Its current app, Allbridge Next (next.allbridge.io), lists Stellar beside EVM chains, Solana, Tron and TON. On 2026-07-19 Allbridge Core, the pool-based bridge that brought native USDC swaps to Stellar on Soroban, was exploited for about $1.65M and paused; its liquidity pools were then discontinued, Stellar stays off the relaunched Core pending an audit, and Allbridge is moving its products to Next.",
 	// Raven sls-091: the row still said "Currently on testnet, with mainnet
 	// pending" beside a sourced mainnet deployment. Zenex's deployments page
 	// (docs.zenex.trade/deployments/contract-addresses, checked by the

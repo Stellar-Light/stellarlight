@@ -499,6 +499,10 @@ export interface Project {
 		 */
 		prevAsOf?: string | null;
 		/**
+		 * Start of the unbroken run of snapshots in which no tracked contract's events or subinvocations moved. Null = moved in the latest window, or not measured.
+		 */
+		quietSince?: string | null;
+		/**
 		 * Days between snapshots (delta window length)
 		 */
 		deltaDays?: number | null;
@@ -732,6 +736,14 @@ export interface Project {
 	 */
 	tvlMethod?: string | null;
 	llamaSlugs?: string[] | null;
+	/**
+	 * DefiLlama's verdict on the mapped slugs: listed, deprecated (every slug deprecated or dead), or not-found (renamed or removed upstream, never a death). Written by enrich-tvl.
+	 */
+	llamaListing?: {
+		state?: ("listed" | "deprecated" | "not-found") | null;
+		deadFrom?: string | null;
+		checkedAt?: string | null;
+	};
 	provenance: {
 		source: "LumenloopSeed" | "UserSubmitted" | "AdminEdit";
 		sourceId?: string | null;
@@ -3439,6 +3451,7 @@ export interface ProjectsSelect<T extends boolean = true> {
 				source?: T;
 				asOf?: T;
 				prevAsOf?: T;
+				quietSince?: T;
 				deltaDays?: T;
 		  };
 	coverage?:
@@ -3530,6 +3543,13 @@ export interface ProjectsSelect<T extends boolean = true> {
 	tvlSource?: T;
 	tvlMethod?: T;
 	llamaSlugs?: T;
+	llamaListing?:
+		| T
+		| {
+				state?: T;
+				deadFrom?: T;
+				checkedAt?: T;
+		  };
 	provenance?:
 		| T
 		| {

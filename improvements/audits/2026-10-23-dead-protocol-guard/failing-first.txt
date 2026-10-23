@@ -1,0 +1,20 @@
+Tests written before the fix, run against the base sources (origin/main
+724f4e6a plus the new and edited test files only), 2026-10-23 16:49 local:
+
+  npx vitest run src/lib/__tests__/status-checks.test.ts \
+    src/app/api/projects/search/__tests__/route.test.ts \
+    src/lib/__tests__/verify-claim.test.ts \
+    src/lib/__tests__/project-deployment.test.ts --maxWorkers=4 --minWorkers=1
+
+  Test Files  4 failed (4)
+       Tests  3 failed | 40 passed (43)
+
+  status-checks.test.ts: Failed to resolve import "../status-checks"
+    (the guard module does not exist on the base; every test in it fails)
+  route.test.ts > status checks (DQ1) > caveats the deprecated row and
+    leaves the unlinked row as it was: statusCaveat is undefined
+  verify-claim.test.ts > Live on record with a dead upstream protocol:
+    the statement is "X is Live on record (basis: human-verified, as of
+    2026-08-27)." with no caveat
+  project-deployment.test.ts > every search-route row builder uses the ONE
+    shared serializer: 0 builders call statusChecksFor, 3 call pickDeployment

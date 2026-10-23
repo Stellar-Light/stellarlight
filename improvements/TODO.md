@@ -232,6 +232,25 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     `facet=placement` 68 winners of 1,371 with the left-out line;
     hackmeridian-2026 its four declared tracks and `prizeTiers` null.
 
+11. **A Live row whose DefiLlama protocol is dead reads as plainly Live.**
+    Probe: `/api/projects/search?q=allbridge` serves Allbridge `status:
+    Live`, `statusConfidence` 0.9 high and no `statusCaveat`, while
+    `https://api.llama.fi/protocols` marks `allbridge-core` deprecated with
+    `deadFrom` 2026-08-31; `/api/verify?type=live&subject=allbridge` answers
+    supported, 0.9 high (live 1.9.101, 2026-10-23).
+    Found by the owner's read of the row; measured in
+    `improvements/rounds/2026-10-23-dead-protocol-guard.md`.
+    State: fixed on branch `lane/dq1-dead-protocol-guard` (spec 1.9.108,
+    placeholder), not pushed. The guard needs the enrich-tvl lane to store
+    `llamaListing`; the Allbridge description and routes need a curate-projects
+    execute; the dispatch steps are in the ledger.
+    Done when: merged and deployed; the enrich-tvl and curate-projects lanes
+    ran (dry run read first); live, re-checked by someone other than the
+    author: every DefiLlama-linked row serves `statusChecks`, Allbridge serves
+    the Allbridge Next description, `llamaSlugs` [allbridge-next], `tvlUSD`
+    null, `routes` null and a clear listing check, and no other row carries a
+    `statusCaveat` unless its DefiLlama protocol is deprecated or dead.
+
 ## Next
 
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
@@ -346,6 +365,41 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   users likely share one per-IP limit [inferred]. See the owner decision on
   a key below.
 
+Found 2026-10-23 by the dead-protocol guard round
+(`improvements/rounds/2026-10-23-dead-protocol-guard.md`):
+
+- Two DefiLlama slugs in `scripts/enrich-tvl.ts` LLAMA_MAP no longer
+  resolve, so their TVL freezes and the listing check reads could-not-check:
+  `soroswap` (now `soroswap-amm`, Stellar slice $1,177,991 on 2026-10-23;
+  stored tvlAsOf 2026-10-19) and `sentora` (now `sentora-curator`, which no
+  longer lists Stellar; stored $10,393,904 at tvlAsOf 2026-08-10).
+- Three LLAMA_MAP keys match no public directory row, so those rows carry
+  no DefiLlama link and the status checks never see them:
+  `phoenix-protocol` (the row is `phoenix`, Live; DefiLlama
+  `phoenix-defi-hub` $47,473 on Stellar), `normal-stellar-amm` (the row is
+  `normal`, Live, human-verified 2026-09-02; DefiLlama `normal` TVL $0, and
+  normalfinance.io's own stellar.toml marks all ten of its currencies
+  `status = "dead"`, read 2026-10-23) and `whalehub` (no row).
+- Estrela is served Live (basis repo-activity) with Allbridge Core's bridge
+  routes copied in curate-projects, but its SCF page (#22 and #35) describes
+  Allbridge's Soroban stablecoin AMM (allbridge-io/dex-soroban-contracts, last
+  commit 2025-07-24), not the bridge. The round clears the copied routes; its
+  supportedNetworks (EVM, Solana, Tron, Sui) and its status are unreviewed.
+- Agent-facing text still recommends the Allbridge Core SDK for moving USDC
+  from EVM chains to Stellar (`src/lib/stellar-scout-skill.ts`, the Allbridge
+  SDK bullet; `src/lib/integrations/curated-skills.ts`, slug allbridge-sdk),
+  while docs-core.allbridge.io says Stellar is unavailable on the relaunched
+  Core pending audit (read 2026-10-23).
+- `view=compact` project rows do not carry `statusCaveat`; adding it gives
+  every compact row a new null key.
+- The TVL rule of the status checks cannot speak until enrich-onchain has
+  stored 60 days of `onchain.quietSince`; today no row has more than 7 days of
+  observed silence on record.
+- The status checks see only the 18 of 1,005 public rows with a DefiLlama
+  link; a dead product with no link (or a stale slug, above) is not checked.
+- enrich-onchain writes `projects.onchain` without reading it back (only
+  `codeInUse` is verified).
+
 
 ## Owner decisions (safe default in brackets)
 
@@ -362,6 +416,11 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
 - Set `ADMIN_ROUTE_SECRET` (32 or more characters) in the production environment, for scripted
   calls to the five `/api/admin/*` routes and `/api/import/airtable` through
   the `x-admin-secret` header [unset: admin session only].
+- Allbridge's status stamp: human-verified 2026-09-05 rested on a 200 page
+  and an SDK repo push while Allbridge Core on Stellar held $0 (DefiLlama's
+  Stellar series reads $0 from 2026-08-21). Re-stamp it on Allbridge Next
+  evidence, or withdraw it [withdraw to site-liveness, status unchanged,
+  until the owner re-checks Next on Stellar].
 - Rotate `PAYLOAD_SECRET`: until the admin-auth round, every blog preview
   put it in a URL (request logs, browser history). It signs every session,
   so rotating logs every admin and partner out [no rotation unless a log

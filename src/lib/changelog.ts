@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.108",
+		type: "fixed",
+		summary:
+			"A Live project whose DefiLlama protocol is dead no longer reads as plainly Live. searchProjects rows with a DefiLlama link (llamaSlugs) now carry statusChecks and statusCaveat: when DefiLlama marks every linked slug deprecated or dead, or when a DEX, Lending, Bridge or Yield row has DefiLlama TVL 0 and no tracked contract moved for 60 or more days of observed time, a Live row serves a one-sentence caveat and its statusConfidence is halved; the status itself does not move. verifyClaim type=live applies the same checks: the verdict stays supported, the statement carries the caveat, a status-check evidence row names the fact and confidence is halved. Rows without a DefiLlama link are unchanged. Allbridge served Live at 0.9 high while DefiLlama marked allbridge-core deprecated (deadFrom 2026-08-31) after the July 2026 Core exploit.",
+		detail:
+			"Each check is hit, clear or could-not-check, and a failed or missing read is never a hit: a listing not read yet, a slug missing from DefiLlama's list (a rename or removal, as soroswap's mapped slug on 2026-10-23), a null TVL, a row with no tracked contract, contracts never measured, and silence observed for under 60 days are each could-not-check. statusChecks is present only on rows with a DefiLlama link and statusCaveat only beside it; null means no check hit or the row is not Live. The facts are stored by the enrich lanes: enrich-tvl records DefiLlama's verdict on the mapped slugs (llamaListing, read from the full /protocols list) and no longer writes 0 for a protocol whose TVL DefiLlama serves as null; enrich-onchain records when its contracts last moved (onchain.quietSince), so the TVL rule can speak only after 60 days of readings. Until the lanes run, every listing check reads could-not-check. Allbridge's mapping moves from allbridge-core to allbridge-next (Allbridge Next, no TVL figure upstream), so its tvlUSD becomes null with llamaSlugs [allbridge-next]: with llamaSlugs set, tvlUSD null now means the linked protocol publishes no Stellar TVL figure. Its description (curate lane) now describes Allbridge Next with one dated line on the 2026-07-19 Core exploit and wind-down, and the Core liquidity-pool routes on allbridge and estrela are cleared (routes null, not curated). The skill's API reference says how to relay the caveat. Measured on 1,005 public rows (live 1.9.101, DefiLlama /protocols read 2026-10-23): 18 rows have a DefiLlama link; with the listing the lane would write, the guard caveats 1 row (Allbridge), and the TVL rule hits none (the only Live TVL-0 row, Allbridge, has 6 days of observed contract silence on record). None of the 20 highest-prominence Live rows is caveated. A replay of the real search handler over 30 captured query pages, base and this change on the same rows: all 467 served rows without a DefiLlama link and all 10 pages with none are byte-identical.",
+	},
+	{
+		date: "2026-10-23",
 		surfaces: ["mcp"],
 		version: "scout-mcp@1.8.0",
 		type: "added",

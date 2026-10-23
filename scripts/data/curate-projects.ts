@@ -1269,28 +1269,19 @@ const ROUTES_SET: Record<string, CuratedRoute[]> = {
 			asOf: "2026-07-11",
 		},
 	),
-	// docs-core.allbridge.io chain list + live SRB (Soroban) USDC pool on the
-	// core API (verified 2026-07-09). Allbridge Core swaps between NATIVE-asset
-	// liquidity pools on each chain — destination USDC is the chain's canonical
-	// issue, which is also what the sls-032 quote-time audit observed.
-	allbridge: stellarRoutes(["evm", "solana", "tron", "sui"], {
-		direction: "bidirectional",
-		assets: ["USDC"],
-		assetRepresentation: "canonical",
-		mechanism: "native-liquidity-pool",
-		sourceUrl: "https://docs-core.allbridge.io",
-		asOf: "2026-07-09",
-	}),
-	// Estrela = Allbridge Core (SCF #22; its links resolve to allbridge.io) —
-	// same verified route matrix as allbridge above.
-	estrela: stellarRoutes(["evm", "solana", "tron", "sui"], {
-		direction: "bidirectional",
-		assets: ["USDC"],
-		assetRepresentation: "canonical",
-		mechanism: "native-liquidity-pool",
-		sourceUrl: "https://docs-core.allbridge.io",
-		asOf: "2026-07-09",
-	}),
+	// Allbridge Core's Stellar routes (native-liquidity-pool USDC to EVM,
+	// Solana, Tron and Sui, verified 2026-07-09) ended with its pools:
+	// docs-core.allbridge.io says Core's liquidity pools were discontinued in
+	// July 2026 and Stellar is unavailable on the relaunched, CCTP-based Core
+	// pending audit (read 2026-10-23, lane DQ1). Empty = exact-sync clears the
+	// stored rows, served as routes null (not curated), not as route-free.
+	// Allbridge Next's Stellar routes are not curated yet. estrela carried a
+	// copy of the Core matrix, but its SCF page (SCF #22 and #35, read
+	// 2026-10-23) describes Allbridge's Soroban stablecoin AMM
+	// (allbridge-io/dex-soroban-contracts), not the Core bridge: the copied
+	// routes never described it.
+	allbridge: [],
+	estrela: [],
 	// developers.circle.com/cctp/concepts/supported-chains-and-domains: Stellar
 	// is CCTP V2 domain 27 (verified 2026-07-09, #414 wave). CCTP is the RAIL
 	// (see its description): burn-and-mint of Circle-issued canonical USDC —
