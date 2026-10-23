@@ -147,3 +147,21 @@ Owner decision, safe default first:
   any battery case, so they were left out (no evidence either way).
 - Harness: cases may list `partialPaths`; partial hits are reported
   (`partialRank`, `partialOnlyTop10`) and never counted as found.
+- 14:05Z: fresh held-out battery frozen by a separate agent (Claude Opus
+  5.5) that never saw the code or ranking:
+  `../audits/2026-10-23-source-locator/fresh-battery.frozen.json`, copied
+  unchanged, sha256
+  `b051ae9ebed38ee6200406164a71741c128262ad8a2704484513f9a322637081`. Its
+  pinned refs are the same eight commits as the first battery and the
+  13:41Z build.
+- 14:06Z: harness only adapted to its field names (`questions`,
+  `headings`, `misleadingPaths`); ranking untouched since `9083b2fd`.
+- 14:07Z: the fresh run, once, rows built from tarballs at the pinned
+  refs (21,440 pointers): top 1 10, top 3 12, **top 10 15 of 20**; missed
+  in the top 10: f01 (rank 40), f07 (none: `env.json`, a file type the
+  index does not cover), f12 (13; a partial path at rank 1), f15 (25),
+  f16 (36). Partial-only in the top 10: f12. Decoys in the top 10: none
+  (f14 decoy at 148, f16 at 122). `fresh-battery-result.json`.
+- Same rows, frozen labels: m1 rank 1, m2 rank 2 (`pass2-old-battery-as-dev.json`).
+- **Criteria met** (m1 and m2 in the top 3; 15 of 20 fresh in the top
+  10, needed 14): build the operation at spec 1.9.99.

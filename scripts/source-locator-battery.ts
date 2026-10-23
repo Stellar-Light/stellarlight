@@ -34,7 +34,10 @@ interface Case {
 	paths: string[];
 	/** Files that answer part of the question: reported, never counted as found. */
 	partialPaths?: string[];
+	/** Decoys: reported when served, never a hit. */
+	misleadingPaths?: string[];
 	symbols?: string[];
+	headings?: string[];
 }
 
 const args = process.argv.slice(2);
@@ -43,9 +46,11 @@ const flag = (n: string) =>
 const batteryPath = flag("--battery");
 if (!batteryPath) throw new Error("--battery <file> is required");
 const battery = JSON.parse(readFileSync(batteryPath, "utf8")) as {
-	cases: Case[];
+	cases?: Case[];
+	questions?: Case[];
 	refs?: Record<string, string>;
 };
+const cases = battery.cases ?? battery.questions ?? [];
 
 let rows: IndexRow[] = [];
 const rowsPath = flag("--rows");
@@ -65,7 +70,7 @@ if (rowsPath) {
 	}
 } else throw new Error("--rows <file> or --tarballs <dir> is required");
 
-const results = battery.cases.map((c) => {
+const results = cases.map((c) => {
 	const pq = parseQuery(c.q, isContentStopword);
 	const cand = candidateTerms(pq);
 	const pool = rows.filter((r) => isCandidate(r, cand));
@@ -79,19 +84,23 @@ const results = battery.cases.map((c) => {
 			(s) =>
 				s.row.repo === c.repo &&
 				c.paths.includes(s.row.path) &&
-				(c.symbols ?? []).includes(s.row.locator ?? ""),
+				[...(c.symbols ?? []), ...(c.headings ?? [])].includes(
+					s.row.locator ?? "",
+				),
 		) + 1 || null;
-	const partialRank =
+	const rankAt = (paths: string[] | undefined) =>
 		ranked.findIndex(
-			(s) =>
-				s.row.repo === c.repo && (c.partialPaths ?? []).includes(s.row.path),
+			(s) => s.row.repo === c.repo && (paths ?? []).includes(s.row.path),
 		) + 1 || null;
+	const partialRank = rankAt(c.partialPaths);
+	const misleadingRank = rankAt(c.misleadingPaths);
 	return {
 		id: c.id,
 		q: c.q,
 		fileRank,
 		symbolRank,
 		partialRank,
+		misleadingRank,
 		candidates: pool.length,
 		overCap: pool.length > CANDIDATE_CAP,
 		matched: ranked.length,
@@ -128,10 +137,14 @@ const summary = {
 				r.partialRank <= 10,
 		)
 		.map((r) => r.id),
+	/** Cases with a decoy path served in the top 10 (never counted as found). */
+	misleadingInTop10: results
+		.filter((r) => r.misleadingRank !== null && r.misleadingRank <= 10)
+		.map((r) => r.id),
 };
 for (const r of results)
 	console.log(
-		`${r.id.padEnd(4)} file@${String(r.fileRank ?? "-").padEnd(4)} symbol@${String(r.symbolRank ?? "-").padEnd(4)} cand ${String(r.candidates).padEnd(6)} top1 ${r.top3[0] ? `${r.top3[0].repo} ${r.top3[0].path} ${r.top3[0].locator ?? "(file)"} [${r.top3[0].score}]` : "(none)"}`,
+		`${r.id.padEnd(4)} file@${String(r.fileRank ?? "-").padEnd(4)} symbol@${String(r.symbolRank ?? "-").padEnd(4)} partial@${String(r.partialRank ?? "-").padEnd(4)} decoy@${String(r.misleadingRank ?? "-").padEnd(4)} cand ${String(r.candidates).padEnd(6)} top1 ${r.top3[0] ? `${r.top3[0].repo} ${r.top3[0].path} ${r.top3[0].locator ?? "(file)"} [${r.top3[0].score}]` : "(none)"}`,
 	);
 console.log(JSON.stringify(summary, null, 2));
 const jsonOut = flag("--json");
