@@ -3,7 +3,6 @@ import {
 	canonicalFor,
 	explicitRepoName,
 	flagshipsFor,
-	repoQueryTokens,
 	searchRepos,
 } from "../repo-search";
 
@@ -896,63 +895,6 @@ describe("a repo with a known successor sits below it (2026-10-23)", () => {
 			{ limit: 5 },
 		);
 		expect(repos[0].fullName).toBe("proto/pool-contracts");
-	});
-});
-
-describe("question tokens (repoQueryTokens, 2026-10-23)", () => {
-	it("trims edge punctuation so stopwords drop and content words match", () => {
-		expect(
-			repoQueryTokens(
-				"What's the fastest way to read a price feed, or an oracle, from my contract?",
-			),
-		).toEqual(["read", "price", "feed", "oracle", "contract"]);
-	});
-	it("drops contractions and question filler, keeps c# and hyphenated forms", () => {
-		expect(repoQueryTokens("Don't I need an SDK?")).toEqual(["sdk"]);
-		expect(repoQueryTokens("Which C# SDK can I use instead?")).toEqual([
-			"c#",
-			"sdk",
-		]);
-		expect(repoQueryTokens("(sep-10) auth, please")).toEqual([
-			"sep",
-			"10",
-			"auth",
-			"sep-10",
-		]);
-	});
-	it("counts a repeated word once", () => {
-		expect(
-			repoQueryTokens("contract to contract calls, contract events"),
-		).toEqual(["contract", "calls", "events"]);
-	});
-	it("a query of only filler still searches, without its punctuation", () => {
-		expect(repoQueryTokens("how do I get started?")).toEqual([
-			"get",
-			"started",
-		]);
-	});
-	it("a word followed by punctuation matches, filler no longer outranks it", async () => {
-		const filler = doc({
-			fullName: "acme/starter",
-			description: "The fastest way to get started",
-			codeScanState: "scanned",
-			stellarProof: "cargo-sdk",
-			repoScore: 90,
-		});
-		const right = doc({
-			fullName: "lib/contract-utils",
-			description: "Pausable and upgradeable contracts",
-			codeScanState: "scanned",
-			stellarProof: "cargo-sdk",
-			repoScore: 40,
-		});
-		const { repos, searched } = await searchRepos(
-			mockPayload([filler, right]),
-			"What's the fastest way to get started with pausable, upgradeable contracts?",
-			{ limit: 5 },
-		);
-		expect(repos[0].fullName).toBe("lib/contract-utils");
-		expect(searched.tokens).toEqual(["pausable", "upgradeable", "contracts"]);
 	});
 });
 

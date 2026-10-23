@@ -295,3 +295,94 @@ repo above its successor) but do not make natural-language questions find
 their repo. Shipping is the orchestrator's call on that basis. Moved to
 `improvements/TODO.md` (Next): natural-language repo questions (the 15
 misses and why), and the DeFindex successor data change.
+
+## Narrow ship: D1 plus D3 (orchestrator's request, 21:31Z)
+
+Bar (a) failed, so the full change does not ship. The orchestrator asked
+for D1 plus D3 without D2, as a narrow bug fix, measured on a new commit.
+The bars below are copied from the request and made checkable, written
+before any run of the variant (the ablation at 21:17Z ran each fix alone,
+never D1 with D3).
+
+- (1) Exact names: no rank-1 loss over the 60 lookups (rank 1 on the base
+  replay, not rank 1 on the variant). The project names Blend and Reflector
+  are reported beside them.
+- (2) Keyword replay: every keyword query whose results (base or variant,
+  the whole ranking) hold neither a used row (`codeInUse.events > 0`) nor a
+  row whose successor is also in them answers byte-identically to base:
+  the replay record (first page with names and scores, matchMode, total,
+  tokens, warnings and the whole ranking) serialized as JSON.
+- (3) The visible bug: blend-capital/blend-contracts and
+  reflector-network/reflector-contract no longer lead any page through
+  usage. Checked on all 145 replayed queries: where either is rank 1 on the
+  variant, no row of the same tier above the score (equal canonical, alias,
+  flagship, stellarness and anchor-identity keys) has a higher match score.
+  A lead through one of those tiers is not the usage bug (Reflector is the
+  curated first oracle flagship) and is reported, not counted. sc-04, sa-04
+  and q=smart account are checked by name, and every first row that
+  changes is listed with its scores, base and variant.
+- (4) No battery tools question gets worse in rank than on base: sc-03,
+  sc-04, sa-03, sa-04, cc-03, cc-04.
+- (5) Dev set: reported, no bar (expected about 9 of 25).
+
+If every bar holds: the code becomes exactly D1 plus D3 (D2 and its tests
+leave the code; its evidence stays in the audit as measured, not shipped),
+changelog at the 1.9.106 placeholder, then tests, contract, the Raven gate
+and biome, and a new commit on the branch, not pushed.
+
+### Log (narrow ship)
+
+- 21:31Z: the bars above written; no variant result read yet.
+- 21:32Z: D2 removed from the code and its 5 tests from the test file;
+  `src/lib/repo-search.ts` against d9bd53b5 is now exactly D1 plus D3.
+  Ranking tests: 63 of 63 pass.
+- 21:33Z: variant replay (`replay.mts`, this tree) over the captured
+  corpus, and at 21:34Z the same over a corpus copy with `codeInUse`
+  cleared on the two used rows (scratch only).
+- 21:35Z, `measure-narrow.mts` (`narrow-report.txt`,
+  `narrow-results.json`):
+  - (1) holds: 0 rank-1 losses over 60 lookups (rank 1 on 58, base and
+    variant; bare "core" and "aggregator" never led). q=Blend leads with
+    blend-capital/blend-contracts-v2, q=Reflector with
+    reflector-network/reflector-contract;
+  - (2) holds: 17 of 17 keyword queries without a used row or a successor
+    pair are byte-identical (whole record, ranking included). Of the 35
+    with a mechanism, 9 are identical, 10 change their first page and 16
+    only their ranking below it;
+  - (3) holds: a used row is rank 1 on 7 of 145 pages; 6 lead with usage
+    removed too (four exact-name lookups of the two repos, hm26-sc-03 where
+    reflector-contract has the best score at 32.3, q=oracle where it is the
+    first curated flagship) and q=Reflector wins a tie at score 5; none
+    leads through usage. sc-04 Heliobond/frontend (46.2) where
+    blend-contracts (16) led; sa-04 Gloriachinedu/lumenflow-contracts
+    (41.8) where blend-contracts (10.4) led, reflector-contract (9.1) off
+    the page; q=smart account stellar/smart-account-kit (13) where
+    reflector-contract (3) led. 11 first rows change, every one from one of
+    the two used rows (listed in the report);
+  - (4) holds: sc-03 71 to 70, sc-04 111 to 110, sa-03 1 to 1, sa-04 72 to
+    72, cc-03 250 to 250, cc-04 39 to 39;
+  - (5) dev set 9 to 9 (tuning 6 to 6, held-out 3 to 3).
+- 21:36Z: failing first for the shipped tests: 5 failed, 58 passed of 63 on
+  the base sources (`failing-first.txt`); the full change's record, with
+  the D2 tests, is renamed `failing-first-with-d2.txt` (the 18:03Z and
+  21:09Z entries above refer to it).
+- 21:36Z to 21:39Z, checks: `pnpm contract:write` (no artifact change), then
+  `CONTRACT_BASE=origin/main pnpm contract:check`: exit 0 (origin/main has
+  moved 4 commits since the branch point; the check compared against the
+  merge base d9bd53b5). `pnpm typecheck`: exit 0. `npx vitest run src/lib/
+  src/components/ src/app/ src/collections/ src/data/ --maxWorkers=4
+  --minWorkers=1`: 214 files, 2,673 tests passed, none skipped, exit 0.
+  `pnpm raven:gate`: "Raven would ACCEPT 1.9.106", exit 0. `pnpm exec biome
+  check` on the changed files and the audit folder: 0 errors, 1 warning on
+  an unchanged line. Changelog 1.9.106 rewritten for D1 plus D3.
+
+### Outcome (narrow ship)
+
+Supersedes the outcome above for what ships: a second commit on
+`lane/r4-repos-ranking` makes the code exactly D1 plus D3; every narrow bar
+holds. D2 is measured and not shipped; its evidence stays in the audit
+(`report.txt`, `results.json`, `ablation.txt`, `failing-first-with-d2.txt`).
+The two TODO items and the DeFindex data steps stand as written. origin/main
+moved 4 commits after the branch point, one of them a changelog entry, so
+the branch needs a rebase before a PR. Not pushed.
+

@@ -5,20 +5,35 @@ criteria fixed before any result, and the log).
 
 ## Verdict
 
-Three fixes are on the branch (D1 to D3 below). Against the bars fixed in
-the ledger before any result:
+**Shipped on the branch: D1 plus D3** (usage breaks ties; a successor takes
+its old repo's place), a narrow bug fix. The full change (D1, D2 and D3)
+failed its dev-set bar and does not ship; D2 stays here as measured, not
+shipped.
+
+Narrow ship, against the bars written in the ledger at 21:31Z before it ran
+(`measure-narrow.mts`, `narrow-report.txt`, `narrow-results.json`):
+
+| bar | result |
+| --- | --- |
+| (1) exact names: no rank-1 loss over 60 lookups | **holds**: 0 losses; rank 1 on 58 of 60, base and variant (bare "core" and "aggregator" never led). q=Blend now leads with blend-capital/blend-contracts-v2, q=Reflector with reflector-network/reflector-contract |
+| (2) keyword queries with no used row and no successor pair byte-identical to base | **holds**: 17 of 17 (the whole replay record, ranking included) |
+| (3) Blend v1 and Reflector no longer lead through usage | **holds**: a used row is rank 1 on 7 of 145 pages, none through usage beyond a score tie (6 lead with usage removed too, q=Reflector wins a tie at score 5); sc-04 Heliobond/frontend (46.2) leads where blend-contracts (16) did, sa-04 Gloriachinedu/lumenflow-contracts (41.8) where blend-contracts (10.4) did, q=smart account stellar/smart-account-kit (13) where reflector-contract (3) did; 11 first rows change in all |
+| (4) no battery tools question ranks its repo lower | **holds**: sc-03 71 to 70, sc-04 111 to 110, sa-03 1 to 1, sa-04 72 to 72, cc-03 250 to 250, cc-04 39 to 39 |
+| (5) dev set, no bar | 9 to 9 of 25 (tuning 6 to 6, held-out 3 to 3) |
+
+Full change (D1, D2 and D3), against the bars fixed before any result:
 
 | bar | result |
 | --- | --- |
 | (a) dev set: expected repo in the top 5 rises by 6 of 25 | **fails**: 9 to 10 (tuning 6 to 6, held-out 3 to 4; 1 gained, 0 lost) |
-| (b) exact names: 0 losses | **holds**: 60 of 60 lookups keep rank 1 where they had it (30 of 30 owner/name, 28 of 30 bare names, before and after); project names Blend and Reflector keep a repo of the project first |
-| (c) keyword queries | **holds**: 17 of 17 queries with no used row, no successor pair and unchanged tokens answer identically; 42 of 52 identical in all, and each of the 10 that change holds a used row or a successor pair |
+| (b) exact names: 0 losses | holds: 60 of 60 lookups keep rank 1 where they had it; Blend and Reflector keep a repo of the project first |
+| (c) keyword queries | holds: 17 of 17 queries with no used row, no successor pair and unchanged tokens answer identically; 42 of 52 identical in all |
 
-The battery questions (checked, not tuned on) are below. The fixes remove
-the defect the battery found: a used project-linked row no longer leads a
-page it barely matches. They do not make natural-language questions find
-their repo: most dev-set misses have other causes (section "Why bar (a)
-failed").
+D2 made two battery questions rank their repo lower (sc-03 71 to 98, sc-04
+111 to 160 on its own) because, without rarity weighting, the common words
+it lets through ("token", "contracts") count. Neither change makes
+natural-language questions find their repo: most dev-set misses have other
+causes (section "Why bar (a) failed").
 
 ## The cause, confirmed
 
@@ -48,30 +63,37 @@ replay:
 
 ## The fixes
 
+Shipped:
+
 - **D1, usage breaks ties.** `inUse` moves from above the match score to
   directly below it (AGENTS.md rule 6: authority signals break ties, never
   beat relevance). Every tier above the score is unchanged.
-- **D2, question tokens.** searchRepos scores `repoQueryTokens(q)`:
-  `contentTokens(q)` without edge punctuation (a trailing `#` or `+` stays),
-  without a trailing `'s`, without contractions, without the shared
-  stopwords (applied again after the trim) and a repo-search filler list
-  (rating words, frame nouns, function words, pronouns, greetings, verbs about
-  the asker), each word once. The shared `contentTokens` and stopword list
-  are unchanged, so searchProjects, searchHackathonBuilds and locateSource
-  keep their tokens.
 - **D3, successors first.** After the sort, a repo whose successor
   (stored `successorRepo`, else the curated map's `supersededBy`) is also in
   the results gives the successor its place and sits directly below it. A q
   that names the old repo itself keeps it first; a successor that is not in
   the results changes nothing. As first designed, D3 only sank the old row;
   that lost q=Blend to an unrelated repo (bar b), so the pre-registered
-  fallback (the successor takes the slot) shipped.
+  fallback (the successor takes the slot) is what ships.
 
-Tests: `src/lib/__tests__/repo-search-rank.test.ts`, 10 new or rewritten
-tests fail on the base sources (`failing-first.txt`) and pass here (68 of
-68). The old test "a mainnet-used repo outranks a keyword-luckier repo
-without usage" encoded the bug; it is replaced by "wins a tie at equal
-match score" and "never lifts a weak match above a better one".
+Measured, not shipped:
+
+- **D2, question tokens.** `repoQueryTokens(q)`: `contentTokens(q)` without
+  edge punctuation (a trailing `#` or `+` kept), without a trailing `'s`,
+  without contractions, without the shared stopwords (applied again after
+  the trim) and a repo-search filler list (rating words, frame nouns,
+  function words, pronouns, greetings, verbs about the asker), each word
+  once. It fixes a real tokenizer defect (cause 2), but on its own it moved
+  the dev set 9 to 9 (gained dev-14, lost dev-20) and ranked two battery
+  repos lower. It belongs with rarity weighting, measured together.
+
+Tests: `src/lib/__tests__/repo-search-rank.test.ts`. For the shipped code, 5
+new or rewritten tests fail on the base sources (`failing-first.txt`) and
+63 of 63 pass here. The full change's run, with the 5 D2 tests, is
+`failing-first-with-d2.txt` (10 fail on base). The old test "a mainnet-used
+repo outranks a keyword-luckier repo without usage" encoded the bug; it is
+replaced by "wins a tie at equal match score" and "never lifts a weak match
+above a better one".
 
 ## Method
 
@@ -87,8 +109,11 @@ match score" and "never lifts a weak match above a better one".
   sort then Payload's fallback `-createdAt`; limit). Base: origin/main
   d9bd53b5 from a scratch copy. **Fidelity: 145 of 145 base first pages
   identical to live** in rows, order, scores, matchMode and total.
-- `measure.mts`: the bars. `report.txt` and `results.json` are its output
-  for this branch; `ablation.txt` runs each fix alone.
+- `measure.mts`: the full change's bars; `report.txt` and `results.json`
+  are its output for D1, D2 and D3, and `ablation.txt` runs each fix alone.
+  `measure-narrow.mts`: the narrow ship's bars, from the variant's replay
+  and a second replay over the corpus with usage cleared (does a used row's
+  lead depend on usage?); output `narrow-report.txt`, `narrow-results.json`.
 - Sets (`sets.json`, fixed before any result): the dev set
   (`devset.json`, 25 questions written blind from GitHub and docs by a
   separate agent, frozen by sha256 in `FREEZE.json`, 8 held out by the hash
@@ -98,7 +123,7 @@ match score" and "never lifts a weak match above a better one".
 
 ## Results
 
-### Dev set (rank of the first expected repo, base to branch)
+### Dev set, full change (rank of the first expected repo, base to D1, D2 and D3)
 
 | id | slice | expected | rank |
 | --- | --- | --- | --- |
@@ -128,9 +153,9 @@ match score" and "never lifts a weak match above a better one".
 | dev-24 | tuning | stellar/typescript-wallet-sdk | 19 to 17 |
 | dev-25 | held-out | stellar/stellar-anchor-tests | 2 to 2 |
 
-### Battery tools questions (not tuned on): rank of the expected repo
+### Battery tools questions, full change (not tuned on): rank of the expected repo
 
-| id | expected | base | branch |
+| id | expected | base | D1, D2, D3 |
 | --- | --- | --- | --- |
 | hm26-sc-03 | OpenZeppelin/stellar-contracts | 71 of 595 | 97 of 591 |
 | hm26-sc-04 | stellar-scaffold/cli (theahaco/scaffold-stellar is not indexed) | 111 of 590 | 159 of 596 |
@@ -153,6 +178,7 @@ fall further: with the punctuation gone, common words such as "token" and
 | D2 only | 9 to 9 (gains dev-14, loses dev-20) | 0 | 52 of 52 | sc-03 98, sc-04 160, sa-04 54, cc-03 214, cc-04 29 |
 | D3 only | 9 to 9 | 0 | 48 of 52 | ranks move by 1 |
 | all three | 9 to 10 | 0 | 42 of 52 | as above |
+| D1 and D3 (shipped) | 9 to 9 | 0 | 42 of 52 (17 of 17 without a mechanism, byte-identical) | sc-03 70, sc-04 110, others unchanged |
 
 ## Why bar (a) failed
 
@@ -227,9 +253,9 @@ checks that archived repos have a map entry, and
 
 ## Limits
 
-- The filler list misses inflections ("adding", "writing" still score); a
-  stemmed check would catch them. Not changed: the held-out slice showed
-  it, and tuning on it is not allowed.
+- D2's filler list (not shipped) misses inflections ("adding", "writing"
+  still score); a stemmed check would catch them. The held-out slice showed
+  it, so it was not tuned.
 - The replay reads the index as captured (18:00Z to 18:10Z); the lanes
   write daily.
 - Usage counts on two rows today; D1 matters more as the on-chain lane

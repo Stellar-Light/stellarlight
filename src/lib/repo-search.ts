@@ -720,102 +720,6 @@ export function isContentStopword(t: string): boolean {
 	return STOPWORDS.has(t);
 }
 
-// Question filler repo search drops on top of the shared stopwords (round
-// 2026-10-23-repos-ranking): words that frame a builder's question ("what's
-// the fastest way to", "instead of writing them myself", "add X to my app")
-// and name no thing a repo is. They matched descriptions, fed the coverage
-// multiplier and widened the 600-row candidate window. Kept out of the
-// shared list, which projects, builds and locate also read.
-const REPO_QUERY_FILLER = new Set<string>([
-	"easy",
-	"easier",
-	"easiest",
-	"simple",
-	"simpler",
-	"simplest",
-	"quick",
-	"quicker",
-	"quickest",
-	"fast",
-	"faster",
-	"fastest",
-	"way",
-	"ways",
-	"if",
-	"but",
-	"so",
-	"than",
-	"then",
-	"not",
-	"without",
-	"also",
-	"just",
-	"really",
-	"actually",
-	"already",
-	"even",
-	"else",
-	"instead",
-	"own",
-	"myself",
-	"yourself",
-	"ourselves",
-	"themselves",
-	"itself",
-	"someone",
-	"anyone",
-	"anybody",
-	"something",
-	"anything",
-	"everything",
-	"everyone",
-	"please",
-	"thanks",
-	"thank",
-	"hi",
-	"hello",
-	"hey",
-	"whats",
-	"add",
-	"get",
-	"make",
-	"let",
-	"lets",
-	"try",
-	"trying",
-	"looking",
-	"start",
-	"started",
-	"help",
-	"able",
-	"possible",
-	"recommend",
-	"suggest",
-]);
-
-/**
- * The tokens repo search scores: contentTokens without edge punctuation
- * (contentTokens splits on spaces only, so "to," and "myself?" escaped the
- * stopwords while "token," and "account?" could never match: the boundary
- * matcher needs a word character after the punctuation), without
- * contractions and question filler, each once. A trailing # or + stays (c#,
- * c++). A query of nothing else keeps its trimmed words, then today's tokens.
- */
-export function repoQueryTokens(q: string): string[] {
-	const trimmed: string[] = [];
-	for (const raw of contentTokens(q)) {
-		const t = raw
-			.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}#+]+$/gu, "")
-			.replace(/['’]s$/, "");
-		// A contraction left after that (don't, i'm, we've) names nothing.
-		if (t.length > 1 && !/['’]/.test(t) && !trimmed.includes(t))
-			trimmed.push(t);
-	}
-	const words = trimmed.filter((t) => !STOPWORDS.has(t));
-	const content = words.filter((t) => !REPO_QUERY_FILLER.has(t));
-	return content.length ? content : words.length ? words : contentTokens(q);
-}
-
 // SDF / canonical Stellar orgs — for a Stellar query their repos are the
 // authoritative answer, so they win ties over community/generic repos.
 // SDF ownership comes from repo-grade's FIRST_PARTY_OWNERS — one definition,
@@ -1299,7 +1203,7 @@ export async function searchRepos(
 		domain = "",
 		dependsOn = "",
 	} = opts;
-	const tokens = repoQueryTokens(q);
+	const tokens = contentTokens(q);
 	// Single-word IDENTIFIER queries (camelCase/snake_case symbols — the R-SYM
 	// class): contentTokens splits `contractErrorCodeFromNumber` into concept
 	// fragments [contract, error, code, number], so the repo DEFINING the
