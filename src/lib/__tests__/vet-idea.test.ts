@@ -1,4 +1,13 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import {
+	afterAll,
+	afterEach,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
 import { GAP_VERTICALS } from "../ecosystem-gaps";
 import { semanticBuildScores } from "../hackathon-build-semantic";
 import {
@@ -19,6 +28,14 @@ vi.mock("@/lib/hackathon-builds", async (orig) => ({
 	...(await orig<typeof import("@/lib/hackathon-builds")>()),
 	getHackathonBuildsIndex: vi.fn(async () => buildsIndex),
 }));
+// Every case runs without the reranker unless it stubs one: a shell that
+// exports VOYAGE_API_KEY must not reach the live API from these tests.
+beforeEach(() => {
+	vi.stubEnv("VOYAGE_API_KEY", "");
+});
+afterEach(() => {
+	vi.unstubAllEnvs();
+});
 
 describe("vet-idea vertical map", () => {
 	it("every VERTICAL_TOKENS value is a real GAP_VERTICALS member", () => {
@@ -580,5 +597,133 @@ describe("vet-idea prior-art builds for short ideas", () => {
 			/did not meet the evidence rule: too few of the idea's words matched, and search by meaning could not run/,
 		);
 		expect(p.note).not.toMatch(/no meaning score reached 0\.7/);
+	});
+});
+
+/**
+ * 2026-10-23: the hybrid top 50 reordered by a reranker that reads the idea
+ * with each build's name and summary; of the five it puts first, those it
+ * scores at least RERANK_FLOOR are listed. On held-out labeled ideas:
+ * same-idea builds listed 11 to 14, wrong ones 16 to 10. When it cannot run,
+ * today's order and evidence rule serve, and the answer says so.
+ */
+describe("vet-idea prior-art builds, reranked", () => {
+	const build = (id: string, description: string): IndexedBuild => ({
+		id,
+		name: id,
+		description,
+		githubUrl: null,
+		demoUrl: null,
+		videoUrl: null,
+		track: null,
+		hackathonPlacement: null,
+		award: null,
+		isWinner: false,
+		voteCount: null,
+		url: `https://dorahacks.io/buidl/${id}`,
+		source: "dorahacks",
+		hackathon: { title: "E", slug: "e", endedAt: "2025-01-15" },
+		haystack: `${id} ${description}`.toLowerCase(),
+	});
+	let scoreOf: (doc: string) => number = () => 0.5;
+	beforeAll(() => {
+		buildsIndex.push(
+			build("remit-home", "Send remittances home in USDC."),
+			build("corridor", "A remittance corridor for families abroad."),
+			build("chess-club", "A chess game for clubs."),
+			build("bracket", "Esports tournament brackets."),
+		);
+	});
+	afterAll(() => {
+		buildsIndex.length = 0;
+	});
+	beforeEach(() => {
+		vi.stubEnv("VOYAGE_API_KEY", "test");
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (_url: string, init: RequestInit) => {
+				const { documents } = JSON.parse(String(init.body)) as {
+					documents: string[];
+				};
+				return {
+					ok: true,
+					status: 200,
+					json: async () => ({
+						data: documents.map((d, index) => ({
+							index,
+							relevance_score: scoreOf(d),
+						})),
+					}),
+				};
+			}),
+		);
+	});
+	afterEach(() => {
+		vi.unstubAllGlobals();
+		vi.unstubAllEnvs();
+	});
+	const payload = {
+		find: async () => ({ docs: [], totalDocs: 0 }),
+	} as never;
+	const priorArt = async (q: string) =>
+		(await buildVetIdea(payload, q)).priorArt;
+
+	// The reranker caches by idea and candidates, so every case that reaches
+	// it asks its own idea: the cases hold in any order.
+	it("falls back to the hybrid order and the evidence rule when the reranker fails, and says so", async () => {
+		vi.mocked(fetch).mockRejectedValueOnce(new Error("network"));
+		const p = await priorArt("remittance app");
+		expect(p.builds?.map((b) => b.id).sort()).toEqual([
+			"corridor",
+			"remit-home",
+		]);
+		expect(p.buildsReranked).toBe(false);
+		expect(p.note).toMatch(/the reranker could not run this request/);
+		expect(p.note).toMatch(/reads this idea as one word/);
+	});
+
+	it("lists the reranked top five in the reranker's order", async () => {
+		scoreOf = (d) => (d.startsWith("remit-home.") ? 0.9 : 0.6);
+		const p = await priorArt("remittance");
+		expect(p.builds?.map((b) => b.id)).toEqual(["remit-home", "corridor"]);
+		expect(p.buildsReranked).toBe(true);
+		expect(p.buildsBelowEvidenceRule).toBe(0);
+		// The one-word path is not how a reranked build is listed.
+		expect(p.note).not.toMatch(/reads this idea as one word/);
+	});
+
+	it("leaves out a build the reranker scores below its floor", async () => {
+		scoreOf = (d) => (d.startsWith("corridor.") ? 0.9 : 0.2);
+		const p = await priorArt("remittances");
+		expect(p.builds?.map((b) => b.id)).toEqual(["corridor"]);
+		expect(p.buildsBelowEvidenceRule).toBe(1);
+	});
+
+	// Review 2026-10-23: an idea no build matched served buildsReranked true
+	// with builds [] and a note naming the reranker.
+	it("does not claim a rerank when nothing matched", async () => {
+		const p = await priorArt("quantum teleportation");
+		expect(p.builds).toEqual([]);
+		expect(p.buildsReranked).toBe(false);
+		expect(p.note).not.toMatch(/reranker/);
+		expect(fetch).not.toHaveBeenCalled();
+	});
+
+	it("says the reranker scored the nearest below its floor instead of claiming none", async () => {
+		scoreOf = () => 0.1;
+		const p = await priorArt("chess tournament");
+		expect(p.builds).toEqual([]);
+		expect(p.buildsBelowEvidenceRule).toBe(2);
+		expect(p.note).toMatch(
+			/2 nearest submissions did not meet the evidence rule: the reranker, reading the idea with each one's name and summary, scored them below 0\.45/,
+		);
+	});
+
+	it("does not rerank when search by meaning did not run", async () => {
+		vi.mocked(semanticBuildScores).mockResolvedValueOnce(null);
+		const p = await priorArt("chess tournament");
+		expect(p.buildsMode).toBe("keyword");
+		expect(p.buildsReranked).toBe(false);
+		expect(fetch).not.toHaveBeenCalled();
 	});
 });
