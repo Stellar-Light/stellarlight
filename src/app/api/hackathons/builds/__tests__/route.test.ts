@@ -74,6 +74,9 @@ vi.mock("@/lib/hackathon-builds", async (orig) => ({
 				endedAt: "2026-04-13",
 			},
 		}),
+		// One submission entered in two events: one result, two entries.
+		build("twin"),
+		build("twin", { hackathon: { title: "R", slug: "r", endedAt: recentEnd } }),
 	]),
 }));
 
@@ -163,5 +166,25 @@ describe("GET /api/hackathons/builds rows say what the repo did after the event"
 		// Read, but the event ended too recently to say the team stopped.
 		expect("afterEvent" in (rows.get("recent") ?? {})).toBe(false);
 		expect(rows.get("recent")?.lastCommitAt).toBeNull();
+	});
+});
+
+describe("GET /api/hackathons/builds counts both units", () => {
+	it("serves event entries beside unique submissions, the unit analyze counts", async () => {
+		const { GET } = await import("../route");
+		const read = async (qs: string) =>
+			(
+				await (
+					await GET(
+						new NextRequest(`https://x.test/api/hackathons/builds?${qs}`),
+					)
+				).json()
+			).meta.counts;
+		expect(await read("q=twin&mode=keyword")).toMatchObject({
+			matched: 1,
+			entries: 2,
+		});
+		expect(await read("limit=50")).toMatchObject({ matched: 9, entries: 10 });
+		expect(await read("hackathon=r")).toMatchObject({ matched: 2, entries: 2 });
 	});
 });

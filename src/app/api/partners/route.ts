@@ -60,6 +60,9 @@ const PARTNER_TYPES = [
 
 // Mirrors Partners.rampTypes select options.
 const RAMP_TYPES = ["on-ramp", "off-ramp"];
+const RAMP_TYPE = "on-off-ramp";
+const RAMP_TYPE_WARNING =
+	"type=on-off-ramp lists partners typed on-off-ramp and anchors whose rampTypes record a ramp. An anchor with no ramp recorded is left out, which is not evidence it does not ramp: type=anchor lists every anchor.";
 const REGION_VALUES: string[] = REGIONS.map((r) => r.value);
 /** "North America" / "north america" / "NORTH-AMERICA" / "latam" → "north-america" / "latam". */
 function normalizeRegion(raw: string): string | null {
@@ -379,11 +382,23 @@ export async function GET(req: NextRequest) {
 	try {
 		// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
 		const where: any = { status: { equals: "published" } };
-		if (type) where.partnerType = { equals: type };
+		const and: unknown[] = rampList.map((r) => ({
+			rampTypes: { contains: r },
+		}));
+		// Ramp providers are typed anchor and carry rampTypes, so a ramp type
+		// also takes an anchor with a ramp recorded. `in` matches a hasMany
+		// element exactly; `contains` would be a substring test.
+		if (type === RAMP_TYPE)
+			and.push({
+				or: [
+					{ partnerType: { equals: RAMP_TYPE } },
+					{ partnerType: { equals: "anchor" }, rampTypes: { in: RAMP_TYPES } },
+				],
+			});
+		else if (type) where.partnerType = { equals: type };
 		if (sector) where.sectors = { contains: sector };
 		if (regionNorm) where.regions = { contains: regionNorm };
-		if (rampList.length)
-			where.and = rampList.map((r) => ({ rampTypes: { contains: r } }));
+		if (and.length) where.and = and;
 		// engine-e ambiguous-contract (open since 07-22): with every published
 		// partner currently accepting clients, accepting=1 returned pages
 		// byte-identical to the bare call — live filter, single-value enum,
@@ -479,12 +494,15 @@ export async function GET(req: NextRequest) {
 		resultCount: partners.length,
 	});
 
+	const warnings = paramWarning ? [paramWarning] : [];
+	if (type === RAMP_TYPE) warnings.push(RAMP_TYPE_WARNING);
+
 	return NextResponse.json(
 		{
 			meta: {
 				source: "https://stellarlight.xyz/partners",
 				generatedAt: new Date().toISOString(),
-				...(paramWarning ? { warnings: [paramWarning] } : {}),
+				...(warnings.length ? { warnings } : {}),
 				filters: {
 					type,
 					sector,
@@ -547,9 +565,11 @@ export async function GET(req: NextRequest) {
 								// claim stated confidently. Verify what a field MEANS before
 								// telling anyone to act on it.
 								summary:
-									type && !q
-										? `No partner of type '${type}' is listed among the published partners — a statement about THIS directory's coverage (it holds integration partners of these types: ${PARTNER_TYPES.join(", ")}), not about the ecosystem. For a concrete need, POST /api/partners/match ranks every published partner by fit.`
-										: `No partner matches${q ? ` "${q}"` : " these filters"}. /api/partners lists STELLAR integration partners (anchors, on/off-ramps, custody, infrastructure) — it is scoped to this ecosystem, so a query about another chain or a general topic returns nothing here by design, which is a scope boundary and not a finding about the partner landscape.`,
+									type === RAMP_TYPE
+										? `No partner typed on-off-ramp, and no anchor with a ramp recorded in rampTypes, matches these filters. Most ramp providers are typed anchor and some have no ramp recorded yet: try type=anchor with the same filters (add ramps=on-ramp or ramps=off-ramp to require a direction). For a concrete need, POST /api/partners/match ranks every published partner by fit.`
+										: type && !q
+											? `No partner of type '${type}' is listed among the published partners. That is a statement about THIS directory's coverage (it holds integration partners of these types: ${PARTNER_TYPES.join(", ")}), not about the ecosystem. For a concrete need, POST /api/partners/match ranks every published partner by fit.`
+											: `No partner matches${q ? ` "${q}"` : " these filters"}. /api/partners lists STELLAR integration partners (anchors, on/off-ramps, custody, infrastructure); it is scoped to this ecosystem, so a query about another chain or a general topic returns nothing here by design, which is a scope boundary and not a finding about the partner landscape.`,
 								scope:
 									"Stellar integration partners (anchors, ramps, custody, infrastructure); not a multi-chain directory and not a project directory",
 								tryInstead: [

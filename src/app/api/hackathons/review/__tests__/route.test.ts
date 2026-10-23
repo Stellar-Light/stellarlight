@@ -162,3 +162,33 @@ describe("GET /api/hackathons/review", () => {
 		expect((await get("link=x&extra=1")).status).toBe(400);
 	});
 });
+
+describe("a submission with no confident category", () => {
+	it("says why categoryContext is null: uncertain, or not categorized yet", async () => {
+		const saved = { ...stored };
+		const s = stored as Record<string, unknown>;
+		try {
+			s.categories = [];
+			const uncertain = (await get("link=github.com/rajkaria/toll")).body;
+			expect(uncertain.review.categoryContext).toBeNull();
+			expect(uncertain.review.categoryNote).toMatch(/uncertain, not missing/);
+			expect(
+				undeclaredInServed(
+					spec,
+					responseSchema(spec, "/api/hackathons/review"),
+					uncertain,
+				),
+			).toEqual([]);
+
+			delete s.categories;
+			s.categoriesAt = null;
+			const unread = (await get("link=github.com/rajkaria/toll")).body;
+			expect(unread.review.categoryContext).toBeNull();
+			expect(unread.review.categoryNote).toMatch(/not categorized yet/);
+		} finally {
+			Object.assign(stored, saved);
+		}
+		const typed = (await get("link=github.com/rajkaria/toll")).body;
+		expect(typed.review.categoryNote).toBeNull();
+	});
+});

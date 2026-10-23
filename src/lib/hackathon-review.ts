@@ -264,6 +264,8 @@ export interface HackathonReview {
 		winners: number;
 		shareOfSubmissions: number | null;
 	} | null;
+	/** Why categoryContext is null; null when it is served. */
+	categoryNote: string | null;
 	/** The SCF pitch view over its summary: live round, funded peers, the
 	 * vet-idea competitors, maturity, prior art and supply gap, and angles. */
 	pitch: ScfPitchReport;
@@ -344,6 +346,11 @@ export async function buildHackathonReview(
 						shareOfSubmissions: cat.values[0]?.share ?? null,
 					}
 				: null,
+		categoryNote: top
+			? null
+			: submission.categories
+				? "No confident category: a type is assigned only where the method is right 70% of the time on the hand-typed directory, and none cleared that bar for this submission. Its category is uncertain, not missing; read `similar` for the submissions nearest it."
+				: "This submission is not categorized yet, so there is no category to give context for.",
 		pitch,
 	};
 }

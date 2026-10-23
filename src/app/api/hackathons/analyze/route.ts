@@ -110,18 +110,20 @@ export async function GET(req: NextRequest) {
 		warnings.push(
 			`Counted by meaning: at most the ${MEANING_NEIGHBOURS} submissions nearest the query that clear the similarity floor, and a neighbour in meaning is not proof a build is about the topic. For a share of a topic, keyword mode counts every build that names it.`,
 		);
-	// A type the method never assigns would read as a share of zero: say it
-	// cannot be measured instead.
-	if (
-		facet === "category" &&
-		value &&
-		!indexed.some((b) =>
-			b.categories?.some((c) => c.type.toLowerCase() === value.toLowerCase()),
-		)
-	)
+	// A value no stored submission carries would read as a count of zero: say
+	// so, with the values that do occur. A type the method never assigns is
+	// unknown, not zero.
+	if (value && !distribution(indexed, facet, { value }).values[0]?.builds) {
+		const seen = distribution(indexed, facet, {
+			top: Number.POSITIVE_INFINITY,
+		}).values.map((v) => v.value);
+		const named = `${seen.slice(0, 30).join(", ") || "none"}${seen.length > 30 ? `, and ${seen.length - 30} more (omit value to list them by count)` : ""}`;
 		warnings.push(
-			`No submission is sorted into '${value}': the method assigns a type only where it is right 70% of the time on the hand-typed directory, and this one never gets there. Its share is unknown, not zero; count the topic with q instead (q=${value.toLowerCase()}, facet=event).`,
+			facet === "category"
+				? `No submission is sorted into '${value}': the method assigns a type only where it is right 70% of the time on the hand-typed directory, and this one never gets there. Its share is unknown, not zero; count the topic with q instead (q=${value.toLowerCase()}, facet=event). Types assigned: ${named}.`
+				: `No stored submission has ${facet} '${value}', so its 0 is a value that matched nothing, not a measured count. Values seen, most submissions first: ${named}.`,
 		);
+	}
 	const matched = scored.map((s) => s.b);
 	const opts = { top, value };
 	const total = { field: field.length, ...distribution(matched, facet, opts) };

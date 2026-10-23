@@ -275,7 +275,10 @@ export function distribution(
 	});
 	let values: ValueCount[];
 	if (opts.value) {
-		const want = opts.value.toLowerCase();
+		// A package name asked of the library facet counts as its library.
+		const want = (
+			facet === "library" ? libraryOf(opts.value.toLowerCase()) : opts.value
+		).toLowerCase();
 		const hit = [...tally].find(([v]) => v.toLowerCase() === want);
 		values = [hit ? row(hit[0], hit[1]) : row(opts.value)];
 	} else {

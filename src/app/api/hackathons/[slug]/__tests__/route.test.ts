@@ -665,3 +665,46 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		}).toEqual({ stored: [], roster: [], overlay: [] });
 	});
 });
+
+describe("an unknown slug", () => {
+	it("404s with a way forward in the error text itself and the closest known slugs", async () => {
+		const { GET } = await import("../route");
+		const slug = "stellar-hacks-quantum-2031";
+		const res = await GET(
+			new NextRequest(`https://x.test/api/hackathons/${slug}`),
+			{ params: Promise.resolve({ slug }) },
+		);
+		expect(res.status).toBe(404);
+		const body = await res.json();
+		expect(body.error).toContain(`hackathon not found: ${slug}`);
+		expect(body.error).toContain("/api/hackathons?q=");
+		expect(body.error).toContain("stellar-hacks-zk");
+		expect(body.closestSlugs).toEqual(["stellar-hacks-zk"]);
+		const schema = (
+			spec.paths["/api/hackathons/{slug}"] as {
+				get: {
+					responses: Record<
+						string,
+						{ content: Record<string, { schema: unknown }> }
+					>;
+				};
+			}
+		).get.responses["404"].content["application/json"].schema;
+		expect(undeclaredInServed(spec, schema, body)).toEqual([]);
+	});
+});
+
+describe("rules: what a null section means", () => {
+	it("says in the spec that a null judgingCriteria is a read page with no judging section", () => {
+		type Node = { properties: Record<string, Node>; description?: string };
+		const detail = (spec.components.schemas as unknown as Record<string, Node>)
+			.HackathonDetailResponse;
+		const rules = detail.properties.hackathon.properties.rules.properties;
+		expect(rules.judgingCriteria.description).toMatch(
+			/null = the page was read .* no judging section/,
+		);
+		expect(rules.requirements.description).toMatch(
+			/null = the page was read .* no requirements section/,
+		);
+	});
+});
