@@ -443,3 +443,7 @@ Criteria, fixed before any result:
   with 10 forbidden captures, 0 hit-to-miss); biome on the 10 changed code
   files: no errors; added lines: no em or en dashes, no barred names, no
   local paths.
+
+## Re-check of 7c0dd42e and one fix (2026-10-23)
+
+The re-check said GATE: push (its own replay: full events 270 of 270 identical; every by plus value combination tried correct), with one low: the value line counted the field's left-out rows, not the rows q matched (`q=lance&facet=track&value=Open Innovation` named 3 winners-only rows that never matched q). The line now counts only left-out rows q matched; with no q that is every left-out row, so the replayed requests (none sends q with value) are unchanged. Two route tests pin it (failed before, pass after). Checks: tsc 0, the analyze suite 24 of 24.

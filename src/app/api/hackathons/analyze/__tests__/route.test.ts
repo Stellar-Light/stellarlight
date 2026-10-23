@@ -725,6 +725,22 @@ describe("events whose stored rows are their winners only", () => {
 			LEFT_OUT,
 			"value 'Open Innovation': only rows left out above carry it (3 winners-only rows), so its 0 is not a count of it and its share is null",
 		]);
+		// Re-check: with q, the line counts the left-out rows q matched, not
+		// every left-out row (q=lance matches Lance, a Composability winner).
+		const lanceTrack = await get(
+			"analyze",
+			"q=lance&mode=keyword&facet=track&value=Open%20Innovation",
+		);
+		expect(JSON.stringify(lanceTrack.body.meta.warnings)).not.toContain(
+			"only rows left out above carry it",
+		);
+		const lanceEvent = await get(
+			"analyze",
+			"q=lance&mode=keyword&facet=event&value=hackmeridian-2025",
+		);
+		expect(lanceEvent.body.meta.warnings).toContain(
+			"value 'hackmeridian-2025': only rows left out above carry it (1 winners-only row), so its 0 is not a count of it and its share is null",
+		);
 		// A value the full listings carry keeps its share.
 		const kale = await get("analyze", "facet=event&value=kale");
 		expect(kale.body.total.values).toEqual([

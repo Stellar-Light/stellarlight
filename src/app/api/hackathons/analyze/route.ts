@@ -183,9 +183,13 @@ export async function GET(req: NextRequest) {
 	// the value, so it serves no share, nor does a group holding those rows,
 	// nor winners against the rest (facet=event&value=hackmeridian-2025
 	// served share 0 for an event with 6 stored rows).
+	// Only the left-out rows q matched (with no q, every left-out row).
+	const leftMatched = left.length
+		? scored.map((s) => s.b).filter(incomplete)
+		: [];
 	const carriers =
 		value && !total.values[0]?.builds
-			? left.filter(
+			? leftMatched.filter(
 					(b) => distribution([b], facet, { value }).values[0]?.builds,
 				)
 			: [];
