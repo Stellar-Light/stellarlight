@@ -1,0 +1,159 @@
+{
+	"name": "locate-ranking dev set (tuned on)",
+	"frozenAt": "2026-10-23T18:00:00Z",
+	"rule": "Written for the locate-ranking round before any ranking was run on it; labels read from the public tarballs at the refs below. The 14 cases tuned on. Each q is sent as is, with no repo or kind filter, over the whole index. Found at k (the round's criterion): a top-k pointer with the expected repo, one of the expected paths and one of the expected symbols. File level is reported beside it.",
+	"heldOutCompanion": "dev-heldout.frozen.json (ids divisible by 3, never tuned on)",
+	"refs": {
+		"stellar/stellar-core": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+		"stellar/rs-soroban-sdk": "8e5b425dce5fa1dcd5a3fe1d3f3fcd18431586dd",
+		"stellar/rs-soroban-env": "0c99950e96128beba3319aa96b116646ce974e69",
+		"stellar/js-stellar-sdk": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+		"stellar/stellar-rpc": "ec4171d970ac812d9f4317b3cce2c315baa31320",
+		"stellar/quickstart": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+		"stellar/stellar-cli": "4ff88b7ea11dd3c847bb711b80258517148e1529",
+		"stellar/soroban-examples": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2",
+		"OpenZeppelin/stellar-contracts": "ddc327eb92d63709436da3a8455f641c2d5476c5"
+	},
+	"cases": [
+		{
+			"id": "d01",
+			"class": "joined identifier",
+			"q": "Which function in the Rust SDK runs a BLS12-381 pairing check?",
+			"repo": "stellar/rs-soroban-sdk",
+			"paths": ["soroban-sdk/src/crypto/bls12_381.rs"],
+			"symbols": ["pairing_check"],
+			"basis": "Bls12_381::pairing_check, line 719"
+		},
+		{
+			"id": "d02",
+			"class": "plain words",
+			"q": "How does a Soroban contract read the current ledger sequence number with the Rust SDK?",
+			"repo": "stellar/rs-soroban-sdk",
+			"paths": ["soroban-sdk/src/ledger.rs"],
+			"symbols": ["sequence"],
+			"basis": "Ledger::sequence, line 65"
+		},
+		{
+			"id": "d04",
+			"class": "joined identifier",
+			"q": "Where does the Soroban host implement the Poseidon2 permutation?",
+			"repo": "stellar/rs-soroban-env",
+			"paths": [
+				"soroban-env-host/src/host.rs",
+				"soroban-env-host/src/crypto/mod.rs",
+				"soroban-env-host/src/crypto/poseidon/poseidon2.rs"
+			],
+			"symbols": [
+				"poseidon2_permutation",
+				"poseidon2_permutation_impl",
+				"permutation",
+				"Poseidon2"
+			],
+			"basis": "host function poseidon2_permutation (host.rs line 3445), poseidon2_permutation_impl (crypto/mod.rs line 367), Poseidon2::permutation (poseidon2.rs line 20)"
+		},
+		{
+			"id": "d05",
+			"class": "vocabulary",
+			"q": "Where is the SAC's clawback implemented in the Soroban host?",
+			"repo": "stellar/rs-soroban-env",
+			"paths": [
+				"soroban-env-host/src/builtin_contracts/stellar_asset_contract/contract.rs"
+			],
+			"symbols": ["clawback"],
+			"basis": "StellarAssetContract::clawback, line 297"
+		},
+		{
+			"id": "d07",
+			"class": "joined identifier",
+			"q": "Where does stellar-core apply surge pricing when it builds a transaction set?",
+			"repo": "stellar/stellar-core",
+			"paths": ["src/herder/TxSetFrame.cpp"],
+			"symbols": ["applySurgePricing"],
+			"basis": "applySurgePricing, line 568"
+		},
+		{
+			"id": "d08",
+			"class": "plain words",
+			"q": "Where does stellar-core check whether a transaction is banned from its queue?",
+			"repo": "stellar/stellar-core",
+			"paths": ["src/herder/TransactionQueue.cpp"],
+			"symbols": ["TransactionQueue::isBanned"],
+			"basis": "TransactionQueue::isBanned, line 956"
+		},
+		{
+			"id": "d10",
+			"class": "joined identifier, repo named",
+			"q": "Where is the fee stats RPC method implemented in stellar-rpc?",
+			"repo": "stellar/stellar-rpc",
+			"paths": ["cmd/stellar-rpc/internal/methods/get_fee_stats.go"],
+			"symbols": ["NewGetFeeStatsHandler"],
+			"basis": "NewGetFeeStatsHandler, line 36"
+		},
+		{
+			"id": "d11",
+			"class": "plain words",
+			"q": "Where does the JavaScript SDK poll a submitted transaction until it completes?",
+			"repo": "stellar/js-stellar-sdk",
+			"paths": ["src/rpc/server.ts"],
+			"symbols": ["pollTransaction"],
+			"basis": "RpcServer.pollTransaction, line 1130"
+		},
+		{
+			"id": "d13",
+			"class": "repo named",
+			"q": "Which stellar-cli file implements the keys generate command?",
+			"repo": "stellar/stellar-cli",
+			"paths": ["cmd/soroban-cli/src/commands/keys/generate.rs"],
+			"symbols": ["Cmd", "run"],
+			"basis": "struct Cmd line 32, Cmd::run line 76"
+		},
+		{
+			"id": "d14",
+			"class": "plain words",
+			"q": "Where does the stellar CLI extend a contract's TTL?",
+			"repo": "stellar/stellar-cli",
+			"paths": ["cmd/soroban-cli/src/commands/contract/extend.rs"],
+			"symbols": ["Cmd", "run", "run_against_rpc_server"],
+			"basis": "struct Cmd line 31, Cmd::run line 99, run_against_rpc_server line 132"
+		},
+		{
+			"id": "d16",
+			"class": "trait implementation",
+			"q": "Is there an example account contract that checks a BLS signature in __check_auth?",
+			"repo": "stellar/soroban-examples",
+			"paths": ["bls_signature/src/lib.rs"],
+			"symbols": [
+				"impl CustomAccountInterface for IncrementContract",
+				"__check_auth"
+			],
+			"basis": "impl CustomAccountInterface for IncrementContract line 69, __check_auth line 75"
+		},
+		{
+			"id": "d17",
+			"class": "trait implementation",
+			"q": "Which soroban-examples contract implements the custom account interface for a 1-of-n multisig?",
+			"repo": "stellar/soroban-examples",
+			"paths": ["multisig_1_of_n_account/contract/src/lib.rs"],
+			"symbols": ["impl CustomAccountInterface for Contract", "__check_auth"],
+			"basis": "impl CustomAccountInterface for Contract line 45, its __check_auth below it"
+		},
+		{
+			"id": "d19",
+			"class": "coverage",
+			"q": "Where is the Ownable trait defined in OpenZeppelin's Stellar contracts?",
+			"repo": "OpenZeppelin/stellar-contracts",
+			"paths": ["packages/access/src/ownable/mod.rs"],
+			"symbols": ["Ownable"],
+			"basis": "pub trait Ownable, line 50"
+		},
+		{
+			"id": "d20",
+			"class": "coverage, vocabulary",
+			"q": "Where does OpenZeppelin's Stellar library implement a keccak hasher?",
+			"repo": "OpenZeppelin/stellar-contracts",
+			"paths": ["packages/contract-utils/src/crypto/keccak.rs"],
+			"symbols": ["Keccak256", "impl Hasher for Keccak256"],
+			"basis": "pub struct Keccak256 line 7, impl Hasher for Keccak256 line 12"
+		}
+	]
+}

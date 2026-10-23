@@ -1,0 +1,221 @@
+{
+	"summary": {
+		"cases": 6,
+		"indexPointers": 25903,
+		"top1": 3,
+		"top3": 4,
+		"top10": 6,
+		"symbolTop1": 2,
+		"symbolTop3": 3,
+		"symbolTop10": 5,
+		"missedTop10": [],
+		"partialOnlyTop10": [],
+		"misleadingInTop10": []
+	},
+	"results": [
+		{
+			"id": "d03",
+			"q": "In soroban-sdk, where do contracts publish events with topics and data?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2050,
+			"overCap": false,
+			"matched": 2047,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/events.rs",
+					"locator": "publish_event",
+					"score": 32,
+					"matchReason": "symbol has publish; symbol has event, path too; symbol publish events; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/events.rs",
+					"locator": "Events",
+					"score": 29,
+					"matchReason": "symbol events, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/events.rs",
+					"locator": "topics",
+					"score": 29,
+					"matchReason": "path has event; symbol topics; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d06",
+			"q": "Where does the Soroban host verify an ed25519 signature?",
+			"fileRank": 8,
+			"symbolRank": 9,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1545,
+			"overCap": false,
+			"matched": 1541,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/benches/common/cost_types/verify_ed25519_sig.rs",
+					"locator": "impl HostCostMeasurement for VerifyEd25519SigMeasure",
+					"score": 29,
+					"matchReason": "path has soroban; symbol has host, path too; symbol has verify, path too; symbol has ed25519, path …"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/rust/src/ed25519_verify.rs",
+					"locator": "verify_ed25519_signature_dalek",
+					"score": 28,
+					"matchReason": "symbol has verify, path too; symbol has ed25519, path too; symbol has signature; symbol holds ed255…"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/benches/common/cost_types/verify_ed25519_sig.rs",
+					"locator": "VerifyEd25519SigMeasure",
+					"score": 25,
+					"matchReason": "path has soroban; path has host; symbol has verify, path too; symbol has ed25519, path too; signatu…"
+				}
+			]
+		},
+		{
+			"id": "d09",
+			"q": "In stellar-rpc, which handler serves getLedgerEntries?",
+			"fileRank": 4,
+			"symbolRank": 4,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 3477,
+			"overCap": false,
+			"matched": 3477,
+			"top3": [
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/preflight/pool.go",
+					"locator": "GetLedgerEntries",
+					"score": 48,
+					"matchReason": "symbol getLedgerEntries; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/host/noOpDaemon.go",
+					"locator": "GetLedgerEntries",
+					"score": 48,
+					"matchReason": "symbol getLedgerEntries; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/ledgerentries/ledgerentries.go",
+					"locator": "GetLedgerEntries",
+					"score": 48,
+					"matchReason": "symbol getLedgerEntries; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d12",
+			"q": "Which js-stellar-sdk function turns a native JavaScript value into an ScVal?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 601,
+			"overCap": false,
+			"matched": 593,
+			"top3": [
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/base/scval.ts",
+					"locator": "nativeToScVal",
+					"score": 25,
+					"matchReason": "symbol has native; symbol has sc val; repo named in q"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/base/scval.ts",
+					"locator": "scValToNative",
+					"score": 25,
+					"matchReason": "symbol has native; symbol has sc val; repo named in q"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/contract/spec.ts",
+					"locator": "nativeToScVal",
+					"score": 25,
+					"matchReason": "symbol has native; symbol has sc val; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d15",
+			"q": "Where does the quickstart start script initialize friendbot?",
+			"fileRank": 1,
+			"symbolRank": 2,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 227,
+			"overCap": false,
+			"matched": 227,
+			"top3": [
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "start",
+					"score": 34,
+					"matchReason": "symbol start, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "init_friendbot",
+					"score": 34,
+					"matchReason": "path has start; symbol has init; symbol has friendbot; symbol initialize friendbot; repo named in q"
+				},
+				{
+					"repo": "stellar/quickstart",
+					"path": "common/friendbot/bin/start",
+					"locator": null,
+					"score": 34,
+					"matchReason": "file start, path too; path has friendbot; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d18",
+			"q": "Where is the spending limit policy for OpenZeppelin smart accounts enforced?",
+			"fileRank": 3,
+			"symbolRank": null,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 831,
+			"overCap": false,
+			"matched": 831,
+			"top3": [
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "examples/multisig-smart-account/spending-limit-policy/src/contract.rs",
+					"locator": "SpendingLimitPolicyContract",
+					"score": 35,
+					"matchReason": "symbol has spending, path too; symbol has limit, path too; symbol has policy, path too; path has sm…"
+				},
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "examples/multisig-smart-account/spending-limit-policy/src/contract.rs",
+					"locator": "impl Policy for SpendingLimitPolicyContract",
+					"score": 35,
+					"matchReason": "symbol has spending, path too; symbol has limit, path too; symbol has policy, path too; path has sm…"
+				},
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "packages/accounts/src/policies/spending_limit.rs",
+					"locator": "SpendingLimitEnforced",
+					"score": 28,
+					"matchReason": "symbol has spending, path too; symbol has limit, path too; path has policy; path has account; symbo…"
+				}
+			]
+		}
+	]
+}

@@ -58,14 +58,21 @@ function project(r: IndexRow, projection: Record<string, number> | undefined) {
 
 /** The driver calls the route makes, evaluated over the fixture rows. */
 function matches(r: IndexRow, filter: Record<string, unknown>): boolean {
-	const terms = (filter.terms as { $in: Array<string | RegExp> }).$in;
+	const byTerm = (f: Record<string, unknown>) =>
+		r.terms.some((t) =>
+			(f.terms as { $in: Array<string | RegExp> }).$in.some((x) =>
+				typeof x === "string" ? x === t : x.test(t),
+			),
+		);
+	const byPath = (f: Record<string, unknown>) =>
+		f.repo === r.repo &&
+		new RegExp((f.path as { $regex: string }).$regex).test(r.path);
+	const branches = (filter.$or as Array<Record<string, unknown>>) ?? [filter];
 	const repoIn = (filter.repo as { $in: string[] }).$in;
 	return (
 		repoIn.includes(r.repo) &&
 		(!filter.locatorKind || filter.locatorKind === r.locatorKind) &&
-		r.terms.some((t) =>
-			terms.some((x) => (typeof x === "string" ? x === t : x.test(t))),
-		)
+		branches.some((b) => (b.terms ? byTerm(b) : byPath(b)))
 	);
 }
 
@@ -194,6 +201,61 @@ describe("GET /api/sources/locate", () => {
 		});
 	});
 
+	it("a typed stellar-cli command also reads its module's rows by path, and ranks them first", async () => {
+		const C = "cmd/soroban-cli/src/commands";
+		store.repos.push(built("stellar/stellar-cli"));
+		store.rows.push(
+			row(
+				"stellar/stellar-cli",
+				`${C}/contract/invoke.rs`,
+				"symbol",
+				"Cmd",
+				41,
+			),
+			row(
+				"stellar/stellar-cli",
+				`${C}/contract/invoke.rs`,
+				"symbol",
+				"run",
+				134,
+			),
+			row(
+				"stellar/stellar-cli",
+				`${C}/contract/info/shared.rs`,
+				"symbol",
+				"Contract",
+				10,
+			),
+			row("stellar/stellar-cli", `${C}/contract/mod.rs`, "symbol", "Cmd", 22),
+		);
+		const { body } = await get(
+			"q=Where is the stellar contract invoke command implemented",
+		);
+		expect(store.lastFilter).toMatchObject({
+			$or: [
+				{ terms: expect.any(Object) },
+				{ repo: "stellar/stellar-cli", path: { $regex: expect.any(String) } },
+			],
+		});
+		expect(
+			body.pointers
+				.slice(0, 2)
+				.map(
+					(p: { path: string; locator: string }) => `${p.path} ${p.locator}`,
+				),
+		).toEqual([`${C}/contract/invoke.rs Cmd`, `${C}/contract/invoke.rs run`]);
+		expect(body.pointers[0].matchReason).toContain(
+			"implements contract invoke",
+		);
+		expect(body.pointers.map((p: { path: string }) => p.path)).not.toContain(
+			`${C}/contract/mod.rs`,
+		);
+		expect(declared(body)).toEqual([]);
+		// Without a command, the filter is the plain term read.
+		await get("q=ENABLE_CORE_MANUAL_CLOSE");
+		expect(store.lastFilter).not.toHaveProperty("$or");
+	});
+
 	it("reads only the fields it ranks and serves, never key or terms", async () => {
 		const { body } = await get("q=ENABLE_CORE_MANUAL_CLOSE");
 		expect(store.lastProjection).toEqual({
@@ -293,7 +355,9 @@ describe("GET /api/sources/locate", () => {
 		);
 		const { body } = await get(`q=transfer ${"word ".repeat(40)}`);
 		expect(body.pointers).toHaveLength(10);
-		expect(JSON.stringify(body).length).toBeLessThan(12_000);
+		// 12,437 characters with nine repos in meta.index and the join, ident
+		// and cmd factors (11,910 with eight): still about half the cap.
+		expect(JSON.stringify(body).length).toBeLessThan(13_000);
 	});
 
 	it("rejects what it cannot honour with 400 and the valid values", async () => {

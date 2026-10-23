@@ -618,8 +618,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Locate where a flag, option default, function or interface is defined in Stellar's own source
-         * @description Scored pointers into allowlisted Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples): the file, symbol or heading, line, commit and blob sha where a CLI flag, config option default, SDK or host function, or contract interface is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read. pointers [] = no match in the indexed repos; null = could not search.
+         * Locate where a flag, command, option default, function or interface is defined in Stellar's source
+         * @description Scored pointers into allowlisted repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples, OpenZeppelin/stellar-contracts): the file, symbol or heading, line, commit and blob sha where a CLI flag or command, config option default, SDK or host function, contract interface or trait implementation is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read. pointers [] = no match in the indexed repos; null = could not search.
          */
         get: operations["locateSource"];
         put?: never;
@@ -859,13 +859,13 @@ export interface components {
              * @description owner/name of the repo.
              * @enum {string}
              */
-            repo: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples";
+            repo: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples" | "OpenZeppelin/stellar-contracts";
             /** @description The 40-hex commit the pointer was read at. An unchanged file keeps its first ref: the same blob and lines hold at later commits up to the repo's indexed ref (meta.index). */
             ref: string;
             /** @description Repo-relative file path. */
             path: string;
             /**
-             * @description file = the whole file; symbol = a named definition (function, type, constant, CLI flag, config option or key, environment variable); heading = a Markdown section.
+             * @description file = the whole file; symbol = a named definition (function, type, constant, CLI flag, config option or key, environment variable) or a Rust trait implementation, written impl Trait for Type; heading = a Markdown section.
              * @enum {string}
              */
             locatorKind: "file" | "symbol" | "heading";
@@ -874,7 +874,7 @@ export interface components {
             /** @description 1-based line the locator sits on at ref; null for a file pointer. */
             line: number | null;
             /**
-             * @description implementation = the repo's code (core, SDKs, host, RPC, quickstart); tooling = stellar-cli; reference-docs = any Markdown file and the soroban-examples contracts. A role, not an endorsement.
+             * @description implementation = the repo's code (core, SDKs, host, RPC, quickstart, OpenZeppelin's contract library); tooling = stellar-cli; reference-docs = any Markdown file and the soroban-examples contracts. A role, not an endorsement.
              * @enum {string}
              */
             authorityRole: "implementation" | "tooling" | "reference-docs";
@@ -894,7 +894,7 @@ export interface components {
             verificationUrl: string;
             /** @description 0 to 100 for this q and this pointer alone; compare within one response, not across queries. */
             score: number;
-            /** @description Compact score parts: words matched of q, exact, prefix (an identifier held in the name), word, path, repo named, name (share of the name's own words q accounts for). */
+            /** @description Compact score parts: words matched of q, exact, prefix (an identifier held in the name), word, path, join (adjacent words of q matched as one name), ident (identifiers typed in q found whole, counted double), cmd (stellar-cli command words the file's module path matches), repo named, name (share of the name's own words q accounts for). */
             factors: string;
         };
         /** @description The request itself was wrong (a 400): fix the call, do not retry it as is. */
@@ -6352,10 +6352,10 @@ export interface operations {
     locateSource: {
         parameters: {
             query: {
-                /** @description What to locate: a symbol, flag, option, config key or topic words (at most 300 characters), e.g. --enable-core-manual-close or getTransactions default limit. Naming a repo in q (stellar-rpc, quickstart) lifts its pointers. */
+                /** @description What to locate: a symbol, flag, option, config key, stellar-cli command or topic words (at most 300 characters), e.g. --enable-core-manual-close, getTransactions default limit or stellar contract invoke. A repo named in q (stellar-rpc, quickstart, OpenZeppelin) strongly lifts its pointers; a typed stellar-cli command lifts the module that implements it. */
                 q: string;
                 /** @description Only this allowlisted repo, as owner/name (e.g. stellar/quickstart). Anything else answers 400 with the valid values. */
-                repo?: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples";
+                repo?: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples" | "OpenZeppelin/stellar-contracts";
                 /** @description Only this locator kind. */
                 kind?: "file" | "symbol" | "heading";
                 /** @description Page of 10 pointers: a whole number from 1 to 2000 written as plain digits. */
@@ -6376,7 +6376,7 @@ export interface operations {
                     "application/json": {
                         meta: {
                             /**
-                             * @description Always expanded: identifiers split into words, plurals folded, a few code abbreviations mapped (max, min, config, auth, init, env, tx).
+                             * @description Always expanded: identifiers split into words, plurals folded, a few code abbreviations mapped (max, min, config, auth, init, env, tx), adjacent words of q also read as one name (token interface as TokenInterface), and a few crypto and auth words matched to the names the code uses (passkey and WebAuthn as secp256r1, SEP-41 as TokenInterface, SAC as StellarAssetContract).
                              * @enum {string}
                              */
                             matchMode?: "expanded";

@@ -1,0 +1,36 @@
+{
+	"name": "locate-ranking dev set, amendment A1 (tuned on)",
+	"frozenAt": "2026-10-23T18:05:00Z",
+	"rule": "Amendment A1 to dev-set.frozen.json, asked for by the orchestrator after a cold-outsider sweep: a CLI command path typed in q (stellar <noun> <verb>, or the old soroban binary name). Written and labelled from the stellar-cli tarball before any ranking was run on these cases and before any tuning; the ids divisible by 3 (d21, d24) are held out in dev-heldout-a1.frozen.json. Found at k: a top-k pointer with the expected repo, one of the expected paths and one of the expected symbols.",
+	"refs": {
+		"stellar/stellar-core": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+		"stellar/rs-soroban-sdk": "8e5b425dce5fa1dcd5a3fe1d3f3fcd18431586dd",
+		"stellar/rs-soroban-env": "0c99950e96128beba3319aa96b116646ce974e69",
+		"stellar/js-stellar-sdk": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+		"stellar/stellar-rpc": "ec4171d970ac812d9f4317b3cce2c315baa31320",
+		"stellar/quickstart": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+		"stellar/stellar-cli": "4ff88b7ea11dd3c847bb711b80258517148e1529",
+		"stellar/soroban-examples": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2",
+		"OpenZeppelin/stellar-contracts": "ddc327eb92d63709436da3a8455f641c2d5476c5"
+	},
+	"cases": [
+		{
+			"id": "d22",
+			"class": "CLI command path",
+			"q": "Where is the stellar contract invoke command implemented?",
+			"repo": "stellar/stellar-cli",
+			"paths": ["cmd/soroban-cli/src/commands/contract/invoke.rs"],
+			"symbols": ["Cmd", "run"],
+			"basis": "struct Cmd line 41, Cmd::run line 134"
+		},
+		{
+			"id": "d23",
+			"class": "CLI command path, old binary name",
+			"q": "Which file implements `soroban contract build` in the CLI?",
+			"repo": "stellar/stellar-cli",
+			"paths": ["cmd/soroban-cli/src/commands/contract/build.rs"],
+			"symbols": ["Cmd", "run"],
+			"basis": "struct Cmd line 34, Cmd::run line 124"
+		}
+	]
+}
