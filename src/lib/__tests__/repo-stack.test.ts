@@ -117,4 +117,39 @@ describe("fetchRepoActivity", () => {
 		);
 		expect(failed.size).toBe(0);
 	});
+
+	it("reads the owner/name GitHub answers a renamed or transferred repo under", async () => {
+		const { fetchRepoActivity } = await import(
+			"../../../scripts/scan/fetch-repo-code"
+		);
+		const post = vi.fn(async (_url: string, init: { body: string }) => {
+			expect(JSON.parse(init.body).query).toContain("nameWithOwner");
+			return new Response(
+				JSON.stringify({
+					data: {
+						r0: {
+							nameWithOwner: "Widget-Labs/Widget",
+							isArchived: false,
+							defaultBranchRef: null,
+						},
+						r1: null,
+					},
+					errors: [{ type: "NOT_FOUND", path: ["r1"] }],
+				}),
+			);
+		});
+		const got = await fetchRepoActivity(
+			"t",
+			["a-builder/widget", "a-builder/gone"],
+			post as unknown as typeof fetch,
+		);
+		expect(got.get("a-builder/widget")).toEqual({
+			state: "read",
+			lastCommitAt: null,
+			archived: false,
+			fullName: "widget-labs/widget",
+		});
+		// Not found: where it went is unknown, so no owner/name is reported.
+		expect(got.get("a-builder/gone")).toEqual({ state: "missing" });
+	});
 });

@@ -25,6 +25,12 @@
  * ("x402 Wallet by Sorobanhooks") does not start with the team's project
  * name, so it is not taken for that project. Every link says which rule made
  * it (`basis`).
+ *
+ * A team that renames or transfers its repo leaves the stored URL behind,
+ * and GitHub redirects it. The sync lane stores where the repo is now, and
+ * the first and third rules also read that repo when the stored one finds
+ * nothing (`moved-repo`, `moved-owner-and-name`). A repo GitHub could not
+ * resolve is not taken as moved.
  */
 
 /** owner/name of a GitHub repository URL, lowercased. null for an account or
@@ -40,9 +46,8 @@ export function repoFullNameOf(url: string | null | undefined): string | null {
 export interface LinkedProject {
 	slug: string;
 	name: string;
-	/** Which rule linked it: the project lists the submission's exact repo, or
-	 * the submission's demo site is the project's website. Absent on links
-	 * stored before the basis was recorded (all by repo). */
+	/** Which rule linked it (LINK_BASES). Absent on links stored before the
+	 * basis was recorded (all by repo). */
 	basis?: LinkBasis;
 	/** The project's directory status today, read with the index. Absent
 	 * when that read failed: unknown, not "no status". */
@@ -53,7 +58,13 @@ export interface LinkedProject {
 	factsReadAt?: string;
 }
 
-export const LINK_BASES = ["repo", "website", "owner-and-name"] as const;
+export const LINK_BASES = [
+	"repo",
+	"website",
+	"owner-and-name",
+	"moved-repo",
+	"moved-owner-and-name",
+] as const;
 /** reviewSubmission: how the link was resolved, and its check ids.
  * Here (pure) so the spec can spread them. */
 export const REVIEW_RESOLVED_BY = ["submission", "repo"] as const;
@@ -233,6 +244,83 @@ export function ownerAndNameLink(
 		return !!pk && (key === pk || key.startsWith(pk));
 	});
 	return hits.length === 1 ? { ...hits[0], basis: "owner-and-name" } : null;
+}
+
+/** The submission fields the rules read. */
+export interface BuildLinkFields {
+	name?: string | null;
+	githubUrl?: string | null;
+	demoUrl?: string | null;
+	/** owner/name of githubUrl, lowercased (repoFullNameOf). */
+	repoFullName?: string | null;
+	/** owner/name GitHub resolves that repo to now, lowercased, when it was
+	 * renamed or transferred. Absent or null: not moved, or not read. */
+	repoCurrentFullName?: string | null;
+}
+
+/** The repoCurrentFullName the sync lane stores: where this run's read
+ * found the repo (null when that is the repo itself), or with no read (not
+ * found, or the read failed) the last value stored for this same repo. A
+ * value stored for a different repo is never carried over. */
+export function currentRepoFor(
+	repoFullName: string | null | undefined,
+	read: string | undefined,
+	prev?: {
+		repoFullName?: string | null;
+		repoCurrentFullName?: string | null;
+	} | null,
+): string | null {
+	if (read !== undefined) return read !== repoFullName ? read : null;
+	return prev && prev.repoFullName === repoFullName
+		? (prev.repoCurrentFullName ?? null)
+		: null;
+}
+
+/** The three directory indexes the rules read. */
+export interface ProjectIndexes {
+	repos: Map<string, LinkedProject | null>;
+	sites: Map<string, LinkedProject | null>;
+	owners: Map<string, LinkedProject[]>;
+}
+
+/**
+ * The one project a submission became and the rule that made the link, first
+ * match wins: a project lists its stored repo; a project lists the repo it
+ * moved to; its demo site is a project's website; owner and name on the
+ * stored repo; owner and name on the repo it moved to. A repo two projects
+ * list links nothing (`ambiguous`), and neither does a site two projects
+ * share.
+ */
+export function linkBuild(
+	b: BuildLinkFields,
+	idx: ProjectIndexes,
+): { project: LinkedProject | null; ambiguous: boolean } {
+	const stored = b.repoFullName || null;
+	const moved =
+		b.repoCurrentFullName && b.repoCurrentFullName !== stored
+			? b.repoCurrentFullName
+			: null;
+	for (const [repo, basis] of [
+		[stored, "repo"],
+		[moved, "moved-repo"],
+	] as const) {
+		const p = repo ? idx.repos.get(repo) : undefined;
+		if (p === null) return { project: null, ambiguous: true };
+		if (p) return { project: { ...p, basis }, ambiguous: false };
+	}
+	const key = siteKeyOf(b.demoUrl);
+	const s = key ? idx.sites.get(key) : undefined;
+	if (s !== undefined)
+		return { project: s && { ...s, basis: "website" }, ambiguous: false };
+	const o = ownerAndNameLink(b.githubUrl, b.name, idx.owners);
+	const m =
+		!o && moved
+			? ownerAndNameLink(`https://github.com/${moved}`, b.name, idx.owners)
+			: null;
+	return {
+		project: o ?? (m && { ...m, basis: "moved-owner-and-name" }),
+		ambiguous: false,
+	};
 }
 
 /** A curated submission id, as curated-builds.ts makes them: lowercase words

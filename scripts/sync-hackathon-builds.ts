@@ -17,14 +17,17 @@
  *   2. each submission's own page (the team's full write-up and self-reported
  *      tags) when it has not been read in the last 30 days
  *   3. the project link: the one directory project that lists the exact repo
- *      (src/lib/hackathon-build-links.ts; a shared GitHub owner never counts)
+ *      (src/lib/hackathon-build-links.ts; a shared GitHub owner never counts),
+ *      or the repo it was renamed or transferred to; runs after step 6
  *   4. embeddings for search by meaning, only for rows whose text changed
  *      (voyage-3 via src/lib/embed.ts), and the vector index they need
  *   5. the stack: the Stellar packages each submission's repo declares in its
  *      package.json and Cargo.toml files, read once a month per repo, winners
  *      and the newest events first, at most STACK_MAX_REPOS repos a run
- *   6. repo activity: the last commit on each repo's default branch and
- *      whether it is archived, every run (GraphQL, 50 repos a call)
+ *   6. repo activity: the last commit on each repo's default branch, whether
+ *      it is archived, and the owner/name GitHub answers it under (a renamed
+ *      or transferred repo answers under its new one), every run, before the
+ *      links (GraphQL, 50 repos a call)
  *   0. the events themselves: every Stellar DoraHacks event's own page
  *      (dates, prize, tracks, the page, the submission form's requirements,
  *      the requirements and judging sections when the organizer wrote them),
@@ -60,11 +63,12 @@ import {
 	embeddingTextHash,
 } from "../src/lib/hackathon-build-embedding";
 import {
+	currentRepoFor,
 	indexProjectOwners,
 	indexProjectRepos,
 	indexProjectSites,
 	type LinkedProject,
-	ownerAndNameLink,
+	linkBuild,
 	type ProjectRepoRow,
 	repoFullNameOf,
 	siteKeyOf,
@@ -91,6 +95,7 @@ import {
 	fetchRepoActivity,
 	fetchRepoStack,
 	RateLimitError,
+	type RepoActivity,
 } from "./scan/fetch-repo-code";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -239,6 +244,7 @@ const FIELDS = [
 	"demoUrl",
 	"videoUrl",
 	"repoFullName",
+	"repoCurrentFullName",
 	"projectSlug",
 	"projectName",
 	"projectLinkBasis",
@@ -517,6 +523,58 @@ async function main() {
 		`\nsubmission pages: ${due.size} due, ${detail.read} read, ${detail.notFound} not found, ${detail.failed} could not be read (stored values kept)`,
 	);
 
+	// ── 6. repo activity ─────────────────────────────────────────────────
+	// Cheap enough to refresh every run. Read before the links: GitHub answers
+	// a renamed or transferred repo under its new owner/name, and the links
+	// read that too. A repo GitHub reports missing is left to the stack step,
+	// the one writer of repoMissingAt.
+	const ghToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
+	const activityRepos = [
+		...new Set(
+			[...rows.values()]
+				.map((r) => r.repoFullName)
+				.filter((x): x is string => !!x),
+		),
+	];
+	let activityRead = 0;
+	const activity = ghToken
+		? await fetchRepoActivity(ghToken, activityRepos)
+		: new Map<string, RepoActivity>();
+	if (!ghToken) {
+		console.log(
+			`\nrepo activity: ${activityRepos.length} repos, not read (GITHUB_TOKEN is not set)`,
+		);
+	} else {
+		for (const r of rows.values()) {
+			const a = r.repoFullName ? activity.get(r.repoFullName) : undefined;
+			if (a?.state !== "read") continue;
+			r.repoLastCommitAt = a.lastCommitAt;
+			r.repoArchived = a.archived;
+			r.activityCheckedAt = now;
+		}
+		activityRead = [...activity.values()].filter(
+			(a) => a.state === "read",
+		).length;
+		const missing = activity.size - activityRead;
+		const moved = [...activity].filter(
+			([repo, a]) => a.state === "read" && a.fullName && a.fullName !== repo,
+		).length;
+		console.log(
+			`\nrepo activity: ${activityRepos.length} repos, ${activityRead} read (${moved} renamed or transferred), ${missing} not found, ${activityRepos.length - activity.size} could not be read (stored values kept)`,
+		);
+	}
+	// Where each repo is now, for the links: this run's read, else the last
+	// one stored for the same repo. Never a guess: a repo not read here and
+	// never read before has none.
+	for (const r of rows.values()) {
+		const a = r.repoFullName ? activity.get(r.repoFullName) : undefined;
+		r.repoCurrentFullName = currentRepoFor(
+			r.repoFullName,
+			a?.state === "read" ? a.fullName : undefined,
+			stored.get(r.entryKey),
+		);
+	}
+
 	// ── 3. project links ─────────────────────────────────────────────────
 	let links: Map<string, LinkedProject | null> | null = null;
 	let sites: Map<string, LinkedProject | null> | null = null;
@@ -547,29 +605,17 @@ async function main() {
 		);
 	}
 	let ambiguous = 0;
-	if (links) {
+	if (links && sites && owners) {
 		for (const r of rows.values()) {
-			const p = r.repoFullName ? links.get(r.repoFullName) : undefined;
-			if (p === null) ambiguous++;
-			// No project lists the repo: the demo site may still be a project's
-			// own website. An ambiguous repo stays unlinked either way.
-			const key = siteKeyOf(r.demoUrl);
-			const s = p === undefined && key ? sites?.get(key) : undefined;
-			// Neither: the project's own GitHub owner and its name, together.
-			const o =
-				p === undefined && s === undefined && owners
-					? ownerAndNameLink(r.githubUrl, r.name, owners)
-					: null;
-			const linked = p ?? s ?? o ?? null;
-			r.projectSlug = linked?.slug ?? null;
-			r.projectName = linked?.name ?? null;
-			r.projectLinkBasis = p
-				? "repo"
-				: s
-					? "website"
-					: o
-						? "owner-and-name"
-						: null;
+			const { project, ambiguous: listedTwice } = linkBuild(r, {
+				repos: links,
+				sites,
+				owners,
+			});
+			if (listedTwice) ambiguous++;
+			r.projectSlug = project?.slug ?? null;
+			r.projectName = project?.name ?? null;
+			r.projectLinkBasis = project?.basis ?? null;
 			r.linkCheckedAt = now;
 		}
 	}
@@ -651,7 +697,6 @@ async function main() {
 		stackDue.set(r.repoFullName, [...(stackDue.get(r.repoFullName) ?? []), r]);
 	}
 	const stackRun = { read: 0, missing: 0, failed: 0, rateLimited: false };
-	const ghToken = process.env.GITHUB_TOKEN || process.env.GH_TOKEN;
 	const stackBatch = [...stackDue.keys()].slice(0, STACK_MAX_REPOS);
 	if (!stackDue.size) {
 		console.log("\nrepo stacks: none due");
@@ -699,39 +744,6 @@ async function main() {
 					.map(([p, n]) => `${p} ${n}`)
 					.join(", ") || "none"
 			}`,
-		);
-	}
-
-	// ── 6. repo activity ─────────────────────────────────────────────────
-	// Cheap enough to refresh every run. A repo GitHub reports missing is left
-	// to the stack step, the one writer of repoMissingAt.
-	const activityRepos = [
-		...new Set(
-			[...rows.values()]
-				.map((r) => r.repoFullName)
-				.filter((x): x is string => !!x),
-		),
-	];
-	let activityRead = 0;
-	if (!ghToken) {
-		console.log(
-			`\nrepo activity: ${activityRepos.length} repos, not read (GITHUB_TOKEN is not set)`,
-		);
-	} else {
-		const activity = await fetchRepoActivity(ghToken, activityRepos);
-		for (const r of rows.values()) {
-			const a = r.repoFullName ? activity.get(r.repoFullName) : undefined;
-			if (a?.state !== "read") continue;
-			r.repoLastCommitAt = a.lastCommitAt;
-			r.repoArchived = a.archived;
-			r.activityCheckedAt = now;
-		}
-		activityRead = [...activity.values()].filter(
-			(a) => a.state === "read",
-		).length;
-		const missing = activity.size - activityRead;
-		console.log(
-			`\nrepo activity: ${activityRepos.length} repos, ${activityRead} read, ${missing} not found, ${activityRepos.length - activity.size} could not be read (stored values kept)`,
 		);
 	}
 
@@ -873,17 +885,15 @@ async function main() {
 		.filter((r) => r.projectSlug)
 		.sort((a, b) => Number(!!b.isWinner) - Number(!!a.isWinner));
 	console.log(
-		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, ${linked.filter((r) => r.projectLinkBasis === "owner-and-name").length} by owner and name, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
+		`\n${linked.length} builds link to a directory project (${linked.filter((r) => r.isWinner).length} winners; ${linked.filter((r) => r.projectLinkBasis === "website").length} by website, ${linked.filter((r) => r.projectLinkBasis === "owner-and-name").length} by owner and name, ${linked.filter((r) => r.projectLinkBasis?.startsWith("moved-")).length} through a renamed or transferred repo, the rest by repo); ${ambiguous} builds' repos are listed by more than one project and stay unlinked`,
 	);
-	// Owner-and-name links first: the newest rule is the one to read.
-	linked.sort(
-		(a, b) =>
-			Number(b.projectLinkBasis === "owner-and-name") -
-			Number(a.projectLinkBasis === "owner-and-name"),
-	);
+	// The newest rules first: links through a moved repo, then owner and name.
+	const rank = (b?: string | null) =>
+		b?.startsWith("moved-") ? 2 : b === "owner-and-name" ? 1 : 0;
+	linked.sort((a, b) => rank(b.projectLinkBasis) - rank(a.projectLinkBasis));
 	for (const r of linked.slice(0, 80))
 		console.log(
-			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.projectLinkBasis === "owner-and-name" ? `owner+name ${r.githubUrl}` : r.repoFullName} -> ${r.projectSlug}`,
+			`  ${r.isWinner ? "winner" : "      "} ${(r.name ?? "").slice(0, 40).padEnd(40)} ${r.projectLinkBasis === "website" ? `site ${siteKeyOf(r.demoUrl)}` : r.projectLinkBasis === "owner-and-name" ? `owner+name ${r.githubUrl}` : r.projectLinkBasis?.startsWith("moved-") ? `${r.projectLinkBasis} ${r.repoFullName} now ${r.repoCurrentFullName}` : r.repoFullName} -> ${r.projectSlug}`,
 		);
 
 	if (!EXECUTE) {

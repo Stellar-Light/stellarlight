@@ -149,6 +149,24 @@ export const HackathonBuilds: CollectionConfig = {
 			},
 		},
 		{
+			// One writer: the sync lane's repo activity read (GitHub's GraphQL
+			// answers a renamed or transferred repo under its new owner/name).
+			// The project link reads it. Not public: the read hook leaves a doc
+			// with no githubUrl or repoFullName alone, so a public select or
+			// where on this field would name a held repo's new home. The lanes
+			// read it with includeSecurityHeld, as they read the held link.
+			name: "repoCurrentFullName",
+			type: "text",
+			access: {
+				read: ({ req }) =>
+					isAdmin(req.user) || req.context?.includeSecurityHeld === true,
+			},
+			admin: {
+				description:
+					"owner/name GitHub answers repoFullName under now, lowercased, when the repo was renamed or transferred. Empty = not moved when last read (activityCheckedAt), or never read. A read that fails or finds nothing keeps the last value for the same repo.",
+			},
+		},
+		{
 			name: "projectSlug",
 			type: "text",
 			index: true,
@@ -163,7 +181,7 @@ export const HackathonBuilds: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Which rule linked projectSlug: repo (the project lists this exact repo), website (the submission's demo site is the project's website), or owner-and-name (the repo sits under the project's GitHub owner and the submission carries the project's name).",
+					"Which rule linked projectSlug: repo (the project lists this exact repo), website (the submission's demo site is the project's website), owner-and-name (the repo sits under the project's GitHub owner and the submission carries the project's name), or moved-repo and moved-owner-and-name (the same two repo rules, read on repoCurrentFullName, where the repo was renamed or transferred to).",
 			},
 		},
 		{
