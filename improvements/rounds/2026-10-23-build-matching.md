@@ -155,3 +155,14 @@ author's.
   0; `npx vitest run src/lib/__tests__ src/app/api` exit 0, 179 files and
   2242 tests; `CONTRACT_BASE=4430f803 pnpm contract:check` exit 0;
   `pnpm raven:gate` exit 0, ACCEPT 1.9.93.
+- Review (Claude Fable 5.1, effort high, fresh context, read-only clone at
+  53b2e73e): GATE: push. Opt-in isolation, the unread-stack path,
+  tokenization and the identity claim (re-derived from the committed
+  files) verified. Four low or info findings:
+  - The changelog's examples of generic words matching were the mild ones.
+    Now fixed: it names tooling packages that answer design, system, xdr and
+    utils.
+  - The excluded set is a snapshot of the tenth cut (x402 at 11.4%). Left as
+    a known ceiling for a later guard.
+  - The exclusion test also passes on base.
+  - The committed replay files are slimmed.
