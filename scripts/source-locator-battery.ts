@@ -7,7 +7,9 @@
  *     --battery improvements/audits/2026-10-23-source-locator/battery.frozen.json [--json out.json]
  *
  * --tarballs <dir> builds the rows from local owner_repo.tar.gz files at the
- * battery's refs instead (same buildRows the builder runs).
+ * battery's refs instead (same buildRows the builder runs); --also
+ * owner/name@ref (repeatable) adds a repo the battery's refs do not list, so
+ * a battery written for eight repos is scored over the index of nine.
  *
  * A case is found at k when a top-k pointer has the expected repo and one of
  * the expected (full-answer) paths; the symbol column, and a partial-answer
@@ -62,7 +64,10 @@ if (rowsPath) {
 	>;
 	rows = Object.values(byRepo).flatMap((r) => r.rows);
 } else if (tarDir) {
-	for (const [repo, ref] of Object.entries(battery.refs ?? {})) {
+	const also = args.flatMap((a, i) =>
+		a === "--also" && args[i + 1] ? [args[i + 1].split("@")] : [],
+	);
+	for (const [repo, ref] of [...Object.entries(battery.refs ?? {}), ...also]) {
 		const buf = gunzipSync(
 			readFileSync(join(tarDir, `${repo.replace("/", "_")}.tar.gz`)),
 		);
@@ -116,15 +121,17 @@ const results = cases.map((c) => {
 
 const within = (k: number) =>
 	results.filter((r) => r.fileRank !== null && r.fileRank <= k).length;
+const symbolWithin = (k: number) =>
+	results.filter((r) => r.symbolRank !== null && r.symbolRank <= k).length;
 const summary = {
 	cases: results.length,
 	indexPointers: rows.length,
 	top1: within(1),
 	top3: within(3),
 	top10: within(10),
-	symbolTop10: results.filter(
-		(r) => r.symbolRank !== null && r.symbolRank <= 10,
-	).length,
+	symbolTop1: symbolWithin(1),
+	symbolTop3: symbolWithin(3),
+	symbolTop10: symbolWithin(10),
 	missedTop10: results
 		.filter((r) => r.fileRank === null || r.fileRank > 10)
 		.map((r) => r.id),

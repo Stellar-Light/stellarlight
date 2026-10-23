@@ -1,0 +1,36 @@
+Per-rule verdicts for the chosen configuration (bar 3). Each line removes one rule alone, everything else equal.
+'rule moves down (on vs off)': frozen cases whose file rank is worse with the rule in place, as 'off->on'.
+'helps': frozen cases whose file rank is better with the rule in place, 'off->on'.
+'sym top10 flips': frozen cases whose symbol top-10 membership differs, 'off->on'.
+'dev sym@10': symbol top-10 hits over the 16 tuned dev cases with the rule (on) and without (off).
+'priority req': required items met over the six priority questions, on and off.
+Against the base ranks (origin/main), the chosen configuration leaves no frozen case below its base file rank.
+
+f-nojoin         rule moves down (on vs off): f05 1->4 | helps: f01 25->15, f04 8->4 | sym top10 flips: f04 sym 80->4 | dev sym@10 on 14 off 13 | priority req on 8 off 6
+f-noheld         rule moves down (on vs off): f05 2->4 | helps: f08 2->1, f13 4->3 | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 7
+f-heldanysym     rule moves down (on vs off): f19 1->2 | helps: f17 3->1 | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-noheadjoin     rule moves down (on vs off): none | helps: c09 2->1, f08 11->1 | sym top10 flips: f08 sym 11->1 | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-nofilejoin     rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-share1         rule moves down (on vs off): f01 3->15, f04 3->4, f19 1->2 | helps: f06 2->1 | sym top10 flips: c17 sym 18->2 | dev sym@10 on 14 off 13 | priority req on 8 off 8
+f-share0         rule moves down (on vs off): f01 1->15, f04 1->4, f19 1->2 | helps: c17 17->1, f06 2->1, f12 6->5 | sym top10 flips: c17 sym 19->2 | dev sym@10 on 14 off 13 | priority req on 8 off 8
+f-nopunct        rule moves down (on vs off): f05 1->4 | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-nojoinok       rule moves down (on vs off): none | helps: f01 25->15 | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-nokebab        rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-nosyn          rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 7
+f-typed1         rule moves down (on vs off): none | helps: c08 4->1, c18 3->2, c19 2->1, f05 5->4, f09 8->2, f12 14->5 | sym top10 flips: c06 sym 11->1 | dev sym@10 on 14 off 14 | priority req on 8 off 7
+f-repo3          rule moves down (on vs off): none | helps: f01 21->15, f12 7->5, f20 2->1 | sym top10 flips: m2 sym 13->9 | dev sym@10 on 14 off 14 | priority req on 8 off 7
+f-noimpl         rule moves down (on vs off): none | helps: f05 6->4 | sym top10 flips: none | dev sym@10 on 14 off 13 | priority req on 8 off 6
+f-nocmd          rule moves down (on vs off): none | helps: f16 43->1 | sym top10 flips: f16 sym 1000000->6 | dev sym@10 on 14 off 12 | priority req on 8 off 8
+f-nooz           rule moves down (on vs off): f04 2->4 | helps: none | sym top10 flips: none | dev sym@10 on 14 off 12 | priority req on 8 off 8
+f-nofullname     rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-passkey    rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-webauthn   rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-p256       rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-ecdsa      rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-ethereum   rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-keccak     rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-sep41      rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-sep0041    rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-sac        rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-signature  rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8
+f-syn-bls        rule moves down (on vs off): none | helps: none | sym top10 flips: none | dev sym@10 on 14 off 14 | priority req on 8 off 8

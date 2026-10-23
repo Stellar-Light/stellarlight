@@ -1,0 +1,863 @@
+{
+	"about": "Per case: the rank of the first pointer at an expected file (file) and at an expected symbol (symbol), base code (origin/main d9bd53b5, today's eight-repo index) against this branch (nine repos, impl locators). Ranks from the same harness logic over local tarballs at the pinned refs; null = not served at all. Held-out cases list the run before the command-detection fix (heldOutRun) and after it (final).",
+	"sets": {
+		"dev-set.frozen.json": {
+			"base": {
+				"battery": "dev-set.frozen.json",
+				"cases": 14,
+				"pointers": 21440,
+				"file": [3, 7, 10],
+				"symbol": [2, 6, 8]
+			},
+			"final": {
+				"battery": "dev-set.frozen.json",
+				"cases": 14,
+				"pointers": 25903,
+				"file": [8, 10, 13],
+				"symbol": [6, 8, 12]
+			},
+			"cases": [
+				{
+					"id": "d01",
+					"base": {
+						"file": 7,
+						"symbol": 47
+					},
+					"final": {
+						"file": 2,
+						"symbol": 9
+					}
+				},
+				{
+					"id": "d02",
+					"base": {
+						"file": 9,
+						"symbol": 10
+					},
+					"final": {
+						"file": 9,
+						"symbol": 10
+					}
+				},
+				{
+					"id": "d04",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "d05",
+					"base": {
+						"file": 3,
+						"symbol": 3
+					},
+					"final": {
+						"file": 1,
+						"symbol": 8
+					}
+				},
+				{
+					"id": "d07",
+					"base": {
+						"file": 3,
+						"symbol": 3
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "d08",
+					"base": {
+						"file": 1,
+						"symbol": 2
+					},
+					"final": {
+						"file": 1,
+						"symbol": 2
+					}
+				},
+				{
+					"id": "d10",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 2,
+						"symbol": 2
+					}
+				},
+				{
+					"id": "d11",
+					"base": {
+						"file": 7,
+						"symbol": 7
+					},
+					"final": {
+						"file": 8,
+						"symbol": 8
+					}
+				},
+				{
+					"id": "d13",
+					"base": {
+						"file": 87,
+						"symbol": null
+					},
+					"final": {
+						"file": 77,
+						"symbol": null
+					}
+				},
+				{
+					"id": "d14",
+					"base": {
+						"file": 50,
+						"symbol": null
+					},
+					"final": {
+						"file": 5,
+						"symbol": null
+					}
+				},
+				{
+					"id": "d16",
+					"base": {
+						"file": 3,
+						"symbol": 3
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "d17",
+					"base": {
+						"file": 2,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "d19",
+					"base": {
+						"file": null,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "d20",
+					"base": {
+						"file": null,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				}
+			]
+		},
+		"dev-set-a1.frozen.json": {
+			"base": {
+				"battery": "dev-set-a1.frozen.json",
+				"cases": 2,
+				"pointers": 21440,
+				"file": [1, 1, 1],
+				"symbol": [0, 0, 0]
+			},
+			"final": {
+				"battery": "dev-set-a1.frozen.json",
+				"cases": 2,
+				"pointers": 25903,
+				"file": [2, 2, 2],
+				"symbol": [0, 1, 2]
+			},
+			"cases": [
+				{
+					"id": "d22",
+					"base": {
+						"file": 1,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": 5
+					}
+				},
+				{
+					"id": "d23",
+					"base": {
+						"file": 60,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": 2
+					}
+				}
+			]
+		},
+		"battery.frozen.json": {
+			"base": {
+				"battery": "battery.frozen.json",
+				"cases": 20,
+				"pointers": 21440,
+				"file": [16, 20, 20],
+				"symbol": [11, 19, 20]
+			},
+			"final": {
+				"battery": "battery.frozen.json",
+				"cases": 20,
+				"pointers": 25903,
+				"file": [18, 20, 20],
+				"symbol": [15, 19, 20]
+			},
+			"cases": [
+				{
+					"id": "m1",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "m2",
+					"base": {
+						"file": 2,
+						"symbol": 4
+					},
+					"final": {
+						"file": 2,
+						"symbol": 9
+					}
+				},
+				{
+					"id": "c03",
+					"base": {
+						"file": 1,
+						"symbol": 3
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c04",
+					"base": {
+						"file": 1,
+						"symbol": 2
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c05",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c06",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c07",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c08",
+					"base": {
+						"file": 2,
+						"symbol": 3
+					},
+					"final": {
+						"file": 1,
+						"symbol": 2
+					}
+				},
+				{
+					"id": "c09",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c10",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c11",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c12",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c13",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c14",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c15",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c16",
+					"base": {
+						"file": 1,
+						"symbol": 2
+					},
+					"final": {
+						"file": 1,
+						"symbol": 2
+					}
+				},
+				{
+					"id": "c17",
+					"base": {
+						"file": 1,
+						"symbol": 2
+					},
+					"final": {
+						"file": 1,
+						"symbol": 2
+					}
+				},
+				{
+					"id": "c18",
+					"base": {
+						"file": 2,
+						"symbol": 2
+					},
+					"final": {
+						"file": 2,
+						"symbol": 2
+					}
+				},
+				{
+					"id": "c19",
+					"base": {
+						"file": 2,
+						"symbol": 2
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "c20",
+					"base": {
+						"file": 1,
+						"symbol": 2
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				}
+			]
+		},
+		"fresh-battery.frozen.json": {
+			"base": {
+				"battery": "fresh-battery.frozen.json",
+				"cases": 20,
+				"pointers": 21440,
+				"file": [10, 12, 15],
+				"symbol": [7, 9, 10]
+			},
+			"final": {
+				"battery": "fresh-battery.frozen.json",
+				"cases": 20,
+				"pointers": 25903,
+				"file": [11, 14, 17],
+				"symbol": [8, 9, 12]
+			},
+			"cases": [
+				{
+					"id": "f01",
+					"base": {
+						"file": 40,
+						"symbol": 155
+					},
+					"final": {
+						"file": 15,
+						"symbol": 143
+					}
+				},
+				{
+					"id": "f02",
+					"base": {
+						"file": 1,
+						"symbol": 4
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "f03",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "f04",
+					"base": {
+						"file": 7,
+						"symbol": 17
+					},
+					"final": {
+						"file": 4,
+						"symbol": 4
+					}
+				},
+				{
+					"id": "f05",
+					"base": {
+						"file": 4,
+						"symbol": null
+					},
+					"final": {
+						"file": 4,
+						"symbol": null
+					}
+				},
+				{
+					"id": "f06",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "f07",
+					"base": {
+						"file": null,
+						"symbol": null
+					},
+					"final": {
+						"file": null,
+						"symbol": null
+					}
+				},
+				{
+					"id": "f08",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "f09",
+					"base": {
+						"file": 8,
+						"symbol": 214
+					},
+					"final": {
+						"file": 2,
+						"symbol": 179
+					}
+				},
+				{
+					"id": "f10",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "f11",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "f12",
+					"base": {
+						"file": 13,
+						"symbol": 180
+					},
+					"final": {
+						"file": 5,
+						"symbol": 80
+					}
+				},
+				{
+					"id": "f13",
+					"base": {
+						"file": 3,
+						"symbol": 3
+					},
+					"final": {
+						"file": 3,
+						"symbol": 3
+					}
+				},
+				{
+					"id": "f14",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "f15",
+					"base": {
+						"file": 25,
+						"symbol": 25
+					},
+					"final": {
+						"file": 25,
+						"symbol": 25
+					}
+				},
+				{
+					"id": "f16",
+					"base": {
+						"file": 36,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": 6
+					}
+				},
+				{
+					"id": "f17",
+					"base": {
+						"file": 1,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": null
+					}
+				},
+				{
+					"id": "f18",
+					"base": {
+						"file": 1,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": null
+					}
+				},
+				{
+					"id": "f19",
+					"base": {
+						"file": 2,
+						"symbol": 2
+					},
+					"final": {
+						"file": 2,
+						"symbol": 6
+					}
+				},
+				{
+					"id": "f20",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					}
+				}
+			]
+		},
+		"dev-heldout.frozen.json": {
+			"base": {
+				"battery": "dev-heldout.frozen.json",
+				"cases": 6,
+				"pointers": 21440,
+				"file": [3, 5, 5],
+				"symbol": [1, 2, 4]
+			},
+			"final": {
+				"battery": "dev-heldout.frozen.json",
+				"cases": 6,
+				"pointers": 25903,
+				"file": [3, 4, 6],
+				"symbol": [2, 3, 5]
+			},
+			"heldOutRun": {
+				"battery": "dev-heldout.frozen.json",
+				"cases": 6,
+				"pointers": 25903,
+				"file": [3, 4, 6],
+				"symbol": [2, 3, 5]
+			},
+			"cases": [
+				{
+					"id": "d03",
+					"base": {
+						"file": 1,
+						"symbol": 4
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					},
+					"heldOutRun": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "d06",
+					"base": {
+						"file": 2,
+						"symbol": 16
+					},
+					"final": {
+						"file": 8,
+						"symbol": 9
+					},
+					"heldOutRun": {
+						"file": 8,
+						"symbol": 9
+					}
+				},
+				{
+					"id": "d09",
+					"base": {
+						"file": 1,
+						"symbol": 1
+					},
+					"final": {
+						"file": 4,
+						"symbol": 4
+					},
+					"heldOutRun": {
+						"file": 4,
+						"symbol": 4
+					}
+				},
+				{
+					"id": "d12",
+					"base": {
+						"file": 3,
+						"symbol": 3
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					},
+					"heldOutRun": {
+						"file": 1,
+						"symbol": 1
+					}
+				},
+				{
+					"id": "d15",
+					"base": {
+						"file": 1,
+						"symbol": 10
+					},
+					"final": {
+						"file": 1,
+						"symbol": 2
+					},
+					"heldOutRun": {
+						"file": 1,
+						"symbol": 2
+					}
+				},
+				{
+					"id": "d18",
+					"base": {
+						"file": null,
+						"symbol": null
+					},
+					"final": {
+						"file": 3,
+						"symbol": null
+					},
+					"heldOutRun": {
+						"file": 3,
+						"symbol": null
+					}
+				}
+			]
+		},
+		"dev-heldout-a1.frozen.json": {
+			"base": {
+				"battery": "dev-heldout-a1.frozen.json",
+				"cases": 2,
+				"pointers": 21440,
+				"file": [0, 0, 0],
+				"symbol": [0, 0, 0]
+			},
+			"final": {
+				"battery": "dev-heldout-a1.frozen.json",
+				"cases": 2,
+				"pointers": 25903,
+				"file": [2, 2, 2],
+				"symbol": [1, 2, 2]
+			},
+			"heldOutRun": {
+				"battery": "dev-heldout-a1.frozen.json",
+				"cases": 2,
+				"pointers": 25903,
+				"file": [1, 1, 1],
+				"symbol": [1, 1, 1]
+			},
+			"cases": [
+				{
+					"id": "d21",
+					"base": {
+						"file": 154,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": 2
+					},
+					"heldOutRun": {
+						"file": 126,
+						"symbol": null
+					}
+				},
+				{
+					"id": "d24",
+					"base": {
+						"file": 892,
+						"symbol": null
+					},
+					"final": {
+						"file": 1,
+						"symbol": 1
+					},
+					"heldOutRun": {
+						"file": 1,
+						"symbol": 1
+					}
+				}
+			]
+		}
+	}
+}

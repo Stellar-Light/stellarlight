@@ -31,8 +31,10 @@
  * []; and a plan deleting more than max(50, half the stored pointers) needs
  * --allow-shrink, which the schedule never passes.
  *
- * Cost: 8 GitHub API reads (HEAD sha) and 8 tarballs per run, about 45 MB
- * in total; GITHUB_TOKEN is optional (lifts the 60/hour API limit).
+ * Cost: one GitHub API read (HEAD sha) and one tarball per allowlisted repo
+ * per run, nine today, about 48 MB in total; GITHUB_TOKEN is optional (lifts
+ * the 60/hour API limit). A repo added to the allowlist stays dry on the
+ * schedule until its own hand-dispatched execute (see --scheduled).
  */
 
 import "./load-env";
@@ -46,8 +48,8 @@ import {
 import { buildRows, tarFiles } from "../src/lib/source-locator-extract";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 
-/** Bump when extraction or term rules change; changed terms are re-planned either way. */
-const BUILDER_VERSION = "1";
+/** Bump when extraction or term rules change; changed terms are re-planned either way. 2: impl locators. */
+const BUILDER_VERSION = "2";
 const args = process.argv.slice(2);
 const flag = (name: string) =>
 	args.includes(name) ? (args[args.indexOf(name) + 1] ?? "") : null;
@@ -190,7 +192,7 @@ async function run() {
 			);
 			// Below 100 stored rows the floor of 50 is the cap, so a small repo
 			// could still be emptied by a tarball holding one indexable file.
-			// None of the eight is under 410 rows (2026-10-23).
+			// None of the nine is under 410 rows (2026-10-23).
 			const shrinkCap = Math.max(50, Math.floor(existing.size / 2));
 			if (deletes.length > shrinkCap && !allowShrink) {
 				console.error(

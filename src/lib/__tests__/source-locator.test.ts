@@ -1,11 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { isContentStopword } from "../repo-search";
 import {
+	candidateTerms,
 	type IndexRow,
+	isCandidate,
 	parseQuery,
 	rankRows,
+	resolveRepo,
 	rowKey,
 	rowTerms,
+	SOURCE_REPO_NAMES,
 	subwords,
 	verificationUrl,
 } from "../source-locator";
@@ -15,8 +19,10 @@ import {
 	extractLocators,
 	fileTypeOf,
 	isIndexablePath,
+	MAX_LOCATORS_PER_FILE,
 	tarFiles,
 } from "../source-locator-extract";
+import { SYNONYMS } from "../source-locator-synonyms";
 
 const names = (path: string, text: string) =>
 	extractLocators(path, text).map((l) => `${l.line}:${l.locator}`);
@@ -53,6 +59,60 @@ describe("extraction, one rule per file type", () => {
 			"13:extend_ttl",
 			"16:MAX",
 		]);
+	});
+
+	it("Rust: top-level `impl Trait for Type` blocks are locators, generic arguments dropped", () => {
+		const src = [
+			"#[contractimpl(contracttrait)]",
+			"impl TokenInterface for Token {",
+			"    fn transfer(env: Env) {}",
+			"}",
+			"impl<'a> From<&'a Address> for Val {",
+			"}",
+			"unsafe impl Send for Host {}",
+			"impl<E: Env, T, U> FromVal<E, T> for U",
+			"where",
+			"    U: Clone,",
+			"{",
+			"}",
+			"impl<F: Fn(u32) -> u32> Runner<F> for Vec<Option<F>> {}",
+			"impl crate::testutils::Address for Address {}",
+			"impl Storage {",
+			"}",
+			"    impl Indented for Skipped {}",
+			"impl From<Bytes> for Val {}",
+		].join("\n");
+		expect(
+			names("src/token.rs", src).filter((n) => n.includes("impl ")),
+		).toEqual([
+			"2:impl TokenInterface for Token",
+			"5:impl From for Val",
+			"7:impl Send for Host",
+			"8:impl FromVal for U",
+			"13:impl Runner for Vec",
+			"14:impl crate::testutils::Address for Address",
+		]);
+		// The methods inside keep their own locators.
+		expect(names("src/token.rs", src)).toContain("3:transfer");
+	});
+
+	it("impl locators never displace a file's other locators: the cap counts them apart", () => {
+		const fns = Array.from(
+			{ length: MAX_LOCATORS_PER_FILE + 5 },
+			(_, i) => `pub fn f${i}() {}`,
+		);
+		const impls = Array.from(
+			{ length: 3 },
+			(_, i) => `impl Trait${i} for Thing {}`,
+		);
+		// impls first: before the fix they took three of the capped places
+		const got = names("src/big.rs", [...impls, ...fns].join("\n"));
+		const plain = got.filter((n) => !n.includes("impl "));
+		expect(plain).toHaveLength(MAX_LOCATORS_PER_FILE);
+		expect(plain.at(-1)).toBe(
+			`${MAX_LOCATORS_PER_FILE + 3}:f${MAX_LOCATORS_PER_FILE - 1}`,
+		);
+		expect(got.filter((n) => n.includes("impl "))).toHaveLength(3);
 	});
 
 	it("Go: funcs, methods, grouped decls, option names; a one-word Name only in an option table", () => {
@@ -402,6 +462,376 @@ describe("ranking", () => {
 			"string",
 		]);
 	});
+});
+
+const ask = (s: string) => parseQuery(s, isContentStopword);
+const top = (s: string, rows: IndexRow[]) => {
+	const p = ask(s);
+	const cand = candidateTerms(p);
+	return rankRows(
+		p,
+		rows.filter((r) => isCandidate(r, cand)),
+	);
+};
+const at = (s: string, rows: IndexRow[], locator: string) =>
+	top(s, rows).findIndex((x) => x.row.locator === locator) + 1;
+
+describe("identifier candidates from q", () => {
+	const SDK = "stellar/rs-soroban-sdk";
+	it("adjacent words join into one identifier: 'token interface' reaches TokenInterface above a generic Token", () => {
+		const rows = [
+			row(
+				"stellar/soroban-examples",
+				"token/src/contract.rs",
+				"symbol",
+				"Token",
+			),
+			row(SDK, "soroban-sdk/src/token.rs", "symbol", "TokenInterface"),
+		];
+		const ranked = top("Where is the token interface defined?", rows);
+		expect(ranked[0].row.locator).toBe("TokenInterface");
+		expect(ranked[0].factors).toContain("join:1");
+		expect(ranked[0].matchReason).toContain("symbol token interface");
+	});
+
+	it("case, separators, plurals and code abbreviations do not matter", () => {
+		const rows = [
+			row("stellar/js-stellar-sdk", "src/a.ts", "symbol", "Contract"),
+			row(
+				"stellar/rs-soroban-env",
+				"src/b.rs",
+				"symbol",
+				"StellarAssetContract",
+			),
+			row("stellar/quickstart", "start", "symbol", "start_friendbot_service"),
+			row("stellar/quickstart", "start", "symbol", "init_friendbot"),
+		];
+		expect(
+			at(
+				"Where is the Stellar Asset Contract implemented?",
+				rows,
+				"StellarAssetContract",
+			),
+		).toBe(1);
+		expect(
+			at("Where does quickstart initialize friendbot?", rows, "init_friendbot"),
+		).toBe(1);
+	});
+
+	it("a joined phrase inside a longer name is held, and one run counts once", () => {
+		const rows = [
+			row("stellar/rs-soroban-env", "src/a.rs", "symbol", "multi_pairing"),
+			row(
+				"stellar/rs-soroban-env",
+				"src/a.rs",
+				"symbol",
+				"bls12_381_multi_pairing_check",
+			),
+		];
+		const [first] = top("multi pairing check", rows);
+		expect(first.row.locator).toBe("bls12_381_multi_pairing_check");
+		expect(first.factors).toContain("join:1");
+	});
+
+	it("a stopword ends a run: the words around it never join", () => {
+		const rows = [
+			row("stellar/stellar-core", "src/a.cpp", "symbol", "getOrCreate"),
+		];
+		const [first] = top("get or create", rows);
+		expect(first.factors).toContain("join:0");
+	});
+
+	it("punctuation ends a run too", () => {
+		expect(
+			ask("the token interface trait (transfer, approve, burn)").joined.map(
+				(j) => j.raw,
+			),
+		).toEqual(["token interface", "interface trait", "token interface trait"]);
+	});
+
+	it("a symbol holding only part of a run gets no join credit; a heading may", () => {
+		const rows = [
+			row(
+				"stellar/stellar-cli",
+				"src/fetch/fee.rs",
+				"symbol",
+				"INCLUSION_FEE_TITLE",
+			),
+			row(
+				"stellar/stellar-cli",
+				"docs/fees.md",
+				"heading",
+				"Inclusion fee and resource fee",
+			),
+		];
+		const ranked = top("Where is the default inclusion fee set?", rows);
+		const by = (loc: string) => ranked.find((x) => x.row.locator === loc);
+		expect(by("INCLUSION_FEE_TITLE")?.factors).toContain("join:0");
+		expect(by("Inclusion fee and resource fee")?.factors).toContain("join:1");
+	});
+
+	it("an identifier typed in q counts double: held in a name, it outranks two plain words", () => {
+		const rows = [
+			row(
+				"stellar/stellar-rpc",
+				"cmd/stellar-rpc/internal/methods/simulate_transaction.go",
+				"symbol",
+				"NewSimulateTransactionHandler",
+			),
+			row("stellar/rs-soroban-env", "src/fees.rs", "symbol", "charge_fees"),
+		];
+		const ranked = top(
+			"Where is simulateTransaction implemented, and what fees does it charge?",
+			rows,
+		);
+		expect(ranked[0].row.locator).toBe("NewSimulateTransactionHandler");
+		expect(ranked[0].factors).toContain("ident:1");
+	});
+
+	it("kebab-case of three parts is typed too: calculate-asset-supply", () => {
+		expect(ask("the calculate-asset-supply command").units[0].kind).toBe(
+			"typed",
+		);
+		expect(ask("Ethereum-signed message").units[0].kind).toBe("word");
+	});
+});
+
+describe("a repo named in q", () => {
+	it("its pointers rank above an exact name elsewhere", () => {
+		const rows = [
+			row("stellar/js-stellar-sdk", "src/rpc/api.ts", "symbol", "Events"),
+			row("stellar/stellar-rpc", "cmd/x/y.go", "symbol", "EventInfo"),
+		];
+		expect(at("events in stellar-rpc", rows, "EventInfo")).toBe(1);
+	});
+
+	it("is read by owner/name, by name, or by a clear alias", () => {
+		expect(ask("the stellar/quickstart image").repos).toEqual([
+			"stellar/quickstart",
+		]);
+		expect(ask("OpenZeppelin's Ownable trait").repos).toEqual([
+			"OpenZeppelin/stellar-contracts",
+		]);
+		expect(ask("OpenZeppelin/stellar-contracts Ownable").repos).toEqual([
+			"OpenZeppelin/stellar-contracts",
+		]);
+		// "stellar contracts" in prose names no repo
+		expect(ask("how stellar contracts store data").repos).toEqual([]);
+	});
+});
+
+describe("OpenZeppelin/stellar-contracts in the allowlist", () => {
+	it("resolves in any case, as owner/name or name", () => {
+		expect(SOURCE_REPO_NAMES).toContain("OpenZeppelin/stellar-contracts");
+		for (const v of [
+			"OpenZeppelin/stellar-contracts",
+			"openzeppelin/stellar-contracts",
+			"stellar-contracts",
+		])
+			expect(resolveRepo(v), v).toBe("OpenZeppelin/stellar-contracts");
+		expect(resolveRepo("STELLAR/QUICKSTART")).toBe("stellar/quickstart");
+	});
+});
+
+describe("a stellar-cli command path typed in q", () => {
+	const CLI = "stellar/stellar-cli";
+	const C = "cmd/soroban-cli/src/commands";
+	const rows = [
+		row(CLI, `${C}/contract/invoke.rs`, "symbol", "Cmd", 41),
+		row(CLI, `${C}/contract/invoke.rs`, "symbol", "run", 134),
+		row(CLI, `${C}/contract/build.rs`, "symbol", "Cmd", 34),
+		row(CLI, `${C}/contract/alias.rs`, "symbol", "Cmd", 9),
+		row(CLI, `${C}/contract/alias/add.rs`, "symbol", "Cmd", 11),
+		row(CLI, `${C}/contract/info/shared.rs`, "symbol", "Contract", 10),
+		row(CLI, `${C}/contract/mod.rs`, "symbol", "Cmd", 22),
+		row(
+			"stellar/js-stellar-sdk",
+			"src/base/contract.ts",
+			"symbol",
+			"Contract",
+			1,
+		),
+		row(
+			"stellar/rs-soroban-env",
+			"src/e.rs",
+			"symbol",
+			"StellarAssetContract",
+			30,
+		),
+	];
+	const where = (s: string) =>
+		top(s, rows).map(
+			(x) => `${x.row.path.replace(`${C}/`, "")} ${x.row.locator}`,
+		);
+
+	it("reads the module that implements it, though its symbols share no word with q", () => {
+		const p = ask("Where is the stellar contract invoke command implemented?");
+		expect(p.command?.slice(0, 2)).toEqual(["contract", "invoke"]);
+		expect(
+			where("Where is the stellar contract invoke command implemented?").slice(
+				0,
+				2,
+			),
+		).toEqual(["contract/invoke.rs Cmd", "contract/invoke.rs run"]);
+	});
+
+	it("a command after an earlier mention of the binary still counts", () => {
+		expect(
+			ask("Where does the stellar CLI implement `stellar tx sign`?").command,
+		).toEqual(["tx", "sign"]);
+	});
+
+	it("the old binary name counts, and a skipped word (build) still names the module", () => {
+		expect(where("Which file implements `soroban contract build`?")[0]).toBe(
+			"contract/build.rs Cmd",
+		);
+	});
+
+	it("the deepest matching module wins: alias add before its parent", () => {
+		const got = where("Where is `stellar contract alias add` implemented?");
+		expect(got[0]).toBe("contract/alias/add.rs Cmd");
+		expect(got.indexOf("contract/alias.rs Cmd")).toBeGreaterThan(0);
+	});
+
+	it("capitalized prose is no command, and the mod.rs dispatcher is not the command", () => {
+		expect(ask("deploy its Stellar Asset Contract").command).toBeNull();
+		expect(where("stellar contract invoke")).not.toContain(
+			"contract/mod.rs Cmd",
+		);
+	});
+});
+
+describe("synonym map: each entry reaches the name the code uses", () => {
+	const ENV = "stellar/rs-soroban-env";
+	const SDK = "stellar/rs-soroban-sdk";
+	// One case per entry: a q with the builder's word, the symbol it should
+	// reach, and a generic symbol that outranked it before the map.
+	const CASES: Record<string, { q: string; want: IndexRow; rival: IndexRow }> =
+		{
+			passkey: {
+				q: "verify a passkey signature",
+				want: row(
+					SDK,
+					"soroban-sdk/src/crypto.rs",
+					"symbol",
+					"secp256r1_verify",
+				),
+				rival: row("stellar/stellar-core", "src/a.cpp", "symbol", "Signature"),
+			},
+			webauthn: {
+				q: "WebAuthn signature check",
+				want: row(
+					SDK,
+					"soroban-sdk/src/crypto.rs",
+					"symbol",
+					"secp256r1_verify",
+				),
+				rival: row(
+					"stellar/stellar-core",
+					"src/a.cpp",
+					"symbol",
+					"SignatureChecker",
+				),
+			},
+			p256: {
+				q: "p256 signature check",
+				want: row(
+					ENV,
+					"src/crypto/mod.rs",
+					"symbol",
+					"secp256r1_verify_signature",
+				),
+				rival: row(
+					"stellar/stellar-core",
+					"src/a.cpp",
+					"symbol",
+					"SignatureChecker",
+				),
+			},
+			ecdsa: {
+				q: "ecdsa recover",
+				want: row(
+					SDK,
+					"soroban-sdk/src/crypto.rs",
+					"symbol",
+					"secp256k1_recover",
+				),
+				rival: row("stellar/stellar-core", "src/a.cpp", "symbol", "recover"),
+			},
+			ethereum: {
+				q: "Ethereum signature recovery",
+				want: row(
+					SDK,
+					"soroban-sdk/src/crypto.rs",
+					"symbol",
+					"secp256k1_recover",
+				),
+				rival: row(
+					"stellar/stellar-core",
+					"src/a.cpp",
+					"symbol",
+					"SignatureChecker",
+				),
+			},
+			keccak: {
+				q: "keccak hash",
+				want: row(SDK, "soroban-sdk/src/crypto.rs", "symbol", "keccak256"),
+				rival: row("stellar/stellar-core", "src/a.cpp", "symbol", "Hash"),
+			},
+			sep41: {
+				q: "the SEP-41 interface",
+				want: row(SDK, "soroban-sdk/src/token.rs", "symbol", "TokenInterface"),
+				rival: row("stellar/stellar-core", "src/a.cpp", "symbol", "Interface"),
+			},
+			sep0041: {
+				q: "SEP-0041 token",
+				want: row(SDK, "soroban-sdk/src/token.rs", "symbol", "TokenInterface"),
+				rival: row("stellar/stellar-core", "src/a.cpp", "symbol", "Token"),
+			},
+			sac: {
+				q: "the SAC contract",
+				want: row(
+					ENV,
+					"src/builtin/contract.rs",
+					"symbol",
+					"StellarAssetContract",
+				),
+				rival: row("stellar/js-stellar-sdk", "src/b.ts", "symbol", "Contract"),
+			},
+			signature: {
+				q: "verify an ed25519 signature",
+				want: row(
+					ENV,
+					"soroban-env-host/src/host.rs",
+					"symbol",
+					"verify_sig_ed25519",
+				),
+				rival: row("stellar/js-stellar-sdk", "src/b.ts", "symbol", "Signature"),
+			},
+			bls: {
+				q: "BLS pairing",
+				want: row(
+					SDK,
+					"soroban-sdk/src/crypto.rs",
+					"symbol",
+					"bls12_381_pairing",
+				),
+				rival: row("stellar/stellar-core", "src/a.cpp", "symbol", "Pairing"),
+			},
+		};
+
+	it("every entry has a case", () => {
+		expect(Object.keys(CASES).sort()).toEqual([...SYNONYMS.keys()].sort());
+	});
+
+	for (const [term, c] of Object.entries(CASES))
+		it(`${term} -> ${SYNONYMS.get(term)?.alts.join(", ")}`, () => {
+			const ranked = top(c.q, [c.rival, c.want]);
+			expect(
+				ranked[0]?.row.locator,
+				ranked.map((x) => x.matchReason).join(" | "),
+			).toBe(c.want.locator);
+		});
 });
 
 describe("verificationUrl", () => {

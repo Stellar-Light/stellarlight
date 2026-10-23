@@ -7,7 +7,9 @@
  *
  * One rule per file type, the same for every repo:
  *   Rust        fn (top level and impl level), struct, enum, trait, type,
- *               union, const, static, macro_rules!, clap --flags and env vars
+ *               union, const, static, macro_rules!, clap --flags and env vars,
+ *               top-level `impl Trait for Type` blocks (generic arguments
+ *               dropped: `impl<'a> From<&'a X> for Val` is `impl From for Val`)
  *   Go          func and methods, type, const and var (grouped too), config
  *               option names (Name:/TomlKey: kebab strings) and flag names
  *   C and C++   column-0 function definitions, class/struct/enum, #define,
@@ -135,14 +137,20 @@ export function extractLocators(
 	const raw = EXTRACTORS[type](lines);
 	const seen = new Set<string>();
 	const out: ExtractedLocator[] = [];
+	// `impl Trait for Type` locators have a cap of their own, so adding them
+	// never displaces a file's other locators (their rows keep their keys).
+	const kept = { impl: 0, other: 0 };
 	for (const l of raw) {
 		const locator = l.locator.trim().slice(0, MAX_LOCATOR_CHARS);
 		if (!locator) continue;
 		const key = `${l.kind}\u0000${locator}`;
 		if (seen.has(key)) continue;
+		const group =
+			l.kind === "symbol" && locator.startsWith("impl ") ? "impl" : "other";
+		if (kept[group] >= MAX_LOCATORS_PER_FILE) continue;
 		seen.add(key);
+		kept[group]++;
 		out.push({ ...l, locator });
-		if (out.length >= MAX_LOCATORS_PER_FILE) break;
 	}
 	return out;
 }
@@ -161,7 +169,25 @@ const RUST_ITEM =
 const RUST_CONST =
 	/^(?: {4})?(?:pub(?:\([^)]*\))?\s+)?(?:const|static)\s+(?:mut\s+)?([A-Za-z_]\w*)\s*:/;
 const RUST_MACRO = /^macro_rules!\s+([A-Za-z_]\w*)/;
+const RUST_IMPL = /^(?:unsafe\s+)?impl\b(.*)$/;
 const RUST_FIELD = /^\s*(?:pub(?:\([^)]*\))?\s+)?([a-z_][a-z0-9_]*)\s*:/;
+
+/** `impl<..> Trait<..> for Type<..> {` read as `impl Trait for Type`; null for an inherent impl. */
+function implLocator(rest: string): string | null {
+	let s = "";
+	let depth = 0;
+	for (let i = 0; i < rest.length; i++) {
+		const c = rest[i];
+		if (c === "-" && rest[i + 1] === ">") {
+			if (!depth) s += "->";
+			i++;
+		} else if (c === "<") depth++;
+		else if (c === ">") depth = Math.max(0, depth - 1);
+		else if (!depth) s += c;
+	}
+	const m = s.trim().match(/^(\S.*?)\s+for\s+(\S.*?)\s*(?:\{.*|where\b.*)?$/);
+	return m ? `impl ${m[1]} for ${m[2]}` : null;
+}
 
 function rust(lines: string[]): ExtractedLocator[] {
 	const out: ExtractedLocator[] = [];
@@ -187,6 +213,12 @@ function rust(lines: string[]): ExtractedLocator[] {
 			s.match(RUST_MACRO);
 		if (m) {
 			out.push(sym(m[1], i));
+			continue;
+		}
+		const impl = s.match(RUST_IMPL);
+		if (impl) {
+			const locator = implLocator(impl[1]);
+			if (locator) out.push(sym(locator, i));
 			continue;
 		}
 		// clap: #[arg(...)] / #[clap(...)] carrying `long`, then the field.

@@ -1,0 +1,877 @@
+Variants and single-rule ablations, measured offline over the 16 tuned dev cases, both frozen batteries and the six priority questions (rows from tarballs at the pinned refs). In each section, 'x->y' is a case's rank in the run the section compares against (named after 'vs'), then in the variant (named after '=====', with the edits in brackets: nojoin = no joins, exactjoin = no held joins, noheadjoin = no joins on headings, noshare or share2 = run share off or squared, typed1 or typed3 = typed weight, repo3 = repo weight 3, nosyn = no synonyms, noimpl = no impl locators, nocmd = no CLI commands, nooz = OpenZeppelin out, nopunct = no punctuation breaks, kebabtyped = kebab-case typed, heldfullsym = a symbol's held join needs the whole run). Rounds 1 to 4 explored the design; the per-rule verdicts of the chosen configuration are in rules.txt.
+
+######## round1.out
+===== a-nojoin (nojoin) vs v2b
+dev-set                file [9, 10, 13] sym [6, 8, 11]   (base file [7, 10, 13] sym [5, 8, 11])
+    d01   file 2->1 sym 9->148 sym-down file-up LOST-TOP10
+    d02   file 9->9 sym 13->10 sym-up
+    d07   file 1->3 sym 1->3 FILE-DOWN sym-down
+    d10   file 2->1 sym 2->1 file-up sym-up
+    d16   file 3->1 sym 3->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [18, 20, 20] sym [15, 18, 19])
+    c17   file 1->1 sym 18->2 sym-up
+fresh-battery          file [12, 15, 17] sym [7, 9, 11]   (base file [11, 16, 18] sym [8, 10, 11])
+    f01   file 3->25 sym 17->140 FILE-DOWN sym-down LOST-TOP10
+    f02   file 1->1 sym 17->4 sym-up
+    f04   file 3->8 sym 3->80 FILE-DOWN sym-down LOST-TOP10
+    f05   file 4->1 sym -->- file-up
+    f17   file 3->1 sym -->- file-up
+    f19   file 1->2 sym 1->2 FILE-DOWN sym-down
+priority strict 2/6 required 6/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 fail CustomAccountInterface:p@12 | AccountContract:p@27
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-exactjoin (exactjoin) vs v2b
+dev-set                file [9, 10, 12] sym [6, 8, 11]   (base file [7, 10, 13] sym [5, 8, 11])
+    d01   file 2->1 sym 9->8 file-up sym-up
+    d02   file 9->11 sym 13->12 FILE-DOWN sym-up LOST-TOP10
+    d16   file 3->1 sym 3->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 18, 19])
+fresh-battery          file [10, 16, 18] sym [5, 8, 12]   (base file [11, 16, 18] sym [8, 10, 11])
+    f01   file 3->3 sym 17->143 sym-down
+    f02   file 1->1 sym 17->4 sym-up
+    f05   file 4->2 sym -->- file-up
+    f06   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f17   file 3->1 sym -->- file-up
+    f19   file 1->1 sym 1->6 sym-down
+priority strict 2/6 required 7/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 fail CustomAccountInterface:m@1 | AccountContract:p@27
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-noheadjoin (noheadjoin) vs v2b
+dev-set                file [7, 10, 13] sym [5, 8, 11]   (base file [7, 10, 13] sym [5, 8, 11])
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [17, 19, 20] sym [14, 17, 19]   (base file [18, 20, 20] sym [15, 18, 19])
+    c09   file 1->9 sym 1->9 FILE-DOWN sym-down
+fresh-battery          file [10, 15, 17] sym [7, 9, 10]   (base file [11, 16, 18] sym [8, 10, 11])
+    f02   file 1->1 sym 17->13 sym-up
+    f08   file 1->11 sym 1->11 FILE-DOWN sym-down LOST-TOP10
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-noshare (noshare) vs v2b
+dev-set                file [7, 10, 13] sym [5, 8, 11]   (base file [7, 10, 13] sym [5, 8, 11])
+    d02   file 9->5 sym 13->36 sym-down file-up
+    d13   file 77->78 sym -->- FILE-DOWN
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 18, 19])
+    c17   file 1->1 sym 18->74 sym-down
+fresh-battery          file [12, 16, 18] sym [7, 10, 12]   (base file [11, 16, 18] sym [8, 10, 11])
+    f01   file 3->1 sym 17->5 file-up sym-up
+    f02   file 1->1 sym 17->19 sym-down
+    f04   file 3->1 sym 3->1 file-up sym-up
+    f06   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f12   file 5->6 sym 80->81 FILE-DOWN sym-down
+    f19   file 1->1 sym 1->3 sym-down
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-share2 (share2) vs v2b
+dev-set                file [8, 10, 13] sym [6, 8, 12]   (base file [7, 10, 13] sym [5, 8, 11])
+    d02   file 9->9 sym 13->10 sym-up
+    d10   file 2->1 sym 2->1 file-up sym-up
+    d16   file 3->2 sym 3->2 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [18, 20, 20] sym [15, 18, 19])
+    c17   file 1->1 sym 18->2 sym-up
+fresh-battery          file [11, 14, 17] sym [8, 9, 11]   (base file [11, 16, 18] sym [8, 10, 11])
+    f01   file 3->15 sym 17->22 FILE-DOWN sym-down LOST-TOP10
+    f02   file 1->1 sym 17->14 sym-up
+    f04   file 3->4 sym 3->4 FILE-DOWN sym-down
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@4
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-typed1 (typed1) vs v2b
+dev-set                file [6, 9, 13] sym [5, 9, 11]   (base file [7, 10, 13] sym [5, 8, 11])
+    d01   file 2->1 sym 9->1 file-up sym-up
+    d05   file 1->2 sym 8->3 FILE-DOWN sym-up
+    d16   file 3->4 sym 3->4 FILE-DOWN sym-down
+    d20   file 1->2 sym 1->2 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [16, 19, 20] sym [10, 16, 18]   (base file [18, 20, 20] sym [15, 18, 19])
+    m2    file 2->2 sym 9->4 sym-up
+    c03   file 1->1 sym 1->3 sym-down
+    c04   file 1->1 sym 1->2 sym-down
+    c06   file 1->1 sym 1->11 sym-down LOST-TOP10
+    c08   file 1->5 sym 2->6 FILE-DOWN sym-down
+    c19   file 1->2 sym 1->2 FILE-DOWN sym-down
+    c20   file 1->1 sym 1->2 sym-down
+fresh-battery          file [11, 15, 17] sym [8, 10, 11]   (base file [11, 16, 18] sym [8, 10, 11])
+    f05   file 4->5 sym -->- FILE-DOWN
+    f09   file 2->8 sym 179->175 FILE-DOWN sym-up
+    f12   file 5->14 sym 80->43 FILE-DOWN sym-up LOST-TOP10
+priority strict 2/6 required 7/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 fail NewSimulateTransactionHandler:n@12
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@2
+    hm26-sa-06 fail secp256r1_verify:n@27 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@124 | keccak256:m@5 | recover_key_ecdsa_secp256k1:n@145
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-typed3 (typed3) vs v2b
+dev-set                file [9, 10, 13] sym [6, 8, 9]   (base file [7, 10, 13] sym [5, 8, 11])
+    d01   file 2->1 sym 9->56 sym-down file-up LOST-TOP10
+    d05   file 1->1 sym 8->13 sym-down LOST-TOP10
+    d11   file 8->9 sym 8->9 FILE-DOWN sym-down
+    d16   file 3->1 sym 3->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 18]   (base file [18, 20, 20] sym [15, 18, 19])
+    m2    file 2->2 sym 9->23 sym-down LOST-TOP10
+fresh-battery          file [12, 17, 18] sym [8, 10, 11]   (base file [11, 16, 18] sym [8, 10, 11])
+    f05   file 4->1 sym -->- file-up
+    f09   file 2->2 sym 179->180 sym-down
+    f12   file 5->5 sym 80->89 sym-down
+priority strict 2/6 required 6/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@3
+    hm26-sa-05 fail CustomAccountInterface:p@12 | AccountContract:p@22
+    hm26-sa-06 fail secp256r1_verify:n@15 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-repo3 (repo3) vs v2b
+dev-set                file [7, 10, 12] sym [5, 8, 11]   (base file [7, 10, 13] sym [5, 8, 11])
+    d13   file 77->96 sym -->- FILE-DOWN
+    d14   file 5->53 sym -->- FILE-DOWN LOST-TOP10
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 18]   (base file [18, 20, 20] sym [15, 18, 19])
+    m2    file 2->2 sym 9->13 sym-down LOST-TOP10
+fresh-battery          file [10, 14, 18] sym [7, 10, 11]   (base file [11, 16, 18] sym [8, 10, 11])
+    f01   file 3->4 sym 17->24 FILE-DOWN sym-down
+    f09   file 2->2 sym 179->221 sym-down
+    f12   file 5->7 sym 80->236 FILE-DOWN sym-down
+    f17   file 3->7 sym -->- FILE-DOWN
+    f20   file 1->2 sym 1->2 FILE-DOWN sym-down
+priority strict 2/6 required 7/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 fail NewSimulateTransactionHandler:n@12
+    hm26-sa-05 PASS CustomAccountInterface:m@4 | AccountContract:m@1
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-nosyn (nosyn) vs v2b
+dev-set                file [5, 10, 13] sym [4, 9, 11]   (base file [7, 10, 13] sym [5, 8, 11])
+    d05   file 1->3 sym 8->3 FILE-DOWN sym-up
+    d20   file 1->2 sym 1->2 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 18, 19])
+fresh-battery          file [11, 16, 18] sym [8, 10, 11]   (base file [11, 16, 18] sym [8, 10, 11])
+priority strict 3/6 required 7/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@261 | verify_sig_ecdsa_secp256r1:n@877 | secp256r1_verify_signature:n@29
+    hm26-cc-05 fail secp256k1_recover:p@112 | keccak256:m@2 | recover_key_ecdsa_secp256k1:n@126
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-noimpl (noimpl) vs v2b
+dev-set                file [6, 10, 13] sym [4, 7, 10]   (base file [7, 10, 13] sym [5, 8, 11])
+    d11   file 8->7 sym 8->7 file-up sym-up
+    d13   file 77->68 sym -->- file-up
+    d17   file 1->2 sym 1->- FILE-DOWN sym-down LOST-TOP10
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 18, 19])
+fresh-battery          file [11, 16, 18] sym [8, 10, 11]   (base file [11, 16, 18] sym [8, 10, 11])
+    f05   file 4->6 sym -->- FILE-DOWN
+priority strict 1/6 required 6/12
+    hm26-sc-05 fail TokenInterface:m@1 | Token:p@None
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 fail CustomAccountInterface:m@1 | AccountContract:p@None
+    hm26-sa-06 fail secp256r1_verify:n@11 | verify_sig_ecdsa_secp256r1:m@7 | secp256r1_verify_signature:m@6
+    hm26-cc-05 fail secp256k1_recover:p@17 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@18
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-nocmd (nocmd) vs v2b
+dev-set                file [7, 10, 13] sym [5, 8, 11]   (base file [7, 10, 13] sym [5, 8, 11])
+dev-set-a1             file [0, 1, 1] sym [0, 0, 0]   (base file [2, 2, 2] sym [0, 1, 2])
+    d22   file 1->3 sym 5->- FILE-DOWN sym-down LOST-TOP10
+    d23   file 1->64 sym 2->- FILE-DOWN sym-down LOST-TOP10
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 18, 19])
+fresh-battery          file [10, 15, 17] sym [8, 10, 10]   (base file [11, 16, 18] sym [8, 10, 11])
+    f16   file 1->46 sym 6->- FILE-DOWN sym-down LOST-TOP10
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-nooz (nooz) vs v2b
+dev-set                file [5, 8, 11] sym [3, 6, 9]   (base file [7, 10, 13] sym [5, 8, 11])
+    d19   file 1->- sym 1->- FILE-DOWN sym-down LOST-TOP10
+    d20   file 1->- sym 1->- FILE-DOWN sym-down LOST-TOP10
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [18, 20, 20] sym [15, 18, 19])
+    c17   file 1->1 sym 18->2 sym-up
+fresh-battery          file [12, 16, 18] sym [9, 10, 11]   (base file [11, 16, 18] sym [8, 10, 11])
+    f04   file 3->1 sym 3->1 file-up sym-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@12 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@21 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@22
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== a-nopunct (nopunct) vs v2b
+dev-set                file [7, 10, 13] sym [5, 8, 11]   (base file [7, 10, 13] sym [5, 8, 11])
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 18, 19])
+fresh-battery          file [11, 17, 18] sym [8, 10, 11]   (base file [11, 16, 18] sym [8, 10, 11])
+    f05   file 4->2 sym -->- file-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+
+######## round2.out
+===== j-v2b () vs a-nojoin
+dev-set                file [7, 10, 13] sym [5, 8, 11]   (base file [9, 10, 13] sym [6, 8, 11])
+    d01   file 1->2 sym 148->9 FILE-DOWN sym-up
+    d02   file 9->9 sym 10->13 sym-down LOST-TOP10
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d16   file 1->3 sym 1->3 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 19, 20])
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+fresh-battery          file [11, 16, 18] sym [8, 10, 11]   (base file [12, 15, 17] sym [7, 9, 11])
+    f01   file 25->3 sym 140->17 file-up sym-up
+    f02   file 1->1 sym 4->17 sym-down LOST-TOP10
+    f04   file 8->3 sym 80->3 file-up sym-up
+    f05   file 1->4 sym -->- FILE-DOWN
+    f17   file 1->3 sym -->- FILE-DOWN
+    f19   file 2->1 sym 2->1 file-up sym-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+edit nofilejoin: expected 1 match, got 0
+===== j-exact-sym-head (exactjoin nofilejoin) vs a-nojoin
+dev-set                file [9, 10, 12] sym [6, 8, 11]   (base file [9, 10, 13] sym [6, 8, 11])
+    d01   file 1->1 sym 148->8 sym-up
+    d02   file 9->11 sym 10->12 FILE-DOWN sym-down LOST-TOP10
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 19, 20])
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+fresh-battery          file [10, 16, 18] sym [5, 8, 12]   (base file [12, 15, 17] sym [7, 9, 11])
+    f01   file 25->3 sym 140->141 sym-down file-up
+    f04   file 8->3 sym 80->3 file-up sym-up
+    f05   file 1->2 sym -->- FILE-DOWN
+    f06   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f19   file 2->1 sym 2->6 sym-down file-up
+priority strict 2/6 required 7/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 fail CustomAccountInterface:m@1 | AccountContract:p@27
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== j-exact-all (exactjoin) vs a-nojoin
+dev-set                file [9, 10, 12] sym [6, 8, 11]   (base file [9, 10, 13] sym [6, 8, 11])
+    d01   file 1->1 sym 148->8 sym-up
+    d02   file 9->11 sym 10->12 FILE-DOWN sym-down LOST-TOP10
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 19, 20])
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+fresh-battery          file [10, 16, 18] sym [5, 8, 12]   (base file [12, 15, 17] sym [7, 9, 11])
+    f01   file 25->3 sym 140->143 sym-down file-up
+    f04   file 8->3 sym 80->3 file-up sym-up
+    f05   file 1->2 sym -->- FILE-DOWN
+    f06   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f19   file 2->1 sym 2->6 sym-down file-up
+priority strict 2/6 required 7/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 fail CustomAccountInterface:m@1 | AccountContract:p@27
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== j-exact-all-noshare (exactjoin noshare) vs a-nojoin
+dev-set                file [9, 10, 12] sym [6, 8, 11]   (base file [9, 10, 13] sym [6, 8, 11])
+    d01   file 1->1 sym 148->8 sym-up
+    d02   file 9->13 sym 10->14 FILE-DOWN sym-down LOST-TOP10
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [17, 19, 19] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 19, 20])
+    c17   file 1->17 sym 2->18 FILE-DOWN sym-down LOST-TOP10
+fresh-battery          file [12, 16, 18] sym [6, 8, 12]   (base file [12, 15, 17] sym [7, 9, 11])
+    f01   file 25->1 sym 140->144 sym-down file-up
+    f02   file 1->1 sym 4->6 sym-down
+    f04   file 8->1 sym 80->1 file-up sym-up
+    f05   file 1->2 sym -->- FILE-DOWN
+    f06   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f12   file 5->6 sym 80->81 FILE-DOWN sym-down
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f19   file 2->1 sym 2->6 sym-down file-up
+priority strict 2/6 required 7/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 fail CustomAccountInterface:m@1 | AccountContract:p@29
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== j-held3 (heldprefix3) vs a-nojoin
+dev-set                file [7, 10, 12] sym [5, 8, 11]   (base file [9, 10, 13] sym [6, 8, 11])
+    d01   file 1->2 sym 148->9 FILE-DOWN sym-up
+    d02   file 9->11 sym 10->12 FILE-DOWN sym-down LOST-TOP10
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d16   file 1->2 sym 1->2 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 19, 20])
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+fresh-battery          file [10, 16, 18] sym [6, 8, 11]   (base file [12, 15, 17] sym [7, 9, 11])
+    f01   file 25->3 sym 140->22 file-up sym-up
+    f02   file 1->1 sym 4->14 sym-down LOST-TOP10
+    f04   file 8->3 sym 80->3 file-up sym-up
+    f05   file 1->3 sym -->- FILE-DOWN
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f17   file 1->3 sym -->- FILE-DOWN
+    f19   file 2->1 sym 2->5 sym-down file-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@8
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== j-nojoinok (nojoinok) vs a-nojoin
+dev-set                file [7, 10, 13] sym [5, 8, 11]   (base file [9, 10, 13] sym [6, 8, 11])
+    d01   file 1->2 sym 148->9 FILE-DOWN sym-up
+    d02   file 9->9 sym 10->13 sym-down LOST-TOP10
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d16   file 1->3 sym 1->3 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 19, 20])
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+fresh-battery          file [11, 15, 17] sym [8, 10, 11]   (base file [12, 15, 17] sym [7, 9, 11])
+    f02   file 1->1 sym 4->17 sym-down LOST-TOP10
+    f04   file 8->3 sym 80->3 file-up sym-up
+    f05   file 1->4 sym -->- FILE-DOWN
+    f17   file 1->3 sym -->- FILE-DOWN
+    f19   file 2->1 sym 2->1 file-up sym-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== j-exact-nojoinok (exactjoin nojoinok) vs a-nojoin
+dev-set                file [9, 10, 12] sym [6, 8, 11]   (base file [9, 10, 13] sym [6, 8, 11])
+    d01   file 1->1 sym 148->8 sym-up
+    d02   file 9->11 sym 10->12 FILE-DOWN sym-down LOST-TOP10
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 19, 20])
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+fresh-battery          file [10, 15, 17] sym [5, 8, 12]   (base file [12, 15, 17] sym [7, 9, 11])
+    f04   file 8->3 sym 80->3 file-up sym-up
+    f05   file 1->2 sym -->- FILE-DOWN
+    f06   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f19   file 2->1 sym 2->6 sym-down file-up
+priority strict 2/6 required 7/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 fail CustomAccountInterface:m@1 | AccountContract:p@27
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== j-exact-share2 (exactjoin share2) vs a-nojoin
+dev-set                file [9, 10, 13] sym [6, 8, 12]   (base file [9, 10, 13] sym [6, 8, 11])
+    d01   file 1->1 sym 148->8 sym-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [18, 20, 20] sym [15, 19, 20])
+fresh-battery          file [10, 14, 17] sym [6, 7, 12]   (base file [12, 15, 17] sym [7, 9, 11])
+    f01   file 25->15 sym 140->140 file-up
+    f04   file 8->4 sym 80->4 file-up sym-up
+    f05   file 1->2 sym -->- FILE-DOWN
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f19   file 2->2 sym 2->6 sym-down
+priority strict 2/6 required 7/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 fail CustomAccountInterface:m@1 | AccountContract:p@27
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+edit share2: expected 1 match, got 0
+===== j-held3-nofile (heldprefix3 nofilejoin) vs a-nojoin
+dev-set                file [7, 10, 12] sym [5, 8, 11]   (base file [9, 10, 13] sym [6, 8, 11])
+    d01   file 1->2 sym 148->9 FILE-DOWN sym-up
+    d02   file 9->11 sym 10->12 FILE-DOWN sym-down LOST-TOP10
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d16   file 1->2 sym 1->2 FILE-DOWN sym-down
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [2, 2, 2] sym [0, 1, 2])
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [18, 20, 20] sym [15, 19, 20])
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+fresh-battery          file [10, 16, 18] sym [6, 8, 11]   (base file [12, 15, 17] sym [7, 9, 11])
+    f01   file 25->3 sym 140->22 file-up sym-up
+    f02   file 1->1 sym 4->14 sym-down LOST-TOP10
+    f04   file 8->3 sym 80->3 file-up sym-up
+    f05   file 1->3 sym -->- FILE-DOWN
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f17   file 1->3 sym -->- FILE-DOWN
+    f19   file 2->1 sym 2->5 sym-down file-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@8
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+
+######## round3.out
+===== b1 (share2 kebabtyped) vs base
+dev-set                file [8, 10, 13] sym [6, 8, 12]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->2 sym 47->9 file-up sym-up
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d16   file 3->2 sym 3->2 file-up sym-up
+    d17   file 2->1 sym -->1 file-up sym-up
+    d19   file -->1 sym -->1 file-up sym-up
+    d20   file -->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [11, 14, 17] sym [9, 10, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->15 sym 155->22 file-up sym-up
+    f02   file 1->1 sym 4->1 sym-up
+    f04   file 7->4 sym 17->4 file-up sym-up
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f16   file 36->1 sym -->6 file-up sym-up
+    f17   file 1->3 sym -->- FILE-DOWN
+    f19   file 2->1 sym 2->1 file-up sym-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@4
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== b2 (share2held3 kebabtyped) vs base
+dev-set                file [8, 10, 13] sym [6, 8, 12]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->2 sym 47->9 file-up sym-up
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d16   file 3->1 sym 3->1 file-up sym-up
+    d17   file 2->1 sym -->1 file-up sym-up
+    d19   file -->1 sym -->1 file-up sym-up
+    d20   file -->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [11, 14, 17] sym [8, 9, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->15 sym 155->22 file-up sym-up
+    f02   file 1->1 sym 4->1 sym-up
+    f04   file 7->4 sym 17->4 file-up sym-up
+    f05   file 4->3 sym -->- file-up
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f16   file 36->1 sym -->6 file-up sym-up
+    f19   file 2->1 sym 2->1 file-up sym-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@8
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== b3 (share2 kebabtyped heldheadimpl) vs base
+dev-set                file [9, 10, 13] sym [6, 8, 12]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->1 sym 47->8 file-up sym-up
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d16   file 3->1 sym 3->1 file-up sym-up
+    d17   file 2->1 sym -->1 file-up sym-up
+    d19   file -->1 sym -->1 file-up sym-up
+    d20   file -->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [11, 14, 17] sym [8, 8, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->15 sym 155->143 file-up sym-up
+    f02   file 1->1 sym 4->1 sym-up
+    f04   file 7->4 sym 17->4 file-up sym-up
+    f05   file 4->2 sym -->- file-up
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f16   file 36->1 sym -->6 file-up sym-up
+    f19   file 2->2 sym 2->6 sym-down
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@4
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== b4 (share2held3 kebabtyped heldheadimpl) vs base
+dev-set                file [9, 10, 13] sym [6, 8, 12]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->1 sym 47->8 file-up sym-up
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d16   file 3->1 sym 3->1 file-up sym-up
+    d17   file 2->1 sym -->1 file-up sym-up
+    d19   file -->1 sym -->1 file-up sym-up
+    d20   file -->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [10, 14, 17] sym [7, 8, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->15 sym 155->140 file-up sym-up
+    f02   file 1->1 sym 4->1 sym-up
+    f04   file 7->4 sym 17->4 file-up sym-up
+    f05   file 4->2 sym -->- file-up
+    f08   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f16   file 36->1 sym -->6 file-up sym-up
+    f19   file 2->2 sym 2->6 sym-down
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@7
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== b5 (kebabtyped) vs base
+dev-set                file [7, 10, 13] sym [5, 8, 11]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->2 sym 47->9 file-up sym-up
+    d02   file 9->9 sym 10->13 sym-down LOST-TOP10
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d17   file 2->1 sym -->1 file-up sym-up
+    d19   file -->1 sym -->1 file-up sym-up
+    d20   file -->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [11, 16, 18] sym [8, 11, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->3 sym 155->17 file-up sym-up
+    f02   file 1->1 sym 4->2 sym-up
+    f04   file 7->3 sym 17->3 file-up sym-up
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f16   file 36->1 sym -->6 file-up sym-up
+    f17   file 1->3 sym -->- FILE-DOWN
+    f19   file 2->1 sym 2->1 file-up sym-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== b6 (kebabtyped heldheadimpl) vs base
+dev-set                file [9, 10, 12] sym [6, 8, 11]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->1 sym 47->8 file-up sym-up
+    d02   file 9->11 sym 10->12 FILE-DOWN sym-down LOST-TOP10
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d16   file 3->1 sym 3->1 file-up sym-up
+    d17   file 2->1 sym -->1 file-up sym-up
+    d19   file -->1 sym -->1 file-up sym-up
+    d20   file -->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [11, 16, 18] sym [7, 9, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->3 sym 155->146 file-up sym-up
+    f02   file 1->1 sym 4->1 sym-up
+    f04   file 7->3 sym 17->3 file-up sym-up
+    f05   file 4->2 sym -->- file-up
+    f06   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f13   file 3->4 sym 3->4 FILE-DOWN sym-down
+    f16   file 36->1 sym -->6 file-up sym-up
+    f19   file 2->1 sym 2->6 sym-down file-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== b7 (share2 kebabtyped nooz) vs base
+dev-set                file [6, 8, 11] sym [4, 6, 10]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->2 sym 47->9 file-up sym-up
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d16   file 3->2 sym 3->2 file-up sym-up
+    d17   file 2->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [11, 15, 17] sym [9, 11, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->15 sym 155->22 file-up sym-up
+    f02   file 1->1 sym 4->1 sym-up
+    f04   file 7->2 sym 17->2 file-up sym-up
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f16   file 36->1 sym -->6 file-up sym-up
+    f17   file 1->3 sym -->- FILE-DOWN
+    f19   file 2->1 sym 2->1 file-up sym-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@3
+    hm26-sa-06 fail secp256r1_verify:n@12 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@21 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@22
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+b1                       dev-tuned sym@10 14 (base 8)  battery [18, 20, 20]/[15, 19, 20]  fresh [11, 14, 17]/[9, 10, 12]  vs base: f17 file 1->3
+b2                       dev-tuned sym@10 14 (base 8)  battery [18, 20, 20]/[15, 19, 20]  fresh [11, 14, 17]/[8, 9, 12]  vs base: f08 file 1->2, f13 file 3->4
+b3                       dev-tuned sym@10 14 (base 8)  battery [18, 20, 20]/[15, 19, 20]  fresh [11, 14, 17]/[8, 8, 12]  vs base: f13 file 3->4
+b4                       dev-tuned sym@10 14 (base 8)  battery [18, 20, 20]/[15, 19, 20]  fresh [10, 14, 17]/[7, 8, 12]  vs base: f08 file 1->2, f13 file 3->4
+b5                       dev-tuned sym@10 13 (base 8)  battery [18, 20, 20]/[15, 18, 19]  fresh [11, 16, 18]/[8, 11, 12]  vs base: c17 SYM-TOP10-LOST 2->18, f17 file 1->3
+b6                       dev-tuned sym@10 13 (base 8)  battery [18, 20, 20]/[15, 18, 19]  fresh [11, 16, 18]/[7, 9, 12]  vs base: c17 SYM-TOP10-LOST 2->18, f06 file 1->2, f13 file 3->4
+b7                       dev-tuned sym@10 12 (base 8)  battery [18, 20, 20]/[15, 19, 20]  fresh [11, 15, 17]/[9, 11, 12]  vs base: f17 file 1->3
+
+######## round4.out
+===== b8 (share2 kebabtyped heldfullsym) vs base
+dev-set                file [8, 10, 13] sym [6, 8, 12]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->2 sym 47->9 file-up sym-up
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d16   file 3->1 sym 3->1 file-up sym-up
+    d17   file 2->1 sym -->1 file-up sym-up
+    d19   file -->1 sym -->1 file-up sym-up
+    d20   file -->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [11, 14, 17] sym [8, 9, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->15 sym 155->143 file-up sym-up
+    f02   file 1->1 sym 4->1 sym-up
+    f04   file 7->4 sym 17->4 file-up sym-up
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f16   file 36->1 sym -->6 file-up sym-up
+    f19   file 2->2 sym 2->6 sym-down
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@9
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== b9 (kebabtyped heldfullsym) vs base
+dev-set                file [8, 10, 12] sym [6, 8, 11]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->2 sym 47->9 file-up sym-up
+    d02   file 9->11 sym 10->12 FILE-DOWN sym-down LOST-TOP10
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d16   file 3->1 sym 3->1 file-up sym-up
+    d17   file 2->1 sym -->1 file-up sym-up
+    d19   file -->1 sym -->1 file-up sym-up
+    d20   file -->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 18, 19]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c17   file 1->1 sym 2->18 sym-down LOST-TOP10
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [11, 16, 18] sym [7, 10, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->3 sym 155->146 file-up sym-up
+    f02   file 1->1 sym 4->1 sym-up
+    f04   file 7->3 sym 17->3 file-up sym-up
+    f06   file 1->2 sym 1->2 FILE-DOWN sym-down
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f16   file 36->1 sym -->6 file-up sym-up
+    f19   file 2->1 sym 2->6 sym-down file-up
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@9
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+===== b10 (share2 heldfullsym) vs base
+dev-set                file [8, 10, 13] sym [6, 8, 12]   (base file [3, 7, 10] sym [2, 6, 8])
+    d01   file 7->2 sym 47->9 file-up sym-up
+    d05   file 3->1 sym 3->8 sym-down file-up
+    d07   file 3->1 sym 3->1 file-up sym-up
+    d10   file 1->2 sym 1->2 FILE-DOWN sym-down
+    d11   file 7->8 sym 7->8 FILE-DOWN sym-down
+    d13   file 87->77 sym -->- file-up
+    d14   file 50->5 sym -->- file-up
+    d16   file 3->1 sym 3->1 file-up sym-up
+    d17   file 2->1 sym -->1 file-up sym-up
+    d19   file -->1 sym -->1 file-up sym-up
+    d20   file -->1 sym -->1 file-up sym-up
+dev-set-a1             file [2, 2, 2] sym [0, 1, 2]   (base file [1, 1, 1] sym [0, 0, 0])
+    d22   file 1->1 sym -->5 sym-up
+    d23   file 60->1 sym -->2 file-up sym-up
+battery                file [18, 20, 20] sym [15, 19, 20]   (base file [16, 20, 20] sym [11, 19, 20])
+    m2    file 2->2 sym 4->9 sym-down
+    c03   file 1->1 sym 3->1 sym-up
+    c04   file 1->1 sym 2->1 sym-up
+    c08   file 2->1 sym 3->2 file-up sym-up
+    c19   file 2->1 sym 2->1 file-up sym-up
+    c20   file 1->1 sym 2->1 sym-up
+fresh-battery          file [11, 14, 17] sym [7, 8, 12]   (base file [10, 12, 15] sym [7, 9, 10])
+    f01   file 40->15 sym 155->143 file-up sym-up
+    f02   file 1->1 sym 4->5 sym-down
+    f04   file 7->4 sym 17->4 file-up sym-up
+    f09   file 8->2 sym 214->179 file-up sym-up
+    f12   file 13->5 sym 180->80 file-up sym-up
+    f16   file 36->1 sym -->6 file-up sym-up
+    f19   file 2->2 sym 2->6 sym-down
+priority strict 3/6 required 8/12
+    hm26-sc-05 PASS TokenInterface:m@1 | Token:m@2
+    hm26-sc-06 PASS NewSimulateTransactionHandler:m@1
+    hm26-sa-05 PASS CustomAccountInterface:m@1 | AccountContract:m@9
+    hm26-sa-06 fail secp256r1_verify:n@17 | verify_sig_ecdsa_secp256r1:n@11 | secp256r1_verify_signature:m@10
+    hm26-cc-05 fail secp256k1_recover:p@24 | keccak256:m@1 | recover_key_ecdsa_secp256k1:n@25
+    hm26-cc-06 fail Cmd:n@None | StellarAssetContract:m@1
+b8                       dev-tuned sym@10 14 (base 8)  battery [18, 20, 20]/[15, 19, 20]  fresh [11, 14, 17]/[8, 9, 12]  vs base: no frozen case below base
+b9                       dev-tuned sym@10 13 (base 8)  battery [18, 20, 20]/[15, 18, 19]  fresh [11, 16, 18]/[7, 10, 12]  vs base: c17 SYM-TOP10-LOST 2->18, f06 file 1->2
+b10                      dev-tuned sym@10 14 (base 8)  battery [18, 20, 20]/[15, 19, 20]  fresh [11, 14, 17]/[7, 8, 12]  vs base: no frozen case below base
+

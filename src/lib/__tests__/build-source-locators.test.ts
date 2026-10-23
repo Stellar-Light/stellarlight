@@ -182,6 +182,28 @@ describe("build-source-locators", () => {
 		expect((await run("--replan")).code).toBe(0);
 	});
 
+	it("trait-impl locators added to an indexed tree plan as creates only: no stored row changes", async () => {
+		const rust = {
+			name: "quickstart-x/src/lib.rs",
+			body: "pub struct Token;\nimpl TokenInterface for Token {\n    fn transfer() {}\n}\n",
+		};
+		tarball = serve([...TREE, rust]);
+		await run("--execute");
+		// The index as an extraction without impl locators stored it.
+		const implKeys = [...rows.keys()].filter((k) =>
+			k.includes("|symbol|impl "),
+		);
+		expect(implKeys).toEqual([
+			"stellar/quickstart|src/lib.rs|symbol|impl TokenInterface for Token",
+		]);
+		for (const k of implKeys) rows.delete(k);
+		const before = new Map(rows);
+		const r = await run("--execute");
+		expect(r.out).toContain("plan: writes=1 (create 1, update 0, delete 0)");
+		for (const [k, doc] of before) expect(rows.get(k), k).toEqual(doc);
+		expect((await run("--replan")).out).toContain("replan: writes=0");
+	});
+
 	it("a tarball with no indexable file (empty archive) is unreadable: nothing written, state kept, exit 1", async () => {
 		await run("--execute");
 		const before = new Map(rows);

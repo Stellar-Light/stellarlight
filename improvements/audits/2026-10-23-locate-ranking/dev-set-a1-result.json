@@ -1,0 +1,85 @@
+{
+	"summary": {
+		"cases": 2,
+		"indexPointers": 25903,
+		"top1": 2,
+		"top3": 2,
+		"top10": 2,
+		"symbolTop1": 0,
+		"symbolTop3": 1,
+		"symbolTop10": 2,
+		"missedTop10": [],
+		"partialOnlyTop10": [],
+		"misleadingInTop10": []
+	},
+	"results": [
+		{
+			"id": "d22",
+			"q": "Where is the stellar contract invoke command implemented?",
+			"fileRank": 1,
+			"symbolRank": 5,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1519,
+			"overCap": false,
+			"matched": 1518,
+			"top3": [
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/invoke.rs",
+					"locator": "invoke",
+					"score": 41,
+					"matchReason": "implements contract invoke; path has contract; symbol invoke, path too; path has command"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/invoke.rs",
+					"locator": "build_invoke_contract_tx",
+					"score": 38,
+					"matchReason": "implements contract invoke; symbol has contract, path too; symbol has invoke, path too; path has co…"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/invoke.rs",
+					"locator": "STELLAR_CONTRACT_ID",
+					"score": 33,
+					"matchReason": "implements contract invoke; symbol has contract, path too; path has invoke; path has command"
+				}
+			]
+		},
+		{
+			"id": "d23",
+			"q": "Which file implements `soroban contract build` in the CLI?",
+			"fileRank": 1,
+			"symbolRank": 2,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2090,
+			"overCap": false,
+			"matched": 2089,
+			"top3": [
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/build.rs",
+					"locator": "handle_contract_metadata_args",
+					"score": 33,
+					"matchReason": "implements contract build; path has soroban; symbol has contract, path too; path has cli"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/build.rs",
+					"locator": "Cmd",
+					"score": 28,
+					"matchReason": "implements contract build; path has soroban; path has contract; path has cli"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/build.rs",
+					"locator": "--manifest-path",
+					"score": 28,
+					"matchReason": "implements contract build; path has soroban; path has contract; path has cli"
+				}
+			]
+		}
+	]
+}

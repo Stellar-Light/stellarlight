@@ -1,0 +1,132 @@
+First pass (20:42Z): the 46 tests of src/lib/__tests__/source-locator.test.ts as first written, run against the base library (origin/main d9bd53b5 src/lib/source-locator.ts and source-locator-extract.ts swapped in, the synonym file present).
+
+   ✓ extraction, one rule per file type > Rust: items, impl-level fns, clap flags and env vars; test modules skipped 3ms
+   × extraction, one rule per file type > Rust: top-level `impl Trait for Type` blocks are locators, generic arguments dropped 5ms
+   × extraction, one rule per file type > impl locators never displace a file's other locators: the cap counts them apart 2ms
+   ✓ extraction, one rule per file type > Go: funcs, methods, grouped decls, option names; a one-word Name only in an option table 1ms
+   ✓ extraction, one rule per file type > C++: column-0 definitions (return type on its own line too), types, defines, config keys; declarations skipped 1ms
+   ✓ extraction, one rule per file type > TS/JS: exported and top-level declarations, class members, never statements 1ms
+   ✓ extraction, one rule per file type > Markdown: headings outside code fences, inline markup stripped 0ms
+   ✓ extraction, one rule per file type > shell (by shebang): VAR:= defaults, top-level VAR=, functions, case-arm flags 0ms
+   ✓ extraction, one rule per file type > .cfg: uncommented top-level keys 0ms
+   ✓ extraction, one rule per file type > skips tests, vendored and generated trees, changelogs, unknown types 0ms
+   ✓ tarball to rows > blobSha is git's blob id 0ms
+   ✓ tarball to rows > reads ustar and pax paths, strips the top directory, keeps names and hashes only 1ms
+   ✓ ranking > drops filler and stopwords, keeps identifiers, consumes a named repo 0ms
+   ✓ ranking > an exact symbol beats words, and separators and case do not matter 0ms
+   ✓ ranking > a word of five letters or fewer never matches inside a longer name 0ms
+   ✓ ranking > a plain word that is a whole part of a name is a word match, not a held identifier 0ms
+   ✓ ranking > an identifier of several parts held inside a longer name keeps the held tier 0ms
+   ✓ ranking > between equal matches, the name the query explains more fully ranks first 0ms
+   ✓ ranking > a named repo lifts its pointers; a filter keeps one repo or kind 0ms
+   ✓ ranking > nothing matching is an empty list 0ms
+   ✓ ranking > object-prototype words are plain words 0ms
+   × identifier candidates from q > adjacent words join into one identifier: 'token interface' reaches TokenInterface above a generic Token 1ms
+   × identifier candidates from q > case, separators, plurals and code abbreviations do not matter 1ms
+   × identifier candidates from q > a joined phrase inside a longer name is held, and one run counts once 1ms
+   × identifier candidates from q > a stopword ends a run: the words around it never join 0ms
+   × identifier candidates from q > an identifier typed in q outranks plain words, however many match 0ms
+   × a repo named in q > its pointers rank above an exact name elsewhere 0ms
+   × a repo named in q > is read by owner/name, by name, or by a clear alias 0ms
+   × OpenZeppelin/stellar-contracts in the allowlist > resolves in any case, as owner/name or name 0ms
+   × a stellar-cli command path typed in q > reads the module that implements it, though its symbols share no word with q 0ms
+   × a stellar-cli command path typed in q > the old binary name counts, and a skipped word (build) still names the module 0ms
+   × a stellar-cli command path typed in q > the deepest matching module wins: alias add before its parent 0ms
+   × a stellar-cli command path typed in q > capitalized prose is no command, and the mod.rs dispatcher is not the command 0ms
+   ✓ synonym map: each entry reaches the name the code uses > every entry has a case 0ms
+   × synonym map: each entry reaches the name the code uses > passkey -> secp256r1, webauthn 0ms
+   × synonym map: each entry reaches the name the code uses > webauthn -> secp256r1 0ms
+   × synonym map: each entry reaches the name the code uses > p256 -> secp256r1 0ms
+   × synonym map: each entry reaches the name the code uses > ecdsa -> secp256k1, secp256r1 0ms
+   × synonym map: each entry reaches the name the code uses > ethereum -> secp256k1, keccak256, eth 0ms
+   × synonym map: each entry reaches the name the code uses > keccak -> keccak256 0ms
+   × synonym map: each entry reaches the name the code uses > sep41 -> TokenInterface 0ms
+   × synonym map: each entry reaches the name the code uses > sep0041 -> TokenInterface 0ms
+   × synonym map: each entry reaches the name the code uses > sac -> StellarAssetContract 0ms
+   × synonym map: each entry reaches the name the code uses > signature -> sig 0ms
+   × synonym map: each entry reaches the name the code uses > bls -> bls12, bls12381 0ms
+   ✓ verificationUrl > pins the commit and the line, encoding path segments 0ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 25 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  1 failed (1)
+      Tests  25 failed | 21 passed (46)
+
+Second pass (21:09Z), after the design changed for measured reasons (typed identifiers count double instead of ranking first; joins read headings, stop at punctuation, scale by the squared run share; command detection reads every mention of the binary): the final tests of source-locator.test.ts, the route test and the builder test, against the base library, base route and base builder.
+
+   ✓ extraction, one rule per file type > Rust: items, impl-level fns, clap flags and env vars; test modules skipped 2ms
+   × extraction, one rule per file type > Rust: top-level `impl Trait for Type` blocks are locators, generic arguments dropped 5ms
+   × extraction, one rule per file type > impl locators never displace a file's other locators: the cap counts them apart 2ms
+   ✓ extraction, one rule per file type > Go: funcs, methods, grouped decls, option names; a one-word Name only in an option table 1ms
+   ✓ extraction, one rule per file type > C++: column-0 definitions (return type on its own line too), types, defines, config keys; declarations skipped 1ms
+   ✓ extraction, one rule per file type > TS/JS: exported and top-level declarations, class members, never statements 1ms
+   ✓ extraction, one rule per file type > Markdown: headings outside code fences, inline markup stripped 1ms
+   ✓ extraction, one rule per file type > shell (by shebang): VAR:= defaults, top-level VAR=, functions, case-arm flags 1ms
+   ✓ extraction, one rule per file type > .cfg: uncommented top-level keys 1ms
+   ✓ extraction, one rule per file type > skips tests, vendored and generated trees, changelogs, unknown types 1ms
+   ✓ tarball to rows > blobSha is git's blob id 2ms
+   ✓ tarball to rows > reads ustar and pax paths, strips the top directory, keeps names and hashes only 2ms
+   ✓ ranking > drops filler and stopwords, keeps identifiers, consumes a named repo 1ms
+   ✓ ranking > an exact symbol beats words, and separators and case do not matter 0ms
+   ✓ ranking > a word of five letters or fewer never matches inside a longer name 0ms
+   ✓ ranking > a plain word that is a whole part of a name is a word match, not a held identifier 0ms
+   ✓ ranking > an identifier of several parts held inside a longer name keeps the held tier 0ms
+   ✓ ranking > between equal matches, the name the query explains more fully ranks first 0ms
+   ✓ ranking > a named repo lifts its pointers; a filter keeps one repo or kind 0ms
+   ✓ ranking > nothing matching is an empty list 0ms
+   ✓ ranking > object-prototype words are plain words 0ms
+   × identifier candidates from q > adjacent words join into one identifier: 'token interface' reaches TokenInterface above a generic Token 1ms
+   × identifier candidates from q > case, separators, plurals and code abbreviations do not matter 1ms
+   × identifier candidates from q > a joined phrase inside a longer name is held, and one run counts once 1ms
+   × identifier candidates from q > a stopword ends a run: the words around it never join 0ms
+   × identifier candidates from q > punctuation ends a run too 0ms
+   × identifier candidates from q > a symbol holding only part of a run gets no join credit; a heading may 0ms
+   × identifier candidates from q > an identifier typed in q counts double: held in a name, it outranks two plain words 0ms
+   × identifier candidates from q > kebab-case of three parts is typed too: calculate-asset-supply 0ms
+   × a repo named in q > its pointers rank above an exact name elsewhere 0ms
+   × a repo named in q > is read by owner/name, by name, or by a clear alias 0ms
+   × OpenZeppelin/stellar-contracts in the allowlist > resolves in any case, as owner/name or name 0ms
+   × a stellar-cli command path typed in q > reads the module that implements it, though its symbols share no word with q 0ms
+   × a stellar-cli command path typed in q > a command after an earlier mention of the binary still counts 0ms
+   × a stellar-cli command path typed in q > the old binary name counts, and a skipped word (build) still names the module 0ms
+   × a stellar-cli command path typed in q > the deepest matching module wins: alias add before its parent 0ms
+   × a stellar-cli command path typed in q > capitalized prose is no command, and the mod.rs dispatcher is not the command 0ms
+   ✓ synonym map: each entry reaches the name the code uses > every entry has a case 0ms
+   × synonym map: each entry reaches the name the code uses > passkey -> secp256r1, webauthn 0ms
+   × synonym map: each entry reaches the name the code uses > webauthn -> secp256r1 0ms
+   × synonym map: each entry reaches the name the code uses > p256 -> secp256r1 0ms
+   × synonym map: each entry reaches the name the code uses > ecdsa -> secp256k1, secp256r1 0ms
+   × synonym map: each entry reaches the name the code uses > ethereum -> secp256k1, keccak256, eth 0ms
+   × synonym map: each entry reaches the name the code uses > keccak -> keccak256 0ms
+   × synonym map: each entry reaches the name the code uses > sep41 -> TokenInterface 0ms
+   × synonym map: each entry reaches the name the code uses > sep0041 -> TokenInterface 0ms
+   × synonym map: each entry reaches the name the code uses > sac -> StellarAssetContract 0ms
+   × synonym map: each entry reaches the name the code uses > signature -> sig 0ms
+   × synonym map: each entry reaches the name the code uses > bls -> bls12, bls12381 0ms
+   ✓ verificationUrl > pins the commit and the line, encoding path segments 0ms
+PAGE_SIZE 11910
+   ✓ GET /api/sources/locate > serves ranked pointers in the SourcePointer shape, every field declared 13ms
+   ✓ GET /api/sources/locate > reads candidates by term, only from indexed repos 2ms
+   × GET /api/sources/locate > a typed stellar-cli command also reads its module's rows by path, and ranks them first 9ms
+   ✓ GET /api/sources/locate > reads only the fields it ranks and serves, never key or terms 2ms
+   ✓ GET /api/sources/locate > no match is a data-shaped empty: pointers [] and total 0 1ms
+   ✓ GET /api/sources/locate > an index that cannot be read is null with a note, never [] 1ms
+   ✓ GET /api/sources/locate > a repo not indexed yet is null with a note, not an empty list 2ms
+   ✓ GET /api/sources/locate > names the repos it could not search when the index is partial 1ms
+   ✓ GET /api/sources/locate > filters by repo (owner/name or name) and pages ten at a time 3ms
+   ✓ GET /api/sources/locate > a full page stays far under an agent's 24,000-character output cap 2ms
+   ✓ GET /api/sources/locate > rejects what it cannot honour with 400 and the valid values 7ms
+   ✓ build-source-locators > first fill writes and stamps state; a second execute and --replan plan 0  514ms
+   × build-source-locators > trait-impl locators added to an indexed tree plan as creates only: no stored row changes 112ms
+   ✓ build-source-locators > a tarball with no indexable file (empty archive) is unreadable: nothing written, state kept, exit 1  414ms
+   ✓ build-source-locators > a tarball whose entries lack the top directory (flat names) is refused the same way 206ms
+   ✓ build-source-locators > a plan deleting more than max(50, half the stored rows) is refused without --allow-shrink  315ms
+   ✓ build-source-locators > a small shrink under the cap goes through 209ms
+   ✓ build-source-locators > --scheduled writes a repo only once that repo has its own state row  312ms
+   ✓ build-source-locators > --replan reports its own count and exits 1 when a stored row drifted  309ms
+   ✓ build-source-locators > a failed tarball fetch writes nothing and exits 1 206ms
+   ✓ build-source-locators.yml forwards exactly the intended flags > reads the event and every input through env, never inline 0ms
+   ✓ build-source-locators.yml forwards exactly the intended flags > the schedule runs --execute --scheduled, never --allow-shrink or --repo 163ms
+   ✓ build-source-locators.yml forwards exactly the intended flags > a dry dispatch never forwards --allow-shrink, so its plan shows every refusal 9ms
+   ✓ build-source-locators.yml forwards exactly the intended flags > an execute dispatch forwards --allow-shrink and one repo, the repo as a single argument 22ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 31 ⎯⎯⎯⎯⎯⎯⎯
+ Test Files  3 failed (3)
+      Tests  31 failed | 43 passed (74)
