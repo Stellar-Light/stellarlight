@@ -7,7 +7,11 @@
  *
  * Privacy: query strings truncated to 100 chars, lowercased; user-agent
  * bucketed into coarse categories (claude, codex, cursor, curl, browser,
- * bot, agent, other); no IP, no full UA.
+ * bot, agent, other); no IP, no full UA. A call a Cloudflare Worker makes
+ * carries a CF-Worker header naming the Worker's zone (a domain name that
+ * Cloudflare sets and a Worker cannot override); it is stored as `cfWorker`
+ * so a keyless, UA-less gateway can still be told apart. A client outside
+ * Cloudflare can send the header too: it is attribution, not identity.
  */
 
 import type { NextRequest } from "next/server";
@@ -47,6 +51,14 @@ export function bucketUserAgent(ua: string | null): UaBucket {
 	return "other";
 }
 
+/** The zone a CF-Worker header names, lowercased; undefined unless a hostname. */
+export function cfWorkerZone(header: string | null): string | undefined {
+	const z = header?.trim().toLowerCase();
+	return z && z.length <= 100 && /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(z)
+		? z
+		: undefined;
+}
+
 interface LogArgs {
 	req: NextRequest;
 	endpoint: string;
@@ -65,6 +77,8 @@ interface LogArgs {
 	status?: number;
 	/** Date.now() at the start of the handler; the log stores the elapsed ms. */
 	startedAt?: number;
+	/** The page served `meta.partial: true` (a backend read failed). */
+	partial?: boolean;
 }
 
 /** Log a hit. Always returns immediately — DB write is fire-and-forget. */
@@ -77,6 +91,7 @@ export function logApiHit({
 	matchMode,
 	status,
 	startedAt,
+	partial,
 }: LogArgs): void {
 	const durationMs =
 		typeof startedAt === "number"
@@ -84,6 +99,7 @@ export function logApiHit({
 			: undefined;
 	const ua = req.headers.get("user-agent");
 	const scoutVersion = req.headers.get("x-scout-version") || undefined;
+	const cfWorker = cfWorkerZone(req.headers.get("cf-worker"));
 	const country =
 		req.headers.get("x-vercel-ip-country") ||
 		req.headers.get("cf-ipcountry") ||
@@ -121,6 +137,8 @@ export function logApiHit({
 					...(matchMode ? { matchMode } : {}),
 					...(typeof status === "number" ? { status } : {}),
 					...(typeof durationMs === "number" ? { durationMs } : {}),
+					...(cfWorker ? { cfWorker } : {}),
+					...(typeof partial === "boolean" ? { partial } : {}),
 				},
 			});
 		} catch {

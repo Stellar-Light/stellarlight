@@ -20,6 +20,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { CODE_DOMAINS } from "@/lib/code-domains";
 import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
 import {
+	failedReadsOf,
 	isDegraded,
 	REQUEST_READ_BUDGET_MS,
 	withPartial,
@@ -207,6 +208,7 @@ async function handle(req: NextRequest) {
 			limit,
 		},
 		resultCount: repos.length,
+		partial: failedReadsOf(warnings).length > 0,
 	});
 
 	return NextResponse.json(
