@@ -1,0 +1,75 @@
+{
+	"name": "locate-ranking dev set (held out)",
+	"frozenAt": "2026-10-23T18:00:00Z",
+	"rule": "Written with dev-set.frozen.json before any ranking was run on either; the ids divisible by 3, chosen by that rule before any result. Never tuned on: run once, at the end, with the base and the final code. Found at k: a top-k pointer with the expected repo, one of the expected paths and one of the expected symbols. File level is reported beside it.",
+	"refs": {
+		"stellar/stellar-core": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+		"stellar/rs-soroban-sdk": "8e5b425dce5fa1dcd5a3fe1d3f3fcd18431586dd",
+		"stellar/rs-soroban-env": "0c99950e96128beba3319aa96b116646ce974e69",
+		"stellar/js-stellar-sdk": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+		"stellar/stellar-rpc": "ec4171d970ac812d9f4317b3cce2c315baa31320",
+		"stellar/quickstart": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+		"stellar/stellar-cli": "4ff88b7ea11dd3c847bb711b80258517148e1529",
+		"stellar/soroban-examples": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2",
+		"OpenZeppelin/stellar-contracts": "ddc327eb92d63709436da3a8455f641c2d5476c5"
+	},
+	"cases": [
+		{
+			"id": "d03",
+			"class": "repo named",
+			"q": "In soroban-sdk, where do contracts publish events with topics and data?",
+			"repo": "stellar/rs-soroban-sdk",
+			"paths": ["soroban-sdk/src/events.rs"],
+			"symbols": ["publish", "publish_event"],
+			"basis": "Events::publish line 116, Events::publish_event line 97"
+		},
+		{
+			"id": "d06",
+			"class": "vocabulary",
+			"q": "Where does the Soroban host verify an ed25519 signature?",
+			"repo": "stellar/rs-soroban-env",
+			"paths": [
+				"soroban-env-host/src/host.rs",
+				"soroban-env-host/src/crypto/mod.rs"
+			],
+			"symbols": ["verify_sig_ed25519", "verify_sig_ed25519_internal"],
+			"basis": "host function verify_sig_ed25519 (host.rs line 3035), verify_sig_ed25519_internal (crypto/mod.rs line 79)"
+		},
+		{
+			"id": "d09",
+			"class": "typed identifier, repo named",
+			"q": "In stellar-rpc, which handler serves getLedgerEntries?",
+			"repo": "stellar/stellar-rpc",
+			"paths": ["cmd/stellar-rpc/internal/methods/get_ledger_entries.go"],
+			"symbols": ["NewGetLedgerEntriesHandler"],
+			"basis": "NewGetLedgerEntriesHandler, line 26"
+		},
+		{
+			"id": "d12",
+			"class": "typed identifier, repo named",
+			"q": "Which js-stellar-sdk function turns a native JavaScript value into an ScVal?",
+			"repo": "stellar/js-stellar-sdk",
+			"paths": ["src/base/scval.ts"],
+			"symbols": ["nativeToScVal"],
+			"basis": "export function nativeToScVal, line 174"
+		},
+		{
+			"id": "d15",
+			"class": "joined identifier",
+			"q": "Where does the quickstart start script initialize friendbot?",
+			"repo": "stellar/quickstart",
+			"paths": ["start"],
+			"symbols": ["init_friendbot"],
+			"basis": "function init_friendbot, line 544"
+		},
+		{
+			"id": "d18",
+			"class": "coverage, joined identifier",
+			"q": "Where is the spending limit policy for OpenZeppelin smart accounts enforced?",
+			"repo": "OpenZeppelin/stellar-contracts",
+			"paths": ["packages/accounts/src/policies/spending_limit.rs"],
+			"symbols": ["enforce"],
+			"basis": "spending_limit::enforce, line 233"
+		}
+	]
+}

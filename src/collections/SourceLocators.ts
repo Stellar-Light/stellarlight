@@ -15,7 +15,7 @@ export const SourceLocators: CollectionConfig = {
 		defaultColumns: ["repo", "path", "locatorKind", "locator", "line"],
 		group: "Research",
 		description:
-			"Pointers into Stellar's own repos (path, symbol or heading, line, blob sha). Managed by scripts/build-source-locators.ts.",
+			"Pointers into the allowlisted repos, Stellar's own and OpenZeppelin's Soroban contracts (path, symbol or heading, line, blob sha). Managed by scripts/build-source-locators.ts.",
 	},
 	access: {
 		read: adminOnly,

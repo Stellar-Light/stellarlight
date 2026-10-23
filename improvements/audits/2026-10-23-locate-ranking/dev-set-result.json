@@ -1,0 +1,493 @@
+{
+	"summary": {
+		"cases": 14,
+		"indexPointers": 25903,
+		"top1": 8,
+		"top3": 10,
+		"top10": 13,
+		"symbolTop1": 6,
+		"symbolTop3": 8,
+		"symbolTop10": 12,
+		"missedTop10": ["d13"],
+		"partialOnlyTop10": [],
+		"misleadingInTop10": []
+	},
+	"results": [
+		{
+			"id": "d01",
+			"q": "Which function in the Rust SDK runs a BLS12-381 pairing check?",
+			"fileRank": 2,
+			"symbolRank": 9,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1059,
+			"overCap": false,
+			"matched": 1059,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/host.rs",
+					"locator": "bls12_381_multi_pairing_check",
+					"score": 28,
+					"matchReason": "symbol holds BLS12-381; symbol has pairing; symbol has check; symbol holds pairing check"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/crypto/bls12_381.rs",
+					"locator": "Bls12_381",
+					"score": 24,
+					"matchReason": "path has sdk; symbol BLS12-381, path too"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/crypto.rs",
+					"locator": "bls12_381",
+					"score": 23,
+					"matchReason": "path has sdk; symbol BLS12-381"
+				}
+			]
+		},
+		{
+			"id": "d02",
+			"q": "How does a Soroban contract read the current ledger sequence number with the Rust SDK?",
+			"fileRank": 9,
+			"symbolRank": 10,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 3859,
+			"overCap": false,
+			"matched": 3855,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/ledger/LedgerTxnEntry.cpp",
+					"locator": "LedgerTxnEntry::current",
+					"score": 12,
+					"matchReason": "symbol current; symbol has ledger, path too"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/ledger/LedgerTxnHeader.cpp",
+					"locator": "LedgerTxnHeader::current",
+					"score": 12,
+					"matchReason": "symbol current; symbol has ledger, path too"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/ledger/ImmutableLedgerView.cpp",
+					"locator": "LedgerEntryWrapper::current",
+					"score": 12,
+					"matchReason": "symbol current; symbol has ledger, path too"
+				}
+			]
+		},
+		{
+			"id": "d04",
+			"q": "Where does the Soroban host implement the Poseidon2 permutation?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1225,
+			"overCap": false,
+			"matched": 1224,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/host.rs",
+					"locator": "poseidon2_permutation",
+					"score": 33,
+					"matchReason": "path has soroban; path has host; symbol has poseidon2; symbol has permutation; symbol Poseidon2 per…"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/crypto/poseidon/poseidon2.rs",
+					"locator": "Poseidon2",
+					"score": 33,
+					"matchReason": "path has soroban; path has host; symbol Poseidon2, path too"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/crypto/mod.rs",
+					"locator": "poseidon2_permutation_impl",
+					"score": 27,
+					"matchReason": "path has soroban; path has host; symbol has poseidon2; symbol has permutation; symbol holds Poseido…"
+				}
+			]
+		},
+		{
+			"id": "d05",
+			"q": "Where is the SAC's clawback implemented in the Soroban host?",
+			"fileRank": 1,
+			"symbolRank": 8,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 3257,
+			"overCap": false,
+			"matched": 3257,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/builtin_contracts/stellar_asset_contract/contract.rs",
+					"locator": "StellarAssetContract",
+					"score": 33,
+					"matchReason": "SAC as symbol StellarAssetContract, path too; path has soroban; path has host"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/testutils.rs",
+					"locator": "StellarAssetContract",
+					"score": 30,
+					"matchReason": "SAC as symbol StellarAssetContract; path has soroban"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/builtin_contracts/stellar_asset_contract/metadata.rs",
+					"locator": "StellarAssetContractMetadata",
+					"score": 23,
+					"matchReason": "SAC as symbol holds StellarAssetContract, path too; path has soroban; path has host"
+				}
+			]
+		},
+		{
+			"id": "d07",
+			"q": "Where does stellar-core apply surge pricing when it builds a transaction set?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2485,
+			"overCap": false,
+			"matched": 2485,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/herder/TxSetFrame.cpp",
+					"locator": "applySurgePricing",
+					"score": 51,
+					"matchReason": "symbol has apply; symbol has surge; symbol has pricing; path has transaction; symbol apply surge pr…"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/transactions/TransactionFrame.cpp",
+					"locator": "TransactionFrame::apply",
+					"score": 39,
+					"matchReason": "symbol apply; symbol has transaction, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/transactions/FeeBumpTransactionFrame.cpp",
+					"locator": "FeeBumpTransactionFrame::apply",
+					"score": 38,
+					"matchReason": "symbol apply; symbol has transaction, path too; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d08",
+			"q": "Where does stellar-core check whether a transaction is banned from its queue?",
+			"fileRank": 1,
+			"symbolRank": 2,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2359,
+			"overCap": false,
+			"matched": 2359,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/herder/TransactionQueue.cpp",
+					"locator": "TransactionQueue::countBanned",
+					"score": 44,
+					"matchReason": "symbol has transaction, path too; symbol has banned; symbol has queue, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/herder/TransactionQueue.cpp",
+					"locator": "TransactionQueue::isBanned",
+					"score": 44,
+					"matchReason": "symbol has transaction, path too; symbol has banned; symbol has queue, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/herder/TransactionQueue.h",
+					"locator": "TransactionQueue",
+					"score": 38,
+					"matchReason": "symbol has transaction, path too; symbol has queue, path too; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d10",
+			"q": "Where is the fee stats RPC method implemented in stellar-rpc?",
+			"fileRank": 2,
+			"symbolRank": 2,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 787,
+			"overCap": false,
+			"matched": 787,
+			"top3": [
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/store/feestats.go",
+					"locator": "FeeStats",
+					"score": 44,
+					"matchReason": "symbol has fee; symbol has stat; path has rpc; symbol fee stats; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/methods/get_fee_stats.go",
+					"locator": "NewGetFeeStatsHandler",
+					"score": 40,
+					"matchReason": "symbol has fee, path too; symbol has stat, path too; path has rpc; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv2/config/config.go",
+					"locator": "FeeStatsConfig",
+					"score": 36,
+					"matchReason": "symbol has fee; symbol has stat; path has rpc; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d11",
+			"q": "Where does the JavaScript SDK poll a submitted transaction until it completes?",
+			"fileRank": 8,
+			"symbolRank": 8,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2147,
+			"overCap": false,
+			"matched": 2147,
+			"top3": [
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/base/transaction.ts",
+					"locator": "Transaction",
+					"score": 13,
+					"matchReason": "path has sdk; symbol transaction, path too"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/horizon/transaction_call_builder.ts",
+					"locator": "transaction",
+					"score": 13,
+					"matchReason": "path has sdk; symbol transaction, path too"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/store/transaction.go",
+					"locator": "Transaction",
+					"score": 11,
+					"matchReason": "symbol transaction, path too"
+				}
+			]
+		},
+		{
+			"id": "d13",
+			"q": "Which stellar-cli file implements the keys generate command?",
+			"fileRank": 77,
+			"symbolRank": null,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1154,
+			"overCap": false,
+			"matched": 1145,
+			"top3": [
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/crates/soroban-spec-json/src/lib.rs",
+					"locator": "generate",
+					"score": 39,
+					"matchReason": "symbol generate; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/crates/soroban-spec-typescript/src/lib.rs",
+					"locator": "generate",
+					"score": 39,
+					"matchReason": "symbol generate; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "FULL_HELP_DOCS.md",
+					"locator": "stellar keys generate",
+					"score": 38,
+					"matchReason": "heading has key; heading has generate; heading holds keys generate; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d14",
+			"q": "Where does the stellar CLI extend a contract's TTL?",
+			"fileRank": 5,
+			"symbolRank": null,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1322,
+			"overCap": false,
+			"matched": 1322,
+			"top3": [
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/info/shared.rs",
+					"locator": "Contract",
+					"score": 41,
+					"matchReason": "symbol contract, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/utils/contract-template/src/lib.rs",
+					"locator": "Contract",
+					"score": 41,
+					"matchReason": "symbol contract, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/log/event.rs",
+					"locator": "contract",
+					"score": 39,
+					"matchReason": "symbol contract; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d16",
+			"q": "Is there an example account contract that checks a BLS signature in __check_auth?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2714,
+			"overCap": false,
+			"matched": 2713,
+			"top3": [
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "bls_signature/src/lib.rs",
+					"locator": "__check_auth",
+					"score": 24,
+					"matchReason": "path has example; symbol has check; path has bls; path has signature; symbol __check_auth"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "multisig_1_of_n_account/contract/src/lib.rs",
+					"locator": "__check_auth",
+					"score": 24,
+					"matchReason": "path has example; path has account; path has contract; symbol has check; symbol __check_auth"
+				},
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "examples/multisig-smart-account/account/src/contract.rs",
+					"locator": "__check_auth",
+					"score": 24,
+					"matchReason": "path has example; path has account; path has contract; symbol has check; symbol __check_auth"
+				}
+			]
+		},
+		{
+			"id": "d17",
+			"q": "Which soroban-examples contract implements the custom account interface for a 1-of-n multisig?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1902,
+			"overCap": false,
+			"matched": 1902,
+			"top3": [
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "multisig_1_of_n_account/contract/src/lib.rs",
+					"locator": "impl CustomAccountInterface for Contract",
+					"score": 42,
+					"matchReason": "symbol has contract, path too; symbol has custom; symbol has account, path too; symbol has interfac…"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "account/src/lib.rs",
+					"locator": "impl CustomAccountInterface for AccountContract",
+					"score": 38,
+					"matchReason": "symbol has contract; symbol has custom; symbol has account, path too; symbol has interface; symbol …"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "bls_signature/src/lib.rs",
+					"locator": "impl CustomAccountInterface for IncrementContract",
+					"score": 36,
+					"matchReason": "symbol has contract; symbol has custom; symbol has account; symbol has interface; symbol holds cust…"
+				}
+			]
+		},
+		{
+			"id": "d19",
+			"q": "Where is the Ownable trait defined in OpenZeppelin's Stellar contracts?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1154,
+			"overCap": false,
+			"matched": 1154,
+			"top3": [
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "packages/access/src/ownable/mod.rs",
+					"locator": "Ownable",
+					"score": 37,
+					"matchReason": "symbol Ownable, path too; path has contract; repo named in q"
+				},
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "packages/contract-utils/README.md",
+					"locator": "Stellar Contract Utils",
+					"score": 33,
+					"matchReason": "heading has contract, path too; heading holds Stellar contracts; repo named in q"
+				},
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "Architecture.md",
+					"locator": "OpenZeppelin Stellar Contracts Architecture",
+					"score": 33,
+					"matchReason": "heading has contract, path too; heading holds Stellar contracts; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "d20",
+			"q": "Where does OpenZeppelin's Stellar library implement a keccak hasher?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 31,
+			"overCap": false,
+			"matched": 31,
+			"top3": [
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "packages/contract-utils/src/crypto/keccak.rs",
+					"locator": "Keccak256",
+					"score": 42,
+					"matchReason": "keccak as symbol keccak256; repo named in q"
+				},
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "packages/contract-utils/src/crypto/hasher.rs",
+					"locator": "Hasher",
+					"score": 30,
+					"matchReason": "symbol hasher, path too; repo named in q"
+				},
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "packages/contract-utils/src/crypto/keccak.rs",
+					"locator": "impl Hasher for Keccak256",
+					"score": 29,
+					"matchReason": "keccak as symbol has keccak256; symbol has hasher; repo named in q"
+				}
+			]
+		}
+	]
+}

@@ -134,7 +134,7 @@ Search existing Stellar projects (competitor / overlap lookup). The workhorse fo
 
 **Params:** `q={keywords}`, `type={Wallet|DEX|Lending|Bridge|Payments|Anchor|Card Issuing|…}` (exact category — use it for \"what X services exist\" questions, e.g. `type=Card Issuing` for card-program infrastructure), `category={cat}`, `scfAwarded=1`, `limit=N`.
 
-**Returns:** `.projects[*]` scored by keyword overlap, sorted by relevance.
+**Returns:** `.projects[*]` scored by keyword overlap, sorted by relevance. A row with a DefiLlama link also carries `statusChecks` (each hit, clear or could-not-check) and `statusCaveat`: when a Live row has a hit (DefiLlama dates its protocol dead, or retired it with nothing locked and no live successor; or an on-chain protocol shows a fresh TVL of 0 and 60+ days of contract silence), relay the caveat with the status and treat Live as unconfirmed; `statusConfidence` is halved there.
 
 **Tiered keyword matching — read `.meta.matchMode` before framing results:**
 - `strict` — every query token matched (highest confidence; lead with "I found N exact matches for {q}")

@@ -75,6 +75,7 @@ import {
 	productsCoverage,
 } from "@/lib/rwa-products";
 import { serverTiming } from "@/lib/server-timing";
+import { type StatusCheck, statusChecksFor } from "@/lib/status-checks";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -154,6 +155,8 @@ async function semanticProjectRows(
 				tvlMethod: 1,
 				// sls-039: mapped provider identifiers ride semantic rows too
 				llamaSlugs: 1,
+				// DQ1: DefiLlama's verdict on those slugs, read by statusChecksFor
+				llamaListing: 1,
 				// on-chain metrics (2026-07-20): absent = not tracked, never zero
 				onchain: 1,
 				// PG Award truth rides semantic rows too (F3 class)
@@ -196,7 +199,9 @@ async function semanticProjectRows(
 			statusAsOf: p.statusAsOf ?? null,
 			statusSourceUrl: p.statusSourceUrl ?? null,
 			statusBasis: p.statusBasis ?? null,
-			statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
+			// DQ1: confidence, and on DefiLlama-linked rows the status checks
+			// and caveat (src/lib/status-checks.ts), from one function.
+			...statusChecksFor(p),
 			// sls-079: status answers "operating for users?"; THIS answers
 			// "deployed on which network?". Two facts, two fields. unknown is
 			// served explicitly - absence of evidence is never proof of disuse,
@@ -418,6 +423,9 @@ interface ProjectRow {
 	statusSourceUrl?: string | null;
 	statusBasis?: string | null;
 	statusConfidence?: FactConfidence | null;
+	// DQ1: present only on rows with a DefiLlama link (src/lib/status-checks.ts)
+	statusChecks?: StatusCheck[];
+	statusCaveat?: string | null;
 	tvlUSD?: number | null;
 	// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 	onchain?: any;
@@ -1518,7 +1526,8 @@ async function handle(req: NextRequest) {
 					statusAsOf: p.statusAsOf ?? null,
 					statusSourceUrl: p.statusSourceUrl ?? null,
 					statusBasis: p.statusBasis ?? null,
-					statusConfidence: factConfidence(p.statusBasis, p.statusAsOf),
+					// DQ1: status confidence, checks and caveat (status-checks.ts)
+					...statusChecksFor(p),
 					// sls-079: deployment rides EVERY row builder — the first fix
 					// landed on one of three builders and the served paths missed it.
 					deployment: pickDeployment(p.deployment, p.slug),
@@ -2183,6 +2192,13 @@ async function handle(req: NextRequest) {
 			);
 			// biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
 			const swapped = (row: (typeof baseProjects)[number], c: any) => {
+				// A shadow's status checks describe the shadow; the canonical's
+				// come from statusChecksFor(c) below (the statusBasis leak class).
+				const {
+					statusChecks: _shadowChecks,
+					statusCaveat: _shadowCaveat,
+					...rest
+				} = row;
 				let logoUrl: string | null = null;
 				if (c.logo && typeof c.logo === "object") {
 					if (c.logo.url) logoUrl = c.logo.url;
@@ -2190,7 +2206,7 @@ async function handle(req: NextRequest) {
 						logoUrl = `/api/media/file/${c.logo.filename}`;
 				}
 				return {
-					...row,
+					...rest,
 					id: String(c.id),
 					name: c.name,
 					slug: c.slug,
@@ -2204,7 +2220,8 @@ async function handle(req: NextRequest) {
 					statusAsOf: c.statusAsOf ?? null,
 					statusSourceUrl: c.statusSourceUrl ?? null,
 					statusBasis: c.statusBasis ?? null,
-					statusConfidence: factConfidence(c.statusBasis, c.statusAsOf),
+					// DQ1: the canonical's own checks; the shadow's were stripped above
+					...statusChecksFor(c),
 					// sls-079: from the canonical too, same rule as the fields above
 					deployment: pickDeployment(c.deployment, c.slug),
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,

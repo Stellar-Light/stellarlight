@@ -232,6 +232,26 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     `facet=placement` 68 winners of 1,371 with the left-out line;
     hackmeridian-2026 its four declared tracks and `prizeTiers` null.
 
+11. **A Live row whose DefiLlama protocol is dead reads as plainly Live.**
+    Probe: `/api/projects/search?q=allbridge` serves Allbridge `status:
+    Live`, `statusConfidence` 0.9 high and no `statusCaveat`, while
+    `https://api.llama.fi/protocols` marks `allbridge-core` deprecated with
+    `deadFrom` 2026-08-31; `/api/verify?type=live&subject=allbridge` answers
+    supported, 0.9 high (live 1.9.101, 2026-10-23).
+    Found by the owner's read of the row; measured in
+    `improvements/rounds/2026-10-23-dead-protocol-guard.md`.
+    State: merged as #1876 (spec 1.9.105); the enrich-tvl and curate-projects
+    runs are next. The guard needs the enrich-tvl lane to store
+    `llamaListing`; the Allbridge description and routes need a curate-projects
+    execute; the dispatch steps are in the ledger.
+    Done when: merged and deployed; the enrich-tvl and curate-projects lanes
+    ran (dry run read first); live, re-checked by someone other than the
+    author: every DefiLlama-linked row serves `statusChecks`, Allbridge serves
+    the reworded description, `llamaSlugs` [allbridge-next], `tvlUSD` null,
+    `routes` null, derived `supportedNetworks` and a clear listing check, and
+    no other row carries a `statusCaveat` unless DefiLlama dates its protocol
+    dead or retired it with nothing locked and no live successor.
+
 ## Next
 
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
@@ -345,6 +365,26 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   User-Agent, no timeout and no retries, from Cloudflare's network, so its
   users likely share one per-IP limit [inferred]. See the owner decision on
   a key below.
+- scout-mcp `locate_source` trails the API from spec 1.9.106 (found in the
+  review of `lane/l3-locate-ranking`, 2026-10-23): its `repo` enum
+  (`scout-mcp/src/index.ts`, "keep in sync with SOURCE_REPOS") lacks
+  OpenZeppelin/stellar-contracts, so an MCP client cannot filter to it;
+  its description and README row say eight repos and "Stellar's own code",
+  and its q text says a named repo "lifts" where it now weighs 8 for every
+  repo named in q. For the next scout-mcp release.
+- api-client: the schema regenerated for 1.9.106 (locateSource `repo` enum
+  with OpenZeppelin/stellar-contracts, the factors and locatorKind texts)
+  reaches npm users only with the next api-client release (same review).
+- locateSource lifts stellar/quickstart by 8 when q says "quickstart" as a
+  docs word: `q=quickstart guide to deploy a contract` puts the quickstart
+  README heading "Deploy to Digital Ocean" above the exact deploy and
+  Contract symbols (same review, offline at the indexed commits). A split
+  weight (3 for the bare word) fixed it but moved the frozen fresh
+  battery's f15 from 25 to 102, where stellar-rpc's and stellar-core's
+  constants outrank quickstart's README "Ports" heading
+  (`improvements/audits/2026-10-23-locate-ranking/rules.txt`, r-lift8).
+  The likely fix is a split that also handles f15's case; measure it in a
+  later round.
 - searchRepos rarely finds the repo a natural-language question asks for:
   on 25 builder questions written blind (round
   `2026-10-23-repos-ranking`, evidence
@@ -400,6 +440,48 @@ Found 2026-10-23 by the prize-labels lane and its review
   Probe: getHackathon `stellar-hacks-zk-gaming` serves `winners[0].prizeUsd`
   null beside `award` "1st Place - $5,000" (1.9.101, 2026-10-23).
 
+Found 2026-10-23 by the dead-protocol guard round
+(`improvements/rounds/2026-10-23-dead-protocol-guard.md`):
+
+- Two DefiLlama slugs in `scripts/enrich-tvl.ts` LLAMA_MAP no longer
+  resolve, so their TVL freezes and the listing check reads could-not-check:
+  `soroswap` (now `soroswap-amm`, Stellar slice $1,177,991 on 2026-10-23;
+  stored tvlAsOf 2026-10-19) and `sentora` (now `sentora-curator`, which no
+  longer lists Stellar; stored $10,393,904 at tvlAsOf 2026-08-10).
+- Three LLAMA_MAP keys match no public directory row, so those rows carry
+  no DefiLlama link and the status checks never see them:
+  `phoenix-protocol` (the row is `phoenix`, Live; DefiLlama
+  `phoenix-defi-hub` $47,473 on Stellar), `normal-stellar-amm` (the row is
+  `normal`, Live, human-verified 2026-09-02; DefiLlama `normal` TVL $0, and
+  normalfinance.io's own stellar.toml marks all ten of its currencies
+  `status = "dead"`, read 2026-10-23) and `whalehub` (no row).
+- Estrela is served Live (basis repo-activity) with Allbridge Core's bridge
+  routes copied in curate-projects, but its SCF page (#22 and #35) describes
+  Allbridge's Soroban stablecoin AMM (allbridge-io/dex-soroban-contracts, last
+  commit 2025-07-24), not the bridge. The round clears the copied routes and
+  network matrix (it now serves derived networks, basis scf-award); its
+  identity (a separate product, or a duplicate to fold) and its Live status
+  are unreviewed.
+- The research golden case `bridge-evm-to-stellar` still expects Allbridge as
+  a current EVM to Stellar route, while docs-core.allbridge.io says Stellar
+  support on the relaunched Core is unavailable pending audit (read
+  2026-10-23); the projects-mode case `bridge-solana-to-stellar` was updated
+  in the dead-protocol guard round.
+- Agent-facing text still recommends the Allbridge Core SDK for moving USDC
+  from EVM chains to Stellar (`src/lib/stellar-scout-skill.ts`, the Allbridge
+  SDK bullet; `src/lib/integrations/curated-skills.ts`, slug allbridge-sdk),
+  while docs-core.allbridge.io says Stellar is unavailable on the relaunched
+  Core pending audit (read 2026-10-23).
+- `view=compact` project rows do not carry `statusCaveat`; adding it gives
+  every compact row a new null key.
+- The TVL rule of the status checks cannot speak until enrich-onchain has
+  stored 60 days of `onchain.quietSince`; today no row has more than 7 days of
+  observed silence on record.
+- The status checks see only the 18 of 1,005 public rows with a DefiLlama
+  link; a dead product with no link (or a stale slug, above) is not checked.
+- enrich-onchain writes `projects.onchain` without reading it back (only
+  `codeInUse` is verified).
+
 
 Found 2026-10-23 in review of the smart wallet O2 ship
 (`improvements/rounds/2026-10-23-smart-wallet-o2.md`):
@@ -428,6 +510,11 @@ Found 2026-10-23 in review of the smart wallet O2 ship
 - Set `ADMIN_ROUTE_SECRET` (32 or more characters) in the production environment, for scripted
   calls to the five `/api/admin/*` routes and `/api/import/airtable` through
   the `x-admin-secret` header [unset: admin session only].
+- Allbridge's status stamp: human-verified 2026-09-05 rested on a 200 page
+  and an SDK repo push while Allbridge Core on Stellar held $0 (DefiLlama's
+  Stellar series reads $0 from 2026-08-21). Re-stamp it on Allbridge Next
+  evidence, or withdraw it [withdraw to site-liveness, status unchanged,
+  until the owner re-checks Next on Stellar].
 - Rotate `PAYLOAD_SECRET`: until the admin-auth round, every blog preview
   put it in a URL (request logs, browser history). It signs every session,
   so rotating logs every admin and partner out [no rotation unless a log

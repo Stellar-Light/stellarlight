@@ -61,6 +61,7 @@ import {
 	SOURCE_REPO_NAMES,
 } from "./source-locator";
 import { PRICE_BASES } from "./stablecoins";
+import { CHECK_RESULTS, STATUS_CHECKS } from "./status-checks";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
 
@@ -2097,7 +2098,7 @@ export const spec: OpenAPISpec = {
 										evidence: {
 											type: "array",
 											description:
-												"Typed evidence rows — discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source).",
+												"Typed evidence rows; discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source); status-check = a check of a Live label that hit (note, source, asOf), the same check searchProjects serves in statusChecks: the verdict stays supported, the statement carries the caveat and confidence is halved.",
 											items: {
 												type: "object",
 												properties: {
@@ -2108,6 +2109,7 @@ export const spec: OpenAPISpec = {
 															"status-record",
 															"code-activity",
 															"curated-note",
+															"status-check",
 														],
 													},
 													auditor: { type: "string", nullable: true },
@@ -7043,12 +7045,12 @@ export const spec: OpenAPISpec = {
 				// Reads the pointer index and ranks it; writes nothing beyond the usage log.
 				"x-side-effecting": false,
 				summary:
-					"Locate where a flag, option default, function or interface is defined in Stellar's own source",
+					"Locate where a flag, command, option default, function or interface is defined in Stellar's source",
 				description:
-					"Scored pointers into allowlisted Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples): the file, symbol or heading, line, commit and blob sha where a CLI flag, config option default, SDK or host function, or contract interface is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read. pointers [] = no match in the indexed repos; null = could not search.",
+					"Scored pointers into allowlisted repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples, OpenZeppelin/stellar-contracts): the file, symbol or heading, line, commit and blob sha where a CLI flag or command, config option default, SDK or host function, contract interface or trait implementation is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read. pointers [] = no match in the indexed repos; null = could not search.",
 				"x-routing": {
 					purpose:
-						"Point to the exact file, line and commit in Stellar's own repos where a symbol, CLI flag, config option, default value or doc section is defined.",
+						"Point to the exact file, line and commit in the allowlisted repos where a symbol, CLI flag, config option, default value or doc section is defined.",
 					keywords: [
 						"where is it defined",
 						"which file defines",
@@ -7081,7 +7083,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: true,
 						description:
-							"What to locate: a symbol, flag, option, config key or topic words (at most 300 characters), e.g. --enable-core-manual-close or getTransactions default limit. Naming a repo in q (stellar-rpc, quickstart) lifts its pointers.",
+							"What to locate: a symbol, flag, option, config key, stellar-cli command or topic words (at most 300 characters), e.g. --enable-core-manual-close, getTransactions default limit or stellar contract invoke. A repo named in q (stellar-rpc, quickstart, OpenZeppelin) strongly lifts its pointers; a typed stellar-cli command lifts the module that implements it.",
 						schema: { type: "string", maxLength: 300 },
 					},
 					{
@@ -7134,7 +7136,7 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													enum: [...LOCATE_MATCH_MODES],
 													description:
-														"Always expanded: identifiers split into words, plurals folded, a few code abbreviations mapped (max, min, config, auth, init, env, tx).",
+														"Always expanded: identifiers split into words, plurals folded, a few code abbreviations mapped (max, min, config, auth, init, env, tx), adjacent words of q also read as one name (token interface as TokenInterface), and a few crypto and auth words matched to the names the code uses (passkey and WebAuthn as secp256r1, SEP-41 as TokenInterface, SAC as StellarAssetContract).",
 												},
 												matchModeLabel: { type: "string" },
 												source: { type: "string", format: "uri" },
@@ -9907,7 +9909,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: [...LOCATOR_KINDS],
 						description:
-							"file = the whole file; symbol = a named definition (function, type, constant, CLI flag, config option or key, environment variable); heading = a Markdown section.",
+							"file = the whole file; symbol = a named definition (function, type, constant, CLI flag, config option or key, environment variable) or a Rust trait implementation, written impl Trait for Type; heading = a Markdown section.",
 					},
 					locator: {
 						type: "string",
@@ -9925,7 +9927,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: [...AUTHORITY_ROLES],
 						description:
-							"implementation = the repo's code (core, SDKs, host, RPC, quickstart); tooling = stellar-cli; reference-docs = any Markdown file and the soroban-examples contracts. A role, not an endorsement.",
+							"implementation = the repo's code (core, SDKs, host, RPC, quickstart, OpenZeppelin's contract library); tooling = stellar-cli; reference-docs = any Markdown file and the soroban-examples contracts. A role, not an endorsement.",
 					},
 					matchReason: {
 						type: "string",
@@ -9961,7 +9963,7 @@ export const spec: OpenAPISpec = {
 					factors: {
 						type: "string",
 						description:
-							"Compact score parts: words matched of q, exact, prefix (an identifier held in the name), word, path, repo named, name (share of the name's own words q accounts for).",
+							"Compact score parts: words matched of q, exact, prefix (an identifier held in the name), word, path, join (adjacent words of q matched as one name), ident (identifiers typed in q found whole, counted double), cmd (stellar-cli command words the file's module path matches), repo named, name (share of the name's own words q accounts for).",
 					},
 				},
 			},
@@ -10602,12 +10604,48 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Deterministic trust score for the lifecycle status fact: basis-class weight \u00d7 stepwise freshness decay. score 0\u20131, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance \u21d2 same score \u2014 cacheable.",
+							"Deterministic trust score for the lifecycle status fact: basis-class weight times stepwise freshness decay. score 0 to 1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). The same provenance gives the same score, so it can be cached. Halved on a Live row when a statusChecks entry is a hit (statusCaveat says why).",
 						properties: {
 							score: { type: "number" },
 							label: { type: "string", enum: ["high", "medium", "low"] },
 							ageDays: { type: "integer", nullable: true },
 						},
+					},
+					statusChecks: {
+						type: "array",
+						description:
+							"Checks of the status label against stored upstream facts, present only on rows with a DefiLlama link (llamaSlugs); absent means the row has no DefiLlama link, so neither check applies. defillama-listing: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for DEX, Lending, Bridge and Yield rows: hit when a DefiLlama TVL of 0 read within the last 14 days meets 60 or more days of observed time in which no tracked contract emitted an event or took a sub-call, clear when a fresh TVL is above 0 or a contract moved in the latest window, could-not-check otherwise (no TVL figure, a TVL reading older than 14 days, no tracked contract, or under 60 days observed). A could-not-check result is not a clean bill.",
+						items: {
+							type: "object",
+							required: ["check", "result", "detail", "asOf", "sourceUrl"],
+							properties: {
+								check: { type: "string", enum: [...STATUS_CHECKS] },
+								result: { type: "string", enum: [...CHECK_RESULTS] },
+								detail: {
+									type: "string",
+									description:
+										"What was read, or why it could not be read, in plain words with dates.",
+								},
+								asOf: {
+									type: "string",
+									nullable: true,
+									description:
+										"Date (YYYY-MM-DD) of the reading the result rests on; null when there was none.",
+								},
+								sourceUrl: {
+									type: "string",
+									format: "uri",
+									description:
+										"Where to check the fact: the first linked protocol's DefiLlama page (its listing and TVL figure); the contract readings behind the TVL check are the row's onchain block.",
+								},
+							},
+						},
+					},
+					statusCaveat: {
+						type: "string",
+						nullable: true,
+						description:
+							"Present only with statusChecks. On a Live row with a hit, one sentence to relay with the status: the label may describe a product that stopped or moved (a protocol deprecated upstream can have a successor), so treat Live as unconfirmed. A check never changes the status itself. Null = no check hit, or the row is not Live; read statusChecks for what was checked.",
 					},
 					statusBasis: {
 						type: "string",
@@ -10972,7 +11010,7 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'). Refreshed weekly; see tvlAsOf.",
+							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf.",
 					},
 					tvlAsOf: {
 						type: "string",

@@ -31,8 +31,10 @@
  * []; and a plan deleting more than max(50, half the stored pointers) needs
  * --allow-shrink, which the schedule never passes.
  *
- * Cost: 8 GitHub API reads (HEAD sha) and 8 tarballs per run, about 45 MB
- * in total; GITHUB_TOKEN is optional (lifts the 60/hour API limit).
+ * Cost: one GitHub API read (HEAD sha) and one tarball per allowlisted repo
+ * per run, nine today, about 48 MB in total; GITHUB_TOKEN is optional (lifts
+ * the 60/hour API limit). A repo added to the allowlist stays dry on the
+ * schedule until its own hand-dispatched execute (see --scheduled).
  */
 
 import "./load-env";
@@ -46,8 +48,8 @@ import {
 import { buildRows, tarFiles } from "../src/lib/source-locator-extract";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 
-/** Bump when extraction or term rules change; changed terms are re-planned either way. */
-const BUILDER_VERSION = "1";
+/** Bump when extraction or term rules change; changed terms are re-planned either way. 2: impl locators. */
+const BUILDER_VERSION = "2";
 const args = process.argv.slice(2);
 const flag = (name: string) =>
 	args.includes(name) ? (args[args.indexOf(name) + 1] ?? "") : null;
@@ -133,6 +135,8 @@ async function run() {
 	let plannedWrites = 0;
 	let refusedWrites = 0;
 	const refused: string[] = [];
+	// Repos a scheduled run leaves dry (no state row yet): named apart, never counted as planned.
+	const skipped: string[] = [];
 	let failures = 0;
 	for (const repo of repos) {
 		const started = Date.now();
@@ -190,7 +194,7 @@ async function run() {
 			);
 			// Below 100 stored rows the floor of 50 is the cap, so a small repo
 			// could still be emptied by a tarball holding one indexable file.
-			// None of the eight is under 410 rows (2026-10-23).
+			// None of the nine is under 410 rows (2026-10-23).
 			const shrinkCap = Math.max(50, Math.floor(existing.size / 2));
 			if (deletes.length > shrinkCap && !allowShrink) {
 				console.error(
@@ -201,14 +205,19 @@ async function run() {
 				failures++;
 				continue;
 			}
-			plannedWrites += writes;
-			if (!execute) continue;
-			if (scheduled && !(await models.repos.findOne({ repo }).lean())) {
+			if (
+				execute &&
+				scheduled &&
+				!(await models.repos.findOne({ repo }).lean())
+			) {
 				console.log(
 					`  ${repo}: no state row yet, so this scheduled run stays dry for it. Its first fill is a hand-dispatched execute, after its dry run is read.`,
 				);
+				skipped.push(`${repo} (${writes} planned)`);
 				continue;
 			}
+			plannedWrites += writes;
+			if (!execute) continue;
 
 			for (let i = 0; i < upserts.length; i += 1000)
 				await models.rows.bulkWrite(
@@ -287,7 +296,7 @@ async function run() {
 	if (models && replan) console.log(`\nreplan: writes=${replanWrites}`);
 	else if (models)
 		console.log(
-			`\nwrites planned: ${plannedWrites}${refused.length ? `; refused, nothing written: ${refused.join(", ")}` : ""}`,
+			`\nwrites planned: ${plannedWrites}${refused.length ? `; refused, nothing written: ${refused.join(", ")}` : ""}${skipped.length ? `; skipped, no state row yet: ${skipped.join(", ")}` : ""}`,
 		);
 	if (failures) process.exitCode = 1;
 	else if (replan && replanWrites > 0) {

@@ -1,0 +1,36 @@
+{
+	"name": "locate-ranking dev set, amendment A1 (held out)",
+	"frozenAt": "2026-10-23T18:05:00Z",
+	"rule": "Amendment A1 to dev-heldout.frozen.json: CLI command paths typed in q, written with dev-set-a1.frozen.json before any ranking was run on them; the ids divisible by 3. Never tuned on: run once, at the end, with the base and the final code. Found at k: a top-k pointer with the expected repo, one of the expected paths and one of the expected symbols.",
+	"refs": {
+		"stellar/stellar-core": "05c6328c13b595c52b6ad1ecd1e69cd9b2a582d4",
+		"stellar/rs-soroban-sdk": "8e5b425dce5fa1dcd5a3fe1d3f3fcd18431586dd",
+		"stellar/rs-soroban-env": "0c99950e96128beba3319aa96b116646ce974e69",
+		"stellar/js-stellar-sdk": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+		"stellar/stellar-rpc": "ec4171d970ac812d9f4317b3cce2c315baa31320",
+		"stellar/quickstart": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+		"stellar/stellar-cli": "4ff88b7ea11dd3c847bb711b80258517148e1529",
+		"stellar/soroban-examples": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2",
+		"OpenZeppelin/stellar-contracts": "ddc327eb92d63709436da3a8455f641c2d5476c5"
+	},
+	"cases": [
+		{
+			"id": "d21",
+			"class": "CLI command path",
+			"q": "Where does the stellar CLI implement `stellar tx sign`?",
+			"repo": "stellar/stellar-cli",
+			"paths": ["cmd/soroban-cli/src/commands/tx/sign.rs"],
+			"symbols": ["Cmd", "run"],
+			"basis": "struct Cmd line 24, Cmd::run line 38"
+		},
+		{
+			"id": "d24",
+			"class": "CLI command path, three levels",
+			"q": "Where is `stellar contract alias add` implemented?",
+			"repo": "stellar/stellar-cli",
+			"paths": ["cmd/soroban-cli/src/commands/contract/alias/add.rs"],
+			"symbols": ["Cmd", "run"],
+			"basis": "struct Cmd line 11, Cmd::run line 49"
+		}
+	]
+}

@@ -29,7 +29,9 @@ import { serverTiming } from "@/lib/server-timing";
 import {
 	authorityRole,
 	CANDIDATE_CAP,
+	CLI_COMMANDS,
 	candidateTerms,
+	commandPathPattern,
 	LOCATE_MATCH_MODES,
 	LOCATE_MAX_PAGE,
 	LOCATE_PAGE_SIZE,
@@ -59,7 +61,7 @@ const READ_PROJECTION = Object.fromEntries([
 ]);
 const MAX_Q_CHARS = 300;
 const NOTE =
-	"Pointers, not content: fetch verificationUrl (the file at the pinned commit, at the line) to read the fact. ref is the commit the pointer was read at; an unchanged file keeps its first ref, which stays valid (same blob, same lines) and was re-confirmed at verifiedAt. Ranking is lexical: an exact symbol or file name scores highest, then an identifier held in a name, then words in a symbol or heading, then path words; score is 0 to 100 against this q. pointers [] means the indexed repos hold no match; null means they could not be searched.";
+	"Pointers, not content: fetch verificationUrl (the file at the pinned commit, at the line) to read the fact. ref is the commit the pointer was read at; an unchanged file keeps its first ref, which stays valid (same blob, same lines) and was re-confirmed at verifiedAt. Ranking is lexical: an exact symbol or file name scores highest, then an identifier held in a name, then words in a symbol or heading, then path words; adjacent words of q also match as one name, an identifier typed in q counts double, a few crypto and auth words match the code's names, and a repo or stellar-cli command named in q lifts its pointers; score is 0 to 100 against this q. pointers [] means the indexed repos hold no match; null means they could not be searched.";
 
 interface RepoState {
 	repo: string;
@@ -230,6 +232,14 @@ export async function GET(req: NextRequest) {
 	}
 
 	const cand = candidateTerms(pq);
+	const byTerm = {
+		terms: {
+			$in: [...cand.exact, ...cand.prefixes.map((p) => new RegExp(`^${p}`))],
+		},
+	};
+	// A stellar-cli command typed in q also reads every row of the module
+	// that implements it (its Cmd and run share no word with q).
+	const modulePath = commandPathPattern(cand.paths);
 	const found = (
 		await degradedRead(
 			"source-locators",
@@ -238,12 +248,17 @@ export async function GET(req: NextRequest) {
 					.collection("source-locators")
 					.find(
 						{
-							terms: {
-								$in: [
-									...cand.exact,
-									...cand.prefixes.map((p) => new RegExp(`^${p}`)),
-								],
-							},
+							...(modulePath
+								? {
+										$or: [
+											byTerm,
+											{
+												repo: CLI_COMMANDS.repo,
+												path: { $regex: modulePath },
+											},
+										],
+									}
+								: byTerm),
 							repo: { $in: indexed },
 							...(kind ? { locatorKind: kind } : {}),
 						},

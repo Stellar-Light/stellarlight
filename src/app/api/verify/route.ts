@@ -190,6 +190,12 @@ export async function GET(req: NextRequest) {
 				prominence: true,
 				verificationLevel: true,
 				supportedNetworks: true,
+				// DQ1: what the status checks read (src/lib/status-checks.ts)
+				tvlUSD: true,
+				tvlAsOf: true,
+				llamaSlugs: true,
+				llamaListing: true,
+				onchain: true,
 			},
 		});
 		full = r.docs[0] ?? null;
@@ -276,6 +282,12 @@ export async function GET(req: NextRequest) {
 			statusBasis: subjectCard.statusBasis,
 			statusAsOf: subjectCard.statusAsOf,
 			statusSourceUrl: subjectCard.statusSourceUrl,
+			types: subjectCard.types,
+			tvlUSD: full?.tvlUSD ?? null,
+			tvlAsOf: full?.tvlAsOf ?? null,
+			llamaSlugs: full?.llamaSlugs ?? null,
+			llamaListing: full?.llamaListing ?? null,
+			onchain: full?.onchain ?? null,
 		});
 		logApiHit({
 			req,
