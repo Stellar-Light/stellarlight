@@ -1734,14 +1734,13 @@ export async function searchRepos(
 				// mid-prose plus a secondary token — but identity never lets a
 				// no-evidence repo beat a code-verified one (the F4 contract).
 				b.anchorIdentity - a.anchorIdentity ||
-				// Verified mainnet usage BEFORE raw keyword coverage (code-truth 5,
-				// the round-5 oracle case: keyword-luckier feeders outranked the
-				// one oracle demonstrably live on mainnet). Identity still beats
-				// usage (alias/anchorIdentity above); coarse binary so relevance
-				// dominates within the tier; no-usage rows are untouched relative
-				// to each other.
-				b.inUse - a.inUse ||
 				b.score - a.score ||
+				// Verified mainnet usage breaks ties at equal match score (code-truth
+				// 5). It is an authority signal (AGENTS.md rule 6), so it never beats
+				// a better match: above the score it let a project-linked contract
+				// matching one word lead pages it barely matched (round
+				// 2026-10-23-repos-ranking: blend-contracts at 16 over rows at 46).
+				b.inUse - a.inUse ||
 				// Archive-tier demotion binds tightest of the demotions: an
 				// archived/dead-and-unstarred repo sinks below every live
 				// same-relevance competitor (EC long-tail guard, task #115).
@@ -1758,6 +1757,31 @@ export async function searchRepos(
 				(b.r.repoScore ?? 0) - (a.r.repoScore ?? 0) ||
 				(b.r.stars ?? 0) - (a.r.stars ?? 0),
 		);
+		// A repo whose known successor is also on this list gives the
+		// successor its place and sits directly below it, so the living repo
+		// comes first (round 2026-10-23-repos-ranking: blend-contracts, v1, led
+		// questions v2 also answered). Sinking v1 alone lost q=Blend to an
+		// unrelated repo. The successor is the row's successorRepo, else the
+		// curated dated map's. A query naming the old repo itself (alias) keeps
+		// it in place; a successor not on the list changes nothing.
+		const at = (name: string) =>
+			filtered.findIndex((d) => d.r.fullName.toLowerCase() === name);
+		for (let i = 0, moves = 0; i < filtered.length; i++) {
+			const d = filtered[i];
+			if (d.alias || moves >= filtered.length) continue;
+			const succ = (
+				(d.r as { successorRepo?: string | null }).successorRepo ??
+				repoSupersession(d.r.fullName)?.supersededBy ??
+				""
+			).toLowerCase();
+			const j = succ ? at(succ) : -1;
+			if (j > i) {
+				filtered.splice(i, 0, ...filtered.splice(j, 1));
+				moves++;
+				// The successor now at i may have a successor of its own.
+				i--;
+			}
+		}
 		const total = filtered.length;
 		const repos = filtered
 			.slice(offset, offset + limit)

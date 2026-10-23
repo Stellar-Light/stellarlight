@@ -384,6 +384,53 @@ describe("rarity and phrases", () => {
 		expect(out[0].matched).toEqual(["pay-per-call"]);
 		expect(out.map((s) => s.b.name)).not.toContain("Parts");
 	});
+
+	// On main a hyphenated phrase spelled only q's own number spaced or
+	// joined: q=pay-per-calls missed "pay per call", and the whole-word check
+	// called pay-per-call unused beside "pay per calls" (2026-10-23).
+	it("matches a hyphenated phrase in both numbers, spaced or joined", () => {
+		const pool = [
+			build("Meter", "Pay per call for data."),
+			build("Joined", "Paypercall billing."),
+		];
+		expect(
+			searchHackathonBuilds(pool, "pay-per-calls")
+				.map((s) => s.b.name)
+				.sort(),
+		).toEqual(["Joined", "Meter"]);
+		expect(
+			wordsNoBuildUses(
+				[build("Meters", "Pay per calls for data.")],
+				"pay-per-call",
+			),
+		).toEqual({ absent: [], concepts: 1 });
+	});
+
+	// Review: the number varies on the last part only. Whole-token forms
+	// stripped a short last part's s ("stellar-ens" became "stellar en"),
+	// which matched prose and read the phrase as used.
+	it("varies a hyphenated phrase's number on its last part only", () => {
+		const prose = [build("Segundos", "Paga con stellar en segundos.")];
+		expect(searchHackathonBuilds(prose, "stellar-ens")).toEqual([]);
+		expect(wordsNoBuildUses(prose, "stellar-ens")).toEqual({
+			absent: ["stellar-ens"],
+			concepts: 1,
+		});
+		// The other directions: a singular q finds the plural in text, and a
+		// plural q is read as used beside the singular.
+		expect(
+			searchHackathonBuilds(
+				[build("Accounts", "Smart accounts for teams.")],
+				"smart-account",
+			).map((s) => s.b.name),
+		).toEqual(["Accounts"]);
+		expect(
+			wordsNoBuildUses(
+				[build("Meter", "Pay per call for data.")],
+				"pay-per-calls",
+			),
+		).toEqual({ absent: [], concepts: 1 });
+	});
 });
 
 describe("words no build uses", () => {

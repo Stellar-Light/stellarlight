@@ -33,12 +33,32 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api", "skill"],
-		version: "spec@1.9.109",
+		version: "spec@1.9.104",
 		type: "changed",
 		summary:
 			'An award several placements of one event share is served as `awardCategory`, never as a winner\'s `award`. All five Stellar Hacks: Real-World ZK winners were served award "$10,000 XLM Prize", the title of the award their placements sit in, beside their own prizes of $5,000 to $750, so an agent could report each as having won $10,000. On 34 winners of 7 events (Real-World ZK, Agents, Scaffold Stellar, Blend, KALE x Reflector, PaltaLabs and Build Better) `award` is now null and the title is in the new `awardCategory`: searchHackathonBuilds rows, getHackathon winners, submissions and hidden winners, and getHackathonSubmission and reviewSubmission, top level and entries.',
 		detail:
 			"The rule: within one event, the same award text on winners of different placements names their category, and so does a title that states more money than a winner's own placement ('$10,000 XLM Prize' on '1st Place - $5,000 in XLM'). DoraHacks nests placements under one award, and the sync stores the award's title on each winner. The same text on winners of one placement stays each one's own `award` (Build on Stellar Chile's featured video pitch prizes, given to 10 and 5 winners; Stellar LATAM's two Track 2 co-winners), as does an award per winner (ZK Gaming's '1st Place - $5,000'). getHackathon, getHackathonSubmission and reviewSubmission also count the placements of winners hidden upstream; search reads served winners only. Every row that serves `award` now also serves `awardCategory`, null when nothing on record marks the award as shared. What a winner won is still `placement` (`hackathonPlacement` on getHackathon) and `prizeUsd`. Search still matches the title's words: matchedTerms reads the award or award category. getHackathonSubmission and reviewSubmission read the winners of a submission's events when it carries award text, and answer 503 when that read fails rather than serve an award they could not check. Migration: spec 1.9.26 to 1.9.101 documented `award` as the award category title, so a client that shows it as the category label now gets null on 34 of the 66 served winners with award text; read `awardCategory ?? award` for the old value. Checked: a replay of the real handlers over a live capture of 10 events (37 requests) differs from the base only by the new key and by these 34 winners' award moving to awardCategory; 10 winners hand-checked against DoraHacks' own winner assignments.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
+		version: "spec@1.9.103",
+		type: "fixed",
+		summary:
+			"searchRepos no longer lets a weak match lead because its contract is used on mainnet: verified usage (codeInUse) now breaks ties at equal match score instead of ranking above the score. blend-capital/blend-contracts (Blend v1, score 16) led a question about scaffolding a Soroban dapp over rows scoring 46 and a question about smart account spending limits over rows scoring 41.8, and reflector-network/reflector-contract (score 3) led q=smart account; Heliobond/frontend, Gloriachinedu/lumenflow-contracts and stellar/smart-account-kit lead them now. A repo whose successor is also in the results gives the successor its place and sits directly below it: q=Blend now leads with blend-capital/blend-contracts-v2.",
+		detail:
+			"Usage is an authority signal: two rows in the index carry it today (blend-capital/blend-contracts and reflector-network/reflector-contract, both linked to directory projects), and above the match score either one led any page where it matched one word and tied on Stellar evidence and identity. Every tier above the score is unchanged, so canonical repos, exact names and curated flagships keep their places (reflector-contract still leads q=oracle as the first oracle flagship). The successor of a repo is its successorRepo, else the curated supersededBy; a q that names the old repo itself keeps it first, and a successor not in the results changes nothing. Measured by replaying this tree's searchRepos over the whole repos index (13,698 rows, read from the collection's public REST read on live 1.9.101); the base replay matched live on 145 of 145 first pages. 60 exact-name lookups (30 repos by owner/name and by bare name) keep every rank 1, and q=Reflector keeps a Reflector repo first. Every keyword query whose results hold no used row and no repo with its successor (17 of 52) answers byte for byte as before; 11 first rows change across the 145 replayed queries, each from a used row or a successor. Six HackMeridian tools questions: no expected repo ranks lower (OpenZeppelin/stellar-contracts 71 to 70, stellar-scaffold/cli 111 to 110, the other four unchanged). A dev set of 25 builder questions keeps 9 with an expected repo in the top 5. Not shipped: dropping punctuation and question filler from q, measured in the same round, which made two of those questions rank their repo lower.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
+		version: "spec@1.9.102",
+		type: "fixed",
+		summary:
+			"searchHackathonBuilds: a hyphenated phrase in q now matches its other number too, spaced or joined. q=smart-accounts missed Stelakey, which writes smart account, and q=pay-per-calls missed the one submission that writes pay per call spaced. The unused-words line reads the same forms. The number varies on the phrase's last part only, so q=stellar-ens does not turn into stellar en.",
+		detail:
+			"A hyphenated phrase is one concept, matched spaced (smart account) or joined (smartaccount); it matched only the number typed. It now matches both, the same way single words already did. Replayed over every frozen builds query that holds a hyphen (23 runs): 21 are byte-identical, one changes one score and one changes order only (no build enters or leaves any list, and no warning changes).",
 	},
 	{
 		date: "2026-10-23",
