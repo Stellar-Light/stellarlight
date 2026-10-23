@@ -28,21 +28,21 @@
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "ENABLE_CORE_MANUAL_CLOSE",
-					"score": 38,
+					"score": 43,
 					"matchReason": "path has start; symbol --enable-core-manual-close; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "--enable-core-manual-close",
-					"score": 38,
+					"score": 43,
 					"matchReason": "path has start; symbol --enable-core-manual-close; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "start",
-					"score": 23,
+					"score": 30,
 					"matchReason": "symbol start, path too; repo named in q"
 				}
 			]
@@ -402,21 +402,21 @@
 					"repo": "stellar/quickstart",
 					"path": "README.md",
 					"locator": "Ephemeral mode",
-					"score": 34,
+					"score": 39,
 					"matchReason": "path has readme; heading has ephemeral; heading has mode; heading ephemeral mode; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "README.md",
 					"locator": "Persistent mode",
-					"score": 34,
+					"score": 39,
 					"matchReason": "path has readme; heading has mode; heading has persistent; heading persistent mode; repo named in q"
 				},
 				{
 					"repo": "stellar/stellar-rpc",
 					"path": "cmd/stellar-rpc/internal/cli/mode.go",
 					"locator": "Mode",
-					"score": 18,
+					"score": 16,
 					"matchReason": "symbol mode, path too"
 				}
 			]
@@ -504,21 +504,21 @@
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "LIMITS",
-					"score": 67,
+					"score": 71,
 					"matchReason": "symbol --limits; repo named in q"
 				},
 				{
 					"repo": "stellar/quickstart",
 					"path": "start",
 					"locator": "--limits",
-					"score": 67,
+					"score": 71,
 					"matchReason": "symbol --limits; repo named in q"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/container/start.rs",
 					"locator": "--limits",
-					"score": 57,
+					"score": 49,
 					"matchReason": "symbol --limits"
 				}
 			]

@@ -492,14 +492,21 @@
 		{
 			"id": "f15",
 			"q": "Which port in the quickstart container serves horizon, stellar-rpc, friendbot and lab, and which ports are the admin and stellar-core ports? Where is this documented?",
-			"fileRank": 102,
-			"symbolRank": 102,
+			"fileRank": 25,
+			"symbolRank": 25,
 			"partialRank": null,
 			"misleadingRank": null,
 			"candidates": 366,
 			"overCap": false,
 			"matched": 365,
 			"top3": [
+				{
+					"repo": "stellar/quickstart",
+					"path": "common/lab/bin/start",
+					"locator": "PORT",
+					"score": 24,
+					"matchReason": "symbol port; path has lab; symbol has port; repo named in q"
+				},
 				{
 					"repo": "stellar/stellar-rpc",
 					"path": "cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go",
@@ -511,13 +518,6 @@
 					"repo": "stellar/stellar-rpc",
 					"path": "cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go",
 					"locator": "fillContainerPorts",
-					"score": 20,
-					"matchReason": "symbol has port; symbol has container; symbol has port; repo named in q"
-				},
-				{
-					"repo": "stellar/stellar-rpc",
-					"path": "cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go",
-					"locator": "inContainerCorePort",
 					"score": 20,
 					"matchReason": "symbol has port; symbol has container; symbol has port; repo named in q"
 				}

@@ -11069,7 +11069,7 @@
 						"name": "q",
 						"in": "query",
 						"required": true,
-						"description": "What to locate: a symbol, flag, option, config key, stellar-cli command or topic words (at most 300 characters), e.g. --enable-core-manual-close, getTransactions default limit or stellar contract invoke. A repo named in q by owner/name or a hyphenated name (stellar-rpc, soroban-sdk) or as OpenZeppelin lifts its pointers strongly, the bare word quickstart less; a typed stellar-cli command lifts the module that implements it.",
+						"description": "What to locate: a symbol, flag, option, config key, stellar-cli command or topic words (at most 300 characters), e.g. --enable-core-manual-close, getTransactions default limit or stellar contract invoke. A repo named in q (stellar-rpc, quickstart, OpenZeppelin) strongly lifts its pointers; a typed stellar-cli command lifts the module that implements it.",
 						"schema": {
 							"type": "string",
 							"maxLength": 300

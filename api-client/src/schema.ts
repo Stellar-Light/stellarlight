@@ -6317,7 +6317,7 @@ export interface operations {
     locateSource: {
         parameters: {
             query: {
-                /** @description What to locate: a symbol, flag, option, config key, stellar-cli command or topic words (at most 300 characters), e.g. --enable-core-manual-close, getTransactions default limit or stellar contract invoke. A repo named in q by owner/name or a hyphenated name (stellar-rpc, soroban-sdk) or as OpenZeppelin lifts its pointers strongly, the bare word quickstart less; a typed stellar-cli command lifts the module that implements it. */
+                /** @description What to locate: a symbol, flag, option, config key, stellar-cli command or topic words (at most 300 characters), e.g. --enable-core-manual-close, getTransactions default limit or stellar contract invoke. A repo named in q (stellar-rpc, quickstart, OpenZeppelin) strongly lifts its pointers; a typed stellar-cli command lifts the module that implements it. */
                 q: string;
                 /** @description Only this allowlisted repo, as owner/name (e.g. stellar/quickstart). Anything else answers 400 with the valid values. */
                 repo?: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples" | "OpenZeppelin/stellar-contracts";

@@ -26,7 +26,7 @@
  * symbol only when it holds the whole run), times the square of the share
  * of the run it covers. The share of the name's own parts that q accounts
  * for adds up to 1, so a tighter name wins a near tie. A repo named in q
- * adds 8 to its pointers (3 when named only by quickstart, a docs word too).
+ * adds 8 to its pointers.
  * A stellar-cli command typed in q (stellar contract invoke, or the stellar
  * CLI followed by contract invoke) adds 8 per matching command word to the
  * module that implements it, and counts only when some pointer's module
@@ -311,8 +311,6 @@ export interface ParsedQuery {
 	joined: QueryUnit[];
 	/** Allowlisted repos q names (owner/name, repo name or alias). */
 	repos: string[];
-	/** What naming each repo adds to its pointers: WEIGHTS.repo, or WEIGHTS.repoWord for a bare common-word alias. */
-	repoLift: Record<string, number>;
 	/** A stellar-cli command typed in q (`stellar contract invoke`), its words after the binary; null when none. */
 	command: string[] | null;
 }
@@ -335,9 +333,6 @@ const JOINABLE = /^(?:[A-Z]?[a-z0-9]+|[A-Z0-9]+)$/;
 // joined name or a command: StellarAssetContract, protocol_version,
 // `stellar contract build`, `stellar contract alias show`.
 const JOINS_THOUGH_STOPWORD = new Set(["stellar", "protocol", "build", "show"]);
-// An alias that is also a docs word ("a quickstart guide") lifts its repo by
-// WEIGHTS.repoWord, not WEIGHTS.repo.
-const COMMON_WORD_ALIASES = new Set(["quickstart"]);
 const ENDS_RUN = /[,.;:!?)\]}"'`]$/;
 const STARTS_RUN = /^[([{"'`]/;
 const MAX_SPAN = 4;
@@ -373,11 +368,6 @@ export function parseQuery(
 	const tokens = parts.map((p) => p.t);
 	const consumed = new Set<number>();
 	const repos = new Set<string>();
-	const repoLift: Record<string, number> = {};
-	const lift = (repo: string, weight: number) => {
-		repos.add(repo);
-		repoLift[repo] = Math.max(repoLift[repo] ?? 0, weight);
-	};
 	// The last token of an alias naming stellar-cli ("the stellar CLI"): a
 	// command may follow it.
 	const cliAliasEnds = new Set<number>();
@@ -393,10 +383,7 @@ export function parseQuery(
 				while (j < tokens.length && got.length < want.length)
 					got.push(...tokenWords[j++]);
 				if (got.join(" ") === want.join(" ")) {
-					lift(
-						r.repo,
-						COMMON_WORD_ALIASES.has(alias) ? WEIGHTS.repoWord : WEIGHTS.repo,
-					);
+					repos.add(r.repo);
 					for (let k = i; k < j; k++) consumed.add(k);
 					if (r.repo === CLI_COMMANDS.repo) cliAliasEnds.add(j - 1);
 				}
@@ -406,7 +393,7 @@ export function parseQuery(
 	tokens.forEach((t, i) => {
 		const named = t.includes("/") ? resolveRepo(t) : null;
 		if (named) {
-			lift(named, WEIGHTS.repo);
+			repos.add(named);
 			consumed.add(i);
 		}
 	});
@@ -497,7 +484,7 @@ export function parseQuery(
 		}
 		if (words.length >= 2) command = words;
 	}
-	return { units, joined, repos: [...repos], repoLift, command };
+	return { units, joined, repos: [...repos], command };
 }
 
 /** Module path prefixes under stellar-cli's commands tree that a typed command names, two words or more. */
@@ -590,10 +577,7 @@ export const WEIGHTS = {
 	prefix: 5,
 	word: 3,
 	path: 1,
-	/** A repo named in q by owner/name or a hyphenated alias (stellar-rpc). */
 	repo: 8,
-	/** A repo named only by a bare alias that is also a docs word (quickstart). */
-	repoWord: 3,
 	/** Times the share of the name's own words that q accounts for: a tighter name wins a tie. */
 	name: 1,
 	/** An identifier typed in q, found whole in a name, counts this many times its tier. */
@@ -755,14 +739,14 @@ export function scoreRow(pq: ParsedQuery, row: RankRow): Scored | null {
 	if (!matched && !byRun.size && !depth) return null;
 	const nameShare = locWords.size ? nameHits.size / locWords.size : 0;
 	total += WEIGHTS.name * nameShare;
-	const repoLift = pq.repoLift[row.repo] ?? 0;
-	if (repoLift) {
-		total += repoLift;
+	const repoNamed = pq.repos.includes(row.repo);
+	if (repoNamed) {
+		total += WEIGHTS.repo;
 		reasons.push("repo named in q");
 	}
 	// The most a pointer could score for this q: each unit at its strongest
 	// form (a synonym in identifier form counts as typed), every run's join,
-	// the tightest name, the largest repo lift, every command word.
+	// the tightest name, the repo lift, every command word.
 	const max =
 		pq.units.reduce(
 			(n, u) =>
@@ -778,7 +762,7 @@ export function scoreRow(pq: ParsedQuery, row: RankRow): Scored | null {
 		) +
 		WEIGHTS.exact * new Set(pq.joined.map((j) => j.run)).size +
 		WEIGHTS.name +
-		Math.max(0, ...Object.values(pq.repoLift)) +
+		(pq.repos.length ? WEIGHTS.repo : 0) +
 		WEIGHTS.exact * (pq.command?.length ?? 0);
 	const matchReason = reasons.join("; ");
 	return {
@@ -788,7 +772,7 @@ export function scoreRow(pq: ParsedQuery, row: RankRow): Scored | null {
 		score: Math.min(100, Math.round((100 * total) / max)),
 		matchReason:
 			matchReason.length > 100 ? `${matchReason.slice(0, 99)}…` : matchReason,
-		factors: `words:${matched}/${pq.units.length} exact:${counts.exact} prefix:${counts.prefix} word:${counts.word} path:${counts.path} join:${byRun.size} ident:${idHits} cmd:${depth} repo:${repoLift ? 1 : 0} name:${nameShare.toFixed(2)}`,
+		factors: `words:${matched}/${pq.units.length} exact:${counts.exact} prefix:${counts.prefix} word:${counts.word} path:${counts.path} join:${byRun.size} ident:${idHits} cmd:${depth} repo:${repoNamed ? 1 : 0} name:${nameShare.toFixed(2)}`,
 	};
 }
 

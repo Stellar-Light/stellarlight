@@ -618,24 +618,6 @@ describe("a repo named in q", () => {
 		// "stellar contracts" in prose names no repo
 		expect(ask("how stellar contracts store data").repos).toEqual([]);
 	});
-
-	it("a bare common-word alias lifts by 3; owner/name and hyphenated aliases by 8", () => {
-		const rows = [
-			row("stellar/quickstart", "README.md", "heading", "Deploy"),
-			row("stellar/stellar-cli", "src/deploy.rs", "symbol", "deploy"),
-		];
-		// "quickstart guide" is docs prose: the exact deploy symbol stays first
-		expect(at("quickstart guide to deploy a contract", rows, "deploy")).toBe(1);
-		expect(ask("quickstart guide").repoLift).toEqual({
-			"stellar/quickstart": 3,
-		});
-		// the owner/name names the repo outright
-		expect(at("stellar/quickstart deploy", rows, "Deploy")).toBe(1);
-		expect(ask("stellar-rpc and stellar/quickstart").repoLift).toEqual({
-			"stellar/stellar-rpc": 8,
-			"stellar/quickstart": 8,
-		});
-	});
 });
 
 describe("OpenZeppelin/stellar-contracts in the allowlist", () => {

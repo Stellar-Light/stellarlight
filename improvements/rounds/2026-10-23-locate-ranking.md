@@ -307,3 +307,27 @@ Bar 3 not met as written; waived by the orchestrator because no frozen case ends
   repos" wording fixed in the routing purpose and the collection
   description (and its generated type comment); scout-mcp and api-client
   left as they are and queued in `improvements/TODO.md`.
+- Committed as `1b8f410b`. The orchestrator then dropped the quickstart
+  weight split: the waiver rests on no frozen case ending below its main
+  rank, and f15 at 25 to 102 broke it. Every other fix in `1b8f410b` kept.
+- 22:04Z: the split removed (the bare word quickstart lifts by 8 again; the
+  test that pinned 3 removed with it). Re-measured over the same tarballs:
+  dev tuned symbol 6/9/14, held-out cases 3/5/7 (re-run), `battery` file
+  18/20/20 and symbol 15/19/20, `fresh-battery` file 11/14/17 and symbol
+  8/9/12, priority six 3 strict and 8 of 12 required. Every rank is
+  identical to the run before the review fixes; f15 is back at 25, and no
+  frozen case is below its main rank. The review's other fixes still show:
+  q=sac serves 100 and 94 at ranks 1 and 2, "how stellar contracts store
+  data" adds no command words to the maximum, and "where does the stellar
+  cli implement contract invoke" ranks `invoke.rs` first.
+- Known follow-up, queued in `improvements/TODO.md`: "quickstart guide to
+  deploy a contract" puts the quickstart README heading "Deploy to Digital
+  Ocean" above the exact deploy and Contract symbols. The likely fix is a
+  split weight that also handles f15's case, where the constants of other
+  repos named in q (stellar-rpc, stellar-core) outrank quickstart's "Ports"
+  heading; to be measured in a later round.
+- 22:05Z, `pnpm raven:gate`: ACCEPT 1.9.105, exit 0, output identical to
+  the 1.9.101 run apart from the version. `pnpm contract:write` then
+  `CONTRACT_BASE=origin/main pnpm contract:check` exit 0.
+- 22:06Z: `tsc --noEmit -p tsconfig.json` exit 0; the full set (4 workers)
+  217 files, 2,722 tests, exit 0 (`rate-limited-429.test.ts` 32 of 32).

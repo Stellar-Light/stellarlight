@@ -3,9 +3,12 @@
 Evidence for `improvements/rounds/2026-10-23-locate-ranking.md`. Spec
 placeholder 1.9.105.
 
-**Verdict: bars 1 and 2 met. Bar 3 not met as written; waived by the orchestrator because no frozen case ends below its main rank, and the joins carry f01 25 to 15, f04 8 to 4 and two priority items.** After the review fixes the
-quickstart alias lifts by 3, and f15 now ends below its main rank (25 to
-102, outside the top 10 both ways); see "Repo named in q".
+**Verdict: bars 1 and 2 met. Bar 3 not met as written; waived by the
+orchestrator because no frozen case ends below its main rank, and the joins
+carry f01 25 to 15, f04 8 to 4 and two priority items.** The review's other
+fixes are kept; its quickstart weight split was dropped (f15 fell 25 to 102
+under it), so no frozen case ends below its main rank, and the over-match
+the split targeted is a known follow-up (see "Repo named in q").
 
 | set (symbol level) | base top 1/3/10 | this branch top 1/3/10 |
 | --- | --- | --- |
@@ -26,10 +29,9 @@ quickstart alias lifts by 3, and f15 now ends below its main rank (25 to
   d23 and d24 are the CLI command class added by amendment A1. No dev case
   left the top 10; moved down inside it: d05 3 to 8, d10 1 to 2, d11 7 to
   8, and held-out d09 1 to 4.
-- **Bar 2** (no frozen top-10 loss): none at file or symbol level. One
-  case below its base file rank, outside the top 10: f15 25 to 102, from
-  the quickstart lift split the review asked for. Symbol ranks that moved
-  down inside the top 10: m2 4 to 9, f19 2 to 6.
+- **Bar 2** (no frozen top-10 loss): none at file or symbol level, and no
+  frozen case below its base file rank. Symbol ranks that moved down inside
+  the top 10: m2 4 to 9, f19 2 to 6.
 - **Priority questions** (check, not tuned on, and not held out: they
   found the five classes): 0 to 3 strict passes, 2 to 8 of 12 required
   items. The base run reproduces the live 1.9.100 grades exactly.
@@ -64,10 +66,8 @@ pointers). This branch: nine repos and impl locators (25,903).
    keccak256; sep41 and sep0041 to TokenInterface; sac to
    StellarAssetContract; signature to sig; bls to bls12 and bls12381. A
    word scores its best form; a synonym in identifier form counts as typed.
-3. **A repo named in q** by owner/name or a hyphenated alias (stellar-rpc,
-   soroban-sdk, stellar CLI), or as OpenZeppelin, adds 8, the weight of an
-   exact name, where it added 3; the bare alias quickstart, a docs word
-   too, adds 3. Not a filter: see "Repo named in q".
+3. **A repo named in q** (owner/name, name or alias) adds 8, the weight of
+   an exact name, where it added 3. Not a filter: see "Repo named in q".
 4. **`impl Trait for Type` locators** for top-level Rust impl blocks
    (generic arguments dropped: `impl<'a> From<&'a Address> for Val` is
    `impl From for Val`), kind symbol, with a per-file cap of their own so
@@ -95,12 +95,15 @@ Measured on the chosen configuration (`rules.txt`, f-repo3): with the old
 weight 3, m2 leaves the symbol top 10 (9 to 13) and f01 (15 to 21), f12 (5
 to 7) and f20 (1 to 2) fall; on an earlier variant f17 also fell 3 to 7
 (`ablations.txt`, a-repo3). Every one of those questions names its repo by
-a hyphenated name. The review then split the weight: 3 for quickstart, a
-docs word too ("a quickstart guide to deploy a contract" put a README
-heading above the exact deploy and Contract symbols). With the split only
-f15 moves, 25 to 102: it names quickstart by the bare word and also names
-stellar-rpc and stellar-core, whose integration-test port constants now
-outrank quickstart's README "Ports" heading (`rules.txt`, r-lift8). A
+a hyphenated name. The review asked for a split weight, 3 for quickstart,
+a docs word too: "quickstart guide to deploy a contract" puts a quickstart
+README heading ("Deploy to Digital Ocean") above the exact deploy and
+Contract symbols. Measured, the split moved only f15, 25 to 102: it names
+quickstart by the bare word and also names stellar-rpc and stellar-core,
+whose integration-test port constants then outranked quickstart's README
+"Ports" heading (`rules.txt`, r-lift8). It was dropped; quickstart lifts by
+8 and the over-match stays a known follow-up in `improvements/TODO.md`, for
+a split weight that also handles f15's case, measured in a later round. A
 filter, or a rank tier that puts the named repo first, was not chosen: the
 priority questions name one repo while half the answer is in another
 (sa-05 names the Soroban SDK and expects the soroban-examples account
@@ -197,8 +200,10 @@ this repo).
 - sa-06 and cc-05: a per-file cap in a page, or ranking `benches/` and
   cost-runner files below equal matches, is the next lever; neither built
   nor measured.
-- f15 ends below its main rank after the quickstart split (25 to 102).
-  Camel-case brand names (WebAuthn, JavaScript) count as typed identifiers.
+- "quickstart" as a docs word lifts stellar/quickstart by 8: "quickstart
+  guide to deploy a contract" puts a quickstart README heading first
+  (known follow-up). Camel-case brand names (WebAuthn, JavaScript) count as
+  typed identifiers.
 - scout-mcp's `locate_source` (repo enum without OpenZeppelin, "eight
   repos" text) and the api-client release trail the API; both are queued in
   `improvements/TODO.md`.

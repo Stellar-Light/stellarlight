@@ -355,6 +355,16 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
 - api-client: the schema regenerated for 1.9.105 (locateSource `repo` enum
   with OpenZeppelin/stellar-contracts, the factors and locatorKind texts)
   reaches npm users only with the next api-client release (same review).
+- locateSource lifts stellar/quickstart by 8 when q says "quickstart" as a
+  docs word: `q=quickstart guide to deploy a contract` puts the quickstart
+  README heading "Deploy to Digital Ocean" above the exact deploy and
+  Contract symbols (same review, offline at the indexed commits). A split
+  weight (3 for the bare word) fixed it but moved the frozen fresh
+  battery's f15 from 25 to 102, where stellar-rpc's and stellar-core's
+  constants outrank quickstart's README "Ports" heading
+  (`improvements/audits/2026-10-23-locate-ranking/rules.txt`, r-lift8).
+  The likely fix is a split that also handles f15's case; measure it in a
+  later round.
 
 
 ## Owner decisions (safe default in brackets)
