@@ -2648,6 +2648,18 @@ export const GITHUB_LINK_FIX: Record<string, string> = {
 	// own site (normalfinance.io). The other six were rejected: a docs repo, an
 	// org placeholder, a widget, all name-similar and evidence-free.
 	normal: "https://github.com/normalfinance/normal-index-v1",
+	// 2026-10-23 (GitHub API, read-only): paltalabs/defindex is archived
+	// (last push 2026-07-01); defindex-io/stellar-contracts is its fork, not
+	// archived, homepage defindex.io (the row's own site), pushed 2026-10-14.
+	// The repo index already stamps it as the old repo's successorRepo from
+	// the curated relations map; the row's link still named the archived repo.
+	defindex: "https://github.com/defindex-io/stellar-contracts",
+	// 2026-10-23 (GitHub API, read-only): the row lists stellar/freighter
+	// ("Stellar browser extension") and stellar/freighter-mobile ("Freighter's
+	// mobile wallet") in github.repos, but links.github named the mobile repo;
+	// the extension is the wallet's main repo, the one its release notes come
+	// from (STATUS_FIX freighter sources github.com/stellar/freighter/releases).
+	freighter: "https://github.com/stellar/freighter",
 };
 
 /** Rebrands — name, website, and description move together so both the old
@@ -5169,6 +5181,10 @@ export const GITHUB_REPOS_ADD: Record<
 		{ owner: "perspectivefi", name: "spectra-stellar-bridge-public" },
 		{ owner: "perspectivefi", name: "spectra-oracles-stellar-public" },
 	],
+	// 2026-10-23: the living DeFindex repo (see GITHUB_LINK_FIX defindex) is
+	// not indexed, so searchRepos cannot give it the archived repo's place.
+	// Attach it so enrich-repos indexes it under the project.
+	defindex: [{ owner: "defindex-io", name: "stellar-contracts" }],
 };
 
 export const TYPES_ADD: Record<string, string[]> = {

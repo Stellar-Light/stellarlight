@@ -405,6 +405,13 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   `scripts/data/curation-maps.ts`, then the curate-projects and
   enrich-repos lanes (steps in the round's audit README). No check asserts
   that a curated successor is indexed.
+  State (2026-10-23): both map entries added, with Freighter's links.github
+  (it named stellar/freighter-mobile; the row's main repo is the
+  stellar/freighter extension). Next, owner: the curate-projects lane, dry
+  run then execute (its diff shows the two links.github moves and
+  defindex's added repo), then the enrich-repos lane with
+  `only=defindex-io/stellar-contracts`. Done when /api/projects serves both
+  links and /api/repos/search lists defindex-io/stellar-contracts.
 
 Found 2026-10-23 by the prize-labels lane and its review
 (`improvements/rounds/2026-10-23-prize-labels.md`):
