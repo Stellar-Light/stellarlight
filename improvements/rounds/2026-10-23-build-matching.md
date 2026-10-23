@@ -559,3 +559,7 @@ fresh battery written by a separate agent that was told no rule.
   unchanged; the examples fire 19 of 23. `check-unused.py` checks every
   word, related form, spelling and withheld count (against the builds the
   replays differ by): 0 false on all four sets.
+
+### Renumbered at merge (2026-10-23)
+
+#1862 (compact views) took 1.9.96 first, so `update_pr_branch.sh <worktree> 1.9.97` merged origin/main at eb9ef225 into this line (88d7160b) and the change ships as **spec 1.9.97**. The entries above keep the number they were written with.

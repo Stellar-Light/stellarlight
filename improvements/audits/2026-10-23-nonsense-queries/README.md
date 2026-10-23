@@ -358,7 +358,7 @@ of q is in no submission:
 - `check-unused.py` reads back every claim in every line on all three
   sets: 0 false (`shipped/unused-*.txt`).
 
-**Third commit: review fixes (spec 1.9.96, after merging main's 1.9.95).**
+**Third commit: review fixes (written as spec 1.9.96 after merging main's 1.9.95; ships as 1.9.97 because #1862 took 1.9.96 first).**
 The review (Claude Fable 5.1, high) replayed the second commit on the live
 corpus (1,356 submissions) and found these, all fixed:
 
