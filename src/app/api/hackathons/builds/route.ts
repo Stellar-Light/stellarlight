@@ -28,6 +28,7 @@ import {
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
+	wordsNoBuildUses,
 } from "@/lib/hackathon-builds";
 import { heldSecurity } from "@/lib/held-repos";
 import { clampLimit, clampOffset } from "@/lib/http-params";
@@ -115,6 +116,16 @@ export async function GET(req: NextRequest) {
 		countEntries: true,
 	});
 	warnings.unshift(...parsed.warnings);
+	// Most of q's words in no submission: a build listed by its words alone
+	// matches only part of q. One found by meaning was scored on all of it.
+	const unused =
+		q && scored.some((s) => s.matched.length && s.similarity === undefined)
+			? wordsNoBuildUses(indexed, q)
+			: null;
+	if (unused && unused.absent.length * 2 > unused.concepts)
+		warnings.push(
+			`${unused.absent.length} of the ${unused.concepts} words searched in q (${unused.absent.join(", ")}) occur as a whole word in no submission in the index (a matchedTerms entry naming one was found inside a longer word), so a build listed by its words alone, with no similarity, matches only part of q and is not evidence that this idea was built`,
+		);
 
 	const builds = scored
 		.slice(offset, offset + limit)

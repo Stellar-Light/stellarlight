@@ -1,0 +1,94 @@
+before: base; after: L
+capture: api 1.9.93 -> 1.9.93, 2026-10-23T02:13:07.774Z to 2026-10-23T02:15:48.475Z; corpus 1344
+
+== Labeled builds graded 2 (same idea): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 working | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 holdout | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 holdout | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+short | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+short | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+tests | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+tests | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+  nothing lost or gained
+
+== Labeled builds graded 1 (related): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 working | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 holdout | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 holdout | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+short | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+short | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+tests | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+tests | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+  nothing lost or gained
+
+== vetIdea's five and the brief's picks (hybrid), every change ==
+ideas that differ from before, of 0: vetIdea's five 0, the brief's picks 0, the plain rankings prior art and analyze read (every row and field) 0
+
+== nonsense: builds returned, before -> after ==
+crimson accordion volcano | keyword | 0 -> 0
+crimson accordion volcano | hybrid | 0 -> 0
+sleepy giraffe bakery | keyword | 0 -> 0
+sleepy giraffe bakery | hybrid | 0 -> 0
+marmalade thunderstorm trombone | keyword | 0 -> 0
+marmalade thunderstorm trombone | hybrid | 0 -> 0
+polka dot submarine | keyword | 0 -> 0
+polka dot submarine | hybrid | 0 -> 0
+gargling penguin lighthouse | keyword | 0 -> 0
+gargling penguin lighthouse | hybrid | 0 -> 0
+knitted cactus parliament | keyword | 0 -> 0
+knitted cactus parliament | hybrid | 0 -> 0
+yodeling teapot glacier | keyword | 0 -> 0
+yodeling teapot glacier | hybrid | 0 -> 0
+bashful pineapple tractor | keyword | 0 -> 0
+bashful pineapple tractor | hybrid | 0 -> 0
+blockchain sourdough starter | keyword | 7 -> 0 | removed: ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. [blockchain]; La Technologie Blockchain en Afrique Francophone [blockchain]; ArtChain: Collaborative Digital Art Platform on Stellar Bloc [blockchain]; Blockchain-Powered Brainwave AI Model [blockchain]; ArtChain: Collaborative Digital Art Platform on Stellar Bloc [blockchain]; Blockchain Maps [blockchain]; RIZO: Latina Beauty Platform Powered by Blockchain [blockchain]
+blockchain sourdough starter | hybrid | 103 -> 99 | removed: ByeSiduos ♻️⚡ - Blockchain para un planeta limpio. [blockchain]; Blockchain-Powered Brainwave AI Model [blockchain]; Blockchain Maps [blockchain]; RIZO: Latina Beauty Platform Powered by Blockchain [blockchain]
+NFT lawnmower marathon | keyword | 7 -> 0 | removed: APTOSPACE - NFT Marketplace Website [nft]; SpringNFTs [nft]; QR Mint [nft]; Mint Up [nft]; Mint-Regalos [nft]; NFT DND [nft]; PayMint [nft]
+NFT lawnmower marathon | hybrid | 7 -> 0 | removed: APTOSPACE - NFT Marketplace Website [nft]; SpringNFTs [nft]; QR Mint [nft]; Mint Up [nft]; Mint-Regalos [nft]; NFT DND [nft]; PayMint [nft]
+smart contract hamster wheel | keyword | 80 -> 80
+smart contract hamster wheel | hybrid | 85 -> 85
+DeFi pancake flipping | keyword | 18 -> 0 | removed: YieldBack.Cash [defi]; DeFi Quest - From Zero to DeFi in Minutes [defi]; OrbitYield [defi]; Yieldspan Protocol [defi]; BlendX- Defi Manager for Stellar [defi]; YieldPilot [defi]; YieldShield - Dynamic Risk‑Aware Vault Protector [defi]; DEFI [defi]; Yield2Pay [defi]; DeFi-DashBoard [defi]; YieldSwap [defi]; YieldZap [defi]; mini-app-defindex [defi]; CodeFi [defi]; Micro Lending [defi]; Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based  [defi]; Bitcoin.DeFi [defi]; dorahacks-buidl-42589 (name withheld) [defi]
+DeFi pancake flipping | hybrid | 18 -> 0 | removed: YieldBack.Cash [defi]; DeFi Quest - From Zero to DeFi in Minutes [defi]; OrbitYield [defi]; Yieldspan Protocol [defi]; BlendX- Defi Manager for Stellar [defi]; YieldPilot [defi]; YieldShield - Dynamic Risk‑Aware Vault Protector [defi]; DEFI [defi]; Yield2Pay [defi]; DeFi-DashBoard [defi]; YieldSwap [defi]; YieldZap [defi]; mini-app-defindex [defi]; CodeFi [defi]; Micro Lending [defi]; Astro-Shiba: SAC Factory + Bonding Curve AMM + Oracle-Based  [defi]; Bitcoin.DeFi [defi]; dorahacks-buidl-42589 (name withheld) [defi]
+bitcoin origami zeppelin | keyword | 2 -> 0 | removed: Bitcoin.DeFi [bitcoin]; ZKBridge - Cross-Chain Private Bridge on Stellar [bitcoin]
+bitcoin origami zeppelin | hybrid | 13 -> 11 | removed: Bitcoin.DeFi [bitcoin]; ZKBridge - Cross-Chain Private Bridge on Stellar [bitcoin]
+ethereum bagpipe tuner | keyword | 6 -> 0 | removed: ZKBridge - Cross-Chain Private Bridge on Stellar [ethereum]; Zephyr Bridge [ethereum]; TrustBridge [ethereum]; SkillBridge: Virtual Skill Development [ethereum]; Stellarbridge [ethereum]; AetherBridge: Sovereign Agentic Rails [ethereum]
+ethereum bagpipe tuner | hybrid | 6 -> 0 | removed: ZKBridge - Cross-Chain Private Bridge on Stellar [ethereum]; Zephyr Bridge [ethereum]; TrustBridge [ethereum]; SkillBridge: Virtual Skill Development [ethereum]; Stellarbridge [ethereum]; AetherBridge: Sovereign Agentic Rails [ethereum]
+AI toaster opera | keyword | 47 -> 10 | removed: xbid.ai [ai]; Inject AI [ai]; AI Arena [ai]; Blockchain-Powered Brainwave AI Model [ai]; NeoSen AI [ai]; StellaX AI Wallet [ai]; AI-Powered Blend Risk Dashboard Innovation [ai]; Blend AI Powered Smart Monitoring By Sorobanhooks [ai]; Socio - AI-generated swap signals for Stellar & Soroban [ai]; Career Plug AI - Smart Careers, Strong Identities [ai]; AI Health Triage [ai]; RemittEase AI: Intelligent Cross-Border Finance Platform wit [ai]; AI Internet-Meritocracy [ai]; ArtChain-AI [ai]; Nexar - Next-Gen AI-Powered Stellar Payments and Social [ai]; TrustGenome AI [ai]; Stellar AI Escrow Commerce [ai]; Risk Pulse AI [ai]; AgentOracle - The Trust Layer for AI Agents [ai]; stellarshield-ai [ai]; StellarTrader AI [ai]; Stellar Micro payment for AI prompt [ai]; Stellar Agent Gateway - x402 Micropayment Marketplace for AI [ai]; Ai Bora [ai]; Nexa - The native payment infrastructure for Stellar Agents, [ai]; ChatPay Tallent AI [ai]; CareGuard - AI Healthcare Agent on Stellar [ai]; Zap402 - Pay-per-Query AI Agent Marketplace on Stellar [ai]; Fund402 - Just-In-Time Loans for AI Agents [ai]; SpendGuard - AI Agent Governance [ai]; AutoBooks: The AI CFO That Charges Other Bots for Advice [ai]; PayWall.ai [ai]; NyayaMitra AI - Legal Intelligence MCP Network on Stellar x4 [ai]; AXON-Micropayment-Platform-for-Decentralized-AI-Services-DeA [ai]; Autopilot: AI-Powered Financial Automation on the Stellar Ne [ai]; Micopay "Private Resource Access for AI Agents" [ai]; Drongo AI [ai]
+AI toaster opera | hybrid | 47 -> 10 | removed: xbid.ai [ai]; Inject AI [ai]; AI Arena [ai]; Blockchain-Powered Brainwave AI Model [ai]; NeoSen AI [ai]; StellaX AI Wallet [ai]; AI-Powered Blend Risk Dashboard Innovation [ai]; Blend AI Powered Smart Monitoring By Sorobanhooks [ai]; Socio - AI-generated swap signals for Stellar & Soroban [ai]; Career Plug AI - Smart Careers, Strong Identities [ai]; AI Health Triage [ai]; RemittEase AI: Intelligent Cross-Border Finance Platform wit [ai]; AI Internet-Meritocracy [ai]; ArtChain-AI [ai]; Nexar - Next-Gen AI-Powered Stellar Payments and Social [ai]; TrustGenome AI [ai]; Stellar AI Escrow Commerce [ai]; Risk Pulse AI [ai]; AgentOracle - The Trust Layer for AI Agents [ai]; stellarshield-ai [ai]; StellarTrader AI [ai]; Stellar Micro payment for AI prompt [ai]; Stellar Agent Gateway - x402 Micropayment Marketplace for AI [ai]; Ai Bora [ai]; Nexa - The native payment infrastructure for Stellar Agents, [ai]; ChatPay Tallent AI [ai]; CareGuard - AI Healthcare Agent on Stellar [ai]; Zap402 - Pay-per-Query AI Agent Marketplace on Stellar [ai]; Fund402 - Just-In-Time Loans for AI Agents [ai]; SpendGuard - AI Agent Governance [ai]; AutoBooks: The AI CFO That Charges Other Bots for Advice [ai]; PayWall.ai [ai]; NyayaMitra AI - Legal Intelligence MCP Network on Stellar x4 [ai]; AXON-Micropayment-Platform-for-Decentralized-AI-Services-DeA [ai]; Autopilot: AI-Powered Financial Automation on the Stellar Ne [ai]; Micopay "Private Resource Access for AI Agents" [ai]; Drongo AI [ai]
+zero knowledge pogo stick | keyword | 156 -> 156
+zero knowledge pogo stick | hybrid | 188 -> 188
+soroban pickle juggling | keyword | 21 -> 21
+soroban pickle juggling | hybrid | 21 -> 21
+stellar mattress comparison | keyword | 0 -> 0
+stellar mattress comparison | hybrid | 0 -> 0
+wallet for pet iguanas | keyword | 10 -> 0 | removed: Umbra Wallet [wallet]; Stellar Smart Wallets [wallet]; NeuralWallet [wallet]; StellaX AI Wallet [wallet]; Ai2wallet [wallet]; x402 Smart Wallet - By Sorobanhooks [wallet]; CosmosPay | Wallet & Payment Gateway for Stellar Developers [wallet]; BairrouApp! Wallet [wallet]; Shield-Wallet [wallet]; Stella - Private Payments Wallet [wallet]
+wallet for pet iguanas | hybrid | 10 -> 0 | removed: Umbra Wallet [wallet]; Stellar Smart Wallets [wallet]; NeuralWallet [wallet]; StellaX AI Wallet [wallet]; Ai2wallet [wallet]; x402 Smart Wallet - By Sorobanhooks [wallet]; CosmosPay | Wallet & Payment Gateway for Stellar Developers [wallet]; BairrouApp! Wallet [wallet]; Shield-Wallet [wallet]; Stella - Private Payments Wallet [wallet]
+lumen bowling alley scheduler | keyword | 10 -> 0 | removed: lumens.news [lumen]; LumenSure - Private Proof-Backed Insurance Payouts on Stella [lumen]; Lumencito [lumen]; Playlumen [lumen]; LumenPass [lumen]; LumenFX [lumen]; Lumen Trust [lumen]; Lumen [lumen]; lumengate [lumen]; Lumenveil [lumen]
+lumen bowling alley scheduler | hybrid | 10 -> 0 | removed: lumens.news [lumen]; LumenSure - Private Proof-Backed Insurance Payouts on Stella [lumen]; Lumencito [lumen]; Playlumen [lumen]; LumenPass [lumen]; LumenFX [lumen]; Lumen Trust [lumen]; Lumen [lumen]; lumengate [lumen]; Lumenveil [lumen]
+anchor ship knot tutorial | keyword | 14 -> 14
+anchor ship knot tutorial | hybrid | 15 -> 15
+pay per yodel | keyword | 132 -> 132
+pay per yodel | hybrid | 132 -> 132
+stellar kazoo orchestra tickets | keyword | 5 -> 0 | removed: TicketReal [tickets]; StellarOrchestra [orchestra]; Stellar Tickets [tickets]; Twin Ticket [tickets]; TokenTicket [tickets]
+stellar kazoo orchestra tickets | hybrid | 5 -> 0 | removed: TicketReal [tickets]; StellarOrchestra [orchestra]; Stellar Tickets [tickets]; Twin Ticket [tickets]; TokenTicket [tickets]
+soroban garden gnome registry | keyword | 23 -> 23
+soroban garden gnome registry | hybrid | 23 -> 23
+total | keyword 538 -> 436 | hybrid 683 -> 584
+
+== probe: builds returned, before -> after ==
+quantum llama sandwich | keyword | 2 -> 0 | removed: Quantum Shield Exchange [quantum]; MellaMate [llama]
+    after, top 5: 
+quantum llama sandwich | hybrid | 2 -> 0 | removed: Quantum Shield Exchange [quantum]; MellaMate [llama]
+    after, top 5: 
+
+== passkey: builds returned, before -> after ==
+
+grade-2 builds lost from the matched list or the top 20 (the ship criterion): 0

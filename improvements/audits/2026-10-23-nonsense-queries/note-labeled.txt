@@ -1,0 +1,27 @@
+capture: api 1.9.91 -> 1.9.91, corpus 1344
+group | q | concepts | in no submission | keyword rows | hybrid rows | fires keyword | fires hybrid
+idea 40 | loyalty points issued as tokens | 3 | loyalty, issued | 1 | 2 | yes | yes
+nonsense | purple elephant trampoline | 3 | purple, elephant, trampoline | 0 | 0 | no | no
+nonsense | volcano knitting subscription | 3 | volcano, knitting | 1 | 1 | yes | yes
+nonsense | haunted spoon orchestra | 3 | haunted, spoon, orchestra | 1 | 1 | yes | yes
+nonsense | telepathic cactus insurance | 3 | telepathic, cactus | 2 | 2 | yes | yes
+nonsense | submarine pancake festival | 3 | submarine, pancake, festival | 0 | 0 | no | no
+nonsense | invisible giraffe tax | 3 | giraffe | 0 | 0 | no | no
+nonsense | moon cheese lottery | 3 | moon, cheese | 2 | 2 | yes | yes
+nonsense | dancing penguin mortgage | 3 | dancing, penguin, mortgage | 0 | 0 | no | no
+nonsense | banana origami parliament | 3 | banana, origami, parliament | 0 | 0 | no | no
+nonsense | time travel sock exchange | 4 | sock | 9 | 9 | no | no
+nonsense | underwater bicycle courier | 3 | underwater, bicycle, courier | 0 | 0 | no | no
+nonsense | whispering teapot ledger | 3 | whispering, teapot | 4 | 4 | yes | yes
+nonsense | glitter dinosaur karaoke | 3 | glitter, dinosaur, karaoke | 0 | 0 | no | no
+nonsense | sleepy walrus accountant | 3 | sleepy, walrus, accountant | 0 | 1 | no | no
+nonsense | cosmic broccoli wrestling league | 4 | broccoli, wrestling, league | 1 | 1 | yes | yes
+probe | quantum llama sandwich | 3 | llama, sandwich | 2 | 2 | yes | yes
+passkey | passkey | 1 | none | 15 | 15 | no | no
+passkey | passkey | 1 | none | 15 | 15 | no | no
+
+group | queries | with rows, keyword / hybrid | line fires, keyword / hybrid
+idea (all 140) | 140 | 139 / 140 | 1 / 1
+nonsense | 15 | 7 / 8 | 6 / 6
+probe | 1 | 1 / 1 | 1 / 1
+passkey | 2 | 2 / 2 | 0 / 0

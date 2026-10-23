@@ -3620,7 +3620,7 @@ export const spec: OpenAPISpec = {
 				},
 				parameters: [
 					...buildFilterParams(
-						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup).",
+						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when its name holds one of q's words or it covers half of them, and a word of four letters or more also matches inside a longer word, so one word of a longer q can list a build; when most of q's words occur as a whole word in no submission and a build is listed by its words alone, meta.warnings says so.",
 						"hybrid",
 					),
 					{
@@ -3685,7 +3685,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), or the event listing could not be read to check a hackathon value ('could not check hackathon ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built.",
+														"Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or most of the words searched in q occur as a whole word in no submission while a build is listed by its words alone ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built; the q line means a build listed by its words alone, with no similarity, matches only part of q and is not evidence that the idea was built.",
 												},
 												filters: BUILD_FILTERS_ECHO_SCHEMA,
 												counts: {

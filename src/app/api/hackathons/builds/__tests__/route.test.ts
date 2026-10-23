@@ -20,6 +20,11 @@ vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
 		complete: true,
 	})),
 }));
+// Search by meaning cannot run in tests (no key), as without the mock.
+vi.mock("@/lib/hackathon-build-semantic", async (orig) => ({
+	...(await orig<typeof import("@/lib/hackathon-build-semantic")>()),
+	semanticBuildScores: vi.fn(async () => null),
+}));
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({ find: async () => ({ docs: [] }) })),
 }));
@@ -100,6 +105,67 @@ describe("GET /api/hackathons/builds matches declared packages", () => {
 		expect(rows.map((r) => [r.id, r.matchedTerms])).toEqual([
 			["tukar", ["passkey"]],
 		]);
+	});
+});
+
+describe("GET /api/hackathons/builds says when most of q matches no build", () => {
+	const get = async (q: string, mode = "keyword") => {
+		const { GET } = await import("../route");
+		const res = await GET(
+			new NextRequest(
+				`https://x.test/api/hackathons/builds?q=${encodeURIComponent(q)}&mode=${mode}`,
+			),
+		);
+		return res.json();
+	};
+
+	// The 2026-10-22 battery: q=quantum llama sandwich listed a build named
+	// for "quantum" and one with "llama" inside its name, with no caveat.
+	it("keeps the rows and warns that they match only part of q", async () => {
+		const body = await get("tukar llama sandwich");
+		expect(
+			(body.builds as Array<Record<string, unknown>>).map((r) => [
+				r.id,
+				r.matchedTerms,
+			]),
+		).toEqual([["tukar", ["tukar"]]]);
+		expect(body.meta.warnings).toEqual([
+			"2 of the 3 words searched in q (llama, sandwich) occur as a whole word in no submission in the index (a matchedTerms entry naming one was found inside a longer word), so a build listed by its words alone, with no similarity, matches only part of q and is not evidence that this idea was built",
+		]);
+	});
+
+	it("says nothing when every build listed by words was also found by meaning", async () => {
+		const { semanticBuildScores } = await import(
+			"@/lib/hackathon-build-semantic"
+		);
+		vi.mocked(semanticBuildScores).mockResolvedValueOnce(
+			new Map([["tukar", 0.8]]),
+		);
+		const body = await get("tukar llama sandwich", "hybrid");
+		expect(
+			(body.builds as Array<Record<string, unknown>>).map((r) => [
+				r.id,
+				r.similarity,
+			]),
+		).toEqual([["tukar", 0.8]]);
+		expect(body.meta.warnings).toBeUndefined();
+	});
+
+	it("counts a word found only inside a longer one as in no submission", async () => {
+		const body = await get("tukar nread sandwich");
+		expect((body.builds as Array<{ id: string }>).map((r) => r.id)).toEqual([
+			"tukar",
+			"unread",
+		]);
+		expect(body.meta.warnings?.[0]).toMatch(
+			/^2 of the 3 words .*\(nread, sandwich\)/,
+		);
+	});
+
+	it("says nothing when at most half of q's words are in no submission", async () => {
+		const body = await get("tukar twin sandwich");
+		expect(body.meta.counts.matched).toBe(2);
+		expect(body.meta.warnings).toBeUndefined();
 	});
 });
 

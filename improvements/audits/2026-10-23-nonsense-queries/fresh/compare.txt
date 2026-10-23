@@ -1,0 +1,94 @@
+before: base; after: note
+capture: api 1.9.93 -> 1.9.93, 2026-10-23T02:13:07.774Z to 2026-10-23T02:15:48.475Z; corpus 1344
+
+== Labeled builds graded 2 (same idea): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 working | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 holdout | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 holdout | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+short | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+short | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+tests | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+tests | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+  nothing lost or gained
+
+== Labeled builds graded 1 (related): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 working | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 holdout | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+40 holdout | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+short | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+short | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+tests | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+tests | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+  nothing lost or gained
+
+== vetIdea's five and the brief's picks (hybrid), every change ==
+ideas that differ from before, of 0: vetIdea's five 0, the brief's picks 0, the plain rankings prior art and analyze read (every row and field) 0
+
+== nonsense: builds returned, before -> after ==
+crimson accordion volcano | keyword | 0 -> 0
+crimson accordion volcano | hybrid | 0 -> 0
+sleepy giraffe bakery | keyword | 0 -> 0
+sleepy giraffe bakery | hybrid | 0 -> 0
+marmalade thunderstorm trombone | keyword | 0 -> 0
+marmalade thunderstorm trombone | hybrid | 0 -> 0
+polka dot submarine | keyword | 0 -> 0
+polka dot submarine | hybrid | 0 -> 0
+gargling penguin lighthouse | keyword | 0 -> 0
+gargling penguin lighthouse | hybrid | 0 -> 0
+knitted cactus parliament | keyword | 0 -> 0
+knitted cactus parliament | hybrid | 0 -> 0
+yodeling teapot glacier | keyword | 0 -> 0
+yodeling teapot glacier | hybrid | 0 -> 0
+bashful pineapple tractor | keyword | 0 -> 0
+bashful pineapple tractor | hybrid | 0 -> 0
+blockchain sourdough starter | keyword | 7 -> 7
+blockchain sourdough starter | hybrid | 103 -> 103
+NFT lawnmower marathon | keyword | 7 -> 7
+NFT lawnmower marathon | hybrid | 7 -> 7
+smart contract hamster wheel | keyword | 80 -> 80
+smart contract hamster wheel | hybrid | 85 -> 85
+DeFi pancake flipping | keyword | 18 -> 18
+DeFi pancake flipping | hybrid | 18 -> 18
+bitcoin origami zeppelin | keyword | 2 -> 2
+bitcoin origami zeppelin | hybrid | 13 -> 13
+ethereum bagpipe tuner | keyword | 6 -> 6
+ethereum bagpipe tuner | hybrid | 6 -> 6
+AI toaster opera | keyword | 47 -> 47
+AI toaster opera | hybrid | 47 -> 47
+zero knowledge pogo stick | keyword | 156 -> 156
+zero knowledge pogo stick | hybrid | 188 -> 188
+soroban pickle juggling | keyword | 21 -> 21
+soroban pickle juggling | hybrid | 21 -> 21
+stellar mattress comparison | keyword | 0 -> 0
+stellar mattress comparison | hybrid | 0 -> 0
+wallet for pet iguanas | keyword | 10 -> 10
+wallet for pet iguanas | hybrid | 10 -> 10
+lumen bowling alley scheduler | keyword | 10 -> 10
+lumen bowling alley scheduler | hybrid | 10 -> 10
+anchor ship knot tutorial | keyword | 14 -> 14
+anchor ship knot tutorial | hybrid | 15 -> 15
+pay per yodel | keyword | 132 -> 132
+pay per yodel | hybrid | 132 -> 132
+stellar kazoo orchestra tickets | keyword | 5 -> 5
+stellar kazoo orchestra tickets | hybrid | 5 -> 5
+soroban garden gnome registry | keyword | 23 -> 23
+soroban garden gnome registry | hybrid | 23 -> 23
+total | keyword 538 -> 538 | hybrid 683 -> 683
+
+== probe: builds returned, before -> after ==
+quantum llama sandwich | keyword | 2 -> 2
+    after, top 5: Quantum Shield Exchange [quantum]; MellaMate [llama]
+quantum llama sandwich | hybrid | 2 -> 2
+    after, top 5: Quantum Shield Exchange [quantum]; MellaMate [llama]
+
+== passkey: builds returned, before -> after ==
+
+grade-2 builds lost from the matched list or the top 20 (the ship criterion): 0
