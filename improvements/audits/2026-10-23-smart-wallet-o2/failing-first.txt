@@ -1,0 +1,27 @@
+New tests on the tree before O2, 2026-10-23T21:34:20Z, from the repository root:
+  npx vitest run src/lib/__tests__/hackathon-builds.test.ts src/lib/__tests__/vet-idea.test.ts -t "smart wallet|smart account"
+
+1. The H tree (7bd30f78, the branch before O2): 6 of 7 fail, the guard passes, exit 1.
+   × vet-idea prior-art builds for a smart wallet or smart account > lists a build that writes the other phrase or a passkey, and says so
+   × a smart wallet in q is one concept that passkey evidence satisfies > lists the passkey winners for passkey smart wallet, not a wallet named build
+   × a smart wallet in q is one concept that passkey evidence satisfies > lets one passkey mention satisfy one concept of q, q's own word first
+   × a smart wallet in q is one concept that passkey evidence satisfies > reads either phrase, in any spelling or number, as one concept passkey evidence also satisfies
+   × a smart wallet in q is one concept that passkey evidence satisfies > reads both phrases in one q as one concept, named by the first
+   × a smart wallet in q is one concept that passkey evidence satisfies > counts the concept's equivalents in a build's own words, a passkey for one concept only
+   ✓ a smart wallet in q is one concept that passkey evidence satisfies > never expands passkey, and leaves smart, wallet and account to their own words
+ Test Files  2 failed (2)
+      Tests  6 failed | 1 passed | 96 skipped (103)
+
+2. Lane Z3's O1H matcher swapped in (src/lib/hackathon-builds.ts only; restored and checked by cmp):
+   the tests of fixes (1) and (2) and of the merged phrases fail; O1's phrase test and the guard pass, exit 1.
+   × vet-idea prior-art builds for a smart wallet or smart account > lists a build that writes the other phrase or a passkey, and says so
+   × a smart wallet in q is one concept that passkey evidence satisfies > lists the passkey winners for passkey smart wallet, not a wallet named build
+   × a smart wallet in q is one concept that passkey evidence satisfies > lets one passkey mention satisfy one concept of q, q's own word first
+   ✓ a smart wallet in q is one concept that passkey evidence satisfies > reads either phrase, in any spelling or number, as one concept passkey evidence also satisfies
+   × a smart wallet in q is one concept that passkey evidence satisfies > reads both phrases in one q as one concept, named by the first
+   × a smart wallet in q is one concept that passkey evidence satisfies > counts the concept's equivalents in a build's own words, a passkey for one concept only
+   ✓ a smart wallet in q is one concept that passkey evidence satisfies > never expands passkey, and leaves smart, wallet and account to their own words
+ Test Files  2 failed (2)
+      Tests  5 failed | 2 passed | 96 skipped (103)
+
+3. With O2: hackathon-builds, vet-idea and hackathon-brief tests 116 of 116.

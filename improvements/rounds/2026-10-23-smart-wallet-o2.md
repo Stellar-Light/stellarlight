@@ -176,7 +176,79 @@ Rubric: lane Z's grader prompt, verbatim.
   tests 116 of 116; `npx tsc --noEmit` exit 0; `npx vitest run src/lib/`
   2,388 of 2,388 (187 files); biome clean after formatting.
 - 21:38Z: this method written, before any replay in this tree.
+- 21:39Z: method and `o2.diff` committed (d77f12f7).
+- 21:39:58Z to 21:40:46Z: replays of base, h and o1h (`replay.mts`,
+  unchanged, sha256 b2e7d59c...), swapping `src/lib/hackathon-builds.ts`
+  and `src/lib/vet-idea.ts` (O2's vet-idea imports SMART_CONCEPT; the replay
+  never calls vetIdea); O2 restored, `cmp` ok. Each equals Z3's replay on
+  all 305 queries, byte for byte, note lines too.
+- 21:41:03Z to 21:41:29Z: the o2 replay; O2 restored, `cmp` ok.
+- 21:43:03Z: `measure.py sheet`: 480 rows read; labels and Z3's grades
+  answer 470; 10 on the sheet (all part B). Two graders (Claude Sonnet
+  through the Agent tool, lane Z's prompt verbatim), each over its own
+  shuffle; both answered 10 of 10.
+- 21:44:13Z to 21:44:43Z: lane K's replay with O2, rule L off and on;
+  `check-unused.py`: 0 false of 529 claims (labeled 222, fresh 144,
+  adversarial 54, review 69, event-in-q 38, battery 2; lane Z's probes fire
+  none). O2 restored, `cmp` ok.
+- 21:44:57Z: `measure.py grades`: the passes agree on 10 of 10, 0 rows
+  unanswered. `measure.py report`: (a) met, 2 on-topic winners (DeFi Quest
+  and Tukar, by declared packages) where the base had 1; (b) met, 269 of
+  269; (b)(i) failed, 37 list rows and 15 query and build pairs over every
+  frozen set (29 and 12 over the six sets Z3's bar read; 8 and 3 on the
+  battery); (b)(ii) met, 0 builds graded 0 enter a top 5, 23 leave; (c)
+  met; (d) met, 10 of 10. Split apart: 30 of the 37 rows are same-grade
+  swaps and 7 real losses (z08: Veil and Passkey-Kit integration from 5th
+  to 6th behind lumengate, graded 1; the battery's sa-01 topic form: Zelyo
+  leaves both matched lists). vetIdea's five keep their size on every
+  changed query but z07 (4, O1H 1, O2 1); fix (1) restores z03 (5, 3, 5)
+  and z04 (5, 1, 5).
+- 21:48Z to 21:52Z: candidate checks on the O2 tree: `npx vitest run
+  src/lib/ src/components/ src/app/ src/collections/ src/data/
+  --maxWorkers=4 --minWorkers=1` first 2,693 of 2,694 (rate-limited-429's
+  audits case timed out at 5 s on a cold import; it passed alone on the
+  second try), then 2,694 of 2,694 (217 files); tsc exit 0 and biome clean
+  from 21:36Z.
+- 21:54:17Z: live `/api/status` apiVersion 1.9.102. `git fetch origin`:
+  origin/main dfeabfc0, H merged as #1873, which differs from 7bd30f78 by
+  phraseForms (a hyphenated phrase's number varies on its last part only).
+- 21:55:50Z to 21:56:21Z: dfeabfc0's matcher replays byte-identical to
+  7bd30f78's on all 305 queries; O2 merged onto it (`git merge-file`, exit
+  0, no conflict) replays byte-identical to the measured O2 on all 305.
+  `git apply --check` of `o2.diff` passes on 7bd30f78; on dfeabfc0 (a
+  scratch index) a plain apply fails on one context line, `git apply -3`
+  applies all four files cleanly and its matcher equals the merged file.
+- About 21:57Z: O2 not shipped, per the brief and this method:
+  `src/lib/hackathon-builds.ts`, `src/lib/vet-idea.ts` and their tests
+  restored to the branch (`git checkout --`, `cmp` against 7bd30f78's
+  files).
+- 22:01Z: evidence committed (229da3d6); `git rebase --onto origin/main
+  7bd30f78`: the two commits now sit on dfeabfc0 (H as merged), the
+  method commit d77f12f7 is dd58c0c2, author date kept (21:39:12Z).
+- 22:01:34Z to 22:02:16Z: evidence-only tree on dfeabfc0: `npx tsc
+  --noEmit` exit 0; the full vitest set 2,688 of 2,688 (217 files); biome
+  clean.
+- 22:02:43Z to 22:03:22Z: O2 applied with `git apply -3` onto dfeabfc0
+  (the files a scratch index took): tsc exit 0, 2,695 of 2,695 (217 files),
+  biome clean on the 4 files; then restored, tree clean.
 
 ## Outcome
 
-(pending)
+Nothing observable changes: the branch carries this ledger and the evidence
+in `improvements/audits/2026-10-23-smart-wallet-o2/`. O2 meets L1-02 (2
+on-topic winners in a matched list of 4), byte identity on every frozen
+query without the phrase or a hyphen, (b)(ii), rule L's claims and the
+adversarial probes, and fix (1) restores vetIdea's five on q=smart wallet
+and q=smart account. It fails the strict regression bar fixed before the
+run, with or without the battery counted: 37 list rows and 15 pairs over
+every frozen set, 29 and 12 over the six sets lane Z3's bar read (O1H: 32
+and 14, 27 and 12). Of the 37 rows, 30 are same-grade swaps inside a fixed
+window (mechanism 3 on z03 and z04, unchanged by design; on z01, passkey
+builds that also wrote smart or wallet passed by the winners and the builds
+writing the phrase); 7 are real losses on 3 pairs: on q=passkey or
+smart-wallet onboarding a build writing passkey smart accounts (graded 1)
+covers two concepts of three and pushes Veil and Passkey-Kit integration
+to 6th; on the battery's sa-01 topic form Zelyo, matched in the base on
+smart from "smart contracts", falls below the half rule once its passkey
+counts for q's passkey alone. Open for the owner, as after Z3: whether bar
+(i) should count same-grade swaps inside a fixed window.

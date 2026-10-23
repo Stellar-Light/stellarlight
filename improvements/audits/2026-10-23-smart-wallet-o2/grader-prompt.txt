@@ -1,0 +1,26 @@
+You are grading Stellar hackathon builds, blind. Read the JSON sheet at {SHEET}. Each row has a row id and a part (A, B or C). Judge every row on its own, from the row alone. Do not read any other file, look anything up, or run code; only read the sheet and write your answers.
+
+Part A rows (one build: name, summary, declared packages).
+Answer `uses`: true when the build's name, summary or declared packages show that its product uses passkeys, a smart wallet or a smart account (a contract account) for its users; otherwise false. A wallet, an account, a signer or a multisig feature that does not say passkey, smart wallet, smart account or contract account is false.
+Answer `evidence`: "text" when the name or summary shows it, "packages" when only the declared packages do (for example passkey-kit), "none" when `uses` is false.
+
+Part B rows (a search query and one build: name, summary, declared packages).
+Grade 2, 1 or 0: how well the build answers the query, for a hacker searching past Stellar hackathon builds with that query.
+2 = what the query asks for. For a query naming passkeys, passkey-kit, a smart wallet or a smart account: a build whose product uses one of them for its users, as its name, summary or declared packages show; when the query adds other words (onboarding, policy signers, wallet), the build also does that part.
+1 = related: the same domain or a component (a wallet, account or signer feature without passkeys, smart wallets or smart accounts; or a build that uses them but misses the query's other words).
+0 = shares words only, or a different product.
+Declared packages show what a build was made with (passkey-kit means it uses passkey smart wallets); they do not show that it does the query's other words.
+
+Part C rows (an idea and one build: name, summary).
+The question: a hacker describes this idea; which past hackathon builds are prior art they must see? Grade 2, 1 or 0 (rubric v1 of the labeled prior-art set):
+2 = SAME IDEA: the build's core product does what the idea describes, for the same user problem, with the same core mechanism.
+1 = RELATED: same domain or a real component of the idea, useful context but a different product.
+0 = NOT PRIOR ART: shares words only, or a different product.
+Judge from the name and summary only. If the summary is empty or too vague, grade from the name alone. A build that does the idea as one feature among many unrelated features is a 1.
+
+For every part: when torn between 2 and 1, choose 1; between 1 and 0, choose 0; between true and false, choose false.
+
+Write your answers as a JSON array to {OUT}, one entry per row, every row answered:
+  part A: {"row": "r001", "uses": true, "evidence": "text"}
+  parts B and C: {"row": "r002", "grade": 2}
+Then reply with only the number of rows you answered.
