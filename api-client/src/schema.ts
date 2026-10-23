@@ -3409,7 +3409,7 @@ export interface operations {
                         error: string;
                         /** @description How to find the slug: GET /api/hackathons?q=<one word of the event's name>. */
                         hint?: string;
-                        /** @description Up to three listed slugs sharing the most words with the one asked for; [] when none shares a word. */
+                        /** @description Up to three listed slugs sharing the most distinguishing words with the one asked for. A word more than half the listed slugs carry (stellar) does not count, so [] means no listed slug shares a distinguishing word; the error text then names none. */
                         closestSlugs?: string[];
                     };
                 };

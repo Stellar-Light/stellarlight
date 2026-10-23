@@ -127,7 +127,39 @@ The orchestrator holds the push, the PR and the independent review.
 - First `CONTRACT_BASE=83e134b2 pnpm contract:check`: exit 1, enum
   literals 99 against baseline 98 (a literal enum on compare's `source`);
   the enum was dropped for a description. Rerun: exit 0.
-- Final checks (after every edit): see Outcome.
+- Commit f34a9143 (checks in Outcome).
+- Independent review: Claude Fable 5.1, high. Verdict: push. It verified
+  items 1, 2, 4, 6, 7, 8a and 8c and confirmed each test fails with its fix
+  reverted. Findings:
+  1. Medium: `closestSlugs` counted shared slug words with ties going to
+     listing order; live, 19 of 27 slugs carry `stellar`, so a slug such as
+     `stellar-defi-summit-2024` tied most of the listing and got the three
+     most current events, which reads as the intended one.
+  2. Low: the on-off-ramp warning claimed anchors were left out even when
+     none were.
+  3. Low: `upsertChunks`' doc block sat above `restampObservedAt`, and that
+     helper's comment said it throws where it is a no-op without a mongoose
+     model.
+- Review fixes, failing first (`npx vitest run src/app/api/hackathons/ -t
+  "unknown slug"`, the tests rewritten over a six-slug listing where 4 carry
+  `stellar`): 1 failed, `expected [ 'stellar-hacks-zk', ... ] to deeply
+  equal []` for `stellar-defi-summit-2024`; the near miss
+  (`hackmeridian-2024` gets `hackmeridian-2025`) and the typo
+  (`stellar-hacks-blnd` gets `stellar-hacks-blend`) passed. Fix: a word more
+  than half the listed slugs carry is not counted (computed from the
+  listing, no hand list); no distinguishing match serves `[]` and the error
+  text names no slug. The spec and skill reference say so. The ramp
+  warning now states the rule ("Anchors with no ramp type recorded are not
+  included"), with no extra query. The doc block is back above
+  `upsertChunks`; `restampObservedAt` says it is a no-op without the model.
+  After: 3 passed. Live check 5 now covers a near miss and a
+  common-words-only slug.
+- Review-fix checks: `pnpm exec tsc --noEmit -p tsconfig.json` first exit 2
+  (the new listing fixture lacked `winner_announced`; cast as the file's
+  other fixtures are), then exit 0; `npx vitest run src/lib/__tests__
+  src/app/api` exit 0 (179 files, 2239 tests); `pnpm contract:write` exit
+  0; `CONTRACT_BASE=83e134b2 pnpm contract:check` exit 0; `pnpm raven:gate`
+  exit 0, ACCEPT 1.9.92 (0 hit to miss, the same 2 gains); biome clean.
 
 ## Live checks after deploy
 
@@ -152,9 +184,13 @@ Against https://www.stellarlight.xyz with apiVersion 1.9.92:
    both `hackathons[].source` are `curated`; `deltas.notes` contains
    `submission and winner counts unavailable for` naming each event with no
    stored submissions (hackmeridian-2025 at least).
-5. `GET /api/hackathons/stellar-hacks-quantum-2031`: 404; `error` contains
-   `GET /api/hackathons?q=` and `Closest known slugs:`; `closestSlugs` is a
-   non-empty array.
+5. Near miss: `GET /api/hackathons/hackmeridian-2024`: 404; `error`
+   contains `GET /api/hackathons?q=` and `Closest known slugs:`;
+   `closestSlugs` contains a `hackmeridian-` slug. Common words only:
+   `GET /api/hackathons/stellar-qqq-zzz`: 404; `closestSlugs` is `[]` and
+   `error` does not contain `Closest known slugs` (only `stellar` overlaps,
+   carried by 19 of 27 listed slugs). `GET /api/hackathons/stellar-defi-summit-2024`:
+   every slug in `closestSlugs` contains `defi`, `summit` or `2024`.
 6. `GET /api/hackathons/builds?category=RWA`: `meta.counts.matched` 64 and
    `meta.counts.entries` equal to `GET /api/hackathons/analyze?facet=category&value=RWA`
    `total.builds` (65 on 1.9.91).
@@ -172,11 +208,13 @@ Against https://www.stellarlight.xyz with apiVersion 1.9.92:
 
 ## Outcome
 
-All eight items fixed on `lane/j-benchmark-gaps` in one commit, not pushed.
+All eight items fixed on `lane/j-benchmark-gaps` in f34a9143, with the
+review fixes in a second commit; not pushed.
 Item 3 ships without the literal word `scf` in the description: with it,
 Raven's gate holds 1.9.92 on an SCF RFP question. Checks on the final
 tree: `pnpm exec tsc --noEmit -p tsconfig.json` exit 0; `npx vitest run
-src/lib/__tests__ src/app/api` exit 0 (179 files, 2237 tests; the
+src/lib/__tests__ src/app/api` exit 0 (179 files, 2239 tests after the
+review fixes; the
 integration suite tests/int/api.int.spec.ts is not in these paths and was
 not run); `pnpm contract:write` then `CONTRACT_BASE=83e134b2 pnpm
 contract:check` exit 0; `pnpm raven:gate` exit 0, ACCEPT 1.9.92; biome

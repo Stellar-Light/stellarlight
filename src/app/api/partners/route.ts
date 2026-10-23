@@ -62,7 +62,7 @@ const PARTNER_TYPES = [
 const RAMP_TYPES = ["on-ramp", "off-ramp"];
 const RAMP_TYPE = "on-off-ramp";
 const RAMP_TYPE_WARNING =
-	"type=on-off-ramp lists partners typed on-off-ramp and anchors whose rampTypes record a ramp. An anchor with no ramp recorded is left out, which is not evidence it does not ramp: type=anchor lists every anchor.";
+	"type=on-off-ramp lists partners typed on-off-ramp and anchors whose rampTypes record a ramp. Anchors with no ramp type recorded are not included, which is not evidence they do not ramp: type=anchor lists every anchor.";
 const REGION_VALUES: string[] = REGIONS.map((r) => r.value);
 /** "North America" / "north america" / "NORTH-AMERICA" / "latam" → "north-america" / "latam". */
 function normalizeRegion(raw: string): string | null {

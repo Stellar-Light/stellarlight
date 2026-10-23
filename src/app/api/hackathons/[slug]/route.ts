@@ -297,13 +297,27 @@ async function curatedWinnersFor(
 	}));
 }
 
-/** Up to three listed slugs sharing the most words with an unknown one;
- * listing order (current events first) breaks ties. */
+/** Up to three listed slugs sharing the most distinguishing words with an
+ * unknown one; listing order (current events first) breaks ties. A word more
+ * than half the listing carries ("stellar") distinguishes nothing, so a slug
+ * matching only such words gets none. */
 function closestSlugs(slug: string, listed: string[]): string[] {
-	const split = (s: string) => s.toLowerCase().split(/[^a-z0-9]+/);
-	const words = new Set(split(slug).filter(Boolean));
+	const split = (s: string) =>
+		new Set(
+			s
+				.toLowerCase()
+				.split(/[^a-z0-9]+/)
+				.filter(Boolean),
+		);
+	const sets = listed.map(split);
+	const carriers = new Map<string, number>();
+	for (const ws of sets)
+		for (const w of ws) carriers.set(w, (carriers.get(w) ?? 0) + 1);
+	const words = [...split(slug)].filter(
+		(w) => (carriers.get(w) ?? 0) * 2 <= listed.length,
+	);
 	return listed
-		.map((k, i) => ({ k, i, n: split(k).filter((w) => words.has(w)).length }))
+		.map((k, i) => ({ k, i, n: words.filter((w) => sets[i].has(w)).length }))
 		.filter((x) => x.n > 0)
 		.sort((a, b) => b.n - a.n || a.i - b.i)
 		.slice(0, 3)

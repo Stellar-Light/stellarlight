@@ -361,17 +361,9 @@ function normalizeDate(d: string | null | undefined): string | null {
 	return Number.isFinite(ts) ? new Date(ts).toISOString().slice(0, 10) : null;
 }
 
-/**
- * Embed and upsert a batch of chunks against the existing collection.
- * Skips chunks whose content hash hasn't changed — EXCEPT when metadata
- * (title, publishedAt) drifted while the content stayed identical: those
- * update in place without re-embedding (embeddings hash the content only).
- * Without this path, extraction fixes never reach existing rows — audit R2:
- * cap-0066's garbage title survived every daily refresh because its body
- * hash was unchanged.
- */
 /** Advance observedAt on unchanged research-docs chunks in one bulk $set:
- * content and embedding untouched. Throws when the write fails. */
+ * content and embedding untouched. A no-op when the database adapter exposes
+ * no mongoose model; throws when the write itself fails. */
 export async function restampObservedAt(
 	payload: Payload,
 	ids: (string | number)[],
@@ -389,6 +381,15 @@ export async function restampObservedAt(
 		await model.updateMany({ _id: { $in: ids } }, { $set: { observedAt: at } });
 }
 
+/**
+ * Embed and upsert a batch of chunks against the existing collection.
+ * Skips chunks whose content hash hasn't changed — EXCEPT when metadata
+ * (title, publishedAt) drifted while the content stayed identical: those
+ * update in place without re-embedding (embeddings hash the content only).
+ * Without this path, extraction fixes never reach existing rows — audit R2:
+ * cap-0066's garbage title survived every daily refresh because its body
+ * hash was unchanged.
+ */
 export async function upsertChunks(opts: {
 	payload: Payload;
 	source: ResearchSource;

@@ -57,7 +57,7 @@ Single-hackathon detail. **Two response shapes** depending on the data source:
 - Read-through + cached ~1h; if the DoraHacks feed is briefly unavailable these degrade to empty and `.meta.note` says so. `.hackathon.externalUrl` is the canonical event page.
 - **Per-event coverage is uneven** — ideathons / brand-new events may have **no submitted buidls yet**, so `submissions`/`winners`/`tracks` are legitimately empty (not an error); larger build events (e.g. `stellar-hacks-blend`, `stellar-agents-x402-stripe-mpp`) are fully populated.
 
-**Unknown slug:** 404 whose `error` text itself says how to find the slug (`GET /api/hackathons?q=<one word of the event's name>`) and names up to three closest known slugs; the same are served as `hint` and `closestSlugs` (`[]` when no listed slug shares a word).
+**Unknown slug:** 404 whose `error` text itself says how to find the slug (`GET /api/hackathons?q=<one word of the event's name>`) and names up to three closest known slugs; the same are served as `hint` and `closestSlugs` (`[]` when no listed slug shares a distinguishing word; a word more than half the listed slugs carry, such as `stellar`, does not count).
 
 ---
 

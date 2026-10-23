@@ -667,19 +667,36 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 });
 
 describe("an unknown slug", () => {
-	it("404s with a way forward in the error text itself and the closest known slugs", async () => {
+	// Most listed slugs carry "stellar", so it distinguishes nothing.
+	const listing = [
+		"stellar-hacks-zk",
+		"stellar-hacks-blend",
+		"stellar-agents-x402-stripe-mpp",
+		"stellar-builders-camp-jaipur-2026",
+		"hackmeridian-2025",
+		"kale",
+	].map((uname) => ({ ...doraEvent, uname }) as DoraHacksHackathon);
+	const miss = async (slug: string) => {
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce(listing);
 		const { GET } = await import("../route");
-		const slug = "stellar-hacks-quantum-2031";
 		const res = await GET(
 			new NextRequest(`https://x.test/api/hackathons/${slug}`),
 			{ params: Promise.resolve({ slug }) },
 		);
-		expect(res.status).toBe(404);
-		const body = await res.json();
+		return { status: res.status, body: await res.json() };
+	};
+
+	it("404s with a way forward in the error text itself and the closest known slugs", async () => {
+		const slug = "hackmeridian-2024";
+		const { status, body } = await miss(slug);
+		expect(status).toBe(404);
 		expect(body.error).toContain(`hackathon not found: ${slug}`);
 		expect(body.error).toContain("/api/hackathons?q=");
-		expect(body.error).toContain("stellar-hacks-zk");
-		expect(body.closestSlugs).toEqual(["stellar-hacks-zk"]);
+		expect(body.error).toContain("Closest known slugs: hackmeridian-2025.");
+		expect(body.closestSlugs).toEqual(["hackmeridian-2025"]);
 		const schema = (
 			spec.paths["/api/hackathons/{slug}"] as {
 				get: {
@@ -691,6 +708,20 @@ describe("an unknown slug", () => {
 			}
 		).get.responses["404"].content["application/json"].schema;
 		expect(undeclaredInServed(spec, schema, body)).toEqual([]);
+	});
+
+	it("still finds the event behind a typo", async () => {
+		const { body } = await miss("stellar-hacks-blnd");
+		expect(body.closestSlugs).toContain("stellar-hacks-blend");
+		expect(body.closestSlugs).not.toContain("kale");
+	});
+
+	it("names no slug when only words most slugs carry match", async () => {
+		const { status, body } = await miss("stellar-defi-summit-2024");
+		expect(status).toBe(404);
+		expect(body.closestSlugs).toEqual([]);
+		expect(body.error).not.toContain("Closest known slugs");
+		expect(body.error).toContain("/api/hackathons?q=");
 	});
 });
 
