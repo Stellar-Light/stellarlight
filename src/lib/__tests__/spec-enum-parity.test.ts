@@ -24,6 +24,16 @@ import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
 import { REPO_MATCH_MODES } from "../repo-search";
 import { RESEARCH_SOURCES } from "../research-sources";
+import {
+	AUTHORITY_ROLES,
+	CANDIDATE_CAP,
+	LOCATE_MATCH_MODES,
+	LOCATE_MAX_PAGE,
+	LOCATE_PAGE_SIZE,
+	LOCATE_TOTAL_BASES,
+	LOCATOR_KINDS,
+	SOURCE_REPO_NAMES,
+} from "../source-locator";
 import { PRICE_BASES } from "../stablecoins";
 import { TRUST_SIGNALS } from "../trust-report";
 
@@ -448,5 +458,44 @@ describe("search matchMode enums are the code's lists", () => {
 		expect(sorted(metaMode("RepoSearchResponse"))).toEqual(
 			sorted(REPO_MATCH_MODES),
 		);
+	});
+});
+
+describe("locateSource enums are the code's lists", () => {
+	const op = S.paths["/api/sources/locate"].get;
+	const ok200 = op.responses["200"].content["application/json"].schema;
+	const pointer = S.components.schemas.SourcePointer.properties;
+	const param = (name: string) =>
+		(op.parameters as Param[]).find((p) => p.name === name)?.schema.enum;
+	it("repo, kind, authorityRole, matchMode and totalBasis spread from source-locator", () => {
+		expect(param("repo")).toEqual([...SOURCE_REPO_NAMES]);
+		expect(param("kind")).toEqual([...LOCATOR_KINDS]);
+		expect(pointer.repo.enum).toEqual([...SOURCE_REPO_NAMES]);
+		expect(pointer.locatorKind.enum).toEqual([...LOCATOR_KINDS]);
+		expect(pointer.authorityRole.enum).toEqual([...AUTHORITY_ROLES]);
+		expect(ok200.properties.meta.properties.matchMode.enum).toEqual([
+			...LOCATE_MATCH_MODES,
+		]);
+		expect(
+			ok200.properties.meta.properties.counts.properties.totalBasis.enum,
+		).toEqual([...LOCATE_TOTAL_BASES]);
+	});
+	it("page's maximum is the candidate cap over the page size, in the schema and the text", () => {
+		const page = (
+			op.parameters as Array<Param & { schema: { maximum: number } }>
+		).find((p) => p.name === "page");
+		expect(LOCATE_MAX_PAGE).toBe(CANDIDATE_CAP / LOCATE_PAGE_SIZE);
+		expect(page?.schema.maximum).toBe(LOCATE_MAX_PAGE);
+		expect(page?.description).toContain(`1 to ${LOCATE_MAX_PAGE}`);
+		expect(op.responses["400"].description).toContain(
+			`1 to ${LOCATE_MAX_PAGE}`,
+		);
+	});
+	it("the collection stores the same locator kinds", () => {
+		const src = readFileSync(
+			resolve(__dirname, "../../collections/SourceLocators.ts"),
+			"utf8",
+		);
+		expect(src).toContain("options: [...LOCATOR_KINDS]");
 	});
 });

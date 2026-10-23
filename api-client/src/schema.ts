@@ -610,6 +610,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/sources/locate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Locate where a flag, option default, function or interface is defined in Stellar's own source
+         * @description Scored pointers into allowlisted Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples): the file, symbol or heading, line, commit and blob sha where a CLI flag, config option default, SDK or host function, or contract interface is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read. pointers [] = no match in the indexed repos; null = could not search.
+         */
+        get: operations["locateSource"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/audits": {
         parameters: {
             query?: never;
@@ -828,6 +848,54 @@ export interface components {
             advisory?: string;
             /** @description Seconds to wait before resending; the same value as the Retry-After header. On a 429, the seconds until the rate window resets, or the language model's own wait (at most 3600, 60 when it sent no usable number); on a 503, 2 on database reads and 60 or 300 on the skills registry. */
             retryAfterSeconds: number;
+        };
+        /** @description Where a fact lives in an allowlisted Stellar repo, never the content: fetch verificationUrl to read it. Names, a line and hashes only. */
+        SourcePointer: {
+            /** @description Short id within this response (s1, s2, ...), the same order as rank. */
+            id: string;
+            /** @description Position in the full ranking for this q (page 2 starts at 11). Array order is rank order. */
+            rank: number;
+            /**
+             * @description owner/name of the repo.
+             * @enum {string}
+             */
+            repo: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples";
+            /** @description The 40-hex commit the pointer was read at. An unchanged file keeps its first ref: the same blob and lines hold at later commits up to the repo's indexed ref (meta.index). */
+            ref: string;
+            /** @description Repo-relative file path. */
+            path: string;
+            /**
+             * @description file = the whole file; symbol = a named definition (function, type, constant, CLI flag, config option or key, environment variable); heading = a Markdown section.
+             * @enum {string}
+             */
+            locatorKind: "file" | "symbol" | "heading";
+            /** @description The symbol name or heading text as written; null for a file pointer. */
+            locator: string | null;
+            /** @description 1-based line the locator sits on at ref; null for a file pointer. */
+            line: number | null;
+            /**
+             * @description implementation = the repo's code (core, SDKs, host, RPC, quickstart); tooling = stellar-cli; reference-docs = any Markdown file and the soroban-examples contracts. A role, not an endorsement.
+             * @enum {string}
+             */
+            authorityRole: "implementation" | "tooling" | "reference-docs";
+            /** @description Which words of q matched and how, at most 100 characters. */
+            matchReason: string;
+            /**
+             * Format: date-time
+             * @description When the index build last confirmed this pointer's blob and line (its repo's builtAt); null only if that build time is unknown.
+             */
+            verifiedAt: string | null;
+            /** @description git blob id of the file at ref, the id GitHub serves for it: provenance, not security. */
+            blobSha: string;
+            /**
+             * Format: uri
+             * @description https://github.com/<repo>/blob/<ref>/<path>#L<line> (no #L for a file pointer).
+             */
+            verificationUrl: string;
+            /** @description 0 to 100 for this q and this pointer alone; compare within one response, not across queries. */
+            score: number;
+            /** @description Compact score parts: words matched of q, exact, prefix (an identifier held in the name), word, path, repo named, name (share of the name's own words q accounts for). */
+            factors: string;
         };
         /** @description The request itself was wrong (a 400): fix the call, do not retry it as is. */
         RequestError: {
@@ -6122,6 +6190,134 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+        };
+    };
+    locateSource: {
+        parameters: {
+            query: {
+                /** @description What to locate: a symbol, flag, option, config key or topic words (at most 300 characters), e.g. --enable-core-manual-close or getTransactions default limit. Naming a repo in q (stellar-rpc, quickstart) lifts its pointers. */
+                q: string;
+                /** @description Only this allowlisted repo, as owner/name (e.g. stellar/quickstart). Anything else answers 400 with the valid values. */
+                repo?: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples";
+                /** @description Only this locator kind. */
+                kind?: "file" | "symbol" | "heading";
+                /** @description Page of 10 pointers: a whole number from 1 to 2000 written as plain digits. */
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ranked pointers. pointers [] with total 0 = searched, no match; pointers null = not indexed yet (meta.note says which). */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        meta: {
+                            /**
+                             * @description Always expanded: identifiers split into words, plurals folded, a few code abbreviations mapped (max, min, config, auth, init, env, tx).
+                             * @enum {string}
+                             */
+                            matchMode?: "expanded";
+                            matchModeLabel?: string;
+                            /** Format: uri */
+                            source?: string;
+                            /** Format: date-time */
+                            generatedAt?: string;
+                            /** @description The filters applied (null = not applied). */
+                            filters?: {
+                                q?: string;
+                                repo?: string | null;
+                                kind?: string | null;
+                                page?: number;
+                            };
+                            counts?: {
+                                /** @description Pointers matching q in the searched repos; null when nothing could be searched (totalBasis says why). */
+                                total?: number | null;
+                                returned?: number;
+                                /**
+                                 * @description Present only when total is null: no searched repo is indexed yet.
+                                 * @enum {string}
+                                 */
+                                totalBasis?: "not-indexed";
+                            };
+                            /** @description Each searched repo: the commit indexed, when, and its pointer count; ref null = not indexed yet. */
+                            index?: {
+                                repo?: string;
+                                ref?: string | null;
+                                /** Format: date-time */
+                                builtAt?: string | null;
+                                pointers?: number | null;
+                            }[];
+                            note?: string;
+                            /** @description Present only when there is something to disclose: repos not indexed yet, or a q so broad its candidates were cut. */
+                            warnings?: string[];
+                        };
+                        /** @description This page, best first. [] = no match in the indexed repos; null = could not search. */
+                        pointers: components["schemas"]["SourcePointer"][] | null;
+                        /** @description Pointers matching q; null when nothing could be searched. */
+                        total: number | null;
+                        page: number;
+                        pageSize: number;
+                        /** @description true when a later page holds more pointers. */
+                        truncated: boolean;
+                        /**
+                         * Format: date-time
+                         * @description The oldest build time among the searched, indexed repos.
+                         */
+                        indexAsOf: string | null;
+                    };
+                };
+            };
+            /** @description q missing, over 300 characters or all filler; an unknown parameter, repo or kind; a page that is not a whole number from 1 to 2000. Never silently ignored. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestError"] & {
+                        validParams?: string[];
+                        validValues?: string[];
+                        /** @description For page: the lowest and highest page, [1, 2000]. */
+                        validRange?: number[];
+                    };
+                };
+            };
+            /** @description This endpoint's rate window is spent. hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
+            429: {
+                headers: {
+                    /** @description Seconds to wait; the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
+                    /** @description Always `instance`: the counter is per serverless instance, not global. */
+                    "X-RateLimit-Scope"?: "instance";
+                    /** @description Our own wall time, as on a 200. */
+                    "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+            /** @description The index could not be read: an outage, NOT a claim that no source matches. pointers and total are null. Retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending. */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"] & {
+                        /** @description Always null here: could not search. */
+                        pointers?: components["schemas"]["SourcePointer"][] | null;
+                        /** @description Always null here. */
+                        total?: number | null;
+                    };
                 };
             };
         };

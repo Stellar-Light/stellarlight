@@ -240,6 +240,7 @@ export async function GET() {
 				"/api/hackathon-brief",
 				"/api/repos/trust",
 				"/api/contracts",
+				"/api/sources/locate",
 			],
 			docs: "https://stellarlight.xyz/scout",
 			skill: "https://stellarlight.xyz/skills/stellar-scout.md",
