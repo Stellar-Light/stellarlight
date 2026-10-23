@@ -1863,7 +1863,7 @@ export interface components {
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
-            /** @description Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements, never inferred from names). Null = not superseded or not yet classified. In searchRepos, when the successor (this field, else supersededBy) is also in the results, the successor takes this repo's place and this repo sits directly below it, unless q names this repo itself. */
+            /** @description Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements, never inferred from names). Null = not superseded or not yet classified. In searchRepos, when the successor (this field, else supersededBy) is also in the results, the successor takes this repo's place and this repo moves below it, unless q is an exact alias of this repo's owner, name or path. */
             successorRepo?: string | null;
             /** @description Where to go instead, as GitHub spells it — from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'. */
             supersededBy?: string | null;
