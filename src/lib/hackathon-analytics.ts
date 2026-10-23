@@ -13,6 +13,7 @@
  * apart and left out of every share's denominator, so "not read" never reads
  * as "none".
  */
+import { CURATED_BUILD_ID } from "@/lib/hackathon-build-links";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 
 const DAY = 86_400_000;
@@ -97,10 +98,13 @@ const LIBRARY_SCOPES: Array<[string, string]> = [
 /** The library a declared package belongs to. */
 /** One event's submissions profiled by the engine: what they were about,
  * what they built with, and what became of them. compareHackathons and
- * getHackathon serve this same shape. */
+ * getHackathon serve this same shape. On a winners-only event it says so
+ * and serves no submission count: it describes the winners only. */
 export function eventProfile(builds: IndexedBuild[]) {
+	const winnersOnly = eventCoverage(builds) === "winners-only";
 	return {
-		submissions: builds.length,
+		...(winnersOnly ? { coverage: COVERAGE_VALUES[0] } : {}),
+		submissions: winnersOnly ? null : builds.length,
 		winners: builds.filter((b) => b.isWinner).length,
 		category: distribution(builds, "category", { top: 5 }),
 		library: distribution(builds, "library", { top: 5 }),
@@ -112,6 +116,62 @@ export function eventProfile(builds: IndexedBuild[]) {
 	};
 }
 export type EventProfile = ReturnType<typeof eventProfile>;
+
+/** The `coverage` values served. Absent means the stored rows are the
+ * event's listing, so "full" is never served. The spec spreads this list. */
+export const COVERAGE_VALUES = ["winners-only"] as const;
+
+/** What one event's stored rows cover, decided from the rows alone; every
+ * reader of an event's counts asks this. full: the event's listing as the
+ * DoraHacks sync stores it. winners-only: every row is a curated winner
+ * (scripts/import-curated-builds.ts), so only the winners are on record and
+ * the size and mix of the field are unknown. null: none stored.
+ * ponytail: a curated row that is not a winner makes its event full; a
+ * partial curated listing needs its own value (a test keeps every curated
+ * row a winner until then). */
+export function eventCoverage(
+	builds: IndexedBuild[],
+): "full" | (typeof COVERAGE_VALUES)[number] | null {
+	if (!builds.length) return null;
+	return builds.every((b) => b.isWinner && CURATED_BUILD_ID.test(b.id))
+		? "winners-only"
+		: "full";
+}
+
+/** Each winners-only event in the index, in index order, with its winners. */
+export function winnersOnlyEvents(builds: IndexedBuild[]): Map<string, number> {
+	const byEvent = new Map<string, IndexedBuild[]>();
+	for (const b of builds) {
+		const rows = byEvent.get(b.hackathon.slug);
+		if (rows) rows.push(b);
+		else byEvent.set(b.hackathon.slug, [b]);
+	}
+	return new Map(
+		[...byEvent]
+			.filter(([, rows]) => eventCoverage(rows) === "winners-only")
+			.map(([slug, rows]) => [slug, rows.length]),
+	);
+}
+
+/** getHackathon's stats.coverageNote on a winners-only event. */
+export function winnersOnlyNote(winners: number): string {
+	const rows =
+		winners === 1
+			? "1 row, with the page that names the win as url"
+			: `${winners} rows, with the page that names each win as url`;
+	return `Only this event's winners are on record here (${rows}); its other submissions are not stored. The size and mix of its field are unknown, so totalSubmissions, each track's submissionCount and outcomes are null, never the winner count, and profile describes the winners only.`;
+}
+
+/** The meta.warnings line for winners-only events a request counts by
+ * name: their rows are their winners, never their fields. */
+export function winnersOnlyWarning(events: Array<[string, number]>): string {
+	if (events.length === 1) {
+		const [slug, n] = events[0];
+		return `only the winners of ${slug} are stored (${n} ${n === 1 ? "row" : "rows"}, coverage winners-only); its other submissions are not, so counts from it describe its winners, not its field, whose size and mix are unknown`;
+	}
+	const named = events.map(([slug, n]) => `${slug} (${n})`);
+	return `only the winners of ${named.slice(0, -1).join(", ")} and ${named.at(-1)} are stored (coverage winners-only); their other submissions are not, so counts from them describe their winners, not their fields, whose size and mix are unknown`;
+}
 
 /** Each assigned type's measured precision and recall, as the lane stamped
  * them on the builds that carry it. */

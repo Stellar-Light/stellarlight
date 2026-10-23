@@ -15,7 +15,12 @@ import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
 import { WINNER_OVERLAY } from "@/data/winner-overlay";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
-import { afterEventFields, eventProfile } from "@/lib/hackathon-analytics";
+import {
+	afterEventFields,
+	eventCoverage,
+	eventProfile,
+	winnersOnlyNote,
+} from "@/lib/hackathon-analytics";
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
@@ -452,6 +457,9 @@ export async function GET(
 			]);
 			const stored = index.filter((b) => b.hackathon.slug === slug);
 			const fromStore = stored.length > 0;
+			// Only the winners on record (a curated import): the field is
+			// unknown, so no count of it is served, never the winner count.
+			const winnersOnly = eventCoverage(stored) === "winners-only";
 			// Served in the submission shape this endpoint has always served:
 			// the stored row's other facts live on search, detail and analyze.
 			const liveSubmissions: DoraHacksSubmission[] = fromStore
@@ -547,18 +555,23 @@ export async function GET(
 			const liveTracks = [...trackMap.values()].sort(
 				(a, b) => b.submissionCount - a.submissionCount,
 			);
+			const servedTracks = winnersOnly
+				? liveTracks.map((t) => ({ ...t, submissionCount: null }))
+				: liveTracks;
 			return NextResponse.json(
 				{
 					meta: {
 						source: getHackathonUrl(dora),
 						generatedAt: new Date().toISOString(),
-						note: fromStore
-							? "DoraHacks event. Submissions, winners, tracks and profile come from Scout's stored copy, refreshed daily; the event page and rules from its stored page (hackathon.rules)."
-							: liveSubmissions.length
-								? "DoraHacks-sourced: submissions, winners, and tracks below are pulled live from DoraHacks."
-								: curatedWinners.length
-									? "DoraHacks-sourced: live submission feed unavailable; the curated winner roster below still answers 'who won'. Visit externalUrl for all submissions."
-									: "DoraHacks-sourced: live submission feed unavailable; visit externalUrl for full detail.",
+						note: winnersOnly
+							? "Event off DoraHacks with only its winners on record (hackathon.coverage winners-only): submissions and winners list them, from Scout's stored copy; stats.coverageNote says what that leaves unknown."
+							: fromStore
+								? "DoraHacks event. Submissions, winners, tracks and profile come from Scout's stored copy, refreshed daily; the event page and rules from its stored page (hackathon.rules)."
+								: liveSubmissions.length
+									? "DoraHacks-sourced: submissions, winners, and tracks below are pulled live from DoraHacks."
+									: curatedWinners.length
+										? "DoraHacks-sourced: live submission feed unavailable; the curated winner roster below still answers 'who won'. Visit externalUrl for all submissions."
+										: "DoraHacks-sourced: live submission feed unavailable; visit externalUrl for full detail.",
 					},
 					hackathon: {
 						id: `dorahacks-${dora.id}`,
@@ -605,20 +618,26 @@ export async function GET(
 						...(fromStore ? { profile: eventProfile(stored) } : {}),
 						hackersCount: dora.hackers_count || null,
 						source: dora.source === "curated" ? "curated" : "dorahacks",
+						...(winnersOnly ? { coverage: "winners-only" as const } : {}),
 						stats: {
 							// An empty submission roster is not a count of zero. The
 							// code-curated events ride this branch too (the São Paulo
 							// Builder Summit is an in-person sprint with no roster
 							// anywhere), and counting its zero rows published
-							// `totalSubmissions: 0` beside twelve winners.
-							totalSubmissions: liveSubmissions.length || null,
+							// `totalSubmissions: 0` beside twelve winners. Nor is a
+							// roster of winners alone: HackMeridian 2025 served 6.
+							totalSubmissions: winnersOnly
+								? null
+								: liveSubmissions.length || null,
 							// DoraHacks' own count beside ours, and why they differ
 							// (sls-092: Real-World ZK serves 319 of DoraHacks' 345).
 							upstreamSubmissions: storedEvent?.upstreamSubmissions ?? null,
-							coverageNote: submissionCoverageNote(
-								storedEvent?.upstreamSubmissions,
-								liveSubmissions.length || null,
-							),
+							coverageNote: winnersOnly
+								? winnersOnlyNote(stored.length)
+								: submissionCoverageNote(
+										storedEvent?.upstreamSubmissions,
+										liveSubmissions.length || null,
+									),
 							hiddenWinners: hidden,
 							winnersNote,
 							// null, not 0, when no USD figure is known: a prize not yet
@@ -632,17 +651,19 @@ export async function GET(
 							// classified these". Zero is a measurement; absence of
 							// one is not. Nothing classifies these yet, so all 300
 							// are unknown, and the buckets sum to the submissions
-							// they describe.
-							outcomes: liveSubmissions.length
-								? {
-										built: 0,
-										inProgress: 0,
-										abandoned: 0,
-										unknown: liveSubmissions.length,
-									}
-								: null,
+							// they describe; with winners alone there is no field
+							// to sum to.
+							outcomes:
+								liveSubmissions.length && !winnersOnly
+									? {
+											built: 0,
+											inProgress: 0,
+											abandoned: 0,
+											unknown: liveSubmissions.length,
+										}
+									: null,
 						},
-						tracks: liveTracks,
+						tracks: servedTracks,
 					},
 					winners,
 					// sls-005: says whether the winners ARRAY ORDER is a ranking.
@@ -656,7 +677,7 @@ export async function GET(
 					submissions: liveSubmissions,
 					// Top-level `tracks` (drift report #12) so `data.tracks` isn't
 					// undefined for a consumer (also present under hackathon.tracks).
-					tracks: liveTracks,
+					tracks: servedTracks,
 				},
 				{
 					headers: {

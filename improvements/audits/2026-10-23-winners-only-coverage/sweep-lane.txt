@@ -1,0 +1,37 @@
+benchmark (c): hackmeridian-2025 submissionCount = null
+checked analyze by=event groups[].coverage: 23
+checked analyze by=event meta.warnings (winners-only line): 3
+checked analyze facet=event meta.warnings (winners-only line): 3
+checked analyze (hackathon filter) meta.warnings (winners-only line): 6
+checked builds (hackathon filter) meta.warnings (winners-only line): 3
+checked compare submissionCount: 81
+checked compare winnerCount: 81
+checked compare hackersCount: 81
+checked compare coverage: 81
+checked compare activeRatePct: 81
+checked compare profile.coverage: 81
+checked compare profile.submissions: 81
+checked compare profile.winners: 81
+checked compare deltas.submissionCount: 81
+checked compare deltas.notes (submission count line): 81
+checked compare deltas.notes (winners-only line): 81
+checked compare deltas.notes (not 'none stored'): 81
+checked compare deltas.facetShifts: 81
+checked benchmark (c) 2025 submissionCount null or >= 100: 1
+checked getHackathon hackathon.coverage: 3
+checked getHackathon hackathon.hackersCount: 3
+checked getHackathon stats.totalSubmissions: 3
+checked getHackathon stats.upstreamSubmissions: 3
+checked getHackathon stats.outcomes: 3
+checked getHackathon stats.winners: 3
+checked getHackathon stats.coverageNote: 3
+checked getHackathon profile.coverage: 3
+checked getHackathon profile.submissions: 3
+checked getHackathon profile.winners: 3
+checked getHackathon hackathon.tracks[].submissionCount: 3
+checked getHackathon hackathon.tracks[].winnerCount: 3
+checked getHackathon tracks[].submissionCount: 3
+checked getHackathon tracks[].winnerCount: 3
+checked getHackathon winners[] (listed): 3
+checked getHackathon meta.note: 3
+PASS: 1140 checks

@@ -62,6 +62,9 @@ interface HackathonSnapshot {
 	/** stillActiveCount / submissionCount as a percent — the survival rate that
 	 *  makes "2× the submissions but half as durable" answerable. */
 	activeRatePct?: number;
+	/** Present only when the stored rows are the event's winners alone: then
+	 * submissionCount is null and the profile describes the winners. */
+	coverage?: EventProfile["coverage"];
 	/** What the event's stored submissions were about and built with, counted
 	 * by the same engine as analyzeHackathonSubmissions. Absent when the store
 	 * holds none of the event's submissions. */
@@ -69,7 +72,8 @@ interface HackathonSnapshot {
 }
 
 /** Fill submissions, winners and the profile from the stored index; curated
- * counts are kept where the event already has them. */
+ * counts are kept where the event already has them. A winners-only event's
+ * profile serves no submission count, so none is filled from it. */
 function withStored(
 	s: HackathonSnapshot,
 	builds: IndexedBuild[],
@@ -80,6 +84,7 @@ function withStored(
 		...s,
 		submissionCount: s.submissionCount ?? profile.submissions,
 		winnerCount: s.winnerCount ?? profile.winners,
+		...(profile.coverage ? { coverage: profile.coverage } : {}),
 		profile,
 	};
 }
@@ -344,14 +349,32 @@ async function compare(slugs: string[], req: NextRequest) {
 	});
 	const deltas = computeDeltas(snapshots);
 	deltas.notes.push(...readNotes);
+	const winnersOnly = snapshots.filter((s) => s.coverage === "winners-only");
 	const uncounted = snapshots.filter(
-		(s) => s.source !== "not-found" && s.submissionCount === null,
+		(s) =>
+			s.source !== "not-found" && s.submissionCount === null && !s.coverage,
 	);
 	if (uncounted.length && index)
 		deltas.notes.push(
 			`submission and winner counts unavailable for ${uncounted.map((s) => s.slug).join(", ")}: none of their submissions are stored, so the counts are null, not zero`,
 		);
-	const shifts = facetShifts(byEvent);
+	// A curated record's own count would stand: the line claims null only
+	// where the count is null.
+	const unknownField = winnersOnly.filter((s) => s.submissionCount === null);
+	if (unknownField.length) {
+		const one = unknownField.length === 1;
+		deltas.notes.push(
+			`${unknownField.map((s) => s.slug).join(", ")}: only ${one ? "its" : "their"} winners are on record (coverage winners-only), so submissionCount is null, unknown, never the winner count; ${one ? "its profile describes" : "their profiles describe"} the winners only and ${one ? "it is" : "they are"} left out of facetShifts`,
+		);
+	}
+	// A winners' mix is not the field's, so those events shift nothing.
+	const shifts = facetShifts(
+		new Map(
+			[...byEvent].filter(
+				([slug]) => !winnersOnly.some((s) => s.slug === slug),
+			),
+		),
+	);
 	if (shifts.length) {
 		deltas.facetShifts = shifts;
 		const pct = (n: number | null) =>

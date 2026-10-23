@@ -666,6 +666,107 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 	});
 });
 
+// Live 1.9.97: hackmeridian-2025's six curated winners were served as the
+// event's whole field (totalSubmissions 6, tracks 3 and 3) where its record
+// says 110+ submissions.
+describe("an event whose stored rows are its winners only", () => {
+	const curatedEvent = (
+		uname: string,
+		over: Partial<DoraHacksHackathon> = {},
+	) =>
+		({
+			...doraEvent,
+			uname,
+			source: "curated",
+			winner_announced: true,
+			...over,
+		}) as DoraHacksHackathon;
+	const serve = async (slug: string, hackers = 0) => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			curatedEvent(slug, { hackers_count: hackers }),
+		]);
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(
+			await storedCurated(slug),
+		);
+		return getEvent(slug);
+	};
+	beforeEach(() => {
+		hiddenRows = [];
+	});
+
+	it("serves null field counts, keeps the winners and says why", async () => {
+		const body = await serve("hackmeridian-2025", 400);
+		const h = body.hackathon;
+		expect(h.coverage).toBe("winners-only");
+		expect(h.hackersCount).toBe(400);
+		expect(h.stats).toMatchObject({
+			totalSubmissions: null,
+			outcomes: null,
+			winners: 6,
+			winnersNote: null,
+		});
+		expect(h.stats.coverageNote).toBe(
+			"Only this event's winners are on record here (6 rows, with the page that names each win as url); its other submissions are not stored. The size and mix of its field are unknown, so totalSubmissions, each track's submissionCount and outcomes are null, never the winner count, and profile describes the winners only.",
+		);
+		expect(h.profile).toMatchObject({
+			coverage: "winners-only",
+			submissions: null,
+			winners: 6,
+		});
+		for (const tracks of [h.tracks, body.tracks])
+			expect(tracks).toEqual([
+				{ name: "Open Innovation", submissionCount: null, winnerCount: 3 },
+				{ name: "Composability", submissionCount: null, winnerCount: 3 },
+			]);
+		// The winners stay listed, ranked within their tracks.
+		expect(body.winners).toHaveLength(6);
+		expect(body.submissions).toHaveLength(6);
+		expect(body.meta.note).toBe(
+			"Event off DoraHacks with only its winners on record (hackathon.coverage winners-only): submissions and winners list them, from Scout's stored copy; stats.coverageNote says what that leaves unknown.",
+		);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("one published winner: its track's winner count stays and its dated note stays", async () => {
+		const body = await serve("apac-stellar-hackathon-2026");
+		const s = body.hackathon.stats;
+		expect(s.totalSubmissions).toBeNull();
+		expect(s.winners).toBe(1);
+		expect(s.winnersNote).toBe(
+			CURATED_WINNERS_NOTES["apac-stellar-hackathon-2026"],
+		);
+		expect(s.coverageNote).toMatch(
+			/^Only this event's winners are on record here \(1 row, with the page that names the win as url\)/,
+		);
+		expect(body.hackathon.tracks).toEqual([
+			{
+				name: "Payment & Consumer Application",
+				submissionCount: null,
+				winnerCount: 1,
+			},
+		]);
+	});
+
+	it("a DoraHacks event with stored rows keeps its counts and carries no coverage", async () => {
+		const body = await getEvent();
+		expect("coverage" in body.hackathon).toBe(false);
+		expect("coverage" in body.hackathon.profile).toBe(false);
+		expect(body.hackathon.stats.totalSubmissions).toBe(2);
+		expect(body.hackathon.profile.submissions).toBe(2);
+		expect(body.meta.note).toMatch(/^DoraHacks event\./);
+	});
+});
+
 describe("an unknown slug", () => {
 	// Most listed slugs carry "stellar", so it distinguishes nothing.
 	const listing = [

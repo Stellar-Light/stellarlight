@@ -1,0 +1,23 @@
+  81 FAIL compare submissionCount
+  81 FAIL compare profile.submissions
+  81 FAIL compare profile.coverage
+  81 FAIL compare deltas.notes (winners-only line)
+  81 FAIL compare coverage
+  68 FAIL compare deltas.submissionCount
+  66 FAIL compare deltas.notes (submission count line)
+   6 FAIL analyze (hackathon filter) meta.warnings (winners-only line)
+   3 FAIL getHackathon stats.totalSubmissions
+   3 FAIL getHackathon stats.outcomes
+   3 FAIL getHackathon stats.coverageNote
+   3 FAIL getHackathon profile.submissions
+   3 FAIL getHackathon profile.coverage
+   3 FAIL getHackathon meta.note
+   3 FAIL getHackathon hackathon.coverage
+   3 FAIL builds (hackathon filter) meta.warnings (winners-only line)
+   3 FAIL analyze facet=event meta.warnings (winners-only line)
+   3 FAIL analyze by=event meta.warnings (winners-only line)
+   3 FAIL analyze by=event groups[].coverage
+   2 FAIL getHackathon tracks[].submissionCount
+   2 FAIL getHackathon hackathon.tracks[].submissionCount
+   1 FAIL benchmark (c) 2025 submissionCount null or >= 100
+total: FAIL: 583 of 1140 checks, base tree (bf8262db)

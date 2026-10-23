@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.102",
+		type: "fixed",
+		summary:
+			"An event whose stored rows are its winners alone no longer serves them as its whole field. HackMeridian 2025, Build on Stellar Philippines 2026 and APAC Stellar Hackathon 2026 hold only the winners a curated import stored (6, 5 and 1): compareHackathons served submissionCount 6, 5 and 1, equal to winnerCount, and getHackathon served hackmeridian-2025 totalSubmissions 6 and tracks of 3 and 3, where its record gives 110+ submissions. Every count of such an event's field is now null (unknown), its winner counts and declared hackersCount stay, and a new `coverage: winners-only` field and a note say only the winners are on record.",
+		detail:
+			"Coverage is decided from an event's stored rows, by one rule every reader shares: winners-only when every stored row is a curated winner (a curated-<event>-<name> id), full when the daily DoraHacks sync stored the rows. `coverage` is present only on a winners-only event; absent means full, or nothing stored, so full events serve exactly what they served before. compareHackathons: submissionCount and profile.submissions null; coverage on the row and its profile; deltas.notes names the events and drops the submission-count spread for them; they are left out of facetShifts (a winners' mix is not the field's) and out of the note for events with nothing stored. getHackathon: hackathon.coverage and profile.coverage; stats.totalSubmissions, stats.outcomes and every tracks[].submissionCount null, per-track winnerCount kept; stats.coverageNote says only the winners are on record and what that leaves unknown; meta.note no longer calls such an event a DoraHacks event. analyzeHackathonSubmissions and searchHackathonBuilds keep counting stored rows, and a meta.warnings line ('only the winners of <slug> are stored ...') names such an event when a hackathon value, facet=event or by=event counts it; analyze by=event marks its group with coverage. Measured by replaying the real handlers over the index captured from live 1.9.97 (1,383 event entries, 27 listed events; 20 indexed events full, 3 winners-only, none mixing curated and synced rows): the replay reproduced all 27 live event pages; 360 requests naming only full or unstored events are byte identical before and after (276 compare pairs, 24 event pages, 40 analyze requests with a hackathon filter in one and two dimensions, 20 builds searches); 90 of the 91 requests naming a winners-only event changed (analyze facet=placement across every event did not), and a sweep of 1,140 field checks over them passes, including the benchmark check that HackMeridian 2025's submission count is null or at least 100. Not changed: getHackathons serves no submission counts; hackathonBrief, vetIdea and reviewSubmission list builds and state no event's field size; analyze across every event without a per-event split still counts the 12 curated winners among its 1,383 entries. Spec: coverage declared wherever it is served (enum winners-only, no null), profile.submissions and tracks[].submissionCount nullable, getHackathon's tracks items declared.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.97",
 		type: "changed",
 		summary:

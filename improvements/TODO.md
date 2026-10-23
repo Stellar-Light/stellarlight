@@ -206,6 +206,23 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     lost on any earlier labeled set (the short ideas included), measured as
     in that directory.
 
+11. **Events whose stored rows are their winners only serve the winners as
+    their whole field.**
+    Probe: `/api/hackathons/compare?slugs=hackmeridian-2025,hackmeridian-2026`
+    serves hackmeridian-2025 `submissionCount` 6, its `winnerCount`, and no
+    `coverage` (live 1.9.99, 2026-10-23 15:38Z); `/api/hackathons/hackmeridian-2025`
+    serves `stats.totalSubmissions` 6 and tracks of 3 and 3, where its
+    record says 110+ submissions.
+    Found by the benchmark check "2025 submission count is null or >= 100"
+    (null on 1.9.94, 6 after the curated import stored the winners of three
+    events off DoraHacks).
+    State: fixed on branch `lane/v-winners-only-coverage` (spec placeholder
+    1.9.102), not pushed. Replay and sweep:
+    `improvements/audits/2026-10-23-winners-only-coverage/`.
+    Done when: merged and deployed, and the probe serves `submissionCount`
+    null with `coverage: "winners-only"`, re-checked live by someone other
+    than the author.
+
 ## Next
 
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
@@ -277,6 +294,19 @@ unless noted.
 - apac-stellar-hackathon-2026 serves endDate 2026-07-24, but its
   organizer's 2026-07-29 post puts the grand finale on 31 July (found
   2026-10-22).
+
+Found 2026-10-23 by the winners-only coverage round
+(`improvements/rounds/2026-10-23-winners-only-coverage.md`):
+
+- compareHackathons divides the prize pool by the winners on record:
+  apac-stellar-hackathon-2026 serves `prizePerWinnerUSD` 60,000 (pool
+  60,000, 1 published winner) while its `winnersNote` says only one track's
+  winners are published.
+- analyzeHackathonSubmissions across every event counts the 12 curated
+  winners of the three winners-only events among its entries:
+  `facet=placement` serves 80 winners of 1,383 (5.8%); without them 68 of
+  1,371 (5.0%). Every all-event share and winnersVsOthers include winners
+  whose field is not stored.
 
 Found 2026-10-22 by reading how Raven calls and reads Scout
 (stellar-experimental/stellar-raven at b1dc866: `src/adapters/scout.ts`,

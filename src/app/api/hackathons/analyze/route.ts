@@ -15,6 +15,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import {
+	COVERAGE_VALUES,
 	categoryMeasures,
 	distribution,
 	distributionBy,
@@ -23,6 +24,8 @@ import {
 	type FacetId,
 	GROUP_FACETS,
 	type GroupFacetId,
+	winnersOnlyEvents,
+	winnersOnlyWarning,
 	winnersVsOthers,
 } from "@/lib/hackathon-analytics";
 import {
@@ -127,9 +130,24 @@ export async function GET(req: NextRequest) {
 	const matched = scored.map((s) => s.b);
 	const opts = { top, value };
 	const total = { field: field.length, ...distribution(matched, facet, opts) };
+	// An event whose stored rows are its winners alone: its group says so,
+	// and a count by event names it (a hackathon value already warned).
+	const winnersOnly = winnersOnlyEvents(indexed);
 	const groups = by
-		? distributionBy(matched, field, facet, by, opts)
+		? distributionBy(matched, field, facet, by, opts).map((g) =>
+				by === "event" && winnersOnly.has(g.value)
+					? { ...g, coverage: COVERAGE_VALUES[0] }
+					: g,
+			)
 		: undefined;
+	const shown = new Set([
+		...(by === "event" ? (groups ?? []).map((g) => g.value) : []),
+		...(facet === "event" ? total.values.map((v) => v.value) : []),
+	]);
+	const unwarned = [...winnersOnly].filter(
+		([slug]) => shown.has(slug) && !f.hackathons.includes(slug),
+	);
+	if (unwarned.length) warnings.push(winnersOnlyWarning(unwarned));
 	const lift = winnersVsOthers(matched, facet, opts);
 	// How far each reported type's count can be trusted, from the lane's own
 	// measurement on the hand-typed directory.

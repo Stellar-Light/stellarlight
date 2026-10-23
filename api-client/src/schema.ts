@@ -1494,9 +1494,15 @@ export interface components {
                     /** Format: date-time */
                     readAt?: string;
                 };
-                /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. */
+                /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it profiles the winners only, not the event's field. */
                 profile?: {
-                    submissions?: number;
+                    /**
+                     * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
+                     * @enum {string}
+                     */
+                    coverage?: "winners-only";
+                    /** @description Stored submissions profiled. null when coverage is winners-only: only the winners are on record, so the size of the field is unknown. */
+                    submissions?: number | null;
                     winners?: number;
                     category?: {
                         /** @description Builds in the set. */
@@ -1612,8 +1618,25 @@ export interface components {
                         }[];
                     };
                 };
-                /** @description Counts for the event. totalSubmissions counts the submissions served here (null = no submission list). */
+                /**
+                 * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
+                 * @enum {string}
+                 */
+                coverage?: "winners-only";
+                /** @description The event's tracks, derived from its rows; the same array as the top-level `tracks`. */
+                tracks?: ({
+                    name?: string;
+                    /** @description Submissions in the track. null when the event's coverage is winners-only: only its winners are on record, so the track's field is unknown, never its winner count. */
+                    submissionCount?: number | null;
+                    winnerCount?: number;
+                    /** @description Directory rows only: the prize money its winners took. */
+                    totalPrizeUSD?: number;
+                } & {
+                    [key: string]: unknown;
+                })[];
+                /** @description Counts for the event. totalSubmissions counts the submissions served here (null = no submission list, or only the winners are on record). */
                 stats?: {
+                    /** @description The submissions served here. null when no submission list is held, and when coverage is winners-only: only the winners are on record, so the size of the field is unknown, never the winner count. */
                     totalSubmissions?: number | null;
                     /** @description Prize money in USD: the event's prize pool, else the sum of its winners' recorded prizes. null = no USD figure is known (a prize not yet announced, or prizes that are not cash); never 0 for unknown. */
                     totalPrizeUSD?: number | null;
@@ -1627,11 +1650,11 @@ export interface components {
                     }[] | null;
                     /** @description Why the winners are what they are, so a missing winner or a 0 is explained rather than silent. When hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award. On an event off DoraHacks: a dated note that its winners are published only in part, or not announced upstream. When winners carry winnerSource: the page that names them and which named winners are not served. On an ended DoraHacks event with no winner served: DoraHacks' winner_announced flag, from its event listing (refreshed hourly), says not announced upstream, or announced but not recorded here. Not announced is never a claim that no one won. null = nothing to add, or the flag could not be read. */
                     winnersNote?: string | null;
-                    /** @description Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. */
+                    /** @description Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. When coverage is winners-only: that only the winners are on record, so the size and mix of the field are unknown and the counts of it are null. */
                     coverageNote?: string | null;
                     /** @description The number of rows in `winners`. */
                     winners?: number;
-                    /** @description Submissions by status after the event, summing to totalSubmissions; null when no submission list is held. Only submissions that are directory projects carry a status; DoraHacks submissions are not classified, so on a DoraHacks event built, inProgress and abandoned are 0 and unknown counts every submission. `profile` says what they became. */
+                    /** @description Submissions by status after the event, summing to totalSubmissions; null when no submission list is held, or only the winners are (coverage winners-only). Only submissions that are directory projects carry a status; DoraHacks submissions are not classified, so on a DoraHacks event built, inProgress and abandoned are 0 and unknown counts every submission. `profile` says what they became. */
                     outcomes?: {
                         built?: number;
                         inProgress?: number;
@@ -1726,9 +1749,16 @@ export interface components {
             submissions?: {
                 [key: string]: unknown;
             }[];
-            tracks?: {
+            tracks?: ({
+                name?: string;
+                /** @description Submissions in the track. null when the event's coverage is winners-only: only its winners are on record, so the track's field is unknown, never its winner count. */
+                submissionCount?: number | null;
+                winnerCount?: number;
+                /** @description Directory rows only: the prize money its winners took. */
+                totalPrizeUSD?: number;
+            } & {
                 [key: string]: unknown;
-            }[];
+            })[];
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
@@ -3521,18 +3551,29 @@ export interface operations {
                             source?: string;
                             /** @description Registered hackers, from the event listing. null when the listing publishes none (a 0 counts as none) or the row comes from a curated event record, which carries none: unknown, never zero. */
                             hackersCount?: number | null;
-                            /** @description Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event. */
+                            /** @description Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event. Also null on a winners-only event (coverage): only its winners are stored, so the size of its field is unknown, never the winner count. */
                             submissionCount?: number | null;
-                            /** @description Winners, on the same basis as submissionCount. null when neither is held: could not check, never zero. */
+                            /** @description Winners, on the same basis as submissionCount; on a winners-only event, its stored winners. null when neither is held: could not check, never zero. */
                             winnerCount?: number | null;
+                            /**
+                             * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
+                             * @enum {string}
+                             */
+                            coverage?: "winners-only";
                             prizePerWinnerUSD?: number | null;
                             /** @description Curated events only: the event's directory projects still active today. */
                             stillActiveCount?: number | null;
                             liveCount?: number | null;
                             activeRatePct?: number | null;
-                            /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. */
+                            /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it profiles the winners only, not the event's field. */
                             profile?: {
-                                submissions?: number;
+                                /**
+                                 * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
+                                 * @enum {string}
+                                 */
+                                coverage?: "winners-only";
+                                /** @description Stored submissions profiled. null when coverage is winners-only: only the winners are on record, so the size of the field is unknown. */
+                                submissions?: number | null;
                                 winners?: number;
                                 category?: {
                                     /** @description Builds in the set. */
@@ -3651,9 +3692,9 @@ export interface operations {
                         }[];
                         /** @description What differs across the compared events. */
                         deltas?: {
-                            /** @description Plain-language differences, plus every gap: an event whose counts are unavailable, and any read that failed (a failed read is never served as an absent event or a zero). */
+                            /** @description Plain-language differences, plus every gap: an event whose counts are unavailable, a winners-only event whose submission count is unknown, and any read that failed (a failed read is never served as an absent event or a zero). */
                             notes?: string[];
-                            /** @description Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set. */
+                            /** @description Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set. A winners-only event (coverage) is left out: its winners' mix is not its field's. */
                             facetShifts?: {
                                 /** @enum {string} */
                                 facet?: "category" | "package";
@@ -3724,7 +3765,7 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other. */
+                            /** @description Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. A hackathon value naming an event whose stored rows are its winners only adds 'only the winners of <slug> are stored ...': its rows are its winners, not its field. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other. */
                             warnings?: string[];
                             /** @description The filters as applied: an echo, so a caller can see what was honoured. */
                             filters?: {
@@ -4088,7 +4129,7 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. */
+                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. When a hackathon value, facet=event or by=event counts an event whose stored rows are its winners only, a line names it ('only the winners of <slug> are stored ...'): counts from it describe its winners, not its field. */
                             warnings?: string[];
                             source?: string;
                             upstream?: string;
@@ -4133,7 +4174,7 @@ export interface operations {
                         };
                         /** @description The facet over every matched submission. */
                         total?: {
-                            /** @description Builds passing every filter except q; builds / field is the share that matched q. */
+                            /** @description Builds passing every filter except q; builds / field is the share that matched q. A winners-only event's builds are its winners (meta.warnings names it), not its field. */
                             field?: number;
                             /** @description Builds in the set. */
                             builds?: number;
@@ -4156,8 +4197,13 @@ export interface operations {
                             /** @description by=event: the event's title. */
                             title?: string;
                             endedAt?: string | null;
-                            /** @description Builds in this group before q: the group's whole field. */
+                            /** @description Builds in this group before q: the group's whole field. On a group with coverage winners-only, the event's winners on record, not its field. */
                             field?: number;
+                            /**
+                             * @description by=event only, present only when the event's stored rows are its winners alone (winners-only): its counts describe its winners, and the size and mix of its field are unknown.
+                             * @enum {string}
+                             */
+                            coverage?: "winners-only";
                             /** @description Builds in the set. */
                             builds?: number;
                             /** @description Builds whose value is known: every share's denominator. */
