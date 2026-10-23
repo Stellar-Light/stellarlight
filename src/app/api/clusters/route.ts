@@ -19,8 +19,6 @@
  * Powers two kinds of question:
  *   1. *"What's the most crowded category on Stellar?"* — sort by crowdedness
  *   2. *"Show me an underbuilt category"* — bottom of the crowdedness list
- *
- * Mirrors Colosseum Copilot's /clusters endpoint pattern.
  */
 
 import { type NextRequest, NextResponse } from "next/server";

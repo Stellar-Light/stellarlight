@@ -4,7 +4,7 @@
  *   GET  /api/hackathons/compare?slugs=stellar-hacks-agents,stellar-hacks-build
  *   POST /api/hackathons/compare  Body: { slugs: ["a", "b", ...] }
  *
- * Mirrors Colosseum Copilot's /compare. Returns each hackathon's
+ * Returns each hackathon's
  * stats + a `deltas` block highlighting the differences agents care
  * about ("hackathon B had 2× the submissions but half the prize per
  * winner").

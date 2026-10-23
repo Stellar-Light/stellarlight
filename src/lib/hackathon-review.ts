@@ -1,6 +1,6 @@
 /**
- * Review a hackathon submission from a link: Copilot's "get feedback on your
- * own project", answered from evidence and with no sign-in.
+ * Review a hackathon submission from a link: feedback on a team's own
+ * project, answered from evidence and with no sign-in.
  *
  * A composite over what already exists; it computes nothing new:
  *   - the submission's own stored facts (stack, categories, repo activity,

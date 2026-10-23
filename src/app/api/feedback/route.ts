@@ -4,7 +4,7 @@
  *   POST /api/feedback
  *   Body: { kind, message, context? }
  *
- * Mirrors Colosseum Copilot's /feedback pattern — gives agents an
+ * Gives agents an
  * in-skill channel for reporting bugs / missing data / wrong answers
  * without a separate GitHub-issues flow.
  *
