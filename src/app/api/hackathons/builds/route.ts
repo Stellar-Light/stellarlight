@@ -18,6 +18,7 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { RERANK_TOP } from "@/lib/build-rerank";
 import { afterEventFields, distribution } from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
@@ -28,7 +29,7 @@ import {
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
-	wordsNoBuildUses,
+	unusedWordsWarning,
 } from "@/lib/hackathon-builds";
 import { heldSecurity } from "@/lib/held-repos";
 import { clampLimit, clampOffset } from "@/lib/http-params";
@@ -108,33 +109,23 @@ export async function GET(req: NextRequest) {
 		served: mode,
 		warnings,
 		entries,
+		rerank,
+		withheld,
 	} = await queryBuilds(indexed, f, {
 		perSubmission: true,
 		// Here only: a declared package matches q (q=passkey finds builds on
 		// passkey-kit); prior art and analyze's counts read the text alone.
 		packages: true,
 		countEntries: true,
+		// Hybrid's first 50 reordered by the reranker: on 13 held-out labeled
+		// ideas the top 5 held 15 same-idea builds and 17 wrong ones, where
+		// the hybrid order held 11 and 21 (2026-10-23).
+		rerank: true,
 	});
 	warnings.unshift(...parsed.warnings);
-	// Most of q's words in no submission: a build listed by its words alone
-	// matches only part of q. One found by meaning was scored on all of it.
-	const unused =
-		q && scored.some((s) => s.matched.length && s.similarity === undefined)
-			? wordsNoBuildUses(indexed, q)
-			: null;
-	if (unused && unused.absent.length * 2 > unused.concepts) {
-		const { absent, concepts } = unused;
-		const words = `searched in q (${absent.join(", ")})`;
-		// Every word in no submission: a words-alone build holds them only
-		// inside longer words ("1 of the 1 words ... part of q" said less).
-		warnings.push(
-			absent.length < concepts
-				? `${absent.length} of the ${concepts} words ${words} occur as a whole word in no submission in the index (a matchedTerms entry naming one was found inside a longer word), so a build listed by its words alone, with no similarity, matches only part of q and is not evidence that this idea was built`
-				: concepts === 1
-					? `the word ${words} occurs as a whole word in no submission in the index: a build listed by its words alone, with no similarity, holds it only inside a longer word and is not evidence that this idea was built`
-					: `none of the ${concepts} words ${words} occurs as a whole word in any submission in the index: a build listed by its words alone, with no similarity, holds them only inside longer words and is not evidence that this idea was built`,
-		);
-	}
+	// Any of q's words in no submission: say which, and what the rows are.
+	const unused = q ? unusedWordsWarning(indexed, q, scored, withheld) : null;
+	if (unused) warnings.push(unused);
 
 	const builds = scored
 		.slice(offset, offset + limit)
@@ -202,6 +193,8 @@ export async function GET(req: NextRequest) {
 								: "filtered",
 				),
 				mode: { requested: f.mode, served: mode },
+				// Present only when the reranker was attempted (q, hybrid served).
+				...(rerank !== undefined ? { reranked: rerank !== null } : {}),
 				...(warnings.length ? { warnings } : {}),
 				source: "https://stellarlight.xyz/api/hackathons/builds",
 				upstream: "dorahacks.io",
@@ -222,6 +215,8 @@ export async function GET(req: NextRequest) {
 					matched: scored.length,
 					// Event entries that match: analyze's unit for the same filter.
 					entries,
+					// Matched by name, held back: most of q is in no submission.
+					withheldByName: withheld.length,
 					returned: builds.length,
 				},
 				// Over every matched build, not just this page: "which SDKs do
@@ -231,7 +226,7 @@ export async function GET(req: NextRequest) {
 					note: "Stellar packages declared in each matched build's repo manifests (package.json, Cargo.toml). Counted over buildsRead; the other matched builds have no repo link, a repo that is not public, or were not read yet: unknown, not 'uses none'.",
 				},
 				note: q
-					? "Prior art over hackathon PROTOTYPES (DoraHacks submissions); most never become directory projects. Ordered by how many of the query's concepts a build covers, then prize winners first. A hit means someone already built something similar at a Stellar hackathon: check `url` or `githubUrl` before rebuilding, and `project` for what it became. No hit is NOT proof it was never tried (DoraHacks-sourced; non-winners can have thin descriptions)."
+					? `Prior art over hackathon PROTOTYPES (DoraHacks submissions); most never become directory projects. Ordered by how many of the query's concepts a build covers, then prize winners first${rerank ? `; the first ${RERANK_TOP} then reordered by a reranker that reads q with each build's name and summary (meta.reranked)` : ""}. A hit means someone already built something similar at a Stellar hackathon: check \`url\` or \`githubUrl\` before rebuilding, and \`project\` for what it became. No hit is NOT proof it was never tried (DoraHacks-sourced; non-winners can have thin descriptions).`
 					: "No q: prize winners first across all Stellar hackathons. Pass q to check prior art ('has anyone built X at a hackathon?').",
 			},
 			builds,

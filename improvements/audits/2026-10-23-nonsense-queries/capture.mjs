@@ -7,12 +7,14 @@
 //   query, none edited or dropped) and the probe "quantum llama sandwich":
 //   the whole keyword and hybrid rankings (every hybrid row with a meaning
 //   score gives the replay its meaning map).
+// With a second argument, a query file in the shape of probes.json is
+// captured instead of the battery and the probe (kind "adversarial").
 // /api/status apiVersion is read at start and end.
 // Usage, from the repository root:
-//   node improvements/audits/2026-10-23-nonsense-queries/capture.mjs <out.json>
+//   node improvements/audits/2026-10-23-nonsense-queries/capture.mjs <out.json> [probes.json]
 import { readFileSync, writeFileSync } from "node:fs";
 
-const [, , outPath] = process.argv;
+const [, , outPath, queriesPath] = process.argv;
 const BASE = "https://www.stellarlight.xyz";
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const PAUSE = 2000;
@@ -24,15 +26,22 @@ const battery = JSON.parse(
 		"utf8",
 	),
 );
-const extra = [
-	...battery.queries.map((x) => ({
-		kind: "nonsense",
-		id: x.id,
-		group: x.kind,
-		q: x.q,
-	})),
-	{ kind: "probe", q: "quantum llama sandwich" },
-];
+const extra = queriesPath
+	? JSON.parse(readFileSync(queriesPath, "utf8")).queries.map((x) => ({
+			kind: "adversarial",
+			id: x.id,
+			group: x.group,
+			q: x.q,
+		}))
+	: [
+			...battery.queries.map((x) => ({
+				kind: "nonsense",
+				id: x.id,
+				group: x.kind,
+				q: x.q,
+			})),
+			{ kind: "probe", q: "quantum llama sandwich" },
+		];
 
 async function get(path) {
 	for (let attempt = 0; attempt < 6; attempt++) {

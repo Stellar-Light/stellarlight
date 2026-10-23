@@ -1,0 +1,80 @@
+{
+	"writtenAt": "2026-10-23T13:08:08Z",
+	"writer": "Claude Opus 5.5 (lane L2), fixed before any probe ran against rule L or the extended line",
+	"queries": [
+		{ "id": "p01", "group": "one word", "q": "escrow" },
+		{ "id": "p02", "group": "one word", "q": "llama" },
+		{ "id": "p03", "group": "product name", "q": "soroswap" },
+		{ "id": "p04", "group": "product name", "q": "blend" },
+		{ "id": "p05", "group": "product name", "q": "reflector" },
+		{ "id": "p06", "group": "product name", "q": "soroswap aggregator" },
+		{ "id": "p07", "group": "product name", "q": "blend lending pool" },
+		{ "id": "p08", "group": "typo", "q": "sorobn wallet" },
+		{ "id": "p09", "group": "typo", "q": "remitance app" },
+		{ "id": "p10", "group": "typo", "q": "pasky wallet" },
+		{
+			"id": "p11",
+			"group": "typo",
+			"q": "decentralised exchnage for stablecoins"
+		},
+		{ "id": "p12", "group": "accent or punctuation", "q": "café payments" },
+		{
+			"id": "p13",
+			"group": "accent or punctuation",
+			"q": "AI agents, payments"
+		},
+		{
+			"id": "p14",
+			"group": "accent or punctuation",
+			"q": "pagos en línea para comercios"
+		},
+		{
+			"id": "p15",
+			"group": "accent or punctuation",
+			"q": "paiement mobile sécurisé"
+		},
+		{
+			"id": "p16",
+			"group": "accent or punctuation",
+			"q": "x402!!! paywall???"
+		},
+		{ "id": "p17", "group": "two words", "q": "pogo payments" },
+		{ "id": "p18", "group": "two words", "q": "escrow sandwich" },
+		{ "id": "p19", "group": "two words", "q": "llama wallet" },
+		{
+			"id": "p20",
+			"group": "five words",
+			"q": "loyalty points for coffee shops"
+		},
+		{
+			"id": "p21",
+			"group": "five words",
+			"q": "tokenized carbon credits for farmers"
+		},
+		{
+			"id": "p22",
+			"group": "five words",
+			"q": "proof of reserves for stablecoin issuers"
+		},
+		{
+			"id": "p23",
+			"group": "five words",
+			"q": "crowdfunding platform for indie game developers"
+		},
+		{
+			"id": "p24",
+			"group": "five words",
+			"q": "trombone lessons marketplace with escrow payments"
+		},
+		{ "id": "p25", "group": "only stellar", "q": "stellar" },
+		{ "id": "p26", "group": "only stellar", "q": "stellar zorblax" },
+		{ "id": "p27", "group": "only stellar", "q": "stellar zorblax quibbet" },
+		{ "id": "p28", "group": "hyphenated", "q": "pay-per-call" },
+		{ "id": "p29", "group": "hyphenated", "q": "zero-knowledge pogo stick" },
+		{ "id": "p30", "group": "hyphenated", "q": "cross-border remittance" },
+		{ "id": "p31", "group": "package", "q": "passkey-kit" },
+		{ "id": "p32", "group": "package", "q": "soroban-sdk" },
+		{ "id": "p33", "group": "package", "q": "@creit.tech/stellar-wallets-kit" },
+		{ "id": "p34", "group": "package", "q": "stellar-hd-wallet" }
+	]
+}

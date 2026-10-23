@@ -532,7 +532,7 @@ const VET_PRIOR_ART_SCHEMA = {
 			type: "array",
 			nullable: true,
 			description:
-				"null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. `matchedTerms` shows which words matched; `similarity` is the meaning score; of the top five, only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed, and one with similarity and no matchedTerms was found by meaning alone, so check it.",
+				"null = the submissions index could not be read (not checked; the note says so), [] = checked, none listed (read it with buildsBelowEvidenceRule). Stored hackathon submissions matching the idea, best first: searchHackathonBuilds in hybrid mode (words plus meaning), across events on DoraHacks and off it. When buildsReranked is true, the first 50 of that ranking are reordered by a reranker that reads the idea with each build's name and summary, and of its top five the builds it scores at least 0.45 are listed. When it is false, of the hybrid top five only builds with a score of at least 0.7, two matched words, or every word of the idea the search reads used in the build's own name or description (a synonym, track or award text does not count; the search skips generic words such as app, so a one-word idea's builds need only mention that word) are listed. `matchedTerms` shows which words matched; `similarity` is the meaning score; a build with similarity and no matchedTerms was found by meaning alone, and a reranked build with neither by the reranker alone, so check it.",
 			items: {
 				type: "object",
 				properties: {
@@ -561,11 +561,17 @@ const VET_PRIOR_ART_SCHEMA = {
 			description:
 				"The search that served builds: hybrid normally, keyword when search by meaning could not run (the note then says so); null with builds when the index could not be read.",
 		},
+		buildsReranked: {
+			type: "boolean",
+			nullable: true,
+			description:
+				"true = the hybrid ranking's first 50 were reordered by a reranker (a cross-encoder model) that reads the idea with each build's name and summary, and builds holds the builds of its top five it scored at least 0.45. false = the reranker did not run: buildsMode is keyword, no submission matched, or it failed, took longer than 2 s, or was skipped because search by meaning had already taken longer than 3 s (the note then says which), so builds is the hybrid top five under the word and meaning rule. null with builds when the index could not be read.",
+		},
 		buildsBelowEvidenceRule: {
 			type: "integer",
 			nullable: true,
 			description:
-				"How many of the five nearest submissions are not in builds because they fell short of the evidence rule. builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read.",
+				"How many of the five nearest submissions are not in builds because they fell short of the evidence rule (the reranker's 0.45 when buildsReranked is true). builds [] with a count above 0 means submissions came close but none met the rule (the note says so; searchHackathonBuilds with the same q lists them), not that nobody built this; builds [] with 0 means nothing came close. null with builds when the index could not be read.",
 		},
 		repos: {
 			type: "array",
@@ -3667,7 +3673,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Search what was BUILT at Stellar hackathons (prior-art over prototypes)",
 				description:
-					"Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals. Unit: submissions (counts.entries = event entries). Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.",
+					"Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event, placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; in hybrid mode a reranker orders the top 50. Unit: submissions (counts.entries = event entries). Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Prior-art over hackathon PROTOTYPES — has this idea already been hacked together at a Stellar hackathon?",
@@ -3709,7 +3715,7 @@ export const spec: OpenAPISpec = {
 				},
 				parameters: [
 					...buildFilterParams(
-						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when its name holds one of q's words or it covers half of them, and a word of four letters or more also matches inside a longer word, so one word of a longer q can list a build; when most of q's words occur as a whole word in no submission and a build is listed by its words alone, meta.warnings says so.",
+						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when it covers half of q's words, or when its name holds one of them unless most of q's words occur as a whole word in no submission (text or declared packages). A word of four letters or more also matches inside a longer word. When any of q's words occurs as a whole word in no submission, meta.warnings names those words and says what the listed builds are, and says when a build whose name matched was held back (meta.counts.withheldByName).",
 						"hybrid",
 					),
 					{
@@ -3770,11 +3776,16 @@ export const spec: OpenAPISpec = {
 														},
 													},
 												},
+												reranked: {
+													type: "boolean",
+													description:
+														"Present only with q when hybrid served and a build matched. true = the first 50 of the hybrid ranking (word coverage blended with meaning, winners first among near equals) were reordered by a reranker, a cross-encoder that reads q with each build's name and summary together; it does not read placement, so a winner keeps no edge there except on a tie, and rows past 50 keep the hybrid order. false = the reranker failed, took longer than 2 s, or was skipped because search by meaning had already taken longer than 3 s, so every row is in hybrid order (meta.warnings says which). Absent = not attempted: no q, keyword or meaning mode, no matched build, or no reranker configured. Each page is ranked by its own request: when paging, read this flag on every page, since a page served after a failure is in hybrid order and its rows can repeat or skip rows of a reranked page.",
+												},
 												warnings: {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or most of the words searched in q occur as a whole word in no submission while a build is listed by its words alone ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built; the q line means a build listed by its words alone, with no similarity, matches only part of q and is not evidence that the idea was built.",
+														"Present only when something limited this answer: search by meaning could not run, the reranker could not run or was skipped ('the reranker could not run this request ...' or 'the reranker was skipped because search by meaning took longer than 3 s ...'; rows are then in hybrid order), a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other.",
 												},
 												filters: BUILD_FILTERS_ECHO_SCHEMA,
 												counts: {
@@ -3796,6 +3807,11 @@ export const spec: OpenAPISpec = {
 															type: "integer",
 															description:
 																"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze.",
+														},
+														withheldByName: {
+															type: "integer",
+															description:
+																"Builds whose name matched q but that are not listed, because most of the words searched in q occur as a whole word in no submission; meta.warnings names the words they matched. Not counted in matched or entries. 0 = none held back; always 0 in meaning mode, which never lists a build by its name.",
 														},
 														returned: { type: "integer" },
 													},
@@ -4101,7 +4117,7 @@ export const spec: OpenAPISpec = {
 						schema: { type: "integer", default: 10, maximum: 30 },
 					},
 					...buildFilterParams(
-						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. Empty = every submission.",
+						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. A word only a declared package uses still counts as used when deciding whether most of q's words occur in no submission, which holds back builds matched by name alone. Empty = every submission.",
 						"keyword",
 					),
 				],
@@ -6077,7 +6093,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													nullable: true,
 													description:
-														"Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners that match at least half of the idea's words and have two matched words or a meaning score of at least 0.7, then the builds vetIdea lists from the same top five, five at most, so every build listed passes vetIdea's evidence rule. null = the submissions index could not be read (not checked), [] = checked, none listed (vet.priorArt.buildsBelowEvidenceRule says whether the nearest came close).",
+														"Prototype-layer prior art by hybrid search (words plus meaning), the same search vetIdea runs: up to two prize winners that match at least half of the idea's words and have two matched words or a meaning score of at least 0.7, then the builds vetIdea lists (vet.priorArt.builds, reranked when vet.priorArt.buildsReranked is true), five at most. A build vetIdea lists that the submissions index no longer holds (rebuilt between the two reads) is left out here and named in whatNotToClaim. null = the submissions index could not be read (not checked), [] = checked, none listed (vet.priorArt.buildsBelowEvidenceRule says whether the nearest came close).",
 													items: {
 														type: "object",
 														properties: {

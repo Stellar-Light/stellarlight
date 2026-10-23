@@ -2,6 +2,11 @@
  * The filters every hackathon-submission operation takes, parsed and applied
  * once, so search, analyze and compare read the same set the same way.
  */
+import {
+	RERANK_SKIP_AFTER_MS,
+	RERANK_TIMEOUT_MS,
+	rerankBuilds,
+} from "@/lib/build-rerank";
 import { semanticBuildScores } from "@/lib/hackathon-build-semantic";
 import {
 	BUILD_SEARCH_MODES,
@@ -263,6 +268,16 @@ export interface BuildQuery {
 	 * counts (a submission entered in several events is one entry per
 	 * event), however perSubmission folded the rows. */
 	entries?: number;
+	/** With rerank, in hybrid mode: the reranker's score per build of the
+	 * first RERANK_TOP, which `scored` is then ordered by; null = it did not
+	 * run (failed, slow, or skipped because search by meaning used up
+	 * RERANK_SKIP_AFTER_MS), so `scored` keeps the hybrid order and warnings
+	 * says so. Absent = not attempted (keyword or meaning mode, no q, no
+	 * matched build, or the reranker is not configured). */
+	rerank?: Map<string, number> | null;
+	/** Builds whose name matched q but that rule L held back, as most of q
+	 * is in no submission, and that meaning did not list either. */
+	withheld: { b: IndexedBuild; matched: string[] }[];
 }
 
 /** Run the filters over the index. Search by meaning that cannot run serves
@@ -273,13 +288,17 @@ export async function queryBuilds(
 	/** searchHackathonBuilds: one result per submission. analyze leaves it
 	 * off and counts every event entry (sls-092). `packages`: q also matches
 	 * declared packages; only the searchHackathonBuilds route passes it.
-	 * `countEntries`: also count matching event entries (meta.counts.entries). */
+	 * `countEntries`: also count matching event entries (meta.counts.entries).
+	 * `rerank`: in hybrid mode, reorder the first RERANK_TOP by the reranker
+	 * (src/lib/build-rerank.ts); vetIdea and the builds route pass it. */
 	opts: {
 		perSubmission?: boolean;
 		packages?: boolean;
 		countEntries?: boolean;
+		rerank?: boolean;
 	} = {},
 ): Promise<BuildQuery> {
+	const startedAt = Date.now();
 	const structural = {
 		winnersOnly: f.winnersOnly,
 		track: f.track,
@@ -313,6 +332,7 @@ export async function queryBuilds(
 			served: f.mode,
 			warnings: [],
 			entries: entriesOf("", browse),
+			withheld: [],
 		};
 	const warnings: string[] = [];
 	let served = f.mode;
@@ -330,17 +350,40 @@ export async function queryBuilds(
 			);
 		}
 	}
-	const scored = searchHackathonBuilds(indexed, f.q, {
+	const held: BuildQuery["withheld"] = [];
+	const hybrid = searchHackathonBuilds(indexed, f.q, {
 		...structural,
 		mode: served,
 		semantic,
 		packages: opts.packages,
+		// Meaning mode never lists a build by its name: nothing is withheld.
+		withheld: served === "meaning" ? undefined : held,
 	});
+	// Nothing matched: nothing to rerank, so it is not attempted. Search by
+	// meaning already slow: the rerank is skipped, not stacked on top.
+	const attempt = opts.rerank && served === "hybrid" && hybrid.length > 0;
+	const slow = attempt && Date.now() - startedAt > RERANK_SKIP_AFTER_MS;
+	const { ranked: scored, scores: rerank } = !attempt
+		? { ranked: hybrid, scores: undefined }
+		: slow
+			? { ranked: hybrid, scores: null }
+			: await rerankBuilds(f.q, hybrid);
+	if (slow)
+		warnings.push(
+			`the reranker was skipped because search by meaning took longer than ${RERANK_SKIP_AFTER_MS / 1000} s, the time budget before a rerank, so rows are in hybrid order`,
+		);
+	else if (rerank === null)
+		warnings.push(
+			`the reranker could not run this request (failed or slower than ${RERANK_TIMEOUT_MS / 1000} s), so rows are in hybrid order`,
+		);
+	const listed = new Set(scored.map((s) => s.b.id));
 	return {
+		...(rerank !== undefined ? { rerank } : {}),
 		scored,
 		field,
 		served,
 		warnings,
+		withheld: held.filter((w) => !listed.has(w.b.id)),
 		entries: entriesOf(f.q, scored, {
 			mode: served,
 			semantic,

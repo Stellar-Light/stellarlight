@@ -1,0 +1,44 @@
+capture: api 1.9.94 -> 1.9.94, corpus 1344
+id | group | q | words read | in no submission | keyword before -> after | hybrid before -> after | warning fires, keyword / hybrid
+p01 | one word | escrow | 1 | none | 34 -> 34 | 34 -> 34 | no / no
+p02 | one word | llama | 1 | llama | 1 -> 1 | 1 -> 1 | yes / yes
+p03 | product name | soroswap | 1 | none | 15 -> 15 | 18 -> 18 | no / no
+p04 | product name | blend | 1 | none | 47 -> 47 | 47 -> 47 | no / no
+p05 | product name | reflector | 1 | none | 14 -> 14 | 14 -> 14 | no / no
+p06 | product name | soroswap aggregator | 2 | none | 19 -> 19 | 50 -> 50 | no / no
+p07 | product name | blend lending pool | 3 | none | 77 -> 77 | 77 -> 77 | no / no
+p08 | typo | sorobn wallet | 2 | sorobn | 89 -> 89 | 141 -> 141 | yes / yes
+p09 | typo | remitance app | 1 | remitance | 0 -> 0 | 0 -> 0 | yes / yes
+p10 | typo | pasky wallet | 2 | pasky | 89 -> 89 | 91 -> 91 | yes / yes
+p11 | typo | decentralised exchnage for stablecoins | 3 | exchnage | 1 -> 1 | 285 -> 285 | yes / yes
+p12 | accent or punctuation | café payments | 2 | café | 270 -> 270 | 270 -> 270 | yes / yes
+p13 | accent or punctuation | AI agents, payments | 3 | none | 147 -> 147 | 147 -> 147 | no / no
+p14 | accent or punctuation | pagos en línea para comercios | 5 | none | 22 -> 22 | 26 -> 26 | no / no
+p15 | accent or punctuation | paiement mobile sécurisé | 3 | paiement, sécurisé | 1 -> 0 | 1 -> 0 | yes / yes
+p16 | accent or punctuation | x402!!! paywall??? | 2 | none | 0 -> 0 | 83 -> 83 | no / no
+p17 | two words | pogo payments | 2 | pogo | 270 -> 270 | 270 -> 270 | yes / yes
+p18 | two words | escrow sandwich | 2 | sandwich | 34 -> 34 | 34 -> 34 | yes / yes
+p19 | two words | llama wallet | 2 | llama | 90 -> 90 | 90 -> 90 | yes / yes
+p20 | five words | loyalty points for coffee shops | 4 | loyalty, coffee, shops | 2 -> 0 | 3 -> 1 | yes / yes
+p21 | five words | tokenized carbon credits for farmers | 4 | none | 8 -> 8 | 27 -> 27 | no / no
+p22 | five words | proof of reserves for stablecoin issuers | 4 | none | 64 -> 64 | 109 -> 109 | no / no
+p23 | five words | crowdfunding platform for indie game developers | 4 | indie | 6 -> 6 | 11 -> 11 | yes / yes
+p24 | five words | trombone lessons marketplace with escrow payments | 5 | trombone | 30 -> 30 | 31 -> 31 | yes / yes
+p25 | only stellar | stellar | 1 | none | 874 -> 874 | 874 -> 874 | no / no
+p26 | only stellar | stellar zorblax | 1 | zorblax | 0 -> 0 | 1 -> 1 | yes / yes
+p27 | only stellar | stellar zorblax quibbet | 2 | zorblax, quibbet | 0 -> 0 | 47 -> 47 | yes / yes
+p28 | hyphenated | pay-per-call | 1 | none | 5 -> 5 | 5 -> 5 | no / no
+p29 | hyphenated | zero-knowledge pogo stick | 3 | pogo, stick | 4 -> 0 | 223 -> 220 | yes / yes
+p30 | hyphenated | cross-border remittance | 2 | none | 34 -> 34 | 36 -> 36 | no / no
+p31 | package | passkey-kit | 1 | none | 12 -> 12 | 19 -> 19 | no / no
+p32 | package | soroban-sdk | 1 | none | 0 -> 0 | 57 -> 57 | no / no
+p33 | package | @creit.tech/stellar-wallets-kit | 1 | none | 0 -> 0 | 284 -> 284 | no / no
+p34 | package | stellar-hd-wallet | 1 | none | 7 -> 7 | 286 -> 286 | no / no
+
+Builds removed or added:
+p15 keyword: removed Stellar Mobile Agents; added none
+p15 hybrid: removed Stellar Mobile Agents; added none
+p20 keyword: removed X402-MCP Shopify Commerce; Stellar Health Point; added none
+p20 hybrid: removed X402-MCP Shopify Commerce; Stellar Health Point; added none
+p29 keyword: removed StellarSpend: Private Spending Limits with Zero-Kn; Zero-Knowledge Encrypted Unified Swaps (ZEUS); Private cross-border payments on Stellar with zero; ProofPass | Privacy-Preserving Age Verification wi; added none
+p29 hybrid: removed StellarSpend: Private Spending Limits with Zero-Kn; Zero-Knowledge Encrypted Unified Swaps (ZEUS); Private cross-border payments on Stellar with zero; added none

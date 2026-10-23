@@ -7,6 +7,7 @@ import {
 	indexedFromStored,
 	onePerSubmission,
 	searchHackathonBuilds,
+	unusedWordsWarning,
 	wordsNoBuildUses,
 } from "@/lib/hackathon-builds";
 import {
@@ -402,15 +403,261 @@ describe("words no build uses", () => {
 		});
 	});
 
+	// Review 2026-10-23: notes read as used through not, uses through us.
+	it("drops es only after s, x, z, ch or sh", () => {
+		const short = [build("Short", "not mod plan them hop to do us tax")];
+		for (const w of [
+			"notes",
+			"modes",
+			"planes",
+			"themes",
+			"hopes",
+			"toes",
+			"does",
+			"uses",
+		])
+			expect(wordsNoBuildUses(short, w).absent, w).toEqual([w]);
+		expect(wordsNoBuildUses(short, "taxes").absent).toEqual([]);
+	});
+
 	it("does not count a token with no letter or digit as a word", () => {
 		expect(wordsNoBuildUses(pool, "agents !!! ???")).toEqual({
 			absent: [],
 			concepts: 1,
 		});
 	});
+
+	// 140 labeled ideas, 2026-10-23: charities and family were called unused
+	// beside charity and families, soroban-sdk beside 66% of read repos.
+	it("reads charity for charities, a common library as used, and names a word bare", () => {
+		const more = [
+			build("Give", "A charity drive for families."),
+			{ ...build("Vault", "A vault."), stack: ["soroban-sdk"] },
+		];
+		expect(
+			wordsNoBuildUses(more, "charities family soroban-sdk (rosca,"),
+		).toEqual({ absent: ["rosca"], concepts: 4 });
+	});
+});
+
+describe("the warning names related forms submissions do use", () => {
+	// The 12 words on 140 labeled ideas (2026-10-23) whose related form is
+	// used, and look-alikes that are not related forms.
+	const pool = [
+		build("Cash", "Cash out, with cashback."),
+		build("Mint", "Mint and minting tools."),
+		build("Hedge", "Hedge positions."),
+		build("Rent", "Rent, rental and rentals."),
+		build("Cart", "A shopping cart."),
+		build("Office", "Back office, backed by assets, background jobs."),
+		build("Algo", "Trading algorithms."),
+		build("Fees", "Cheap and cheaper fees."),
+		build("Gen", "Generate a generation."),
+		build("Votes", "Delegation and delegating."),
+		build("Keys", "Revocable keys."),
+		build("Misc", "Reliable, forever, vouch, sticker, traction."),
+		// Review 2026-10-23: words these were said to be related forms of.
+		build(
+			"Look",
+			"Portal, portion, million, mineral, minerals, stripe, formal, billion, planes.",
+		),
+		build("Alike", "Cent, stale, with."),
+		build("Short", "Them, not, plan, hop, mod."),
+	];
+	const line = (q: string) => unusedWordsWarning(pool, q, []) ?? "";
+
+	it("names each related form that is used", () => {
+		for (const [word, clause] of [
+			["cashing", "cash for cashing"],
+			["minted", "mint and minting for minted"],
+			// mint is not grown back on a stem minter gives by dropping er
+			// (center is not cent), only its inflections are.
+			["minter", "minting for minter"],
+			["hedging", "hedge for hedging"],
+			// An inflection's stem takes back no al (renting is not rental).
+			["renting", "rent for renting"],
+			["shops", "shopping for shops"],
+			["backing", "back and backed for backing"],
+			["algorithmic", "algorithms for algorithmic"],
+			["cheapest", "cheap for cheapest"],
+			["generator", "generate for generator"],
+			["delegate", "delegating and delegation for delegate"],
+		])
+			expect(line(word), word).toContain(`used: ${clause}`);
+	});
+
+	it("claims no related form a shared prefix only looks like", () => {
+		// revocable is related to revoke, but k to c is past the rule.
+		for (const word of [
+			"revoke",
+			"relief",
+			"forex",
+			"vouchers",
+			"stick",
+			"tractor",
+			"port",
+			"mill",
+			"miner",
+			"center",
+			"strip",
+			"stalling",
+			"wither",
+			// es and e dropped where they are not an ending: them is not
+			// themes or theme.
+			"themes",
+			"theme",
+			"notes",
+			"planes",
+			"hopes",
+			"modes",
+			// Re-check 2026-10-23: a word's own inflection let these back in
+			// (ports portal, mills million, forming formal, billed billion).
+			"ports",
+			"mills",
+			"forming",
+			"strips",
+			"miners",
+			"billed",
+		])
+			expect(line(word), word).not.toMatch(/related form/);
+	});
+
+	it("names plan for planning but never planes", () => {
+		expect(line("planning")).toContain("used: plan for planning");
+		expect(line("planning")).not.toContain("planes");
+	});
+});
+
+describe("the warning names a spelling only when one is clear", () => {
+	const remit = (n: number, typo: number) => [
+		...Array.from({ length: n }, (_, i) =>
+			build(`Remit ${i}`, "Remittance app."),
+		),
+		...Array.from({ length: typo }, (_, i) =>
+			build(`Typo ${i}`, "Remmitance app."),
+		),
+	];
+	const suggestion = "(remittance is a used word one edit from remitance)";
+
+	it("names a word five times as used as any other one edit away", () => {
+		expect(unusedWordsWarning(remit(5, 1), "remitance", [])).toContain(
+			suggestion,
+		);
+	});
+
+	it("names none when two are close in use", () => {
+		expect(unusedWordsWarning(remit(5, 2), "remitance", [])).not.toContain(
+			suggestion,
+		);
+	});
+});
+
+describe("a name alone does not list a build when most of q is in no build", () => {
+	const pool = [
+		build("Quantum Shield Exchange", "Post-quantum key custody."),
+		build("MellaMate", "A companion app for daily habits."),
+		build("Escrow Hub", "Escrow for freelancers on Soroban."),
+		build("Café Pay", "Tap to pay at a café."),
+	];
+	const names = (q: string) =>
+		searchHackathonBuilds(pool, q).map((s) => s.b.name);
+
+	it("drops a build named for one word, or holding one inside its name", () => {
+		expect(names("quantum llama sandwich")).toEqual([]);
+	});
+
+	it("keeps name matches when at most half of q is in no build", () => {
+		expect(names("quantum escrow sandwich").sort()).toEqual([
+			"Escrow Hub",
+			"Quantum Shield Exchange",
+		]);
+		// An accented word is a word some build uses.
+		expect(names("café sandwich")).toEqual(["Café Pay"]);
+	});
+
+	it("keeps a build that covers half of q, and every one-word match", () => {
+		expect(names("escrow freelancers pogo stick")).toEqual(["Escrow Hub"]);
+		expect(names("llama")).toEqual(["MellaMate"]);
+	});
 });
 
 describe("brief picks winners first, then broadens", () => {
+	// 2026-10-23: vetIdea reranks its prior art, so the brief takes vetIdea's
+	// list after its winner slots instead of re-deriving the hybrid top five.
+	it("after its winner slots lists the builds vetIdea lists, in vetIdea's order", async () => {
+		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
+		const pool = [
+			build(
+				"RenderGate",
+				"Pay-per-render browser API for agents with x402.",
+				true,
+			),
+			build("Exact phrase", "x402 pay-per-call API for AI agents."),
+			build("Second", "x402 API for agents paying per call."),
+		];
+		const scored = searchHackathonBuilds(
+			pool,
+			"x402 pay-per-call API for AI agents",
+			{ perSubmission: true },
+		);
+		expect(
+			pickBriefBuilds(scored, [pool[2], pool[0]]).map((s) => s.b.name),
+		).toEqual(["RenderGate", "Second"]);
+		// No list from vetIdea (its read failed): the evidence rule, as before.
+		expect(pickBriefBuilds(scored, undefined)).toEqual(pickBriefBuilds(scored));
+		expect(pickBriefBuilds(scored).map((s) => s.b.name)).toContain(
+			"Exact phrase",
+		);
+	});
+
+	// Review 2026-10-23: the brief looked vetIdea's ids up in its own ranking
+	// and dropped, in silence, one its own search did not hold (vetIdea served
+	// hybrid, the brief keyword).
+	it("lists a build vetIdea lists that its own ranking does not hold", async () => {
+		const { pickBriefBuilds, vetBuildsIn } = await import(
+			"@/lib/hackathon-brief"
+		);
+		const pool = [
+			build("Words", "x402 pay-per-call API for AI agents."),
+			build("Meaning only", "Agents settle usage per request in stablecoins."),
+		];
+		// Keyword served: the meaning-only build is not in the ranking.
+		const scored = searchHackathonBuilds(
+			pool,
+			"x402 pay-per-call API for AI agents",
+			{ perSubmission: true },
+		);
+		expect(scored.map((s) => s.b.name)).toEqual(["Words"]);
+		const vetRows = [
+			{ id: "Meaning only", hackathon: "Stellar Hacks: Agents" },
+			{ id: "Words", hackathon: "Stellar Hacks: Agents" },
+		];
+		const listed = vetBuildsIn(vetRows, scored, pool);
+		expect(pickBriefBuilds(scored, listed.builds).map((s) => s.b.name)).toEqual(
+			["Meaning only", "Words"],
+		);
+		expect(listed.missing).toEqual([]);
+	});
+
+	it("takes vetIdea's event entry from the index, and names a build it cannot find", async () => {
+		const { vetBuildsIn } = await import("@/lib/hackathon-brief");
+		const twin = build("Twin", "A wallet.", false, "twin");
+		const other = {
+			...twin,
+			hackathon: { title: "Other", slug: "other", endedAt: null },
+		};
+		const listed = vetBuildsIn(
+			[
+				{ id: "twin", hackathon: "Other" },
+				{ id: "gone", hackathon: "Stellar Hacks: Agents" },
+			],
+			[],
+			[twin, other],
+		);
+		expect(listed.builds).toEqual([other]);
+		expect(listed.missing).toEqual(["gone"]);
+	});
+
 	it("puts covering winners first and leaves out a one-word winner", async () => {
 		const { pickBriefBuilds } = await import("@/lib/hackathon-brief");
 		// The brief takes the search's scored list (hybrid in production).
