@@ -345,6 +345,26 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   User-Agent, no timeout and no retries, from Cloudflare's network, so its
   users likely share one per-IP limit [inferred]. See the owner decision on
   a key below.
+- searchRepos rarely finds the repo a natural-language question asks for:
+  on 25 builder questions written blind (round
+  `2026-10-23-repos-ranking`, evidence
+  `improvements/audits/2026-10-23-repos-ranking/`), 10 have an expected
+  repo in the top 5 after that round's fixes. Of the 15 misses, 2 repos are
+  not indexed, 3 are indexed but never enter the 600-row candidate window
+  (no description, repoScore 30 to 43), and 10 are outranked by rows that
+  match many common words in code symbols, by curated floats firing on a
+  word in passing, or for lack of vocabulary ("command-line" for
+  stellar-cli, "python" for py-stellar-base). Rarity weighting, a
+  rare-anchor supplement and two synonyms moved ranks both ways and gained
+  no tuning question (`prototypes.txt`). Needs a labeled set larger than 17
+  tuning questions before another attempt.
+- DeFindex's project row links the archived paltalabs/defindex, and its
+  curated successor defindex-io/stellar-contracts is not indexed
+  (2026-10-23, read-only). Data change: `GITHUB_REPOS_ADD` and
+  `GITHUB_LINK_FIX` entries for `defindex` in
+  `scripts/data/curation-maps.ts`, then the curate-projects and
+  enrich-repos lanes (steps in the round's audit README). No check asserts
+  that a curated successor is indexed.
 
 
 ## Owner decisions (safe default in brackets)

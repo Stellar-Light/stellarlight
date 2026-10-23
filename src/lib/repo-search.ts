@@ -720,6 +720,102 @@ export function isContentStopword(t: string): boolean {
 	return STOPWORDS.has(t);
 }
 
+// Question filler repo search drops on top of the shared stopwords (round
+// 2026-10-23-repos-ranking): words that frame a builder's question ("what's
+// the fastest way to", "instead of writing them myself", "add X to my app")
+// and name no thing a repo is. They matched descriptions, fed the coverage
+// multiplier and widened the 600-row candidate window. Kept out of the
+// shared list, which projects, builds and locate also read.
+const REPO_QUERY_FILLER = new Set<string>([
+	"easy",
+	"easier",
+	"easiest",
+	"simple",
+	"simpler",
+	"simplest",
+	"quick",
+	"quicker",
+	"quickest",
+	"fast",
+	"faster",
+	"fastest",
+	"way",
+	"ways",
+	"if",
+	"but",
+	"so",
+	"than",
+	"then",
+	"not",
+	"without",
+	"also",
+	"just",
+	"really",
+	"actually",
+	"already",
+	"even",
+	"else",
+	"instead",
+	"own",
+	"myself",
+	"yourself",
+	"ourselves",
+	"themselves",
+	"itself",
+	"someone",
+	"anyone",
+	"anybody",
+	"something",
+	"anything",
+	"everything",
+	"everyone",
+	"please",
+	"thanks",
+	"thank",
+	"hi",
+	"hello",
+	"hey",
+	"whats",
+	"add",
+	"get",
+	"make",
+	"let",
+	"lets",
+	"try",
+	"trying",
+	"looking",
+	"start",
+	"started",
+	"help",
+	"able",
+	"possible",
+	"recommend",
+	"suggest",
+]);
+
+/**
+ * The tokens repo search scores: contentTokens without edge punctuation
+ * (contentTokens splits on spaces only, so "to," and "myself?" escaped the
+ * stopwords while "token," and "account?" could never match: the boundary
+ * matcher needs a word character after the punctuation), without
+ * contractions and question filler, each once. A trailing # or + stays (c#,
+ * c++). A query of nothing else keeps its trimmed words, then today's tokens.
+ */
+export function repoQueryTokens(q: string): string[] {
+	const trimmed: string[] = [];
+	for (const raw of contentTokens(q)) {
+		const t = raw
+			.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}#+]+$/gu, "")
+			.replace(/['’]s$/, "");
+		// A contraction left after that (don't, i'm, we've) names nothing.
+		if (t.length > 1 && !/['’]/.test(t) && !trimmed.includes(t))
+			trimmed.push(t);
+	}
+	const words = trimmed.filter((t) => !STOPWORDS.has(t));
+	const content = words.filter((t) => !REPO_QUERY_FILLER.has(t));
+	return content.length ? content : words.length ? words : contentTokens(q);
+}
+
 // SDF / canonical Stellar orgs — for a Stellar query their repos are the
 // authoritative answer, so they win ties over community/generic repos.
 // SDF ownership comes from repo-grade's FIRST_PARTY_OWNERS — one definition,
@@ -1203,7 +1299,7 @@ export async function searchRepos(
 		domain = "",
 		dependsOn = "",
 	} = opts;
-	const tokens = contentTokens(q);
+	const tokens = repoQueryTokens(q);
 	// Single-word IDENTIFIER queries (camelCase/snake_case symbols — the R-SYM
 	// class): contentTokens splits `contractErrorCodeFromNumber` into concept
 	// fragments [contract, error, code, number], so the repo DEFINING the
@@ -1734,14 +1830,13 @@ export async function searchRepos(
 				// mid-prose plus a secondary token — but identity never lets a
 				// no-evidence repo beat a code-verified one (the F4 contract).
 				b.anchorIdentity - a.anchorIdentity ||
-				// Verified mainnet usage BEFORE raw keyword coverage (code-truth 5,
-				// the round-5 oracle case: keyword-luckier feeders outranked the
-				// one oracle demonstrably live on mainnet). Identity still beats
-				// usage (alias/anchorIdentity above); coarse binary so relevance
-				// dominates within the tier; no-usage rows are untouched relative
-				// to each other.
-				b.inUse - a.inUse ||
 				b.score - a.score ||
+				// Verified mainnet usage breaks ties at equal match score (code-truth
+				// 5). It is an authority signal (AGENTS.md rule 6), so it never beats
+				// a better match: above the score it let a project-linked contract
+				// matching one word lead pages it barely matched (round
+				// 2026-10-23-repos-ranking: blend-contracts at 16 over rows at 46).
+				b.inUse - a.inUse ||
 				// Archive-tier demotion binds tightest of the demotions: an
 				// archived/dead-and-unstarred repo sinks below every live
 				// same-relevance competitor (EC long-tail guard, task #115).
@@ -1758,6 +1853,31 @@ export async function searchRepos(
 				(b.r.repoScore ?? 0) - (a.r.repoScore ?? 0) ||
 				(b.r.stars ?? 0) - (a.r.stars ?? 0),
 		);
+		// A repo whose known successor is also on this list gives the
+		// successor its place and sits directly below it, so the living repo
+		// comes first (round 2026-10-23-repos-ranking: blend-contracts, v1, led
+		// questions v2 also answered). Sinking v1 alone lost q=Blend to an
+		// unrelated repo. The successor is the row's successorRepo, else the
+		// curated dated map's. A query naming the old repo itself (alias) keeps
+		// it in place; a successor not on the list changes nothing.
+		const at = (name: string) =>
+			filtered.findIndex((d) => d.r.fullName.toLowerCase() === name);
+		for (let i = 0, moves = 0; i < filtered.length; i++) {
+			const d = filtered[i];
+			if (d.alias || moves >= filtered.length) continue;
+			const succ = (
+				(d.r as { successorRepo?: string | null }).successorRepo ??
+				repoSupersession(d.r.fullName)?.supersededBy ??
+				""
+			).toLowerCase();
+			const j = succ ? at(succ) : -1;
+			if (j > i) {
+				filtered.splice(i, 0, ...filtered.splice(j, 1));
+				moves++;
+				// The successor now at i may have a successor of its own.
+				i--;
+			}
+		}
 		const total = filtered.length;
 		const repos = filtered
 			.slice(offset, offset + limit)

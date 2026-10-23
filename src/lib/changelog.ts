@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.106",
+		type: "fixed",
+		summary:
+			"searchRepos no longer lets a weak match lead because its contract is used on mainnet: verified usage (codeInUse) now breaks ties at equal match score instead of ranking above the score. blend-capital/blend-contracts (Blend v1, score 16) led a question about scaffolding a Soroban dapp over rows scoring 46, and reflector-network/reflector-contract led q=smart account; neither leads now. Words in q lose edge punctuation before scoring, so 'token,' and 'account?' match and 'to,' drops as a stopword, and question filler (fastest, way, instead, myself, add, get) is not scored. A repo whose successor is also in the results gives the successor its place and sits directly below it.",
+		detail:
+			"Usage is an authority signal: two rows in the index carry it today (blend-capital/blend-contracts, reflector-network/reflector-contract, both linked to directory projects), and above the match score either one led any page where it matched one word. The successor of a repo is its successorRepo, else the curated supersededBy; a q that names the old repo itself keeps it first. The word cleanup and the filler list apply to searchRepos and the repo searches built on it (searchProjects' codeReferences, vetIdea, explainRepo's search fallback); searchProjects, searchHackathonBuilds and locateSource keep their own tokens. Each word counts once. meta.searched.tokens on an empty page lists the cleaned words, and a question can now reach matchMode strict. Measured by replaying this tree's searchRepos over the whole repos index (13,698 rows, read from the collection's public REST read on live 1.9.101) against live: 145 of 145 first pages identical before the change. A dev set of 25 builder questions written blind from GitHub and docs: an expected repo in the top 5 went from 9 to 10 (6 to 6 on the 17 used for tuning, 3 to 4 on the 8 held out; stellar/quickstart 18 to 4, none lost); the bar of +6 was not met, because most misses come from repos not indexed or never fetched, missing vocabulary and rows that match many common words. 60 exact-name lookups (30 repos by owner/name and by bare name) keep every rank 1, and the project names Blend and Reflector keep a repo of the project first. 42 of 52 keyword queries answer identically; the 10 that change each hold a used row or a successor pair. Six HackMeridian tools questions: OpenZeppelin/stellar-contracts for smart account policies 72 to 52, axelarnetwork/axelar-amplifier-stellar 39 to 29, OpenZeppelin/stellar-contracts for the contracts library 71 to 97, Scaffold Stellar 111 to 159, passkey-kit stays 1.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.101",
 		type: "fixed",
 		summary:

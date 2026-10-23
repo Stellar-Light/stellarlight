@@ -1,0 +1,163 @@
+apiVersion during capture: [{"at":"2026-10-23T18:00:43.928Z","apiVersion":"1.9.101"},{"at":"2026-10-23T18:05:19.990Z","apiVersion":"1.9.101"},{"at":"2026-10-23T18:10:13.692Z","apiVersion":"1.9.101"}]
+corpus rows: 13698; live pages: 145
+
+FIDELITY base replay vs live, first page (20): 145/145 identical
+
+DEV SET: expected repo in the top 5 (base -> branch)
+  all 25: 9 -> 10 (gained 1, lost 0); bar: +6
+  tuning 17: 6 -> 6 (gained 0, lost 0)
+  held-out 8: 3 -> 4 (gained 1, lost 0)
+  dev-01 [tuning] StellarCN/py-stellar-base: rank 37 -> 52; base top stellar/stellar-rpc, MentorsMind/MentorsMind-Backend, berkingurcan/stellar-agent-search; branch top stellar/stellar-rpc, stellar/js-stellar-sdk, Heliobond/backend
+  dev-02 [tuning] stellar/go-stellar-sdk: rank 2 -> 2; base top stellar/stellar-horizon, stellar/go-stellar-sdk, vottunio/stellar-sdk; branch top stellar/stellar-horizon, stellar/go-stellar-sdk, vottunio/stellar-sdk
+  dev-03 [tuning] Soneso/stellar_flutter_sdk: rank 47 -> 35; base top stellar/stellar-horizon, stellar/go-stellar-sdk, stellar/freighter-mobile; branch top stellar/stellar-horizon, stellar/go-stellar-sdk, stellar/freighter-mobile
+  dev-04 [tuning] Creit-Tech/Stellar-Wallets-Kit: rank 4 -> 4; base top stellar/freighter, Creit-Tech/xBull-Wallet, stellar/passkey-kit; branch top stellar/freighter, Creit-Tech/xBull-Wallet, stellar/passkey-kit
+  dev-05 [tuning] stellar/freighter: rank 3 -> 2; base top blend-capital/blend-contracts, SoroWill/sorowill-sdk, stellar/freighter; branch top SoroWill/sorowill-sdk, stellar/freighter, Scopuly/scopuly-browser-extension
+  dev-06 [held-out] stellar-expert/albedo: rank 30 -> 24; base top blend-capital/blend-contracts, bluxcc/core, Scopuly/scopuly-browser-extension; branch top Scopuly/scopuly-browser-extension, 3K1-Labs/latch-web-extension, SoroWill/sorowill-sdk
+  dev-07 [held-out] reflector-network/reflector-contract: rank 4 -> 4; base top stellar/stellar-protocol, diadata-org/soroban-oracle-feeders, bandprotocol/band-std-reference-contracts-soroban; branch top stellar/stellar-protocol, diadata-org/soroban-oracle-feeders, bandprotocol/band-std-reference-contracts-soroban
+  dev-08 [tuning] redstone-finance/redstone-oracles-monorepo (NOT INDEXED): rank - -> -; base top diadata-org/soroban-oracle-feeders, bandprotocol/band-std-reference-contracts-soroban, SimplyTokenized/soroban-smart-contracts; branch top diadata-org/soroban-oracle-feeders, bandprotocol/band-std-reference-contracts-soroban, SimplyTokenized/soroban-smart-contracts
+  dev-09 [tuning] smartcontractkit/chainlink-stellar: rank - -> -; base top diadata-org/soroban-oracle-feeders, bandprotocol/band-std-reference-contracts-soroban, reflector-network/reflector-contract; branch top diadata-org/soroban-oracle-feeders, bandprotocol/band-std-reference-contracts-soroban, reflector-network/reflector-contract
+  dev-10 [held-out] soroswap/aggregator: rank 351 -> 43; base top Phoenix-Protocol-Group/phoenix-contracts, soroswap/core, stellar/freighter; branch top Phoenix-Protocol-Group/phoenix-contracts, soroswap/core, stellar/freighter
+  dev-11 [tuning] blend-capital/blend-sdk-js | blend-capital/blend-contracts-v2: rank 2 -> 2; base top stellar/js-stellar-sdk, blend-capital/blend-contracts-v2, xycloo/xycloans; branch top stellar/js-stellar-sdk, blend-capital/blend-contracts-v2, xycloo/xycloans
+  dev-12 [tuning] defindex-io/stellar-contracts (NOT INDEXED): rank - -> -; base top Foryield/soroban-yield-vault, Eras256/Nirium, bakeronchain/learnvault; branch top Foryield/soroban-yield-vault, StellarYield-Labs/StellarYield, Eras256/Nirium
+  dev-13 [tuning] stellar/stellar-cli: rank 33 -> 36; base top LumenWipe/lumenwipe, Timi16/soroban-debugger, 57blocks/stellar-resource-usage-report; branch top LumenWipe/lumenwipe, Timi16/soroban-debugger, 57blocks/stellar-resource-usage-report
+  dev-14 [held-out] stellar/quickstart: rank 18 -> 4; base top stellar/stellar-horizon, stellar/go-stellar-sdk, stellar/stellar-rpc; branch top stellar/stellar-horizon, stellar/go-stellar-sdk, stellar/stellar-rpc
+  dev-15 [tuning] stellar/stellar-etl: rank 55 -> 87; base top stellar/stellar-horizon, stellar/go-stellar-sdk, reflector-network/reflector-contract; branch top stellar/stellar-horizon, stellar/go-stellar-sdk, StellarViewOrg/stellarview-explorer
+  dev-16 [tuning] stellar/stellar-rpc: rank 1 -> 1; base top stellar/stellar-rpc, mpprouter/rozo-mpprouter, BlaineHeffron/soroban-sdk-tools; branch top stellar/stellar-rpc, Heliobond/backend, BlaineHeffron/soroban-sdk-tools
+  dev-17 [tuning] axelarnetwork/axelar-amplifier-stellar: rank 27 -> 28; base top reflector-network/reflector-contract, lendwise-fi/lendwise, kaankacar/sepolia-to-stellar-usdc; branch top lendwise-fi/lendwise, perspectivefi/spectra-stellar-bridge-public, axelarnetwork/axelar-contract-deployments
+  dev-18 [held-out] LayerZero-Labs/monorepo-external: rank - -> -; base top blend-capital/blend-contracts, reflector-network/reflector-contract, RozoAI/rozo-intents-contracts; branch top perspectivefi/spectra-stellar-bridge-public, axelarnetwork/axelar-amplifier-stellar, RozoAI/rozo-intents-contracts
+  dev-19 [tuning] pendulum-chain/spacewalk: rank 414 -> 414; base top allbridge-io/allbridge-core-soroban-contracts, RozoAI/rozo-intents-contracts, lightsail-network/crossmesh-ingress-contracts; branch top allbridge-io/allbridge-core-soroban-contracts, RozoAI/rozo-intents-contracts, lightsail-network/crossmesh-ingress-contracts
+  dev-20 [tuning] OpenZeppelin/stellar-contracts: rank 4 -> 4; base top reflector-network/reflector-contract, blend-capital/blend-contracts, stellar/rs-soroban-env; branch top stellar/rs-soroban-env, Smart-Treasury-Account-STA/dApp, Smart-Treasury-Account-STA/sdk
+  dev-21 [tuning] Crossmint/stellar-smart-account: rank - -> -; base top reflector-network/reflector-contract, blend-capital/blend-contracts, Socket-Fi/socketfi-smart-account; branch top untangledfinance/oz-policy-builder, fazzatti/colibri, stellar-experimental/walleterm
+  dev-22 [held-out] OpenZeppelin/openzeppelin-relayer: rank 147 -> 81; base top stellar/freighter, Creit-Tech/xBull-Wallet, stellar/passkey-kit; branch top stellar/freighter, Creit-Tech/xBull-Wallet, stellar/passkey-kit
+  dev-23 [held-out] stellar/anchor-platform: rank 4 -> 4; base top stellar/stellar-protocol, stellar/sep45-reference, fazzatti/colibri; branch top stellar/stellar-protocol, stellar/sep45-reference, fazzatti/colibri
+  dev-24 [tuning] stellar/typescript-wallet-sdk: rank 19 -> 17; base top stellar/stellar-protocol, stellar/sep45-reference, Creit-Tech/xBull-Wallet; branch top stellar/stellar-protocol, stellar/sep45-reference, Creit-Tech/xBull-Wallet
+  dev-25 [held-out] stellar/stellar-anchor-tests: rank 2 -> 2; base top stellar/stellar-protocol, stellar/stellar-anchor-tests, Argo-Navis-Dev/php-anchor-sdk; branch top stellar/stellar-protocol, stellar/stellar-anchor-tests, Argo-Navis-Dev/php-anchor-sdk
+
+EXACT NAMES: rank 1 (base -> branch); bar: 0 losses
+  exact-full: 30 lookups; rank 1 live 30, base 30, branch 30; losses 0; gains 0
+  exact-name: 30 lookups; rank 1 live 28, base 28, branch 28; losses 0; gains 0
+  project-name: 2 lookups; rank 1 live 2, base 2, branch 2; losses 0; gains 0
+  exact-name "core": base top stellar/stellar-core -> branch top stellar/stellar-core
+  exact-name "aggregator": base top Lum-Agg/stellar-dex-agg -> branch top Lum-Agg/stellar-dex-agg
+
+KEYWORD QUERIES (default page, 20): 42/52 identical; bar: every query with no used row, no successor pair and unchanged tokens identical (17/17)
+  "blend lending protocol": changed; used rows in pool 1, successor pairs 1, tokens changed false
+      blend-capital/blend-contracts [used] [successor blend-capital/blend-contracts-v2]: 3 -> off page
+      PositiveSecurity/BlendV2-FV: 4 -> 3
+      XOXNO/rs-lending-xlm: 5 -> 4
+      alexzoid-eth/2025-02-blend-fv: 6 -> 5
+      BenRai1/BenRai1-2025-02-blend-fv: 7 -> 6
+      LSHFGJ/2025-02-blend-fv: 8 -> 7
+      Kirkeelee/blend-fv-contest-kirkeelee: 9 -> 8
+      burhankhaja/Blend-FV-rust: 10 -> 9
+      pollar-xyz/pollar-backoffice: off page -> 20
+  "passkey smart wallet": changed; used rows in pool 1, successor pairs 0, tokens changed false
+      reflector-network/reflector-contract [used]: 5 -> off page
+      jes-labs/stellar-passkeyui: 6 -> 5
+      Socket-Fi/socketfi-smart-account: 7 -> 6
+      justmert/soropass: 8 -> 7
+      CaBsCrypto/stellar-agent-spend-hub: 9 -> 8
+      3K1-Labs/latch-web-extension: 10 -> 9
+      fazzatti/colibri: 11 -> 10
+      kaankacar/stellar-wallet-gallery: 12 -> 11
+      Crossmint/stellar-smart-account: off page -> 20
+  "oracle price feed": changed; used rows in pool 2, successor pairs 2, tokens changed false
+      blend-capital/blend-contracts [used] [successor blend-capital/blend-contracts-v2]: 5 -> off page
+      nice-bills/soroban-oracle-safety: 6 -> 5
+      lequynh-cg/oracle: 7 -> 6
+      eq-lab/slender-ui: 8 -> 7
+      0xdevcollins/stellar-dvn: 9 -> 8
+      ChaoLing140/StellarInsure: 10 -> 9
+      Nova-reward/InvoiceFi-Stellar: 11 -> 10
+      utkurock/Lusty: 12 -> 11
+      reflector-network/reflector-stellar-connector: off page -> 20
+  "amm": changed; used rows in pool 1, successor pairs 1, tokens changed false
+      blend-capital/blend-contracts [used] [successor blend-capital/blend-contracts-v2]: 3 -> off page
+      normalfinance/normal-v1-interface: 4 -> 3
+      zenith-protocols/pool-status-admin: 5 -> 4
+      Kaizenode/SafeSwap: 6 -> 5
+      actarus314/DecantFi: 7 -> 6
+      Gabrululu/Stellar-SwapANDSplash: 8 -> 7
+      Lum-Agg/stellar-dex-agg: 9 -> 8
+      leojay-net/Stellar-Dex-Chat: 10 -> 9
+      Invoice-Liquidity-Network/Invoice-Liquidity-Network: off page -> 20
+  "smart wallet": changed; used rows in pool 1, successor pairs 0, tokens changed false
+      reflector-network/reflector-contract [used]: 5 -> off page
+      stellar/smart-account-kit: 6 -> 5
+      stellar/smart-wallet-demo-app: 7 -> 6
+      Socket-Fi/socketfi-smart-account: 8 -> 7
+      jes-labs/stellar-passkeyui: 9 -> 8
+      untangledfinance/oz-policy-builder: 10 -> 9
+      Crossmint/stellar-smart-account: 11 -> 10
+      Consulting-Manao/chimpdao-contracts: 12 -> 11
+      CaBsCrypto/stellar-agent-spend-hub: off page -> 20
+  "price feed": changed; used rows in pool 2, successor pairs 1, tokens changed false
+      blend-capital/blend-contracts [used] [successor blend-capital/blend-contracts-v2]: 5 -> off page
+      eq-lab/slender-ui: 6 -> 5
+      0xdevcollins/stellar-dvn: 7 -> 6
+      ChaoLing140/StellarInsure: 8 -> 7
+      Nova-reward/InvoiceFi-Stellar: 9 -> 8
+      utkurock/Lusty: 10 -> 9
+      usep-f/LikhaSpace: 11 -> 10
+      Afro-Pay/AfroPay-Stellar: 12 -> 11
+      lequynh-cg/oracle: off page -> 20
+  "smart account": changed; used rows in pool 1, successor pairs 1, tokens changed false
+      reflector-network/reflector-contract [used]: 1 -> off page
+      stellar/smart-account-kit: 2 -> 1
+      untangledfinance/oz-policy-builder: 3 -> 2
+      Socket-Fi/socketfi-smart-account: 4 -> 3
+      jes-labs/stellar-passkeyui: 5 -> 4
+      Crossmint/stellar-smart-account: 6 -> 5
+      AyushmanGupta21/Parallax: 7 -> 6
+      XOXNO/rs-lending-xlm: 8 -> 7
+      nickthelegend/polaris-core-stellar: off page -> 20
+  "soroban cli": changed; used rows in pool 2, successor pairs 2, tokens changed false
+      reflector-network/reflector-contract [used]: 20 -> off page
+      stellar/soroban-examples: off page -> 20
+  "token contract": changed; used rows in pool 2, successor pairs 1, tokens changed false
+      blend-capital/blend-contracts [used] [successor blend-capital/blend-contracts-v2]: 1 -> off page
+      reflector-network/reflector-contract [used]: 2 -> off page
+      kalepail/KALE-sc: 3 -> 1
+      stellar/smart-account-kit: 4 -> 2
+      stellar/soroban-examples: 5 -> 3
+      duraznito16/stellar-memory: 6 -> 4
+      Scopuly/x402-stellar-guard: 7 -> 5
+      SentinelFi/stellar-metamask-snap: 8 -> 6
+      Vinaystwt/xMPP: off page -> 19
+      tosirano/thelighted: off page -> 20
+  "liquidity pool": changed; used rows in pool 1, successor pairs 1, tokens changed false
+      blend-capital/blend-contracts [used] [successor blend-capital/blend-contracts-v2]: 3 -> off page
+      normalfinance/normal-v1-interface: 4 -> 3
+      zenith-protocols/pool-status-admin: 5 -> 4
+      Kaizenode/SafeSwap: 6 -> 5
+      actarus314/DecantFi: 7 -> 6
+      Gabrululu/Stellar-SwapANDSplash: 8 -> 7
+      Lum-Agg/stellar-dex-agg: 9 -> 8
+      leojay-net/Stellar-Dex-Chat: 10 -> 9
+      MuhamadHamzah/MicroInsurancePool-Stellar: off page -> 20
+
+BATTERY tools questions (not tuned on): rank of the expected repo
+  hm26-sc-03 OpenZeppelin/stellar-contracts: 71 of 595 -> 97 of 591
+      base top 5: reflector-network/reflector-contract, OpenZeppelin/role-manager, lohit-40/web3-guard-stellar, script3/soroban-governor, soroswap/core
+      branch top 5: sushi-labs/sushiswap, MDTechLabs/GasGuard, OpenZeppelin/role-manager, fuul-protocol/protocol-sdk-stellar, axelarnetwork/axelar-amplifier-stellar
+      tokens: audited library reusable soroban contracts (fungible token, access control, pausable, upgradeable) import instead writing myself? -> audited library reusable soroban contracts fungible token access control pausable upgradeable import writing
+  hm26-sc-04 stellar-scaffold/cli | theahaco/scaffold-stellar: 111 of 590 -> 159 of 596
+      base top 5: blend-capital/blend-contracts, Heliobond/frontend, theahaco/contract-explorer, OpenZeppelin/role-manager, RaceeyXo/use-stellar
+      branch top 5: fxjrin/stellar-contracts-kit, theahaco/authline, stellar-scaffold/ui, rumblefishdev/soroban-block-explorer, theahaco/contract-explorer
+      tokens: what's fastest way scaffold full stack soroban dapp contracts, react frontend typed type script clients? full-stack -> scaffold full stack soroban dapp contracts react frontend typed type script clients full-stack
+  hm26-sa-03 stellar/passkey-kit | stellar/smart-account-kit: 1 of 594 -> 1 of 591
+      base top 5: stellar/passkey-kit, stellar/freighter, Creit-Tech/xBull-Wallet, Creit-Tech/Stellar-Wallets-Kit, stellar/sep45-reference
+      branch top 5: stellar/passkey-kit, stellar/freighter, Creit-Tech/xBull-Wallet, Creit-Tech/Stellar-Wallets-Kit, stellar/sep45-reference
+      tokens: sdk add passkey (web authn) smart wallets web app? -> sdk passkey web authn smart wallets app
+  hm26-sa-04 OpenZeppelin/stellar-contracts: 72 of 515 -> 52 of 571
+      base top 5: blend-capital/blend-contracts, reflector-network/reflector-contract, Gloriachinedu/lumenflow-contracts, heliosproto/heliosproto, stellar/passkey-kit
+      branch top 5: heliosproto/heliosproto, Gloriachinedu/lumenflow-contracts, stellar/passkey-kit, Crossmint/stellar-smart-account, kunaldrall29/policywright
+      tokens: add spending limits multisig thresholds smart account? m-of-n -> spending limits multisig thresholds smart account m-of-n
+  hm26-cc-03 text: cctp | text: cross-chain transfer protocol: 250 of 401 -> 213 of 528
+      base top 5: Financial-Empowerment-Partners/impala, emmanuelist/CrossFlow, kaankacar/sepolia-to-stellar-usdc, perspectivefi/spectra-stellar-bridge-public, SnPAgency/RampContractFoldes
+      branch top 5: Financial-Empowerment-Partners/impala, kaankacar/sepolia-to-stellar-usdc, perspectivefi/spectra-stellar-bridge-public, RozoAI/rozo-intents-contracts, CarbonScribe/carbon-scribe
+      tokens: move usdc natively evm chains without wrapped token? -> move usdc natively evm chains wrapped token
+  hm26-cc-04 axelarnetwork/axelar-amplifier-stellar: 39 of 591 -> 29 of 575
+      base top 5: Scopuly/scopuly-browser-extension, OpenZeppelin/openzeppelin-relayer, C-Address-Onboarding-Bridge/C-Address-Onboarding-Bridge--Frontend-, bluxcc/core, MetaMask/snap-stellar-wallet
+      branch top 5: 0xdevcollins/stellar-dvn, axelarnetwork/axelar-contract-deployments, axelarnetwork/axelarjs-sdk, Scopuly/scopuly-browser-extension, circlefin/stellar-cctp
+      tokens: soroban contract send message to, call, contract evm chain? -> soroban contract send message call evm chain
