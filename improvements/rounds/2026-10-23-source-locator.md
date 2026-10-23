@@ -189,3 +189,29 @@ Owner decision, safe default first:
   for 0, top 3 for 4. Topic words are never in the operation's text, so the
   coverage gate admits it mostly for short, intent-worded questions. Not
   tuned on the fresh battery.
+- 14:24Z, checks: `tsc --noEmit -p tsconfig.json` 0; scripts type
+  ratchet 0 (no new errors, 28 known); `vitest run src/lib/__tests__
+  src/app/api src/collections/__tests__` 0 (182 files, 2294 tests);
+  `pnpm contract:write` 0; `CONTRACT_BASE=02d7deba pnpm contract:check` 0;
+  writer conformance 0; Raven gate ACCEPT 1.9.99; biome: no errors on the
+  changed files (warnings only on untouched lines of `payload.config.ts`
+  and the generated `payload-types.ts`); no en or em dash and no named
+  product in added lines; both frozen battery hashes unchanged. Committed
+  as `011b9c76`.
+
+## Outcome (second pass)
+
+Built and committed on `lane/o-source-locator`, not pushed: the
+locateSource operation (route, spec 1.9.99 with routing text, two
+collections, the builder lane and its workflow, changelog). The index is
+empty in production until its lane runs: every answer is pointers null
+with a note until then. To fill it, after merge: dispatch
+`build-source-locators.yml` dry, read the plan (about 21,440 creates),
+dispatch it with execute=true on its own (the Idempotence step must plan
+0), then read pointers back through `/api/sources/locate`. The daily
+schedule maintains it after that first fill.
+
+Open: the builder's database modes have not run against a database (no
+local Mongo; the driver calls are covered only by the route test's mock);
+m2 passes by a thin margin; JSON files (env.json) have no locator rule;
+routing reaches the operation mostly for short, intent-worded questions.
