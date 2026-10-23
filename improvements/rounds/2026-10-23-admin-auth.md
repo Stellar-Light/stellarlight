@@ -56,3 +56,33 @@ author's, and a second-family review for code.
 
 Committed on `lane/t-admin-auth`, not pushed. Live checks for after deploy
 are in the lane report; no route was called against production.
+
+## Log, second commit (review request: fold in three open risks)
+
+- Scope added: `/api/preview` took `PAYLOAD_SECRET` in its query string;
+  `payload-jobs` read and delete were `!!req.user`; `sync/builders` GET
+  honoured an admin session.
+- Design for preview: admin session (`isAdminRequest`), no secret in the
+  URL. The editor is signed in when they click Preview; a preview-only
+  secret would still sit in a URL and adds an env value to manage. No new
+  env var.
+- Found while checking jobs: `jobs.access.run`, `queue` and `cancel` were
+  unset, and Payload's default is any logged-in user, so a partner could
+  call `GET /api/payload-jobs/run`. Gated on `isAdmin` with the rest.
+  Callers checked: `sync/rss`, `sync/rss/[id]` and `cron/rss-sync` call
+  `payload.jobs.queue` and `payload.jobs.run` through the local API, which
+  overrides access unless `overrideAccess: false` is passed; none passes it.
+- `sync/builders` callers: the cron in `vercel.json` (GET, env Bearer) and
+  `BuildersSyncButton.tsx` (POST, session). GET is now Bearer only; POST
+  keeps Bearer or an admin session.
+- Tests first: `src/app/api/preview/__tests__/preview.test.ts`,
+  `src/collections/__tests__/jobs-access.test.ts`, one new case in
+  `src/app/api/sync/__tests__/sync-auth.test.ts`. On the first commit's
+  code: 10 failed, 20 passed of 30 (preview admitted the old query secret
+  and refused an admin session; the Blog URL carried the secret; jobs read
+  and delete admitted a partner; jobs.access run, queue and cancel were
+  unset; builders GET admitted an admin session). After the fix: 38 of 38
+  in those files plus `access.test.ts`.
+- `PAYLOAD_SECRET`: if it was ever exposed in logs, rotating it is an owner
+  decision (it signs every session; rotating logs everyone out). Added to
+  `improvements/TODO.md`.

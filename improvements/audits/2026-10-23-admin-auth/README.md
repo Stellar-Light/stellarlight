@@ -71,6 +71,36 @@ called against production.
   documented in `src/lib/openapi-spec.ts`, so no spec version or changelog
   entry.
 
+### Second commit (same class, folded in on review request)
+
+- **`/api/preview`** took `PAYLOAD_SECRET` in its query string, and the
+  Blog collection's admin preview URL built it. That secret signs every
+  Payload session, so a logged URL was enough to forge an admin session.
+  Design chosen: the route now requires an admin session
+  (`isAdminRequest`), and the preview URL carries only the slug. The editor
+  is already signed in when they click Preview, and the admin panel opens
+  the preview as a top-level GET on the same site, which carries the
+  SameSite Lax session cookie. This needs no new secret to set, rotate or
+  leak, where a preview-only secret would still sit in a URL. Draft mode is
+  read-only, so a cross-site link to it does no harm.
+- **`payload-jobs` access** (`src/payload.config.ts`): collection read and
+  delete were `!!req.user`, so a partner could list and delete sync job
+  records. Both now use `isAdmin`. The same class sat one level up:
+  `jobs.access.run`, `queue` and `cancel` were unset, and Payload's default
+  for them is "any logged-in user", so a partner could call
+  `GET /api/payload-jobs/run`. All three now use `isAdmin`. The job runner
+  is unaffected: `payload.jobs.queue` and `payload.jobs.run` in
+  `sync/rss`, `sync/rss/[id]` and `cron/rss-sync` are local API calls,
+  which override access unless `overrideAccess: false` is passed (none
+  passes it; checked in Payload 3.63 `queues/localAPI.js`). Collection
+  create was already `() => false` and queueing worked, which shows the
+  same.
+- **`sync/builders` GET** no longer honours a session. Its callers: the
+  daily cron in `vercel.json` (GET with the env Bearer token) and the admin
+  panel button (`BuildersSyncButton.tsx`, POST with the session). No caller
+  needs GET with a session, so GET takes the Bearer token only and POST
+  takes the Bearer token or an admin session.
+
 ## Every route checked
 
 Mutating (writes, or exports POST/PUT/PATCH/DELETE handlers) under
@@ -83,7 +113,7 @@ Mutating (writes, or exports POST/PUT/PATCH/DELETE handlers) under
 | `admin/fix-entities` | query literal | changed, same |
 | `admin/score-projects` | query literal | changed, same |
 | `admin/tag-projects` | query literal | changed, same |
-| `sync/builders` | env bearer or any user | changed: env bearer or admin |
+| `sync/builders` | env bearer or any user | changed: GET env bearer only; POST env bearer or admin |
 | `sync/lumenloop` | any user | changed: admin |
 | `sync/rss` | any user | changed: admin |
 | `sync/rss/[id]` | any user | changed: admin |
@@ -95,8 +125,9 @@ Mutating (writes, or exports POST/PUT/PATCH/DELETE handlers) under
 | `partners/assistant`, `partners/magic-link`, `partners/submit-listing` | public partner flows, rate limited | left: partner-facing by design |
 | `analyze` | public GET writing a funding snapshot | left: a derived cache row, no caller input stored |
 | `projects/[id]/github` | public GET writing a GitHub cache row | left: a derived cache row |
-| `preview` | `?secret=` against `PAYLOAD_SECRET` | left, not mutating (enables draft mode); see risks |
+| `preview` | `?secret=` against `PAYLOAD_SECRET` | changed: admin session; no secret in the URL |
 | every other route exporting POST/PUT/PATCH/DELETE | read-only handlers (405s or POST reads) | left: no write found |
+| `payload-jobs` collection and `/api/payload-jobs/run` (Payload REST, `src/payload.config.ts`) | any logged-in user | changed: admin |
 
 ## Open risks
 
@@ -104,14 +135,9 @@ Mutating (writes, or exports POST/PUT/PATCH/DELETE handlers) under
   the raw query texts. The literals are dead (no code accepts them). The
   query texts stay readable in history until the owner decides on a
   rewrite (owner decision in `improvements/TODO.md`).
-- **`/api/preview`** takes `PAYLOAD_SECRET` in the query string (the Blog
-  collection's preview URL builds it). That puts the Payload signing secret
-  in access logs and browser history whenever a preview is opened. Not
-  mutating, so left; it needs its own fix (a separate preview secret, or a
-  session check).
-- **`payload-jobs` access** (`src/payload.config.ts`) lets any signed-in
-  user, partners included, read and delete sync job records. Outside
-  `src/app/api`, so left.
-- **`sync/builders` GET** still honours an admin session, so a cross-site
-  link could make an admin's browser start a builder sync. It only pulls
-  public profiles; left so the route keeps its current callers.
+- **`PAYLOAD_SECRET` exposure.** Every preview opened before this change
+  wrote the signing secret into a URL: request logs, browser history and
+  any proxy in between. Whether it reached a log anyone else can read is
+  not known from here. Rotating it is an owner decision: it signs every
+  session, so a rotation logs every admin and partner out (owner decision
+  in `improvements/TODO.md`).

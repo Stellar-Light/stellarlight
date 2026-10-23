@@ -132,6 +132,11 @@ describe("/api/sync/builders env bearer", () => {
 		expect((await get()).status).toBe(401);
 	});
 
+	it("denies an admin session on GET: a session sync needs POST", async () => {
+		as("Bearer admin-jwt");
+		expect((await get()).status).toBe(401);
+	});
+
 	it("denies any bearer when neither env value is set", async () => {
 		delete process.env.CRON_SECRET;
 		as("Bearer undefined");

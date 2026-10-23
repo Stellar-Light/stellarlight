@@ -9,10 +9,12 @@ export const Blog: CollectionConfig = {
 	admin: {
 		useAsTitle: "title",
 		defaultColumns: ["title", "author", "publishedAt", "featured", "status"],
+		// The editor's admin session authorizes the preview
+		// (src/app/api/preview/route.ts); no secret goes in this URL.
 		preview: (doc) => {
 			if (doc?.slug) {
 				const base = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
-				return `${base}/api/preview?secret=${process.env.PAYLOAD_SECRET}&slug=${doc.slug}`;
+				return `${base}/api/preview?slug=${encodeURIComponent(String(doc.slug))}`;
 			}
 			return null;
 		},
