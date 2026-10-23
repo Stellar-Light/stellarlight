@@ -3700,7 +3700,7 @@ export const spec: OpenAPISpec = {
 				},
 				parameters: [
 					...buildFilterParams(
-						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when its name holds one of q's words or it covers half of them, and a word of four letters or more also matches inside a longer word, so one word of a longer q can list a build; when most of q's words occur as a whole word in no submission and a build is listed by its words alone, meta.warnings says so.",
+						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when it covers half of q's words, or when its name holds one of them unless most of q's words occur as a whole word in no submission (text or declared packages). A word of four letters or more also matches inside a longer word. When any of q's words occurs as a whole word in no submission, meta.warnings names those words and says what the listed builds are, and says when a build whose name matched was held back (meta.counts.withheldByName).",
 						"hybrid",
 					),
 					{
@@ -3765,7 +3765,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or most of the words searched in q occur as a whole word in no submission while a build is listed by its words alone ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built; the q line means a build listed by its words alone, with no similarity, matches only part of q and is not evidence that the idea was built.",
+														"Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other.",
 												},
 												filters: BUILD_FILTERS_ECHO_SCHEMA,
 												counts: {
@@ -3787,6 +3787,11 @@ export const spec: OpenAPISpec = {
 															type: "integer",
 															description:
 																"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze.",
+														},
+														withheldByName: {
+															type: "integer",
+															description:
+																"Builds whose name matched q but that are not listed, because most of the words searched in q occur as a whole word in no submission; meta.warnings names the words they matched. Not counted in matched or entries. 0 = none held back; always 0 in meaning mode, which never lists a build by its name.",
 														},
 														returned: { type: "integer" },
 													},
@@ -4092,7 +4097,7 @@ export const spec: OpenAPISpec = {
 						schema: { type: "integer", default: 10, maximum: 30 },
 					},
 					...buildFilterParams(
-						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. Empty = every submission.",
+						"Topic: count only the submissions that match it, the way searchHackathonBuilds matches, except that a declared package does not match here. A word only a declared package uses still counts as used when deciding whether most of q's words occur in no submission, which holds back builds matched by name alone. Empty = every submission.",
 						"keyword",
 					),
 				],

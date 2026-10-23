@@ -263,6 +263,9 @@ export interface BuildQuery {
 	 * counts (a submission entered in several events is one entry per
 	 * event), however perSubmission folded the rows. */
 	entries?: number;
+	/** Builds whose name matched q but that rule L held back, as most of q
+	 * is in no submission, and that meaning did not list either. */
+	withheld: { b: IndexedBuild; matched: string[] }[];
 }
 
 /** Run the filters over the index. Search by meaning that cannot run serves
@@ -313,6 +316,7 @@ export async function queryBuilds(
 			served: f.mode,
 			warnings: [],
 			entries: entriesOf("", browse),
+			withheld: [],
 		};
 	const warnings: string[] = [];
 	let served = f.mode;
@@ -330,17 +334,22 @@ export async function queryBuilds(
 			);
 		}
 	}
+	const held: BuildQuery["withheld"] = [];
 	const scored = searchHackathonBuilds(indexed, f.q, {
 		...structural,
 		mode: served,
 		semantic,
 		packages: opts.packages,
+		// Meaning mode never lists a build by its name: nothing is withheld.
+		withheld: served === "meaning" ? undefined : held,
 	});
+	const listed = new Set(scored.map((s) => s.b.id));
 	return {
 		scored,
 		field,
 		served,
 		warnings,
+		withheld: held.filter((w) => !listed.has(w.b.id)),
 		entries: entriesOf(f.q, scored, {
 			mode: served,
 			semantic,

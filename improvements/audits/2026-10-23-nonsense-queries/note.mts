@@ -1,10 +1,8 @@
-// Where the builds route's new meta.warnings line fires, replayed over a
-// capture (capture.mjs here, or ../2026-10-23-build-matching/capture.mjs):
-// per query, the concepts this tree's search reads, those no stored
-// submission uses as a whole word (wordsNoBuildUses), the rows the route
-// lists in keyword and hybrid mode, and whether the line fires, as the route
-// decides: a row listed by its words alone (matchedTerms, no similarity) and
-// more than half the concepts in no submission. The pool is built as
+// Where the builds route's meta.warnings line about unused words fires, and
+// its exact text, replayed over a capture (capture.mjs here, or
+// ../2026-10-23-build-matching/capture.mjs): per query and mode, the rows
+// the route lists and the line unusedWordsWarning gives for them, as the
+// route calls it. The pool is built as
 // ../2026-10-23-build-matching/replay.mts builds it.
 // Usage, from the repository root:
 //   pnpm exec tsx improvements/audits/2026-10-23-nonsense-queries/note.mts <capture.json>
@@ -12,7 +10,7 @@ import { readFileSync } from "node:fs";
 import {
 	indexedFromStored,
 	searchHackathonBuilds,
-	wordsNoBuildUses,
+	unusedWordsWarning,
 } from "../../../src/lib/hackathon-builds";
 import type { HackathonBuild } from "../../../src/payload-types";
 
@@ -86,9 +84,7 @@ const queries: Query[] = [
 console.log(
 	`capture: api ${live.apiVersionStart} -> ${live.apiVersionEnd}, corpus ${pool.length}`,
 );
-console.log(
-	"group | q | concepts | in no submission | keyword rows | hybrid rows | fires keyword | fires hybrid",
-);
+console.log("group | q | mode | rows | line (none = no line)");
 const tally = new Map<
 	string,
 	{ n: number; withRows: [number, number]; fires: [number, number] }
@@ -99,36 +95,38 @@ for (const x of queries) {
 			.filter((r) => r.similarity !== undefined)
 			.map((r) => [r.id, r.similarity as number]),
 	);
+	const q = x.q.trim().toLowerCase();
 	const opts = { perSubmission: true, packages: true };
-	const kwRows = searchHackathonBuilds(pool, x.q, { ...opts, mode: "keyword" });
-	const hyRows = searchHackathonBuilds(pool, x.q, {
-		...opts,
-		mode: "hybrid",
-		semantic,
-	});
-	const kw = kwRows.length;
-	const hy = hyRows.length;
-	const { absent, concepts } = wordsNoBuildUses(pool, x.q);
-	const most = absent.length * 2 > concepts;
-	const wordsAlone = (rows: typeof kwRows) =>
-		rows.some((s) => s.matched.length && s.similarity === undefined);
-	const fires = [
-		most && wordsAlone(kwRows),
-		most && wordsAlone(hyRows),
-	] as const;
+	// As the route: builds rule L held back, less any meaning listed.
+	const search = (mode: "keyword" | "hybrid") => {
+		const held: { b: { id: string }; matched: string[] }[] = [];
+		const r = searchHackathonBuilds(pool, q, {
+			...opts,
+			mode,
+			semantic,
+			withheld: held as never,
+		});
+		const listed = new Set(r.map((s) => s.b.id));
+		return { r, held: held.filter((w) => !listed.has(w.b.id)) };
+	};
+	const found = [search("keyword"), search("hybrid")];
+	const rows = found.map((f) => f.r);
+	const lines = found.map((f) => unusedWordsWarning(pool, q, f.r, f.held));
 	const g = x.group.startsWith("idea") ? "idea (all 140)" : x.group;
 	const t = tally.get(g) ?? { n: 0, withRows: [0, 0], fires: [0, 0] };
 	t.n++;
-	t.withRows[0] += kw > 0 ? 1 : 0;
-	t.withRows[1] += hy > 0 ? 1 : 0;
-	t.fires[0] += fires[0] ? 1 : 0;
-	t.fires[1] += fires[1] ? 1 : 0;
+	rows.forEach((r, i) => {
+		t.withRows[i] += r.length > 0 ? 1 : 0;
+		t.fires[i] += lines[i] ? 1 : 0;
+	});
 	tally.set(g, t);
 	// Every battery query; an idea only where the line fires.
-	if (!x.group.startsWith("idea") || fires[0] || fires[1])
-		console.log(
-			`${x.group} | ${x.q} | ${concepts} | ${absent.join(", ") || "none"} | ${kw} | ${hy} | ${fires[0] ? "yes" : "no"} | ${fires[1] ? "yes" : "no"}`,
-		);
+	(["keyword", "hybrid"] as const).forEach((mode, i) => {
+		if (!x.group.startsWith("idea") || lines[i])
+			console.log(
+				`${x.group} | ${x.q} | ${mode} | ${rows[i].length} | ${lines[i] ?? "none"}`,
+			);
+	});
 }
 console.log();
 console.log(

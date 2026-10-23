@@ -631,12 +631,32 @@ function termMatcher(v: string): (hay: string) => boolean {
  * builds that hold them (review, 2026-10-23). The warning reads this; the
  * scorer's own matching is unchanged. */
 function anyScriptWord(v: string): ((hay: string) => boolean) | null {
-	const core = v.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+	const core = wordCore(v);
 	if (!core) return null;
 	const escaped = core.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	const re = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "u");
 	return (hay) => re.test(hay);
 }
+
+/** A token without its edge punctuation: "(rosca," is rosca. */
+const wordCore = (v: string) =>
+	v.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+
+/** The plural or singular wordForms leaves out: charities is charity, family
+ * is families, taxes is tax. Read only by wordsNoBuildUses: on 140 labeled
+ * ideas, charities and family were called in no submission while charity
+ * and families were there. */
+const otherNumber = (w: string) =>
+	w.endsWith("ies")
+		? [`${w.slice(0, -3)}y`]
+		: // Only where es is the plural ending: notes is not not, uses not us.
+			/(ss|x|z|ch|sh)es$/.test(w)
+			? [w.slice(0, -2)]
+			: /[^aeiou]y$/.test(w)
+				? [`${w.slice(0, -1)}ies`]
+				: /(ss|x|z|ch|sh)$/.test(w)
+					? [`${w}es`]
+					: [];
 
 /** The concepts a query is searched by: its words less query filler and the
  * generic words every submission says, each with the forms it matches. */
@@ -674,13 +694,12 @@ function queryTerms(query: string) {
 /**
  * The concepts of `q` that no build in `indexed` uses as a whole word in any
  * form (plural or singular, synonym, phrase spaced or joined) in its text or
- * declared packages, and how many concepts `q` has. The builds route warns
- * when they are most of q and keeps its rows. Dropping name matches in that
- * case (2026-10-23) emptied "quantum llama sandwich" and lost no labeled
- * same-idea build, but cut a fresh 24-query nonsense battery's builds by
- * only 19% (538 to 436): most of the rest match half of q's concepts, or one
- * word of a two-word q. On 140 labeled ideas the warning fires for one, whose
- * only build listed by words alone is graded not the idea.
+ * declared packages, and how many concepts `q` has. When they are most of
+ * q, a name alone no longer lists a build (rule L, searchHackathonBuilds);
+ * when there is any, the builds route names them in a warning. On 140
+ * labeled ideas (2026-10-23) the warning fires for 30 in keyword mode, each
+ * named word checked unused in the stored text, and rule L drops one build,
+ * graded not the idea.
  */
 export function wordsNoBuildUses(
 	indexed: IndexedBuild[],
@@ -691,27 +710,279 @@ export function wordsNoBuildUses(
 	const terms = queryTerms(q.trim().toLowerCase()).filter(({ t }) =>
 		/[\p{L}\p{N}]/u.test(t),
 	);
-	const hays = indexed.map(withPackages);
+	const { hays } = usedHays(indexed);
 	const absent = terms
-		.filter(({ forms }) => {
-			const hits = forms.flatMap((f) => anyScriptWord(f) ?? []);
+		.filter(({ t, forms }) => {
+			const hits = [...forms, ...otherNumber(wordCore(t))].flatMap(
+				(f) => anyScriptWord(f) ?? [],
+			);
 			return (
 				hits.length > 0 && !hays.some((hay) => hits.some((hit) => hit(hay)))
 			);
 		})
-		.map(({ t }) => t);
+		.map(({ t }) => wordCore(t));
 	return { absent, concepts: terms.length };
+}
+
+/** A build's text and every package it declares, the common libraries too:
+ * a word only soroban-sdk holds is a word submissions use, though matching
+ * leaves that library out. */
+const usedText = (b: IndexedBuild) =>
+	`${b.haystack} ${(b.stack ?? []).join(" ").toLowerCase()}`;
+
+// ponytail: keyed on the index array, so an index changed in place would
+// read stale; the served index never is. A builds request read the corpus
+// about three times before this.
+const usedCache = new WeakMap<
+	IndexedBuild[],
+	{ hays: string[]; words?: Map<string, number> }
+>();
+
+/** Every build's used text, read once per index. */
+function usedHays(indexed: IndexedBuild[]) {
+	const hit = usedCache.get(indexed);
+	if (hit) return hit;
+	const c = { hays: indexed.map(usedText) };
+	usedCache.set(indexed, c);
+	return c;
+}
+
+/** How often each word occurs in the used text, counted once per index. */
+function usedCounts(indexed: IndexedBuild[]): Map<string, number> {
+	const c: { hays: string[]; words?: Map<string, number> } = usedHays(indexed);
+	if (c.words) return c.words;
+	const words = new Map<string, number>();
+	for (const h of c.hays)
+		for (const w of h.match(/[\p{L}\p{N}]+/gu) ?? [])
+			words.set(w, (words.get(w) ?? 0) + 1);
+	c.words = words;
+	return words;
+}
+
+/** Endings stripped to find a word's stem, and the endings each kind of
+ * stem takes back, for the related forms the warning names: cashing is
+ * cash, hedging is hedge, shops is shopping, renting is rental, delegate is
+ * delegation, algorithmic is algorithms, generator is generate. The word
+ * itself takes back only inflections (port is not portal, mill not
+ * million, strip not stripe), a stem ending er or or drops takes back no
+ * bare stem (center is not cent, wither not with, tractor not traction), a
+ * doubled consonant undone takes back no e (stalling is not stale), es is
+ * dropped only after ss, x, z, ch or sh and a dropped e is not left off
+ * (themes and theme are not them), er is never grown (stick is not
+ * sticker) and ers never stripped (vouchers is not vouch). Review,
+ * 2026-10-23. */
+/** What a stem takes back, by the ending stripped to find it. An
+ * inflection's stem takes back inflections only, e only after ing or ed
+ * (staking is stake, hedging hedge; strips is not stripe) and es only after
+ * ss, x, z, ch or sh (planning is not planes): with al, ic or ion it named
+ * portal for ports, million for mills and formal for forming (re-check,
+ * 2026-10-23). */
+function growsFor(suffix: string, stem: string): string[] {
+	if (suffix === "e") return ["ed", "ing", "al", "als", "ic", "ion"];
+	if (suffix === "ic") return ["", "s"];
+	if (suffix === "er" || suffix === "or") return ["e", "es", "ed", "ing"];
+	return [
+		"",
+		"s",
+		"ed",
+		"ing",
+		...(suffix === "ing" || suffix === "ed" ? ["e"] : []),
+		...(/(ss|x|z|ch|sh)$/.test(stem) ? ["es"] : []),
+	];
+}
+const STRIPPED = ["ing", "est", "ed", "es", "s", "e", "er", "or", "ic"];
+const GROW_WORD = ["s", "es", "ed", "ing"];
+
+/** Forms of `w` some build uses, most used first, at most 3: a stem of at
+ * least four letters with a suffix grown back, never `w`'s own plural or
+ * singular, all of which are unused when this is asked. */
+function relatedUsed(w: string, used: Map<string, number>): string[] {
+	if (!/^\p{L}+$/u.test(w)) return [];
+	const stems = new Map<string, string[]>();
+	for (const suffix of STRIPPED) {
+		const stem = w.slice(0, -suffix.length);
+		if (!w.endsWith(suffix) || stem.length < 4) continue;
+		if (suffix === "es" && !/(ss|x|z|ch|sh)es$/.test(w)) continue;
+		stems.set(stem, growsFor(suffix, stem));
+		// shopping is shop.
+		if (stem.length > 4 && /([^aeiou])\1$/.test(stem)) {
+			const undone = stem.slice(0, -1);
+			stems.set(
+				undone,
+				growsFor(suffix, undone).filter((g) => g !== "e"),
+			);
+		}
+	}
+	if (w.length >= 4) stems.set(w, GROW_WORD);
+	const own = new Set([w, ...wordForms(w), ...otherNumber(w)]);
+	const out = new Set<string>();
+	for (const [stem, grows] of stems)
+		for (const grow of grows)
+			for (const form of [
+				stem + grow,
+				// shop is shopping.
+				...(/^(ed|ing)$/.test(grow) && /[^aeiou]$/.test(stem)
+					? [stem + stem.slice(-1) + grow]
+					: []),
+			])
+				if (!own.has(form) && used.has(form)) out.add(form);
+	return [...out]
+		.sort((a, b) => (used.get(b) ?? 0) - (used.get(a) ?? 0))
+		.slice(0, 3);
+}
+
+/** One edit apart: a letter added, dropped or changed, or two adjacent
+ * letters swapped (exchnage, exchange). A swap is two edits counted one at
+ * a time, so this stays within the two edits a suggestion may be. */
+function oneEdit(a: string, b: string): boolean {
+	if (a.length < b.length) [a, b] = [b, a];
+	let i = 0;
+	while (i < b.length && a[i] === b[i]) i++;
+	if (a.length === b.length + 1) return a.slice(i + 1) === b.slice(i);
+	if (a.length !== b.length || i === a.length) return false;
+	return (
+		a.slice(i + 1) === b.slice(i + 1) ||
+		(a[i] === b[i + 1] &&
+			a[i + 1] === b[i] &&
+			a.slice(i + 2) === b.slice(i + 2))
+	);
+}
+
+/** The one word some build uses that `w` looks like a typo of, or null: one
+ * edit away, the same first letter, neither a prefix of the other (sleepy
+ * and sleep are two words, not a typo), and no second such word unless the
+ * first is used at least five times as often (submissions misspell too:
+ * remmitance beside remittance). On the 2026-10-23 batteries, any word
+ * within two edits named summarise for submarine and royalty for loyalty;
+ * this rule names neither. */
+function oneSpelling(w: string, used: Map<string, number>): string | null {
+	if (!/^\p{L}{5,}$/u.test(w)) return null;
+	const found = [...used.keys()]
+		.filter(
+			(u) =>
+				u[0] === w[0] &&
+				/^\p{L}{4,}$/u.test(u) &&
+				!u.startsWith(w) &&
+				!w.startsWith(u) &&
+				oneEdit(w, u),
+		)
+		.sort((a, b) => (used.get(b) ?? 0) - (used.get(a) ?? 0));
+	const [first, second] = found.map((u) => used.get(u) ?? 0);
+	return found.length && (second === undefined || first >= 5 * second)
+		? found[0]
+		: null;
+}
+
+const andList = (xs: string[], and = "and") =>
+	xs.length < 2
+		? xs.join("")
+		: `${xs.slice(0, -1).join(", ")} ${and} ${xs[xs.length - 1]}`;
+
+/**
+ * The builds route's line when any word of `q` occurs as a whole word in no
+ * submission (wordsNoBuildUses), or null. It never changes rows. It names
+ * the words; says what the rows are (one listed by its words matches only
+ * q's other words, one found by meaning is close to q as a whole); names a
+ * related form submissions do use (cash for cashing), so the line is not
+ * read as nobody building for cash-out; and, when nothing is listed, asks to
+ * check the spelling, naming a used word only when it is the one oneSpelling
+ * finds and the word has no related form.
+ */
+export function unusedWordsWarning(
+	indexed: IndexedBuild[],
+	q: string,
+	scored: ScoredBuild[],
+	/** Builds rule L held back: their name matched, most of q is unused. */
+	withheld: { b: IndexedBuild; matched: string[] }[] = [],
+): string | null {
+	const { absent, concepts } = wordsNoBuildUses(indexed, q);
+	if (!absent.length) return null;
+	const used = usedCounts(indexed);
+	const one = absent.length === 1;
+	const all = absent.length === concepts;
+	const words = `searched in q (${absent.join(", ")})`;
+	const head = !all
+		? `${absent.length} of the ${concepts} words ${words} ${one ? "occurs" : "occur"} as a whole word in no submission in the index`
+		: one
+			? `the word ${words} occurs as a whole word in no submission in the index`
+			: `none of the ${concepts} words ${words} occurs as a whole word in any submission in the index`;
+	const byWords = scored.some((s) => s.matched.length);
+	const byMeaning = scored.some((s) => s.similarity !== undefined);
+	const those = one ? "that word" : "those words";
+	const inside = one
+		? "it only inside a longer word"
+		: "them only inside longer words";
+	const named = one ? "it" : "one of them";
+	const related = absent.map((w) => [w, relatedUsed(w, used)] as const);
+	const spelling = scored.length
+		? []
+		: related.flatMap(([w, r]) => {
+				const s = r.length ? null : oneSpelling(w, used);
+				return s ? [`${s} is a used word one edit from ${w}`] : [];
+			});
+	// Withheld by name, never "no match": church tithe donations app held
+	// back Donation Management, and the line asked to check the spelling.
+	// A word only inside a longer word of every name it matched is said so
+	// (llama in MellaMate), as the listed-row sentence does.
+	const n = withheld.length;
+	const byName: string[] = [];
+	const inLonger: string[] = [];
+	for (const { t, forms } of queryTerms(q.trim().toLowerCase())) {
+		// Only names the word hit at all: a word a held build matched in its
+		// description alone (tracker in "gifts tracker") is not named.
+		const inName = forms.map(termMatcher);
+		const names = withheld
+			.filter((w) => w.matched.includes(t))
+			.map((w) => w.b.name.toLowerCase())
+			.filter((nm) => inName.some((hit) => hit(nm)));
+		if (!names.length) continue;
+		const hits = forms.flatMap((f) => anyScriptWord(f) ?? []);
+		const whole = names.some((nm) => hits.some((hit) => hit(nm)));
+		(whole ? byName : inLonger).push(wordCore(t));
+	}
+	const how = [
+		...(byName.length ? [`by name for ${andList(byName, "or")}`] : []),
+		...(inLonger.length
+			? [`inside a longer word for ${andList(inLonger, "or")}`]
+			: []),
+	];
+	const heldText = n
+		? `; ${n === 1 ? "1 build" : `${n} builds`} matched ${how.length > 1 ? `${how.join(", or ")},` : how.join("")} ${n === 1 ? "is" : "are"} not listed, because most of the words searched in q occur in no submission`
+		: "";
+	// Conditional: a dictionary sweep of the first wording named corrections
+	// for 70 words spelled right (gamer, routine, discard).
+	const body = !scored.length
+		? `, and no build is listed${heldText}; if ${one ? "it is" : "one of them is"} misspelled, correct it${spelling.length ? ` (${spelling.join("; ")})` : ""}`
+		: !byMeaning
+			? all
+				? `: a build listed by its words alone, with no similarity, holds ${inside} and is not evidence that this idea was built`
+				: `, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names ${named}, it was found inside a longer word`
+			: !byWords
+				? `: every build listed was found by meaning (similarity, no matchedTerms) and is close to q as a whole, not to ${those}`
+				: all
+					? `: a build listed by its words holds ${inside}, and a build with similarity is close to q as a whole, not to ${those}; neither is evidence that this idea was built`
+					: `: a build listed by its words matches only the other words of q (where its matchedTerms names ${named}, it was found inside a longer word), and a build with similarity is close to q as a whole, not to ${those}`;
+	const forms = related.filter(([, r]) => r.length);
+	const formCount = forms.reduce((n, [, r]) => n + r.length, 0);
+	const relatedText = forms.length
+		? `; ${formCount === 1 ? "a related form is" : "related forms are"} used: ${forms.map(([w, r]) => `${andList(r)} for ${w}`).join("; ")}`
+		: "";
+	return head + body + (scored.length ? heldText : "") + relatedText;
 }
 
 /**
  * Score + rank builds for a topic query. Prior-art favors RECALL (a missed
- * existing build is the costly error): a NAME match always surfaces (on
- * 2026-10-23, holding name matches to the half-of-concepts rule dropped 8
- * builds graded the same idea from labeled ideas' keyword matches, three of
- * them MCP servers for "MCP server that lets AI agents use Stellar", so a
- * nonsense query can still list a build named for one of its words);
- * otherwise at least half the concepts must hit so a common token alone
- * ("payments") doesn't flood. Query filler ("for", "like") and "stellar",
+ * existing build is the costly error): a NAME match surfaces (on
+ * 2026-10-23, holding every name match to the half-of-concepts rule dropped
+ * 8 builds graded the same idea from labeled ideas' keyword matches, three
+ * of them MCP servers for "MCP server that lets AI agents use Stellar"),
+ * except when most of the query's concepts occur as a whole word in no
+ * build (rule L): then "quantum llama sandwich" listed a build named for
+ * quantum and one with llama inside its name. Rule L lost no labeled build
+ * on 140 ideas and emptied that query; on a fresh 24-query nonsense battery
+ * it cut builds by 19% (538 to 436, keyword), short of the half it was held
+ * to, and the owner chose to ship it. Otherwise at least half the concepts
+ * must hit so a common token alone ("payments") doesn't flood. Query filler ("for", "like") and "stellar",
  * which every submission says, are not concepts.
  *
  * Order: how much of the query a build covers, each word weighted by how
@@ -748,6 +1019,9 @@ export function searchHackathonBuilds(
 		 * matched for vetIdea it put 3 builds graded not prior art in its five
 		 * for 3 of 140 labeled ideas and pushed a same-idea build to sixth. */
 		packages?: boolean;
+		/** Filled with the builds rule L held back: the name matched, but
+		 * most of q is in no submission. The builds route says so. */
+		withheld?: { b: IndexedBuild; matched: string[] }[];
 	} = {},
 ): ScoredBuild[] {
 	let pool = indexed;
@@ -786,6 +1060,8 @@ export function searchHackathonBuilds(
 			.sort((a, b) => b.score - a.score);
 	}
 	const terms = queryTerms(query);
+	const unused = wordsNoBuildUses(indexed, query);
+	const namesAdmit = unused.absent.length * 2 <= unused.concepts;
 	const hay = new Map(
 		opts.packages ? pool.map((b) => [b, withPackages(b)] as const) : [],
 	);
@@ -825,7 +1101,8 @@ export function searchHackathonBuilds(
 		}
 		if (
 			score > 0 &&
-			(nameMatched || matched.size >= Math.ceil(terms.length / 2))
+			((nameMatched && namesAdmit) ||
+				matched.size >= Math.ceil(terms.length / 2))
 		) {
 			score += b.isWinner ? 2 : 0;
 			score += Math.min(b.voteCount ?? 0, 20) * 0.05;
@@ -841,7 +1118,8 @@ export function searchHackathonBuilds(
 				share: matched.size / (terms.length || 1),
 				textShare: inText.size / (terms.length || 1),
 			});
-		}
+		} else if (score > 0 && nameMatched)
+			opts.withheld?.push({ b, matched: [...matched] });
 	}
 	const mode = opts.mode ?? "keyword";
 	const sem = opts.semantic;

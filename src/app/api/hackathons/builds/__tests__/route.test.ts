@@ -108,7 +108,7 @@ describe("GET /api/hackathons/builds matches declared packages", () => {
 	});
 });
 
-describe("GET /api/hackathons/builds says when most of q matches no build", () => {
+describe("GET /api/hackathons/builds when q's words are in no build", () => {
 	const get = async (q: string, mode = "keyword") => {
 		const { GET } = await import("../route");
 		const res = await GET(
@@ -118,61 +118,201 @@ describe("GET /api/hackathons/builds says when most of q matches no build", () =
 		);
 		return res.json();
 	};
+	const withIndex = async (rows: IndexedBuild[]) => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(rows);
+	};
 
 	// The 2026-10-22 battery: q=quantum llama sandwich listed a build named
-	// for "quantum" and one with "llama" inside its name, with no caveat.
-	it("keeps the rows and warns that they match only part of q", async () => {
-		const body = await get("tukar llama sandwich");
+	// for "quantum" and one with "llama" inside its name. With most of q in no
+	// build, a name no longer lists a build alone (rule L, 2026-10-23).
+	it("lists no build by its name alone when most of q's words are in no build", async () => {
+		const llama = await get("tukar llama sandwich");
+		expect(llama.meta.counts).toMatchObject({ matched: 0, withheldByName: 1 });
+		// Nothing listed: say which words matched no submission, and that a
+		// build matched by name and was held back (review, 2026-10-23).
+		expect(llama.meta.warnings).toEqual([
+			"2 of the 3 words searched in q (llama, sandwich) occur as a whole word in no submission in the index, and no build is listed; 1 build matched by name for tukar is not listed, because most of the words searched in q occur in no submission; if one of them is misspelled, correct it",
+		]);
+		const nread = await get("tukar nread sandwich");
+		expect(nread.meta.counts).toMatchObject({ matched: 0, withheldByName: 2 });
+		// unread is one edit from nread but starts with another letter: no
+		// spelling is named.
+		expect(nread.meta.warnings).toEqual([
+			"2 of the 3 words searched in q (nread, sandwich) occur as a whole word in no submission in the index, and no build is listed; 2 builds matched by name for tukar, or inside a longer word for nread, are not listed, because most of the words searched in q occur in no submission; if one of them is misspelled, correct it",
+		]);
+		expect((await get("tukar twin")).meta.counts.withheldByName).toBe(0);
+	});
+
+	it("says a real name match was held back, never that nothing matched", async () => {
+		await withIndex([
+			build("donations", {
+				name: "Donation Management",
+				haystack: "donation management: track gifts",
+			}),
+		]);
+		const tithe = await get("church tithe donations app");
+		expect(tithe.meta.counts).toMatchObject({ matched: 0, withheldByName: 1 });
+		expect(tithe.meta.warnings).toEqual([
+			"2 of the 3 words searched in q (church, tithe) occur as a whole word in no submission in the index, and no build is listed; 1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission; if one of them is misspelled, correct it",
+		]);
+		await withIndex([
+			build("ide", {
+				name: "Stellar-IDE",
+				haystack: "stellar-ide: an ide for soroban contracts",
+			}),
+		]);
+		const ide = await get("Sorobix IDE plugin");
+		expect(ide.meta.counts).toMatchObject({ matched: 0, withheldByName: 1 });
+		expect(ide.meta.warnings?.[0]).toContain(
+			"; 1 build matched by name for ide is not listed, because most of the words searched in q occur in no submission",
+		);
+	});
+
+	// Re-check 2026-10-23: meaning mode never lists a build by its name, so
+	// none is withheld there and the line does not say so.
+	// Re-check 2026-10-23: tracker, matched in the description only, was
+	// called found inside a longer word of the name.
+	it("names only the words a held build matched in its name", async () => {
+		await withIndex([
+			build("donations", {
+				name: "Donation Management",
+				haystack: "donation management: gifts tracker",
+			}),
+		]);
+		const body = await get("church tithe zakat donations tracker");
+		expect(body.meta.counts).toMatchObject({ matched: 0, withheldByName: 1 });
+		expect(body.meta.warnings).toEqual([
+			"3 of the 5 words searched in q (church, tithe, zakat) occur as a whole word in no submission in the index, and no build is listed; 1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission; if one of them is misspelled, correct it",
+		]);
+	});
+
+	it("withholds nothing in meaning mode", async () => {
+		await withIndex([
+			build("donations", {
+				name: "Donation Management",
+				haystack: "donation management: track gifts",
+			}),
+		]);
+		const { semanticBuildScores } = await import(
+			"@/lib/hackathon-build-semantic"
+		);
+		vi.mocked(semanticBuildScores).mockResolvedValueOnce(new Map());
+		const body = await get("church tithe donations app", "meaning");
+		expect(body.meta.mode.served).toBe("meaning");
+		expect(body.meta.counts).toMatchObject({ matched: 0, withheldByName: 0 });
+		expect(body.meta.warnings).toEqual([
+			"2 of the 3 words searched in q (church, tithe) occur as a whole word in no submission in the index, and no build is listed; if one of them is misspelled, correct it",
+		]);
+	});
+
+	it("still lists a name match when at most half of q's words are in no build, and names the missing one", async () => {
+		const body = await get("tukar twin sandwich");
+		expect(
+			(body.builds as Array<{ id: string }>).map((r) => r.id).sort(),
+		).toEqual(["tukar", "twin"]);
+		expect(body.meta.warnings).toEqual([
+			"1 of the 3 words searched in q (sandwich) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word",
+		]);
+	});
+
+	it("lists builds on the words some submission uses and names the rest", async () => {
+		await withIndex([
+			build("zkvault", { haystack: "zkvault: zero knowledge proofs" }),
+			build("other", { haystack: "other: a payments app" }),
+		]);
+		const body = await get("zero knowledge pogo stick");
 		expect(
 			(body.builds as Array<Record<string, unknown>>).map((r) => [
 				r.id,
 				r.matchedTerms,
 			]),
-		).toEqual([["tukar", ["tukar"]]]);
+		).toEqual([["zkvault", ["zero", "knowledge"]]]);
 		expect(body.meta.warnings).toEqual([
-			"2 of the 3 words searched in q (llama, sandwich) occur as a whole word in no submission in the index (a matchedTerms entry naming one was found inside a longer word), so a build listed by its words alone, with no similarity, matches only part of q and is not evidence that this idea was built",
+			"2 of the 4 words searched in q (pogo, stick) occur as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names one of them, it was found inside a longer word",
 		]);
 	});
 
-	it("says nothing when every build listed by words was also found by meaning", async () => {
+	it("says nothing when every word of q is used", async () => {
+		expect((await get("tukar twin")).meta.warnings).toBeUndefined();
+	});
+
+	// Hybrid is the default: blockchain sourdough starter listed 99 builds by
+	// meaning with no line.
+	it("says what builds found by meaning are, alone or beside builds listed by words", async () => {
 		const { semanticBuildScores } = await import(
 			"@/lib/hackathon-build-semantic"
 		);
 		vi.mocked(semanticBuildScores).mockResolvedValueOnce(
 			new Map([["tukar", 0.8]]),
 		);
-		const body = await get("tukar llama sandwich", "hybrid");
+		const meaning = await get("tukar llama sandwich", "hybrid");
 		expect(
-			(body.builds as Array<Record<string, unknown>>).map((r) => [
+			(meaning.builds as Array<Record<string, unknown>>).map((r) => [
 				r.id,
 				r.similarity,
+				r.matchedTerms ?? null,
 			]),
-		).toEqual([["tukar", 0.8]]);
-		expect(body.meta.warnings).toBeUndefined();
-	});
-
-	it("counts a word found only inside a longer one as in no submission", async () => {
-		const body = await get("tukar nread sandwich");
-		expect((body.builds as Array<{ id: string }>).map((r) => r.id)).toEqual([
-			"tukar",
-			"unread",
+		).toEqual([["tukar", 0.8, null]]);
+		expect(meaning.meta.warnings).toEqual([
+			"2 of the 3 words searched in q (llama, sandwich) occur as a whole word in no submission in the index: every build listed was found by meaning (similarity, no matchedTerms) and is close to q as a whole, not to those words",
 		]);
-		expect(body.meta.warnings?.[0]).toMatch(
-			/^2 of the 3 words .*\(nread, sandwich\)/,
+		vi.mocked(semanticBuildScores).mockResolvedValueOnce(
+			new Map([["kept", 0.8]]),
 		);
+		const both = await get("tukar twin sandwich", "hybrid");
+		expect(
+			(both.builds as Array<{ id: string }>).map((r) => r.id).sort(),
+		).toEqual(["kept", "tukar", "twin"]);
+		expect(both.meta.warnings).toEqual([
+			"1 of the 3 words searched in q (sandwich) occurs as a whole word in no submission in the index: a build listed by its words matches only the other words of q (where its matchedTerms names it, it was found inside a longer word), and a build with similarity is close to q as a whole, not to that word",
+		]);
 	});
 
-	it("says nothing when at most half of q's words are in no submission", async () => {
-		const body = await get("tukar twin sandwich");
-		expect(body.meta.counts.matched).toBe(2);
-		expect(body.meta.warnings).toBeUndefined();
+	it("names a related form submissions use, and only a real one", async () => {
+		await withIndex([
+			build("cashout", { haystack: "cashout: cash for remittances" }),
+			build("steady", { haystack: "steady: reliable remittances" }),
+		]);
+		const cash = await get("cashing remittances");
+		expect(cash.meta.warnings).toEqual([
+			"1 of the 2 words searched in q (cashing) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word; a related form is used: cash for cashing",
+		]);
+		await withIndex([
+			build("steady", { haystack: "steady: reliable remittances" }),
+		]);
+		const relief = await get("relief remittances");
+		expect(relief.meta.warnings?.[0]).not.toMatch(/related form/);
+		expect(relief.meta.warnings?.[0]).toMatch(/\(relief\)/);
+	});
+
+	it("suggests a spelling only when one used word is that close", async () => {
+		await withIndex([
+			build("remit", { haystack: "remit: remittance app for families" }),
+		]);
+		const typo = await get("remitance app");
+		expect(typo.meta.counts.matched).toBe(0);
+		expect(typo.meta.warnings).toEqual([
+			"the word searched in q (remitance) occurs as a whole word in no submission in the index, and no build is listed; if it is misspelled, correct it (remittance is a used word one edit from remitance)",
+		]);
+		// Two used words one edit away: neither is named.
+		await withIndex([build("decks", { haystack: "decks: cards and cords" })]);
+		const two = await get("curds");
+		expect(two.meta.warnings).toEqual([
+			"the word searched in q (curds) occurs as a whole word in no submission in the index, and no build is listed; if it is misspelled, correct it",
+		]);
+		// A swap counts as one edit; sleep is not a typo of sleepy.
+		await withIndex([build("swap", { haystack: "swap: exchange and sleep" })]);
+		const swap = await get("exchnage sleepy");
+		expect(swap.meta.warnings).toEqual([
+			"none of the 2 words searched in q (exchnage, sleepy) occurs as a whole word in any submission in the index, and no build is listed; if one of them is misspelled, correct it (exchange is a used word one edit from exchnage)",
+		]);
 	});
 
 	// Review 2026-10-23: "agents," and "café" were reported in no submission
 	// while matchedTerms named them, so the line fired with both clauses false.
 	it("reads a word with a trailing comma or an accent as the build's own", async () => {
-		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
-		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+		await withIndex([
 			build("agentpay", {
 				haystack: "agentpay: ai agents, payments, a café",
 			}),
@@ -187,13 +327,20 @@ describe("GET /api/hackathons/builds says when most of q matches no build", () =
 		expect(body.meta.warnings).toBeUndefined();
 	});
 
-	it("words the line for a one-word q", async () => {
-		const body = await get("nread");
-		expect((body.builds as Array<{ id: string }>).map((r) => r.id)).toEqual([
+	it("words the line for a one-word q and for a q none of whose words is used", async () => {
+		const one = await get("nread");
+		expect((one.builds as Array<{ id: string }>).map((r) => r.id)).toEqual([
 			"unread",
 		]);
-		expect(body.meta.warnings).toEqual([
+		expect(one.meta.warnings).toEqual([
 			"the word searched in q (nread) occurs as a whole word in no submission in the index: a build listed by its words alone, with no similarity, holds it only inside a longer word and is not evidence that this idea was built",
+		]);
+		const none = await get("nread ukar");
+		expect(
+			(none.builds as Array<{ id: string }>).map((r) => r.id).sort(),
+		).toEqual(["tukar", "unread"]);
+		expect(none.meta.warnings).toEqual([
+			"none of the 2 words searched in q (nread, ukar) occurs as a whole word in any submission in the index: a build listed by its words alone, with no similarity, holds them only inside longer words and is not evidence that this idea was built",
 		]);
 	});
 });

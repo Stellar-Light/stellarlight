@@ -390,3 +390,234 @@ fresh battery written by a separate agent that was told no rule.
   - Test first: `wordsNoBuildUses(pool, "agents !!! ???")` gave absent
     ['!!!', '???'] on db1ff05d, and absent [] with 1 concept after the fix.
     The two touched test files pass (59).
+
+## Lane L2: ship rule L, and widen the warning (spec 1.9.95)
+
+### Scope and decision
+
+- Owner decision, in chat: ship rule L, "don't ship it half-ass". Rule L
+  missed criterion (c)'s volume bar (builds returned 538 -> 436 keyword and
+  683 -> 584 hybrid on the fresh battery, against a required half). The
+  owner's call overrides that bar and only that one; every other bar stands
+  and was re-measured on the final code.
+- Lane: Claude Opus 5.5, xhigh, own worktree, branch `lane/l2-rule-l` from
+  main 02d7deba (1.9.94). Not pushed.
+- Bars: (a) on 140 labeled ideas, keyword and hybrid, no build graded 2 or 1
+  leaves the matched list, top 20 or top 5; (b) vetIdea's five and the
+  brief's picks identical to base except drops of builds graded 0, each
+  named; (c) the fresh battery's zero counts and builds, every removed
+  build named; (d) the probe returns 0; (e) where the line fires on the 140
+  ideas, each word checked; (f) adversarial probes.
+
+### Log
+
+- `git fetch origin main && git switch -c lane/l2-rule-l origin/main`: HEAD
+  02d7deba.
+- 13:08:08Z: `probes.json` written (34 probes: one word, product names,
+  typos, accents and punctuation, two and five words, only "stellar",
+  hyphenated phrases, package names) before any probe ran.
+  `capture.mjs <out> probes.json`: 34 queries, 98 pages, every one 200,
+  apiVersion 1.9.94 at 13:08:36Z and 1.9.94 at 13:12:50Z.
+- Shared or builds route only: shared. Rule L in searchHackathonBuilds
+  reaches vetIdea, hackathonBrief and analyze's q with no option, so
+  meta.counts.entries, which re-runs the match, stays equal to analyze's
+  total; a builds-route option would need passing to that re-run too (the
+  #1856 merge found that class of bug).
+- Tests first, against main's code:
+  `npx vitest run src/lib/__tests__/hackathon-builds.test.ts -t "a name
+  alone does not list a build"`: 1 failed (`expected [ 'Quantum Shield
+  Exchange', ...(1) ] to deeply equal []`), 2 passed.
+  `npx vitest run src/app/api/hackathons/builds/__tests__/route.test.ts -t
+  "words are in no build"`: 4 failed (`tukar llama sandwich: expected 1 to
+  be +0`; three warnings `expected undefined to deeply equal [ Array(1) ]`
+  or `.toMatch() expects to receive a string, but got undefined`), 2 passed.
+  Later, `-t "charity for charities"`: 1 failed (`expected { absent: [
+  'charities', ...(3) ], ...(1) } to deeply equal { absent: [ 'rosca' ],
+  concepts: 4 }`).
+- Rule L: `namesAdmit` from `wordsNoBuildUses(indexed, query)`, absent * 2
+  <= concepts; a name match admits only when it holds. The rest of the
+  scorer is unchanged.
+- First replay of the 140 ideas named 33 ideas for the warning, among them
+  "charities" (charity is used), "family" (families is used) and "(rosca,";
+  the probes named "soroban-sdk" and "@creit.tech/stellar-wallets-kit"
+  unused, though 66% and 27% of read repos declare them. Fixed in
+  wordsNoBuildUses only: every declared package counts, the plural or
+  singular wordForms misses is read (ies and y, es), and a word is named
+  without edge punctuation. Every number below is from the final code.
+- (a) `compare.mts` on lane K's capture: nothing lost or gained, grade 2 or
+  grade 1, at any depth, any set, either mode.
+- (b) vetIdea's five 0 and the brief's picks 0 of 140 differ; the prior-art
+  rankings differ for 1 (i31: Stellar Health Point, graded 0, leaves keyword
+  and hybrid).
+- (c) Fresh battery: keyword 538 -> 436 builds, 9 -> 17 queries at 0; hybrid
+  683 -> 584, 9 -> 15; nothing added; every removed build named in
+  `shipped/compare-fresh.txt`. Lane K's battery 20 -> 9 and 21 -> 10.
+- (d) Probe 2 -> 0, keyword and hybrid.
+- (e) The warning fires for 30 ideas in keyword mode and 29 in hybrid.
+  `check-unused.py`, a separate Python search, finds each of the 37 named
+  words in 0 submissions; for 12 a related form is used (cash for cashing,
+  hedge for hedging, mint for minted).
+- (f) 34 probes: rows change for 3 (paiement mobile sécurisé loses a build
+  named for "mobile"; loyalty points for coffee shops loses two; the
+  hyphenated zero-knowledge pogo stick loses four, three in hybrid); the
+  warning fires for 10 in keyword mode and 9 in hybrid, each named word
+  used by no submission. Product names and package names are used words
+  and change nothing.
+- Text: builds `q` and `meta.warnings` descriptions; changelog 1.9.95
+  (says the owner chose to ship past the bar, with the numbers);
+  api-reference.md; `pnpm contract:write`.
+
+### Lane L2, second commit: three gaps the first left open (spec 1.9.95)
+
+- Orchestrator, on the owner's "not half done": close three of the first
+  commit's own open risks, rows unchanged, tests first. (1) Builds found by
+  meaning had no caveat (blockchain sourdough starter, 99 in hybrid mode).
+  (2) A word with a used related form (cashing, cash) could be over-read.
+  (3) A query that listed nothing said nothing (remitance app).
+- Tests first, against 499988e9: `npx vitest run
+  src/lib/__tests__/hackathon-builds.test.ts -t "related forms"`: 2 failed
+  (`unusedWordsWarning is not a function`); `npx vitest run
+  src/app/api/hackathons/builds/__tests__/route.test.ts -t "words are in no
+  build"`: 4 failed (three `expected undefined to deeply equal [ Array(1) ]`
+  for the zero-row, meaning and spelling lines; the related-form line
+  differed), 5 passed. The spelling-clarity tests were added with the
+  frequency rule and fail on 499988e9 the same way.
+- Change: `unusedWordsWarning` in `src/lib/hackathon-builds.ts` builds the
+  one line; the route pushes it. It fires whenever any word of q is in no
+  submission, whatever found the rows, and words the rows by kind (words,
+  meaning, both, none); names related forms; when nothing is listed, asks
+  to check the spelling.
+- Two rules were narrowed after their first measurement, before shipping,
+  both on what a claim may say, not on rows:
+  - spelling: any word within two edits named summarise for submarine,
+    royalty for loyalty, gambling for gargling and tempo for teapot. Now:
+    one edit (a swap of adjacent letters counts as one), the same first
+    letter, neither a prefix of the other, and no other such word used more
+    than a fifth as often. Remittance for remitance is named (the corpus
+    also holds remmitance once against remittance 9 times);
+  - related forms: tractor named traction. Now a stem found by dropping er,
+    or or ic takes back only inflections.
+- Re-measured on the final code:
+  - rows: every replay output identical to 499988e9's (lane K's capture, 140
+    ideas; the fresh battery; the 34 probes);
+  - the line fires for 32 of 140 ideas in keyword mode and 32 in hybrid (was
+    30 and 29), 24 of 24 battery queries in both modes (was 7 and 7), 15 of
+    15 on lane K's battery (was 1), and 16 of 34 probes in both modes (was
+    10 and 9). Every line's text is in `shipped/note-*.txt`;
+  - `check-unused.py`, rewritten to read back every claim in every line
+    (each named word unused, each related form used, each spelling used and
+    one edit away): 0 false on all three sets. Related forms named: 12
+    ideas (cash, shopping, issue, back, mint, algorithms, cheap, generate,
+    rent, hedge, delegation and their forms), 4 battery queries (start,
+    flips, schedules, whisper), 1 probe (shopping). Spellings named: one,
+    remittance for remitance.
+- Text: the builds `q` and `meta.warnings` descriptions, the 1.9.95
+  changelog entry and api-reference.md describe the line's forms, the
+  related-form rule and the spelling rule.
+
+### Lane L2 review (Claude Fable 5.1, effort high) and third commit (spec 1.9.96)
+
+- The review replayed b63a697a on the live corpus (1,356 submissions):
+  GATE: fix. Verified tsc, tests, contract, entries parity, multi-word
+  product names, package queries and the meaning-row sentences. Findings:
+  1. Medium: related forms named unrelated words (port portal, mill
+     million, miner mineral, strip stripe, center cent, stalling stale,
+     wither with).
+  2. Medium: the zero-row tail read as a correction; a 2,410-word
+     dictionary sweep named one for 70 words spelled right (gamer games,
+     routine routing, discard discord, monkey money, thorough through,
+     inventor investor, garantie garantir).
+  3. Medium: rule L withheld real name matches silently (church tithe
+     donations app: Donation Management; Sorobix IDE plugin: Stellar-IDE).
+  4. Low: otherNumber read notes, modes, planes, themes, hopes, toes, does
+     and uses as used through not, mod, plan, them, hop, to, do, us.
+  5. Low: the spec's spelling clause omitted conditions; analyze's q text
+     did not say a package-only word counts as used for rule L.
+  6. Nit: the corpus was tokenized about three times per request.
+- `update_pr_branch.sh <worktree> 1.9.96`: merged origin/main (925f47f9,
+  #1859 took 1.9.95) at c776bb7a; changelog entry renumbered to 1.9.96.
+- Tests first, against b63a697a's code: 7 failed (`withheldByName`
+  missing twice; the zero-row wording; `notes: expected [] to deeply equal
+  [ 'notes' ]`; `minter` named mint; `port` named a related form; the
+  spelling wording), 70 passed. With the fixes all pass.
+- Fixes: (1) the word itself grows only s, es, ed, ing; a stem from er or
+  or grows e, es, ed, ing; an undone double grows no e; while measuring,
+  themes named them, so es is stripped only after ss, x, z, ch or sh and a
+  dropped e is not left off (theme is not them). center keeps centered, its
+  past tense. (2) ", and no build is listed; if it is (one of them is)
+  misspelled, correct it (X is the used word one edit from w)"; the naming
+  rule unchanged. (3) searchHackathonBuilds fills an optional `withheld`
+  list; queryBuilds returns those not listed by meaning; the line adds "N
+  builds matched by name for W are not listed, because most of the words
+  searched in q occur in no submission"; meta.counts.withheldByName
+  (declared). (4) otherNumber as the review asked, with ss in place of s so
+  uses is not us. (5) spec and analyze q text. (6) a WeakMap per index,
+  with a ponytail comment.
+- Re-measured: rows identical to b63a697a on lane K's capture, the fresh
+  battery, the 34 probes, and the review's 23 examples captured live
+  (1.9.95 to 1.9.95, 46 pages, every one 200). Where the line fires is
+  unchanged; the examples fire 19 of 23. `check-unused.py` checks every
+  word, related form, spelling and withheld count (against the builds the
+  replays differ by): 0 false on all four sets.
+
+### Renumbered at merge (2026-10-23)
+
+#1862 (compact views) took 1.9.96 first, so `update_pr_branch.sh <worktree> 1.9.97` merged origin/main at eb9ef225 into this line (88d7160b) and the change ships as **spec 1.9.97**. The entries above keep the number they were written with.
+
+### Lane L2 re-check of 5023b236 and fourth commit (spec 1.9.97)
+
+- The re-check (same reviewer) confirmed the six fixes; GATE: fix first on
+  four new findings. The orchestrator merged main (88d7160b, #1862 took
+  1.9.96, renumbered to 1.9.97) and noted it (838e6706).
+  1. Medium: a word's own inflection bypassed the bare-word fix: ports
+     named portal and portion (83 rows), mills million, forming and formed
+     formal, strips stripe, miners mineral and minerals; with no rows,
+     milling and billed billion, porting and ported portal, planning
+     planes.
+  2. Low: in meaning mode the withheld clause fired for a build the mode
+     never lists by name.
+  3. Nit: "the used word" claimed one candidate; the rule allows a second
+     used a fifth as often.
+  4. Nit: "matched by name for llama" when llama was inside MellaMate.
+- Tests first, against 838e6706: 7 failed (the nread line, the meaning-mode
+  withheldByName, the spelling wording twice, `renting` named rental,
+  `ports` named a related form, planning did not name plan alone), 72
+  passed. With the fixes, 114 of 114 in the hackathon files.
+- Fixes: (1) `growsFor`: a stem from s, ing, ed or est grows "", s, ed,
+  ing, e only after ing or ed, es only after ss, x, z, ch or sh; the e, ic,
+  er and or stems keep theirs. (2) queryBuilds passes no withheld list when
+  meaning served. (3) "is a used word one edit from". (4) a withheld word
+  is "by name for" when some held name holds it whole, else "inside a
+  longer word for".
+- Re-measured: rows identical to 5023b236 on lane K's capture, the fresh
+  battery, the 34 probes and the 23 review examples. Related forms gone
+  from those sets' lines: issues for issued, rental and rentals for
+  renting. On the live corpus (keyword, `shipped/recheck-words.txt`) the
+  re-check's words name only form, bill, bills, billing, plan and plans.
+  `check-unused.py` checks every claim, now including each "inside a
+  longer word": 0 false on all four sets.
+
+### Lane L2 third re-check of a042c41d and fifth commit (spec 1.9.97)
+
+- The re-check confirmed the four fixes (a 514-word inflection sweep found
+  no wrong related form; meaning mode serves 0; the wording holds). GATE:
+  fix first on one finding, plus one text error from the orchestrator:
+  1. Medium: a word a held build matched only in its description or
+     packages was called "inside a longer word": index {name Donation
+     Management, description gifts tracker}, q=church tithe zakat donations
+     tracker said "matched by name for donations, or inside a longer word
+     for tracker".
+  2. Text: the 1.9.97 changelog said es is dropped after s, x, z, ch or sh;
+     the code uses ss. The code comment and the README said the same; the
+     spec and api-reference.md did not.
+- Test first, against a042c41d: the probe as a route test failed (received
+  "... matched by name for donations, or inside a longer word for tracker,
+  is not listed ..."). With the fix, 115 of 115 in the hackathon files.
+- Fix: only a word that hits a held build's name at all (termMatcher, as
+  the scorer matches) is classified, whole in a name by name, else inside a
+  longer word; a word matched only outside the name is left out. The
+  withheld count and withheldByName still count the build (1 in the test).
+  Texts say ss.
+- Re-measured: rows identical to a042c41d on all four sets, and every line
+  text identical too. `check-unused.py` now also fails an inside claim
+  unless some held name holds the word: 0 false claims on all four sets.
