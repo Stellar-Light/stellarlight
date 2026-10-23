@@ -21,6 +21,7 @@ import { CODE_DOMAINS } from "@/lib/code-domains";
 import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
 import { REPO_COMPACT, viewParamError, withView } from "@/lib/compact-view";
 import {
+	failedReadsOf,
 	isDegraded,
 	REQUEST_READ_BUDGET_MS,
 	withPartial,
@@ -212,6 +213,7 @@ async function handle(req: NextRequest) {
 			limit,
 		},
 		resultCount: repos.length,
+		partial: failedReadsOf(warnings).length > 0,
 	});
 
 	// ?view=compact rows (src/lib/compact-view.ts); the default passes through.

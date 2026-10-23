@@ -28,6 +28,7 @@ import {
 	DEFAULT_READ_TIMEOUT_MS,
 	degradedRead,
 	degradedWarning,
+	failedReadsOf,
 	isDegraded,
 	scopedWarning,
 	withPartial,
@@ -1109,24 +1110,6 @@ async function research(
 		}
 	}
 
-	log({
-		req,
-		startedAt,
-		status: 200,
-		endpoint: "/api/research",
-		query: q,
-		filters: {
-			source: sourceFilter,
-			auditor: auditorFilter,
-			protocol: protocolFilter,
-			severity: severityFilter,
-			limit: limitParam,
-			mode,
-		},
-		resultCount: results.length,
-		matchMode: mode,
-	});
-
 	// sls-071, sls-090: a finding id, an advisory id or a repo-qualified
 	// release tag is on the page, held but left off it, or a miss. Vector
 	// search never goes empty, so without this an absent id returns its
@@ -1154,6 +1137,24 @@ async function research(
 		exactLookupWarning,
 		heldNote,
 	].filter((w): w is string => !!w);
+	log({
+		req,
+		startedAt,
+		status: 200,
+		endpoint: "/api/research",
+		query: q,
+		filters: {
+			source: sourceFilter,
+			auditor: auditorFilter,
+			protocol: protocolFilter,
+			severity: severityFilter,
+			limit: limitParam,
+			mode,
+		},
+		resultCount: results.length,
+		matchMode: mode,
+		partial: failedReadsOf(warnings).length > 0,
+	});
 	// sls-090: when the query named exact keys, each row says which it
 	// carries; [] = none of them.
 	const rows = results.map((r) => {
@@ -1459,6 +1460,7 @@ async function researchMany(
 		},
 		resultCount: results.length,
 		matchMode: mode,
+		partial: failedReadsOf(warnings).length > 0,
 	});
 	return NextResponse.json(
 		{
