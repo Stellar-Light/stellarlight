@@ -43,6 +43,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.103",
+		type: "fixed",
+		summary:
+			"searchHackathonBuilds: a hyphenated phrase in q now matches its other number too, spaced or joined. q=smart-accounts missed Stelakey, which writes smart account, and q=pay-per-calls missed the one submission that writes pay per call spaced. The unused-words line reads the same forms. The number varies on the phrase's last part only, so q=stellar-ens does not turn into stellar en.",
+		detail:
+			"A hyphenated phrase is one concept, matched spaced (smart account) or joined (smartaccount); it matched only the number typed. It now matches both, the same way single words already did. Replayed over every frozen builds query that holds a hyphen (23 runs): 21 are byte-identical, one changes one score and one changes order only (no build enters or leaves any list, and no warning changes).",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.102",
 		type: "fixed",
 		summary:

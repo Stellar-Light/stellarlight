@@ -571,6 +571,14 @@ export function buildsForRepos(
 // self-referential SSR fetches fail on Vercel). The route calls this too, so
 // the two can never drift.
 
+/** A hyphenated phrase's two numbers vary on its last part only: forms of
+ * the whole token stripped a short last part's s ("stellar-ens" became
+ * "stellar en", which matched prose). */
+function phraseForms(token: string): string[] {
+	const cut = token.lastIndexOf("-") + 1;
+	return wordForms(token.slice(cut)).map((f) => token.slice(0, cut) + f);
+}
+
 /** A query token and its plural or singular. */
 function wordForms(token: string): string[] {
 	if (token.length > 3 && token.endsWith("s"))
@@ -669,8 +677,8 @@ function queryTerms(query: string) {
 		),
 	];
 	// A hyphenated phrase is one concept: "pay-per-call" also matches
-	// "pay per call" and "paypercall", and its parts stop counting on their
-	// own (they made one phrase weigh three times).
+	// "pay per call", "paypercall" and the plural, and its parts stop
+	// counting on their own (they made one phrase weigh three times).
 	const parts = new Set(
 		raw.filter((t) => t.includes("-")).flatMap((t) => t.split("-")),
 	);
@@ -678,7 +686,10 @@ function queryTerms(query: string) {
 		.filter((t) => !parts.has(t))
 		.map((t) => {
 			const joined = t.includes("-")
-				? [t.replace(/-/g, " "), t.replace(/-/g, "")]
+				? phraseForms(t).flatMap((f) => [
+						f.replace(/-/g, " "),
+						f.replace(/-/g, ""),
+					])
 				: [];
 			const forms = [...expandBuildTerm(t), ...joined];
 			return {
