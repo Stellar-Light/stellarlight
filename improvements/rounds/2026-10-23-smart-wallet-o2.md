@@ -301,4 +301,14 @@ counts for q's passkey alone. Open for the owner, as after Z3: whether bar
   matchedTerms does, though the idea wrote smart account.
   Grok, the other-family reviewer the review skill asks for, could not run:
   its API answered 402 (usage balance exhausted).
+- Re-check of 6e19e309 (the changelog and ledger answers, same reviewer):
+  GATE push. Every sentence matches its measurement: q=smart wallet
+  payments 290 and 71, the first row without the phrase or a passkey 22nd;
+  the half rule admits 1 of 2 terms on both trees (x402 agents 275 and 272
+  rows alike on ship and base).
+- Merge: main merged in at 11020a1d (spec 1.9.106 there); this change is
+  spec 1.9.107, renumbered from the 1.9.112 placeholder. Checks on the
+  merged tree: tsc exit 0; vitest (src/lib, src/components, src/app,
+  src/collections, src/data) 219 files, 2,801 tests passed; contract:write
+  no diff; contract:check exit 0; Raven gate ACCEPT 1.9.107.
 
