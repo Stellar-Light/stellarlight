@@ -2,7 +2,7 @@
 /**
  * Stellar Scout MCP Server
  *
- * Exposes stellarlight.xyz's 19 public APIs as MCP tools so any MCP-compatible
+ * Exposes stellarlight.xyz's public APIs as MCP tools so any MCP-compatible
  * client (Claude desktop, Cursor, ChatGPT custom GPTs, Gemini, Cline, Continue,
  * Zed, etc.) can call them as native function calls.
  *
@@ -90,10 +90,17 @@ function asToolResult(
 	result:
 		| { ok: true; data: unknown }
 		| { ok: false; error: string; status?: number },
+	// true for a view=compact call: the JSON without indentation.
+	compact = false,
 ): { content: { type: "text"; text: string }[]; isError?: boolean } {
 	if (result.ok) {
 		return {
-			content: [{ type: "text", text: JSON.stringify(result.data, null, 2) }],
+			content: [
+				{
+					type: "text",
+					text: JSON.stringify(result.data, null, compact ? 0 : 2),
+				},
+			],
 		};
 	}
 	return {
@@ -583,6 +590,15 @@ server.registerTool(
 	},
 );
 
+// view on search_projects and search_repos (API spec 1.9.96). Keep in sync
+// with VIEW_VALUES in src/lib/compact-view.ts.
+const viewInput = z
+	.enum(["full", "compact"])
+	.optional()
+	.describe(
+		"Row shape. full (the default) returns every row field, unchanged. compact is for clients whose tool output is capped or cut: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. This tool returns a compact page as unindented JSON; measured through it on 2026-10-23 over four default pages of search_projects and search_repos: 90,918 to 120,796 characters full, 12,806 to 24,433 compact. Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. meta.view (first in meta) says the page is compact and where the left-out detail is read: repeat the call without view.",
+	);
+
 // 6. search_projects — prior-art / competitor lookup
 server.registerTool(
 	"search_projects",
@@ -598,12 +614,44 @@ server.registerTool(
 				.describe(
 					"Filter by category (Infrastructure, Tooling, User-Facing App, Asset, Protocol/Contract, Anchor, Partner Integration).",
 				),
-			hackathon: z.string().optional().describe("Filter by hackathon slug."),
+			type: z
+				.enum([
+					// Keep in sync with PROJECT_TYPES in src/lib/project-types.ts.
+					"Wallet",
+					"DEX",
+					"Lending",
+					"Bridge",
+					"Infrastructure",
+					"Payments",
+					"Anchor",
+					"SDK",
+					"Indexer",
+					"Explorer",
+					"Analytics",
+					"AI",
+					"Gaming",
+					"Education",
+					"Security",
+					"NFT",
+					"RWA",
+					"Stablecoin",
+					"Social Impact",
+					"RPC",
+					"Faucet",
+					"Card Issuing",
+					"Exchange",
+					"Oracle",
+					"Yield",
+				])
+				.optional()
+				.describe(
+					"Only projects whose types[] includes this product type (exact membership). type=Wallet alone lists Wallet-typed projects; combine it with q or status to scope further. Distinct from category: a project has one category but can carry several types.",
+				),
 			status: z
 				.string()
 				.optional()
 				.describe(
-					"Filter by lifecycle status (Live, Inactive, Development, Pre-Release, Pre-Development). status=Inactive lists retired/defunct projects — useful for 'is X still alive' and post-mortem queries.",
+					"Filter by lifecycle status (Live, Inactive, Development, Pre-Release). status=Inactive lists retired/defunct projects, useful for 'is X still alive' and post-mortem queries.",
 				),
 			scfAwarded: z
 				.boolean()
@@ -616,19 +664,21 @@ server.registerTool(
 				.max(100)
 				.optional()
 				.describe("Max results (default 20)."),
+			view: viewInput,
 		},
 	},
-	async ({ q, category, hackathon, status, scfAwarded, limit }) => {
+	async ({ q, category, type, status, scfAwarded, limit, view }) => {
 		const params = new URLSearchParams();
 		if (q) params.set("q", q);
 		if (category) params.set("category", category);
-		if (hackathon) params.set("hackathon", hackathon);
+		if (type) params.set("type", type);
 		if (status) params.set("status", status);
 		if (scfAwarded) params.set("scfAwarded", "1");
 		if (limit !== undefined) params.set("limit", String(limit));
+		if (view) params.set("view", view);
 		const qs = params.toString();
 		const result = await callScout(`/api/projects/search${qs ? `?${qs}` : ""}`);
-		return asToolResult(result);
+		return asToolResult(result, view === "compact");
 	},
 );
 
@@ -651,10 +701,11 @@ server.registerTool(
 				.optional()
 				.describe("Filter by primary language (e.g. 'Rust', 'TypeScript')."),
 			activity: z
-				.enum(["active", "dormant", "archived", "unknown"])
+				// Keep in sync with REPO_ACTIVITY_STATES in src/lib/repo-grade.ts.
+				.enum(["active", "maintained", "dormant", "archived", "unknown"])
 				.optional()
 				.describe(
-					"Derived liveness filter. dormant/unknown are observations (stale/no commit date), never death verdicts.",
+					"Derived liveness filter: active (a commit within 45 days), maintained (within 180 days), dormant (a known commit older than 180 days), archived (the owner's own verdict), unknown (no commit date held). dormant and unknown are observations, never death verdicts.",
 				),
 			minScore: z
 				.number()
@@ -678,18 +729,21 @@ server.registerTool(
 				.min(0)
 				.optional()
 				.describe("Pagination offset (default 0)."),
+			view: viewInput,
 		},
 	},
-	async ({ q, language, minScore, limit, offset }) => {
+	async ({ q, language, activity, minScore, limit, offset, view }) => {
 		const params = new URLSearchParams();
 		if (q) params.set("q", q);
 		if (language) params.set("language", language);
+		if (activity) params.set("activity", activity);
 		if (minScore !== undefined) params.set("minScore", String(minScore));
 		if (limit !== undefined) params.set("limit", String(limit));
 		if (offset !== undefined) params.set("offset", String(offset));
+		if (view) params.set("view", view);
 		const qs = params.toString();
 		const result = await callScout(`/api/repos/search${qs ? `?${qs}` : ""}`);
-		return asToolResult(result);
+		return asToolResult(result, view === "compact");
 	},
 );
 
@@ -720,6 +774,65 @@ server.registerTool(
 		if (repo) params.set("repo", repo);
 		const result = await callScout(`/api/repos/explain?${params.toString()}`);
 		return asToolResult(result);
+	},
+);
+
+// 6d. locate_source: scored pointers into Stellar's own source (API spec 1.9.99)
+server.registerTool(
+	"locate_source",
+	{
+		title:
+			"Locate where a flag, option default, function or interface is defined in Stellar's own source",
+		description:
+			"Where in Stellar's own code is X defined or implemented: scored pointers into eight allowlisted Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples). Each pointer gives the file, symbol or heading, line, commit and blob sha where a CLI flag, config option default, SDK or host function, or contract interface is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read and cite it. Ten a page, best first; truncated true means a later page holds more. `pointers: []` with total 0 = the indexed repos were searched and nothing matched; `pointers: null` = could not search (the repo is not indexed yet, which meta.note says, or the index could not be read, an HTTP 503 to retry), so never read null as no match. Not for docs, protocol text, SEPs or CAPs → use search_research; how a repo works, in prose → explain_repo; ecosystem projects' repos or code examples → search_repos.",
+		inputSchema: {
+			q: z
+				.string()
+				.min(1)
+				.max(300)
+				.describe(
+					"What to locate: a symbol, flag, option, config key or topic words (at most 300 characters), e.g. --enable-core-manual-close or getTransactions default limit. Naming a repo in q (stellar-rpc, quickstart) lifts its pointers.",
+				),
+			repo: z
+				.enum([
+					// Keep in sync with SOURCE_REPOS in src/lib/source-locator.ts
+					// (the route answers 400 for any other value).
+					"stellar/stellar-core",
+					"stellar/rs-soroban-sdk",
+					"stellar/rs-soroban-env",
+					"stellar/js-stellar-sdk",
+					"stellar/stellar-rpc",
+					"stellar/quickstart",
+					"stellar/stellar-cli",
+					"stellar/soroban-examples",
+				])
+				.optional()
+				.describe(
+					"Only this allowlisted repo, as owner/name (e.g. stellar/quickstart).",
+				),
+			kind: z
+				.enum(["file", "symbol", "heading"])
+				.optional()
+				.describe(
+					"Only this locator kind: file = the whole file; symbol = a named definition (function, type, constant, CLI flag, config option or key, environment variable); heading = a Markdown section.",
+				),
+			page: z
+				.number()
+				.int()
+				.min(1)
+				.max(2000)
+				.optional()
+				.describe(
+					"Page of 10 pointers: a whole number from 1 to 2000 (default 1).",
+				),
+		},
+	},
+	async ({ q, repo, kind, page }) => {
+		const params = new URLSearchParams({ q });
+		if (repo) params.set("repo", repo);
+		if (kind) params.set("kind", kind);
+		if (page !== undefined) params.set("page", String(page));
+		return asToolResult(await callScout(`/api/sources/locate?${params}`));
 	},
 );
 
@@ -812,17 +925,13 @@ server.registerTool(
 				.describe(
 					"Exact project-type filter, repeatable via comma ('DEX,Lending'). Resolved filter echoed in meta.filters.type.",
 				),
-			include: z
-				.string()
-				.optional()
-				.describe(
-					"Optional comma-separated includes (e.g. 'hackathons' to surface hackathon context).",
-				),
 		},
 	},
-	async ({ include }) => {
-		const qs = include ? `?include=${encodeURIComponent(include)}` : "";
-		const result = await callScout(`/api/leaderboard${qs}`);
+	async ({ type }) => {
+		const params = new URLSearchParams();
+		if (type) params.set("type", type);
+		const qs = params.toString();
+		const result = await callScout(`/api/leaderboard${qs ? `?${qs}` : ""}`);
 		return asToolResult(result);
 	},
 );

@@ -2,8 +2,8 @@
  * sitemap.xml generator.
  *
  * Static top-level routes + every detail page we can rank: projects,
- * entities, partners, blog posts, skills and stablecoins, plus the directory
- * category pages. Next.js
+ * entities, partners, blog posts, skills, stablecoins and hackathon events,
+ * plus the directory category pages. Next.js
  * serves this at /sitemap.xml automatically (App Router convention).
  *
  * Skills inclusion is the SEO unlock — 30+ indexable URLs the moment this
@@ -14,6 +14,7 @@
 import type { MetadataRoute } from "next";
 import { DIRECTORY_CATEGORIES } from "@/lib/directory-categories";
 import { CURATED_SKILLS } from "@/lib/integrations/curated-skills";
+import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
 import { fetchSdfSkillNames } from "@/lib/integrations/sdf-skills";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -204,15 +205,24 @@ async function loadDetailUrls(now: Date): Promise<MetadataRoute.Sitemap> {
 	// discovery depended on a crawler walking in from the list page.
 	//   stablecoins  46 rows, keyed by assetId — live and submitted
 	//
-	// hackathons stays wired but contributes NOTHING today, and that is worth
-	// stating rather than leaving as a silent zero: /hackathons is served from
-	// the DoraHacks API at request time, the `hackathons` COLLECTION the detail
-	// route queries is empty, and /hackathons/<any dorahacks slug> 404s. There
-	// are no detail pages to submit. Left in place so the day that collection
-	// is populated the pages are submitted without anyone remembering to come
-	// back here — the pull is a no-op until then.
+	// Event pages: every event /api/hackathons/{slug} opens, from the two
+	// places it looks a slug up, in its order: the `hackathons` collection
+	// (empty in production) and the DoraHacks listing, which carries the
+	// curated events off DoraHacks.
 	await pull("stablecoins", "/stablecoins", {}, 0.6, "assetId");
 	await pull("hackathons", "/hackathons", {}, 0.6);
+	const listed = new Set(out.map((u) => u.url));
+	for (const h of await fetchAllDoraHacksHackathons().catch(() => [])) {
+		const url = `${SITE_URL}/hackathons/${h.uname}`;
+		if (listed.has(url)) continue;
+		listed.add(url);
+		out.push({
+			url,
+			lastModified: now,
+			changeFrequency: "weekly",
+			priority: 0.6,
+		});
+	}
 	return out;
 }
 
