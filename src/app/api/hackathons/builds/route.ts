@@ -18,6 +18,7 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { inferEventFilter } from "@/lib/event-in-query";
 import { afterEventFields, distribution } from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
@@ -88,7 +89,14 @@ export async function GET(req: NextRequest) {
 	// top-5 slots to keyword's 40%, and kept exact-name lookups (27 of 30
 	// first, keyword 26) for about 150 ms more at the median (2026-10-20).
 	// After the index read: a hackathon value is checked against its events.
-	const parsed = await parseBuildFilters(sp, "hybrid", indexed, listedEvents);
+	// An event named in q becomes that value (src/lib/event-in-query.ts).
+	const ev = inferEventFilter(sp, indexed);
+	const parsed = await parseBuildFilters(
+		ev.params,
+		"hybrid",
+		indexed,
+		listedEvents,
+	);
 	if ("error" in parsed)
 		return NextResponse.json(parsed.error, { status: 400 });
 	const f = parsed.filters;
@@ -116,7 +124,7 @@ export async function GET(req: NextRequest) {
 		packages: true,
 		countEntries: true,
 	});
-	warnings.unshift(...parsed.warnings);
+	warnings.unshift(...ev.warnings, ...parsed.warnings);
 	// Any of q's words in no submission: say which, and what the rows are.
 	const unused = q ? unusedWordsWarning(indexed, q, scored, withheld) : null;
 	if (unused) warnings.push(unused);
@@ -167,7 +175,7 @@ export async function GET(req: NextRequest) {
 	try {
 		logApiHit({
 			endpoint: "/api/hackathons/builds",
-			query: q,
+			query: sp.get("q")?.trim() || undefined,
 			req,
 			startedAt,
 			status: 200,
@@ -191,6 +199,7 @@ export async function GET(req: NextRequest) {
 				source: "https://stellarlight.xyz/api/hackathons/builds",
 				upstream: "dorahacks.io",
 				generatedAt: new Date().toISOString(),
+				...(ev.inferredFilter ? { inferredFilter: ev.inferredFilter } : {}),
 				filters: {
 					q: q ?? null,
 					winnersOnly: f.winnersOnly,

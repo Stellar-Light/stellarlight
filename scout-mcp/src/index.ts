@@ -346,7 +346,7 @@ server.registerTool(
 	{
 		title: "Search what was built at Stellar hackathons",
 		description:
-			"Prior-art over hackathon PROTOTYPES: topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks), most of which never become directory projects. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement, repo/demo links, categories and stack. Filters: winnersOnly, hackathon (event slugs), track, category (a directory project type), package (a Stellar package the repo declares). For counts and trends → use analyze_hackathon_submissions; for SHIPPED products → use search_projects.",
+			"Prior-art over hackathon PROTOTYPES: topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks), most of which never become directory projects. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement, repo/demo links, categories and stack. Filters: winnersOnly, hackathon (event slugs), track, category (a directory project type), package (a Stellar package the repo declares). An event named in full in q (its title or slug) becomes the hackathon filter and meta.inferredFilter says so; pass hackathon to choose the event yourself, or hackathon as an empty string to search the name as words in every event. For counts and trends → use analyze_hackathon_submissions; for SHIPPED products → use search_projects.",
 		inputSchema: {
 			...BUILD_FILTER_INPUTS,
 			limit: z
@@ -368,6 +368,8 @@ server.registerTool(
 	},
 	async ({ limit, offset, ...filters }) => {
 		const params = buildFilterParams(filters);
+		// An empty hackathon is the opt-out from reading an event named in q.
+		if (filters.hackathon === "") params.set("hackathon", "");
 		if (limit !== undefined) params.set("limit", String(limit));
 		if (offset !== undefined) params.set("offset", String(offset));
 		const qs = params.toString();

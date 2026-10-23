@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.101",
+		type: "fixed",
+		summary:
+			"searchHackathonBuilds reads an event named in full in q as the hackathon filter: q=HackMeridian 2025 serves that event's six winners, each with its track, where it served 5 builds from three other events. meta.inferredFilter {hackathon, matched} and a meta.warnings line say what was inferred; send hackathon= with no value to search the words as text in every event, as before.",
+		detail:
+			"With no hackathon parameter, an event's title (in any case, accents and punctuation aside) or its slug as typed, on whole words, becomes the filter and leaves q; the longest name wins. The rest of q is searched inside the event. A rest that only asks for the event's entries (winners, builds, projects, submissions, hackathon) leaves nothing to search, and the event is listed as hackathon=<slug> alone lists it, winners first: q=HackMeridian 2025 winners lists the six winners. Words that start the titles of two or more events and hold a word other than a stopword infer nothing, and one meta.warnings line names the events (HackMeridian: hackmeridian-2025 and hackmeridian-2026; Stellar Hacks: 6 events); so do the full names of two events. A run inside a title is not read (ZK Gaming, real world), and a slug counts only as typed, hyphens included, so 'build on Stellar' or 'Stellar LATAM' in a topic query never becomes the build-on-stellar or stellar-latam filter. Any hackathon parameter turns this off, and one that does not select the event q names adds a warning. The events read are those the cached index holds plus the curated events off DoraHacks, all 27 getHackathons lists today; no read is added. Measured by replaying the real handler over all 1,356 stored submissions captured live on 1.9.97, with each query's live meaning scores: 24 of 24 probes behave as specified, 6 of them aimed at false positives, and all 724 requests of the frozen builds-search queries in improvements/audits (180 queries: the 140 labeled ideas, two nonsense batteries and their probe, the passkey checks, one-word, short and test ideas and size probes; default, limit 100, keyword and meaning) answer byte for byte as before; none of the 180 holds an event name or slug. Of 1,331 distinct stored build names sent as q, none infers an event, and one, whose name ends '(Stellar Hacks)', gets the partial-name line. analyzeHackathonSubmissions, vetIdea and compareHackathons are unchanged. scout-mcp's search_hackathon_builds describes this and passes an empty hackathon through, from its next release.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.97",
 		type: "changed",
 		summary:
