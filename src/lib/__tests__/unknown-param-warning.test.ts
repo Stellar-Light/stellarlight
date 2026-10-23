@@ -81,10 +81,11 @@ const HELPER_ROUTES = [
 	"skills",
 ];
 
-/** Params a route reads via sp.get/has/getAll. */
+/** Params a route reads via sp.get/has/getAll, a call split across lines
+ * included (leaderboard reads `sp\n.getAll("type")`). */
 function readsOf(src: string): Set<string> {
 	return new Set(
-		[...src.matchAll(/\bsp\.(?:get|has|getAll)\("([A-Za-z0-9_]+)"\)/g)].map(
+		[...src.matchAll(/\bsp\s*\.(?:get|has|getAll)\(\s*"([A-Za-z0-9_]+)"\s*\)/g)].map(
 			(m) => m[1],
 		),
 	);

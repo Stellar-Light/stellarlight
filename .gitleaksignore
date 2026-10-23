@@ -23,3 +23,5 @@
 0af24d6a0f6ebf49534f22350103b5c1f515c8e4:scripts/airtable_import.csv:generic-api-key:75
 # a fake Stripe-shaped key in a test fixture (the consumer report must never echo raw query text); the fixture now joins it at runtime
 4cb9d1c4f3059427d2a17f00a1bbfea02b086f84:src/lib/__tests__/consumer-report.test.ts:stripe-access-token:15
+# a skip reason in the MCP smoke test read as a generic key (a file name, then a flag name); reworded in the next commit
+1c9ad2e3161e405d3052012c60e179f47a19706f:scout-mcp/test/smoke.mjs:generic-api-key:839
