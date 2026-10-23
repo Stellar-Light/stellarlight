@@ -631,12 +631,31 @@ function termMatcher(v: string): (hay: string) => boolean {
  * builds that hold them (review, 2026-10-23). The warning reads this; the
  * scorer's own matching is unchanged. */
 function anyScriptWord(v: string): ((hay: string) => boolean) | null {
-	const core = v.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+	const core = wordCore(v);
 	if (!core) return null;
 	const escaped = core.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 	const re = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "u");
 	return (hay) => re.test(hay);
 }
+
+/** A token without its edge punctuation: "(rosca," is rosca. */
+const wordCore = (v: string) =>
+	v.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+
+/** The plural or singular wordForms leaves out: charities is charity, family
+ * is families, taxes is tax. Read only by wordsNoBuildUses: on 140 labeled
+ * ideas, charities and family were called in no submission while charity
+ * and families were there. */
+const otherNumber = (w: string) =>
+	w.endsWith("ies")
+		? [`${w.slice(0, -3)}y`]
+		: w.endsWith("es")
+			? [w.slice(0, -2)]
+			: /[^aeiou]y$/.test(w)
+				? [`${w.slice(0, -1)}ies`]
+				: /(s|x|z|ch|sh)$/.test(w)
+					? [`${w}es`]
+					: [];
 
 /** The concepts a query is searched by: its words less query filler and the
  * generic words every submission says, each with the forms it matches. */
@@ -674,13 +693,12 @@ function queryTerms(query: string) {
 /**
  * The concepts of `q` that no build in `indexed` uses as a whole word in any
  * form (plural or singular, synonym, phrase spaced or joined) in its text or
- * declared packages, and how many concepts `q` has. The builds route warns
- * when they are most of q and keeps its rows. Dropping name matches in that
- * case (2026-10-23) emptied "quantum llama sandwich" and lost no labeled
- * same-idea build, but cut a fresh 24-query nonsense battery's builds by
- * only 19% (538 to 436): most of the rest match half of q's concepts, or one
- * word of a two-word q. On 140 labeled ideas the warning fires for one, whose
- * only build listed by words alone is graded not the idea.
+ * declared packages, and how many concepts `q` has. When they are most of
+ * q, a name alone no longer lists a build (rule L, searchHackathonBuilds);
+ * when there is any, the builds route names them in a warning. On 140
+ * labeled ideas (2026-10-23) the warning fires for 30 in keyword mode, each
+ * named word checked unused in the stored text, and rule L drops one build,
+ * graded not the idea.
  */
 export function wordsNoBuildUses(
 	indexed: IndexedBuild[],
@@ -691,27 +709,38 @@ export function wordsNoBuildUses(
 	const terms = queryTerms(q.trim().toLowerCase()).filter(({ t }) =>
 		/[\p{L}\p{N}]/u.test(t),
 	);
-	const hays = indexed.map(withPackages);
+	// Every declared package counts here, the common libraries too: a word
+	// only soroban-sdk holds is a word submissions use, though matching
+	// leaves that library out.
+	const hays = indexed.map(
+		(b) => `${b.haystack} ${(b.stack ?? []).join(" ").toLowerCase()}`,
+	);
 	const absent = terms
-		.filter(({ forms }) => {
-			const hits = forms.flatMap((f) => anyScriptWord(f) ?? []);
+		.filter(({ t, forms }) => {
+			const hits = [...forms, ...otherNumber(wordCore(t))].flatMap(
+				(f) => anyScriptWord(f) ?? [],
+			);
 			return (
 				hits.length > 0 && !hays.some((hay) => hits.some((hit) => hit(hay)))
 			);
 		})
-		.map(({ t }) => t);
+		.map(({ t }) => wordCore(t));
 	return { absent, concepts: terms.length };
 }
 
 /**
  * Score + rank builds for a topic query. Prior-art favors RECALL (a missed
- * existing build is the costly error): a NAME match always surfaces (on
- * 2026-10-23, holding name matches to the half-of-concepts rule dropped 8
- * builds graded the same idea from labeled ideas' keyword matches, three of
- * them MCP servers for "MCP server that lets AI agents use Stellar", so a
- * nonsense query can still list a build named for one of its words);
- * otherwise at least half the concepts must hit so a common token alone
- * ("payments") doesn't flood. Query filler ("for", "like") and "stellar",
+ * existing build is the costly error): a NAME match surfaces (on
+ * 2026-10-23, holding every name match to the half-of-concepts rule dropped
+ * 8 builds graded the same idea from labeled ideas' keyword matches, three
+ * of them MCP servers for "MCP server that lets AI agents use Stellar"),
+ * except when most of the query's concepts occur as a whole word in no
+ * build (rule L): then "quantum llama sandwich" listed a build named for
+ * quantum and one with llama inside its name. Rule L lost no labeled build
+ * on 140 ideas and emptied that query; on a fresh 24-query nonsense battery
+ * it cut builds by 19% (538 to 436, keyword), short of the half it was held
+ * to, and the owner chose to ship it. Otherwise at least half the concepts
+ * must hit so a common token alone ("payments") doesn't flood. Query filler ("for", "like") and "stellar",
  * which every submission says, are not concepts.
  *
  * Order: how much of the query a build covers, each word weighted by how
@@ -786,6 +815,8 @@ export function searchHackathonBuilds(
 			.sort((a, b) => b.score - a.score);
 	}
 	const terms = queryTerms(query);
+	const unused = wordsNoBuildUses(indexed, query);
+	const namesAdmit = unused.absent.length * 2 <= unused.concepts;
 	const hay = new Map(
 		opts.packages ? pool.map((b) => [b, withPackages(b)] as const) : [],
 	);
@@ -825,7 +856,8 @@ export function searchHackathonBuilds(
 		}
 		if (
 			score > 0 &&
-			(nameMatched || matched.size >= Math.ceil(terms.length / 2))
+			((nameMatched && namesAdmit) ||
+				matched.size >= Math.ceil(terms.length / 2))
 		) {
 			score += b.isWinner ? 2 : 0;
 			score += Math.min(b.voteCount ?? 0, 20) * 0.05;

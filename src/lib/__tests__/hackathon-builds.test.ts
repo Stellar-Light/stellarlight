@@ -408,6 +408,47 @@ describe("words no build uses", () => {
 			concepts: 1,
 		});
 	});
+
+	// 140 labeled ideas, 2026-10-23: charities and family were called unused
+	// beside charity and families, soroban-sdk beside 66% of read repos.
+	it("reads charity for charities, a common library as used, and names a word bare", () => {
+		const more = [
+			build("Give", "A charity drive for families."),
+			{ ...build("Vault", "A vault."), stack: ["soroban-sdk"] },
+		];
+		expect(
+			wordsNoBuildUses(more, "charities family soroban-sdk (rosca,"),
+		).toEqual({ absent: ["rosca"], concepts: 4 });
+	});
+});
+
+describe("a name alone does not list a build when most of q is in no build", () => {
+	const pool = [
+		build("Quantum Shield Exchange", "Post-quantum key custody."),
+		build("MellaMate", "A companion app for daily habits."),
+		build("Escrow Hub", "Escrow for freelancers on Soroban."),
+		build("Café Pay", "Tap to pay at a café."),
+	];
+	const names = (q: string) =>
+		searchHackathonBuilds(pool, q).map((s) => s.b.name);
+
+	it("drops a build named for one word, or holding one inside its name", () => {
+		expect(names("quantum llama sandwich")).toEqual([]);
+	});
+
+	it("keeps name matches when at most half of q is in no build", () => {
+		expect(names("quantum escrow sandwich").sort()).toEqual([
+			"Escrow Hub",
+			"Quantum Shield Exchange",
+		]);
+		// An accented word is a word some build uses.
+		expect(names("café sandwich")).toEqual(["Café Pay"]);
+	});
+
+	it("keeps a build that covers half of q, and every one-word match", () => {
+		expect(names("escrow freelancers pogo stick")).toEqual(["Escrow Hub"]);
+		expect(names("llama")).toEqual(["MellaMate"]);
+	});
 });
 
 describe("brief picks winners first, then broadens", () => {

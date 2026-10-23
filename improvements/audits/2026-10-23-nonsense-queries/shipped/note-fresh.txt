@@ -1,0 +1,33 @@
+capture: api 1.9.93 -> 1.9.93, corpus 1344
+group | q | concepts | in no submission | keyword rows | hybrid rows | fires keyword | fires hybrid
+nonsense plain | crimson accordion volcano | 3 | crimson, accordion, volcano | 0 | 0 | no | no
+nonsense plain | sleepy giraffe bakery | 3 | sleepy, giraffe, bakery | 0 | 0 | no | no
+nonsense plain | marmalade thunderstorm trombone | 3 | marmalade, thunderstorm, trombone | 0 | 0 | no | no
+nonsense plain | polka dot submarine | 3 | polka, dot, submarine | 0 | 0 | no | no
+nonsense plain | gargling penguin lighthouse | 3 | gargling, penguin, lighthouse | 0 | 0 | no | no
+nonsense plain | knitted cactus parliament | 3 | knitted, cactus, parliament | 0 | 0 | no | no
+nonsense plain | yodeling teapot glacier | 3 | yodeling, teapot, glacier | 0 | 0 | no | no
+nonsense plain | bashful pineapple tractor | 3 | bashful, pineapple, tractor | 0 | 0 | no | no
+nonsense tech | blockchain sourdough starter | 3 | sourdough, starter | 0 | 99 | no | no
+nonsense tech | NFT lawnmower marathon | 3 | lawnmower, marathon | 0 | 0 | no | no
+nonsense tech | smart contract hamster wheel | 4 | hamster, wheel | 80 | 85 | yes | yes
+nonsense tech | DeFi pancake flipping | 3 | pancake, flipping | 0 | 0 | no | no
+nonsense tech | bitcoin origami zeppelin | 3 | origami, zeppelin | 0 | 11 | no | no
+nonsense tech | ethereum bagpipe tuner | 3 | bagpipe, tuner | 0 | 0 | no | no
+nonsense tech | AI toaster opera | 3 | toaster, opera | 10 | 10 | yes | yes
+nonsense tech | zero knowledge pogo stick | 4 | pogo, stick | 156 | 188 | yes | yes
+nonsense stellar | soroban pickle juggling | 3 | pickle | 21 | 21 | yes | yes
+nonsense stellar | stellar mattress comparison | 2 | mattress, comparison | 0 | 0 | no | no
+nonsense stellar | wallet for pet iguanas | 3 | pet, iguanas | 0 | 0 | no | no
+nonsense stellar | lumen bowling alley scheduler | 4 | bowling, alley, scheduler | 0 | 0 | no | no
+nonsense stellar | anchor ship knot tutorial | 4 | knot, tutorial | 14 | 15 | yes | yes
+nonsense stellar | pay per yodel | 2 | yodel | 132 | 132 | yes | yes
+nonsense stellar | stellar kazoo orchestra tickets | 3 | kazoo, orchestra | 0 | 0 | no | no
+nonsense stellar | soroban garden gnome registry | 4 | garden, gnome | 23 | 23 | yes | yes
+probe | quantum llama sandwich | 3 | llama, sandwich | 0 | 0 | no | no
+
+group | queries | with rows, keyword / hybrid | line fires, keyword / hybrid
+nonsense plain | 8 | 0 / 0 | 0 / 0
+nonsense tech | 8 | 3 / 5 | 3 / 3
+nonsense stellar | 8 | 4 / 4 | 4 / 4
+probe | 1 | 0 / 0 | 0 / 0

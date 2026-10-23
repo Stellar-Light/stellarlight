@@ -1,0 +1,13 @@
+group | q | word | submissions using it as a whole word | related words used (count)
+nonsense tech | smart contract hamster wheel | hamster | 0 | none
+nonsense tech | smart contract hamster wheel | wheel | 0 | none
+nonsense tech | AI toaster opera | toaster | 0 | none
+nonsense tech | AI toaster opera | opera | 0 | operator (6), operations (5), operate (5), operativos (1)
+nonsense tech | zero knowledge pogo stick | pogo | 0 | none
+nonsense tech | zero knowledge pogo stick | stick | 0 | none
+nonsense stellar | soroban pickle juggling | pickle | 0 | picks (1)
+nonsense stellar | anchor ship knot tutorial | knot | 0 | none
+nonsense stellar | anchor ship knot tutorial | tutorial | 0 | tutoring (1)
+nonsense stellar | pay per yodel | yodel | 0 | none
+nonsense stellar | soroban garden gnome registry | garden | 0 | none
+nonsense stellar | soroban garden gnome registry | gnome | 0 | none

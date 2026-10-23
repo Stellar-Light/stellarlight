@@ -390,3 +390,79 @@ fresh battery written by a separate agent that was told no rule.
   - Test first: `wordsNoBuildUses(pool, "agents !!! ???")` gave absent
     ['!!!', '???'] on db1ff05d, and absent [] with 1 concept after the fix.
     The two touched test files pass (59).
+
+## Lane L2: ship rule L, and widen the warning (spec 1.9.95)
+
+### Scope and decision
+
+- Owner decision, in chat: ship rule L, "don't ship it half-ass". Rule L
+  missed criterion (c)'s volume bar (builds returned 538 -> 436 keyword and
+  683 -> 584 hybrid on the fresh battery, against a required half). The
+  owner's call overrides that bar and only that one; every other bar stands
+  and was re-measured on the final code.
+- Lane: Claude Opus 5.5, xhigh, own worktree, branch `lane/l2-rule-l` from
+  main 02d7deba (1.9.94). Not pushed.
+- Bars: (a) on 140 labeled ideas, keyword and hybrid, no build graded 2 or 1
+  leaves the matched list, top 20 or top 5; (b) vetIdea's five and the
+  brief's picks identical to base except drops of builds graded 0, each
+  named; (c) the fresh battery's zero counts and builds, every removed
+  build named; (d) the probe returns 0; (e) where the line fires on the 140
+  ideas, each word checked; (f) adversarial probes.
+
+### Log
+
+- `git fetch origin main && git switch -c lane/l2-rule-l origin/main`: HEAD
+  02d7deba.
+- 13:08:08Z: `probes.json` written (34 probes: one word, product names,
+  typos, accents and punctuation, two and five words, only "stellar",
+  hyphenated phrases, package names) before any probe ran.
+  `capture.mjs <out> probes.json`: 34 queries, 98 pages, every one 200,
+  apiVersion 1.9.94 at 13:08:36Z and 1.9.94 at 13:12:50Z.
+- Shared or builds route only: shared. Rule L in searchHackathonBuilds
+  reaches vetIdea, hackathonBrief and analyze's q with no option, so
+  meta.counts.entries, which re-runs the match, stays equal to analyze's
+  total; a builds-route option would need passing to that re-run too (the
+  #1856 merge found that class of bug).
+- Tests first, against main's code:
+  `npx vitest run src/lib/__tests__/hackathon-builds.test.ts -t "a name
+  alone does not list a build"`: 1 failed (`expected [ 'Quantum Shield
+  Exchange', ...(1) ] to deeply equal []`), 2 passed.
+  `npx vitest run src/app/api/hackathons/builds/__tests__/route.test.ts -t
+  "words are in no build"`: 4 failed (`tukar llama sandwich: expected 1 to
+  be +0`; three warnings `expected undefined to deeply equal [ Array(1) ]`
+  or `.toMatch() expects to receive a string, but got undefined`), 2 passed.
+  Later, `-t "charity for charities"`: 1 failed (`expected { absent: [
+  'charities', ...(3) ], ...(1) } to deeply equal { absent: [ 'rosca' ],
+  concepts: 4 }`).
+- Rule L: `namesAdmit` from `wordsNoBuildUses(indexed, query)`, absent * 2
+  <= concepts; a name match admits only when it holds. The rest of the
+  scorer is unchanged.
+- First replay of the 140 ideas named 33 ideas for the warning, among them
+  "charities" (charity is used), "family" (families is used) and "(rosca,";
+  the probes named "soroban-sdk" and "@creit.tech/stellar-wallets-kit"
+  unused, though 66% and 27% of read repos declare them. Fixed in
+  wordsNoBuildUses only: every declared package counts, the plural or
+  singular wordForms misses is read (ies and y, es), and a word is named
+  without edge punctuation. Every number below is from the final code.
+- (a) `compare.mts` on lane K's capture: nothing lost or gained, grade 2 or
+  grade 1, at any depth, any set, either mode.
+- (b) vetIdea's five 0 and the brief's picks 0 of 140 differ; the prior-art
+  rankings differ for 1 (i31: Stellar Health Point, graded 0, leaves keyword
+  and hybrid).
+- (c) Fresh battery: keyword 538 -> 436 builds, 9 -> 17 queries at 0; hybrid
+  683 -> 584, 9 -> 15; nothing added; every removed build named in
+  `shipped/compare-fresh.txt`. Lane K's battery 20 -> 9 and 21 -> 10.
+- (d) Probe 2 -> 0, keyword and hybrid.
+- (e) The warning fires for 30 ideas in keyword mode and 29 in hybrid.
+  `check-unused.py`, a separate Python search, finds each of the 37 named
+  words in 0 submissions; for 12 a related form is used (cash for cashing,
+  hedge for hedging, mint for minted).
+- (f) 34 probes: rows change for 3 (paiement mobile sécurisé loses a build
+  named for "mobile"; loyalty points for coffee shops loses two; the
+  hyphenated zero-knowledge pogo stick loses four, three in hybrid); the
+  warning fires for 10 in keyword mode and 9 in hybrid, each named word
+  used by no submission. Product names and package names are used words
+  and change nothing.
+- Text: builds `q` and `meta.warnings` descriptions; changelog 1.9.95
+  (says the owner chose to ship past the bar, with the numbers);
+  api-reference.md; `pnpm contract:write`.

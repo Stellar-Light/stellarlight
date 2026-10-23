@@ -1,0 +1,47 @@
+capture: api 1.9.94 -> 1.9.94, corpus 1344
+group | q | concepts | in no submission | keyword rows | hybrid rows | fires keyword | fires hybrid
+adversarial one word | escrow | 1 | none | 34 | 34 | no | no
+adversarial one word | llama | 1 | llama | 1 | 1 | yes | yes
+adversarial product name | soroswap | 1 | none | 15 | 18 | no | no
+adversarial product name | blend | 1 | none | 47 | 47 | no | no
+adversarial product name | reflector | 1 | none | 14 | 14 | no | no
+adversarial product name | soroswap aggregator | 2 | none | 19 | 50 | no | no
+adversarial product name | blend lending pool | 3 | none | 77 | 77 | no | no
+adversarial typo | sorobn wallet | 2 | sorobn | 89 | 141 | yes | yes
+adversarial typo | remitance app | 1 | remitance | 0 | 0 | no | no
+adversarial typo | pasky wallet | 2 | pasky | 89 | 91 | yes | yes
+adversarial typo | decentralised exchnage for stablecoins | 3 | exchnage | 1 | 285 | yes | no
+adversarial accent or punctuation | café payments | 2 | café | 270 | 270 | yes | yes
+adversarial accent or punctuation | AI agents, payments | 3 | none | 147 | 147 | no | no
+adversarial accent or punctuation | pagos en línea para comercios | 5 | none | 22 | 26 | no | no
+adversarial accent or punctuation | paiement mobile sécurisé | 3 | paiement, sécurisé | 0 | 0 | no | no
+adversarial accent or punctuation | x402!!! paywall??? | 2 | none | 0 | 83 | no | no
+adversarial two words | pogo payments | 2 | pogo | 270 | 270 | yes | yes
+adversarial two words | escrow sandwich | 2 | sandwich | 34 | 34 | yes | yes
+adversarial two words | llama wallet | 2 | llama | 90 | 90 | yes | yes
+adversarial five words | loyalty points for coffee shops | 4 | loyalty, coffee, shops | 0 | 1 | no | no
+adversarial five words | tokenized carbon credits for farmers | 4 | none | 8 | 27 | no | no
+adversarial five words | proof of reserves for stablecoin issuers | 4 | none | 64 | 109 | no | no
+adversarial five words | crowdfunding platform for indie game developers | 4 | indie | 6 | 11 | yes | yes
+adversarial five words | trombone lessons marketplace with escrow payments | 5 | trombone | 30 | 31 | yes | yes
+adversarial only stellar | stellar | 1 | none | 874 | 874 | no | no
+adversarial only stellar | stellar zorblax | 1 | zorblax | 0 | 1 | no | no
+adversarial only stellar | stellar zorblax quibbet | 2 | zorblax, quibbet | 0 | 47 | no | no
+adversarial hyphenated | pay-per-call | 1 | none | 5 | 5 | no | no
+adversarial hyphenated | zero-knowledge pogo stick | 3 | pogo, stick | 0 | 220 | no | no
+adversarial hyphenated | cross-border remittance | 2 | none | 34 | 36 | no | no
+adversarial package | passkey-kit | 1 | none | 12 | 19 | no | no
+adversarial package | soroban-sdk | 1 | none | 0 | 57 | no | no
+adversarial package | @creit.tech/stellar-wallets-kit | 1 | none | 0 | 284 | no | no
+adversarial package | stellar-hd-wallet | 1 | none | 7 | 286 | no | no
+
+group | queries | with rows, keyword / hybrid | line fires, keyword / hybrid
+adversarial one word | 2 | 2 / 2 | 1 / 1
+adversarial product name | 5 | 5 / 5 | 0 / 0
+adversarial typo | 4 | 3 / 3 | 3 / 2
+adversarial accent or punctuation | 5 | 3 / 4 | 1 / 1
+adversarial two words | 3 | 3 / 3 | 3 / 3
+adversarial five words | 5 | 4 / 5 | 2 / 2
+adversarial only stellar | 3 | 1 / 3 | 0 / 0
+adversarial hyphenated | 3 | 2 / 3 | 0 / 0
+adversarial package | 4 | 2 / 4 | 0 / 0

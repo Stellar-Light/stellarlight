@@ -1,0 +1,39 @@
+group | q | word | submissions using it as a whole word | related words used (count)
+idea 40 | cross-border remittance app cashing out through local anchors | cashing | 0 | cash (9), cashabroad (1), cashback (1)
+idea 40 | NFT event ticketing with resale royalties | resale | 0 | none
+idea 40 | savings circle (ROSCA, tanda) with automatic payouts | rosca | 0 | none
+idea 40 | merchant QR code payments for small shops | shops | 0 | shopify (4), shopping (1)
+idea 40 | fiat on-ramp and off-ramp for a local currency | on-ramp | 0 | none
+idea tests | a stablecoin with 1:1 backing for merchant payments | backing | 0 | backed (7), back (6), background (2), backstop (1)
+idea tests | fiat-backed stablecoin for payments | fiat-backed | 0 | none
+idea tests | a minted stablecoin for payments | minted | 0 | mint (10), minting (4), mint-regalos (1)
+idea tests | a stablecoin pegging the dollar for payments | pegging | 0 | none
+idea tests | redeemable stablecoin for merchant payments | redeemable | 0 | none
+idea tests | a stablecoin with daily redemptions for payroll | redemptions | 0 | none
+idea tests | a stablecoin minter for merchant payments | minter | 0 | mint (10), minting (4), mint-regalos (1)
+idea tests | an overcollateralized stablecoin for lending | overcollateralized | 0 | none
+idea tests | an algorithmic stablecoin for merchant payments | algorithmic | 0 | algorithms (1)
+idea tests | a depegged stablecoin for merchant payments | depegged | 0 | none
+idea tests | a stablecoin that anchors its peg to gold | peg | 0 | none
+idea tests | a stablecoin that anchors its peg to gold | gold | 0 | none
+idea tests | donation matching for nonprofits | nonprofits | 0 | none
+idea fresh | tokenized farmland | farmland | 0 | none
+idea fresh | crop insurance | crop | 0 | none
+idea fresh | refugee aid vouchers | vouchers | 0 | vouch (3)
+idea fresh | cheapest route to swap USDC into naira | cheapest | 0 | cheap (2), cheaper (1)
+idea fresh | Soroban contract template generator from plain English | generator | 0 | generation (9), generate (6), generated (5), genera (5)
+idea fresh | Soroban contract template generator from plain English | plain | 0 | plaintext (1)
+idea fresh | Soroban contract template generator from plain English | english | 0 | none
+idea fresh | quadratic voting for community grants | quadratic | 0 | none
+idea fresh | verifiable diploma credentials for university graduates | diploma | 0 | none
+idea fresh | NGO tool to track disaster relief cash transfers to individual recipients with receipts | relief | 0 | reliable (6), relies (3), reliability (2), reliably (1)
+idea fresh | onchain fantasy sports game where winners are paid in stablecoins from the prize pool | fantasy | 0 | none
+idea fresh | round up savings app that sweeps spare change from purchases into a yield bearing stablecoin | sweeps | 0 | none
+idea fresh | round up savings app that sweeps spare change from purchases into a yield bearing stablecoin | spare | 0 | none
+idea fresh | marketplace for renting out tools and equipment with deposits held in escrow contracts | renting | 0 | rent (1), rental (1), rentabilidad (1), rentals (1)
+idea fresh | marketplace for renting out tools and equipment with deposits held in escrow contracts | held | 0 | none
+idea fresh | forex hedging tool for exporters that locks exchange rates using onchain forward contracts | forex | 0 | forever (12), forecasting (2), forever-auditable (1)
+idea fresh | forex hedging tool for exporters that locks exchange rates using onchain forward contracts | hedging | 0 | hedge (3)
+idea fresh | DAO tool that lets members delegate votes to experts by topic and revoke any time | delegate | 0 | delegation (2), delegating (1)
+idea fresh | DAO tool that lets members delegate votes to experts by topic and revoke any time | revoke | 0 | revolutionize (4), revolutionizes (4), revolutionizing (4), revolutionary (3)
+nonsense | time travel sock exchange | sock | 0 | none

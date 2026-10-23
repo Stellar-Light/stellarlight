@@ -4,7 +4,8 @@
 // submission uses as a whole word (wordsNoBuildUses), the rows the route
 // lists in keyword and hybrid mode, and whether the line fires, as the route
 // decides: a row listed by its words alone (matchedTerms, no similarity) and
-// more than half the concepts in no submission. The pool is built as
+// at least one concept in no submission (more than half before 1.9.95,
+// when rule L also began holding name matches back). The pool is built as
 // ../2026-10-23-build-matching/replay.mts builds it.
 // Usage, from the repository root:
 //   pnpm exec tsx improvements/audits/2026-10-23-nonsense-queries/note.mts <capture.json>
@@ -109,13 +110,10 @@ for (const x of queries) {
 	const kw = kwRows.length;
 	const hy = hyRows.length;
 	const { absent, concepts } = wordsNoBuildUses(pool, x.q);
-	const most = absent.length * 2 > concepts;
+	const any = absent.length > 0;
 	const wordsAlone = (rows: typeof kwRows) =>
 		rows.some((s) => s.matched.length && s.similarity === undefined);
-	const fires = [
-		most && wordsAlone(kwRows),
-		most && wordsAlone(hyRows),
-	] as const;
+	const fires = [any && wordsAlone(kwRows), any && wordsAlone(hyRows)] as const;
 	const g = x.group.startsWith("idea") ? "idea (all 140)" : x.group;
 	const t = tally.get(g) ?? { n: 0, withRows: [0, 0], fires: [0, 0] };
 	t.n++;

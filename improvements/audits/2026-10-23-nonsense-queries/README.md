@@ -13,6 +13,12 @@ word in no submission and a build is listed by its words alone, meta.warnings
 names those words and says such a build is not evidence that the idea was
 built (spec 1.9.94).
 
+**Update, spec 1.9.95: rule L ships, by the owner's decision.** It missed the
+volume bar above (19% and 14% against a half), and the owner chose to ship
+it past that bar only; every other bar was re-measured on the final code and
+held. The warning now fires whenever any word of q is in no submission. See
+"Shipped in 1.9.95" below.
+
 ## Ship criteria (fixed in the brief, before any result)
 
 - (a) Recall: on all 140 labeled ideas, keyword and hybrid, on the builds
@@ -156,6 +162,163 @@ Against the criteria, for what shipped: (a) met, (b) met (identical), (c) not
 met (rows unchanged: 538 and 683 builds, 9 queries at 0), (d) not met (the
 probe still lists 2 builds, now with the line).
 
+## Shipped in 1.9.95: rule L and the wider warning
+
+The owner chose, in chat, to ship rule L ("don't ship it half-ass"),
+overriding criterion (c)'s volume bar and only that one. Built on main
+02d7deba (1.9.94). Before is main's code, after the final code, both
+replayed over the same captures; the base slim outputs are byte-identical to
+`labeled/before.json` and `fresh/before.json`.
+
+**What changed.**
+
+- In the shared scorer, so the builds route, vetIdea, hackathonBrief and
+  analyzeHackathonSubmissions' q agree (and meta.counts.entries still
+  equals analyze's total): when more than half of q's concepts occur as a
+  whole word in no submission, a name match no longer lists a build alone.
+  "In no submission" is `wordsNoBuildUses`, the warning's own test.
+- That test now counts every declared package, the common libraries too
+  (soroban-sdk was called unused beside 66% of read repos), reads the
+  plural or singular `wordForms` leaves out (charities is charity, family is
+  families), and names a word without its edge punctuation ("(rosca," is
+  rosca).
+- The warning fires when at least one word of q is in no submission and a
+  build is listed by its words alone, and says the build matches only q's
+  other words. The wordings for one word and for every word absent are
+  unchanged. It never changes rows.
+
+**(a) Recall, 140 labeled ideas** (`shipped/compare-labeled.txt`): no build
+graded 2 or 1 leaves or enters the matched list, the top 20 or the top 5, on
+any set, in keyword or hybrid mode.
+
+**(b) Prior art**: vetIdea's five and the brief's picks are identical to the
+base on 140 of 140 ideas. The rankings prior art reads differ for one idea:
+i31 "loyalty points issued as tokens" loses Stellar Health Point (graded 0)
+in keyword and hybrid.
+
+**(c) Fresh battery** (`shipped/compare-fresh.txt`, every build named):
+
+| mode | builds returned | queries at 0 |
+| --- | --- | --- |
+| keyword | 538 -> 436 | 9 -> 17 |
+| hybrid | 683 -> 584 | 9 -> 15 |
+
+Removed, keyword (102): blockchain sourdough starter 7, NFT lawnmower
+marathon 7, DeFi pancake flipping 18, bitcoin origami zeppelin 2, ethereum
+bagpipe tuner 6, AI toaster opera 37, wallet for pet iguanas 10, lumen
+bowling alley scheduler 10, stellar kazoo orchestra tickets 5. Hybrid
+removes the same less 3 blockchain builds close in meaning (99). Nothing
+added. Lane K's battery: 20 -> 9 keyword, 21 -> 10 hybrid.
+
+**(d) Probe**: `quantum llama sandwich` 2 -> 0, keyword and hybrid.
+
+**(e) Where the warning fires among the 140 labeled ideas**
+(`shipped/note-labeled.txt`; each word checked by `check-unused.py`, a
+separate Python whole-word search over every submission's text and every
+declared package, `shipped/unused-labeled.txt`): 30 ideas in keyword mode,
+29 in hybrid. Every word named occurs as a whole word in no submission (37
+words, 0 uses each).
+
+| idea | words named | a related form some submission uses |
+| --- | --- | --- |
+| cross-border remittance app cashing out through local anchors | cashing | cash |
+| NFT event ticketing with resale royalties | resale | none |
+| savings circle (ROSCA, tanda) with automatic payouts | rosca | none |
+| merchant QR code payments for small shops | shops | shopping |
+| fiat on-ramp and off-ramp for a local currency | on-ramp | none (nor onramp, on ramp) |
+| a stablecoin with 1:1 backing for merchant payments | backing | backed |
+| fiat-backed stablecoin for payments | fiat-backed | none |
+| a minted stablecoin for payments | minted | mint, minting |
+| a stablecoin pegging the dollar for payments | pegging | none |
+| redeemable stablecoin for merchant payments | redeemable | none |
+| a stablecoin with daily redemptions for payroll | redemptions | none |
+| a stablecoin minter for merchant payments | minter | mint, minting |
+| an overcollateralized stablecoin for lending | overcollateralized | none |
+| an algorithmic stablecoin for merchant payments | algorithmic | algorithms |
+| a depegged stablecoin for merchant payments | depegged | none |
+| a stablecoin that anchors its peg to gold | peg, gold | none |
+| donation matching for nonprofits (keyword only) | nonprofits | none |
+| tokenized farmland | farmland | none |
+| crop insurance | crop | none |
+| refugee aid vouchers | vouchers | none |
+| cheapest route to swap USDC into naira | cheapest | cheap, cheaper |
+| Soroban contract template generator from plain English | generator, plain, english | generate (for generator) |
+| quadratic voting for community grants | quadratic | none |
+| verifiable diploma credentials for university graduates | diploma | none |
+| NGO tool to track disaster relief cash transfers ... | relief | none |
+| onchain fantasy sports game where winners are paid ... | fantasy | none |
+| round up savings app that sweeps spare change ... | sweeps, spare | none |
+| marketplace for renting out tools and equipment ... | renting, held | rent, rental (for renting) |
+| forex hedging tool for exporters ... | forex, hedging | hedge (for hedging) |
+| DAO tool that lets members delegate votes ... revoke any time | delegate, revoke | delegation, revocable |
+
+Real ideas with one rare word no submission uses get a true line: quadratic
+voting, diploma credentials, tokenized farmland, crop insurance, resale
+royalties, an overcollateralized stablecoin, fantasy sports. For 12 words a
+related form is used; the line names the word as typed and says only that
+it occurs as a whole word in no submission, which holds.
+
+**(f) Adversarial probes** (`probes.json`, fixed before any probe ran;
+captured live on 1.9.94 to 1.9.94, 98 pages, every one 200;
+`shipped/probes-table.txt`, `shipped/unused-probes.txt`):
+
+| id | group | q | in no submission | keyword | hybrid | warning (kw / hy) |
+| --- | --- | --- | --- | --- | --- | --- |
+| p01 | one word | escrow | none | 34 -> 34 | 34 -> 34 | no / no |
+| p02 | one word | llama | llama | 1 -> 1 | 1 -> 1 | yes / yes |
+| p03 | product name | soroswap | none | 15 -> 15 | 18 -> 18 | no / no |
+| p04 | product name | blend | none | 47 -> 47 | 47 -> 47 | no / no |
+| p05 | product name | reflector | none | 14 -> 14 | 14 -> 14 | no / no |
+| p06 | product name | soroswap aggregator | none | 19 -> 19 | 50 -> 50 | no / no |
+| p07 | product name | blend lending pool | none | 77 -> 77 | 77 -> 77 | no / no |
+| p08 | typo | sorobn wallet | sorobn | 89 -> 89 | 141 -> 141 | yes / yes |
+| p09 | typo | remitance app | remitance | 0 -> 0 | 0 -> 0 | no / no |
+| p10 | typo | pasky wallet | pasky | 89 -> 89 | 91 -> 91 | yes / yes |
+| p11 | typo | decentralised exchnage for stablecoins | exchnage | 1 -> 1 | 285 -> 285 | yes / no |
+| p12 | accent | café payments | café | 270 -> 270 | 270 -> 270 | yes / yes |
+| p13 | punctuation | AI agents, payments | none | 147 -> 147 | 147 -> 147 | no / no |
+| p14 | accent | pagos en línea para comercios | none | 22 -> 22 | 26 -> 26 | no / no |
+| p15 | accent | paiement mobile sécurisé | paiement, sécurisé | 1 -> 0 | 1 -> 0 | no / no |
+| p16 | punctuation | x402!!! paywall??? | none | 0 -> 0 | 83 -> 83 | no / no |
+| p17 | two words | pogo payments | pogo | 270 -> 270 | 270 -> 270 | yes / yes |
+| p18 | two words | escrow sandwich | sandwich | 34 -> 34 | 34 -> 34 | yes / yes |
+| p19 | two words | llama wallet | llama | 90 -> 90 | 90 -> 90 | yes / yes |
+| p20 | five words | loyalty points for coffee shops | loyalty, coffee, shops | 2 -> 0 | 3 -> 1 | no / no |
+| p21 | five words | tokenized carbon credits for farmers | none | 8 -> 8 | 27 -> 27 | no / no |
+| p22 | five words | proof of reserves for stablecoin issuers | none | 64 -> 64 | 109 -> 109 | no / no |
+| p23 | five words | crowdfunding platform for indie game developers | indie | 6 -> 6 | 11 -> 11 | yes / yes |
+| p24 | five words | trombone lessons marketplace with escrow payments | trombone | 30 -> 30 | 31 -> 31 | yes / yes |
+| p25 | only stellar | stellar | none | 874 -> 874 | 874 -> 874 | no / no |
+| p26 | only stellar | stellar zorblax | zorblax | 0 -> 0 | 1 -> 1 | no / no |
+| p27 | only stellar | stellar zorblax quibbet | zorblax, quibbet | 0 -> 0 | 47 -> 47 | no / no |
+| p28 | hyphenated | pay-per-call | none | 5 -> 5 | 5 -> 5 | no / no |
+| p29 | hyphenated | zero-knowledge pogo stick | pogo, stick | 4 -> 0 | 223 -> 220 | no / no |
+| p30 | hyphenated | cross-border remittance | none | 34 -> 34 | 36 -> 36 | no / no |
+| p31 | package | passkey-kit | none | 12 -> 12 | 19 -> 19 | no / no |
+| p32 | package | soroban-sdk | none | 0 -> 0 | 57 -> 57 | no / no |
+| p33 | package | @creit.tech/stellar-wallets-kit | none | 0 -> 0 | 284 -> 284 | no / no |
+| p34 | package | stellar-hd-wallet | none | 7 -> 7 | 286 -> 286 | no / no |
+
+Removed: p15 Stellar Mobile Agents (a name holding "mobile"); p20 X402-MCP
+Shopify Commerce and Stellar Health Point; p29 four builds named for zero
+knowledge in keyword, three of them in hybrid. Nothing added. Product names
+that are one invented word are used words, so nothing changes for them.
+Packages count as used, the common libraries too (p32, p33). Every word the
+warning names is used by no submission (`shipped/unused-probes.txt`; sorobn
+is a typo of soroban, which is used).
+
+Read with care:
+
+- A hyphenated phrase is one concept. `zero-knowledge pogo stick` has 2 of
+  3 concepts in no submission, so rule L holds back its four zero-knowledge
+  builds, while `zero knowledge pogo stick` (2 of 4) keeps 156 with the
+  warning.
+- The warning covers builds listed by their words alone. A build found by
+  meaning carries similarity and no caveat: `blockchain sourdough starter`
+  lists 99 such builds in hybrid mode with no line, and `stellar zorblax
+  quibbet` 47.
+- A typo that matches nothing returns nothing and no line (`remitance app`).
+
 ## Open risks
 
 - The battery's rows are unchanged. An agent that ignores meta.warnings still
@@ -170,6 +333,13 @@ probe still lists 2 builds, now with the line).
   words alone: one regex pass per absent word over about 1,400 entries.
 
 ## Files
+
+- 1.9.95 additions: `probes.json` (the probe list) and `probes.mts` (the
+  probe table); `check-unused.py` (the separate word check); `shipped/` (the
+  final replay's comparisons, slim `labeled-after.json` and
+  `fresh-after.json`, where the warning fires, the probe table, the word
+  checks and the probe capture log). `capture.mjs` takes a probe file as a
+  second argument; `note.mts` reads the wider firing rule.
 
 - `nonsense-fresh.frozen.json.txt`: the fresh battery, bytes unchanged.
 - `capture.mjs`, `capture.txt`: the fresh capture and its log.

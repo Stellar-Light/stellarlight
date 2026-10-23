@@ -1,0 +1,11 @@
+group | q | word | submissions using it as a whole word | related words used (count)
+adversarial one word | llama | llama | 0 | none
+adversarial typo | sorobn wallet | sorobn | 0 | soroban-sdk (669), soroban (151), soroban-token-sdk (38), soroban-env-host (25)
+adversarial typo | pasky wallet | pasky | 0 | none
+adversarial typo | decentralised exchnage for stablecoins | exchnage | 0 | none
+adversarial accent or punctuation | café payments | café | 0 | none
+adversarial two words | pogo payments | pogo | 0 | none
+adversarial two words | escrow sandwich | sandwich | 0 | none
+adversarial two words | llama wallet | llama | 0 | none
+adversarial five words | crowdfunding platform for indie game developers | indie | 0 | individuals (12), individual (7), india (3), indian (1)
+adversarial five words | trombone lessons marketplace with escrow payments | trombone | 0 | none

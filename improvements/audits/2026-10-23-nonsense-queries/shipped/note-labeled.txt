@@ -1,0 +1,56 @@
+capture: api 1.9.91 -> 1.9.91, corpus 1344
+group | q | concepts | in no submission | keyword rows | hybrid rows | fires keyword | fires hybrid
+idea 40 | cross-border remittance app cashing out through local anchors | 6 | cashing | 12 | 122 | yes | yes
+idea 40 | NFT event ticketing with resale royalties | 5 | resale | 12 | 20 | yes | yes
+idea 40 | savings circle (ROSCA, tanda) with automatic payouts | 6 | rosca | 4 | 54 | yes | yes
+idea 40 | merchant QR code payments for small shops | 6 | shops | 31 | 41 | yes | yes
+idea 40 | fiat on-ramp and off-ramp for a local currency | 5 | on-ramp | 1 | 27 | yes | yes
+idea tests | a stablecoin with 1:1 backing for merchant payments | 5 | backing | 25 | 292 | yes | yes
+idea tests | fiat-backed stablecoin for payments | 3 | fiat-backed | 80 | 221 | yes | yes
+idea tests | a minted stablecoin for payments | 3 | minted | 80 | 216 | yes | yes
+idea tests | a stablecoin pegging the dollar for payments | 4 | pegging | 81 | 167 | yes | yes
+idea tests | redeemable stablecoin for merchant payments | 4 | redeemable | 85 | 321 | yes | yes
+idea tests | a stablecoin with daily redemptions for payroll | 4 | redemptions | 9 | 48 | yes | yes
+idea tests | a stablecoin minter for merchant payments | 4 | minter | 85 | 312 | yes | yes
+idea tests | an overcollateralized stablecoin for lending | 3 | overcollateralized | 27 | 104 | yes | yes
+idea tests | an algorithmic stablecoin for merchant payments | 4 | algorithmic | 85 | 313 | yes | yes
+idea tests | a depegged stablecoin for merchant payments | 4 | depegged | 85 | 292 | yes | yes
+idea tests | a stablecoin that anchors its peg to gold | 4 | peg, gold | 7 | 14 | yes | yes
+idea tests | donation matching for nonprofits | 3 | nonprofits | 1 | 7 | yes | no
+idea fresh | tokenized farmland | 2 | farmland | 11 | 11 | yes | yes
+idea fresh | crop insurance | 2 | crop | 46 | 46 | yes | yes
+idea fresh | refugee aid vouchers | 3 | vouchers | 2 | 2 | yes | yes
+idea fresh | cheapest route to swap USDC into naira | 5 | cheapest | 18 | 34 | yes | yes
+idea fresh | Soroban contract template generator from plain English | 6 | generator, plain, english | 23 | 48 | yes | yes
+idea fresh | quadratic voting for community grants | 4 | quadratic | 8 | 8 | yes | yes
+idea fresh | verifiable diploma credentials for university graduates | 5 | diploma | 5 | 22 | yes | yes
+idea fresh | NGO tool to track disaster relief cash transfers to individual recipients with receipts | 9 | relief | 8 | 21 | yes | yes
+idea fresh | onchain fantasy sports game where winners are paid in stablecoins from the prize pool | 9 | fantasy | 39 | 88 | yes | yes
+idea fresh | round up savings app that sweeps spare change from purchases into a yield bearing stablecoin | 10 | sweeps, spare | 20 | 143 | yes | yes
+idea fresh | marketplace for renting out tools and equipment with deposits held in escrow contracts | 8 | renting, held | 12 | 20 | yes | yes
+idea fresh | forex hedging tool for exporters that locks exchange rates using onchain forward contracts | 9 | forex, hedging | 29 | 39 | yes | yes
+idea fresh | DAO tool that lets members delegate votes to experts by topic and revoke any time | 9 | delegate, revoke | 12 | 30 | yes | yes
+nonsense | purple elephant trampoline | 3 | purple, elephant, trampoline | 0 | 0 | no | no
+nonsense | volcano knitting subscription | 3 | volcano, knitting | 0 | 0 | no | no
+nonsense | haunted spoon orchestra | 3 | haunted, spoon, orchestra | 0 | 0 | no | no
+nonsense | telepathic cactus insurance | 3 | telepathic, cactus | 0 | 0 | no | no
+nonsense | submarine pancake festival | 3 | submarine, pancake, festival | 0 | 0 | no | no
+nonsense | invisible giraffe tax | 3 | giraffe | 0 | 0 | no | no
+nonsense | moon cheese lottery | 3 | moon, cheese | 0 | 0 | no | no
+nonsense | dancing penguin mortgage | 3 | dancing, penguin, mortgage | 0 | 0 | no | no
+nonsense | banana origami parliament | 3 | banana, origami, parliament | 0 | 0 | no | no
+nonsense | time travel sock exchange | 4 | sock | 9 | 9 | yes | yes
+nonsense | underwater bicycle courier | 3 | underwater, bicycle, courier | 0 | 0 | no | no
+nonsense | whispering teapot ledger | 3 | whispering, teapot | 0 | 0 | no | no
+nonsense | glitter dinosaur karaoke | 3 | glitter, dinosaur, karaoke | 0 | 0 | no | no
+nonsense | sleepy walrus accountant | 3 | sleepy, walrus, accountant | 0 | 1 | no | no
+nonsense | cosmic broccoli wrestling league | 4 | broccoli, wrestling, league | 0 | 0 | no | no
+probe | quantum llama sandwich | 3 | llama, sandwich | 0 | 0 | no | no
+passkey | passkey | 1 | none | 15 | 15 | no | no
+passkey | passkey | 1 | none | 15 | 15 | no | no
+
+group | queries | with rows, keyword / hybrid | line fires, keyword / hybrid
+idea (all 140) | 140 | 138 / 140 | 30 / 29
+nonsense | 15 | 1 / 2 | 1 / 1
+probe | 1 | 0 / 0 | 0 / 0
+passkey | 2 | 2 / 2 | 0 / 0

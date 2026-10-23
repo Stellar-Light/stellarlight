@@ -108,7 +108,7 @@ describe("GET /api/hackathons/builds matches declared packages", () => {
 	});
 });
 
-describe("GET /api/hackathons/builds says when most of q matches no build", () => {
+describe("GET /api/hackathons/builds when q's words are in no build", () => {
 	const get = async (q: string, mode = "keyword") => {
 		const { GET } = await import("../route");
 		const res = await GET(
@@ -118,61 +118,85 @@ describe("GET /api/hackathons/builds says when most of q matches no build", () =
 		);
 		return res.json();
 	};
+	const withIndex = async (rows: IndexedBuild[]) => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(rows);
+	};
 
 	// The 2026-10-22 battery: q=quantum llama sandwich listed a build named
-	// for "quantum" and one with "llama" inside its name, with no caveat.
-	it("keeps the rows and warns that they match only part of q", async () => {
-		const body = await get("tukar llama sandwich");
+	// for "quantum" and one with "llama" inside its name. With most of q in no
+	// build, a name no longer lists a build alone (rule L, 2026-10-23).
+	it("lists no build by its name alone when most of q's words are in no build", async () => {
+		for (const q of ["tukar llama sandwich", "tukar nread sandwich"]) {
+			const body = await get(q);
+			expect(body.meta.counts.matched, q).toBe(0);
+			expect(body.meta.warnings, q).toBeUndefined();
+		}
+	});
+
+	it("still lists a name match when at most half of q's words are in no build, and names the missing one", async () => {
+		const body = await get("tukar twin sandwich");
+		expect(
+			(body.builds as Array<{ id: string }>).map((r) => r.id).sort(),
+		).toEqual(["tukar", "twin"]);
+		expect(body.meta.warnings).toEqual([
+			"1 of the 3 words searched in q (sandwich) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word",
+		]);
+	});
+
+	it("lists builds on the words some submission uses and names the rest", async () => {
+		await withIndex([
+			build("zkvault", { haystack: "zkvault: zero knowledge proofs" }),
+			build("other", { haystack: "other: a payments app" }),
+		]);
+		const body = await get("zero knowledge pogo stick");
 		expect(
 			(body.builds as Array<Record<string, unknown>>).map((r) => [
 				r.id,
 				r.matchedTerms,
 			]),
-		).toEqual([["tukar", ["tukar"]]]);
+		).toEqual([["zkvault", ["zero", "knowledge"]]]);
 		expect(body.meta.warnings).toEqual([
-			"2 of the 3 words searched in q (llama, sandwich) occur as a whole word in no submission in the index (a matchedTerms entry naming one was found inside a longer word), so a build listed by its words alone, with no similarity, matches only part of q and is not evidence that this idea was built",
+			"2 of the 4 words searched in q (pogo, stick) occur as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names one of them, it was found inside a longer word",
 		]);
 	});
 
-	it("says nothing when every build listed by words was also found by meaning", async () => {
+	it("says nothing when every word of q is used, or every build listed by words was also found by meaning", async () => {
+		expect((await get("tukar twin")).meta.warnings).toBeUndefined();
 		const { semanticBuildScores } = await import(
 			"@/lib/hackathon-build-semantic"
 		);
 		vi.mocked(semanticBuildScores).mockResolvedValueOnce(
 			new Map([["tukar", 0.8]]),
 		);
-		const body = await get("tukar llama sandwich", "hybrid");
+		const body = await get("tukar twin sandwich", "hybrid");
 		expect(
 			(body.builds as Array<Record<string, unknown>>).map((r) => [
+				r.id,
+				r.similarity ?? null,
+			]),
+		).toEqual([
+			["tukar", 0.8],
+			["twin", null],
+		]);
+		expect(body.meta.warnings?.[0]).toMatch(/^1 of the 3 words .*\(sandwich\)/);
+		vi.mocked(semanticBuildScores).mockResolvedValueOnce(
+			new Map([["tukar", 0.8]]),
+		);
+		const meaning = await get("tukar llama sandwich", "hybrid");
+		expect(
+			(meaning.builds as Array<Record<string, unknown>>).map((r) => [
 				r.id,
 				r.similarity,
 			]),
 		).toEqual([["tukar", 0.8]]);
-		expect(body.meta.warnings).toBeUndefined();
-	});
-
-	it("counts a word found only inside a longer one as in no submission", async () => {
-		const body = await get("tukar nread sandwich");
-		expect((body.builds as Array<{ id: string }>).map((r) => r.id)).toEqual([
-			"tukar",
-			"unread",
-		]);
-		expect(body.meta.warnings?.[0]).toMatch(
-			/^2 of the 3 words .*\(nread, sandwich\)/,
-		);
-	});
-
-	it("says nothing when at most half of q's words are in no submission", async () => {
-		const body = await get("tukar twin sandwich");
-		expect(body.meta.counts.matched).toBe(2);
-		expect(body.meta.warnings).toBeUndefined();
+		expect(meaning.meta.warnings).toBeUndefined();
 	});
 
 	// Review 2026-10-23: "agents," and "café" were reported in no submission
 	// while matchedTerms named them, so the line fired with both clauses false.
 	it("reads a word with a trailing comma or an accent as the build's own", async () => {
-		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
-		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+		await withIndex([
 			build("agentpay", {
 				haystack: "agentpay: ai agents, payments, a café",
 			}),
@@ -187,13 +211,20 @@ describe("GET /api/hackathons/builds says when most of q matches no build", () =
 		expect(body.meta.warnings).toBeUndefined();
 	});
 
-	it("words the line for a one-word q", async () => {
-		const body = await get("nread");
-		expect((body.builds as Array<{ id: string }>).map((r) => r.id)).toEqual([
+	it("words the line for a one-word q and for a q none of whose words is used", async () => {
+		const one = await get("nread");
+		expect((one.builds as Array<{ id: string }>).map((r) => r.id)).toEqual([
 			"unread",
 		]);
-		expect(body.meta.warnings).toEqual([
+		expect(one.meta.warnings).toEqual([
 			"the word searched in q (nread) occurs as a whole word in no submission in the index: a build listed by its words alone, with no similarity, holds it only inside a longer word and is not evidence that this idea was built",
+		]);
+		const none = await get("nread ukar");
+		expect(
+			(none.builds as Array<{ id: string }>).map((r) => r.id).sort(),
+		).toEqual(["tukar", "unread"]);
+		expect(none.meta.warnings).toEqual([
+			"none of the 2 words searched in q (nread, ukar) occurs as a whole word in any submission in the index: a build listed by its words alone, with no similarity, holds them only inside longer words and is not evidence that this idea was built",
 		]);
 	});
 });

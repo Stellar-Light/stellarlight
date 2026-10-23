@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
 		surfaces: ["api"],
+		version: "spec@1.9.95",
+		type: "changed",
+		summary:
+			"searchHackathonBuilds no longer lists a build by its name alone when most of the words searched in q occur as a whole word in no submission: q=quantum llama sandwich lists 0 builds, was 2. meta.warnings now names any word of q that no submission uses whenever a build is listed by its words alone (q=zero knowledge pogo stick lists zero-knowledge builds and names pogo and stick). vetIdea, hackathonBrief and analyzeHackathonSubmissions' q use the same rule.",
+		detail:
+			"This rule was measured before 1.9.94 and held back because it missed a bar fixed before the run: on a fresh battery of 24 nonsense queries it had to halve the builds returned, and it cut them by 19% in keyword mode (538 to 436) and 14% in hybrid (683 to 584). The owner chose to ship it past that bar; every other bar held. Replayed over all 1,344 stored submissions: on 140 labeled ideas no build graded the same idea or related left the matched list, the top 20 or the top 5, in keyword or hybrid mode; vetIdea's five and hackathonBrief's picks are identical; one build leaves one idea's list (Stellar Health Point for 'loyalty points issued as tokens', graded not the idea). On the battery, queries returning nothing go from 9 to 17 of 24 in keyword mode and from 9 to 15 in hybrid; on an earlier 15-query battery the builds returned go from 20 to 9. What remains matches half of q's words, or one word of a two-word q, and the warning names the missing words. A word counts as used when any form of it (plural or singular, a synonym, a hyphenated phrase spaced or joined) occurs as a whole word, in any script with edge punctuation ignored, in a submission's name, summary, track, award or declared packages, every package counted. On the 140 ideas the warning fires for 30 in keyword mode and 29 in hybrid, and every word it names occurs in no stored submission; for some a related form does (cash for cashing, hedge for hedging), which the warning does not deny. The warning never changes rows, and a build found by meaning is not covered by it. A hyphenated phrase counts as one word, so q=zero-knowledge pogo stick (2 of 3 words in no submission) lists no build by name, while q=zero knowledge pogo stick (2 of 4) lists 156 with the warning.",
+	},
+	{
+		date: "2026-10-23",
+		surfaces: ["api"],
 		version: "spec@1.9.94",
 		type: "fixed",
 		summary:
