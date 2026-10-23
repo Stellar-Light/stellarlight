@@ -1707,7 +1707,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-deprecated/transfer-server-validator": [
 		{
-			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Dec 15, 2021' (read 2026-09-02); github.com/stellar/transfer-server-validator redirects here. README: Jest suite for SEP-6/24/31 transfer servers at https://anchor-validator.stellar.org: now a 301 to https://anchor-tests.stellar.org/ (the stellar/stellar-anchor-tests UI; no HTTP response on 2026-09-02). https://github.com/stellar-deprecated/transfer-server-validator",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Dec 15, 2021' (read 2026-09-02); github.com/stellar/transfer-server-validator redirects here. README: Jest suite for SEP-6/24/31 transfer servers at https://anchor-validator.stellar.org; now a 301 to https://anchor-tests.stellar.org/ (the stellar/stellar-anchor-tests UI; no HTTP response on 2026-09-02). https://github.com/stellar-deprecated/transfer-server-validator",
 			triggers: ["transfer server validator", "anchor validator deprecated"],
 			source: "curated",
 			asOf: "2026-09-02",
