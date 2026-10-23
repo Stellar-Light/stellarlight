@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
 			meta: {
 				source: `${getAppUrl()}/api/hackathon-brief`,
 				generatedAt: new Date().toISOString(),
-				note: "One-call hackathon brief. vet = same computation as /api/vet-idea (gap is SUPPLY-side coverage, not demand; maturity absence = no evidence on record). startFrom = the top non-archived competitor repos with a trust SUMMARY — signals is a closed vocabulary of facts, not a score; full contractInterface at fullReport. liveContracts is evidence-gated: an empty list is 'no verified contract on record', never 'nothing on mainnet'. funding.round never asserts a negative on fetch failure. whatNotToClaim is derived from this brief's own facts. Rails (stablecoins/partners) and open RFPs are deliberately NOT bundled — call /api/stablecoins, /api/partners, /api/rfps when the demo needs them.",
+				note: "One-call hackathon brief. vet = same computation as /api/vet-idea (gap is SUPPLY-side coverage, not demand; maturity absence = no evidence on record). startFrom = the top non-archived competitor repos with a trust SUMMARY; signals is a closed vocabulary of facts, not a score; full contractInterface at fullReport. liveContracts is evidence-gated: an empty list is 'no verified contract on record', never 'nothing on mainnet'. funding.round never asserts a negative on fetch failure. whatNotToClaim is derived from this brief's own facts. Rails (stablecoins/partners) and open RFPs are deliberately NOT bundled; call /api/stablecoins, /api/partners, /api/rfps when the demo needs them.",
 			},
 			report,
 		},

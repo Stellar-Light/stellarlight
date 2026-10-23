@@ -154,7 +154,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"paltalabs/stellar-react": [
 		{
-			note: 'README (read 2026-09-07): "soroban-react with stellar wallets kit" — the React binding layered on the Stellar Wallets Kit, and the successor line to paltalabs/soroban-react. https://github.com/paltalabs/stellar-react',
+			note: 'README (read 2026-09-07): "soroban-react with stellar wallets kit", the React binding layered on the Stellar Wallets Kit, and the successor line to paltalabs/soroban-react. https://github.com/paltalabs/stellar-react',
 			triggers: ["soroban react hooks", "stellar wallets kit react"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -265,7 +265,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// than published facts about someone's repo.
 	"Sorosan/sorosan-client": [
 		{
-			note: 'README (read 2026-09-07) opens with its own retirement: "Note this will be deprecated in use for sorosan-sdk/core. This package is now outdated and deprecated. Please update to the latest version." So @sorosan-client/core is the OLD package and Sorosan/sorosan-sdk is its successor — the two repos otherwise read almost identically. Last commit 2023-12-24. https://github.com/Sorosan/sorosan-client#readme',
+			note: 'README (read 2026-09-07) opens with its own retirement: "Note this will be deprecated in use for sorosan-sdk/core. This package is now outdated and deprecated. Please update to the latest version." So @sorosan-client/core is the OLD package and Sorosan/sorosan-sdk is its successor; the two repos otherwise read almost identically. Last commit 2023-12-24. https://github.com/Sorosan/sorosan-client#readme',
 			triggers: ["sorosan client deprecated", "sorosan-sdk successor"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -273,7 +273,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"BuilderOSS/nouns-builder": [
 		{
-			note: 'Triage 2026-09-07: README is "Nouns Builder front-end website and subgraph mono-repo", deployed on "Mainnet" and "Sepolia testnet" — Ethereum, not Stellar. Kept as a flag so an attribution pass does not read it as Stellar evidence. https://github.com/BuilderOSS/nouns-builder',
+			note: 'Triage 2026-09-07: README is "Nouns Builder front-end website and subgraph mono-repo", deployed on "Mainnet" and "Sepolia testnet", Ethereum, not Stellar. Kept as a flag so an attribution pass does not read it as Stellar evidence. https://github.com/BuilderOSS/nouns-builder',
 			source: "curated",
 			asOf: "2026-09-07",
 			visibility: "internal",
@@ -281,7 +281,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-chef/stellar-chef": [
 		{
-			note: "Triage 2026-09-07: the README is an unmodified \"Salvia-kit Dashboard v4 Svelte-kit\" template — a different project's starter docs, not this one's. The deployed tool at stellar-chef.github.io/stellar-chef IS real (recipes, faucet, calculators, testnet) and was read in a browser 2026-09-06; the repo's own text just describes something else. Do not quote this README as a fact about Stellar Chef. https://github.com/stellar-chef/stellar-chef",
+			note: "Triage 2026-09-07: the README is an unmodified \"Salvia-kit Dashboard v4 Svelte-kit\" template: a different project's starter docs, not this one's. The deployed tool at stellar-chef.github.io/stellar-chef IS real (recipes, faucet, calculators, testnet) and was read in a browser 2026-09-06; the repo's own text just describes something else. Do not quote this README as a fact about Stellar Chef. https://github.com/stellar-chef/stellar-chef",
 			source: "curated",
 			asOf: "2026-09-07",
 			visibility: "internal",
@@ -297,7 +297,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"paltalabs/available-xlm": [
 		{
-			note: 'GitHub description (read 2026-09-07): "A repo to experiment with maximum available XLM when..."; README: "intended to test and understand the Minimum Balance needed for an account to be able to perform transactions." An experiment, not a library — nothing here is published or importable. https://github.com/paltalabs/available-xlm',
+			note: 'GitHub description (read 2026-09-07): "A repo to experiment with maximum available XLM when..."; README: "intended to test and understand the Minimum Balance needed for an account to be able to perform transactions." An experiment, not a library; nothing here is published or importable. https://github.com/paltalabs/available-xlm',
 			triggers: ["stellar minimum balance experiment"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -305,7 +305,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Raum-Network/raum-raumfi-v3": [
 		{
-			note: 'README (read 2026-09-07): "Concentrated-liquidity exchange stack for Stellar Soroban" — one repository holding the contract workspace AND a Next.js frontend, so it answers both "where are the RaumFi contracts" and "where is the app". GitHub description calls it the "CLMM implementation of RaumFi DEX". https://github.com/Raum-Network/raum-raumfi-v3',
+			note: 'README (read 2026-09-07): "Concentrated-liquidity exchange stack for Stellar Soroban", one repository holding the contract workspace AND a Next.js frontend, so it answers both "where are the RaumFi contracts" and "where is the app". GitHub description calls it the "CLMM implementation of RaumFi DEX". https://github.com/Raum-Network/raum-raumfi-v3',
 			triggers: ["raumfi clmm contracts", "concentrated liquidity soroban"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -321,7 +321,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"MoonBite-GmbH/soroban-multisig-contracts": [
 		{
-			note: 'GitHub description (read 2026-09-07): "A simple multisig contract allowing to configure a r[equired quorum]"; the README calls itself "an attempt to create a smart contract allowing to initialize a multisig with a configurable quorum" — the authors\' own hedge, worth carrying rather than presenting it as a finished product. https://github.com/MoonBite-GmbH/soroban-multisig-contracts',
+			note: 'GitHub description (read 2026-09-07): "A simple multisig contract allowing to configure a r[equired quorum]"; the README calls itself "an attempt to create a smart contract allowing to initialize a multisig with a configurable quorum", the authors\' own hedge, worth carrying rather than presenting it as a finished product. https://github.com/MoonBite-GmbH/soroban-multisig-contracts',
 			triggers: ["soroban multisig contract", "configurable quorum stellar"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -329,7 +329,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"perun-network/perun-stellar-backend": [
 		{
-			note: 'README (read 2026-09-07): "the Stellar backend for the go-perun channel library" — peer-to-peer payment channels. The product is go-perun; this repo is its Stellar adapter, so it answers "does Perun support Stellar", not "what is Perun". https://github.com/perun-network/perun-stellar-backend',
+			note: 'README (read 2026-09-07): "the Stellar backend for the go-perun channel library", peer-to-peer payment channels. The product is go-perun; this repo is its Stellar adapter, so it answers "does Perun support Stellar", not "what is Perun". https://github.com/perun-network/perun-stellar-backend',
 			triggers: ["perun payment channels stellar", "go-perun stellar backend"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -337,7 +337,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"sorobanhooks/stellar-wallet-sdk": [
 		{
-			note: 'GitHub description (read 2026-09-07): "Minimal, non-custodial Stellar wallet SDK with encrypted local key storage and session-based signing." Distinct from the SDF-published @stellar/typescript-wallet-sdk despite the near-identical name — different org, different package. https://github.com/sorobanhooks/stellar-wallet-sdk',
+			note: 'GitHub description (read 2026-09-07): "Minimal, non-custodial Stellar wallet SDK with encrypted local key storage and session-based signing." Distinct from the SDF-published @stellar/typescript-wallet-sdk despite the near-identical name: different org, different package. https://github.com/sorobanhooks/stellar-wallet-sdk',
 			triggers: ["non-custodial wallet sdk stellar", "sorobanhooks wallet sdk"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -345,7 +345,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"sorobanhooks/stellar-logos": [
 		{
-			note: 'README (read 2026-09-07): "A collection of high-quality logos and assets for the Stellar ecosystem." An asset repository — no code, so repo activity here says nothing about a product. https://github.com/sorobanhooks/stellar-logos',
+			note: 'README (read 2026-09-07): "A collection of high-quality logos and assets for the Stellar ecosystem." An asset repository: no code, so repo activity here says nothing about a product. https://github.com/sorobanhooks/stellar-logos',
 			triggers: ["stellar ecosystem logos"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -407,7 +407,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"paulfears/StellarSnap": [
 		{
-			note: 'README (read 2026-09-07): integrating "Stellar wallet functionalities into MetaMask Snaps" — the surface is MetaMask, not a standalone wallet. https://github.com/paulfears/StellarSnap',
+			note: 'README (read 2026-09-07): integrating "Stellar wallet functionalities into MetaMask Snaps"; the surface is MetaMask, not a standalone wallet. https://github.com/paulfears/StellarSnap',
 			triggers: ["stellar metamask snap", "metamask stellar wallet"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -415,7 +415,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"expand-network/sdk-nodejs": [
 		{
-			note: 'GitHub description (read 2026-09-07): "SDK for node.js" from expand.network, a multi-chain API provider — Stellar is one supported network among many, so activity here is not Stellar-specific. https://github.com/expand-network/sdk-nodejs',
+			note: 'GitHub description (read 2026-09-07): "SDK for node.js" from expand.network, a multi-chain API provider; Stellar is one supported network among many, so activity here is not Stellar-specific. https://github.com/expand-network/sdk-nodejs',
 			triggers: ["expand network sdk", "multi-chain api sdk"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -446,7 +446,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blend-capital/blend-bootstrapper-ui": [
 		{
-			note: "README (read 2026-09-06): 'The Blend Bootstrapper UI is a dApp that allows individuals to interact with Bootstrapper based contracts on the Soroban network' — the contracts live in blend-capital/backstop-bootstrapper, which the README links. So this repo answers 'the bootstrapper interface', never 'the bootstrapper contract'. TypeScript, last commit 2025-05-13. https://github.com/blend-capital/blend-bootstrapper-ui",
+			note: "README (read 2026-09-06): 'The Blend Bootstrapper UI is a dApp that allows individuals to interact with Bootstrapper based contracts on the Soroban network'; the contracts live in blend-capital/backstop-bootstrapper, which the README links. So this repo answers 'the bootstrapper interface', never 'the bootstrapper contract'. TypeScript, last commit 2025-05-13. https://github.com/blend-capital/blend-bootstrapper-ui",
 			triggers: [
 				"blend bootstrapper ui",
 				"blend backstop bootstrapper contracts",
@@ -467,7 +467,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 		{
 			// internal: a judgment about attribution, not a published fact about
 			// someone's repo. See the visibility contract on KnowledgeNote.
-			note: "Triage 2026-09-06: GitHub description 'Solana geyser plugin implementing a Kafka publisher', topics [kafka, solana], Rust, no Stellar reference. Our index carries stellarProof 'none' for it, yet it is attributed to the Stellar project row 'blockdaemon' — org-wide attribution pulling in a sibling-chain repo. It is already excluded from leaderboard activity (that lane skips stellarProof none, spec 1.9.47); flagged here so a future attribution pass does not read it as Stellar evidence. https://github.com/blockdaemon/solana-accountsdb-plugin-kafka",
+			note: "Triage 2026-09-06: GitHub description 'Solana geyser plugin implementing a Kafka publisher', topics [kafka, solana], Rust, no Stellar reference. Our index carries stellarProof 'none' for it, yet it is attributed to the Stellar project row 'blockdaemon', org-wide attribution pulling in a sibling-chain repo. It is already excluded from leaderboard activity (that lane skips stellarProof none, spec 1.9.47); flagged here so a future attribution pass does not read it as Stellar evidence. https://github.com/blockdaemon/solana-accountsdb-plugin-kafka",
 			source: "curated",
 			asOf: "2026-09-06",
 			visibility: "internal",
@@ -489,7 +489,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// repository that 404s (triage, not a note). ~250 GitHub API calls.
 	"dogstarapps/arka.fund": [
 		{
-			note: "README (2026-07-04): 'Arka.fund is a non-custodial asset-management protocol for Stellar/Soroban' — managers create configurable vaults ('Arkas'). Mainnet: 'Mainnet release gate: passed on 2026-06-13'; 'deployed contract WASM hashes match the manifest as of 2026-07-03'; canonical IDs in deployments.mainnet.json — Arka Factory CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK and Arka Registry CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY, both created on the public network 2026-06-11 by GBHIT7TX… (stellar.expert, read 2026-09-05); also Router CCZNPW4X…, Venue Registry CAR5IEPA…, OracleGuard CDHSFLLD…, Aquarius Adapter CAOJRRH3…. App app.arka.fund; no tags or releases. https://github.com/dogstarapps/arka.fund#readme",
+			note: "README (2026-07-04): 'Arka.fund is a non-custodial asset-management protocol for Stellar/Soroban'; managers create configurable vaults ('Arkas'). Mainnet: 'Mainnet release gate: passed on 2026-06-13'; 'deployed contract WASM hashes match the manifest as of 2026-07-03'; canonical IDs in deployments.mainnet.json: Arka Factory CAIVP3OKEPRAXCN5GRMNOZCVCF6VLI6DDDZ4X5NOIUUC73I5EGLG4CYK and Arka Registry CCMCYADNUESGFRIJRZ2AOHUZBIPMRLVZCHB3BVIPHZCKGWFJSSJQBXAY, both created on the public network 2026-06-11 by GBHIT7TX… (stellar.expert, read 2026-09-05); also Router CCZNPW4X…, Venue Registry CAR5IEPA…, OracleGuard CDHSFLLD…, Aquarius Adapter CAOJRRH3…. App app.arka.fund; no tags or releases. https://github.com/dogstarapps/arka.fund#readme",
 			triggers: ["arka fund contracts", "arka fund mainnet"],
 			source: "curated",
 			asOf: "2026-07-04",
@@ -497,7 +497,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"shariqazeem/kyvernlabs": [
 		{
-			note: "npm @kyvernlabs/pulse — 0.2.0 (2026-04-08; 2 versions since 2026-04-03; repository → this repo; MIT): 'x402 analytics middleware — multi-chain (Base, Stellar, Solana), blockchain-verified'; companion @kyvernlabs/mcp 0.2.0 (2026-04-04), 'MCP server for KyvernLabs Pulse — 17 tools'. README 'Pulse by KyvernLabs': Stellar verification via @stellar/stellar-sdk v15 on mainnet (horizon.stellar.org) + testnet, USDC; dashboard at kyvernlabs.com/pulse/dashboard. No tags or releases. https://www.npmjs.com/package/@kyvernlabs/pulse",
+			note: "npm @kyvernlabs/pulse: 0.2.0 (2026-04-08; 2 versions since 2026-04-03; repository → this repo; MIT): 'x402 analytics middleware — multi-chain (Base, Stellar, Solana), blockchain-verified'; companion @kyvernlabs/mcp 0.2.0 (2026-04-04), 'MCP server for KyvernLabs Pulse — 17 tools'. README 'Pulse by KyvernLabs': Stellar verification via @stellar/stellar-sdk v15 on mainnet (horizon.stellar.org) + testnet, USDC; dashboard at kyvernlabs.com/pulse/dashboard. No tags or releases. https://www.npmjs.com/package/@kyvernlabs/pulse",
 			triggers: ["kyvernlabs pulse npm", "x402 revenue analytics stellar"],
 			source: "curated",
 			asOf: "2026-04-08",
@@ -505,7 +505,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dfns/dfns-sdk-ts": [
 		{
-			note: "npm @dfns/sdk — 0.8.29 (2026-09-03; 185 versions since 2023-06-13; repository → this repo; MIT), the Dfns TypeScript SDK; GitHub release 0.8.29 the same day (README install `npm i @dfns/sdk`, Node 18+). Dfns' docs list Stellar among supported networks (docs.dfns.co/networks/stellar — Stellar wallets, sign and broadcast). https://www.npmjs.com/package/@dfns/sdk",
+			note: "npm @dfns/sdk: 0.8.29 (2026-09-03; 185 versions since 2023-06-13; repository → this repo; MIT), the Dfns TypeScript SDK; GitHub release 0.8.29 the same day (README install `npm i @dfns/sdk`, Node 18+). Dfns' docs list Stellar among supported networks (docs.dfns.co/networks/stellar: Stellar wallets, sign and broadcast). https://www.npmjs.com/package/@dfns/sdk",
 			triggers: ["dfns typescript sdk", "dfns sdk npm"],
 			source: "curated",
 			asOf: "2026-09-03",
@@ -513,7 +513,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"idos-network/idos-sdk-js": [
 		{
-			note: "npm @idos-network/client — 1.5.0 (2026-08-11; 9 versions since 2025-05-22; repository → this repo; MIT), 'idOS Client JavaScript SDK for browser environments'; the client README lists \"stellar\" among wallet types ('Multi-Chain Wallet Support — Works with EVM, NEAR, XRPL, and Stellar wallet types'), with Stellar signature verification under packages/kwil-infra. Monorepo: all @idos-network/* packages are versioned together via Changesets; tags are per package (e.g. @idos-network/issuer-sdk-js@0.0.4). https://www.npmjs.com/package/@idos-network/client",
+			note: "npm @idos-network/client: 1.5.0 (2026-08-11; 9 versions since 2025-05-22; repository → this repo; MIT), 'idOS Client JavaScript SDK for browser environments'; the client README lists \"stellar\" among wallet types ('Multi-Chain Wallet Support — Works with EVM, NEAR, XRPL, and Stellar wallet types'), with Stellar signature verification under packages/kwil-infra. Monorepo: all @idos-network/* packages are versioned together via Changesets; tags are per package (e.g. @idos-network/issuer-sdk-js@0.0.4). https://www.npmjs.com/package/@idos-network/client",
 			triggers: ["idos javascript sdk", "idos stellar wallet"],
 			source: "curated",
 			asOf: "2026-08-11",
@@ -521,7 +521,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"moonlight-protocol/soroban-core": [
 		{
-			note: "GitHub releases v0.5.0 (2026-07-20), v0.4.0 (2026-06-23), v0.3.0 (2026-06-17); 5 tags. Cargo workspace version 0.5.0 pins soroban-sdk =25.3.0 (Cargo.toml at HEAD). README: 'Moonlight: the missing privacy layer, for any blockchain, built on Stellar' — 'the core smart contracts and modules for the Moonlight Protocol on Soroban' (moonlightprotocol.io); the v0.5.0 notes declare the wasm32v1-none target in rust-toolchain.toml. https://github.com/Moonlight-Protocol/soroban-core/releases",
+			note: "GitHub releases v0.5.0 (2026-07-20), v0.4.0 (2026-06-23), v0.3.0 (2026-06-17); 5 tags. Cargo workspace version 0.5.0 pins soroban-sdk =25.3.0 (Cargo.toml at HEAD). README: 'Moonlight: the missing privacy layer, for any blockchain, built on Stellar'; 'the core smart contracts and modules for the Moonlight Protocol on Soroban' (moonlightprotocol.io); the v0.5.0 notes declare the wasm32v1-none target in rust-toolchain.toml. https://github.com/Moonlight-Protocol/soroban-core/releases",
 			triggers: [
 				"moonlight soroban core release",
 				"moonlight protocol contracts",
@@ -532,7 +532,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"nectar-network/nectar": [
 		{
-			note: "README (2026-08-16): 'Multi-operator keeper infrastructure for Soroban DeFi. Distributed liquidation network for Blend Protocol on Stellar'; 'Canonical repository: github.com/Nectar-Network/nectar — other mirrors may lag'; contracts 'frozen at tag audit-freeze-v1 for the SCF Soroban Security Audit Bank' (tag dated 2026-08-15; earlier v0.3.0-audit 2026-07-25; no releases). Testnet only: 'Tranche 3 hardened deploy settling in Circle testnet USDC, 2026-07-22' — KeeperRegistry CD33A7IG…, NectarVault CDOGQY7N… on Soroban testnet; the nectar-vault crate targets soroban-sdk 22.0.0. Companion: Nectar-Network/keeper-sdk; site nectarnetwork.fun. https://github.com/Nectar-Network/nectar#readme",
+			note: "README (2026-08-16): 'Multi-operator keeper infrastructure for Soroban DeFi. Distributed liquidation network for Blend Protocol on Stellar'; 'Canonical repository: github.com/Nectar-Network/nectar — other mirrors may lag'; contracts 'frozen at tag audit-freeze-v1 for the SCF Soroban Security Audit Bank' (tag dated 2026-08-15; earlier v0.3.0-audit 2026-07-25; no releases). Testnet only: 'Tranche 3 hardened deploy settling in Circle testnet USDC, 2026-07-22': KeeperRegistry CD33A7IG…, NectarVault CDOGQY7N… on Soroban testnet; the nectar-vault crate targets soroban-sdk 22.0.0. Companion: Nectar-Network/keeper-sdk; site nectarnetwork.fun. https://github.com/Nectar-Network/nectar#readme",
 			triggers: [
 				"nectar network audit freeze",
 				"nectar keeper blend liquidation",
@@ -543,7 +543,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarcarbon/sorocarbon": [
 		{
-			note: "GitHub releases are per-contract tags carrying the stellar-cli version — latest v0.4.5_contracts_sink_carbon_sink-carbon_cli22.8.1 (2025-11-13; a plain v0.4.5 tag the same day; v0.4.4 2025-11-13, v0.4.3 2025-11-03). The workspace targets soroban-sdk 22 (Cargo.toml at HEAD). README: 'Home of Stellarcarbon's Soroban smart contracts' — contracts/sink_carbon; the documented deploy path is testnet ('To deploy the latest release to testnet, first download it from GitHub'), showing a testnet sink contract CBDWJLGQ…. https://github.com/stellarcarbon/sorocarbon/releases",
+			note: "GitHub releases are per-contract tags carrying the stellar-cli version: latest v0.4.5_contracts_sink_carbon_sink-carbon_cli22.8.1 (2025-11-13; a plain v0.4.5 tag the same day; v0.4.4 2025-11-13, v0.4.3 2025-11-03). The workspace targets soroban-sdk 22 (Cargo.toml at HEAD). README: 'Home of Stellarcarbon's Soroban smart contracts': contracts/sink_carbon; the documented deploy path is testnet ('To deploy the latest release to testnet, first download it from GitHub'), showing a testnet sink contract CBDWJLGQ…. https://github.com/stellarcarbon/sorocarbon/releases",
 			triggers: ["sorocarbon release", "stellarcarbon sink contract"],
 			source: "curated",
 			asOf: "2025-11-13",
@@ -551,7 +551,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pragya-shar/quilltip": [
 		{
-			note: "GitHub releases v1.2.0 (2026-08-25), v1.1.0 (2026-06-22), v1.0.0 (2026-05-08); 4 tags. README 'Quilltip - Decentralized Publishing Platform' (quilltip.me, MIT): micro-tipping for authors on Stellar — 'Network: Stellar Testnet' ('testnet practice today'); the Tipping Contract badge links a testnet contract (CC7Q3HDX…), documented in docs/tipping-contract-testnet-deploy.md. https://github.com/pragya-shar/quilltip/releases",
+			note: "GitHub releases v1.2.0 (2026-08-25), v1.1.0 (2026-06-22), v1.0.0 (2026-05-08); 4 tags. README 'Quilltip - Decentralized Publishing Platform' (quilltip.me, MIT): micro-tipping for authors on Stellar: 'Network: Stellar Testnet' ('testnet practice today'); the Tipping Contract badge links a testnet contract (CC7Q3HDX…), documented in docs/tipping-contract-testnet-deploy.md. https://github.com/pragya-shar/quilltip/releases",
 			triggers: ["quilltip release", "quilltip tipping contract"],
 			source: "curated",
 			asOf: "2026-08-25",
@@ -559,7 +559,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"eras256/nirium": [
 		{
-			note: "README (2026-09-04): 'Nirium's own NiriumVault treasury contract remains on Stellar Testnet, audit-gated' (testnet CBTWMZCG…; NiriumProtocol CC2TU5BD…); 'The autonomous treasury node runs on mainnet over a DeFindex vault the client owns: a third-party contract audited by OtterSec, not ours' — that vault is CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH, created on the public network 2026-08-06 (stellar.expert token name 'DeFindex-Vault-Nirium Treasury', read 2026-09-05); 'Mainnet is invite-only'. Badges claim 'SCF Instaward #1 & #2 Delivered'; Apache-2.0; tags showroom-stable (2026-03-27) and deploy-1, no releases. https://github.com/Eras256/Nirium#readme",
+			note: "README (2026-09-04): 'Nirium's own NiriumVault treasury contract remains on Stellar Testnet, audit-gated' (testnet CBTWMZCG…; NiriumProtocol CC2TU5BD…); 'The autonomous treasury node runs on mainnet over a DeFindex vault the client owns: a third-party contract audited by OtterSec, not ours'; that vault is CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH, created on the public network 2026-08-06 (stellar.expert token name 'DeFindex-Vault-Nirium Treasury', read 2026-09-05); 'Mainnet is invite-only'. Badges claim 'SCF Instaward #1 & #2 Delivered'; Apache-2.0; tags showroom-stable (2026-03-27) and deploy-1, no releases. https://github.com/Eras256/Nirium#readme",
 			triggers: ["nirium vault mainnet", "nirium treasury contract"],
 			source: "curated",
 			asOf: "2026-09-04",
@@ -567,7 +567,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"xccy-labs/xccy-soroban": [
 		{
-			note: "Only tag oraclehub-v0.1.0-soroban (commit 2026-05-06; no releases); workspace version 0.1.0 targets soroban-sdk 25 (Cargo.toml comment: 'soroban-sdk 25.3 transitively'). README 'Status: early. The OracleHub module is the only thing shipped so far. Hub + 5 adapters are deployed and live on Stellar testnet' — OracleHub v2 CDYX3GID…, ReflectorPrice v2 CACERBYE…, BlendRate CCHP47YX… (testnet); 'Mainnet readiness: security audit, parameter calibration, observability' is an open checkbox. https://github.com/XCCY-Labs/xccy-soroban#readme",
+			note: "Only tag oraclehub-v0.1.0-soroban (commit 2026-05-06; no releases); workspace version 0.1.0 targets soroban-sdk 25 (Cargo.toml comment: 'soroban-sdk 25.3 transitively'). README 'Status: early. The OracleHub module is the only thing shipped so far. Hub + 5 adapters are deployed and live on Stellar testnet': OracleHub v2 CDYX3GID…, ReflectorPrice v2 CACERBYE…, BlendRate CCHP47YX… (testnet); 'Mainnet readiness: security audit, parameter calibration, observability' is an open checkbox. https://github.com/XCCY-Labs/xccy-soroban#readme",
 			triggers: ["xccy soroban oraclehub", "xccy interest rate swap soroban"],
 			source: "curated",
 			asOf: "2026-05-07",
@@ -575,7 +575,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"cushyon/stellar_migration": [
 		{
-			note: "README 'CushionStellar' (2026-07-05): 'Capital-protected strategy vaults on Stellar' — a Next.js frontend plus one Soroban contract, 'SEP-41 token + SEP-56 vault with on-chain strategy safety checks'; the strategy-vault crate (0.1.0) targets soroban-sdk 26.1.0 with the wasm32v1-none target (Cargo.toml at HEAD). The repo description 'Migrate the smart contract logic to Stellar' predates this; deploy instructions are testnet; no tags or releases. https://github.com/cushyon/Stellar_migration#readme",
+			note: "README 'CushionStellar' (2026-07-05): 'Capital-protected strategy vaults on Stellar', a Next.js frontend plus one Soroban contract, 'SEP-41 token + SEP-56 vault with on-chain strategy safety checks'; the strategy-vault crate (0.1.0) targets soroban-sdk 26.1.0 with the wasm32v1-none target (Cargo.toml at HEAD). The repo description 'Migrate the smart contract logic to Stellar' predates this; deploy instructions are testnet; no tags or releases. https://github.com/cushyon/Stellar_migration#readme",
 			triggers: ["cushionstellar vault", "cushion stellar strategy vault"],
 			source: "curated",
 			asOf: "2026-07-05",
@@ -583,7 +583,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"towa-hi/stellarunitydevtoolkit": [
 		{
-			note: "README (2026-04-06): 'a set of tools that allows Unity developers to interface with the Stellar smart contract platform (formerly known as Soroban) through RPC' — 'Distributed as a Unity Package Manager package (com.scryingstone.stellar-sdk), targeting Unity 2022.3+'; the manifest at StellarDevToolkit/Packages/com.scryingstone.stellar-sdk/package.json is version 0.1.0, displayName 'Stellar Development Toolkit for Unity' (unity field 6000.0), beside a com.scryingstone.stellar-wallet package. No description, tags, releases or registry listing. https://github.com/towa-hi/StellarUnityDevToolkit#readme",
+			note: "README (2026-04-06): 'a set of tools that allows Unity developers to interface with the Stellar smart contract platform (formerly known as Soroban) through RPC'; 'Distributed as a Unity Package Manager package (com.scryingstone.stellar-sdk), targeting Unity 2022.3+'; the manifest at StellarDevToolkit/Packages/com.scryingstone.stellar-sdk/package.json is version 0.1.0, displayName 'Stellar Development Toolkit for Unity' (unity field 6000.0), beside a com.scryingstone.stellar-wallet package. No description, tags, releases or registry listing. https://github.com/towa-hi/StellarUnityDevToolkit#readme",
 			triggers: ["unity stellar sdk", "stellar unity toolkit"],
 			source: "curated",
 			asOf: "2026-04-06",
@@ -591,7 +591,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarchain/soroban-auditor": [
 		{
-			note: "README (2026-02-11): 'Decompiler for Soroban WASM contracts -> source-like Rust (focus: reverse engineering, not perfect recompilation)' — binaries soroban-auditor and sdk-analyze; the Cargo package soroban-auditor 2.5.1 at HEAD depends on soroban-sdk 25.1.0 and is NOT on crates.io ('crate soroban-auditor does not exist', 2026-09-05) — build from source with `cargo build`. MIT; no tags or releases. https://github.com/stellarchain/soroban-auditor#readme",
+			note: "README (2026-02-11): 'Decompiler for Soroban WASM contracts -> source-like Rust (focus: reverse engineering, not perfect recompilation)': binaries soroban-auditor and sdk-analyze; the Cargo package soroban-auditor 2.5.1 at HEAD depends on soroban-sdk 25.1.0 and is NOT on crates.io ('crate soroban-auditor does not exist', 2026-09-05); build from source with `cargo build`. MIT; no tags or releases. https://github.com/stellarchain/soroban-auditor#readme",
 			triggers: ["soroban wasm decompiler", "soroban auditor decompile"],
 			source: "curated",
 			asOf: "2026-02-11",
@@ -599,14 +599,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"airswiftio/scf": [
 		{
-			note: "Soroban contracts only — soroban/contract_deployer, soroban/scf_pool and soroban/scf_soroban, built with `make` and deployed/bumped by per-contract deploy.sh and bump.sh scripts against the network named in a `network_name` file (README, 2024-03-12; it never says what SCF stands for). The pool crate pins soroban-sdk 21.0.1-preview.3 (Cargo.toml at HEAD); the README's setup links point at the retired soroban.stellar.org docs. No description, tags or releases; last push 2025-02-27. https://github.com/Airswiftio/SCF#readme",
+			note: "Soroban contracts only: soroban/contract_deployer, soroban/scf_pool and soroban/scf_soroban, built with `make` and deployed/bumped by per-contract deploy.sh and bump.sh scripts against the network named in a `network_name` file (README, 2024-03-12; it never says what SCF stands for). The pool crate pins soroban-sdk 21.0.1-preview.3 (Cargo.toml at HEAD); the README's setup links point at the retired soroban.stellar.org docs. No description, tags or releases; last push 2025-02-27. https://github.com/Airswiftio/SCF#readme",
 			source: "curated",
 			asOf: "2024-03-12",
 		},
 	],
 	"emrekayat/query402": [
 		{
-			note: "RENAMED: this path redirects to github.com/Query402/Query402 (HTTP 301, 2026-09-05). README (2026-08-31): 'Query402 participates in the Stellar Wave program. This public repository is the canonical workspace for Wave issues and contributions'; 'Agentic pay-per-query internet access on Stellar with x402' — a 'hackathon-ready' router for search/news/scrape on stellar:testnet (facilitator keys from channels.openzeppelin.com/testnet); MIT; no tags or releases. https://github.com/Query402/Query402",
+			note: "RENAMED: this path redirects to github.com/Query402/Query402 (HTTP 301, 2026-09-05). README (2026-08-31): 'Query402 participates in the Stellar Wave program. This public repository is the canonical workspace for Wave issues and contributions'; 'Agentic pay-per-query internet access on Stellar with x402', a 'hackathon-ready' router for search/news/scrape on stellar:testnet (facilitator keys from channels.openzeppelin.com/testnet); MIT; no tags or releases. https://github.com/Query402/Query402",
 			triggers: ["query402 repo", "query402 stellar wave"],
 			source: "curated",
 			asOf: "2026-09-05",
@@ -622,7 +622,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"elegidokawai2/hackaton--ajolote-en-ingles-": [
 		{
-			note: "RENAMED: this path redirects to github.com/Ander-tsx/NUUP (HTTP 301, 2026-09-05). README 'NUUP — ProofWork' (2026-04-26, Spanish): 'Plataforma gamificada de freelancers con reputación on-chain sobre la red Stellar' — four Soroban contracts deployed to testnet by the repo's script ('Red: Testnet Stellar | Token de pago: MXNe (SAC)'); the original path records its hackathon origin ('Hackaton Ajolote'); no tags or releases. https://github.com/Ander-tsx/NUUP",
+			note: "RENAMED: this path redirects to github.com/Ander-tsx/NUUP (HTTP 301, 2026-09-05). README 'NUUP — ProofWork' (2026-04-26, Spanish): 'Plataforma gamificada de freelancers con reputación on-chain sobre la red Stellar', four Soroban contracts deployed to testnet by the repo's script ('Red: Testnet Stellar | Token de pago: MXNe (SAC)'); the original path records its hackathon origin ('Hackaton Ajolote'); no tags or releases. https://github.com/Ander-tsx/NUUP",
 			triggers: ["nuup proofwork repo", "hackaton ajolote stellar"],
 			source: "curated",
 			asOf: "2026-09-05",
@@ -630,14 +630,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"gatogrozero/devengo": [
 		{
-			note: "No longer accessible: github.com/GatoGroZero/devengo returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-05) — deleted or made private. https://github.com/GatoGroZero/devengo",
+			note: "No longer accessible: github.com/GatoGroZero/devengo returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-05): deleted or made private. https://github.com/GatoGroZero/devengo",
 			source: "curated",
 			asOf: "2026-09-05",
 		},
 	],
 	"0xyudz/magentix": [
 		{
-			note: "README 'MagentiX — Autonomous AI Agents with x402 Payments on Stellar' (2026-04-13): 'Built for the Stellar Hacks 2026 hackathon' — a marketplace where 'Service Providers register AI tools' and agents pay per call via x402 with a '60/40' provider/platform split, demo at magenti-x-app-frontend-hyr5.vercel.app; Stellar testnet; no description, license, tags or releases. https://github.com/0xyudz/MagentiX#readme",
+			note: "README 'MagentiX — Autonomous AI Agents with x402 Payments on Stellar' (2026-04-13): 'Built for the Stellar Hacks 2026 hackathon', a marketplace where 'Service Providers register AI tools' and agents pay per call via x402 with a '60/40' provider/platform split, demo at magenti-x-app-frontend-hyr5.vercel.app; Stellar testnet; no description, license, tags or releases. https://github.com/0xyudz/MagentiX#readme",
 			triggers: ["magentix repo"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -645,7 +645,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"7maylord/erebus": [
 		{
-			note: "README 'Erebus' (2026-04-12): 'Privacy-preserving payment pool for AI agents on Stellar × x402' — agents fund a shared pool and queue payouts so only Pool → Payee appears on-chain; 'Built for the Stellar Agents x402 + Stripe MPP Hackathon'; 'Network: Stellar Testnet', USDC, pool address GBP642BQ…; AGPL-3.0; frontend erebus-x.vercel.app; no tags or releases. https://github.com/7maylord/erebus#readme",
+			note: "README 'Erebus' (2026-04-12): 'Privacy-preserving payment pool for AI agents on Stellar × x402'; agents fund a shared pool and queue payouts so only Pool → Payee appears on-chain; 'Built for the Stellar Agents x402 + Stripe MPP Hackathon'; 'Network: Stellar Testnet', USDC, pool address GBP642BQ…; AGPL-3.0; frontend erebus-x.vercel.app; no tags or releases. https://github.com/7maylord/erebus#readme",
 			triggers: ["erebus payment pool", "erebus x402 privacy"],
 			source: "curated",
 			asOf: "2026-04-12",
@@ -653,7 +653,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ella0victor/sentryx402": [
 		{
-			note: "README 'Sentryx402' (2026-04-13): 'a payment-native agent runner built for the Stellar x402 hackathon' — an autonomous research agent with 'a real wallet, a hard spending budget, a receipt trail', paying per query 'on Stellar testnet using x402' (Freighter on stellar:testnet); sentryx402.vercel.app; no description, license, tags or releases. https://github.com/ELLA0VICTOR/sentryx402#readme",
+			note: "README 'Sentryx402' (2026-04-13): 'a payment-native agent runner built for the Stellar x402 hackathon', an autonomous research agent with 'a real wallet, a hard spending budget, a receipt trail', paying per query 'on Stellar testnet using x402' (Freighter on stellar:testnet); sentryx402.vercel.app; no description, license, tags or releases. https://github.com/ELLA0VICTOR/sentryx402#readme",
 			triggers: ["sentryx402 repo"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -661,7 +661,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"glayzz/agentmarket-pro": [
 		{
-			note: "README 'AgentMarket Pro' (2026-04-12): 'A live AI agent economy where autonomous agents hire each other and pay in real USDC via the x402 protocol on Stellar' — 'Built for Stellar Hacks: Agents — x402 + Stripe MPP Track' (DoraHacks stellar-agents-x402-stripe-mpp), a solo project; 'real USDC transaction on Stellar testnet'; demo agentmarket-pro.vercel.app; no description, license, tags or releases. https://github.com/Glayzz/agentmarket-pro#readme",
+			note: "README 'AgentMarket Pro' (2026-04-12): 'A live AI agent economy where autonomous agents hire each other and pay in real USDC via the x402 protocol on Stellar'; 'Built for Stellar Hacks: Agents — x402 + Stripe MPP Track' (DoraHacks stellar-agents-x402-stripe-mpp), a solo project; 'real USDC transaction on Stellar testnet'; demo agentmarket-pro.vercel.app; no description, license, tags or releases. https://github.com/Glayzz/agentmarket-pro#readme",
 			triggers: ["agentmarket pro repo"],
 			source: "curated",
 			asOf: "2026-04-12",
@@ -677,7 +677,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"jennivarl/autox420": [
 		{
-			note: "README 'AutoX420 — On-Chain API Paywall with x402 on Stellar' (2026-04-13): 'An AI agent that autonomously buys real API data using x402 micropayments on Stellar' — five paid endpoints bought every 45 seconds, 'Real USDC transactions on Stellar testnet'; live at auto402-production.up.railway.app; a 'Hackathon Requirements Met' table marks it a hackathon build; sibling Jennivarl/underworld; no description, license, tags or releases. https://github.com/Jennivarl/AutoX420#readme",
+			note: "README 'AutoX420 — On-Chain API Paywall with x402 on Stellar' (2026-04-13): 'An AI agent that autonomously buys real API data using x402 micropayments on Stellar', five paid endpoints bought every 45 seconds, 'Real USDC transactions on Stellar testnet'; live at auto402-production.up.railway.app; a 'Hackathon Requirements Met' table marks it a hackathon build; sibling Jennivarl/underworld; no description, license, tags or releases. https://github.com/Jennivarl/AutoX420#readme",
 			triggers: ["autox420 repo"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -685,7 +685,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"jennivarl/underworld": [
 		{
-			note: "README 'UNDERWORLD — AI Research Marketplace on Stellar' (2026-04-13): 'Three AI agents that autonomously buy and sell deep research intelligence' — client, orchestrator (Gemini 2.5 Flash) and specialists paid via x402, '$0.10 USDC' per request; 'Built for the Stellar Agents Hackathon'; 'Real Stellar testnet transactions — USDC verified by x402 facilitator'; sibling Jennivarl/AutoX420; no description, license, tags or releases. https://github.com/Jennivarl/underworld#readme",
+			note: "README 'UNDERWORLD — AI Research Marketplace on Stellar' (2026-04-13): 'Three AI agents that autonomously buy and sell deep research intelligence', client, orchestrator (Gemini 2.5 Flash) and specialists paid via x402, '$0.10 USDC' per request; 'Built for the Stellar Agents Hackathon'; 'Real Stellar testnet transactions — USDC verified by x402 facilitator'; sibling Jennivarl/AutoX420; no description, license, tags or releases. https://github.com/Jennivarl/underworld#readme",
 			triggers: ["underworld research marketplace"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -693,7 +693,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"unique-coder/stellarbrief": [
 		{
-			note: "README 'StellarBrief' (2026-04-13): 'A two-sided x402 trading intelligence market on Stellar' — six paid endpoints (crypto/forex prices, news, Claude summaries) at $0.01 USDC per call; 'Built for Stellar Hacks: Agents — April 2026'; 'a complete x402 product on Stellar testnet' (USDC SAC on testnet); no description, license, tags or releases. https://github.com/Unique-coder/stellarbrief#readme",
+			note: "README 'StellarBrief' (2026-04-13): 'A two-sided x402 trading intelligence market on Stellar', six paid endpoints (crypto/forex prices, news, Claude summaries) at $0.01 USDC per call; 'Built for Stellar Hacks: Agents — April 2026'; 'a complete x402 product on Stellar testnet' (USDC SAC on testnet); no description, license, tags or releases. https://github.com/Unique-coder/stellarbrief#readme",
 			triggers: ["stellarbrief repo"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -701,7 +701,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"techkeyy/the-signaler": [
 		{
-			note: "README 'The Signaler' (2026-04-11): 'Autonomous Signal Acquisition Network' — seller agents post encrypted crypto-price signals, buyers (Python + stellar-sdk + Gemini) pay 'via x402-inspired protocol on Stellar'; 'Built for Stellar Hacks: Agents on DoraHacks'; 'Real Stellar testnet XLM payments per acquisition' ('Testnet-only transfers'); live at the-signaler-production.up.railway.app; no description, license, tags or releases. https://github.com/Techkeyy/the-signaler#readme",
+			note: "README 'The Signaler' (2026-04-11): 'Autonomous Signal Acquisition Network'; seller agents post encrypted crypto-price signals, buyers (Python + stellar-sdk + Gemini) pay 'via x402-inspired protocol on Stellar'; 'Built for Stellar Hacks: Agents on DoraHacks'; 'Real Stellar testnet XLM payments per acquisition' ('Testnet-only transfers'); live at the-signaler-production.up.railway.app; no description, license, tags or releases. https://github.com/Techkeyy/the-signaler#readme",
 			triggers: ["the signaler repo"],
 			source: "curated",
 			asOf: "2026-04-11",
@@ -709,7 +709,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"aliveevie/sentinelmesh": [
 		{
-			note: "README 'SentinelMesh — Autonomous DeFi Threat Detection Network on Stellar' (2026-04-04): 'Built for the Agents on Stellar Hackathon — April 2026' (DoraHacks agents-on-stellar); 'Two Rust contracts deployed to Stellar testnet, built with soroban-sdk 21.7.6' — Circuit Breaker CDX4AAQT… and Reputation Registry CBGMETPT… (testnet), four sentinel agents paid over x402 (stellar:testnet); no description, license, tags or releases. https://github.com/aliveevie/sentinelmesh#readme",
+			note: "README 'SentinelMesh — Autonomous DeFi Threat Detection Network on Stellar' (2026-04-04): 'Built for the Agents on Stellar Hackathon — April 2026' (DoraHacks agents-on-stellar); 'Two Rust contracts deployed to Stellar testnet, built with soroban-sdk 21.7.6': Circuit Breaker CDX4AAQT… and Reputation Registry CBGMETPT… (testnet), four sentinel agents paid over x402 (stellar:testnet); no description, license, tags or releases. https://github.com/aliveevie/sentinelmesh#readme",
 			triggers: ["sentinelmesh repo", "sentinelmesh circuit breaker"],
 			source: "curated",
 			asOf: "2026-04-04",
@@ -717,7 +717,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"chinesepowered/hack-stellaragents": [
 		{
-			note: "README 'Stellar Security Audit Agent' (2026-04-11): 'AI-powered smart contract auditor that verifies deployed code, finds vulnerabilities, and stores immutable audit results on Stellar' — compares deployed WASM against source and writes results to a Soroban audit-registry contract (submit_audit); 'Built for the Stellar Agents Hackathon'; Stellar testnet ('The pre-compiled Soroban WASM is included — deploy to testnet'); no description, license, tags or releases. https://github.com/chinesepowered/hack-stellaragents#readme",
+			note: "README 'Stellar Security Audit Agent' (2026-04-11): 'AI-powered smart contract auditor that verifies deployed code, finds vulnerabilities, and stores immutable audit results on Stellar', compares deployed WASM against source and writes results to a Soroban audit-registry contract (submit_audit); 'Built for the Stellar Agents Hackathon'; Stellar testnet ('The pre-compiled Soroban WASM is included — deploy to testnet'); no description, license, tags or releases. https://github.com/chinesepowered/hack-stellaragents#readme",
 			triggers: ["stellar security audit agent"],
 			source: "curated",
 			asOf: "2026-04-11",
@@ -725,7 +725,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"comzzy-comzzy/datavend": [
 		{
-			note: "README 'DataVend — AI-Powered Stellar Data Agent' (2026-04-11): 'An autonomous AI agent that sells on-chain Stellar wallet data per query using the x402 payment protocol on Stellar mainnet' — '$0.01 USDC on Stellar mainnet', verified 'via OpenZeppelin facilitator'; 'Competition: Stellar Hacks: Agents — DoraHacks'; live at datavend.tech / datavend-three.vercel.app; no description, license, tags or releases. https://github.com/comzzy-comzzy/datavend#readme",
+			note: "README 'DataVend — AI-Powered Stellar Data Agent' (2026-04-11): 'An autonomous AI agent that sells on-chain Stellar wallet data per query using the x402 payment protocol on Stellar mainnet'; '$0.01 USDC on Stellar mainnet', verified 'via OpenZeppelin facilitator'; 'Competition: Stellar Hacks: Agents — DoraHacks'; live at datavend.tech / datavend-three.vercel.app; no description, license, tags or releases. https://github.com/comzzy-comzzy/datavend#readme",
 			triggers: ["datavend repo", "datavend x402"],
 			source: "curated",
 			asOf: "2026-04-11",
@@ -733,7 +733,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"divineudoka12/zerixs": [
 		{
-			note: "README 'Zerixs' (2026-04-13): 'Goal-based autonomous financial agent network on Stellar' — an orchestrator that pays specialist agents 'through x402 on Stellar testnet' (Groq as the AI provider); its 'Submission Snapshot' and 'Why This Fits The Hackathon' sections mark it a hackathon submission; no description, license, tags or releases. https://github.com/divineudoka12/Zerixs#readme",
+			note: "README 'Zerixs' (2026-04-13): 'Goal-based autonomous financial agent network on Stellar', an orchestrator that pays specialist agents 'through x402 on Stellar testnet' (Groq as the AI provider); its 'Submission Snapshot' and 'Why This Fits The Hackathon' sections mark it a hackathon submission; no description, license, tags or releases. https://github.com/divineudoka12/Zerixs#readme",
 			triggers: ["zerixs repo"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -741,7 +741,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"emdevelopa/stellar_payment_api": [
 		{
-			note: "README 'PLUTO — Agentic Payment Infrastructure on Stellar' (2026-04-13): 'a dual-mode payment infrastructure' — Freighter checkouts for humans plus an x402Middleware for agents; 'All Stellar interactions use actual testnet transactions' (USDC issuer GBBD47IF… on testnet); the 'Hackathon Notes & Judging Criteria' section lists areas unfinished 'due to hackathon time constraints'; live at stellar-payment-api.vercel.app; no description, license, tags or releases. https://github.com/emdevelopa/Stellar_Payment_API#readme",
+			note: "README 'PLUTO — Agentic Payment Infrastructure on Stellar' (2026-04-13): 'a dual-mode payment infrastructure', Freighter checkouts for humans plus an x402Middleware for agents; 'All Stellar interactions use actual testnet transactions' (USDC issuer GBBD47IF… on testnet); the 'Hackathon Notes & Judging Criteria' section lists areas unfinished 'due to hackathon time constraints'; live at stellar-payment-api.vercel.app; no description, license, tags or releases. https://github.com/emdevelopa/Stellar_Payment_API#readme",
 			triggers: ["pluto agentic payment", "stellar payment api pluto"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -757,7 +757,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rtomas/soundstake": [
 		{
-			note: "README 'SoundStake' (2026-04-13): 'The first music catalog where AI agents pay musicians directly' — musicians register songs and price tiers on a Soroban contract, buyers pay per use via x402 in USDC; 'Hackathon: Stellar Agents x402 + Stripe MPP'; 'Blockchain: Stellar testnet → mainnet' (deploy steps are testnet, wasm32v1-none); live at soundstake-ten.vercel.app; no description, license, tags or releases. https://github.com/rtomas/soundstake#readme",
+			note: "README 'SoundStake' (2026-04-13): 'The first music catalog where AI agents pay musicians directly'; musicians register songs and price tiers on a Soroban contract, buyers pay per use via x402 in USDC; 'Hackathon: Stellar Agents x402 + Stripe MPP'; 'Blockchain: Stellar testnet → mainnet' (deploy steps are testnet, wasm32v1-none); live at soundstake-ten.vercel.app; no description, license, tags or releases. https://github.com/rtomas/soundstake#readme",
 			triggers: ["soundstake repo"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -765,7 +765,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"oscargauss/fan-match": [
 		{
-			note: "README 'FanForge' (2026-04-13): 'a Massively Multiplayer Online Stadium built for the Stellar Agents x402 Stripe MPP Hackathon' (DoraHacks) — two Claude-powered agents play foosball while fans fund them 'with USDC on Stellar testnet' via x402 micropayments (@stellar/stellar-sdk, Pollar keys); live at fan-forge.ogauss.io; no tags or releases. https://github.com/OscarGauss/fan-match#readme",
+			note: "README 'FanForge' (2026-04-13): 'a Massively Multiplayer Online Stadium built for the Stellar Agents x402 Stripe MPP Hackathon' (DoraHacks); two Claude-powered agents play foosball while fans fund them 'with USDC on Stellar testnet' via x402 micropayments (@stellar/stellar-sdk, Pollar keys); live at fan-forge.ogauss.io; no tags or releases. https://github.com/OscarGauss/fan-match#readme",
 			triggers: ["fanforge stadium", "fan match repo"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -781,7 +781,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"penguinpecker/ko402": [
 		{
-			note: "README 'KO402 — Pay-Per-Move AI Fighting Game on Stellar' (2026-04-06): 'a turn-based fighting game where autonomous AI agents battle each other using real Stellar micropayments' — each move is a USDC payment and the pot (0.2 USDC) settles to the winner; 'Stellar Hacks: Agents — DoraHacks'; 'Stellar Testnet, USDC payments via Horizon SDK' (escrow account GCRRX5XD…); ko402.vercel.app; no description, license, tags or releases. https://github.com/penguinpecker/ko402#readme",
+			note: "README 'KO402 — Pay-Per-Move AI Fighting Game on Stellar' (2026-04-06): 'a turn-based fighting game where autonomous AI agents battle each other using real Stellar micropayments'; each move is a USDC payment and the pot (0.2 USDC) settles to the winner; 'Stellar Hacks: Agents — DoraHacks'; 'Stellar Testnet, USDC payments via Horizon SDK' (escrow account GCRRX5XD…); ko402.vercel.app; no description, license, tags or releases. https://github.com/penguinpecker/ko402#readme",
 			triggers: ["ko402 fighting game"],
 			source: "curated",
 			asOf: "2026-04-06",
@@ -789,7 +789,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"zzzbedream/cortex402": [
 		{
-			note: "README 'Cortex402' (2026-04-13): 'AI-native payment middleware for the x402 protocol on Stellar' — server-side 402 lifecycle plus typed agent tools (sign_stellar_transaction, check_payment_status) with single-use memo_hash replay protection; Horizon on Stellar Testnet with testnet USDC by default; the repo description is just the name; no license, tags or releases. https://github.com/zzzbedream/Cortex402#readme",
+			note: "README 'Cortex402' (2026-04-13): 'AI-native payment middleware for the x402 protocol on Stellar', server-side 402 lifecycle plus typed agent tools (sign_stellar_transaction, check_payment_status) with single-use memo_hash replay protection; Horizon on Stellar Testnet with testnet USDC by default; the repo description is just the name; no license, tags or releases. https://github.com/zzzbedream/Cortex402#readme",
 			triggers: ["cortex402 middleware"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -797,7 +797,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"marxmad/agenticx402": [
 		{
-			note: "README 'PumaX402 — Agentic Services Hub on Stellar' (2026-04-13): 'A unified catalog and access layer for x402 and MPP services on Stellar: discover, pay per request, and consume APIs' — live hub at agenticx402-production.up.railway.app; stellar-sdk + stellar-cli + Soroban (Rust); MIT (Node ≥20); no description, tags or releases. https://github.com/MarxMad/Agenticx402#readme",
+			note: "README 'PumaX402 — Agentic Services Hub on Stellar' (2026-04-13): 'A unified catalog and access layer for x402 and MPP services on Stellar: discover, pay per request, and consume APIs', live hub at agenticx402-production.up.railway.app; stellar-sdk + stellar-cli + Soroban (Rust); MIT (Node ≥20); no description, tags or releases. https://github.com/MarxMad/Agenticx402#readme",
 			triggers: ["pumax402 hub", "agenticx402 repo"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -805,7 +805,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"panditdhamdhere/payflow": [
 		{
-			note: "README 'Payflow Agent Tools' (2026-04-12): 'Pay-per-call HTTP tools for AI agents on Stellar, using x402' — Express + @x402/express + @x402/stellar (exact scheme) with a Vite/React UI and Freighter; prices in 'testnet USDC' (issuer GBBD47IF…), flow 'matches the Stellar x402 quickstart'; written as a submission ('put the live URL at the top of your submission'); MIT; no description, tags or releases. https://github.com/panditdhamdhere/Payflow#readme",
+			note: "README 'Payflow Agent Tools' (2026-04-12): 'Pay-per-call HTTP tools for AI agents on Stellar, using x402', Express + @x402/express + @x402/stellar (exact scheme) with a Vite/React UI and Freighter; prices in 'testnet USDC' (issuer GBBD47IF…), flow 'matches the Stellar x402 quickstart'; written as a submission ('put the live URL at the top of your submission'); MIT; no description, tags or releases. https://github.com/panditdhamdhere/Payflow#readme",
 			triggers: ["payflow agent tools"],
 			source: "curated",
 			asOf: "2026-04-12",
@@ -813,7 +813,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"isaac-richie/stellarpulse": [
 		{
-			note: "README 'StellarPulse' (2026-04-13): 'a pay-per-insight intelligence terminal built on Stellar' — Polymarket/Kalshi signals turned into briefs, premium analysis 'behind Stellar x402 payment verification' for humans and agents; needs a 'Stellar testnet account' for payment testing; API at stellarpulse-api.vercel.app; no description, license, tags or releases. https://github.com/isaac-richie/stellarpulse#readme",
+			note: "README 'StellarPulse' (2026-04-13): 'a pay-per-insight intelligence terminal built on Stellar', Polymarket/Kalshi signals turned into briefs, premium analysis 'behind Stellar x402 payment verification' for humans and agents; needs a 'Stellar testnet account' for payment testing; API at stellarpulse-api.vercel.app; no description, license, tags or releases. https://github.com/isaac-richie/stellarpulse#readme",
 			triggers: ["stellarpulse repo"],
 			source: "curated",
 			asOf: "2026-04-13",
@@ -821,7 +821,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"methu-ship/toll": [
 		{
-			note: "README 'toll: The Stellar Agentic API Marketplace' (2026-04-10): 'a decentralized, autonomous marketplace where AI agents buy and sell data and services using the X402 payment protocol on the Stellar Network' — a seller agent registers price/swap/FX feeds, a buyer agent scores and purchases them; 'Stellar Testnet' with Friendbot funding; no description, license, tags or releases. https://github.com/methu-ship/toll#readme",
+			note: "README 'toll: The Stellar Agentic API Marketplace' (2026-04-10): 'a decentralized, autonomous marketplace where AI agents buy and sell data and services using the X402 payment protocol on the Stellar Network'; a seller agent registers price/swap/FX feeds, a buyer agent scores and purchases them; 'Stellar Testnet' with Friendbot funding; no description, license, tags or releases. https://github.com/methu-ship/toll#readme",
 			triggers: ["toll agentic api marketplace"],
 			source: "curated",
 			asOf: "2026-04-10",
@@ -829,7 +829,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"shivraigithub/genesis402": [
 		{
-			note: "README 'Genesis402 - Stellar x402 Gateway' (2026-04-11): 'a no-code monetization layer that wraps existing APIs with pay-per-request enforcement using x402 on Stellar' — Express/TypeScript backend, Next.js frontend, x402Version 2 challenges; no description, license, tags or releases. https://github.com/ShivRaiGithub/Genesis402#readme",
+			note: "README 'Genesis402 - Stellar x402 Gateway' (2026-04-11): 'a no-code monetization layer that wraps existing APIs with pay-per-request enforcement using x402 on Stellar', Express/TypeScript backend, Next.js frontend, x402Version 2 challenges; no description, license, tags or releases. https://github.com/ShivRaiGithub/Genesis402#readme",
 			triggers: ["genesis402 gateway"],
 			source: "curated",
 			asOf: "2026-04-11",
@@ -837,7 +837,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"godbrand0/argent": [
 		{
-			note: "README 'Argen: Agentic Liquidation Protocol' (2026-04-12): 'an autonomous lending protocol on Stellar that leverages ZK-Proofs and x402 payments' — 'Deployed Contracts (Stellar Testnet)': Vault CBNXMW4Q…, vUSDC CDEMATCS…, ZK Verifier CDGYLCFD… (all testnet); Apache-2.0; argent-mu.vercel.app; no description, tags or releases. https://github.com/Godbrand0/argent#readme",
+			note: "README 'Argen: Agentic Liquidation Protocol' (2026-04-12): 'an autonomous lending protocol on Stellar that leverages ZK-Proofs and x402 payments'; 'Deployed Contracts (Stellar Testnet)': Vault CBNXMW4Q…, vUSDC CDEMATCS…, ZK Verifier CDGYLCFD… (all testnet); Apache-2.0; argent-mu.vercel.app; no description, tags or releases. https://github.com/Godbrand0/argent#readme",
 			triggers: ["argen liquidation protocol", "argent repo stellar"],
 			source: "curated",
 			asOf: "2026-04-12",
@@ -861,7 +861,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"warp-driver/phoenix-blend-pool": [
 		{
-			note: "README 'phoenix-blend-pool' (2026-06-01): 'WarpDrive-driven rebalance automation for the Phoenix XLM-USDC blended pool variant' — a circuit subscribes to the blended pool's events, WarpDrive operators sign, an aggregator submits at quorum and an automation-handler contract on Stellar verifies; the Rebalance action moves USDC between the pool and Blend; GPL-3.0; no description, tags or releases. https://github.com/warp-driver/Phoenix-Blend-Pool#readme",
+			note: "README 'phoenix-blend-pool' (2026-06-01): 'WarpDrive-driven rebalance automation for the Phoenix XLM-USDC blended pool variant'; a circuit subscribes to the blended pool's events, WarpDrive operators sign, an aggregator submits at quorum and an automation-handler contract on Stellar verifies; the Rebalance action moves USDC between the pool and Blend; GPL-3.0; no description, tags or releases. https://github.com/warp-driver/Phoenix-Blend-Pool#readme",
 			triggers: [
 				"phoenix blend pool rebalance",
 				"warpdrive phoenix automation",
@@ -887,7 +887,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// testnet / fork) and sit in BAND_40_49_TRIAGE_2026_09_02. 3 API calls.
 	"ledgerhq/app-stellar": [
 		{
-			note: "The Ledger hardware-wallet app for Stellar — Cargo package `stellar` 6.0.3 at HEAD; README: transaction signing on Nano X, Nano S+, Nano Gen5, Stax and Flex (ledger_app.toml devices: nanox, nanos+, stax, flex, apex_p). Releases are per-device tags carrying the app version: stax_1.10.0_6.0.3_sdk_v26.0.2 and flex_1.6.0_6.0.3_sdk_v26.0.2 (2026-04-22), nanox_2.7.0_6.0.3_sdk_v26.0.2 (2026-04-21); 388 tags. https://github.com/LedgerHQ/app-stellar/releases",
+			note: "The Ledger hardware-wallet app for Stellar: Cargo package `stellar` 6.0.3 at HEAD; README: transaction signing on Nano X, Nano S+, Nano Gen5, Stax and Flex (ledger_app.toml devices: nanox, nanos+, stax, flex, apex_p). Releases are per-device tags carrying the app version: stax_1.10.0_6.0.3_sdk_v26.0.2 and flex_1.6.0_6.0.3_sdk_v26.0.2 (2026-04-22), nanox_2.7.0_6.0.3_sdk_v26.0.2 (2026-04-21); 388 tags. https://github.com/LedgerHQ/app-stellar/releases",
 			triggers: ["ledger stellar app version", "ledger nano stellar app"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -895,7 +895,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"beans-bv/dotnet-stellar-sdk": [
 		{
-			note: "NuGet stellar-dotnet-sdk — 15.1.0 (2026-06-07; 95 versions since 2.0.0 on 2018-05-31; the current 15.x entries list this repo as project URL while the 2021 7.2.x entries list elucidsoft/dotnet-stellar-sdk); companion package stellar-dotnet-sdk-xdr 15.1.0. README: 'Stellar API SDK for .NET', a port of the Java SDK (lightsail-network) with SEPs ported from Soneso's Flutter SDK; latest pre-release 16.0.0-beta (2026-06-25). https://www.nuget.org/packages/stellar-dotnet-sdk",
+			note: "NuGet stellar-dotnet-sdk: 15.1.0 (2026-06-07; 95 versions since 2.0.0 on 2018-05-31; the current 15.x entries list this repo as project URL while the 2021 7.2.x entries list elucidsoft/dotnet-stellar-sdk); companion package stellar-dotnet-sdk-xdr 15.1.0. README: 'Stellar API SDK for .NET', a port of the Java SDK (lightsail-network) with SEPs ported from Soneso's Flutter SDK; latest pre-release 16.0.0-beta (2026-06-25). https://www.nuget.org/packages/stellar-dotnet-sdk",
 			triggers: ["dotnet stellar sdk nuget", "stellar dotnet sdk"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -903,7 +903,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kommitters/stellar_sdk": [
 		{
-			note: "Hex stellar_sdk — 0.23.0 (2026-06-03; 45 releases since 2021-08-18; GitHub link → this repo; MIT), the Elixir SDK for Stellar. CHANGELOG 0.23.0 (02.06.2026): Protocol 22/23/26 support, stellar_base ~> 0.17.0, CreateContractArgsV2 (CAP-0058); the previous release 0.22.0 was 2024-08-16. Low-level XDR companion: kommitters/stellar_base. https://hex.pm/packages/stellar_sdk",
+			note: "Hex stellar_sdk: 0.23.0 (2026-06-03; 45 releases since 2021-08-18; GitHub link → this repo; MIT), the Elixir SDK for Stellar. CHANGELOG 0.23.0 (02.06.2026): Protocol 22/23/26 support, stellar_base ~> 0.17.0, CreateContractArgsV2 (CAP-0058); the previous release 0.22.0 was 2024-08-16. Low-level XDR companion: kommitters/stellar_base. https://hex.pm/packages/stellar_sdk",
 			triggers: ["elixir stellar sdk", "stellar sdk hex package"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -911,7 +911,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kommitters/stellar_base": [
 		{
-			note: "Hex stellar_base — 0.17.0 (2026-06-03; 42 releases since 2021-08-12; GitHub link → this repo; MIT): 'low-level elixir library to read, write, hash, and sign XDR primitive constructs'. CHANGELOG 0.17.0 (02.06.2026): Protocol 22/23/26, TransactionMetaV4, Quorum Freeze (CAP-0077), contract constructors (CAP-0058), muxed SCAddress (CAP-0079); the previous release 0.16.0 was 2024-07-23. Consumed by kommitters/stellar_sdk. https://hex.pm/packages/stellar_base",
+			note: "Hex stellar_base: 0.17.0 (2026-06-03; 42 releases since 2021-08-12; GitHub link → this repo; MIT): 'low-level elixir library to read, write, hash, and sign XDR primitive constructs'. CHANGELOG 0.17.0 (02.06.2026): Protocol 22/23/26, TransactionMetaV4, Quorum Freeze (CAP-0077), contract constructors (CAP-0058), muxed SCAddress (CAP-0079); the previous release 0.16.0 was 2024-07-23. Consumed by kommitters/stellar_sdk. https://hex.pm/packages/stellar_base",
 			triggers: ["elixir stellar xdr library"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -919,7 +919,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"streamingfast/firehose-stellar": [
 		{
-			note: "Go module github.com/streamingfast/firehose-stellar — v1.2.1 (2026-08-28; 10 tags; Go proxy origin → this repo). CHANGELOG: v1.2.1 requires stellar-core >= 28.0.1-3508 (SDF's fix for the August 2026 critical security advisory); v1.2.0 (2026-08-25) Protocol 28 (CAP-0083/CAP-0085); v1.1.0 (2026-06-18) Protocol 27 + the captive-core fetcher. A release is a tag push built by release.yml (binaries, images, Homebrew formula). https://github.com/streamingfast/firehose-stellar/blob/HEAD/CHANGELOG.md",
+			note: "Go module github.com/streamingfast/firehose-stellar: v1.2.1 (2026-08-28; 10 tags; Go proxy origin → this repo). CHANGELOG: v1.2.1 requires stellar-core >= 28.0.1-3508 (SDF's fix for the August 2026 critical security advisory); v1.2.0 (2026-08-25) Protocol 28 (CAP-0083/CAP-0085); v1.1.0 (2026-06-18) Protocol 27 + the captive-core fetcher. A release is a tag push built by release.yml (binaries, images, Homebrew formula). https://github.com/streamingfast/firehose-stellar/blob/HEAD/CHANGELOG.md",
 			triggers: ["firehose stellar release", "firehose stellar version"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -937,7 +937,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"creit-tech/xbull-wallet-connect": [
 		{
-			note: "npm @creit.tech/xbull-wallet-connect — 0.4.0 (2025-08-13; 2 versions since 2024-09-15; repository → this repo): 'connect your website with xBull Wallet in both extension and webapp version'. The README's install line is `npm i --save @creit.tech/xbull-wallet-connect` but it recommends installing from GitHub by version tag ('we use Github instead of NPM'); GitHub releases 0.1.0…0.4.0 (4 tags; 0.4.0 on 2025-08-13). https://www.npmjs.com/package/@creit.tech/xbull-wallet-connect",
+			note: "npm @creit.tech/xbull-wallet-connect: 0.4.0 (2025-08-13; 2 versions since 2024-09-15; repository → this repo): 'connect your website with xBull Wallet in both extension and webapp version'. The README's install line is `npm i --save @creit.tech/xbull-wallet-connect` but it recommends installing from GitHub by version tag ('we use Github instead of NPM'); GitHub releases 0.1.0…0.4.0 (4 tags; 0.4.0 on 2025-08-13). https://www.npmjs.com/package/@creit.tech/xbull-wallet-connect",
 			triggers: [
 				"xbull wallet connect package",
 				"connect website xbull wallet",
@@ -948,7 +948,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lobstrco/stellar-identicon-js": [
 		{
-			note: "npm stellar-identicon-js — 1.0.0 (2019-09-19; 2 versions since 2019-09-18; repository → this repo; ISC): canvas identicons derived from a Stellar public key. README: the Python twin Lobstrco/stellar-identicon-py yields the same image for the same address by default, and LOBSTR's hosted service id.lobstr.co/<G…>.png serves 210×210 PNGs generated by the Python version behind CloudFront. No tags. https://www.npmjs.com/package/stellar-identicon-js",
+			note: "npm stellar-identicon-js: 1.0.0 (2019-09-19; 2 versions since 2019-09-18; repository → this repo; ISC): canvas identicons derived from a Stellar public key. README: the Python twin Lobstrco/stellar-identicon-py yields the same image for the same address by default, and LOBSTR's hosted service id.lobstr.co/<G…>.png serves 210×210 PNGs generated by the Python version behind CloudFront. No tags. https://www.npmjs.com/package/stellar-identicon-js",
 			triggers: ["stellar identicon library", "identicon from stellar address"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -956,7 +956,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"beans-bv/beans-merchant-sdk-javascript": [
 		{
-			note: "npm beans-merchant-sdk — 5.0.0 (2025-10-29; 11 versions since 2024-01-30; MIT; repository → github.com/Beans-BV/merchant_sdk_javascript, which redirects here — HTTP 301, 2026-09-02). README 'Beans Merchant JavaScript SDK': QR-code payment requests and on/off-ramp integration with the Beans app on Stellar; GitHub releases 1.0.0…5.0.0 (20 tags; 3.0.0–5.0.0 all published 2025-10-29). Sibling SDK: Beans-BV/beans-merchant-sdk-dart. https://www.npmjs.com/package/beans-merchant-sdk",
+			note: "npm beans-merchant-sdk: 5.0.0 (2025-10-29; 11 versions since 2024-01-30; MIT; repository → github.com/Beans-BV/merchant_sdk_javascript, which redirects here; HTTP 301, 2026-09-02). README 'Beans Merchant JavaScript SDK': QR-code payment requests and on/off-ramp integration with the Beans app on Stellar; GitHub releases 1.0.0…5.0.0 (20 tags; 3.0.0 to 5.0.0 all published 2025-10-29). Sibling SDK: Beans-BV/beans-merchant-sdk-dart. https://www.npmjs.com/package/beans-merchant-sdk",
 			triggers: ["beans merchant sdk npm", "beans merchant javascript"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -964,7 +964,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"xcapit/openzktool": [
 		{
-			note: "RENAMED: github.com/xcapit/stellar-privacy-poc — the path in this repo's package.json (npm name stellar-privacy-sdk 0.1.0-poc) — redirects here (HTTP 301, 2026-09-02); the README badges still point at fboiero/stellar-privacy-poc, which returns 404. README 'OpenZKTool — Privacy infrastructure for Stellar Soroban using Zero-Knowledge Proofs', Status: Proof of Concept (Groth16/BN254 verifier for Soroban), AGPL-3.0; no tags or releases. https://github.com/xcapit/openzktool",
+			note: "RENAMED: github.com/xcapit/stellar-privacy-poc, the path in this repo's package.json (npm name stellar-privacy-sdk 0.1.0-poc), redirects here (HTTP 301, 2026-09-02); the README badges still point at fboiero/stellar-privacy-poc, which returns 404. README 'OpenZKTool — Privacy infrastructure for Stellar Soroban using Zero-Knowledge Proofs', Status: Proof of Concept (Groth16/BN254 verifier for Soroban), AGPL-3.0; no tags or releases. https://github.com/xcapit/openzktool",
 			triggers: ["openzktool repo renamed", "stellar privacy poc repo"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -972,7 +972,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"sorobanhooks/freighter": [
 		{
-			note: "RENAMED: this path redirects to github.com/sorobanhooks/aptopia-wallet (HTTP 301, 2026-09-02), a fork of stellar/freighter (GitHub 'forked from' banner). README 'Aptopia': 'non-custodial smart wallet on the Stellar testnet' built as a Freighter fork with yield vaults, a trading agent, x402 pay-per-call data and an OpenZeppelin Smart Account — 'Mainnet is gated on audit + funding — this codebase targets Stellar testnet only.' No tags. https://github.com/sorobanhooks/aptopia-wallet",
+			note: "RENAMED: this path redirects to github.com/sorobanhooks/aptopia-wallet (HTTP 301, 2026-09-02), a fork of stellar/freighter (GitHub 'forked from' banner). README 'Aptopia': 'non-custodial smart wallet on the Stellar testnet' built as a Freighter fork with yield vaults, a trading agent, x402 pay-per-call data and an OpenZeppelin Smart Account: 'Mainnet is gated on audit + funding — this codebase targets Stellar testnet only.' No tags. https://github.com/sorobanhooks/aptopia-wallet",
 			triggers: ["aptopia wallet repo", "sorobanhooks freighter fork"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -980,7 +980,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"coinfabrik/scout-soroban": [
 		{
-			note: "README install line `cargo install cargo-scout-audit` — crates.io cargo-scout-audit 0.3.16 (2026-02-13; 39 versions since 2023-06-30) lists repository github.com/coinfabrik/scout-audit, not this repo: the maintained analyzer (ink!, Soroban, Substrate) lives in CoinFabrik/scout-audit; this Soroban-specific repo (last push 2024-07-31; no tags) hosts the docs site. Companions: VS Code extension CoinFabrik.scout-audit, GitHub Action coinfabrik/scout-actions@v3; SCF-funded. https://crates.io/crates/cargo-scout-audit",
+			note: "README install line `cargo install cargo-scout-audit`: crates.io cargo-scout-audit 0.3.16 (2026-02-13; 39 versions since 2023-06-30) lists repository github.com/coinfabrik/scout-audit, not this repo: the maintained analyzer (ink!, Soroban, Substrate) lives in CoinFabrik/scout-audit; this Soroban-specific repo (last push 2024-07-31; no tags) hosts the docs site. Companions: VS Code extension CoinFabrik.scout-audit, GitHub Action coinfabrik/scout-actions@v3; SCF-funded. https://crates.io/crates/cargo-scout-audit",
 			triggers: [
 				"scout soroban install",
 				"soroban static analysis tool",
@@ -992,7 +992,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"coinfabrik/scout-actions": [
 		{
-			note: "GitHub Marketplace action 'Run Scout Action' (`uses: coinfabrik/scout-actions@v3`; action.yml name 'Scout Security Analysis' — 'Runs Scout security analysis on Rust projects and reports findings'); latest release v3.2 (2025-01-31; 22 tags). README: Scout assists ink!, Soroban and Substrate developers; the analyzer itself is CoinFabrik/scout-audit (crate cargo-scout-audit). https://github.com/marketplace/actions/run-scout-action",
+			note: "GitHub Marketplace action 'Run Scout Action' (`uses: coinfabrik/scout-actions@v3`; action.yml name 'Scout Security Analysis': 'Runs Scout security analysis on Rust projects and reports findings'); latest release v3.2 (2025-01-31; 22 tags). README: Scout assists ink!, Soroban and Substrate developers; the analyzer itself is CoinFabrik/scout-audit (crate cargo-scout-audit). https://github.com/marketplace/actions/run-scout-action",
 			triggers: ["scout github action", "soroban security github action"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1000,7 +1000,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dfns/dfns-sdk-python": [
 		{
-			note: "PyPI dfns-sdk — 0.0.4 (2026-09-08; 6 releases since 2026-01-12; Repository → this repo), the Dfns Python SDK. Dfns' docs list Stellar among supported networks — 'Network-specific features, signature kinds, supported assets, and integration requirements for Stellar wallets on the DFNS platform' (docs.dfns.co/networks/stellar), with Stellar sign and broadcast API references. https://pypi.org/project/dfns-sdk/",
+			note: "PyPI dfns-sdk: 0.0.4 (2026-09-08; 6 releases since 2026-01-12; Repository → this repo), the Dfns Python SDK. Dfns' docs list Stellar among supported networks: 'Network-specific features, signature kinds, supported assets, and integration requirements for Stellar wallets on the DFNS platform' (docs.dfns.co/networks/stellar), with Stellar sign and broadcast API references. https://pypi.org/project/dfns-sdk/",
 			triggers: ["dfns python sdk", "dfns stellar wallets"],
 			source: "curated",
 			asOf: "2026-09-13",
@@ -1008,7 +1008,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blindpaylabs/blindpay-node": [
 		{
-			note: "npm @blindpay/node — 5.3.1 (2026-08-07; 42 versions since 2025-09-27; repository → this repo; MIT), 'Official Node.js SDK for Blindpay API - Stablecoin API for global payments'; GitHub release v5.3.1 the same day (8 tags). BlindPay's own changelog dates its 'Stellar Integration' to 2025-05-09 and a 'Stellar Wallet Rotation and Testnet USDB Fix' to 2026-05-15. https://www.npmjs.com/package/@blindpay/node",
+			note: "npm @blindpay/node: 5.3.1 (2026-08-07; 42 versions since 2025-09-27; repository → this repo; MIT), 'Official Node.js SDK for Blindpay API - Stablecoin API for global payments'; GitHub release v5.3.1 the same day (8 tags). BlindPay's own changelog dates its 'Stellar Integration' to 2025-05-09 and a 'Stellar Wallet Rotation and Testnet USDB Fix' to 2026-05-15. https://www.npmjs.com/package/@blindpay/node",
 			triggers: ["blindpay node sdk", "blindpay stellar integration"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1016,7 +1016,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blindpaylabs/blindpay-mcp": [
 		{
-			note: "npm @blindpay/mcp — 1.7.1 (2026-08-08; 16 versions since 2026-01-05; repository → this repo; MIT), 'Official MCP Server for BlindPay API - Stablecoin API for global payments'; GitHub release v1.7.1 the same day (13 tags). Stellar is one of BlindPay's rails per its changelog ('Stellar Integration', 2025-05-09). https://www.npmjs.com/package/@blindpay/mcp",
+			note: "npm @blindpay/mcp: 1.7.1 (2026-08-08; 16 versions since 2026-01-05; repository → this repo; MIT), 'Official MCP Server for BlindPay API - Stablecoin API for global payments'; GitHub release v1.7.1 the same day (13 tags). Stellar is one of BlindPay's rails per its changelog ('Stellar Integration', 2025-05-09). https://www.npmjs.com/package/@blindpay/mcp",
 			triggers: ["blindpay mcp server"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1024,7 +1024,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blindpaylabs/blindpay-go": [
 		{
-			note: "Go module github.com/blindpaylabs/blindpay-go — v1.19.0 (2026-08-04; Go proxy origin → this repo; 20 tags, four of them cut on 2026-08-04), 'Blindpay's Golang SDK'. Stellar is one of BlindPay's rails per its changelog ('Stellar Integration', 2025-05-09). https://pkg.go.dev/github.com/blindpaylabs/blindpay-go",
+			note: "Go module github.com/blindpaylabs/blindpay-go: v1.19.0 (2026-08-04; Go proxy origin → this repo; 20 tags, four of them cut on 2026-08-04), 'Blindpay's Golang SDK'. Stellar is one of BlindPay's rails per its changelog ('Stellar Integration', 2025-05-09). https://pkg.go.dev/github.com/blindpaylabs/blindpay-go",
 			triggers: ["blindpay go sdk"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1032,7 +1032,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blindpaylabs/blindpay-swift": [
 		{
-			note: "Swift package distributed by git tag (Package.swift: package blindpay-swift, product BlindPay) — latest release v4.5.1 (2026-08-07; 27 tags; v4.4.0 and v4.5.0 on 2026-08-04), 'BlindPay's Swift SDK'. Stellar is one of BlindPay's rails per its changelog ('Stellar Integration', 2025-05-09). https://github.com/blindpaylabs/blindpay-swift/releases",
+			note: "Swift package distributed by git tag (Package.swift: package blindpay-swift, product BlindPay): latest release v4.5.1 (2026-08-07; 27 tags; v4.4.0 and v4.5.0 on 2026-08-04), 'BlindPay's Swift SDK'. Stellar is one of BlindPay's rails per its changelog ('Stellar Integration', 2025-05-09). https://github.com/blindpaylabs/blindpay-swift/releases",
 			triggers: ["blindpay swift sdk"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1048,7 +1048,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"normalfinance/normal-stellar-amm": [
 		{
-			note: "GitHub releases: v1.0.0 (2025-11-06) plus per-contract tags of the same day (e.g. v1.0.0_contracts_pool_plane_pool-plane_cli22.8.1; 11 tags). README 'Audits': 'Summer 2025 x Halborn' — audits/ holds 'Normal x Halborn - Summer 2025 Audit.pdf' and THREAT.MD (GitHub API, 2026-09-02). Cargo workspace contracts/* + modules/*; sibling protocol repo normalfinance/stellar-v1 (renamed from lsp). https://github.com/normalfinance/normal-stellar-amm/releases",
+			note: "GitHub releases: v1.0.0 (2025-11-06) plus per-contract tags of the same day (e.g. v1.0.0_contracts_pool_plane_pool-plane_cli22.8.1; 11 tags). README 'Audits': 'Summer 2025 x Halborn'; audits/ holds 'Normal x Halborn - Summer 2025 Audit.pdf' and THREAT.MD (GitHub API, 2026-09-02). Cargo workspace contracts/* + modules/*; sibling protocol repo normalfinance/stellar-v1 (renamed from lsp). https://github.com/normalfinance/normal-stellar-amm/releases",
 			triggers: ["normal stellar amm audit", "normal amm halborn"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1056,7 +1056,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"satoshipay/solar": [
 		{
-			note: "Solar Wallet — README: 'User-friendly Stellar wallet, featuring multi-signature, custom assets management and more. Runs on Mac OS, Windows, Linux, Android and iOS'; binaries ship via GitHub releases — latest v0.28.1 (2022-06-03; 85 tags; v0.28.0 2021-10-27); keys encrypted with PBKDF2-SHA256 + xsalsa20-poly1305; solarwallet.io still links these downloads (2026-09-02). Last push 2022-06-03. https://github.com/satoshipay/solar/releases",
+			note: "Solar Wallet: README: 'User-friendly Stellar wallet, featuring multi-signature, custom assets management and more. Runs on Mac OS, Windows, Linux, Android and iOS'; binaries ship via GitHub releases: latest v0.28.1 (2022-06-03; 85 tags; v0.28.0 2021-10-27); keys encrypted with PBKDF2-SHA256 + xsalsa20-poly1305; solarwallet.io still links these downloads (2026-09-02). Last push 2022-06-03. https://github.com/satoshipay/solar/releases",
 			triggers: ["solar wallet release", "satoshipay solar wallet"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1064,7 +1064,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarterm/stellarterm-desktop-client": [
 		{
-			note: "README: 'the StellarTerm client now in a desktop app format' — downloads via GitHub releases; latest 'StellarTerm Desktop Client v2220' (2023-02-21; 20 tags; previous v1956 2021-06-22, v1768 2020-05-29). The web client is the sibling stellarterm/stellarterm. https://github.com/stellarterm/stellarterm-desktop-client/releases",
+			note: "README: 'the StellarTerm client now in a desktop app format'; downloads via GitHub releases; latest 'StellarTerm Desktop Client v2220' (2023-02-21; 20 tags; previous v1956 2021-06-22, v1768 2020-05-29). The web client is the sibling stellarterm/stellarterm. https://github.com/stellarterm/stellarterm-desktop-client/releases",
 			triggers: ["stellarterm desktop download", "stellarterm desktop release"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1072,7 +1072,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lobstrco/vault-ios": [
 		{
-			note: "Source of the LOBSTR Vault iOS app — README links App Store id1452248529 ('LOBSTR Vault - Multi-signature security on the Stellar network'; local key storage; signs for one or more Stellar accounts; N-of-N across devices); single GitHub release 1.3.2 (2020-05-07; 2 tags); last push 2025-02-12. Android sibling: Lobstrco/vault-android. https://apps.apple.com/app/lobstr-vault/id1452248529",
+			note: "Source of the LOBSTR Vault iOS app: README links App Store id1452248529 ('LOBSTR Vault - Multi-signature security on the Stellar network'; local key storage; signs for one or more Stellar accounts; N-of-N across devices); single GitHub release 1.3.2 (2020-05-07; 2 tags); last push 2025-02-12. Android sibling: Lobstrco/vault-android. https://apps.apple.com/app/lobstr-vault/id1452248529",
 			triggers: ["lobstr vault ios source", "lobstr vault app store"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1080,7 +1080,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bigger-tech/simple-stellar-signer": [
 		{
-			note: "MOVED: github.com/PlutoDAO/simple-stellar-signer — the path the README's docs links still use — redirects here (HTTP 301, 2026-09-02). README 'Simple Signer': embeddable login + transaction signing for Stellar supporting xBull, Albedo, Freighter, Rabet, WalletConnect, LOBSTR and Ledger, with hosted instances named as sign.bigger.systems (+ -testnet, -futurenet). No tags; last push 2025-03-14. https://github.com/bigger-tech/simple-stellar-signer",
+			note: "MOVED: github.com/PlutoDAO/simple-stellar-signer, the path the README's docs links still use, redirects here (HTTP 301, 2026-09-02). README 'Simple Signer': embeddable login + transaction signing for Stellar supporting xBull, Albedo, Freighter, Rabet, WalletConnect, LOBSTR and Ledger, with hosted instances named as sign.bigger.systems (+ -testnet, -futurenet). No tags; last push 2025-03-14. https://github.com/bigger-tech/simple-stellar-signer",
 			triggers: ["simple stellar signer repo", "plutodao simple signer"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1088,14 +1088,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"devasignhq/apps": [
 		{
-			note: "No longer accessible: github.com/devasignhq/apps returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-07-31 (description: monorepo of the DevAsign Maintainer and Contributor apps, app.devasign.com). The owner's public escrow repo is devasignhq/bounty-escrow. https://github.com/devasignhq/apps",
+			note: "No longer accessible: github.com/devasignhq/apps returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02): deleted or made private; our index last saw a push on 2026-07-31 (description: monorepo of the DevAsign Maintainer and Contributor apps, app.devasign.com). The owner's public escrow repo is devasignhq/bounty-escrow. https://github.com/devasignhq/apps",
 			source: "curated",
 			asOf: "2026-09-02",
 		},
 	],
 	"devasignhq/devasign-api": [
 		{
-			note: "No longer accessible: github.com/devasignhq/devasign-api returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-06-19 and a release v1.1.0 dated 2026-06-26. The owner's public escrow repo is devasignhq/bounty-escrow. https://github.com/devasignhq/devasign-api",
+			note: "No longer accessible: github.com/devasignhq/devasign-api returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02): deleted or made private; our index last saw a push on 2026-06-19 and a release v1.1.0 dated 2026-06-26. The owner's public escrow repo is devasignhq/bounty-escrow. https://github.com/devasignhq/devasign-api",
 			source: "curated",
 			asOf: "2026-09-02",
 		},
@@ -1126,13 +1126,13 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// tag-only. Research used 16 GitHub API calls.
 	"x402-foundation/x402": [
 		{
-			note: "npm @x402/stellar — the 'x402 Payment Protocol Stellar Implementation', Apache-2.0, repository → this repo, published since 2026-03-10. Depends on @stellar/stellar-sdk ^16 and @x402/core; the README's SDK install line lists it among the chain packages next to @x402/core. Git tags are per package (npm-@x402/stellar@v<version>). Read the current version from npm — this package releases continuously (three publishes in a day, 2026-09-04) and a version pinned here would be a stale mirror rather than knowledge. https://www.npmjs.com/package/@x402/stellar",
+			note: "npm @x402/stellar: the 'x402 Payment Protocol Stellar Implementation', Apache-2.0, repository → this repo, published since 2026-03-10. Depends on @stellar/stellar-sdk ^16 and @x402/core; the README's SDK install line lists it among the chain packages next to @x402/core. Git tags are per package (npm-@x402/stellar@v<version>). Read the current version from npm; this package releases continuously (three publishes in a day, 2026-09-04) and a version pinned here would be a stale mirror rather than knowledge. https://www.npmjs.com/package/@x402/stellar",
 			triggers: ["x402 stellar npm", "x402 stellar package"],
 			source: "curated",
 			asOf: "2026-09-02",
 		},
 		{
-			note: "PyPI x402 is the Python SDK (MIT; Repository → this repo; tags are per package, pypi-x402@v<version>); npm @x402/core (published since 2025-12-10) and the older unscoped npm x402 (since 2025-02-20, superseded by the scoped packages) both link back here. There is NO single latest GitHub release for this repo — it carries hundreds of per-package tags, so a plain 'latest release' lookup answers the wrong question. Read current versions from PyPI/npm rather than from here; this project publishes several releases a day. https://pypi.org/project/x402/",
+			note: "PyPI x402 is the Python SDK (MIT; Repository → this repo; tags are per package, pypi-x402@v<version>); npm @x402/core (published since 2025-12-10) and the older unscoped npm x402 (since 2025-02-20, superseded by the scoped packages) both link back here. There is NO single latest GitHub release for this repo; it carries hundreds of per-package tags, so a plain 'latest release' lookup answers the wrong question. Read current versions from PyPI/npm rather than from here; this project publishes several releases a day. https://pypi.org/project/x402/",
 			triggers: ["x402 python sdk"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1140,7 +1140,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"soroswap/frontend": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jul 24, 2026' (read 2026-09-02; the same day as soroswap/spacewalk-implementation and phoenix-zephyr-indexer). Repo description: 'OLD Soroswap.Finance Frontend for Soroswap AMM, Soroswap Aggregator & Spacewalk Bridge Implementation'; last push 2025-08-24; no tags or releases; the README still points at soroswap.finance. https://github.com/soroswap/frontend",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Jul 24, 2026' (read 2026-09-02; the same day as soroswap/spacewalk-implementation and phoenix-zephyr-indexer). Repo description: 'OLD Soroswap.Finance Frontend for Soroswap AMM, Soroswap Aggregator & Spacewalk Bridge Implementation'; last push 2025-08-24; no tags or releases; the README still points at soroswap.finance. https://github.com/soroswap/frontend",
 			triggers: ["soroswap frontend archived"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1148,7 +1148,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lobstrco/lobstr-browser-extension": [
 		{
-			note: "npm @lobstrco/signer-extension-api — 2.1.0 (2026-07-24; 3 versions since 2024-03-27; repository → this repo; Apache-2.0), the client SDK in this monorepo's @lobstrco/signer-extension-api workspace (same 2.1.0 at HEAD). README: the LOBSTR signer extension lets dapps connect to the Stellar network and sign with the LOBSTR mobile wallet. No tags or releases. https://www.npmjs.com/package/@lobstrco/signer-extension-api",
+			note: "npm @lobstrco/signer-extension-api: 2.1.0 (2026-07-24; 3 versions since 2024-03-27; repository → this repo; Apache-2.0), the client SDK in this monorepo's @lobstrco/signer-extension-api workspace (same 2.1.0 at HEAD). README: the LOBSTR signer extension lets dapps connect to the Stellar network and sign with the LOBSTR mobile wallet. No tags or releases. https://www.npmjs.com/package/@lobstrco/signer-extension-api",
 			triggers: ["lobstr signer extension npm", "lobstr extension api package"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1156,7 +1156,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"community-exchange-network/komunitin": [
 		{
-			note: "MOVED: github.com/komunitin/komunitin — the clone URL in this repo's own README — redirects here (HTTP 301, 2026-09-02). README: Komunitin 'Open System for Exchange Communities'; its accounting service is 'the decentralized backend for the accounting API based on the Stellar blockchain' (accounting/); live demo at demo.komunitin.org, docs at docs.komunitin.org. No tags. https://github.com/community-exchange-network/komunitin",
+			note: "MOVED: github.com/komunitin/komunitin, the clone URL in this repo's own README, redirects here (HTTP 301, 2026-09-02). README: Komunitin 'Open System for Exchange Communities'; its accounting service is 'the decentralized backend for the accounting API based on the Stellar blockchain' (accounting/); live demo at demo.komunitin.org, docs at docs.komunitin.org. No tags. https://github.com/community-exchange-network/komunitin",
 			triggers: ["komunitin repo moved", "komunitin accounting stellar"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1164,7 +1164,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"skyhitz/hitz-gravity": [
 		{
-			note: "README 'Mainnet': HITZ Gravity Token (Soroban SEP-41, soroban-sdk 25) at CBAPZAZNNB4X3VPXV2LYA5RMV7XHXIVREES2GG7R5GUXDZ4R4CKOY4EU, WASM hash befa64d9…5b08, max supply 100,000,000 HITZ — stellar.expert (public) shows the contract created 2026-04-25 with the same wasm prefix; the 'Validated Source' is GitHub release v1.0.0 (2026-04-29). Powers skyhitz.io. https://stellar.expert/explorer/public/contract/CBAPZAZNNB4X3VPXV2LYA5RMV7XHXIVREES2GG7R5GUXDZ4R4CKOY4EU",
+			note: "README 'Mainnet': HITZ Gravity Token (Soroban SEP-41, soroban-sdk 25) at CBAPZAZNNB4X3VPXV2LYA5RMV7XHXIVREES2GG7R5GUXDZ4R4CKOY4EU, WASM hash befa64d9…5b08, max supply 100,000,000 HITZ; stellar.expert (public) shows the contract created 2026-04-25 with the same wasm prefix; the 'Validated Source' is GitHub release v1.0.0 (2026-04-29). Powers skyhitz.io. https://stellar.expert/explorer/public/contract/CBAPZAZNNB4X3VPXV2LYA5RMV7XHXIVREES2GG7R5GUXDZ4R4CKOY4EU",
 			triggers: ["hitz token contract", "skyhitz gravity token"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1186,7 +1186,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rohan911438/a2a-protocol": [
 		{
-			note: "README 'Mainnet': escrow contract CADGOK3EO3F5IJAD2JVG4V65N2GXHAWEY5QERK66BZI7UBEQPQJLKRL3 on Stellar Mainnet (Public) — stellar.expert (public) shows it created 2026-08-08. The README self-describes as 'a hackathon project' (Team Brotherhood) with a live frontend at a2aprotocol.netlify.app; the A2AT token is 'Proposed, Not Yet Implemented'. No tags or releases. https://stellar.expert/explorer/public/contract/CADGOK3EO3F5IJAD2JVG4V65N2GXHAWEY5QERK66BZI7UBEQPQJLKRL3",
+			note: "README 'Mainnet': escrow contract CADGOK3EO3F5IJAD2JVG4V65N2GXHAWEY5QERK66BZI7UBEQPQJLKRL3 on Stellar Mainnet (Public); stellar.expert (public) shows it created 2026-08-08. The README self-describes as 'a hackathon project' (Team Brotherhood) with a live frontend at a2aprotocol.netlify.app; the A2AT token is 'Proposed, Not Yet Implemented'. No tags or releases. https://stellar.expert/explorer/public/contract/CADGOK3EO3F5IJAD2JVG4V65N2GXHAWEY5QERK66BZI7UBEQPQJLKRL3",
 			triggers: ["a2a protocol escrow contract"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1194,13 +1194,13 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"progax01/stellar8004": [
 		{
-			note: "AgenticOcean — README 'Smart Contracts — Mainnet': VaultFactory CAXYXFBO26RSBU2HRNPDWOQ7M2WITX67E7PI543WHDDMM5F7U4WQOUXM, AgentRegistry CDKHR3UUKCKXJ6CRKWKUZI3SKWAAKJMU6TGHRBM2VJJBCKEO6ETH55AU, ReputationRegistry CB6B4EBQ3JXLGUWF5WGMQV63PL3K2WQP5LMEL2BZDIDTEPCIC5BDH6ZB, ValidationRegistry CDX65CKW2NZQZK5U7DQRK6KVOBI4PTLQVGHYAEQ7OPPY2KRCDUAS2AL5 — all four on stellar.expert (public), created 2026-02-23 by one deployer. Live demo agenticocean.solbinary.com. https://github.com/progax01/stellar8004#smart-contracts--mainnet",
+			note: "AgenticOcean: README 'Smart Contracts — Mainnet': VaultFactory CAXYXFBO26RSBU2HRNPDWOQ7M2WITX67E7PI543WHDDMM5F7U4WQOUXM, AgentRegistry CDKHR3UUKCKXJ6CRKWKUZI3SKWAAKJMU6TGHRBM2VJJBCKEO6ETH55AU, ReputationRegistry CB6B4EBQ3JXLGUWF5WGMQV63PL3K2WQP5LMEL2BZDIDTEPCIC5BDH6ZB, ValidationRegistry CDX65CKW2NZQZK5U7DQRK6KVOBI4PTLQVGHYAEQ7OPPY2KRCDUAS2AL5; all four on stellar.expert (public), created 2026-02-23 by one deployer. Live demo agenticocean.solbinary.com. https://github.com/progax01/stellar8004#smart-contracts--mainnet",
 			triggers: ["agenticocean contracts", "agenticocean mainnet"],
 			source: "curated",
 			asOf: "2026-09-02",
 		},
 		{
-			note: "README 'Published SDKs' names npm @agenticocean/vault 0.1.1, @agenticocean/x402-stellar 1.0.1 and @agenticocean/defi-agent 0.3.1 (all 2026-02-23) — but none of the three registry entries points at this repo (vault and defi-agent carry no repository field; x402-stellar names a different path, stellaragent402/stellaragent402), so cite this README, not npm, for identity. https://www.npmjs.com/package/@agenticocean/vault",
+			note: "README 'Published SDKs' names npm @agenticocean/vault 0.1.1, @agenticocean/x402-stellar 1.0.1 and @agenticocean/defi-agent 0.3.1 (all 2026-02-23), but none of the three registry entries points at this repo (vault and defi-agent carry no repository field; x402-stellar names a different path, stellaragent402/stellaragent402), so cite this README, not npm, for identity. https://www.npmjs.com/package/@agenticocean/vault",
 			triggers: ["agenticocean npm"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1208,7 +1208,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"asgcompute/xlmx402earn": [
 		{
-			note: "npm @x402xlm/start — 1.3.3 (2026-04-11; 7 versions since 2026-04-09; repository → this repo; Apache-2.0), the `npx @x402xlm/start` quick-start skill the README badges ('Quick-start skill for AI agents to earn XLM on the Stellar testnet'); GitHub release v1.0.0 'Hackathon Submission' (2026-04-10; Stellar Hacks: Agents); hosted at stellar-agent-earn.vercel.app. Testnet product. https://www.npmjs.com/package/@x402xlm/start",
+			note: "npm @x402xlm/start: 1.3.3 (2026-04-11; 7 versions since 2026-04-09; repository → this repo; Apache-2.0), the `npx @x402xlm/start` quick-start skill the README badges ('Quick-start skill for AI agents to earn XLM on the Stellar testnet'); GitHub release v1.0.0 'Hackathon Submission' (2026-04-10; Stellar Hacks: Agents); hosted at stellar-agent-earn.vercel.app. Testnet product. https://www.npmjs.com/package/@x402xlm/start",
 			triggers: ["x402xlm start package"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1216,7 +1216,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"inferara/soroban-security-portal": [
 		{
-			note: "README 'Container Images': Docker Hub georgii4inferara/soroban-security-portal (API — the hub description is this repo's URL), soroban-security-portal-ui and sorobansecurityportal (Helm), all tagged 1.0.129 on 2026-08-26. The portal is hosted at stellarsecurityportal.com, listed on Tansu (project 'securityportal') and funded by the SCF + Stellar Public Good Program (README badge). No tags. https://hub.docker.com/r/georgii4inferara/soroban-security-portal",
+			note: "README 'Container Images': Docker Hub georgii4inferara/soroban-security-portal (API: the hub description is this repo's URL), soroban-security-portal-ui and sorobansecurityportal (Helm), all tagged 1.0.129 on 2026-08-26. The portal is hosted at stellarsecurityportal.com, listed on Tansu (project 'securityportal') and funded by the SCF + Stellar Public Good Program (README badge). No tags. https://hub.docker.com/r/georgii4inferara/soroban-security-portal",
 			triggers: [
 				"security portal docker image",
 				"stellar security portal hosted",
@@ -1227,7 +1227,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"litemint/litemint": [
 		{
-			note: "README: app.litemint.com is 'a bespoke, open-source, non-custodial Stellar wallet built for gamers and digital collectors' (BIP-39, SLIP-0010/SEP-0005 derivation, SDEX trading, NFTs); its build guide downloads source from GitHub releases — latest v1.3.2 (2021-01-28; 9 tags). The npm package litemint (1.0.1, 2018) points at github.com/FredericRezeau/litemint, a separate repo, not this one. https://github.com/litemint/litemint/releases",
+			note: "README: app.litemint.com is 'a bespoke, open-source, non-custodial Stellar wallet built for gamers and digital collectors' (BIP-39, SLIP-0010/SEP-0005 derivation, SDEX trading, NFTs); its build guide downloads source from GitHub releases: latest v1.3.2 (2021-01-28; 9 tags). The npm package litemint (1.0.1, 2018) points at github.com/FredericRezeau/litemint, a separate repo, not this one. https://github.com/litemint/litemint/releases",
 			triggers: ["litemint wallet release", "litemint web wallet"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1235,7 +1235,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"normalfinance/stellar-v1": [
 		{
-			note: "RENAMED: github.com/normalfinance/lsp — the path still in this repo's package.json repository field — redirects here (HTTP 301, 2026-09-02). README 'Normal Stellar v1': USDC-backed synthetic-asset protocol (Cargo workspace 1.0.0, contracts/* + modules/*); git tags 1.0.0 (2026-01-26) and pre-fee-change, no GitHub releases (API, 2026-09-02); docs at docs.normalfinance.io. https://github.com/normalfinance/stellar-v1",
+			note: "RENAMED: github.com/normalfinance/lsp, the path still in this repo's package.json repository field, redirects here (HTTP 301, 2026-09-02). README 'Normal Stellar v1': USDC-backed synthetic-asset protocol (Cargo workspace 1.0.0, contracts/* + modules/*); git tags 1.0.0 (2026-01-26) and pre-fee-change, no GitHub releases (API, 2026-09-02); docs at docs.normalfinance.io. https://github.com/normalfinance/stellar-v1",
 			triggers: ["normal finance lsp repo", "normal stellar v1 renamed"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1250,35 +1250,35 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"devasignhq/soroban-escrow": [
 		{
-			note: "No longer accessible: github.com/devasignhq/soroban-escrow returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-07-21. The owner's public escrow contract repo is devasignhq/bounty-escrow (see that note). https://github.com/devasignhq/soroban-escrow",
+			note: "No longer accessible: github.com/devasignhq/soroban-escrow returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02): deleted or made private; our index last saw a push on 2026-07-21. The owner's public escrow contract repo is devasignhq/bounty-escrow (see that note). https://github.com/devasignhq/soroban-escrow",
 			source: "curated",
 			asOf: "2026-09-02",
 		},
 	],
 	"0xbhoomi/agentmesh": [
 		{
-			note: "No longer accessible: github.com/0xbhoomi/agentmesh returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-04-12 (an April-2026 agents-hackathon row). https://github.com/0xbhoomi/agentmesh",
+			note: "No longer accessible: github.com/0xbhoomi/agentmesh returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02): deleted or made private; our index last saw a push on 2026-04-12 (an April-2026 agents-hackathon row). https://github.com/0xbhoomi/agentmesh",
 			source: "curated",
 			asOf: "2026-09-02",
 		},
 	],
 	"gdalabs/autorepay-stellar": [
 		{
-			note: "No longer accessible: github.com/gdalabs/autorepay-stellar returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-04-11 (an April-2026 agents-hackathon row). https://github.com/gdalabs/autorepay-stellar",
+			note: "No longer accessible: github.com/gdalabs/autorepay-stellar returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02): deleted or made private; our index last saw a push on 2026-04-11 (an April-2026 agents-hackathon row). https://github.com/gdalabs/autorepay-stellar",
 			source: "curated",
 			asOf: "2026-09-02",
 		},
 	],
 	"thesupermanish/superpage-stellar": [
 		{
-			note: "No longer accessible: github.com/TheSupermanish/superpage-stellar returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-04-13 (an April-2026 agents-hackathon row). https://github.com/TheSupermanish/superpage-stellar",
+			note: "No longer accessible: github.com/TheSupermanish/superpage-stellar returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02): deleted or made private; our index last saw a push on 2026-04-13 (an April-2026 agents-hackathon row). https://github.com/TheSupermanish/superpage-stellar",
 			source: "curated",
 			asOf: "2026-09-02",
 		},
 	],
 	"yieldback-cash/amm": [
 		{
-			note: "No longer accessible: github.com/yieldback-cash/amm returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02) — deleted or made private; our index last saw a push on 2026-04-10. Sibling yieldback-cash/* rows were triaged in batch 5. https://github.com/yieldback-cash/amm",
+			note: "No longer accessible: github.com/yieldback-cash/amm returns 404 with no redirect (HTML page, git ls-remote and the GitHub API all agree, 2026-09-02): deleted or made private; our index last saw a push on 2026-04-10. Sibling yieldback-cash/* rows were triaged in batch 5. https://github.com/yieldback-cash/amm",
 			source: "curated",
 			asOf: "2026-09-02",
 		},
@@ -1301,7 +1301,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// no pool repo carries GitHub's archive banner. Research used 9 API calls.
 	"soneso/stellar-php-sdk": [
 		{
-			note: "Packagist package soneso/stellar-php-sdk — 1.13.0 (2026-08-24; 87 versions since 0.0.1 on 2021-12-29; repository → this repo; Apache-2.0), matching GitHub release 1.13.0 'v1.13.0 Protocol 28 (CAP-85) support and ADDRESS_V2 defaults' (2026-08-24). README install: `composer require soneso/stellar-php-sdk`, PHP 8.0+. https://packagist.org/packages/soneso/stellar-php-sdk",
+			note: "Packagist package soneso/stellar-php-sdk: 1.13.0 (2026-08-24; 87 versions since 0.0.1 on 2021-12-29; repository → this repo; Apache-2.0), matching GitHub release 1.13.0 'v1.13.0 Protocol 28 (CAP-85) support and ADDRESS_V2 defaults' (2026-08-24). README install: `composer require soneso/stellar-php-sdk`, PHP 8.0+. https://packagist.org/packages/soneso/stellar-php-sdk",
 			triggers: ["php sdk composer", "stellar php sdk install"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1309,7 +1309,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"airgap-it/airgap-coin-lib": [
 		{
-			note: "npm @airgap/stellar — 0.13.47 (2026-07-28; 46 versions since 2025-05-15; repository → this monorepo; MIT), the Stellar protocol module of AirGap's coinlib, published alongside @airgap/coinlib-core 0.13.47 (541 versions since 2020-12-17, same repo). 0.13.47 is also the newest of 82 git tags; no GitHub releases. https://www.npmjs.com/package/@airgap/stellar",
+			note: "npm @airgap/stellar: 0.13.47 (2026-07-28; 46 versions since 2025-05-15; repository → this monorepo; MIT), the Stellar protocol module of AirGap's coinlib, published alongside @airgap/coinlib-core 0.13.47 (541 versions since 2020-12-17, same repo). 0.13.47 is also the newest of 82 git tags; no GitHub releases. https://www.npmjs.com/package/@airgap/stellar",
 			triggers: ["airgap stellar npm", "airgap coinlib stellar module"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1317,7 +1317,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"airgap-it/airgap-vault": [
 		{
-			note: "Latest GitHub release v3.34.4 (2026-03-26; 71 tags). package.json at HEAD depends on @airgap/stellar 0.13.46 — the Stellar module published from sibling airgap-it/airgap-coin-lib. README 'Download': Google Play id it.airgap.vault and App Store id1417126841; the offline key-holder half of the pair with airgap-it/airgap-wallet. https://github.com/airgap-it/airgap-vault/releases/tag/v3.34.4",
+			note: "Latest GitHub release v3.34.4 (2026-03-26; 71 tags). package.json at HEAD depends on @airgap/stellar 0.13.46: the Stellar module published from sibling airgap-it/airgap-coin-lib. README 'Download': Google Play id it.airgap.vault and App Store id1417126841; the offline key-holder half of the pair with airgap-it/airgap-wallet. https://github.com/airgap-it/airgap-vault/releases/tag/v3.34.4",
 			triggers: ["airgap vault release", "airgap vault stellar support"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1341,7 +1341,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"noir-lang/noir": [
 		{
-			note: "npm @noir-lang/noir_js 1.0.0-rc.1 (2026-09-09; 665 versions since 2023-09-15, nightlies included; repository → this repo, directory tooling/noir_js; MIT OR Apache-2.0) and @noir-lang/noir_wasm 1.0.0-rc.1 (755 versions; compiler/wasm) — the line moved from beta to its first release candidate. Latest non-nightly GitHub release v1.0.0-beta.26 (2026-07-30); a nightly-YYYY-MM-DD release is cut daily (nightly-2026-09-01); Cargo workspace version 1.0.0-beta.26. https://www.npmjs.com/package/@noir-lang/noir_js",
+			note: "npm @noir-lang/noir_js 1.0.0-rc.1 (2026-09-09; 665 versions since 2023-09-15, nightlies included; repository → this repo, directory tooling/noir_js; MIT OR Apache-2.0) and @noir-lang/noir_wasm 1.0.0-rc.1 (755 versions; compiler/wasm); the line moved from beta to its first release candidate. Latest non-nightly GitHub release v1.0.0-beta.26 (2026-07-30); a nightly-YYYY-MM-DD release is cut daily (nightly-2026-09-01); Cargo workspace version 1.0.0-beta.26. https://www.npmjs.com/package/@noir-lang/noir_js",
 			triggers: ["noir latest version", "noir js npm"],
 			source: "curated",
 			asOf: "2026-09-13",
@@ -1363,7 +1363,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rango-exchange/rango-client": [
 		{
-			note: "Monorepo of the Rango widget and wallets library (README: wallets/, queue-manager/, widget/); releases are per-package tags — widget-embedded@0.63.0 and provider-freighter@0.4.0 both on 2026-08-18 (3,386 tags). Stellar support is the wallets/provider-freighter package (package.json name @rango-dev/provider-freighter; Freighter wallet). https://github.com/rango-exchange/rango-client/releases/tag/provider-freighter%400.4.0",
+			note: "Monorepo of the Rango widget and wallets library (README: wallets/, queue-manager/, widget/); releases are per-package tags: widget-embedded@0.63.0 and provider-freighter@0.4.0 both on 2026-08-18 (3,386 tags). Stellar support is the wallets/provider-freighter package (package.json name @rango-dev/provider-freighter; Freighter wallet). https://github.com/rango-exchange/rango-client/releases/tag/provider-freighter%400.4.0",
 			triggers: ["rango freighter provider", "rango widget release"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1371,7 +1371,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"akanimoh12/stellar-ipredict": [
 		{
-			note: "README 'Deployed Contracts (Stellar Mainnet)': Prediction Market CDGNPRYTFDXJLWZE4YDKZXW4IEN2RLPSE4N7VM5HJ7NLPL2QC45GIXI5, IPREDICT Token CAYL4TKNRMXAX5ZLQGFEZ6XOC2QHTCTN5QC2SB5BEEHLVO6SDU2UBLRH, Referral Registry CAGJVX6EXMCKKWDJCQFIEJ34CZTHZOGLWJM6KQTGDEXEO723CJZ5773H, Leaderboard CCWWOQSDSO3XXLCMA6A2HYRUFYVNUJZ2HPAMFQSPOB4JWYIBY2HWVTOB — all four exist on pubnet per stellar.expert (created 2026-06-02). Frontend https://ipredict-stellar.vercel.app (200 on 2026-09-02). https://github.com/Akanimoh12/Stellar-iPredict",
+			note: "README 'Deployed Contracts (Stellar Mainnet)': Prediction Market CDGNPRYTFDXJLWZE4YDKZXW4IEN2RLPSE4N7VM5HJ7NLPL2QC45GIXI5, IPREDICT Token CAYL4TKNRMXAX5ZLQGFEZ6XOC2QHTCTN5QC2SB5BEEHLVO6SDU2UBLRH, Referral Registry CAGJVX6EXMCKKWDJCQFIEJ34CZTHZOGLWJM6KQTGDEXEO723CJZ5773H, Leaderboard CCWWOQSDSO3XXLCMA6A2HYRUFYVNUJZ2HPAMFQSPOB4JWYIBY2HWVTOB; all four exist on pubnet per stellar.expert (created 2026-06-02). Frontend https://ipredict-stellar.vercel.app (200 on 2026-09-02). https://github.com/Akanimoh12/Stellar-iPredict",
 			triggers: ["ipredict contract address", "ipredict mainnet"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1387,7 +1387,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"vinaystwt/xmpp": [
 		{
-			note: "npm @vinaystwt/xmpp-core 0.2.0 and @vinaystwt/xmpp-mcp 0.2.0 (both 2026-04-04; 3 versions each; repository → this repo; MIT) — the README's 'Public Packages' (`npm install @vinaystwt/xmpp-core @vinaystwt/xmpp-mcp`): gateway client / route planning, and an MCP server factory. README links its DoraHacks submission (Stellar Agents x402 + Stripe MPP hackathon). https://www.npmjs.com/package/@vinaystwt/xmpp-core",
+			note: "npm @vinaystwt/xmpp-core 0.2.0 and @vinaystwt/xmpp-mcp 0.2.0 (both 2026-04-04; 3 versions each; repository → this repo; MIT): the README's 'Public Packages' (`npm install @vinaystwt/xmpp-core @vinaystwt/xmpp-mcp`): gateway client / route planning, and an MCP server factory. README links its DoraHacks submission (Stellar Agents x402 + Stripe MPP hackathon). https://www.npmjs.com/package/@vinaystwt/xmpp-core",
 			triggers: ["xmpp npm package", "xmpp core mcp install"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1395,7 +1395,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"martinvibes/sentinelshield": [
 		{
-			note: "npm sentinelshield-stellar — 0.1.0 (2026-04-11; single version; repository → this repo; MIT; bins sentinelshield and sentinelshield-stellar), the README's `npm install sentinelshield-stellar`. README banner: 'currently live on Stellar Testnet while we finish a security audit … Mainnet is coming'; 'Built for the Stellar agentic payments hackathon'. https://www.npmjs.com/package/sentinelshield-stellar",
+			note: "npm sentinelshield-stellar: 0.1.0 (2026-04-11; single version; repository → this repo; MIT; bins sentinelshield and sentinelshield-stellar), the README's `npm install sentinelshield-stellar`. README banner: 'currently live on Stellar Testnet while we finish a security audit … Mainnet is coming'; 'Built for the Stellar agentic payments hackathon'. https://www.npmjs.com/package/sentinelshield-stellar",
 			triggers: ["sentinelshield npm", "sentinelshield mainnet"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1403,7 +1403,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"daraijaola/runbox": [
 		{
-			note: "npm runbox-client — 1.0.0 (2026-04-11; single version; repository → this repo; MIT), the README's `npm install runbox-client` SDK; GitHub release v1.0.0 the same day (the only tag). README also documents an MCP server (`npm install -g runbox-mcp`) and a Soroban spending-cap contract on testnet. https://www.npmjs.com/package/runbox-client",
+			note: "npm runbox-client: 1.0.0 (2026-04-11; single version; repository → this repo; MIT), the README's `npm install runbox-client` SDK; GitHub release v1.0.0 the same day (the only tag). README also documents an MCP server (`npm install -g runbox-mcp`) and a Soroban spending-cap contract on testnet. https://www.npmjs.com/package/runbox-client",
 			triggers: ["runbox client npm", "runbox sdk install"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1411,7 +1411,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"fxjrin/defi-copilot": [
 		{
-			note: "npm defi-copilot-mcp — 1.3.1 (2026-04-12; 7 versions since 2026-04-11; repository → this repo; MIT; bin defi-copilot-mcp), the README's MCP server: `claude mcp add defi-copilot -- npx -y defi-copilot-mcp` (default STELLAR_NETWORK=testnet). The repo's package.json is named defi-copilot; the published npm name is defi-copilot-mcp. GitHub tags v1.0.0–v1.1.1. https://www.npmjs.com/package/defi-copilot-mcp",
+			note: "npm defi-copilot-mcp: 1.3.1 (2026-04-12; 7 versions since 2026-04-11; repository → this repo; MIT; bin defi-copilot-mcp), the README's MCP server: `claude mcp add defi-copilot -- npx -y defi-copilot-mcp` (default STELLAR_NETWORK=testnet). The repo's package.json is named defi-copilot; the published npm name is defi-copilot-mcp. GitHub tags v1.0.0 to v1.1.1. https://www.npmjs.com/package/defi-copilot-mcp",
 			triggers: ["defi copilot mcp", "defi copilot npm"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1419,7 +1419,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ggoldani/agent-passport": [
 		{
-			note: "npm @ggoldani/agent-passport-sdk 0.1.0 and @ggoldani/agent-passport-mcp 0.1.0 (both 2026-05-06; single versions; repository → this repo; MIT; MCP bin agent-passport-mcp) — the README's two install paths (app SDK vs MCP for Claude/Cursor); README examples target Soroban testnet RPC. https://www.npmjs.com/package/@ggoldani/agent-passport-sdk",
+			note: "npm @ggoldani/agent-passport-sdk 0.1.0 and @ggoldani/agent-passport-mcp 0.1.0 (both 2026-05-06; single versions; repository → this repo; MIT; MCP bin agent-passport-mcp): the README's two install paths (app SDK vs MCP for Claude/Cursor); README examples target Soroban testnet RPC. https://www.npmjs.com/package/@ggoldani/agent-passport-sdk",
 			triggers: ["agent passport sdk", "agentpassport mcp install"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1435,7 +1435,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bytemaster333/account-demolisher": [
 		{
-			note: "README: 'Live at https://demolisher.app/' (200 on 2026-09-02) — closes Stellar accounts: classic entries, Soroban DeFi positions on Blend, Aquarius, Soroswap and FxDAO, balance conversion to XLM, CEX destinations via a mediator account, multisig signature collection, and a SEP-41 allowance viewer; security model at https://docs.demolisher.app/docs/developers/security/model (200). Node 22. https://github.com/bytemaster333/account-demolisher",
+			note: "README: 'Live at https://demolisher.app/' (200 on 2026-09-02); closes Stellar accounts: classic entries, Soroban DeFi positions on Blend, Aquarius, Soroswap and FxDAO, balance conversion to XLM, CEX destinations via a mediator account, multisig signature collection, and a SEP-41 allowance viewer; security model at https://docs.demolisher.app/docs/developers/security/model (200). Node 22. https://github.com/bytemaster333/account-demolisher",
 			triggers: ["account demolisher app", "demolisher close stellar account"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1443,7 +1443,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"carstenjacobsen/x402-testing-tool": [
 		{
-			note: "README: hosted at https://x402test.org (200 on 2026-09-02) — a Server Simulator (create a simulated x402-paywalled endpoint: method, path, network e.g. Stellar Testnet, asset, amount, receiving address) and a Client Simulator (send a request, get 402, build the payment, resubmit); wallet support 'currently only the Freighter wallet'. https://github.com/carstenjacobsen/x402-testing-tool",
+			note: "README: hosted at https://x402test.org (200 on 2026-09-02): a Server Simulator (create a simulated x402-paywalled endpoint: method, path, network e.g. Stellar Testnet, asset, amount, receiving address) and a Client Simulator (send a request, get 402, build the payment, resubmit); wallet support 'currently only the Freighter wallet'. https://github.com/carstenjacobsen/x402-testing-tool",
 			triggers: ["x402 testing tool", "x402test simulator"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1467,7 +1467,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"moonlight-protocol/local-dev": [
 		{
-			note: "README 'Repos' names the Moonlight stack as nine sibling repos under github.com/Moonlight-Protocol — provider-platform, provider-console, council-platform, council-console, pay-platform, moonlight-pay, network-dashboard-platform, network-dashboard, ui (five spot-checked, all 200 on 2026-09-02) — run together by up.sh on a local Stellar network via Docker. Single release stellar-cli-v0.1.0 (2026-03-10). https://github.com/Moonlight-Protocol/local-dev",
+			note: "README 'Repos' names the Moonlight stack as nine sibling repos under github.com/Moonlight-Protocol: provider-platform, provider-console, council-platform, council-console, pay-platform, moonlight-pay, network-dashboard-platform, network-dashboard, ui (five spot-checked, all 200 on 2026-09-02), run together by up.sh on a local Stellar network via Docker. Single release stellar-cli-v0.1.0 (2026-03-10). https://github.com/Moonlight-Protocol/local-dev",
 			triggers: ["moonlight repos", "moonlight local stack"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1502,7 +1502,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"midasbal/lumina-scan": [
 		{
-			note: "README headline (read 2026-09-02): 'shutting this down. built it for a hackathon, no real future for it. maybe later' — the author's own status for this x402/MPP security-scanner submission (testnet USDC; demo at lumina-scan.vercel.app). No releases or tags. https://github.com/midasbal/lumina-scan",
+			note: "README headline (read 2026-09-02): 'shutting this down. built it for a hackathon, no real future for it. maybe later', the author's own status for this x402/MPP security-scanner submission (testnet USDC; demo at lumina-scan.vercel.app). No releases or tags. https://github.com/midasbal/lumina-scan",
 			triggers: ["lumina scan status", "lumina scan shut down"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1518,7 +1518,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"leomanza/near-shade-coordination": [
 		{
-			note: "RENAMED: github.com/leomanza/near-shade-coordination redirects to github.com/leomanza/delibera.xyz (HTTP 301; GitHub API resolves the old path, 2026-09-02). README: 'Delibera — Privacy-Preserving Multi-Agent DAO Coordination on NEAR'; the Stellar part is a 'Stellar Hacks: Agents hackathon entry' — x402 USDC payments on Stellar for a deliberation oracle settled on NEAR. https://github.com/leomanza/delibera.xyz",
+			note: "RENAMED: github.com/leomanza/near-shade-coordination redirects to github.com/leomanza/delibera.xyz (HTTP 301; GitHub API resolves the old path, 2026-09-02). README: 'Delibera — Privacy-Preserving Multi-Agent DAO Coordination on NEAR'; the Stellar part is a 'Stellar Hacks: Agents hackathon entry', x402 USDC payments on Stellar for a deliberation oracle settled on NEAR. https://github.com/leomanza/delibera.xyz",
 			triggers: ["delibera repo renamed", "near shade coordination stellar"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1526,7 +1526,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"leojay-net/stellar-agent-flow": [
 		{
-			note: "MOVED: github.com/leojay-net/Stellar-Agent-Flow redirects to github.com/Pridex-Org/Stellar-Agent-Flow (HTTP 301; GitHub API resolves the old path, 2026-09-02). README: 'AgentFlow (Stellar Edition)' — a node-canvas orchestrator for Stellar agents (Next.js + React Flow); package.json name agentflow, private; no releases or tags. https://github.com/Pridex-Org/Stellar-Agent-Flow",
+			note: "MOVED: github.com/leojay-net/Stellar-Agent-Flow redirects to github.com/Pridex-Org/Stellar-Agent-Flow (HTTP 301; GitHub API resolves the old path, 2026-09-02). README: 'AgentFlow (Stellar Edition)', a node-canvas orchestrator for Stellar agents (Next.js + React Flow); package.json name agentflow, private; no releases or tags. https://github.com/Pridex-Org/Stellar-Agent-Flow",
 			triggers: ["agentflow stellar repo moved"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1550,7 +1550,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"trustless-oss/trustless-oss": [
 		{
-			note: "MOVED here: github.com/ryzen-xp/Trustless-OSS redirects to github.com/Trustless-OSS/Trustless-OSS (HTTP 301; GitHub API resolves the old path, 2026-09-02; repo created 2026-05-10) — the README's CI badges and clone URL still name ryzen-xp/Trustless-OSS. README: on-chain bounties for OSS contributors — fund a Stellar USDC escrow, attach rewards to issues, pay out when the linked PR merges. https://github.com/Trustless-OSS/Trustless-OSS",
+			note: "MOVED here: github.com/ryzen-xp/Trustless-OSS redirects to github.com/Trustless-OSS/Trustless-OSS (HTTP 301; GitHub API resolves the old path, 2026-09-02; repo created 2026-05-10); the README's CI badges and clone URL still name ryzen-xp/Trustless-OSS. README: on-chain bounties for OSS contributors: fund a Stellar USDC escrow, attach rewards to issues, pay out when the linked PR merges. https://github.com/Trustless-OSS/Trustless-OSS",
 			triggers: ["trustless oss repo moved", "trustless oss bounties"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1594,7 +1594,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// Network). Research used 0 GitHub API calls.
 	"stellar-expert/albedo": [
 		{
-			note: "npm package @albedo-link/intent — 0.13.0 (2025-06-13; 17 versions since 2020-07-14; repository field → stellar-expert/albedo; MIT), built from this monorepo's intent/ directory; the README (README.MD, uppercase, on default branch master) installs it with `npm i -S @albedo-link/intent`. No GitHub releases. https://www.npmjs.com/package/@albedo-link/intent",
+			note: "npm package @albedo-link/intent: 0.13.0 (2025-06-13; 17 versions since 2020-07-14; repository field → stellar-expert/albedo; MIT), built from this monorepo's intent/ directory; the README (README.MD, uppercase, on default branch master) installs it with `npm i -S @albedo-link/intent`. No GitHub releases. https://www.npmjs.com/package/@albedo-link/intent",
 			triggers: ["albedo npm package", "albedo intent library"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1608,7 +1608,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-scaffold/cli": [
 		{
-			note: "crates.io stellar-scaffold-cli — 0.0.27 (2026-08-13; 30 versions since 2025-05-12; repository → this repo's crates/stellar-scaffold-cli) plus stellar-build 0.0.7 (2026-06-30; 8 versions; same repo). README install: `cargo install --locked stellar-scaffold-cli`. Latest GitHub release stellar-scaffold-cli-v0.0.27 (2026-08-13); workspace pins soroban-sdk 27.0.0-rc.1 and stellar-xdr =27.0.0. https://crates.io/crates/stellar-scaffold-cli",
+			note: "crates.io stellar-scaffold-cli: 0.0.27 (2026-08-13; 30 versions since 2025-05-12; repository → this repo's crates/stellar-scaffold-cli) plus stellar-build 0.0.7 (2026-06-30; 8 versions; same repo). README install: `cargo install --locked stellar-scaffold-cli`. Latest GitHub release stellar-scaffold-cli-v0.0.27 (2026-08-13); workspace pins soroban-sdk 27.0.0-rc.1 and stellar-xdr =27.0.0. https://crates.io/crates/stellar-scaffold-cli",
 			triggers: ["scaffold stellar install", "stellar scaffold crate"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1622,7 +1622,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-02",
 		},
 		{
-			note: "README names a third component, 'Loam Frontend' at github.com/loambuild/frontend — that path now 301-redirects to github.com/stellar-scaffold/ui (checked 2026-09-02), the Scaffold Stellar UI repo; the README itself never mentions Scaffold Stellar and no rename date is stated anywhere we read. https://github.com/loambuild/loam",
+			note: "README names a third component, 'Loam Frontend' at github.com/loambuild/frontend; that path now 301-redirects to github.com/stellar-scaffold/ui (checked 2026-09-02), the Scaffold Stellar UI repo; the README itself never mentions Scaffold Stellar and no rename date is stated anywhere we read. https://github.com/loambuild/loam",
 			triggers: ["loam frontend repo", "loam scaffold stellar"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1630,7 +1630,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lightsail-network/stellar-contract-bindings": [
 		{
-			note: "PyPI package stellar-contract-bindings — 0.6.0b0 (2026-09-02; all releases betas; project URLs point here). README: `pip install stellar-contract-bindings`; generates Soroban bindings for Python, Java, Flutter/Dart, PHP, Swift/iOS and Kotlin Multiplatform (TypeScript/Rust are left to stellar-cli); hosted generator https://stellar-contract-bindings.fly.dev/ (200 on 2026-09-02). https://pypi.org/project/stellar-contract-bindings/",
+			note: "PyPI package stellar-contract-bindings: 0.6.0b0 (2026-09-02; all releases betas; project URLs point here). README: `pip install stellar-contract-bindings`; generates Soroban bindings for Python, Java, Flutter/Dart, PHP, Swift/iOS and Kotlin Multiplatform (TypeScript/Rust are left to stellar-cli); hosted generator https://stellar-contract-bindings.fly.dev/ (200 on 2026-09-02). https://pypi.org/project/stellar-contract-bindings/",
 			triggers: [
 				"contract bindings python",
 				"soroban bindings java flutter",
@@ -1642,7 +1642,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lightsail-network/strledger": [
 		{
-			note: "PyPI package strledger — 0.10.1 (2025-09-01; 19 releases; homepage/repository fields point here), matching GitHub release v0.10.1 (2025-09-01). README: `pip install -U strledger`; Python bindings + CLI for the Ledger hardware-wallet Stellar app (get-address, app-info, signing), pairing with the StellarCN py-stellar-base SDK. https://pypi.org/project/strledger/",
+			note: "PyPI package strledger: 0.10.1 (2025-09-01; 19 releases; homepage/repository fields point here), matching GitHub release v0.10.1 (2025-09-01). README: `pip install -U strledger`; Python bindings + CLI for the Ledger hardware-wallet Stellar app (get-address, app-info, signing), pairing with the StellarCN py-stellar-base SDK. https://pypi.org/project/strledger/",
 			triggers: ["ledger stellar python", "strledger install"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1661,7 +1661,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"openzeppelin/oz-keystore": [
 		{
-			note: "crates.io oz-keystore — 0.1.4 (2025-05-01; 5 versions since 2025-01-20; repository → this repo). README: unified keystore library — encrypted-JSON local keystore and HashiCorp Vault backends — for EVM, Stellar and Solana keys, with examples local-keystore-to-stellar-wallet and hashicorp-vault-to-stellar-wallet. No GitHub releases. https://crates.io/crates/oz-keystore",
+			note: "crates.io oz-keystore: 0.1.4 (2025-05-01; 5 versions since 2025-01-20; repository → this repo). README: unified keystore library (encrypted-JSON local keystore and HashiCorp Vault backends) for EVM, Stellar and Solana keys, with examples local-keystore-to-stellar-wallet and hashicorp-vault-to-stellar-wallet. No GitHub releases. https://crates.io/crates/oz-keystore",
 			triggers: ["openzeppelin keystore crate", "oz keystore stellar"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1669,7 +1669,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"openzeppelin/openzeppelin-adapters": [
 		{
-			note: "npm @openzeppelin/adapter-stellar — 6.0.0 (2026-09-09; 13 versions since 2026-03-24 — two majors in three weeks, 4.0.1 → 6.0.0; repository → this monorepo, directory packages/adapter-stellar; AGPL-3.0). README: full Soroban adapter for Stellar public/test networks, wallet integration via Stellar Wallets Kit, SAC detection. Releases are per-package tags, e.g. @openzeppelin/adapter-stellar@6.0.0. https://www.npmjs.com/package/@openzeppelin/adapter-stellar",
+			note: "npm @openzeppelin/adapter-stellar: 6.0.0 (2026-09-09; 13 versions since 2026-03-24; two majors in three weeks, 4.0.1 → 6.0.0; repository → this monorepo, directory packages/adapter-stellar; AGPL-3.0). README: full Soroban adapter for Stellar public/test networks, wallet integration via Stellar Wallets Kit, SAC detection. Releases are per-package tags, e.g. @openzeppelin/adapter-stellar@6.0.0. https://www.npmjs.com/package/@openzeppelin/adapter-stellar",
 			triggers: ["openzeppelin adapter stellar", "openzeppelin adapters npm"],
 			source: "curated",
 			asOf: "2026-09-13",
@@ -1677,7 +1677,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"openzeppelin/stellar-upgrader-cli": [
 		{
-			note: "Stellar CLI plugin installed from source only — README: git clone, `cargo install --path .`, then binary `stellar-upgrader` shows in `stellar plugins --list`; Cargo.toml (stellar-upgrader 0.1.0) still has the placeholder repository 'github.com/your-username/stellar-upgrader'. The crates.io crate stellar-upgrader (1.1.4, publisher interoplabs-ci, no repository field) is a different project. https://github.com/OpenZeppelin/stellar-upgrader-cli",
+			note: "Stellar CLI plugin installed from source only; README: git clone, `cargo install --path .`, then binary `stellar-upgrader` shows in `stellar plugins --list`; Cargo.toml (stellar-upgrader 0.1.0) still has the placeholder repository 'github.com/your-username/stellar-upgrader'. The crates.io crate stellar-upgrader (1.1.4, publisher interoplabs-ci, no repository field) is a different project. https://github.com/OpenZeppelin/stellar-upgrader-cli",
 			triggers: [
 				"stellar upgrader plugin install",
 				"openzeppelin upgrader cli",
@@ -1688,7 +1688,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-quorum-analyzer": [
 		{
-			note: "SAT-solver library for FBAS quorum-intersection checks (SCP); README: 'Primary: Integrated with stellar-core'. stellar-core consumes it as a git dependency — src/rust/Cargo.toml has [dependencies.stellar-quorum-analyzer] version 0.1.0, git = this repo, rev 502a354eb9a31cf86098be84aa1b3081767fa3c7 (read 2026-09-02); not on crates.io, no releases; pins stellar-xdr =27.0.0. https://github.com/stellar/stellar-quorum-analyzer",
+			note: "SAT-solver library for FBAS quorum-intersection checks (SCP); README: 'Primary: Integrated with stellar-core'. stellar-core consumes it as a git dependency: src/rust/Cargo.toml has [dependencies.stellar-quorum-analyzer] version 0.1.0, git = this repo, rev 502a354eb9a31cf86098be84aa1b3081767fa3c7 (read 2026-09-02); not on crates.io, no releases; pins stellar-xdr =27.0.0. https://github.com/stellar/stellar-quorum-analyzer",
 			triggers: ["quorum analyzer stellar core", "quorum intersection library"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1696,7 +1696,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-turrets": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jan 8, 2026' (read 2026-09-02). README: Stellar Turrets reference implementation (Cloudflare Workers + AWS Lambda); its API-docs link https://tyvdh.github.io/stellar-turrets/ returns 404. The original tyvdh/stellar-turrets path now redirects to kalepail/stellar-turrets, itself archived ('Jan 15, 2022'). https://github.com/stellar/stellar-turrets",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Jan 8, 2026' (read 2026-09-02). README: Stellar Turrets reference implementation (Cloudflare Workers + AWS Lambda); its API-docs link https://tyvdh.github.io/stellar-turrets/ returns 404. The original tyvdh/stellar-turrets path now redirects to kalepail/stellar-turrets, itself archived ('Jan 15, 2022'). https://github.com/stellar/stellar-turrets",
 			triggers: [
 				"stellar turrets archived",
 				"turrets reference implementation",
@@ -1707,7 +1707,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-deprecated/transfer-server-validator": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Dec 15, 2021' (read 2026-09-02); github.com/stellar/transfer-server-validator redirects here. README: Jest suite for SEP-6/24/31 transfer servers at https://anchor-validator.stellar.org — now a 301 to https://anchor-tests.stellar.org/ (the stellar/stellar-anchor-tests UI; no HTTP response on 2026-09-02). https://github.com/stellar-deprecated/transfer-server-validator",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Dec 15, 2021' (read 2026-09-02); github.com/stellar/transfer-server-validator redirects here. README: Jest suite for SEP-6/24/31 transfer servers at https://anchor-validator.stellar.org: now a 301 to https://anchor-tests.stellar.org/ (the stellar/stellar-anchor-tests UI; no HTTP response on 2026-09-02). https://github.com/stellar-deprecated/transfer-server-validator",
 			triggers: ["transfer server validator", "anchor validator deprecated"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1715,7 +1715,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-deprecated/sep24-demo-client": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Nov 7, 2023' (read 2026-09-02); github.com/stellar/sep24-demo-client redirects here. README: 'Stellar SEP24 Demo Client has been deprecated' — functionality integrated into https://github.com/stellar/stellar-demo-wallet, use https://demo-wallet.stellar.org/ (200 on 2026-09-02). package.json name is sep6-demo-client. https://github.com/stellar-deprecated/sep24-demo-client",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Nov 7, 2023' (read 2026-09-02); github.com/stellar/sep24-demo-client redirects here. README: 'Stellar SEP24 Demo Client has been deprecated', functionality integrated into https://github.com/stellar/stellar-demo-wallet, use https://demo-wallet.stellar.org/ (200 on 2026-09-02). package.json name is sep6-demo-client. https://github.com/stellar-deprecated/sep24-demo-client",
 			triggers: ["sep24 demo client", "sep-24 demo deprecated"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1723,7 +1723,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-deprecated/sep31-demo-client": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Nov 7, 2023' (read 2026-09-02); github.com/stellar/sep31-demo-client redirects here. README: 'Stellar SEP31 Demo Client is now Deprecated' — integrated into https://github.com/stellar/stellar-demo-wallet, use https://demo-wallet.stellar.org/ (200 on 2026-09-02). package.json name is sep6-demo-client, the same as the SEP-24 client's. https://github.com/stellar-deprecated/sep31-demo-client",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Nov 7, 2023' (read 2026-09-02); github.com/stellar/sep31-demo-client redirects here. README: 'Stellar SEP31 Demo Client is now Deprecated', integrated into https://github.com/stellar/stellar-demo-wallet, use https://demo-wallet.stellar.org/ (200 on 2026-09-02). package.json name is sep6-demo-client, the same as the SEP-24 client's. https://github.com/stellar-deprecated/sep31-demo-client",
 			triggers: ["sep31 demo client", "sep-31 demo deprecated"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1731,7 +1731,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-deprecated/auth-required-tokens-manager": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jul 1, 2024' (read 2026-09-02); github.com/stellar/auth-required-tokens-manager redirects here. README: web app to manage TESTNET auth-required tokens and generate SEP-7 QR codes for payment / path-payment operations; package.json name is stellar-react-starter. https://github.com/stellar-deprecated/auth-required-tokens-manager",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Jul 1, 2024' (read 2026-09-02); github.com/stellar/auth-required-tokens-manager redirects here. README: web app to manage TESTNET auth-required tokens and generate SEP-7 QR codes for payment / path-payment operations; package.json name is stellar-react-starter. https://github.com/stellar-deprecated/auth-required-tokens-manager",
 			triggers: ["auth required tokens manager"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1739,7 +1739,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-deprecated/network-explorer": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Nov 16, 2019' (read 2026-09-02); github.com/stellar/network-explorer redirects here. README line 1: 'This tool is no longer maintained. Take a look at the laboratory instead' (github.com/stellar/laboratory, live). https://github.com/stellar-deprecated/network-explorer",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Nov 16, 2019' (read 2026-09-02); github.com/stellar/network-explorer redirects here. README line 1: 'This tool is no longer maintained. Take a look at the laboratory instead' (github.com/stellar/laboratory, live). https://github.com/stellar-deprecated/network-explorer",
 			triggers: ["stellar network explorer archived"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1747,7 +1747,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/core-node-admin-panel": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jun 6, 2024' (read 2026-09-02). README 'Proposal': a UI admin toolset for validator operators to judge node health and risks, run as a proxy server + front-end against a stellar-core instance (`npm run dev`); package.json name stellar-node-admin, private. https://github.com/stellar/core-node-admin-panel",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Jun 6, 2024' (read 2026-09-02). README 'Proposal': a UI admin toolset for validator operators to judge node health and risks, run as a proxy server + front-end against a stellar-core instance (`npm run dev`); package.json name stellar-node-admin, private. https://github.com/stellar/core-node-admin-panel",
 			triggers: ["core node admin panel"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1755,7 +1755,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lobstrco/stellar-core-parallel-catchup-py": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jun 22, 2026' (read 2026-09-02). readme.md (lowercase filename): 'Fast Stellar Core Catch Up' — Python scripts that run a full validator's history catch-up as parallel ledger-range jobs ('less than a day' on a powerful server vs. 'more than a month' serially); CircleCI badge. https://github.com/Lobstrco/stellar-core-parallel-catchup-py",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Jun 22, 2026' (read 2026-09-02). readme.md (lowercase filename): 'Fast Stellar Core Catch Up', Python scripts that run a full validator's history catch-up as parallel ledger-range jobs ('less than a day' on a powerful server vs. 'more than a month' serially); CircleCI badge. https://github.com/Lobstrco/stellar-core-parallel-catchup-py",
 			triggers: ["parallel catchup stellar core", "lobstr catchup script"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1763,7 +1763,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"justmert/soropass": [
 		{
-			note: "npm @soropass/core — 0.3.1 (2026-09-01; 6 versions since 2026-08-10) and @soropass/ui 0.3.0 (2026-09-01; 1 version), both with repository → justmert/soropass; peer dependency @stellar/stellar-sdk. All contract addresses in the README are testnet. https://www.npmjs.com/package/@soropass/core",
+			note: "npm @soropass/core: 0.3.1 (2026-09-01; 6 versions since 2026-08-10) and @soropass/ui 0.3.0 (2026-09-01; 1 version), both with repository → justmert/soropass; peer dependency @stellar/stellar-sdk. All contract addresses in the README are testnet. https://www.npmjs.com/package/@soropass/core",
 			triggers: ["soropass npm", "soropass passkey package"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1771,7 +1771,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"sergical/blockchain-wallet-validator": [
 		{
-			note: "npm blockchain-wallet-validator — 1.2.1 (2025-12-23; 7 versions since 2024-12-17; repository → sergical/blockchain-wallet-validator), matching GitHub release v1.2.1. README lists Stellar among validated networks (Base32 G… public keys, e.g. GBQMXVTR5HQNRGXPR4ZPBOZR7VQXOQMEQMZWIVLIW2MYBXC2HQWZZ4VJ) and says releases go out via npm trusted publishers (GitHub Actions OIDC). https://www.npmjs.com/package/blockchain-wallet-validator",
+			note: "npm blockchain-wallet-validator: 1.2.1 (2025-12-23; 7 versions since 2024-12-17; repository → sergical/blockchain-wallet-validator), matching GitHub release v1.2.1. README lists Stellar among validated networks (Base32 G… public keys, e.g. GBQMXVTR5HQNRGXPR4ZPBOZR7VQXOQMEQMZWIVLIW2MYBXC2HQWZZ4VJ) and says releases go out via npm trusted publishers (GitHub Actions OIDC). https://www.npmjs.com/package/blockchain-wallet-validator",
 			triggers: [
 				"validate stellar address library",
 				"wallet address validator npm",
@@ -1782,7 +1782,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"raceeyxo/use-stellar": [
 		{
-			note: "npm use-stellar — 0.1.5 (2026-08-24; 4 versions since 2026-06-03). The registry's repository field names github.com/israelolrunfemi/use-stellar, which 301-redirects to RaceeyXo/use-stellar (checked 2026-09-02). README: React hooks for wallet connection, balances and tx submission; @stellar/stellar-sdk is bundled as a regular dependency, not a peer dependency. https://www.npmjs.com/package/use-stellar",
+			note: "npm use-stellar: 0.1.5 (2026-08-24; 4 versions since 2026-06-03). The registry's repository field names github.com/israelolrunfemi/use-stellar, which 301-redirects to RaceeyXo/use-stellar (checked 2026-09-02). README: React hooks for wallet connection, balances and tx submission; @stellar/stellar-sdk is bundled as a regular dependency, not a peer dependency. https://www.npmjs.com/package/use-stellar",
 			triggers: ["use-stellar react hooks", "stellar react hooks package"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1790,7 +1790,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"defarm-repo/defarm-sdk-ts": [
 		{
-			note: "npm @defarm/sdk — 0.2.1 (2026-08-22; 9 versions since 2026-02-22; repository → defarm-repo/defarm-sdk-ts; ships a `defarm` CLI bin; MIT). README: client-side sealing ('blind envelopes') for DeFarm livestock/item records, each DFID 'anchored on a public network (Stellar) + IPFS'; the pure-crypto core (src/core) is the auditable surface. No GitHub releases. https://www.npmjs.com/package/@defarm/sdk",
+			note: "npm @defarm/sdk: 0.2.1 (2026-08-22; 9 versions since 2026-02-22; repository → defarm-repo/defarm-sdk-ts; ships a `defarm` CLI bin; MIT). README: client-side sealing ('blind envelopes') for DeFarm livestock/item records, each DFID 'anchored on a public network (Stellar) + IPFS'; the pure-crypto core (src/core) is the auditable surface. No GitHub releases. https://www.npmjs.com/package/@defarm/sdk",
 			triggers: ["defarm sdk npm"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1808,7 +1808,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-02",
 		},
 		{
-			note: "npm @trionlabs/stellar8004 — 0.0.11 (2026-04-13; 2 versions; repository → trionlabs/stellar-8004): the TypeScript SDK for the three 8004 registries (identity, reputation, validation). No GitHub releases; workspace pins soroban-sdk 25. https://www.npmjs.com/package/@trionlabs/stellar8004",
+			note: "npm @trionlabs/stellar8004: 0.0.11 (2026-04-13; 2 versions; repository → trionlabs/stellar-8004): the TypeScript SDK for the three 8004 registries (identity, reputation, validation). No GitHub releases; workspace pins soroban-sdk 25. https://www.npmjs.com/package/@trionlabs/stellar8004",
 			triggers: ["stellar8004 npm", "8004 sdk package"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1816,7 +1816,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kalepail/ohloss": [
 		{
-			note: "README 'Mainnet Deployment' — 'Status: Live on mainnet'; current contract CBOM2KGQDK4TMTIULH2UJWNLWEIXG47IM2RND4UDGM7KK5EQUQDFOVAY (CHITSHEET.md marks it NEW; the OLD contract was CAHPLVEDW2HWY2EOTCTECDK5ZRHAB5FLER3WGHQ5OPFMBMMFJSTBRJZU). Workspace pins soroban-sdk 23.1.0; no releases or tags. https://github.com/kalepail/ohloss",
+			note: "README 'Mainnet Deployment': 'Status: Live on mainnet'; current contract CBOM2KGQDK4TMTIULH2UJWNLWEIXG47IM2RND4UDGM7KK5EQUQDFOVAY (CHITSHEET.md marks it NEW; the OLD contract was CAHPLVEDW2HWY2EOTCTECDK5ZRHAB5FLER3WGHQ5OPFMBMMFJSTBRJZU). Workspace pins soroban-sdk 23.1.0; no releases or tags. https://github.com/kalepail/ohloss",
 			triggers: ["ohloss contract address", "ohloss mainnet"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1824,7 +1824,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"xoxno/rs-lending-xlm": [
 		{
-			note: "README: over-collateralized money market on Soroban (central pool, per-market accounting, spokes as risk regimes, timelocked governance), licensed PolyForm Noncommercial 1.0.0 — 'Commercial use requires a written agreement with XOXNO'. Workspace pins soroban-sdk =27.0.6; no releases or tags; the README lists no deployed addresses ('resolve deployed addresses from the active network configuration'). https://github.com/XOXNO/rs-lending-xlm",
+			note: "README: over-collateralized money market on Soroban (central pool, per-market accounting, spokes as risk regimes, timelocked governance), licensed PolyForm Noncommercial 1.0.0: 'Commercial use requires a written agreement with XOXNO'. Workspace pins soroban-sdk =27.0.6; no releases or tags; the README lists no deployed addresses ('resolve deployed addresses from the active network configuration'). https://github.com/XOXNO/rs-lending-xlm",
 			triggers: ["xoxno lending license", "xoxno lending stellar"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1832,7 +1832,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kalepail/superpeach": [
 		{
-			note: "README: passkey-powered multi-signer Stellar smart-wallet example — two sites in one repo (a 'Super Signer' site and an example dapp); demos hosted at https://superpeach.xyz/ plus https://minipeach-a.pages.dev/ and minipeach-b.pages.dev (superpeach.xyz and minipeach-a returned 200 on 2026-09-02). package.json is private; no releases. https://github.com/kalepail/superpeach",
+			note: "README: passkey-powered multi-signer Stellar smart-wallet example: two sites in one repo (a 'Super Signer' site and an example dapp); demos hosted at https://superpeach.xyz/ plus https://minipeach-a.pages.dev/ and minipeach-b.pages.dev (superpeach.xyz and minipeach-a returned 200 on 2026-09-02). package.json is private; no releases. https://github.com/kalepail/superpeach",
 			triggers: ["superpeach demo", "super peach passkey wallet"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1848,7 +1848,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"brozorec/smart-account-sign": [
 		{
-			note: "README: two Stellar CLI plugins for OpenZeppelin smart accounts — stellar-smart-account and stellar-passkey — installed from source (`cargo install --locked --path stellar-smart-account` / `--path stellar-passkey`, then `stellar plugins --list`); neither crate is on crates.io (2026-09-02). Stated limitation: Delegated signers are not supported (External signers only). https://github.com/brozorec/smart-account-sign",
+			note: "README: two Stellar CLI plugins for OpenZeppelin smart accounts: stellar-smart-account and stellar-passkey, installed from source (`cargo install --locked --path stellar-smart-account` / `--path stellar-passkey`, then `stellar plugins --list`); neither crate is on crates.io (2026-09-02). Stated limitation: Delegated signers are not supported (External signers only). https://github.com/brozorec/smart-account-sign",
 			triggers: ["smart account cli plugin", "stellar passkey plugin install"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1872,7 +1872,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"soroswap/spacewalk-implementation": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jul 24, 2026' (read 2026-09-02). README (114 bytes): 'Implementation of the Skywalk bridge between Pendulum (Polkadot) and Stellar / Soroban' (sic — the repo name says Spacewalk); no manifest, releases or tags. https://github.com/soroswap/spacewalk-implementation",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Jul 24, 2026' (read 2026-09-02). README (114 bytes): 'Implementation of the Skywalk bridge between Pendulum (Polkadot) and Stellar / Soroban' (sic; the repo name says Spacewalk); no manifest, releases or tags. https://github.com/soroswap/spacewalk-implementation",
 			triggers: ["soroswap spacewalk archived"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1880,7 +1880,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"soroswap/phoenix-zephyr-indexer": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jul 24, 2026' (read 2026-09-02). No README; Cargo package zephyr-phoenix 0.1.0 pinning soroban-sdk 20.2.0 — a Zephyr indexer program for Phoenix; no releases or tags. https://github.com/soroswap/phoenix-zephyr-indexer",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Jul 24, 2026' (read 2026-09-02). No README; Cargo package zephyr-phoenix 0.1.0 pinning soroban-sdk 20.2.0: a Zephyr indexer program for Phoenix; no releases or tags. https://github.com/soroswap/phoenix-zephyr-indexer",
 			triggers: ["phoenix zephyr indexer archived"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1896,7 +1896,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"yripper/stellarpay": [
 		{
-			note: "npm @stellarpay-sdk/core, @stellarpay-sdk/client and @stellarpay-sdk/mcp — all 0.1.0 (2026-08-04; a single version each; repository → yripper/stellarpay). README: built for the Stellar hackathon (Agentic Payments track) and 'everything below is testnet' — one middleware for x402 + MPP charge/channel paywalls. https://www.npmjs.com/package/@stellarpay-sdk/core",
+			note: "npm @stellarpay-sdk/core, @stellarpay-sdk/client and @stellarpay-sdk/mcp: all 0.1.0 (2026-08-04; a single version each; repository → yripper/stellarpay). README: built for the Stellar hackathon (Agentic Payments track) and 'everything below is testnet', one middleware for x402 + MPP charge/channel paywalls. https://www.npmjs.com/package/@stellarpay-sdk/core",
 			triggers: ["stellarpay sdk npm"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1904,7 +1904,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"berkingurcan/stellar-agent-search": [
 		{
-			note: "npm stellar-agent-search — 0.1.0 (2026-07-30; 2 versions; repository → berkingurcan/stellar-agent-search; bin stellar-agent-search). README: read-only MCP server + CLI over the trionlabs/stellar-8004 registry contracts on mainnet, pinning the @trionlabs/stellar8004 SDK for signed writes; 'adds no contracts'. https://www.npmjs.com/package/stellar-agent-search",
+			note: "npm stellar-agent-search: 0.1.0 (2026-07-30; 2 versions; repository → berkingurcan/stellar-agent-search; bin stellar-agent-search). README: read-only MCP server + CLI over the trionlabs/stellar-8004 registry contracts on mainnet, pinning the @trionlabs/stellar8004 SDK for signed writes; 'adds no contracts'. https://www.npmjs.com/package/stellar-agent-search",
 			triggers: ["stellar agent search mcp", "8004 agent discovery mcp"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1912,7 +1912,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"zenith-protocols/zenith-sdk": [
 		{
-			note: "npm @zenith-protocols/zenith-sdk — 0.0.1 (2025-10-21; the only published version; repository → zenith-protocols/zenith-sdk), while package.json at HEAD says 2.0.0 (unpublished as of 2026-09-02). README: `npm install @zenith-protocols/zenith-sdk`; testnet + mainnet network constants for the Zenith vault/trading contracts. https://www.npmjs.com/package/@zenith-protocols/zenith-sdk",
+			note: "npm @zenith-protocols/zenith-sdk: 0.0.1 (2025-10-21; the only published version; repository → zenith-protocols/zenith-sdk), while package.json at HEAD says 2.0.0 (unpublished as of 2026-09-02). README: `npm install @zenith-protocols/zenith-sdk`; testnet + mainnet network constants for the Zenith vault/trading contracts. https://www.npmjs.com/package/@zenith-protocols/zenith-sdk",
 			triggers: ["zenith sdk npm"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -1962,7 +1962,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"soroswap/core": [
 		{
-			note: "README: Soroswap is live on Mainnet — SoroswapFactory CA4HEQTL2WPEUYKYKCDOHCDNIV4QHNJ7EL4J4NQ6VADP7SYHVRYZ7AW2, SoroswapRouter CAG5LRYQ5JVEUI5TEID72EYOVX44TTUJT5BQR2J6J77FH65PCCFAJDDH, deployer GAYPUMZFDKUEUJ4LPTHVXVG2GD5B6AV5GGLYDMSZXCSI4QILQKSY25JI; the OtterSec audit is in-repo at audits/2024-02-22_soroswap_ottersec_audit.pdf (fetches 200). https://github.com/soroswap/core",
+			note: "README: Soroswap is live on Mainnet: SoroswapFactory CA4HEQTL2WPEUYKYKCDOHCDNIV4QHNJ7EL4J4NQ6VADP7SYHVRYZ7AW2, SoroswapRouter CAG5LRYQ5JVEUI5TEID72EYOVX44TTUJT5BQR2J6J77FH65PCCFAJDDH, deployer GAYPUMZFDKUEUJ4LPTHVXVG2GD5B6AV5GGLYDMSZXCSI4QILQKSY25JI; the OtterSec audit is in-repo at audits/2024-02-22_soroswap_ottersec_audit.pdf (fetches 200). https://github.com/soroswap/core",
 			triggers: [
 				"soroswap router address",
 				"soroswap factory address",
@@ -1972,7 +1972,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-01",
 		},
 		{
-			note: "The npm packages are built from sibling repos, not this one: @soroswap/sdk 0.5.0 (2026-08-11; repository soroswap/sdk) and soroswap-router-sdk 1.4.6 (2024-10-08), whose repository field names soroswap/soroswap-router-sdk — a path that returns 404 on GitHub as of 2026-09-01. Docs: https://docs.soroswap.finance/",
+			note: "The npm packages are built from sibling repos, not this one: @soroswap/sdk 0.5.0 (2026-08-11; repository soroswap/sdk) and soroswap-router-sdk 1.4.6 (2024-10-08), whose repository field names soroswap/soroswap-router-sdk, a path that returns 404 on GitHub as of 2026-09-01. Docs: https://docs.soroswap.finance/",
 			triggers: ["soroswap sdk npm", "soroswap router sdk package"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2002,7 +2002,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blend-capital/blend-sdk-js": [
 		{
-			note: "npm name is @blend-capital/blend-sdk — 3.3.0 (2026-06-19; 52 versions since 2023-10-24; repository field points here; GitHub release v3.3.0 the same day). README install: npm install @blend-capital/blend-sdk. https://www.npmjs.com/package/@blend-capital/blend-sdk",
+			note: "npm name is @blend-capital/blend-sdk: 3.3.0 (2026-06-19; 52 versions since 2023-10-24; repository field points here; GitHub release v3.3.0 the same day). README install: npm install @blend-capital/blend-sdk. https://www.npmjs.com/package/@blend-capital/blend-sdk",
 			triggers: ["blend sdk npm", "blend javascript sdk package"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2022,7 +2022,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/react": [
 		{
-			note: "npm @bluxcc/react — published since 2025-02-03. Its npm repository field still names github.com/bluxcc/blux, which returns HTTP 301 to bluxcc/react (2026-09-01) — this repo is the current home of that path. README install: npm i @bluxcc/react; docs https://docs.blux.cc/. Read the current version from npm; this package ships several releases a week. https://www.npmjs.com/package/@bluxcc/react",
+			note: "npm @bluxcc/react: published since 2025-02-03. Its npm repository field still names github.com/bluxcc/blux, which returns HTTP 301 to bluxcc/react (2026-09-01); this repo is the current home of that path. README install: npm i @bluxcc/react; docs https://docs.blux.cc/. Read the current version from npm; this package ships several releases a week. https://www.npmjs.com/package/@bluxcc/react",
 			triggers: ["blux react package", "bluxcc blux repo moved"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -2030,7 +2030,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"chatch/stellar-hd-wallet": [
 		{
-			note: "npm stellar-hd-wallet — 1.0.2 (2025-04-27; 13 versions since 2017-12-25; GitHub release v1.0.2 same day; repository field points here). SEP-0005 key derivation for Stellar; README says every SEP-0005 test case is exercised in its tests. A Deno/browser port that drops the Node-only deps is @creit-tech/stellar-sep-0005 on JSR. https://www.npmjs.com/package/stellar-hd-wallet",
+			note: "npm stellar-hd-wallet: 1.0.2 (2025-04-27; 13 versions since 2017-12-25; GitHub release v1.0.2 same day; repository field points here). SEP-0005 key derivation for Stellar; README says every SEP-0005 test case is exercised in its tests. A Deno/browser port that drops the Node-only deps is @creit-tech/stellar-sep-0005 on JSR. https://www.npmjs.com/package/stellar-hd-wallet",
 			triggers: ["stellar hd wallet npm", "mnemonic key derivation javascript"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2038,7 +2038,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"creit-tech/stellar-sep-0005-js": [
 		{
-			note: "Published on JSR, not npm: @creit-tech/stellar-sep-0005 — 0.2.0 (2025-08-17; JSR links the package to this repo). README: a SEP-0005 key-derivation port of chatch/stellar-hd-wallet, written because that library uses Node-only features; install `npx jsr add @creit-tech/stellar-sep-0005` or `deno add jsr:@creit-tech/stellar-sep-0005`. https://jsr.io/@creit-tech/stellar-sep-0005",
+			note: "Published on JSR, not npm: @creit-tech/stellar-sep-0005: 0.2.0 (2025-08-17; JSR links the package to this repo). README: a SEP-0005 key-derivation port of chatch/stellar-hd-wallet, written because that library uses Node-only features; install `npx jsr add @creit-tech/stellar-sep-0005` or `deno add jsr:@creit-tech/stellar-sep-0005`. https://jsr.io/@creit-tech/stellar-sep-0005",
 			triggers: ["sep 0005 deno", "creit sep 0005 jsr"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2046,7 +2046,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"creit-tech/stellar-sep-0040-js": [
 		{
-			note: "Published on JSR, not npm: @creit-tech/stellar-sep-0040 — 0.1.0 (2025-11-05; JSR links the package to this repo). README: a small client for calling SEP-0040 oracle methods; install `npx jsr add @creit-tech/stellar-sep-0040` or `deno add jsr:@creit-tech/stellar-sep-0040`. https://jsr.io/@creit-tech/stellar-sep-0040",
+			note: "Published on JSR, not npm: @creit-tech/stellar-sep-0040: 0.1.0 (2025-11-05; JSR links the package to this repo). README: a small client for calling SEP-0040 oracle methods; install `npx jsr add @creit-tech/stellar-sep-0040` or `deno add jsr:@creit-tech/stellar-sep-0040`. https://jsr.io/@creit-tech/stellar-sep-0040",
 			triggers: ["sep 0040 oracle client javascript", "sep 40 jsr package"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2054,7 +2054,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/js-soroban-client": [
 		{
-			note: "ARCHIVED — GitHub's banner reads 'archived by the owner on Mar 11, 2025' (read 2026-09-01). README 'Deprecation Notice': deprecated in favor of stellar/js-stellar-sdk, migration guide at https://gist.github.com/Shaptic/5ce4f16d9cce7118f391fbde398c2f30; npm soroban-client is deprecated and frozen at 1.0.1 (2024-01-03; 33 versions since 2022-10-11). https://github.com/stellar/js-soroban-client",
+			note: "ARCHIVED: GitHub's banner reads 'archived by the owner on Mar 11, 2025' (read 2026-09-01). README 'Deprecation Notice': deprecated in favor of stellar/js-stellar-sdk, migration guide at https://gist.github.com/Shaptic/5ce4f16d9cce7118f391fbde398c2f30; npm soroban-client is deprecated and frozen at 1.0.1 (2024-01-03; 33 versions since 2022-10-11). https://github.com/stellar/js-soroban-client",
 			triggers: [
 				"soroban client deprecated",
 				"migrate from soroban-client",
@@ -2066,7 +2066,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/django-polaris": [
 		{
-			note: "ARCHIVED — GitHub's banner reads 'archived by the owner on May 23, 2025' (read 2026-09-01). PyPI django-polaris is frozen at 2.6.0 (2025-02-13; 75 releases; GitHub release v2.6.0 same day); README.rst: SDF's extendable Django app for SEP implementations; docs still served at https://django-polaris.readthedocs.io/en/stable. https://pypi.org/project/django-polaris/",
+			note: "ARCHIVED: GitHub's banner reads 'archived by the owner on May 23, 2025' (read 2026-09-01). PyPI django-polaris is frozen at 2.6.0 (2025-02-13; 75 releases; GitHub release v2.6.0 same day); README.rst: SDF's extendable Django app for SEP implementations; docs still served at https://django-polaris.readthedocs.io/en/stable. https://pypi.org/project/django-polaris/",
 			triggers: [
 				"django polaris archived",
 				"polaris still maintained",
@@ -2078,7 +2078,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-deprecated/horizon": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jan 22, 2020'; github.com/stellar/horizon returns HTTP 301 here (2026-09-01). README: 'This repository has moved to the go monorepo' (stellar/go/tree/master/services/horizon) — and stellar/go is itself archived, with Horizon now developed in stellar/stellar-horizon. https://github.com/stellar-deprecated/horizon",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Jan 22, 2020'; github.com/stellar/horizon returns HTTP 301 here (2026-09-01). README: 'This repository has moved to the go monorepo' (stellar/go/tree/master/services/horizon); and stellar/go is itself archived, with Horizon now developed in stellar/stellar-horizon. https://github.com/stellar-deprecated/horizon",
 			triggers: ["old horizon repo", "stellar horizon repository moved"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2086,14 +2086,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-deprecated/horizon-importer": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Nov 16, 2019' (read 2026-09-01). README: 'This project is not in active development anymore. Please use https://github.com/stellar/horizon' — a path that now redirects to stellar-deprecated/horizon (itself archived; Horizon lives in stellar/stellar-horizon). https://github.com/stellar-deprecated/horizon-importer",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Nov 16, 2019' (read 2026-09-01). README: 'This project is not in active development anymore. Please use https://github.com/stellar/horizon', a path that now redirects to stellar-deprecated/horizon (itself archived; Horizon lives in stellar/stellar-horizon). https://github.com/stellar-deprecated/horizon-importer",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"stellar-deprecated/bridge-server": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Sep 12, 2019' (read 2026-09-01). README describes two Go apps: bridge (builds, submits and monitors Stellar transactions) and compliance (helper for the pre-SEP compliance protocol); the README names no successor. https://github.com/stellar-deprecated/bridge-server",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Sep 12, 2019' (read 2026-09-01). README describes two Go apps: bridge (builds, submits and monitors Stellar transactions) and compliance (helper for the pre-SEP compliance protocol); the README names no successor. https://github.com/stellar-deprecated/bridge-server",
 			triggers: ["bridge server archived", "stellar bridge server compliance"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2101,7 +2101,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/sep-smart-wallet": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Jan 30, 2026' (read 2026-09-01). README: a passkey-based smart wallet exercising SEP-10c (alpha) and SEP-24, under a '[!WARNING] … for demonstration purposes only and has not been audited. Do not use it to store, protect, or secure assets' notice. https://github.com/stellar/sep-smart-wallet",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Jan 30, 2026' (read 2026-09-01). README: a passkey-based smart wallet exercising SEP-10c (alpha) and SEP-24, under a '[!WARNING] … for demonstration purposes only and has not been audited. Do not use it to store, protect, or secure assets' notice. https://github.com/stellar/sep-smart-wallet",
 			triggers: ["sep-10c smart wallet demo", "sep smart wallet archived"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2109,14 +2109,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/amm-reference-ui": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on May 1, 2025' (read 2026-09-01). README: a reference implementation for setting up a UI for AMMs, explicitly 'not a recommendation or prescribed way to set up a UI'. https://github.com/stellar/amm-reference-ui",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on May 1, 2025' (read 2026-09-01). README: a reference implementation for setting up a UI for AMMs, explicitly 'not a recommendation or prescribed way to set up a UI'. https://github.com/stellar/amm-reference-ui",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"stellar/recoverysigner-demo-client": [
 		{
-			note: "ARCHIVED — GitHub's banner: 'archived by the owner on Mar 26, 2025' (read 2026-09-01). README: a limited-feature demo client for a SEP-30 recoverysigner server (registration and recovery of an account), plain HTML/JS with no build step. https://github.com/stellar/recoverysigner-demo-client",
+			note: "ARCHIVED: GitHub's banner: 'archived by the owner on Mar 26, 2025' (read 2026-09-01). README: a limited-feature demo client for a SEP-30 recoverysigner server (registration and recovery of an account), plain HTML/JS with no build step. https://github.com/stellar/recoverysigner-demo-client",
 			triggers: ["sep-30 demo client", "recoverysigner demo"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2143,7 +2143,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-account-tools": [
 		{
-			note: "Live app at https://stellar.github.io/stellar-account-tools/ (README 'Live app'; HTTP 200 on 2026-09-01). README: an SDF-built web app for managing Stellar accounts whose headline tool is 'Emergency SDP Host Access Revocation' — revoking a Stellar Disbursement Platform host's access to your distribution account. No releases; package version 0.0.0. https://github.com/stellar/stellar-account-tools",
+			note: "Live app at https://stellar.github.io/stellar-account-tools/ (README 'Live app'; HTTP 200 on 2026-09-01). README: an SDF-built web app for managing Stellar accounts whose headline tool is 'Emergency SDP Host Access Revocation', revoking a Stellar Disbursement Platform host's access to your distribution account. No releases; package version 0.0.0. https://github.com/stellar/stellar-account-tools",
 			triggers: ["revoke sdp host access", "stellar account tools app"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2173,7 +2173,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"withobsrvr/stellarbeat": [
 		{
-			note: "README title: 'OBSRVR Radar (formerly Stellarbeat)' — a monitoring and analytics platform for the Stellar network's validators and organizations; the root package is named radar (private, 0.1.0). No releases or tags as of 2026-09-01. https://github.com/withObsrvr/stellarbeat",
+			note: "README title: 'OBSRVR Radar (formerly Stellarbeat)', a monitoring and analytics platform for the Stellar network's validators and organizations; the root package is named radar (private, 0.1.0). No releases or tags as of 2026-09-01. https://github.com/withObsrvr/stellarbeat",
 			triggers: ["stellarbeat renamed", "obsrvr radar stellarbeat"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2181,7 +2181,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"hot-dao/kit": [
 		{
-			note: "npm @hot-labs/kit — 1.6.4 (2026-02-20; 85 versions since 2025-12-07; no repository field on npm; the repo's package.json is 1.6.5). README: a multi-chain connector implementing NEAR Intents for NEAR, EVM, Solana, TON, Stellar and Cosmos; install `yarn add @hot-labs/kit react react-dom`; docs https://hot-labs.gitbook.io/hot-protocol/hot-kit. https://www.npmjs.com/package/@hot-labs/kit",
+			note: "npm @hot-labs/kit: 1.6.4 (2026-02-20; 85 versions since 2025-12-07; no repository field on npm; the repo's package.json is 1.6.5). README: a multi-chain connector implementing NEAR Intents for NEAR, EVM, Solana, TON, Stellar and Cosmos; install `yarn add @hot-labs/kit react react-dom`; docs https://hot-labs.gitbook.io/hot-protocol/hot-kit. https://www.npmjs.com/package/@hot-labs/kit",
 			triggers: ["hot kit stellar", "near intents stellar connector"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2189,7 +2189,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"hot-dao/hot-sdk-js": [
 		{
-			note: "npm @hot-wallet/sdk — 1.0.11 (2025-02-20; 46 versions since 2024-07-26; no repository field on npm; no GitHub releases). README has a 'Stellar Connect' section (stellar:getAddress / signTransaction / signAuthEntry / signMessage requests) described as compatible with Creit-Tech/Stellar-Wallets-Kit. https://www.npmjs.com/package/@hot-wallet/sdk",
+			note: "npm @hot-wallet/sdk: 1.0.11 (2025-02-20; 46 versions since 2024-07-26; no repository field on npm; no GitHub releases). README has a 'Stellar Connect' section (stellar:getAddress / signTransaction / signAuthEntry / signMessage requests) described as compatible with Creit-Tech/Stellar-Wallets-Kit. https://www.npmjs.com/package/@hot-wallet/sdk",
 			triggers: ["hot wallet stellar sdk", "hot wallet wallets kit module"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2197,7 +2197,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"allbridge-io/allbridge-core-js-sdk": [
 		{
-			note: "npm @allbridge/bridge-core-sdk — 3.35.0 (2026-09-09; 336 versions since 2022-10-07). Its repository field names allbridge-public/allbridge-core-js-sdk; that copy and this one share the identical HEAD 20b0d81c54169c3c5d8e366ef6f6ee56f60ee542 (2026-09-01) and neither redirects. README links Stellar docs at documentation/browser/stellar.md. https://www.npmjs.com/package/@allbridge/bridge-core-sdk",
+			note: "npm @allbridge/bridge-core-sdk: 3.35.0 (2026-09-09; 336 versions since 2022-10-07). Its repository field names allbridge-public/allbridge-core-js-sdk; that copy and this one share the identical HEAD 20b0d81c54169c3c5d8e366ef6f6ee56f60ee542 (2026-09-01) and neither redirects. README links Stellar docs at documentation/browser/stellar.md. https://www.npmjs.com/package/@allbridge/bridge-core-sdk",
 			triggers: ["allbridge core sdk npm", "allbridge sdk stellar"],
 			source: "curated",
 			asOf: "2026-09-13",
@@ -2205,7 +2205,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"allbridge-io/allbridge-core-rest-api": [
 		{
-			note: "Docker image allbridge/io.allbridge.rest-api (Docker Hub, registered 2024-03-01): newest version tag 3.32.0 (2026-06-26) while `latest` was last pushed 2026-01-30 with 3.29.1 — pin a version. README's network list includes 'Stellar (STLR) & Soroban (SRB)', configured with STLR_NODE_URL plus SRB_NODE_URL (both required). https://hub.docker.com/r/allbridge/io.allbridge.rest-api",
+			note: "Docker image allbridge/io.allbridge.rest-api (Docker Hub, registered 2024-03-01): newest version tag 3.32.0 (2026-06-26) while `latest` was last pushed 2026-01-30 with 3.29.1. Pin a version. README's network list includes 'Stellar (STLR) & Soroban (SRB)', configured with STLR_NODE_URL plus SRB_NODE_URL (both required). https://hub.docker.com/r/allbridge/io.allbridge.rest-api",
 			triggers: ["allbridge rest api docker", "allbridge rest api stellar"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2224,7 +2224,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bp-ventures/lightecho-stellar-oracle": [
 		{
-			note: "PyPI lightecho-stellar-oracle — 2.0.0 (2024-08-15; 41 releases; PyPI homepage points to oracle-sdk/python in this repo). README lists the PRODUCTION SEP-40 oracle contract for base XLM as CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T and dates the production pilot launch to March 5 2024; a Python CLI lives at oracle-onchain/sep40/cli. https://pypi.org/project/lightecho-stellar-oracle/",
+			note: "PyPI lightecho-stellar-oracle: 2.0.0 (2024-08-15; 41 releases; PyPI homepage points to oracle-sdk/python in this repo). README lists the PRODUCTION SEP-40 oracle contract for base XLM as CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T and dates the production pilot launch to March 5 2024; a Python CLI lives at oracle-onchain/sep40/cli. https://pypi.org/project/lightecho-stellar-oracle/",
 			triggers: ["lightecho oracle contract address", "lightecho python sdk"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2251,7 +2251,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"script3/sep-41-token": [
 		{
-			note: "crates.io sep-41-token — 1.4.0 (2026-01-26; 9 versions since 2023-10-20; release v1.4.0 same day): SEP-0041 trait, client and mock contract (members sep-41, mock-sep-41). Its repository field (sep-41/Cargo.toml) names script3/sep-40-oracle, so crates.io links it to that sibling repo. Companion crates: sep-40-oracle 1.4.0, soroban-fixed-point-math 1.5.0. https://crates.io/crates/sep-41-token",
+			note: "crates.io sep-41-token: 1.4.0 (2026-01-26; 9 versions since 2023-10-20; release v1.4.0 same day): SEP-0041 trait, client and mock contract (members sep-41, mock-sep-41). Its repository field (sep-41/Cargo.toml) names script3/sep-40-oracle, so crates.io links it to that sibling repo. Companion crates: sep-40-oracle 1.4.0, soroban-fixed-point-math 1.5.0. https://crates.io/crates/sep-41-token",
 			triggers: ["sep-41 token crate", "sep 41 trait rust"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2270,7 +2270,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarguard/stellar-uri": [
 		{
-			note: "npm @stellarguard/stellar-uri — 3.0.1 (2021-05-29; 16 versions since 2018-10-25; repository field points here; repo not archived as of 2026-09-01). TypeScript implementation of SEP-0007 web+stellar: URIs for browser or Node; README notes TransactionStellarUri can replace transaction parts addressed by SEP-0011 txrep path. https://www.npmjs.com/package/@stellarguard/stellar-uri",
+			note: "npm @stellarguard/stellar-uri: 3.0.1 (2021-05-29; 16 versions since 2018-10-25; repository field points here; repo not archived as of 2026-09-01). TypeScript implementation of SEP-0007 web+stellar: URIs for browser or Node; README notes TransactionStellarUri can replace transaction parts addressed by SEP-0011 txrep path. https://www.npmjs.com/package/@stellarguard/stellar-uri",
 			triggers: ["sep-0007 uri javascript", "web stellar uri library"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2278,7 +2278,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarguard/txrep": [
 		{
-			note: "npm @stellarguard/txrep — 2.0.0 (2020-05-18; 10 versions since 2019-11-30; repository field points here; repo not archived as of 2026-09-01). TypeScript implementation of SEP-0011 txrep, the human-readable Stellar transaction representation. https://www.npmjs.com/package/@stellarguard/txrep",
+			note: "npm @stellarguard/txrep: 2.0.0 (2020-05-18; 10 versions since 2019-11-30; repository field points here; repo not archived as of 2026-09-01). TypeScript implementation of SEP-0011 txrep, the human-readable Stellar transaction representation. https://www.npmjs.com/package/@stellarguard/txrep",
 			triggers: ["sep-0011 txrep javascript", "txrep library npm"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2310,7 +2310,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"fxdao/fxdao-sdk-js": [
 		{
-			note: "npm @fxdao/fxdao-sdk-js — 0.9.3 (2025-09-03; 8 versions since 2024-01-12; the npm repository field points here). The README is a bare title, so the npm page is the only documentation surface. https://www.npmjs.com/package/@fxdao/fxdao-sdk-js",
+			note: "npm @fxdao/fxdao-sdk-js: 0.9.3 (2025-09-03; 8 versions since 2024-01-12; the npm repository field points here). The README is a bare title, so the npm page is the only documentation surface. https://www.npmjs.com/package/@fxdao/fxdao-sdk-js",
 			triggers: ["fxdao sdk npm"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2334,7 +2334,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kalepail/soroban-passkey": [
 		{
-			note: "SoroPass — README: demo at https://passkey.sorobanbyexample.org/ (HTTP 200 on 2026-09-01) and write-up at https://kalepail.com/blockchain/the-passkey-powered-future-of-web3; a pnpm app with no releases or tags; repo not archived. https://github.com/kalepail/soroban-passkey",
+			note: "SoroPass: README: demo at https://passkey.sorobanbyexample.org/ (HTTP 200 on 2026-09-01) and write-up at https://kalepail.com/blockchain/the-passkey-powered-future-of-web3; a pnpm app with no releases or tags; repo not archived. https://github.com/kalepail/soroban-passkey",
 			triggers: ["soropass demo", "soroban passkey demo"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2350,7 +2350,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/basic-payment-app": [
 		{
-			note: "BasicPay — companion code for the SDF Example Application Tutorial; README links https://developers.stellar.org/docs/building-apps/example-application-tutorial/overview (301 to /docs/build/apps/example-application-tutorial/overview, 200 on 2026-09-01). README '[!CAUTION]': educational, not for production or Mainnet. Private package (bpa 0.0.1), no releases. https://github.com/stellar/basic-payment-app",
+			note: "BasicPay: companion code for the SDF Example Application Tutorial; README links https://developers.stellar.org/docs/building-apps/example-application-tutorial/overview (301 to /docs/build/apps/example-application-tutorial/overview, 200 on 2026-09-01). README '[!CAUTION]': educational, not for production or Mainnet. Private package (bpa 0.0.1), no releases. https://github.com/stellar/basic-payment-app",
 			triggers: ["basicpay tutorial", "example application tutorial code"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2371,7 +2371,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// batch notes.
 	"soneso/kmp-stellar-sdk": [
 		{
-			note: 'Kotlin Multiplatform SDK on Maven Central as com.soneso.stellar:stellar-sdk — 1.12.0 (GitHub release v1.12.0, 2026-08-26; the Maven entry links back to this repo; Apache-2.0). README install: implementation("com.soneso.stellar:stellar-sdk:1.12.0"), Gradle 9.0+. https://central.sonatype.com/artifact/com.soneso.stellar/stellar-sdk',
+			note: 'Kotlin Multiplatform SDK on Maven Central as com.soneso.stellar:stellar-sdk: 1.12.0 (GitHub release v1.12.0, 2026-08-26; the Maven entry links back to this repo; Apache-2.0). README install: implementation("com.soneso.stellar:stellar-sdk:1.12.0"), Gradle 9.0+. https://central.sonatype.com/artifact/com.soneso.stellar/stellar-sdk',
 			triggers: ["kotlin multiplatform sdk maven", "kmp sdk maven coordinates"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2387,7 +2387,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"soneso/stellar_flutter_sdk": [
 		{
-			note: "pub.dev package stellar_flutter_sdk — 3.6.0 (2026-08-24; 118 versions since 0.7.8 on 2020-06-23; the pub.dev homepage points at this repo; MIT). Requires Dart SDK >=3.8.0 <4.0.0 and Flutter >=3.32.0; iOS deployment target 15.0+ (smart-account passkey calls need iOS 16 at runtime, else return not-supported). https://pub.dev/packages/stellar_flutter_sdk",
+			note: "pub.dev package stellar_flutter_sdk: 3.6.0 (2026-08-24; 118 versions since 0.7.8 on 2020-06-23; the pub.dev homepage points at this repo; MIT). Requires Dart SDK >=3.8.0 <4.0.0 and Flutter >=3.32.0; iOS deployment target 15.0+ (smart-account passkey calls need iOS 16 at runtime, else return not-supported). https://pub.dev/packages/stellar_flutter_sdk",
 			triggers: ["flutter sdk pub package", "flutter sdk dart version"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2395,7 +2395,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/kotlin-wallet-sdk": [
 		{
-			note: "ARCHIVED (GitHub API archived:true, 2026-09-01) and deprecated — README banner: 'This SDK is deprecated and no longer maintained… There is no direct Kotlin/Java successor.' Maven Central org.stellar:wallet-sdk is frozen at 3.0.0 (GitHub release 2026-04-28) with the same DEPRECATED notice; README sends JVM users to the lower-level Java SDK (implement SEP-1/10/12/24/30 yourself) and wallet-SDK users to TypeScript, Flutter (Soneso/stellar_wallet_flutter_sdk) or Swift. https://github.com/stellar/kotlin-wallet-sdk",
+			note: "ARCHIVED (GitHub API archived:true, 2026-09-01) and deprecated; README banner: 'This SDK is deprecated and no longer maintained… There is no direct Kotlin/Java successor.' Maven Central org.stellar:wallet-sdk is frozen at 3.0.0 (GitHub release 2026-04-28) with the same DEPRECATED notice; README sends JVM users to the lower-level Java SDK (implement SEP-1/10/12/24/30 yourself) and wallet-SDK users to TypeScript, Flutter (Soneso/stellar_wallet_flutter_sdk) or Swift. https://github.com/stellar/kotlin-wallet-sdk",
 			triggers: [
 				"kotlin wallet sdk deprecated",
 				"kotlin wallet sdk archived",
@@ -2407,7 +2407,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/wallet-backend-client": [
 		{
-			note: "ARCHIVED (GitHub API archived:true, 2026-09-01) and never published: the README's `npm install @stellar/wallet-backend-client` does not resolve — registry.npmjs.org returns Not found for that name (2026-09-01). README also declares the repo 'not currently under active development' and out of scope for Stellar's HackerOne program. https://github.com/stellar/wallet-backend-client",
+			note: "ARCHIVED (GitHub API archived:true, 2026-09-01) and never published: the README's `npm install @stellar/wallet-backend-client` does not resolve: registry.npmjs.org returns Not found for that name (2026-09-01). README also declares the repo 'not currently under active development' and out of scope for Stellar's HackerOne program. https://github.com/stellar/wallet-backend-client",
 			triggers: ["wallet backend client npm", "wallet backend client archived"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2415,7 +2415,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lightsail-network/java-stellar-sdk-android-spi": [
 		{
-			note: "Android companion of lightsail-network/java-stellar-sdk: Maven Central network.lightsail:stellar-sdk-android-spi — 5.0.0 (published 2026-09-01, same day as the SDK's 5.0.0; Apache-2.0; the Maven entry links back to this repo). Versions track the SDK (tags 4.0.0, 4.0.1, 5.0.0). https://central.sonatype.com/artifact/network.lightsail/stellar-sdk-android-spi",
+			note: "Android companion of lightsail-network/java-stellar-sdk: Maven Central network.lightsail:stellar-sdk-android-spi: 5.0.0 (published 2026-09-01, same day as the SDK's 5.0.0; Apache-2.0; the Maven entry links back to this repo). Versions track the SDK (tags 4.0.0, 4.0.1, 5.0.0). https://central.sonatype.com/artifact/network.lightsail/stellar-sdk-android-spi",
 			triggers: ["android spi maven", "java sdk android spi"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2423,7 +2423,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"argo-navis-dev/php-anchor-sdk": [
 		{
-			note: "Packagist name argonavis/php-anchor-sdk (from composer.json) — 0.10.0 (2025-11-09; 11 versions since 0.1.0 on 2023-12-25; Packagist source points at this repo; Apache-2.0). Latest GitHub release 0.10.0 (2025-11-09); repo last pushed 2026-03-29. https://packagist.org/packages/argonavis/php-anchor-sdk",
+			note: "Packagist name argonavis/php-anchor-sdk (from composer.json): 0.10.0 (2025-11-09; 11 versions since 0.1.0 on 2023-12-25; Packagist source points at this repo; Apache-2.0). Latest GitHub release 0.10.0 (2025-11-09); repo last pushed 2026-03-29. https://packagist.org/packages/argonavis/php-anchor-sdk",
 			triggers: ["php anchor sdk composer", "php anchor sdk packagist"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2431,7 +2431,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/js-xdr": [
 		{
-			note: "npm name is @stellar/js-xdr — 5.0.0 (2026-08-20; scoped package first published 2023-11-20). The old unscoped js-xdr is deprecated on npm ('This package has moved to @stellar/js-xdr!') and frozen at 3.1.2 (2024-07-18). It is a runtime XDR codec, not a generator: the SDK's bindings are produced by tools/xdrgen/generate.mjs in stellar/js-stellar-sdk. https://www.npmjs.com/package/@stellar/js-xdr",
+			note: "npm name is @stellar/js-xdr: 5.0.0 (2026-08-20; scoped package first published 2023-11-20). The old unscoped js-xdr is deprecated on npm ('This package has moved to @stellar/js-xdr!') and frozen at 3.1.2 (2024-07-18). It is a runtime XDR codec, not a generator: the SDK's bindings are produced by tools/xdrgen/generate.mjs in stellar/js-stellar-sdk. https://www.npmjs.com/package/@stellar/js-xdr",
 			triggers: ["js xdr deprecated", "xdr npm package"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2439,13 +2439,13 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/rs-stellar-xdr": [
 		{
-			note: "crates.io name stellar-xdr — 28.0.0 (2026-07-30; first published 2022-07-29; 41 versions; ~2.15M downloads; crate repository field points here). Support policy (README): only the most recent major gets bug fixes and features; critical security backports to older majors are best-effort. CLI build: `cargo install --locked stellar-xdr --version ... --features cli`. https://crates.io/crates/stellar-xdr",
+			note: "crates.io name stellar-xdr: 28.0.0 (2026-07-30; first published 2022-07-29; 41 versions; ~2.15M downloads; crate repository field points here). Support policy (README): only the most recent major gets bug fixes and features; critical security backports to older majors are best-effort. CLI build: `cargo install --locked stellar-xdr --version ... --features cli`. https://crates.io/crates/stellar-xdr",
 			triggers: ["stellar xdr crate", "rust xdr crate"],
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 		{
-			note: "Security advisory (as of 2026-09-01 — re-check the live feed, this is dated): CVE-2026-29795 / GHSA-x57h-xx53-v53w, medium, published 2026-03-04 — StringM::from_str bypasses max length validation; affects stellar-xdr <= 25.0.0, patched in 25.0.1. https://github.com/stellar/rs-stellar-xdr/security/advisories/GHSA-x57h-xx53-v53w",
+			note: "Security advisory (as of 2026-09-01; re-check the live feed, this is dated): CVE-2026-29795 / GHSA-x57h-xx53-v53w, medium, published 2026-03-04: StringM::from_str bypasses max length validation; affects stellar-xdr <= 25.0.0, patched in 25.0.1. https://github.com/stellar/rs-stellar-xdr/security/advisories/GHSA-x57h-xx53-v53w",
 			triggers: ["stellar xdr advisory", "stellar xdr cve"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2453,7 +2453,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/rs-stellar-rpc-client": [
 		{
-			note: "crates.io name stellar-rpc-client (first published 2024-03-05; 30 versions; ~225k downloads; repository field points here). On 2026-09-01 the newest upload is pre-release 28.0.0-rc.1 (2026-08-25) while max stable is 27.0.0 — matching the latest non-prerelease GitHub release v27.0.0 (2026-06-17). README is a 4-line stub pointing at developers.stellar.org/docs. https://crates.io/crates/stellar-rpc-client",
+			note: "crates.io name stellar-rpc-client (first published 2024-03-05; 30 versions; ~225k downloads; repository field points here). On 2026-09-01 the newest upload is pre-release 28.0.0-rc.1 (2026-08-25) while max stable is 27.0.0, matching the latest non-prerelease GitHub release v27.0.0 (2026-06-17). README is a 4-line stub pointing at developers.stellar.org/docs. https://crates.io/crates/stellar-rpc-client",
 			triggers: ["stellar rpc client crate", "rust rpc client crate"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2461,7 +2461,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/xdrgen": [
 		{
-			note: "README notice (2026-09-01): 'Generators are no longer maintained in this repository' — the Python, Java and Rust generators moved out next to the XDR libraries they generate (PRs #221, #226); C#, Elixir and Ruby generators were deleted and survive only at commit 2efacde612445d97e0548131ed699e8130bdeb7b; the Go generator still lives here. New generators should use xdrgen as a library. RubyGems xdrgen is frozen at 0.1.1 (2021-08-20; 3 versions since 2020-01-23). https://github.com/stellar/xdrgen#readme",
+			note: "README notice (2026-09-01): 'Generators are no longer maintained in this repository', the Python, Java and Rust generators moved out next to the XDR libraries they generate (PRs #221, #226); C#, Elixir and Ruby generators were deleted and survive only at commit 2efacde612445d97e0548131ed699e8130bdeb7b; the Go generator still lives here. New generators should use xdrgen as a library. RubyGems xdrgen is frozen at 0.1.1 (2021-08-20; 3 versions since 2020-01-23). https://github.com/stellar/xdrgen#readme",
 			triggers: ["xdrgen generators moved", "xdrgen gem"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2469,7 +2469,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-xdr": [
 		{
-			note: "Canonical .x XDR definitions; one GitHub release per protocol — v28.0 (2026-08-27), v27.0, v26.0. Branch model (README): all changes land on main; curr = current protocol, next = definitions that only take effect at the next protocol boundary, wrapped in per-feature #ifdef flags (e.g. CAP73_SAC_CREATE_ACCOUNTS); 'when in doubt just make the changes only in the next branch'. https://github.com/stellar/stellar-xdr#making-modifications",
+			note: "Canonical .x XDR definitions; one GitHub release per protocol: v28.0 (2026-08-27), v27.0, v26.0. Branch model (README): all changes land on main; curr = current protocol, next = definitions that only take effect at the next protocol boundary, wrapped in per-feature #ifdef flags (e.g. CAP73_SAC_CREATE_ACCOUNTS); 'when in doubt just make the changes only in the next branch'. https://github.com/stellar/stellar-xdr#making-modifications",
 			triggers: ["xdr curr next", "xdr next branch"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2489,7 +2489,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-galexie": [
 		{
-			note: "Split out of the stellar/go monorepo (see the go-stellar-sdk note); releases are tagged galexie-vX — galexie-v28.0.1 (2026-08-27), galexie-v28.0.0 (2026-08-14). Docker Hub image stellar/stellar-galexie (tags 28.0.1, 28.0.0, latest; ~3.5k pulls, 2026-09-01). The README's docs link developers.stellar.org/docs/data/galexie now redirects to /docs/data/indexers/build-your-own/galexie. https://hub.docker.com/r/stellar/stellar-galexie/tags",
+			note: "Split out of the stellar/go monorepo (see the go-stellar-sdk note); releases are tagged galexie-vX: galexie-v28.0.1 (2026-08-27), galexie-v28.0.0 (2026-08-14). Docker Hub image stellar/stellar-galexie (tags 28.0.1, 28.0.0, latest; ~3.5k pulls, 2026-09-01). The README's docs link developers.stellar.org/docs/data/galexie now redirects to /docs/data/indexers/build-your-own/galexie. https://hub.docker.com/r/stellar/stellar-galexie/tags",
 			triggers: ["galexie docker image", "galexie release"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2497,7 +2497,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-etl": [
 		{
-			note: "Runs from Docker Hub image stellar/stellar-etl (README: `docker pull stellar/stellar-etl:latest`; ~138.6k pulls). Hub tags are commit SHAs and :latest was last updated 2026-03-10 although the repo was pushed 2026-08-27 — pin by SHA or build from source (Go 1.23+; captive-core needs stellar-core v20.0.0+). GitHub releases run to v2.8.23 (2026-06-23). https://hub.docker.com/r/stellar/stellar-etl/tags",
+			note: "Runs from Docker Hub image stellar/stellar-etl (README: `docker pull stellar/stellar-etl:latest`; ~138.6k pulls). Hub tags are commit SHAs and :latest was last updated 2026-03-10 although the repo was pushed 2026-08-27. Pin by SHA or build from source (Go 1.23+; captive-core needs stellar-core v20.0.0+). GitHub releases run to v2.8.23 (2026-06-23). https://hub.docker.com/r/stellar/stellar-etl/tags",
 			triggers: ["stellar etl docker", "stellar etl image"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2505,7 +2505,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-anchor-tests": [
 		{
-			note: "npm package is @stellar/anchor-tests (the monorepo's @stellar/anchor-tests workspace) — 0.6.22 (2026-06-05; 46 versions since 2021-06-11; repository points here). The README's hosted UI anchor-tests.stellar.org did NOT resolve on 2026-09-01 (DNS NXDOMAIN, checked twice; stellar-demo-wallet's README links it too) — run the CLI/UI locally. https://www.npmjs.com/package/@stellar/anchor-tests",
+			note: "npm package is @stellar/anchor-tests (the monorepo's @stellar/anchor-tests workspace): 0.6.22 (2026-06-05; 46 versions since 2021-06-11; repository points here). The README's hosted UI anchor-tests.stellar.org did NOT resolve on 2026-09-01 (DNS NXDOMAIN, checked twice; stellar-demo-wallet's README links it too). Run the CLI/UI locally. https://www.npmjs.com/package/@stellar/anchor-tests",
 			triggers: [
 				"anchor tests npm",
 				"anchor tests hosted",
@@ -2517,7 +2517,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-protocol": [
 		{
-			note: "Home of CAPs and SEPs: accepted CAPs live in core/ as cap-XXXX.md (process in core/README.md), accepted SEPs in ecosystem/ as sep-XXXX.md (process in ecosystem/README.md), media under contents/{cap|sep}-XXXX/, templates cap-template.md and sep-template.md at the root; default branch master, e.g. https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md. No releases or tags — cite by path + commit. https://github.com/stellar/stellar-protocol#repository-structure",
+			note: "Home of CAPs and SEPs: accepted CAPs live in core/ as cap-XXXX.md (process in core/README.md), accepted SEPs in ecosystem/ as sep-XXXX.md (process in ecosystem/README.md), media under contents/{cap|sep}-XXXX/, templates cap-template.md and sep-template.md at the root; default branch master, e.g. https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md. No releases or tags. Cite by path + commit. https://github.com/stellar/stellar-protocol#repository-structure",
 			triggers: [
 				"where are seps",
 				"cap sep repository",
@@ -2529,7 +2529,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-docs": [
 		{
-			note: "Source of developers.stellar.org (Docusaurus; Node 24+, pnpm). Agent-facing bundles are live: https://developers.stellar.org/llms.txt is a hand-curated static/llms.txt (docusaurus.config.ts sets generateLLMsTxt:false — 'keep our curated static/llms.txt untouched'; ~15 KB) and llms-full.txt is generated by docusaurus-plugin-llms (~4.4 MB on 2026-09-01) — point AI tools there instead of crawling the MDX. https://github.com/stellar/stellar-docs/blob/main/docusaurus.config.ts",
+			note: "Source of developers.stellar.org (Docusaurus; Node 24+, pnpm). Agent-facing bundles are live: https://developers.stellar.org/llms.txt is a hand-curated static/llms.txt (docusaurus.config.ts sets generateLLMsTxt:false: 'keep our curated static/llms.txt untouched'; ~15 KB) and llms-full.txt is generated by docusaurus-plugin-llms (~4.4 MB on 2026-09-01). Point AI tools there instead of crawling the MDX. https://github.com/stellar/stellar-docs/blob/main/docusaurus.config.ts",
 			triggers: ["stellar docs llms", "developer docs llms", "docs llms txt"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2550,7 +2550,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"chatch/stellarexplorer": [
 		{
-			note: "Hosted at https://steexp.com (public), https://testnet.steexp.com and https://futurenet.steexp.com (README; steexp.com answered 200 on 2026-09-01). Releases are tagged vX.Y.Z-app — latest v3.1.3-app (2026-07-06). The npm package `stellarexplorer` (1.0.8, 2018-08-13) is deprecated by its author as 'not a library to be shared but a site' — do not install it. https://github.com/chatch/stellarexplorer/releases",
+			note: "Hosted at https://steexp.com (public), https://testnet.steexp.com and https://futurenet.steexp.com (README; steexp.com answered 200 on 2026-09-01). Releases are tagged vX.Y.Z-app: latest v3.1.3-app (2026-07-06). The npm package `stellarexplorer` (1.0.8, 2018-08-13) is deprecated by its author as 'not a library to be shared but a site'. Do not install it. https://github.com/chatch/stellarexplorer/releases",
 			triggers: ["steexp source code", "stellarexplorer npm"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2570,7 +2570,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lobstrco/vault-android": [
 		{
-			note: "Android source of LOBSTR Vault (multisig signer app; GPL-3.0; Kotlin). No GitHub releases or tags — builds ship through the stores the README links: Google Play id com.lobstr.stellar.vault (https://play.google.com/store/apps/details?id=com.lobstr.stellar.vault) and App Store id1452248529 (https://itunes.apple.com/app/lobstr-vault/id1452248529). Repo last pushed 2026-07-15. https://github.com/Lobstrco/vault-android",
+			note: "Android source of LOBSTR Vault (multisig signer app; GPL-3.0; Kotlin). No GitHub releases or tags: builds ship through the stores the README links: Google Play id com.lobstr.stellar.vault (https://play.google.com/store/apps/details?id=com.lobstr.stellar.vault) and App Store id1452248529 (https://itunes.apple.com/app/lobstr-vault/id1452248529). Repo last pushed 2026-07-15. https://github.com/Lobstrco/vault-android",
 			triggers: [
 				"lobstr vault play store",
 				"lobstr vault app store",
@@ -2582,7 +2582,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"daccred/attestprotocol": [
 		{
-			note: "npm packages @attestprotocol/sdk, @attestprotocol/stellar-sdk and @attestprotocol/cli — all 2.0.2, last published 2025-11-09; their repository field names github.com/daccred/attest.so, which the GitHub API resolves to daccred/attestprotocol (renamed). The monorepo's packages/ already carry unpublished 2.0.3 / 3.0.0, so npm lags the repo. https://www.npmjs.com/package/@attestprotocol/stellar-sdk",
+			note: "npm packages @attestprotocol/sdk, @attestprotocol/stellar-sdk and @attestprotocol/cli: all 2.0.2, last published 2025-11-09; their repository field names github.com/daccred/attest.so, which the GitHub API resolves to daccred/attestprotocol (renamed). The monorepo's packages/ already carry unpublished 2.0.3 / 3.0.0, so npm lags the repo. https://www.npmjs.com/package/@attestprotocol/stellar-sdk",
 			triggers: ["attest protocol npm", "attestprotocol package"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2599,21 +2599,21 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kalepail/passkey-kit": [
 		{
-			note: "ARCHIVED (GitHub API archived:true; last push 2026-07-31; 496 stars) — README: 'This repository has moved… Development of passkey-kit now happens at stellar/passkey-kit… all tags were carried over.' Resolve every passkey-kit question to stellar/passkey-kit; npm passkey-kit's repository field already points there. https://github.com/stellar/passkey-kit",
+			note: "ARCHIVED (GitHub API archived:true; last push 2026-07-31; 496 stars): README: 'This repository has moved… Development of passkey-kit now happens at stellar/passkey-kit… all tags were carried over.' Resolve every passkey-kit question to stellar/passkey-kit; npm passkey-kit's repository field already points there. https://github.com/stellar/passkey-kit",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"kalepail/smart-account-kit": [
 		{
-			note: "ARCHIVED (GitHub API archived:true; last push 2026-07-31) — README: 'This repository has moved. Development continues at github.com/stellar/smart-account-kit… no further commits, releases, issues, or pull requests will be accepted.' Resolve to stellar/smart-account-kit (npm smart-account-kit). https://github.com/stellar/smart-account-kit",
+			note: "ARCHIVED (GitHub API archived:true; last push 2026-07-31): README: 'This repository has moved. Development continues at github.com/stellar/smart-account-kit… no further commits, releases, issues, or pull requests will be accepted.' Resolve to stellar/smart-account-kit (npm smart-account-kit). https://github.com/stellar/smart-account-kit",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"blend-capital/blend-contract-sdk": [
 		{
-			note: "Companion of blend-capital/blend-contracts: crates.io blend-contract-sdk (WASM exports of the Blend contracts for use with soroban-sdk) — 2.25.0 (2026-01-26; 11 versions since 0.1.0 on 2024-04-09; ~27k downloads; crate repository points here; MIT). Latest GitHub release v2.25.0 (2026-01-26). https://crates.io/crates/blend-contract-sdk",
+			note: "Companion of blend-capital/blend-contracts: crates.io blend-contract-sdk (WASM exports of the Blend contracts for use with soroban-sdk): 2.25.0 (2026-01-26; 11 versions since 0.1.0 on 2024-04-09; ~27k downloads; crate repository points here; MIT). Latest GitHub release v2.25.0 (2026-01-26). https://crates.io/crates/blend-contract-sdk",
 			triggers: ["blend contract sdk crate", "blend sdk crates"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2628,7 +2628,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-design-system": [
 		{
-			note: "npm @stellar/design-system — 4.0.2 (2026-07-28; 76 versions since 2020-12-09; repository points here). Releases are cut by publishing a GitHub release whose tag matches the npm version (v4.0.2 latest); README documents the bump → tag → release workflow. https://www.npmjs.com/package/@stellar/design-system",
+			note: "npm @stellar/design-system: 4.0.2 (2026-07-28; 76 versions since 2020-12-09; repository points here). Releases are cut by publishing a GitHub release whose tag matches the npm version (v4.0.2 latest); README documents the bump → tag → release workflow. https://www.npmjs.com/package/@stellar/design-system",
 			triggers: ["design system npm", "stellar design system package"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2636,7 +2636,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"trezor/trezor-firmware": [
 		{
-			note: "Stellar support lives in two places in the monorepo (2026-09-01): Trezor Core at core/src/apps/stellar (README: all operations except Inflation; files incl. sign_tx.py and sign_soroban_authorization.py, which handles the StellarSignSorobanAuthorization message) and legacy firmware at legacy/firmware/stellar.c (no Soroban code). No Stellar-specific releases — firmware tags cover the whole repo. https://github.com/trezor/trezor-firmware/tree/main/core/src/apps/stellar",
+			note: "Stellar support lives in two places in the monorepo (2026-09-01): Trezor Core at core/src/apps/stellar (README: all operations except Inflation; files incl. sign_tx.py and sign_soroban_authorization.py, which handles the StellarSignSorobanAuthorization message) and legacy firmware at legacy/firmware/stellar.c (no Soroban code). No Stellar-specific releases: firmware tags cover the whole repo. https://github.com/trezor/trezor-firmware/tree/main/core/src/apps/stellar",
 			triggers: ["trezor soroban", "trezor stellar support"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2644,7 +2644,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/wallet-backend": [
 		{
-			note: "No GitHub releases or tags (2026-09-01). Docker Hub image stellar/wallet-backend exists but is stale: only `testing` / testing-2025-05-13-fde7cfa tags, last updated 2025-05-13, while the repo was pushed 2026-09-01 — build from source or use the README's docker compose quickstart (`docker compose up db stellar-rpc-testnet api-testnet ingest-testnet`). https://hub.docker.com/r/stellar/wallet-backend/tags",
+			note: "No GitHub releases or tags (2026-09-01). Docker Hub image stellar/wallet-backend exists but is stale: only `testing` / testing-2025-05-13-fde7cfa tags, last updated 2025-05-13, while the repo was pushed 2026-09-01. Build from source or use the README's docker compose quickstart (`docker compose up db stellar-rpc-testnet api-testnet ingest-testnet`). https://hub.docker.com/r/stellar/wallet-backend/tags",
 			triggers: ["wallet backend docker image"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2652,7 +2652,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-disbursement-platform-frontend": [
 		{
-			note: "Companion UI of stellar/stellar-disbursement-platform-backend; releases follow the SDP version — 7.0.0 (2026-08-19), 6.6.0, 6.5.0. Docker Hub image stellar/stellar-disbursement-platform-frontend (~16.2k pulls; last updated 2026-09-04). Docs: developers.stellar.org/docs/platforms/stellar-disbursement-platform. https://hub.docker.com/r/stellar/stellar-disbursement-platform-frontend",
+			note: "Companion UI of stellar/stellar-disbursement-platform-backend; releases follow the SDP version: 7.0.0 (2026-08-19), 6.6.0, 6.5.0. Docker Hub image stellar/stellar-disbursement-platform-frontend (~16.2k pulls; last updated 2026-09-04). Docs: developers.stellar.org/docs/platforms/stellar-disbursement-platform. https://hub.docker.com/r/stellar/stellar-disbursement-platform-frontend",
 			triggers: [
 				"sdp frontend docker",
 				"disbursement platform frontend release",
@@ -2663,7 +2663,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/soroban-examples": [
 		{
-			note: "Release tags track the soroban-sdk major they build against: v23.0.0 (2025-09-08, 'Update examples to use SDK v23'), v22.0.1 (2024-12-09), v22.0.0, v21.6.0 — no v24+ tag as of 2026-09-01 although the repo is still pushed (2026-08-30). Contracts build to target/wasm32v1-none/release/*.wasm with the Stellar CLI. https://github.com/stellar/soroban-examples/releases",
+			note: "Release tags track the soroban-sdk major they build against: v23.0.0 (2025-09-08, 'Update examples to use SDK v23'), v22.0.1 (2024-12-09), v22.0.0, v21.6.0; no v24+ tag as of 2026-09-01 although the repo is still pushed (2026-08-30). Contracts build to target/wasm32v1-none/release/*.wasm with the Stellar CLI. https://github.com/stellar/soroban-examples/releases",
 			triggers: ["soroban examples sdk version", "soroban examples release"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2671,7 +2671,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/core": [
 		{
-			note: "npm @bluxcc/core — published since 2025-09-23; repository points here. Licensed BUSL on npm (README section 'License & Usage Restrictions') — the fact worth knowing before depending on it; install `npm i @bluxcc/core`; site blux.cc. Read the current version from npm; this package ships several releases a week. https://www.npmjs.com/package/@bluxcc/core",
+			note: "npm @bluxcc/core: published since 2025-09-23; repository points here. Licensed BUSL on npm (README section 'License & Usage Restrictions'), the fact worth knowing before depending on it; install `npm i @bluxcc/core`; site blux.cc. Read the current version from npm; this package ships several releases a week. https://www.npmjs.com/package/@bluxcc/core",
 			triggers: ["blux npm package", "blux core license"],
 			source: "curated",
 			asOf: "2026-09-02",
@@ -2679,7 +2679,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-broker/client": [
 		{
-			note: "npm @stellar-broker/client — 0.7.0 (2026-07-16; 22 versions since 2024-08-15; repository points here; MIT); companion contract repo stellar-broker/router-contract; service site stellar.broker. https://www.npmjs.com/package/@stellar-broker/client",
+			note: "npm @stellar-broker/client: 0.7.0 (2026-07-16; 22 versions since 2024-08-15; repository points here; MIT); companion contract repo stellar-broker/router-contract; service site stellar.broker. https://www.npmjs.com/package/@stellar-broker/client",
 			triggers: ["stellarbroker client npm", "stellar broker npm"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2687,7 +2687,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rahul-soshte/rs-soroban-client": [
 		{
-			note: 'Community (non-SDF) Rust client for Stellar RPC: crates.io soroban-client — 0.6.0 (2026-09-05; 47 versions since 0.1.0 on 2023-06-25; crate repository points here; Apache-2.0). The README dependency line still reads soroban-client = "0.5.9", one minor behind what the crate publishes. Not the same as SDF\'s stellar-rpc-client crate. https://crates.io/crates/soroban-client',
+			note: 'Community (non-SDF) Rust client for Stellar RPC: crates.io soroban-client: 0.6.0 (2026-09-05; 47 versions since 0.1.0 on 2023-06-25; crate repository points here; Apache-2.0). The README dependency line still reads soroban-client = "0.5.9", one minor behind what the crate publishes. Not the same as SDF\'s stellar-rpc-client crate. https://crates.io/crates/soroban-client',
 			triggers: ["soroban client crate", "soroban client rust"],
 			source: "curated",
 			asOf: "2026-09-07",
@@ -2695,7 +2695,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ericmt-98/micopay-mvp": [
 		{
-			note: "Same repo as ericmt-98/micopay-protocol: github.com/ericmt-98/micopay-mvp redirects to Micopay/micopay-protocol (GitHub API, 2026-09-01) — treat both old paths as one project and cite the Micopay org. https://github.com/Micopay/micopay-protocol",
+			note: "Same repo as ericmt-98/micopay-protocol: github.com/ericmt-98/micopay-mvp redirects to Micopay/micopay-protocol (GitHub API, 2026-09-01). Treat both old paths as one project and cite the Micopay org. https://github.com/Micopay/micopay-protocol",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2709,14 +2709,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"horizontalsystems/stellar-web-sdk": [
 		{
-			note: "npm stellar-web-sdk — 0.2.0 (2026-09-07; 4 versions, the first three all 2026-08-12; repository points here; MIT). README install: `npm install stellar-web-sdk @stellar/stellar-sdk` (peer dependency on @stellar/stellar-sdk). No GitHub releases or tags. https://www.npmjs.com/package/stellar-web-sdk",
+			note: "npm stellar-web-sdk: 0.2.0 (2026-09-07; 4 versions, the first three all 2026-08-12; repository points here; MIT). README install: `npm install stellar-web-sdk @stellar/stellar-sdk` (peer dependency on @stellar/stellar-sdk). No GitHub releases or tags. https://www.npmjs.com/package/stellar-web-sdk",
 			source: "curated",
 			asOf: "2026-09-07",
 		},
 	],
 	"horizontalsystems/stellar-kit-android": [
 		{
-			note: "Not on Maven Central — distributed via JitPack as com.github.horizontalsystems:stellar-kit-android:<version> where <version> is the first 7 characters of a commit hash (README; JitPack's build list confirms hash builds). No GitHub releases or tags; Android 8.0+/Kotlin 2.0+; the client used by Unstoppable Wallet (horizontalsystems/unstoppable-wallet-android). https://github.com/horizontalsystems/stellar-kit-android#installation",
+			note: "Not on Maven Central: distributed via JitPack as com.github.horizontalsystems:stellar-kit-android:<version> where <version> is the first 7 characters of a commit hash (README; JitPack's build list confirms hash builds). No GitHub releases or tags; Android 8.0+/Kotlin 2.0+; the client used by Unstoppable Wallet (horizontalsystems/unstoppable-wallet-android). https://github.com/horizontalsystems/stellar-kit-android#installation",
 			triggers: ["stellarkit android jitpack", "stellar kit android install"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2741,13 +2741,13 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// same-named pair) yielded nothing durable and are deliberately absent.
 	"stellar/js-stellar-base": [
 		{
-			note: "DEPRECATED on npm: every version of @stellar/stellar-base (24 versions, last 15.0.0 on 2026-03-30) carries the deprecation 'This package is now rolled into @stellar/stellar-sdk'; the README (2026-09) says future updates incl. protocol releases ship only in @stellar/stellar-sdk, which re-exports this package's full API — switch the dependency. https://www.npmjs.com/package/@stellar/stellar-base",
+			note: "DEPRECATED on npm: every version of @stellar/stellar-base (24 versions, last 15.0.0 on 2026-03-30) carries the deprecation 'This package is now rolled into @stellar/stellar-sdk'; the README (2026-09) says future updates incl. protocol releases ship only in @stellar/stellar-sdk, which re-exports this package's full API. Switch the dependency. https://www.npmjs.com/package/@stellar/stellar-base",
 			triggers: ["stellar base deprecated", "stellar base still maintained"],
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 		{
-			note: "Repo is NOT archived (still pushed 2026-08-31) but its last tagged release is v15.0.0 (2026-03-30); the SDK absorbed it at @stellar/stellar-sdk v16.0.0 (see the stellar/js-stellar-sdk note) — resolve base-library questions to stellar/js-stellar-sdk. https://github.com/stellar/js-stellar-base/releases",
+			note: "Repo is NOT archived (still pushed 2026-08-31) but its last tagged release is v15.0.0 (2026-03-30); the SDK absorbed it at @stellar/stellar-sdk v16.0.0 (see the stellar/js-stellar-sdk note). Resolve base-library questions to stellar/js-stellar-sdk. https://github.com/stellar/js-stellar-base/releases",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2766,7 +2766,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lightsail-network/java-stellar-sdk": [
 		{
-			note: "Moved out of the stellar org: github.com/stellar/java-stellar-sdk redirects here (GitHub API resolves the old path to lightsail-network/java-stellar-sdk, 2026-09-01). Maven Central coordinates network.lightsail:stellar-sdk — 34 versions from 0.43.1 (2024-03-31) to 5.0.0 (2026-09-01); Javadoc at javadoc.io/doc/network.lightsail/stellar-sdk. https://central.sonatype.com/artifact/network.lightsail/stellar-sdk",
+			note: "Moved out of the stellar org: github.com/stellar/java-stellar-sdk redirects here (GitHub API resolves the old path to lightsail-network/java-stellar-sdk, 2026-09-01). Maven Central coordinates network.lightsail:stellar-sdk: 34 versions from 0.43.1 (2024-03-31) to 5.0.0 (2026-09-01); Javadoc at javadoc.io/doc/network.lightsail/stellar-sdk. https://central.sonatype.com/artifact/network.lightsail/stellar-sdk",
 			triggers: ["java stellar sdk moved", "java sdk maven coordinates"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2779,7 +2779,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-cli": [
 		{
-			note: "Two old GitHub paths redirect here — stellar/soroban-tools and stellar/soroban-cli both resolve to stellar/stellar-cli (GitHub API, 2026-09-01). On crates.io it ships as BOTH stellar-cli (28.0.0, 2026-08-26; first published 2023-10-26) and legacy-named soroban-cli (same 28.0.0; since 2022-07-28, ~174k downloads), both with repository = this repo. https://crates.io/crates/stellar-cli",
+			note: "Two old GitHub paths redirect here: stellar/soroban-tools and stellar/soroban-cli both resolve to stellar/stellar-cli (GitHub API, 2026-09-01). On crates.io it ships as BOTH stellar-cli (28.0.0, 2026-08-26; first published 2023-10-26) and legacy-named soroban-cli (same 28.0.0; since 2022-07-28, ~174k downloads), both with repository = this repo. https://crates.io/crates/stellar-cli",
 			triggers: ["soroban cli renamed", "soroban tools renamed"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2792,7 +2792,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-rpc": [
 		{
-			note: "Renamed from stellar/soroban-rpc — the old GitHub path redirects here (API resolves it to stellar/stellar-rpc, 2026-09-01); the Docker Hub image moved too: stellar/stellar-rpc (updated 2026-08-27) is current while stellar/soroban-rpc is frozen at 2025-01-31. Latest release v28.0.1 (2026-08-27); v28.0.0 2026-08-17, v27.0.0 2026-06-11. https://github.com/stellar/stellar-rpc/releases",
+			note: "Renamed from stellar/soroban-rpc; the old GitHub path redirects here (API resolves it to stellar/stellar-rpc, 2026-09-01); the Docker Hub image moved too: stellar/stellar-rpc (updated 2026-08-27) is current while stellar/soroban-rpc is frozen at 2025-01-31. Latest release v28.0.1 (2026-08-27); v28.0.0 2026-08-17, v27.0.0 2026-06-11. https://github.com/stellar/stellar-rpc/releases",
 			triggers: ["soroban rpc renamed", "soroban rpc docker image"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2800,7 +2800,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/quickstart": [
 		{
-			note: "Docker Hub image stellar/quickstart (~1.11M pulls, 2026-09-01); no GitHub releases — floating tags latest (mainnet-stable), testing (RCs, mainnet+testnet), futurenet, nightly, nightly-next, plus an immutable per-commit tag v<version>-b<build>.<attempt>-<tag>. README marks it development-only, not for production. https://github.com/stellar/quickstart#tags",
+			note: "Docker Hub image stellar/quickstart (~1.11M pulls, 2026-09-01); no GitHub releases: floating tags latest (mainnet-stable), testing (RCs, mainnet+testnet), futurenet, nightly, nightly-next, plus an immutable per-commit tag v<version>-b<build>.<attempt>-<tag>. README marks it development-only, not for production. https://github.com/stellar/quickstart#tags",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2817,7 +2817,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-01",
 		},
 		{
-			note: "Two repository security advisories (as of 2026-09-01; re-check the live feed): GHSA-mgx8-frjx-x33m / CVE-2024-32985, medium, 2024-05-09 — remote P2P crash, fixed in v20.4.0; GHSA-3p8h-7v82-ffvq, low, 2025-01-29 — memo mutability with Soroban auth signatures (auth entries not bound to the tx memo), fixed in 22.0.0. https://github.com/stellar/stellar-core/security/advisories",
+			note: "Two repository security advisories (as of 2026-09-01; re-check the live feed): GHSA-mgx8-frjx-x33m / CVE-2024-32985, medium, 2024-05-09: remote P2P crash, fixed in v20.4.0; GHSA-3p8h-7v82-ffvq, low, 2025-01-29: memo mutability with Soroban auth signatures (auth entries not bound to the tx memo), fixed in 22.0.0. https://github.com/stellar/stellar-core/security/advisories",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2829,7 +2829,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-01",
 		},
 		{
-			note: "One repository advisory (as of 2026-09-01): GHSA-pm4j-7r4q-ccg8, low, 2026-03-06 — the muxed-address<->ScVal conversion flag could stick after a failed storage-key conversion, causing spurious contract failures (transaction rolls back; no state corruption); soroban-env-host <26.0.0 affected, fixed in 26.0.0. https://github.com/stellar/rs-soroban-env/security/advisories/GHSA-pm4j-7r4q-ccg8",
+			note: "One repository advisory (as of 2026-09-01): GHSA-pm4j-7r4q-ccg8, low, 2026-03-06: the muxed-address<->ScVal conversion flag could stick after a failed storage-key conversion, causing spurious contract failures (transaction rolls back; no state corruption); soroban-env-host <26.0.0 affected, fixed in 26.0.0. https://github.com/stellar/rs-soroban-env/security/advisories/GHSA-pm4j-7r4q-ccg8",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2842,14 +2842,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-13",
 		},
 		{
-			note: "README security status (relay it): unaudited — the smart-wallet contract, SDKs and relayer proxy have had no independent audit; for context rules, thresholds and spending limits it points to the sibling stellar/smart-account-kit built on the audited OpenZeppelin stellar-contracts. Exports PasskeyKit (browser) and PasskeyServer (holds the relayer secret). https://github.com/stellar/passkey-kit",
+			note: "README security status (relay it): unaudited: the smart-wallet contract, SDKs and relayer proxy have had no independent audit; for context rules, thresholds and spending limits it points to the sibling stellar/smart-account-kit built on the audited OpenZeppelin stellar-contracts. Exports PasskeyKit (browser) and PasskeyServer (holds the relayer secret). https://github.com/stellar/passkey-kit",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"creit-tech/stellar-wallets-kit": [
 		{
-			note: "Published under two scopes: npm @creit.tech/stellar-wallets-kit (2.6.0, 2026-08-28; first published 2024-01-12) and JSR @creit-tech/stellar-wallets-kit (2.6.0; on JSR since 2024-11-02, linked to this repo) — the README's install path is now the JSR one (`npx jsr add @creit-tech/stellar-wallets-kit`). Docs at stellarwalletskit.dev; MIT. https://jsr.io/@creit-tech/stellar-wallets-kit",
+			note: "Published under two scopes: npm @creit.tech/stellar-wallets-kit (2.6.0, 2026-08-28; first published 2024-01-12) and JSR @creit-tech/stellar-wallets-kit (2.6.0; on JSR since 2024-11-02, linked to this repo); the README's install path is now the JSR one (`npx jsr add @creit-tech/stellar-wallets-kit`). Docs at stellarwalletskit.dev; MIT. https://jsr.io/@creit-tech/stellar-wallets-kit",
 			triggers: ["wallets kit package", "wallets kit jsr", "wallets kit npm"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2857,7 +2857,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blend-capital/blend-contracts": [
 		{
-			note: "This is the Blend V1 contract repo — last release v1.0.0 (2024-05-01; per-contract wasm: pool, pool-factory, backstop, emitter), last push 2024-07-29, not archived. V2 contracts live in the separate repo blend-capital/blend-contracts-v2 (v2.0.0, 2025-04-14) with docs in blend-capital/docs-v2; companions blend-sdk-js, blend-utils, blend-contract-sdk. AGPL-3.0. https://github.com/blend-capital/blend-contracts-v2",
+			note: "This is the Blend V1 contract repo: last release v1.0.0 (2024-05-01; per-contract wasm: pool, pool-factory, backstop, emitter), last push 2024-07-29, not archived. V2 contracts live in the separate repo blend-capital/blend-contracts-v2 (v2.0.0, 2025-04-14) with docs in blend-capital/docs-v2; companions blend-sdk-js, blend-utils, blend-contract-sdk. AGPL-3.0. https://github.com/blend-capital/blend-contracts-v2",
 			triggers: ["blend v2 contracts"],
 			source: "curated",
 			asOf: "2026-09-01",
@@ -2865,7 +2865,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"coinfabrik/scout-audit": [
 		{
-			note: "Crate name differs from the repo: cargo-scout-audit (0.3.16, 2026-02-13; first published 2023-06-30; ~36k downloads; repository = this repo) — `cargo install cargo-scout-audit`, then `cargo scout-audit` (html/md/pdf/json/sarif output). GitHub Releases are stale (latest v0.2.10, 2024-04-25; tags reach v0.2.19) — read the version from crates.io. https://crates.io/crates/cargo-scout-audit",
+			note: "Crate name differs from the repo: cargo-scout-audit (0.3.16, 2026-02-13; first published 2023-06-30; ~36k downloads; repository = this repo): `cargo install cargo-scout-audit`, then `cargo scout-audit` (html/md/pdf/json/sarif output). GitHub Releases are stale (latest v0.2.10, 2024-04-25; tags reach v0.2.19). Read the version from crates.io. https://crates.io/crates/cargo-scout-audit",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2886,7 +2886,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// verified: gh api repos/stellar/go → archived:true, pushed_at 2025-12-10; raw README.md master lines 13-17.
 	"stellar/freighter-mobile": [
 		{
-			note: "Shipped to both stores — Google Play id org.stellar.freighterwallet and App Store id6743947720 (README badges); tagged releases every 1–3 weeks (v1.19.27 2026-06-17, v1.22.27 2026-08-10, v1.24.28 2026-08-29, v1.25.28 2026-09-01). Dev prerequisites Node ≥22.12 (stellar-sdk 17 ESM), Yarn 4.10. https://github.com/stellar/freighter-mobile/releases",
+			note: "Shipped to both stores: Google Play id org.stellar.freighterwallet and App Store id6743947720 (README badges); tagged releases every 1 to 3 weeks (v1.19.27 2026-06-17, v1.22.27 2026-08-10, v1.24.28 2026-08-29, v1.25.28 2026-09-01). Dev prerequisites Node ≥22.12 (stellar-sdk 17 ESM), Yarn 4.10. https://github.com/stellar/freighter-mobile/releases",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2910,7 +2910,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// verified: default branch master; raw Cargo.toml members; gh api releases?per_page=6; gh api contents/audits; README lines 29-30.
 	"stellar/anchor-platform": [
 		{
-			note: "Releases every 1–3 weeks: 4.7.1 (2026-08-26), 4.7.0 (2026-08-20), 4.6.2 (2026-08-03), 4.6.1 (2026-07-20). Published as the Docker Hub image stellar/anchor-platform; the image is rebuilt with each release and between them, so read its current tag from Docker Hub rather than from here. https://github.com/stellar/anchor-platform/releases",
+			note: "Releases every 1 to 3 weeks: 4.7.1 (2026-08-26), 4.7.0 (2026-08-20), 4.6.2 (2026-08-03), 4.6.1 (2026-07-20). Published as the Docker Hub image stellar/anchor-platform; the image is rebuilt with each release and between them, so read its current tag from Docker Hub rather than from here. https://github.com/stellar/anchor-platform/releases",
 			source: "curated",
 			asOf: "2026-09-05",
 		},
@@ -2934,7 +2934,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// verified: pypi.org/pypi/soroban/json (version, releases, requires_python, project_urls); gh api tags; README `pip install soroban`.
 	"acta-team/did-stellar": [
 		{
-			note: "npm @acta-team/did-stellar (0.1.2, 2026-07-27; first published 2026-05-26; repository = this repo, directory packages/resolver) — did:stellar v0.1 TypeScript SDK (DIF did-resolver compatible) plus a hosted resolver at did.acta.build; repo tag v0.1.3 exists with no matching npm version or GitHub release as of 2026-09-01. https://www.npmjs.com/package/@acta-team/did-stellar",
+			note: "npm @acta-team/did-stellar (0.1.2, 2026-07-27; first published 2026-05-26; repository = this repo, directory packages/resolver): did:stellar v0.1 TypeScript SDK (DIF did-resolver compatible) plus a hosted resolver at did.acta.build; repo tag v0.1.3 exists with no matching npm version or GitHub release as of 2026-09-01. https://www.npmjs.com/package/@acta-team/did-stellar",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2950,7 +2950,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// verified: packages/{snap,connector}/package.json names; registry.npmjs.org for both (created 2026-08-27T16:17Z); gh api contents/ + tags.
 	"kalepail/kale-sc": [
 		{
-			note: "README publishes the live addresses — MAINNET contract CDL74RF5BLYR2YBLCCI7F5FB6TPSCLKEJUBSD2RSVWZ4YHF3VMFAIGWA (the same README table carries the asset issuer, the SAC and the TESTNET equivalents) — and states the contract is unaudited ('a meme coin'). README parameters: 500 KALE/minute, 5% emission decay per ~30 days, ~500M cap; site kalefarm.xyz; no tagged releases. https://github.com/kalepail/KALE-sc",
+			note: "README publishes the live addresses: MAINNET contract CDL74RF5BLYR2YBLCCI7F5FB6TPSCLKEJUBSD2RSVWZ4YHF3VMFAIGWA (the same README table carries the asset issuer, the SAC and the TESTNET equivalents), and states the contract is unaudited ('a meme coin'). README parameters: 500 KALE/minute, 5% emission decay per ~30 days, ~500M cap; site kalefarm.xyz; no tagged releases. https://github.com/kalepail/KALE-sc",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2966,7 +2966,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// verified: gh api repos (description, homepage); raw README.md main badges; gh api releases?per_page=3.
 	"ericmt-98/micopay-protocol": [
 		{
-			note: "Repo moved: ericmt-98/micopay-protocol now lives at Micopay/micopay-protocol (old path redirects; GitHub API resolves it, 2026-09-01) — cite the new org. MIT; app at app.micopay.xyz. https://github.com/Micopay/micopay-protocol",
+			note: "Repo moved: ericmt-98/micopay-protocol now lives at Micopay/micopay-protocol (old path redirects; GitHub API resolves it, 2026-09-01); cite the new org. MIT; app at app.micopay.xyz. https://github.com/Micopay/micopay-protocol",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -2988,7 +2988,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// fact, not a verdict about the project.
 	"stellar/go-stellar-sdk": [
 		{
-			note: "Successor of the stellar/go monorepo: since October 2025 it holds only SDK packages (txnbuild, horizonclient, rpcclient, ingest, xdr); stellar/go is archived and redirects here (https://github.com/stellar/go). Module path github.com/stellar/go-stellar-sdk \u2014 rename imports from github.com/stellar/go/.., no breaking API changes (https://github.com/stellar/go/blob/master/MIGRATION.md).",
+			note: "Successor of the stellar/go monorepo: since October 2025 it holds only SDK packages (txnbuild, horizonclient, rpcclient, ingest, xdr); stellar/go is archived and redirects here (https://github.com/stellar/go). Module path github.com/stellar/go-stellar-sdk: rename imports from github.com/stellar/go/.., no breaking API changes (https://github.com/stellar/go/blob/master/MIGRATION.md).",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -3049,7 +3049,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"solomonadzape95/tilt": [
 		{
-			note: "Repo renamed: solomonadzape95/tilt is now solomonadzape95/crypt (old URL redirects). Project is branded 'API Safety Net' \u2014 a parametric SLA escrow on Soroban paying USDC to subscribers on API downtime, built for the Boundless x Trustless Work Hackathon (https://github.com/solomonadzape95/crypt).",
+			note: "Repo renamed: solomonadzape95/tilt is now solomonadzape95/crypt (old URL redirects). Project is branded 'API Safety Net', a parametric SLA escrow on Soroban paying USDC to subscribers on API downtime, built for the Boundless x Trustless Work Hackathon (https://github.com/solomonadzape95/crypt).",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -3096,7 +3096,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// hackathon demos) and are deliberately absent.
 	"stellar/js-stellar-sdk": [
 		{
-			note: "npm name is @stellar/stellar-sdk (17.1.0, 2026-09-14). Three older packages are deprecated on npm in its favor: stellar-sdk (frozen at 13.3.0), soroban-client (frozen at 1.0.1), and @stellar/stellar-base (rolled into the SDK at v16.0.0, 2026-06-15) \u2014 resolve docs/code importing any of those to @stellar/stellar-sdk. https://www.npmjs.com/package/@stellar/stellar-sdk",
+			note: "npm name is @stellar/stellar-sdk (17.1.0, 2026-09-14). Three older packages are deprecated on npm in its favor: stellar-sdk (frozen at 13.3.0), soroban-client (frozen at 1.0.1), and @stellar/stellar-base (rolled into the SDK at v16.0.0, 2026-06-15); resolve docs/code importing any of those to @stellar/stellar-sdk. https://www.npmjs.com/package/@stellar/stellar-sdk",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
@@ -3106,7 +3106,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-01",
 		},
 		{
-			note: "Publishes agent-facing docs bundles \u2014 llms.txt (index) and llms-full.txt (full corpus + changelog) at https://stellar.github.io/js-stellar-sdk/llms.txt \u2014 point AI tools there instead of scraping the repo; the generated bundles are not committed to the repo itself.",
+			note: "Publishes agent-facing docs bundles: llms.txt (index) and llms-full.txt (full corpus + changelog) at https://stellar.github.io/js-stellar-sdk/llms.txt; point AI tools there instead of scraping the repo; the generated bundles are not committed to the repo itself.",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -3125,19 +3125,19 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/freighter": [
 		{
-			note: "Monorepo: the browser extension (5.47.0, 2026-08-31) plus the site-integration npm SDK @stellar/freighter-api (6.0.1, 2025-12-03). The extension is configured against TWO backend repos \u2014 stellar/freighter-backend (V1) and stellar/freighter-backend-v2 (V2), both wired via INDEXER_URL/INDEXER_V2_URL; the mobile app is the separate repo stellar/freighter-mobile.",
+			note: "Monorepo: the browser extension (5.47.0, 2026-08-31) plus the site-integration npm SDK @stellar/freighter-api (6.0.1, 2025-12-03). The extension is configured against TWO backend repos: stellar/freighter-backend (V1) and stellar/freighter-backend-v2 (V2), both wired via INDEXER_URL/INDEXER_V2_URL; the mobile app is the separate repo stellar/freighter-mobile.",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 		{
-			note: "One advisory in the GitHub Advisory Database: GHSA-vqr6-hwg2-775w (high, 2023-08-23) \u2014 mnemonic phrase readable by JavaScript through a private API, fixed in extension 5.3.1. Long patched; only relevant to forks/builds pinned below 5.3.1. https://github.com/stellar/freighter/security/advisories/GHSA-vqr6-hwg2-775w",
+			note: "One advisory in the GitHub Advisory Database: GHSA-vqr6-hwg2-775w (high, 2023-08-23): mnemonic phrase readable by JavaScript through a private API, fixed in extension 5.3.1. Long patched; only relevant to forks/builds pinned below 5.3.1. https://github.com/stellar/freighter/security/advisories/GHSA-vqr6-hwg2-775w",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"stellar/smart-account-kit": [
 		{
-			note: "npm package is the unscoped smart-account-kit (0.8.0, 2026-09-08) \u2014 TypeScript client for the OpenZeppelin/stellar-contracts smart-account contract (passkeys, multi-signers, policies, fee sponsoring). Repo created 2026-07-30; Protocol 27 deployment artifacts are versioned in docs/deployments-protocol-27-2026-07-09.md. https://www.npmjs.com/package/smart-account-kit",
+			note: "npm package is the unscoped smart-account-kit (0.8.0, 2026-09-08): TypeScript client for the OpenZeppelin/stellar-contracts smart-account contract (passkeys, multi-signers, policies, fee sponsoring). Repo created 2026-07-30; Protocol 27 deployment artifacts are versioned in docs/deployments-protocol-27-2026-07-09.md. https://www.npmjs.com/package/smart-account-kit",
 			source: "curated",
 			asOf: "2026-09-13",
 		},
@@ -3149,21 +3149,21 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"creit-tech/xbull-wallet": [
 		{
-			note: "For app integration the repo itself points at Stellar Wallets Kit (Creit-Tech/Stellar-Wallets-Kit, npm @creit.tech/stellar-wallets-kit 2.6.0, 2026-08-28) \u2014 one library covering xBull plus other Stellar wallets; the in-page xBullSDK is the older direct path. Latest wallet release v1.40.0 (2025-08-12): SEP-0053 message signing, protocol-23 SDK. AGPLv3. https://github.com/Creit-Tech/xBull-Wallet",
+			note: "For app integration the repo itself points at Stellar Wallets Kit (Creit-Tech/Stellar-Wallets-Kit, npm @creit.tech/stellar-wallets-kit 2.6.0, 2026-08-28): one library covering xBull plus other Stellar wallets; the in-page xBullSDK is the older direct path. Latest wallet release v1.40.0 (2025-08-12): SEP-0053 message signing, protocol-23 SDK. AGPLv3. https://github.com/Creit-Tech/xBull-Wallet",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"stellarterm/stellarterm": [
 		{
-			note: "Web trading client for stellarterm.com; the markets API is the companion repo stellarterm/stellarterm-api (api.stellarterm.com, last push 2024-01). The README's deploy pointer stellarterm/stellarterm.github.io is an archived repo (last push 2018) \u2014 don't cite it as the live deploy path. Testnet mode via stellarterm.com/#testnet. https://github.com/stellarterm/stellarterm",
+			note: "Web trading client for stellarterm.com; the markets API is the companion repo stellarterm/stellarterm-api (api.stellarterm.com, last push 2024-01). The README's deploy pointer stellarterm/stellarterm.github.io is an archived repo (last push 2018). Don't cite it as the live deploy path. Testnet mode via stellarterm.com/#testnet. https://github.com/stellarterm/stellarterm",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"shamba-records-limited/microvault": [
 		{
-			note: "SEP-0056 tokenized-vault engine for microlending; TESTNET deployment \u2014 vault CDZVKARL\u2026 and governance CAL3RYRW\u2026 contract addresses are published in the README (stellar.expert testnet links). v1.1.2 (2026-08-31) added MoneyGram cash-in for repayments and YellowCard collections. AGPL-3.0 with CLA-based dual licensing (commercial license offered). https://github.com/Shamba-Records-Limited/microvault",
+			note: "SEP-0056 tokenized-vault engine for microlending; TESTNET deployment: vault CDZVKARL\u2026 and governance CAL3RYRW\u2026 contract addresses are published in the README (stellar.expert testnet links). v1.1.2 (2026-08-31) added MoneyGram cash-in for repayments and YellowCard collections. AGPL-3.0 with CLA-based dual licensing (commercial license offered). https://github.com/Shamba-Records-Limited/microvault",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -3177,28 +3177,28 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bosun-josh121/clevercon": [
 		{
-			note: "Repo moved: now lives at clevercon-protocol/clevercon (old Bosun-Josh121 URL redirects; verified 2026-09-01) \u2014 cite the new org. Agent-payment rail + service marketplace on Stellar TESTNET (CleverVault contract CC4QX7\u2026); placed 2nd in the Stellar Agents hackathon; the privacy roadmap builds on companion repo Bosun-Josh121/ciphermit. https://github.com/clevercon-protocol/clevercon",
+			note: "Repo moved: now lives at clevercon-protocol/clevercon (old Bosun-Josh121 URL redirects; verified 2026-09-01). Cite the new org. Agent-payment rail + service marketplace on Stellar TESTNET (CleverVault contract CC4QX7\u2026); placed 2nd in the Stellar Agents hackathon; the privacy roadmap builds on companion repo Bosun-Josh121/ciphermit. https://github.com/clevercon-protocol/clevercon",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"ritik4ever/lodestar": [
 		{
-			note: "Repo moved: now lives at Stellar-Ecosystem/lodestar (old ritik4ever URL redirects; verified 2026-09-01). x402 service-discovery registry + agent credit scoring, two Soroban contracts on TESTNET (registry CAKZALA\u2026, agents CCT4FUTW\u2026); its own README status section says early-stage, demo-ready, not production-grade \u2014 relay that framing. https://github.com/Stellar-Ecosystem/lodestar",
+			note: "Repo moved: now lives at Stellar-Ecosystem/lodestar (old ritik4ever URL redirects; verified 2026-09-01). x402 service-discovery registry + agent credit scoring, two Soroban contracts on TESTNET (registry CAKZALA\u2026, agents CCT4FUTW\u2026); its own README status section says early-stage, demo-ready, not production-grade. Relay that framing. https://github.com/Stellar-Ecosystem/lodestar",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"xaviersharwin10/soroban_node_0": [
 		{
-			note: "Despite the placeholder repo name, this is the Soroban Security Auditor agent from Stellar Hacks: Agents (April 2026), published on npm as auditor-mcp (0.1.8, 2026-04-12) \u2014 an MCP server whose agent audits Soroban .rs contracts and self-pays 0.15 USDC per audit via x402/Stripe MPP on testnet. Resolve auditor-mcp questions to this repo. https://www.npmjs.com/package/auditor-mcp",
+			note: "Despite the placeholder repo name, this is the Soroban Security Auditor agent from Stellar Hacks: Agents (April 2026), published on npm as auditor-mcp (0.1.8, 2026-04-12): an MCP server whose agent audits Soroban .rs contracts and self-pays 0.15 USDC per audit via x402/Stripe MPP on testnet. Resolve auditor-mcp questions to this repo. https://www.npmjs.com/package/auditor-mcp",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
 	],
 	"davidmaronio/stellarpay402": [
 		{
-			note: "Published on npm twice: @davidmaronio/stellarpay402-mcp (MCP server, 0.1.1, 2026-04-08) and stellarpay402 (CLI, 0.1.1, 2026-04-13) \u2014 agent-to-agent API marketplace with a Soroban registry contract on TESTNET (CCCCETOW\u2026), built for the April 2026 Stellar x402 hackathon. https://www.npmjs.com/package/stellarpay402",
+			note: "Published on npm twice: @davidmaronio/stellarpay402-mcp (MCP server, 0.1.1, 2026-04-08) and stellarpay402 (CLI, 0.1.1, 2026-04-13): agent-to-agent API marketplace with a Soroban registry contract on TESTNET (CCCCETOW\u2026), built for the April 2026 Stellar x402 hackathon. https://www.npmjs.com/package/stellarpay402",
 			source: "curated",
 			asOf: "2026-09-01",
 		},
@@ -3228,7 +3228,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// permanent list — the note says to re-check the live feed.
 	"stellar/rs-soroban-sdk": [
 		{
-			note: "Security advisories (as of 2026-08-31, check the live advisory feed — this list is dated, not permanent): CVE-2026-24889 / GHSA-96xm-fv9w-pf3f, medium — overflow in Bytes::slice, Vec::slice, GenRange::gen_range (soroban-sdk; fixed in 25.0.2 / 23.5.1 / 22.0.9); CVE-2026-26267 / GHSA-4chv-4c6w-w254, high — #[contractimpl] macro calls inherent function instead of trait (soroban-sdk-macros; fixed in 25.1.1 / 23.5.2 / 22.0.10); CVE-2026-32322 / GHSA-x2hw-px52-wp4m, medium — Fr scalar field equality bypasses modular reduction (soroban-sdk; fixed in 25.3.0 / 23.5.3 / 22.0.11). Impact conditions differ per advisory; upgrade to a patched supported branch and recompile affected deployed code.",
+			note: "Security advisories (as of 2026-08-31, check the live advisory feed; this list is dated, not permanent): CVE-2026-24889 / GHSA-96xm-fv9w-pf3f, medium: overflow in Bytes::slice, Vec::slice, GenRange::gen_range (soroban-sdk; fixed in 25.0.2 / 23.5.1 / 22.0.9); CVE-2026-26267 / GHSA-4chv-4c6w-w254, high: #[contractimpl] macro calls inherent function instead of trait (soroban-sdk-macros; fixed in 25.1.1 / 23.5.2 / 22.0.10); CVE-2026-32322 / GHSA-x2hw-px52-wp4m, medium: Fr scalar field equality bypasses modular reduction (soroban-sdk; fixed in 25.3.0 / 23.5.3 / 22.0.11). Impact conditions differ per advisory; upgrade to a patched supported branch and recompile affected deployed code.",
 			source: "curated",
 			asOf: "2026-08-31",
 		},
@@ -3237,7 +3237,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// work): per-protocol extension docs live in subdirectory READMEs.
 	"creit-tech/stellar-indexer-sdk": [
 		{
-			note: "Ships per-protocol extensions with their own docs under src/protocols/ (Blend, Reflector, Axis Markets; more in progress) — the root README is the map. Service is token-gated beta; SDK published on JSR as @stellar-indexer/stellar-indexer-sdk.",
+			note: "Ships per-protocol extensions with their own docs under src/protocols/ (Blend, Reflector, Axis Markets; more in progress): the root README is the map. Service is token-gated beta; SDK published on JSR as @stellar-indexer/stellar-indexer-sdk.",
 			source: "curated",
 			asOf: "2026-08-01",
 		},
@@ -3247,12 +3247,12 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// below verified against source, not README prose alone.
 	"fazzatti/colibri": [
 		{
-			note: "Published on JSR as @colibri/core; fazzatti/colibri-examples is the companion worked-examples repo — cite both together for how-to questions.",
+			note: "Published on JSR as @colibri/core; fazzatti/colibri-examples is the companion worked-examples repo. Cite both together for how-to questions.",
 			source: "curated",
 			asOf: "2026-07-31",
 		},
 		{
-			note: "TypeScript-first Stellar/Soroban toolkit built on a pipeline/process/step architecture with a plugin system and deterministic error handling — including decoding contract errors out of failed simulation responses (core/common/helpers/contract-error-from-failed-simulation-response).",
+			note: "TypeScript-first Stellar/Soroban toolkit built on a pipeline/process/step architecture with a plugin system and deterministic error handling: including decoding contract errors out of failed simulation responses (core/common/helpers/contract-error-from-failed-simulation-response).",
 			source: "curated",
 			asOf: "2026-08-15",
 		},
@@ -3262,12 +3262,12 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-08-15",
 		},
 		{
-			note: "@colibri/webauth implements unified SEP-10 AND SEP-45 web authentication with deterministic account routing, strict challenge verification, and enforced Soroban simulation — one of the few SEP-45 (contract-account auth) implementations in the ecosystem.",
+			note: "@colibri/webauth implements unified SEP-10 AND SEP-45 web authentication with deterministic account routing, strict challenge verification, and enforced Soroban simulation: one of the few SEP-45 (contract-account auth) implementations in the ecosystem.",
 			source: "curated",
 			asOf: "2026-08-15",
 		},
 		{
-			note: "Ships a working smart-account reference fleet as in-repo Soroban contracts (_internal/contracts): passkey-account, delegated-asset-account, recursive-delegate-account, signatureless-account, web-auth — built to compiled wasm with sha256-pinned fixtures and tested against; the code-symbols layer (PasskeyAccount, DelegatedAssetAccount) comes from here.",
+			note: "Ships a working smart-account reference fleet as in-repo Soroban contracts (_internal/contracts): passkey-account, delegated-asset-account, recursive-delegate-account, signatureless-account, web-auth: built to compiled wasm with sha256-pinned fixtures and tested against; the code-symbols layer (PasskeyAccount, DelegatedAssetAccount) comes from here.",
 			source: "curated",
 			asOf: "2026-08-15",
 		},
@@ -3281,14 +3281,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// giant's Stellar integration is real code in this monorepo.
 	"sushi-labs/sushiswap": [
 		{
-			note: "SushiSwap is live on Stellar: this monorepo carries real Stellar integration code (deps @creit.tech/stellar-wallets-kit + @stellar/stellar-sdk, scanned capabilities contract-invoke + signing) — swap execution against Soroban with wallet-kit signing. Its codeDomains stay interface-derived (the Stellar side is TS integration, not contracts), so it deliberately does NOT carry defi-amm; cite this note for 'is Sushi on Stellar' questions.",
+			note: "SushiSwap is live on Stellar: this monorepo carries real Stellar integration code (deps @creit.tech/stellar-wallets-kit + @stellar/stellar-sdk, scanned capabilities contract-invoke + signing): swap execution against Soroban with wallet-kit signing. Its codeDomains stay interface-derived (the Stellar side is TS integration, not contracts), so it deliberately does NOT carry defi-amm; cite this note for 'is Sushi on Stellar' questions.",
 			source: "curated",
 			asOf: "2026-08-15",
 		},
 	],
 	"fazzatti/colibri-examples": [
 		{
-			note: "Companion worked-examples repo for @colibri (Deno runtime): getting-started/ carries the newcomer walkthroughs, examples/ the per-feature recipes, each with its own README — the practical entry point before reading colibri core.",
+			note: "Companion worked-examples repo for @colibri (Deno runtime): getting-started/ carries the newcomer walkthroughs, examples/ the per-feature recipes, each with its own README; the practical entry point before reading colibri core.",
 			source: "curated",
 			asOf: "2026-08-15",
 		},
@@ -3315,14 +3315,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"fxjrin/stellar-contracts-kit": [
 		{
-			note: "npm stellar-contracts-kit 0.1.1 (2026-06-05; = repo tag v0.1.1): TypeScript SDK for Soroban — `npx sck` generates typed contract clients from any live contract spec, a built-in wallet modal (Freighter, Cyphras, Lobstr), auto / read-only / force-invoke call modes, spec caching and one-call contract restore for expired state (README read 2026-09-14; MIT; last push 2026-06-05 — nothing since the 0.1.1 release).",
+			note: "npm stellar-contracts-kit 0.1.1 (2026-06-05; = repo tag v0.1.1): TypeScript SDK for Soroban: `npx sck` generates typed contract clients from any live contract spec, a built-in wallet modal (Freighter, Cyphras, Lobstr), auto / read-only / force-invoke call modes, spec caching and one-call contract restore for expired state (README read 2026-09-14; MIT; last push 2026-06-05; nothing since the 0.1.1 release).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
 	],
 	"stellar/stellar-dbt-public": [
 		{
-			note: "SDF's public dbt project — the data-transformation models behind its analytics datasets; releases track a semver stream (v1.15.59 on 2026-09-10) and branches are named major/minor/patch by change type (README read 2026-09-14; Python; last push 2026-09-11).",
+			note: "SDF's public dbt project: the data-transformation models behind its analytics datasets; releases track a semver stream (v1.15.59 on 2026-09-10) and branches are named major/minor/patch by change type (README read 2026-09-14; Python; last push 2026-09-11).",
 			triggers: ["stellar dbt models", "sdf analytics dbt"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3341,7 +3341,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-demo-wallet": [
 		{
-			note: "SDF's Stellar Demo Wallet, hosted at demo-wallet.stellar.org — a front end for interactively testing anchor SEP interoperability (automated anchor testing lives in stellar/stellar-anchor-tests); defaults to testnet, mainnet via HORIZON_PASSPHRASE/HORIZON_URL in env-config.js; latest release v3.0.0 (2025-09-10); the 'Build a Stellar Wallet' tutorial it was created for moved to stellar/docs-wallet (README read 2026-09-14; Apache-2.0; last push 2026-09-09).",
+			note: "SDF's Stellar Demo Wallet, hosted at demo-wallet.stellar.org: a front end for interactively testing anchor SEP interoperability (automated anchor testing lives in stellar/stellar-anchor-tests); defaults to testnet, mainnet via HORIZON_PASSPHRASE/HORIZON_URL in env-config.js; latest release v3.0.0 (2025-09-10); the 'Build a Stellar Wallet' tutorial it was created for moved to stellar/docs-wallet (README read 2026-09-14; Apache-2.0; last push 2026-09-09).",
 			triggers: ["demo wallet anchor testing", "test anchor sep flows"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3349,7 +3349,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NethermindEth/stellar-private-payments": [
 		{
-			note: "Nethermind's privacy-pools reference implementation for Stellar — WIP and not audited per its README: Groth16 (BN254) proofs from Circom circuits, browser-side WASM proving, Soroban contracts, SEP-0043 wallet signing, and Association Set Providers (ASPs) as the compliance control; demo at nethermindeth.github.io/stellar-private-payments; npm stellar-private-payments 0.1.0 (2026-09-03); repo tag circuits-v0.3 (2026-09-01) (README read 2026-09-14; Rust; Apache-2.0; last push 2026-09-12).",
+			note: "Nethermind's privacy-pools reference implementation for Stellar; WIP and not audited per its README: Groth16 (BN254) proofs from Circom circuits, browser-side WASM proving, Soroban contracts, SEP-0043 wallet signing, and Association Set Providers (ASPs) as the compliance control; demo at nethermindeth.github.io/stellar-private-payments; npm stellar-private-payments 0.1.0 (2026-09-03); repo tag circuits-v0.3 (2026-09-01) (README read 2026-09-14; Rust; Apache-2.0; last push 2026-09-12).",
 			triggers: [
 				"privacy pools stellar",
 				"private payments zero knowledge stellar",
@@ -3360,7 +3360,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/friendbot": [
 		{
-			note: "Friendbot, the testnet/futurenet XLM faucet: one REST endpoint (GET|POST / with addr=) that creates and funds accounts and — when configured with fund_contract_addresses + rpc_url — contract C… addresses; hosted at friendbot.stellar.org (testnet) and friendbot-futurenet.stellar.org; Quickstart serves it at localhost:8000/friendbot; merges to main deploy to testnet immediately (README read 2026-09-14; Go; Apache-2.0; no tagged releases; last push 2026-08-28).",
+			note: "Friendbot, the testnet/futurenet XLM faucet: one REST endpoint (GET|POST / with addr=) that creates and funds accounts and; when configured with fund_contract_addresses + rpc_url: contract C… addresses; hosted at friendbot.stellar.org (testnet) and friendbot-futurenet.stellar.org; Quickstart serves it at localhost:8000/friendbot; merges to main deploy to testnet immediately (README read 2026-09-14; Go; Apache-2.0; no tagged releases; last push 2026-08-28).",
 			triggers: [
 				"testnet faucet",
 				"fund a testnet account",
@@ -3372,14 +3372,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/freighter-backend-v2": [
 		{
-			note: "Freighter's next-generation backend, written in Go, PostgreSQL-backed; the TypeScript stellar/freighter-backend (indexer integration layer) is still active alongside it (last push 2026-09-04). Releases are Docker images cut by a two-step prerelease → promote GitHub Actions flow into an internal registry — no GitHub releases (README read 2026-09-14; last push 2026-09-08).",
+			note: "Freighter's next-generation backend, written in Go, PostgreSQL-backed; the TypeScript stellar/freighter-backend (indexer integration layer) is still active alongside it (last push 2026-09-04). Releases are Docker images cut by a two-step prerelease → promote GitHub Actions flow into an internal registry; no GitHub releases (README read 2026-09-14; last push 2026-09-08).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
 	],
 	"gateway-fm/oz-policy-builder": [
 		{
-			note: "OpenZeppelin Accounts Policy Builder for Soroban: record a transaction (on-chain by hash or locally simulated) and synthesize a minimum-permission context rule plus a validated policy composition as human-readable Rust implementing the OpenZeppelin Policy trait — deterministic, fail-closed, nothing deployed automatically. An SCF-funded project; its Tranche 1 surface (recorder → PolicySpec → synthesizer → codegen, a reference evaluator and MCP ops) shipped as v0.1.0 on 2026-09-03 (README read 2026-09-14; Rust; Apache-2.0; last push 2026-09-08).",
+			note: "OpenZeppelin Accounts Policy Builder for Soroban: record a transaction (on-chain by hash or locally simulated) and synthesize a minimum-permission context rule plus a validated policy composition as human-readable Rust implementing the OpenZeppelin Policy trait: deterministic, fail-closed, nothing deployed automatically. An SCF-funded project; its Tranche 1 surface (recorder → PolicySpec → synthesizer → codegen, a reference evaluator and MCP ops) shipped as v0.1.0 on 2026-09-03 (README read 2026-09-14; Rust; Apache-2.0; last push 2026-09-08).",
 			triggers: [
 				"openzeppelin policy builder",
 				"smart account policy from transaction",
@@ -3390,7 +3390,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Scopuly/x402-stellar-guard": [
 		{
-			note: "npm @scopuly/x402-stellar-guard 0.1.0 (2026-08-13; public preview, not audited per its README): the wallet-side safety layer for x402 v2 payments on Stellar — strict PAYMENT-REQUIRED parsing, HTTPS origin binding, network / SEP-41 asset / recipient / amount / fee-sponsorship policy, exact CAP-71 transfer decoding and byte-level binding of the authorization entry to the reviewed intent; scoped to Stellar 'exact' payments with explicit user approval (README read 2026-09-14; Apache-2.0; last push 2026-09-13).",
+			note: "npm @scopuly/x402-stellar-guard 0.1.0 (2026-08-13; public preview, not audited per its README): the wallet-side safety layer for x402 v2 payments on Stellar: strict PAYMENT-REQUIRED parsing, HTTPS origin binding, network / SEP-41 asset / recipient / amount / fee-sponsorship policy, exact CAP-71 transfer decoding and byte-level binding of the authorization entry to the reviewed intent; scoped to Stellar 'exact' payments with explicit user approval (README read 2026-09-14; Apache-2.0; last push 2026-09-13).",
 			triggers: ["x402 wallet safety", "x402 payment policy stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3398,7 +3398,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Smart-Treasury-Account-STA/sdk": [
 		{
-			note: "npm sta-sdk 0.2.1 (2026-09-10): TypeScript SDK for the Smart Treasury Account Soroban contracts — smart_account custom-authorization (Entry A / Entry B) construction, prepare → simulate → sign → submit → poll, typed #[contractevent] parsing and typed state reads (policy version, replay nonce, recovery state); targets the live testnet and mainnet deployments; peer dependency @stellar/stellar-sdk >= 16 (README read 2026-09-14; MIT; no GitHub releases; last push 2026-09-10).",
+			note: "npm sta-sdk 0.2.1 (2026-09-10): TypeScript SDK for the Smart Treasury Account Soroban contracts: smart_account custom-authorization (Entry A / Entry B) construction, prepare → simulate → sign → submit → poll, typed #[contractevent] parsing and typed state reads (policy version, replay nonce, recovery state); targets the live testnet and mainnet deployments; peer dependency @stellar/stellar-sdk >= 16 (README read 2026-09-14; MIT; no GitHub releases; last push 2026-09-10).",
 			triggers: ["smart treasury account sdk", "sta sdk soroban"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3406,7 +3406,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Fundable-Protocol/fundable-sdk": [
 		{
-			note: "npm @fundable/sdk 0.2.3 (2026-09-14; the repo's last tag v0.1.0 of 2026-07-26 lags npm): multichain TypeScript SDK for Fundable token streams and distributions — Stellar is the first implemented chain adapter and the public domain types deliberately carry no Soroban-specific values; 0.x API, docs on GitBook (README read 2026-09-14; MIT; last push 2026-09-13).",
+			note: "npm @fundable/sdk 0.2.3 (2026-09-14; the repo's last tag v0.1.0 of 2026-07-26 lags npm): multichain TypeScript SDK for Fundable token streams and distributions: Stellar is the first implemented chain adapter and the public domain types deliberately carry no Soroban-specific values; 0.x API, docs on GitBook (README read 2026-09-14; MIT; last push 2026-09-13).",
 			triggers: ["fundable token streams", "fundable sdk stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3441,7 +3441,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/dashboard": [
 		{
-			note: "Source of dashboard.stellar.org, SDF's network dashboard — a JavaScript app on Node 22 with no tagged releases (README read 2026-09-14; 238 stars; last push 2026-09-03).",
+			note: "Source of dashboard.stellar.org, SDF's network dashboard: a JavaScript app on Node 22 with no tagged releases (README read 2026-09-14; 238 stars; last push 2026-09-03).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
@@ -3456,14 +3456,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"subquery/stellar-subql-starter": [
 		{
-			note: "SubQuery's starter/example indexer project for Stellar and Soroban (bootstrap with `npm i -g @subql/cli` and `subql init`; works across Stellar's networks) — a template, not a maintained product: no releases, last push 2026-01-22 (README read 2026-09-14).",
+			note: "SubQuery's starter/example indexer project for Stellar and Soroban (bootstrap with `npm i -g @subql/cli` and `subql init`; works across Stellar's networks), a template, not a maintained product: no releases, last push 2026-01-22 (README read 2026-09-14).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
 	],
 	"Inferara/soroban-ret": [
 		{
-			note: "Soroban smart-contract reverse-engineering tool from Inferara, listed under the Stellar Security Portal dev tools: a five-stage pipeline decompiling contract WASM to Rust that compiles back for wasm32v1-none; its README (read 2026-09-14) states 38 of 39 fixtures round-trip and large mainnet contracts recover correct interfaces but only partial bodies — 'read the output as a reconstruction, not as the original source'; repo tag v0.0.4 (2026-07-26); Apache-2.0; last push 2026-08-06.",
+			note: "Soroban smart-contract reverse-engineering tool from Inferara, listed under the Stellar Security Portal dev tools: a five-stage pipeline decompiling contract WASM to Rust that compiles back for wasm32v1-none; its README (read 2026-09-14) states 38 of 39 fixtures round-trip and large mainnet contracts recover correct interfaces but only partial bodies: 'read the output as a reconstruction, not as the original source'; repo tag v0.0.4 (2026-07-26); Apache-2.0; last push 2026-08-06.",
 			triggers: ["decompile soroban wasm", "soroban reverse engineering"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3471,7 +3471,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"eq-lab/pipeline": [
 		{
-			note: "Examined 2026-09-14: no README, no description, no topics; a v0.0.2 tag (2026-09-10) exists. Nothing durable to state publicly — revisit if a README lands.",
+			note: "Examined 2026-09-14: no README, no description, no topics; a v0.0.2 tag (2026-09-10) exists. Nothing durable to state publicly. Revisit if a README lands.",
 			visibility: "internal",
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3480,7 +3480,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// ── P5 wave 5 (2026-09-14): next 12 of the curated-pool repos without a note.
 	"OpenZeppelin/role-manager": [
 		{
-			note: "OpenZeppelin's Role Manager (rolemanager.openzeppelin.com): an access-control management interface for OpenZeppelin Access Control contracts across chains — visualize roles and permissions and execute administrative actions; latest release v3.0.0 (2026-08-25); the README marks the project 'currently in development' (read 2026-09-14; TypeScript; AGPL-3.0; 9 stars; last push 2026-09-01).",
+			note: "OpenZeppelin's Role Manager (rolemanager.openzeppelin.com): an access-control management interface for OpenZeppelin Access Control contracts across chains: visualize roles and permissions and execute administrative actions; latest release v3.0.0 (2026-08-25); the README marks the project 'currently in development' (read 2026-09-14; TypeScript; AGPL-3.0; 9 stars; last push 2026-09-01).",
 			triggers: ["openzeppelin role manager"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3488,7 +3488,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"xcapit/shelter": [
 		{
-			note: "Shelter: humanitarian-aid disbursement on smart contracts — donors fund a Shelter with tokens such as USDC and stewards (NGOs, community partners) control who can access aid, when and how; the README marks it Work in Progress; last release ltw_service-v1.2.0 (2025-09-10) and last push 2025-09-19 — no activity for a year (read 2026-09-14; TypeScript; AGPL-3.0; 17 stars).",
+			note: "Shelter: humanitarian-aid disbursement on smart contracts: donors fund a Shelter with tokens such as USDC and stewards (NGOs, community partners) control who can access aid, when and how; the README marks it Work in Progress; last release ltw_service-v1.2.0 (2025-09-10) and last push 2025-09-19; no activity for a year (read 2026-09-14; TypeScript; AGPL-3.0; 17 stars).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
@@ -3503,7 +3503,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarchain/io.stellarkey": [
 		{
-			note: "StellarKey (stellarkey.io): an open-source, backend-free self-custodial Stellar wallet and local-first point of sale — Next.js 16, React 19, @stellar/stellar-sdk 17, shipped as a static export so keys, wallet records and merchant data stay on the user's device; v1.0.2 (2026-09-14) (README read 2026-09-14; AGPL-3.0; last push 2026-09-14).",
+			note: "StellarKey (stellarkey.io): an open-source, backend-free self-custodial Stellar wallet and local-first point of sale: Next.js 16, React 19, @stellar/stellar-sdk 17, shipped as a static export so keys, wallet records and merchant data stay on the user's device; v1.0.2 (2026-09-14) (README read 2026-09-14; AGPL-3.0; last push 2026-09-14).",
 			triggers: ["stellarkey wallet", "self-custodial wallet point of sale"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3511,7 +3511,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"untangledfinance/oz-policy-builder": [
 		{
-			note: "npm @crediolabs/policy-synth 1.3.0 (2026-09-01): records a Soroban transaction and synthesizes the minimal policy an OpenZeppelin Stellar smart account then enforces on every call ('this key may only call transfer on USDC, never more than 50 at a time, only to these addresses') — an off-chain synthesizer plus the on-chain predicate. Not the same project as gateway-fm/oz-policy-builder (Rust, SCF Tranche 1), which shares the name and the goal (README read 2026-09-14; TypeScript; MIT; no GitHub releases; last push 2026-09-01).",
+			note: "npm @crediolabs/policy-synth 1.3.0 (2026-09-01): records a Soroban transaction and synthesizes the minimal policy an OpenZeppelin Stellar smart account then enforces on every call ('this key may only call transfer on USDC, never more than 50 at a time, only to these addresses'): an off-chain synthesizer plus the on-chain predicate. Not the same project as gateway-fm/oz-policy-builder (Rust, SCF Tranche 1), which shares the name and the goal (README read 2026-09-14; TypeScript; MIT; no GitHub releases; last push 2026-09-01).",
 			triggers: ["policy synth openzeppelin", "crediolabs policy"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3527,14 +3527,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Stellar-Light/stellarlight": [
 		{
-			note: "The source of stellarlight.xyz — the Stellar ecosystem data layer (projects, repos, builders, hackathons, a research corpus) served to people and to agents through /api/* with an OpenAPI spec at /api/openapi.json; Next.js 16 + Payload CMS on MongoDB; ARCHITECTURE.md documents the code-verified mechanics (README read 2026-09-14; MIT; no tagged releases; last push 2026-09-14).",
+			note: "The source of stellarlight.xyz: the Stellar ecosystem data layer (projects, repos, builders, hackathons, a research corpus) served to people and to agents through /api/* with an OpenAPI spec at /api/openapi.json; Next.js 16 + Payload CMS on MongoDB; ARCHITECTURE.md documents the code-verified mechanics (README read 2026-09-14; MIT; no tagged releases; last push 2026-09-14).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
 	],
 	"stellar/supercluster": [
 		{
-			note: "Stellar Supercluster (SSC): SDF's stellar-core integration-test automation — runs containerized core nodes in self-contained simulated networks on Kubernetes and drives traffic or core's internal load generation; the second-generation tool that replaced the retired Stellar Core Commander (SCC) (README read 2026-09-14; F#; no releases; last push 2026-09-08).",
+			note: "Stellar Supercluster (SSC): SDF's stellar-core integration-test automation: runs containerized core nodes in self-contained simulated networks on Kubernetes and drives traffic or core's internal load generation; the second-generation tool that replaced the retired Stellar Core Commander (SCC) (README read 2026-09-14; F#; no releases; last push 2026-09-08).",
 			triggers: ["stellar core integration testing", "supercluster"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3542,7 +3542,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"axis-markets/js-client": [
 		{
-			note: "npm @axis-markets/client 0.5.0 (2026-09-13): JavaScript SDK for the AXIS Stellar DEX — AxisContractClient wraps the on-chain AXIS contract (sign and send, read orders) and AxisApiClient is a dependency-free HTTP client for the aggregator/indexer REST API (quotes, orderbook depth, candles, ticker, market/order/trade data) (README read 2026-09-14; MIT; no GitHub releases; last push 2026-09-13).",
+			note: "npm @axis-markets/client 0.5.0 (2026-09-13): JavaScript SDK for the AXIS Stellar DEX: AxisContractClient wraps the on-chain AXIS contract (sign and send, read orders) and AxisApiClient is a dependency-free HTTP client for the aggregator/indexer REST API (quotes, orderbook depth, candles, ticker, market/order/trade data) (README read 2026-09-14; MIT; no GitHub releases; last push 2026-09-13).",
 			triggers: ["axis dex sdk", "axis markets client"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3558,14 +3558,14 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blend-capital/blend-utils": [
 		{
-			note: "Deployment and utility scripts for the Blend Protocol — deploying the contracts and setting up mock environments; no releases, last push 2025-12-18 (README read 2026-09-14; TypeScript; MIT).",
+			note: "Deployment and utility scripts for the Blend Protocol: deploying the contracts and setting up mock environments; no releases, last push 2025-12-18 (README read 2026-09-14; TypeScript; MIT).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
 	],
 	"script3/soroban-governor": [
 		{
-			note: "Soroban Governor: a Governor-style DAO governance framework for Soroban modeled on the OpenZeppelin Governance system, with its audits in the repo's audits/ folder; last release v1.1.1 (2024-07-09) and no push since 2024-07-09 — the contracts are dormant while the sibling repos moved on (script3/soroban-governor-ui last push 2026-05-17, soroban-governor-js-sdk 2025-07-18) (README read 2026-09-14; Rust; MIT; 17 stars).",
+			note: "Soroban Governor: a Governor-style DAO governance framework for Soroban modeled on the OpenZeppelin Governance system, with its audits in the repo's audits/ folder; last release v1.1.1 (2024-07-09) and no push since 2024-07-09; the contracts are dormant while the sibling repos moved on (script3/soroban-governor-ui last push 2026-05-17, soroban-governor-js-sdk 2025-07-18) (README read 2026-09-14; Rust; MIT; 17 stars).",
 			triggers: ["soroban governor dao", "governance framework soroban"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3582,7 +3582,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"HelixLabsDev/helix-mongolian-spring": [
 		{
-			note: "Helix Stellar — Soroban core contracts for cross-chain LST-collateral lending on Stellar; an SCF #41 Build Award project per its README; no releases, no license file, last push 2026-05-15 (read 2026-09-14; Rust).",
+			note: "Helix Stellar: Soroban core contracts for cross-chain LST-collateral lending on Stellar; an SCF #41 Build Award project per its README; no releases, no license file, last push 2026-05-15 (read 2026-09-14; Rust).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
@@ -3597,7 +3597,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"zenith-protocols/vault-ui": [
 		{
-			note: "Examined 2026-09-14: the README is the unmodified create-next-app template, no description, no releases, last push 2025-07-22 — nothing durable to state publicly.",
+			note: "Examined 2026-09-14: the README is the unmodified create-next-app template, no description, no releases, last push 2025-07-22; nothing durable to state publicly.",
 			visibility: "internal",
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3605,7 +3605,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Gabrielpatrola/stellar-x402-middleware": [
 		{
-			note: "npm stellar-x402-middleware 0.4.0 (2026-08-14; = repo tag v0.4.0): Express and Hono middleware that adds x402-paywalled API routes settled on Stellar — `stellarPaywall({ payTo, price })` (README read 2026-09-14; last push 2026-08-14).",
+			note: "npm stellar-x402-middleware 0.4.0 (2026-08-14; = repo tag v0.4.0): Express and Hono middleware that adds x402-paywalled API routes settled on Stellar: `stellarPaywall({ payTo, price })` (README read 2026-09-14; last push 2026-08-14).",
 			triggers: ["x402 middleware express", "paywall api routes stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3621,7 +3621,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-community-fund-contracts": [
 		{
-			note: "Neural Quorum Governance contracts — the on-chain voting used by the Stellar Community Fund, plus the Rust 'neurons' modules that feed it; the README states the code is unaudited and under development; last release v1.0.3 (governance pkg 0.1.0, 2026-07-24) (read 2026-09-14; Rust; 12 stars; last push 2026-09-14).",
+			note: "Neural Quorum Governance contracts: the on-chain voting used by the Stellar Community Fund, plus the Rust 'neurons' modules that feed it; the README states the code is unaudited and under development; last release v1.0.3 (governance pkg 0.1.0, 2026-07-24) (read 2026-09-14; Rust; 12 stars; last push 2026-09-14).",
 			triggers: ["neural quorum governance", "scf voting contracts"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3629,7 +3629,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/helm-charts": [
 		{
-			note: "SDF's Helm charts (`helm repo add stellar https://helm.stellar.org/charts`) — the README lists the Horizon API server chart; the last tagged chart release, 0.3.97, dates from 2023-08-09 while the repo still receives pushes (last 2026-09-11) (read 2026-09-14; Go Template; 3 stars).",
+			note: "SDF's Helm charts (`helm repo add stellar https://helm.stellar.org/charts`); the README lists the Horizon API server chart; the last tagged chart release, 0.3.97, dates from 2023-08-09 while the repo still receives pushes (last 2026-09-11) (read 2026-09-14; Go Template; 3 stars).",
 			triggers: ["horizon helm chart"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3645,7 +3645,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"soroswap/aggregator": [
 		{
-			note: "Soroswap Aggregator — Soroban contracts that aggregate liquidity across Soroban AMMs through adapters (Soroswap, Phoenix); audited by Runtime Verification (report dated 2024-08-31 in audits/); mainnet addresses published in public/mainnet.json; last push 2025-12-22 (README read 2026-09-14; Rust; Apache-2.0; 6 stars).",
+			note: "Soroswap Aggregator: Soroban contracts that aggregate liquidity across Soroban AMMs through adapters (Soroswap, Phoenix); audited by Runtime Verification (report dated 2024-08-31 in audits/); mainnet addresses published in public/mainnet.json; last push 2025-12-22 (README read 2026-09-14; Rust; Apache-2.0; 6 stars).",
 			triggers: ["soroswap aggregator", "dex aggregator soroban"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3653,7 +3653,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/streamhash": [
 		{
-			note: "StreamHash: SDF's Go library for building and querying Minimal Perfect Hash Function indexes over billions of keys with bounded RAM (1B+ keys in roughly 1–75 MB) and streaming, parallel construction; v0.1.0 (2026-08-04) (README read 2026-09-14; Apache-2.0; last push 2026-09-09).",
+			note: "StreamHash: SDF's Go library for building and querying Minimal Perfect Hash Function indexes over billions of keys with bounded RAM (1B+ keys in roughly 1 to 75 MB) and streaming, parallel construction; v0.1.0 (2026-08-04) (README read 2026-09-14; Apache-2.0; last push 2026-09-09).",
 			triggers: ["minimal perfect hash stellar", "streamhash"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3661,7 +3661,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Creit-Tech/Stellar-Router-SDK": [
 		{
-			note: "Stellar Router: a Soroban contract plus SDK to execute several contract calls in one transaction — Soroban allows a single operation per transaction, the router batches the calls; the SDK is published on JSR as @creit-tech/stellar-router-sdk (0.3.0 latest) (README read 2026-09-14; TypeScript; MIT; 6 stars; no GitHub releases; last push 2026-08-23).",
+			note: "Stellar Router: a Soroban contract plus SDK to execute several contract calls in one transaction: Soroban allows a single operation per transaction, the router batches the calls; the SDK is published on JSR as @creit-tech/stellar-router-sdk (0.3.0 latest) (README read 2026-09-14; TypeScript; MIT; 6 stars; no GitHub releases; last push 2026-08-23).",
 			triggers: ["batch soroban calls one transaction", "stellar router sdk"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3669,7 +3669,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"eq-lab/slender": [
 		{
-			note: "Slender: a pool-based lending protocol on Soroban — suppliers receive interest-accruing sTokens; no releases; last push 2025-10-03 (README read 2026-09-14; Rust; MIT; 7 stars).",
+			note: "Slender: a pool-based lending protocol on Soroban: suppliers receive interest-accruing sTokens; no releases; last push 2025-10-03 (README read 2026-09-14; Rust; MIT; 7 stars).",
 			triggers: ["slender lending soroban"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3677,7 +3677,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/freighter-developer-docs": [
 		{
-			note: "Source of Freighter's developer documentation (Freighter is SDF's non-custodial wallet: browser extension + mobile app) — connecting a dapp with a single call, signing authorization entries for contract calls and arbitrary messages; no releases; last push 2026-06-04 (read 2026-09-14).",
+			note: "Source of Freighter's developer documentation (Freighter is SDF's non-custodial wallet: browser extension + mobile app): connecting a dapp with a single call, signing authorization entries for contract calls and arbitrary messages; no releases; last push 2026-06-04 (read 2026-09-14).",
 			triggers: ["freighter developer docs", "integrate freighter dapp"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3685,21 +3685,21 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"karagozemin/QuietBook": [
 		{
-			note: "QuietBook: confidential bookbuilding rounds for tokenized RWAs on Stellar — issuers run a round without exposing investor bids or balances; live demo on Vercel, with a judge runbook and testnet evidence under docs/ (a hackathon-style deliverable) (README read 2026-09-14; TypeScript; 2 stars; no releases; last push 2026-08-07).",
+			note: "QuietBook: confidential bookbuilding rounds for tokenized RWAs on Stellar: issuers run a round without exposing investor bids or balances; live demo on Vercel, with a judge runbook and testnet evidence under docs/ (a hackathon-style deliverable) (README read 2026-09-14; TypeScript; 2 stars; no releases; last push 2026-08-07).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
 	],
 	"stellar/freighter-protocol-icons": [
 		{
-			note: "The icon set Freighter shows for supported protocols — PNG icons at 96×96 plus background images, contributed by pull request under the README's image specs (read 2026-09-14; last push 2026-09-02).",
+			note: "The icon set Freighter shows for supported protocols; PNG icons at 96×96 plus background images, contributed by pull request under the README's image specs (read 2026-09-14; last push 2026-09-02).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
 	],
 	"stellar/product-conventions": [
 		{
-			note: "SDF's frontend product conventions — the goals, scope and ethos its product team applies to Stellar user interfaces; last release v2.3.0 (2024-03-13); last push 2026-07-01 (read 2026-09-14; JavaScript; 10 stars).",
+			note: "SDF's frontend product conventions: the goals, scope and ethos its product team applies to Stellar user interfaces; last release v2.3.0 (2024-03-13); last push 2026-07-01 (read 2026-09-14; JavaScript; 10 stars).",
 			source: "curated",
 			asOf: "2026-09-14",
 		},
@@ -3714,7 +3714,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// ── P5 wave 7 (2026-09-14): repoScore 40–49 band, top 30 without a note.
 	"stellar/laboratory-backend": [
 		{
-			note: "Contract Data API — SDF's Node.js REST API for managing contract data (Express.js 5 + Prisma ORM on PostgreSQL, TypeScript, pnpm); its API design doc lives in stellar/platform-design-docs (contract-data-api branch) per the README; no license file, no releases (README read 2026-09-14; 1 star; last push 2026-08-27).",
+			note: "Contract Data API: SDF's Node.js REST API for managing contract data (Express.js 5 + Prisma ORM on PostgreSQL, TypeScript, pnpm); its API design doc lives in stellar/platform-design-docs (contract-data-api branch) per the README; no license file, no releases (README read 2026-09-14; 1 star; last push 2026-08-27).",
 			triggers: ["contract data api", "laboratory backend"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3722,7 +3722,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/freighter-website": [
 		{
-			note: "Examined 2026-09-14: the README is the unmodified create-next-app template; GitHub description 'Freighter website'; no license, no releases; last push 2026-07-01 — nothing durable to state publicly.",
+			note: "Examined 2026-09-14: the README is the unmodified create-next-app template; GitHub description 'Freighter website'; no license, no releases; last push 2026-07-01. Nothing durable to state publicly.",
 			visibility: "internal",
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3730,7 +3730,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Templar-Protocol/contracts": [
 		{
-			note: "Templar Protocol's core repository — an overcollateralized lending protocol (templarfi.org): a Rust workspace holding the deployable contracts, shared protocol logic, off-chain services and bots, operator CLI tools, client libraries, fuzz targets and an audits/ directory of auditor-facing notes; the README carries Test, Kani and Codecov workflow badges; releases are per-crate via release-plz — latest templar-liquidator-v0.1.7 (2026-09-01); tag v1.3.0 (2026-02-11) (README read 2026-09-14; GPL-3.0; 10 stars; last push 2026-09-14).",
+			note: "Templar Protocol's core repository: an overcollateralized lending protocol (templarfi.org): a Rust workspace holding the deployable contracts, shared protocol logic, off-chain services and bots, operator CLI tools, client libraries, fuzz targets and an audits/ directory of auditor-facing notes; the README carries Test, Kani and Codecov workflow badges; releases are per-crate via release-plz: latest templar-liquidator-v0.1.7 (2026-09-01); tag v1.3.0 (2026-02-11) (README read 2026-09-14; GPL-3.0; 10 stars; last push 2026-09-14).",
 			triggers: ["templar lending protocol", "templar contracts"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3738,7 +3738,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-expert/tx-meta-effects-parser": [
 		{
-			note: "npm @stellar-expert/tx-meta-effects-parser 10.1.1 (2026-08-28): StellarExpert's low-level effects parser — `parseTxOperationsMeta({network, tx, result, meta, …})` derives the atomic ledger state changes directly from a transaction's result and meta XDR instead of Horizon's /effects, with options for Soroban system events, SAC mapping, failed-op effects and contract metrics (README read 2026-09-14; MIT; last push 2026-08-28).",
+			note: "npm @stellar-expert/tx-meta-effects-parser 10.1.1 (2026-08-28): StellarExpert's low-level effects parser: `parseTxOperationsMeta({network, tx, result, meta, …})` derives the atomic ledger state changes directly from a transaction's result and meta XDR instead of Horizon's /effects, with options for Soroban system events, SAC mapping, failed-op effects and contract metrics (README read 2026-09-14; MIT; last push 2026-08-28).",
 			triggers: ["tx meta effects parser", "effects from transaction meta"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3746,7 +3746,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"armandocodecr/latam-ramp-kit": [
 		{
-			note: "LATAM Ramp Kit — SDK + React components for adding fiat on/off-ramps to apps in Latin America, built for the Stellar 'Brazil Ramps and Regional Kits' sub-lane per its README, which documents BRL in via PIX and out again on Stellar testnet through the Etherfuse sandbox; npm @ramp-kit/core 0.1.7, @ramp-kit/react 0.1.6, @ramp-kit/server 0.1.5 and @ramp-kit/mcp 0.1.9 (all published 2026-08-21), the last an MCP server also listed in the MCP Registry (README read 2026-09-14; MIT; no releases; last push 2026-08-21).",
+			note: "LATAM Ramp Kit: SDK + React components for adding fiat on/off-ramps to apps in Latin America, built for the Stellar 'Brazil Ramps and Regional Kits' sub-lane per its README, which documents BRL in via PIX and out again on Stellar testnet through the Etherfuse sandbox; npm @ramp-kit/core 0.1.7, @ramp-kit/react 0.1.6, @ramp-kit/server 0.1.5 and @ramp-kit/mcp 0.1.9 (all published 2026-08-21), the last an MCP server also listed in the MCP Registry (README read 2026-09-14; MIT; no releases; last push 2026-08-21).",
 			triggers: [
 				"latam ramp kit",
 				"fiat ramp latin america",
@@ -3758,7 +3758,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-expert/stellar-tx-signers-inspector": [
 		{
-			note: "npm @stellar-expert/tx-signers-inspector 2.0.0 (2026-08-30): StellarExpert's library to discover the required signers and weights for a Stellar transaction or account and build an optimal signature schema — `inspectTransactionSigners(tx)` / `inspectAccountSigners(…)`, with `getAllPotentialSigners()` listing every signer across the source accounts (README read 2026-09-14; MIT; 5 stars; last push 2026-08-30).",
+			note: "npm @stellar-expert/tx-signers-inspector 2.0.0 (2026-08-30): StellarExpert's library to discover the required signers and weights for a Stellar transaction or account and build an optimal signature schema: `inspectTransactionSigners(tx)` / `inspectAccountSigners(…)`, with `getAllPotentialSigners()` listing every signer across the source accounts (README read 2026-09-14; MIT; 5 stars; last push 2026-08-30).",
 			triggers: ["required signers transaction", "signers inspector"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3766,7 +3766,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lightsail-network/stellar-inspect": [
 		{
-			note: "npm stellar-inspect 0.1.0 (2026-09-09; = repo tag v0.1.0): Lightsail's library that finds the Stellar Asset Contracts (SACs) referenced by a transaction or by Soroban authorization entries and reports which asset each wraps — `findSacs(input, { networkPassphrase })` walks the invoked contracts, Address-typed arguments, the auth tree, the footprint and createContract ops; ES modules, installed alongside @stellar/stellar-sdk (README read 2026-09-14; MIT; last push 2026-09-09).",
+			note: "npm stellar-inspect 0.1.0 (2026-09-09; = repo tag v0.1.0): Lightsail's library that finds the Stellar Asset Contracts (SACs) referenced by a transaction or by Soroban authorization entries and reports which asset each wraps: `findSacs(input, { networkPassphrase })` walks the invoked contracts, Address-typed arguments, the auth tree, the footprint and createContract ops; ES modules, installed alongside @stellar/stellar-sdk (README read 2026-09-14; MIT; last push 2026-09-09).",
 			triggers: ["find sacs transaction", "stellar inspect"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3774,7 +3774,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"TrustLine-id/stellar-sdk": [
 		{
-			note: "Trustline Stellar SDK — crates.io trustline-sdk 0.1.0 (2026-09-03; = repo tag v0.1.0): a Rust/Soroban SDK for guarding contracts against unauthorized access — a contract calls `require_trustline(…)` before sensitive operations against a deployed Validation Engine instance (transaction validation, on-chain sanctions checks, address verification), with Payment Forwarder and Firewall gateway examples; an SCF #44 project per its README (README read 2026-09-14; MIT; last push 2026-09-03).",
+			note: "Trustline Stellar SDK: crates.io trustline-sdk 0.1.0 (2026-09-03; = repo tag v0.1.0): a Rust/Soroban SDK for guarding contracts against unauthorized access: a contract calls `require_trustline(…)` before sensitive operations against a deployed Validation Engine instance (transaction validation, on-chain sanctions checks, address verification), with Payment Forwarder and Firewall gateway examples; an SCF #44 project per its README (README read 2026-09-14; MIT; last push 2026-09-03).",
 			triggers: ["trustline sdk", "sanctions check soroban"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3782,7 +3782,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"mpprouter/rozo-mpprouter": [
 		{
-			note: "MPP Router — a Cloudflare Worker exposing a stable public API for paid services over a Stellar-based (USDC) payment flow, with idempotent automatic refunds on non-delivery and an on-chain escape hatch for channel funders to recover an unused channel balance without the Router; v0.2.2 (2026-09-14) made it a multi-operator router with self-serve provider onboarding, direct settlement to providers' own Stellar keys and a HackenProof security review attached to the release (README read 2026-09-14; BSD-2-Clause; last push 2026-09-14).",
+			note: "MPP Router: a Cloudflare Worker exposing a stable public API for paid services over a Stellar-based (USDC) payment flow, with idempotent automatic refunds on non-delivery and an on-chain escape hatch for channel funders to recover an unused channel balance without the Router; v0.2.2 (2026-09-14) made it a multi-operator router with self-serve provider onboarding, direct settlement to providers' own Stellar keys and a HackenProof security review attached to the release (README read 2026-09-14; BSD-2-Clause; last push 2026-09-14).",
 			triggers: ["mpp router"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3790,7 +3790,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"AquariusDeFi/aqua-governance": [
 		{
-			note: "Backend API for the Aquarius DAO (gov.aqua.network): a Python 3.10 / Django 3.2 + DRF + Celery service running the proposal lifecycle — creation, discussion, weekly voting-slot booking, on-chain voting via AQUA / governICE / gdICE claimable balances sent to per-proposal accounts, quorum-checked tallying, and Soroban asset-registry execution for asset proposals; reads Horizon and Soroban RPC (README read 2026-09-14; BUSL-1.1; 2 stars; no releases; last push 2026-09-03).",
+			note: "Backend API for the Aquarius DAO (gov.aqua.network): a Python 3.10 / Django 3.2 + DRF + Celery service running the proposal lifecycle: creation, discussion, weekly voting-slot booking, on-chain voting via AQUA / governICE / gdICE claimable balances sent to per-proposal accounts, quorum-checked tallying, and Soroban asset-registry execution for asset proposals; reads Horizon and Soroban RPC (README read 2026-09-14; BUSL-1.1; 2 stars; no releases; last push 2026-09-03).",
 			triggers: ["aquarius governance backend", "aqua dao voting"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3798,7 +3798,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Phoenix-Protocol-Group/phoenix-nft-marketplace": [
 		{
-			note: "Examined 2026-09-14: no README; GitHub description 'NFT marketplace with auctions and collections interface'; a Rust workspace (contracts/, helpers/), GPL-3.0, no releases or tags; last push 2026-04-11 — nothing durable to state publicly.",
+			note: "Examined 2026-09-14: no README; GitHub description 'NFT marketplace with auctions and collections interface'; a Rust workspace (contracts/, helpers/), GPL-3.0, no releases or tags; last push 2026-04-11. Nothing durable to state publicly.",
 			visibility: "internal",
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3806,7 +3806,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CometDEX/frontend-v1": [
 		{
-			note: "Examined 2026-09-14: the README is a two-line stub ('Comet Pool Frontend — frontend to be able to interact with the soroban contracts'); no description, no license, no releases; last push 2023-08-13 — nothing durable to state publicly.",
+			note: "Examined 2026-09-14: the README is a two-line stub ('Comet Pool Frontend — frontend to be able to interact with the soroban contracts'); no description, no license, no releases; last push 2023-08-13. Nothing durable to state publicly.",
 			visibility: "internal",
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3814,7 +3814,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-broker/router-contract": [
 		{
-			note: "StellarBroker's router contract (Rust/Soroban): executes the multi-hop swaps prepared by the StellarBroker Router service (stellar.broker) across Stellar liquidity-pool protocols — Aquarius, Soroswap, Comet, Phoenix and SushiSwap per its README; audits/ holds a Runtime Verification report dated 2025-04-28; no releases (README read 2026-09-14; MIT; last push 2026-07-26).",
+			note: "StellarBroker's router contract (Rust/Soroban): executes the multi-hop swaps prepared by the StellarBroker Router service (stellar.broker) across Stellar liquidity-pool protocols: Aquarius, Soroswap, Comet, Phoenix and SushiSwap per its README; audits/ holds a Runtime Verification report dated 2025-04-28; no releases (README read 2026-09-14; MIT; last push 2026-07-26).",
 			triggers: ["stellarbroker router contract", "stellar broker swap router"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3822,7 +3822,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-broker/ui": [
 		{
-			note: "Examined 2026-09-14: no README; GitHub description 'Website UI for StellarBroker service' (stellar.broker); JavaScript/webpack, MIT, no releases; last push 2026-03-11 — nothing durable to state publicly.",
+			note: "Examined 2026-09-14: no README; GitHub description 'Website UI for StellarBroker service' (stellar.broker); JavaScript/webpack, MIT, no releases; last push 2026-03-11. Nothing durable to state publicly.",
 			visibility: "internal",
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3830,7 +3830,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-indexer-go": [
 		{
-			note: "Trustless Work's official indexer (Go 1.25+): follows the Stellar ledger stream over RPC, detects activity on Trustless Work escrow contracts (events, deposits, state changes; escrow discovery by approved WASM hash) and publishes versioned envelopes to RabbitMQ for the core API — with an ordered multi-RPC failover pool, a durable cursor + watchlist, gap evidence for skipped ranges and at-least-once delivery under deterministic message ids; no license file, no releases (README read 2026-09-14; 4 stars; last push 2026-09-04).",
+			note: "Trustless Work's official indexer (Go 1.25+): follows the Stellar ledger stream over RPC, detects activity on Trustless Work escrow contracts (events, deposits, state changes; escrow discovery by approved WASM hash) and publishes versioned envelopes to RabbitMQ for the core API: with an ordered multi-RPC failover pool, a durable cursor + watchlist, gap evidence for skipped ranges and at-least-once delivery under deterministic message ids; no license file, no releases (README read 2026-09-14; 4 stars; last push 2026-09-04).",
 			triggers: ["trustless work indexer", "escrow indexer stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3838,7 +3838,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"untangledfinance/untangled-web": [
 		{
-			note: "npm untangled-web 1.0.134 (2025-12-26; = repo tag 1.0.134): Untangled Finance's TypeScript backend framework for its platform — a Bun.serve HTTP server with decorator-based IoC (@Module / @Controller / @Bean), filters, CORS, MongoDB and PostgreSQL connectors, Redis caching and queues, cron jobs and JWT auth with RBAC; nothing Stellar-specific in the framework itself (README read 2026-09-14; no license file; no GitHub releases; last push 2026-08-27).",
+			note: "npm untangled-web 1.0.134 (2025-12-26; = repo tag 1.0.134): Untangled Finance's TypeScript backend framework for its platform: a Bun.serve HTTP server with decorator-based IoC (@Module / @Controller / @Bean), filters, CORS, MongoDB and PostgreSQL connectors, Redis caching and queues, cron jobs and JWT auth with RBAC; nothing Stellar-specific in the framework itself (README read 2026-09-14; no license file; no GitHub releases; last push 2026-08-27).",
 			triggers: ["untangled web framework"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3846,7 +3846,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"soroswap/docs": [
 		{
-			note: "Source of docs.soroswap.finance — a Mintlify site (docs.json, tabs Documentation / API / Smart Contracts) covering, per its GitHub description, the Soroswap AMM, the Soroswap Aggregator and the Spacewalk bridge implementation; content directories getting-started, amm, aggregator, api, concepts, tutorials and resources; no README, no license file (read 2026-09-14; MDX; 2 stars; last push 2026-09-06).",
+			note: "Source of docs.soroswap.finance: a Mintlify site (docs.json, tabs Documentation / API / Smart Contracts) covering, per its GitHub description, the Soroswap AMM, the Soroswap Aggregator and the Spacewalk bridge implementation; content directories getting-started, amm, aggregator, api, concepts, tutorials and resources; no README, no license file (read 2026-09-14; MDX; 2 stars; last push 2026-09-06).",
 			triggers: ["soroswap docs", "soroswap documentation"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3854,7 +3854,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/reflector-subscription-encryption": [
 		{
-			note: "Examined 2026-09-14: no README; GitHub description 'Encryption primitives for Reflector subscriptions'; JavaScript, no license, tags to v1.1.0 (2024-07-18); last push 2024-07-24 — nothing durable to state publicly.",
+			note: "Examined 2026-09-14: no README; GitHub description 'Encryption primitives for Reflector subscriptions'; JavaScript, no license, tags to v1.1.0 (2024-07-18); last push 2024-07-24. Nothing durable to state publicly.",
 			visibility: "internal",
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3862,7 +3862,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/reflector-stellar-connector": [
 		{
-			note: "@reflector/stellar-connector — the Stellar asset price-feed connector for the Reflector oracle backend: `aggregateTrades({rpcUrl, baseAsset, assets, from, period, limit})` aggregates trades per period from a Soroban RPC that has getTransactions and getLatestLedger enabled; not on npm — the README installs it as a GitHub dependency pinned to a tag; tags reach v4.1.7 (2026-08-27) and v4.2.0-rc2 (2026-09-10) (README read 2026-09-14; MIT; last push 2026-09-10).",
+			note: "@reflector/stellar-connector: the Stellar asset price-feed connector for the Reflector oracle backend: `aggregateTrades({rpcUrl, baseAsset, assets, from, period, limit})` aggregates trades per period from a Soroban RPC that has getTransactions and getLatestLedger enabled; not on npm: the README installs it as a GitHub dependency pinned to a tag; tags reach v4.1.7 (2026-08-27) and v4.2.0-rc2 (2026-09-10) (README read 2026-09-14; MIT; last push 2026-09-10).",
 			triggers: [
 				"reflector stellar connector",
 				"reflector price feed connector",
@@ -3873,7 +3873,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kunaldrall29/policywright": [
 		{
-			note: "Policywright turns a transaction a user already performed (or simulated) into the least-privilege OpenZeppelin smart-account authorization that permits exactly that flow — a context rule scoped to the observed (contract, function) pairs plus minimal spending-limit and frequency-limit policies — emitted as spec.json, an installable context-rule.json, a summary and an illustrative Rust policy, with a dry-run simulator; the worked example is a Blend emissions claim followed by a Soroswap BLND→USDC swap; hosted at policywright.lemmalabs.space (README read 2026-09-14; TypeScript; MIT; no releases; last push 2026-09-11).",
+			note: "Policywright turns a transaction a user already performed (or simulated) into the least-privilege OpenZeppelin smart-account authorization that permits exactly that flow: a context rule scoped to the observed (contract, function) pairs plus minimal spending-limit and frequency-limit policies: emitted as spec.json, an installable context-rule.json, a summary and an illustrative Rust policy, with a dry-run simulator; the worked example is a Blend emissions claim followed by a Soroswap BLND→USDC swap; hosted at policywright.lemmalabs.space (README read 2026-09-14; TypeScript; MIT; no releases; last push 2026-09-11).",
 			triggers: ["policywright smart account", "least privilege smart account"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3881,7 +3881,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-expert/contract-wasm-interface-parser": [
 		{
-			note: "npm @stellar-expert/contract-wasm-interface-parser 6.0.1 (2026-08-29): StellarExpert's lightweight parser that reads a Soroban contract's interface metadata straight from its binary WASM — `parseContractMetadata(Buffer)` returns the parsed interface (the README's example shows unions and structs with their cases and fields) (README read 2026-09-14; MIT; last push 2026-08-29).",
+			note: "npm @stellar-expert/contract-wasm-interface-parser 6.0.1 (2026-08-29): StellarExpert's lightweight parser that reads a Soroban contract's interface metadata straight from its binary WASM: `parseContractMetadata(Buffer)` returns the parsed interface (the README's example shows unions and structs with their cases and fields) (README read 2026-09-14; MIT; last push 2026-08-29).",
 			triggers: ["parse contract interface wasm", "wasm interface parser"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3889,7 +3889,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/actions": [
 		{
-			note: "SDF's shared GitHub Actions and reusable workflows for @stellar repositories (`uses: stellar/actions/<dir>@main`) — rust-cache, rust-set-rust-version, rust-check-git-rev-deps, rust-bump-version, rust-publish and rust-publish-dry-run(-v2), disk-cleanup, sdf-ecr-login and sdf-pr-preview, plus a README-rust-release guide; the README warns they are not suitable outside @stellar repos and not safe under pull_request_target (README read 2026-09-14; Apache-2.0; 4 stars; no releases; last push 2026-08-30).",
+			note: "SDF's shared GitHub Actions and reusable workflows for @stellar repositories (`uses: stellar/actions/<dir>@main`): rust-cache, rust-set-rust-version, rust-check-git-rev-deps, rust-bump-version, rust-publish and rust-publish-dry-run(-v2), disk-cleanup, sdf-ecr-login and sdf-pr-preview, plus a README-rust-release guide; the README warns they are not suitable outside @stellar repos and not safe under pull_request_target (README read 2026-09-14; Apache-2.0; 4 stars; no releases; last push 2026-08-30).",
 			triggers: ["stellar github actions", "reusable workflows stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3905,7 +3905,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"honti0078-code/Hatiin": [
 		{
-			note: "Hatiin (Tagalog for 'to split') — a bill-splitting app on Stellar: a Next.js frontend with a Soroban SplitEscrow contract, live at hatiin-stellar.vercel.app on mainnet (contract and explorer links in the README) alongside a testnet deployment; the README is a program submission checklist (50-user proof, feedback log, pitch deck); v1.0.0 (2026-08-10) (README read 2026-09-14; TypeScript; MIT; last push 2026-08-27).",
+			note: "Hatiin (Tagalog for 'to split'): a bill-splitting app on Stellar: a Next.js frontend with a Soroban SplitEscrow contract, live at hatiin-stellar.vercel.app on mainnet (contract and explorer links in the README) alongside a testnet deployment; the README is a program submission checklist (50-user proof, feedback log, pitch deck); v1.0.0 (2026-08-10) (README read 2026-09-14; TypeScript; MIT; last push 2026-08-27).",
 			triggers: ["hatiin bill split"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3913,7 +3913,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"meokhay-ai/Tabungan": [
 		{
-			note: "Tabungan — a Stellar app built around a FamilyVault Soroban contract: a Next.js frontend live at tabungan-stellar.vercel.app; the README is a program submission checklist ('Level 5' evidence, 50-user cohort) whose on-chain proof references the testnet contract, with a mainnet deployment recorded in contracts/DEPLOYMENT.md; v1.0.0 (2026-08-10) (README read 2026-09-14; TypeScript; MIT; 1 star; last push 2026-08-27).",
+			note: "Tabungan: a Stellar app built around a FamilyVault Soroban contract: a Next.js frontend live at tabungan-stellar.vercel.app; the README is a program submission checklist ('Level 5' evidence, 50-user cohort) whose on-chain proof references the testnet contract, with a mainnet deployment recorded in contracts/DEPLOYMENT.md; v1.0.0 (2026-08-10) (README read 2026-09-14; TypeScript; MIT; 1 star; last push 2026-08-27).",
 			triggers: ["tabungan family vault"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3921,7 +3921,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"RozoAI/rozo-checkout-skill": [
 		{
-			note: "npm @rozoai/checkout 0.1.10 (2026-08-11): `npx @rozoai/checkout pay <coinbase-link>` pays an OpenRouter Coinbase Payment Link (which itself accepts only USDC on Base) with BTC over Lightning or USDT/USDC on Solana, BNB Chain, Ethereum, Polygon, Base or Stellar (usdc-stellar, MEMO_TEXT required) by routing through a bridge and a funder wallet — no account, API key or private key; also packaged as a Claude Code skill (SKILL.md); GitHub release v0.1.6 (2026-08-11) (README read 2026-09-14; MIT; last push 2026-08-28).",
+			note: "npm @rozoai/checkout 0.1.10 (2026-08-11): `npx @rozoai/checkout pay <coinbase-link>` pays an OpenRouter Coinbase Payment Link (which itself accepts only USDC on Base) with BTC over Lightning or USDT/USDC on Solana, BNB Chain, Ethereum, Polygon, Base or Stellar (usdc-stellar, MEMO_TEXT required) by routing through a bridge and a funder wallet; no account, API key or private key; also packaged as a Claude Code skill (SKILL.md); GitHub release v0.1.6 (2026-08-11) (README read 2026-09-14; MIT; last push 2026-08-28).",
 			triggers: ["pay openrouter coinbase link", "rozo checkout"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3929,7 +3929,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Scopuly/scopuly-browser-extension": [
 		{
-			note: "Scopuly's Manifest V3 browser extension connecting Stellar dApps to a paired Scopuly signer (iOS/Android via QR pairing, or Scopuly for Mac): it injects `window.scopuly`, reviews transaction, message, Soroban authorization, submit and x402 receipt requests in the browser, forwards them to the signer and verifies the returned result before answering the dApp — secret keys never enter the extension; provider protocol 0.3.0; listed in the Chrome Web Store, Microsoft Edge Add-ons and Firefox Add-ons (the README names 0.3.2 as the store version); latest GitHub release v0.3.4 (2026-08-18) (README read 2026-09-14; TypeScript; MIT; last push 2026-08-18).",
+			note: "Scopuly's Manifest V3 browser extension connecting Stellar dApps to a paired Scopuly signer (iOS/Android via QR pairing, or Scopuly for Mac): it injects `window.scopuly`, reviews transaction, message, Soroban authorization, submit and x402 receipt requests in the browser, forwards them to the signer and verifies the returned result before answering the dApp: secret keys never enter the extension; provider protocol 0.3.0; listed in the Chrome Web Store, Microsoft Edge Add-ons and Firefox Add-ons (the README names 0.3.2 as the store version); latest GitHub release v0.3.4 (2026-08-18) (README read 2026-09-14; TypeScript; MIT; last push 2026-08-18).",
 			triggers: ["scopuly extension", "scopuly browser signer"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3937,7 +3937,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"zenith-protocols/relayer-plugin-zenex": [
 		{
-			note: "npm @zenith-protocols/relayer-plugin-zenex 0.1.1 (2026-08-01): an OpenZeppelin Relayer plugin for the Zenex transaction relay — prepares and submits router transactions (auth discovery, Chainlink Data Streams report injection, fee enforcement) and delegates final submission to the embedded @openzeppelin/relayer-plugin-channels handler in-process; ships a typed ZenexClient; requires OpenZeppelin Relayer v1.4.0+ with a Stellar network config and Chainlink Data Streams credentials (README read 2026-09-14; MIT; no releases; last push 2026-09-10).",
+			note: "npm @zenith-protocols/relayer-plugin-zenex 0.1.1 (2026-08-01): an OpenZeppelin Relayer plugin for the Zenex transaction relay: prepares and submits router transactions (auth discovery, Chainlink Data Streams report injection, fee enforcement) and delegates final submission to the embedded @openzeppelin/relayer-plugin-channels handler in-process; ships a typed ZenexClient; requires OpenZeppelin Relayer v1.4.0+ with a Stellar network config and Chainlink Data Streams credentials (README read 2026-09-14; MIT; no releases; last push 2026-09-10).",
 			triggers: ["zenex relayer plugin", "chainlink data streams relayer"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3945,7 +3945,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"idos-network/nitro-enclave-experiment": [
 		{
-			note: "idOS's AWS Nitro Enclave experiment — its Trusted Execution Environments: a facesign-service built on the FaceTec SDK and an entropy-service, built as enclave images (EIF) on an EC2 instance provisioned with Terraform, with an operator runbook and an open TODO list in the README; no license, no releases (README read 2026-09-14; TypeScript; last push 2026-09-10).",
+			note: "idOS's AWS Nitro Enclave experiment; its Trusted Execution Environments: a facesign-service built on the FaceTec SDK and an entropy-service, built as enclave images (EIF) on an EC2 instance provisioned with Terraform, with an operator runbook and an open TODO list in the README; no license, no releases (README read 2026-09-14; TypeScript; last push 2026-09-10).",
 			triggers: ["idos nitro enclave", "idos tee"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -3953,7 +3953,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"winsznx/routedock": [
 		{
-			note: "RouteDock — a unified payment execution layer for agents on Stellar: `client.pay(url)` selects x402, MPP charge or MPP session channels (incl. WebSocket) from the provider's routedock.json manifest, so one SDK covers the three agent-payment protocols; npm @routedock/routedock 0.1.2 (2026-04-13) while the monorepo keeps moving (last push 2026-09-14); homepage routedock.xyz (README read 2026-09-14; TypeScript; MIT; 7 stars; no releases).",
+			note: "RouteDock: a unified payment execution layer for agents on Stellar: `client.pay(url)` selects x402, MPP charge or MPP session channels (incl. WebSocket) from the provider's routedock.json manifest, so one SDK covers the three agent-payment protocols; npm @routedock/routedock 0.1.2 (2026-04-13) while the monorepo keeps moving (last push 2026-09-14); homepage routedock.xyz (README read 2026-09-14; TypeScript; MIT; 7 stars; no releases).",
 			triggers: [
 				"routedock payment",
 				"x402 mpp one call",
@@ -3970,7 +3970,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// or a package registry whose `repository` points back at that repo.
 	"axelarnetwork/axelar-amplifier-stellar": [
 		{
-			note: "Axelar's cross-chain gateway protocol (CGP) implemented in Soroban for Stellar — the README points at axelarnetwork/cgp-spec for the reference Solidity contracts, publishes workspace rustdocs at axelarnetwork.github.io/axelar-amplifier-stellar, and pins `cargo install --locked stellar-cli --version 25.2.0` for deployment; newest tag stellar-axelar-example-v1.0.10 (2026-06-15) (README read 2026-09-14; Apache-2.0; 11 stars; last push 2026-09-09).",
+			note: "Axelar's cross-chain gateway protocol (CGP) implemented in Soroban for Stellar; the README points at axelarnetwork/cgp-spec for the reference Solidity contracts, publishes workspace rustdocs at axelarnetwork.github.io/axelar-amplifier-stellar, and pins `cargo install --locked stellar-cli --version 25.2.0` for deployment; newest tag stellar-axelar-example-v1.0.10 (2026-06-15) (README read 2026-09-14; Apache-2.0; 11 stars; last push 2026-09-09).",
 			triggers: [
 				"axelar stellar gateway",
 				"cross-chain gateway soroban",
@@ -4006,7 +4006,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/contract-client-js": [
 		{
-			note: "npm @reflector/contract-client 2.2.0 (published 2026-09-11; the package's repository field points back at this repo): the JavaScript client for Reflector's contracts — the Pulse and Beam price oracles, DAO governance and Flare price subscriptions. Every client takes the same parameters (publicKey, rpcUrl, a signTransaction callback for writes, contractId) and it declares a peer dependency on @stellar/stellar-sdk >= v17 (README read 2026-09-14; MIT; last push 2026-09-13).",
+			note: "npm @reflector/contract-client 2.2.0 (published 2026-09-11; the package's repository field points back at this repo): the JavaScript client for Reflector's contracts; the Pulse and Beam price oracles, DAO governance and Flare price subscriptions. Every client takes the same parameters (publicKey, rpcUrl, a signTransaction callback for writes, contractId) and it declares a peer dependency on @stellar/stellar-sdk >= v17 (README read 2026-09-14; MIT; last push 2026-09-13).",
 			triggers: [
 				"reflector contract client",
 				"pulse beam oracle client",
@@ -4018,7 +4018,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/dao-client": [
 		{
-			note: "Client for the Reflector DAO contract (GitHub repo description; the README is empty and no package is published under this name as of 2026-09-14) — the DAO contract itself is reflector-network/reflector-dao-contract (metadata read 2026-09-14; MIT; last push 2026-09-04).",
+			note: "Client for the Reflector DAO contract (GitHub repo description; the README is empty and no package is published under this name as of 2026-09-14); the DAO contract itself is reflector-network/reflector-dao-contract (metadata read 2026-09-14; MIT; last push 2026-09-04).",
 			triggers: ["reflector dao client"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4038,7 +4038,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Tellus-Cooperative/stellar-paylink": [
 		{
-			note: "Non-custodial payment links for Stellar, published by Tellus Cooperative — a recipient names an amount and asset, shares a link or QR code, and the payer approves the transaction in their own wallet, with server-side on-chain verification. The README calls the product Stellar HareLink (the repository is named stellar-paylink) and badges it Stellar Testnet at v0.1.0-rc.1, its newest release (2026-09-12); demo at stellar-paylink-lac.vercel.app (README read 2026-09-14; MIT; last push 2026-09-12).",
+			note: "Non-custodial payment links for Stellar, published by Tellus Cooperative: a recipient names an amount and asset, shares a link or QR code, and the payer approves the transaction in their own wallet, with server-side on-chain verification. The README calls the product Stellar HareLink (the repository is named stellar-paylink) and badges it Stellar Testnet at v0.1.0-rc.1, its newest release (2026-09-12); demo at stellar-paylink-lac.vercel.app (README read 2026-09-14; MIT; last push 2026-09-12).",
 			triggers: [
 				"stellar payment link",
 				"payment qr stellar",
@@ -4050,7 +4050,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lumenbro/lumenjoule-sdk": [
 		{
-			note: "npm lumenjoule-sdk 1.2.0 (published 2026-03-13; the package's repository field points back at this repo): an x402 client SDK that gives an AI agent a self-custodial Stellar wallet with on-chain spend limits — the agent calls any x402-enabled API, the SDK detects the 402, signs a payment from the smart wallet and retries. The README states the signing key stays on the caller's device (Secure Enclave, encrypted file, or a Stellar keypair) and the server only wraps transactions for gas sponsorship, contrasting this with MPC wallets that hold key shards (README read 2026-09-14; MIT; last push 2026-03-17).",
+			note: "npm lumenjoule-sdk 1.2.0 (published 2026-03-13; the package's repository field points back at this repo): an x402 client SDK that gives an AI agent a self-custodial Stellar wallet with on-chain spend limits; the agent calls any x402-enabled API, the SDK detects the 402, signs a payment from the smart wallet and retries. The README states the signing key stays on the caller's device (Secure Enclave, encrypted file, or a Stellar keypair) and the server only wraps transactions for gas sponsorship, contrasting this with MPC wallets that hold key shards (README read 2026-09-14; MIT; last push 2026-03-17).",
 			triggers: [
 				"lumenjoule sdk",
 				"agent spend limits stellar",
@@ -4123,7 +4123,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-experimental/stellar-raven": [
 		{
-			note: "Stellar Raven (raven.stellar.org): a remote MCP server on Cloudflare Workers that exposes exactly two tools, `search` and `execute`, over a unified catalog of Stellar ecosystem services and skills. An agent discovers a capability with search, then calls execute with JavaScript that runs in a Dynamic Worker isolate with NO network access — every service call goes through a host-side adapter — and the server instructions carry a generated source-family micro-map so an agent can pick the grounding family before searching; design notes in PLAN.md (README read 2026-09-14; Apache-2.0; 7 stars; no releases; last push 2026-09-11).",
+			note: "Stellar Raven (raven.stellar.org): a remote MCP server on Cloudflare Workers that exposes exactly two tools, `search` and `execute`, over a unified catalog of Stellar ecosystem services and skills. An agent discovers a capability with search, then calls execute with JavaScript that runs in a Dynamic Worker isolate with NO network access (every service call goes through a host-side adapter) and the server instructions carry a generated source-family micro-map so an agent can pick the grounding family before searching; design notes in PLAN.md (README read 2026-09-14; Apache-2.0; 7 stars; no releases; last push 2026-09-11).",
 			triggers: [
 				"stellar raven mcp",
 				"raven search execute",
@@ -4147,7 +4147,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blend-capital/blend-ui": [
 		{
-			note: "The open-source web interface for the Blend lending protocol. Its README documents network-specific builds that all export to out/ — `.env.testnet` with `npm run build:testnet`, `.env.production` with `npm run build:mainnet`, and a standalone configuration — so a self-hosted Blend front end is a config choice, not a fork. Newest release v2.5.3 (2026-08-27) (README read 2026-09-14; MIT; last push 2026-08-27).",
+			note: "The open-source web interface for the Blend lending protocol. Its README documents network-specific builds that all export to out/: `.env.testnet` with `npm run build:testnet`, `.env.production` with `npm run build:mainnet`, and a standalone configuration, so a self-hosted Blend front end is a config choice, not a fork. Newest release v2.5.3 (2026-08-27) (README read 2026-09-14; MIT; last push 2026-08-27).",
 			triggers: [
 				"blend ui interface",
 				"blend frontend selfhost",
@@ -4179,7 +4179,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"salazarsebas/stellar-agentgate": [
 		{
-			note: "stellar-agentgate: a `stellar-cli` plugin that puts a policy gate between an agent and a contract — the README's own diagram is Agent / MCP → Smart Wallet → agent-policy → target contract — and it records 2nd place in the 'CLI Plugins for Agents' bounty at Stellar Summit São Paulo; docs at acachete.mintlify.site. Newest release v0.2.0 (2026-08-06) (README read 2026-09-14; Apache-2.0; last push 2026-09-07).",
+			note: "stellar-agentgate: a `stellar-cli` plugin that puts a policy gate between an agent and a contract; the README's own diagram is Agent / MCP → Smart Wallet → agent-policy → target contract, and it records 2nd place in the 'CLI Plugins for Agents' bounty at Stellar Summit São Paulo; docs at acachete.mintlify.site. Newest release v0.2.0 (2026-08-06) (README read 2026-09-14; Apache-2.0; last push 2026-09-07).",
 			triggers: [
 				"agentgate policy plugin",
 				"stellar cli plugin agents",
@@ -4203,7 +4203,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"RozoAI/rozo-rewards-miniapp": [
 		{
-			note: "Rozo Rewards (rewards.rozo.ai), the merchant discovery and cashback surface of Rozo: the README describes it as a stablecoin payment platform for merchants built on Base, where a user discovers merchants and pays with USDC across multiple chains or through the Rozo Wallet on Stellar — so Stellar appears here as one payment path, not as the app's own chain (README read 2026-09-14; no license file; topics cashback, cryptopayments; no releases; last push 2026-09-14).",
+			note: "Rozo Rewards (rewards.rozo.ai), the merchant discovery and cashback surface of Rozo: the README describes it as a stablecoin payment platform for merchants built on Base, where a user discovers merchants and pays with USDC across multiple chains or through the Rozo Wallet on Stellar, so Stellar appears here as one payment path, not as the app's own chain (README read 2026-09-14; no license file; topics cashback, cryptopayments; no releases; last push 2026-09-14).",
 			triggers: [
 				"rozo rewards cashback",
 				"rozo merchant discovery",
@@ -4227,7 +4227,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-experimental/meridian-pay-sdp-backend": [
 		{
-			note: "A Meridian Pay fork of stellar/stellar-disbursement-platform-backend (the GitHub description states exactly that). Its README is the upstream Stellar Disbursement Platform README unchanged — badges, Swagger link and CI all still point at the stellar/ repository — so nothing in this repo describes what the fork itself changes; read the upstream project for SDP behaviour and the commit history here for the divergence (metadata and README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-13).",
+			note: "A Meridian Pay fork of stellar/stellar-disbursement-platform-backend (the GitHub description states exactly that). Its README is the upstream Stellar Disbursement Platform README unchanged: badges, Swagger link and CI all still point at the stellar/ repository, so nothing in this repo describes what the fork itself changes; read the upstream project for SDP behaviour and the commit history here for the divergence (metadata and README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-13).",
 			triggers: ["meridian pay sdp", "disbursement platform fork"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4235,7 +4235,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/reflector-shared": [
 		{
-			note: "Triage 2026-09-14: empty README, no GitHub description, no published package and no releases — the repo states nothing durable about itself. It sits in the reflector-network org beside reflector-node and the client packages, so the name suggests shared internals, but that is an inference the repo does not support. Re-examine if it gains a package, a README or a release. https://github.com/reflector-network/reflector-shared",
+			note: "Triage 2026-09-14: empty README, no GitHub description, no published package and no releases; the repo states nothing durable about itself. It sits in the reflector-network org beside reflector-node and the client packages, so the name suggests shared internals, but that is an inference the repo does not support. Re-examine if it gains a package, a README or a release. https://github.com/reflector-network/reflector-shared",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -4243,7 +4243,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"gateway-fm/lez-atomic-swaps": [
 		{
-			note: "Triage 2026-09-14: NOT a Stellar repo — a curation error to correct, not a note to publish. The README describes atomic swaps between native Bitcoin and LEZ using Taproot/MuSig2 adaptor signatures, witnessed escrow on LEZ, offer discovery over Logos Delivery and negotiation over Logos Chat; a GitHub code search for `stellar` across the repository returns 0 hits, and neither the description, the topics nor the release notes mention Stellar or Soroban. It is in the curated pool at repoScore 47 on the strength of the word `swap` alone. https://github.com/gateway-fm/lez-atomic-swaps",
+			note: "Triage 2026-09-14: NOT a Stellar repo; a curation error to correct, not a note to publish. The README describes atomic swaps between native Bitcoin and LEZ using Taproot/MuSig2 adaptor signatures, witnessed escrow on LEZ, offer discovery over Logos Delivery and negotiation over Logos Chat; a GitHub code search for `stellar` across the repository returns 0 hits, and neither the description, the topics nor the release notes mention Stellar or Soroban. It is in the curated pool at repoScore 47 on the strength of the word `swap` alone. https://github.com/gateway-fm/lez-atomic-swaps",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -4255,7 +4255,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// whose `repository` points back at it.
 	"stellar/smart-wallet-demo-app": [
 		{
-			note: "SDF's smart-wallet demo app. Its README opens with a security policy that matters more than the demo: the repository is OUT OF SCOPE for the Stellar HackerOne program, is no longer actively maintained, receives no security patches, and vulnerability reports against it are closed as informational — so it is a reference to read, never a base to fork for production. The walkthrough wires the Stellar Disbursement Platform (create an API key with write permissions) to the wallet (README read 2026-09-14; no license file; 46 stars; no releases; last push 2026-08-26).",
+			note: "SDF's smart-wallet demo app. Its README opens with a security policy that matters more than the demo: the repository is OUT OF SCOPE for the Stellar HackerOne program, is no longer actively maintained, receives no security patches, and vulnerability reports against it are closed as informational, so it is a reference to read, never a base to fork for production. The walkthrough wires the Stellar Disbursement Platform (create an API key with write permissions) to the wallet (README read 2026-09-14; no license file; 46 stars; no releases; last push 2026-08-26).",
 			triggers: [
 				"smart wallet demo",
 				"passkey wallet demo stellar",
@@ -4287,7 +4287,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/crate-git-revision": [
 		{
-			note: "A build-time helper from the @stellar org that embeds a crate's git revision into its build: it reads the revision either from the `.cargo_vcs_info.json` file inside a published crate or from the git repository of an unpublished build, and injects a `GIT_REVISION` environment variable carrying the full revision with a `-dirty` suffix when the working directory is dirty — which is how Stellar's Rust binaries report the commit they were built from. Newest release v0.0.9 (2026-05-28) (README read 2026-09-14; Apache-2.0; 3 stars; last push 2026-08-24).",
+			note: "A build-time helper from the @stellar org that embeds a crate's git revision into its build: it reads the revision either from the `.cargo_vcs_info.json` file inside a published crate or from the git repository of an unpublished build, and injects a `GIT_REVISION` environment variable carrying the full revision with a `-dirty` suffix when the working directory is dirty, which is how Stellar's Rust binaries report the commit they were built from. Newest release v0.0.9 (2026-05-28) (README read 2026-09-14; Apache-2.0; 3 stars; last push 2026-08-24).",
 			triggers: [
 				"git revision crate",
 				"embed git revision rust",
@@ -4334,7 +4334,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"xycloo/zephyr-vm": [
 		{
-			note: "The Zephyr VM by Xycloo Labs (mercurydata.app/zephyr-vm): a wasmi-based virtual machine for cloud computing over blockchain data — indexing, monitoring and automation — and the execution core of Mercury, though the README states it can also be built and run locally. Docs at docs.mercurydata.app (README read 2026-09-14; MPL-2.0; 3 stars; no releases; last push 2026-09-03).",
+			note: "The Zephyr VM by Xycloo Labs (mercurydata.app/zephyr-vm): a wasmi-based virtual machine for cloud computing over blockchain data (indexing, monitoring and automation) and the execution core of Mercury, though the README states it can also be built and run locally. Docs at docs.mercurydata.app (README read 2026-09-14; MPL-2.0; 3 stars; no releases; last push 2026-09-03).",
 			triggers: [
 				"zephyr vm mercury",
 				"blockchain data vm stellar",
@@ -4346,7 +4346,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"xycloo/rs-ingest": [
 		{
-			note: "crates.io `ingest` 0.1.1 (updated 2024-09-27; the crate's repository points back at this repo): Xycloo's Rust ingestion library offering single- and multi-threaded, online and offline ingestion of Stellar ledger data. Read the scope before reaching for it — the README is written for FUTURENET, the network SDF has since retired, and the newest GitHub tag is 0.0.3 (2023-10-04) (README read 2026-09-14; Apache-2.0; 3 stars; last push 2026-08-27).",
+			note: "crates.io `ingest` 0.1.1 (updated 2024-09-27; the crate's repository points back at this repo): Xycloo's Rust ingestion library offering single- and multi-threaded, online and offline ingestion of Stellar ledger data. Read the scope before reaching for it: the README is written for FUTURENET, the network SDF has since retired, and the newest GitHub tag is 0.0.3 (2023-10-04) (README read 2026-09-14; Apache-2.0; 3 stars; last push 2026-08-27).",
 			triggers: [
 				"rs-ingest futurenet",
 				"rust ledger ingestion stellar",
@@ -4370,7 +4370,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blend-capital/docs-v2": [
 		{
-			note: "The source of the Blend v2 documentation at docs.blend.capital — user documentation for Blend's lending pools and a separate pool-creator guide for deploying one. Blend is described here as a liquidity protocol primitive on Stellar (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-27).",
+			note: "The source of the Blend v2 documentation at docs.blend.capital: user documentation for Blend's lending pools and a separate pool-creator guide for deploying one. Blend is described here as a liquidity protocol primitive on Stellar (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-27).",
 			triggers: ["blend v2 docs", "blend pool creator guide"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4378,7 +4378,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/oracle-client": [
 		{
-			note: "Client bindings for the Reflector oracle contract (GitHub repo description; the README is empty and nothing is published under this name as of 2026-09-14) — the richer, published client for Reflector's Pulse and Beam oracles is @reflector/contract-client from reflector-network/contract-client-js (metadata read 2026-09-14; MIT; last push 2026-08-27).",
+			note: "Client bindings for the Reflector oracle contract (GitHub repo description; the README is empty and nothing is published under this name as of 2026-09-14); the richer, published client for Reflector's Pulse and Beam oracles is @reflector/contract-client from reflector-network/contract-client-js (metadata read 2026-09-14; MIT; last push 2026-08-27).",
 			triggers: ["reflector oracle client bindings"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4426,7 +4426,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ayazabbas/dark-fleet": [
 		{
-			note: "Dark Fleet (darkfleet.ayazabbas.com): a zero-knowledge battleship game built for the Stellar Hacks: ZK Gaming hackathon — two players connect Freighter wallets, commit hidden board states with Pedersen hash commitments, and prove shot results with ZK proofs on-chain without revealing ship positions. Newest release v1.0.0 (2026-02-23) (README read 2026-09-14; no license file; last push 2026-04-15).",
+			note: "Dark Fleet (darkfleet.ayazabbas.com): a zero-knowledge battleship game built for the Stellar Hacks: ZK Gaming hackathon: two players connect Freighter wallets, commit hidden board states with Pedersen hash commitments, and prove shot results with ZK proofs on-chain without revealing ship positions. Newest release v1.0.0 (2026-02-23) (README read 2026-09-14; no license file; last push 2026-04-15).",
 			triggers: [
 				"dark fleet battleship",
 				"zk gaming stellar",
@@ -4438,7 +4438,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Financial-Empowerment-Partners/impala": [
 		{
-			note: "Payala-Impala: a bridge between the Payala OFFLINE payment system and Stellar, so value that moved offline through Payala's network can cross on-chain when a user wants the wider ecosystem. The README describes Soroban contracts plus hardware-protected cryptographic primitives on a JavaCard smartcard and Android bindings — an unusual combination worth citing when the question is offline or smartcard payments on Stellar (README read 2026-09-14; no license file; no releases; last push 2026-09-08).",
+			note: "Payala-Impala: a bridge between the Payala OFFLINE payment system and Stellar, so value that moved offline through Payala's network can cross on-chain when a user wants the wider ecosystem. The README describes Soroban contracts plus hardware-protected cryptographic primitives on a JavaCard smartcard and Android bindings: an unusual combination worth citing when the question is offline or smartcard payments on Stellar (README read 2026-09-14; no license file; no releases; last push 2026-09-08).",
 			triggers: [
 				"payala impala offline",
 				"offline payments stellar",
@@ -4450,7 +4450,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"The-Brookes-Project/soroban-sc": [
 		{
-			note: "Verseprop's Soroban security-token contract: a regulatory-compliant security token whose README lists issuance with configurable parameters, built-in KYC/AML verification and status tracking, multi-admin administration and authorization controls for trading — the compliance-gated end of the token spectrum rather than a plain SEP-41 asset (README read 2026-09-14; no license file; no releases; last push 2025-12-05).",
+			note: "Verseprop's Soroban security-token contract: a regulatory-compliant security token whose README lists issuance with configurable parameters, built-in KYC/AML verification and status tracking, multi-admin administration and authorization controls for trading, the compliance-gated end of the token spectrum rather than a plain SEP-41 asset (README read 2026-09-14; no license file; no releases; last push 2025-12-05).",
 			triggers: [
 				"verseprop security token",
 				"compliant security token soroban",
@@ -4462,7 +4462,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Mael-wnb/dig-stellar": [
 		{
-			note: "Dig Stellar (dig-stellar-web.vercel.app): an analytics and portfolio-monitoring module for Stellar DeFi — protocol analytics, pool-level monitoring, multi-wallet portfolio tracking and normalised on-chain data pipelines, with alerts and non-custodial action flows described as future work rather than shipped features (README read 2026-09-14; MIT; no releases; last push 2026-09-05).",
+			note: "Dig Stellar (dig-stellar-web.vercel.app): an analytics and portfolio-monitoring module for Stellar DeFi: protocol analytics, pool-level monitoring, multi-wallet portfolio tracking and normalised on-chain data pipelines, with alerts and non-custodial action flows described as future work rather than shipped features (README read 2026-09-14; MIT; no releases; last push 2026-09-05).",
 			triggers: [
 				"dig stellar analytics",
 				"multi wallet portfolio stellar",
@@ -4486,7 +4486,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lumtum02-oss/Agos": [
 		{
-			note: 'Agos (agos-stellar.vercel.app), tagline "Payday is every second": a Soroban streaming-payroll dapp where an employer opens a stream and the recipient accrues continuously. The README is written as a hackathon submission checklist — public repo, 20+ commits, live deployment, pitch deck and demo video — so read it as a submission artifact; topics mark it testnet and the newest tag is v1.0.0 (2026-08-10) (README read 2026-09-14; MIT; last push 2026-08-29).',
+			note: 'Agos (agos-stellar.vercel.app), tagline "Payday is every second": a Soroban streaming-payroll dapp where an employer opens a stream and the recipient accrues continuously. The README is written as a hackathon submission checklist (public repo, 20+ commits, live deployment, pitch deck and demo video), so read it as a submission artifact; topics mark it testnet and the newest tag is v1.0.0 (2026-08-10) (README read 2026-09-14; MIT; last push 2026-08-29).',
 			triggers: [
 				"agos payroll stream",
 				"streaming payroll soroban",
@@ -4498,7 +4498,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"allbridge-io/allbridge-core-soroban-contracts": [
 		{
-			note: "The Soroban contract set of Allbridge Core, the cross-chain bridge's Stellar side (repo name and org; Allbridge Core's JS SDK is allbridge-io/allbridge-core-js-sdk). The README states only `make` to build and `make test` to run tests, and there is no description, release or published package, so nothing here documents the contracts' interface — read the deployed contract metadata instead (README read 2026-09-14; no license file; last push 2026-08-25).",
+			note: "The Soroban contract set of Allbridge Core, the cross-chain bridge's Stellar side (repo name and org; Allbridge Core's JS SDK is allbridge-io/allbridge-core-js-sdk). The README states only `make` to build and `make test` to run tests, and there is no description, release or published package, so nothing here documents the contracts' interface. Read the deployed contract metadata instead (README read 2026-09-14; no license file; last push 2026-08-25).",
 			triggers: [
 				"allbridge core soroban contracts",
 				"allbridge stellar bridge contracts",
@@ -4509,7 +4509,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"gateway-fm/loadgenerator": [
 		{
-			note: "Triage 2026-09-14: NOT a Stellar repo. GasStorm Load Generator — a high-throughput transaction load generator for benchmarking blockchain sequencers and execution layers, shipped as the Docker image gatewayfm/loadgenerator and the Go module github.com/gateway-fm/loadgenerator, used by gateway-fm/gasstorm. A GitHub code search for `stellar` across the repository returns 0 hits. It is in the index because the whole gateway-fm org was swept in behind the curated gatewayfm project (a genuine Stellar RPC provider) by the small-org rule. https://github.com/gateway-fm/loadgenerator",
+			note: "Triage 2026-09-14: NOT a Stellar repo. GasStorm Load Generator: a high-throughput transaction load generator for benchmarking blockchain sequencers and execution layers, shipped as the Docker image gatewayfm/loadgenerator and the Go module github.com/gateway-fm/loadgenerator, used by gateway-fm/gasstorm. A GitHub code search for `stellar` across the repository returns 0 hits. It is in the index because the whole gateway-fm org was swept in behind the curated gatewayfm project (a genuine Stellar RPC provider) by the small-org rule. https://github.com/gateway-fm/loadgenerator",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -4517,7 +4517,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"gateway-fm/ops-indexer": [
 		{
-			note: "Triage 2026-09-14: NOT a Stellar repo. A standalone EVM chain indexer with a gRPC read API — it polls an EVM node, writes to a private postgres and serves blocks, transactions, logs, tokens, gas stats and OP-Stack deposits to Open Privacy Suite and ops-explorer. A GitHub code search for `stellar` across the repository returns 0 hits. Same cause as gateway-fm/loadgenerator and gateway-fm/lez-atomic-swaps: the org was swept in behind the curated gatewayfm project. https://github.com/gateway-fm/ops-indexer",
+			note: "Triage 2026-09-14: NOT a Stellar repo. A standalone EVM chain indexer with a gRPC read API; it polls an EVM node, writes to a private postgres and serves blocks, transactions, logs, tokens, gas stats and OP-Stack deposits to Open Privacy Suite and ops-explorer. A GitHub code search for `stellar` across the repository returns 0 hits. Same cause as gateway-fm/loadgenerator and gateway-fm/lez-atomic-swaps: the org was swept in behind the curated gatewayfm project. https://github.com/gateway-fm/ops-indexer",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -4528,7 +4528,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// README, releases, or a registry whose `repository` points back at it.
 	"orbitlens/stellar-expert-explorer": [
 		{
-			note: "The source of StellarExpert (stellar.expert) itself — the block explorer and analytics platform most Stellar answers end up citing. The README links its Open API documentation at stellar.expert/openapi.html and states the Open Directory API data is publicly available to developers free of charge, which is why it is a legitimate citation target rather than a scraped one (README read 2026-09-14; MIT; 81 stars; no releases; last push 2026-09-11).",
+			note: "The source of StellarExpert (stellar.expert) itself: the block explorer and analytics platform most Stellar answers end up citing. The README links its Open API documentation at stellar.expert/openapi.html and states the Open Directory API data is publicly available to developers free of charge, which is why it is a legitimate citation target rather than a scraped one (README read 2026-09-14; MIT; 81 stars; no releases; last push 2026-09-11).",
 			triggers: [
 				"stellar expert explorer",
 				"stellarexpert open api",
@@ -4540,7 +4540,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"MetaMask/snap-stellar-wallet": [
 		{
-			note: "MetaMask's Stellar Wallet Snap monorepo — READ THE HEADER BEFORE USING IT: the README states in a boxed warning that the package has been migrated to MetaMask's `internal-snaps` monorepo, that this repository has been archived, and that all future development and feature releases happen there. GitHub's own `archived` flag still reads false and the last push is 2026-08-20, so the repo is readable but the README says it is not where the work lives (README and metadata read 2026-09-14; no license file; 4 stars; no releases).",
+			note: "MetaMask's Stellar Wallet Snap monorepo. READ THE HEADER BEFORE USING IT: the README states in a boxed warning that the package has been migrated to MetaMask's `internal-snaps` monorepo, that this repository has been archived, and that all future development and feature releases happen there. GitHub's own `archived` flag still reads false and the last push is 2026-08-20, so the repo is readable but the README says it is not where the work lives (README and metadata read 2026-09-14; no license file; 4 stars; no releases).",
 			triggers: [
 				"metamask stellar snap",
 				"stellar wallet snap",
@@ -4552,7 +4552,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pendulum-chain/spacewalk": [
 		{
-			note: "Spacewalk: a trustless, vault-based bridge between Stellar and Substrate/Polkadot parachains with ON-CHAIN VERIFICATION OF STELLAR CONSENSUS — the repo holds the pallets plus a standalone chain configured to run and test the bridge. Newest release v1.0.18 (2025-06-11) and last push 2026-03-19, so cite it as the bridge's implementation rather than as currently-moving work (README read 2026-09-14; Apache-2.0; 34 stars).",
+			note: "Spacewalk: a trustless, vault-based bridge between Stellar and Substrate/Polkadot parachains with ON-CHAIN VERIFICATION OF STELLAR CONSENSUS; the repo holds the pallets plus a standalone chain configured to run and test the bridge. Newest release v1.0.18 (2025-06-11) and last push 2026-03-19, so cite it as the bridge's implementation rather than as currently-moving work (README read 2026-09-14; Apache-2.0; 34 stars).",
 			triggers: [
 				"spacewalk bridge stellar",
 				"stellar polkadot bridge",
@@ -4564,7 +4564,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-registry/contracts": [
 		{
-			note: 'The on-chain Stellar Registry contracts, which the README describes as the infrastructure layer between "I wrote a smart contract" and "the ecosystem can safely use my smart contract" — Wasm publication and named contract deployment on Soroban. Newest tag main_contracts_registry_registry_pkg0.6.4_cli25.1.0 (2026-09-09) (README read 2026-09-14; Apache-2.0; last push 2026-09-09).',
+			note: 'The on-chain Stellar Registry contracts, which the README describes as the infrastructure layer between "I wrote a smart contract" and "the ecosystem can safely use my smart contract": Wasm publication and named contract deployment on Soroban. Newest tag main_contracts_registry_registry_pkg0.6.4_cli25.1.0 (2026-09-09) (README read 2026-09-14; Apache-2.0; last push 2026-09-09).',
 			triggers: [
 				"stellar registry contracts",
 				"named contract deployment soroban",
@@ -4588,7 +4588,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/rs-soroban-poseidon": [
 		{
-			note: "crates.io soroban-poseidon 27.0.0 (updated 2026-07-08; the crate's repository points back at this repo): SDF's Poseidon and Poseidon2 hash functions for Soroban contracts — the README states the sponge construction matches circom's circomlib implementation, that BN254 parameters match circomlib, and that the BLS12-381 parameters are self-generated to match poseidon-bls12381-circom, which is exactly what a ZK integration needs to know before trusting cross-system proofs. Newest tag v27.0.0 (README read 2026-09-14; Apache-2.0; last push 2026-08-28).",
+			note: "crates.io soroban-poseidon 27.0.0 (updated 2026-07-08; the crate's repository points back at this repo): SDF's Poseidon and Poseidon2 hash functions for Soroban contracts; the README states the sponge construction matches circom's circomlib implementation, that BN254 parameters match circomlib, and that the BLS12-381 parameters are self-generated to match poseidon-bls12381-circom, which is exactly what a ZK integration needs to know before trusting cross-system proofs. Newest tag v27.0.0 (README read 2026-09-14; Apache-2.0; last push 2026-08-28).",
 			triggers: [
 				"poseidon hash soroban",
 				"poseidon2 stellar",
@@ -4600,7 +4600,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/go-stellar-xdr-json": [
 		{
-			note: "SDF's Go library for converting Stellar XDR to and from JSON — the repository combines Rust code with Go bindings, so a consumer builds the archive with `make build-libs` rather than relying on pure Go. Newest tag 26.0.0 (2026-05-05), which tracks the protocol line rather than a semantic version of its own (README read 2026-09-14; Apache-2.0; last push 2026-08-31).",
+			note: "SDF's Go library for converting Stellar XDR to and from JSON; the repository combines Rust code with Go bindings, so a consumer builds the archive with `make build-libs` rather than relying on pure Go. Newest tag 26.0.0 (2026-05-05), which tracks the protocol line rather than a semantic version of its own (README read 2026-09-14; Apache-2.0; last push 2026-08-31).",
 			triggers: ["xdr to json go", "go xdr json stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4608,7 +4608,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/account-viewer-v2": [
 		{
-			note: "SDF's Account Viewer 2.0 — the simple tool for viewing a Stellar account and sending transactions from it, which the README states replaces the original Account Viewer with an updated framework and design; built with create-react-app and yarn. Newest release v1.6.1 (2026-03-23) (README read 2026-09-14; no license file; 43 stars; last push 2026-09-03).",
+			note: "SDF's Account Viewer 2.0: the simple tool for viewing a Stellar account and sending transactions from it, which the README states replaces the original Account Viewer with an updated framework and design; built with create-react-app and yarn. Newest release v1.6.1 (2026-03-23) (README read 2026-09-14; no license file; 43 stars; last push 2026-09-03).",
 			triggers: ["account viewer stellar", "view stellar account tool"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4616,7 +4616,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/scf-handbook": [
 		{
-			note: "The SCF Handbook, which its own front matter calls a SOURCE OF TRUTH document for the Stellar Community Fund — how the programs work, which one to apply to and how to apply. When a question is about SCF process rather than a specific award, this is the citable document (README read 2026-09-14; no license file; 13 stars; no releases; last push 2026-09-08).",
+			note: "The SCF Handbook, which its own front matter calls a SOURCE OF TRUTH document for the Stellar Community Fund: how the programs work, which one to apply to and how to apply. When a question is about SCF process rather than a specific award, this is the citable document (README read 2026-09-14; no license file; 13 stars; no releases; last push 2026-09-08).",
 			triggers: [
 				"scf handbook",
 				"stellar community fund apply",
@@ -4628,7 +4628,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/ecosystem-resources": [
 		{
-			note: "SDF's à-la-carte menu of workshop, tutorial and developer-activation material for in-person events and hackathons — the README's framing is that an organiser running a training does not have to reinvent the wheel and can select from what is already there (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-09-09).",
+			note: "SDF's à-la-carte menu of workshop, tutorial and developer-activation material for in-person events and hackathons; the README's framing is that an organiser running a training does not have to reinvent the wheel and can select from what is already there (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-09-09).",
 			triggers: [
 				"stellar workshop resources",
 				"hackathon activation material stellar",
@@ -4647,7 +4647,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-experimental/stellar-contract-verify-plugin": [
 		{
-			note: "A Stellar CLI plugin that verifies a contract's WASM reproduces from the build metadata it records, per SEP-58. Its README opens with an IMPORTANT box: it should not be used in production, exists for experimentation and testing, is not maintained, and may be removed at any time — so cite it as evidence that reproducible-build verification is being prototyped, never as a tool to depend on (README read 2026-09-14; Apache-2.0; topic stellar-cli-plugin; no releases; last push 2026-08-27).",
+			note: "A Stellar CLI plugin that verifies a contract's WASM reproduces from the build metadata it records, per SEP-58. Its README opens with an IMPORTANT box: it should not be used in production, exists for experimentation and testing, is not maintained, and may be removed at any time, so cite it as evidence that reproducible-build verification is being prototyped, never as a tool to depend on (README read 2026-09-14; Apache-2.0; topic stellar-cli-plugin; no releases; last push 2026-08-27).",
 			triggers: [
 				"contract verify plugin",
 				"sep-58 reproducible build",
@@ -4683,7 +4683,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"runtimeverification/komet-node": [
 		{
-			note: "Komet Node: a LOCAL Stellar testnet node built on Runtime Verification's K formal semantics of Soroban — the runnable companion to their komet semantics, installed through kup. It is the formal-methods path to testing a contract against a semantics rather than against an implementation (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-20).",
+			note: "Komet Node: a LOCAL Stellar testnet node built on Runtime Verification's K formal semantics of Soroban; the runnable companion to their komet semantics, installed through kup. It is the formal-methods path to testing a contract against a semantics rather than against an implementation (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-20).",
 			triggers: [
 				"komet node semantics",
 				"formal semantics soroban",
@@ -4695,7 +4695,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"withObsrvr/prism": [
 		{
-			note: "Prism, a Soroban-first block explorer for Stellar by Obsrvr (withobsrvr.com), powered by Obsrvr Lake. The README is unusually explicit about the architecture — a server-rendered Go application on Go 1.26 with Cobra/Viper, net/http and templates, htmx for interactivity, and deliberately no SPA, no React and no client-side router (README read 2026-09-14; no license file; no releases; last push 2026-08-05).",
+			note: "Prism, a Soroban-first block explorer for Stellar by Obsrvr (withobsrvr.com), powered by Obsrvr Lake. The README is unusually explicit about the architecture: a server-rendered Go application on Go 1.26 with Cobra/Viper, net/http and templates, htmx for interactivity, and deliberately no SPA, no React and no client-side router (README read 2026-09-14; no license file; no releases; last push 2026-08-05).",
 			triggers: [
 				"prism block explorer",
 				"obsrvr explorer stellar",
@@ -4715,7 +4715,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"tryoutbounder/anchor-go": [
 		{
-			note: "anchor-go: a Go client library for the Stellar Ecosystem Proposals an anchor implements, starting with SEP-1 — fetching and parsing a `stellar.toml`, the first point of contact any client has with an anchor. Last push 2025-11-29 and no release, so treat coverage beyond SEP-1 as unverified (README read 2026-09-14; no license file).",
+			note: "anchor-go: a Go client library for the Stellar Ecosystem Proposals an anchor implements, starting with SEP-1: fetching and parsing a `stellar.toml`, the first point of contact any client has with an anchor. Last push 2025-11-29 and no release, so treat coverage beyond SEP-1 as unverified (README read 2026-09-14; no license file).",
 			triggers: [
 				"anchor go client",
 				"sep-1 stellar toml go",
@@ -4727,7 +4727,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"theahaco/authline": [
 		{
-			note: "Authline (theahaco.github.io/authline): an asset and trustline management dApp built on Ahaco's Scaffold Stellar toolkit — Vite, React, TypeScript with auto-generated contract clients — and its README is still Scaffold Stellar's own, marked under active development. Newest release v0.8.1 (2026-09-08) (README read 2026-09-14; Apache-2.0; last push 2026-09-08).",
+			note: "Authline (theahaco.github.io/authline): an asset and trustline management dApp built on Ahaco's Scaffold Stellar toolkit: Vite, React, TypeScript with auto-generated contract clients, and its README is still Scaffold Stellar's own, marked under active development. Newest release v0.8.1 (2026-09-08) (README read 2026-09-14; Apache-2.0; last push 2026-09-08).",
 			triggers: [
 				"authline trustline manager",
 				"trustline management dapp",
@@ -4739,7 +4739,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"miguelnietoa/recall": [
 		{
-			note: "Recall (recall-stellar.vercel.app): a toolkit for Stellar Confidential Tokens that lets a wallet ship confidential payments WITHOUT writing a circuit, and keeps the event history balances are rebuilt from — the README's reason for that indexer is concrete and worth citing: Stellar's RPC retains only SEVEN DAYS of event history. Six builds are described, all running (README read 2026-09-14; MIT; no releases; last push 2026-08-06).",
+			note: "Recall (recall-stellar.vercel.app): a toolkit for Stellar Confidential Tokens that lets a wallet ship confidential payments WITHOUT writing a circuit, and keeps the event history balances are rebuilt from; the README's reason for that indexer is concrete and worth citing: Stellar's RPC retains only SEVEN DAYS of event history. Six builds are described, all running (README read 2026-09-14; MIT; no releases; last push 2026-08-06).",
 			triggers: [
 				"recall confidential tokens",
 				"confidential payments toolkit stellar",
@@ -4751,7 +4751,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"yripper/openzeppelin-stellar-privacy-wallet": [
 		{
-			note: "Privacy Wallet (privacywallet.coderipper.xyz, testnet): a passkey-secured smart wallet for Stellar with two privacy rails — confidential transfers and a shielded pool whose idle liquidity earns yield in DeFindex — with zero-knowledge proofs generated client-side and no seed phrase or browser extension. Built for a Stellar privacy hackathon; no release published (README read 2026-09-14; no license file; 3 stars; last push 2026-08-21).",
+			note: "Privacy Wallet (privacywallet.coderipper.xyz, testnet): a passkey-secured smart wallet for Stellar with two privacy rails: confidential transfers and a shielded pool whose idle liquidity earns yield in DeFindex, with zero-knowledge proofs generated client-side and no seed phrase or browser extension. Built for a Stellar privacy hackathon; no release published (README read 2026-09-14; no license file; 3 stars; last push 2026-08-21).",
 			triggers: [
 				"privacy wallet passkey stellar",
 				"shielded pool stellar",
@@ -4763,7 +4763,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"leocagli/open-stellar-passport": [
 		{
-			note: 'open-stellar-passport: a zero-knowledge "passport" in Circom that lets an autonomous agent prove it is human-backed, anti-Sybil and solvent WITHOUT revealing its owner or its balance — built for the Stellar Hacks: Real-World ZK hackathon as the trust layer for agent commerce on Stellar (README read 2026-09-14; license NOASSERTION; no releases; last push 2026-09-14).',
+			note: 'open-stellar-passport: a zero-knowledge "passport" in Circom that lets an autonomous agent prove it is human-backed, anti-Sybil and solvent WITHOUT revealing its owner or its balance, built for the Stellar Hacks: Real-World ZK hackathon as the trust layer for agent commerce on Stellar (README read 2026-09-14; license NOASSERTION; no releases; last push 2026-09-14).',
 			triggers: [
 				"zk passport agent",
 				"anti-sybil proof stellar",
@@ -4787,7 +4787,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blaze-xyz/cli": [
 		{
-			note: "npm @blaze-money/cli 1.5.0 (published 2026-07-29; the package's repository points back at this repo): Blaze's payments SDK, CLI and MCP server, pitched as giving an AI agent the ability to manage payments, analyse spending and automate financial operations; docs at docs.blaze.money. The README does not name Stellar — read it as agent-payments infrastructure whose Stellar relationship must be established elsewhere (README read 2026-09-14; MIT; last push 2026-06-24).",
+			note: "npm @blaze-money/cli 1.5.0 (published 2026-07-29; the package's repository points back at this repo): Blaze's payments SDK, CLI and MCP server, pitched as giving an AI agent the ability to manage payments, analyse spending and automate financial operations; docs at docs.blaze.money. The README does not name Stellar. Read it as agent-payments infrastructure whose Stellar relationship must be established elsewhere (README read 2026-09-14; MIT; last push 2026-06-24).",
 			triggers: ["blaze payments cli", "agent payments mcp server"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4819,7 +4819,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-clonable-backoffice": [
 		{
-			note: "The Trustless Work backoffice: a clonable administrative console for the full lifecycle of Trustless Work escrows — deployment, monitoring, operation, milestone updates and funding — intended to be cloned for fast escrow initialisation rather than used as a hosted product (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-05-09).",
+			note: "The Trustless Work backoffice: a clonable administrative console for the full lifecycle of Trustless Work escrows (deployment, monitoring, operation, milestone updates and funding), intended to be cloned for fast escrow initialisation rather than used as a hosted product (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-05-09).",
 			triggers: ["trustless work backoffice", "escrow admin console stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4827,7 +4827,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-spikes": [
 		{
-			note: "Trustless Work's product documentation and discussion repository — the org's own framing of itself as \"the Escrow Ecosystem for Stellar\", building tools to integrate escrows into any payment flow with Soroban contracts and stablecoins such as USDC. Spikes and discussion rather than shipped code (README read 2026-09-14; no license file; 5 stars; no releases; last push 2026-06-29).",
+			note: "Trustless Work's product documentation and discussion repository: the org's own framing of itself as \"the Escrow Ecosystem for Stellar\", building tools to integrate escrows into any payment flow with Soroban contracts and stablecoins such as USDC. Spikes and discussion rather than shipped code (README read 2026-09-14; no license file; 5 stars; no releases; last push 2026-06-29).",
 			triggers: ["trustless work spikes", "escrow ecosystem stellar docs"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4835,7 +4835,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Zerie5/lulpay-campaign-contract": [
 		{
-			note: "LulPay's Soroban crowdfunding campaign contract: each campaign is deployed as its own contract instance from this WASM template, and contributions, withdrawals and refunds move a configured Stellar Asset Contract token — USDC on testnet. Built with soroban-sdk 23, locked at 23.2.1 in Cargo.lock to match the public testnet deployment (README read 2026-09-14; no license file; no releases; last push 2026-07-27).",
+			note: "LulPay's Soroban crowdfunding campaign contract: each campaign is deployed as its own contract instance from this WASM template, and contributions, withdrawals and refunds move a configured Stellar Asset Contract token, USDC on testnet. Built with soroban-sdk 23, locked at 23.2.1 in Cargo.lock to match the public testnet deployment (README read 2026-09-14; no license file; no releases; last push 2026-07-27).",
 			triggers: [
 				"lulpay campaign contract",
 				"crowdfunding contract soroban",
@@ -4847,7 +4847,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"paltalabs/defindex-distributor": [
 		{
-			note: "The DeFindex Distributor by PaltaLabs: a Soroban contract plus CLI that batch-deposits campaign funds into a DeFindex vault and distributes the minted dfTokens to recipients from a CSV of asset, vault, user and amount — as if each user had deposited directly. Newest tag main_defindex-distributor_pkg0.0.1_cli22.8.1 (2026-02-27) (README read 2026-09-14; no license file; last push 2026-02-27).",
+			note: "The DeFindex Distributor by PaltaLabs: a Soroban contract plus CLI that batch-deposits campaign funds into a DeFindex vault and distributes the minted dfTokens to recipients from a CSV of asset, vault, user and amount, as if each user had deposited directly. Newest tag main_defindex-distributor_pkg0.0.1_cli22.8.1 (2026-02-27) (README read 2026-09-14; no license file; last push 2026-02-27).",
 			triggers: [
 				"defindex distributor",
 				"batch deposit vault stellar",
@@ -4875,7 +4875,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"nirvana-labs/nirvana-typescript": [
 		{
-			note: "npm @nirvana-labs/nirvana 2.0.1 (published 2026-09-11; the package's repository points back at this repo): the official TypeScript client for the Nirvana Labs REST API. Neither the README nor a GitHub code search of the repository mentions Stellar or Soroban (0 hits, searched 2026-09-14), so it is indexed through its owner's project rather than through Stellar-specific code — do not cite it as a Stellar library. Newest release v2.0.1 (README read 2026-09-14; Apache-2.0).",
+			note: "npm @nirvana-labs/nirvana 2.0.1 (published 2026-09-11; the package's repository points back at this repo): the official TypeScript client for the Nirvana Labs REST API. Neither the README nor a GitHub code search of the repository mentions Stellar or Soroban (0 hits, searched 2026-09-14), so it is indexed through its owner's project rather than through Stellar-specific code. Do not cite it as a Stellar library. Newest release v2.0.1 (README read 2026-09-14; Apache-2.0).",
 			triggers: ["nirvana labs typescript"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4883,7 +4883,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dfns/dfns-sdk-java": [
 		{
-			note: "The Dfns Java SDK (dfns.co): the custody provider's Java client, requiring Java 17+ and published to Maven Central as co.dfns:dfns-sdk-java. Its Stellar relevance is narrow but real — a GitHub code search finds 7 occurrences of `stellar` in the repository (searched 2026-09-14) — so treat it as a custody SDK with Stellar support, not a Stellar SDK (README read 2026-09-14; MIT; no releases; last push 2026-09-11).",
+			note: "The Dfns Java SDK (dfns.co): the custody provider's Java client, requiring Java 17+ and published to Maven Central as co.dfns:dfns-sdk-java. Its Stellar relevance is narrow but real: a GitHub code search finds 7 occurrences of `stellar` in the repository (searched 2026-09-14), so treat it as a custody SDK with Stellar support, not a Stellar SDK (README read 2026-09-14; MIT; no releases; last push 2026-09-11).",
 			triggers: ["dfns java sdk", "dfns custody stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4891,7 +4891,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dappradar/tokens": [
 		{
-			note: "DappRadar's community-maintained token metadata collection, used by DappRadar's Portfolio Tracker and other products; contributions are made by pull request under published guidelines. It spans many chains — a code search finds 9 occurrences of `stellar` in the repository (searched 2026-09-14) — so it is a multi-chain token list that includes Stellar, not a Stellar registry (README read 2026-09-14; no license file; 37 stars; last push 2025-12-12).",
+			note: "DappRadar's community-maintained token metadata collection, used by DappRadar's Portfolio Tracker and other products; contributions are made by pull request under published guidelines. It spans many chains: a code search finds 9 occurrences of `stellar` in the repository (searched 2026-09-14), so it is a multi-chain token list that includes Stellar, not a Stellar registry (README read 2026-09-14; no license file; 37 stars; last push 2025-12-12).",
 			triggers: ["dappradar token list", "multichain token metadata"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4899,7 +4899,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"idos-network/docs": [
 		{
-			note: "The idOS documentation site (docs.idos.network, Docusaurus): idOS is described there as an identity operating system — a decentralised storage and access-management network for user data that brings portable identity to the stablecoin economy, letting users onboard to stablecoin apps and share data as easily as moving money, on- and off-chain (README read 2026-09-14; no license file; no releases; last push 2026-09-09).",
+			note: "The idOS documentation site (docs.idos.network, Docusaurus): idOS is described there as an identity operating system: a decentralised storage and access-management network for user data that brings portable identity to the stablecoin economy, letting users onboard to stablecoin apps and share data as easily as moving money, on- and off-chain (README read 2026-09-14; no license file; no releases; last push 2026-09-09).",
 			triggers: [
 				"idos documentation",
 				"portable identity stablecoin",
@@ -4911,7 +4911,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"idos-network/contracts": [
 		{
-			note: "idOS's EVM-side contracts — the repo's own description names the CCA, the $IDOS ERC20 token and the node staking contract, it builds with Foundry, and it carries an audit report PDF (NM0731-FINAL_IDOS.pdf) covering a subset of the contracts at commit f0ba57e. A GitHub code search finds 0 occurrences of `stellar` (searched 2026-09-14), so this is NOT the Stellar side of idOS; use it only for questions about the token and staking contracts (README read 2026-09-14; no license file; 3 stars; last push 2026-03-06).",
+			note: "idOS's EVM-side contracts: the repo's own description names the CCA, the $IDOS ERC20 token and the node staking contract, it builds with Foundry, and it carries an audit report PDF (NM0731-FINAL_IDOS.pdf) covering a subset of the contracts at commit f0ba57e. A GitHub code search finds 0 occurrences of `stellar` (searched 2026-09-14), so this is NOT the Stellar side of idOS; use it only for questions about the token and staking contracts (README read 2026-09-14; no license file; 3 stars; last push 2026-03-06).",
 			triggers: [
 				"idos erc20 contract",
 				"idos staking contract",
@@ -4931,7 +4931,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/reflector-exchanges-connector": [
 		{
-			note: "The CEX and DEX data source for the Reflector backend (GitHub repo description; the README is empty as of 2026-09-14) — the component that feeds exchange prices into the Reflector oracle's node (reflector-network/reflector-node) (metadata read 2026-09-14; MIT; no releases; last push 2026-04-10).",
+			note: "The CEX and DEX data source for the Reflector backend (GitHub repo description; the README is empty as of 2026-09-14), the component that feeds exchange prices into the Reflector oracle's node (reflector-network/reflector-node) (metadata read 2026-09-14; MIT; no releases; last push 2026-04-10).",
 			triggers: ["reflector exchanges connector"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4939,7 +4939,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/reflector-fx-connector": [
 		{
-			note: "The foreign-exchange rates data source for the Reflector backend (GitHub repo description; the README is empty as of 2026-09-14) — the FX counterpart to the exchanges connector, which is how Reflector's non-crypto pairs are sourced (metadata read 2026-09-14; MIT; no releases; last push 2026-05-26).",
+			note: "The foreign-exchange rates data source for the Reflector backend (GitHub repo description; the README is empty as of 2026-09-14), the FX counterpart to the exchanges connector, which is how Reflector's non-crypto pairs are sourced (metadata read 2026-09-14; MIT; no releases; last push 2026-05-26).",
 			triggers: ["reflector fx connector", "forex rates oracle stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4947,7 +4947,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/reflector-website": [
 		{
-			note: "The website with general information about the Reflector protocol (GitHub repo description; the README is empty as of 2026-09-14) — the source of reflector.network rather than any part of the oracle itself (metadata read 2026-09-14; no license file; no releases; last push 2026-09-07).",
+			note: "The website with general information about the Reflector protocol (GitHub repo description; the README is empty as of 2026-09-14), the source of reflector.network rather than any part of the oracle itself (metadata read 2026-09-14; no license file; no releases; last push 2026-09-07).",
 			triggers: ["reflector website source"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4955,7 +4955,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"therealjhay/stellargive": [
 		{
-			note: "StellarGive: a donation project on Stellar aimed at people in crisis. This copy is a GitHub FORK — its README's CI badges all point at Feyisara2108/stellargive, the upstream — so cite the upstream repository for the project's state (README and metadata read 2026-09-14; MIT; no releases; last push 2026-07-28).",
+			note: "StellarGive: a donation project on Stellar aimed at people in crisis. This copy is a GitHub FORK: its README's CI badges all point at Feyisara2108/stellargive, the upstream, so cite the upstream repository for the project's state (README and metadata read 2026-09-14; MIT; no releases; last push 2026-07-28).",
 			triggers: ["stellargive donations"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4971,7 +4971,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"devasignhq/website": [
 		{
-			note: "DevAsign's marketing and documentation site. Its README is a useful map of the product's split: this repository is the PUBLIC WEBSITE only — landing, pricing, docs and bounty pages — while the code-review app lives at devasign.ai; DevAsign itself is described as a multimodal, goal-aware AI code reviewer that reviews a pull request against what was asked and pays bounties to the contributors who ship the work (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-02).",
+			note: "DevAsign's marketing and documentation site. Its README is a useful map of the product's split: this repository is the PUBLIC WEBSITE only (landing, pricing, docs and bounty pages), while the code-review app lives at devasign.ai; DevAsign itself is described as a multimodal, goal-aware AI code reviewer that reviews a pull request against what was asked and pays bounties to the contributors who ship the work (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-02).",
 			triggers: ["devasign website", "ai code reviewer bounty"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -4979,7 +4979,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"LiquidsFi/liquidsfi-contracts": [
 		{
-			note: "Triage 2026-09-14: empty README, no GitHub description, no release, no published package — the repo states nothing durable about itself beyond the name suggesting LiquidsFi's contracts. Re-examine if it gains a README, a release or a deployment. https://github.com/LiquidsFi/liquidsfi-contracts",
+			note: "Triage 2026-09-14: empty README, no GitHub description, no release, no published package; the repo states nothing durable about itself beyond the name suggesting LiquidsFi's contracts. Re-examine if it gains a README, a release or a deployment. https://github.com/LiquidsFi/liquidsfi-contracts",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -4987,7 +4987,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"devasignhq/mobile-app": [
 		{
-			note: "Triage 2026-09-14: GONE — `gh api repos/devasignhq/mobile-app` returns 404, so the repository has been deleted or made private since it was indexed. The row should be retired or re-resolved rather than served; its sibling devasignhq/website is live and noted. https://github.com/devasignhq/mobile-app",
+			note: "Triage 2026-09-14: GONE. `gh api repos/devasignhq/mobile-app` returns 404, so the repository has been deleted or made private since it was indexed. The row should be retired or re-resolved rather than served; its sibling devasignhq/website is live and noted. https://github.com/devasignhq/mobile-app",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -5005,7 +5005,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// (feedback: a named repo is a probe, and staleness is not death).
 	"ngaongoc934-maker/Ipon": [
 		{
-			note: 'Triage 2026-09-14: monthly-submission cohort template. The README is the shared checklist — repo link, 20+ commits, live app (https://ipon-dun.vercel.app), pitch deck, demo video, feedback survey, monthly submission link — and never states what Ipon does; the GitHub description is the cohort\'s generic "Ipon — Stellar/Soroban project", topics mark it testnet, tag v1.0.0 (2026-08-10). Nothing durable to publish until the repo describes its own product. https://github.com/ngaongoc934-maker/Ipon',
+			note: 'Triage 2026-09-14: monthly-submission cohort template. The README is the shared checklist: repo link, 20+ commits, live app (https://ipon-dun.vercel.app), pitch deck, demo video, feedback survey, monthly submission link, and never states what Ipon does; the GitHub description is the cohort\'s generic "Ipon — Stellar/Soroban project", topics mark it testnet, tag v1.0.0 (2026-08-10). Nothing durable to publish until the repo describes its own product. https://github.com/ngaongoc934-maker/Ipon',
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -5040,7 +5040,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// metadata, README, releases, or a registry that points back at it.
 	"mericcintosun/lumenia": [
 		{
-			note: "Lumenia (getlumenia.com): send or request USDC by link, where the recipient claims it walletless and seedless and pays no gas — the README's own badge says Stellar testnet plus a CAPPED MAINNET PILOT, and its topics name the primitives it rides on: claimable-balances, sponsored-reserves and fee-bump. Newest release v0.1.0 (README read 2026-09-14; MIT; last push 2026-09-12).",
+			note: "Lumenia (getlumenia.com): send or request USDC by link, where the recipient claims it walletless and seedless and pays no gas; the README's own badge says Stellar testnet plus a CAPPED MAINNET PILOT, and its topics name the primitives it rides on: claimable-balances, sponsored-reserves and fee-bump. Newest release v0.1.0 (README read 2026-09-14; MIT; last push 2026-09-12).",
 			triggers: [
 				"lumenia usdc link",
 				"walletless claim usdc",
@@ -5052,7 +5052,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"mpprouter/stellar-agent-wallet-skill": [
 		{
-			note: "stellar-agent-wallet (clawhub.ai/plugins/stellar-agent-wallet): Rozo's agent-side Stellar USDC wallet skill — it pays 402-gated APIs through x402 or the MPP Router, checks balances, adds USDC trustlines, swaps XLM→USDC on the DEX, and sends or bridges USDC to EVM, Solana or back to Stellar via Rozo, with file-based secret storage, a sponsored mode and both networks. Newest tag v1.8.2; nothing is published on npm under `stellar-agent-wallet` as of the read (README read 2026-09-14; no license file; last push 2026-09-04).",
+			note: "stellar-agent-wallet (clawhub.ai/plugins/stellar-agent-wallet): Rozo's agent-side Stellar USDC wallet skill; it pays 402-gated APIs through x402 or the MPP Router, checks balances, adds USDC trustlines, swaps XLM→USDC on the DEX, and sends or bridges USDC to EVM, Solana or back to Stellar via Rozo, with file-based secret storage, a sponsored mode and both networks. Newest tag v1.8.2; nothing is published on npm under `stellar-agent-wallet` as of the read (README read 2026-09-14; no license file; last push 2026-09-04).",
 			triggers: [
 				"stellar agent wallet skill",
 				"pay 402 api agent",
@@ -5064,7 +5064,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"karagozemin/Solvent": [
 		{
-			note: "Solvent (solvent-web.vercel.app): zero-knowledge proof-of-reserves on Stellar — the README's claim is specific enough to cite, that a holder proves a bank balance clears a threshold FROM A REAL DKIM-SIGNED EMAIL and a Soroban contract verifies it, so the reserve claim rests on the bank's own signature rather than on a screenshot. Newest release v0.1.0 (README read 2026-09-14; no license file; last push 2026-07-04).",
+			note: "Solvent (solvent-web.vercel.app): zero-knowledge proof-of-reserves on Stellar: the README's claim is specific enough to cite, that a holder proves a bank balance clears a threshold FROM A REAL DKIM-SIGNED EMAIL and a Soroban contract verifies it, so the reserve claim rests on the bank's own signature rather than on a screenshot. Newest release v0.1.0 (README read 2026-09-14; no license file; last push 2026-07-04).",
 			triggers: [
 				"solvent proof of reserves",
 				"dkim email proof stellar",
@@ -5076,7 +5076,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"runtimeverification/stellar-debugger": [
 		{
-			note: "Runtime Verification's Stellar Debugger: time-travel debugging for Soroban contracts inside the editor — set a breakpoint in a Rust contract and step FORWARD AND BACKWARD through what it did, line by line, instead of redeploy-and-guess. The companion piece to their K-semantics work (komet-node) (README read 2026-09-14; BSD-3-Clause; 1 star; no releases; last push 2026-09-13).",
+			note: "Runtime Verification's Stellar Debugger: time-travel debugging for Soroban contracts inside the editor: set a breakpoint in a Rust contract and step FORWARD AND BACKWARD through what it did, line by line, instead of redeploy-and-guess. The companion piece to their K-semantics work (komet-node) (README read 2026-09-14; BSD-3-Clause; 1 star; no releases; last push 2026-09-13).",
 			triggers: [
 				"stellar debugger breakpoint",
 				"time travel debugging soroban",
@@ -5088,7 +5088,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-expert/refractor": [
 		{
-			note: "Refractor (refractor.stellar.expert): StellarExpert's multisig aggregator and pending-transaction storage for Stellar — where a transaction waits while its signers collect. The README is empty; the GitHub description is the durable statement (metadata read 2026-09-14; MIT; 5 stars; no releases; last push 2026-07-23).",
+			note: "Refractor (refractor.stellar.expert): StellarExpert's multisig aggregator and pending-transaction storage for Stellar: where a transaction waits while its signers collect. The README is empty; the GitHub description is the durable statement (metadata read 2026-09-14; MIT; 5 stars; no releases; last push 2026-07-23).",
 			triggers: [
 				"refractor multisig",
 				"pending transaction storage stellar",
@@ -5100,7 +5100,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarchain/v4": [
 		{
-			note: "The Stellarchain V4 frontend (stellarchain.io): a Next.js App Router application for exploring Stellar and Soroban data — ledgers, transactions, operations and effects, accounts and labels, markets, assets and liquidity pools, and Soroban contracts with their events, metadata and verification (README read 2026-09-14; no license file; no releases; last push 2026-09-03).",
+			note: "The Stellarchain V4 frontend (stellarchain.io): a Next.js App Router application for exploring Stellar and Soroban data: ledgers, transactions, operations and effects, accounts and labels, markets, assets and liquidity pools, and Soroban contracts with their events, metadata and verification (README read 2026-09-14; no license file; no releases; last push 2026-09-03).",
 			triggers: [
 				"stellarchain explorer",
 				"soroban contract verification explorer",
@@ -5111,7 +5111,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/mcp-stellar-xdr": [
 		{
-			note: "SDF's MCP server for Stellar XDR: it exposes XDR-JSON and JSON Schema as tools so an agent can understand what a piece of XDR means, modify its values, and construct new XDR — the canonical answer when an agent needs to read or build XDR without a local SDK (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-28). A sibling of the same name lives in stellar-experimental.",
+			note: "SDF's MCP server for Stellar XDR: it exposes XDR-JSON and JSON Schema as tools so an agent can understand what a piece of XDR means, modify its values, and construct new XDR; the canonical answer when an agent needs to read or build XDR without a local SDK (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-28). A sibling of the same name lives in stellar-experimental.",
 			triggers: ["mcp stellar xdr", "xdr json mcp server", "agent build xdr"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5119,7 +5119,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-experimental/mcp-stellar-xdr": [
 		{
-			note: "The stellar-experimental copy of SDF's XDR MCP server — same README and same purpose as stellar/mcp-stellar-xdr (XDR-JSON and JSON Schema as agent tools), 2 stars and last pushed 2026-09-03, six days after the stellar/ copy. Cite the stellar/ repository unless a question is specifically about the experimental org (README read 2026-09-14; Apache-2.0; no releases).",
+			note: "The stellar-experimental copy of SDF's XDR MCP server: same README and same purpose as stellar/mcp-stellar-xdr (XDR-JSON and JSON Schema as agent tools), 2 stars and last pushed 2026-09-03, six days after the stellar/ copy. Cite the stellar/ repository unless a question is specifically about the experimental org (README read 2026-09-14; Apache-2.0; no releases).",
 			triggers: ["experimental mcp xdr"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5127,7 +5127,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/research": [
 		{
-			note: "The sources of the SDF research website — the README is one line naming exactly that, and the repository is where the published research pages come from rather than the research itself (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-11).",
+			note: "The sources of the SDF research website; the README is one line naming exactly that, and the repository is where the published research pages come from rather than the research itself (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-11).",
 			triggers: ["sdf research website"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5135,7 +5135,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/security-tools": [
 		{
-			note: "SDF's repository for PUBLIC security tooling, in Rust — the README states only that, so the contents are the documentation; worth checking directly when a question is about Stellar security tooling published by the foundation (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-28).",
+			note: "SDF's repository for PUBLIC security tooling, in Rust; the README states only that, so the contents are the documentation; worth checking directly when a question is about Stellar security tooling published by the foundation (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-28).",
 			triggers: ["stellar security tools sdf"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5155,7 +5155,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kaankacar/stellar-wallet-gallery": [
 		{
-			note: 'Stellar Wallet Gallery: the SAME tiny app built six times, once per wallet kit — Stellar Wallets Kit, Blux, Privy, Para, Passkey Kit and Smart Accounts — with an identical flow and identical UI from a shared package, made for side-by-side comparison at a Stellar Developers Meeting. The most direct answer available to "which wallet kit should I use", because the differences are isolated by construction (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-08-20).',
+			note: 'Stellar Wallet Gallery: the SAME tiny app built six times, once per wallet kit: Stellar Wallets Kit, Blux, Privy, Para, Passkey Kit and Smart Accounts, with an identical flow and identical UI from a shared package, made for side-by-side comparison at a Stellar Developers Meeting. The most direct answer available to "which wallet kit should I use", because the differences are isolated by construction (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-08-20).',
 			triggers: [
 				"wallet kit comparison stellar",
 				"stellar wallets kit vs blux",
@@ -5175,7 +5175,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"alexanderkoh/bookee": [
 		{
-			note: "Bookee: LOCAL-FIRST, read-only bookkeeping for Stellar accounts — a Tauri desktop app over SQLite that turns an account's on-chain history into readable books with no wallet connection, no private keys and no backend, which is what makes it safe to point at a treasury account. Newest release v0.1.4 (README read 2026-09-14; Apache-2.0; 4 stars; last push 2026-09-14).",
+			note: "Bookee: LOCAL-FIRST, read-only bookkeeping for Stellar accounts: a Tauri desktop app over SQLite that turns an account's on-chain history into readable books with no wallet connection, no private keys and no backend, which is what makes it safe to point at a treasury account. Newest release v0.1.4 (README read 2026-09-14; Apache-2.0; 4 stars; last push 2026-09-14).",
 			triggers: [
 				"bookee bookkeeping stellar",
 				"local first accounting stellar",
@@ -5195,7 +5195,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"clevercon-protocol/clevercon": [
 		{
-			note: "CleverCon (clevercon-dashboard.vercel.app): a non-custodial spending-control layer for AI agents on Stellar — fund a vault, set PRIVATE spending rules, and the agent spends within them with the limits enforced on-chain. The same problem space as agent wallets with spend caps, solved at the vault rather than in the client (README read 2026-09-14; MIT; 3 stars; no releases; last push 2026-09-13).",
+			note: "CleverCon (clevercon-dashboard.vercel.app): a non-custodial spending-control layer for AI agents on Stellar: fund a vault, set PRIVATE spending rules, and the agent spends within them with the limits enforced on-chain. The same problem space as agent wallets with spend caps, solved at the vault rather than in the client (README read 2026-09-14; MIT; 3 stars; no releases; last push 2026-09-13).",
 			triggers: [
 				"clevercon spending control",
 				"agent vault spending rules",
@@ -5207,7 +5207,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"enliven17/talos-stellar": [
 		{
-			note: "Talos Protocol (talos-stellar.vercel.app): autonomous agent corporations on Stellar, where agents register on-chain, sell services and earn USDC via x402 — an agent-commerce design that treats the agent as an economic entity with its own registry entry (README read 2026-09-14; AGPL-3.0; 5 stars; no releases; last push 2026-09-04).",
+			note: "Talos Protocol (talos-stellar.vercel.app): autonomous agent corporations on Stellar, where agents register on-chain, sell services and earn USDC via x402: an agent-commerce design that treats the agent as an economic entity with its own registry entry (README read 2026-09-14; AGPL-3.0; 5 stars; no releases; last push 2026-09-04).",
 			triggers: [
 				"talos agent corporations",
 				"agents earn usdc x402",
@@ -5219,7 +5219,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CaBsCrypto/stellar-bazaar-x402": [
 		{
-			note: "Stellar Bazaar x402: Stellar-native discovery for paid HTTP APIs and MCP tools using x402 — machine-readable discovery plus atomic micropayments, published bilingually (English and Spanish READMEs). Live at stellar-bazaar-x402.vercel.app (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-09-03).",
+			note: "Stellar Bazaar x402: Stellar-native discovery for paid HTTP APIs and MCP tools using x402: machine-readable discovery plus atomic micropayments, published bilingually (English and Spanish READMEs). Live at stellar-bazaar-x402.vercel.app (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-09-03).",
 			triggers: [
 				"stellar bazaar x402",
 				"discovery paid apis stellar",
@@ -5231,7 +5231,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CaBsCrypto/ficha-onchain": [
 		{
-			note: "TrustLeaf (trustleaf-demo.vercel.app): patient-owned medical records on Stellar — the README describes doctor and patient portals over two Soroban contracts with Privy and SPONSORED FEES, keeping the hash on-chain and the data off it, consent-gated. Topics name healthcare, mcp and self-sovereign-identity (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
+			note: "TrustLeaf (trustleaf-demo.vercel.app): patient-owned medical records on Stellar; the README describes doctor and patient portals over two Soroban contracts with Privy and SPONSORED FEES, keeping the hash on-chain and the data off it, consent-gated. Topics name healthcare, mcp and self-sovereign-identity (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
 			triggers: [
 				"trustleaf medical records",
 				"patient owned records stellar",
@@ -5263,7 +5263,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"axis-markets/json-storage": [
 		{
-			note: "npm @axis-markets/json-storage 0.2.0 (published 2026-06-21; the package's repository points back at this repo): a JSON-file-backed `HistoryStorage` for the AXIS indexer that implements the same interface as the reference `InMemoryHistoryStorage` and adds durable persistence to a single file — intended for testing and local use, which the README says plainly (README read 2026-09-14; MIT; last push 2026-06-21).",
+			note: "npm @axis-markets/json-storage 0.2.0 (published 2026-06-21; the package's repository points back at this repo): a JSON-file-backed `HistoryStorage` for the AXIS indexer that implements the same interface as the reference `InMemoryHistoryStorage` and adds durable persistence to a single file, intended for testing and local use, which the README says plainly (README read 2026-09-14; MIT; last push 2026-06-21).",
 			triggers: ["axis indexer storage", "json history storage indexer"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5271,7 +5271,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/demo": [
 		{
-			note: "The demo site for the Blux wallet kit (demo.blux.cc) — it exercises @bluxcc/react, whose published package (npm 0.3.7, 2026-09-13) lives in the separate bluxcc/blux repository, so this repo is the showcase and not the library (README read 2026-09-14; no license file; topics blux, stellar-wallet; no releases; last push 2026-09-03).",
+			note: "The demo site for the Blux wallet kit (demo.blux.cc); it exercises @bluxcc/react, whose published package (npm 0.3.7, 2026-09-13) lives in the separate bluxcc/blux repository, so this repo is the showcase and not the library (README read 2026-09-14; no license file; topics blux, stellar-wallet; no releases; last push 2026-09-03).",
 			triggers: ["blux demo wallet kit"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5279,7 +5279,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Socket-Fi/socketfi-react-integration-reference": [
 		{
-			note: "SocketFi's official React integration reference for its embedded smart accounts on Stellar (socket.fi) — React 19, TypeScript 5 and Vite 7 examples; topics name passkey, sdk, smart, soroban, stellar and wallet. Reference implementations rather than the SDK itself (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-05).",
+			note: "SocketFi's official React integration reference for its embedded smart accounts on Stellar (socket.fi): React 19, TypeScript 5 and Vite 7 examples; topics name passkey, sdk, smart, soroban, stellar and wallet. Reference implementations rather than the SDK itself (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-05).",
 			triggers: [
 				"socketfi embedded smart accounts",
 				"socketfi react integration",
@@ -5290,7 +5290,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reclaimprotocol/stellar-sdk-onchain-integration": [
 		{
-			note: "Reclaim Protocol's Soroban contract for on-chain verification of its cryptographic proofs using WITNESS-BASED EPOCHS — the Stellar end of Reclaim's zkTLS-style attestations, which is what lets a contract act on a claim about off-chain web data (README read 2026-09-14; no license file; no releases; last push 2026-01-27).",
+			note: "Reclaim Protocol's Soroban contract for on-chain verification of its cryptographic proofs using WITNESS-BASED EPOCHS; the Stellar end of Reclaim's zkTLS-style attestations, which is what lets a contract act on a claim about off-chain web data (README read 2026-09-14; no license file; no releases; last push 2026-01-27).",
 			triggers: [
 				"reclaim protocol stellar",
 				"witness epoch verification soroban",
@@ -5302,7 +5302,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"mystic-finance/Stellar-RFQ": [
 		{
-			note: "Octarine Settlement: a duration-priced RFQ settlement contract in Soroban for real-world assets whose value is a function of TIME TO REDEMPTION — the README tabulates three order types settling through one contract, each with its own price source, signer and custody model (README read 2026-09-14; no license file; no releases; last push 2026-09-01).",
+			note: "Octarine Settlement: a duration-priced RFQ settlement contract in Soroban for real-world assets whose value is a function of TIME TO REDEMPTION; the README tabulates three order types settling through one contract, each with its own price source, signer and custody model (README read 2026-09-14; no license file; no releases; last push 2026-09-01).",
 			triggers: [
 				"octarine rfq settlement",
 				"duration priced rwa soroban",
@@ -5334,7 +5334,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-backoffice": [
 		{
-			note: "The Trustless Work backoffice at dapp.trustlesswork.com — the INTERNAL admin console for managing the full escrow lifecycle, as distinct from trustlesswork-clonable-backoffice, which is the version meant to be cloned. The most-starred repo in the org at 18 stars (README read 2026-09-14; no license file; no releases; last push 2026-09-11).",
+			note: "The Trustless Work backoffice at dapp.trustlesswork.com; the INTERNAL admin console for managing the full escrow lifecycle, as distinct from trustlesswork-clonable-backoffice, which is the version meant to be cloned. The most-starred repo in the org at 18 stars (README read 2026-09-14; no license file; no releases; last push 2026-09-11).",
 			triggers: ["trustless work dapp backoffice"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5342,7 +5342,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ACTA-Team/products-acta": [
 		{
-			note: "ACTA's product monorepo (products-acta.vercel.app): the apps built on top of ACTA's trust-minimised verifiable credentials on Stellar/Soroban — a products catalog and landing at apps/web plus a portable credit-history app for financial inclusion at apps/credit-history (README read 2026-09-14; MIT; no releases; last push 2026-08-28).",
+			note: "ACTA's product monorepo (products-acta.vercel.app): the apps built on top of ACTA's trust-minimised verifiable credentials on Stellar/Soroban: a products catalog and landing at apps/web plus a portable credit-history app for financial inclusion at apps/credit-history (README read 2026-09-14; MIT; no releases; last push 2026-08-28).",
 			triggers: ["acta products monorepo", "portable credit history stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5358,7 +5358,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"SCF-Public-Goods-Maintenance/scf-public-goods-maintenance.github.io": [
 		{
-			note: "The documentation site for the SCF Public Goods Maintenance process and tooling (scf-public-goods-maintenance.github.io) — the written process behind PG Atlas, licensed CC-BY-4.0 with an SPDX header, 9 stars (README read 2026-09-14; no releases; last push 2026-09-01).",
+			note: "The documentation site for the SCF Public Goods Maintenance process and tooling (scf-public-goods-maintenance.github.io); the written process behind PG Atlas, licensed CC-BY-4.0 with an SPDX header, 9 stars (README read 2026-09-14; no releases; last push 2026-09-01).",
 			triggers: ["public goods maintenance process", "scf public goods docs"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5374,7 +5374,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarcarbon/sc-website": [
 		{
-			note: "The source of stellarcarbon.io, a Next.js site with a published staging environment at test.stellarcarbon.io — useful to know when verifying what Stellarcarbon states about itself, because the staging host is the project's own (README read 2026-09-14; GPL-3.0; 4 stars; no releases; last push 2026-07-23).",
+			note: "The source of stellarcarbon.io, a Next.js site with a published staging environment at test.stellarcarbon.io, useful to know when verifying what Stellarcarbon states about itself, because the staging host is the project's own (README read 2026-09-14; GPL-3.0; 4 stars; no releases; last push 2026-07-23).",
 			triggers: ["stellarcarbon website source"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5382,7 +5382,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"boundlessfi/builders": [
 		{
-			note: "Boundless Builders: a DISPLAY-ONLY sub-app of the Boundless platform served at its own builders subdomain — the read-only surface of the project's bounty and builder data rather than the platform itself. 10 stars (README read 2026-09-14; no license file; no releases; last push 2026-09-01).",
+			note: "Boundless Builders: a DISPLAY-ONLY sub-app of the Boundless platform served at its own builders subdomain; the read-only surface of the project's bounty and builder data rather than the platform itself. 10 stars (README read 2026-09-14; no license file; no releases; last push 2026-09-01).",
 			triggers: ["boundless builders app"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5390,7 +5390,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"wmendes/stellar-album-2026": [
 		{
-			note: "stellar-album: an educational sticker-album dApp on Soroban built to teach the FULL SPECTRUM OF FUNGIBILITY in one coherent collectible game — from a purely fungible coin to a purely non-fungible, soulbound album. A teaching artefact for SEP-41 and NFT semantics rather than a product (README read 2026-09-14; no license file; 7 stars; no releases; last push 2026-07-01).",
+			note: "stellar-album: an educational sticker-album dApp on Soroban built to teach the FULL SPECTRUM OF FUNGIBILITY in one coherent collectible game: from a purely fungible coin to a purely non-fungible, soulbound album. A teaching artefact for SEP-41 and NFT semantics rather than a product (README read 2026-09-14; no license file; 7 stars; no releases; last push 2026-07-01).",
 			triggers: [
 				"stellar album fungibility",
 				"soulbound album soroban",
@@ -5402,7 +5402,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"danielfsha/Card-RPG": [
 		{
-			note: "A card-RPG template from the Stellar Game Studio collection — ecosystem-ready game templates and examples meant to be scaffolded into a builder's own workflow, with the collection's entry point at jamesbachini.github.io/Stellar-Game-Studio. The repo has no description of its own; the README is the Game Studio's (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
+			note: "A card-RPG template from the Stellar Game Studio collection: ecosystem-ready game templates and examples meant to be scaffolded into a builder's own workflow, with the collection's entry point at jamesbachini.github.io/Stellar-Game-Studio. The repo has no description of its own; the README is the Game Studio's (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
 			triggers: ["stellar game studio template", "card rpg stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5410,7 +5410,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"jairoamayac/yield-bounty": [
 		{
-			note: "tesouro.pix: a BRL balance held in TESOURO — Brazilian sovereign debt tokenised by Etherfuse, which the README quotes at 12.76% a year — that is sold ONLY at the moment of a PIX payment and only in the amount that payment needs, so the holder earns up to the second they pay. Cite the yield figure as the README's claim on the read date, not as a current rate (README read 2026-09-14; no license file; no releases; last push 2026-08-05).",
+			note: "tesouro.pix: a BRL balance held in TESOURO (Brazilian sovereign debt tokenised by Etherfuse, which the README quotes at 12.76% a year) that is sold ONLY at the moment of a PIX payment and only in the amount that payment needs, so the holder earns up to the second they pay. Cite the yield figure as the README's claim on the read date, not as a current rate (README read 2026-09-14; no license file; no releases; last push 2026-08-05).",
 			triggers: [
 				"tesouro pix yield",
 				"brazilian treasury stablebond stellar",
@@ -5422,7 +5422,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"beto-rocha-blockchain/energypay-tesouro-yield": [
 		{
-			note: "A Brazil-first stablebond yield app built for the Stellar Builder Summit São Paulo 2026 whose premise is separating REAL YIELD FROM FX — the README states every number in it was produced by running the repo's code against live networks and that nothing is simulated, which is a checkable claim rather than a pitch (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-06).",
+			note: "A Brazil-first stablebond yield app built for the Stellar Builder Summit São Paulo 2026 whose premise is separating REAL YIELD FROM FX; the README states every number in it was produced by running the repo's code against live networks and that nothing is simulated, which is a checkable claim rather than a pitch (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-06).",
 			triggers: [
 				"energypay tesouro yield",
 				"real yield versus fx brazil",
@@ -5434,7 +5434,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"polsalarm/PadaLock": [
 		{
-			note: "PadaLock (padalock.vercel.app): purpose-locked remittance on Stellar for overseas Filipino workers — money sent home that can only be spent the way it was meant to, which is the spending-control idea applied to remittance rather than to agents (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
+			note: "PadaLock (padalock.vercel.app): purpose-locked remittance on Stellar for overseas Filipino workers: money sent home that can only be spent the way it was meant to, which is the spending-control idea applied to remittance rather than to agents (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
 			triggers: [
 				"padalock remittance",
 				"purpose locked remittance stellar",
@@ -5446,7 +5446,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"karagozemin/sub-rosa-issue": [
 		{
-			note: "Sub Rosa's ecosystem-contribution workspace (sub-rosa-web.vercel.app), created specifically for the Stellar Wave program — the README states in a note box that THE MAIN SUB ROSA REPOSITORY IS MAINTAINED SEPARATELY, so this repo is the contribution surface and not the product's source (README read 2026-09-14; MIT; 6 stars; no releases; last push 2026-09-10).",
+			note: "Sub Rosa's ecosystem-contribution workspace (sub-rosa-web.vercel.app), created specifically for the Stellar Wave program; the README states in a note box that THE MAIN SUB ROSA REPOSITORY IS MAINTAINED SEPARATELY, so this repo is the contribution surface and not the product's source (README read 2026-09-14; MIT; 6 stars; no releases; last push 2026-09-10).",
 			triggers: ["sub rosa stellar wave", "sub rosa contribution workspace"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5454,7 +5454,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CopperxHQ/countries": [
 		{
-			note: "npm @koshmoney/countries 1.0.1-beta.1 (published 2026-01-10; the package's repository points back at this repo): a lookup library for ISO-3166-2 subdivisions from Copperx/Kosh. It is general geographic reference data with no Stellar-specific content — useful for an anchor's address forms, not a Stellar library (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-06-05).",
+			note: "npm @koshmoney/countries 1.0.1-beta.1 (published 2026-01-10; the package's repository points back at this repo): a lookup library for ISO-3166-2 subdivisions from Copperx/Kosh. It is general geographic reference data with no Stellar-specific content, useful for an anchor's address forms, not a Stellar library (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-06-05).",
 			triggers: ["iso 3166-2 subdivisions lookup"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5462,7 +5462,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"idos-network/idos-sdk-kotlin": [
 		{
-			note: "The idOS Kotlin SDK, released as v0.0.10 on GitHub and badged for Maven Central under org.idos:idos-sdk-kotlin — the Maven Central search API returned no artifact for that coordinate on 2026-09-14, so the badge's availability is unconfirmed and the GitHub release is the reliable source (README read 2026-09-14; MIT; last push 2026-07-20).",
+			note: "The idOS Kotlin SDK, released as v0.0.10 on GitHub and badged for Maven Central under org.idos:idos-sdk-kotlin; the Maven Central search API returned no artifact for that coordinate on 2026-09-14, so the badge's availability is unconfirmed and the GitHub release is the reliable source (README read 2026-09-14; MIT; last push 2026-07-20).",
 			triggers: ["idos kotlin sdk"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5478,7 +5478,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"idos-network/supply": [
 		{
-			note: "The $IDOS supply calculator at supply.idos.network: a small Vercel API that reports circulating supply by querying on-chain IDOS balances of known locked wallets and vesting contracts and subtracting them from the fixed total — on ARBITRUM, which the README states, so it is not a Stellar-side figure (README read 2026-09-14; MIT; no releases; last push 2026-05-14).",
+			note: "The $IDOS supply calculator at supply.idos.network: a small Vercel API that reports circulating supply by querying on-chain IDOS balances of known locked wallets and vesting contracts and subtracting them from the fixed total, on ARBITRUM, which the README states, so it is not a Stellar-side figure (README read 2026-09-14; MIT; no releases; last push 2026-05-14).",
 			triggers: ["idos circulating supply", "idos supply calculator"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5486,7 +5486,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"TrustLine-id/evmsdk": [
 		{
-			note: "Trustline's EVM SDK: a SOLIDITY library that protects EVM contracts from unauthorised access and malicious transactions by integrating Trustline's oracle with multiple on-chain data sources. It is the EVM counterpart to Trustline's Stellar work (TrustLine-id/stellar-sdk, TrustLine-id/stellar-validation-engine) — do not cite it for Stellar behaviour (README read 2026-09-14; MIT; no releases; last push 2026-07-03).",
+			note: "Trustline's EVM SDK: a SOLIDITY library that protects EVM contracts from unauthorised access and malicious transactions by integrating Trustline's oracle with multiple on-chain data sources. It is the EVM counterpart to Trustline's Stellar work (TrustLine-id/stellar-sdk, TrustLine-id/stellar-validation-engine). Do not cite it for Stellar behaviour (README read 2026-09-14; MIT; no releases; last push 2026-07-03).",
 			triggers: ["trustline evm sdk", "trustline oracle solidity"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5494,7 +5494,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Xoulomon/Stellar-Spend": [
 		{
-			note: "A GitHub FORK of whiteghost0001/Stellar-Spend — the README's CI badge points at the upstream repository, and the fork carries no description or release of its own, so read the upstream for the project's state (README and metadata read 2026-09-14; MIT; last push 2026-04-27).",
+			note: "A GitHub FORK of whiteghost0001/Stellar-Spend; the README's CI badge points at the upstream repository, and the fork carries no description or release of its own, so read the upstream for the project's state (README and metadata read 2026-09-14; MIT; last push 2026-04-27).",
 			triggers: ["stellar spend fork"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5502,7 +5502,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"gateway-fm/gasstorm": [
 		{
-			note: "Triage 2026-09-14: NOT a Stellar repo. GasStorm is a local devnet and stress-testing toolkit for EVM SEQUENCERS — it spins up an L1/L2 stack, a block builder and a load generator with a dashboard for throughput, latency and gas. Fourth gateway-fm repo triaged this way (with lez-atomic-swaps, loadgenerator and ops-indexer): the org was swept into the pool behind the curated gatewayfm project, a genuine Stellar RPC provider. https://github.com/gateway-fm/gasstorm",
+			note: "Triage 2026-09-14: NOT a Stellar repo. GasStorm is a local devnet and stress-testing toolkit for EVM SEQUENCERS; it spins up an L1/L2 stack, a block builder and a load generator with a dashboard for throughput, latency and gas. Fourth gateway-fm repo triaged this way (with lez-atomic-swaps, loadgenerator and ops-indexer): the org was swept into the pool behind the curated gatewayfm project, a genuine Stellar RPC provider. https://github.com/gateway-fm/gasstorm",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -5510,7 +5510,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"gateway-fm/midenscan-indexer": [
 		{
-			note: "Triage 2026-09-14: NOT a Stellar repo. The Miden Indexer — a blockchain data indexing service for the Miden ecosystem that probes a Miden Node for new blocks and powers Midenscan (newest release v0.16.1). Fifth gateway-fm repo triaged this way; see gasstorm for the cause. https://github.com/gateway-fm/midenscan-indexer",
+			note: "Triage 2026-09-14: NOT a Stellar repo. The Miden Indexer: a blockchain data indexing service for the Miden ecosystem that probes a Miden Node for new blocks and powers Midenscan (newest release v0.16.1). Fifth gateway-fm repo triaged this way; see gasstorm for the cause. https://github.com/gateway-fm/midenscan-indexer",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -5528,7 +5528,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// (374 remained after wave 11). Read 2026-09-14.
 	"Stellar-Light/stellar-scout": [
 		{
-			note: "Stellar Scout (stellarlight.xyz/scout): the AI skill that turns a coding agent into a Stellar ecosystem analyst — prior art, hackathon results and SCF history before you build — installable into any agent that loads skills. This is Stellar Light's own published skill (README read 2026-09-14; MIT; no releases; last push 2026-09-08).",
+			note: "Stellar Scout (stellarlight.xyz/scout): the AI skill that turns a coding agent into a Stellar ecosystem analyst (prior art, hackathon results and SCF history before you build), installable into any agent that loads skills. This is Stellar Light's own published skill (README read 2026-09-14; MIT; no releases; last push 2026-09-08).",
 			triggers: ["stellar scout skill", "prior art before building stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5548,7 +5548,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NethermindEth/stellar-risc0-verifier": [
 		{
-			note: "Nethermind's RISC Zero verifier for Stellar — Groth16 verification of RISC0 receipts in Soroban, the piece a zkVM proof needs to be checked on Stellar. Its README opens with an IMPORTANT box stating the project has NOT BEEN AUDITED, which must travel with any citation. 10 stars, topics groth16, risc0, zk (README read 2026-09-14; Apache-2.0; no releases; last push 2026-04-11).",
+			note: "Nethermind's RISC Zero verifier for Stellar: Groth16 verification of RISC0 receipts in Soroban, the piece a zkVM proof needs to be checked on Stellar. Its README opens with an IMPORTANT box stating the project has NOT BEEN AUDITED, which must travel with any citation. 10 stars, topics groth16, risc0, zk (README read 2026-09-14; Apache-2.0; no releases; last push 2026-04-11).",
 			triggers: [
 				"risc0 verifier stellar",
 				"groth16 verification soroban",
@@ -5560,7 +5560,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"perspectivefi/spectra-oracles-stellar-public": [
 		{
-			note: "Spectra's Stellar oracle contracts: deterministic Principal Token prices from a ZERO-COUPON-BOND MODEL exposed through the SEP-40 oracle interface — given an implied APY, a maturity and a future PT value the oracle returns the price, so the number is derived rather than polled from a market (README read 2026-09-14; license NOASSERTION; topics defi, oracle, soroban; no releases; last push 2026-08-09).",
+			note: "Spectra's Stellar oracle contracts: deterministic Principal Token prices from a ZERO-COUPON-BOND MODEL exposed through the SEP-40 oracle interface: given an implied APY, a maturity and a future PT value the oracle returns the price, so the number is derived rather than polled from a market (README read 2026-09-14; license NOASSERTION; topics defi, oracle, soroban; no releases; last push 2026-08-09).",
 			triggers: [
 				"spectra principal token oracle",
 				"zero coupon bond oracle stellar",
@@ -5584,7 +5584,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"zenith-protocols/soroban-vault": [
 		{
-			note: "Zenith's Strategy Vault: an ERC-4626-compliant tokenised vault built on OpenZeppelin's Stellar Contracts, with DEPOSIT-BASED LOCKING — a depositor waits out a configured lock time — plus strategy integration. Notable as a concrete case of the ERC-4626 shape being carried onto Soroban (README read 2026-09-14; no license file; no releases; last push 2026-01-22).",
+			note: "Zenith's Strategy Vault: an ERC-4626-compliant tokenised vault built on OpenZeppelin's Stellar Contracts, with DEPOSIT-BASED LOCKING (a depositor waits out a configured lock time), plus strategy integration. Notable as a concrete case of the ERC-4626 shape being carried onto Soroban (README read 2026-09-14; no license file; no releases; last push 2026-01-22).",
 			triggers: [
 				"erc-4626 vault soroban",
 				"strategy vault stellar",
@@ -5604,7 +5604,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lumenbro/soroban-policies": [
 		{
-			note: "LumenBro's Soroban signer policies, built on the `SmartAccountPolicy` trait from AhaLabs' stellar-smart-account — an agent spend policy among them, with VERIFIED BUILDS through the Stellar CLI. Newest tag v2.0.0_agent-spend-policy_pkg1.0.0_cli22.8.1 (README read 2026-09-14; MIT; last push 2026-03-11).",
+			note: "LumenBro's Soroban signer policies, built on the `SmartAccountPolicy` trait from AhaLabs' stellar-smart-account; an agent spend policy among them, with VERIFIED BUILDS through the Stellar CLI. Newest tag v2.0.0_agent-spend-policy_pkg1.0.0_cli22.8.1 (README read 2026-09-14; MIT; last push 2026-03-11).",
 			triggers: [
 				"soroban signer policy",
 				"agent spend policy contract",
@@ -5624,7 +5624,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"LFGBanditLabs/quipay-contracts": [
 		{
-			note: "Quipay's Soroban contracts: autonomous payroll streaming on Stellar — the contract side of payroll-on-autopilot, a design that keeps recurring. Compare with Agos (streaming payroll) and mercurial payout contracts (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-17).",
+			note: "Quipay's Soroban contracts: autonomous payroll streaming on Stellar, the contract side of payroll-on-autopilot, a design that keeps recurring. Compare with Agos (streaming payroll) and mercurial payout contracts (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-17).",
 			triggers: ["quipay payroll contracts", "payroll streaming soroban"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5632,7 +5632,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Grainlify/Stellar-Contracts": [
 		{
-			note: "Grainlify's GrainHack escrow for Soroban: MERKLE CLAIM ROOTS with PULL-ONLY CLAIMS, and the contract-side protocol is documented in docs/MERKLE_LEAF_FORMAT.md, which the README says is self-contained and uses contracts/grainhack-escrow/src/lib.rs as its source of truth — a rare case where the leaf format is published rather than implied (README read 2026-09-14; no license file; no releases; last push 2026-08-30).",
+			note: "Grainlify's GrainHack escrow for Soroban: MERKLE CLAIM ROOTS with PULL-ONLY CLAIMS, and the contract-side protocol is documented in docs/MERKLE_LEAF_FORMAT.md, which the README says is self-contained and uses contracts/grainhack-escrow/src/lib.rs as its source of truth, a rare case where the leaf format is published rather than implied (README read 2026-09-14; no license file; no releases; last push 2026-08-30).",
 			triggers: [
 				"grainhack escrow merkle",
 				"merkle claim root soroban",
@@ -5667,7 +5667,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"luanlabs/fluxity-api": [
 		{
-			note: "The backend for Fluxity (fluxity.finance), a token-streaming and lockup platform on Soroban: a REST API for token and lockup data that MIRRORS ON-CHAIN LOCKUP CONTRACT EVENTS into MongoDB — the indexing half of a streaming product, which is where the queryable history lives (README read 2026-09-14; no license file; no releases; last push 2026-08-14).",
+			note: "The backend for Fluxity (fluxity.finance), a token-streaming and lockup platform on Soroban: a REST API for token and lockup data that MIRRORS ON-CHAIN LOCKUP CONTRACT EVENTS into MongoDB; the indexing half of a streaming product, which is where the queryable history lives (README read 2026-09-14; no license file; no releases; last push 2026-08-14).",
 			triggers: [
 				"fluxity api streaming",
 				"token lockup events indexer stellar",
@@ -5678,7 +5678,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-sdk-react": [
 		{
-			note: "Trustless Work's open-source React library for integrating its escrows. Read the package identity carefully: the README links npm @trustless-work/escrow, whose published package (3.0.5, 2026-01-02) declares its repository as Trustless-Work/react-library-trustless-work, NOT this repo — so this repository and the published package are not the same source as of 2026-09-14 (README and npm read 2026-09-14; no license file; last push 2026-08-14).",
+			note: "Trustless Work's open-source React library for integrating its escrows. Read the package identity carefully: the README links npm @trustless-work/escrow, whose published package (3.0.5, 2026-01-02) declares its repository as Trustless-Work/react-library-trustless-work, NOT this repo, so this repository and the published package are not the same source as of 2026-09-14 (README and npm read 2026-09-14; no license file; last push 2026-08-14).",
 			triggers: ["trustless work react sdk", "escrow react library stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5686,7 +5686,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-skill": [
 		{
-			note: 'Trustless Work\'s AI development skill for agents — the README states it documents the PRODUCTION V1 INTEGRATION and pins "Protocol version: V1", which is the kind of version anchor an agent needs before generating integration code (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-09-12).',
+			note: 'Trustless Work\'s AI development skill for agents; the README states it documents the PRODUCTION V1 INTEGRATION and pins "Protocol version: V1", which is the kind of version anchor an agent needs before generating integration code (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-09-12).',
 			triggers: ["trustless work skill agents", "escrow integration skill"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5722,7 +5722,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CTX-com/Cards402": [
 		{
-			note: "Cards402 (cards402.com, API at api.cards402.com): virtual Visa cards for AI agents — pay USDC or XLM on Stellar and receive a card number, which the README times at about 33 seconds. The bridge between on-chain agent funds and ordinary card rails (README read 2026-09-14; no license file; 6 stars; no releases; last push 2026-07-26).",
+			note: "Cards402 (cards402.com, API at api.cards402.com): virtual Visa cards for AI agents: pay USDC or XLM on Stellar and receive a card number, which the README times at about 33 seconds. The bridge between on-chain agent funds and ordinary card rails (README read 2026-09-14; no license file; 6 stars; no releases; last push 2026-07-26).",
 			triggers: [
 				"cards402 virtual card",
 				"visa card for agents stellar",
@@ -5734,7 +5734,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"jamesbachini/x402-mcp-stellar": [
 		{
-			note: "A local stdio MCP server that calls x402-protected HTTP resources and pays automatically in Stellar USDC, configured for `stellar:testnet` by default and mainnet-ready through environment variables (`stellar:pubnet`) — the smallest working example of an agent paying a 402 on Stellar (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-04-21).",
+			note: "A local stdio MCP server that calls x402-protected HTTP resources and pays automatically in Stellar USDC, configured for `stellar:testnet` by default and mainnet-ready through environment variables (`stellar:pubnet`); the smallest working example of an agent paying a 402 on Stellar (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-04-21).",
 			triggers: ["x402 mcp stellar", "mcp pay 402 usdc", "stdio mcp x402"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5742,7 +5742,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"RozoAI/rozo-intents-skills": [
 		{
-			note: "rozo-intents: Rozo's cross-chain payment skill for agents — send USDC/USDT across Ethereum, Arbitrum, Base, BSC, Polygon, Solana and Stellar by describing the intent in plain language, with Rozo handling wallet detection and token selection; distributed through ClawHub. Newest tag v1.0.4 (README read 2026-09-14; MIT-0; last push 2026-08-11).",
+			note: "rozo-intents: Rozo's cross-chain payment skill for agents; send USDC/USDT across Ethereum, Arbitrum, Base, BSC, Polygon, Solana and Stellar by describing the intent in plain language, with Rozo handling wallet detection and token selection; distributed through ClawHub. Newest tag v1.0.4 (README read 2026-09-14; MIT-0; last push 2026-08-11).",
 			triggers: [
 				"rozo intents skill",
 				"cross chain usdc agent",
@@ -5754,7 +5754,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"RozoAI/rozo-deeplink": [
 		{
-			note: "Rozo Deeplink: a universal deeplink and QR-code parser for web3 applications — a monorepo with the parsing core, a React QR-scanning component and a demo (rozo-deeplink-demo.vercel.app). Newest release v1.1.0 (README read 2026-09-14; no license file; last push 2026-09-13).",
+			note: "Rozo Deeplink: a universal deeplink and QR-code parser for web3 applications: a monorepo with the parsing core, a React QR-scanning component and a demo (rozo-deeplink-demo.vercel.app). Newest release v1.1.0 (README read 2026-09-14; no license file; last push 2026-09-13).",
 			triggers: ["rozo deeplink parser", "qr code parser web3"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5762,7 +5762,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"theboycoder/confidential-agent-commerce": [
 		{
-			note: "Confidential Agent Commerce (confidential-agent-commerce.vercel.app): two AI agents buy and sell from each other on Stellar testnet with the AMOUNT ENCRYPTED ON-CHAIN — anyone can see a payment happened, and only the buyer, the seller and a REGISTERED AUDITOR can see how much. The auditor role is the part worth citing when confidential payments meet compliance (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
+			note: "Confidential Agent Commerce (confidential-agent-commerce.vercel.app): two AI agents buy and sell from each other on Stellar testnet with the AMOUNT ENCRYPTED ON-CHAIN: anyone can see a payment happened, and only the buyer, the seller and a REGISTERED AUDITOR can see how much. The auditor role is the part worth citing when confidential payments meet compliance (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
 			triggers: [
 				"confidential agent commerce",
 				"encrypted amount stellar",
@@ -5774,7 +5774,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"0xdevcollins/stellar-dvn": [
 		{
-			note: "An independent LayerZero V2 Decentralized Verifier Network for Stellar — a Soroban contract plus an off-chain verifier. The README is refreshingly plain that it was built for the fun of it, not for a client or a launch, to answer whether a working DVN on Stellar was possible; read it as a feasibility artefact, not a service (README read 2026-09-14; no license file; no releases; last push 2026-08-13).",
+			note: "An independent LayerZero V2 Decentralized Verifier Network for Stellar: a Soroban contract plus an off-chain verifier. The README is refreshingly plain that it was built for the fun of it, not for a client or a launch, to answer whether a working DVN on Stellar was possible; read it as a feasibility artefact, not a service (README read 2026-09-14; no license file; no releases; last push 2026-08-13).",
 			triggers: [
 				"layerzero dvn stellar",
 				"decentralized verifier network soroban",
@@ -5785,7 +5785,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NebulaVRF/vrf-contract": [
 		{
-			note: "NebulaVRF's testnet contract: verifiable on-chain randomness on Soroban using BLS12-381 with a COMMIT–REVEAL scheme, shipped with integration docs. A second, independent VRF design alongside NibrasD/Stellar-VRF, which instead binds to the drand beacon — worth knowing both exist when randomness comes up (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-02-14).",
+			note: "NebulaVRF's testnet contract: verifiable on-chain randomness on Soroban using BLS12-381 with a COMMIT-REVEAL scheme, shipped with integration docs. A second, independent VRF design alongside NibrasD/Stellar-VRF, which instead binds to the drand beacon. Worth knowing both exist when randomness comes up (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-02-14).",
 			triggers: [
 				"nebulavrf randomness",
 				"commit reveal randomness soroban",
@@ -5797,7 +5797,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"davedumto/veil": [
 		{
-			note: "Veil (veil-kohl-zeta.vercel.app): provably honest AI predictions anchored on Stellar — a predictor proves a forecast was genuinely computed by a real model WITHOUT REVEALING THE MODEL'S WEIGHTS, commits it on-chain BEFORE the event and reveals afterwards, on Soroban testnet. A clean statement of the commit-before-reveal pattern applied to model outputs (README read 2026-09-14; no license file; no releases; last push 2026-06-29).",
+			note: "Veil (veil-kohl-zeta.vercel.app): provably honest AI predictions anchored on Stellar: a predictor proves a forecast was genuinely computed by a real model WITHOUT REVEALING THE MODEL'S WEIGHTS, commits it on-chain BEFORE the event and reveals afterwards, on Soroban testnet. A clean statement of the commit-before-reveal pattern applied to model outputs (README read 2026-09-14; no license file; no releases; last push 2026-06-29).",
 			triggers: [
 				"veil ai predictions",
 				"prove model inference stellar",
@@ -5809,7 +5809,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"leocagli/stellar-rwa-holder-cap": [
 		{
-			note: "A holder-count compliance module for OpenZeppelin RWA tokens on Stellar that enforces a cap on the number of holders — the Reg D / Section-style constraint an issuer must keep to, implemented as a token module rather than off-chain bookkeeping. Newest release v0.1.0 (README read 2026-09-14; MIT; last push 2026-08-06).",
+			note: "A holder-count compliance module for OpenZeppelin RWA tokens on Stellar that enforces a cap on the number of holders, the Reg D / Section-style constraint an issuer must keep to, implemented as a token module rather than off-chain bookkeeping. Newest release v0.1.0 (README read 2026-09-14; MIT; last push 2026-08-06).",
 			triggers: [
 				"holder cap compliance stellar",
 				"reg d holder limit token",
@@ -5821,7 +5821,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kaankacar/tr-mock-anchor": [
 		{
-			note: "TR Mock Anchor: a mock Turkish TRY⇄USDC on/off-ramp on Stellar testnet for builders who need a TRY ramp before a production anchor exists, exposed through the standard PORTABLE SEP PATH — SEP-1, SEP-10, SEP-6, SEP-12 and SEP-38 — so an integration written against it moves to a real anchor unchanged (README read 2026-09-14; MIT; no releases; last push 2026-09-08).",
+			note: "TR Mock Anchor: a mock Turkish TRY⇄USDC on/off-ramp on Stellar testnet for builders who need a TRY ramp before a production anchor exists, exposed through the standard PORTABLE SEP PATH: SEP-1, SEP-10, SEP-6, SEP-12 and SEP-38, so an integration written against it moves to a real anchor unchanged (README read 2026-09-14; MIT; no releases; last push 2026-09-08).",
 			triggers: [
 				"mock anchor try usdc",
 				"sep-6 sep-38 test anchor",
@@ -5833,7 +5833,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kaankacar/sepolia-to-stellar-usdc": [
 		{
-			note: "A one-page bridge demo: swap testnet ETH for CIRCLE-ISSUED USDC on Uniswap v3 (Ethereum Sepolia), then burn it through CCTP V2 with a hook that routes it to a Stellar testnet account — a concrete, readable example of the CCTP path onto Stellar (README read 2026-09-14; no license file; no releases; last push 2026-08-25).",
+			note: "A one-page bridge demo: swap testnet ETH for CIRCLE-ISSUED USDC on Uniswap v3 (Ethereum Sepolia), then burn it through CCTP V2 with a hook that routes it to a Stellar testnet account; a concrete, readable example of the CCTP path onto Stellar (README read 2026-09-14; no license file; no releases; last push 2026-08-25).",
 			triggers: [
 				"cctp bridge stellar testnet",
 				"sepolia usdc to stellar",
@@ -5853,7 +5853,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"0xZyrick/fog-of-chess": [
 		{
-			note: "Lantern Chess (the repo is named fog-of-chess): fog-of-war chess on Stellar where every move is verified by a zero-knowledge proof — an opponent learns that something moved but never what. Live at lanternchess.vercel.app; topics zk-proof, soroban (README read 2026-09-14; MIT; no releases; last push 2026-03-04).",
+			note: "Lantern Chess (the repo is named fog-of-chess): fog-of-war chess on Stellar where every move is verified by a zero-knowledge proof: an opponent learns that something moved but never what. Live at lanternchess.vercel.app; topics zk-proof, soroban (README read 2026-09-14; MIT; no releases; last push 2026-03-04).",
 			triggers: [
 				"lantern chess zk",
 				"fog of war chess stellar",
@@ -5865,7 +5865,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"gmanjuns027/Poison-Game": [
 		{
-			note: "Poison Game (poison-game-one.vercel.app): a zero-knowledge battleship-style game on Soroban whose proofs are written in NOIR — a different proving stack from Dark Fleet's Pedersen commitments, useful when the question is which ZK toolchains have actually been used on Stellar (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
+			note: "Poison Game (poison-game-one.vercel.app): a zero-knowledge battleship-style game on Soroban whose proofs are written in NOIR, a different proving stack from Dark Fleet's Pedersen commitments, useful when the question is which ZK toolchains have actually been used on Stellar (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
 			triggers: ["poison game zk battleship", "noir proofs stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5873,7 +5873,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"beranalpa/Cangkulan-Lite-ZK-Card-Game": [
 		{
-			note: "Cangkulan Lite: a zero-knowledge card game on Soroban whose README badges FOUR DISTINCT ZK PROOF MODES — a comparison of proving approaches inside one game rather than a single implementation (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
+			note: "Cangkulan Lite: a zero-knowledge card game on Soroban whose README badges FOUR DISTINCT ZK PROOF MODES, a comparison of proving approaches inside one game rather than a single implementation (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
 			triggers: ["cangkulan zk card game", "four proof modes stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5881,7 +5881,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"litemint/cyberbrawl-community-resources": [
 		{
-			note: "Community-created resources for Cyberbrawl (cyberbrawl.io), Litemint's fast competitive card battler — the community repository rather than the game's own source. Its topics still carry hacktoberfest/hacktoberfest2021 (README read 2026-09-14; MIT; 5 stars; no releases; last push 2026-09-14).",
+			note: "Community-created resources for Cyberbrawl (cyberbrawl.io), Litemint's fast competitive card battler; the community repository rather than the game's own source. Its topics still carry hacktoberfest/hacktoberfest2021 (README read 2026-09-14; MIT; 5 stars; no releases; last push 2026-09-14).",
 			triggers: ["cyberbrawl community resources", "litemint card battler"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5889,7 +5889,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rahimklaber/stellar_kt": [
 		{
-			note: "stellar_kt: a MULTIPLATFORM Kotlin Stellar SDK targeting JS, Native and JVM — the README states the author's aim is basic transaction creation, signing and submission first, with Soroban planned once that lands, so do not assume Soroban coverage. 6 stars; no release published (README read 2026-09-14; no license file; last push 2026-07-15).",
+			note: "stellar_kt: a MULTIPLATFORM Kotlin Stellar SDK targeting JS, Native and JVM; the README states the author's aim is basic transaction creation, signing and submission first, with Soroban planned once that lands, so do not assume Soroban coverage. 6 stars; no release published (README read 2026-09-14; no license file; last push 2026-07-15).",
 			triggers: ["kotlin multiplatform stellar sdk", "stellar_kt sdk"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5897,7 +5897,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/frontend-helpers": [
 		{
-			note: "SDF's shared frontend helpers — functionality the team kept duplicating across projects, collected so there is less to maintain; the README's own rule is that anything done in more than one repo belongs here. Newest release v2.1.4 (README read 2026-09-14; no license file; last push 2026-07-01).",
+			note: "SDF's shared frontend helpers: functionality the team kept duplicating across projects, collected so there is less to maintain; the README's own rule is that anything done in more than one repo belongs here. Newest release v2.1.4 (README read 2026-09-14; no license file; last push 2026-07-01).",
 			triggers: ["stellar frontend helpers"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5905,7 +5905,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/screencasts": [
 		{
-			note: "The content behind Stellar's screencasts, written in Tape — the scripts and recordings source rather than the videos themselves (README read 2026-09-14; no license file; no releases; last push 2026-09-04).",
+			note: "The content behind Stellar's screencasts, written in Tape; the scripts and recordings source rather than the videos themselves (README read 2026-09-14; no license file; no releases; last push 2026-09-04).",
 			triggers: ["stellar screencasts content"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5913,7 +5913,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-experimental/stellar-spec": [
 		{
-			note: "A Stellar Protocol Specification Suite dated 2026-06-21 and marked Version 27 (stellar-core v27.0.0 / Protocol 27), status Informational — an organised specification index rather than the CAPs themselves. Cite the protocol version it declares, because the document is a snapshot (README read 2026-09-14; no license file; no releases; last push 2026-06-21).",
+			note: "A Stellar Protocol Specification Suite dated 2026-06-21 and marked Version 27 (stellar-core v27.0.0 / Protocol 27), status Informational: an organised specification index rather than the CAPs themselves. Cite the protocol version it declares, because the document is a snapshot (README read 2026-09-14; no license file; no releases; last push 2026-06-21).",
 			triggers: [
 				"stellar protocol specification suite",
 				"protocol 27 spec index",
@@ -5952,7 +5952,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"hot-dao/hot-validation-sdk": [
 		{
-			note: "HOT DAO's validation SDK: the glue authorising signature generation on the MPC side of the Omni bridge, wrapping RPC calls to several chains — a request typically starts with a call to NEAR and then reaches the others. A GitHub code search finds 14 occurrences of `stellar` in the repository (searched 2026-09-14), so Stellar is one validated chain among several rather than the subject (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-06-14).",
+			note: "HOT DAO's validation SDK: the glue authorising signature generation on the MPC side of the Omni bridge, wrapping RPC calls to several chains; a request typically starts with a call to NEAR and then reaches the others. A GitHub code search finds 14 occurrences of `stellar` in the repository (searched 2026-09-14), so Stellar is one validated chain among several rather than the subject (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-06-14).",
 			triggers: ["hot validation sdk", "omni bridge mpc validation"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5968,7 +5968,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Tellus-Cooperative/.github": [
 		{
-			note: "Tellus Cooperative's GitHub organisation profile repository — the org's profile card, not code. Their Stellar work is in Tellus-Cooperative/stellar-paylink (metadata read 2026-09-14; no license file; no releases; last push 2026-09-10).",
+			note: "Tellus Cooperative's GitHub organisation profile repository: the org's profile card, not code. Their Stellar work is in Tellus-Cooperative/stellar-paylink (metadata read 2026-09-14; no license file; no releases; last push 2026-09-10).",
 			triggers: ["tellus cooperative profile"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -5976,7 +5976,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"nirvana-labs/nirvana-go": [
 		{
-			note: "The official Go client for the Nirvana Labs REST API, published on pkg.go.dev, newest release v2.0.0. A GitHub code search finds 0 occurrences of `stellar` in the repository (searched 2026-09-14) — like its TypeScript sibling it is indexed through its owner's project, not through Stellar code; do not cite it as a Stellar library (README read 2026-09-14; Apache-2.0; 4 stars; last push 2026-09-11).",
+			note: "The official Go client for the Nirvana Labs REST API, published on pkg.go.dev, newest release v2.0.0. A GitHub code search finds 0 occurrences of `stellar` in the repository (searched 2026-09-14); like its TypeScript sibling it is indexed through its owner's project, not through Stellar code; do not cite it as a Stellar library (README read 2026-09-14; Apache-2.0; 4 stars; last push 2026-09-11).",
 			triggers: ["nirvana labs go library"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6018,7 +6018,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// (324 remained after wave 12). Read 2026-09-14.
 	"alexanderkoh/stellarlight": [
 		{
-			note: "The public repository of Stellar Light itself (stellarlight.xyz) — the data layer for the Stellar ecosystem, a curated index of what has been built and who to work with, served to people through the web app and to agents through the Stellar Scout API, MCP server and skill (README read 2026-09-14; MIT; 4 stars; no releases; last push 2026-09-14).",
+			note: "The public repository of Stellar Light itself (stellarlight.xyz), the data layer for the Stellar ecosystem, a curated index of what has been built and who to work with, served to people through the web app and to agents through the Stellar Scout API, MCP server and skill (README read 2026-09-14; MIT; 4 stars; no releases; last push 2026-09-14).",
 			triggers: ["stellar light data layer", "stellarlight repository"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6026,7 +6026,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Stellar-Light/awesome-stellar-community-fund": [
 		{
-			note: "Twelve AI skills plus curated guides for the Stellar Community Fund (stellarlight.xyz/skills) — claim verification, application guidance and reference material for SCF participants. Created by LumenLoop and now maintained by Stellar Light (README read 2026-09-14; MIT; no releases; last push 2026-07-23).",
+			note: "Twelve AI skills plus curated guides for the Stellar Community Fund (stellarlight.xyz/skills): claim verification, application guidance and reference material for SCF participants. Created by LumenLoop and now maintained by Stellar Light (README read 2026-09-14; MIT; no releases; last push 2026-07-23).",
 			triggers: ["scf skills collection", "awesome stellar community fund"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6046,7 +6046,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kalepail/stellar-mpp-sdk": [
 		{
-			note: "Stellar support for the Machine Payments Protocol (mpp.dev): machine-to-machine payments using Soroban SAC token transfers, with optional support for one-way payment channels — the Stellar payment method inside MPP rather than a wallet. Note this copy is a GitHub FORK, so check the upstream for the current state (README and metadata read 2026-09-14; no license file; no releases; last push 2026-03-20).",
+			note: "Stellar support for the Machine Payments Protocol (mpp.dev): machine-to-machine payments using Soroban SAC token transfers, with optional support for one-way payment channels; the Stellar payment method inside MPP rather than a wallet. Note this copy is a GitHub FORK, so check the upstream for the current state (README and metadata read 2026-09-14; no license file; no releases; last push 2026-03-20).",
 			triggers: [
 				"stellar mpp sdk",
 				"machine payments protocol stellar",
@@ -6070,7 +6070,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"57blocks/agentsmith-x402": [
 		{
-			note: "agentsmith-x402: open-source x402 payments and discovery for Stellar — agents discover HTTP and MCP services in Bazaar, receive a 402 challenge from the resource server, and pay through a SELF-HOSTED Stellar facilitator, which is the part most x402 stacks leave to a third party (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-28).",
+			note: "agentsmith-x402: open-source x402 payments and discovery for Stellar: agents discover HTTP and MCP services in Bazaar, receive a 402 challenge from the resource server, and pay through a SELF-HOSTED Stellar facilitator, which is the part most x402 stacks leave to a third party (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-28).",
 			triggers: [
 				"agentsmith x402",
 				"self hosted stellar facilitator",
@@ -6082,7 +6082,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Micopay/micopaybridge": [
 		{
-			note: "MicoPay Bridge (micopay.com.mx/bridge): a peer-to-peer market for AI agents secured by escrows — two agents that have never met settle a trade ACROSS XRPL AND STELLAR atomically with no custodian, account or prior registration, and can cash out to physical channels in Mexico. Topics name htlc, atomic-swap, x402 and zero-knowledge (README read 2026-09-14; MIT; no releases; last push 2026-09-04).",
+			note: "MicoPay Bridge (micopay.com.mx/bridge): a peer-to-peer market for AI agents secured by escrows: two agents that have never met settle a trade ACROSS XRPL AND STELLAR atomically with no custodian, account or prior registration, and can cash out to physical channels in Mexico. Topics name htlc, atomic-swap, x402 and zero-knowledge (README read 2026-09-14; MIT; no releases; last push 2026-09-04).",
 			triggers: [
 				"micopay bridge agents",
 				"xrpl stellar atomic swap",
@@ -6094,7 +6094,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"axis-markets/orderbook": [
 		{
-			note: "The AXIS limit-orderbook DEX contract for Stellar, whose README documents the interface directly — `last() -> u64` for the newest order id and `order(id) -> Option<Order>` to fetch one — so the contract's read surface is citable without decompiling it (README read 2026-09-14; no license file; no releases; last push 2026-09-13).",
+			note: "The AXIS limit-orderbook DEX contract for Stellar, whose README documents the interface directly: `last() -> u64` for the newest order id and `order(id) -> Option<Order>` to fetch one, so the contract's read surface is citable without decompiling it (README read 2026-09-14; no license file; no releases; last push 2026-09-13).",
 			triggers: ["axis orderbook contract", "limit orderbook dex soroban"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6102,7 +6102,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Fundable-Protocol/stellar_indexer": [
 		{
-			note: "The Fundable Indexer: a Bun/Turborepo workspace that reads Soroban CONTRACT EVENTS, turns them into typed application data and stores the result in PostgreSQL — the same event-indexing need that Recall and Fluxity solve, here as an open-source component (README read 2026-09-14; no license file; no releases; last push 2026-07-18).",
+			note: "The Fundable Indexer: a Bun/Turborepo workspace that reads Soroban CONTRACT EVENTS, turns them into typed application data and stores the result in PostgreSQL; the same event-indexing need that Recall and Fluxity solve, here as an open-source component (README read 2026-09-14; no license file; no releases; last push 2026-07-18).",
 			triggers: [
 				"fundable indexer events",
 				"soroban events to postgres",
@@ -6114,7 +6114,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"withObsrvr/stellar-extract": [
 		{
-			note: "A shared Go library for extracting typed rows from Stellar ledger data, which the README calls the single source of truth for BRONZE-LAYER extraction across the Obsrvr data platform — installable as github.com/withObsrvr/stellar-extract. The ingestion layer beneath Obsrvr's Prism explorer (README read 2026-09-14; no license file; no releases; last push 2026-08-18).",
+			note: "A shared Go library for extracting typed rows from Stellar ledger data, which the README calls the single source of truth for BRONZE-LAYER extraction across the Obsrvr data platform: installable as github.com/withObsrvr/stellar-extract. The ingestion layer beneath Obsrvr's Prism explorer (README read 2026-09-14; no license file; no releases; last push 2026-08-18).",
 			triggers: [
 				"stellar extract go library",
 				"bronze layer ledger extraction",
@@ -6126,7 +6126,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"SentinelFi/stellar_wallet_mock": [
 		{
-			note: "stellar-wallet-mock: a Playwright testing library that MOCKS THE FREIGHTER extension so a Stellar/Soroban dApp can be tested headlessly end to end without a real wallet — the missing piece for CI on any wallet-connected front end (README read 2026-09-14; no license file; no releases; last push 2026-04-07).",
+			note: "stellar-wallet-mock: a Playwright testing library that MOCKS THE FREIGHTER extension so a Stellar/Soroban dApp can be tested headlessly end to end without a real wallet; the missing piece for CI on any wallet-connected front end (README read 2026-09-14; no license file; no releases; last push 2026-04-07).",
 			triggers: [
 				"mock freighter playwright",
 				"e2e test stellar dapp",
@@ -6138,7 +6138,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"salazarsebas/acachete-faucet": [
 		{
-			note: "Acachete Labs' MULTI-TOKEN faucet for Stellar testnet and futurenet (faucet-stellar.acachete.xyz) — broader than friendbot, which funds XLM only, so it is the answer when a builder needs test assets beyond lumens (README read 2026-09-14; MIT; no releases; last push 2026-03-02).",
+			note: "Acachete Labs' MULTI-TOKEN faucet for Stellar testnet and futurenet (faucet-stellar.acachete.xyz), broader than friendbot, which funds XLM only, so it is the answer when a builder needs test assets beyond lumens (README read 2026-09-14; MIT; no releases; last push 2026-03-02).",
 			triggers: [
 				"acachete faucet multi token",
 				"testnet token faucet stellar",
@@ -6150,7 +6150,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"paltalabs/defindex-sdk": [
 		{
-			note: "The DeFindex SDK, published on npm as @defindex/sdk (the README's badge) with the GitHub release line at v0.3.0 — the client for DeFindex's vaults, and the dependency Soroswap's front end uses for its earning and farming features (README read 2026-09-14; the README badges MIT while GitHub reports no license file; 2 stars; last push 2026-09-04).",
+			note: "The DeFindex SDK, published on npm as @defindex/sdk (the README's badge) with the GitHub release line at v0.3.0; the client for DeFindex's vaults, and the dependency Soroswap's front end uses for its earning and farming features (README read 2026-09-14; the README badges MIT while GitHub reports no license file; 2 stars; last push 2026-09-04).",
 			triggers: ["defindex sdk vaults", "defindex client library"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6158,7 +6158,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rahimklaber/SStream": [
 		{
-			note: "SStream (s-stream.vercel.app): an early streaming-payments protocol for Soroban whose README states its three functions plainly — create a stream by naming recipient, amount per second, total and end, then the operations around it. Last push 2024-07-24, so it is the 2024 reference implementation of the pattern that Fluxity and Quipay later productised (README read 2026-09-14; no license file; 3 stars; no releases).",
+			note: "SStream (s-stream.vercel.app): an early streaming-payments protocol for Soroban whose README states its three functions plainly: create a stream by naming recipient, amount per second, total and end, then the operations around it. Last push 2024-07-24, so it is the 2024 reference implementation of the pattern that Fluxity and Quipay later productised (README read 2026-09-14; no license file; 3 stars; no releases).",
 			triggers: [
 				"sstream streaming payments",
 				"amount per second stream soroban",
@@ -6169,7 +6169,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"luanlabs/fluxity.finance": [
 		{
-			note: "The landing page for Fluxity (fluxity.finance), the token-streaming and lockup platform on Soroban — the marketing surface whose backend is luanlabs/fluxity-api; topics money-streaming, soroban (README read 2026-09-14; MIT; no releases; last push 2026-08-14).",
+			note: "The landing page for Fluxity (fluxity.finance), the token-streaming and lockup platform on Soroban; the marketing surface whose backend is luanlabs/fluxity-api; topics money-streaming, soroban (README read 2026-09-14; MIT; no releases; last push 2026-08-14).",
 			triggers: ["fluxity landing page", "money streaming stellar site"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6177,7 +6177,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"defarm-repo/tooling": [
 		{
-			note: "DeFarm's public developer tooling — a TypeScript SDK and CLI for integrating with the DeFarm platform, whose agricultural traceability the README says is anchored on STELLAR MAINNET (not testnet, which is unusual in this cohort). The repository is a public snapshot of the tooling that ships with the product (README read 2026-09-14; MIT; no releases; last push 2026-09-02).",
+			note: "DeFarm's public developer tooling: a TypeScript SDK and CLI for integrating with the DeFarm platform, whose agricultural traceability the README says is anchored on STELLAR MAINNET (not testnet, which is unusual in this cohort). The repository is a public snapshot of the tooling that ships with the product (README read 2026-09-14; MIT; no releases; last push 2026-09-02).",
 			triggers: ["defarm tooling sdk", "agri traceability mainnet stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6185,7 +6185,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"warp-driver/oracle-demo": [
 		{
-			note: "A two-operator WarpDrive oracle that polls CoinGecko every 30 seconds for BTC-USD and ETH-USD and settles quorum-signed rounds into a single on-chain OracleContract on Stellar testnet — the README's value is that it demonstrates WarpDrive's cron, Stellar-event and composition-event triggers in one artefact (README read 2026-09-14; MIT; no releases; last push 2026-06-24).",
+			note: "A two-operator WarpDrive oracle that polls CoinGecko every 30 seconds for BTC-USD and ETH-USD and settles quorum-signed rounds into a single on-chain OracleContract on Stellar testnet; the README's value is that it demonstrates WarpDrive's cron, Stellar-event and composition-event triggers in one artefact (README read 2026-09-14; MIT; no releases; last push 2026-06-24).",
 			triggers: [
 				"warpdrive oracle demo",
 				"quorum signed price rounds stellar",
@@ -6197,7 +6197,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Kali-Decoder/stellar-crates-tinder": [
 		{
-			note: "swyft.fun (the repo is named stellar-crates-tinder): non-custodial swipe investing for tokenised real-world assets on Stellar — set a budget, swipe assets into a basket, deposit stablecoin on TESTNET through Freighter, and hold vault share tokens, with prices from DIA-compatible oracles (README read 2026-09-14; no license file; no releases; last push 2026-08-24).",
+			note: "swyft.fun (the repo is named stellar-crates-tinder): non-custodial swipe investing for tokenised real-world assets on Stellar: set a budget, swipe assets into a basket, deposit stablecoin on TESTNET through Freighter, and hold vault share tokens, with prices from DIA-compatible oracles (README read 2026-09-14; no license file; no releases; last push 2026-08-24).",
 			triggers: [
 				"swyft swipe investing",
 				"tokenized rwa basket stellar",
@@ -6221,7 +6221,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"SCF-Public-Goods-Maintenance/pg-atlas-frontend": [
 		{
-			note: "The PG Atlas dashboard at pgatlas.xyz — Vite, React, TanStack Router and Query over the metrics backbone for the SCF Public Goods dependency graph; the third piece alongside pg-atlas-backend and pg-atlas-ts-sdk (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-07-30).",
+			note: "The PG Atlas dashboard at pgatlas.xyz: Vite, React, TanStack Router and Query over the metrics backbone for the SCF Public Goods dependency graph; the third piece alongside pg-atlas-backend and pg-atlas-ts-sdk (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-07-30).",
 			triggers: ["pg atlas dashboard", "public goods dependency graph ui"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6229,7 +6229,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Brale-xyz/docs": [
 		{
-			note: "The open-source developer documentation for Brale's stablecoin infrastructure API (docs.brale.xyz) — issuing your own stablecoin and moving value, documented publicly, which makes it a citable source for how a regulated issuer's API is shaped (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-09-14).",
+			note: "The open-source developer documentation for Brale's stablecoin infrastructure API (docs.brale.xyz): issuing your own stablecoin and moving value, documented publicly, which makes it a citable source for how a regulated issuer's API is shaped (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-09-14).",
 			triggers: ["brale api docs", "issue your own stablecoin api"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6245,7 +6245,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blindpaylabs/blindpay-skills": [
 		{
-			note: "BlindPay's agent skills. Note the duplication before citing a path: blindpaylabs/skills is byte-for-byte the same project — same description, same README, same 564 KB, both created 2026-01-30 and neither marked a fork — so one of the two is a rename or a copy, and there is no signal in the metadata for which is canonical (README and metadata read 2026-09-14; MIT; 5 stars; no releases; last push 2026-09-14).",
+			note: "BlindPay's agent skills. Note the duplication before citing a path: blindpaylabs/skills is byte-for-byte the same project: same description, same README, same 564 KB, both created 2026-01-30 and neither marked a fork, so one of the two is a rename or a copy, and there is no signal in the metadata for which is canonical (README and metadata read 2026-09-14; MIT; 5 stars; no releases; last push 2026-09-14).",
 			triggers: ["blindpay agent skills"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6253,7 +6253,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blindpaylabs/skills": [
 		{
-			note: "BlindPay's agent skills — the twin of blindpaylabs/blindpay-skills, identical in description, README, size (564 KB) and creation date (2026-01-30), with neither marked a fork. Cite the pair, not one path, until the org states which is canonical (README and metadata read 2026-09-14; MIT; 5 stars; no releases; last push 2026-09-14).",
+			note: "BlindPay's agent skills: the twin of blindpaylabs/blindpay-skills, identical in description, README, size (564 KB) and creation date (2026-01-30), with neither marked a fork. Cite the pair, not one path, until the org states which is canonical (README and metadata read 2026-09-14; MIT; 5 stars; no releases; last push 2026-09-14).",
 			triggers: ["blindpay skills duplicate"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6261,7 +6261,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dfns/dfns-sdk-go": [
 		{
-			note: "The Dfns Go SDK (v2, godoc at github.com/dfns/dfns-sdk-go/v2), newest release v2.2.0 — the custody provider's Go client, sibling of dfns-sdk-java. Treat it as a custody SDK that supports Stellar among other chains, not a Stellar library (README read 2026-09-14; MIT; 8 stars; last push 2026-09-11).",
+			note: "The Dfns Go SDK (v2, godoc at github.com/dfns/dfns-sdk-go/v2), newest release v2.2.0; the custody provider's Go client, sibling of dfns-sdk-java. Treat it as a custody SDK that supports Stellar among other chains, not a Stellar library (README read 2026-09-14; MIT; 8 stars; last push 2026-09-11).",
 			triggers: ["dfns go sdk"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6269,7 +6269,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"DcentWallet/info": [
 		{
-			note: "D'CENT's user-facing information repository: the wallet's user guide, its SUPPORTED COIN LIST at dcentwallet.com/SupportedCoin and its firmware version list — the place to check what D'CENT actually supports rather than inferring it (README read 2026-09-14; no license file; 2 stars; no releases; last push 2026-06-09).",
+			note: "D'CENT's user-facing information repository: the wallet's user guide, its SUPPORTED COIN LIST at dcentwallet.com/SupportedCoin and its firmware version list, the place to check what D'CENT actually supports rather than inferring it (README read 2026-09-14; no license file; 2 stars; no releases; last push 2026-06-09).",
 			triggers: ["dcent supported coins", "dcent wallet user guide"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6277,7 +6277,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"DcentWallet/biometric-firmware": [
 		{
-			note: "D'CENT's release repository for Biometric Wallet firmware images; newest release v2.36.2 (2026-09-10). Firmware distribution, so the release feed is the fact — there is no source here (README read 2026-09-14; no license file; last push 2026-09-10).",
+			note: "D'CENT's release repository for Biometric Wallet firmware images; newest release v2.36.2 (2026-09-10). Firmware distribution, so the release feed is the fact; there is no source here (README read 2026-09-14; no license file; last push 2026-09-10).",
 			triggers: ["dcent biometric firmware"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6285,7 +6285,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"allbridge-io/allbridge-mcp": [
 		{
-			note: "allbridge-mcp: an MCP server for Allbridge bridge workflows that helps an agent plan a transfer, build execution jobs, broadcast signed payloads and track the result WITHOUT HOLDING PRIVATE KEYS — the key-custody boundary is the design point worth citing (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-05-04).",
+			note: "allbridge-mcp: an MCP server for Allbridge bridge workflows that helps an agent plan a transfer, build execution jobs, broadcast signed payloads and track the result WITHOUT HOLDING PRIVATE KEYS; the key-custody boundary is the design point worth citing (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-05-04).",
 			triggers: ["allbridge mcp server", "agent bridge without keys"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6301,7 +6301,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"btq-ag/QRiNG": [
 		{
-			note: "QRiNG: a hybrid quantum-blockchain protocol for VERIFIABLE QUANTUM RANDOM NUMBER GENERATION — randomness from Hadamard-circuit measurements settled on-chain by majority vote. A GitHub code search finds 0 occurrences of `stellar` in the repository (searched 2026-09-14), so the settlement chain is not evidenced here; cite it for the randomness protocol, not for a Stellar deployment (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-07-22).",
+			note: "QRiNG: a hybrid quantum-blockchain protocol for VERIFIABLE QUANTUM RANDOM NUMBER GENERATION: randomness from Hadamard-circuit measurements settled on-chain by majority vote. A GitHub code search finds 0 occurrences of `stellar` in the repository (searched 2026-09-14), so the settlement chain is not evidenced here; cite it for the randomness protocol, not for a Stellar deployment (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-07-22).",
 			triggers: ["qring quantum randomness", "quantum rng blockchain"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6309,7 +6309,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"btq-ag/Leonne": [
 		{
-			note: "Leonne: a modular framework for simulating consensus networks using post-quantum topological methods, from BTQ. A GitHub code search finds 0 occurrences of `stellar` (searched 2026-09-14) — consensus research rather than Stellar code (README read 2026-09-14; MIT; 6 stars; no releases; last push 2026-04-15).",
+			note: "Leonne: a modular framework for simulating consensus networks using post-quantum topological methods, from BTQ. A GitHub code search finds 0 occurrences of `stellar` (searched 2026-09-14): consensus research rather than Stellar code (README read 2026-09-14; MIT; 6 stars; no releases; last push 2026-04-15).",
 			triggers: [
 				"leonne consensus simulation",
 				"post quantum consensus framework",
@@ -6320,7 +6320,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"btq-ag/QLDPC": [
 		{
-			note: "QLDPC: an interactive Python toolkit for quantum LDPC error correction — a circuit builder with real-time visualisation, built on Qiskit. Quantum-computing research from BTQ with no Stellar-specific content (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-04-16).",
+			note: "QLDPC: an interactive Python toolkit for quantum LDPC error correction: a circuit builder with real-time visualisation, built on Qiskit. Quantum-computing research from BTQ with no Stellar-specific content (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-04-16).",
 			triggers: ["qldpc error correction toolkit"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6336,7 +6336,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"nirvana-labs/nirvana-cli": [
 		{
-			note: "The official CLI for the Nirvana Labs REST API, installable through a Homebrew tap, newest release v0.55.0 — the third Nirvana Labs client in the index alongside nirvana-go and nirvana-typescript, all indexed through their owner's project rather than through Stellar code (README read 2026-09-14; Apache-2.0; last push 2026-09-08).",
+			note: "The official CLI for the Nirvana Labs REST API, installable through a Homebrew tap, newest release v0.55.0; the third Nirvana Labs client in the index alongside nirvana-go and nirvana-typescript, all indexed through their owner's project rather than through Stellar code (README read 2026-09-14; Apache-2.0; last push 2026-09-08).",
 			triggers: ["nirvana labs cli"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6344,7 +6344,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blaze-xyz/betterstack-logs-mcp": [
 		{
-			note: "An MCP server for querying and analysing Betterstack logs across multiple sources and source groups with source selection — Blaze's internal observability tooling exposed to agents, with no Stellar-specific content (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-02-20).",
+			note: "An MCP server for querying and analysing Betterstack logs across multiple sources and source groups with source selection: Blaze's internal observability tooling exposed to agents, with no Stellar-specific content (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-02-20).",
 			triggers: ["betterstack logs mcp"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6352,7 +6352,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ondoprotocol/gm-solana-simulator": [
 		{
-			note: "A Rust library for simulating Ondo Global Markets JIT trades through Jupiter RFQ: GM tokens are minted JUST-IN-TIME when a swap occurs, which the README explains breaks standard transaction simulation — the problem this library exists to solve. Solana, not Stellar (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-09-04).",
+			note: "A Rust library for simulating Ondo Global Markets JIT trades through Jupiter RFQ: GM tokens are minted JUST-IN-TIME when a swap occurs, which the README explains breaks standard transaction simulation, the problem this library exists to solve. Solana, not Stellar (README read 2026-09-14; no license file; 3 stars; no releases; last push 2026-09-04).",
 			triggers: ["ondo gm simulator", "jit mint simulation jupiter"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6360,7 +6360,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/.github": [
 		{
-			note: "The @stellar org's default community health files — CODE_OF_CONDUCT, CONTRIBUTING, issue and pull-request templates that GitHub applies across the org's repositories. 14 stars for a repository that contains no product (README read 2026-09-14; no license file; no releases; last push 2026-09-09).",
+			note: "The @stellar org's default community health files: CODE_OF_CONDUCT, CONTRIBUTING, issue and pull-request templates that GitHub applies across the org's repositories. 14 stars for a repository that contains no product (README read 2026-09-14; no license file; no releases; last push 2026-09-09).",
 			triggers: [
 				"stellar community health files",
 				"stellar contributing template",
@@ -6390,7 +6390,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"0xVida/inter-stellar-battle": [
 		{
-			note: "INTER-STELLAR (inter-stellar-battle.vercel.app): a retro 16-bit wagered fighting game on Stellar where WHICH MOVE YOU THREW never becomes visible to the chain or the public, and in its Blind Duel mode an opponent does not even learn your character or stats — the hidden-information pattern applied to real-time combat rather than turn-based play (README read 2026-09-14; no license file; no releases; last push 2026-07-03).",
+			note: "INTER-STELLAR (inter-stellar-battle.vercel.app): a retro 16-bit wagered fighting game on Stellar where WHICH MOVE YOU THREW never becomes visible to the chain or the public, and in its Blind Duel mode an opponent does not even learn your character or stats, the hidden-information pattern applied to real-time combat rather than turn-based play (README read 2026-09-14; no license file; no releases; last push 2026-07-03).",
 			triggers: [
 				"inter-stellar battle game",
 				"private wagered combat stellar",
@@ -6402,7 +6402,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Clash-Of-Pirates/Clash-of-pirates": [
 		{
-			note: "Clash (clash-of-pirates.vercel.app): a fully on-chain PvP strategy game on Stellar where cryptographic proofs keep play fair without revealing moves until they resolve — another entry in the ecosystem's hidden-information game cluster (README read 2026-09-14; no license file; no releases; last push 2026-06-27).",
+			note: "Clash (clash-of-pirates.vercel.app): a fully on-chain PvP strategy game on Stellar where cryptographic proofs keep play fair without revealing moves until they resolve: another entry in the ecosystem's hidden-information game cluster (README read 2026-09-14; no license file; no releases; last push 2026-06-27).",
 			triggers: ["clash of pirates zk", "onchain pvp strategy stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6410,7 +6410,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ThaisFReis/Proof-of-Life": [
 		{
-			note: "Proof of Life: a two-player asymmetric thriller on Stellar whose README states the mechanic exactly — your position is a secret and your moves are proofs — with a video walkthrough linked. Asymmetric information as the game design rather than as a feature (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-03-02).",
+			note: "Proof of Life: a two-player asymmetric thriller on Stellar whose README states the mechanic exactly: your position is a secret and your moves are proofs, with a video walkthrough linked. Asymmetric information as the game design rather than as a feature (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-03-02).",
 			triggers: ["proof of life game", "asymmetric hidden position stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6418,7 +6418,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"deegalabs/deegagames-zk": [
 		{
-			note: "DeegaGames ZK (deegagames-zk.vercel.app): provably fair games with zero-knowledge proofs on Stellar, built for the Stellar Hacks: ZK Gaming hackathon — the same hackathon that produced Dark Fleet and Poison Game, which is why several independent ZK game repos share a date (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-02-23).",
+			note: "DeegaGames ZK (deegagames-zk.vercel.app): provably fair games with zero-knowledge proofs on Stellar, built for the Stellar Hacks: ZK Gaming hackathon, the same hackathon that produced Dark Fleet and Poison Game, which is why several independent ZK game repos share a date (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-02-23).",
 			triggers: ["deegagames provably fair", "zk gaming hackathon stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6426,7 +6426,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CaBsCrypto/pizzaninja": [
 		{
-			note: "Slash Slice Arena (slashslice.spicycrust.com): a browser game with 60 FPS MediaPipe HAND TRACKING — you slice with your hands — wired to Stellar through Privy; topics mediapipe, privy, soroban. An unusual input modality for an on-chain game (README read 2026-09-14; no license file; no releases; last push 2026-09-12).",
+			note: "Slash Slice Arena (slashslice.spicycrust.com): a browser game with 60 FPS MediaPipe HAND TRACKING (you slice with your hands), wired to Stellar through Privy; topics mediapipe, privy, soroban. An unusual input modality for an on-chain game (README read 2026-09-14; no license file; no releases; last push 2026-09-12).",
 			triggers: [
 				"slash slice arena",
 				"hand tracking game stellar",
@@ -6438,7 +6438,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Bond-Hive/interface": [
 		{
-			note: "BondHive's main interface repository. The README is the unmodified create-next-app scaffold and the GitHub description says only that it is the new interface, so nothing here documents the product — read Bond-Hive/soroban_contracts for what BondHive does on Stellar (README read 2026-09-14; MIT; no releases; last push 2025-06-16).",
+			note: "BondHive's main interface repository. The README is the unmodified create-next-app scaffold and the GitHub description says only that it is the new interface, so nothing here documents the product. Read Bond-Hive/soroban_contracts for what BondHive does on Stellar (README read 2026-09-14; MIT; no releases; last push 2025-06-16).",
 			triggers: ["bondhive interface"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6446,7 +6446,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Bond-Hive/testnet_interface": [
 		{
-			note: "BondHive's testnet interface — the testnet twin of Bond-Hive/interface, likewise an unmodified create-next-app scaffold README with no product description; last push 2025-06-04 (README read 2026-09-14; MIT; no releases).",
+			note: "BondHive's testnet interface: the testnet twin of Bond-Hive/interface, likewise an unmodified create-next-app scaffold README with no product description; last push 2025-06-04 (README read 2026-09-14; MIT; no releases).",
 			triggers: ["bondhive testnet interface"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6454,7 +6454,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"gateway-fm/miden-agglayer": [
 		{
-			note: "Triage 2026-09-14: NOT a Stellar repo. `miden-agglayer` connects Polygon AggLayer tooling to a MIDEN rollup, exposing an EVM-shaped JSON-RPC service and translating bridge transactions into Miden notes; newest release v0.16.2. SIXTH gateway-fm repo triaged this way (with lez-atomic-swaps, loadgenerator, ops-indexer, gasstorm and midenscan-indexer) — the whole org was swept into the pool behind the curated gatewayfm project, which is a genuine Stellar RPC provider. https://github.com/gateway-fm/miden-agglayer",
+			note: "Triage 2026-09-14: NOT a Stellar repo. `miden-agglayer` connects Polygon AggLayer tooling to a MIDEN rollup, exposing an EVM-shaped JSON-RPC service and translating bridge transactions into Miden notes; newest release v0.16.2. SIXTH gateway-fm repo triaged this way (with lez-atomic-swaps, loadgenerator, ops-indexer, gasstorm and midenscan-indexer); the whole org was swept into the pool behind the curated gatewayfm project, which is a genuine Stellar RPC provider. https://github.com/gateway-fm/miden-agglayer",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -6462,7 +6462,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"acta-team/dApp-ACTA": [
 		{
-			note: "Triage 2026-09-14: GONE — `gh api repos/acta-team/dApp-ACTA` returns 404, so the repository was deleted, renamed or made private since indexing. ACTA's live repositories are under the ACTA-Team casing (acta-credentials, products-acta, ACTA-docs), all noted. The row should be retired or re-resolved. https://github.com/acta-team/dApp-ACTA",
+			note: "Triage 2026-09-14: GONE. `gh api repos/acta-team/dApp-ACTA` returns 404, so the repository was deleted, renamed or made private since indexing. ACTA's live repositories are under the ACTA-Team casing (acta-credentials, products-acta, ACTA-docs), all noted. The row should be retired or re-resolved. https://github.com/acta-team/dApp-ACTA",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -6470,7 +6470,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"acta-team/website": [
 		{
-			note: "Triage 2026-09-14: GONE — 404 from the GitHub API, same as acta-team/dApp-ACTA. ACTA's live repositories are under the ACTA-Team casing. Retire or re-resolve the row. https://github.com/acta-team/website",
+			note: "Triage 2026-09-14: GONE. 404 from the GitHub API, same as acta-team/dApp-ACTA. ACTA's live repositories are under the ACTA-Team casing. Retire or re-resolve the row. https://github.com/acta-team/website",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -6478,7 +6478,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"switchlyprotocol/switchlynode": [
 		{
-			note: "Triage 2026-09-14: GONE — 404 from the GitHub API. The org's node-launcher repository (SwitchlyProtocol/node-launcher) is live and noted; this node repository is not reachable. Retire or re-resolve the row. https://github.com/switchlyprotocol/switchlynode",
+			note: "Triage 2026-09-14: GONE. 404 from the GitHub API. The org's node-launcher repository (SwitchlyProtocol/node-launcher) is live and noted; this node repository is not reachable. Retire or re-resolve the row. https://github.com/switchlyprotocol/switchlynode",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -6496,7 +6496,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"OpenZeppelin/soroban-security-detectors-sdk": [
 		{
-			note: "OpenZeppelin's Soroban security detectors SDK — the framework for writing static detectors against Soroban contracts, which is the upstream of automated Soroban security tooling rather than a one-off linter. Newest release v0.0.2 (README read 2026-09-14; AGPL-3.0; 8 stars; last push 2026-09-01).",
+			note: "OpenZeppelin's Soroban security detectors SDK, the framework for writing static detectors against Soroban contracts, which is the upstream of automated Soroban security tooling rather than a one-off linter. Newest release v0.0.2 (README read 2026-09-14; AGPL-3.0; 8 stars; last push 2026-09-01).",
 			triggers: [
 				"soroban security detectors",
 				"static analysis soroban contracts",
@@ -6508,7 +6508,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"SoundnessLabs/stellar-pq": [
 		{
-			note: "Stellar Post-Quantum Cryptography (stellar-pq.soundness.xyz): experimental post-quantum schemes for Stellar explored at BOTH the application level, through Soroban Smart Accounts, and lower down — the clearest published answer to what post-quantum work on Stellar looks like today, with the word experimental carried from the README (README read 2026-09-14; MIT; 3 stars; no releases; last push 2026-08-27).",
+			note: "Stellar Post-Quantum Cryptography (stellar-pq.soundness.xyz): experimental post-quantum schemes for Stellar explored at BOTH the application level, through Soroban Smart Accounts, and lower down; the clearest published answer to what post-quantum work on Stellar looks like today, with the word experimental carried from the README (README read 2026-09-14; MIT; 3 stars; no releases; last push 2026-08-27).",
 			triggers: [
 				"post quantum stellar",
 				"pq smart accounts soroban",
@@ -6520,7 +6520,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blend-capital/liquidation-bot": [
 		{
-			note: "Blend's liquidation bot, built on Paradigm's Artemis framework — the reference implementation of keeping a Soroban lending protocol solvent. Newest release v1.0.0; last push 2024-08-02, so it documents the 2024 design; 13 stars (README read 2026-09-14; Apache-2.0).",
+			note: "Blend's liquidation bot, built on Paradigm's Artemis framework; the reference implementation of keeping a Soroban lending protocol solvent. Newest release v1.0.0; last push 2024-08-02, so it documents the 2024 design; 13 stars (README read 2026-09-14; Apache-2.0).",
 			triggers: [
 				"blend liquidation bot",
 				"artemis framework soroban",
@@ -6532,7 +6532,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kalepail/sorodoom": [
 		{
-			note: "SoroDOOM: a deterministic PureDOOM session run in a Soroban-compatible execution layer with the COMPLETE REPLAY settled on Stellar — the browser runs a pinned gameplay build and the replay is the proof. Topics deterministic-replay, doom, soroban; live at sorodoom.sdf-ecosystem.workers.dev. The most vivid demonstration available that deterministic replay can be settled on-chain (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-29).",
+			note: "SoroDOOM: a deterministic PureDOOM session run in a Soroban-compatible execution layer with the COMPLETE REPLAY settled on Stellar; the browser runs a pinned gameplay build and the replay is the proof. Topics deterministic-replay, doom, soroban; live at sorodoom.sdf-ecosystem.workers.dev. The most vivid demonstration available that deterministic replay can be settled on-chain (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-29).",
 			triggers: [
 				"sorodoom deterministic replay",
 				"doom on soroban",
@@ -6544,7 +6544,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Galmanus/vineland-sdk": [
 		{
-			note: "@vineland/sdk: behavioural-unlinkability compliance on Stellar — a wallet proves it belongs to an issuer's KYC'd set WITHOUT REVEALING WHICH MEMBER, no two of its actions link, and amounts stay public. A precise statement of the compliance-versus-privacy trade being attempted (README read 2026-09-14; MIT; no releases; last push 2026-08-23).",
+			note: "@vineland/sdk: behavioural-unlinkability compliance on Stellar: a wallet proves it belongs to an issuer's KYC'd set WITHOUT REVEALING WHICH MEMBER, no two of its actions link, and amounts stay public. A precise statement of the compliance-versus-privacy trade being attempted (README read 2026-09-14; MIT; no releases; last push 2026-08-23).",
 			triggers: [
 				"vineland unlinkability",
 				"prove kyc set membership stellar",
@@ -6556,7 +6556,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/stellar-rpc-blaster": [
 		{
-			note: "SDF's internal RPC CLI load-testing tool. Its README opens with a note that the repository is IN DEVELOPMENT AND NOT YET READY FOR USE, pointing at the `dev` branch for current status — so cite it as work in progress, not a tool to reach for (README read 2026-09-14; no license file; no releases; last push 2026-09-03).",
+			note: "SDF's internal RPC CLI load-testing tool. Its README opens with a note that the repository is IN DEVELOPMENT AND NOT YET READY FOR USE, pointing at the `dev` branch for current status, so cite it as work in progress, not a tool to reach for (README read 2026-09-14; no license file; no releases; last push 2026-09-03).",
 			triggers: ["stellar rpc load testing", "rpc blaster tool"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6564,7 +6564,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-laboratory": [
 		{
-			note: "The Trustless Work demo dApp at demo.trustlesswork.com — a minimal example of interacting with the Trustless Work API, which makes it the shortest path to seeing the escrow flow end to end before integrating (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
+			note: "The Trustless Work demo dApp at demo.trustlesswork.com: a minimal example of interacting with the Trustless Work API, which makes it the shortest path to seeing the escrow flow end to end before integrating (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
 			triggers: ["trustless work demo dapp", "escrow api example"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6583,7 +6583,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Moonlight-Protocol/pay-platform": [
 		{
-			note: "Moonlight Pay's backend: the wallet-based account service for the Moonlight Protocol (GitHub description; the README is empty). Its release line is the most active signal — v0.5.28 as of 2026-08-11 (metadata read 2026-09-14; no license file).",
+			note: "Moonlight Pay's backend: the wallet-based account service for the Moonlight Protocol (GitHub description; the README is empty). Its release line is the most active signal: v0.5.28 as of 2026-08-11 (metadata read 2026-09-14; no license file).",
 			triggers: ["moonlight pay backend"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6599,7 +6599,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarchain/v4-api": [
 		{
-			note: "The StellarChain V4 API: a Symfony 8 and API Platform service for StellarChain's account and metrics data, exposing `/v1` docs and a `/v1/accounts` collection with the address as the API identifier — the backend of the stellarchain/v4 frontend (README read 2026-09-14; no license file; no releases; last push 2026-09-03).",
+			note: "The StellarChain V4 API: a Symfony 8 and API Platform service for StellarChain's account and metrics data, exposing `/v1` docs and a `/v1/accounts` collection with the address as the API identifier; the backend of the stellarchain/v4 frontend (README read 2026-09-14; no license file; no releases; last push 2026-09-03).",
 			triggers: ["stellarchain api accounts", "stellarchain v4 api"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6607,7 +6607,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"warp-driver/warpdrive": [
 		{
-			note: "The WarpDrive core repository — off-chain compute and Vectrs, the engine behind warpdrive-contracts and oracle-demo; the README badges the project status as active and stable enough to use (README read 2026-09-14; license NOASSERTION; no releases; last push 2026-06-04).",
+			note: "The WarpDrive core repository: off-chain compute and Vectrs, the engine behind warpdrive-contracts and oracle-demo; the README badges the project status as active and stable enough to use (README read 2026-09-14; license NOASSERTION; no releases; last push 2026-06-04).",
 			triggers: ["warpdrive offchain compute", "vectrs warpdrive"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6615,7 +6615,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Ben-Platform/kalienator": [
 		{
-			note: "Kalienator: a CLI program in Effect-TS for running KALE-earning operations around the clock (kalien.xyz) — the automation layer for Stellar's proof-of-teamwork farming game. Newest tag v0.1; topics kale, stellar, effect-ts (README read 2026-09-14; no license file; last push 2026-04-09).",
+			note: "Kalienator: a CLI program in Effect-TS for running KALE-earning operations around the clock (kalien.xyz); the automation layer for Stellar's proof-of-teamwork farming game. Newest tag v0.1; topics kale, stellar, effect-ts (README read 2026-09-14; no license file; last push 2026-04-09).",
 			triggers: [
 				"kalienator kale farming",
 				"kale earning automation",
@@ -6627,7 +6627,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Ben-Platform/kaleminator": [
 		{
-			note: "Kaleminator: the sibling of Kalienator — a CLI Effect-TS service that monitors transfers and triggers actions such as harvesting, organised as an apps/services workspace. Same KALE automation family (README read 2026-09-14; no license file; no releases; last push 2026-04-13).",
+			note: "Kaleminator: the sibling of Kalienator: a CLI Effect-TS service that monitors transfers and triggers actions such as harvesting, organised as an apps/services workspace. Same KALE automation family (README read 2026-09-14; no license file; no releases; last push 2026-04-13).",
 			triggers: [
 				"kaleminator harvest trigger",
 				"monitor transfers trigger action stellar",
@@ -6646,7 +6646,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Gbangbolaoluwagbemiga/orbitwork-stellar": [
 		{
-			note: 'OrbitWork (orbitwork-stellar.vercel.app): a cross-border freelance marketplace on Stellar TESTNET with a job board, escrow payments, on-chain reputation and three Soroban contracts, built during the Rise In "Stellar Journey to Mastery" programme — the README\'s own framing (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-07).',
+			note: 'OrbitWork (orbitwork-stellar.vercel.app): a cross-border freelance marketplace on Stellar TESTNET with a job board, escrow payments, on-chain reputation and three Soroban contracts, built during the Rise In "Stellar Journey to Mastery" programme: the README\'s own framing (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-07).',
 			triggers: [
 				"orbitwork freelance marketplace",
 				"onchain reputation escrow stellar",
@@ -6679,7 +6679,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lucylow/stellar-hacks-agents": [
 		{
-			note: "A pay-per-query web-search MCP server on Stellar: the README states the problem precisely — agents need real-time search, but monthly subscriptions waste money per query and API keys are fragile — and answers it with per-query payment instead of a subscription. Built for Stellar Hacks: Agents (README read 2026-09-14; no license file; no releases; last push 2026-04-13).",
+			note: "A pay-per-query web-search MCP server on Stellar: the README states the problem precisely: agents need real-time search, but monthly subscriptions waste money per query and API keys are fragile, and answers it with per-query payment instead of a subscription. Built for Stellar Hacks: Agents (README read 2026-09-14; no license file; no releases; last push 2026-04-13).",
 			triggers: ["pay per query search mcp", "per query payment agent stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6687,7 +6687,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lumenbro/agents-portal": [
 		{
-			note: "LumenBro's AI Agent Portal (agents-portal-eta.vercel.app): passkey-secured smart wallets with ON-CHAIN SPEND POLICIES on Stellar — the hosted face of the policies in lumenbro/soroban-policies and the wallet the lumenjoule SDK creates against. The README is empty; the GitHub description is the durable statement (metadata read 2026-09-14; no license file; no releases; last push 2026-03-16).",
+			note: "LumenBro's AI Agent Portal (agents-portal-eta.vercel.app): passkey-secured smart wallets with ON-CHAIN SPEND POLICIES on Stellar; the hosted face of the policies in lumenbro/soroban-policies and the wallet the lumenjoule SDK creates against. The README is empty; the GitHub description is the durable statement (metadata read 2026-09-14; no license file; no releases; last push 2026-03-16).",
 			triggers: ["lumenbro agents portal", "passkey wallet spend policy"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6695,7 +6695,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lumenbro/joule-site": [
 		{
-			note: "The JOULE landing page (joule-site.vercel.app) for LumenBro's prepaid AI compute credits on Stellar — the marketing surface whose contracts are lumenbro/joule-contracts. The README is empty; the description is the record (metadata read 2026-09-14; no license file; no releases; last push 2026-03-11).",
+			note: "The JOULE landing page (joule-site.vercel.app) for LumenBro's prepaid AI compute credits on Stellar; the marketing surface whose contracts are lumenbro/joule-contracts. The README is empty; the description is the record (metadata read 2026-09-14; no license file; no releases; last push 2026-03-11).",
 			triggers: ["joule token site"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6703,7 +6703,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ACTA-Team/news-acta": [
 		{
-			note: "ACTA's news hub (news.acta.build): a Next.js site collecting the project's announcements, releases, partnerships and ecosystem updates — the place ACTA states its own dated claims, which makes it a citable source for when something shipped (README read 2026-09-14; MIT; no releases; last push 2026-08-21).",
+			note: "ACTA's news hub (news.acta.build): a Next.js site collecting the project's announcements, releases, partnerships and ecosystem updates; the place ACTA states its own dated claims, which makes it a citable source for when something shipped (README read 2026-09-14; MIT; no releases; last push 2026-08-21).",
 			triggers: ["acta news hub", "acta announcements"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6711,7 +6711,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"EmmaSA1/Hack-tonalli": [
 		{
-			note: "A hackathon project that issues certificates through ACTA: the README's only durable content is a link to the issuing transaction on StellarExpert's TESTNET explorer plus a staging deployment workflow — useful as a worked example of ACTA credential issuance, not as a product (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-05-01).",
+			note: "A hackathon project that issues certificates through ACTA: the README's only durable content is a link to the issuing transaction on StellarExpert's TESTNET explorer plus a staging deployment workflow: useful as a worked example of ACTA credential issuance, not as a product (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-05-01).",
 			triggers: ["hack tonalli acta certificate"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6719,7 +6719,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Keengfk/stellar-nft-app": [
 		{
-			note: "A digital-art NFT platform on Stellar in JavaScript and React, with a live demo and its contract address published in the README — a small, complete example of an NFT front end over a Soroban contract (README read 2026-09-14; MIT; last push 2026-08-22).",
+			note: "A digital-art NFT platform on Stellar in JavaScript and React, with a live demo and its contract address published in the README: a small, complete example of an NFT front end over a Soroban contract (README read 2026-09-14; MIT; last push 2026-08-22).",
 			triggers: ["stellar nft app example", "digital art nft stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6727,7 +6727,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NebulaVRF/landing": [
 		{
-			note: "The landing page for NebulaVRF, the commit–reveal BLS12-381 randomness contract in NebulaVRF/vrf-contract. The README is the unmodified create-next-app scaffold, so the sibling contract repository is where the substance is (README read 2026-09-14; no license file; no releases; last push 2026-02-14).",
+			note: "The landing page for NebulaVRF, the commit-reveal BLS12-381 randomness contract in NebulaVRF/vrf-contract. The README is the unmodified create-next-app scaffold, so the sibling contract repository is where the substance is (README read 2026-09-14; no license file; no releases; last push 2026-02-14).",
 			triggers: ["nebulavrf landing"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6735,7 +6735,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"0xZaid10/Cipher-Command-ZK-Game-on-Stellar-": [
 		{
-			note: "Cipher Command (cipher-command.vercel.app): a fully on-chain two-player strategy game on a 6×6 board where piece POSITIONS AND RANKS are never revealed, enforced by zero-knowledge proofs at every action — Stratego's hidden-rank problem solved with proofs (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
+			note: "Cipher Command (cipher-command.vercel.app): a fully on-chain two-player strategy game on a 6×6 board where piece POSITIONS AND RANKS are never revealed, enforced by zero-knowledge proofs at every action: Stratego's hidden-rank problem solved with proofs (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
 			triggers: [
 				"cipher command hidden ranks",
 				"stratego zk stellar",
@@ -6747,7 +6747,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"LevanIlashvili/zkBattleship": [
 		{
-			note: "zkBattleship: zero-knowledge battleship on Stellar where players commit ship placements with NOIR proofs and verify shots on-chain using ULTRAHONK, so the board never leaves the browser. Built for Stellar Hacks ZK Gaming — a third independent battleship implementation in that cohort, and the one that names its proving system (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
+			note: "zkBattleship: zero-knowledge battleship on Stellar where players commit ship placements with NOIR proofs and verify shots on-chain using ULTRAHONK, so the board never leaves the browser. Built for Stellar Hacks ZK Gaming: a third independent battleship implementation in that cohort, and the one that names its proving system (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
 			triggers: [
 				"zkbattleship noir ultrahonk",
 				"ultrahonk verification stellar",
@@ -6758,7 +6758,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ShivamSoni20/ZKonfess": [
 		{
-			note: "ZKonfess (z-konfess.vercel.app): anonymous confessions on Stellar with ZK-Noir proofs, whose tagline states the design goal — cryptography, not trust, for immutable anonymity. Another Stellar Hacks ZK Gaming entry (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
+			note: "ZKonfess (z-konfess.vercel.app): anonymous confessions on Stellar with ZK-Noir proofs, whose tagline states the design goal: cryptography, not trust, for immutable anonymity. Another Stellar Hacks ZK Gaming entry (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
 			triggers: ["zkonfess anonymous", "anonymous posting zk stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6766,7 +6766,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"0xasuna/zkshotroul": [
 		{
-			note: "A ZK roulette-style game scaffolded from the Stellar Game Studio template collection — the README is the Game Studio's shared text (jamesbachini.github.io/Stellar-Game-Studio) rather than a description of this game, the same pattern as danielfsha/Card-RPG (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-06-24).",
+			note: "A ZK roulette-style game scaffolded from the Stellar Game Studio template collection; the README is the Game Studio's shared text (jamesbachini.github.io/Stellar-Game-Studio) rather than a description of this game, the same pattern as danielfsha/Card-RPG (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-06-24).",
 			triggers: ["zkshotroul game", "stellar game studio scaffold"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6774,7 +6774,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pellartech/coala-pay-weather-oracle": [
 		{
-			note: "A Soroban weather-oracle contract for Coala Pay that records and validates weather data across EPOCHS and triggers a token transfer on the outcome — parametric insurance in its simplest form, where a measurement releases funds (README read 2026-09-14; no license file; no releases; last push 2025-07-21).",
+			note: "A Soroban weather-oracle contract for Coala Pay that records and validates weather data across EPOCHS and triggers a token transfer on the outcome: parametric insurance in its simplest form, where a measurement releases funds (README read 2026-09-14; no license file; no releases; last push 2025-07-21).",
 			triggers: [
 				"weather oracle soroban",
 				"parametric trigger token transfer",
@@ -6786,7 +6786,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"fiatsend/techical-achitecture": [
 		{
-			note: "Fiatsend's published technical architecture for integrating with Stellar — Anchor Platform SEPs, Soroban and the DeFi building blocks they build on. A design document rather than code, and a rare case of an anchor-adjacent product publishing its integration plan (README read 2026-09-14; no license file; no releases; last push 2026-05-28).",
+			note: "Fiatsend's published technical architecture for integrating with Stellar: Anchor Platform SEPs, Soroban and the DeFi building blocks they build on. A design document rather than code, and a rare case of an anchor-adjacent product publishing its integration plan (README read 2026-09-14; no license file; no releases; last push 2026-05-28).",
 			triggers: [
 				"fiatsend architecture stellar",
 				"anchor platform integration design",
@@ -6797,7 +6797,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"untangledfinance/untangled-docs": [
 		{
-			note: "The documentation site for Untangled Protocol (docs.untangled.finance), built with Docusaurus — the user documentation behind the Blend-position risk agent and vault contracts noted elsewhere in this registry (README read 2026-09-14; no license file; no releases; last push 2026-08-31).",
+			note: "The documentation site for Untangled Protocol (docs.untangled.finance), built with Docusaurus; the user documentation behind the Blend-position risk agent and vault contracts noted elsewhere in this registry (README read 2026-09-14; no license file; no releases; last push 2026-08-31).",
 			triggers: ["untangled protocol docs"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6805,7 +6805,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"untangledfinance/credio-docs": [
 		{
-			note: "The documentation site for Credio (docs.credio.network), which the GitHub description defines as streaming machine-learning model outputs from data scientists and rating agencies — the docs half of the credio-agents repository (README read 2026-09-14; no license file; no releases; last push 2026-08-11).",
+			note: "The documentation site for Credio (docs.credio.network), which the GitHub description defines as streaming machine-learning model outputs from data scientists and rating agencies; the docs half of the credio-agents repository (README read 2026-09-14; no license file; no releases; last push 2026-08-11).",
 			triggers: ["credio network docs", "streamed model outputs ratings"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6813,7 +6813,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"leocagli/Open-Stellar": [
 		{
-			note: "Open Stellar (v0-open-stellar.vercel.app): an AI agent hub on Cloudflare Workers with Groq — the project that leocagli/open-stellar-passport describes itself as the missing trust layer for. Note the CI and quality badges point at the Bitcoindefi org, so the canonical home may be that copy (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-31).",
+			note: "Open Stellar (v0-open-stellar.vercel.app): an AI agent hub on Cloudflare Workers with Groq; the project that leocagli/open-stellar-passport describes itself as the missing trust layer for. Note the CI and quality badges point at the Bitcoindefi org, so the canonical home may be that copy (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-31).",
 			triggers: ["open stellar agent hub", "cloudflare workers groq stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6829,7 +6829,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"AdamikHQ/adamik-sdk": [
 		{
-			note: "@adamik/sdk: a TypeScript SDK that DECODES AND VERIFIES blockchain transaction data returned by the Adamik API — a verification client for multi-chain transaction payloads, not a Stellar SDK (README read 2026-09-14; MIT; no releases; last push 2025-09-24).",
+			note: "@adamik/sdk: a TypeScript SDK that DECODES AND VERIFIES blockchain transaction data returned by the Adamik API: a verification client for multi-chain transaction payloads, not a Stellar SDK (README read 2026-09-14; MIT; no releases; last push 2025-09-24).",
 			triggers: [
 				"adamik sdk decode verify",
 				"verify transaction payload multichain",
@@ -6840,7 +6840,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blockdaemon/automated-approver-service": [
 		{
-			note: "Blockdaemon's reference implementation of an Institutional Vault Automated Approver: it polls pending operations, signs `make transaction` and `transfer` intents with ECDSA P-256, and posts approve or reject decisions — the policy-automation pattern for custody, published as reference code. Newest release v2.0.0 (README read 2026-09-14; MIT; last push 2026-09-02).",
+			note: "Blockdaemon's reference implementation of an Institutional Vault Automated Approver: it polls pending operations, signs `make transaction` and `transfer` intents with ECDSA P-256, and posts approve or reject decisions; the policy-automation pattern for custody, published as reference code. Newest release v2.0.0 (README read 2026-09-14; MIT; last push 2026-09-02).",
 			triggers: [
 				"automated approver custody",
 				"institutional vault approval policy",
@@ -6851,7 +6851,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"crypto-com/crypto-agent-trading": [
 		{
-			note: "Crypto.com's agent skills for trading through its APIs — buy, sell, swap and query balances from any SKILL.md-compatible agent platform (OpenClaw, Cursor, Claude Code and others), two independent skills in one repository. 19 stars; an example of an exchange publishing agent skills directly (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-29).",
+			note: "Crypto.com's agent skills for trading through its APIs: buy, sell, swap and query balances from any SKILL.md-compatible agent platform (OpenClaw, Cursor, Claude Code and others), two independent skills in one repository. 19 stars; an example of an exchange publishing agent skills directly (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-29).",
 			triggers: ["crypto.com agent skills", "exchange trading skill agent"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6859,7 +6859,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Flutterwave/Woocommerce-v2": [
 		{
-			note: "Flutterwave's WooCommerce plugin for its Business (F4B) v2 APIs, newest release 3.3.0 (2026-09-09) — a merchant payment integration for WordPress stores. Part of Flutterwave's large plugin estate rather than Stellar-specific code (README read 2026-09-14; MIT; last push 2026-09-09).",
+			note: "Flutterwave's WooCommerce plugin for its Business (F4B) v2 APIs, newest release 3.3.0 (2026-09-09): a merchant payment integration for WordPress stores. Part of Flutterwave's large plugin estate rather than Stellar-specific code (README read 2026-09-14; MIT; last push 2026-09-09).",
 			triggers: ["flutterwave woocommerce plugin"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6867,7 +6867,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Brale-xyz/canton-backup-utility": [
 		{
-			note: "Brale's utility for backing up and restoring a CANTON Validator — currently covering users and their rights on the participant node. Canton infrastructure tooling, published by a stablecoin issuer whose developer docs are noted separately (README read 2026-09-14; MIT; 3 stars; no releases; last push 2026-07-09).",
+			note: "Brale's utility for backing up and restoring a CANTON Validator: currently covering users and their rights on the participant node. Canton infrastructure tooling, published by a stablecoin issuer whose developer docs are noted separately (README read 2026-09-14; MIT; 3 stars; no releases; last push 2026-07-09).",
 			triggers: ["canton validator backup", "brale canton utility"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6875,7 +6875,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"airgap-it/airgap-docs": [
 		{
-			note: "The AirGap help centre and documentation for AirGap Vault and AirGap Wallet (support.airgap.it), built with Docusaurus — the user-facing documentation of a multi-chain air-gapped wallet that includes Stellar (README read 2026-09-14; no license file; 4 stars; no releases; last push 2026-03-24).",
+			note: "The AirGap help centre and documentation for AirGap Vault and AirGap Wallet (support.airgap.it), built with Docusaurus; the user-facing documentation of a multi-chain air-gapped wallet that includes Stellar (README read 2026-09-14; no license file; 4 stars; no releases; last push 2026-03-24).",
 			triggers: ["airgap documentation", "airgap vault wallet help"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6891,7 +6891,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Inferara/inf-wasm-tools": [
 		{
-			note: "Inferara's fork of the WASM tools with support for NON-DETERMINISTIC OPERATIONS — the tooling under their Inference language, aimed at formal specification and verification of WASM programs. Relevant to Soroban only through WASM, which the repository does not claim (README read 2026-09-14; MIT; 3 stars; topics formal-methods, wasm; no releases; last push 2025-12-09).",
+			note: "Inferara's fork of the WASM tools with support for NON-DETERMINISTIC OPERATIONS; the tooling under their Inference language, aimed at formal specification and verification of WASM programs. Relevant to Soroban only through WASM, which the repository does not claim (README read 2026-09-14; MIT; 3 stars; topics formal-methods, wasm; no releases; last push 2025-12-09).",
 			triggers: ["inferara wasm tools", "nondeterministic wasm formal"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6899,7 +6899,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Inferara/book": [
 		{
-			note: "The user guide for Inferara's Inference programming language (inference-lang.org/book) — a formal-methods language, documented from installation to advanced use. No Stellar-specific content (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-26).",
+			note: "The user guide for Inferara's Inference programming language (inference-lang.org/book): a formal-methods language, documented from installation to advanced use. No Stellar-specific content (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-26).",
 			triggers: ["inference language book"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6907,7 +6907,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Inferara/tree-sitter-inference": [
 		{
-			note: "The tree-sitter grammar for the Inference language, published on crates.io — editor tooling for Inferara's formal-methods language, with no Stellar-specific content (README read 2026-09-14; GPL-3.0; 2 stars; no releases; last push 2026-03-23).",
+			note: "The tree-sitter grammar for the Inference language, published on crates.io: editor tooling for Inferara's formal-methods language, with no Stellar-specific content (README read 2026-09-14; GPL-3.0; 2 stars; no releases; last push 2026-03-23).",
 			triggers: ["tree-sitter inference grammar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6915,7 +6915,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"nirvana-labs/karpenter-provider-nirvana": [
 		{
-			note: "A Karpenter node-provisioning provider for Nirvana Kubernetes Service (docs.nirvanalabs.io/cloud/nks) — Kubernetes infrastructure, newest release v0.15.1. The fourth Nirvana Labs repository in the index, none of which carries Stellar-specific code (README read 2026-09-14; Apache-2.0; last push 2026-08-26).",
+			note: "A Karpenter node-provisioning provider for Nirvana Kubernetes Service (docs.nirvanalabs.io/cloud/nks): Kubernetes infrastructure, newest release v0.15.1. The fourth Nirvana Labs repository in the index, none of which carries Stellar-specific code (README read 2026-09-14; Apache-2.0; last push 2026-08-26).",
 			triggers: ["karpenter provider nirvana", "nks node provisioning"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -6931,7 +6931,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"nirvana-labs/homebrew-tap": [
 		{
-			note: "Triage 2026-09-14: a Homebrew tap for installing Nirvana Labs products — packaging metadata, empty README, no releases. The fifth Nirvana Labs repository in the index; none carries Stellar-specific code. https://github.com/nirvana-labs/homebrew-tap",
+			note: "Triage 2026-09-14: a Homebrew tap for installing Nirvana Labs products: packaging metadata, empty README, no releases. The fifth Nirvana Labs repository in the index; none carries Stellar-specific code. https://github.com/nirvana-labs/homebrew-tap",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -6939,7 +6939,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"IvanMartinez134/Tomin": [
 		{
-			note: "Triage 2026-09-14: empty README, no GitHub description, no release, no topics — the repository states nothing durable about itself. Re-examine if it gains any of those. https://github.com/IvanMartinez134/Tomin",
+			note: "Triage 2026-09-14: empty README, no GitHub description, no release, no topics; the repository states nothing durable about itself. Re-examine if it gains any of those. https://github.com/IvanMartinez134/Tomin",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -6949,7 +6949,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// (224 remained after wave 14). Read 2026-09-14.
 	"Soneso/as-soroban-sdk": [
 		{
-			note: "Soneso's Soroban SDK for ASSEMBLYSCRIPT — writing Soroban contracts in a TypeScript-like language instead of Rust, at v1.2.0. With stellar-experimental's Zig and C SDKs it is one of the few non-Rust paths to a Soroban contract, and the most mature of them at 19 stars (README read 2026-09-14; Apache-2.0; last push 2025-08-11).",
+			note: "Soneso's Soroban SDK for ASSEMBLYSCRIPT: writing Soroban contracts in a TypeScript-like language instead of Rust, at v1.2.0. With stellar-experimental's Zig and C SDKs it is one of the few non-Rust paths to a Soroban contract, and the most mature of them at 19 stars (README read 2026-09-14; Apache-2.0; last push 2025-08-11).",
 			triggers: [
 				"assemblyscript soroban sdk",
 				"write soroban contract typescript",
@@ -6961,7 +6961,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"freespek/solarkraft": [
 		{
-			note: "Solarkraft: a RUNTIME MONITORING tool for Soroban powered by TLA+ and Apalache — formal specifications checked against what a contract actually did on-chain, rather than only before deployment. The README states the activation phase is finished and an MVP exists, with a 10-minute demo video; 12 stars, topics tlaplus, verification (README read 2026-09-14; Apache-2.0; no releases; last push 2025-02-25).",
+			note: "Solarkraft: a RUNTIME MONITORING tool for Soroban powered by TLA+ and Apalache: formal specifications checked against what a contract actually did on-chain, rather than only before deployment. The README states the activation phase is finished and an MVP exists, with a 10-minute demo video; 12 stars, topics tlaplus, verification (README read 2026-09-14; Apache-2.0; no releases; last push 2025-02-25).",
 			triggers: [
 				"solarkraft runtime monitoring",
 				"tla+ apalache soroban",
@@ -6973,7 +6973,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"FrankSzendzielarz/SorobanRPCSDK": [
 		{
-			note: "A lightweight cross-platform .NET and NATIVE SDK for the Stellar RPC API in C#, funded by the Stellar Community Fund — the answer when the question is how to reach Soroban RPC from .NET. Newest release v0.0.3; last push 2025-04-10 (README read 2026-09-14; no license file; 3 stars).",
+			note: "A lightweight cross-platform .NET and NATIVE SDK for the Stellar RPC API in C#, funded by the Stellar Community Fund; the answer when the question is how to reach Soroban RPC from .NET. Newest release v0.0.3; last push 2025-04-10 (README read 2026-09-14; no license file; 3 stars).",
 			triggers: [
 				"dotnet soroban rpc sdk",
 				"c# stellar rpc",
@@ -6985,7 +6985,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pendulum-chain/substrate-stellar-sdk": [
 		{
-			note: "A Rust Stellar SDK built for SUBSTRATE projects: it does not depend on the standard library, which is what makes it usable inside a runtime — the SDK underneath Pendulum's Spacewalk bridge. 11 stars (README read 2026-09-14; Apache-2.0; no releases; last push 2026-04-29).",
+			note: "A Rust Stellar SDK built for SUBSTRATE projects: it does not depend on the standard library, which is what makes it usable inside a runtime; the SDK underneath Pendulum's Spacewalk bridge. 11 stars (README read 2026-09-14; Apache-2.0; no releases; last push 2026-04-29).",
 			triggers: [
 				"substrate stellar sdk",
 				"no_std stellar rust",
@@ -6997,7 +6997,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"boundless-xyz/signal-on-stellar": [
 		{
-			note: "Signal on Stellar: an ETHEREUM ZK LIGHT CLIENT living in a Soroban contract — proofs of Ethereum consensus are retrieved from the Boundless network and submitted to this contract, which lets Stellar verify Ethereum state without trusting a bridge operator (README read 2026-09-14; no license file; 2 stars; no releases; last push 2026-01-27).",
+			note: "Signal on Stellar: an ETHEREUM ZK LIGHT CLIENT living in a Soroban contract: proofs of Ethereum consensus are retrieved from the Boundless network and submitted to this contract, which lets Stellar verify Ethereum state without trusting a bridge operator (README read 2026-09-14; no license file; 2 stars; no releases; last push 2026-01-27).",
 			triggers: [
 				"ethereum light client stellar",
 				"signal boundless stellar",
@@ -7009,7 +7009,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/debit-card-reference": [
 		{
-			note: "SDF's reference implementation of DEBIT CARDS on Stellar. The README is a single line, so the code is the documentation — but its existence is the citable fact when the question is whether card issuance has an official reference on Stellar (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-14).",
+			note: "SDF's reference implementation of DEBIT CARDS on Stellar. The README is a single line, so the code is the documentation, but its existence is the citable fact when the question is whether card issuance has an official reference on Stellar (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-07-14).",
 			triggers: [
 				"debit card reference stellar",
 				"card issuance stellar official",
@@ -7032,7 +7032,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"coinspect/wallet-security-ranking": [
 		{
-			note: "The data repository behind Coinspect's Wallet Security Ranking (coinspect.com/wallets): configuration, individual wallet reports and historical results, published openly. An independent, dated source for wallet security claims — including Stellar wallets — rather than a vendor's own statement (README read 2026-09-14; license NOASSERTION; 7 stars; no releases; last push 2026-09-04).",
+			note: "The data repository behind Coinspect's Wallet Security Ranking (coinspect.com/wallets): configuration, individual wallet reports and historical results, published openly. An independent, dated source for wallet security claims (including Stellar wallets) rather than a vendor's own statement (README read 2026-09-14; license NOASSERTION; 7 stars; no releases; last push 2026-09-04).",
 			triggers: [
 				"wallet security ranking",
 				"coinspect wallet reports",
@@ -7044,7 +7044,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Scopuly/signer-extension-api": [
 		{
-			note: "@scopuly/signer-extension-api: a zero-dependency TypeScript injected-provider API letting a Stellar dApp talk to the Scopuly wallet in either environment — the in-app dApp browser of the Scopuly mobile app or its browser extension (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-08-09).",
+			note: "@scopuly/signer-extension-api: a zero-dependency TypeScript injected-provider API letting a Stellar dApp talk to the Scopuly wallet in either environment; the in-app dApp browser of the Scopuly mobile app or its browser extension (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-08-09).",
 			triggers: [
 				"scopuly signer api",
 				"injected provider stellar wallet",
@@ -7056,7 +7056,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bp-ventures/stcli": [
 		{
-			note: "stcli: a REPL command-line Stellar wallet that is deliberately ALL IN ONE PYTHON FILE — clone the single stcli.py and run it. 16 stars; last push 2023-05-23, so it is a 2023 artefact, but the single-file design is why it still gets cited (README read 2026-09-14; Apache-2.0).",
+			note: "stcli: a REPL command-line Stellar wallet that is deliberately ALL IN ONE PYTHON FILE: clone the single stcli.py and run it. 16 stars; last push 2023-05-23, so it is a 2023 artefact, but the single-file design is why it still gets cited (README read 2026-09-14; Apache-2.0).",
 			triggers: [
 				"stcli python wallet",
 				"single file stellar wallet",
@@ -7068,7 +7068,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"subquery/subql-stellar": [
 		{
-			note: "SubQuery's Stellar support: the Stellar node for SubQuery's open, universal web3 data-indexing framework, released as node-stellar/6.2.0 — an alternative to writing a bespoke indexer for Soroban events (README read 2026-09-14; GPL-3.0; 4 stars; last push 2026-06-17).",
+			note: "SubQuery's Stellar support: the Stellar node for SubQuery's open, universal web3 data-indexing framework, released as node-stellar/6.2.0: an alternative to writing a bespoke indexer for Soroban events (README read 2026-09-14; GPL-3.0; 4 stars; last push 2026-06-17).",
 			triggers: ["subquery stellar indexer", "subql stellar node"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7076,7 +7076,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"xycloo/retroshades-svm-fork": [
 		{
-			note: "Xycloo's fork of rs-soroban-env — the Rust contract-environment interface and host implementation for Soroban, carrying `soroban-env-common`, the shared interface between contract guest and host. A modified host environment is how Mercury's Retroshades runs contracts differently from mainnet; treat any behaviour here as the fork's, not the protocol's (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-27).",
+			note: "Xycloo's fork of rs-soroban-env: the Rust contract-environment interface and host implementation for Soroban, carrying `soroban-env-common`, the shared interface between contract guest and host. A modified host environment is how Mercury's Retroshades runs contracts differently from mainnet; treat any behaviour here as the fork's, not the protocol's (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-27).",
 			triggers: [
 				"retroshades env fork",
 				"soroban host environment fork",
@@ -7096,7 +7096,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"karagozemin/AgentAllowance": [
 		{
-			note: "AgentAllowance: policy-aware x402 infrastructure for autonomous AI spending on Stellar, whose tagline states the design in one line — give AI agents a budget, not your wallet. The same problem as CleverCon and LumenBro's policies, solved at the x402 layer (README read 2026-09-14; MIT; no releases; last push 2026-08-12).",
+			note: "AgentAllowance: policy-aware x402 infrastructure for autonomous AI spending on Stellar, whose tagline states the design in one line: give AI agents a budget, not your wallet. The same problem as CleverCon and LumenBro's policies, solved at the x402 layer (README read 2026-09-14; MIT; no releases; last push 2026-08-12).",
 			triggers: [
 				"agent allowance x402",
 				"agent budget not wallet",
@@ -7108,7 +7108,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blessedux/inferwallet": [
 		{
-			note: "SZX / InferWallet: turns the Stellar CLASSIC asset SZX into permissionless AI-inference spend — hold SZX in Freighter, point Cursor at a local proxy, and burn SZX to call OpenRouter models with no provider account. A rare design that uses a classic asset rather than a Soroban token for metering (README read 2026-09-14; no license file; no releases; last push 2026-08-14).",
+			note: "SZX / InferWallet: turns the Stellar CLASSIC asset SZX into permissionless AI-inference spend: hold SZX in Freighter, point Cursor at a local proxy, and burn SZX to call OpenRouter models with no provider account. A rare design that uses a classic asset rather than a Soroban token for metering (README read 2026-09-14; no license file; no releases; last push 2026-08-14).",
 			triggers: [
 				"inferwallet szx",
 				"burn asset for inference",
@@ -7120,7 +7120,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"RozoAI/fe-gate": [
 		{
-			note: "@rozoai/fe-gate: one shared frontend test gate for every Rozo web app, in three layers — an L0 PR gate each app repo calls through a reusable workflow, plus a Playwright base with hydration, QR and href assertions and a mock wallet. The reusable-CI pattern applied to wallet-connected front ends (README read 2026-09-14; no license file; no releases; last push 2026-09-11).",
+			note: "@rozoai/fe-gate: one shared frontend test gate for every Rozo web app, in three layers: an L0 PR gate each app repo calls through a reusable workflow, plus a Playwright base with hydration, QR and href assertions and a mock wallet. The reusable-CI pattern applied to wallet-connected front ends (README read 2026-09-14; no license file; no releases; last push 2026-09-11).",
 			triggers: [
 				"rozo fe-gate",
 				"shared frontend test gate",
@@ -7132,7 +7132,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Moonlight-Protocol/moonlight-sdk": [
 		{
-			note: "The SDK for the Moonlight PRIVACY protocol, which the README marks WORK IN PROGRESS with APIs subject to change — use with caution is its own instruction. Newest release v0.13.0 (README read 2026-09-14; no license file; 2 stars; last push 2026-07-28).",
+			note: "The SDK for the Moonlight PRIVACY protocol, which the README marks WORK IN PROGRESS with APIs subject to change; use with caution is its own instruction. Newest release v0.13.0 (README read 2026-09-14; no license file; 2 stars; last push 2026-07-28).",
 			triggers: ["moonlight sdk privacy", "moonlight protocol client"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7140,7 +7140,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/docs": [
 		{
-			note: "The source of Blux's official documentation (docs.blux.cc): authentication and wallet infrastructure for Stellar dApps, covering getting started and the JavaScript surface — the written reference behind the @bluxcc/react package (README read 2026-09-14; no license file; no releases; last push 2026-09-13).",
+			note: "The source of Blux's official documentation (docs.blux.cc): authentication and wallet infrastructure for Stellar dApps, covering getting started and the JavaScript surface; the written reference behind the @bluxcc/react package (README read 2026-09-14; no license file; no releases; last push 2026-09-13).",
 			triggers: ["blux documentation", "blux auth wallet docs"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7148,7 +7148,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/whitelabel": [
 		{
-			note: "Blux's whitelabel demo — the branded-integration example beside bluxcc/demo (the kit showcase) and bluxcc/docs. The README is empty, so the repository name and the sibling repos are the context (metadata read 2026-09-14; no license file; no releases; last push 2026-09-02).",
+			note: "Blux's whitelabel demo: the branded-integration example beside bluxcc/demo (the kit showcase) and bluxcc/docs. The README is empty, so the repository name and the sibling repos are the context (metadata read 2026-09-14; no license file; no releases; last push 2026-09-02).",
 			triggers: ["blux whitelabel demo"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7156,7 +7156,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Fundable-Protocol/Backend": [
 		{
-			note: "The Fundable backend: a Node/Express, PostgreSQL and TypeORM API alongside a Soroban INDEXER SCAFFOLD in the same repository (`src/` for the API, `indexer/` for the workspace), using Bun for packages — the service half of the Fundable streaming product whose SDK and indexer are noted separately (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-05).",
+			note: "The Fundable backend: a Node/Express, PostgreSQL and TypeORM API alongside a Soroban INDEXER SCAFFOLD in the same repository (`src/` for the API, `indexer/` for the workspace), using Bun for packages; the service half of the Fundable streaming product whose SDK and indexer are noted separately (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-05).",
 			triggers: ["fundable backend api", "fundable indexer scaffold"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7183,7 +7183,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NibrasD/StellarScribe": [
 		{
-			note: "StellarScribe: a content-publishing platform on Soroban where creators mint LONG-FORM CONTENT as NFTs and set up token-gated access — publishing and monetisation rather than art NFTs (README read 2026-09-14; no license file; no releases; last push 2026-05-17).",
+			note: "StellarScribe: a content-publishing platform on Soroban where creators mint LONG-FORM CONTENT as NFTs and set up token-gated access: publishing and monetisation rather than art NFTs (README read 2026-09-14; no license file; no releases; last push 2026-05-17).",
 			triggers: [
 				"stellarscribe publishing",
 				"token gated content stellar",
@@ -7195,7 +7195,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Jistriane/TrustGate": [
 		{
-			note: "TrustGate: a trustless task marketplace on Stellar with a specific mechanism — a requester escrows payment, EXECUTORS BID WITH THEIR OWN COLLATERAL, the marketplace picks a winner and Soroban settles. Collateralised bidding is what distinguishes it from the other escrow marketplaces in this index. Built for GrantFox at Stellar Summit São Paulo 2026 (README read 2026-09-14; no license file; no releases; last push 2026-08-06).",
+			note: "TrustGate: a trustless task marketplace on Stellar with a specific mechanism: a requester escrows payment, EXECUTORS BID WITH THEIR OWN COLLATERAL, the marketplace picks a winner and Soroban settles. Collateralised bidding is what distinguishes it from the other escrow marketplaces in this index. Built for GrantFox at Stellar Summit São Paulo 2026 (README read 2026-09-14; no license file; no releases; last push 2026-08-06).",
 			triggers: [
 				"trustgate task marketplace",
 				"executor collateral bidding",
@@ -7215,7 +7215,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ClickPesa/clickpesa-stellar-validator": [
 		{
-			note: "A copy of the SEP transfer-server validator: a Jest test suite that validates SEP-6, SEP-24 and SEP-31 transfer servers, runnable against any domain (the README's example points at testanchor.stellar.org). Last push 2021-05-05 — the OLDEST repository in this registry, and useful as the historical shape of anchor conformance testing (README read 2026-09-14; no license file).",
+			note: "A copy of the SEP transfer-server validator: a Jest test suite that validates SEP-6, SEP-24 and SEP-31 transfer servers, runnable against any domain (the README's example points at testanchor.stellar.org). Last push 2021-05-05: the OLDEST repository in this registry, and useful as the historical shape of anchor conformance testing (README read 2026-09-14; no license file).",
 			triggers: [
 				"sep-6 sep-24 sep-31 validator",
 				"transfer server test suite",
@@ -7227,7 +7227,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ClickPesa-Debt-Fund/cdf-pool-ui": [
 		{
-			note: "The ClickPesa Debt Fund pool interface, whose GitHub description states what it is built on — Blend Protocol and Mercury — while the README is the unmodified Vite React template. A real-world-credit pool on Blend's primitives; the description is the durable fact (metadata read 2026-09-14; no license file; no releases; last push 2024-11-08).",
+			note: "The ClickPesa Debt Fund pool interface, whose GitHub description states what it is built on: Blend Protocol and Mercury, while the README is the unmodified Vite React template. A real-world-credit pool on Blend's primitives; the description is the durable fact (metadata read 2026-09-14; no license file; no releases; last push 2024-11-08).",
 			triggers: ["clickpesa debt fund pool", "blend mercury pool ui"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7235,7 +7235,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"defarm-repo/defarm-verify": [
 		{
-			note: "defarm-verify: an INDEPENDENT, open-source verifier for a DeFarm DFID that runs on the reader's own machine and closes the verification loop WITHOUT TRUSTING DeFarm's page or server — checking the on-chain anchor directly. The README is in Portuguese. A rare case of a project publishing the tool that can disprove its own claims (README read 2026-09-14; MIT; no releases; last push 2026-08-14).",
+			note: "defarm-verify: an INDEPENDENT, open-source verifier for a DeFarm DFID that runs on the reader's own machine and closes the verification loop WITHOUT TRUSTING DeFarm's page or server, checking the on-chain anchor directly. The README is in Portuguese. A rare case of a project publishing the tool that can disprove its own claims (README read 2026-09-14; MIT; no releases; last push 2026-08-14).",
 			triggers: [
 				"defarm verify dfid",
 				"independent verifier traceability",
@@ -7247,7 +7247,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ACTA-Team/links": [
 		{
-			note: "ACTA's link hub (links.acta.build): a lightweight branded page consolidating the project's official profiles, channels and key resources — useful as the index of where ACTA publishes, when a claim needs a first-party source (README read 2026-09-14; MIT; no releases; last push 2026-08-27).",
+			note: "ACTA's link hub (links.acta.build): a lightweight branded page consolidating the project's official profiles, channels and key resources, useful as the index of where ACTA publishes, when a claim needs a first-party source (README read 2026-09-14; MIT; no releases; last push 2026-08-27).",
 			triggers: ["acta links hub"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7255,7 +7255,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"fiatsend/docs": [
 		{
-			note: "Fiatsend's end-user documentation (docs.fiatsend.com), built with Docusaurus — the user-facing half of the technical architecture Fiatsend publishes separately (README read 2026-09-14; no license file; no releases; last push 2026-04-01).",
+			note: "Fiatsend's end-user documentation (docs.fiatsend.com), built with Docusaurus; the user-facing half of the technical architecture Fiatsend publishes separately (README read 2026-09-14; no license file; no releases; last push 2026-04-01).",
 			triggers: ["fiatsend documentation"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7263,7 +7263,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"wmendes/stellar-mint": [
 		{
-			note: "stellar-mint: a three-class teaching project on CLASSIC Stellar asset issuance that walks the full spectrum of issuer control — from a bare, ungoverned promise to a regulated stablecoin the issuer can freeze. The classic-asset counterpart to the same author's stellar-album, which teaches fungibility on Soroban (README read 2026-09-14; no license file; 5 stars; no releases; last push 2026-07-08).",
+			note: "stellar-mint: a three-class teaching project on CLASSIC Stellar asset issuance that walks the full spectrum of issuer control: from a bare, ungoverned promise to a regulated stablecoin the issuer can freeze. The classic-asset counterpart to the same author's stellar-album, which teaches fungibility on Soroban (README read 2026-09-14; no license file; 5 stars; no releases; last push 2026-07-08).",
 			triggers: [
 				"stellar mint teaching",
 				"issuer control spectrum",
@@ -7275,7 +7275,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"0xshikhar/zkpoker": [
 		{
-			note: "zkPoker (zkpoker.shikhar.xyz): a two-player Texas Hold'em prototype on Soroban with on-chain multiplayer state settlement and a real ZERO-KNOWLEDGE SHOWDOWN path verified on-chain — poker's hidden-hand problem, which is harder than battleship's because the reveal is partial (README read 2026-09-14; MIT; no releases; last push 2026-02-24).",
+			note: "zkPoker (zkpoker.shikhar.xyz): a two-player Texas Hold'em prototype on Soroban with on-chain multiplayer state settlement and a real ZERO-KNOWLEDGE SHOWDOWN path verified on-chain: poker's hidden-hand problem, which is harder than battleship's because the reveal is partial (README read 2026-09-14; MIT; no releases; last push 2026-02-24).",
 			triggers: [
 				"zkpoker stellar",
 				"zero knowledge showdown",
@@ -7287,7 +7287,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Suganthan96/zk-UNO": [
 		{
-			note: "ZK-UNO (zk-uno-omega.vercel.app): a two-player UNO game on Stellar testnet where every hand is secret and every move is cryptographically proven with Soroban contracts — card-game hidden state, from the same ZK Gaming cohort (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
+			note: "ZK-UNO (zk-uno-omega.vercel.app): a two-player UNO game on Stellar testnet where every hand is secret and every move is cryptographically proven with Soroban contracts: card-game hidden state, from the same ZK Gaming cohort (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
 			triggers: ["zk uno card game", "secret hand proof stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7295,7 +7295,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CijeTheCreator/zk-minewars": [
 		{
-			note: "Stellar Minewars: a fully on-chain two-player competitive MINESWEEPER on Soroban with zero-knowledge proofs for fair play — the hidden-board problem in a race format rather than turn-based combat (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
+			note: "Stellar Minewars: a fully on-chain two-player competitive MINESWEEPER on Soroban with zero-knowledge proofs for fair play; the hidden-board problem in a race format rather than turn-based combat (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
 			triggers: ["zk minewars minesweeper", "competitive minesweeper stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7303,7 +7303,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Naveen-807/Mafia-Duel": [
 		{
-			note: "Mafia Duel: a fully on-chain ZK social-deduction game on Soroban, submitted to the Stellar Game Studio track — social deduction is an unusual fit for proofs because the hidden information is a role rather than a position (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
+			note: "Mafia Duel: a fully on-chain ZK social-deduction game on Soroban, submitted to the Stellar Game Studio track; social deduction is an unusual fit for proofs because the hidden information is a role rather than a position (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
 			triggers: ["mafia duel social deduction", "zk social deduction stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7311,7 +7311,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Blazingkevin/phantom-fleet": [
 		{
-			note: "Phantom Fleet (phantom-fleet.vercel.app): on-chain battleship on Stellar whose README makes the strongest claim in this game cohort — the chain REJECTS CHEATERS with an on-chain revert, not a UI badge or a client-side check — with the contract address published (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
+			note: "Phantom Fleet (phantom-fleet.vercel.app): on-chain battleship on Stellar whose README makes the strongest claim in this game cohort: the chain REJECTS CHEATERS with an on-chain revert, not a UI badge or a client-side check, with the contract address published (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
 			triggers: [
 				"phantom fleet battleship",
 				"onchain revert cheating",
@@ -7323,7 +7323,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pramadanif/phantomfleet": [
 		{
-			note: "PHANTOM FLEET: a zero-knowledge naval-combat game on Stellar (phantomfleet.vercel.app) — a separate project from Blazingkevin/phantom-fleet despite the shared name, both from the same ZK gaming cohort; check the deployment before citing either (README read 2026-09-14; no license file; no releases; last push 2026-02-24).",
+			note: "PHANTOM FLEET: a zero-knowledge naval-combat game on Stellar (phantomfleet.vercel.app), a separate project from Blazingkevin/phantom-fleet despite the shared name, both from the same ZK gaming cohort; check the deployment before citing either (README read 2026-09-14; no license file; no releases; last push 2026-02-24).",
 			triggers: ["phantomfleet naval combat"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7331,7 +7331,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Marvy247/BattleZero": [
 		{
-			note: "BattleZero (battle-zero.vercel.app): a complete zero-knowledge battleship on Stellar TESTNET with cryptographic verification of hidden-information play — the fourth independent battleship implementation in the ZK Gaming cohort (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
+			note: "BattleZero (battle-zero.vercel.app): a complete zero-knowledge battleship on Stellar TESTNET with cryptographic verification of hidden-information play; the fourth independent battleship implementation in the ZK Gaming cohort (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
 			triggers: ["battlezero naval warfare", "zk battleship testnet stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7339,7 +7339,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"SphinxBSD/aether-grid": [
 		{
-			note: "Aether Grid: a decentralised zero-knowledge turn-based strategy game on Soroban where two players compete on a 7×7 grid to locate a hidden energy source — grid search as the hidden-information mechanic (README read 2026-09-14; no license file; no releases; last push 2026-03-01).",
+			note: "Aether Grid: a decentralised zero-knowledge turn-based strategy game on Soroban where two players compete on a 7×7 grid to locate a hidden energy source; grid search as the hidden-information mechanic (README read 2026-09-14; no license file; no releases; last push 2026-03-01).",
 			triggers: ["aether grid strategy", "hidden energy source game stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7355,7 +7355,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"agenciacrehub/Dark-Sector": [
 		{
-			note: "A game scaffolded from the Stellar Game Studio template collection — the README is the Game Studio's shared text (jamesbachini.github.io/Stellar-Game-Studio) rather than a description of Dark Sector, the same pattern as Card-RPG and zkshotroul (README read 2026-09-14; MIT; no releases; last push 2026-02-21).",
+			note: "A game scaffolded from the Stellar Game Studio template collection; the README is the Game Studio's shared text (jamesbachini.github.io/Stellar-Game-Studio) rather than a description of Dark Sector, the same pattern as Card-RPG and zkshotroul (README read 2026-09-14; MIT; no releases; last push 2026-02-21).",
 			triggers: ["dark sector game studio"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7363,7 +7363,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"HelixLabsDev/helix-labs-canton-tools": [
 		{
-			note: "Helix Labs' open-source CANTON NETWORK developer tooling: a shared Canton JSON API v2 client, logger, scheduler, health server and env helpers, plus protocol-automation packages. Canton and Daml, not Stellar — noted so the distinction is on record for an org that also builds on Stellar. Newest release v0.1.0 (README read 2026-09-14; Apache-2.0; last push 2026-03-13).",
+			note: "Helix Labs' open-source CANTON NETWORK developer tooling: a shared Canton JSON API v2 client, logger, scheduler, health server and env helpers, plus protocol-automation packages. Canton and Daml, not Stellar; noted so the distinction is on record for an org that also builds on Stellar. Newest release v0.1.0 (README read 2026-09-14; Apache-2.0; last push 2026-03-13).",
 			triggers: ["canton network tooling", "canton json api client"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7371,7 +7371,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Brale-xyz/oauth2-token-agent": [
 		{
-			note: "An Elixir library that works with the `oauth2` package to renew tokens automatically before they expire — small, general infrastructure published by Brale with no Stellar-specific content (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-21).",
+			note: "An Elixir library that works with the `oauth2` package to renew tokens automatically before they expire; small, general infrastructure published by Brale with no Stellar-specific content (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-21).",
 			triggers: ["oauth2 token agent elixir"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7379,7 +7379,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"icon-project/sodax-sdks": [
 		{
-			note: "The Sodax SDKs from the ICON project, released as @sdks@2.1.0 with a frontend demo — cross-chain SDK work whose Stellar relationship is not stated in the README, so establish it from the product rather than this repository (README read 2026-09-14; MIT; 1 star; last push 2026-09-14).",
+			note: "The Sodax SDKs from the ICON project, released as @sdks@2.1.0 with a frontend demo; cross-chain SDK work whose Stellar relationship is not stated in the README, so establish it from the product rather than this repository (README read 2026-09-14; MIT; 1 star; last push 2026-09-14).",
 			triggers: ["sodax sdks icon"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7395,7 +7395,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dapplooker/graphprotocol-docker": [
 		{
-			note: "DappLooker's Docker setup for running a Graph Protocol indexer and query node — The Graph's infrastructure, packaged; no Stellar-specific content (README read 2026-09-14; no license file; 2 stars; no releases; last push 2026-07-09).",
+			note: "DappLooker's Docker setup for running a Graph Protocol indexer and query node; The Graph's infrastructure, packaged; no Stellar-specific content (README read 2026-09-14; no license file; 2 stars; no releases; last push 2026-07-09).",
 			triggers: ["graph indexer docker"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7403,7 +7403,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"devasignhq/verify-demo": [
 		{
-			note: "A small orders app used as a FIXTURE to exercise DevAsign's pull-request verification end to end — order maths in one file, a React breakdown component and a server; it exists to be reviewed, not used (README read 2026-09-14; no license file; no releases; last push 2026-09-09).",
+			note: "A small orders app used as a FIXTURE to exercise DevAsign's pull-request verification end to end: order maths in one file, a React breakdown component and a server; it exists to be reviewed, not used (README read 2026-09-14; no license file; no releases; last push 2026-09-09).",
 			triggers: ["devasign verify fixture"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7411,7 +7411,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"reflector-network/reflector-steam": [
 		{
-			note: "Triage 2026-09-14: no description, empty README, no releases, last push 2025-10-21 — a Rust repository in the reflector-network org that states nothing about itself. Re-examine if it gains a README or a release. https://github.com/reflector-network/reflector-steam",
+			note: "Triage 2026-09-14: no description, empty README, no releases, last push 2025-10-21; a Rust repository in the reflector-network org that states nothing about itself. Re-examine if it gains a README or a release. https://github.com/reflector-network/reflector-steam",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -7419,7 +7419,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"00labs/huma-assets": [
 		{
-			note: "Triage 2026-09-14: a public assets repository (logos and metadata) for Huma Finance — brand files, empty README, no releases. Nothing to serve about the protocol; Huma's product claims belong to its other repositories. https://github.com/00labs/huma-assets",
+			note: "Triage 2026-09-14: a public assets repository (logos and metadata) for Huma Finance: brand files, empty README, no releases. Nothing to serve about the protocol; Huma's product claims belong to its other repositories. https://github.com/00labs/huma-assets",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -7427,7 +7427,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"allbridge-io/media": [
 		{
-			note: "Triage 2026-09-14: Allbridge's media files — brand assets, empty README, no description beyond that, no releases. Nothing durable about the bridge itself; see allbridge-core-soroban-contracts and allbridge-mcp. https://github.com/allbridge-io/media",
+			note: "Triage 2026-09-14: Allbridge's media files: brand assets, empty README, no description beyond that, no releases. Nothing durable about the bridge itself; see allbridge-core-soroban-contracts and allbridge-mcp. https://github.com/allbridge-io/media",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -7449,7 +7449,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"OpenZeppelin/soroban-helpers": [
 		{
-			note: "OpenZeppelin's collection of Rust libraries for simplifying Soroban DEVELOPMENT AND TESTING — the helper layer beside their stellar-contracts and security-detectors SDK, with coverage reported through Codecov (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-09-10).",
+			note: "OpenZeppelin's collection of Rust libraries for simplifying Soroban DEVELOPMENT AND TESTING; the helper layer beside their stellar-contracts and security-detectors SDK, with coverage reported through Codecov (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-09-10).",
 			triggers: [
 				"soroban helpers openzeppelin",
 				"soroban testing helpers rust",
@@ -7460,7 +7460,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Creit-Tech/Stellar-Assets-SDK": [
 		{
-			note: "Creit Tech's Stellar Assets SDK: a library for handling every kind of Stellar asset on Soroban, written because reading the balances of multiple addresses was needlessly hard — the README states that motivation directly, which is the useful part when choosing between asset libraries (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-08-23).",
+			note: "Creit Tech's Stellar Assets SDK: a library for handling every kind of Stellar asset on Soroban, written because reading the balances of multiple addresses was needlessly hard; the README states that motivation directly, which is the useful part when choosing between asset libraries (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-08-23).",
 			triggers: [
 				"stellar assets sdk creit",
 				"multiple address balances soroban",
@@ -7471,7 +7471,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar/sep24-reference-ui": [
 		{
-			note: "SDF's SEP-24 reference UI — the interactive-deposit-and-withdrawal flow as an implementation an anchor or wallet can read rather than infer from the SEP text. 6 stars (README read 2026-09-14; Apache-2.0; no releases; last push 2026-09-03).",
+			note: "SDF's SEP-24 reference UI: the interactive-deposit-and-withdrawal flow as an implementation an anchor or wallet can read rather than infer from the SEP text. 6 stars (README read 2026-09-14; Apache-2.0; no releases; last push 2026-09-03).",
 			triggers: ["sep-24 reference ui", "interactive deposit withdrawal ui"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7479,7 +7479,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"RozoAI/rozo-paysponsor": [
 		{
-			note: "rozo-paysponsor: Rozo's reference for SPONSORED ONBOARDING — deliver USDC to a Stellar wallet that holds 0 XLM and no trustline, and let its owner claim it paying zero gas. Topics name the mechanics: account-abstraction, claimable-balance, gasless. The script-only demo of the zero-XLM onboarding path (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-20).",
+			note: "rozo-paysponsor: Rozo's reference for SPONSORED ONBOARDING: deliver USDC to a Stellar wallet that holds 0 XLM and no trustline, and let its owner claim it paying zero gas. Topics name the mechanics: account-abstraction, claimable-balance, gasless. The script-only demo of the zero-XLM onboarding path (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-20).",
 			triggers: [
 				"rozo pay sponsor",
 				"zero xlm onboarding usdc",
@@ -7491,7 +7491,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"JoseCToscano/stellar-mcp": [
 		{
-			note: "stellar-mcp: an MCP ecosystem that GENERATES a production-ready MCP server FROM ANY DEPLOYED SOROBAN CONTRACT, then connects it to an agent — the generic answer to exposing a contract to agents, rather than hand-writing a server per contract. 6 stars (README read 2026-09-14; no license file; no releases; last push 2026-03-26).",
+			note: "stellar-mcp: an MCP ecosystem that GENERATES a production-ready MCP server FROM ANY DEPLOYED SOROBAN CONTRACT, then connects it to an agent; the generic answer to exposing a contract to agents, rather than hand-writing a server per contract. 6 stars (README read 2026-09-14; no license file; no releases; last push 2026-03-26).",
 			triggers: [
 				"generate mcp from contract",
 				"soroban contract mcp server",
@@ -7503,7 +7503,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-viewer": [
 		{
-			note: "The Trustless Work escrow viewer (viewer.trustlesswork.com): a decentralised READ-ONLY inspector that lets anyone examine a Soroban escrow contract by its id — the transparency surface for escrows, and the most-starred viewer in the org at 7 stars (README read 2026-09-14; no license file; no releases; last push 2026-09-11).",
+			note: "The Trustless Work escrow viewer (viewer.trustlesswork.com): a decentralised READ-ONLY inspector that lets anyone examine a Soroban escrow contract by its id; the transparency surface for escrows, and the most-starred viewer in the org at 7 stars (README read 2026-09-14; no license file; no releases; last push 2026-09-11).",
 			triggers: ["escrow viewer trustless work", "inspect escrow contract id"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7511,7 +7511,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"paul-motron/vaultguard": [
 		{
-			note: "VaultGuard: a trustless, time-locked DEAD MAN'S SWITCH for Stellar assets — an owner deposits XLM, USDC or any Stellar Asset Contract token and names beneficiaries with fixed percentage shares, which release if the owner stops checking in. Inheritance as a contract rather than a legal instrument (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
+			note: "VaultGuard: a trustless, time-locked DEAD MAN'S SWITCH for Stellar assets: an owner deposits XLM, USDC or any Stellar Asset Contract token and names beneficiaries with fixed percentage shares, which release if the owner stops checking in. Inheritance as a contract rather than a legal instrument (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
 			triggers: [
 				"vaultguard dead mans switch",
 				"time locked inheritance stellar",
@@ -7523,7 +7523,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-experimental/c-soroban-sdk": [
 		{
-			note: "An experimental C99 SDK for writing Soroban contracts, documented at leighmcculloch.github.io/c-soroban-sdk. Its README opens with a CAUTION box — experimental, not for anything beyond toy experiments — and with the Zig SDK and Soneso's AssemblyScript SDK it completes the short list of non-Rust routes to a Soroban contract (README read 2026-09-14; Apache-2.0; no releases; last push 2026-03-02).",
+			note: "An experimental C99 SDK for writing Soroban contracts, documented at leighmcculloch.github.io/c-soroban-sdk. Its README opens with a CAUTION box (experimental, not for anything beyond toy experiments), and with the Zig SDK and Soneso's AssemblyScript SDK it completes the short list of non-Rust routes to a Soroban contract (README read 2026-09-14; Apache-2.0; no releases; last push 2026-03-02).",
 			triggers: [
 				"c soroban sdk",
 				"c99 soroban contract",
@@ -7535,7 +7535,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-expert/ui-framework": [
 		{
-			note: "@stellar-expert/ui-framework: the shared React component library behind StellarExpert's apps, newest release v1.3.6, with peer dependencies installed separately — the components a third party would reuse to match StellarExpert's surfaces (README read 2026-09-14; MIT; 1 star; last push 2026-08-31).",
+			note: "@stellar-expert/ui-framework: the shared React component library behind StellarExpert's apps, newest release v1.3.6, with peer dependencies installed separately; the components a third party would reuse to match StellarExpert's surfaces (README read 2026-09-14; MIT; 1 star; last push 2026-08-31).",
 			triggers: [
 				"stellar expert ui framework",
 				"shared components stellarexpert",
@@ -7546,7 +7546,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-expert/formatter": [
 		{
-			note: "@stellar-expert/formatter: formatting utilities and common formats for numeric, string and binary Stellar data — including `fromStroops(valueInStroops)` for turning an Int64 stroop amount into a readable value, which is the conversion every Stellar UI has to get right (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-07-15).",
+			note: "@stellar-expert/formatter: formatting utilities and common formats for numeric, string and binary Stellar data: including `fromStroops(valueInStroops)` for turning an Int64 stroop amount into a readable value, which is the conversion every Stellar UI has to get right (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-07-15).",
 			triggers: [
 				"stroops formatting library",
 				"stellar expert formatter",
@@ -7558,7 +7558,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Lobstrco/stellar-identicon-py": [
 		{
-			note: "LOBSTR's Python identicon generator: a unique icon derived deterministically from a Stellar wallet's public key, served live at id.lobstr.co/<G...>.png — the visual account-recognition convention several Stellar wallets share. Last push 2021-03-31, so it is stable rather than abandoned (README read 2026-09-14; Apache-2.0; 5 stars; no releases).",
+			note: "LOBSTR's Python identicon generator: a unique icon derived deterministically from a Stellar wallet's public key, served live at id.lobstr.co/<G...>.png; the visual account-recognition convention several Stellar wallets share. Last push 2021-03-31, so it is stable rather than abandoned (README read 2026-09-14; Apache-2.0; 5 stars; no releases).",
 			triggers: [
 				"stellar identicon generator",
 				"wallet icon from public key",
@@ -7570,7 +7570,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NoetherDEX/noether-docs": [
 		{
-			note: "The official documentation for Noether (docs.noether.exchange), a decentralised PERPETUAL FUTURES exchange on Stellar — user guides plus REST and WebSocket API reference and SDK quick-starts. The citable source when the question is whether perps exist on Stellar and what their API looks like (README read 2026-09-14; no license file; no releases; last push 2026-07-09).",
+			note: "The official documentation for Noether (docs.noether.exchange), a decentralised PERPETUAL FUTURES exchange on Stellar: user guides plus REST and WebSocket API reference and SDK quick-starts. The citable source when the question is whether perps exist on Stellar and what their API looks like (README read 2026-09-14; no license file; no releases; last push 2026-07-09).",
 			triggers: [
 				"noether perpetual futures",
 				"perps on stellar docs",
@@ -7582,7 +7582,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NoetherDEX/noetherdiscordwebhook": [
 		{
-			note: "Noether's Discord webhook for trade notifications — the operational glue that posts the perpetual exchange's trades into a channel. The README is empty; the description is the record (metadata read 2026-09-14; no license file; 1 star; no releases; last push 2026-03-03).",
+			note: "Noether's Discord webhook for trade notifications, the operational glue that posts the perpetual exchange's trades into a channel. The README is empty; the description is the record (metadata read 2026-09-14; no license file; 1 star; no releases; last push 2026-03-03).",
 			triggers: ["noether discord webhook"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7590,7 +7590,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"axis-markets/indexer": [
 		{
-			note: "@axis-markets/indexer: the open-source indexer for AXIS, the limit-orderbook DEX on Soroban — it scans AXIS contract events and maintains the CURRENT ORDERBOOK STATE IN MEMORY, which is the design choice that distinguishes an orderbook indexer from a general event indexer (README read 2026-09-14; MIT; no releases; last push 2026-06-19).",
+			note: "@axis-markets/indexer: the open-source indexer for AXIS, the limit-orderbook DEX on Soroban; it scans AXIS contract events and maintains the CURRENT ORDERBOOK STATE IN MEMORY, which is the design choice that distinguishes an orderbook indexer from a general event indexer (README read 2026-09-14; MIT; no releases; last push 2026-06-19).",
 			triggers: ["axis indexer orderbook", "in memory orderbook state stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7598,7 +7598,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"axis-markets/stellarexpert-data-source": [
 		{
-			note: "A StellarExpert-backed data-source provider for AXIS (GitHub description; the README is empty) — the adapter through which the AXIS stack reads StellarExpert data, alongside its own indexer and json-storage (metadata read 2026-09-14; MIT; no releases; last push 2026-06-22).",
+			note: "A StellarExpert-backed data-source provider for AXIS (GitHub description; the README is empty), the adapter through which the AXIS stack reads StellarExpert data, alongside its own indexer and json-storage (metadata read 2026-09-14; MIT; no releases; last push 2026-06-22).",
 			triggers: ["axis stellarexpert data source"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7606,7 +7606,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lightsail-network/quasar-gateway": [
 		{
-			note: "Quasar Gateway: a Go service providing API-KEY VALIDATION and request proxying in front of Lightsail's Quasar data services — the access-control layer a data provider needs before exposing endpoints (README read 2026-09-14; no license file; no releases; last push 2026-07-23).",
+			note: "Quasar Gateway: a Go service providing API-KEY VALIDATION and request proxying in front of Lightsail's Quasar data services; the access-control layer a data provider needs before exposing endpoints (README read 2026-09-14; no license file; no releases; last push 2026-07-23).",
 			triggers: ["quasar gateway api keys", "request proxy api key validation"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7614,7 +7614,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"withObsrvr/obsrvr-stellar-components": [
 		{
-			note: "Reusable Stellar `flowctl` components from Obsrvr that compose into a pipeline — the README shows the shape directly: `raw-ledger-source@0.2.2 -> stellar-ledger-processor -> sinks`. Nix-flake based, so the build is pinned (README read 2026-09-14; no license file; no releases; last push 2026-08-06).",
+			note: "Reusable Stellar `flowctl` components from Obsrvr that compose into a pipeline; the README shows the shape directly: `raw-ledger-source@0.2.2 -> stellar-ledger-processor -> sinks`. Nix-flake based, so the build is pinned (README read 2026-09-14; no license file; no releases; last push 2026-08-06).",
 			triggers: [
 				"obsrvr flowctl components",
 				"ledger source processor sink pipeline",
@@ -7633,7 +7633,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kaankacar/scrimp": [
 		{
-			note: "Scrimp: outcome-attributed spend control for agents that pay per HTTP call, with a sharp positioning line in the README — everyone else stops an agent spending TOO MUCH; Scrimp stops it spending ON NOTHING. Attribution of spend to outcome is the distinct idea in a crowded agent-budget field (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-05).",
+			note: "Scrimp: outcome-attributed spend control for agents that pay per HTTP call, with a sharp positioning line in the README: everyone else stops an agent spending TOO MUCH; Scrimp stops it spending ON NOTHING. Attribution of spend to outcome is the distinct idea in a crowded agent-budget field (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-05).",
 			triggers: [
 				"scrimp spend control",
 				"outcome attributed agent spend",
@@ -7645,7 +7645,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ACTA-Team/skills": [
 		{
-			note: "ACTA's official Agent Skills (skills.sh/acta-team/skills/acta): reusable context that teaches a coding agent to build against ACTA's non-custodial verifiable-credentials infrastructure on Stellar — a project publishing the skill that makes agents fluent in its own API (README read 2026-09-14; MIT; no releases; last push 2026-08-22).",
+			note: "ACTA's official Agent Skills (skills.sh/acta-team/skills/acta): reusable context that teaches a coding agent to build against ACTA's non-custodial verifiable-credentials infrastructure on Stellar; a project publishing the skill that makes agents fluent in its own API (README read 2026-09-14; MIT; no releases; last push 2026-08-22).",
 			triggers: ["acta agent skills", "verifiable credentials skill stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7653,7 +7653,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lumenloop/lumenloop-ng-skills": [
 		{
-			note: "LumenLoop's next-generation skills content for the guest/MCP tier — the source that lumenloop-ng's `sync-skills` publishes from, so it is the upstream of the skills a guest agent receives rather than the packaged copy (README read 2026-09-14; MIT; no releases; last push 2026-08-27).",
+			note: "LumenLoop's next-generation skills content for the guest/MCP tier, the source that lumenloop-ng's `sync-skills` publishes from, so it is the upstream of the skills a guest agent receives rather than the packaged copy (README read 2026-09-14; MIT; no releases; last push 2026-08-27).",
 			triggers: ["lumenloop ng skills", "guest tier skills source"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7661,7 +7661,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"GrantChain/GrantFox-Analytics": [
 		{
-			note: "GrantFox Analytics: a PUBLIC payments-analytics site showing every payment released to open-source contributors and maintainers, broken down by project and filterable by campaign — an unusually transparent artefact for a grants programme, and a citable source for what a campaign actually paid out (README read 2026-09-14; no license file; no releases; last push 2026-08-21).",
+			note: "GrantFox Analytics: a PUBLIC payments-analytics site showing every payment released to open-source contributors and maintainers, broken down by project and filterable by campaign; an unusually transparent artefact for a grants programme, and a citable source for what a campaign actually paid out (README read 2026-09-14; no license file; no releases; last push 2026-08-21).",
 			triggers: [
 				"grantfox analytics payouts",
 				"public grant payment analytics",
@@ -7672,7 +7672,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"devasignhq/verify-action": [
 		{
-			note: "@devasign/verify: the runner half of DevAsign's PR verification — it runs the generated acceptance tests for a pull request inside the repository's OWN CI, like any other test step, and posts a per-criterion result. The design point is that verification runs on the customer's infrastructure, not the vendor's (README read 2026-09-14; GPL-3.0; no releases; last push 2026-09-14).",
+			note: "@devasign/verify: the runner half of DevAsign's PR verification; it runs the generated acceptance tests for a pull request inside the repository's OWN CI, like any other test step, and posts a per-criterion result. The design point is that verification runs on the customer's infrastructure, not the vendor's (README read 2026-09-14; GPL-3.0; no releases; last push 2026-09-14).",
 			triggers: ["devasign verify action", "acceptance tests in your own ci"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7680,7 +7680,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blindpaylabs/blindpay-rust": [
 		{
-			note: "BlindPay's official Rust SDK for its stablecoin payments API, installed with `cargo add blindpay` — the fourth BlindPay client in this registry beside the CLI, Python and PHP SDKs (README read 2026-09-14; MIT; no releases; last push 2026-07-02).",
+			note: "BlindPay's official Rust SDK for its stablecoin payments API, installed with `cargo add blindpay`, the fourth BlindPay client in this registry beside the CLI, Python and PHP SDKs (README read 2026-09-14; MIT; no releases; last push 2026-07-02).",
 			triggers: ["blindpay rust sdk", "cargo add blindpay"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7688,7 +7688,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/.github": [
 		{
-			note: "Blux's organisation profile, which carries the project's own one-line definition — a React component library for integrating decentralised applications, the toolkit whose pieces are bluxcc/blux (the package), docs, demo, landing and whitelabel (README read 2026-09-14; MIT; no releases; last push 2026-08-22).",
+			note: "Blux's organisation profile, which carries the project's own one-line definition: a React component library for integrating decentralised applications, the toolkit whose pieces are bluxcc/blux (the package), docs, demo, landing and whitelabel (README read 2026-09-14; MIT; no releases; last push 2026-08-22).",
 			triggers: ["blux toolkit overview"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7696,7 +7696,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bluxcc/landing": [
 		{
-			note: "The Blux landing page — the marketing surface of the Blux wallet toolkit; the README is empty, so the sibling repositories (docs, demo, whitelabel, .github) carry the substance (metadata read 2026-09-14; no license file; no releases; last push 2026-08-29).",
+			note: "The Blux landing page: the marketing surface of the Blux wallet toolkit; the README is empty, so the sibling repositories (docs, demo, whitelabel, .github) carry the substance (metadata read 2026-09-14; no license file; no releases; last push 2026-08-29).",
 			triggers: ["blux landing page"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7704,7 +7704,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Poorva-M/Xpense-Web3": [
 		{
-			note: "Xpens (xpense-web3.vercel.app): an on-chain personal expense tracker on Soroban where a user connects Freighter, Rabet or xBull and every expense entry is a contract call — a simple, complete example of per-record on-chain state from a web front end (README read 2026-09-14; no license file; no releases; last push 2026-07-19).",
+			note: "Xpens (xpense-web3.vercel.app): an on-chain personal expense tracker on Soroban where a user connects Freighter, Rabet or xBull and every expense entry is a contract call; a simple, complete example of per-record on-chain state from a web front end (README read 2026-09-14; no license file; no releases; last push 2026-07-19).",
 			triggers: ["xpense onchain tracker", "expense tracker soroban"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7712,7 +7712,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"wmendes/stellar-watch": [
 		{
-			note: "Stellar Watch: a command-line payments monitor that probes RPC instances, reads contract state, sends classic and token payments, and reads OLD LEDGERS DIRECTLY FROM THE DATA LAKE — that last capability is what separates it from a plain RPC client. The README is in Portuguese (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-08).",
+			note: "Stellar Watch: a command-line payments monitor that probes RPC instances, reads contract state, sends classic and token payments, and reads OLD LEDGERS DIRECTLY FROM THE DATA LAKE; that last capability is what separates it from a plain RPC client. The README is in Portuguese (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-08).",
 			triggers: [
 				"stellar watch cli monitor",
 				"read old ledgers data lake",
@@ -7724,7 +7724,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"jadonamite/automata-core": [
 		{
-			note: "@jadonamite/automata-core: an embedded cross-chain SDK needing NO BACKEND — bring your own RPC URLs and get balance reads, USDC bridging over Circle CCTP V2 and token operations directly. The backend-free design is the claim worth citing (README read 2026-09-14; no license file; no releases; last push 2026-05-30).",
+			note: "@jadonamite/automata-core: an embedded cross-chain SDK needing NO BACKEND: bring your own RPC URLs and get balance reads, USDC bridging over Circle CCTP V2 and token operations directly. The backend-free design is the claim worth citing (README read 2026-09-14; no license file; no releases; last push 2026-05-30).",
 			triggers: [
 				"automata core sdk",
 				"no backend cross chain sdk",
@@ -7736,7 +7736,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ContentDAO/public": [
 		{
-			note: "ContentDAO's public data and FINAL smart contracts — the README is one line naming exactly that, so the repository is a published artefact set rather than a development tree; useful when a claim needs the deployed contract source (README read 2026-09-14; no license file; no releases; last push 2026-08-25).",
+			note: "ContentDAO's public data and FINAL smart contracts; the README is one line naming exactly that, so the repository is a published artefact set rather than a development tree; useful when a claim needs the deployed contract source (README read 2026-09-14; no license file; no releases; last push 2026-08-25).",
 			triggers: ["contentdao public contracts"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7744,7 +7744,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"PagCrypto/token-list": [
 		{
-			note: "The public settings of the pagcrypto.finance crypto gateway (GitHub description; the README is empty) — a gateway publishing its token configuration in the open, the same pattern as Soroswap's token list (metadata read 2026-09-14; no license file; no releases; last push 2026-08-25).",
+			note: "The public settings of the pagcrypto.finance crypto gateway (GitHub description; the README is empty), a gateway publishing its token configuration in the open, the same pattern as Soroswap's token list (metadata read 2026-09-14; no license file; no releases; last push 2026-08-25).",
 			triggers: ["pagcrypto token list"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7752,7 +7752,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ACTA-Team/.github": [
 		{
-			note: "ACTA's organisation profile and shared GitHub community-health files — templates and policies applied across the org's repositories, no product content (metadata read 2026-09-14; no license file; no releases; last push 2026-06-30).",
+			note: "ACTA's organisation profile and shared GitHub community-health files: templates and policies applied across the org's repositories, no product content (metadata read 2026-09-14; no license file; no releases; last push 2026-06-30).",
 			triggers: ["acta org profile"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7760,7 +7760,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Accelar-labs/sprixen-mcp": [
 		{
-			note: "Sprixen's MCP server (sprixen.com/docs/mcp): an AI GAME-ASSET generator exposed to Claude Code, Cursor, Codex, Windsurf and other agents — asset generation rather than anything Stellar-specific, noted so the distinction is on record (README read 2026-09-14; MIT; no releases; last push 2026-09-06).",
+			note: "Sprixen's MCP server (sprixen.com/docs/mcp): an AI GAME-ASSET generator exposed to Claude Code, Cursor, Codex, Windsurf and other agents; asset generation rather than anything Stellar-specific, noted so the distinction is on record (README read 2026-09-14; MIT; no releases; last push 2026-09-06).",
 			triggers: ["sprixen game assets mcp", "ai game asset generator"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7768,7 +7768,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Bevor-Protocol/Bevor-Skills": [
 		{
-			note: "Bevor's agent skill for GRAPH-AWARE cybersecurity work, which the README says starts automatically for compatible security targets even when a request does not name it — auto-activating skills are an unusual design worth knowing about when studying how skills get invoked (README read 2026-09-14; MIT; no releases; last push 2026-09-03).",
+			note: "Bevor's agent skill for GRAPH-AWARE cybersecurity work, which the README says starts automatically for compatible security targets even when a request does not name it; auto-activating skills are an unusual design worth knowing about when studying how skills get invoked (README read 2026-09-14; MIT; no releases; last push 2026-09-03).",
 			triggers: ["bevor security skill", "graph aware cybersecurity skill"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7776,7 +7776,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blaze-xyz/blaze-grok-plugin": [
 		{
-			note: "Blaze's CFO MCP connector for GROK: it lets that assistant analyse a business's cash flow, balances, spending, payroll, bills, receivables and accounting data, and prepare payment and invoicing workflows — the same Blaze product surfaced to a different agent host (README read 2026-09-14; MIT; no releases; last push 2026-08-28).",
+			note: "Blaze's CFO MCP connector for GROK: it lets that assistant analyse a business's cash flow, balances, spending, payroll, bills, receivables and accounting data, and prepare payment and invoicing workflows; the same Blaze product surfaced to a different agent host (README read 2026-09-14; MIT; no releases; last push 2026-08-28).",
 			triggers: ["blaze grok connector", "cfo mcp cash flow"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7784,7 +7784,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lokapal-xyz/sa-birth": [
 		{
-			note: "Source Agent: BIRTH — a single-player maze CALIBRATION game presented as the canonical prologue of a larger Source Agent narrative; the README is written entirely in-fiction, so the repository's own description is the only plain statement of what it is (README read 2026-09-14; MIT; no releases; last push 2026-02-25).",
+			note: "Source Agent: BIRTH: a single-player maze CALIBRATION game presented as the canonical prologue of a larger Source Agent narrative; the README is written entirely in-fiction, so the repository's own description is the only plain statement of what it is (README read 2026-09-14; MIT; no releases; last push 2026-02-25).",
 			triggers: ["source agent birth", "maze calibration game stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7792,7 +7792,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"leocagli/Human-vs-bots": [
 		{
-			note: "Human-vs-bots: a Godot web3 game on Stellar with ZK — a real-time arena where a player proves they are human rather than a bot. The README is in Spanish and the CI badge points at the Bitcoindefi org, so that may be the canonical copy; written in GDScript, which is unusual in this index (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-07-20).",
+			note: "Human-vs-bots: a Godot web3 game on Stellar with ZK: a real-time arena where a player proves they are human rather than a bot. The README is in Spanish and the CI badge points at the Bitcoindefi org, so that may be the canonical copy; written in GDScript, which is unusual in this index (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-07-20).",
 			triggers: [
 				"human vs bots arena",
 				"prove human zk game",
@@ -7804,7 +7804,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ChielokaCode/AlphaDuel": [
 		{
-			note: "Alpha Duel (alpha-duel.vercel.app): a ZK-powered multiplayer WORD-GUESSING game from the Stellar Game Studio track — hidden-word state rather than hidden positions (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
+			note: "Alpha Duel (alpha-duel.vercel.app): a ZK-powered multiplayer WORD-GUESSING game from the Stellar Game Studio track: hidden-word state rather than hidden positions (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
 			triggers: ["alpha duel word game", "zk word guessing stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7812,7 +7812,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Ridhointerstellar/-ZK-RPS-Battle-Royale": [
 		{
-			note: "ZK RPS Battle Royale: rock-paper-scissors as a battle royale on Soroban, using a cryptographic COMMIT-REVEAL protocol so simultaneous choices cannot be front-run — the simplest possible demonstration of why commit-reveal exists (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
+			note: "ZK RPS Battle Royale: rock-paper-scissors as a battle royale on Soroban, using a cryptographic COMMIT-REVEAL protocol so simultaneous choices cannot be front-run; the simplest possible demonstration of why commit-reveal exists (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
 			triggers: [
 				"zk rock paper scissors",
 				"commit reveal battle royale stellar",
@@ -7823,7 +7823,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"hallzyx/ctm-game": [
 		{
-			note: "CTM (Commit-Turn-Move): a zero-knowledge variant of rock-paper-scissors on Stellar whose name IS its protocol — commit, take the turn, reveal the move. A second independent RPS implementation from the same cohort as ZK RPS Battle Royale (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
+			note: "CTM (Commit-Turn-Move): a zero-knowledge variant of rock-paper-scissors on Stellar whose name IS its protocol: commit, take the turn, reveal the move. A second independent RPS implementation from the same cohort as ZK RPS Battle Royale (README read 2026-09-14; MIT; no releases; last push 2026-02-22).",
 			triggers: ["commit turn move game", "ctm rock paper scissors"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7831,7 +7831,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kingfavourjudah/zk-stellar-game": [
 		{
-			note: "Treasure Recovery: a zero-knowledge RPG on Stellar built for the ZK Gaming hackathon, where a soldier recovers stolen treasure and the proofs hide game state — an RPG rather than a two-player duel, which is rare in this cohort (README read 2026-09-14; no license file; no releases; last push 2026-02-18).",
+			note: "Treasure Recovery: a zero-knowledge RPG on Stellar built for the ZK Gaming hackathon, where a soldier recovers stolen treasure and the proofs hide game state; an RPG rather than a two-player duel, which is rare in this cohort (README read 2026-09-14; no license file; no releases; last push 2026-02-18).",
 			triggers: ["treasure recovery zk rpg", "zk rpg stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7839,7 +7839,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"wmendes/dead-drop-zk": [
 		{
-			note: "Dead Drop: a 1v1 ZK hidden-information hunt on Stellar where zero-knowledge proofs are required to reveal DISTANCES to a hidden point — proving a derived quantity rather than a position, which is a different proof shape from the battleship cohort (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
+			note: "Dead Drop: a 1v1 ZK hidden-information hunt on Stellar where zero-knowledge proofs are required to reveal DISTANCES to a hidden point, proving a derived quantity rather than a position, which is a different proof shape from the battleship cohort (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
 			triggers: ["dead drop zk hunt", "prove distance zk stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7847,7 +7847,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"zzzbedream/La-Ruleta-de-la-Pobla-ZK-Russian-Roulette": [
 		{
-			note: "La Ruleta de la Pobla, a ZK Russian-roulette game scaffolded from the Stellar Game Studio template collection — its README is the Game Studio's shared text rather than a description of the game, the same pattern as Card-RPG, zkshotroul and Dark-Sector (README read 2026-09-14; MIT; no releases; last push 2026-02-18).",
+			note: "La Ruleta de la Pobla, a ZK Russian-roulette game scaffolded from the Stellar Game Studio template collection; its README is the Game Studio's shared text rather than a description of the game, the same pattern as Card-RPG, zkshotroul and Dark-Sector (README read 2026-09-14; MIT; no releases; last push 2026-02-18).",
 			triggers: ["ruleta pobla zk game"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7855,7 +7855,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Fundable-Protocol/evm_client": [
 		{
-			note: "Fundable's EVM front end. Read the chain before citing it: the README states Fundable is built on STARKNET for this client's payments and subscriptions, while the org's Stellar work lives in stellar_indexer, Backend and fundable-sdk — so this repository is not the Stellar surface (README read 2026-09-14; no license file; no releases; last push 2026-08-04).",
+			note: "Fundable's EVM front end. Read the chain before citing it: the README states Fundable is built on STARKNET for this client's payments and subscriptions, while the org's Stellar work lives in stellar_indexer, Backend and fundable-sdk, so this repository is not the Stellar surface (README read 2026-09-14; no license file; no releases; last push 2026-08-04).",
 			triggers: ["fundable evm client", "fundable starknet frontend"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7863,7 +7863,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"elementpayHQ/element-pay-listener": [
 		{
-			note: "Element Pay's blockchain event listener in Node, written to replace an earlier Python listener; the README lists its chains as BASE, LISK, SCROLL and ARBITRUM — EVM networks, so do not read it as a Stellar event listener (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
+			note: "Element Pay's blockchain event listener in Node, written to replace an earlier Python listener; the README lists its chains as BASE, LISK, SCROLL and ARBITRUM, EVM networks, so do not read it as a Stellar event listener (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
 			triggers: ["element pay listener", "multichain event listener evm"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7871,7 +7871,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"clixpesa/mint-contracts": [
 		{
-			note: "Clixpesa's V2 savings and micro-lending contracts — in SOLIDITY, covering overdraft and yield-bearing features. Clixpesa's Stellar-side work is elsewhere; this repository is EVM (README read 2026-09-14; Apache-2.0; no releases; last push 2026-04-07).",
+			note: "Clixpesa's V2 savings and micro-lending contracts, in SOLIDITY, covering overdraft and yield-bearing features. Clixpesa's Stellar-side work is elsewhere; this repository is EVM (README read 2026-09-14; Apache-2.0; no releases; last push 2026-04-07).",
 			triggers: ["clixpesa mint contracts", "savings micro lending solidity"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7887,7 +7887,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-nextjs": [
 		{
-			note: "Triage 2026-09-14: a Next.js starter kit from PipeOps — the README is a clone-and-run boilerplate with no product or Stellar content. https://github.com/pipeops-dev/pipeops-nextjs",
+			note: "Triage 2026-09-14: a Next.js starter kit from PipeOps; the README is a clone-and-run boilerplate with no product or Stellar content. https://github.com/pipeops-dev/pipeops-nextjs",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -7895,7 +7895,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NoetherDEX/yahya_development": [
 		{
-			note: "Triage 2026-09-14: GONE — the GitHub API returns no metadata for this repository, so it was deleted, renamed or made private since indexing. Noether's live repositories (noether-docs, noetherdiscordwebhook) are noted. Retire or re-resolve the row. https://github.com/NoetherDEX/yahya_development",
+			note: "Triage 2026-09-14: GONE. The GitHub API returns no metadata for this repository, so it was deleted, renamed or made private since indexing. Noether's live repositories (noether-docs, noetherdiscordwebhook) are noted. Retire or re-resolve the row. https://github.com/NoetherDEX/yahya_development",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -7905,7 +7905,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// (124 remained after wave 16). Read 2026-09-14.
 	"lightsail-network/sac-resolver": [
 		{
-			note: "sac-resolver: resolves a STELLAR ASSET CONTRACT address back to the asset it wraps, as a public Cloudflare Worker + D1 service at sac-resolver.lightsail.network/{mainnet|testnet}/... — the inverse lookup every Soroban explorer and indexer needs, because a SAC address alone does not say which classic asset it represents (README read 2026-09-14; MIT; topics cloudflare-workers, soroban; no releases; last push 2026-09-08).",
+			note: "sac-resolver: resolves a STELLAR ASSET CONTRACT address back to the asset it wraps, as a public Cloudflare Worker + D1 service at sac-resolver.lightsail.network/{mainnet|testnet}/...; the inverse lookup every Soroban explorer and indexer needs, because a SAC address alone does not say which classic asset it represents (README read 2026-09-14; MIT; topics cloudflare-workers, soroban; no releases; last push 2026-09-08).",
 			triggers: [
 				"sac resolver asset",
 				"stellar asset contract to asset",
@@ -7917,7 +7917,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-experimental/contract-verifications": [
 		{
-			note: "A repository that runs a DAILY BUILD-VERIFICATION of Stellar contracts and records the results — reproducibility checked continuously rather than once at publication. Its README carries a WARNING that the repository is an experiment and its contents should be treated as such (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-09).",
+			note: "A repository that runs a DAILY BUILD-VERIFICATION of Stellar contracts and records the results, reproducibility checked continuously rather than once at publication. Its README carries a WARNING that the repository is an experiment and its contents should be treated as such (README read 2026-09-14; Apache-2.0; no releases; last push 2026-07-09).",
 			triggers: [
 				"daily contract verification stellar",
 				"reproducible build results soroban",
@@ -7928,7 +7928,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-expert/soroban-build-workflow": [
 		{
-			note: "StellarExpert's reusable GitHub Actions workflow for compiling and releasing Soroban contracts to WASM — the shared CI most published Soroban contracts route through, newest tag v25.1.0 tracking the CLI line. 6 stars (README read 2026-09-14; no license file; last push 2026-07-23).",
+			note: "StellarExpert's reusable GitHub Actions workflow for compiling and releasing Soroban contracts to WASM; the shared CI most published Soroban contracts route through, newest tag v25.1.0 tracking the CLI line. 6 stars (README read 2026-09-14; no license file; last push 2026-07-23).",
 			triggers: [
 				"soroban build workflow",
 				"compile release contract github actions",
@@ -7951,7 +7951,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rahul-soshte/soroban-math": [
 		{
-			note: "crates.io soroban-math 0.2.6: a FIXED-POINT math library for Soroban contracts with advanced functions — the dependency a contract reaches for rather than hand-rolling fixed-point arithmetic, which is where financial contracts most often go wrong (README read 2026-09-14; no license file; 1 star; last push 2025-07-10).",
+			note: "crates.io soroban-math 0.2.6: a FIXED-POINT math library for Soroban contracts with advanced functions; the dependency a contract reaches for rather than hand-rolling fixed-point arithmetic, which is where financial contracts most often go wrong (README read 2026-09-14; no license file; 1 star; last push 2025-07-10).",
 			triggers: ["soroban fixed point math", "math library soroban contracts"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7967,7 +7967,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"PotLock/grantpicks": [
 		{
-			note: "GrantPicks (grantpicks.com): a PAIRWISE VOTING mechanism — budget boxing — implemented on both Soroban and NEAR, with front end and contracts in one monorepo. The citable example when the question is how to allocate a grant budget by comparison rather than by score. 5 stars (README read 2026-09-14; MIT; no releases; last push 2026-03-10).",
+			note: "GrantPicks (grantpicks.com): a PAIRWISE VOTING mechanism (budget boxing) implemented on both Soroban and NEAR, with front end and contracts in one monorepo. The citable example when the question is how to allocate a grant budget by comparison rather than by score. 5 stars (README read 2026-09-14; MIT; no releases; last push 2026-03-10).",
 			triggers: [
 				"grantpicks pairwise voting",
 				"budget boxing allocation",
@@ -7979,7 +7979,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blend-capital/blend-docs": [
 		{
-			note: "The Blend protocol's documentation source — the v1 docs beside blend-capital/docs-v2, describing Blend as a liquidity protocol primitive on Stellar. Last push 2025-04-17, so the v2 repository is the current one (README read 2026-09-14; no license file; 1 star; no releases).",
+			note: "The Blend protocol's documentation source, the v1 docs beside blend-capital/docs-v2, describing Blend as a liquidity protocol primitive on Stellar. Last push 2025-04-17, so the v2 repository is the current one (README read 2026-09-14; no license file; 1 star; no releases).",
 			triggers: ["blend documentation v1"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -7987,7 +7987,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rajkaria/toll": [
 		{
-			note: 'Toll (tollpay.xyz): pitched in its README as "the Stripe for MCP servers" — monetise any AI tool with one line of code, settled in USDC ON STELLAR. The clearest one-line statement of the pay-per-tool-call thesis in this registry (README read 2026-09-14; MIT; no releases; last push 2026-04-18).',
+			note: 'Toll (tollpay.xyz): pitched in its README as "the Stripe for MCP servers": monetise any AI tool with one line of code, settled in USDC ON STELLAR. The clearest one-line statement of the pay-per-tool-call thesis in this registry (README read 2026-09-14; MIT; no releases; last push 2026-04-18).',
 			triggers: [
 				"toll mcp monetization",
 				"stripe for mcp servers",
@@ -7999,7 +7999,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"tantk/rendergate": [
 		{
-			note: "RenderGate: a PAY-PER-RENDER headless-browser API powered by x402 micropayments on Stellar — an agent pays per page render instead of holding an account with a rendering service. Packaged as a Docker space (README read 2026-09-14; no license file; no releases; last push 2026-04-13).",
+			note: "RenderGate: a PAY-PER-RENDER headless-browser API powered by x402 micropayments on Stellar; an agent pays per page render instead of holding an account with a rendering service. Packaged as a Docker space (README read 2026-09-14; no license file; no releases; last push 2026-04-13).",
 			triggers: [
 				"rendergate pay per render",
 				"headless browser x402",
@@ -8058,7 +8058,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/TW-V2-AUDIT-SCRIPTS": [
 		{
-			note: "Bash and stellar-cli scripts that PROVE, end to end and on-chain, that the trustless-work-core API integrates correctly with the v2 escrow contracts — an integration audit published as runnable scripts rather than asserted in a report. A pattern worth copying (README read 2026-09-14; no license file; no releases; last push 2026-06-04).",
+			note: "Bash and stellar-cli scripts that PROVE, end to end and on-chain, that the trustless-work-core API integrates correctly with the v2 escrow contracts; an integration audit published as runnable scripts rather than asserted in a report. A pattern worth copying (README read 2026-09-14; no license file; no releases; last push 2026-06-04).",
 			triggers: [
 				"trustless work audit scripts",
 				"prove api contract integration onchain",
@@ -8069,7 +8069,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-sdk-blocks-react": [
 		{
-			note: "Trustless Work Blocks: a React component library for dropping escrow flows into an app, newest tag v.1.1.1 — the higher-level companion to the escrow SDK (README read 2026-09-14; no license file; 1 star; last push 2026-03-30).",
+			note: "Trustless Work Blocks: a React component library for dropping escrow flows into an app, newest tag v.1.1.1; the higher-level companion to the escrow SDK (README read 2026-09-14; no license file; 1 star; last push 2026-03-30).",
 			triggers: ["trustless work blocks react", "escrow ui components"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8077,7 +8077,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Trustless-Work/trustlesswork-agency-escrow-template": [
 		{
-			note: "A milestone-based escrow TEMPLATE for agencies, consultants and product studios built on Trustless Work — a ready workflow rather than a primitive, which is how the protocol reaches non-crypto service businesses (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-05).",
+			note: "A milestone-based escrow TEMPLATE for agencies, consultants and product studios built on Trustless Work; a ready workflow rather than a primitive, which is how the protocol reaches non-crypto service businesses (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-05).",
 			triggers: ["agency escrow template", "milestone escrow for consultants"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8085,7 +8085,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Moonlight-Protocol/ui": [
 		{
-			note: "@moonlight/ui: shared VANILLA-DOM UI components for Moonlight's four Deno and TypeScript apps — council-console, provider-console, network-dashboard and moonlight-pay. Deliberately framework-free, which is unusual and worth noting when comparing front-end stacks. Newest release v0.3.2 (README read 2026-09-14; MIT; last push 2026-05-20).",
+			note: "@moonlight/ui: shared VANILLA-DOM UI components for Moonlight's four Deno and TypeScript apps: council-console, provider-console, network-dashboard and moonlight-pay. Deliberately framework-free, which is unusual and worth noting when comparing front-end stacks. Newest release v0.3.2 (README read 2026-09-14; MIT; last push 2026-05-20).",
 			triggers: ["moonlight ui components", "vanilla dom component library"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8093,7 +8093,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellarcarbon/sc-data": [
 		{
-			note: "Stellarcarbon's PUBLIC DATA: the contents of its sc-audit database serialised as one NDJSON file per table, published for anyone to use — an independent, machine-readable record of carbon retirements rather than a dashboard's summary (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-04-14).",
+			note: "Stellarcarbon's PUBLIC DATA: the contents of its sc-audit database serialised as one NDJSON file per table, published for anyone to use; an independent, machine-readable record of carbon retirements rather than a dashboard's summary (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-04-14).",
 			triggers: [
 				"stellarcarbon public data",
 				"carbon retirement ndjson",
@@ -8105,7 +8105,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"boundless-xyz/stellar-risc0-verifier": [
 		{
-			note: "Boundless's copy of the Stellar RISC Zero verifier — its README's build badge still points at NethermindEth/stellar-risc0-verifier, the upstream noted in wave 12, so treat this as the Boundless-side copy and cite the upstream for the implementation. Boundless also publishes signal-on-stellar, the Ethereum light client that consumes such proofs (README read 2026-09-14; Apache-2.0; no releases; last push 2026-05-13).",
+			note: "Boundless's copy of the Stellar RISC Zero verifier; its README's build badge still points at NethermindEth/stellar-risc0-verifier, the upstream noted in wave 12, so treat this as the Boundless-side copy and cite the upstream for the implementation. Boundless also publishes signal-on-stellar, the Ethereum light client that consumes such proofs (README read 2026-09-14; Apache-2.0; no releases; last push 2026-05-13).",
 			triggers: ["boundless risc0 verifier copy"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8113,7 +8113,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rumblefishdev/soroban-block-explorer": [
 		{
-			note: "Rumble Fish's Soroban-first block explorer: an Nx and TypeScript monorepo bootstrap with a PUBLIC BACKLOG BOARD as its landing page — the plan is published before the product, so read the board rather than assuming a shipped explorer (README read 2026-09-14; no license file; 2 stars; no releases; last push 2026-09-14).",
+			note: "Rumble Fish's Soroban-first block explorer: an Nx and TypeScript monorepo bootstrap with a PUBLIC BACKLOG BOARD as its landing page; the plan is published before the product, so read the board rather than assuming a shipped explorer (README read 2026-09-14; no license file; 2 stars; no releases; last push 2026-09-14).",
 			triggers: ["rumblefish soroban explorer"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8121,7 +8121,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pedro-pelicioni/sextant": [
 		{
-			note: "SEXTANT (sextants.dev): the facilitator-side Bazaar discovery layer for x402 on Stellar — the same tagline and premise as the same author's stellarsight, so the two are sibling or successor repositories; check which is current before citing either (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-09).",
+			note: "SEXTANT (sextants.dev): the facilitator-side Bazaar discovery layer for x402 on Stellar: the same tagline and premise as the same author's stellarsight, so the two are sibling or successor repositories; check which is current before citing either (README read 2026-09-14; Apache-2.0; no releases; last push 2026-08-09).",
 			triggers: ["sextant bazaar discovery", "x402 discovery sextant"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8129,7 +8129,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lumenloop/lumenloop-overview": [
 		{
-			note: 'LumenLoop\'s own overview of itself: "the discovery layer for the Stellar ecosystem" — one place to find every project, story, event, video, job and governance vote, kept current by a fleet of agents. The clearest first-party statement of what LumenLoop claims to be, and the direct comparison point for Stellar Light (README read 2026-09-14; no license file; no releases; last push 2026-06-02).',
+			note: 'LumenLoop\'s own overview of itself: "the discovery layer for the Stellar ecosystem", one place to find every project, story, event, video, job and governance vote, kept current by a fleet of agents. The clearest first-party statement of what LumenLoop claims to be, and the direct comparison point for Stellar Light (README read 2026-09-14; no license file; no releases; last push 2026-06-02).',
 			triggers: ["lumenloop overview", "discovery layer stellar ecosystem"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8137,7 +8137,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Tellus-Cooperative/bountyhunter": [
 		{
-			note: "An open-source bounty-hunting application on Soroban with Freighter, from Tellus Cooperative — topics bounty, dapp, freighter, soroban. Last push 2023-03-24, which makes it one of the oldest Soroban dApps in this index and a useful marker of what the tooling looked like then (README read 2026-09-14; MIT; 3 stars; no releases).",
+			note: "An open-source bounty-hunting application on Soroban with Freighter, from Tellus Cooperative: topics bounty, dapp, freighter, soroban. Last push 2023-03-24, which makes it one of the oldest Soroban dApps in this index and a useful marker of what the tooling looked like then (README read 2026-09-14; MIT; 3 stars; no releases).",
 			triggers: ["bounty hunter dapp stellar", "early soroban bounty app"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8145,7 +8145,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"skyhitz/mobile": [
 		{
-			note: "The Skyhitz mobile app (skyhitz.io): a beatmakers' music app shipped on the Apple App Store and Google Play, built with Expo and React Native on Stellar — one of the few Stellar projects in this index with published store listings, which is the strongest kind of liveness evidence. 6 stars; last push 2023-03-04 (README read 2026-09-14; no license file).",
+			note: "The Skyhitz mobile app (skyhitz.io): a beatmakers' music app shipped on the Apple App Store and Google Play, built with Expo and React Native on Stellar; one of the few Stellar projects in this index with published store listings, which is the strongest kind of liveness evidence. 6 stars; last push 2023-03-04 (README read 2026-09-14; no license file).",
 			triggers: ["skyhitz mobile app", "music app stellar store listing"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8153,7 +8153,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"krit-k7/MediVault": [
 		{
-			note: "MediVault: patient-owned electronic health records and telemedicine on Soroban — the second patient-records project in this index beside TrustLeaf, both landing on the same design of keeping records with the patient and anchoring proof on-chain (README read 2026-09-14; no license file; no releases; last push 2026-09-02).",
+			note: "MediVault: patient-owned electronic health records and telemedicine on Soroban; the second patient-records project in this index beside TrustLeaf, both landing on the same design of keeping records with the patient and anchoring proof on-chain (README read 2026-09-14; no license file; no releases; last push 2026-09-02).",
 			triggers: [
 				"medivault health records",
 				"patient owned ehr stellar",
@@ -8165,7 +8165,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"legasicrypto/borrowing-protocol": [
 		{
-			note: "Legasi × Stellar: a crypto lending protocol MVP on Soroban with a Supabase backend, deployed on Vercel — the README calls it institutional-grade, which is the project's claim rather than a verified property (README read 2026-09-14; no license file; no releases; last push 2025-12-04).",
+			note: "Legasi × Stellar: a crypto lending protocol MVP on Soroban with a Supabase backend, deployed on Vercel; the README calls it institutional-grade, which is the project's claim rather than a verified property (README read 2026-09-14; no license file; no releases; last push 2025-12-04).",
 			triggers: ["legasi lending protocol", "stellar borrowing mvp"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8173,7 +8173,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"raum-network/raum-chrysalis-v2": [
 		{
-			note: "Chrysalis V2 (arc.raum.network): a monorepo for unified CROSS-CHAIN SETTLEMENT and protocol execution, letting users and autonomous agents move stablecoins across chains — Raum's settlement layer for agent payments (README read 2026-09-14; MIT; no releases; last push 2026-07-10).",
+			note: "Chrysalis V2 (arc.raum.network): a monorepo for unified CROSS-CHAIN SETTLEMENT and protocol execution, letting users and autonomous agents move stablecoins across chains; Raum's settlement layer for agent payments (README read 2026-09-14; MIT; no releases; last push 2026-07-10).",
 			triggers: [
 				"chrysalis cross chain settlement",
 				"raum network settlement",
@@ -8185,7 +8185,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Saber1Y/AgentRail": [
 		{
-			note: "AgentRail: pay-per-task payments for AI agents on Stellar — the README's line is that agents pay their own way. One of many entries in the agent-payments cluster; its distinguishing frame is per-TASK rather than per-call or per-budget (README read 2026-09-14; no license file; no releases; last push 2026-04-11).",
+			note: "AgentRail: pay-per-task payments for AI agents on Stellar; the README's line is that agents pay their own way. One of many entries in the agent-payments cluster; its distinguishing frame is per-TASK rather than per-call or per-budget (README read 2026-09-14; no license file; no releases; last push 2026-04-11).",
 			triggers: ["agentrail pay per task", "agents pay their own way"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8193,7 +8193,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NikhilRaikwar/PayGuard": [
 		{
-			note: "PayGuard (payguard-five.vercel.app): spending boundaries for AI agents, ENFORCED rather than advisory, badged Stellar TESTNET and packaged as a Docker service. The fourth independent agent-spend-control project in this registry beside CleverCon, AgentAllowance and Scrimp — a crowded design space worth knowing as a whole (README read 2026-09-14; MIT; no releases; last push 2026-07-03).",
+			note: "PayGuard (payguard-five.vercel.app): spending boundaries for AI agents, ENFORCED rather than advisory, badged Stellar TESTNET and packaged as a Docker service. The fourth independent agent-spend-control project in this registry beside CleverCon, AgentAllowance and Scrimp; a crowded design space worth knowing as a whole (README read 2026-09-14; MIT; no releases; last push 2026-07-03).",
 			triggers: ["payguard agent boundaries", "enforce agent spending limits"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8201,7 +8201,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"RonaldGaymer2002/Aegis-Sentinel-": [
 		{
-			note: 'Aegis (aegis-wgvt.vercel.app): an autonomous AI agent with "economic sovereignty" on Stellar, written in Laravel/Blade with Soroban contracts; the README is in Spanish. Notable for the stack — a PHP web framework is rare in this index (README read 2026-09-14; no license file; no releases; last push 2026-04-12).',
+			note: 'Aegis (aegis-wgvt.vercel.app): an autonomous AI agent with "economic sovereignty" on Stellar, written in Laravel/Blade with Soroban contracts; the README is in Spanish. Notable for the stack: a PHP web framework is rare in this index (README read 2026-09-14; no license file; no releases; last push 2026-04-12).',
 			triggers: ["aegis sentinel agent", "economic sovereignty agent stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8209,7 +8209,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"RozoAI/rozo-banana": [
 		{
-			note: "Rozo Banana (b.rozo.ai): Rozo's AI image-editing surface built on Gemini/nano-banana, topics agents, image-editing, rozo. The README is the unmodified create-next-app scaffold, so the topics and the live site carry what it is — a consumer AI product beside Rozo's payment rails (README read 2026-09-14; no license file; no releases; last push 2025-11-20).",
+			note: "Rozo Banana (b.rozo.ai): Rozo's AI image-editing surface built on Gemini/nano-banana, topics agents, image-editing, rozo. The README is the unmodified create-next-app scaffold, so the topics and the live site carry what it is; a consumer AI product beside Rozo's payment rails (README read 2026-09-14; no license file; no releases; last push 2025-11-20).",
 			triggers: ["rozo banana image editing"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8217,7 +8217,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"mhaurinho/stellar": [
 		{
-			note: "ReciclaChain: a Starbase-hackathon project turning recycling into value on Stellar for smart cities, organised by ILIS; the README is in Portuguese and states the delivery deadline — a submission artefact rather than a product (README read 2026-09-14; no license file; no releases; last push 2026-07-05).",
+			note: "ReciclaChain: a Starbase-hackathon project turning recycling into value on Stellar for smart cities, organised by ILIS; the README is in Portuguese and states the delivery deadline; a submission artefact rather than a product (README read 2026-09-14; no license file; no releases; last push 2026-07-05).",
 			triggers: [
 				"reciclachain recycling stellar",
 				"smart city recycling blockchain",
@@ -8228,7 +8228,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Prince-kumar223/stellar_dAPP_3": [
 		{
-			note: "A decentralised feedback system built for level 3 of a Stellar monthly challenge programme, with CI and a live deployment — one of the structured-learning submissions in this index, alongside the same author's level-4 voting dApp (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-06-28).",
+			note: "A decentralised feedback system built for level 3 of a Stellar monthly challenge programme, with CI and a live deployment; one of the structured-learning submissions in this index, alongside the same author's level-4 voting dApp (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-06-28).",
 			triggers: ["stellar challenge level 3 feedback dapp"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8244,7 +8244,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Sen-Elsecaller/divine-wrath-frontend": [
 		{
-			note: "Divine Wrath (divine-wrath.vercel.app): a social-deduction game where mortals hide from an angry god, built with React and zero-knowledge proofs — the second ZK social-deduction entry beside Mafia Duel (README read 2026-09-14; no license file; no releases; last push 2026-09-01).",
+			note: "Divine Wrath (divine-wrath.vercel.app): a social-deduction game where mortals hide from an angry god, built with React and zero-knowledge proofs; the second ZK social-deduction entry beside Mafia Duel (README read 2026-09-14; no license file; no releases; last push 2026-09-01).",
 			triggers: ["divine wrath social deduction", "hide from god zk game"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8252,7 +8252,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ShivRaiGithub/PirateTreasure": [
 		{
-			note: "Pirate's Treasure (pirate-treasure.vercel.app): a two-player treasure hunt on Soroban where CRYPTOGRAPHIC COMMITMENTS enforce hidden information directly on-chain — the README calls it ZK-inspired rather than ZK, which is an honest distinction worth preserving (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
+			note: "Pirate's Treasure (pirate-treasure.vercel.app): a two-player treasure hunt on Soroban where CRYPTOGRAPHIC COMMITMENTS enforce hidden information directly on-chain; the README calls it ZK-inspired rather than ZK, which is an honest distinction worth preserving (README read 2026-09-14; MIT; no releases; last push 2026-02-23).",
 			triggers: [
 				"pirate treasure hunt game",
 				"commitment enforced hidden info",
@@ -8263,7 +8263,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"KaruG1999/herbal-moonlight": [
 		{
-			note: "Herbal Moonlight: a ZK-HYBRID strategy game on Stellar built with the Stellar Game Studio toolkit — hybrid meaning only part of the state is proven, which is a different trade from the fully-proven games in the same cohort (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
+			note: "Herbal Moonlight: a ZK-HYBRID strategy game on Stellar built with the Stellar Game Studio toolkit: hybrid meaning only part of the state is proven, which is a different trade from the fully-proven games in the same cohort (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
 			triggers: ["herbal moonlight strategy", "zk hybrid game stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8271,7 +8271,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"troqpay/sdk": [
 		{
-			note: "@troqpay/sdk: TroqPay's official JavaScript/TypeScript SDK, newest release v0.1.3. Its README leads with an operational warning worth repeating — use it from a BACKEND runtime and never expose `trq_test_` or `trq_live_` keys in browser or mobile code (README read 2026-09-14; MIT; last push 2026-08-22).",
+			note: "@troqpay/sdk: TroqPay's official JavaScript/TypeScript SDK, newest release v0.1.3. Its README leads with an operational warning worth repeating: use it from a BACKEND runtime and never expose `trq_test_` or `trq_live_` keys in browser or mobile code (README read 2026-09-14; MIT; last push 2026-08-22).",
 			triggers: ["troqpay sdk", "backend only api keys payment sdk"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8279,7 +8279,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"troqpay/.github": [
 		{
-			note: "TroqPay's organisation profile and community-health files — templates and the profile README applied across the org, no product content (metadata read 2026-09-14; no license file; no releases; last push 2026-08-21).",
+			note: "TroqPay's organisation profile and community-health files: templates and the profile README applied across the org, no product content (metadata read 2026-09-14; no license file; no releases; last push 2026-08-21).",
 			triggers: ["troqpay org profile"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8287,7 +8287,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Brale-xyz/commons": [
 		{
-			note: "Brale Commons: the issuer's centralised hub of open resources for building with stablecoins, versioned in its own README at 1.4.2 — a stablecoin issuer publishing shared tooling rather than only API docs (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-04-21).",
+			note: "Brale Commons: the issuer's centralised hub of open resources for building with stablecoins, versioned in its own README at 1.4.2; a stablecoin issuer publishing shared tooling rather than only API docs (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-04-21).",
 			triggers: ["brale commons stablecoin resources"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8295,7 +8295,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"axis-markets/demo-server": [
 		{
-			note: "A demo server for the AXIS indexer (GitHub description; the README is empty) — the runnable example beside axis-markets/indexer, orderbook and json-storage, all noted (metadata read 2026-09-14; no license file; no releases; last push 2026-05-19).",
+			note: "A demo server for the AXIS indexer (GitHub description; the README is empty), the runnable example beside axis-markets/indexer, orderbook and json-storage, all noted (metadata read 2026-09-14; no license file; no releases; last push 2026-05-19).",
 			triggers: ["axis demo server"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8303,7 +8303,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"stellar-experimental/zig-stellar-xdr": [
 		{
-			note: "Zig types for Stellar XDR, GENERATED from the XDR definitions rather than hand-written. Its README opens with the same CAUTION as the Zig Soroban SDK — experimental, toy experiments only — and together they show how far a non-Rust, non-JS Stellar stack has been taken (README read 2026-09-14; no license file; no releases; last push 2026-02-16).",
+			note: "Zig types for Stellar XDR, GENERATED from the XDR definitions rather than hand-written. Its README opens with the same CAUTION as the Zig Soroban SDK (experimental, toy experiments only), and together they show how far a non-Rust, non-JS Stellar stack has been taken (README read 2026-09-14; no license file; no releases; last push 2026-02-16).",
 			triggers: ["zig stellar xdr", "generated xdr types zig"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8311,7 +8311,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Fundable-Protocol/fundable": [
 		{
-			note: "The Fundable protocol's contract monorepo — written in CAIRO, so these are Starknet contracts; Fundable's Stellar work is in stellar_indexer, Backend and fundable-sdk, and its EVM UI is evm_client. Three chains in one org, which is exactly why the language matters here (README read 2026-09-14; no license file; 4 stars; no releases; last push 2026-01-06).",
+			note: "The Fundable protocol's contract monorepo, written in CAIRO, so these are Starknet contracts; Fundable's Stellar work is in stellar_indexer, Backend and fundable-sdk, and its EVM UI is evm_client. Three chains in one org, which is exactly why the language matters here (README read 2026-09-14; no license file; 4 stars; no releases; last push 2026-01-06).",
 			triggers: ["fundable cairo contracts", "fundable starknet protocol"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8319,7 +8319,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"allbridge-io/allbridge-core-evm-contracts": [
 		{
-			note: "The most recent EVM and TRON versions of Allbridge Core's bridge contracts — the counterpart to allbridge-core-soroban-contracts, which holds the Stellar side. When a question is about how Allbridge Core behaves on a given chain, the language of the repository is the answer (README read 2026-09-14; no license file; 4 stars; no releases; last push 2026-08-25).",
+			note: "The most recent EVM and TRON versions of Allbridge Core's bridge contracts; the counterpart to allbridge-core-soroban-contracts, which holds the Stellar side. When a question is about how Allbridge Core behaves on a given chain, the language of the repository is the answer (README read 2026-09-14; no license file; 4 stars; no releases; last push 2026-08-25).",
 			triggers: ["allbridge evm contracts", "allbridge tron contracts"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8327,7 +8327,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"perspectivefi/spectra-subgraph": [
 		{
-			note: "The Spectra Protocol subgraph, indexing Futures and AMM pool data from Spectra's contracts — a Graph Protocol subgraph, so EVM-side infrastructure; Spectra's Stellar work is in spectra-oracles-stellar-public and spectra-core-stellar-public (README read 2026-09-14; MIT; no releases; last push 2026-08-15).",
+			note: "The Spectra Protocol subgraph, indexing Futures and AMM pool data from Spectra's contracts; a Graph Protocol subgraph, so EVM-side infrastructure; Spectra's Stellar work is in spectra-oracles-stellar-public and spectra-core-stellar-public (README read 2026-09-14; MIT; no releases; last push 2026-08-15).",
 			triggers: ["spectra subgraph indexing"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8335,7 +8335,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"arcane-finance-defi/confidential-asset-platform": [
 		{
-			note: "Arcane Finance's hackathon submission for a confidential asset platform — the README states it is built for SOLANA, combining a frontend, Solana integrations and an indexer. Not a Stellar repository despite the confidential-assets subject matter overlapping Stellar's own work (README read 2026-09-14; no license file; no releases; last push 2026-05-12).",
+			note: "Arcane Finance's hackathon submission for a confidential asset platform; the README states it is built for SOLANA, combining a frontend, Solana integrations and an indexer. Not a Stellar repository despite the confidential-assets subject matter overlapping Stellar's own work (README read 2026-09-14; no license file; no releases; last push 2026-05-12).",
 			triggers: ["arcane confidential asset platform"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8343,7 +8343,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"bitbond/token-tool-mcp": [
 		{
-			note: "npm token-tool-mcp: Bitbond's MCP server for deploying and managing COMPLIANT ERC20 tokens from any agent — tokenisation-as-a-tool, on EVM rather than Stellar, and a useful comparison point for what an agent-driven issuance flow looks like elsewhere. 6 stars (README read 2026-09-14; MIT; no releases; last push 2026-03-31).",
+			note: "npm token-tool-mcp: Bitbond's MCP server for deploying and managing COMPLIANT ERC20 tokens from any agent; tokenisation-as-a-tool, on EVM rather than Stellar, and a useful comparison point for what an agent-driven issuance flow looks like elsewhere. 6 stars (README read 2026-09-14; MIT; no releases; last push 2026-03-31).",
 			triggers: ["token tool mcp bitbond", "deploy compliant erc20 agent"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8351,7 +8351,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dfns/dfns-sdk-rust": [
 		{
-			note: "The Dfns Rust SDK, published on crates.io as dfns-sdk-rust, newest release v0.3.0 — the fourth Dfns client in this index beside the Java, Go and TypeScript SDKs; a custody provider's library that supports Stellar among many chains (README read 2026-09-14; MIT; last push 2026-09-11).",
+			note: "The Dfns Rust SDK, published on crates.io as dfns-sdk-rust, newest release v0.3.0, the fourth Dfns client in this index beside the Java, Go and TypeScript SDKs; a custody provider's library that supports Stellar among many chains (README read 2026-09-14; MIT; last push 2026-09-11).",
 			triggers: ["dfns rust sdk"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8359,7 +8359,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CypherD-IO/agent-pay": [
 		{
-			note: "@cypherhq/agent-pay: Cypher's npm package for agent payments — another entrant in the agent-payments cluster, published by a wallet company rather than a protocol project (README read 2026-09-14; MIT; no releases; last push 2026-04-30).",
+			note: "@cypherhq/agent-pay: Cypher's npm package for agent payments, another entrant in the agent-payments cluster, published by a wallet company rather than a protocol project (README read 2026-09-14; MIT; no releases; last push 2026-04-30).",
 			triggers: ["cypher agent pay"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8367,7 +8367,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dapplooker/openclaw-skills": [
 		{
-			note: "DappLooker's OpenClaw skills, giving an agent access to their DeFi intelligence APIs — the same publish-a-skill-for-your-own-product pattern as ACTA, BlindPay, Crypto.com and Trustless Work, which is now common enough to be a category (README read 2026-09-14; MIT; no releases; last push 2026-05-18).",
+			note: "DappLooker's OpenClaw skills, giving an agent access to their DeFi intelligence APIs; the same publish-a-skill-for-your-own-product pattern as ACTA, BlindPay, Crypto.com and Trustless Work, which is now common enough to be a category (README read 2026-09-14; MIT; no releases; last push 2026-05-18).",
 			triggers: ["dapplooker openclaw skills", "defi intelligence agent skill"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8383,7 +8383,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Beans-BV/beans-gitflow": [
 		{
-			note: "bflow: a cross-platform CLI implementing Beans' customised gitflow — it detects the current branch and offers context-appropriate options. Internal developer tooling from the Beans app team, newest release v3.5.0, with no Stellar-specific content (README read 2026-09-14; Apache-2.0; last push 2026-09-02).",
+			note: "bflow: a cross-platform CLI implementing Beans' customised gitflow; it detects the current branch and offers context-appropriate options. Internal developer tooling from the Beans app team, newest release v3.5.0, with no Stellar-specific content (README read 2026-09-14; Apache-2.0; last push 2026-09-02).",
 			triggers: ["beans gitflow cli"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8391,7 +8391,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rango-exchange/assets": [
 		{
-			note: "Rango Exchange's static assets repository: icons and metadata for every blockchain, protocol and swapper it supports — brand and metadata rather than code, though it is a usable source for how a large aggregator labels chains (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
+			note: "Rango Exchange's static assets repository: icons and metadata for every blockchain, protocol and swapper it supports; brand and metadata rather than code, though it is a usable source for how a large aggregator labels chains (README read 2026-09-14; no license file; no releases; last push 2026-09-14).",
 			triggers: ["rango assets metadata"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8399,7 +8399,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-fastapi": [
 		{
-			note: "Triage 2026-09-14: a FastAPI starter kit from PipeOps — clone-and-run boilerplate, no product or Stellar content, the sibling of pipeops-nextjs and pipeops-rust. https://github.com/pipeops-dev/pipeops-fastapi",
+			note: "Triage 2026-09-14: a FastAPI starter kit from PipeOps: clone-and-run boilerplate, no product or Stellar content, the sibling of pipeops-nextjs and pipeops-rust. https://github.com/pipeops-dev/pipeops-fastapi",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8407,7 +8407,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-rust": [
 		{
-			note: "Triage 2026-09-14: a Rust starter kit from PipeOps — empty README, boilerplate Dockerfile, no product or Stellar content. Third PipeOps starter in the index. https://github.com/pipeops-dev/pipeops-rust",
+			note: "Triage 2026-09-14: a Rust starter kit from PipeOps: empty README, boilerplate Dockerfile, no product or Stellar content. Third PipeOps starter in the index. https://github.com/pipeops-dev/pipeops-rust",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8415,7 +8415,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"almanax-ai/Almanax-marketing-site-copy-MIT": [
 		{
-			note: "Triage 2026-09-14: an MIT-licensed COPY of Almanax's marketing site — empty README, no releases; it exists to relicense a website, not to document a product. https://github.com/almanax-ai/Almanax-marketing-site-copy-MIT",
+			note: "Triage 2026-09-14: an MIT-licensed COPY of Almanax's marketing site: empty README, no releases; it exists to relicense a website, not to document a product. https://github.com/almanax-ai/Almanax-marketing-site-copy-MIT",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8423,7 +8423,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"VoltaHQ/docs": [
 		{
-			note: "Triage 2026-09-14: Volta Projects' documentation repository — empty README, no releases, a Makefile-only tree, so nothing durable is stated here. Re-examine if it publishes content. https://github.com/VoltaHQ/docs",
+			note: "Triage 2026-09-14: Volta Projects' documentation repository: empty README, no releases, a Makefile-only tree, so nothing durable is stated here. Re-examine if it publishes content. https://github.com/VoltaHQ/docs",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8431,7 +8431,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"coindisco/galaxy-ramp": [
 		{
-			note: "Triage 2026-09-14: GONE — the GitHub API returns no metadata, so the repository was deleted, renamed or made private since indexing. Retire or re-resolve the row. https://github.com/coindisco/galaxy-ramp",
+			note: "Triage 2026-09-14: GONE. The GitHub API returns no metadata, so the repository was deleted, renamed or made private since indexing. Retire or re-resolve the row. https://github.com/coindisco/galaxy-ramp",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8439,7 +8439,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"gakpe/minah_blockchain_v0.2": [
 		{
-			note: "Triage 2026-09-14: GONE — no metadata from the GitHub API, same as coindisco/galaxy-ramp. Retire or re-resolve the row. https://github.com/gakpe/minah_blockchain_v0.2",
+			note: "Triage 2026-09-14: GONE. No metadata from the GitHub API, same as coindisco/galaxy-ramp. Retire or re-resolve the row. https://github.com/gakpe/minah_blockchain_v0.2",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8450,7 +8450,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	// >= 30, not archived) carries a note. Read 2026-09-14.
 	"kommitters/elixir_xdr": [
 		{
-			note: "hex.pm elixir_xdr (v0.3.11 on GitHub): process XDR data in Elixir against the RFC 4506 standard — the encoding layer under kommitters' Stellar and Soroban libraries, and the reason an Elixir shop can talk to Stellar at all. 11 stars (README read 2026-09-14; MIT; last push 2026-09-09).",
+			note: "hex.pm elixir_xdr (v0.3.11 on GitHub): process XDR data in Elixir against the RFC 4506 standard; the encoding layer under kommitters' Stellar and Soroban libraries, and the reason an Elixir shop can talk to Stellar at all. 11 stars (README read 2026-09-14; MIT; last push 2026-09-09).",
 			triggers: ["elixir xdr library", "rfc4506 elixir", "xdr encoding elixir"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8458,7 +8458,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kommitters/soroban.ex": [
 		{
-			note: "hex.pm soroban (v0.22.0 on GitHub): the Elixir library for talking to a Soroban-RPC server and building contract invocations — the Elixir path to Soroban, built on kommitters' elixir_xdr. 5 stars (README read 2026-09-14; MIT; last push 2026-09-09).",
+			note: "hex.pm soroban (v0.22.0 on GitHub): the Elixir library for talking to a Soroban-RPC server and building contract invocations; the Elixir path to Soroban, built on kommitters' elixir_xdr. 5 stars (README read 2026-09-14; MIT; last push 2026-09-09).",
 			triggers: [
 				"soroban elixir library",
 				"soroban rpc elixir",
@@ -8470,7 +8470,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"taurushq-io/multi-party-sig": [
 		{
-			note: "Taurus's Go implementation of THRESHOLD SIGNATURE protocols — multi-party computation for signing, at 391 stars the most-starred repository in this registry. It is general cryptography rather than Stellar code, but it is the library a custodian reaches for when a Stellar key must never exist in one place (README read 2026-09-14; Apache-2.0; no releases; last push 2025-09-10).",
+			note: "Taurus's Go implementation of THRESHOLD SIGNATURE protocols: multi-party computation for signing, at 391 stars the most-starred repository in this registry. It is general cryptography rather than Stellar code, but it is the library a custodian reaches for when a Stellar key must never exist in one place (README read 2026-09-14; Apache-2.0; no releases; last push 2025-09-10).",
 			triggers: [
 				"threshold signatures go",
 				"multi party signing library",
@@ -8482,7 +8482,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Galmanus/sorohunter": [
 		{
-			note: "sorohunter: an ADVERSARIAL hunter for agentic Soroban contracts — generic and ABI-driven, so it attacks a contract from its interface rather than from hand-written cases. The offensive counterpart to OpenZeppelin's static detectors and Solarkraft's runtime monitoring, completing the three published approaches to Soroban contract safety (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-08-20).",
+			note: "sorohunter: an ADVERSARIAL hunter for agentic Soroban contracts: generic and ABI-driven, so it attacks a contract from its interface rather than from hand-written cases. The offensive counterpart to OpenZeppelin's static detectors and Solarkraft's runtime monitoring, completing the three published approaches to Soroban contract safety (README read 2026-09-14; MIT; 2 stars; no releases; last push 2026-08-20).",
 			triggers: [
 				"sorohunter adversarial testing",
 				"abi driven contract fuzzing soroban",
@@ -8494,7 +8494,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"davedumto/stellar-social-recovery": [
 		{
-			note: "A reference implementation of GUARDIAN-APPROVED, TIME-LOCKED account recovery for Stellar — no seed phrase and no custodian. The recovery half of the smart-account story whose other half (passkeys, policies) appears throughout this registry (README read 2026-09-14; MIT; no releases; last push 2026-07-12).",
+			note: "A reference implementation of GUARDIAN-APPROVED, TIME-LOCKED account recovery for Stellar: no seed phrase and no custodian. The recovery half of the smart-account story whose other half (passkeys, policies) appears throughout this registry (README read 2026-09-14; MIT; no releases; last push 2026-07-12).",
 			triggers: [
 				"stellar social recovery",
 				"guardian account recovery",
@@ -8506,7 +8506,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"jamesbachini/CCTP-Stellar": [
 		{
-			note: "Demo scripts for Circle CCTP V2 on Stellar testnet: `bridgeout.js` burns testnet USDC through the Stellar `TokenMessengerMinter` and waits for attestation — naming the actual contract an integrator must call, which is the part most CCTP write-ups leave out (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-05-19).",
+			note: "Demo scripts for Circle CCTP V2 on Stellar testnet: `bridgeout.js` burns testnet USDC through the Stellar `TokenMessengerMinter` and waits for attestation, naming the actual contract an integrator must call, which is the part most CCTP write-ups leave out (README read 2026-09-14; MIT; 1 star; no releases; last push 2026-05-19).",
 			triggers: [
 				"cctp stellar demo",
 				"tokenmessengerminter stellar",
@@ -8518,7 +8518,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"leocagli/stellar-x402-paywall-kit": [
 		{
-			note: "npm stellar-x402-paywall-kit: ONE-LINE x402 paywall middleware for Express and Hono backed by a Stellar facilitator — the lowest-effort way to put a 402 in front of an existing HTTP route (README read 2026-09-14; MIT; no GitHub releases; last push 2026-08-06).",
+			note: "npm stellar-x402-paywall-kit: ONE-LINE x402 paywall middleware for Express and Hono backed by a Stellar facilitator; the lowest-effort way to put a 402 in front of an existing HTTP route (README read 2026-09-14; MIT; no GitHub releases; last push 2026-08-06).",
 			triggers: [
 				"x402 paywall middleware",
 				"express hono 402 stellar",
@@ -8530,7 +8530,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"ffarinas/x402-mcp-stellar-template": [
 		{
-			note: "A Go template for setting up payments between AI agents and APIs using USDC on Stellar, pitched at ten minutes from clone to charging per call — written for a SaaS owner who wants agents to pay per request rather than hold an account (README read 2026-09-14; no license file; no releases; last push 2026-04-14).",
+			note: "A Go template for setting up payments between AI agents and APIs using USDC on Stellar, pitched at ten minutes from clone to charging per call, written for a SaaS owner who wants agents to pay per request rather than hold an account (README read 2026-09-14; no license file; no releases; last push 2026-04-14).",
 			triggers: ["x402 mcp template go", "charge agents per call stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8538,7 +8538,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CaBsCrypto/stellar-agent-spend-hub": [
 		{
-			note: "Stellar Agent Spend Hub: privacy-first agentic payments for MCP, API and digital-service spend — an agent discovers paid resources and pays for them, with privacy as the stated design constraint. Topics agentic-payments, mcp, x402 (README read 2026-09-14; no license file; no releases; last push 2026-08-12).",
+			note: "Stellar Agent Spend Hub: privacy-first agentic payments for MCP, API and digital-service spend; an agent discovers paid resources and pays for them, with privacy as the stated design constraint. Topics agentic-payments, mcp, x402 (README read 2026-09-14; no license file; no releases; last push 2026-08-12).",
 			triggers: ["agent spend hub stellar", "privacy first agentic payments"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8546,7 +8546,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"vicentewolde/AgentPay": [
 		{
-			note: "AgentPey (agentpey.com): an agentic payments stack on Stellar testnet built in SEVEN PHASES — verifiable agent identity, spending policy, signed mandates, real commerce and beyond. The phased structure is the useful part: it is a map of what an agent-payments stack actually needs (README read 2026-09-14; Apache-2.0; no releases; last push 2026-09-14).",
+			note: "AgentPey (agentpey.com): an agentic payments stack on Stellar testnet built in SEVEN PHASES: verifiable agent identity, spending policy, signed mandates, real commerce and beyond. The phased structure is the useful part: it is a map of what an agent-payments stack actually needs (README read 2026-09-14; Apache-2.0; no releases; last push 2026-09-14).",
 			triggers: [
 				"agentpey identity credentials",
 				"signed mandates agent payments",
@@ -8558,7 +8558,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"iamnotdou/bound-web": [
 		{
-			note: "Bound Protocol (boundprotocol.dev): a SURETY BOND for AI agents on Stellar — an operator publishes a certificate carrying a bound, so a counterparty can check what an agent is backed for before transacting. Insurance rather than budgeting, which makes it distinct from the spend-control cluster (README read 2026-09-14; MIT; topics ai-agents, soroban; no releases; last push 2026-08-22).",
+			note: "Bound Protocol (boundprotocol.dev): a SURETY BOND for AI agents on Stellar: an operator publishes a certificate carrying a bound, so a counterparty can check what an agent is backed for before transacting. Insurance rather than budgeting, which makes it distinct from the spend-control cluster (README read 2026-09-14; MIT; topics ai-agents, soroban; no releases; last push 2026-08-22).",
 			triggers: [
 				"bound protocol surety",
 				"agent surety bond stellar",
@@ -8570,7 +8570,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kamalbuilds/stealthpayroll": [
 		{
-			note: "Confidential Payroll on Stellar: salary amounts hidden on-chain as PEDERSEN COMMITMENTS with spending proven by UltraHonk zero-knowledge proofs — payroll is the clearest real use of confidential amounts, because the employer must prove solvency without publishing salaries (README read 2026-09-14; no license file; no releases; last push 2026-07-03).",
+			note: "Confidential Payroll on Stellar: salary amounts hidden on-chain as PEDERSEN COMMITMENTS with spending proven by UltraHonk zero-knowledge proofs; payroll is the clearest real use of confidential amounts, because the employer must prove solvency without publishing salaries (README read 2026-09-14; no license file; no releases; last push 2026-07-03).",
 			triggers: [
 				"stealth payroll stellar",
 				"confidential salary commitments",
@@ -8582,7 +8582,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"theahaco/sdf-zk-proposal": [
 		{
-			note: 'Ahaco\'s published proposal to SDF — "ZK Proofs on Soroban: Recovery + Privacy Bundle", rendered at theahaco.github.io/sdf-zk-proposal. A proposal rather than shipped work, but it is the citable statement of what a ZK recovery-and-privacy bundle for Soroban would contain (README read 2026-09-14; no license file; no releases; last push 2026-05-07).',
+			note: 'Ahaco\'s published proposal to SDF: "ZK Proofs on Soroban: Recovery + Privacy Bundle", rendered at theahaco.github.io/sdf-zk-proposal. A proposal rather than shipped work, but it is the citable statement of what a ZK recovery-and-privacy bundle for Soroban would contain (README read 2026-09-14; no license file; no releases; last push 2026-05-07).',
 			triggers: ["zk proofs soroban proposal", "recovery privacy bundle sdf"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8590,7 +8590,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CheesecakeLabs/Stellar-Asset-Sandbox": [
 		{
-			note: "The Stellar Asset Sandbox from Cheesecake Labs: an environment for creating and exercising Stellar assets end to end — the practical companion to the issuer-control teaching material, aimed at teams evaluating asset issuance before committing. 4 stars (README read 2026-09-14; no license file; no releases; last push 2026-07-09).",
+			note: "The Stellar Asset Sandbox from Cheesecake Labs: an environment for creating and exercising Stellar assets end to end; the practical companion to the issuer-control teaching material, aimed at teams evaluating asset issuance before committing. 4 stars (README read 2026-09-14; no license file; no releases; last push 2026-07-09).",
 			triggers: ["stellar asset sandbox", "try asset issuance environment"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8598,7 +8598,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"lightsail-network/ledger-devcontainer": [
 		{
-			note: "A VS Code DevContainer that sets up a LEDGER HARDWARE-WALLET app development environment with zero additional effort, newest release v2025.8.3 — the friction-remover for anyone maintaining the Stellar Ledger app (README read 2026-09-14; MIT; 2 stars; last push 2025-08-27).",
+			note: "A VS Code DevContainer that sets up a LEDGER HARDWARE-WALLET app development environment with zero additional effort, newest release v2025.8.3; the friction-remover for anyone maintaining the Stellar Ledger app (README read 2026-09-14; MIT; 2 stars; last push 2025-08-27).",
 			triggers: ["ledger app devcontainer", "hardware wallet dev environment"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8606,7 +8606,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"withObsrvr/rs-stellar-history-archive-hasher": [
 		{
-			note: "A WASM library for hashing Stellar transaction HISTORY ARCHIVE entries — hashing `TransactionHistoryEntry` and its result counterpart, which is what lets an independent party verify an archive rather than trust it (README read 2026-09-14; MIT; no releases; last push 2026-08-24).",
+			note: "A WASM library for hashing Stellar transaction HISTORY ARCHIVE entries: hashing `TransactionHistoryEntry` and its result counterpart, which is what lets an independent party verify an archive rather than trust it (README read 2026-09-14; MIT; no releases; last push 2026-08-24).",
 			triggers: [
 				"history archive hasher",
 				"verify stellar archive entries",
@@ -8618,7 +8618,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"withObsrvr/stellar-raw-ledger-origin": [
 		{
-			note: "stellar-raw-ledger-origin: one adapter-neutral raw-ledger CORE with two runtime adapters, converting a parsed `xdr.LedgerCloseMeta` into a canonical form — the entry point of Obsrvr's ledger pipeline, beside stellar-extract and obsrvr-stellar-components (README read 2026-09-14; no license file; no releases; last push 2026-08-05).",
+			note: "stellar-raw-ledger-origin: one adapter-neutral raw-ledger CORE with two runtime adapters, converting a parsed `xdr.LedgerCloseMeta` into a canonical form; the entry point of Obsrvr's ledger pipeline, beside stellar-extract and obsrvr-stellar-components (README read 2026-09-14; no license file; no releases; last push 2026-08-05).",
 			triggers: ["raw ledger origin obsrvr", "ledgerclosemeta adapter"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8626,7 +8626,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Hoops-Finance/contracts": [
 		{
-			note: "Hoops' modular Soroban contract suite: a user deposits ONE asset such as USDC and it is spread across SEVERAL AMMs for swaps or liquidity — aggregation at the contract layer rather than in a router (README read 2026-09-14; no license file; no releases; last push 2026-02-28).",
+			note: "Hoops' modular Soroban contract suite: a user deposits ONE asset such as USDC and it is spread across SEVERAL AMMs for swaps or liquidity: aggregation at the contract layer rather than in a router (README read 2026-09-14; no license file; no releases; last push 2026-02-28).",
 			triggers: ["hoops contracts amm spread", "deposit one asset many amms"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8645,7 +8645,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Templar-Protocol/templar-liquidator": [
 		{
-			note: "Templar's liquidator service in Rust, newest release v1.2.0 and pushed the day this note was written — the keeper half of Templar's lending protocol, beside Templar-Protocol/contracts (README read 2026-09-14; GPL-3.0; last push 2026-09-14).",
+			note: "Templar's liquidator service in Rust, newest release v1.2.0 and pushed the day this note was written; the keeper half of Templar's lending protocol, beside Templar-Protocol/contracts (README read 2026-09-14; GPL-3.0; last push 2026-09-14).",
 			triggers: ["templar liquidator", "lending keeper stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8653,7 +8653,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Moonlight-Protocol/provider-stack": [
 		{
-			note: "Moonlight's SELF-HOST privacy-provider stack in Rust, shipped as a `docker compose` bundle with the backend, frontend and Postgres together — running a privacy provider is meant to be a compose file, which is the decentralisation claim made concrete (README read 2026-09-14; no license file; no releases; last push 2026-08-17).",
+			note: "Moonlight's SELF-HOST privacy-provider stack in Rust, shipped as a `docker compose` bundle with the backend, frontend and Postgres together: running a privacy provider is meant to be a compose file, which is the decentralisation claim made concrete (README read 2026-09-14; no license file; no releases; last push 2026-08-17).",
 			triggers: ["moonlight provider stack", "self host privacy provider"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8661,7 +8661,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Moonlight-Protocol/landing-page": [
 		{
-			note: "Moonlight Protocol's landing page (moonlightprotocol.io), marked temporary in its own description — the public face of the privacy protocol whose SDK, provider stack, UI, pay platform and dashboards are noted separately (README read 2026-09-14; AGPL-3.0; last push 2026-03-31).",
+			note: "Moonlight Protocol's landing page (moonlightprotocol.io), marked temporary in its own description; the public face of the privacy protocol whose SDK, provider stack, UI, pay platform and dashboards are noted separately (README read 2026-09-14; AGPL-3.0; last push 2026-03-31).",
 			triggers: ["moonlight protocol landing"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8669,7 +8669,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"RozoAI/rozo-app-mobile": [
 		{
-			note: "The Rozo mobile app, newest tag v1.1.1 with the README stating it is coming soon — the consumer end of Rozo's payment stack, beside the intents skill, deeplink parser, rewards miniapp and pay sponsor (README read 2026-09-14; no license file; last push 2025-11-25).",
+			note: "The Rozo mobile app, newest tag v1.1.1 with the README stating it is coming soon; the consumer end of Rozo's payment stack, beside the intents skill, deeplink parser, rewards miniapp and pay sponsor (README read 2026-09-14; no license file; last push 2025-11-25).",
 			triggers: ["rozo mobile app"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8677,7 +8677,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"troqpay/agent-plugin": [
 		{
-			note: "TroqPay's official MCP server and Codex/Claude plugin, exposing payment tools such as `troqpay_create_checkout` to any MCP client — the agent surface of the payments API whose SDK is noted separately (README read 2026-09-14; MIT; no releases; last push 2026-06-16).",
+			note: "TroqPay's official MCP server and Codex/Claude plugin, exposing payment tools such as `troqpay_create_checkout` to any MCP client; the agent surface of the payments API whose SDK is noted separately (README read 2026-09-14; MIT; no releases; last push 2026-06-16).",
 			triggers: ["troqpay mcp plugin", "payment tools mcp checkout"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8685,7 +8685,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"myazahq/kyc-sdk-react-native": [
 		{
-			note: "@myazahq/kyc-sdk-react-native v2.6.0: a React Native (Expo) KYC SDK with document auto-capture, eMRTD CHIP READING OVER NFC and ON-DEVICE liveness — passport-chip verification on a phone is a meaningfully higher bar than photo-based KYC, which matters for anchors (README read 2026-09-14; MIT; last push 2026-09-08).",
+			note: "@myazahq/kyc-sdk-react-native v2.6.0: a React Native (Expo) KYC SDK with document auto-capture, eMRTD CHIP READING OVER NFC and ON-DEVICE liveness; passport-chip verification on a phone is a meaningfully higher bar than photo-based KYC, which matters for anchors (README read 2026-09-14; MIT; last push 2026-09-08).",
 			triggers: [
 				"react native kyc sdk",
 				"emrtd nfc chip reading",
@@ -8697,7 +8697,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"mozartpay/OAs": [
 		{
-			note: "MozartPay's Orchestrated Agreements CLI (v0.1.0-mvp): a Go command-line tool built on a PURE-GO Soroban RPC client — notable because a pure-Go Soroban path avoids the Rust bindings most Go tooling depends on (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-12).",
+			note: "MozartPay's Orchestrated Agreements CLI (v0.1.0-mvp): a Go command-line tool built on a PURE-GO Soroban RPC client: notable because a pure-Go Soroban path avoids the Rust bindings most Go tooling depends on (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-09-12).",
 			triggers: ["mozartpay orchestrated agreements", "pure go soroban rpc"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8705,7 +8705,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"linkioafrica/payment-widget": [
 		{
-			note: "Linkio Africa's merchant payment widget, generated from a dashboard payment link (link-checkout.vercel.app). The README is the create-next-app scaffold, so the description is the durable statement — checkout generated from a link, the same shape as Tellus's paylink (README read 2026-09-14; no license file; no releases; last push 2026-04-09).",
+			note: "Linkio Africa's merchant payment widget, generated from a dashboard payment link (link-checkout.vercel.app). The README is the create-next-app scaffold, so the description is the durable statement: checkout generated from a link, the same shape as Tellus's paylink (README read 2026-09-14; no license file; no releases; last push 2026-04-09).",
 			triggers: ["linkio payment widget", "merchant checkout link africa"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8713,7 +8713,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"thegivehub/www": [
 		{
-			note: "The GiveHub marketing website (thegivehub.com) — the public site of the giving platform; the README is empty, so the site itself carries what GiveHub does (metadata read 2026-09-14; no license file; no releases; last push 2026-07-27).",
+			note: "The GiveHub marketing website (thegivehub.com), the public site of the giving platform; the README is empty, so the site itself carries what GiveHub does (metadata read 2026-09-14; no license file; no releases; last push 2026-07-27).",
 			triggers: ["givehub website"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8741,7 +8741,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"AnChainAI/anchain-data-mcp": [
 		{
-			note: "AnChain.AI's MCP server for its blockchain-intelligence Data API — compliance and risk analytics exposed to agents. 6 stars; AGPL-3.0, which is worth noting because a copyleft licence constrains how an agent platform can embed it (README read 2026-09-14; no releases; last push 2026-02-18).",
+			note: "AnChain.AI's MCP server for its blockchain-intelligence Data API: compliance and risk analytics exposed to agents. 6 stars; AGPL-3.0, which is worth noting because a copyleft licence constrains how an agent platform can embed it (README read 2026-09-14; no releases; last push 2026-02-18).",
 			triggers: ["anchain data mcp", "blockchain intelligence agent api"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8749,7 +8749,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"almanax-ai/almanax-security-plugin": [
 		{
-			note: "Almanax's official plugin and skills for Claude Code and Codex, used through their hosted MCP server at mcp.almanax.ai — security analysis delivered as a skill rather than a CLI, the same pattern as Bevor's (README read 2026-09-14; Apache-2.0; 2 stars; no releases; last push 2026-03-27).",
+			note: "Almanax's official plugin and skills for Claude Code and Codex, used through their hosted MCP server at mcp.almanax.ai: security analysis delivered as a skill rather than a CLI, the same pattern as Bevor's (README read 2026-09-14; Apache-2.0; 2 stars; no releases; last push 2026-03-27).",
 			triggers: ["almanax security plugin", "hosted security mcp"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8757,7 +8757,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Bevor-Protocol/Bevor-Action": [
 		{
-			note: "Bevor's GitHub Action: it runs Bevor AI smart-contract security analysis on every pull request and uploads findings to their dashboard — CI-time security review, the action counterpart to their agent skill (README read 2026-09-14; MIT; no releases; last push 2026-04-29).",
+			note: "Bevor's GitHub Action: it runs Bevor AI smart-contract security analysis on every pull request and uploads findings to their dashboard: CI-time security review, the action counterpart to their agent skill (README read 2026-09-14; MIT; no releases; last push 2026-04-29).",
 			triggers: ["bevor security action", "contract security on every pr"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8765,7 +8765,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"devasignhq/evals": [
 		{
-			note: "DevAsign's internal EVAL dashboard: it calls their code-review API, gets the review back and scores it with Claude or Gemini as the judge LLM — a team publishing the harness that grades its own product's output, which is rare enough to be worth citing (README read 2026-09-14; Apache-2.0; no releases; last push 2026-05-01).",
+			note: "DevAsign's internal EVAL dashboard: it calls their code-review API, gets the review back and scores it with Claude or Gemini as the judge LLM; a team publishing the harness that grades its own product's output, which is rare enough to be worth citing (README read 2026-09-14; Apache-2.0; no releases; last push 2026-05-01).",
 			triggers: [
 				"devasign evals judge",
 				"score ai code review",
@@ -8777,7 +8777,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"blockdaemon/chain_sink": [
 		{
-			note: "Chain Sink: Blockdaemon's high-performance blockchain data synchronisation tool in Go, newest release v1.0.0 — infrastructure for pulling chain data at scale, from a node provider that also serves Stellar (README read 2026-09-14; Apache-2.0; last push 2026-03-01).",
+			note: "Chain Sink: Blockdaemon's high-performance blockchain data synchronisation tool in Go, newest release v1.0.0; infrastructure for pulling chain data at scale, from a node provider that also serves Stellar (README read 2026-09-14; Apache-2.0; last push 2026-03-01).",
 			triggers: ["blockdaemon chain sink", "high performance chain data sync"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8785,7 +8785,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"dfns/dfns-sdk-kotlin": [
 		{
-			note: "The Dfns Android SDK in Kotlin — the fifth Dfns client in this registry beside the Java, Go, Rust and TypeScript SDKs; a custody provider's mobile library covering Stellar among many chains (README read 2026-09-14; no license file; no releases; last push 2026-08-27).",
+			note: "The Dfns Android SDK in Kotlin, the fifth Dfns client in this registry beside the Java, Go, Rust and TypeScript SDKs; a custody provider's mobile library covering Stellar among many chains (README read 2026-09-14; no license file; no releases; last push 2026-08-27).",
 			triggers: ["dfns android sdk", "dfns kotlin"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8793,7 +8793,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"soroswap/allbridge-implementation": [
 		{
-			note: "Scripts that interface Soroswap with Allbridge for cross-chain transactions to and from Stellar — implementation tests rather than a product, and at a last push of 2024-05-03 they record how that integration was exercised in 2024 (README read 2026-09-14; no license file; 1 star; no releases).",
+			note: "Scripts that interface Soroswap with Allbridge for cross-chain transactions to and from Stellar; implementation tests rather than a product, and at a last push of 2024-05-03 they record how that integration was exercised in 2024 (README read 2026-09-14; no license file; 1 star; no releases).",
 			triggers: ["soroswap allbridge integration", "cross chain tests stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8801,7 +8801,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"warp-driver/warpdrive-intro": [
 		{
-			note: "WarpDrive's Milestone 1 investigation into bringing its off-chain compute to Soroban — the repository is laid out as contracts/ interfaces and architecture plus cryptography/ choices, so it is the design record preceding warpdrive-contracts and oracle-demo (README read 2026-09-14; no license file; no releases; last push 2026-04-17).",
+			note: "WarpDrive's Milestone 1 investigation into bringing its off-chain compute to Soroban; the repository is laid out as contracts/ interfaces and architecture plus cryptography/ choices, so it is the design record preceding warpdrive-contracts and oracle-demo (README read 2026-09-14; no license file; no releases; last push 2026-04-17).",
 			triggers: [
 				"warpdrive intro milestone",
 				"offchain compute design soroban",
@@ -8812,7 +8812,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Aypp23/stellarship": [
 		{
-			note: "Stellarship (stellarship-web.vercel.app): a zero-knowledge hidden-information naval strategy game on Stellar TESTNET where players commit private boards on-chain and play locally or through a relay — the relay option is the design detail that separates it from the other battleship entries (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
+			note: "Stellarship (stellarship-web.vercel.app): a zero-knowledge hidden-information naval strategy game on Stellar TESTNET where players commit private boards on-chain and play locally or through a relay; the relay option is the design detail that separates it from the other battleship entries (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
 			triggers: ["stellarship naval strategy", "relay play zk game stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8820,7 +8820,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"mthdroid/ZKMind": [
 		{
-			note: "ZKMind: Mastermind on Stellar where every FEEDBACK CLUE is proven correct by a zero-knowledge proof — the README's line is that your opponent cannot lie. Proving the correctness of a hint, rather than the secrecy of a position, is a distinct proof shape in this cohort (README read 2026-09-14; no license file; no releases; last push 2026-02-21).",
+			note: "ZKMind: Mastermind on Stellar where every FEEDBACK CLUE is proven correct by a zero-knowledge proof; the README's line is that your opponent cannot lie. Proving the correctness of a hint, rather than the secrecy of a position, is a distinct proof shape in this cohort (README read 2026-09-14; no license file; no releases; last push 2026-02-21).",
 			triggers: [
 				"zkmind mastermind stellar",
 				"prove feedback clue zk",
@@ -8832,7 +8832,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"max-ramos-rod/provably-fair-battleship-stellar": [
 		{
-			note: "A provably fair battleship built with RISC ZERO for the ZK Gaming hackathon — gameplay happens off-chain and the zkVM receipt carries the proof, which is a different architecture from the Noir and Pedersen entries in the same cohort and ties back to the RISC0 verifier work on Stellar (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
+			note: "A provably fair battleship built with RISC ZERO for the ZK Gaming hackathon: gameplay happens off-chain and the zkVM receipt carries the proof, which is a different architecture from the Noir and Pedersen entries in the same cohort and ties back to the RISC0 verifier work on Stellar (README read 2026-09-14; no license file; no releases; last push 2026-02-23).",
 			triggers: ["risc zero battleship stellar", "zkvm game proof stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8840,7 +8840,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Gabrululu/Stellar-Mystery-Box": [
 		{
-			note: "Stellar Mystery Box: a two-to-three-hour WORKSHOP in Spanish where each participant creates, customises and deploys their own Stellar token — teaching material with a fixed run time, which is what a meetup organiser actually needs (README read 2026-09-14; no license file; no releases; last push 2026-08-30).",
+			note: "Stellar Mystery Box: a two-to-three-hour WORKSHOP in Spanish where each participant creates, customises and deploys their own Stellar token; teaching material with a fixed run time, which is what a meetup organiser actually needs (README read 2026-09-14; no license file; no releases; last push 2026-08-30).",
 			triggers: ["stellar mystery box workshop", "taller token stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8848,7 +8848,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"Gabrululu/Stellar-SwapANDSplash": [
 		{
-			note: "Stellar: Swap & Splash — an interactive workshop in Spanish where each participant designs, deploys and customises a token, then swaps it with the group; two layers, a contract and a front end. The sibling of the same author's Mystery Box workshop (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-18).",
+			note: "Stellar: Swap & Splash, an interactive workshop in Spanish where each participant designs, deploys and customises a token, then swaps it with the group; two layers, a contract and a front end. The sibling of the same author's Mystery Box workshop (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-08-18).",
 			triggers: [
 				"swap and splash workshop",
 				"taller intercambio token stellar",
@@ -8859,7 +8859,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"johneliud/school-management": [
 		{
-			note: "A Soroban contract for school administration — student registrations, class assignments and fee payments. A plain, readable example of record-keeping plus payments in one contract, useful as teaching material (README read 2026-09-14; no license file; topic soroban-sdk; no releases; last push 2026-05-23).",
+			note: "A Soroban contract for school administration: student registrations, class assignments and fee payments. A plain, readable example of record-keeping plus payments in one contract, useful as teaching material (README read 2026-09-14; no license file; topic soroban-sdk; no releases; last push 2026-05-23).",
 			triggers: [
 				"school management soroban",
 				"student registration contract stellar",
@@ -8878,7 +8878,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"tupui/soroban-seal-coin": [
 		{
-			note: "Seal Coin (SEAL): a Soroban token project documented in a JUPYTER NOTEBOOK — an unusual and readable format for explaining a token, since the notebook shows the calls and their outputs together (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-06-16).",
+			note: "Seal Coin (SEAL): a Soroban token project documented in a JUPYTER NOTEBOOK, an unusual and readable format for explaining a token, since the notebook shows the calls and their outputs together (README read 2026-09-14; license NOASSERTION; 1 star; no releases; last push 2026-06-16).",
 			triggers: ["seal coin soroban", "jupyter notebook token stellar"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8886,7 +8886,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"EliaquimI/GibborHackaton": [
 		{
-			note: "GIBBOR: a panic-button system combining an ESP32 device, an Android app and a Node backend, whose README frames the problem precisely — a victim records a video, but how do you prove it was not edited and when it was recorded. Anchoring evidence integrity is the Stellar role here; hardware plus mobile plus chain is a rare combination in this index (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-05-15).",
+			note: "GIBBOR: a panic-button system combining an ESP32 device, an Android app and a Node backend, whose README frames the problem precisely: a victim records a video, but how do you prove it was not edited and when it was recorded. Anchoring evidence integrity is the Stellar role here; hardware plus mobile plus chain is a rare combination in this index (README read 2026-09-14; no license file; 1 star; no releases; last push 2026-05-15).",
 			triggers: [
 				"gibbor panic button",
 				"prove video not edited",
@@ -8898,7 +8898,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"kalepail/stellarlight": [
 		{
-			note: "A GitHub FORK of Stellar Light's own public repository (alexanderkoh/stellarlight) — same README, no divergence stated. Cite the upstream for the project's state (README and metadata read 2026-09-14; MIT; no releases; last push 2026-08-21).",
+			note: "A GitHub FORK of Stellar Light's own public repository (alexanderkoh/stellarlight): same README, no divergence stated. Cite the upstream for the project's state (README and metadata read 2026-09-14; MIT; no releases; last push 2026-08-21).",
 			triggers: ["stellarlight fork"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8906,7 +8906,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"TrustLine-id/colosseum-2026": [
 		{
-			note: "Trustline's Colosseum Frontier hackathon submission: an institutional-style tokenised vault on SOLANA extended with SVS-13. Not Stellar — Trustline's Stellar work is stellar-sdk, stellar-validation-engine and stellar-demo-app, all noted (README read 2026-09-14; MIT; no releases; last push 2026-05-08).",
+			note: "Trustline's Colosseum Frontier hackathon submission: an institutional-style tokenised vault on SOLANA extended with SVS-13. Not Stellar; Trustline's Stellar work is stellar-sdk, stellar-validation-engine and stellar-demo-app, all noted (README read 2026-09-14; MIT; no releases; last push 2026-05-08).",
 			triggers: ["trustline colosseum vault solana"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8914,7 +8914,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"fiatsend/contracts": [
 		{
-			note: "Fiatsend's smart contracts in SOLIDITY — payment infrastructure for businesses paying into Africa, the README's framing being payroll platforms like Deel or Payoneer. Fiatsend's Stellar side is its published technical architecture and docs, both noted; this repository is EVM (README read 2026-09-14; no license file; no releases; last push 2026-04-13).",
+			note: "Fiatsend's smart contracts in SOLIDITY, payment infrastructure for businesses paying into Africa, the README's framing being payroll platforms like Deel or Payoneer. Fiatsend's Stellar side is its published technical architecture and docs, both noted; this repository is EVM (README read 2026-09-14; no license file; no releases; last push 2026-04-13).",
 			triggers: [
 				"fiatsend contracts solidity",
 				"payroll into africa contracts",
@@ -8933,7 +8933,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"rango-exchange/token-list": [
 		{
-			note: "Rango Exchange's custom token list, drawn from sources such as CoinGecko and covering more than 10,000 tokens by the README's own count — aggregator metadata spanning many chains, useful as a comparison point for how a large router curates assets (README read 2026-09-14; no license file; 4 stars; no releases; last push 2025-11-11).",
+			note: "Rango Exchange's custom token list, drawn from sources such as CoinGecko and covering more than 10,000 tokens by the README's own count: aggregator metadata spanning many chains, useful as a comparison point for how a large router curates assets (README read 2026-09-14; no license file; 4 stars; no releases; last push 2025-11-11).",
 			triggers: ["rango token list", "aggregator token curation"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8941,7 +8941,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"btq-ag/btq-stresstest": [
 		{
-			note: "BTQ's testnet transaction stress-test tool: participants run it on their own nodes to generate load by periodically sending small random transactions to configured peers. For BTQ's own testnet, not Stellar — the fourth BTQ repository in this index, all quantum/consensus research (README read 2026-09-14; no license file; no releases; last push 2026-04-28).",
+			note: "BTQ's testnet transaction stress-test tool: participants run it on their own nodes to generate load by periodically sending small random transactions to configured peers. For BTQ's own testnet, not Stellar; the fourth BTQ repository in this index, all quantum/consensus research (README read 2026-09-14; no license file; no releases; last push 2026-04-28).",
 			triggers: ["btq stress test testnet"],
 			source: "curated",
 			asOf: "2026-09-14",
@@ -8949,7 +8949,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"CertiKProject/brand-assets": [
 		{
-			note: "Triage 2026-09-14: CertiK's brand assets — logos and imagery with an instruction not to remove or rename them. No product content. https://github.com/CertiKProject/brand-assets",
+			note: "Triage 2026-09-14: CertiK's brand assets: logos and imagery with an instruction not to remove or rename them. No product content. https://github.com/CertiKProject/brand-assets",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8957,7 +8957,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"NoetherDEX/noetherkeeperbot": [
 		{
-			note: "Triage 2026-09-14: GONE — the GitHub API returns no metadata, so the repository was deleted, renamed or made private since indexing. Noether's live repositories (noether-docs, noetherdiscordwebhook) are noted; yahya_development is likewise gone. Retire or re-resolve the row. https://github.com/NoetherDEX/noetherkeeperbot",
+			note: "Triage 2026-09-14: GONE. The GitHub API returns no metadata, so the repository was deleted, renamed or made private since indexing. Noether's live repositories (noether-docs, noetherdiscordwebhook) are noted; yahya_development is likewise gone. Retire or re-resolve the row. https://github.com/NoetherDEX/noetherkeeperbot",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8965,7 +8965,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-adonisJs": [
 		{
-			note: "Triage 2026-09-14: one of TWELVE PipeOps framework starter kits in the curated pool (adonisJs, asp-dotnet-core, fastapi, flask, laravel, nestJs, nodejs, php, ruby-sinatra, rust, vuejs, nextjs). Each is clone-and-run boilerplate for a hosting platform, with no product or Stellar content. They are in the pool because the whole pipeops org was swept in behind its curated project row — the same small-org effect as gateway-fm. https://github.com/pipeops-dev/pipeops-adonisJs",
+			note: "Triage 2026-09-14: one of TWELVE PipeOps framework starter kits in the curated pool (adonisJs, asp-dotnet-core, fastapi, flask, laravel, nestJs, nodejs, php, ruby-sinatra, rust, vuejs, nextjs). Each is clone-and-run boilerplate for a hosting platform, with no product or Stellar content. They are in the pool because the whole pipeops org was swept in behind its curated project row; the same small-org effect as gateway-fm. https://github.com/pipeops-dev/pipeops-adonisJs",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8973,7 +8973,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-asp-dotnet-core": [
 		{
-			note: "Triage 2026-09-14: PipeOps ASP.NET Core starter kit — boilerplate, no product or Stellar content. See pipeops-adonisJs for the full set of twelve. https://github.com/pipeops-dev/pipeops-asp-dotnet-core",
+			note: "Triage 2026-09-14: PipeOps ASP.NET Core starter kit: boilerplate, no product or Stellar content. See pipeops-adonisJs for the full set of twelve. https://github.com/pipeops-dev/pipeops-asp-dotnet-core",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8981,7 +8981,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-flask": [
 		{
-			note: "Triage 2026-09-14: PipeOps Flask starter kit — boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-flask",
+			note: "Triage 2026-09-14: PipeOps Flask starter kit: boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-flask",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8989,7 +8989,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-laravel": [
 		{
-			note: "Triage 2026-09-14: PipeOps Laravel starter kit — boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-laravel",
+			note: "Triage 2026-09-14: PipeOps Laravel starter kit: boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-laravel",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -8997,7 +8997,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-nestJs": [
 		{
-			note: "Triage 2026-09-14: PipeOps Nest.js starter kit — boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-nestJs",
+			note: "Triage 2026-09-14: PipeOps Nest.js starter kit: boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-nestJs",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -9005,7 +9005,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-nodejs": [
 		{
-			note: "Triage 2026-09-14: PipeOps Node.js starter kit — boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-nodejs",
+			note: "Triage 2026-09-14: PipeOps Node.js starter kit: boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-nodejs",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -9013,7 +9013,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-php": [
 		{
-			note: "Triage 2026-09-14: PipeOps PHP starter kit — boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-php",
+			note: "Triage 2026-09-14: PipeOps PHP starter kit: boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-php",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -9021,7 +9021,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-ruby-sinatra": [
 		{
-			note: "Triage 2026-09-14: PipeOps Ruby/Sinatra starter kit — boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-ruby-sinatra",
+			note: "Triage 2026-09-14: PipeOps Ruby/Sinatra starter kit: boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-ruby-sinatra",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -9029,7 +9029,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 	],
 	"pipeops-dev/pipeops-vuejs": [
 		{
-			note: "Triage 2026-09-14: PipeOps Vue.js starter kit — boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-vuejs",
+			note: "Triage 2026-09-14: PipeOps Vue.js starter kit: boilerplate, no product or Stellar content. See pipeops-adonisJs. https://github.com/pipeops-dev/pipeops-vuejs",
 			source: "curated",
 			asOf: "2026-09-14",
 			visibility: "internal",
@@ -9181,7 +9181,7 @@ const BAND_40_49_TRIAGE_2026_09_02: Record<string, string> = {
 		"tech-demo submission by its own README; no IDs or tags",
 	"xycloo/onchain-stellar-complaints": "no README, no tags",
 	"xycloo/rs-zephyr-toolkit":
-		"crates.io entries carry no repository field — link is indirect",
+		"crates.io entries carry no repository field: link is indirect",
 	"yieldback-cash/market-indexer":
 		"no README; package.json name ybc-indexer unpublished",
 	"yieldback-cash/ybc-contracts":
@@ -9447,7 +9447,7 @@ const POOL_TRIAGE_2026_09_02: Record<string, string> = {
 for (const [key, why] of Object.entries(POOL_TRIAGE_2026_09_02)) {
 	REPO_KNOWLEDGE_NOTES[key] ??= [];
 	REPO_KNOWLEDGE_NOTES[key].push({
-		note: `Pool triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
+		note: `Pool triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found. Judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
 		source: "curated",
 		asOf: "2026-09-02",
 		visibility: "internal",
@@ -9456,7 +9456,7 @@ for (const [key, why] of Object.entries(POOL_TRIAGE_2026_09_02)) {
 for (const [key, why] of Object.entries(BAND_50_59_TRIAGE_2026_09_02)) {
 	REPO_KNOWLEDGE_NOTES[key] ??= [];
 	REPO_KNOWLEDGE_NOTES[key].push({
-		note: `Band 50–59 triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
+		note: `Band 50-59 triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found. Judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
 		source: "curated",
 		asOf: "2026-09-02",
 		visibility: "internal",
@@ -9465,7 +9465,7 @@ for (const [key, why] of Object.entries(BAND_50_59_TRIAGE_2026_09_02)) {
 for (const [key, why] of Object.entries(BAND_40_49_TRIAGE_2026_09_02)) {
 	REPO_KNOWLEDGE_NOTES[key] ??= [];
 	REPO_KNOWLEDGE_NOTES[key].push({
-		note: `Band 40–49 triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
+		note: `Band 40-49 triage 2026-09-02: ${why}. Examined for a durable, source-citable fact and none was found. Judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
 		source: "curated",
 		asOf: "2026-09-02",
 		visibility: "internal",
@@ -9481,7 +9481,7 @@ const BATCH_10_TRIAGE_2026_09_05: Record<string, string> = {
 	"acta-team/brazil-regional-kit":
 		"README's 'seven publishable packages' are not on npm (packages/ holds anchors + kit workspaces; @acta-team/ramp-core unpublished); testnet only; no tags",
 	"chidubemkingsley/proofescrow":
-		"hackathon demo ('Built for the Hackathon', unnamed) — Trustless Work escrow on Stellar testnet; no registry, no tags",
+		"hackathon demo ('Built for the Hackathon', unnamed): Trustless Work escrow on Stellar testnet; no registry, no tags",
 	"edgadafi/dispersor-nomina-alebrije":
 		"testnet MVP (Spanish README; hackathon not named); no registry, no tags",
 	"joseluismirro/settler": "no README; no tags",
@@ -9504,12 +9504,12 @@ const BATCH_10_TRIAGE_2026_09_05: Record<string, string> = {
 	"sam-rytech/automata-v2":
 		"cross-chain agent app, Stellar one of several chains; README 'Version 2.0.0' has no tag or registry behind it",
 	"orbitkit-fun/stellar-agent-kit":
-		"README-claimed npm packages (stellar-agent-kit 1.0.6, x402-stellar-sdk 1.0.5, create-stellar-devkit-app 1.1.5, stellar-devkit-mcp 1.0.6; all 2026-03-15) list repository codewmilan/stellar-agent-kit, which returns 404 — no link back (see D)",
+		"README-claimed npm packages (stellar-agent-kit 1.0.6, x402-stellar-sdk 1.0.5, create-stellar-devkit-app 1.1.5, stellar-devkit-mcp 1.0.6; all 2026-03-15) list repository codewmilan/stellar-agent-kit, which returns 404; no link back (see D)",
 };
 for (const [key, why] of Object.entries(BATCH_10_TRIAGE_2026_09_05)) {
 	REPO_KNOWLEDGE_NOTES[key] ??= [];
 	REPO_KNOWLEDGE_NOTES[key].push({
-		note: `Batch-10 triage 2026-09-05: ${why}. Examined for a durable, source-citable fact and none was found — judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
+		note: `Batch-10 triage 2026-09-05: ${why}. Examined for a durable, source-citable fact and none was found. Judged, not unexamined. Re-examine if the repo gains a registry package or a mainnet deployment.`,
 		source: "curated",
 		asOf: "2026-09-05",
 		visibility: "internal",
@@ -9700,7 +9700,7 @@ export function buildKnowledgeNotes(
 			driftBit = ` Latest report is ${driftDays} day${driftDays === 1 ? "" : "s"} old${changedBit}.`;
 		}
 		notes.push({
-			note: `${audits.length} security audit report${audits.length === 1 ? "" : "s"} on record for the owning project${latestBit} — full reports via /api/audits?q=${encodeURIComponent(projectSlug ?? "")}.${driftBit}`,
+			note: `${audits.length} security audit report${audits.length === 1 ? "" : "s"} on record for the owning project${latestBit}: full reports via /api/audits?q=${encodeURIComponent(projectSlug ?? "")}.${driftBit}`,
 			source: "derived:audit",
 			asOf: new Date().toISOString().slice(0, 10),
 		});

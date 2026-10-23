@@ -104,12 +104,12 @@ export async function GET(req: NextRequest) {
 				measuredById.set(d.assetId, d);
 		} catch {
 			warnings.push(
-				"measured state unavailable this request (store unreachable); `measured` is null on every row — not a statement about the assets.",
+				"measured state unavailable this request (store unreachable); `measured` is null on every row; not a statement about the assets.",
 			);
 		}
 	} else {
 		warnings.push(
-			"measured state unavailable this request (store unreachable); `measured` is null on every row — not a statement about the assets.",
+			"measured state unavailable this request (store unreachable); `measured` is null on every row; not a statement about the assets.",
 		);
 	}
 	const served = rows.map((r) =>
@@ -163,10 +163,10 @@ export async function GET(req: NextRequest) {
 				},
 				coverage: {
 					basis: "curated-registry",
-					note: "Rows are the tokenized real-world assets rwa.xyz lists on Stellar (rwaxyzListed=true), plus every other asset a tracked issuer's own stellar.toml declares under a tracked issuer account (rwaxyzListed=false) — so an issuer this registry covers is covered completely; counts.rwaxyzListed / counts.issuerDeclared split them. Each row is re-verified on-chain on its verifiedAt; registryAsOf is the latest. Absence here means untracked — NOT proof an asset is not issued on Stellar; verify against Horizon (classic) or Soroban RPC (contract tokens) before asserting non-existence. Identity is (code, issuer) for a classic asset and the contract id for a Soroban token; a ticker alone identifies nothing (BENJI has 22 issuers on mainnet, 21 of them squatters).",
+					note: "Rows are the tokenized real-world assets rwa.xyz lists on Stellar (rwaxyzListed=true), plus every other asset a tracked issuer's own stellar.toml declares under a tracked issuer account (rwaxyzListed=false), so an issuer this registry covers is covered completely; counts.rwaxyzListed / counts.issuerDeclared split them. Each row is re-verified on-chain on its verifiedAt; registryAsOf is the latest. Absence here means untracked; NOT proof an asset is not issued on Stellar; verify against Horizon (classic) or Soroban RPC (contract tokens) before asserting non-existence. Identity is (code, issuer) for a classic asset and the contract id for a Soroban token; a ticker alone identifies nothing (BENJI has 22 issuers on mainnet, 21 of them squatters).",
 				},
 				methodology:
-					"verificationLevel says how a row earned its place, strongest first: toml-bidirectional (the issuer's own stellar.toml names this code+issuer AND the issuer's home_domain points back), entity-toml (the entity's toml names the issuer; the issuer's home_domain is the minting tool), contract-metadata (name/symbol/decimals/total_supply read from the Soroban contract itself; Horizon /assets never sees these), on-chain-home-domain (issued, entity's domain, toml omits this asset), on-chain-only (issued; toml was a could-not-check or no home_domain). state=deployed-no-supply is a Soroban contract with zero supply and zero events, or a classic asset the issuer declares that has trustlines but nothing minted — either way it is NOT served as a live product on the project row. rwaxyzValueUsd/rwaxyzHolders are rwa.xyz's figures, not ours: read them beside totalSupply and horizonNote, because a $500M row with one holder and eight events is a valuation, not activity. Every row is dated (verifiedAt) and cites evidenceUrl; re-verify there before asserting anything current. `measured` is the six-hour lane's reading — supply, holders, activityCount, dated by measuredAt with measureBasis live|unmeasured — and null until the lane has measured that asset: an admission, never zero. counts.measured says how many served rows carry one.",
+					"verificationLevel says how a row earned its place, strongest first: toml-bidirectional (the issuer's own stellar.toml names this code+issuer AND the issuer's home_domain points back), entity-toml (the entity's toml names the issuer; the issuer's home_domain is the minting tool), contract-metadata (name/symbol/decimals/total_supply read from the Soroban contract itself; Horizon /assets never sees these), on-chain-home-domain (issued, entity's domain, toml omits this asset), on-chain-only (issued; toml was a could-not-check or no home_domain). state=deployed-no-supply is a Soroban contract with zero supply and zero events, or a classic asset the issuer declares that has trustlines but nothing minted; either way it is NOT served as a live product on the project row. rwaxyzValueUsd/rwaxyzHolders are rwa.xyz's figures, not ours: read them beside totalSupply and horizonNote, because a $500M row with one holder and eight events is a valuation, not activity. Every row is dated (verifiedAt) and cites evidenceUrl; re-verify there before asserting anything current. `measured` is the six-hour lane's reading (supply, holders, activityCount, dated by measuredAt with measureBasis live|unmeasured) and null until the lane has measured that asset: an admission, never zero. counts.measured says how many served rows carry one.",
 			},
 			assets: served,
 		},

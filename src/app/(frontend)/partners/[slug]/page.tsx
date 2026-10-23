@@ -66,7 +66,7 @@ const PRICING_LABELS: Record<string, string> = {
 	fixed: "Fixed fee",
 	hourly: "Hourly",
 	"rev-share": "Revenue share",
-	custom: "Custom — contact them",
+	custom: "Custom: contact them",
 };
 
 const SEP_LABEL: Record<string, string> = {
@@ -272,7 +272,7 @@ export async function generateMetadata({
 	const p = await getPartner(slug);
 	if (!p) return { title: "Partner not found" };
 	const title = `${p.name} | Stellar Partners`;
-	const description = p.tagline ?? `${p.name} — a Stellar ecosystem partner.`;
+	const description = p.tagline ?? `${p.name}, a Stellar ecosystem partner.`;
 	// og:image / twitter:image come from opengraph-image.tsx in this segment.
 	return {
 		title,
@@ -386,7 +386,7 @@ export default async function PartnerProfilePage({
 		});
 		verifiedCells.push({
 			label: "Commits (90d)",
-			value: v.githubCommits90d != null ? String(v.githubCommits90d) : "—",
+			value: v.githubCommits90d != null ? String(v.githubCommits90d) : "-",
 		});
 	}
 	if (v.onchainActive != null)
@@ -818,7 +818,7 @@ export default async function PartnerProfilePage({
 								Live on Stellar
 							</CardTitle>
 							<CardDescription>
-								This partner&apos;s own assets on Stellar mainnet — holders and
+								This partner&apos;s own assets on Stellar mainnet: holders and
 								payment activity from stellar.expert
 								{onchainAsOf ? ` (as of ${onchainAsOf})` : ""}
 							</CardDescription>
@@ -1189,12 +1189,12 @@ function cleanUrl(u: string): string {
 
 /** 12345 → "12,345"; nullish/negatives → "—". */
 function fmtNum(n?: number | null): string {
-	if (n == null || Number.isNaN(n) || n < 0) return "—";
+	if (n == null || Number.isNaN(n) || n < 0) return "-";
 	return n.toLocaleString("en-US");
 }
 
 function fmtDate(d?: string | null): string {
-	if (!d) return "—";
+	if (!d) return "-";
 	try {
 		return new Date(d).toLocaleDateString("en-US", {
 			month: "short",
@@ -1202,6 +1202,6 @@ function fmtDate(d?: string | null): string {
 			year: "numeric",
 		});
 	} catch {
-		return "—";
+		return "-";
 	}
 }

@@ -154,7 +154,7 @@ export async function GET(req: NextRequest) {
 					offset,
 				},
 				counts: { returned: contracts.length, total },
-				note: "Evidence-gated: rows exist only for contracts the scanner verified live on mainnet or on-chain enrichment attributed real activity to. Absence is NOT a claim a contract doesn't exist — coverage grows as scans reach repos. Lead with rows that carry codeInUse (live usage is the strongest signal).",
+				note: "Evidence-gated: rows exist only for contracts the scanner verified live on mainnet or on-chain enrichment attributed real activity to. Absence is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Lead with rows that carry codeInUse (live usage is the strongest signal).",
 			},
 			contracts,
 		},

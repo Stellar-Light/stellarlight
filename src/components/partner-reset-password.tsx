@@ -78,7 +78,7 @@ export function PartnerResetPassword() {
 				</h1>
 				<p className="text-sm text-muted-foreground mt-2 max-w-xl">
 					{signin
-						? "Choose a password to finish signing in — next time you can use either it or an emailed link."
+						? "Choose a password to finish signing in. Next time you can use either it or an emailed link."
 						: "Choose a password for your Stellar Light partner account."}
 				</p>
 			</div>
@@ -101,8 +101,8 @@ export function PartnerResetPassword() {
 						<CheckCircle2 className="w-10 h-10 text-emerald-400/90 mx-auto mb-3" />
 						<p className="text-sm text-foreground">
 							{signin
-								? "Signed in — taking you to your dashboard…"
-								: "Password set — taking you to your dashboard…"}
+								? "Signed in. Taking you to your dashboard…"
+								: "Password set. Taking you to your dashboard…"}
 						</p>
 					</div>
 				) : (

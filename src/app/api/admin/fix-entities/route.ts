@@ -11,7 +11,7 @@ const ENTITY_DESCRIPTIONS: Record<string, string> = {
 	"57blocks":
 		"Software engineering firm contributing infrastructure and tooling to the Stellar ecosystem.",
 	"Ultra Stellar":
-		"Software engineering company behind Lobstr, StellarX, and StellarTerm — core Stellar wallet and DEX products.",
+		"Software engineering company behind Lobstr, StellarX, and StellarTerm, core Stellar wallet and DEX products.",
 	Paltalabs:
 		"Development team building Soroswap DEX, DeFindex, and other DeFi primitives on Soroban.",
 	"Creit Tech":

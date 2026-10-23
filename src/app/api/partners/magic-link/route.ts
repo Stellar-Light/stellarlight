@@ -43,7 +43,7 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const NEUTRAL = {
 	ok: true,
 	message:
-		"If that email matches a partner account, a sign-in link is on its way — check your inbox.",
+		"If that email matches a partner account, a sign-in link is on its way. Check your inbox.",
 };
 
 async function notifyAdmin(

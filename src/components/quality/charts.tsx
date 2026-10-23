@@ -567,7 +567,7 @@ export function PhaseProgress({
 								key={p.id}
 								className="flex-1 rounded-[2px]"
 								style={{ backgroundColor: tone(p.state) }}
-								title={`${p.id} — ${p.title}: ${p.state}`}
+								title={`${p.id} · ${p.title}: ${p.state}`}
 							/>
 						))}
 					</div>
@@ -643,9 +643,7 @@ export function PhaseProgress({
 							{meter && (
 								<span className="flex flex-col gap-1">
 									<span className="text-[11px] leading-relaxed text-foreground/80 tabular-nums">
-										<span className="text-muted-foreground">
-											{meter.bar} —{" "}
-										</span>
+										<span className="text-muted-foreground">{meter.bar}: </span>
 										{meter.current} → {meter.target} {meter.unit}
 										<span className="text-muted-foreground">
 											{" "}

@@ -281,7 +281,7 @@ export async function POST(req: NextRequest) {
 		if (err instanceof Anthropic.APIError) {
 			return NextResponse.json(
 				{
-					error: "The answer engine hit a snag — the cards below still stand.",
+					error: "The answer engine hit a snag. The cards below still stand.",
 				},
 				{ status: 502, headers: rateLimitHeaders(limit) },
 			);

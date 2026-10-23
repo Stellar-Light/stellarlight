@@ -102,7 +102,7 @@ export default async function EntitiesPage() {
 						Entities & Organizations
 					</h1>
 					<p className="text-sm text-muted-foreground mt-2 max-w-2xl">
-						The teams and companies building on Stellar — ranked by SCF funding
+						The teams and companies building on Stellar, ranked by SCF funding
 						raised across their projects, what they ship, and where they focus.
 					</p>
 				</div>

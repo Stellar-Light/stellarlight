@@ -108,7 +108,7 @@ export async function GET() {
 					payload,
 					"builders",
 					"builders",
-					"Synced from Stellar Passport — small and growing dataset",
+					"Synced from Stellar Passport: small and growing dataset",
 				),
 				collectionStatus(
 					payload,
@@ -126,13 +126,13 @@ export async function GET() {
 					payload,
 					"research-docs",
 					"researchDocs",
-					"Primary research corpus (SEPs, dev docs, releases, audit full text, ecosystem writing) powering /api/research — refreshed daily",
+					"Primary research corpus (SEPs, dev docs, releases, audit full text, ecosystem writing) powering /api/research: refreshed daily",
 				),
 				collectionStatus(
 					payload,
 					"partner-accounts",
 					"partners",
-					"Partner directory profiles (powers /api/partners + /api/partners/match). Counts ALL rows incl. unpublished drafts — /api/partners serves published-only, so its total can be smaller.",
+					"Partner directory profiles (powers /api/partners + /api/partners/match). Counts ALL rows incl. unpublished drafts; /api/partners serves published-only, so its total can be smaller.",
 				),
 			])
 		: [

@@ -133,8 +133,8 @@ export async function GET(req: NextRequest) {
 		.filter((r) => /submission/i.test(r.phase ?? ""))
 		.map((r) => ({
 			id: `scf-round-${r.round}`,
-			title: `SCF Round #${r.round} — submissions OPEN${r.submissionDeadline ? ` until ${r.submissionDeadline}` : ""}`,
-			description: `Stellar Community Fund round #${r.round} is currently accepting submissions${r.submissionDeadline ? ` (deadline ${r.submissionDeadline})` : ""}. The Build Award funds Stellar/Soroban projects — eligibility, rules and the application flow are in the SCF Handbook (https://stellar.gitbook.io/scf-handbook). Apply via https://communityfund.stellar.org.`,
+			title: `SCF Round #${r.round}: submissions OPEN${r.submissionDeadline ? ` until ${r.submissionDeadline}` : ""}`,
+			description: `Stellar Community Fund round #${r.round} is currently accepting submissions${r.submissionDeadline ? ` (deadline ${r.submissionDeadline})` : ""}. The Build Award funds Stellar/Soroban projects: eligibility, rules and the application flow are in the SCF Handbook (https://stellar.gitbook.io/scf-handbook). Apply via https://communityfund.stellar.org.`,
 			technicalRequirements: null,
 			category: "scf",
 			authorName: "Stellar Community Fund",
@@ -257,7 +257,7 @@ export async function GET(req: NextRequest) {
 							currentPhase: null,
 							lastConfirmedRound: null,
 							lastConfirmedRoundNote:
-								"Live verification against communityfund.stellar.org/awards failed at request time — do NOT read this as 'no round open'; check verifyAt directly.",
+								"Live verification against communityfund.stellar.org/awards failed at request time; do NOT read this as 'no round open'; check verifyAt directly.",
 							submissionWindow: { opens: null, closes: null },
 							roundsInProgress: [],
 							asOf: new Date().toISOString().slice(0, 10),
@@ -275,7 +275,7 @@ export async function GET(req: NextRequest) {
 				submitNewBriefAt: "https://stellarlight.xyz/ideas",
 			},
 			funding:
-				"Stellar Community Fund (SCF) — these briefs say what the ecosystem wants built. `open` means the brief is still soliciting; whether SCF accepts a proposal TODAY depends on the round state in meta.scfRound (submissionWindow, currentPhase, roundsInProgress), dated by asOf. Closed briefs are past rounds, surfaced for context.",
+				"Stellar Community Fund (SCF): these briefs say what the ecosystem wants built. `open` means the brief is still soliciting; whether SCF accepts a proposal TODAY depends on the round state in meta.scfRound (submissionWindow, currentPhase, roundsInProgress), dated by asOf. Closed briefs are past rounds, surfaced for context.",
 			rfps,
 		}),
 		{

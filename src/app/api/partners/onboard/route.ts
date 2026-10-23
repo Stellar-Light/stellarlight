@@ -256,7 +256,7 @@ export async function POST(req: NextRequest) {
 		// it can fall back to the manual form instead of showing an error.
 		return NextResponse.json(
 			{
-				error: "AI onboarding isn't available right now — use the form below.",
+				error: "AI onboarding isn't available right now. Use the form below.",
 				unavailable: true,
 			},
 			{ status: 503, headers: { "Retry-After": "2" } },
@@ -304,7 +304,7 @@ export async function POST(req: NextRequest) {
 		if (mode === "extract") {
 			if (messages.length === 0) {
 				return NextResponse.json(
-					{ error: "Nothing to extract yet — have a conversation first." },
+					{ error: "Nothing to extract yet. Have a conversation first." },
 					{ status: 400 },
 				);
 			}
@@ -350,7 +350,7 @@ export async function POST(req: NextRequest) {
 				fields = JSON.parse(text);
 			} catch {
 				return NextResponse.json(
-					{ error: "Extraction produced malformed output — try again." },
+					{ error: "Extraction produced malformed output. Try again." },
 					{ status: 502 },
 				);
 			}
@@ -376,8 +376,7 @@ export async function POST(req: NextRequest) {
 		) {
 			return NextResponse.json(
 				{
-					error:
-						"AI onboarding isn't available right now — use the form below.",
+					error: "AI onboarding isn't available right now. Use the form below.",
 					unavailable: true,
 				},
 				{ status: 503, headers: { "Retry-After": "2" } },
@@ -386,7 +385,7 @@ export async function POST(req: NextRequest) {
 		if (err instanceof Anthropic.APIError) {
 			// Don't leak provider internals to the client.
 			return NextResponse.json(
-				{ error: "AI onboarding hit a snag — use the form below." },
+				{ error: "AI onboarding hit a snag. Use the form below." },
 				{ status: 502 },
 			);
 		}

@@ -239,7 +239,7 @@ export function PartnerMatchmaker({
 			{state.kind === "error" && (
 				<div className="space-y-3">
 					<p className="text-sm text-muted-foreground">
-						The matchmaker is busy right now —{" "}
+						The matchmaker is busy right now:{" "}
 						<Link href="/partners" className="text-foreground underline">
 							browse the directory
 						</Link>{" "}
@@ -253,7 +253,7 @@ export function PartnerMatchmaker({
 				<div className="space-y-4">
 					<h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
 						{state.matches.length === 0
-							? "No partners match — try broadening it"
+							? "No partners match. Try broadening it"
 							: `${state.matches.length} match${state.matches.length === 1 ? "" : "es"}`}
 					</h2>
 					{state.matches.length === 0 ? (

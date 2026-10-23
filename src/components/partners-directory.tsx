@@ -162,7 +162,7 @@ export function PartnersDirectory({
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
 						Anchors, ramps, auditors, infrastructure and protocols builders can
-						integrate with — each profile partner-maintained and
+						integrate with: each profile partner-maintained and
 						freshness-checked.
 					</p>
 				</div>
@@ -188,8 +188,8 @@ export function PartnersDirectory({
 						Not sure who you need? Ask the concierge
 					</span>
 					<span className="block text-xs text-muted-foreground">
-						Describe what you&apos;re building and get matched to real partners
-						— or list your own company.
+						Describe what you&apos;re building and get matched to real partners,
+						or list your own company.
 					</span>
 				</span>
 				<ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all flex-shrink-0" />
@@ -437,7 +437,7 @@ export function PartnersDirectory({
 						</h3>
 					</div>
 					<p className="text-xs text-muted-foreground">
-						Get listed in a short AI-guided chat — no account needed to start.
+						Get listed in a short AI-guided chat. No account needed to start.
 					</p>
 				</div>
 				<Link

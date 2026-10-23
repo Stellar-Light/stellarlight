@@ -159,7 +159,7 @@ function ThinData({
 		>
 			{measuredDays === 0
 				? "No measurements in this window yet."
-				: `Only ${measuredDays} measured day${measuredDays === 1 ? "" : "s"} in this window — not enough yet for an honest trend.`}
+				: `Only ${measuredDays} measured day${measuredDays === 1 ? "" : "s"} in this window. Not enough yet for an honest trend.`}
 		</div>
 	);
 }
@@ -327,7 +327,7 @@ export function StablecoinCharts({
 			<div className="col-span-full lg:col-span-6">
 				<Panel
 					title="Total Stablecoin Market Cap"
-					description="Measured supply × peg price, summed across every asset measured that day. The tooltip gives the asset count — a step in the line when that count jumps is our coverage widening, not the market moving."
+					description="Measured supply × peg price, summed across every asset measured that day. The tooltip gives the asset count; a step in the line when that count jumps is our coverage widening, not the market moving."
 				>
 					{measuredDayCount(mcapTotals) < MIN_MEASURED_DAYS ? (
 						<ThinData measuredDays={measuredDayCount(mcapTotals)} />
@@ -380,7 +380,7 @@ export function StablecoinCharts({
 			<div className="col-span-full lg:col-span-6">
 				<Panel
 					title="Stablecoin Market Share by Token"
-					description={`Share of measured market cap — top ${TOP_N} assets plus Other, stacked to 100%`}
+					description={`Share of measured market cap: top ${TOP_N} assets plus Other, stacked to 100%`}
 				>
 					{shareMeasuredDays < MIN_MEASURED_DAYS ? (
 						<ThinData measuredDays={shareMeasuredDays} height={280} />
@@ -450,7 +450,7 @@ export function StablecoinCharts({
 			<div className="col-span-full lg:col-span-6">
 				<Panel
 					title="Holders by Token"
-					description="Accounts holding a trustline in each asset — log scale, since the biggest token's count can be 1,000x the smallest"
+					description="Accounts holding a trustline in each asset: log scale, since the biggest token's count can be 1,000x the smallest"
 					titleBadge={<LogScaleBadge />}
 				>
 					{holdersMeasuredDays < MIN_MEASURED_DAYS ? (

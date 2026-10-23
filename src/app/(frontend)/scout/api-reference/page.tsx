@@ -6,7 +6,7 @@ import { spec } from "@/lib/openapi-spec";
 export const metadata: Metadata = {
 	title: "API Reference · Stellar Scout | Stellar Light",
 	description:
-		"Endpoint reference for the public read-only APIs that power Stellar Scout — hackathons (curated + DoraHacks), projects search, builders, SDF skills proxy, and ecosystem dev stats.",
+		"Endpoint reference for the public read-only APIs that power Stellar Scout: hackathons (curated + DoraHacks), projects search, builders, SDF skills proxy, and ecosystem dev stats.",
 };
 
 interface EndpointParam {

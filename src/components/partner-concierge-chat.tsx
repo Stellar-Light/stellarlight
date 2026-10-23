@@ -92,7 +92,7 @@ const EXAMPLES = [
 	"I need a USDC off-ramp in Mexico",
 	"Who can audit my Soroban contract?",
 	"Looking for a wallet SDK",
-	"We're an anchor — list us",
+	"We're an anchor: list us",
 ];
 
 const MAILTO =
@@ -110,8 +110,8 @@ const PRICING_LABELS: Record<string, string> = {
 };
 
 function renderValue(v: unknown, key?: string): string {
-	if (v == null || v === "") return "—";
-	if (Array.isArray(v)) return v.length ? v.join(", ") : "—";
+	if (v == null || v === "") return "-";
+	if (Array.isArray(v)) return v.length ? v.join(", ") : "-";
 	if (typeof v === "boolean") return v ? "Yes" : "No";
 	// Enum values are stored lowercase — show the human label, not the raw slug.
 	if (key === "pricingModel") return PRICING_LABELS[String(v)] ?? String(v);
@@ -177,7 +177,7 @@ export function PartnerConciergeChat({
 			}),
 		});
 		if (r.status === 429) {
-			setError("Too many messages just now — give it a moment and try again.");
+			setError("Too many messages just now. Give it a moment and try again.");
 			return null;
 		}
 		const d = await r.json().catch(() => ({}));
@@ -186,9 +186,7 @@ export function PartnerConciergeChat({
 			return null;
 		}
 		if (typeof d.reply !== "string") {
-			setError(
-				"The assistant hit a snag — browse the directory below instead.",
-			);
+			setError("The assistant hit a snag. Browse the directory below instead.");
 			return null;
 		}
 		return {
@@ -359,7 +357,7 @@ export function PartnerConciergeChat({
 				setPhase("preview");
 			} else {
 				setError(
-					"Couldn't build the profile — add a bit more detail and retry.",
+					"Couldn't build the profile. Add a bit more detail and retry.",
 				);
 			}
 		} finally {
@@ -385,7 +383,7 @@ export function PartnerConciergeChat({
 			});
 			const d = await r.json().catch(() => ({}));
 			if (!r.ok) {
-				setError(d.error ?? "Couldn't submit — try again shortly.");
+				setError(d.error ?? "Couldn't submit. Try again shortly.");
 				return;
 			}
 			setDoneMode(d.mode === "claim" ? "claim" : "draft");
@@ -431,14 +429,14 @@ export function PartnerConciergeChat({
 							>
 								directory
 							</Link>
-							. We&apos;ve logged your claim — once we verify you&apos;re with
+							. We&apos;ve logged your claim. Once we verify you&apos;re with
 							the company, we&apos;ll email{" "}
 							<span className="text-foreground">{contactEmail}</span> an invite
 							to manage the profile.
 						</>
 					) : (
 						<>
-							Thanks — <span className="text-foreground">{orgName}</span> is in
+							Thanks. <span className="text-foreground">{orgName}</span> is in
 							the queue. Once reviewed and published, we&apos;ll email{" "}
 							<span className="text-foreground">{contactEmail}</span> an invite
 							to set a password and manage the profile.
@@ -473,7 +471,7 @@ export function PartnerConciergeChat({
 							<label className="block text-xs text-muted-foreground mb-1.5">
 								Work email{" "}
 								<span className="text-muted-foreground/60">
-									— becomes your account login
+									(becomes your account login)
 								</span>
 							</label>
 							<input
@@ -526,7 +524,7 @@ export function PartnerConciergeChat({
 				</div>
 				{error && <div className="text-xs text-red-400">{error}</div>}
 				<p className="text-[11px] text-muted-foreground/60">
-					Fields the AI couldn&apos;t infer are left blank — nothing is made up.
+					Fields the AI couldn&apos;t infer are left blank. Nothing is made up.
 				</p>
 			</div>
 		);

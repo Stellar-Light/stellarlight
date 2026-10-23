@@ -217,7 +217,7 @@ export default async function DigestPage({ params }: { params: Params }) {
 						</h1>
 					</div>
 					<p className="text-muted-foreground">
-						Monthly ecosystem summary — {totalProjects} total projects in the
+						Monthly ecosystem summary: {totalProjects} total projects in the
 						directory
 					</p>
 				</div>
@@ -372,7 +372,7 @@ export default async function DigestPage({ params }: { params: Params }) {
 												{post.title}
 											</span>
 											<span className="text-xs text-muted-foreground">
-												{post.author} —{" "}
+												{post.author} ·{" "}
 												{new Date(post.publishedAt).toLocaleDateString(
 													"en-US",
 													{ month: "short", day: "numeric" },

@@ -33,15 +33,15 @@ export function ReconciliationNote({ data }: { data: Reconciliation }) {
 					with Stellar circulation; DeFiLlama reports{" "}
 					<span className="text-foreground">{data.theirsTracked}</span>. The
 					difference is mostly which assets are counted, not how they are
-					measured — compared by ticker, since a ticker with two issuers is two
+					measured: compared by ticker, since a ticker with two issuers is two
 					assets to us and one line to them.
 				</p>
 				{onlyOursTop.length > 0 && (
 					<p>
 						<span className="text-foreground">
 							{data.onlyOurs.length} we carry that they do not
-						</span>{" "}
-						— largest:{" "}
+						</span>
+						; largest:{" "}
 						{onlyOursTop.map((a, i) => (
 							<span key={a.ticker}>
 								{i > 0 && ", "}
@@ -56,8 +56,8 @@ export function ReconciliationNote({ data }: { data: Reconciliation }) {
 					<p>
 						<span className="text-foreground">
 							{data.onlyTheirs.length} they carry that we do not
-						</span>{" "}
-						—{" "}
+						</span>
+						:{" "}
 						{data.onlyTheirs.map((a, i) => (
 							<span key={a.ticker}>
 								{i > 0 && ", "}

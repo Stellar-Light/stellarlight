@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
 	const need = String((body as { need?: unknown }).need ?? "").trim();
 	if (!need) {
 		return NextResponse.json(
-			{ error: "Provide a `need` — what are you trying to integrate or buy?" },
+			{ error: "Provide a `need`: what are you trying to integrate or buy?" },
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
@@ -205,7 +205,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error:
-					"AI matchmaking isn't available right now — try the /partners directory filters.",
+					"AI matchmaking isn't available right now. Try the /partners directory filters.",
 				unavailable: true,
 			},
 			{
@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
 				need,
 				matches: [],
 				summary:
-					"No partners are currently listed that could match — the directory is still onboarding its pilot cohort.",
+					"No partners are currently listed that could match. The directory is still onboarding its pilot cohort.",
 			},
 			{ headers: rateLimitHeaders(limit) },
 		);
@@ -321,7 +321,7 @@ export async function POST(req: NextRequest) {
 			parsed = JSON.parse(text);
 		} catch {
 			return NextResponse.json(
-				{ error: "Matchmaker produced malformed output — try again." },
+				{ error: "Matchmaker produced malformed output. Try again." },
 				{ status: 502, headers: rateLimitHeaders(limit) },
 			);
 		}
@@ -369,8 +369,7 @@ export async function POST(req: NextRequest) {
 		if (err instanceof Anthropic.APIError) {
 			return NextResponse.json(
 				{
-					error:
-						"Matchmaking hit a snag — try the /partners directory filters.",
+					error: "Matchmaking hit a snag. Try the /partners directory filters.",
 				},
 				{ status: 502, headers: rateLimitHeaders(limit) },
 			);

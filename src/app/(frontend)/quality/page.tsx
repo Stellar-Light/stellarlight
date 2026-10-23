@@ -334,7 +334,7 @@ export default function QualityPage() {
 							return (
 								<p className="text-xs text-muted-foreground/80 mb-5 max-w-2xl leading-relaxed">
 									{lag.count} of those have been waiting longer than{" "}
-									{lag.graceDays} days — the oldest for {lag.oldestDays}. A
+									{lag.graceDays} days, the oldest for {lag.oldestDays}. A
 									re-baseline that has not happened in {lag.oldestDays} days is
 									not a wait any more.
 								</p>
@@ -409,8 +409,8 @@ export default function QualityPage() {
 								</div>
 								{stale.length > 0 && (
 									<p className="text-[11px] text-muted-foreground/80 mt-2 max-w-2xl leading-relaxed">
-										A stale reading is a reading of the past, not the present —
-										it is never counted as passing.
+										A stale reading is a reading of the past, not the present.
+										It is never counted as passing.
 									</p>
 								)}
 								{(northStar.stale || northStar.belowTarget) &&
@@ -615,7 +615,7 @@ export default function QualityPage() {
 			{/* ── the autonomy ladder: bounded agent lanes, counters measured ── */}
 			<Card
 				title="Agent lanes: autonomy earned, not assumed"
-				description="A lane is a bounded, evidence-only job an agent runs on schedule. Advancement is measured — a lane earns auto-merge only after consecutive weeks where a human reviewed and changed nothing."
+				description="A lane is a bounded, evidence-only job an agent runs on schedule. Advancement is measured: a lane earns auto-merge only after consecutive weeks where a human reviewed and changed nothing."
 				className="mb-6"
 			>
 				{getLanes().map((lane) => (
@@ -645,14 +645,14 @@ export default function QualityPage() {
 						<Stat
 							label="Corrections"
 							value={String(lane.corrections.length)}
-							sub="human had to fix a stamp — resets the counter"
+							sub="human had to fix a stamp: resets the counter"
 						/>
 					</div>
 				))}
 				<p className="text-[11px] text-muted-foreground leading-relaxed mt-4">
 					Weeks are counted only from successful scheduled runs, and the counter
 					is derived daily from the lane&apos;s live write-set diffed against
-					the committed snapshot — a quiet failure reads as a red week, never a
+					the committed snapshot; a quiet failure reads as a red week, never a
 					clean one. A stamp a human upgrades to human-verified stays clean; a
 					stamp a human removes or changes resets the count to zero.
 				</p>
@@ -660,8 +660,8 @@ export default function QualityPage() {
 
 			{/* ── the same counter, for EVERY lane that can write to production ── */}
 			<Card
-				title="Lane autonomy — intervention-free weeks"
-				description="Every workflow in this repo that can write to production data, and the weeks each has earned toward running its execute unattended. Built by reading the workflow files, counted from GitHub's own run history, and reset by the intervention log — no lane's number is asserted here."
+				title="Lane autonomy: intervention-free weeks"
+				description="Every workflow in this repo that can write to production data, and the weeks each has earned toward running its execute unattended. Built by reading the workflow files, counted from GitHub's own run history, and reset by the intervention log; no lane's number is asserted here."
 				right={
 					<EvidenceLink path="improvements/audits/lane-autonomy-latest.json" />
 				}
@@ -680,7 +680,7 @@ export default function QualityPage() {
 					<Stat
 						label={`At ${laneAutonomy.thresholdWeeks}+ clean weeks`}
 						value={String(laneAutonomy.summary.eligibleForStage2)}
-						sub="eligible — the promotion is still a human call"
+						sub="eligible: the promotion is still a human call"
 					/>
 					<Stat
 						label="Promoted to Stage 2"
@@ -735,7 +735,7 @@ export default function QualityPage() {
 											}
 										>
 											{l.unattendedRuns === null
-												? "—"
+												? "-"
 												: `${l.unattendedRuns} / ${l.attendedRuns}`}
 										</td>
 										<td
@@ -755,12 +755,12 @@ export default function QualityPage() {
 										<td className="py-1.5 text-muted-foreground/80 max-w-[22rem] truncate">
 											{l.lastInterventionAt ? (
 												<span
-													title={`${l.lastInterventionAt} — ${l.lastInterventionWhat}`}
+													title={`${l.lastInterventionAt}: ${l.lastInterventionWhat}`}
 												>
 													{l.lastInterventionAt} · {l.lastInterventionWhat}
 												</span>
 											) : (
-												"—"
+												"-"
 											)}
 										</td>
 									</tr>
@@ -779,7 +779,7 @@ export default function QualityPage() {
 						Elapsed time earns nothing. The weeks must be consecutive and must
 						run up to this one, so a lane nobody has run sits at zero however
 						long it has been quiet, and four scattered good weeks are not four
-						clean weeks. Only runs the lane started ITSELF count — a
+						clean weeks. Only runs the lane started ITSELF count; a
 						hand-dispatched execute is a person operating the lane, and is
 						reported here rather than counted. The run counts are runs, not
 						writes: which of them wrote is what the week count is proven from.
@@ -896,7 +896,7 @@ export default function QualityPage() {
 					</div>
 					<p className="text-[11px] text-muted-foreground leading-relaxed">
 						A recurrence is a NEW finding on a surface-and-failure-mode pair we
-						had already closed <em>on silence</em> — the detector went quiet and
+						had already closed <em>on silence</em>: the detector went quiet and
 						nobody re-probed. It is the closure rule's real question: did we
 						close without repairing, and did the same kind of failure come back?
 						Steady state is that rate at zero. Reopened counts the exact-id
@@ -905,9 +905,9 @@ export default function QualityPage() {
 						publishing them is the point.
 					</p>
 					<p className="text-[11px] text-muted-foreground leading-relaxed mt-2">
-						For context, the repeat-<em>class</em> rate — a finding whose §0
+						For context, the repeat-<em>class</em> rate, a finding whose §0
 						class (identity, taxonomy coverage, contract completeness…) already
-						had any prior finding — is{" "}
+						had any prior finding, is{" "}
 						{entities.findings.closure.classRecurrence.last30d.ratePct}% over 30
 						days across{" "}
 						{entities.findings.closure.classRecurrence.byClass.length} classes.
@@ -1396,12 +1396,12 @@ export default function QualityPage() {
 								sub={
 									progress.lessonGuards.guardMissing
 										? `${progress.lessonGuards.unguarded} say Guard: none · ${progress.lessonGuards.guardMissing} name a file that does not exist`
-										: "Say Guard: none — written down, never became a check"
+										: "Say Guard: none; written down, never became a check"
 								}
 							/>
 						</div>
 						<p className="text-[11px] text-muted-foreground leading-relaxed">
-							A lesson counts only when it became a check — a test, a guard
+							A lesson counts only when it became a check: a test, a guard
 							script or a workflow that goes red when the class returns. Each
 							file names its guard with a{" "}
 							<code className="font-mono">Guard:</code> line;{" "}

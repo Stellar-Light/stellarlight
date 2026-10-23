@@ -255,7 +255,7 @@ export async function GET(req: NextRequest) {
 		result.categories = {
 			totalProjects: projects.length,
 			scope:
-				"Active projects only (status Live / Pre-Release / Development). Differs from /api/status.sources.projects, which counts the FULL collection incl. Inactive/other — don't merge the two without labeling the source.",
+				"Active projects only (status Live / Pre-Release / Development). Differs from /api/status.sources.projects, which counts the FULL collection incl. Inactive/other: don't merge the two without labeling the source.",
 			distribution: sorted,
 		};
 	}
@@ -462,15 +462,15 @@ export async function GET(req: NextRequest) {
 					};
 				} else {
 					deltaUnavailable =
-						"No prior funding snapshot with a different project set is recorded yet — snapshot history starts at snapshotAsOf. Re-read after the awarded set changes to receive addedProjects/removedProjects; a shifted headline before then is an amount revision within the SAME set (projectSetHash unchanged).";
+						"No prior funding snapshot with a different project set is recorded yet; snapshot history starts at snapshotAsOf. Re-read after the awarded set changes to receive addedProjects/removedProjects; a shifted headline before then is an amount revision within the SAME set (projectSetHash unchanged).";
 				}
 			} catch {
 				deltaUnavailable =
-					"Snapshot store unavailable this request — the current-vs-previous comparison could not be computed. The funding totals above are unaffected.";
+					"Snapshot store unavailable this request; the current-vs-previous comparison could not be computed. The funding totals above are unaffected.";
 			}
 		} else {
 			deltaUnavailable =
-				"Snapshot store unavailable this request — the current-vs-previous comparison could not be computed. The funding totals above are unaffected.";
+				"Snapshot store unavailable this request; the current-vs-previous comparison could not be computed. The funding totals above are unaffected.";
 		}
 
 		result.funding = {
@@ -499,9 +499,9 @@ export async function GET(req: NextRequest) {
 			snapshotDelta,
 			deltaUnavailable,
 			deltaBasis:
-				"snapshotAsOf = when the CURRENT projectSetHash was first observed (persisted snapshot time). previousSnapshot = the most recent stored snapshot with a DIFFERENT project set; snapshotDelta lists the slugs added/removed between it and this response, with mechanical reason codes for removals (dedupe = record now points at a canonical slug; eligibility-reclassification = record left the active status pool; source-correction = scf.awarded corrected to false; unknown = no mechanical signal). totalUSDDelta = this response's total minus the previous snapshot's. When snapshotDelta is null, deltaUnavailable says why (no differing prior snapshot yet, or store unavailable) — never infer a cause from headline drift alone.",
+				"snapshotAsOf = when the CURRENT projectSetHash was first observed (persisted snapshot time). previousSnapshot = the most recent stored snapshot with a DIFFERENT project set; snapshotDelta lists the slugs added/removed between it and this response, with mechanical reason codes for removals (dedupe = record now points at a canonical slug; eligibility-reclassification = record left the active status pool; source-correction = scf.awarded corrected to false; unknown = no mechanical signal). totalUSDDelta = this response's total minus the previous snapshot's. When snapshotDelta is null, deltaUnavailable says why (no differing prior snapshot yet, or store unavailable); never infer a cause from headline drift alone.",
 			countBasis:
-				"Counts distinct PROJECTS with scf.awarded=true (not awarded submissions — SDF's own counters count submissions, so totals differ by design). Dollar totals are in-house reconstructions: SCF does not publish per-award amounts for all rounds (some are XLM-denominated or undisclosed — see scfAmountStatus on project rows), so cross-source totals can legitimately disagree. Round membership comes from official award pages. byRound apportions each project's total equally across its awarded rounds because per-round amounts are unpublished. NOTE: byRound[].count is per-round MEMBERSHIP (a project is counted in each round it won), so the sum of byRound counts is intentionally GREATER than scfAwardedProjects — never add round counts to get a project total.",
+				"Counts distinct PROJECTS with scf.awarded=true (not awarded submissions; SDF's own counters count submissions, so totals differ by design). Dollar totals are in-house reconstructions: SCF does not publish per-award amounts for all rounds (some are XLM-denominated or undisclosed; see scfAmountStatus on project rows), so cross-source totals can legitimately disagree. Round membership comes from official award pages. byRound apportions each project's total equally across its awarded rounds because per-round amounts are unpublished. NOTE: byRound[].count is per-round MEMBERSHIP (a project is counted in each round it won), so the sum of byRound counts is intentionally GREATER than scfAwardedProjects; never add round counts to get a project total.",
 			postHackathonStatusFunnel: {
 				scope: `hackathon-linked projects only (${hackathonProjects.length} of ${projects.length} active)`,
 				...funnel,
@@ -546,7 +546,7 @@ export async function GET(req: NextRequest) {
 			provider: "DefiLlama",
 			top10,
 			basis:
-				"Sum of per-project tvlUSD across ACTIVE directory projects tracked on DefiLlama (tvlUSD != null; null = not tracked there, never zero — untracked protocols are simply absent, so this UNDERCOUNTS chain-wide TVL). Values are per-protocol DefiLlama totals refreshed on a curated cadence (asOf = most recent per-project tvlAsOf), CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated — never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf also ride each /api/projects/search row.",
+				"Sum of per-project tvlUSD across ACTIVE directory projects tracked on DefiLlama (tvlUSD != null; null = not tracked there, never zero: untracked protocols are simply absent, so this UNDERCOUNTS chain-wide TVL). Values are per-protocol DefiLlama totals refreshed on a curated cadence (asOf = most recent per-project tvlAsOf), CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated: never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf also ride each /api/projects/search row.",
 		};
 	}
 
@@ -689,7 +689,7 @@ export async function GET(req: NextRequest) {
 					testsPresent: testsCount,
 				},
 				basis:
-					"Soroban-SDK toolchain status per scanned repo (soroban-versions.ts dated table; 'unknown' = version unparsed, never a demotion). deprecatedRepos capped at 50, deprecatedTotal is the full count. engineeringPractice counts repos whose latest scan recorded tree-level CI/test presence — presence facts only, not CI results; reposWithPracticeFacts < scannedRepos until re-scans reach the corpus.",
+					"Soroban-SDK toolchain status per scanned repo (soroban-versions.ts dated table; 'unknown' = version unparsed, never a demotion). deprecatedRepos capped at 50, deprecatedTotal is the full count. engineeringPractice counts repos whose latest scan recorded tree-level CI/test presence: presence facts only, not CI results; reposWithPracticeFacts < scannedRepos until re-scans reach the corpus.",
 			};
 		} catch {
 			// best-effort — rollup absent on error, never fabricated

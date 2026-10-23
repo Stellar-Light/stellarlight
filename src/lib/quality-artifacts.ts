@@ -341,7 +341,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			key: "curated-canonical",
 			title: "Curated canonical repos resolve",
 			promise:
-				"Every repo we call authoritative is indexed and carries code signals — a curated name that matches no row silently degrades the query it was written for.",
+				"Every repo we call authoritative is indexed and carries code signals; a curated name that matches no row silently degrades the query it was written for.",
 			measure: {
 				value: curatedCanonical.scanned,
 				of: curatedCanonical.curatedTotal,
@@ -350,7 +350,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			sub: `${curatedCanonical.scanned}/${curatedCanonical.curatedTotal} curated canonical repos indexed and code-scanned`,
 			details: [
 				`${curatedCanonical.absent.length} absent (curated name matches no row)`,
-				`${curatedCanonical.unscanned.length} indexed but no code signals — invisible to code-evidence ranking and to the tier gate`,
+				`${curatedCanonical.unscanned.length} indexed but no code signals: invisible to code-evidence ranking and to the tier gate`,
 				// The JSON import types an empty array as never[], so a green
 				// artifact — [] for the first time on 2026-08-31 — broke the build
 				// while a red one compiled. Explicit element type, not a cast.
@@ -398,7 +398,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				details: [
 					...decided
 						.slice(0, 4)
-						.map((r) => `${r.verdict}: ${r.slug} (${r.to}) — ${r.reason}`),
+						.map((r) => `${r.verdict}: ${r.slug} (${r.to}): ${r.reason}`),
 					`${t.couldNotCheck} could-not-check: a 403, a timeout, a client-rendered shell or a redirect to another site is a page we did not read, never a contradiction`,
 					"read-only: this guard files a finding for a human and never writes a status, because reading a marketing banner as a product state is the failure it exists to catch",
 				],
@@ -422,7 +422,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			key: "consumption",
 			title: "Computed values reach a serving path",
 			promise:
-				"Every field our machinery computes is read by something that shapes an agent's answer — a value nothing consumes cannot change what anyone is told.",
+				"Every field our machinery computes is read by something that shapes an agent's answer; a value nothing consumes cannot change what anyone is told.",
 			measure: {
 				value: consumption.consumed,
 				of: consumption.checked,
@@ -431,9 +431,9 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			sub: `${consumption.consumed}/${consumption.checked} computed fields reach a serving path, or an engine whose output is served`,
 			details: [
 				...consumption.dead.map(
-					(d: { field: string; why: string }) => `DEAD: ${d.field} — ${d.why}`,
+					(d: { field: string; why: string }) => `DEAD: ${d.field}: ${d.why}`,
 				),
-				"a script or a test does not count as consumption — that is how codeProofTier passed for months while only a report called it",
+				"a script or a test does not count as consumption; that is how codeProofTier passed for months while only a report called it",
 			],
 			asOf: consumption.asOf.slice(0, 10),
 			cadence: "on-deploy",
@@ -461,7 +461,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			key: "workflow-health",
 			title: "Guard lanes that actually run",
 			promise:
-				"Every automated lane in the repo has completed a real run recently — a guard that never executes is a promise, not a check.",
+				"Every automated lane in the repo has completed a real run recently; a guard that never executes is a promise, not a check.",
 			measure: {
 				value: workflowHealth.healthy,
 				of: workflowHealth.checked,
@@ -471,7 +471,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			details: [
 				...workflowHealth.broken.map(
 					(b: { file: string; state: string; why: string }) =>
-						`${b.state.toUpperCase()}: ${b.file} — ${b.why}`,
+						`${b.state.toUpperCase()}: ${b.file}: ${b.why}`,
 				),
 				"judged against the workflow file as it stands: runs from a since-edited or never-merged version are ignored, so a fixed lane stops being red",
 				"a lane that exits 1 to report a finding is the guard working, and is not counted here",
@@ -509,14 +509,14 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				of: null,
 				unit: "errors",
 			},
-			sub: `${scriptsTypes.total} type errors in scripts/, ${scriptsTypes.baselined} of them baselined — new ones fail the build`,
+			sub: `${scriptsTypes.total} type errors in scripts/, ${scriptsTypes.baselined} of them baselined; new ones fail the build`,
 			details: [
 				...(scriptsTypes.added.length
 					? [`NEW (blocking): ${scriptsTypes.added.join("; ")}`]
 					: []),
 				...(scriptsTypes.fixed.length
 					? [
-							`fixed but still baselined — re-run with --update: ${scriptsTypes.fixed.join("; ")}`,
+							`fixed but still baselined. Re-run with --update: ${scriptsTypes.fixed.join("; ")}`,
 						]
 					: []),
 				"identity is file + error code + message, without line numbers, so an unrelated edit above an error does not read as a regression",
@@ -548,7 +548,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			key: "answer-dating",
 			title: "Served values a consumer can date",
 			promise:
-				"Every value we serve carries a date that covers IT — or says plainly that it cannot be dated. A value wearing a neighbour's timestamp is a wrong answer with a citation.",
+				"Every value we serve carries a date that covers IT, or says plainly that it cannot be dated. A value wearing a neighbour's timestamp is a wrong answer with a citation.",
 			measure: {
 				value: answerDating.valuesChecked - answerDating.undated,
 				of: answerDating.valuesChecked,
@@ -557,8 +557,8 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			sub: `${answerDating.valuesChecked - answerDating.undated}/${answerDating.valuesChecked} served values are dated in their own scope, or documented as undatable`,
 			details: [
 				"explainRepo.answerAsOf is the pattern: NULL for a DeepWiki answer, because DeepWiki exposes no index date and inventing one would make an unknown look measured",
-				"scoping cuts both ways: verifyClaim's confidence.ageDays dates the numbers inside confidence but NOT the root-level verdict beside it — so verifyClaim.verdict is carried as named debt, not excused; an admission only counts when the description speaks to datability itself ('no index date'), never bare 'null' or 'unknown'",
-				"limit: a scope holding one date is treated as dating every value in it, so this catches the sharper shape only — a value with NO date in scope while other objects in the response carry dates",
+				"scoping cuts both ways: verifyClaim's confidence.ageDays dates the numbers inside confidence but NOT the root-level verdict beside it, so verifyClaim.verdict is carried as named debt, not excused; an admission only counts when the description speaks to datability itself ('no index date'), never bare 'null' or 'unknown'",
+				"limit: a scope holding one date is treated as dating every value in it, so this catches the sharper shape only: a value with NO date in scope while other objects in the response carry dates",
 			],
 			asOf: answerDating.asOf.slice(0, 10),
 			cadence: "on-deploy",
@@ -594,7 +594,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				of: coverageGaps.scf.total,
 				unit: "projects",
 			},
-			sub: `${coverageGaps.scf.served}/${coverageGaps.scf.total} SCF projects served — ${coverageGaps.scf.absent} absent${scfAbsentAwarded === null ? "" : scfAbsentAwarded === coverageGaps.scf.absent ? ", every one an SCF awardee" : `, ${scfAbsentAwarded} of them SCF awardees`}`,
+			sub: `${coverageGaps.scf.served}/${coverageGaps.scf.total} SCF projects served: ${coverageGaps.scf.absent} absent${scfAbsentAwarded === null ? "" : scfAbsentAwarded === coverageGaps.scf.absent ? ", every one an SCF awardee" : `, ${scfAbsentAwarded} of them SCF awardees`}`,
 			details: [
 				`${coverageGaps.scf.absent} SCF-funded projects the directory does not serve`,
 				`DefiLlama: ${coverageGaps.defillama.missing} missing of ${coverageGaps.defillama.stellarListed} Stellar-listed`,
@@ -625,7 +625,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					).corroboratedAbsent ?? []
 				).map(
 					(c) =>
-						`corroborated by BOTH rosters — ${c.name} (${c.slug}) is on the SCF absent list AND listed by DefiLlama on Stellar, below the TVL floor that hid it`,
+						`corroborated by BOTH rosters: ${c.name} (${c.slug}) is on the SCF absent list AND listed by DefiLlama on Stellar, below the TVL floor that hid it`,
 				),
 			],
 			asOf: coverageGaps.asOf.slice(0, 10),
@@ -648,7 +648,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			key: "deepwiki-calibration",
 			title: "Code-depth calibration",
 			promise:
-				"Repo depth grades agree with independent code analysis where both exist — on a sample large enough for the rate to mean something.",
+				"Repo depth grades agree with independent code analysis where both exist, on a sample large enough for the rate to mean something.",
 			measure: { value: deepwiki.agreementRate, of: null, unit: "%" },
 			// The headline CARRIES its n. "100%" on three repos read as a strong
 			// result at a glance while the sample sat in the subtitle nobody
@@ -658,9 +658,9 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 			details: [
 				`${deepwiki.disagreements.length} disagreements`,
 				"two graders, recorded per row and never pooled silently: DeepWiki for the few answer-key repos it has indexed, Grok (agentic, reads the repo) for the rest",
-				"the binding constraints are EXTERNAL: DeepWiki's index covers ~4 of the 86 long-tail answer-key repos, and the Grok balance exhausted mid-run (HTTP 402) after 9 verdicts — topping it up or DeepWiki indexing more of the key is what grows n",
+				"the binding constraints are EXTERNAL: DeepWiki's index covers ~4 of the 86 long-tail answer-key repos, and the Grok balance exhausted mid-run (HTTP 402) after 9 verdicts: topping it up or DeepWiki indexing more of the key is what grows n",
 				deepwiki.frame.graded < DEEPWIKI_MIN_GRADED
-					? `SAMPLE TOO SMALL: ${deepwiki.frame.graded} co-graded repos is under the ${DEEPWIKI_MIN_GRADED} needed to claim a rate. This row is red on insufficient evidence, not on a detected disagreement — re-run against a sample with more co-gradeable repos.`
+					? `SAMPLE TOO SMALL: ${deepwiki.frame.graded} co-graded repos is under the ${DEEPWIKI_MIN_GRADED} needed to claim a rate. This row is red on insufficient evidence, not on a detected disagreement; re-run against a sample with more co-gradeable repos.`
 					: `sample meets the ${DEEPWIKI_MIN_GRADED}-repo floor`,
 			],
 			asOf: "2026-07-10",
@@ -712,18 +712,18 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					...(probed
 						? []
 						: [
-								"the catalog could not be read on this run — the counts below are not a measurement",
+								"the catalog could not be read on this run; the counts below are not a measurement",
 							]),
 					`${lagging} op(s) lagging within the ${ravenDrift.graceDays}-day re-baseline grace window (expected)`,
 					`${missing} op(s) missing beyond grace`,
 					...(undiscoverable
 						? [
-								`${undiscoverable} op(s) in the catalog that our own routing words do not reach — our fix`,
+								`${undiscoverable} op(s) in the catalog that our own routing words do not reach; our fix`,
 							]
 						: []),
 					...(uncataloged.length
 						? [
-								`${uncataloged.length} op(s) callable but absent from the consumer's discovery index past the ${ravenDrift.graceDays}-day grace window (${uncataloged.join(", ")}) — an agent that does not already know the name cannot find them, and no wording of ours can change that`,
+								`${uncataloged.length} op(s) callable but absent from the consumer's discovery index past the ${ravenDrift.graceDays}-day grace window (${uncataloged.join(", ")}): an agent that does not already know the name cannot find them, and no wording of ours can change that`,
 							]
 						: []),
 					`contract ${ravenDrift.specVersion} at measurement`,
@@ -1006,7 +1006,7 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 					`open by surface: ${surfaces}`,
 					`${L.total} tracked · ${L.inWave} in-wave · ${L.verified} verified · ${L.cleared} auto-cleared (detector stopped flagging)`,
 					`closure basis: ${L.verified} verified deliberately · ${L.clearedByReprobe ?? 0} cleared on a live re-probe that PASSED · ${L.clearedOnSilence ?? 0} cleared only because a detector stopped reporting`,
-					`that last group is the re-probe backlog, not a result: a detector going quiet is indistinguishable from a gap nobody asked about again. Spot-check 2026-08-31 — kutana, etesia and octopos sit in it, are still absent from the directory, and each carries SCF round badges.`,
+					`that last group is the re-probe backlog, not a result: a detector going quiet is indistinguishable from a gap nobody asked about again. Spot-check 2026-08-31: kutana, etesia and octopos sit in it, are still absent from the directory, and each carries SCF round badges.`,
 					L.staleHighOpen > 0
 						? `${L.staleHighOpen} high-severity finding(s) stale >30d, work them down`
 						: "no high-severity finding neglected past 30 days",

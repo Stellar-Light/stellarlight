@@ -94,7 +94,7 @@ export async function generateMetadata({
 	const skill = await loadSkill(slug);
 	if (!skill) return { title: "Skill not found" };
 
-	const title = `${skill.name} — Stellar Skill`;
+	const title = `${skill.name} | Stellar Skill`;
 	const description = skill.tagline ?? truncate(skill.description, 160);
 	const canonical = `${SITE_URL}/skills/${skill.slug}`;
 	const ogUrl = `${SITE_URL}/api/skills/${skill.slug}/og`;

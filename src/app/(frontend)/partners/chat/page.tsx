@@ -6,7 +6,7 @@ import { PartnerFinder } from "@/components/partner-finder";
 export const metadata: Metadata = {
 	title: "Find a partner | Stellar Partners",
 	description:
-		"Describe what you're building and get matched to real Stellar partners — anchors, ramps, auditors, infrastructure. Or list your own company. A short AI-guided chat, no account needed.",
+		"Describe what you're building and get matched to real Stellar partners: anchors, ramps, auditors, infrastructure. Or list your own company. A short AI-guided chat, no account needed.",
 };
 
 export default async function PartnerConciergePage({
@@ -36,8 +36,8 @@ export default async function PartnerConciergePage({
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
 						Describe what you&apos;re building and the concierge will match you
-						to real Stellar partners — anchors, ramps, auditors, infrastructure
-						— or help you get your own company listed. No account needed. Prefer
+						to real Stellar partners (anchors, ramps, auditors, infrastructure)
+						or help you get your own company listed. No account needed. Prefer
 						to browse?{" "}
 						<Link
 							href="/partners"

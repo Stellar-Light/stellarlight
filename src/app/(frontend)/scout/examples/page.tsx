@@ -5,7 +5,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
 	title: "Examples · Stellar Scout | Stellar Light",
 	description:
-		"Sample prompts and walk-throughs of full Stellar Scout sessions — Conversational and Deep Dive — including gap classification, SCF history queries, and hackathon track research.",
+		"Sample prompts and walk-throughs of full Stellar Scout sessions, Conversational and Deep Dive, including gap classification, SCF history queries, and hackathon track research.",
 };
 
 const SAMPLE_PROMPTS = [
@@ -22,7 +22,7 @@ const SAMPLE_PROMPTS = [
 	{
 		title: "Spot Stellar builders",
 		prompt:
-			'"Find Stellar builders who\'ve shipped Soroban contracts (small directory — flag any gaps)."',
+			'"Find Stellar builders who\'ve shipped Soroban contracts (small directory: flag any gaps)."',
 	},
 	{
 		title: "Surface SCF history",
@@ -48,7 +48,7 @@ const SAMPLE_PROMPTS = [
 
 const SESSIONS = [
 	{
-		title: "Conversational — check what's been built",
+		title: "Conversational: check what's been built",
 		eyebrow: "Example 1",
 		mode: "conversational" as const,
 		userPrompt:
@@ -83,22 +83,22 @@ const SESSIONS = [
 				},
 			],
 			footer:
-				"Combined: $548k SCF-funded across 4 teams. None target a specific geographic corridor yet — that's the differentiator if you're building one.",
+				"Combined: $548k SCF-funded across 4 teams. None target a specific geographic corridor yet. That's the differentiator if you're building one.",
 		},
 	},
 	{
-		title: "Deep Dive — vet a new idea",
+		title: "Deep Dive: vet a new idea",
 		eyebrow: "Example 2",
 		mode: "deepdive" as const,
 		userPrompt:
-			'"I want to build a privacy-preserving stablecoin on Stellar — Zcash-style shielded pool but for USDC. Vet this idea."',
+			'"I want to build a privacy-preserving stablecoin on Stellar: Zcash-style shielded pool but for USDC. Vet this idea."',
 		steps: [
-			"Restate + reframe: \"You're proposing a shielded stablecoin with hidden balances. Before searching: the regulatory layer (Tornado Cash sanctioning) makes pure privacy a dead-end on Stellar. The real wedge is *selective disclosure* — privacy by default, compliance-readable by warrant. I'll vet that angle.\"",
+			"Restate + reframe: \"You're proposing a shielded stablecoin with hidden balances. Before searching: the regulatory layer (Tornado Cash sanctioning) makes pure privacy a dead-end on Stellar. The real wedge is *selective disclosure*: privacy by default, compliance-readable by warrant. I'll vet that angle.\"",
 			"GET /api/projects/search?q=privacy+stablecoin+confidential → 1 adjacent match (XLM shielded prototype, abandoned).",
-			"Crowdedness 2/10. Partial gap — 1 abandoned adjacent project, 0 SCF-funded, 0 hackathon winners in this exact lane.",
+			"Crowdedness 2/10. Partial gap: 1 abandoned adjacent project, 0 SCF-funded, 0 hackathon winners in this exact lane.",
 			"GET /api/skills/zk-proofs → quote the SDF skill's ZK primitives section inline. Recommend installing https://skills.stellar.org/skills/zk-proofs/SKILL.md + soroban.",
 			"GET /api/builders?q=zk → surface candidates with the small-and-growing caveat.",
-			"GET /api/projects/search?q=privacy+zk&scfAwarded=1 → report 0 SCF-funded privacy/ZK projects on Stellar today — funding signal is open.",
+			"GET /api/projects/search?q=privacy+zk&scfAwarded=1 → report 0 SCF-funded privacy/ZK projects on Stellar today; funding signal is open.",
 			"GET /api/rfps?q=privacy → no open RFP matches; suggest the user submits one at stellarlight.xyz/ideas.",
 		],
 		response: {
@@ -128,7 +128,7 @@ const SESSIONS = [
 				{
 					label: "Funding signal",
 					value: "Open",
-					meta: "0 SCF-funded ZK/privacy projects on Stellar — significant whitespace.",
+					meta: "0 SCF-funded ZK/privacy projects on Stellar: significant whitespace.",
 				},
 				{
 					label: "Next step",
@@ -200,7 +200,7 @@ const SESSIONS = [
 		],
 		response: {
 			summary:
-				"Past Stellar Hacks events with documented track payouts (curated entries only — DoraHacks events show pool only):",
+				"Past Stellar Hacks events with documented track payouts (curated entries only; DoraHacks events show pool only):",
 			rows: [
 				{
 					label: "Stellar Hacks: Agents",
@@ -224,7 +224,7 @@ const SESSIONS = [
 				},
 			],
 			footer:
-				"Curators haven't tagged track-level data on most DoraHacks-sourced events yet, so I can't rank track payouts. For Stellar Hacks: Agents specifically, the event externalUrl has track results — recommend checking that. I'll be more useful here once tracks are curated into the Hackathons collection.",
+				"Curators haven't tagged track-level data on most DoraHacks-sourced events yet, so I can't rank track payouts. For Stellar Hacks: Agents specifically, the event externalUrl has track results. Recommend checking that. I'll be more useful here once tracks are curated into the Hackathons collection.",
 		},
 	},
 	{
@@ -274,7 +274,7 @@ const SESSIONS = [
 				},
 			],
 			footer:
-				"Funding skews toward end-user / B2B payment products, not pure infra. If your idea is in this space, you're competing for SCF dollars against established teams — pick a regional corridor or a B2B vertical they don't cover. None target programmatic agentic payments yet (x402, MPP) — that's a real whitespace.",
+				"Funding skews toward end-user / B2B payment products, not pure infra. If your idea is in this space, you're competing for SCF dollars against established teams. Pick a regional corridor or a B2B vertical they don't cover. None target programmatic agentic payments yet (x402, MPP). That's a real whitespace.",
 		},
 	},
 	{
@@ -282,7 +282,7 @@ const SESSIONS = [
 		eyebrow: "Example 6",
 		mode: "conversational" as const,
 		userPrompt:
-			'"Is there an open Stellar RFP that matches my idea — a real-time price API for Soroban tokens?"',
+			'"Is there an open Stellar RFP that matches my idea, a real-time price API for Soroban tokens?"',
 		steps: [
 			"GET /api/rfps?q=price+api+soroban → filter curated RFPs by keyword overlap.",
 			"Return matches with title, description, technical requirements, quarter, URL.",
@@ -313,7 +313,7 @@ const SESSIONS = [
 				},
 			],
 			footer:
-				'Your idea aligns with an existing open RFP — no need to reinvent. The brief is specific (VWAP weighting, SEP-41 support, configurable liquidity thresholds) — read the full RFP before applying. Adjacent RFP that overlaps: "DeFi Positions API" (Q1 2026) — same author, complementary scope.',
+				'Your idea aligns with an existing open RFP. No need to reinvent. The brief is specific (VWAP weighting, SEP-41 support, configurable liquidity thresholds). Read the full RFP before applying. Adjacent RFP that overlaps: "DeFi Positions API" (Q1 2026): same author, complementary scope.',
 		},
 	},
 	{
@@ -325,11 +325,11 @@ const SESSIONS = [
 		steps: [
 			"GET /api/partners?type=audit-firm&q=soroban → vetted audit firms with services + accepting-clients.",
 			"GET /api/partners?type=anchor&region=latam&q=usdc+off-ramp → LatAm anchors with stellar.toml-verified assets/SEPs/ramps.",
-			"Only surface partners the API actually returns — never invent one. Skip archived; note who's accepting clients.",
+			"Only surface partners the API actually returns. Never invent one. Skip archived; note who's accepting clients.",
 			"Link each profile: stellarlight.xyz/partners/{slug} (capabilities, compliance & corridors, contact).",
 		],
 		response: {
-			summary: "Two lists — auditors, then LatAm USDC off-ramp anchors:",
+			summary: "Two lists (auditors, then LatAm USDC off-ramp anchors):",
 			rows: [
 				{
 					label: "Veridise / OtterSec / Runtime Verification",
@@ -348,7 +348,7 @@ const SESSIONS = [
 				},
 			],
 			footer:
-				"Every partner shown is a real, published listing with a contact path — freshness-checked, not a scraped guess. Full compliance (licenses, KYC, Travel Rule) lives on each profile.",
+				"Every partner shown is a real, published listing with a contact path: freshness-checked, not a scraped guess. Full compliance (licenses, KYC, Travel Rule) lives on each profile.",
 		},
 	},
 ];
@@ -391,7 +391,7 @@ export default function ExamplesPage() {
 					</h1>
 					<p className="text-muted-foreground max-w-2xl">
 						Six starter prompts you can paste into any Scout-equipped agent,
-						plus six worked sessions — each showing the endpoints Scout calls,
+						plus six worked sessions: each showing the endpoints Scout calls,
 						the actions it runs, and the structured response it produces.
 					</p>
 				</div>

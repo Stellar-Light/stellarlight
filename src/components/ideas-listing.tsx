@@ -112,7 +112,7 @@ export function IdeasListing() {
 						SCF Handbook
 					</span>
 					<span className="text-sm text-muted-foreground hidden sm:inline">
-						— Learn how the Stellar Community Fund works
+						· Learn how the Stellar Community Fund works
 					</span>
 				</div>
 				<span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">

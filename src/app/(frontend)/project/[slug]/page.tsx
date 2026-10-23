@@ -342,7 +342,7 @@ export default async function ProjectDetailPage({
 	};
 
 	const formatDate = (dateString: string | null | undefined): string => {
-		if (!dateString) return "—";
+		if (!dateString) return "-";
 		const date = new Date(dateString);
 		const now = new Date();
 		const diffMs = now.getTime() - date.getTime();
@@ -362,7 +362,7 @@ export default async function ProjectDetailPage({
 	};
 
 	const formatDateLong = (dateString: string | null | undefined): string => {
-		if (!dateString) return "—";
+		if (!dateString) return "-";
 		const date = new Date(dateString);
 		return date.toLocaleDateString("en-US", {
 			month: "long",
@@ -698,7 +698,7 @@ export default async function ProjectDetailPage({
 												Last Activity
 											</p>
 											<p className="text-2xl font-bold text-foreground mt-1">
-												{gh ? formatDate(gh.lastActivityAt) : "—"}
+												{gh ? formatDate(gh.lastActivityAt) : "-"}
 											</p>
 										</div>
 									</div>
@@ -962,8 +962,8 @@ export default async function ProjectDetailPage({
 													<span className="font-mono text-foreground">
 														{project.onchain.assetPaymentsAmount.toLocaleString()}
 													</span>{" "}
-													{project.onchain.assetCode ?? "units"} — denominated
-													in the asset, not USD.
+													{project.onchain.assetCode ?? "units"}, denominated in
+													the asset, not USD.
 												</div>
 											)}
 										</div>

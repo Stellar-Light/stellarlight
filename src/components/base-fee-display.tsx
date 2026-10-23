@@ -72,13 +72,13 @@ export default function BaseFeeDisplay() {
 						<div className="flex justify-between items-baseline">
 							<span className="text-xs text-muted-foreground">Market Cap</span>
 							<span className="text-sm font-semibold text-foreground">
-								{priceData ? formatCompact(priceData.marketCap) : "–"}
+								{priceData ? formatCompact(priceData.marketCap) : "-"}
 							</span>
 						</div>
 						<div className="flex justify-between items-baseline">
 							<span className="text-xs text-muted-foreground">24h Volume</span>
 							<span className="text-sm font-semibold text-foreground">
-								{priceData ? formatCompact(priceData.volume24h) : "–"}
+								{priceData ? formatCompact(priceData.volume24h) : "-"}
 							</span>
 						</div>
 						<div className="flex justify-between items-baseline pt-1.5 border-t border-border/50">
@@ -96,7 +96,7 @@ export default function BaseFeeDisplay() {
 						<div className="flex justify-between items-baseline">
 							<span className="text-xs text-muted-foreground">Fee (USD)</span>
 							<span className="text-sm font-semibold text-primary">
-								{priceData ? `$${baseFeeUSD.toFixed(8)}` : "–"}
+								{priceData ? `$${baseFeeUSD.toFixed(8)}` : "-"}
 							</span>
 						</div>
 					</div>

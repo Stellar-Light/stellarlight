@@ -59,7 +59,7 @@ export async function generateMetadata({
 	if (!data) return { title: "Stablecoin not found" };
 	const { row } = data;
 	return {
-		title: `${row.ticker} — ${row.company ?? "Stellar stablecoin"}`,
+		title: `${row.ticker}: ${row.company ?? "Stellar stablecoin"}`,
 		alternates: { canonical: `/stablecoins/${row.assetId}` },
 		description: `${row.ticker}, issued by ${row.company ?? "an unnamed issuer"} and pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
 	};
@@ -127,7 +127,7 @@ export default async function StablecoinDetailPage({
 				timeStyle: "short",
 				timeZone: "UTC",
 			})} UTC`
-		: "—";
+		: "-";
 
 	return (
 		<div className="min-h-screen relative">
@@ -152,7 +152,7 @@ export default async function StablecoinDetailPage({
 							{row.ticker}
 						</h1>
 						<span className="text-xs font-medium px-2 py-1 rounded-md bg-white/[0.04] text-muted-foreground border border-border/50">
-							{pegFlag(row.peg)} {row.peg ?? "—"}
+							{pegFlag(row.peg)} {row.peg ?? "-"}
 						</span>
 						{row.assetType && (
 							<span className="text-xs font-medium px-2 py-1 rounded-md bg-white/[0.04] text-muted-foreground border border-border/50">
@@ -177,7 +177,7 @@ export default async function StablecoinDetailPage({
 								<p className="text-xs text-muted-foreground mt-1">{row.note}</p>
 							)}
 							<p className="text-xs text-muted-foreground mt-1">
-								The row is kept deliberately — its absence would read as a
+								The row is kept deliberately; its absence would read as a
 								delisting, which is not what an unsuccessful measurement means.
 							</p>
 						</CardContent>
@@ -223,7 +223,7 @@ export default async function StablecoinDetailPage({
 						<h2 className="text-base font-semibold text-foreground mb-3">
 							Issuer
 						</h2>
-						<Row label="Company">{row.company ?? "—"}</Row>
+						<Row label="Company">{row.company ?? "-"}</Row>
 						<Row label="Home domain">
 							{row.issuerDomain ? (
 								<a
@@ -236,17 +236,17 @@ export default async function StablecoinDetailPage({
 									<ExternalLink className="w-3 h-3" />
 								</a>
 							) : (
-								"—"
+								"-"
 							)}
 						</Row>
 						<Row label="Issuer account">
 							<code className="text-[11px] font-mono break-all text-muted-foreground">
-								{row.issuer ?? "—"}
+								{row.issuer ?? "-"}
 							</code>
 						</Row>
 						<Row label="Asset ID">
 							<code className="text-[11px] font-mono text-muted-foreground">
-								{row.assetId ?? "—"}
+								{row.assetId ?? "-"}
 							</code>
 						</Row>
 					</CardContent>
@@ -257,21 +257,21 @@ export default async function StablecoinDetailPage({
 						<h2 className="text-base font-semibold text-foreground mb-3">
 							Provenance
 						</h2>
-						<Row label="Basis">{row.basis ?? "—"}</Row>
+						<Row label="Basis">{row.basis ?? "-"}</Row>
 						<Row label="Measured at">{measuredLabel}</Row>
 						<Row label="Price used">
 							{row.priceUSD == null
-								? "—"
+								? "-"
 								: `$${row.priceUSD.toLocaleString("en-US", { maximumFractionDigits: 6 })} per ${row.ticker}`}
 						</Row>
 						<Row label="Unit price basis">
 							{row.priceBasis === "measured-market"
-								? `market price of one ${row.ticker} — this unit is not 1:1 with its ${row.peg ?? "peg"} peg`
+								? `market price of one ${row.ticker}; this unit is not 1:1 with its ${row.peg ?? "peg"} peg`
 								: row.priceUSD == null
-									? "—"
+									? "-"
 									: row.peg === "USD"
-										? "USD peg, taken as 1.00 — peg deviation not measured"
-										: `live ${row.peg ?? "peg"}/USD rate — peg deviation not measured`}
+										? "USD peg, taken as 1.00; peg deviation not measured"
+										: `live ${row.peg ?? "peg"}/USD rate; peg deviation not measured`}
 						</Row>
 					</CardContent>
 				</Card>
@@ -344,7 +344,7 @@ export default async function StablecoinDetailPage({
 				)}
 
 				<p className="text-xs text-muted-foreground leading-relaxed">
-					A stablecoin&apos;s identity is its code <em>and</em> its issuer — two
+					A stablecoin&apos;s identity is its code <em>and</em> its issuer: two
 					live assets can share a ticker, so {row.ticker} here means
 					specifically the asset issued by{" "}
 					<code className="font-mono">{row.issuer?.slice(0, 8)}…</code>. An em

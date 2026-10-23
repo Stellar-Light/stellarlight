@@ -147,7 +147,7 @@ function McpTab() {
 				<code className="text-xs px-1 py-0.5 rounded bg-white/[0.04] border border-border/30">
 					SKILL.md
 				</code>
-				. Drop the config below into your client's MCP settings — restart → 14
+				. Drop the config below into your client's MCP settings. Restart → 14
 				tools appear in the slash menu.
 			</p>
 
@@ -213,7 +213,7 @@ function ManualTab() {
 					<div className="leading-relaxed">
 						<strong>Ask Scout anything.</strong> Try *"vet my idea: a stablecoin
 						off-ramp for Lagos"* or *"what audit findings exist for Blend's
-						oracle?"* — Scout cites primary sources.
+						oracle?"*. Scout cites primary sources.
 					</div>
 				</li>
 			</ol>

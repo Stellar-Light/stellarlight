@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
 				example: {
 					kind: "missing-data",
 					message:
-						"Searched /api/research?q=stellar+x402&source=audit but got 0 results — there are 3 x402 mentions in our project descriptions that should be indexed.",
+						"Searched /api/research?q=stellar+x402&source=audit but got 0 results; there are 3 x402 mentions in our project descriptions that should be indexed.",
 					context: {
 						endpoint: "/api/research",
 						skillVersion: "1.0.0",
@@ -220,22 +220,22 @@ export async function GET() {
 			body: {
 				kind: VALID_KINDS,
 				message:
-					"10–4000 chars, required for report kinds; optional on vote kinds (worked / did-not-work)",
+					"10-4000 chars, required for report kinds; optional on vote kinds (worked / did-not-work)",
 				target: {
 					surface: "required on votes: 'projects' | 'repos'",
 					slug: "required on votes: project slug, or repo fullName (owner/name)",
 				},
 				context: {
-					query: "optional — the user query that triggered the issue",
-					endpoint: "optional — the /api/* endpoint that misbehaved",
-					skillVersion: "optional — SKILL.md frontmatter version",
-					agentName: "optional — claude-code | codex | openclaw | etc.",
+					query: "optional: the user query that triggered the issue",
+					endpoint: "optional: the /api/* endpoint that misbehaved",
+					skillVersion: "optional: SKILL.md frontmatter version",
+					agentName: "optional: claude-code | codex | openclaw | etc.",
 				},
 			},
 			example: {
 				kind: "missing-data",
 				message:
-					"Searched /api/research?q=x402&source=audit but got 0 results — Halborn's Alula audit has a finding labeled '// CRITICAL' on x402 escrow that should match.",
+					"Searched /api/research?q=x402&source=audit but got 0 results; Halborn's Alula audit has a finding labeled '// CRITICAL' on x402 escrow that should match.",
 				context: {
 					query: "x402 escrow security",
 					endpoint: "/api/research",

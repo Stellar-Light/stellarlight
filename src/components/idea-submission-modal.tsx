@@ -183,7 +183,7 @@ export function IdeaSubmissionModal({
 										type="email"
 										value={email}
 										onChange={(e) => setEmail(e.target.value)}
-										placeholder="Optional — for follow-up"
+										placeholder="Optional, for follow-up"
 										className="w-full h-11 px-4 bg-background text-sm text-foreground placeholder-muted-foreground rounded-xl border border-border/50 focus:outline-none focus:ring-2 focus:ring-ring transition-all"
 									/>
 								</div>
@@ -285,7 +285,7 @@ export function IdeaSubmissionModal({
 										Ask an existing team to add the feature
 									</option>
 									<option value="unsure">
-										Not sure — reviewers should decide
+										Not sure: reviewers should decide
 									</option>
 								</select>
 							</div>

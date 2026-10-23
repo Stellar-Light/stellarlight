@@ -463,7 +463,7 @@ export function StablecoinExplorer({
 			say(`${coin.ticker} issuer address copied`);
 			setTimeout(() => setCopiedId(null), 1500);
 		} catch {
-			say("Clipboard blocked — the address is shown in full on the row");
+			say("Clipboard blocked. The address is shown in full on the row");
 		}
 	};
 
@@ -615,7 +615,7 @@ export function StablecoinExplorer({
 												</span>
 											</div>
 											<span className="text-xs text-[#666666] truncate max-w-[120px]">
-												{coin.company || "—"}
+												{coin.company || "-"}
 											</span>
 										</button>
 									))}
@@ -1298,7 +1298,7 @@ export function StablecoinExplorer({
 														Supply · last 30 days
 													</div>
 													<div className="text-xs text-muted-foreground mt-0.5 tabular-nums">
-														{last !== null ? displaySupply(last) : "—"}
+														{last !== null ? displaySupply(last) : "-"}
 														{change !== null && (
 															<span
 																className={
@@ -1419,8 +1419,8 @@ export function StablecoinExplorer({
 
 								<p className="text-xs text-muted-foreground leading-relaxed">
 									Totals sum USD market cap, the only figure comparable across
-									currencies — adding raw supply would treat pesos and dollars
-									as the same unit. Select an asset for its issuer account, DeFi
+									currencies; adding raw supply would treat pesos and dollars as
+									the same unit. Select an asset for its issuer account, DeFi
 									context and history.
 								</p>
 							</div>
@@ -1584,7 +1584,7 @@ export function StablecoinExplorer({
 												Home Domain
 											</div>
 											<div className="text-sm">
-												{selectedCoin.issuerDomain || "—"}
+												{selectedCoin.issuerDomain || "-"}
 											</div>
 										</div>
 										<div>
@@ -1621,7 +1621,7 @@ export function StablecoinExplorer({
 																timeZone: "UTC",
 															},
 														)} UTC · ${selectedCoin.basis}`
-													: "—"}
+													: "-"}
 											</div>
 										</div>
 									</div>
@@ -1686,15 +1686,15 @@ export function StablecoinExplorer({
 												(defi?.venues?.venues ?? []).length === 0 ? (
 													<p className="text-xs text-muted-foreground">
 														Horizon&apos;s pool index was unreachable. That
-														means we could not look — not that{" "}
+														means we could not look, not that{" "}
 														{selectedCoin.ticker} has no pools.
 													</p>
 												) : (defi?.venues?.venues ?? []).every(
 														(v) => v.poolCount === 0,
 													) && (defi?.liquidity?.poolCount ?? 0) === 0 ? (
 													<p className="text-xs text-muted-foreground">
-														No pool we index — classic AMM, Aquarius, Soroswap
-														or Sushi — currently holds this asset.
+														No pool we index (classic AMM, Aquarius, Soroswap or
+														Sushi) currently holds this asset.
 													</p>
 												) : (
 													<>
@@ -1813,8 +1813,8 @@ export function StablecoinExplorer({
 																				{v.unreadable.length > 0 && (
 																					<>
 																						Could not read{" "}
-																						{v.unreadable.join(", ")} right now
-																						— not shown, not zero.{" "}
+																						{v.unreadable.join(", ")} right now.
+																						Not shown, not zero.{" "}
 																					</>
 																				)}
 																				{v.notIndexed.length > 0 && (
@@ -1830,7 +1830,7 @@ export function StablecoinExplorer({
 														})()}
 														<p className="text-[11px] text-muted-foreground/70 mt-3 leading-relaxed">
 															This is the {selectedCoin.ticker} side of each
-															pool only — the other side is priced in tokens we
+															pool only; the other side is priced in tokens we
 															do not measure, so doubling it would be a guess,
 															not a measurement.
 														</p>

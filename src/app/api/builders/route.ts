@@ -205,7 +205,7 @@ async function handle(req: NextRequest) {
 	if (unknownParams.length) {
 		return NextResponse.json(
 			{
-				error: `Unsupported query parameter(s): ${unknownParams.join(", ")}. This endpoint does not filter by them (no SCF-tier/award data exists on builder profiles — a project's award history lives on /api/projects/search rows).`,
+				error: `Unsupported query parameter(s): ${unknownParams.join(", ")}. This endpoint does not filter by them (no SCF-tier/award data exists on builder profiles: a project's award history lives on /api/projects/search rows).`,
 				supportedParams: SUPPORTED_PARAMS,
 			},
 			{ status: 400 },
@@ -420,12 +420,12 @@ async function handle(req: NextRequest) {
 						}
 						if (read < langTotal)
 							warnings.push(
-								`Code-language admission read ${read} of ${langTotal} owned repos matching [${langProbes.join(", ")}] (roster capped at ${LANG_REPO_MAX}) — builders whose only repo in that language falls outside the page are missing from these results. Narrow the query or filter by location to shrink the roster.`,
+								`Code-language admission read ${read} of ${langTotal} owned repos matching [${langProbes.join(", ")}] (roster capped at ${LANG_REPO_MAX}): builders whose only repo in that language falls outside the page are missing from these results. Narrow the query or filter by location to shrink the roster.`,
 							);
 					} catch {
 						// best-effort: on failure admission stays prose-only, as before
 						warnings.push(
-							"Code-language admission could not run (repo index lookup failed) — results are prose-only, so builders proven only by an owned repo's language may be missing.",
+							"Code-language admission could not run (repo index lookup failed): results are prose-only, so builders proven only by an owned repo's language may be missing.",
 						);
 					}
 				}
@@ -782,7 +782,7 @@ async function handle(req: NextRequest) {
 
 	const builderChannels = [
 		{
-			name: "Stellar Discord — Looking for Collaborators",
+			name: "Stellar Discord: Looking for Collaborators",
 			url: "https://discord.gg/stellardev",
 			why: "The active channel where Stellar devs post 'looking for X' calls",
 		},
@@ -820,36 +820,36 @@ async function handle(req: NextRequest) {
 				: collectionTotal === 0 && !isDegraded(warnings)
 					? {
 							summary:
-								"The /api/builders directory is currently empty — Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
+								"The /api/builders directory is currently empty: Stellar Passport sync is queued but hasn't seeded the collection yet. Treat this as a known data gap, not a finding about the Stellar builder community. For teammate-matching today, point the user at GitHub-Stellar topic searches and the Stellar Discord #looking-for-collaborator channel.",
 							channels: builderChannels,
 						}
 					: sdfMatches.length
 						? {
 								summary: `${sdfMatches
-									.map((p) => `${p.name} — ${p.role} (SDF ${p.section})`)
+									.map((p) => `${p.name}: ${p.role} (SDF ${p.section})`)
 									.join(
 										"; ",
-									)}. That's an SDF ROSTER role, not a GitHub-contributor/builder profile — /api/builders only indexes Stellar Passport builders, so this person isn't a "no result" here, they're out of this index's scope. Full people records with provenance are at /api/people.`,
+									)}. That's an SDF ROSTER role, not a GitHub-contributor/builder profile; /api/builders only indexes Stellar Passport builders, so this person isn't a "no result" here, they're out of this index's scope. Full people records with provenance are at /api/people.`,
 								scope:
 									"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
 								sdfPeople: sdfMatches,
 								tryInstead: [
 									{
 										endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
-										why: "the SDF team/people index (leadership, board, advisors) — this person's canonical record",
+										why: "the SDF team/people index (leadership, board, advisors): this person's canonical record",
 									},
 								],
 								channels: builderChannels,
 							}
 						: personLookup
 							? {
-									summary: `No builder profile matches "${q}". /api/builders indexes GitHub-contributor builder profiles synced from Stellar Passport — it is NOT a people/staff directory, so SDF team members and ecosystem leadership (e.g. a VP of Ecosystem) won't appear here even when they're well-known in the ecosystem. This is a scope boundary, not a finding that the person doesn't exist. For a named person or their role, query /api/people (SDF roster); for doc/spec/blog authorship, /api/research.`,
+									summary: `No builder profile matches "${q}". /api/builders indexes GitHub-contributor builder profiles synced from Stellar Passport; it is NOT a people/staff directory, so SDF team members and ecosystem leadership (e.g. a VP of Ecosystem) won't appear here even when they're well-known in the ecosystem. This is a scope boundary, not a finding that the person doesn't exist. For a named person or their role, query /api/people (SDF roster); for doc/spec/blog authorship, /api/research.`,
 									scope:
 										"github-contributor builder profiles (Stellar Passport); not a people/staff directory",
 									tryInstead: [
 										{
 											endpoint: "/api/people",
-											why: "the SDF team/people index — leadership, board of directors, advisors (name → role)",
+											why: "the SDF team/people index: leadership, board of directors, advisors (name → role)",
 										},
 										{
 											endpoint: "/api/research",
@@ -867,13 +867,13 @@ async function handle(req: NextRequest) {
 									// projects, `tyler` is a curated builder under @kalepail. An
 									// index answering only for itself turns its own scope
 									// boundary into a claim about the ecosystem.
-									summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters — broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory${
+									summary: `No builders matched this query. The directory has ${collectionTotal} builder profiles, but none match these filters; broaden or drop a filter (q / location / skill). This is a filter miss, not an empty or unseeded directory${
 										nameSuggestions.length
 											? `. The directory does hold ${nameSuggestions
 													.map((c) => `${c.name} (@${c.handle})`)
 													.join(
 														", ",
-													)} — if that's who was meant, query the full name or the handle. Do NOT report it as the answer to "${q}" unless the caller confirms it.`
+													)}. If that's who was meant, query the full name or the handle. Do NOT report it as the answer to "${q}" unless the caller confirms it.`
 											: ""
 									}`,
 									...(nameSuggestions.length
@@ -884,15 +884,15 @@ async function handle(req: NextRequest) {
 									tryInstead: [
 										{
 											endpoint: `/api/people?q=${encodeURIComponent(q ?? "")}`,
-											why: "if the query is a person's name — the SDF roster (leadership, board, advisors) is a separate index from Passport builder profiles",
+											why: "if the query is a person's name: the SDF roster (leadership, board, advisors) is a separate index from Passport builder profiles",
 										},
 										{
 											endpoint: `/api/projects/search?q=${encodeURIComponent(q ?? "")}`,
-											why: "if the query is a PROJECT or product name rather than a person — single-word queries here are very often a project",
+											why: "if the query is a PROJECT or product name rather than a person: single-word queries here are very often a project",
 										},
 										{
 											endpoint: `/api/repos/search?q=${encodeURIComponent(q ?? "")}`,
-											why: "if the query is a GitHub org/repo name — indexed code the builder directory doesn't mirror",
+											why: "if the query is a GitHub org/repo name: indexed code the builder directory doesn't mirror",
 										},
 									],
 									channels: builderChannels,
@@ -910,7 +910,7 @@ async function handle(req: NextRequest) {
 				// sls-041: what a skill match IS (and is not). Rows are candidate
 				// discovery, not verified experience/seniority/availability.
 				matchBasis:
-					"Skill/q matches are FREE-TEXT hits over profile + project prose — each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index — a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name). A row with match.basis 'code-language' was admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder OWNS in our index while their profile never says the word — matchedFields INCLUDES 'codeEvidence', matchedTerms names the language as indexed, and codeEvidence holds the proving repos. Every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) lists the prose fields in matchedFields too and still keeps the 'code-language' basis — the weaker evidence sets the basis, and these rows sort BELOW all prose hits because owning a Rust repo is a candidate signal, not verified experience.",
+					"Skill/q matches are FREE-TEXT hits over profile + project prose; each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index: a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name). A row with match.basis 'code-language' was admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder OWNS in our index while their profile never says the word; matchedFields INCLUDES 'codeEvidence', matchedTerms names the language as indexed, and codeEvidence holds the proving repos. Every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) lists the prose fields in matchedFields too and still keeps the 'code-language' basis; the weaker evidence sets the basis, and these rows sort BELOW all prose hits because owning a Rust repo is a candidate signal, not verified experience.",
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 				// sls-025 shape, ported from /api/repos/search: a zero-result page
 				// says exactly what WAS searched. `strupey` was the 4th-most-asked
@@ -926,7 +926,7 @@ async function handle(req: NextRequest) {
 									"code-derived owners (GitHub logins owning indexed Stellar repos, no profile required)",
 									"primary language of the repos each builder owns (a language token admits its owners even when their prose never says it)",
 								],
-								note: "0 builders matched. All three identity paths were searched — the curated profile index, the code-derived owner index AND the owned-repo language index — including the curated handle→real-name overlay, so a person findable by either their GitHub login or their real name would have surfaced. An empty result is NOT evidence the person doesn't exist: they may have no Stellar Passport profile and own no repo our index covers, or contribute under a different handle (we key on repo OWNER, so a contributor to someone else's repo is invisible here). Try the bare GitHub login, the real name, or an org name; for code authorship use /api/repos/search, and for SDF roster/leadership use /api/people. If the builder exists publicly but is missing here, report it via POST /api/feedback.",
+								note: "0 builders matched. All three identity paths were searched (the curated profile index, the code-derived owner index AND the owned-repo language index), including the curated handle→real-name overlay, so a person findable by either their GitHub login or their real name would have surfaced. An empty result is NOT evidence the person doesn't exist: they may have no Stellar Passport profile and own no repo our index covers, or contribute under a different handle (we key on repo OWNER, so a contributor to someone else's repo is invisible here). Try the bare GitHub login, the real name, or an org name; for code authorship use /api/repos/search, and for SDF roster/leadership use /api/people. If the builder exists publicly but is missing here, report it via POST /api/feedback.",
 							},
 						}
 					: {}),

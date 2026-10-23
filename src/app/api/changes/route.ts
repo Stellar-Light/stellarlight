@@ -91,7 +91,7 @@ export async function GET(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error:
-					"`since` is required — an ISO date or datetime, e.g. since=2026-08-01 or since=2026-08-12T00:00:00Z",
+					"`since` is required: an ISO date or datetime, e.g. since=2026-08-01 or since=2026-08-12T00:00:00Z",
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
@@ -105,7 +105,7 @@ export async function GET(req: NextRequest) {
 	if (Number.isNaN(sinceMs) || sinceMs < Date.parse("2020-01-01T00:00:00Z")) {
 		return NextResponse.json(
 			{
-				error: `invalid \`since\`: '${sinceRaw}' — use ISO date/datetime (YYYY-MM-DD or full ISO), not before 2020`,
+				error: `invalid \`since\`: '${sinceRaw}'. Use ISO date/datetime (YYYY-MM-DD or full ISO), not before 2020`,
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
@@ -297,7 +297,7 @@ export async function GET(req: NextRequest) {
 				},
 				truncated,
 				byFacet,
-				note: "counts.<surface> is every row written since `since` — enrichment lanes bump updatedAt on hundreds of rows a week, so it is not a material-change number. byFacet.<surface>.<facet> counts rows that were BOTH written since `since` AND whose DATED fact moved past it, over the whole surface — so a facet never exceeds counts.<surface>; facets overlap, and a lane that stamps an evidence date older than `since` shows as `row`.",
+				note: "counts.<surface> is every row written since `since`: enrichment lanes bump updatedAt on hundreds of rows a week, so it is not a material-change number. byFacet.<surface>.<facet> counts rows that were BOTH written since `since` AND whose DATED fact moved past it, over the whole surface, so a facet never exceeds counts.<surface>; facets overlap, and a lane that stamps an evidence date older than `since` shows as `row`.",
 			},
 		},
 		{

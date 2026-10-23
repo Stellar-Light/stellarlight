@@ -7,7 +7,7 @@ import { AskSearch } from "@/components/ask-search";
 export const metadata: Metadata = {
 	title: "Ask Stellar | Stellar Light",
 	description:
-		"Ask anything about the Stellar ecosystem in natural language — projects, protocols, audits, SEPs, dev docs. Grounded, cited answers from the live StellarLight index.",
+		"Ask anything about the Stellar ecosystem in natural language: projects, protocols, audits, SEPs, dev docs. Grounded, cited answers from the live StellarLight index.",
 };
 
 export default function AskPage() {
@@ -32,7 +32,7 @@ export default function AskPage() {
 						</span>
 					</div>
 					<p className="text-sm text-muted-foreground mt-2 max-w-xl">
-						Natural-language search over the live ecosystem index — projects,
+						Natural-language search over the live ecosystem index: projects,
 						providers, protocols, audits, SEPs, and dev docs. The same data
 						layer our agents query, now yours to ask directly.
 					</p>

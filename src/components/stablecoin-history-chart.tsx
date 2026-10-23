@@ -121,7 +121,7 @@ export function StablecoinHistoryChart({
 					</p>
 					<p className="text-xs text-muted-foreground/70 mt-1">
 						{points.length === 1
-							? "One day recorded — a second daily snapshot draws the line."
+							? "One day recorded. A second daily snapshot draws the line."
 							: "The series starts once daily snapshots accumulate."}
 					</p>
 				</div>

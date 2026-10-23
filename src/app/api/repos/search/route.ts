@@ -90,7 +90,7 @@ async function handle(req: NextRequest) {
 				"offset",
 				"fields",
 			],
-			hint: "Repo search matches name/description/topics/symbols from q — put language or framework terms in q if the dedicated filter doesn't cover them.",
+			hint: "Repo search matches name/description/topics/symbols from q; put language or framework terms in q if the dedicated filter doesn't cover them.",
 		},
 	);
 	const view = sp.get("view");
@@ -238,7 +238,7 @@ async function handle(req: NextRequest) {
 				// matched, so ranked neighbours are never read as hits.
 				matchMode,
 				matchModeLabel,
-				note: "Code references graded by repoScore (0-100) = the repo's own merit (code we read: tests, CI, releases, live SDK pin; plus adoption and freshness) lifted by independent corroboration (first-party publication, registry-verified packages, curation, notes, funding), with archived / fork / template / deprecated-SDK demotions. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl` — hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
+				note: "Code references graded by repoScore (0-100) = the repo's own merit (code we read: tests, CI, releases, live SDK pin; plus adoption and freshness) lifted by independent corroboration (first-party publication, registry-verified packages, curation, notes, funding), with archived / fork / template / deprecated-SDK demotions. Lead with high-score repos as the strongest existing references; cite each repo's url/homepage. Each repo carries a `deepWikiUrl`; hand off there for deep 'where/how' questions about a repo's internals (e.g. error codes, consensus).",
 				canonical:
 					canonical.length > 0
 						? {
@@ -260,7 +260,7 @@ async function handle(req: NextRequest) {
 									"topics",
 									"codeSymbols",
 								],
-								note: "0 indexed repos matched. The tokens above (with their synonym/alias expansions) were searched across the listed fields, including owner names and separator-insensitive forms of the query. The index covers curated Stellar-ecosystem repos and can lag or miss new/renamed ones — an empty result is NOT evidence that the repo, standard, or implementation doesn't exist. Try the bare repo name, the owner name alone, or a broader vertical term; if the repo exists publicly but is missing here, report it via POST /api/feedback.",
+								note: "0 indexed repos matched. The tokens above (with their synonym/alias expansions) were searched across the listed fields, including owner names and separator-insensitive forms of the query. The index covers curated Stellar-ecosystem repos and can lag or miss new/renamed ones; an empty result is NOT evidence that the repo, standard, or implementation doesn't exist. Try the bare repo name, the owner name alone, or a broader vertical term; if the repo exists publicly but is missing here, report it via POST /api/feedback.",
 							},
 						}
 					: {}),

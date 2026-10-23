@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(
 			{
 				error:
-					"A valid contactEmail is required — it becomes your account login.",
+					"A valid contactEmail is required. It becomes your account login.",
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
@@ -188,7 +188,7 @@ export async function POST(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	if (!payload) {
 		return NextResponse.json(
-			{ error: "Service unavailable — try again shortly.", unavailable: true },
+			{ error: "Service unavailable. Try again shortly.", unavailable: true },
 			{
 				status: 503,
 				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
@@ -326,7 +326,7 @@ export async function POST(req: NextRequest) {
 			);
 		}
 		return NextResponse.json(
-			{ error: "Couldn't submit the listing — try again shortly." },
+			{ error: "Couldn't submit the listing. Try again shortly." },
 			{ status: 500, headers: rateLimitHeaders(limit) },
 		);
 	}

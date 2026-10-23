@@ -245,7 +245,7 @@ async function research(
 		return NextResponse.json(
 			{
 				error: `unknown severity: '${severityFilter}'`,
-				hint: "severity reflects per-chunk section inference and is 'unknown' for most PDF-derived chunks — filter with that caveat. For report-level enumeration use /api/audits.",
+				hint: "severity reflects per-chunk section inference and is 'unknown' for most PDF-derived chunks; filter with that caveat. For report-level enumeration use /api/audits.",
 				validSeverities: VALID_SEVERITIES,
 			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
@@ -1098,7 +1098,7 @@ async function research(
 				const wideConf = wideTop?.confidence?.score ?? 0;
 				if (wideTop && wideConf > inConf + 0.1) {
 					sourceAdvisory = {
-						note: `stronger matches exist OUTSIDE source=${sourceFilter} — the requested category holds only weaker neighbors for this query; consider dropping the source filter`,
+						note: `stronger matches exist OUTSIDE source=${sourceFilter}: the requested category holds only weaker neighbors for this query; consider dropping the source filter`,
 						inSourceTopScore: Math.round(inConf * 100) / 100,
 						corpusWideTopScore: Math.round(wideConf * 100) / 100,
 						corpusWideTopSource: wideTop.source ?? null,

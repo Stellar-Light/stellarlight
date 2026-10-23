@@ -285,7 +285,7 @@ export async function GET(req: NextRequest) {
 				"offset",
 				"fields",
 			],
-			hint: "Partner rows are matched from q over name/description/offerings — put a capability or corridor term in q if no dedicated filter covers it.",
+			hint: "Partner rows are matched from q over name/description/offerings; put a capability or corridor term in q if no dedicated filter covers it.",
 		},
 	);
 	const type = sp.get("type");
@@ -308,7 +308,7 @@ export async function GET(req: NextRequest) {
 		if (parsed === "invalid") {
 			return NextResponse.json(
 				{
-					error: `Invalid ${name} value '${sp.get(name)}' — it is a boolean flag.`,
+					error: `Invalid ${name} value '${sp.get(name)}': it is a boolean flag.`,
 					acceptedValues: {
 						true: BOOL_TRUE_VALUES,
 						false: BOOL_FALSE_VALUES,
@@ -365,7 +365,7 @@ export async function GET(req: NextRequest) {
 			{
 				error: `Unknown region '${region}'`,
 				validRegions: REGION_VALUES,
-				hint: "Regions are continents/blocs. For a country or currency put it in q (e.g. ?q=nigeria or ?ramps=off-ramp&q=mexico) — coverage.countries is matched from the query text.",
+				hint: "Regions are continents/blocs. For a country or currency put it in q (e.g. ?q=nigeria or ?ramps=off-ramp&q=mexico); coverage.countries is matched from the query text.",
 			},
 			{ status: 400 },
 		);
@@ -529,7 +529,7 @@ export async function GET(req: NextRequest) {
 						? {
 								matchMode: "weak" as const,
 								matchModeLabel:
-									"no partner matched your query — these are fresh/accepting partners shown as a fallback, NOT matches (an empty result would have been the honest answer if none of them fit)",
+									"no partner matched your query; these are fresh/accepting partners shown as a fallback, NOT matches (an empty result would have been the honest answer if none of them fit)",
 							}
 						: {
 								matchMode: "scored" as const,
@@ -575,11 +575,11 @@ export async function GET(req: NextRequest) {
 								tryInstead: [
 									{
 										endpoint: `/api/projects/search?q=${encodeURIComponent(q ?? "")}`,
-										why: "if the subject is a product or protocol rather than a commercial partner — the project directory is much broader",
+										why: "if the subject is a product or protocol rather than a commercial partner: the project directory is much broader",
 									},
 									{
 										endpoint: `/api/research?q=${encodeURIComponent(q ?? "")}`,
-										why: "if the question is conceptual or comparative (including about other chains) — the research corpus indexes SEPs, docs and posts that discuss them",
+										why: "if the question is conceptual or comparative (including about other chains): the research corpus indexes SEPs, docs and posts that discuss them",
 									},
 								],
 							},
@@ -587,7 +587,7 @@ export async function GET(req: NextRequest) {
 					: {}),
 				validTypes: PARTNER_TYPES,
 				validRamps: RAMP_TYPES,
-				note: "Published partners only. Default results pass a directory quality bar (tagline + contact path, non-archived); pass all=1 for the unfiltered set. With `q`, results are relevance-ranked by fit — weighted across the structured capability fields (assets, ramps, SEPs, country, services) and region, not exact-keyword text — so a natural query like 'USDC off-ramp' surfaces anchors by capability; without `q`, pilot partners sort first, then freshness. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
+				note: "Published partners only. Default results pass a directory quality bar (tagline + contact path, non-archived); pass all=1 for the unfiltered set. With `q`, results are relevance-ranked by fit, weighted across the structured capability fields (assets, ramps, SEPs, country, services) and region, not exact-keyword text, so a natural query like 'USDC off-ramp' surfaces anchors by capability; without `q`, pilot partners sort first, then freshness. `verified` fields are system-computed; `freshness.excludeFromMatching` flags partners too stale for AI matching.",
 			},
 			partners: partners.map((r) => pickFields(r, fieldsWanted)),
 		},
