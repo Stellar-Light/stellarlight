@@ -571,7 +571,6 @@ export function buildsForRepos(
 // self-referential SSR fetches fail on Vercel). The route calls this too, so
 // the two can never drift.
 
-/** A query token and its plural or singular. */
 /** A hyphenated phrase's two numbers vary on its last part only: forms of
  * the whole token stripped a short last part's s ("stellar-ens" became
  * "stellar en", which matched prose). */
@@ -580,6 +579,7 @@ function phraseForms(token: string): string[] {
 	return wordForms(token.slice(cut)).map((f) => token.slice(0, cut) + f);
 }
 
+/** A query token and its plural or singular. */
 function wordForms(token: string): string[] {
 	if (token.length > 3 && token.endsWith("s"))
 		return [token, token.slice(0, -1)];
