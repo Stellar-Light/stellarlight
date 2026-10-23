@@ -1165,7 +1165,7 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	// Stellar) with networksBasis saying so. The old matrix came from Core's
 	// pool API, which ended in July 2026; docs-core now lists EVM chains,
 	// Tron, Solana, Sui and Stacks, with Stellar unavailable pending audit,
-	// and the operator states no Stellar route for Allbridge Next.
+	// and the operator names no Stellar route for Allbridge Next.
 	allbridge: [],
 	"circle-cctp-cross-chain-transfer-protocol": [
 		"stellar", // CCTP V2 domain 27 (standard transfer)
@@ -1285,7 +1285,7 @@ const ROUTES_SET: Record<string, CuratedRoute[]> = {
 	// July 2026 and Stellar is unavailable on the relaunched, CCTP-based Core
 	// pending audit (read 2026-10-23, lane DQ1). Empty = exact-sync clears the
 	// stored rows, served as routes null (not curated), not as route-free.
-	// The operator states no Stellar route for Allbridge Next. estrela carried a
+	// The operator names no Stellar route for Allbridge Next. estrela carried a
 	// copy of the Core matrix, but its SCF page (SCF #22 and #35, read
 	// 2026-10-23) describes Allbridge's Soroban stablecoin AMM
 	// (allbridge-io/dex-soroban-contracts), not the Core bridge: the copied
