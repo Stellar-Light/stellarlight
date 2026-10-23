@@ -1,8 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { CURATED_BUILDS } from "@/data/curated-builds";
 import {
+	CURATED_HACKATHONS,
+	CURATED_WINNERS_NOTES,
+} from "@/data/curated-hackathons";
+import {
 	eventCoverage,
 	eventProfile,
+	incompleteRows,
 	winnersOnlyEvents,
 	winnersOnlyWarning,
 } from "@/lib/hackathon-analytics";
@@ -85,6 +90,32 @@ describe("an event's coverage, from its stored rows", () => {
 	});
 });
 
+describe("no ratio over incomplete rows", () => {
+	it("says why an event's rows are incomplete: winners only, or winners published in part", () => {
+		expect(incompleteRows("hackmeridian-2025", "winners-only")).toBe(
+			"only its winners are stored (coverage winners-only)",
+		);
+		// APAC: winners only, and one track's winners published.
+		expect(incompleteRows("apac-stellar-hackathon-2026", "winners-only")).toBe(
+			"only its winners are stored (coverage winners-only), and its winners are published only in part (getHackathon stats.winnersNote)",
+		);
+		expect(incompleteRows("apac-stellar-hackathon-2026", null)).toBe(
+			"its winners are published only in part (getHackathon stats.winnersNote)",
+		);
+		expect(incompleteRows("stellar-hacks-zk", "full")).toBeNull();
+		expect(incompleteRows("stellar-hacks-zk", null)).toBeNull();
+	});
+
+	it("a winners note is kept only for curated events, so any rows it covers are curated winners", () => {
+		// Their rows can then only be winners-only: the import writes curated
+		// events only, and every curated row is a winner. Analyze leaves out
+		// winners-only rows by that rule alone.
+		const curatedEvents = new Set(CURATED_HACKATHONS.map((h) => h.uname));
+		for (const slug of Object.keys(CURATED_WINNERS_NOTES))
+			expect(curatedEvents.has(slug), slug).toBe(true);
+	});
+});
+
 describe("the event profile", () => {
 	it("says it describes the winners only and serves no submission count on a winners-only event", () => {
 		const p = eventProfile(curated("hackmeridian-2025"));
@@ -93,6 +124,25 @@ describe("the event profile", () => {
 		expect(p.winners).toBe(6);
 		// The facets stay: they describe the six winners.
 		expect(p.category.builds).toBe(6);
+	});
+
+	it("serves no share over a winners-only event's rows, only their counts", () => {
+		const categorized = curated("build-on-stellar-philippines-2026").map(
+			(b, i) => ({
+				...b,
+				categories: [{ type: i < 3 ? "Payments" : "DeFi", score: 0.8 }],
+			}),
+		);
+		const p = eventProfile(categorized);
+		expect(p.category).toEqual({
+			builds: 5,
+			known: 5,
+			unknown: 0,
+			values: [
+				{ value: "Payments", builds: 3, winners: 3, share: null },
+				{ value: "DeFi", builds: 2, winners: 2, share: null },
+			],
+		});
 	});
 
 	it("is unchanged on a full event: same keys, same order, no coverage", () => {
@@ -122,7 +172,7 @@ describe("a hackathon filter naming a winners-only event", () => {
 		const r = await parse("hackathon=hackmeridian-2025");
 		if ("error" in r) throw new Error("unexpected 400");
 		expect(r.warnings).toEqual([
-			"only the winners of hackmeridian-2025 are stored (6 rows, coverage winners-only); its other submissions are not, so counts from it describe its winners, not its field, whose size and mix are unknown",
+			"only the winners of hackmeridian-2025 are stored (6 rows, coverage winners-only); its other submissions are not, so its rows are its winners, not its field, whose size and mix are unknown, and no share is computed over them",
 		]);
 	});
 
@@ -138,7 +188,7 @@ describe("a hackathon filter naming a winners-only event", () => {
 			]),
 		]);
 		expect(r.warnings[0]).toBe(
-			"only the winners of build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1) are stored (coverage winners-only); their other submissions are not, so counts from them describe their winners, not their fields, whose size and mix are unknown",
+			"only the winners of build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1) are stored (coverage winners-only); their other submissions are not, so their rows are their winners, not their fields, whose size and mix are unknown, and no share is computed over them",
 		);
 		const full = await parse("hackathon=zk");
 		if ("error" in full) throw new Error("unexpected 400");
@@ -196,7 +246,13 @@ describe("the spec declares coverage and the nulls it brings", () => {
 			event?.properties?.stats?.properties?.outcomes,
 			event?.properties?.tracks?.items?.properties?.submissionCount,
 			detail.properties?.tracks?.items?.properties?.submissionCount,
+			row?.properties?.prizePerWinnerUSD,
 		])
 			expect(n?.nullable).toBe(true);
+	});
+
+	it("declares the row notes that say why a ratio is null", () => {
+		const row = body("/api/hackathons/compare").properties?.hackathons?.items;
+		expect(row?.properties?.notes?.items).toMatchObject({ type: "string" });
 	});
 });

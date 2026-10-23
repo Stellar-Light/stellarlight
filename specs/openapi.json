@@ -3698,7 +3698,8 @@
 													},
 													"prizePerWinnerUSD": {
 														"type": "number",
-														"nullable": true
+														"nullable": true,
+														"description": "prizePoolUSD / winnerCount, rounded. Absent when either is missing or zero. null when the winners on record are incomplete rows: only the winners are stored (coverage winners-only) or they are published only in part (getHackathon stats.winnersNote); notes says which. Never computed over incomplete rows."
 													},
 													"stillActiveCount": {
 														"type": "integer",
@@ -3711,11 +3712,12 @@
 													},
 													"activeRatePct": {
 														"type": "number",
-														"nullable": true
+														"nullable": true,
+														"description": "Curated events only: stillActiveCount / submissionCount as a percent. null over incomplete rows, as prizePerWinnerUSD; notes says why."
 													},
 													"profile": {
 														"type": "object",
-														"description": "What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it profiles the winners only, not the event's field.",
+														"description": "What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, not the event's field, and every share in it is null.",
 														"properties": {
 															"coverage": {
 																"type": "string",
@@ -3765,7 +3767,7 @@
 																				"share": {
 																					"type": "number",
 																					"nullable": true,
-																					"description": "builds / known (0 to 1); null when no build's value is known."
+																					"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 																				}
 																			}
 																		}
@@ -3805,7 +3807,7 @@
 																				"share": {
 																					"type": "number",
 																					"nullable": true,
-																					"description": "builds / known (0 to 1); null when no build's value is known."
+																					"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 																				}
 																			}
 																		}
@@ -3845,7 +3847,7 @@
 																				"share": {
 																					"type": "number",
 																					"nullable": true,
-																					"description": "builds / known (0 to 1); null when no build's value is known."
+																					"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 																				}
 																			}
 																		}
@@ -3885,7 +3887,7 @@
 																				"share": {
 																					"type": "number",
 																					"nullable": true,
-																					"description": "builds / known (0 to 1); null when no build's value is known."
+																					"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 																				}
 																			}
 																		}
@@ -3926,7 +3928,7 @@
 																				"share": {
 																					"type": "number",
 																					"nullable": true,
-																					"description": "builds / known (0 to 1); null when no build's value is known."
+																					"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 																				}
 																			}
 																		}
@@ -3966,7 +3968,7 @@
 																				"share": {
 																					"type": "number",
 																					"nullable": true,
-																					"description": "builds / known (0 to 1); null when no build's value is known."
+																					"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 																				}
 																			}
 																		}
@@ -4006,7 +4008,7 @@
 																				"share": {
 																					"type": "number",
 																					"nullable": true,
-																					"description": "builds / known (0 to 1); null when no build's value is known."
+																					"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 																				}
 																			}
 																		}
@@ -4014,6 +4016,13 @@
 																}
 															}
 														}
+													},
+													"notes": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														},
+														"description": "Present only when a ratio on this row is withheld (null): one line per ratio saying why."
 													}
 												}
 											}
@@ -4022,6 +4031,82 @@
 											"type": "object",
 											"description": "What differs across the compared events.",
 											"properties": {
+												"prizePoolUSD": {
+													"type": "object",
+													"description": "Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out.",
+													"properties": {
+														"highest": {
+															"type": "string",
+															"description": "Slug."
+														},
+														"lowest": {
+															"type": "string",
+															"description": "Slug."
+														},
+														"rangeUSD": {
+															"type": "number"
+														}
+													}
+												},
+												"submissionCount": {
+													"type": "object",
+													"description": "Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out.",
+													"properties": {
+														"highest": {
+															"type": "string",
+															"description": "Slug."
+														},
+														"lowest": {
+															"type": "string",
+															"description": "Slug."
+														},
+														"range": {
+															"type": "integer"
+														}
+													}
+												},
+												"prizePerWinnerUSD": {
+													"type": "object",
+													"description": "Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out.",
+													"properties": {
+														"highest": {
+															"type": "string",
+															"description": "Slug."
+														},
+														"lowest": {
+															"type": "string",
+															"description": "Slug."
+														}
+													}
+												},
+												"hackersCount": {
+													"type": "object",
+													"description": "Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out.",
+													"properties": {
+														"highest": {
+															"type": "string",
+															"description": "Slug."
+														},
+														"lowest": {
+															"type": "string",
+															"description": "Slug."
+														}
+													}
+												},
+												"activeRatePct": {
+													"type": "object",
+													"description": "Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out.",
+													"properties": {
+														"highest": {
+															"type": "string",
+															"description": "Slug."
+														},
+														"lowest": {
+															"type": "string",
+															"description": "Slug."
+														}
+													}
+												},
 												"notes": {
 													"type": "array",
 													"items": {
@@ -5338,7 +5423,7 @@
 													"items": {
 														"type": "string"
 													},
-													"description": "Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. When a hackathon value, facet=event or by=event counts an event whose stored rows are its winners only, a line names it ('only the winners of <slug> are stored ...'): counts from it describe its winners, not its field."
+													"description": "Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. No rate is computed over incomplete rows (an event whose stored rows are its winners only). When the set also holds full listings, those rows are left out of every count and share, and one line names the events and the rows left out ('left out of every count and share: 12 rows of <slug> (6), ...'). When they are all the set holds (a hackathon value naming only such events, or filters that leave only them), their counts stay, every share is null, and a line names them ('only the winners of <slug> are stored ...')."
 												},
 												"source": {
 													"type": "string"
@@ -5475,11 +5560,11 @@
 										},
 										"total": {
 											"type": "object",
-											"description": "The facet over every matched submission.",
+											"description": "The facet over every matched submission, less the incomplete rows meta.warnings says were left out.",
 											"properties": {
 												"field": {
 													"type": "integer",
-													"description": "Builds passing every filter except q; builds / field is the share that matched q. A winners-only event's builds are its winners (meta.warnings names it), not its field."
+													"description": "Builds passing every filter except q, less incomplete rows left out (meta.warnings); builds / field is the share that matched q. When only a winners-only event's rows are counted, they are its winners, not its field."
 												},
 												"builds": {
 													"type": "integer",
@@ -5511,7 +5596,7 @@
 															"share": {
 																"type": "number",
 																"nullable": true,
-																"description": "builds / known (0 to 1); null when no build's value is known."
+																"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 															}
 														}
 													}
@@ -5537,14 +5622,14 @@
 													},
 													"field": {
 														"type": "integer",
-														"description": "Builds in this group before q: the group's whole field. On a group with coverage winners-only, the event's winners on record, not its field."
+														"description": "Builds in this group before q: the group's whole field. On a group with coverage winners-only, the event's winners on record, not its field, and every share in the group is null."
 													},
 													"coverage": {
 														"type": "string",
 														"enum": [
 															"winners-only"
 														],
-														"description": "by=event only, present only when the event's stored rows are its winners alone (winners-only): its counts describe its winners, and the size and mix of its field are unknown."
+														"description": "by=event only, present only when the event's stored rows are its winners alone (winners-only), which happens only when such rows are all the set holds: its counts describe its winners, the size and mix of its field are unknown, and every share in the group is null."
 													},
 													"builds": {
 														"type": "integer",
@@ -5576,7 +5661,7 @@
 																"share": {
 																	"type": "number",
 																	"nullable": true,
-																	"description": "builds / known (0 to 1); null when no build's value is known."
+																	"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 																}
 															}
 														}
@@ -5586,7 +5671,7 @@
 										},
 										"winnersVsOthers": {
 											"type": "object",
-											"description": "Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement.",
+											"description": "Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement, or when the set is only a winners-only event's rows. Incomplete rows left out of the set (meta.warnings) are not among the winners.",
 											"properties": {
 												"winnersKnown": {
 													"type": "integer"
@@ -6200,7 +6285,7 @@
 												"categoryContext": {
 													"type": "object",
 													"nullable": true,
-													"description": "How crowded the submission's top category is across every stored submission. null when it has no confident category or is not categorized yet; categoryNote says which.",
+													"description": "How crowded the submission's top category is across every stored submission of events whose full listing is stored: a winners-only event's winners are left out, so no share mixes them in. null when it has no confident category or is not categorized yet; categoryNote says which.",
 													"properties": {
 														"type": {
 															"type": "string",
@@ -16033,8 +16118,17 @@
 							},
 							"rules": {
 								"type": "object",
-								"description": "What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section).",
+								"description": "What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn; the other keys are absent, not known.",
 								"properties": {
+									"source": {
+										"type": "string",
+										"description": "Curated events only: the page the judging sentence was checked against."
+									},
+									"checkedOn": {
+										"type": "string",
+										"format": "date",
+										"description": "Curated events only: the day that page was checked."
+									},
 									"repoRequired": {
 										"type": "boolean"
 									},
@@ -16065,7 +16159,7 @@
 							},
 							"profile": {
 								"type": "object",
-								"description": "What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it profiles the winners only, not the event's field.",
+								"description": "What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, not the event's field, and every share in it is null.",
 								"properties": {
 									"coverage": {
 										"type": "string",
@@ -16115,7 +16209,7 @@
 														"share": {
 															"type": "number",
 															"nullable": true,
-															"description": "builds / known (0 to 1); null when no build's value is known."
+															"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 														}
 													}
 												}
@@ -16155,7 +16249,7 @@
 														"share": {
 															"type": "number",
 															"nullable": true,
-															"description": "builds / known (0 to 1); null when no build's value is known."
+															"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 														}
 													}
 												}
@@ -16195,7 +16289,7 @@
 														"share": {
 															"type": "number",
 															"nullable": true,
-															"description": "builds / known (0 to 1); null when no build's value is known."
+															"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 														}
 													}
 												}
@@ -16235,7 +16329,7 @@
 														"share": {
 															"type": "number",
 															"nullable": true,
-															"description": "builds / known (0 to 1); null when no build's value is known."
+															"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 														}
 													}
 												}
@@ -16276,7 +16370,7 @@
 														"share": {
 															"type": "number",
 															"nullable": true,
-															"description": "builds / known (0 to 1); null when no build's value is known."
+															"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 														}
 													}
 												}
@@ -16316,7 +16410,7 @@
 														"share": {
 															"type": "number",
 															"nullable": true,
-															"description": "builds / known (0 to 1); null when no build's value is known."
+															"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 														}
 													}
 												}
@@ -16356,7 +16450,7 @@
 														"share": {
 															"type": "number",
 															"nullable": true,
-															"description": "builds / known (0 to 1); null when no build's value is known."
+															"description": "builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them."
 														}
 													}
 												}
@@ -16374,7 +16468,8 @@
 							},
 							"tracks": {
 								"type": "array",
-								"description": "The event's tracks, derived from its rows; the same array as the top-level `tracks`.",
+								"nullable": true,
+								"description": "The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which.",
 								"items": {
 									"type": "object",
 									"additionalProperties": true,
@@ -16382,13 +16477,27 @@
 										"name": {
 											"type": "string"
 										},
+										"kind": {
+											"type": "string",
+											"enum": [
+												"category",
+												"track"
+											],
+											"description": "Present only on a track the event's record declares (an event with no submission roster): category, a division every entry picks; track, a theme an entry can target."
+										},
+										"description": {
+											"type": "string",
+											"description": "Present only on a declared track: one line, in the words of the event's record."
+										},
 										"submissionCount": {
 											"type": "integer",
 											"nullable": true,
-											"description": "Submissions in the track. null when the event's coverage is winners-only: only its winners are on record, so the track's field is unknown, never its winner count."
+											"description": "Submissions in the track. null when the event's coverage is winners-only (only its winners are on record, so the track's field is unknown, never its winner count) and on a declared track (no roster held: not known)."
 										},
 										"winnerCount": {
-											"type": "integer"
+											"type": "integer",
+											"nullable": true,
+											"description": "Winners in the track. null on a declared track: no roster held, not known."
 										},
 										"totalPrizeUSD": {
 											"type": "number",
@@ -16396,6 +16505,38 @@
 										}
 									}
 								}
+							},
+							"prizeTiers": {
+								"type": "array",
+								"nullable": true,
+								"description": "The per-place split parsed from the event page. [] = the organizer's page itemizes no prize by place. null = an event off DoraHacks whose record, a summary, itemizes none, so whether the organizer did is not known; notes says so.",
+								"items": {
+									"type": "object",
+									"properties": {
+										"place": {
+											"type": "string"
+										},
+										"rank": {
+											"type": "integer",
+											"nullable": true
+										},
+										"amountUSD": {
+											"type": "number",
+											"nullable": true
+										},
+										"asset": {
+											"type": "string",
+											"nullable": true
+										}
+									}
+								}
+							},
+							"notes": {
+								"type": "array",
+								"items": {
+									"type": "string"
+								},
+								"description": "Present only when tracks or prizeTiers is null: why each one is not known."
 							},
 							"stats": {
 								"type": "object",
@@ -16679,6 +16820,8 @@
 					},
 					"tracks": {
 						"type": "array",
+						"nullable": true,
+						"description": "The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which.",
 						"items": {
 							"type": "object",
 							"additionalProperties": true,
@@ -16686,13 +16829,27 @@
 								"name": {
 									"type": "string"
 								},
+								"kind": {
+									"type": "string",
+									"enum": [
+										"category",
+										"track"
+									],
+									"description": "Present only on a track the event's record declares (an event with no submission roster): category, a division every entry picks; track, a theme an entry can target."
+								},
+								"description": {
+									"type": "string",
+									"description": "Present only on a declared track: one line, in the words of the event's record."
+								},
 								"submissionCount": {
 									"type": "integer",
 									"nullable": true,
-									"description": "Submissions in the track. null when the event's coverage is winners-only: only its winners are on record, so the track's field is unknown, never its winner count."
+									"description": "Submissions in the track. null when the event's coverage is winners-only (only its winners are on record, so the track's field is unknown, never its winner count) and on a declared track (no roster held: not known)."
 								},
 								"winnerCount": {
-									"type": "integer"
+									"type": "integer",
+									"nullable": true,
+									"description": "Winners in the track. null on a declared track: no roster held, not known."
 								},
 								"totalPrizeUSD": {
 									"type": "number",

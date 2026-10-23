@@ -1,9 +1,10 @@
 /**
- * Criterion (a): compare the base and lane replays (replay.test.ts).
+ * Criteria (a) and (a3): compare the base and lane replays (replay.test.ts).
  *
  *   pnpm exec tsx improvements/audits/2026-10-23-winners-only-coverage/diff.mts replay-base.json replay-lane.json
  *
- * Exit 1 when any request naming only full (or unstored) events differs.
+ * Exit 1 when any request naming only full events differs, or a compare
+ * naming an unstored event does (compare serves no tracks or tiers).
  */
 import { readFileSync } from "node:fs";
 
@@ -19,6 +20,7 @@ const lane = JSON.parse(readFileSync(lanePath, "utf8")) as Replay;
 
 const keys = Object.keys(base.results);
 const missing = keys.filter((k) => !lane.results[k]);
+const route = (k: string) => k.split(/[?/]/)[0];
 const tally: Record<string, { same: number; changed: string[] }> = {};
 for (const k of keys) {
 	const b = base.results[k];
@@ -29,7 +31,6 @@ for (const k of keys) {
 	if (b.sha256 === l.sha256 && b.status === l.status) t.same++;
 	else t.changed.push(`${k} (${b.chars} -> ${l.chars} chars)`);
 }
-const route = (k: string) => k.split(/[?/]/)[0];
 for (const [cls, t] of Object.entries(tally)) {
 	const byRoute: Record<string, number> = {};
 	for (const k of keys)
@@ -45,8 +46,14 @@ for (const [cls, t] of Object.entries(tally)) {
 	for (const c of t.changed) console.log(`  changed: ${c}`);
 }
 if (missing.length) console.log(`missing in lane: ${missing.join(", ")}`);
-const broken = (tally["full-or-none"]?.changed.length ?? 0) + missing.length;
+const unstoredCompare = (tally["names-unstored"]?.changed ?? []).filter(
+	(c) => route(c) === "compare",
+);
+const broken =
+	(tally.full?.changed.length ?? 0) + unstoredCompare.length + missing.length;
 console.log(
-	broken ? `FAIL: ${broken}` : "PASS: every full-or-none request identical",
+	broken
+		? `FAIL: ${broken}`
+		: "PASS: every full request identical, and every compare naming an unstored event",
 );
 process.exitCode = broken ? 1 : 0;

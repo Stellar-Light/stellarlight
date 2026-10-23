@@ -95,3 +95,41 @@ describe("curated hackathons", () => {
 		expect(iso(h?.end_time)).toBe("2025-09-16T15:00:00.000Z");
 	});
 });
+
+describe("tracks and judging a curated record declares", () => {
+	// Case, a hyphen and the final period aside.
+	const plain = (s: string) =>
+		s.toLowerCase().replace(/-/g, " ").replace(/\.$/, "");
+
+	it("come from the record's own description, with no new claim", () => {
+		const declaring = CURATED_HACKATHONS.filter((h) => h.tracks || h.judging);
+		expect(declaring.map((h) => h.uname).sort()).toEqual([
+			"hackmeridian-2026",
+			"stellar-journey-to-mastery-2026",
+		]);
+		for (const h of declaring) {
+			const text = plain(h.description ?? "");
+			for (const t of h.tracks ?? []) {
+				expect(text, `${h.uname}: ${t.name}`).toContain(plain(t.name));
+				expect(text, `${h.uname}: ${t.name}`).toContain(plain(t.description));
+				expect(t.description, t.name).not.toMatch(/[\u2013\u2014]/);
+			}
+			if (h.judging) {
+				// Verbatim, not a paraphrase.
+				expect(h.description).toContain(h.judging.text);
+				expect(h.judging.source).toMatch(/^https:\/\//);
+				expect(h.judging.checkedOn).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+			}
+		}
+	});
+
+	it("names HackMeridian 2026's two categories and two thematic tracks", () => {
+		const h = CURATED_HACKATHONS.find((x) => x.uname === "hackmeridian-2026");
+		expect(h?.tracks?.map((t) => [t.kind, t.name])).toEqual([
+			["category", "Genesis"],
+			["category", "Scale"],
+			["track", "Stellar Unlocked"],
+			["track", "Stellar Composed"],
+		]);
+	});
+});

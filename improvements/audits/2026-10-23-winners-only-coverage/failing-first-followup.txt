@@ -1,0 +1,441 @@
+
+ RUN  v3.2.3 <worktree>
+
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/analyze > answers payments share event by event, oldest first, with known and unknown apart 99ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/analyze > counts packages over the builds whose repo was read 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/analyze > rejects what it cannot honour 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > serves the stored submissions, page, rules and profile without a live roster read 89ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > names a winner its team hid upstream instead of leaving a gap 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > a row flagged hidden that this page still serves is not called missing 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > with no stored roster the record cannot say none are hidden 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > a curated event has no DoraHacks roster to hide from 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > winner rows carry what the winner won and became; submissions keep their shape 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > the curated roster gives each winner its own id, its project and its SCF record 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > an ended DoraHacks event with no winner says what DoraHacks' flag reports, never 'none won' 7ms
+ ✓ src/app/api/hackathons/review/__tests__/route.test.ts > GET /api/hackathons/review > reviews a submission from its repo link 94ms
+ ✓ src/app/api/hackathons/review/__tests__/route.test.ts > GET /api/hackathons/review > declares every served field and null of the review; the pitch is mocked here 2ms
+ ✓ src/app/api/hackathons/review/__tests__/route.test.ts > GET /api/hackathons/review > answers 400 without a link and 404 for one it does not hold 2ms
+ ✓ src/app/api/hackathons/review/__tests__/route.test.ts > a submission with no confident category > says why categoryContext is null: uncertain, or not categorized yet 2ms
+ × src/app/api/hackathons/review/__tests__/route.test.ts > how crowded a category is, across every stored submission > leaves out an event whose stored rows are its winners only 8ms
+   → expected { type: 'Payments', …(3) } to deeply equal { type: 'Payments', …(3) }
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > with no stored copy and a failed live roster, the winners could not be checked 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > winners named off DoraHacks carry the page that names them, and the note says who is not served 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > an event off DoraHacks says why its winners are missing, from its dated note 3ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > ranks a Champion first and its runners-up after it 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > a failed hidden-winner read says nothing, not none 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > declares every served field and null outside the open maps: winners, stats, rules, profile 8ms
+ × src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > serves null field counts, keeps the winners and says why 10ms
+   → expected 'Only this event\'s winners are on rec…' to be 'Only this event\'s winners are on rec…' // Object.is equality
+ × src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > its profile counts the winners and serves no share over them 3ms
+   → expected { builds: 5, known: 5, …(2) } to deeply equal { builds: 5, known: 5, …(2) }
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > one published winner: its track's winner count stays and its dated note stays 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > a DoraHacks event with stored rows keeps its counts and carries no coverage 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an unknown slug > 404s with a way forward in the error text itself and the closest known slugs 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an unknown slug > still finds the event behind a typo 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an unknown slug > names no slug when only words most slugs carry match 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > rules: what a null section means > says in the spec that a null judgingCriteria is a read page with no judging section 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/analyze > splits a listed event with no stored submissions from a value that names none, and takes a title 5ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/compare > gives DoraHacks events their stored counts, a profile and the shifts between them 30ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > a type the method never assigns > is reported as unknown, not as a share of zero 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > counting by meaning > says the count is bounded and a neighbour is not proof of the topic 5ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > category counts carry their measurement > lists precision and recall for each reported type 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > a value that names no stored value > counts a package name asked of the library facet as its library 2ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > a value that names no stored value > warns on every facet and names the values seen 3ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > compare: curated events and missing counts > takes the source from the event row and says when a count is unavailable 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > compare: curated events and missing counts > serves a count it could not read as null, so every row has the same keys 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > compare: curated events and missing counts > says so when the curated lookup fails instead of swallowing it 1ms
+ × src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > compare serves their submission counts as null, keeps the winners and says why 7ms
+   → expected { value: 'Payments', builds: 6, …(2) } to match object { builds: 6, share: null }
+(2 matching properties omitted from actual)
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > benchmark: comparing HackMeridian 2025 with 2026 gives 2025 a null submission count 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a full event beside one keeps its counts, profile and shape 1ms
+ × src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > compare withholds a prize per winner over incomplete winners, and says why on the row 1ms
+   → expected 60000 to be null
+ × src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > analyze with a hackathon filter counts its winners and serves no share over them 1ms
+   → expected [ { value: 'Payments', …(3) } ] to deeply equal [ { value: 'Payments', …(3) } ]
+ × src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > filters that leave winners-only rows alone name them even without a hackathon value 2ms
+   → expected [ Array(1) ] to deeply equal [ Array(1) ]
+ × src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > analyze across every event leaves winners-only rows out of every count and share, in one line 2ms
+   → expected { field: 18, builds: 18, …(3) } to deeply equal { field: 6, builds: 6, known: 6, …(2) }
+ × src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a hackathon value naming a full and a winners-only event counts only the full one 1ms
+   → expected { field: 8, builds: 8, known: 8, …(2) } to match object { field: 2, builds: 2 }
+(3 matching properties omitted from actual)
+ × src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a winners-only group by event says so when it is all there is 1ms
+   → expected [ [ 'hackmeridian-2025', …(2) ], …(1) ] to deeply equal [ [ 'hackmeridian-2025', …(2) ], …(1) ]
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > an event's coverage, from its stored rows > is winners-only when every row is a curated winner, full when the sync stored the rows, null when none are stored 2ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > an event's coverage, from its stored rows > every curated row is a winner, so each curated event is winners-only 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > an event's coverage, from its stored rows > names each winners-only event in an index with its winners 1ms
+ × src/lib/__tests__/hackathon-coverage.test.ts > no ratio over incomplete rows > says why an event's rows are incomplete: winners only, or winners published in part 2ms
+   → (0 , incompleteRows) is not a function
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > no ratio over incomplete rows > a winners note is kept only for curated events, so any rows it covers are curated winners 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the event profile > says it describes the winners only and serves no submission count on a winners-only event 2ms
+ × src/lib/__tests__/hackathon-coverage.test.ts > the event profile > serves no share over a winners-only event's rows, only their counts 3ms
+   → expected { builds: 5, known: 5, …(2) } to deeply equal { builds: 5, known: 5, …(2) }
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the event profile > is unchanged on a full event: same keys, same order, no coverage 0ms
+ × src/lib/__tests__/hackathon-coverage.test.ts > a hackathon filter naming a winners-only event > warns that its rows are its winners, not its field 1ms
+   → expected [ Array(1) ] to deeply equal [ Array(1) ]
+ × src/lib/__tests__/hackathon-coverage.test.ts > a hackathon filter naming a winners-only event > names several in one line, and says nothing for a full event 1ms
+   → expected 'only the winners of build-on-stellar-…' to be 'only the winners of build-on-stellar-…' // Object.is equality
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > names one value, with no null in the enum, everywhere coverage is served 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > declares nullable every count a winners-only event serves as null 0ms
+ × src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > declares the row notes that say why a ratio is null 1ms
+   → expected undefined to match object { type: 'string' }
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 15 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/lib/__tests__/hackathon-coverage.test.ts > no ratio over incomplete rows > says why an event's rows are incomplete: winners only, or winners published in part
+TypeError: (0 , incompleteRows) is not a function
+ ❯ src/lib/__tests__/hackathon-coverage.test.ts:95:10
+     93| describe("no ratio over incomplete rows", () => {
+     94|  it("says why an event's rows are incomplete: winners only, or winners…
+     95|   expect(incompleteRows("hackmeridian-2025", "winners-only")).toBe(
+       |          ^
+     96|    "only its winners are stored (coverage winners-only)",
+     97|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/15]⎯
+
+ FAIL  src/lib/__tests__/hackathon-coverage.test.ts > the event profile > serves no share over a winners-only event's rows, only their counts
+AssertionError: expected { builds: 5, known: 5, …(2) } to deeply equal { builds: 5, known: 5, …(2) }
+
+- Expected
++ Received
+
+@@ -3,17 +3,17 @@
+    "known": 5,
+    "unknown": 0,
+    "values": [
+      {
+        "builds": 3,
+-       "share": null,
++       "share": 0.6,
+        "value": "Payments",
+        "winners": 3,
+      },
+      {
+        "builds": 2,
+-       "share": null,
++       "share": 0.4,
+        "value": "DeFi",
+        "winners": 2,
+      },
+    ],
+  }
+
+ ❯ src/lib/__tests__/hackathon-coverage.test.ts:137:22
+    135|   );
+    136|   const p = eventProfile(categorized);
+    137|   expect(p.category).toEqual({
+       |                      ^
+    138|    builds: 5,
+    139|    known: 5,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/15]⎯
+
+ FAIL  src/lib/__tests__/hackathon-coverage.test.ts > a hackathon filter naming a winners-only event > warns that its rows are its winners, not its field
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+  [
+-   "only the winners of hackmeridian-2025 are stored (6 rows, coverage winners-only); its other submissions are not, so its rows are its winners, not its field, whose size and mix are unknown, and no share is computed over them",
++   "only the winners of hackmeridian-2025 are stored (6 rows, coverage winners-only); its other submissions are not, so counts from it describe its winners, not its field, whose size and mix are unknown",
+  ]
+
+ ❯ src/lib/__tests__/hackathon-coverage.test.ts:174:22
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/15]⎯
+
+ FAIL  src/lib/__tests__/hackathon-coverage.test.ts > a hackathon filter naming a winners-only event > names several in one line, and says nothing for a full event
+AssertionError: expected 'only the winners of build-on-stellar-…' to be 'only the winners of build-on-stellar-…' // Object.is equality
+
+Expected: "only the winners of build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1) are stored (coverage winners-only); their other submissions are not, so their rows are their winners, not their fields, whose size and mix are unknown, and no share is computed over them"
+Received: "only the winners of build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1) are stored (coverage winners-only); their other submissions are not, so counts from them describe their winners, not their fields, whose size and mix are unknown"
+
+ ❯ src/lib/__tests__/hackathon-coverage.test.ts:190:25
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/15]⎯
+
+ FAIL  src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > declares the row notes that say why a ratio is null
+AssertionError: expected undefined to match object { type: 'string' }
+
+- Expected: 
+{
+  "type": "string",
+}
+
++ Received: 
+undefined
+
+ ❯ src/lib/__tests__/hackathon-coverage.test.ts:256:41
+    254|  it("declares the row notes that say why a ratio is null", () => {
+    255|   const row = body("/api/hackathons/compare").properties?.hackathons?.…
+    256|   expect(row?.properties?.notes?.items).toMatchObject({ type: "string"…
+       |                                         ^
+    257|  });
+    258| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/15]⎯
+
+ FAIL  src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > compare serves their submission counts as null, keeps the winners and says why
+AssertionError: expected { value: 'Payments', builds: 6, …(2) } to match object { builds: 6, share: null }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+    "builds": 6,
+-   "share": null,
++   "share": 1,
+  }
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts:468:33
+    466|    expect(p.winners).toBe(r.winnerCount);
+    467|    // Counted, never shared out: no share over winners alone.
+    468|    expect(p.category.values[0]).toMatchObject({
+       |                                 ^
+    469|     builds: r.winnerCount,
+    470|     share: null,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/15]⎯
+
+ FAIL  src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > compare withholds a prize per winner over incomplete winners, and says why on the row
+AssertionError: expected 60000 to be null
+
+- Expected: 
+null
+
++ Received: 
+60000
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts:528:34
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/15]⎯
+
+ FAIL  src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > analyze with a hackathon filter counts its winners and serves no share over them
+AssertionError: expected [ { value: 'Payments', …(3) } ] to deeply equal [ { value: 'Payments', …(3) } ]
+
+- Expected
++ Received
+
+  [
+    {
+      "builds": 6,
+-     "share": null,
++     "share": 1,
+      "value": "Payments",
+      "winners": 6,
+    },
+  ]
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts:554:29
+    552|   const { body } = await get("analyze", "hackathon=hackmeridian-2025");
+    553|   expect(body.total).toMatchObject({ field: 6, builds: 6, known: 6 });
+    554|   expect(body.total.values).toEqual([
+       |                             ^
+    555|    { value: "Payments", builds: 6, winners: 6, share: null },
+    556|   ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/15]⎯
+
+ FAIL  src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > filters that leave winners-only rows alone name them even without a hackathon value
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+  [
+    {
+      "builds": 3,
+-     "share": null,
++     "share": 1,
+      "value": "winner",
+      "winners": 3,
+    },
+  ]
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts:568:29
+    566|    "track=open%20innovation&facet=placement",
+    567|   );
+    568|   expect(body.total.values).toEqual([
+       |                             ^
+    569|    { value: "winner", builds: 3, winners: 3, share: null },
+    570|   ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/15]⎯
+
+ FAIL  src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > analyze across every event leaves winners-only rows out of every count and share, in one line
+AssertionError: expected { field: 18, builds: 18, …(3) } to deeply equal { field: 6, builds: 6, known: 6, …(2) }
+
+- Expected
++ Received
+
+  {
+-   "builds": 6,
+-   "field": 6,
+-   "known": 6,
++   "builds": 18,
++   "field": 18,
++   "known": 18,
+    "unknown": 0,
+    "values": [
++     {
++       "builds": 13,
++       "share": 0.722,
++       "value": "winner",
++       "winners": 13,
++     },
+      {
+        "builds": 5,
+-       "share": 0.833,
++       "share": 0.278,
+        "value": "not placed",
+        "winners": 0,
+-     },
+-     {
+-       "builds": 1,
+-       "share": 0.167,
+-       "value": "winner",
+-       "winners": 1,
+      },
+    ],
+  }
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts:584:26
+    582|  it("analyze across every event leaves winners-only rows out of every …
+    583|   const all = await get("analyze", "facet=placement");
+    584|   expect(all.body.total).toEqual({
+       |                          ^
+    585|    field: 6,
+    586|    builds: 6,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/15]⎯
+
+ FAIL  src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a hackathon value naming a full and a winners-only event counts only the full one
+AssertionError: expected { field: 8, builds: 8, known: 8, …(2) } to match object { field: 2, builds: 2 }
+(3 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "builds": 2,
+-   "field": 2,
++   "builds": 8,
++   "field": 8,
+  }
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts:621:22
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/15]⎯
+
+ FAIL  src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a winners-only group by event says so when it is all there is
+AssertionError: expected [ [ 'hackmeridian-2025', …(2) ], …(1) ] to deeply equal [ [ 'hackmeridian-2025', …(2) ], …(1) ]
+
+- Expected
++ Received
+
+  [
+    [
+      "hackmeridian-2025",
+      "winners-only",
+-     null,
++     1,
+    ],
+    [
+      "apac-stellar-hackathon-2026",
+      "winners-only",
+-     null,
++     1,
+    ],
+  ]
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts:639:5
+    637|     (g.values as Array<{ share: number | null }>)[0].share,
+    638|    ]),
+    639|   ).toEqual([
+       |     ^
+    640|    ["hackmeridian-2025", "winners-only", null],
+    641|    ["apac-stellar-hackathon-2026", "winners-only", null],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/15]⎯
+
+ FAIL  src/app/api/hackathons/review/__tests__/route.test.ts > how crowded a category is, across every stored submission > leaves out an event whose stored rows are its winners only
+AssertionError: expected { type: 'Payments', …(3) } to deeply equal { type: 'Payments', …(3) }
+
+- Expected
++ Received
+
+  {
+-   "shareOfSubmissions": 0.667,
+-   "submissions": 2,
++   "shareOfSubmissions": 0.75,
++   "submissions": 3,
+    "type": "Payments",
+-   "winners": 2,
++   "winners": 3,
+  }
+
+ ❯ src/app/api/hackathons/review/__tests__/route.test.ts:215:40
+    213|   try {
+    214|    const { body } = await get("link=github.com/rajkaria/toll");
+    215|    expect(body.review.categoryContext).toEqual({
+       |                                        ^
+    216|     type: "Payments",
+    217|     submissions: 2,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/15]⎯
+
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > serves null field counts, keeps the winners and says why
+AssertionError: expected 'Only this event\'s winners are on rec…' to be 'Only this event\'s winners are on rec…' // Object.is equality
+
+Expected: "Only this event's winners are on record here (6 rows, with the page that names each win as url); its other submissions are not stored. The size and mix of its field are unknown, so totalSubmissions, each track's submissionCount and outcomes are null, never the winner count, and profile counts the winners only, with every share null."
+Received: "Only this event's winners are on record here (6 rows, with the page that names each win as url); its other submissions are not stored. The size and mix of its field are unknown, so totalSubmissions, each track's submissionCount and outcomes are null, never the winner count, and profile describes the winners only."
+
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:712:32
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/15]⎯
+
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > its profile counts the winners and serves no share over them
+AssertionError: expected { builds: 5, known: 5, …(2) } to deeply equal { builds: 5, known: 5, …(2) }
+
+- Expected
++ Received
+
+@@ -3,11 +3,11 @@
+    "known": 5,
+    "unknown": 0,
+    "values": [
+      {
+        "builds": 5,
+-       "share": null,
++       "share": 1,
+        "value": "Payments",
+        "winners": 5,
+      },
+    ],
+  }
+
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:756:43
+    754|   );
+    755|   const body = await getEvent("build-on-stellar-philippines-2026");
+    756|   expect(body.hackathon.profile.category).toEqual({
+       |                                           ^
+    757|    builds: 5,
+    758|    known: 5,
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/15]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  15 failed | 47 passed (62)
+   Start at  11:56:41
+   Duration  2.13s (transform 718ms, setup 50ms, collect 2.72s, tests 429ms, environment 1.67s, prepare 259ms)
+

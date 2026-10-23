@@ -170,3 +170,197 @@ on another model is due before it.
   live) and two Next leads: compare's `prizePerWinnerUSD` over a partial
   winners list (APAC 60,000), and all-event analyze counting the 12
   curated winners (winners 80 of 1,383, 5.8%; 68 of 1,371 without them).
+
+## Follow-up: ratios over incomplete rows (from the coordinator, 15:45Z)
+
+Scope: close the two leads this lane queued, same class (incomplete rows
+distorting a served number), on top of 8a9d2b1c, without merging main.
+
+1. compareHackathons serves apac-stellar-hackathon-2026
+   `prizePerWinnerUSD` 60,000: its pool over the 1 winner on record, while
+   its winnersNote says only one track's winners are published.
+2. analyzeHackathonSubmissions across every event counts the 12 curated
+   winners in its rates: 80 winners of 1,383 (5.8%) against 68 of 1,371
+   (5.0%) without them.
+
+Decisions, fixed before any result:
+
+- One rule for every ratio served over stored rows (a share, a winner
+  share, a rate, a prize per winner) in compare, getHackathon and analyze,
+  and in reviewSubmission's all-event share, which is the same class: no
+  ratio's denominator comes from incomplete rows. Incomplete: only the
+  winners are stored (coverage winners-only), or the winners are published
+  only in part. Such a ratio is null, never a computed number, and the
+  reason is on the row (compare: a `notes` list; a profile: its
+  `coverage`; analyze: meta.warnings).
+- The "published only in part" signal: a dated entry in
+  `CURATED_WINNERS_NOTES` (`src/data/curated-hackathons.ts`). It is the
+  only machine-readable record of that state today, kept for exactly the
+  curated events whose winners are published in part or not at all
+  (apac-stellar-hackathon-2026 partial; two others not announced, which
+  have no winners, so no ratio to withhold). A published winner count
+  below declared tracks is not available: no event declares its tracks.
+  DoraHacks events whose winners are hidden by their teams or named off
+  DoraHacks are a different state with their own notes, and they are full
+  events, which must stay byte identical; they stay out of this rule and
+  are recorded as a lead.
+- All-event analyze: leave winners-only rows out of every count and share
+  when the counted set also holds events whose full listing is stored, and
+  say so in one meta line naming the events and the rows left out. Chosen
+  over a separate group because one basis per response keeps counts and
+  shares consistent (a share is still builds over known) and adds no block
+  every client must merge. A set made only of winners-only rows (a
+  hackathon value naming only such events, or filters that leave only
+  them) keeps its counts, which describe the winners on record, and serves
+  every share null.
+
+Criteria, fixed before any result:
+
+- (a2) The replay's requests naming only full or unstored events stay byte
+  identical to the base. The all-event analyze requests change only by the
+  winners-only rows leaving their counts and shares, plus the line; every
+  such diff is listed.
+- (e) apac-stellar-hackathon-2026 rows in compare serve `prizePerWinnerUSD`
+  null with a note giving the reason, and no prize-per-winner spread names
+  it; every other ratio over incomplete rows is null.
+- (f) All-event analyze requests carry no winners-only row in any count,
+  share or group, and the line names the three events and 12 rows; a set of
+  winners-only rows alone serves every share null.
+- The sweep is extended to these fields.
+
+### Log
+
+- 15:53Z, read-only, apiVersion 1.9.99: TODO Now item 2's probes have
+  flipped: `/api/hackathons/hackmeridian-2025` serves 6 winners (Lance,
+  The Simple Fund, Star Lends, 4Bridge, Panorama Block, Stellar Forge) and
+  `/api/hackathons/builds/curated-hackmeridian-2025-lance` answers 200.
+- 16:05Z: a third item from the coordinator, for the owner, same branch:
+  getHackathon `hackmeridian-2026` serves `tracks: []` and `prizeTiers: []`,
+  each asserting none, while its record states two categories (Genesis,
+  Scale), two thematic tracks (Stellar Unlocked, Stellar Composed) and
+  judging per category.
+- Decisions for item 3, fixed before any result:
+  - A curated record may declare `tracks`, each `{ name, kind, description }`
+    with kind `category` or `track`, taken from its description with no
+    new claim (a test holds every declared name and description to a
+    phrase of the description), and `judging`, a sentence copied verbatim
+    from its description, with the page it was checked against and the
+    day. `kind` is the smallest shape that keeps categories honest in the
+    one list: Genesis and Scale are divisions every entry picks, the two
+    thematic tracks are themes an entry can target, so four peer tracks
+    would misstate it.
+  - getHackathon: with no roster held (no stored row and no live roster),
+    serve the declared tracks with `submissionCount` and `winnerCount`
+    null, or `tracks: null` when none is declared; a winners-only event
+    whose winners name no track also serves `tracks: null`. Never `[]` for
+    not known. A roster held serves its tracks as before.
+  - `prizeTiers` on an event off DoraHacks: its record is a summary, not
+    the organizer's page, so when it itemizes nothing the tiers are null,
+    not `[]`. DoraHacks events keep `[]` for a stored page with no
+    itemized split.
+  - Each such null carries its reason in a new `hackathon.notes` list,
+    present only then. Judging declared on a curated record is served as
+    `rules: { judgingCriteria, source, checkedOn }`, the other rules keys
+    absent (not known).
+- Criteria for item 3, fixed before any result:
+  - (a3) The replay's requests naming only full events stay byte
+    identical. Compare pairs naming unstored events stay identical (compare
+    serves no tracks or tiers). The event pages of unstored and
+    winners-only events change only in tracks, prizeTiers, notes and rules.
+  - (g) hackmeridian-2026 serves its four declared items with null counts,
+    `prizeTiers` null with a note, and its judging sentence in rules with
+    source and day; no curated event serves `tracks: []` or `prizeTiers:
+    []`; the sweep covers these fields.
+- Tests first for items 1 and 2, run on 8a9d2b1c's code before any change:
+  4 files, 15 failed, 47 passed (`failing-first-followup.txt`): APAC
+  prizePerWinnerUSD 60000 not null, all-event placement field 18 not 6,
+  mixed filter field 8 not 2, shares not null, the row notes missing from
+  the spec, `incompleteRows` missing. The guard tests that full events keep
+  their shape passed.
+- Implementation, items 1 and 2: `incompleteRows(slug, coverage)` in
+  `src/lib/hackathon-analytics.ts` is the one rule (winners-only coverage,
+  or a curated winners note); `incompleteEvents`, `withoutShares` and
+  `leftOutWarning` beside it. compare withholds prizePerWinnerUSD and
+  activeRatePct over incomplete rows with a row `notes` line each;
+  `eventProfile` serves no share over incomplete rows; analyze partitions
+  the counted set (incomplete rows beside full listings are left out of
+  every count and share, one line; alone, counts kept and shares null);
+  reviewSubmission's category share leaves them out. The winners-only
+  warning now reads "its rows are its winners ... and no share is computed
+  over them", true whether a request counts them or leaves them out.
+- One more test after the code, for a path no production event takes (a
+  curated record's activeRatePct over a winners-only event): on an archive
+  of 8a9d2b1c extracted to scratch it fails (activeRatePct 67, not null);
+  on the lane it passes.
+- The served-shape check in the new compare test found compare's deltas
+  spreads undeclared (prizePoolUSD, submissionCount, prizePerWinnerUSD,
+  hackersCount, activeRatePct; TODO Now item 3 listed four). Declared with
+  one shared spread schema; that item's list drops them.
+- Tests first for item 3, run before its implementation: 2 files, 6
+  failed, 30 passed (`failing-first-tracks.txt`); the guard that a stored
+  DoraHacks event keeps its tracks, tiers and no notes passed.
+- Implementation, item 3: `CuratedTrack`, `CuratedHackathon`
+  (`tracks`, `judging`) and `TRACK_KINDS` in
+  `src/data/curated-hackathons.ts`; hackmeridian-2026 declares Genesis and
+  Scale (category) and Stellar Unlocked and Stellar Composed (track) and
+  its judging sentence verbatim (source hackmeridian.com, checked
+  2026-10-20, as the row's comment records); stellar-journey-to-mastery-2026
+  declares its builder and startup tracks, each from its description.
+  getHackathon serves declared tracks with null counts when no roster is
+  held, null when nothing tells, prizeTiers null on a curated event whose
+  record itemizes none, `hackathon.notes` for each null, and the judging
+  sentence as rules. The other curated records state no tracks (Jaipur,
+  the Builder Summit), or hold rows (HackMeridian 2025 and APAC derive
+  theirs; the Philippines winners name none, so null).
+- `contract:check` first failed on the enum ratchet (99 hand-typed enum
+  arrays, baseline 98): the track kind enum now spreads `TRACK_KINDS`.
+- Replay, extended to 455 requests (four all-event analyze requests, two
+  mixed sets and one winners-only set reached by filters) and three
+  classes (full, names-unstored, names-winners-only). Base rerun from an
+  archive of bf8262db extracted to scratch: `replay-base.json`, run twice,
+  `cmp` exit 0; the fidelity check still 27 of 27 live pages. Final tree:
+  `replay-lane.json`, run twice, `cmp` exit 0. `diff.mts`: full 270 of 270
+  identical (190 compare, 20 event pages, 40 analyze, 20 builds);
+  names-unstored 86 compare identical and the 4 event pages changed in
+  tracks, prizeTiers, notes and rules only; names-winners-only 95 of 95
+  changed. The all-event diffs, field by field, are in the audit README
+  (facet=placement winners 80 to 68 of 1,383 to 1,371; facet=event 3
+  events left out, 5 shares move by 0.001 to 0.002; by=event 20 full
+  groups identical; winnersOnly=1 field 80 to 68).
+- `sweep.mts` extended (APAC prize per winner and notes, profile shares,
+  tracks and tiers never [], declared tracks, rules, all-event and mixed
+  analyze sets): 1,562 checks pass on the lane; 710 fail on the base.
+- Checks on the final tree: `pnpm exec tsc --noEmit -p tsconfig.json` exit
+  0; `npx vitest run src/lib/__tests__ src/app/api --maxWorkers=4
+  --minWorkers=1` exit 0, 189 files, 2,425 tests; `npx vitest run
+  src/data/__tests__` exit 0, 4 files, 31 tests; `pnpm contract:write`
+  exit 0; `CONTRACT_BASE=origin/main pnpm contract:check` exit 0 (enum
+  literals 98 hand-typed, 57 spread); biome on the 20 changed code files:
+  no errors; no operation description, summary, parameter or x-routing
+  changed against bf8262db, and new schema property names were added, so
+  `pnpm raven:gate --raven <scratch>/raven-src/stellar-raven` ran: exit 0,
+  ACCEPT 1.9.102 (legacy 220/298/326 and 112, skills 17/23/23, holdout 24
+  passed with 10 forbidden captures, 0 hit-to-miss); added lines: no em or
+  en dashes, no barred names, no local paths.
+- TODO: Now item 2 (HackMeridian 2025 winners not served) closed as done
+  by today's curated import, live since 13:55Z (coordinator), receipt
+  above (15:53Z, 1.9.99: 6 winners, the curated build answers 200); its
+  owner decision "Run the curated-builds execute [run]" removed, since the
+  execute ran. The Next item on HackMeridian 2026 tracks, categories and
+  judging in prose removed (served now; its venue and deadline hour are
+  covered by the events-fields item). The two Next leads this round queued
+  removed (fixed). Now items renumbered: this round's item is now 10.
+
+## Outcome (follow-up)
+
+- Items 1 to 3 committed on `lane/v-winners-only-coverage` on top of
+  8a9d2b1c, not pushed, still spec placeholder 1.9.102 with one changelog
+  entry covering the three. Criteria (a2), (a3), (e), (f) and (g) hold on
+  the replay and the sweep; nothing is deployed, so nothing is verified
+  live.
+- Leads, not fixed: DoraHacks events whose winners are hidden by their
+  teams (buildonstellarchile, 14 of 15 served) or named off DoraHacks
+  (alebrije2026, one named winner not served) keep a prize per winner over
+  the winners served; their notes record a different state and they are
+  full events, which had to stay byte identical. The Builder Summit's
+  bounty tracks live only in its winners roster's labels.

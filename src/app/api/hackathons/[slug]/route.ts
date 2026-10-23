@@ -10,7 +10,10 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
-import { CURATED_WINNERS_NOTES } from "@/data/curated-hackathons";
+import {
+	CURATED_HACKATHONS,
+	CURATED_WINNERS_NOTES,
+} from "@/data/curated-hackathons";
 import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
 import { WINNER_OVERLAY } from "@/data/winner-overlay";
 import { apiError } from "@/lib/api-error";
@@ -555,9 +558,48 @@ export async function GET(
 			const liveTracks = [...trackMap.values()].sort(
 				(a, b) => b.submissionCount - a.submissionCount,
 			);
-			const servedTracks = winnersOnly
-				? liveTracks.map((t) => ({ ...t, submissionCount: null }))
-				: liveTracks;
+			// An empty list says none. A full roster's tracks as before; a
+			// winners-only roster's with submissionCount unknown; with neither,
+			// the tracks the event's record declares, counts unknown; and null
+			// when nothing tells (hackmeridian-2026 served [] beside two
+			// categories and two tracks its record states).
+			const record =
+				dora.source === "curated"
+					? CURATED_HACKATHONS.find((h) => h.uname === slug)
+					: undefined;
+			const servedTracks =
+				liveSubmissions.length && !winnersOnly
+					? liveTracks
+					: winnersOnly && liveTracks.length
+						? liveTracks.map((t) => ({ ...t, submissionCount: null }))
+						: record?.tracks?.length
+							? record.tracks.map((t) => ({
+									name: t.name,
+									kind: t.kind,
+									description: t.description,
+									submissionCount: null,
+									winnerCount: null,
+								}))
+							: null;
+			// The organizer's page itemizes prizes or not; a curated record is a
+			// summary, so when it itemizes none the split is not known.
+			const tiers = parsePrizeTiers(page);
+			const prizeTiers =
+				dora.source === "curated" && !tiers.length ? null : tiers;
+			const notes = [
+				...(servedTracks
+					? []
+					: [
+							liveSubmissions.length
+								? "tracks is null: only its winners are stored and none of them names a track, and no record of it declares tracks, so its tracks are not known here, not none."
+								: "tracks is null: no submission roster is held for this event and no record of it declares tracks, so its tracks are not known here, not none.",
+						]),
+				...(prizeTiers
+					? []
+					: [
+							"prizeTiers is null: this event's record is a summary kept off DoraHacks, not the organizer's page, and it itemizes no prize by place, so whether the organizer did is not known here.",
+						]),
+			];
 			return NextResponse.json(
 				{
 					meta: {
@@ -595,12 +637,14 @@ export async function GET(
 							: null,
 						prizePoolUSD: dora.bonus_price || null,
 						// sls-016: structured per-place split parsed from the description
-						// prose (rank → amountUSD → asset); [] when not itemized.
-						prizeTiers: parsePrizeTiers(page),
+						// prose (rank → amountUSD → asset); [] when the organizer's page
+						// itemizes none, null when a curated summary cannot tell.
+						prizeTiers,
 						// What the organizer published about submitting and judging.
 						// Absent = the event page was not read; a null section = the
 						// page has none (most Stellar event pages have no judging
-						// section: 14 of 20 on 2026-10-05).
+						// section: 14 of 20 on 2026-10-05). An event off DoraHacks:
+						// only the judging sentence its record copies verbatim.
 						...(storedEvent?.detailReadAt
 							? {
 									rules: {
@@ -612,7 +656,15 @@ export async function GET(
 										readAt: storedEvent.detailReadAt,
 									},
 								}
-							: {}),
+							: record?.judging
+								? {
+										rules: {
+											judgingCriteria: record.judging.text,
+											source: record.judging.source,
+											checkedOn: record.judging.checkedOn,
+										},
+									}
+								: {}),
 						// The engine's profile of the stored submissions: categories,
 						// libraries, activity after the event, and what they became.
 						...(fromStore ? { profile: eventProfile(stored) } : {}),
@@ -664,6 +716,8 @@ export async function GET(
 									: null,
 						},
 						tracks: servedTracks,
+						// Why a list above is null, present only then.
+						...(notes.length ? { notes } : {}),
 					},
 					winners,
 					// sls-005: says whether the winners ARRAY ORDER is a ranking.

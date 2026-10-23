@@ -1,0 +1,217 @@
+
+ RUN  v3.2.3 <worktree>
+
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated winners notes > say why a curated event's winners are missing, dated, for curated events only 1ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated winners notes > an event noted as not announced serves no winner 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > serves every date as written: no timestamp crosses a UTC date 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > records a shifted timestamp written through the rows' helper 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > detects a timestamp whose UTC date is not the date written 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > keeps HackMeridian 2026 on the organizer's figures, not 2024's 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > says HackMeridian 2025's days are derived, and stores them at midday 0ms
+ × src/data/__tests__/curated-hackathons.test.ts > tracks and judging a curated record declares > come from the record's own description, with no new claim 3ms
+   → expected [] to deeply equal [ 'hackmeridian-2026', …(1) ]
+ × src/data/__tests__/curated-hackathons.test.ts > tracks and judging a curated record declares > names HackMeridian 2026's two categories and two thematic tracks 1ms
+   → expected undefined to deeply equal [ [ 'category', 'Genesis' ], …(3) ]
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > serves the stored submissions, page, rules and profile without a live roster read 66ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > names a winner its team hid upstream instead of leaving a gap 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > a row flagged hidden that this page still serves is not called missing 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > with no stored roster the record cannot say none are hidden 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > a curated event has no DoraHacks roster to hide from 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > winner rows carry what the winner won and became; submissions keep their shape 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > the curated roster gives each winner its own id, its project and its SCF record 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > an ended DoraHacks event with no winner says what DoraHacks' flag reports, never 'none won' 3ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > with no stored copy and a failed live roster, the winners could not be checked 3ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > winners named off DoraHacks carry the page that names them, and the note says who is not served 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > an event off DoraHacks says why its winners are missing, from its dated note 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > ranks a Champion first and its runners-up after it 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > a failed hidden-winner read says nothing, not none 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > declares every served field and null outside the open maps: winners, stats, rules, profile 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > serves null field counts, keeps the winners and says why 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > its profile counts the winners and serves no share over them 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > one published winner: its track's winner count stays and its dated note stays 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > a DoraHacks event with stored rows keeps its counts and carries no coverage 0ms
+ × src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > serves the categories and tracks a record declares, with counts not known, and its judging 4ms
+   → expected [] to deeply equal [ { name: 'Genesis', …(4) }, …(3) ]
+ × src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > a record that declares no tracks serves null tracks, and no rules 1ms
+   → expected [] to be null
+ × src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > winners that name no track give no track list 1ms
+   → expected [] to be null
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > a DoraHacks event with a stored roster keeps its tracks and tiers, with no notes 0ms
+ × src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > a DoraHacks event with no roster read serves null tracks, not none 0ms
+   → expected [] to be null
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an unknown slug > 404s with a way forward in the error text itself and the closest known slugs 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an unknown slug > still finds the event behind a typo 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an unknown slug > names no slug when only words most slugs carry match 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > rules: what a null section means > says in the spec that a null judgingCriteria is a read page with no judging section 0ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/data/__tests__/curated-hackathons.test.ts > tracks and judging a curated record declares > come from the record's own description, with no new claim
+AssertionError: expected [] to deeply equal [ 'hackmeridian-2026', …(1) ]
+
+- Expected
++ Received
+
+- [
+-   "hackmeridian-2026",
+-   "stellar-journey-to-mastery-2026",
+- ]
++ []
+
+ ❯ src/data/__tests__/curated-hackathons.test.ts:106:48
+    104|  it("come from the record's own description, with no new claim", () =>…
+    105|   const declaring = CURATED_HACKATHONS.filter((h) => h.tracks || h.jud…
+    106|   expect(declaring.map((h) => h.uname).sort()).toEqual([
+       |                                                ^
+    107|    "hackmeridian-2026",
+    108|    "stellar-journey-to-mastery-2026",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/data/__tests__/curated-hackathons.test.ts > tracks and judging a curated record declares > names HackMeridian 2026's two categories and two thematic tracks
+AssertionError: expected undefined to deeply equal [ [ 'category', 'Genesis' ], …(3) ]
+
+- Expected: 
+[
+  [
+    "category",
+    "Genesis",
+  ],
+  [
+    "category",
+    "Scale",
+  ],
+  [
+    "track",
+    "Stellar Unlocked",
+  ],
+  [
+    "track",
+    "Stellar Composed",
+  ],
+]
+
++ Received: 
+undefined
+
+ ❯ src/data/__tests__/curated-hackathons.test.ts:128:51
+    126|  it("names HackMeridian 2026's two categories and two thematic tracks"…
+    127|   const h = CURATED_HACKATHONS.find((x) => x.uname === "hackmeridian-2…
+    128|   expect(h?.tracks?.map((t) => [t.kind, t.name])).toEqual([
+       |                                                   ^
+    129|    ["category", "Genesis"],
+    130|    ["category", "Scale"],
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > serves the categories and tracks a record declares, with counts not known, and its judging
+AssertionError: expected [] to deeply equal [ { name: 'Genesis', …(4) }, …(3) ]
+
+- Expected
++ Received
+
+- [
+-   {
+-     "description": "Takes a new idea or early prototype to a working MVP.",
+-     "kind": "category",
+-     "name": "Genesis",
+-     "submissionCount": null,
+-     "winnerCount": null,
+-   },
+-   {
+-     "description": "Moves an existing product or advanced prototype toward production.",
+-     "kind": "category",
+-     "name": "Scale",
+-     "submissionCount": null,
+-     "winnerCount": null,
+-   },
+-   {
+-     "description": "New uses of Stellar's core protocol features.",
+-     "kind": "track",
+-     "name": "Stellar Unlocked",
+-     "submissionCount": null,
+-     "winnerCount": null,
+-   },
+-   {
+-     "description": "Two or more ecosystem tools or projects combined.",
+-     "kind": "track",
+-     "name": "Stellar Composed",
+-     "submissionCount": null,
+-     "winnerCount": null,
+-   },
+- ]
++ []
+
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:868:33
+    866|    },
+    867|   ];
+    868|   expect(body.hackathon.tracks).toEqual(declared);
+       |                                 ^
+    869|   expect(body.tracks).toEqual(declared);
+    870|   expect(body.hackathon.prizeTiers).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > a record that declares no tracks serves null tracks, and no rules
+AssertionError: expected [] to be null
+
+- Expected: 
+null
+
++ Received: 
+[]
+
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:889:33
+    887|  it("a record that declares no tracks serves null tracks, and no rules…
+    888|   const body = await serveCurated("stellar-builders-camp-jaipur-2026");
+    889|   expect(body.hackathon.tracks).toBeNull();
+       |                                 ^
+    890|   expect(body.tracks).toBeNull();
+    891|   expect(body.hackathon.prizeTiers).toBeNull();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > winners that name no track give no track list
+AssertionError: expected [] to be null
+
+- Expected: 
+null
+
++ Received: 
+[]
+
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:908:33
+    906|    await storedCurated("build-on-stellar-philippines-2026"),
+    907|   );
+    908|   expect(body.hackathon.tracks).toBeNull();
+       |                                 ^
+    909|   expect(body.tracks).toBeNull();
+    910|   expect(body.hackathon.notes).toEqual([
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > a DoraHacks event with no roster read serves null tracks, not none
+AssertionError: expected [] to be null
+
+- Expected: 
+null
+
++ Received: 
+[]
+
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:933:33
+    931|   eventPage = storedEvent;
+    932|   const body = await getEvent();
+    933|   expect(body.hackathon.tracks).toBeNull();
+       |                                 ^
+    934|   expect(body.tracks).toBeNull();
+    935|   expect(body.hackathon.notes).toEqual([NO_ROSTER_NOTE]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  6 failed | 30 passed (36)
+   Start at  12:07:58
+   Duration  1.31s (transform 365ms, setup 23ms, collect 469ms, tests 98ms, environment 1.06s, prepare 130ms)
+

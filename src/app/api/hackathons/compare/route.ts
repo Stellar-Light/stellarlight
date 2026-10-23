@@ -23,6 +23,7 @@ import {
 	eventProfile,
 	type FacetShift,
 	facetShifts,
+	incompleteRows,
 } from "@/lib/hackathon-analytics";
 import {
 	getHackathonBuildsIndex,
@@ -51,7 +52,9 @@ interface HackathonSnapshot {
 	hackersCount?: number | null;
 	submissionCount?: number | null;
 	winnerCount?: number | null;
-	prizePerWinnerUSD?: number;
+	/** null when the winners on record are incomplete rows (incompleteRows):
+	 * `notes` says why. Absent when the pool or the winners are missing. */
+	prizePerWinnerUSD?: number | null;
 	// Cohort DURABILITY (2026-07-21): of this hackathon's submissions, how many
 	// are STILL ACTIVE in the directory today (status Live/Pre-Release/
 	// Development) and how many reached Live. Curated hackathons only — a
@@ -60,8 +63,9 @@ interface HackathonSnapshot {
 	stillActiveCount?: number;
 	liveCount?: number;
 	/** stillActiveCount / submissionCount as a percent — the survival rate that
-	 *  makes "2× the submissions but half as durable" answerable. */
-	activeRatePct?: number;
+	 *  makes "2× the submissions but half as durable" answerable. null over
+	 *  incomplete rows (incompleteRows), with `notes` saying why. */
+	activeRatePct?: number | null;
 	/** Present only when the stored rows are the event's winners alone: then
 	 * submissionCount is null and the profile describes the winners. */
 	coverage?: EventProfile["coverage"];
@@ -69,6 +73,8 @@ interface HackathonSnapshot {
 	 * by the same engine as analyzeHackathonSubmissions. Absent when the store
 	 * holds none of the event's submissions. */
 	profile?: EventProfile;
+	/** Present only when a ratio on this row is withheld: why it is null. */
+	notes?: string[];
 }
 
 /** Fill submissions, winners and the profile from the stored index; curated
@@ -276,11 +282,29 @@ function computeDeltas(snaps: HackathonSnapshot[]): ComparisonDeltas {
 	const hc = pickRange("hackersCount", "registered hackers");
 	if (hc) deltas.hackersCount = { highest: hc.highest, lowest: hc.lowest };
 
-	// Compute prize-per-winner where we have both
+	// Compute prize-per-winner where we have both. No ratio over incomplete
+	// rows (incompleteRows): APAC served its pool over the 1 winner it
+	// publishes. activeRatePct, from a curated record, follows the same rule.
 	for (const s of real) {
+		const why = incompleteRows(s.slug, s.coverage);
+		const withheld: string[] = [];
 		if (s.prizePoolUSD && s.winnerCount && s.winnerCount > 0) {
-			s.prizePerWinnerUSD = Math.round(s.prizePoolUSD / s.winnerCount);
+			if (!why)
+				s.prizePerWinnerUSD = Math.round(s.prizePoolUSD / s.winnerCount);
+			else {
+				s.prizePerWinnerUSD = null;
+				withheld.push(
+					`prizePerWinnerUSD is null: ${why}, so its prize pool over the winners on record is not a prize per winner`,
+				);
+			}
 		}
+		if (why && typeof s.activeRatePct === "number") {
+			s.activeRatePct = null;
+			withheld.push(
+				`activeRatePct is null: ${why}, so its still-active count over its projects is not a rate over its submissions`,
+			);
+		}
+		if (withheld.length) s.notes = withheld;
 	}
 	const ppw = pickRange("prizePerWinnerUSD", "prize per winner");
 	if (ppw)
@@ -364,7 +388,7 @@ async function compare(slugs: string[], req: NextRequest) {
 	if (unknownField.length) {
 		const one = unknownField.length === 1;
 		deltas.notes.push(
-			`${unknownField.map((s) => s.slug).join(", ")}: only ${one ? "its" : "their"} winners are on record (coverage winners-only), so submissionCount is null, unknown, never the winner count; ${one ? "its profile describes" : "their profiles describe"} the winners only and ${one ? "it is" : "they are"} left out of facetShifts`,
+			`${unknownField.map((s) => s.slug).join(", ")}: only ${one ? "its" : "their"} winners are on record (coverage winners-only), so submissionCount is null, unknown, never the winner count; ${one ? "its profile counts" : "their profiles count"} the winners only, with every share null, and ${one ? "it is" : "they are"} left out of facetShifts`,
 		);
 	}
 	// A winners' mix is not the field's, so those events shift nothing.

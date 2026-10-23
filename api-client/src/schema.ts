@@ -1482,8 +1482,15 @@ export interface components {
             hackathon?: {
                 /** @description The event page as the organizer published it, in markdown: the description, then each custom tab under its name as a heading (some organizers publish judging criteria or submission requirements only in a tab). Stored daily for DoraHacks events. */
                 description?: string | null;
-                /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). */
+                /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn; the other keys are absent, not known. */
                 rules?: {
+                    /** @description Curated events only: the page the judging sentence was checked against. */
+                    source?: string;
+                    /**
+                     * Format: date
+                     * @description Curated events only: the day that page was checked.
+                     */
+                    checkedOn?: string;
                     repoRequired?: boolean;
                     videoRequired?: boolean;
                     submissionQuestions?: string[];
@@ -1494,7 +1501,7 @@ export interface components {
                     /** Format: date-time */
                     readAt?: string;
                 };
-                /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it profiles the winners only, not the event's field. */
+                /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, not the event's field, and every share in it is null. */
                 profile?: {
                     /**
                      * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
@@ -1516,7 +1523,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1532,7 +1539,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1548,7 +1555,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1564,7 +1571,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1581,7 +1588,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1597,7 +1604,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1613,7 +1620,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1623,17 +1630,34 @@ export interface components {
                  * @enum {string}
                  */
                 coverage?: "winners-only";
-                /** @description The event's tracks, derived from its rows; the same array as the top-level `tracks`. */
+                /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which. */
                 tracks?: ({
                     name?: string;
-                    /** @description Submissions in the track. null when the event's coverage is winners-only: only its winners are on record, so the track's field is unknown, never its winner count. */
+                    /**
+                     * @description Present only on a track the event's record declares (an event with no submission roster): category, a division every entry picks; track, a theme an entry can target.
+                     * @enum {string}
+                     */
+                    kind?: "category" | "track";
+                    /** @description Present only on a declared track: one line, in the words of the event's record. */
+                    description?: string;
+                    /** @description Submissions in the track. null when the event's coverage is winners-only (only its winners are on record, so the track's field is unknown, never its winner count) and on a declared track (no roster held: not known). */
                     submissionCount?: number | null;
-                    winnerCount?: number;
+                    /** @description Winners in the track. null on a declared track: no roster held, not known. */
+                    winnerCount?: number | null;
                     /** @description Directory rows only: the prize money its winners took. */
                     totalPrizeUSD?: number;
                 } & {
                     [key: string]: unknown;
-                })[];
+                })[] | null;
+                /** @description The per-place split parsed from the event page. [] = the organizer's page itemizes no prize by place. null = an event off DoraHacks whose record, a summary, itemizes none, so whether the organizer did is not known; notes says so. */
+                prizeTiers?: {
+                    place?: string;
+                    rank?: number | null;
+                    amountUSD?: number | null;
+                    asset?: string | null;
+                }[] | null;
+                /** @description Present only when tracks or prizeTiers is null: why each one is not known. */
+                notes?: string[];
                 /** @description Counts for the event. totalSubmissions counts the submissions served here (null = no submission list, or only the winners are on record). */
                 stats?: {
                     /** @description The submissions served here. null when no submission list is held, and when coverage is winners-only: only the winners are on record, so the size of the field is unknown, never the winner count. */
@@ -1749,16 +1773,25 @@ export interface components {
             submissions?: {
                 [key: string]: unknown;
             }[];
+            /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which. */
             tracks?: ({
                 name?: string;
-                /** @description Submissions in the track. null when the event's coverage is winners-only: only its winners are on record, so the track's field is unknown, never its winner count. */
+                /**
+                 * @description Present only on a track the event's record declares (an event with no submission roster): category, a division every entry picks; track, a theme an entry can target.
+                 * @enum {string}
+                 */
+                kind?: "category" | "track";
+                /** @description Present only on a declared track: one line, in the words of the event's record. */
+                description?: string;
+                /** @description Submissions in the track. null when the event's coverage is winners-only (only its winners are on record, so the track's field is unknown, never its winner count) and on a declared track (no roster held: not known). */
                 submissionCount?: number | null;
-                winnerCount?: number;
+                /** @description Winners in the track. null on a declared track: no roster held, not known. */
+                winnerCount?: number | null;
                 /** @description Directory rows only: the prize money its winners took. */
                 totalPrizeUSD?: number;
             } & {
                 [key: string]: unknown;
-            })[];
+            })[] | null;
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
@@ -3560,12 +3593,14 @@ export interface operations {
                              * @enum {string}
                              */
                             coverage?: "winners-only";
+                            /** @description prizePoolUSD / winnerCount, rounded. Absent when either is missing or zero. null when the winners on record are incomplete rows: only the winners are stored (coverage winners-only) or they are published only in part (getHackathon stats.winnersNote); notes says which. Never computed over incomplete rows. */
                             prizePerWinnerUSD?: number | null;
                             /** @description Curated events only: the event's directory projects still active today. */
                             stillActiveCount?: number | null;
                             liveCount?: number | null;
+                            /** @description Curated events only: stillActiveCount / submissionCount as a percent. null over incomplete rows, as prizePerWinnerUSD; notes says why. */
                             activeRatePct?: number | null;
-                            /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it profiles the winners only, not the event's field. */
+                            /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, not the event's field, and every share in it is null. */
                             profile?: {
                                 /**
                                  * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
@@ -3587,7 +3622,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3603,7 +3638,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3619,7 +3654,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3635,7 +3670,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3652,7 +3687,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3668,7 +3703,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3684,14 +3719,53 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
                             };
+                            /** @description Present only when a ratio on this row is withheld (null): one line per ratio saying why. */
+                            notes?: string[];
                         }[];
                         /** @description What differs across the compared events. */
                         deltas?: {
+                            /** @description Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out. */
+                            prizePoolUSD?: {
+                                /** @description Slug. */
+                                highest?: string;
+                                /** @description Slug. */
+                                lowest?: string;
+                                rangeUSD?: number;
+                            };
+                            /** @description Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out. */
+                            submissionCount?: {
+                                /** @description Slug. */
+                                highest?: string;
+                                /** @description Slug. */
+                                lowest?: string;
+                                range?: number;
+                            };
+                            /** @description Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out. */
+                            prizePerWinnerUSD?: {
+                                /** @description Slug. */
+                                highest?: string;
+                                /** @description Slug. */
+                                lowest?: string;
+                            };
+                            /** @description Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out. */
+                            hackersCount?: {
+                                /** @description Slug. */
+                                highest?: string;
+                                /** @description Slug. */
+                                lowest?: string;
+                            };
+                            /** @description Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out. */
+                            activeRatePct?: {
+                                /** @description Slug. */
+                                highest?: string;
+                                /** @description Slug. */
+                                lowest?: string;
+                            };
                             /** @description Plain-language differences, plus every gap: an event whose counts are unavailable, a winners-only event whose submission count is unknown, and any read that failed (a failed read is never served as an absent event or a zero). */
                             notes?: string[];
                             /** @description Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set. A winners-only event (coverage) is left out: its winners' mix is not its field's. */
@@ -4129,7 +4203,7 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. When a hackathon value, facet=event or by=event counts an event whose stored rows are its winners only, a line names it ('only the winners of <slug> are stored ...'): counts from it describe its winners, not its field. */
+                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. No rate is computed over incomplete rows (an event whose stored rows are its winners only). When the set also holds full listings, those rows are left out of every count and share, and one line names the events and the rows left out ('left out of every count and share: 12 rows of <slug> (6), ...'). When they are all the set holds (a hackathon value naming only such events, or filters that leave only them), their counts stay, every share is null, and a line names them ('only the winners of <slug> are stored ...'). */
                             warnings?: string[];
                             source?: string;
                             upstream?: string;
@@ -4172,9 +4246,9 @@ export interface operations {
                             };
                             note?: string;
                         };
-                        /** @description The facet over every matched submission. */
+                        /** @description The facet over every matched submission, less the incomplete rows meta.warnings says were left out. */
                         total?: {
-                            /** @description Builds passing every filter except q; builds / field is the share that matched q. A winners-only event's builds are its winners (meta.warnings names it), not its field. */
+                            /** @description Builds passing every filter except q, less incomplete rows left out (meta.warnings); builds / field is the share that matched q. When only a winners-only event's rows are counted, they are its winners, not its field. */
                             field?: number;
                             /** @description Builds in the set. */
                             builds?: number;
@@ -4187,7 +4261,7 @@ export interface operations {
                                 builds?: number;
                                 /** @description Of `builds`, how many placed. */
                                 winners?: number;
-                                /** @description builds / known (0 to 1); null when no build's value is known. */
+                                /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                                 share?: number | null;
                             }[];
                         };
@@ -4197,10 +4271,10 @@ export interface operations {
                             /** @description by=event: the event's title. */
                             title?: string;
                             endedAt?: string | null;
-                            /** @description Builds in this group before q: the group's whole field. On a group with coverage winners-only, the event's winners on record, not its field. */
+                            /** @description Builds in this group before q: the group's whole field. On a group with coverage winners-only, the event's winners on record, not its field, and every share in the group is null. */
                             field?: number;
                             /**
-                             * @description by=event only, present only when the event's stored rows are its winners alone (winners-only): its counts describe its winners, and the size and mix of its field are unknown.
+                             * @description by=event only, present only when the event's stored rows are its winners alone (winners-only), which happens only when such rows are all the set holds: its counts describe its winners, the size and mix of its field are unknown, and every share in the group is null.
                              * @enum {string}
                              */
                             coverage?: "winners-only";
@@ -4215,11 +4289,11 @@ export interface operations {
                                 builds?: number;
                                 /** @description Of `builds`, how many placed. */
                                 winners?: number;
-                                /** @description builds / known (0 to 1); null when no build's value is known. */
+                                /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
                                 share?: number | null;
                             }[];
                         }[];
-                        /** @description Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement. */
+                        /** @description Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement, or when the set is only a winners-only event's rows. Incomplete rows left out of the set (meta.warnings) are not among the winners. */
                         winnersVsOthers?: {
                             winnersKnown?: number;
                             othersKnown?: number;
@@ -4450,7 +4524,7 @@ export interface operations {
                                     } | null;
                                 }[];
                             };
-                            /** @description How crowded the submission's top category is across every stored submission. null when it has no confident category or is not categorized yet; categoryNote says which. */
+                            /** @description How crowded the submission's top category is across every stored submission of events whose full listing is stored: a winners-only event's winners are left out, so no share mixes them in. null when it has no confident category or is not categorized yet; categoryNote says which. */
                             categoryContext?: {
                                 /** @enum {string} */
                                 type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";

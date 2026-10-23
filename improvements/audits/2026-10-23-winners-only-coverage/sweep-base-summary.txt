@@ -4,8 +4,20 @@
   81 FAIL compare deltas.notes (winners-only line)
   81 FAIL compare coverage
   68 FAIL compare deltas.submissionCount
-  66 FAIL compare deltas.notes (submission count line)
-   6 FAIL analyze (hackathon filter) meta.warnings (winners-only line)
+  66 FAIL compare deltas.notes (no submission count line)
+  27 FAIL compare prizePerWinnerUSD null over incomplete winners
+  27 FAIL compare notes say why prizePerWinnerUSD is null
+  13 FAIL compare deltas.prizePerWinnerUSD
+  13 FAIL compare deltas.notes (no prize per winner line)
+   7 FAIL getHackathon prizeTiers null with the note
+   7 FAIL getHackathon prizeTiers never []
+   7 FAIL analyze (hackathon filter) meta.warnings (winners-only line)
+   6 FAIL analyze (winners-only rows alone) meta.warnings names them
+   6 FAIL analyze (mixed set) left-out line names the events
+   5 FAIL getHackathon tracks never []
+   5 FAIL getHackathon hackathon.tracks never []
+   4 FAIL analyze (every event) total.field over full listings only
+   4 FAIL analyze (every event) left-out line counts 12 rows
    3 FAIL getHackathon stats.totalSubmissions
    3 FAIL getHackathon stats.outcomes
    3 FAIL getHackathon stats.coverageNote
@@ -14,10 +26,15 @@
    3 FAIL getHackathon meta.note
    3 FAIL getHackathon hackathon.coverage
    3 FAIL builds (hackathon filter) meta.warnings (winners-only line)
-   3 FAIL analyze facet=event meta.warnings (winners-only line)
-   3 FAIL analyze by=event meta.warnings (winners-only line)
-   3 FAIL analyze by=event groups[].coverage
    2 FAIL getHackathon tracks[].submissionCount
+   2 FAIL getHackathon tracks null with the note
    2 FAIL getHackathon hackathon.tracks[].submissionCount
+   2 FAIL getHackathon declared tracks served
+   2 FAIL analyze (mixed set) no winners-only event in any value, group or lift
+   1 FAIL getHackathon tracks null
+   1 FAIL getHackathon rules
+   1 FAIL getHackathon hackathon.tracks null
    1 FAIL benchmark (c) 2025 submissionCount null or >= 100
-total: FAIL: 583 of 1140 checks, base tree (bf8262db)
+   1 FAIL analyze (winners-only rows alone) every share null
+   1 FAIL analyze (every event) winners 68 of 1,371
+total: FAIL: 710 of 1562 checks, base tree (bf8262db)

@@ -17,6 +17,7 @@ import { logApiHit } from "@/lib/api-usage";
 import {
 	COVERAGE_VALUES,
 	categoryMeasures,
+	type Distribution,
 	distribution,
 	distributionBy,
 	FACET_IDS,
@@ -24,9 +25,12 @@ import {
 	type FacetId,
 	GROUP_FACETS,
 	type GroupFacetId,
+	incompleteEvents,
+	leftOutWarning,
 	winnersOnlyEvents,
 	winnersOnlyWarning,
 	winnersVsOthers,
+	withoutShares,
 } from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
@@ -127,28 +131,54 @@ export async function GET(req: NextRequest) {
 				: `No stored submission has ${facet} '${value}', so its 0 is a value that matched nothing, not a measured count. Values seen, most submissions first: ${named}.`,
 		);
 	}
-	const matched = scored.map((s) => s.b);
-	const opts = { top, value };
-	const total = { field: field.length, ...distribution(matched, facet, opts) };
-	// An event whose stored rows are its winners alone: its group says so,
-	// and a count by event names it (a hackathon value already warned).
+	// No rate over incomplete rows (incompleteRows). Beside full listings they
+	// are left out of every count and share, in one line: across every event
+	// 12 curated winners made the winners 80 of 1,383 (5.8%), where the full
+	// listings give 68 of 1,371. Alone, they keep their counts, shares null.
 	const winnersOnly = winnersOnlyEvents(indexed);
+	const incompleteSet = incompleteEvents(indexed);
+	const incomplete = (b: IndexedBuild) => incompleteSet.has(b.hackathon.slug);
+	const mixed = field.some((b) => !incomplete(b));
+	const left = mixed ? field.filter(incomplete) : [];
+	const counted = left.length ? field.filter((b) => !incomplete(b)) : field;
+	const matched = scored
+		.map((s) => s.b)
+		.filter((b) => !left.length || !incomplete(b));
+	const noShares = counted.length > 0 && !mixed;
+	const shares = <T extends Distribution>(d: T): T =>
+		noShares ? withoutShares(d) : d;
+	const opts = { top, value };
+	const total = {
+		field: counted.length,
+		...shares(distribution(matched, facet, opts)),
+	};
+	// A winners-only event's group says so; it is grouped only when such
+	// rows are all the set holds.
 	const groups = by
-		? distributionBy(matched, field, facet, by, opts).map((g) =>
-				by === "event" && winnersOnly.has(g.value)
-					? { ...g, coverage: COVERAGE_VALUES[0] }
-					: g,
+		? distributionBy(matched, counted, facet, by, opts).map((g) =>
+				shares(
+					by === "event" && winnersOnly.has(g.value)
+						? { ...g, coverage: COVERAGE_VALUES[0] }
+						: g,
+				),
 			)
 		: undefined;
-	const shown = new Set([
-		...(by === "event" ? (groups ?? []).map((g) => g.value) : []),
-		...(facet === "event" ? total.values.map((v) => v.value) : []),
-	]);
-	const unwarned = [...winnersOnly].filter(
-		([slug]) => shown.has(slug) && !f.hackathons.includes(slug),
-	);
+	if (left.length) {
+		const byEvent = new Map([...winnersOnly.keys()].map((s) => [s, 0]));
+		for (const b of left)
+			byEvent.set(b.hackathon.slug, (byEvent.get(b.hackathon.slug) ?? 0) + 1);
+		warnings.push(leftOutWarning([...byEvent].filter(([, n]) => n > 0)));
+	}
+	// Alone and not named by a hackathon value (which already warned).
+	const unwarned = noShares
+		? [...winnersOnly].filter(
+				([slug]) =>
+					counted.some((b) => b.hackathon.slug === slug) &&
+					!f.hackathons.includes(slug),
+			)
+		: [];
 	if (unwarned.length) warnings.push(winnersOnlyWarning(unwarned));
-	const lift = winnersVsOthers(matched, facet, opts);
+	const lift = noShares ? null : winnersVsOthers(matched, facet, opts);
 	// How far each reported type's count can be trusted, from the lane's own
 	// measurement on the hand-typed directory.
 	let measured:

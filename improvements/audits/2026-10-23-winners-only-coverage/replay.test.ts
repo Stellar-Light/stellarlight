@@ -5,9 +5,10 @@
  * analyzeHackathonSubmissions and searchHackathonBuilds over an index
  * captured from the live API (capture.mts), with the clock pinned and no
  * database, and writes each response body's sha256 and length to
- * REPLAY_OUT. Run once on the base tree and once on the lane's: every
- * request that names only events whose stored rows are a full listing (or
- * none) must hash the same.
+ * REPLAY_OUT. Run once on the base tree and once on the lane's. Each
+ * request is classed by the events it names: full (every one's stored rows
+ * are a full listing), names-unstored (one has nothing stored) or
+ * names-winners-only. Every full request must hash the same.
  *
  *   CAPTURE_DIR=<capture> REPLAY_OUT=<file> [REPLAY_BODIES=<dir>] npx vitest run \
  *     --config improvements/audits/2026-10-23-winners-only-coverage/vitest.replay.config.mts
@@ -308,8 +309,28 @@ for (const qs of [
 	"facet=event&top=30",
 	"facet=category&by=event",
 	"facet=placement",
+	"winnersOnly=1&facet=package",
 ])
 	reqs.push({ key: `analyze?${qs}`, route: "analyze", qs, names: indexed });
+// Sets that mix full and winners-only rows, or hold winners-only rows alone,
+// reached by a track or a hackathon value.
+for (const [qs, names] of [
+	["track=open%20innovation&facet=placement", ["hackmeridian-2025"]],
+	[
+		"track=composability&facet=placement",
+		["hackmeridian-2025", "stellar-hacks-kale-reflector"],
+	],
+	[
+		"hackathon=stellar-hacks-zk,hackmeridian-2025&facet=category",
+		["stellar-hacks-zk", "hackmeridian-2025"],
+	],
+] as const)
+	reqs.push({
+		key: `analyze?${qs}`,
+		route: "analyze",
+		qs,
+		names: [...names],
+	});
 
 const results: Record<
 	string,
@@ -345,7 +366,9 @@ describe("replay", () => {
 		for (const r of reqs) {
 			const cls = r.names.some((s) => coverage(s) === "winners-only")
 				? "names-winners-only"
-				: "full-or-none";
+				: r.names.some((s) => coverage(s) === "none")
+					? "names-unstored"
+					: "full";
 			const { status, text } = await call(r);
 			results[r.key] = {
 				class: cls,

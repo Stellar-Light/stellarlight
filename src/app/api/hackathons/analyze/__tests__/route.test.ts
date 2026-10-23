@@ -455,17 +455,27 @@ describe("events whose stored rows are their winners only", () => {
 		// The registrations the event declares stay.
 		expect(rows[1].hackersCount).toBe(165);
 		for (const r of rows) {
-			const p = r.profile as Record<string, unknown>;
+			const p = r.profile as {
+				coverage: string;
+				submissions: number | null;
+				winners: number;
+				category: { values: Array<{ builds: number; share: number | null }> };
+			};
 			expect(p.coverage).toBe("winners-only");
 			expect(p.submissions).toBeNull();
 			expect(p.winners).toBe(r.winnerCount);
+			// Counted, never shared out: no share over winners alone.
+			expect(p.category.values[0]).toMatchObject({
+				builds: r.winnerCount,
+				share: null,
+			});
 		}
 		// No spread of winner counts read as submission counts.
 		expect(body.deltas.submissionCount).toBeUndefined();
 		const notes = body.deltas.notes as string[];
 		expect(notes.some((n) => n.startsWith("submission count:"))).toBe(false);
 		expect(notes).toContain(
-			"hackmeridian-2025, build-on-stellar-philippines-2026, apac-stellar-hackathon-2026: only their winners are on record (coverage winners-only), so submissionCount is null, unknown, never the winner count; their profiles describe the winners only and they are left out of facetShifts",
+			"hackmeridian-2025, build-on-stellar-philippines-2026, apac-stellar-hackathon-2026: only their winners are on record (coverage winners-only), so submissionCount is null, unknown, never the winner count; their profiles count the winners only, with every share null, and they are left out of facetShifts",
 		);
 		// Their winners are stored: never "none of their submissions are stored".
 		expect(notes.some((n) => n.includes("none of their submissions"))).toBe(
@@ -506,29 +516,146 @@ describe("events whose stored rows are their winners only", () => {
 		expect(meridian.coverage).toBe("winners-only");
 	});
 
-	it("analyze with a hackathon filter says its rows are its winners", async () => {
-		const { body } = await get("analyze", "hackathon=hackmeridian-2025");
-		expect(body.total.builds).toBe(6);
-		expect(body.meta.warnings).toContain(
-			"only the winners of hackmeridian-2025 are stored (6 rows, coverage winners-only); its other submissions are not, so counts from it describe its winners, not its field, whose size and mix are unknown",
+	it("compare withholds a prize per winner over incomplete winners, and says why on the row", async () => {
+		const { body } = await get(
+			"compare",
+			"slugs=apac-stellar-hackathon-2026,agents",
 		);
+		const [apac, agents] = body.hackathons;
+		// APAC's pool over its 1 published winner: one track's winners only.
+		expect(apac.prizePoolUSD).toBe(60_000);
+		expect(apac.winnerCount).toBe(1);
+		expect(apac.prizePerWinnerUSD).toBeNull();
+		expect(apac.notes).toEqual([
+			"prizePerWinnerUSD is null: only its winners are stored (coverage winners-only), and its winners are published only in part (getHackathon stats.winnersNote), so its prize pool over the winners on record is not a prize per winner",
+		]);
+		// A full event keeps its number and carries no notes.
+		expect(agents.prizePerWinnerUSD).toBe(20_000);
+		expect("notes" in agents).toBe(false);
+		// No spread is drawn from the withheld number.
+		expect(body.deltas.prizePerWinnerUSD).toBeUndefined();
+		expect(
+			(body.deltas.notes as string[]).some((n) =>
+				n.startsWith("prize per winner:"),
+			),
+		).toBe(false);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/compare"),
+				body,
+			),
+		).toEqual([]);
 	});
 
-	it("analyze per event marks each winners-only group and warns once", async () => {
-		const byEvent = await get("analyze", "facet=category&by=event");
-		const groups = byEvent.body.groups as Array<Record<string, unknown>>;
-		expect(groups.map((g) => [g.value, g.coverage ?? null, g.field])).toEqual([
-			["kale", null, 2],
-			["hackmeridian-2025", "winners-only", 6],
-			["agents", null, 4],
-			["build-on-stellar-philippines-2026", "winners-only", 5],
-			["apac-stellar-hackathon-2026", "winners-only", 1],
+	it("a curated record's still-active rate over a winners-only event is withheld by the same rule", async () => {
+		const pc = await import("@/lib/payload-client");
+		// A curated record for HackMeridian 2025 tying 6 directory projects to
+		// it, 4 still active and 2 Live.
+		const find = async (a: {
+			collection: string;
+			where?: Record<string, { equals?: string; in?: unknown }>;
+		}) => {
+			if (a.collection === "hackathons")
+				return a.where?.slug?.equals === "hackmeridian-2025"
+					? {
+							docs: [
+								{
+									id: "h1",
+									name: "HackMeridian 2025",
+									slug: "hackmeridian-2025",
+								},
+							],
+							totalDocs: 1,
+						}
+					: { docs: [], totalDocs: 0 };
+			const w = a.where ?? {};
+			const n = w.status ? (w.status.in ? 4 : 2) : 6;
+			return { docs: [], totalDocs: n };
+		};
+		vi.mocked(pc.getPayloadSafe).mockImplementation(
+			async () => ({ find }) as never,
+		);
+		try {
+			const { body } = await get("compare", "slugs=hackmeridian-2025,kale");
+			const [meridian] = body.hackathons;
+			expect(meridian).toMatchObject({
+				source: "curated",
+				submissionCount: 6,
+				stillActiveCount: 4,
+				coverage: "winners-only",
+				activeRatePct: null,
+			});
+			expect(meridian.notes).toEqual([
+				"activeRatePct is null: only its winners are stored (coverage winners-only), so its still-active count over its projects is not a rate over its submissions",
+			]);
+			expect(body.deltas.activeRatePct).toBeUndefined();
+		} finally {
+			vi.mocked(pc.getPayloadSafe).mockImplementation(
+				async () =>
+					({
+						find: async () => ({ docs: [], totalDocs: 0 }),
+					}) as never,
+			);
+		}
+	});
+
+	it("analyze with a hackathon filter counts its winners and serves no share over them", async () => {
+		const { body } = await get("analyze", "hackathon=hackmeridian-2025");
+		expect(body.total).toMatchObject({ field: 6, builds: 6, known: 6 });
+		expect(body.total.values).toEqual([
+			{ value: "Payments", builds: 6, winners: 6, share: null },
 		]);
-		const line =
-			"only the winners of hackmeridian-2025 (6), build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1) are stored (coverage winners-only); their other submissions are not, so counts from them describe their winners, not their fields, whose size and mix are unknown";
-		expect(byEvent.body.meta.warnings).toEqual([line]);
+		expect(body.meta.warnings).toEqual([
+			"only the winners of hackmeridian-2025 are stored (6 rows, coverage winners-only); its other submissions are not, so its rows are its winners, not its field, whose size and mix are unknown, and no share is computed over them",
+		]);
+	});
+
+	it("filters that leave winners-only rows alone name them even without a hackathon value", async () => {
+		// Only HackMeridian 2025's winners carry the track Open Innovation.
+		const { body } = await get(
+			"analyze",
+			"track=open%20innovation&facet=placement",
+		);
+		expect(body.total.values).toEqual([
+			{ value: "winner", builds: 3, winners: 3, share: null },
+		]);
+		expect(body.meta.warnings).toEqual([
+			"only the winners of hackmeridian-2025 are stored (6 rows, coverage winners-only); its other submissions are not, so its rows are its winners, not its field, whose size and mix are unknown, and no share is computed over them",
+		]);
+	});
+
+	// Live 1.9.97 across every event: 80 winners of 1,383 entries (5.8%),
+	// 12 of them curated winners whose fields are not stored; 68 of 1,371
+	// (5.0%) without them.
+	const LEFT_OUT =
+		"left out of every count and share: 12 rows of hackmeridian-2025 (6), build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1), whose stored rows are their winners only; the rest covers events whose full listing is stored";
+
+	it("analyze across every event leaves winners-only rows out of every count and share, in one line", async () => {
+		const all = await get("analyze", "facet=placement");
+		expect(all.body.total).toEqual({
+			field: 6,
+			builds: 6,
+			known: 6,
+			unknown: 0,
+			values: [
+				{ value: "not placed", builds: 5, winners: 0, share: 0.833 },
+				{ value: "winner", builds: 1, winners: 1, share: 0.167 },
+			],
+		});
+		expect(all.body.meta.warnings).toEqual([LEFT_OUT]);
+		const byEvent = await get("analyze", "facet=category&by=event");
+		expect(
+			(byEvent.body.groups as Array<{ value: string }>).map((g) => g.value),
+		).toEqual(["kale", "agents"]);
+		expect(byEvent.body.meta.warnings).toEqual([LEFT_OUT]);
+		// Winners against the rest: the curated winners are not among them.
+		expect(byEvent.body.winnersVsOthers.winnersKnown).toBe(1);
 		const facet = await get("analyze", "facet=event");
-		expect(facet.body.meta.warnings).toEqual([line]);
+		expect(
+			(facet.body.total.values as Array<{ value: string }>).map((v) => v.value),
+		).toEqual(["agents", "kale"]);
+		expect(facet.body.meta.warnings).toEqual([LEFT_OUT]);
 		expect(
 			undeclaredInServed(
 				spec,
@@ -536,8 +663,34 @@ describe("events whose stored rows are their winners only", () => {
 				byEvent.body,
 			),
 		).toEqual([]);
-		// Across every event without a per-event split: no line.
-		const all = await get("analyze", "facet=placement");
-		expect(all.body.meta.warnings).toBeUndefined();
+	});
+
+	it("a hackathon value naming a full and a winners-only event counts only the full one", async () => {
+		const { body } = await get(
+			"analyze",
+			"hackathon=kale,hackmeridian-2025&facet=placement",
+		);
+		expect(body.total).toMatchObject({ field: 2, builds: 2 });
+		expect(body.meta.warnings).toEqual([
+			"only the winners of hackmeridian-2025 are stored (6 rows, coverage winners-only); its other submissions are not, so its rows are its winners, not its field, whose size and mix are unknown, and no share is computed over them",
+			"left out of every count and share: the 6 rows of hackmeridian-2025, whose stored rows are its winners only; the rest covers events whose full listing is stored",
+		]);
+	});
+
+	it("a winners-only group by event says so when it is all there is", async () => {
+		const { body } = await get(
+			"analyze",
+			"hackathon=hackmeridian-2025,apac-stellar-hackathon-2026&facet=category&by=event",
+		);
+		expect(
+			(body.groups as Array<Record<string, unknown>>).map((g) => [
+				g.value,
+				g.coverage,
+				(g.values as Array<{ share: number | null }>)[0].share,
+			]),
+		).toEqual([
+			["hackmeridian-2025", "winners-only", null],
+			["apac-stellar-hackathon-2026", "winners-only", null],
+		]);
 	});
 });
