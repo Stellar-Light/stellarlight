@@ -99,3 +99,23 @@ Bars, fixed here before any result:
   sha256 `364fa03fb3ed9d9151f6aa1212002fe01e807ab24373e2e614ea92a0eebc1082`
   (both after biome formatting, so the committed bytes are the hashed
   bytes).
+- 18:01Z: base code (origin/main `d9bd53b5`) run on the 14 tuned dev
+  cases and both frozen batteries, over today's eight-repo index (21,440
+  pointers): dev tuned symbol level top 1/3/10 2/6/8, file level 3/7/10;
+  frozen battery file 16/20/20, symbol 11/19/20; fresh battery file
+  10/12/15, symbol 7/9/10. No code changed yet; the held-out file not run.
+- 18:05Z, **amendment A1** (asked for by the orchestrator after a
+  cold-outsider sweep, before any tuning): a CLI command path typed in q
+  (`stellar <noun> <verb>`, or the old `soroban` binary name) becomes a
+  sixth mechanism: an identifier candidate mapped onto stellar-cli's
+  commands tree (module path segments), scored above generic symbol hits.
+  Four cases added, labelled from the stellar-cli tarball with no ranking
+  run on them, the same held-out rule applied (ids divisible by 3):
+  `dev-set-a1.frozen.json` (d22, d23; tuned) sha256
+  `eb2cc2a8b29954cef521c0d77c76b4cd2a663c2d8f781e83f800977340e38362`;
+  `dev-heldout-a1.frozen.json` (d21, d24; held out) sha256
+  `d29700209245813a2c707b4fdc3d62edcddd45edf300475816389e57e565b4fd`.
+  The dev set is now 24 cases (16 tuned, 8 held out); bar 1 stays at an
+  improvement of at least 5 cases over all 24, and bars 2 and 3 are
+  unchanged. The fresh battery's f16 (`stellar contract deploy`) is the
+  same class; it stays a regression case, never tuned on.
