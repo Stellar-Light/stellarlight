@@ -312,7 +312,11 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   24,000 characters and keeps the front; `meta` already comes first on the 9
   endpoints checked, so the cut drops rows, not metadata. The owner parked
   response-size changes on 2026-08-18; ask before changing any response
-  shape.
+  shape. Opt-in `view=compact` on searchProjects and searchRepos (spec
+  1.9.98, `improvements/rounds/2026-10-23-compact-views.md`) brings their
+  default pages under the cap with defaults unchanged; the list endpoints
+  over it (skills, partners, leaderboard, builders, audits, stablecoins)
+  are not covered.
 - Raven's calls are anonymous. It sends plain GETs with no key, no
   User-Agent, no timeout and no retries, from Cloudflare's network, so its
   users likely share one per-IP limit [inferred]. See the owner decision on

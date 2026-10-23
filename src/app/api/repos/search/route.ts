@@ -19,6 +19,7 @@ import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { CODE_DOMAINS } from "@/lib/code-domains";
 import { SDK_CAPABILITY_TAGS } from "@/lib/code-symbols";
+import { REPO_COMPACT, viewParamError, withView } from "@/lib/compact-view";
 import {
 	isDegraded,
 	REQUEST_READ_BUDGET_MS,
@@ -73,6 +74,7 @@ async function handle(req: NextRequest) {
 			"limit",
 			"offset",
 			"fields",
+			"view",
 		],
 		{
 			advertise: [
@@ -90,6 +92,9 @@ async function handle(req: NextRequest) {
 			hint: "Repo search matches name/description/topics/symbols from q — put language or framework terms in q if the dedicated filter doesn't cover them.",
 		},
 	);
+	const view = sp.get("view");
+	const viewError = viewParamError(view, sp.get("fields"));
+	if (viewError) return NextResponse.json(viewError, { status: 400 });
 	// Accept query/keyword/search as aliases for q — agents often send the term
 	// under `query`, and an unrecognized param silently drops it.
 	const q =
@@ -209,8 +214,9 @@ async function handle(req: NextRequest) {
 		resultCount: repos.length,
 	});
 
+	// ?view=compact rows (src/lib/compact-view.ts); the default passes through.
 	return NextResponse.json(
-		{
+		withView(view, { repos: REPO_COMPACT })({
 			meta: withPartial({
 				...(laneHints("repos", { empty: repos.length === 0 })
 					? { hints: laneHints("repos", { empty: repos.length === 0 }) }
@@ -259,7 +265,7 @@ async function handle(req: NextRequest) {
 				counts: { returned: repos.length, total },
 			}),
 			repos: repos.map((r) => pickFields(r, fieldsWanted)),
-		},
+		}),
 		{
 			headers: {
 				...serverTiming(startedAt),

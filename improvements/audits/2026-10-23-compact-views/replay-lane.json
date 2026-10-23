@@ -1,0 +1,52 @@
+{
+  "projects ?q=lending": {
+    "status": 200,
+    "chars": 107779,
+    "sha256": "d8d404c6af2428bd3a7c74261b21ec132780931b58a6e92de6ba85081afe93ca"
+  },
+  "projects ?q=lending&limit=5": {
+    "status": 200,
+    "chars": 76840,
+    "sha256": "fa3d1f5e5992ba9d75b91d130ef77ec3595054d400bae3afbe0001dddfef8451"
+  },
+  "projects ?q=lending&fields=name,slug,tvlUSD": {
+    "status": 200,
+    "chars": 69724,
+    "sha256": "1edb2aa57eb484abaf4723949c26376e643c577b083f9e48ba4bf41e6ab4a21c"
+  },
+  "projects ?q=lending&country=NG": {
+    "status": 200,
+    "chars": 108067,
+    "sha256": "69eff3145a1e7f6f480fd747f80a2be49e95f4cd846275ddd4dd28f27ba620f0"
+  },
+  "projects ?": {
+    "status": 200,
+    "chars": 811,
+    "sha256": "afd100177d23554d1e4e06541c293e6bb473ed64a308440ae52b7a1b184f7973"
+  },
+  "repos ?q=soroban": {
+    "status": 200,
+    "chars": 67083,
+    "sha256": "dfc1491cfa5e1a6adf0b354846e41a4b9f06ef561abf15d82079621e25265419"
+  },
+  "repos ?q=soroban&limit=5&offset=2": {
+    "status": 200,
+    "chars": 67082,
+    "sha256": "ff08bff74c8adbddc9bc62410ccc6b230000b1e0b6b85030b12a11498f9c2946"
+  },
+  "repos ?q=soroban&fields=stars,repoScore": {
+    "status": 200,
+    "chars": 3960,
+    "sha256": "7d2129c61320aa967475acf7ad5680cdbc502b8d17d55aeb4782ca00ae5c581e"
+  },
+  "repos ?q=soroban&bogus=1": {
+    "status": 200,
+    "chars": 67409,
+    "sha256": "3a2d4e67306b66717264f2b7de292ad8233eaf80d5e4170c70e3022169c0ea87"
+  },
+  "repos ?": {
+    "status": 200,
+    "chars": 1101,
+    "sha256": "67379f222dd0948ae1ff11d4c416fc3bcfcc461751b3c39e16f79fc109da127d"
+  }
+}

@@ -199,3 +199,60 @@ describe("GET /api/projects/search after a typo recovery (sls-094)", () => {
 		expect(body.meta.matchMode).toBe("strict");
 	});
 });
+
+// view=compact (spec 1.9.98): opt-in compact rows; the default is unchanged.
+describe("GET /api/projects/search view param", () => {
+	beforeEach(() => {
+		vi.useFakeTimers({ now: new Date("2026-10-23T12:00:00.000Z") });
+		vi.stubEnv("VOYAGE_API_KEY", "");
+		candidateCalls = 0;
+		read = (a) => (isCandidate(a) ? [soroswap] : []);
+	});
+	afterEach(() => {
+		vi.useRealTimers();
+		vi.unstubAllEnvs();
+	});
+
+	it("default is unchanged: full rows, no meta.view, view=full identical", async () => {
+		const plain = await search("q=soroswap");
+		expect(plain.body.meta.view).toBeUndefined();
+		expect(plain.body.projects[0]).toHaveProperty("onchain");
+		expect(plain.body.projects[0]).not.toHaveProperty("reposCount");
+		const full = await search("q=soroswap&view=full");
+		// The fake clock moves between calls; everything else is identical.
+		const text = (b: unknown) =>
+			JSON.stringify(b).replace(/"generatedAt":"[^"]+"/, "");
+		expect(text(full.body)).toBe(text(plain.body));
+	});
+
+	it("view=compact serves compact rows and says so", async () => {
+		const { status, body } = await search("q=soroswap&view=compact");
+		expect(status).toBe(200);
+		expect(Object.keys(body)).toEqual(["meta", "projects", "codeReferences"]);
+		expect(Object.keys(body.meta)[0]).toBe("view");
+		expect(body.meta.view.mode).toBe("compact");
+		expect(body.meta.view.rows.projects.detail).toMatch(/fields=/);
+		expect(body.meta.view.rows.codeReferences.detail).toMatch(
+			/\/api\/repos\/search/,
+		);
+		expect(body.meta.warnings).toBeUndefined();
+		const row = body.projects[0];
+		expect(row.slug).toBe("soroswap");
+		expect(row).not.toHaveProperty("onchain");
+		expect(row).toHaveProperty("reposCount");
+		expect(row).toHaveProperty("onchainContractsCount");
+	});
+
+	it("a content-less call in compact view still says it is compact", async () => {
+		const { body } = await search("view=compact");
+		expect(body.meta.view.mode).toBe("compact");
+		expect(body.projects).toEqual([]);
+	});
+
+	it("rejects an unknown view and view=compact with fields", async () => {
+		expect((await search("q=soroswap&view=tiny")).status).toBe(400);
+		expect((await search("q=soroswap&view=compact&fields=name")).status).toBe(
+			400,
+		);
+	});
+});
