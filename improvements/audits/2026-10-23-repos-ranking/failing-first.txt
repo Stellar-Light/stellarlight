@@ -1,0 +1,23 @@
+# The shipped tests (D1 plus D3) in src/lib/__tests__/repo-search-rank.test.ts
+# run against the base sources (origin/main d9bd53b5, a scratch copy of src
+# with this branch's test file), 2026-10-23 21:36Z:
+#   npx vitest run src/lib/__tests__/repo-search-rank.test.ts --reporter=verbose
+# 5 fail on base; on this branch all 63 pass. The full change's run, with the
+# D2 tests that did not ship, is failing-first-with-d2.txt.
+× src/lib/__tests__/repo-search-rank.test.ts > usage-aware ranking (code-truth 5) > usage never lifts a weak match above a better one 5ms
+× src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > a better-matching old generation still sits directly below its successor 1ms
+× src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > the successor takes the old row's place, so a name query keeps the project first 1ms
+× src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > usage on the old generation does not keep it above its successor 0ms
+× src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > the curated map names the successor when the row carries none 0ms
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > usage-aware ranking (code-truth 5) > usage never lifts a weak match above a better one
+AssertionError: expected [ 'proto/frontend', …(1) ] to deeply equal [ Array(2) ]
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > a better-matching old generation still sits directly below its successor
+AssertionError: expected 1 to be 3 // Object.is equality
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > the successor takes the old row's place, so a name query keeps the project first
+AssertionError: expected [ 'proto/pool-contracts', …(2) ] to deeply equal [ 'proto/pool-contracts-v2', …(2) ]
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > usage on the old generation does not keep it above its successor
+AssertionError: expected [ 'proto/pool-contracts', …(1) ] to deeply equal [ 'proto/pool-contracts-v2', …(1) ]
+FAIL  src/lib/__tests__/repo-search-rank.test.ts > a repo with a known successor sits below it (2026-10-23) > the curated map names the successor when the row carries none
+AssertionError: expected [ 'kalepail/stellar-raven', …(1) ] to deeply equal [ …(2) ]
+Test Files  1 failed (1)
+Tests  5 failed | 58 passed (63)

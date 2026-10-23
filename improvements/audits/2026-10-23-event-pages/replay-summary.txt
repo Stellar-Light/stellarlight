@@ -1,0 +1,47 @@
+Byte identity of GET /api/hackathons/{slug}, base against this branch.
+
+Capture (capture.mjs, read-only, 2 s apart): 2026-10-23 17:22:42Z to
+17:23:53Z, apiVersion 1.9.101 at the start and at the end; the listing and
+27 event details, every one 200. Kept in scratch, not committed (upstream
+submission text). sha256 658b2a75ff9c8eca2dcc40ac0324d2342a67213293a2adae76c39ef1761e1c7d.
+
+Requests (replay.test.ts), the clock pinned at the capture's end:
+  27 events, inputs rebuilt from their served bodies
+   4 unknown slugs (near one, a typo, common words only, spaces and case)
+  11 branches a capture cannot reach: a hackathons collection row with
+     projects; the curated roster behind a collection row; index down with
+     a live roster, with a live roster that throws, on the curated roster
+     event and on a winners-only event; the stored event read failing; the
+     hidden winners read failing; a store outage; the listing read and the
+     collection read throwing
+  = 42 responses: 35 x 200, 4 x 404, 1 x 503, 2 x 500. Each line holds the
+  status, content type, Cache-Control, Retry-After and the body's bytes.
+
+Base trees: `git archive` of d9bd53b5 (the branch point) and of 7457e0c8
+(origin/main when committed; it changes no file the route reads), each with
+this branch's node_modules linked and the two harness files copied in.
+
+  REPLAY_LIVE=<capture> REPLAY_OUT=<out> vitest run \
+    --config improvements/audits/2026-10-23-event-pages/vitest.replay.config.mts
+
+  base d9bd53b5   42 lines, 1,445,337 bytes, sha256 dc6feaea80fcf37476503be1981a104810bd536fa0d0458ce343a06f42c62620
+  base 7457e0c8   42 lines, 1,445,337 bytes, sha256 dc6feaea80fcf37476503be1981a104810bd536fa0d0458ce343a06f42c62620
+  this branch     42 lines, 1,445,337 bytes, sha256 dc6feaea80fcf37476503be1981a104810bd536fa0d0458ce343a06f42c62620
+  cmp base branch: exit 0, both bases
+
+The replay can fail: with winnersRanked computed by `every` instead of
+`some` in src/lib/hackathon-detail.ts, the same run differs from the base
+on 2 responses (build-on-stellar-philippines-2026, ideaton2026; cmp exit 1).
+The file was restored from its copy and compared equal before the runs
+above.
+
+How close the rebuilt inputs are to production: 7 of the 27 rebuilt event
+bodies equal the body production served, generatedAt aside (the 7 curated
+events); the other 20 differ in hackathon.profile (stored facts a served
+body does not carry: categories, packages, activity) and, for 6 of them, in
+winners' afterEvent, which also reads a repo's archived and missing flags,
+which a served body does not carry. Equality with production is not the claim;
+equality of base and branch on the same inputs is.
+
+The route's own tests, unedited: 28 passed on the base and 28 on this
+branch.

@@ -31,6 +31,7 @@ import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
 } from "@/lib/hackathon-builds";
+import { prizeCategories, prizeLabels } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 type Params = Promise<{ username: string }>;
@@ -100,7 +101,7 @@ export default async function BuilderProfilePage({
 		totalAwarded: number;
 		rounds: number[];
 	}> = [];
-	let hackBuilds: IndexedBuild[] = [];
+	let hackBuilds: Array<IndexedBuild & { awardCategory: string | null }> = [];
 	try {
 		const payload = await getPayloadSafe();
 		if (payload) {
@@ -152,13 +153,20 @@ export default async function BuilderProfilePage({
 			}
 			try {
 				const idx = await getHackathonBuildsIndex();
+				// An award several placements share is their category, not
+				// one build's prize.
+				const categories = prizeCategories(idx);
 				hackBuilds = buildsForRepos(
 					idx,
 					code?.repos.map((r) => r.fullName) ?? [],
 					[String(builder.github_username)],
-				).sort((a, b) =>
-					(b.hackathon.endedAt ?? "").localeCompare(a.hackathon.endedAt ?? ""),
-				);
+				)
+					.map((b) => ({ ...b, ...prizeLabels(categories, b) }))
+					.sort((a, b) =>
+						(b.hackathon.endedAt ?? "").localeCompare(
+							a.hackathon.endedAt ?? "",
+						),
+					);
 			} catch {}
 		}
 	} catch {}
@@ -555,7 +563,11 @@ export default async function BuilderProfilePage({
 												: b.isWinner
 													? " · winner"
 													: ""}
-											{b.award ? ` · ${b.award}` : ""}
+											{b.award
+												? ` · ${b.award}`
+												: b.awardCategory
+													? ` · in ${b.awardCategory}`
+													: ""}
 										</span>
 									</div>
 								))}

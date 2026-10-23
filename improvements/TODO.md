@@ -365,6 +365,60 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   User-Agent, no timeout and no retries, from Cloudflare's network, so its
   users likely share one per-IP limit [inferred]. See the owner decision on
   a key below.
+- searchRepos rarely finds the repo a natural-language question asks for:
+  on 25 builder questions written blind (round
+  `2026-10-23-repos-ranking`, evidence
+  `improvements/audits/2026-10-23-repos-ranking/`), 10 have an expected
+  repo in the top 5 after that round's fixes. Of the 15 misses, 2 repos are
+  not indexed, 3 are indexed but never enter the 600-row candidate window
+  (no description, repoScore 30 to 43), and 10 are outranked by rows that
+  match many common words in code symbols, by curated floats firing on a
+  word in passing, or for lack of vocabulary ("command-line" for
+  stellar-cli, "python" for py-stellar-base). Rarity weighting, a
+  rare-anchor supplement and two synonyms moved ranks both ways and gained
+  no tuning question (`prototypes.txt`). Needs a labeled set larger than 17
+  tuning questions before another attempt.
+- DeFindex's project row links the archived paltalabs/defindex, and its
+  curated successor defindex-io/stellar-contracts is not indexed
+  (2026-10-23, read-only). Data change: `GITHUB_REPOS_ADD` and
+  `GITHUB_LINK_FIX` entries for `defindex` in
+  `scripts/data/curation-maps.ts`, then the curate-projects and
+  enrich-repos lanes (steps in the round's audit README). No check asserts
+  that a curated successor is indexed.
+
+Found 2026-10-23 by the prize-labels lane and its review
+(`improvements/rounds/2026-10-23-prize-labels.md`):
+
+- An award's structure is inferred, not stored. `fetchWinnerPrizeMap`
+  (`src/lib/integrations/dorahacks.ts`) sees how many prizes each
+  `award_list` entry holds but stores only its title (`award`) on each
+  winner, so `prizeCategories` can call an award a category only from other
+  winners on record under it or from a title that states more than the
+  placement. A lone winner of a multi-prize award whose title names no
+  amount reads as the winner's own award, and search and the builder page
+  read served winners only, so a hidden sibling counts on getHackathon and
+  the submission detail but not in search. Probe:
+  `prizeCategories([{ award: "10K Prize Pool", hackathonPlacement: "1st Place" }])`
+  is empty (a unit call; on 2026-10-23 every category event serves every
+  placement, so no live row has this shape). Plan: (1) in
+  `fetchWinnerPrizeMap`, give each winner `awardPrizes: a.prizes.length`;
+  (2) carry it on `DoraHacksSubmission`, add it to the `hackathon-builds`
+  collection (`src/collections/HackathonBuilds.ts`) and to the fields and
+  row mapping of `scripts/sync-hackathon-builds.ts`; (3) run the sync lane
+  dry, read the printed diff (expect the 67 winner rows with award text to
+  gain the field and nothing else to move), execute it on its own, read the
+  rows back through the API; (4) make `prizeCategories` call an award a
+  category when a row's `awardPrizes` is above 1, keeping the co-winner and
+  amount rules for rows not yet re-synced; (5) drop the hidden-winner reads
+  that only feed the rule once every winner row carries the count. Done
+  when every winner row with award text carries its award's prize count and
+  every surface labels from it.
+- `prizeUsd` is parsed from the placement only, so it is null on the 22
+  served winners whose own award names the amount (zk-gaming 5,
+  ideatontelluscoop 3, buildonstellarchile 14), and vetIdea and
+  hackathonBrief serve those winners' placement "Winners" with no amount.
+  Probe: getHackathon `stellar-hacks-zk-gaming` serves `winners[0].prizeUsd`
+  null beside `award` "1st Place - $5,000" (1.9.101, 2026-10-23).
 
 Found 2026-10-23 by the dead-protocol guard round
 (`improvements/rounds/2026-10-23-dead-protocol-guard.md`):

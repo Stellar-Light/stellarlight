@@ -629,20 +629,25 @@ describe("contentTokens hyphen split (real-demand 2026-07-21: zk-snark 22 asks)"
 });
 
 describe("usage-aware ranking (code-truth 5)", () => {
-	it("a mainnet-used repo outranks a keyword-luckier repo without usage (the oracle case)", async () => {
-		const feeders = doc({
-			fullName: "datacorp/oracle-price-feeders",
-			description: "oracle price feed feeders",
+	// Usage is an authority signal (AGENTS.md rule 6): it breaks ties at equal
+	// match score and never beats a better match. Until 2026-10-23 it ranked
+	// above the match score, so a project-linked contract repo matching one
+	// word led pages it barely matched (hm26-sc-04: blend-contracts at 16
+	// over rows at 46).
+	it("a mainnet-used repo wins a tie at equal match score", async () => {
+		const unused = doc({
+			fullName: "datacorp/oracle-feeds",
+			description: "oracle price feeds",
 			codeScanState: "scanned",
 			stellarProof: "cargo-sdk",
-			repoScore: 23,
+			repoScore: 80,
 		});
 		const used = doc({
-			fullName: "reflector/contract",
-			description: "decentralized oracle for Soroban",
+			fullName: "reflector/oracle-feeds",
+			description: "oracle price feeds",
 			codeScanState: "scanned",
 			stellarProof: "cargo-sdk",
-			repoScore: 62,
+			repoScore: 40,
 			codeInUse: {
 				contracts: 1,
 				events: 44447,
@@ -651,11 +656,39 @@ describe("usage-aware ranking (code-truth 5)", () => {
 			},
 		});
 		const { repos } = await searchRepos(
-			mockPayload([feeders, used]),
-			"oracle price feed",
+			mockPayload([unused, used]),
+			"oracle price feeds",
 			{ limit: 5 },
 		);
-		expect(repos[0].fullName).toBe("reflector/contract");
+		expect(repos[0].score).toBe(repos[1].score);
+		expect(repos[0].fullName).toBe("reflector/oracle-feeds");
+	});
+	it("usage never lifts a weak match above a better one", async () => {
+		const used = doc({
+			fullName: "proto/frontend",
+			description: "Lending protocol on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 70,
+			codeInUse: { contracts: 3, events: 36033, asOf: "2026-10-19" },
+		});
+		const better = doc({
+			fullName: "team/react-frontend-template",
+			description: "React frontend template for Soroban dapps",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 30,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([used, better]),
+			"react frontend template for soroban",
+			{ limit: 5 },
+		);
+		expect(repos.map((r) => r.fullName)).toEqual([
+			"team/react-frontend-template",
+			"proto/frontend",
+		]);
+		expect(repos[0].score).toBeGreaterThan(repos[1].score);
 	});
 	it("exact identity still beats usage — searching the unused repo by name finds it first", async () => {
 		const named = doc({
@@ -728,6 +761,140 @@ describe("superseded-generation demotion (sls-064 analog A)", () => {
 		);
 		expect(repos[0].fullName).toBe("proto/contracts-v2");
 		expect(repos[1].successorRepo).toBe("proto/contracts-v2");
+	});
+});
+
+describe("a repo with a known successor sits below it (2026-10-23)", () => {
+	const v1 = (over: Record<string, unknown> = {}) =>
+		doc({
+			fullName: "proto/pool-contracts",
+			description: "Pool contracts on Soroban, audited, with a backstop",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 70,
+			successorRepo: "proto/pool-contracts-v2",
+			...over,
+		});
+	const v2 = () =>
+		doc({
+			fullName: "proto/pool-contracts-v2",
+			description: "Pool contracts",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 55,
+		});
+	it("a better-matching old generation still sits directly below its successor", async () => {
+		const other = doc({
+			fullName: "x/backstop-pool",
+			description: "backstop pool contracts audited on Soroban",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 10,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([v1(), other, v2()]),
+			"audited pool contracts with a backstop",
+			{ limit: 5 },
+		);
+		const names = repos.map((r) => r.fullName);
+		expect(names.indexOf("proto/pool-contracts")).toBe(
+			names.indexOf("proto/pool-contracts-v2") + 1,
+		);
+	});
+	it("the successor takes the old row's place, so a name query keeps the project first", async () => {
+		// q=Blend: v1 led on usage; sinking it alone put an unrelated repo
+		// with a higher repoScore first.
+		const other = doc({
+			fullName: "other/pool-dashboard",
+			description: "Pool dashboard",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 90,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([
+				v1({
+					description: "Pool contracts",
+					repoScore: 40,
+					codeInUse: { contracts: 2, events: 36033, asOf: "2026-10-19" },
+				}),
+				other,
+				v2(),
+			]),
+			"pool",
+			{ limit: 5 },
+		);
+		expect(repos.map((r) => r.fullName)).toEqual([
+			"proto/pool-contracts-v2",
+			"proto/pool-contracts",
+			"other/pool-dashboard",
+		]);
+	});
+	it("usage on the old generation does not keep it above its successor", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([
+				v1({
+					description: "Pool contracts",
+					codeInUse: { contracts: 2, events: 36033, asOf: "2026-10-19" },
+				}),
+				v2(),
+			]),
+			// Two words: three would make "proto pool contracts" the old repo's
+			// own spaced full name, an exact-name lookup.
+			"pool contracts",
+			{ limit: 5 },
+		);
+		expect(repos.map((r) => r.fullName)).toEqual([
+			"proto/pool-contracts-v2",
+			"proto/pool-contracts",
+		]);
+	});
+	it("the curated map names the successor when the row carries none", async () => {
+		const old = doc({
+			fullName: "kalepail/stellar-raven",
+			description: "Raven agent for docs search",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 60,
+		});
+		const moved = doc({
+			fullName: "stellar-experimental/stellar-raven",
+			description: "Raven",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 40,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([old, moved]),
+			"raven agent docs",
+			{ limit: 5 },
+		);
+		expect(repos.map((r) => r.fullName)).toEqual([
+			"stellar-experimental/stellar-raven",
+			"kalepail/stellar-raven",
+		]);
+	});
+	it("a successor that is not on the list changes nothing", async () => {
+		const other = doc({
+			fullName: "x/pool",
+			description: "pool",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+		});
+		const { repos } = await searchRepos(
+			mockPayload([other, v1()]),
+			"audited pool contracts with a backstop",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("proto/pool-contracts");
+	});
+	it("the old repo's own exact name keeps it first", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([v2(), v1()]),
+			"proto/pool-contracts",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("proto/pool-contracts");
 	});
 });
 

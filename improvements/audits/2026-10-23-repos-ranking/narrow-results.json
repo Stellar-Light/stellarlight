@@ -1,0 +1,1459 @@
+{
+	"bar1": {
+		"lookups": 60,
+		"losses": 0,
+		"exact": [
+			{
+				"set": "exact-full",
+				"q": "stellar/js-stellar-sdk",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/js-stellar-sdk",
+				"variantTop": "stellar/js-stellar-sdk"
+			},
+			{
+				"set": "exact-name",
+				"q": "js-stellar-sdk",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/js-stellar-sdk",
+				"variantTop": "stellar/js-stellar-sdk"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/rs-soroban-sdk",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/rs-soroban-sdk",
+				"variantTop": "stellar/rs-soroban-sdk"
+			},
+			{
+				"set": "exact-name",
+				"q": "rs-soroban-sdk",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/rs-soroban-sdk",
+				"variantTop": "stellar/rs-soroban-sdk"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/stellar-cli",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/stellar-cli",
+				"variantTop": "stellar/stellar-cli"
+			},
+			{
+				"set": "exact-name",
+				"q": "stellar-cli",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/stellar-cli",
+				"variantTop": "stellar/stellar-cli"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/stellar-core",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/stellar-core",
+				"variantTop": "stellar/stellar-core"
+			},
+			{
+				"set": "exact-name",
+				"q": "stellar-core",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/stellar-core",
+				"variantTop": "stellar/stellar-core"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/freighter",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/freighter",
+				"variantTop": "stellar/freighter"
+			},
+			{
+				"set": "exact-name",
+				"q": "freighter",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/freighter",
+				"variantTop": "stellar/freighter"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/passkey-kit",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/passkey-kit",
+				"variantTop": "stellar/passkey-kit"
+			},
+			{
+				"set": "exact-name",
+				"q": "passkey-kit",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/passkey-kit",
+				"variantTop": "stellar/passkey-kit"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/smart-account-kit",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/smart-account-kit",
+				"variantTop": "stellar/smart-account-kit"
+			},
+			{
+				"set": "exact-name",
+				"q": "smart-account-kit",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/smart-account-kit",
+				"variantTop": "stellar/smart-account-kit"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/anchor-platform",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/anchor-platform",
+				"variantTop": "stellar/anchor-platform"
+			},
+			{
+				"set": "exact-name",
+				"q": "anchor-platform",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/anchor-platform",
+				"variantTop": "stellar/anchor-platform"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/stellar-rpc",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/stellar-rpc",
+				"variantTop": "stellar/stellar-rpc"
+			},
+			{
+				"set": "exact-name",
+				"q": "stellar-rpc",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/stellar-rpc",
+				"variantTop": "stellar/stellar-rpc"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/quickstart",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/quickstart",
+				"variantTop": "stellar/quickstart"
+			},
+			{
+				"set": "exact-name",
+				"q": "quickstart",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/quickstart",
+				"variantTop": "stellar/quickstart"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/soroban-examples",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/soroban-examples",
+				"variantTop": "stellar/soroban-examples"
+			},
+			{
+				"set": "exact-name",
+				"q": "soroban-examples",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/soroban-examples",
+				"variantTop": "stellar/soroban-examples"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/js-stellar-base",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/js-stellar-base",
+				"variantTop": "stellar/js-stellar-base"
+			},
+			{
+				"set": "exact-name",
+				"q": "js-stellar-base",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/js-stellar-base",
+				"variantTop": "stellar/js-stellar-base"
+			},
+			{
+				"set": "exact-full",
+				"q": "stellar/go-stellar-sdk",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/go-stellar-sdk",
+				"variantTop": "stellar/go-stellar-sdk"
+			},
+			{
+				"set": "exact-name",
+				"q": "go-stellar-sdk",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "stellar/go-stellar-sdk",
+				"variantTop": "stellar/go-stellar-sdk"
+			},
+			{
+				"set": "exact-full",
+				"q": "StellarCN/py-stellar-base",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "StellarCN/py-stellar-base",
+				"variantTop": "StellarCN/py-stellar-base"
+			},
+			{
+				"set": "exact-name",
+				"q": "py-stellar-base",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "StellarCN/py-stellar-base",
+				"variantTop": "StellarCN/py-stellar-base"
+			},
+			{
+				"set": "exact-full",
+				"q": "OpenZeppelin/stellar-contracts",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "OpenZeppelin/stellar-contracts",
+				"variantTop": "OpenZeppelin/stellar-contracts"
+			},
+			{
+				"set": "exact-name",
+				"q": "stellar-contracts",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "OpenZeppelin/stellar-contracts",
+				"variantTop": "OpenZeppelin/stellar-contracts"
+			},
+			{
+				"set": "exact-full",
+				"q": "OpenZeppelin/openzeppelin-relayer",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "OpenZeppelin/openzeppelin-relayer",
+				"variantTop": "OpenZeppelin/openzeppelin-relayer"
+			},
+			{
+				"set": "exact-name",
+				"q": "openzeppelin-relayer",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "OpenZeppelin/openzeppelin-relayer",
+				"variantTop": "OpenZeppelin/openzeppelin-relayer"
+			},
+			{
+				"set": "exact-full",
+				"q": "axelarnetwork/axelar-amplifier-stellar",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "axelarnetwork/axelar-amplifier-stellar",
+				"variantTop": "axelarnetwork/axelar-amplifier-stellar"
+			},
+			{
+				"set": "exact-name",
+				"q": "axelar-amplifier-stellar",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "axelarnetwork/axelar-amplifier-stellar",
+				"variantTop": "axelarnetwork/axelar-amplifier-stellar"
+			},
+			{
+				"set": "exact-full",
+				"q": "blend-capital/blend-contracts-v2",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "blend-capital/blend-contracts-v2",
+				"variantTop": "blend-capital/blend-contracts-v2"
+			},
+			{
+				"set": "exact-name",
+				"q": "blend-contracts-v2",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "blend-capital/blend-contracts-v2",
+				"variantTop": "blend-capital/blend-contracts-v2"
+			},
+			{
+				"set": "exact-full",
+				"q": "blend-capital/blend-contracts",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "blend-capital/blend-contracts",
+				"variantTop": "blend-capital/blend-contracts"
+			},
+			{
+				"set": "exact-name",
+				"q": "blend-contracts",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "blend-capital/blend-contracts",
+				"variantTop": "blend-capital/blend-contracts"
+			},
+			{
+				"set": "exact-full",
+				"q": "soroswap/core",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "soroswap/core",
+				"variantTop": "soroswap/core"
+			},
+			{
+				"set": "exact-name",
+				"q": "core",
+				"base1": false,
+				"variant1": false,
+				"baseTop": "stellar/stellar-core",
+				"variantTop": "stellar/stellar-core"
+			},
+			{
+				"set": "exact-full",
+				"q": "soroswap/aggregator",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "soroswap/aggregator",
+				"variantTop": "soroswap/aggregator"
+			},
+			{
+				"set": "exact-name",
+				"q": "aggregator",
+				"base1": false,
+				"variant1": false,
+				"baseTop": "Lum-Agg/stellar-dex-agg",
+				"variantTop": "Lum-Agg/stellar-dex-agg"
+			},
+			{
+				"set": "exact-full",
+				"q": "reflector-network/reflector-contract",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "reflector-network/reflector-contract",
+				"variantTop": "reflector-network/reflector-contract"
+			},
+			{
+				"set": "exact-name",
+				"q": "reflector-contract",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "reflector-network/reflector-contract",
+				"variantTop": "reflector-network/reflector-contract"
+			},
+			{
+				"set": "exact-full",
+				"q": "Creit-Tech/Stellar-Wallets-Kit",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "Creit-Tech/Stellar-Wallets-Kit",
+				"variantTop": "Creit-Tech/Stellar-Wallets-Kit"
+			},
+			{
+				"set": "exact-name",
+				"q": "Stellar-Wallets-Kit",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "Creit-Tech/Stellar-Wallets-Kit",
+				"variantTop": "Creit-Tech/Stellar-Wallets-Kit"
+			},
+			{
+				"set": "exact-full",
+				"q": "Creit-Tech/xBull-Wallet",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "Creit-Tech/xBull-Wallet",
+				"variantTop": "Creit-Tech/xBull-Wallet"
+			},
+			{
+				"set": "exact-name",
+				"q": "xBull-Wallet",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "Creit-Tech/xBull-Wallet",
+				"variantTop": "Creit-Tech/xBull-Wallet"
+			},
+			{
+				"set": "exact-full",
+				"q": "script3/soroban-governor",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "script3/soroban-governor",
+				"variantTop": "script3/soroban-governor"
+			},
+			{
+				"set": "exact-name",
+				"q": "soroban-governor",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "script3/soroban-governor",
+				"variantTop": "script3/soroban-governor"
+			},
+			{
+				"set": "exact-full",
+				"q": "Phoenix-Protocol-Group/phoenix-contracts",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "Phoenix-Protocol-Group/phoenix-contracts",
+				"variantTop": "Phoenix-Protocol-Group/phoenix-contracts"
+			},
+			{
+				"set": "exact-name",
+				"q": "phoenix-contracts",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "Phoenix-Protocol-Group/phoenix-contracts",
+				"variantTop": "Phoenix-Protocol-Group/phoenix-contracts"
+			},
+			{
+				"set": "exact-full",
+				"q": "allbridge-io/allbridge-core-soroban-contracts",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "allbridge-io/allbridge-core-soroban-contracts",
+				"variantTop": "allbridge-io/allbridge-core-soroban-contracts"
+			},
+			{
+				"set": "exact-name",
+				"q": "allbridge-core-soroban-contracts",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "allbridge-io/allbridge-core-soroban-contracts",
+				"variantTop": "allbridge-io/allbridge-core-soroban-contracts"
+			},
+			{
+				"set": "exact-full",
+				"q": "Trustless-Work/trustlesswork-smart-contract-stellar",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "Trustless-Work/trustlesswork-smart-contract-stellar",
+				"variantTop": "Trustless-Work/trustlesswork-smart-contract-stellar"
+			},
+			{
+				"set": "exact-name",
+				"q": "trustlesswork-smart-contract-stellar",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "Trustless-Work/trustlesswork-smart-contract-stellar",
+				"variantTop": "Trustless-Work/trustlesswork-smart-contract-stellar"
+			},
+			{
+				"set": "exact-full",
+				"q": "fazzatti/colibri",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "fazzatti/colibri",
+				"variantTop": "fazzatti/colibri"
+			},
+			{
+				"set": "exact-name",
+				"q": "colibri",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "fazzatti/colibri",
+				"variantTop": "fazzatti/colibri"
+			},
+			{
+				"set": "exact-full",
+				"q": "circlefin/stellar-cctp",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "circlefin/stellar-cctp",
+				"variantTop": "circlefin/stellar-cctp"
+			},
+			{
+				"set": "exact-name",
+				"q": "stellar-cctp",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "circlefin/stellar-cctp",
+				"variantTop": "circlefin/stellar-cctp"
+			},
+			{
+				"set": "project-name",
+				"q": "Blend",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "blend-capital/blend-contracts",
+				"variantTop": "blend-capital/blend-contracts-v2"
+			},
+			{
+				"set": "project-name",
+				"q": "Reflector",
+				"base1": true,
+				"variant1": true,
+				"baseTop": "reflector-network/reflector-contract",
+				"variantTop": "reflector-network/reflector-contract"
+			}
+		]
+	},
+	"bar2": {
+		"mechanismFree": 17,
+		"identical": 17,
+		"rows": [
+			{
+				"q": "soroban rust sdk",
+				"mechanism": true,
+				"usedRows": [
+					"reflector-network/reflector-contract",
+					"blend-capital/blend-contracts"
+				],
+				"pairs": ["stellar/js-stellar-base", "blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "javascript sdk",
+				"mechanism": true,
+				"usedRows": [
+					"blend-capital/blend-contracts",
+					"reflector-network/reflector-contract"
+				],
+				"pairs": ["stellar/js-stellar-base", "blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "oracle",
+				"mechanism": true,
+				"usedRows": [
+					"reflector-network/reflector-contract",
+					"blend-capital/blend-contracts"
+				],
+				"pairs": ["blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "anchor platform",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "wallet kit",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["emrekayat/query402"],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "stellar wallets kit",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": [
+					"kalepail/passkey-kit",
+					"kalepail/smart-account-kit",
+					"emrekayat/query402"
+				],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "soroswap",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "blend lending protocol",
+				"mechanism": true,
+				"usedRows": ["blend-capital/blend-contracts"],
+				"pairs": ["blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "passkey smart wallet",
+				"mechanism": true,
+				"usedRows": ["reflector-network/reflector-contract"],
+				"pairs": [],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "horizon api server",
+				"mechanism": true,
+				"usedRows": ["blend-capital/blend-contracts"],
+				"pairs": [
+					"emrekayat/query402",
+					"stellar/go",
+					"blend-capital/blend-contracts"
+				],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "stellar core consensus",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["emrekayat/query402"],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "zk",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["ericmt-98/micopay-mvp", "emrekayat/query402"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "x402",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["emrekayat/query402"],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "oracle price feed",
+				"mechanism": true,
+				"usedRows": [
+					"reflector-network/reflector-contract",
+					"blend-capital/blend-contracts"
+				],
+				"pairs": ["blend-capital/blend-contracts", "emrekayat/query402"],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "streaming payments",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["emrekayat/query402"],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "escrow vault",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["devasignhq/soroban-contract", "ericmt-98/micopay-mvp"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "amm",
+				"mechanism": true,
+				"usedRows": ["blend-capital/blend-contracts"],
+				"pairs": ["blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "dex",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["ericmt-98/micopay-mvp"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "lending",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "bridge",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "cross-chain bridge",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "escrow",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["devasignhq/soroban-contract", "ericmt-98/micopay-mvp"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "dao governance",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["nallely-lopez/rizodao"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "rwa tokenization",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "nft marketplace",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["ericmt-98/micopay-mvp", "nallely-lopez/rizodao"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "indexer",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "sep-10",
+				"mechanism": true,
+				"usedRows": ["blend-capital/blend-contracts"],
+				"pairs": ["blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "sep-24",
+				"mechanism": true,
+				"usedRows": ["blend-capital/blend-contracts"],
+				"pairs": ["blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "passkey",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["kalepail/passkey-kit"],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "smart wallet",
+				"mechanism": true,
+				"usedRows": ["reflector-network/reflector-contract"],
+				"pairs": [],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "multisig",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["kalepail/smart-account-kit"],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "stablecoin",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["ericmt-98/micopay-mvp", "devasignhq/soroban-contract"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "payments",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["emrekayat/query402"],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "price feed",
+				"mechanism": true,
+				"usedRows": [
+					"reflector-network/reflector-contract",
+					"blend-capital/blend-contracts"
+				],
+				"pairs": ["emrekayat/query402"],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "vault",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "staking",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "yield",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "launchpad",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "faucet",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "explorer",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "zero-knowledge",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "account abstraction",
+				"mechanism": true,
+				"usedRows": [],
+				"pairs": ["kalepail/smart-account-kit"],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "smart account",
+				"mechanism": true,
+				"usedRows": ["reflector-network/reflector-contract"],
+				"pairs": ["kalepail/passkey-kit"],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "soroban cli",
+				"mechanism": true,
+				"usedRows": [
+					"reflector-network/reflector-contract",
+					"blend-capital/blend-contracts"
+				],
+				"pairs": ["blend-capital/blend-contracts", "stellar/js-stellar-base"],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "python sdk",
+				"mechanism": true,
+				"usedRows": [
+					"blend-capital/blend-contracts",
+					"reflector-network/reflector-contract"
+				],
+				"pairs": ["stellar/js-stellar-base", "blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "go sdk",
+				"mechanism": true,
+				"usedRows": [
+					"blend-capital/blend-contracts",
+					"reflector-network/reflector-contract"
+				],
+				"pairs": ["stellar/js-stellar-base", "blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "flutter sdk",
+				"mechanism": true,
+				"usedRows": [
+					"blend-capital/blend-contracts",
+					"reflector-network/reflector-contract"
+				],
+				"pairs": ["stellar/js-stellar-base", "blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": true
+			},
+			{
+				"q": "token contract",
+				"mechanism": true,
+				"usedRows": [
+					"blend-capital/blend-contracts",
+					"reflector-network/reflector-contract"
+				],
+				"pairs": ["blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "liquidity pool",
+				"mechanism": true,
+				"usedRows": ["blend-capital/blend-contracts"],
+				"pairs": ["blend-capital/blend-contracts"],
+				"identical": false,
+				"pageIdentical": false
+			},
+			{
+				"q": "remittance",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "micropayments",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			},
+			{
+				"q": "invoice",
+				"mechanism": false,
+				"usedRows": [],
+				"pairs": [],
+				"identical": true,
+				"pageIdentical": true
+			}
+		]
+	},
+	"bar3": {
+		"leads": [
+			{
+				"set": "battery",
+				"id": "hm26-sc-03",
+				"row": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 32.3
+				},
+				"sameWithoutUsage": true,
+				"tie": false,
+				"violation": false,
+				"higherOnPage": []
+			},
+			{
+				"set": "exact-full",
+				"id": "blend-capital/blend-contracts",
+				"row": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 30.4
+				},
+				"sameWithoutUsage": true,
+				"tie": false,
+				"violation": false,
+				"higherOnPage": []
+			},
+			{
+				"set": "exact-name",
+				"id": "blend-capital/blend-contracts",
+				"row": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 24
+				},
+				"sameWithoutUsage": true,
+				"tie": false,
+				"violation": false,
+				"higherOnPage": []
+			},
+			{
+				"set": "exact-full",
+				"id": "reflector-network/reflector-contract",
+				"row": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 30.4
+				},
+				"sameWithoutUsage": true,
+				"tie": false,
+				"violation": false,
+				"higherOnPage": []
+			},
+			{
+				"set": "exact-name",
+				"id": "reflector-network/reflector-contract",
+				"row": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 24
+				},
+				"sameWithoutUsage": true,
+				"tie": false,
+				"violation": false,
+				"higherOnPage": []
+			},
+			{
+				"set": "project-name",
+				"id": "Reflector",
+				"row": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 5
+				},
+				"sameWithoutUsage": false,
+				"tie": true,
+				"violation": false,
+				"higherOnPage": []
+			},
+			{
+				"set": "keyword",
+				"id": "oracle",
+				"row": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 4
+				},
+				"sameWithoutUsage": true,
+				"tie": false,
+				"violation": false,
+				"higherOnPage": [
+					"bp-ventures/lightecho-stellar-oracle (5)",
+					"diadata-org/soroban-oracle-feeders (5)",
+					"XOXNO/rs-lending-xlm (5)",
+					"Heliobond/backend (5)",
+					"Gryd-lock/grydlock-oracle-adapter (5)",
+					"Stellar-Unified-Price-Oracle/Stellar-Unified-Price-Oracle-Frontend- (5)",
+					"AyushmanGupta21/Parallax (5)",
+					"perspectivefi/spectra-oracles-stellar-public (5)",
+					"Sahveli01/soroban-oracle-safety (5)",
+					"Stellar-Unified-Price-Oracle/Stellar-Unified-Price-Oracle-Aggregator-API-Contract (5)",
+					"Stellar-Unified-Price-Oracle/-Stellar-Unified-Price-Oracle-Aggregator-API-Backend (5)",
+					"warp-driver/oracle-demo (5)",
+					"nice-bills/soroban-oracle-safety (5)",
+					"Olvisgil/reflector-oracle-client (5)",
+					"reflector-network/oracle-client (5)",
+					"LiquidsFi/Liquidsfi-oracle-web (5)",
+					"tope-olajide/agent-oracle (5)",
+					"Neko-Protocol/Neko-Oracle-RWA (5)"
+				]
+			}
+		],
+		"violations": 0,
+		"changedFirst": [
+			{
+				"set": "dev",
+				"id": "dev-05",
+				"base": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 10.4
+				},
+				"variant": {
+					"fullName": "SoroWill/sorowill-sdk",
+					"score": 122.39999999999999
+				}
+			},
+			{
+				"set": "dev",
+				"id": "dev-06",
+				"base": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 9.1
+				},
+				"variant": {
+					"fullName": "bluxcc/core",
+					"score": 75.6
+				}
+			},
+			{
+				"set": "dev",
+				"id": "dev-17",
+				"base": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 4
+				},
+				"variant": {
+					"fullName": "lendwise-fi/lendwise",
+					"score": 48.400000000000006
+				}
+			},
+			{
+				"set": "dev",
+				"id": "dev-18",
+				"base": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 14.4
+				},
+				"variant": {
+					"fullName": "RozoAI/rozo-intents-contracts",
+					"score": 44
+				}
+			},
+			{
+				"set": "dev",
+				"id": "dev-20",
+				"base": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 36.1
+				},
+				"variant": {
+					"fullName": "stellar/rs-soroban-env",
+					"score": 102.3
+				}
+			},
+			{
+				"set": "dev",
+				"id": "dev-21",
+				"base": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 41.800000000000004
+				},
+				"variant": {
+					"fullName": "Socket-Fi/socketfi-smart-account",
+					"score": 89.6
+				}
+			},
+			{
+				"set": "battery",
+				"id": "hm26-sc-04",
+				"base": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 16
+				},
+				"variant": {
+					"fullName": "Heliobond/frontend",
+					"score": 46.2
+				}
+			},
+			{
+				"set": "battery",
+				"id": "hm26-sa-04",
+				"base": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 10.4
+				},
+				"variant": {
+					"fullName": "Gloriachinedu/lumenflow-contracts",
+					"score": 41.800000000000004
+				}
+			},
+			{
+				"set": "project-name",
+				"id": "Blend",
+				"base": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 5
+				},
+				"variant": {
+					"fullName": "blend-capital/blend-contracts-v2",
+					"score": 5
+				}
+			},
+			{
+				"set": "keyword",
+				"id": "smart account",
+				"base": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 3
+				},
+				"variant": {
+					"fullName": "stellar/smart-account-kit",
+					"score": 13
+				}
+			},
+			{
+				"set": "keyword",
+				"id": "token contract",
+				"base": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 6.5
+				},
+				"variant": {
+					"fullName": "kalepail/KALE-sc",
+					"score": 13
+				}
+			}
+		]
+	},
+	"bar4": {
+		"worse": 0,
+		"battery": [
+			{
+				"id": "hm26-sc-03",
+				"base": 71,
+				"variant": 70,
+				"baseTotal": 595,
+				"variantTotal": 595,
+				"worse": false,
+				"baseFirst": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 32.3
+				},
+				"variantFirst": {
+					"fullName": "reflector-network/reflector-contract",
+					"score": 32.3
+				}
+			},
+			{
+				"id": "hm26-sc-04",
+				"base": 111,
+				"variant": 110,
+				"baseTotal": 590,
+				"variantTotal": 590,
+				"worse": false,
+				"baseFirst": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 16
+				},
+				"variantFirst": {
+					"fullName": "Heliobond/frontend",
+					"score": 46.2
+				}
+			},
+			{
+				"id": "hm26-sa-03",
+				"base": 1,
+				"variant": 1,
+				"baseTotal": 594,
+				"variantTotal": 594,
+				"worse": false,
+				"baseFirst": {
+					"fullName": "stellar/passkey-kit",
+					"score": 50.6
+				},
+				"variantFirst": {
+					"fullName": "stellar/passkey-kit",
+					"score": 50.6
+				}
+			},
+			{
+				"id": "hm26-sa-04",
+				"base": 72,
+				"variant": 72,
+				"baseTotal": 515,
+				"variantTotal": 515,
+				"worse": false,
+				"baseFirst": {
+					"fullName": "blend-capital/blend-contracts",
+					"score": 10.4
+				},
+				"variantFirst": {
+					"fullName": "Gloriachinedu/lumenflow-contracts",
+					"score": 41.800000000000004
+				}
+			},
+			{
+				"id": "hm26-cc-03",
+				"base": 250,
+				"variant": 250,
+				"baseTotal": 401,
+				"variantTotal": 401,
+				"worse": false,
+				"baseFirst": {
+					"fullName": "Financial-Empowerment-Partners/impala",
+					"score": 26.599999999999998
+				},
+				"variantFirst": {
+					"fullName": "Financial-Empowerment-Partners/impala",
+					"score": 26.599999999999998
+				}
+			},
+			{
+				"id": "hm26-cc-04",
+				"base": 39,
+				"variant": 39,
+				"baseTotal": 591,
+				"variantTotal": 591,
+				"worse": false,
+				"baseFirst": {
+					"fullName": "Scopuly/scopuly-browser-extension",
+					"score": 52.5
+				},
+				"variantFirst": {
+					"fullName": "Scopuly/scopuly-browser-extension",
+					"score": 52.5
+				}
+			}
+		]
+	},
+	"dev": [
+		{
+			"id": "dev-01",
+			"slice": "tuning",
+			"base": 37,
+			"variant": 37
+		},
+		{
+			"id": "dev-02",
+			"slice": "tuning",
+			"base": 2,
+			"variant": 2
+		},
+		{
+			"id": "dev-03",
+			"slice": "tuning",
+			"base": 47,
+			"variant": 47
+		},
+		{
+			"id": "dev-04",
+			"slice": "tuning",
+			"base": 4,
+			"variant": 4
+		},
+		{
+			"id": "dev-05",
+			"slice": "tuning",
+			"base": 3,
+			"variant": 2
+		},
+		{
+			"id": "dev-06",
+			"slice": "held-out",
+			"base": 30,
+			"variant": 29
+		},
+		{
+			"id": "dev-07",
+			"slice": "held-out",
+			"base": 4,
+			"variant": 4
+		},
+		{
+			"id": "dev-08",
+			"slice": "tuning",
+			"base": null,
+			"variant": null
+		},
+		{
+			"id": "dev-09",
+			"slice": "tuning",
+			"base": null,
+			"variant": null
+		},
+		{
+			"id": "dev-10",
+			"slice": "held-out",
+			"base": 351,
+			"variant": 352
+		},
+		{
+			"id": "dev-11",
+			"slice": "tuning",
+			"base": 2,
+			"variant": 2
+		},
+		{
+			"id": "dev-12",
+			"slice": "tuning",
+			"base": null,
+			"variant": null
+		},
+		{
+			"id": "dev-13",
+			"slice": "tuning",
+			"base": 33,
+			"variant": 33
+		},
+		{
+			"id": "dev-14",
+			"slice": "held-out",
+			"base": 18,
+			"variant": 18
+		},
+		{
+			"id": "dev-15",
+			"slice": "tuning",
+			"base": 55,
+			"variant": 53
+		},
+		{
+			"id": "dev-16",
+			"slice": "tuning",
+			"base": 1,
+			"variant": 1
+		},
+		{
+			"id": "dev-17",
+			"slice": "tuning",
+			"base": 27,
+			"variant": 26
+		},
+		{
+			"id": "dev-18",
+			"slice": "held-out",
+			"base": null,
+			"variant": null
+		},
+		{
+			"id": "dev-19",
+			"slice": "tuning",
+			"base": 414,
+			"variant": 414
+		},
+		{
+			"id": "dev-20",
+			"slice": "tuning",
+			"base": 4,
+			"variant": 2
+		},
+		{
+			"id": "dev-21",
+			"slice": "tuning",
+			"base": null,
+			"variant": null
+		},
+		{
+			"id": "dev-22",
+			"slice": "held-out",
+			"base": 147,
+			"variant": 145
+		},
+		{
+			"id": "dev-23",
+			"slice": "held-out",
+			"base": 4,
+			"variant": 4
+		},
+		{
+			"id": "dev-24",
+			"slice": "tuning",
+			"base": 19,
+			"variant": 18
+		},
+		{
+			"id": "dev-25",
+			"slice": "held-out",
+			"base": 2,
+			"variant": 2
+		}
+	]
+}

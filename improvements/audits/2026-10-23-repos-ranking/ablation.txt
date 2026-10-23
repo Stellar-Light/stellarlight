@@ -1,0 +1,4 @@
+D1 only   dev 9->9 gained [] lost [] (tune 6->6, held 3->3) | exact losses 0 | kw identical 42/52 bar-fail [] | battery sc-03:71->70 sc-04:111->110 sa-03:1->1 sa-04:72->71 cc-03:250->250 cc-04:39->39
+D2 only   dev 9->9 gained ['dev-14'] lost ['dev-20'] (tune 6->5, held 3->4) | exact losses 0 | kw identical 52/52 bar-fail [] | battery sc-03:71->98 sc-04:111->160 sa-03:1->1 sa-04:72->54 cc-03:250->214 cc-04:39->29
+D3 only   dev 9->9 gained [] lost [] (tune 6->6, held 3->3) | exact losses 0 | kw identical 48/52 bar-fail [] | battery sc-03:71->72 sc-04:111->111 sa-03:1->1 sa-04:72->73 cc-03:250->250 cc-04:39->39
+D1+D2+D3  dev 9->10 gained ['dev-14'] lost [] (tune 6->6, held 3->4) | exact losses 0 | kw identical 42/52 bar-fail [] | battery sc-03:71->97 sc-04:111->159 sa-03:1->1 sa-04:72->52 cc-03:250->213 cc-04:39->29
