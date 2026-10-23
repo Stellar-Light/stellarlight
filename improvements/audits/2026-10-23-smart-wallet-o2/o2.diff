@@ -1,0 +1,418 @@
+diff --git a/src/lib/__tests__/hackathon-builds.test.ts b/src/lib/__tests__/hackathon-builds.test.ts
+index 872b3dc7..7608ab86 100644
+--- a/src/lib/__tests__/hackathon-builds.test.ts
++++ b/src/lib/__tests__/hackathon-builds.test.ts
+@@ -407,6 +407,160 @@ describe("rarity and phrases", () => {
+ 	});
+ });
+ 
++describe("a smart wallet in q is one concept that passkey evidence satisfies", () => {
++	// Live 1.9.101: q=passkey smart wallet&winnersOnly=1 read three words, so
++	// a build had to cover two or hold one in its name. It listed a build for
++	// wallet in its name and dropped the winner Tukar, whose declared
++	// passkey-kit covers one word of the three.
++	const pool = [
++		{
++			...build("Tukar", "Cross-border transfers in local currencies.", true),
++			stack: ["passkey-kit"],
++		},
++		build("Quest", "DeFi onboarding with a passkey smart wallet.", true),
++		build("Signers", "Policy signers for smart accounts."),
++		build("Safe", "Multisig SmartWallets."),
++		build("Veil", "Biometric sign-in, WebAuthn verified on-chain."),
++		build("Umbra Wallet", "A private wallet with smart contract escrow.", true),
++		build("Shield", "Smart contract audits that score wallet risk."),
++		build("Smart Escrow", "Smart contract escrow for any account."),
++	];
++	const run = (q: string, winnersOnly = false) =>
++		searchHackathonBuilds(pool, q, { winnersOnly, packages: true });
++	const names = (q: string, winnersOnly = false) =>
++		run(q, winnersOnly)
++			.map((s) => s.b.name)
++			.sort();
++	const matched = (q: string, winnersOnly = false) =>
++		Object.fromEntries(run(q, winnersOnly).map((s) => [s.b.name, s.matched]));
++	const smartWallets = ["Quest", "Safe", "Signers", "Tukar", "Veil"];
++
++	it("lists the passkey winners for passkey smart wallet, not a wallet named build", () => {
++		expect(matched("passkey smart wallet", true)).toEqual({
++			Quest: ["passkey", "smart-wallet"],
++			Tukar: ["passkey"],
++		});
++		expect(wordsNoBuildUses(pool, "passkey smart wallet").concepts).toBe(2);
++	});
++
++	// Lane Z3 (2026-10-23): when q said passkey and the phrase, one passkey
++	// mention covered both, so passkey builds that miss the rest of q passed
++	// the builds that do it.
++	it("lets one passkey mention satisfy one concept of q, q's own word first", () => {
++		expect(matched("passkey smart wallet")).toEqual({
++			Quest: ["passkey", "smart-wallet"],
++			Safe: ["smart-wallet"],
++			Signers: ["smart-wallet"],
++			Tukar: ["passkey"],
++			Veil: ["smart-wallet"],
++		});
++		const onboarding = [
++			build("Onboard", "Passkey onboarding for new users."),
++			build("Phrase", "Smart wallet onboarding."),
++			build("Key", "Passkey sign-in, WebAuthn verified."),
++		];
++		expect(
++			Object.fromEntries(
++				searchHackathonBuilds(
++					onboarding,
++					"passkey or smart-wallet onboarding",
++				).map((s) => [s.b.name, s.matched]),
++			),
++		).toEqual({
++			Onboard: ["passkey", "onboarding"],
++			Phrase: ["onboarding", "smart-wallet"],
++		});
++	});
++
++	it("reads either phrase, in any spelling or number, as one concept passkey evidence also satisfies", () => {
++		for (const q of [
++			"smart wallet",
++			"smart wallets",
++			"smart_wallet",
++			"smartwallet",
++			"smart-wallet",
++			"smart-wallets",
++			"smart wallet?",
++			"smart account",
++			"smart-accounts",
++			"smartaccounts",
++		])
++			expect(names(q), q).toEqual(smartWallets);
++		expect(run("smart-accounts").map((s) => s.matched)).toEqual(
++			smartWallets.map(() => ["smart-account"]),
++		);
++	});
++
++	it("reads both phrases in one q as one concept, named by the first", () => {
++		expect(
++			wordsNoBuildUses(pool, "smart wallet or smart account").concepts,
++		).toBe(1);
++		expect(names("smart wallet or smart account")).toEqual(smartWallets);
++		expect(run("smart account or smart wallet").map((s) => s.matched)).toEqual(
++			smartWallets.map(() => ["smart-account"]),
++		);
++	});
++
++	// Lane Z3 (2026-10-23): vetIdea's evidence rule read only q's own phrase,
++	// so q=smart account dropped builds that write smart wallet.
++	it("counts the concept's equivalents in a build's own words, a passkey for one concept only", () => {
++		const share = (q: string) =>
++			Object.fromEntries(run(q).map((s) => [s.b.name, s.textShare]));
++		expect(share("smart wallet")).toEqual({
++			Quest: 1,
++			Safe: 1,
++			Signers: 1,
++			Tukar: 0,
++			Veil: 1,
++		});
++		expect(share("passkey smart wallet")).toEqual({
++			Quest: 1,
++			Safe: 0.5,
++			Signers: 0.5,
++			Tukar: 0,
++			Veil: 0.5,
++		});
++		const one = [build("One", "Deploys a smart account per user.")];
++		expect(wordsNoBuildUses(one, "smart-accounts")).toEqual({
++			absent: [],
++			concepts: 1,
++		});
++		expect(wordsNoBuildUses(pool, "smart account llama")).toEqual({
++			absent: ["llama"],
++			concepts: 2,
++		});
++	});
++
++	it("never expands passkey, and leaves smart, wallet and account to their own words", () => {
++		expect(names("passkey")).toEqual(["Quest", "Tukar"]);
++		expect(names("passkey-kit")).toEqual(["Tukar"]);
++		expect(names("passkey wallet")).toEqual([
++			"Quest",
++			"Safe",
++			"Shield",
++			"Tukar",
++			"Umbra Wallet",
++		]);
++		const smart = [
++			"Quest",
++			"Safe",
++			"Shield",
++			"Signers",
++			"Smart Escrow",
++			"Umbra Wallet",
++		];
++		expect(names("smart")).toEqual(smart);
++		expect(names("smart contract")).toEqual(smart);
++		expect(names("wallet")).toEqual([
++			"Quest",
++			"Safe",
++			"Shield",
++			"Umbra Wallet",
++		]);
++		expect(names("account abstraction")).toEqual(["Signers", "Smart Escrow"]);
++	});
++});
++
+ describe("words no build uses", () => {
+ 	const pool = [build("Agent Pay", "AI agents, payments at the café.")];
+ 
+diff --git a/src/lib/__tests__/vet-idea.test.ts b/src/lib/__tests__/vet-idea.test.ts
+index c482bc4d..bf3b5e91 100644
+--- a/src/lib/__tests__/vet-idea.test.ts
++++ b/src/lib/__tests__/vet-idea.test.ts
+@@ -600,6 +600,57 @@ describe("vet-idea prior-art builds for short ideas", () => {
+ 	});
+ });
+ 
++/**
++ * Lane Z3 (2026-10-23): q=smart account read as one concept, but the
++ * evidence rule's one-word path took only the phrase as typed, so a build
++ * writing smart wallet, the same thing, left vetIdea's five.
++ */
++describe("vet-idea prior-art builds for a smart wallet or smart account", () => {
++	const build = (id: string, description: string): IndexedBuild => ({
++		id,
++		name: id,
++		description,
++		githubUrl: null,
++		demoUrl: null,
++		videoUrl: null,
++		track: null,
++		hackathonPlacement: null,
++		award: null,
++		isWinner: false,
++		voteCount: null,
++		url: `https://dorahacks.io/buidl/${id}`,
++		source: "dorahacks",
++		hackathon: { title: "E", slug: "e", endedAt: "2025-01-15" },
++		haystack: `${id} ${description}`.toLowerCase(),
++	});
++	beforeAll(() => {
++		buildsIndex.push(
++			build("aa-kit", "Deploys a smart account per user."),
++			build("wallet-ui", "A smart wallet for savings."),
++			build("key-login", "Passkey login for payments."),
++			build("escrow", "Smart contract escrow for any account."),
++		);
++	});
++	afterAll(() => {
++		buildsIndex.length = 0;
++	});
++	const payload = {
++		find: async () => ({ docs: [], totalDocs: 0 }),
++	} as never;
++
++	it("lists a build that writes the other phrase or a passkey, and says so", async () => {
++		const p = (await buildVetIdea(payload, "smart account")).priorArt;
++		expect(p.builds?.map((b) => b.id).sort()).toEqual([
++			"aa-kit",
++			"key-login",
++			"wallet-ui",
++		]);
++		expect(p.note).toMatch(
++			/reads this idea as one word, "smart-account": each listed build need only mention smart wallet, smart account, a passkey or WebAuthn in its name or description/,
++		);
++	});
++});
++
+ /**
+  * 2026-10-23: the hybrid top 50 reordered by a reranker that reads the idea
+  * with each build's name and summary; of the five it puts first, those it
+diff --git a/src/lib/hackathon-builds.ts b/src/lib/hackathon-builds.ts
+index d8d8f90a..9d3dbc69 100644
+--- a/src/lib/hackathon-builds.ts
++++ b/src/lib/hackathon-builds.ts
+@@ -598,7 +598,9 @@ export interface ScoredBuild {
+ 	 * uses as typed (or in the plural or singular), 0 to 1; set on word
+ 	 * matches. A synonym does not count ("usdc" is not "stablecoin"), nor does
+ 	 * track or award text, which names a category every entry in it shares
+-	 * ("Best Stablecoin Integration"). */
++	 * ("Best Stablecoin Integration"). A smart wallet or smart account counts
++	 * either phrase, and passkey evidence no other concept of q took
++	 * (heldTerms): they name one thing. */
+ 	textShare?: number;
+ 	/** Vector similarity to the query, when search by meaning ran. */
+ 	similarity?: number;
+@@ -658,12 +660,50 @@ const otherNumber = (w: string) =>
+ 					? [`${w}es`]
+ 					: [];
+ 
++/** A hyphenated phrase in both numbers, hyphenated, spaced and joined. */
++const spellings = (t: string) =>
++	wordForms(t).flatMap((f) => [f, f.replace(/-/g, " "), f.replace(/-/g, "")]);
++
++/** "smart wallet" or "smart account" in q, spaced, underscored, hyphenated
++ * or joined, either number, with no letter, digit or hyphen against an edge:
++ * read as the singular hyphenated phrase, one concept. */
++const SMART_PHRASE =
++	/(?<![\p{L}\p{N}-])smart[\s_-]*(wallet|account)s?(?![\p{L}\p{N}-])/gu;
++
++/** The concept a smart wallet or smart account in q becomes. */
++export const SMART_CONCEPT = /^smart-(wallet|account)$/;
++
++/** What satisfies a smart-wallet or smart-account concept. A passkey (a
++ * WebAuthn credential) cannot sign for a classic Stellar account, only
++ * through a contract account, which builders call a smart wallet
++ * (passkey-kit) or a smart account (smart-account-kit): so either phrase
++ * also matches the other, and so does passkey evidence (passkey-kit and
++ * passkey-kit-sdk hold passkey). One way only: not every smart wallet uses
++ * passkeys, so passkey in q is never expanded. As three words, q=passkey
++ * smart wallet dropped the winner Tukar, whose declared passkey-kit covered
++ * one of them (live 1.9.101). Smart and wallet apart are not evidence: the 3
++ * submissions holding only them say smart contract beside a wallet. */
++const SMART_FORMS = [
++	...spellings("smart-wallet"),
++	...spellings("smart-account"),
++];
++const PASSKEY_FORMS = ["passkey", "passkeys", "webauthn"];
++
++type Term = {
++	t: string;
++	forms: string[];
++	variants: ((hay: string) => boolean)[];
++	own: ((hay: string) => boolean)[];
++	/** A smart-wallet or smart-account concept's passkey evidence. */
++	passkey?: ((hay: string) => boolean)[];
++};
++
+ /** The concepts a query is searched by: its words less query filler and the
+  * generic words every submission says, each with the forms it matches. */
+-function queryTerms(query: string) {
++function queryTerms(query: string): Term[] {
+ 	const raw = [
+ 		...new Set(
+-			contentTokens(query).filter(
++			contentTokens(query.replace(SMART_PHRASE, "smart-$1")).filter(
+ 				(t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t),
+ 			),
+ 		),
+@@ -674,9 +714,24 @@ function queryTerms(query: string) {
+ 	const parts = new Set(
+ 		raw.filter((t) => t.includes("-")).flatMap((t) => t.split("-")),
+ 	);
+-	return raw
+-		.filter((t) => !parts.has(t))
++	const kept = raw.filter((t) => !parts.has(t));
++	// The two phrases name one thing, so a q holding both has one such
++	// concept, named by the first: as two, one mention covered both.
++	const smart = kept.find((t) => SMART_CONCEPT.test(wordCore(t)));
++	return kept
++		.filter((t) => t === smart || !SMART_CONCEPT.test(wordCore(t)))
+ 		.map((t) => {
++			if (t === smart)
++				return {
++					t: wordCore(t),
++					forms: [...SMART_FORMS, ...PASSKEY_FORMS],
++					variants: SMART_FORMS.map(termMatcher),
++					// Either phrase counts as typed: vetIdea's evidence rule took
++					// only q's own, so q=smart account dropped builds that write
++					// smart wallet (lane Z3, 2026-10-23).
++					own: SMART_FORMS.map(termMatcher),
++					passkey: PASSKEY_FORMS.map(termMatcher),
++				};
+ 			const joined = t.includes("-")
+ 				? wordForms(t).flatMap((f) => [
+ 						f.replace(/-/g, " "),
+@@ -694,6 +749,34 @@ function queryTerms(query: string) {
+ 		});
+ }
+ 
++/** The terms one build is held to. Passkey evidence is one fact, whichever
++ * word says it, so it satisfies at most one concept of q: a build that
++ * satisfies another concept of q with a passkey form (q=passkey smart wallet:
++ * its passkey) needs the phrase for the smart wallet; otherwise its passkey
++ * evidence satisfies the smart wallet, as typed too. Counted for both, it
++ * put passkey builds that miss the rest of q above builds that do it (lane
++ * Z3, 2026-10-23). */
++function heldTerms(terms: Term[], hay: string): Term[] {
++	const smart = terms.find((x) => x.passkey);
++	const passkey = smart?.passkey;
++	if (!passkey) return terms;
++	const taken = terms.some(
++		(x) =>
++			x !== smart &&
++			x.forms.some((f, i) => /passkey|webauthn/.test(f) && x.variants[i](hay)),
++	);
++	if (taken) return terms;
++	return terms.map((x) =>
++		x === smart
++			? {
++					...x,
++					variants: [...x.variants, ...passkey],
++					own: [...x.own, ...passkey],
++				}
++			: x,
++	);
++}
++
+ /**
+  * The concepts of `q` that no build in `indexed` uses as a whole word in any
+  * form (plural or singular, synonym, phrase spaced or joined) in its text or
+@@ -1069,17 +1152,20 @@ export function searchHackathonBuilds(
+ 		opts.packages ? pool.map((b) => [b, withPackages(b)] as const) : [],
+ 	);
+ 	const haystack = (b: IndexedBuild) => hay.get(b) ?? b.haystack;
++	const held = new Map(
++		pool.map((b) => [b, heldTerms(terms, haystack(b))] as const),
++	);
+ 	// Rarer words say more. In an agents hackathon "agents" is everywhere and
+ 	// "x402" is not, so a build is weighed by WHICH words it covers, not how
+ 	// many: counting words let descriptions padded with common ones ("per",
+ 	// "api", "agents") outrank the winners that built the idea.
+ 	const weight = new Map<string, number>();
+-	for (const { t, variants } of terms) {
++	terms.forEach(({ t }, i) => {
+ 		const df = pool.filter((b) =>
+-			variants.some((hit) => hit(haystack(b))),
++			(held.get(b) ?? terms)[i].variants.some((hit) => hit(haystack(b))),
+ 		).length;
+ 		weight.set(t, Math.log((pool.length + 1) / (df + 1)));
+-	}
++	});
+ 	const scored: ScoredBuild[] = [];
+ 	for (const b of pool) {
+ 		let score = 0;
+@@ -1089,7 +1175,7 @@ export function searchHackathonBuilds(
+ 		const inText = new Set<string>();
+ 		const name = b.name.toLowerCase();
+ 		const text = `${name} ${b.description ?? ""}`.toLowerCase();
+-		for (const { t, variants, own } of terms) {
++		for (const { t, variants, own } of held.get(b) ?? terms) {
+ 			for (const hit of variants) {
+ 				if (hit(name)) {
+ 					score += 3;
+diff --git a/src/lib/vet-idea.ts b/src/lib/vet-idea.ts
+index 973f3894..9a7105a2 100644
+--- a/src/lib/vet-idea.ts
++++ b/src/lib/vet-idea.ts
+@@ -27,6 +27,7 @@ import { queryBuilds } from "./hackathon-build-query";
+ import {
+ 	type BuildSearchMode,
+ 	getHackathonBuildsIndex,
++	SMART_CONCEPT,
+ } from "./hackathon-builds";
+ import { ACTIVE_PROJECT_STATUSES } from "./population";
+ import {
+@@ -550,12 +551,13 @@ export async function buildVetIdea(
+ 			? `builds is empty because ${n === 1 ? "the nearest submission" : `the ${n} nearest submissions`} did not meet the evidence rule: ${why}. That is not a finding that nobody built this; searchHackathonBuilds with the same q lists them with the words each matched.`
+ 			: null;
+ 	// A listed build that met only the one-word path: the idea reads as one
+-	// word, and the build need only use it. Not a path when reranked.
++	// word, and the build need only use it (a smart wallet or smart account,
++	// any of the words that satisfy it). Not a path when reranked.
+ 	const oneWord = rerank
+ 		? undefined
+ 		: evidence?.find((s) => !twoWordsOrMeaning(s))?.matched[0];
+ 	const oneWordNote = oneWord
+-		? `The search reads this idea as one word, "${oneWord}": each listed build need only mention it in its name or description, which does not make it the same idea.`
++		? `The search reads this idea as one word, "${oneWord}": each listed build need only mention ${SMART_CONCEPT.test(oneWord) ? "smart wallet, smart account, a passkey or WebAuthn" : "it"} in its name or description, which does not make it the same idea.`
+ 		: null;
+ 	const priorArtBuilds = evidence
+ 		? evidence.map(({ b, matched, similarity }) => ({
