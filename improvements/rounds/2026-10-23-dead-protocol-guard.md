@@ -215,3 +215,131 @@ protocol is deprecated or dead.
   repoint clearing in `tvlFieldsFor`, the lineage-swap strip, and whether
   Allbridge Next truly serves Stellar (the evidence is the app bundle and the
   operator's posts, not a transfer).
+
+## Review and fix
+
+- Review of e73109bf (independent, reported by the coordinator): GATE: fix
+  first. It reproduced tsc, the 2,704 tests, the contract, the Raven gate,
+  writer conformance, the scripts types, the replay (467 of 467) and the
+  sweep against today's DefiLlama list, and found:
+  1. MEDIUM: `deprecated === true` alone was a hit, while DefiLlama also
+     retires superseded listings (909 deprecated rows, 63 with TVL above 0,
+     one $2.9B, 118 with a live sibling by parentProtocol); one dead slug
+     plus one missing slug read deprecated.
+  2. MEDIUM: the Allbridge description ("its current app, Allbridge Next",
+     "moving its products to Next") contradicted the operator's pages:
+     docs.allbridge.io calls Core "our current bridge", allbridge.io presents
+     Next as new, and Stellar on Next rested on a wallet adapter in the app
+     bundle.
+  3. MEDIUM: SUPPORTED_NETWORKS (exact-sync) still held Core's matrix for
+     allbridge and estrela, sourced to the pool API this branch declares
+     ended.
+  4. LOW: a one-run upstream gap (a live row with tvl null) wrote tvlUSD
+     null.
+  5. LOW: the TVL rule read tvlUSD whatever its tvlAsOf, so a frozen 0 could
+     hit.
+  6. LOW: onchain.quietSince had no read-back.
+  7. Compact rows without the caveat: stays in TODO.
+- 2026-10-23 17:45 (DQ1): the session's primary directory moved again, to a
+  worktree holding lane R4's branch `lane/r4-repos-ranking` with 4 unpushed
+  commits; it was not touched. The fixes were made in the worktree that
+  holds `lane/dq1-dead-protocol-guard` (`.claude/worktrees/agent-a6d44a355da768cdd`,
+  untouched by anyone since the amend at 17:21:19 by its reflog).
+- Tests first (`failing-first.txt`, second section), against e73109bf: 7
+  failed, 35 passed. With the fixes: 42 of 42 in that file.
+- Fixes:
+  1. `llamaListingOf`: a slug is dead only with a deadFrom date, or when
+     deprecated with nothing locked (tvl 0 or null) and no live listing in
+     its parentProtocol family. New states: superseded (all retired, one not
+     dead) and partial (retired slugs plus a missing one), both
+     could-not-check. This is stricter than the review's wording (deadFrom,
+     or tvl 0/null, or no live sibling): with OR, a deprecated row holding
+     $35M and no family would still hit, which the review's own test rules
+     out. On today's list: 843 deprecated rows dead, 66 superseded, including
+     all 63 that hold value.
+  2. Description reworded clause by clause to the operator's pages (read
+     again on 2026-10-23 after the review): Core exploited on 2026-07-19 (about $1.65M, The Block),
+     pools discontinued in July 2026, the relaunched Core routes through CCTP
+     and LayerZero OFT, Stellar support unavailable pending audit of the
+     Stellar CCTP implementation, and Allbridge Next a newer bridge, with no
+     claim that Next serves Stellar.
+  3. SUPPORTED_NETWORKS `allbridge: []` and `estrela: []`: exact-sync clears
+     the curated matrix, so allbridge serves derived networks (basis
+     onchain-activity, its Stellar contracts) and estrela derived networks
+     (basis scf-award); neither claims a curated list. With Solana gone from
+     Allbridge's networks, the chain-corridor rule moves it from rank 1 to
+     rank 19 of 20 for "solana to stellar bridge" in replay C, so the golden
+     case `bridge-solana-to-stellar` drops "allbridge" from its expectation
+     with a dated note, and `scripts/eval/eval-baselines.json` is
+     re-baselined (`update-eval-baselines.ts`; `lint-eval-banks.ts` clean).
+  4. `tvlFieldsFor`: a sum is written only when every live row carries a
+     figure; a retired row without one counts as none (upstream stopped
+     computing it); a live row without one leaves the stored figure under
+     the same slugs, and is cleared only when the mapping moved.
+  5. TVL rule: a TVL reading older than 14 days (TVL_FRESH_DAYS) is
+     could-not-check, for 0 and for above 0.
+  6. enrich-onchain reads back `asOf` and `quietSince` after each project
+     write (diffWritten) and exits 1 on a mismatch.
+- Re-measure on today's data: corpus re-pulled on 1.9.102 (21:51:42Z to
+  21:52:15Z, 1,005 rows, sha256 c4d8d1cc); DefiLlama /protocols at 21:51:25Z
+  (8,813 protocols, sha256 54f8ddc7). Sweep: 18 linked rows, 1 hit, 1
+  caveated (allbridge, 0.9 to 0.45); flagship 20: 0 caveated; soroswap and
+  sentora could-not-check (slugs missing upstream). Replay (base export
+  724f4e6a and this tree, the 30 captured pages, today's list): in A, B and
+  C, 467 of 467 unlinked rows and 10 of 10 pages with no linked row
+  byte-identical; base A and B bodies identical.
+- Checks on the final tree: `pnpm exec tsc --noEmit -p tsconfig.json` exit
+  0; `pnpm exec tsx scripts/check-scripts-types.ts` GREEN (28 baselined);
+  `npx vitest run src/lib/ src/components/ src/app/ src/collections/
+  src/data/ --maxWorkers=4 --minWorkers=1` 216 files, 2,713 tests passed;
+  `pnpm contract:write`, then `CONTRACT_BASE=origin/main pnpm
+  contract:check` exit 0; `pnpm raven:gate` ACCEPT 1.9.108, exit 0 (the same
+  2 gains and totals as the base); biome on the 28 changed code files: no
+  errors, the same 11 warnings the base carries; writer conformance: all
+  writers conform.
+
+## Owner steps (supersede the section above)
+
+Unchanged in order and timing; what the dry runs should show changed:
+
+1. `gh workflow run enrich-tvl.yml --ref main -f execute=false`. Read:
+   allbridge "mapping moved (allbridge-core → allbridge-next) and the new
+   slugs carry no Stellar TVL figure, so tvlUSD ← null (was 0); listing
+   listed"; soroswap and sentora "no Stellar llama row resolved ...: TVL
+   left as stored; listing not-found"; every other mapped row "listing
+   listed"; no row "deprecated", "superseded" or "partial"; any "came back
+   without a TVL figure (a one-run gap upstream)" line means that row keeps
+   its stored figure. Then `-f execute=true` and read "✓ all N row(s) hold
+   the values written (tvlUSD, tvlAsOf, llamaSlugs, tvlSource, tvlMethod,
+   llamaListing)".
+2. `gh workflow run curate-projects.yml --ref main -f execute=false`. Read:
+   the allbridge description old and new (new begins "Allbridge is a
+   cross-chain bridge provider. Its stablecoin bridge, Allbridge Core");
+   "allbridge: [stellar, evm, solana, tron, sui] → []" and the same for
+   estrela under the networks section; "allbridge: routes ← 0 row(s)" and
+   "estrela: routes ← 0 row(s)". Then `-f execute=true`; the Idempotence
+   step must report 0 writes planned.
+3. enrich-onchain: no dispatch needed; a dry run (`-f execute=false`) shows
+   "(contracts quiet since 2026-10-13)" on allbridge; an execute must end
+   without "RED: ... did not read back as sent".
+4. Read back through the live API: `/api/projects/search?q=allbridge`
+   (the new description, `llamaSlugs` [allbridge-next], `tvlUSD` null,
+   `routes` null, `supportedNetworks` [stellar] with `networksBasis`
+   onchain-activity, `statusChecks` defillama-listing clear, `statusCaveat`
+   null); `/api/projects/search?q=estrela` (`routes` null,
+   `supportedNetworks` [stellar] with `networksBasis` scf-award);
+   `/api/projects/search?q=highest tvl` (every linked row carries
+   `statusChecks`, no non-null `statusCaveat`); `/api/verify?type=live&subject=allbridge`
+   (supported, no caveat once the mapping moved); and the golden case
+   `bridge-solana-to-stellar` in the next nightly-health run.
+
+## Outcome (after review)
+
+- Committed on `lane/dq1-dead-protocol-guard` on top of e73109bf, not
+  pushed; spec 1.9.108 (placeholder). Allbridge reads Live with a
+  description limited to what the operator's pages say, no Core TVL, routes
+  or network matrix; estrela loses the copied Core routes and matrix.
+- Not verified live. TODO keeps Estrela's identity and status, the research
+  golden `bridge-evm-to-stellar` (it still expects Allbridge as a current
+  EVM to Stellar route), the skill's Allbridge Core SDK advice, compact rows
+  and the other leads above.

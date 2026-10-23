@@ -8,13 +8,18 @@
  * 2026-08-31, after the 2026-07-19 exploit). None of it reached the status.
  *
  * The two checks, each read from facts the enrich lanes store:
- *   defillama-listing        DefiLlama marks every mapped slug deprecated or
- *                            dead (enrich-tvl writes llamaListing).
+ *   defillama-listing        DefiLlama marks every mapped slug dead: a
+ *                            deadFrom date, or deprecated with nothing locked
+ *                            and no live listing in its parentProtocol family
+ *                            (enrich-tvl writes llamaListing). Deprecated alone
+ *                            is not a death: DefiLlama also retires listings a
+ *                            successor replaced (909 deprecated rows on
+ *                            2026-10-23, 63 still holding value).
  *   tvl-zero-onchain-quiet   an on-chain protocol type (DEX, Lending, Bridge,
- *                            Yield) with DefiLlama TVL 0 and no event or
- *                            sub-call on any tracked contract for QUIET_DAYS
- *                            of OBSERVED time (enrich-onchain writes
- *                            onchain.quietSince).
+ *                            Yield) with a DefiLlama TVL of 0 read within
+ *                            TVL_FRESH_DAYS and no event or sub-call on any
+ *                            tracked contract for QUIET_DAYS of OBSERVED time
+ *                            (enrich-onchain writes onchain.quietSince).
  *
  * Trinary, per check: hit, clear, or could-not-check. A read that failed,
  * never ran, or found a slug missing upstream is could-not-check, never a
@@ -31,6 +36,10 @@ import { type FactConfidence, factConfidence } from "./fact-confidence";
 /** Days of observed contract silence the TVL check needs before it speaks. */
 export const QUIET_DAYS = 60;
 
+/** A TVL reading older than this cannot speak for today: enrich-tvl runs
+ * weekly, so this allows one missed run (a renamed slug freezes the figure). */
+export const TVL_FRESH_DAYS = 14;
+
 /** Types whose product IS on-chain use: with no value locked and no contract
  * activity, such a protocol is not operating as listed. */
 export const ONCHAIN_USE_TYPES = ["DEX", "Lending", "Bridge", "Yield"] as const;
@@ -38,6 +47,8 @@ export const ONCHAIN_USE_TYPES = ["DEX", "Lending", "Bridge", "Yield"] as const;
 export const LLAMA_LISTING_STATES = [
 	"listed",
 	"deprecated",
+	"superseded",
+	"partial",
 	"not-found",
 ] as const;
 export type LlamaListingState = (typeof LLAMA_LISTING_STATES)[number];
@@ -65,16 +76,28 @@ export interface LlamaListingInput {
 	slug: string;
 	deprecated?: boolean | null;
 	deadFrom?: string | null;
+	tvl?: number | null;
+	parentProtocol?: string | null;
 }
 
-const isDead = (p: LlamaListingInput) =>
-	p.deprecated === true || (typeof p.deadFrom === "string" && !!p.deadFrom);
+const hasDeadFrom = (p: { deadFrom?: string | null }) =>
+	typeof p.deadFrom === "string" && !!p.deadFrom;
+const isRetired = (p: {
+	deprecated?: boolean | null;
+	deadFrom?: string | null;
+}) => p.deprecated === true || hasDeadFrom(p);
 
 /** DefiLlama's verdict on a project's mapped slugs, from its /protocols list.
- * deprecated only when every slug found is deprecated or dead (one live
- * component keeps a project listed); not-found when none is in the list,
- * which is a rename or removal upstream, never a death. deadFrom stays the
- * string DefiLlama publishes (one row says 2022-02-31). */
+ *   listed      a mapped slug is neither deprecated nor dated dead
+ *   deprecated  every mapped slug is found and dead: a deadFrom date, or
+ *               deprecated with nothing locked and no live listing in its
+ *               parentProtocol family
+ *   superseded  every slug is retired, but one is undated and still holds
+ *               value or has a live family listing: a successor, not a death
+ *   partial     the found slugs are retired and another is missing; the
+ *               missing one may be the live one
+ *   not-found   none is in the list (a rename or removal, never a death)
+ * deadFrom stays the string DefiLlama publishes (one row says 2022-02-31). */
 export function llamaListingOf(
 	slugs: readonly string[],
 	protocols: readonly LlamaListingInput[],
@@ -83,8 +106,20 @@ export function llamaListingOf(
 	const found = slugs
 		.map((s) => bySlug.get(s))
 		.filter((p): p is LlamaListingInput => !!p);
+	if (found.some((p) => !isRetired(p)))
+		return { state: "listed", deadFrom: null };
 	if (!found.length) return { state: "not-found", deadFrom: null };
-	if (!found.every(isDead)) return { state: "listed", deadFrom: null };
+	if (found.length < slugs.length) return { state: "partial", deadFrom: null };
+	const liveParents = new Set(
+		protocols
+			.filter((q) => q.parentProtocol && !isRetired(q))
+			.map((q) => q.parentProtocol),
+	);
+	const dead = (p: LlamaListingInput) =>
+		hasDeadFrom(p) ||
+		(!(typeof p.tvl === "number" && p.tvl > 0) &&
+			!(p.parentProtocol && liveParents.has(p.parentProtocol)));
+	if (!found.every(dead)) return { state: "superseded", deadFrom: null };
 	const dates = found
 		.map((p) => p.deadFrom)
 		.filter((d): d is string => typeof d === "string" && !!d)
@@ -95,22 +130,23 @@ export function llamaListingOf(
 export interface LlamaTvlInput {
 	tvl?: number | null;
 	chainTvls?: Record<string, number | null> | null;
+	deprecated?: boolean | null;
+	deadFrom?: string | null;
 }
+
+const rowTvl = (r: LlamaTvlInput): number | null =>
+	typeof r.chainTvls?.Stellar === "number"
+		? r.chainTvls.Stellar
+		: typeof r.tvl === "number"
+			? r.tvl
+			: null;
 
 /** TVL on Stellar summed over mapped rows: each row's Stellar slice where
  * DefiLlama publishes one, else its protocol total. Null when no row carries
  * a number; DefiLlama serves tvl null for a protocol it stopped computing,
  * and that is not a reading of 0. */
 export function stellarTvlOf(rows: readonly LlamaTvlInput[]): number | null {
-	const values = rows
-		.map((r) =>
-			typeof r.chainTvls?.Stellar === "number"
-				? r.chainTvls.Stellar
-				: typeof r.tvl === "number"
-					? r.tvl
-					: null,
-		)
-		.filter((v): v is number => v !== null);
+	const values = rows.map(rowTvl).filter((v): v is number => v !== null);
 	return values.length ? values.reduce((s, v) => s + v, 0) : null;
 }
 
@@ -120,16 +156,19 @@ const sameSlugs = (stored: unknown, mapped: readonly string[]) =>
 	mapped.every((s, i) => stored[i] === s);
 
 /** The TVL fields enrich-tvl writes for one mapped project, or null to leave
- * the stored TVL alone. With no Stellar row resolved, a figure stored under
- * the SAME slugs is the last good reading (dated by tvlAsOf) and stays; one
- * stored under other slugs was read from a protocol the map no longer names,
- * so it is not this mapping's TVL and is cleared. */
+ * the stored TVL alone. A sum is written only when every live row carries a
+ * figure; a retired row (deprecated or dated dead) without one counts as
+ * none, since DefiLlama stopped computing it. A live row without a figure is
+ * a one-run gap upstream: under the same slugs the stored reading stays
+ * (dated by tvlAsOf). Under slugs the map no longer names, the stored figure
+ * is not this mapping's, so it is cleared. */
 export function tvlFieldsFor(
 	mapped: readonly string[],
 	storedSlugs: unknown,
 	stellarRows: readonly LlamaTvlInput[],
 ): { tvlUSD: number | null; llamaSlugs: string[] } | null {
-	if (stellarRows.length) {
+	const gap = stellarRows.some((r) => rowTvl(r) === null && !isRetired(r));
+	if (stellarRows.length && !gap) {
 		const tvl = stellarTvlOf(stellarRows);
 		return {
 			tvlUSD: tvl === null ? null : Math.round(tvl),
@@ -226,13 +265,25 @@ function listingCheck(p: any, slugs: string[]): StatusCheck {
 		return {
 			...base,
 			result: "hit",
-			detail: `DefiLlama marks ${names} deprecated${l.deadFrom ? `, dead from ${l.deadFrom}` : ""} (checked ${checkedAt})`,
+			detail: `DefiLlama marks ${names} deprecated${l.deadFrom ? `, dead from ${l.deadFrom}` : ", with nothing locked and no live listing in its family"} (checked ${checkedAt})`,
 		};
 	if (l.state === "listed")
 		return {
 			...base,
 			result: "clear",
 			detail: `DefiLlama lists ${names} as active (checked ${checkedAt}).`,
+		};
+	if (l.state === "superseded")
+		return {
+			...base,
+			result: "could-not-check",
+			detail: `DefiLlama deprecated ${names} without a dead-from date while value is still locked or a listing in its family is live (checked ${checkedAt}): read as a retired or superseded listing, not a death.`,
+		};
+	if (l.state === "partial")
+		return {
+			...base,
+			result: "could-not-check",
+			detail: `DefiLlama retired part of ${names} and does not list the rest (checked ${checkedAt}): a missing listing is never read as support for a death.`,
 		};
 	return {
 		...base,
@@ -242,7 +293,7 @@ function listingCheck(p: any, slugs: string[]): StatusCheck {
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: raw Payload doc
-function tvlQuietCheck(p: any, slugs: string[]): StatusCheck {
+function tvlQuietCheck(p: any, slugs: string[], now: Date): StatusCheck {
 	const tvlAsOf = day(p.tvlAsOf);
 	const o = p.onchain;
 	const contracts = Array.isArray(o?.contracts) ? o.contracts : [];
@@ -260,6 +311,15 @@ function tvlQuietCheck(p: any, slugs: string[]): StatusCheck {
 	});
 	if (typeof p.tvlUSD !== "number")
 		return result("could-not-check", "No DefiLlama TVL figure on record.");
+	const tvlAge =
+		typeof p.tvlAsOf === "string"
+			? daysBetween(p.tvlAsOf, now.toISOString())
+			: NaN;
+	if (!(tvlAge <= TVL_FRESH_DAYS))
+		return result(
+			"could-not-check",
+			`The DefiLlama TVL on record is ${tvlAsOf ? `from ${tvlAsOf}` : "undated"}, older than ${TVL_FRESH_DAYS} days, so it cannot speak for today.`,
+		);
 	if (p.tvlUSD > 0)
 		return result(
 			"clear",
@@ -329,7 +389,7 @@ export function statusChecksFor(
 	const statusChecks = [
 		listingCheck(p, slugs),
 		...(types.some((t) => (ONCHAIN_USE_TYPES as readonly unknown[]).includes(t))
-			? [tvlQuietCheck(p, slugs)]
+			? [tvlQuietCheck(p, slugs, now)]
 			: []),
 	];
 	const hits = statusChecks.filter((c) => c.result === "hit");

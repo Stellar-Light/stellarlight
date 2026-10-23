@@ -359,8 +359,8 @@
 			"mode": "projects",
 			"question": "solana to stellar bridge",
 			"expect": {
-				"answerRegex": ["allbridge", "rozo|cctp|circle"],
-				"note": "Corridor-matrix guard (2026-07-09): Solana corridors were invisible because supportedNetworks was seeded [stellar, evm] only. Allbridge (docs: Solana live) and Rozo/CCTP (Solana live) must surface for the Solana corridor. Generalizes the bridge-evm-to-stellar research guard to the projects lane + a second chain."
+				"answerRegex": ["rozo|cctp|circle"],
+				"note": "Corridor-matrix guard (2026-07-09): Solana corridors were invisible because supportedNetworks was seeded [stellar, evm] only. Rozo/CCTP (Solana live) must surface for the Solana corridor. Generalizes the bridge-evm-to-stellar research guard to the projects lane + a second chain. 2026-10-23 (lane DQ1): Allbridge dropped from the expectation; docs-core.allbridge.io says Core's pools were discontinued in July 2026 and Stellar support on the relaunched Core is unavailable pending audit, so Allbridge is no longer a Solana to Stellar route."
 			}
 		},
 		{

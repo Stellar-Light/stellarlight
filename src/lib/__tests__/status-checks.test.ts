@@ -19,29 +19,75 @@ import {
 
 const NOW = new Date("2026-10-26T12:00:00.000Z");
 
-// DefiLlama's own rows as /protocols served them on 2026-10-23.
+// DefiLlama rows shaped as /protocols serves them (2026-10-23): the first
+// three are Allbridge's real rows; the rest model the review's cases.
 const PROTOCOLS = [
-	{ slug: "allbridge-core", deprecated: true, deadFrom: "2026-08-31" },
-	{ slug: "allbridge-next", deprecated: null, deadFrom: null },
-	{ slug: "blend-pools", deprecated: null, deadFrom: null },
-	{ slug: "blend-pools-v2", deprecated: null, deadFrom: null },
-	{ slug: "old-v1", deprecated: true, deadFrom: "2025-01-15" },
-	{ slug: "old-v2", deprecated: true, deadFrom: "2026-02-01" },
-	{ slug: "quiet-exit", deprecated: true, deadFrom: null },
+	{
+		slug: "allbridge-core",
+		deprecated: true,
+		deadFrom: "2026-08-31",
+		tvl: null,
+		parentProtocol: "parent#allbridge",
+	},
+	{
+		slug: "allbridge-next",
+		deprecated: null,
+		deadFrom: null,
+		tvl: null,
+		parentProtocol: "parent#allbridge",
+	},
+	{
+		slug: "allbridge-classic",
+		deprecated: null,
+		deadFrom: null,
+		tvl: 1_094_934,
+		parentProtocol: "parent#allbridge",
+	},
+	{ slug: "blend-pools-v2", deprecated: null, deadFrom: null, tvl: 9 },
+	{ slug: "old-v1", deprecated: true, deadFrom: "2025-01-15", tvl: null },
+	{ slug: "old-v2", deprecated: true, deadFrom: "2026-02-01", tvl: null },
+	// deprecated, no deadFrom, nothing locked, no family: a death
+	{ slug: "quiet-exit", deprecated: true, deadFrom: null, tvl: 0 },
+	// deprecated, no deadFrom, $35M still locked: a retired listing
+	{ slug: "big-dex-v1", deprecated: true, deadFrom: null, tvl: 35_000_000 },
+	// deprecated, no deadFrom, drained, but its family has a live listing
+	{
+		slug: "fam-v1",
+		deprecated: true,
+		deadFrom: null,
+		tvl: 0,
+		parentProtocol: "parent#fam",
+	},
+	{
+		slug: "fam-v2",
+		deprecated: null,
+		deadFrom: null,
+		tvl: 4_000,
+		parentProtocol: "parent#fam",
+	},
 ];
 
 describe("llamaListingOf: DefiLlama's verdict on the mapped slugs", () => {
-	it("a deprecated slug with deadFrom is deprecated, dated", () => {
+	it("a deprecated slug with deadFrom is deprecated, dated, whatever its family", () => {
 		expect(llamaListingOf(["allbridge-core"], PROTOCOLS)).toEqual({
 			state: "deprecated",
 			deadFrom: "2026-08-31",
 		});
 	});
-	it("deprecated without a deadFrom is still deprecated", () => {
+	it("deprecated with nothing locked and no live family listing is deprecated", () => {
 		expect(llamaListingOf(["quiet-exit"], PROTOCOLS)).toEqual({
 			state: "deprecated",
 			deadFrom: null,
 		});
+	});
+	it("deprecated with value still locked and no deadFrom is superseded, not dead", () => {
+		expect(llamaListingOf(["big-dex-v1"], PROTOCOLS)).toEqual({
+			state: "superseded",
+			deadFrom: null,
+		});
+	});
+	it("deprecated and drained while its family has a live listing is superseded", () => {
+		expect(llamaListingOf(["fam-v1"], PROTOCOLS).state).toBe("superseded");
 	});
 	it("a listed slug is listed", () => {
 		expect(llamaListingOf(["allbridge-next"], PROTOCOLS).state).toBe("listed");
@@ -58,15 +104,17 @@ describe("llamaListingOf: DefiLlama's verdict on the mapped slugs", () => {
 			deadFrom: "2026-02-01",
 		});
 	});
-	it("a slug missing from the list is not-found, never deprecated", () => {
+	it("a missing slug is never support for a death", () => {
 		// soroswap: the mapped slug left the list on a rename (2026-10-23)
 		expect(llamaListingOf(["soroswap"], PROTOCOLS)).toEqual({
 			state: "not-found",
 			deadFrom: null,
 		});
-		expect(
-			llamaListingOf(["soroswap", "allbridge-core"], PROTOCOLS).state,
-		).toBe("deprecated");
+		// one dead slug and one missing: the missing one may be the live one
+		expect(llamaListingOf(["soroswap", "allbridge-core"], PROTOCOLS)).toEqual({
+			state: "partial",
+			deadFrom: null,
+		});
 	});
 });
 
@@ -89,6 +137,29 @@ describe("stellarTvlOf and tvlFieldsFor: a missing TVL is null, never 0", () => 
 	});
 	it("no Stellar row under the same slugs: the stored TVL stays", () => {
 		expect(tvlFieldsFor(["soroswap"], ["soroswap"], [])).toBeNull();
+	});
+	it("a live row without a figure under the same slugs keeps the stored TVL (a one-run gap)", () => {
+		expect(
+			tvlFieldsFor(["x"], ["x"], [{ tvl: null, deprecated: null }]),
+		).toBeNull();
+		expect(
+			tvlFieldsFor(["x", "y"], ["x", "y"], [{ tvl: 5 }, { tvl: null }]),
+		).toBeNull();
+	});
+	it("a retired row without a figure writes null: upstream stopped computing it", () => {
+		expect(
+			tvlFieldsFor(
+				["allbridge-core"],
+				["allbridge-core"],
+				[{ tvl: null, deprecated: true, deadFrom: "2026-08-31" }],
+			),
+		).toEqual({ tvlUSD: null, llamaSlugs: ["allbridge-core"] });
+	});
+	it("a live row without a figure under moved slugs is cleared too", () => {
+		expect(tvlFieldsFor(["new"], ["old"], [{ tvl: null }])).toEqual({
+			tvlUSD: null,
+			llamaSlugs: ["new"],
+		});
 	});
 	it("no Stellar row under moved slugs: the old figure is cleared", () => {
 		expect(tvlFieldsFor(["allbridge-next"], ["allbridge-core"], [])).toEqual({
@@ -242,6 +313,47 @@ describe("statusChecksFor: the guard on served status", () => {
 		expect(out.statusCaveat).toBeNull();
 	});
 
+	it("the review's case: a Live DEX, deprecated without deadFrom, $35M locked, is not caveated", () => {
+		const out = statusChecksFor(
+			{
+				status: "Live",
+				statusBasis: "onchain-activity",
+				statusAsOf: "2026-10-20",
+				types: ["DEX"],
+				tvlUSD: 35_000_000,
+				tvlAsOf: "2026-10-26T05:00:00.000Z",
+				llamaSlugs: ["big-dex-v1"],
+				llamaListing: {
+					...llamaListingOf(["big-dex-v1"], PROTOCOLS),
+					checkedAt: "2026-10-26T05:00:00.000Z",
+				},
+			},
+			NOW,
+		);
+		expect(byCheck(out, "defillama-listing")?.result).toBe("could-not-check");
+		expect(byCheck(out, "defillama-listing")?.detail).toMatch(
+			/superseded|retired/,
+		);
+		expect(byCheck(out, "tvl-zero-onchain-quiet")?.result).toBe("clear");
+		expect(out.statusCaveat).toBeNull();
+	});
+
+	it("a partial listing (one slug missing) could not be checked", () => {
+		const out = statusChecksFor(
+			{
+				...allbridge,
+				llamaListing: {
+					state: "partial",
+					deadFrom: null,
+					checkedAt: "2026-10-26",
+				},
+			},
+			NOW,
+		);
+		expect(byCheck(out, "defillama-listing")?.result).toBe("could-not-check");
+		expect(out.statusCaveat).toBeNull();
+	});
+
 	it("a listed slug is clear", () => {
 		const out = statusChecksFor(
 			{
@@ -287,6 +399,26 @@ describe("statusChecksFor: the guard on served status", () => {
 			"could-not-check",
 		);
 		expect(out.statusCaveat).toBeNull();
+	});
+	it("a TVL reading older than 14 days could not be checked, 0 or not", () => {
+		const quiet = {
+			...listed,
+			onchain: { ...listed.onchain, quietSince: "2026-08-20T00:00:00.000Z" },
+		};
+		const stale = statusChecksFor({ ...quiet, tvlAsOf: "2026-10-01" }, NOW);
+		expect(byCheck(stale, "tvl-zero-onchain-quiet")?.result).toBe(
+			"could-not-check",
+		);
+		expect(stale.statusCaveat).toBeNull();
+		expect(
+			byCheck(
+				statusChecksFor(
+					{ ...listed, tvlUSD: 1200, tvlAsOf: "2026-10-01" },
+					NOW,
+				),
+				"tvl-zero-onchain-quiet",
+			)?.result,
+		).toBe("could-not-check");
 	});
 	it("a null TVL could not be checked; a positive TVL is clear", () => {
 		expect(
@@ -364,6 +496,13 @@ describe("every serving point carries the guard, and the spec declares it", () =
 	it("no search row builder computes statusConfidence on its own", () => {
 		expect(route).not.toMatch(/statusConfidence: factConfidence\(/);
 		expect((route.match(/\.\.\.statusChecksFor\(\w+\)/g) ?? []).length).toBe(3);
+	});
+	it("enrich-onchain reads quietSince back after it writes it", () => {
+		const script = readFileSync(
+			join(process.cwd(), "scripts/data/enrich-onchain-projects.ts"),
+			"utf8",
+		);
+		expect(script).toMatch(/diffWritten\([^;]*"quietSince"/s);
 	});
 	it("the semantic projection reads the stored listing (the F3 projection class)", () => {
 		expect(route).toMatch(/llamaListing: 1/);

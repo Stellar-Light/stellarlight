@@ -4954,18 +4954,17 @@ export const SEEDS: Array<{
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DESCRIPTION_FIXES: Record<string, string> = {
-	// Lane DQ1 (2026-10-23): the row described Allbridge Core as current.
-	// Core was exploited for about $1.65M on 2026-07-19 and paused (The
-	// Block, 2026-07-19); docs-core.allbridge.io says Core's liquidity pools
-	// were discontinued in July 2026 and that Stellar is unavailable on the
-	// relaunched, CCTP-based Core while its Stellar implementation awaits
-	// audit (read 2026-10-23); Allbridge said Core and Classic would stop in
-	// their current form as it moves fully to Allbridge Next. Next's app
-	// (next.allbridge.io, bundle read 2026-10-23) carries Stellar (Horizon,
-	// Freighter) beside EVM wallets, Solana, TRON and TON. DefiLlama marks
-	// allbridge-core deprecated, deadFrom 2026-08-31.
+	// Lane DQ1 (2026-10-23, reworded after review to what the operator's own
+	// pages say, read 2026-10-23): docs.allbridge.io calls Core "our current
+	// bridge" and Classic deprecated (stops November 2026); docs-core says
+	// Core's liquidity pools were discontinued in July 2026, the relaunched
+	// Core routes through CCTP/xReserve and LayerZero OFT, and Stellar support
+	// is temporarily unavailable while its Stellar CCTP implementation is
+	// pending audit; allbridge.io presents Allbridge Next as new. The exploit
+	// date and amount are The Block's (2026-07-19). Nothing here claims Next
+	// serves Stellar: the operator does not say so.
 	allbridge:
-		"Allbridge is a cross-chain bridge provider. Its current app, Allbridge Next (next.allbridge.io), lists Stellar beside EVM chains, Solana, Tron and TON. On 2026-07-19 Allbridge Core, the pool-based bridge that brought native USDC swaps to Stellar on Soroban, was exploited for about $1.65M and paused; its liquidity pools were then discontinued, Stellar stays off the relaunched Core pending an audit, and Allbridge is moving its products to Next.",
+		"Allbridge is a cross-chain bridge provider. Its stablecoin bridge, Allbridge Core, brought native USDC transfers to Stellar on Soroban through liquidity pools; Core was exploited for about $1.65M on 2026-07-19 and its pools were discontinued in July 2026. The relaunched Core routes transfers through Circle's CCTP and LayerZero's OFT, and its Stellar support is unavailable pending an audit of the Stellar CCTP implementation. Allbridge also offers a newer bridge, Allbridge Next.",
 	// Raven sls-091: the row still said "Currently on testnet, with mainnet
 	// pending" beside a sourced mainnet deployment. Zenex's deployments page
 	// (docs.zenex.trade/deployments/contract-addresses, checked by the

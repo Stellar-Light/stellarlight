@@ -931,7 +931,7 @@ export const Projects: CollectionConfig = {
 			type: "group",
 			admin: {
 				description:
-					"DefiLlama's verdict on the mapped slugs: listed, deprecated (every slug deprecated or dead), or not-found (renamed or removed upstream, never a death). Written by enrich-tvl.",
+					"DefiLlama's verdict on the mapped slugs: listed; deprecated (every slug dead: a deadFrom date, or deprecated with nothing locked and no live family listing); superseded (retired but undated with value locked or a live family listing); partial (retired slugs plus a missing one); not-found (renamed or removed upstream). Only deprecated reads as a death. Written by enrich-tvl.",
 			},
 			fields: [
 				{

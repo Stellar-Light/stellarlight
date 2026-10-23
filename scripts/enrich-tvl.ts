@@ -103,6 +103,9 @@ interface LlamaProtocol {
 	chainTvls?: Record<string, number | null>;
 	deprecated?: boolean | null;
 	deadFrom?: string | null;
+	/** DefiLlama's family key (e.g. parent#allbridge): a retired listing with
+	 * a live sibling was superseded, not killed (llamaListingOf). */
+	parentProtocol?: string | null;
 }
 
 // TVL on Stellar is stellarTvlOf (src/lib/status-checks.ts). Multichain rows
@@ -198,11 +201,16 @@ async function main() {
 		const deadNote = listing.deadFrom ? `, dead from ${listing.deadFrom}` : "";
 		if (!tvl)
 			console.log(
-				`  ${ourSlug}: no Stellar llama row resolved (${llamaSlugs.join(",")}): TVL left as stored; listing ${listing.state}${deadNote}`,
+				rows.length
+					? `  ${ourSlug}: a live llama row came back without a TVL figure (a one-run gap upstream): TVL left as stored; listing ${listing.state}${deadNote}`
+					: `  ${ourSlug}: no Stellar llama row resolved (${llamaSlugs.join(",")}): TVL left as stored; listing ${listing.state}${deadNote}`,
 			);
-		else if (!rows.length)
+		else if (
+			tvl.tvlUSD === null &&
+			(d.llamaSlugs ?? []).join(",") !== llamaSlugs.join(",")
+		)
 			console.log(
-				`  ${ourSlug}: mapping moved (${(d.llamaSlugs ?? []).join(",") || "none"} → ${llamaSlugs.join(",")}) and the new slugs carry no Stellar row, so tvlUSD ← null (was ${d.tvlUSD ?? "null"}); listing ${listing.state}${deadNote}`,
+				`  ${ourSlug}: mapping moved (${(d.llamaSlugs ?? []).join(",") || "none"} → ${llamaSlugs.join(",")}) and the new slugs carry no Stellar TVL figure, so tvlUSD ← null (was ${d.tvlUSD ?? "null"}); listing ${listing.state}${deadNote}`,
 			);
 		else
 			console.log(

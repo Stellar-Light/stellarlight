@@ -396,6 +396,7 @@ async function run() {
 	let updated = 0;
 	let skipped = 0;
 	let fetchSkipped = 0; // projects left stale because stellar.expert did not answer
+	let projectReadBackFailed = 0; // onchain writes that did not persist as sent
 	for (const [slug, keys] of bySlug) {
 		const proj = await payload.find({
 			collection: "projects",
@@ -613,6 +614,26 @@ async function run() {
 					},
 				},
 			});
+			// DQ1 review: read back what the status checks depend on. A field
+			// the schema lacks is dropped silently by payload.update (#615).
+			const projectId = (proj.docs[0] as { id: string | number }).id;
+			const back = await payload.findByID({
+				collection: "projects",
+				id: projectId,
+				depth: 0,
+			});
+			const mm = diffWritten(
+				slug,
+				{ asOf, quietSince },
+				// biome-ignore lint/suspicious/noExplicitAny: stored group shape
+				(back as any).onchain,
+				["asOf", "quietSince"],
+			);
+			if (mm.length) {
+				console.error(formatMismatches(mm));
+				projectReadBackFailed += 1;
+				continue;
+			}
 			updated += 1;
 		}
 	}
@@ -694,6 +715,12 @@ async function run() {
 	console.log(
 		`\n${execute ? "Updated" : "Would update"}: ${execute ? updated : bySlug.size - skipped} | skipped: ${skipped} (${fetchSkipped} by fetch failure)`,
 	);
+	if (projectReadBackFailed) {
+		console.error(
+			`RED: ${projectReadBackFailed} project onchain write(s) did not read back as sent (asOf, quietSince).`,
+		);
+		process.exitCode = 1;
+	}
 	if (fetchSkipped) {
 		// A stale row is a silent failure; the run says so with its exit code.
 		console.error(

@@ -247,9 +247,10 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     Done when: merged and deployed; the enrich-tvl and curate-projects lanes
     ran (dry run read first); live, re-checked by someone other than the
     author: every DefiLlama-linked row serves `statusChecks`, Allbridge serves
-    the Allbridge Next description, `llamaSlugs` [allbridge-next], `tvlUSD`
-    null, `routes` null and a clear listing check, and no other row carries a
-    `statusCaveat` unless its DefiLlama protocol is deprecated or dead.
+    the reworded description, `llamaSlugs` [allbridge-next], `tvlUSD` null,
+    `routes` null, derived `supportedNetworks` and a clear listing check, and
+    no other row carries a `statusCaveat` unless DefiLlama dates its protocol
+    dead or retired it with nothing locked and no live successor.
 
 ## Next
 
@@ -383,8 +384,15 @@ Found 2026-10-23 by the dead-protocol guard round
 - Estrela is served Live (basis repo-activity) with Allbridge Core's bridge
   routes copied in curate-projects, but its SCF page (#22 and #35) describes
   Allbridge's Soroban stablecoin AMM (allbridge-io/dex-soroban-contracts, last
-  commit 2025-07-24), not the bridge. The round clears the copied routes; its
-  supportedNetworks (EVM, Solana, Tron, Sui) and its status are unreviewed.
+  commit 2025-07-24), not the bridge. The round clears the copied routes and
+  network matrix (it now serves derived networks, basis scf-award); its
+  identity (a separate product, or a duplicate to fold) and its Live status
+  are unreviewed.
+- The research golden case `bridge-evm-to-stellar` still expects Allbridge as
+  a current EVM to Stellar route, while docs-core.allbridge.io says Stellar
+  support on the relaunched Core is unavailable pending audit (read
+  2026-10-23); the projects-mode case `bridge-solana-to-stellar` was updated
+  in the dead-protocol guard round.
 - Agent-facing text still recommends the Allbridge Core SDK for moving USDC
   from EVM chains to Stellar (`src/lib/stellar-scout-skill.ts`, the Allbridge
   SDK bullet; `src/lib/integrations/curated-skills.ts`, slug allbridge-sdk),

@@ -15,7 +15,8 @@
  *   B  A plus the llamaListing the enrich-tvl lane writes from the captured
  *      DefiLlama list under today's mapping (allbridge -> allbridge-core).
  *   C  B after the Allbridge row fix: llamaSlugs allbridge-next, tvlUSD
- *      null, its listing, the curated description and routes cleared.
+ *      null, its listing, the curated description, routes and networks
+ *      cleared.
  */
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
@@ -36,17 +37,30 @@ type Protocol = {
 	slug: string;
 	deprecated?: boolean | null;
 	deadFrom?: string | null;
+	tvl?: number | null;
+	parentProtocol?: string | null;
 };
 
-function listingOf(slugs: string[], protocols: Map<string, Protocol>) {
-	// The lane's rule (llamaListingOf), restated so this file runs unchanged
-	// on the base commit, where src/lib/status-checks.ts does not exist.
-	const found = slugs
-		.map((s) => protocols.get(s))
-		.filter(Boolean) as Protocol[];
-	const dead = (p: Protocol) => p.deprecated === true || !!p.deadFrom;
+// The lane's rule (llamaListingOf after review), restated so this file runs
+// unchanged on the base commit, where src/lib/status-checks.ts does not exist.
+const retired = (p: Protocol) => p.deprecated === true || !!p.deadFrom;
+function listingOf(slugs: string[], all: Protocol[]) {
+	const bySlug = new Map(all.map((p) => [p.slug, p]));
+	const found = slugs.map((s) => bySlug.get(s)).filter(Boolean) as Protocol[];
+	if (found.some((p) => !retired(p)))
+		return { state: "listed", deadFrom: null };
 	if (!found.length) return { state: "not-found", deadFrom: null };
-	if (!found.every(dead)) return { state: "listed", deadFrom: null };
+	if (found.length < slugs.length) return { state: "partial", deadFrom: null };
+	const liveParents = new Set(
+		all
+			.filter((q) => q.parentProtocol && !retired(q))
+			.map((q) => q.parentProtocol),
+	);
+	const dead = (p: Protocol) =>
+		!!p.deadFrom ||
+		(!(typeof p.tvl === "number" && p.tvl > 0) &&
+			!(p.parentProtocol && liveParents.has(p.parentProtocol)));
+	if (!found.every(dead)) return { state: "superseded", deadFrom: null };
 	const dates = found
 		.map((p) => p.deadFrom)
 		.filter(Boolean)
@@ -54,16 +68,13 @@ function listingOf(slugs: string[], protocols: Map<string, Protocol>) {
 	return { state: "deprecated", deadFrom: dates.at(-1) ?? null };
 }
 
-const protocols = new Map<string, Protocol>(
+const protocols: Protocol[] =
 	scenario === "A"
 		? []
-		: (
-				JSON.parse(readFileSync(env("REPLAY_PROTOCOLS"), "utf8")) as Protocol[]
-			).map((p) => [p.slug, p]),
-);
+		: (JSON.parse(readFileSync(env("REPLAY_PROTOCOLS"), "utf8")) as Protocol[]);
 
 const ALLBRIDGE_FIX =
-	"Allbridge is a cross-chain bridge provider. Its current app, Allbridge Next (next.allbridge.io), lists Stellar beside EVM chains, Solana, Tron and TON. On 2026-07-19 Allbridge Core, the pool-based bridge that brought native USDC swaps to Stellar on Soroban, was exploited for about $1.65M and paused; its liquidity pools were then discontinued, Stellar stays off the relaunched Core pending an audit, and Allbridge is moving its products to Next.";
+	"Allbridge is a cross-chain bridge provider. Its stablecoin bridge, Allbridge Core, brought native USDC transfers to Stellar on Soroban through liquidity pools; Core was exploited for about $1.65M on 2026-07-19 and its pools were discontinued in July 2026. The relaunched Core routes transfers through Circle's CCTP and LayerZero's OFT, and its Stellar support is unavailable pending an audit of the Stellar CCTP implementation. Allbridge also offers a newer bridge, Allbridge Next.";
 
 function docsFor(rows: Doc[]): Doc[] {
 	return rows.map((r) => {
@@ -74,6 +85,7 @@ function docsFor(rows: Doc[]): Doc[] {
 			doc.tvlUSD = null;
 			doc.shortDescription = ALLBRIDGE_FIX;
 			doc.routes = [];
+			doc.supportedNetworks = [];
 			doc.llamaListing = {
 				...listingOf(["allbridge-next"], protocols),
 				checkedAt: CHECKED_AT,

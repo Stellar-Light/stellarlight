@@ -47,29 +47,40 @@ verdict. Two checks, each read from facts the enrich lanes store:
 
 | check | hit | clear | could-not-check |
 | --- | --- | --- | --- |
-| defillama-listing | DefiLlama marks every linked slug deprecated or dead | a linked slug is listed as active | no listing stored yet, or the slug is missing from the list (a rename or removal) |
-| tvl-zero-onchain-quiet (DEX, Lending, Bridge, Yield rows only) | DefiLlama TVL 0 and no tracked contract moved for 60+ days of observed time | TVL above 0, or a contract moved in the latest window | no TVL figure, no tracked contract, contracts not measured, or under 60 days observed |
+| defillama-listing | DefiLlama marks every linked slug dead: a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family | a linked slug is listed as active | no listing stored yet; a slug missing from the list (a rename or removal); a dead slug beside a missing one; a deprecated slug that looks superseded (no deadFrom while value is locked or a family listing is live) |
+| tvl-zero-onchain-quiet (DEX, Lending, Bridge, Yield rows only) | a DefiLlama TVL of 0 read in the last 14 days, and no tracked contract moved for 60+ days of observed time | a fresh TVL above 0, or a contract moved in the latest window | no TVL figure, a TVL reading older than 14 days, no tracked contract, contracts not measured, or under 60 days observed |
 
 A hit on a Live row adds `statusCaveat` (one sentence) and halves
 `statusConfidence`; the status never moves (a dead listing can mean the
 product moved, as here). `statusChecks` and `statusCaveat` appear only on rows
 with a DefiLlama link, so every other row is served byte for byte as before.
 
-The facts: enrich-tvl writes `llamaListing` (state, deadFrom, checkedAt) from
-the full `/protocols` list, refuses a list under 1,000 protocols, and no
-longer writes 0 for a protocol whose TVL DefiLlama serves as null;
-enrich-onchain writes `onchain.quietSince` (start of the run of readings with
-no contract movement, carried across runs). Until those lanes run the new
+Deprecated alone is not a death. DefiLlama also retires listings a successor
+replaced: on 2026-10-23 it listed 909 deprecated protocols, 63 of them still
+holding value (one $2.9B) and 118 with a live sibling under the same
+parentProtocol. Under the rule above, 843 read as dead and 66 as superseded,
+including all 63 that hold value (none of which carries a deadFrom).
+
+The facts: enrich-tvl writes `llamaListing` (state listed, deprecated,
+superseded, partial or not-found; deadFrom; checkedAt) from the full
+`/protocols` list, refuses a list under 1,000 protocols, writes null rather
+than 0 for a retired protocol whose TVL DefiLlama serves as null, and keeps
+the last good figure when a live row comes back without one; enrich-onchain
+writes `onchain.quietSince` (start of the run of readings with no contract
+movement, carried across runs) and reads it back. Until those lanes run the new
 code, every listing check reads could-not-check, and the TVL rule needs 60
 days of readings before it can speak.
 
 ## Results
 
-Captures: the full public corpus (1,005 rows: 848 Live, 8 Pre-Release, 49
-Development, 100 Inactive; apiVersion 1.9.101 at 20:31:35Z and 20:32:06Z, 15
-GETs; sha256 1e0c0182) and the 30 query pages (1.9.101 at 20:59:01Z and
-21:00:28Z; sha256 408895b7). Captures stay in the lane's scratch directory;
-`capture.mjs` and the commands below reproduce them.
+Captures: the full public corpus, first on 1.9.101 (20:31:35Z to 20:32:06Z,
+sha256 1e0c0182) and again after review on 1.9.102 (21:51:42Z to 21:52:15Z,
+sha256 c4d8d1cc), 1,005 rows each time (848 Live, 8 Pre-Release, 49
+Development, 100 Inactive); DefiLlama `/protocols` at 18:04Z (8,807
+protocols) and after review at 21:51Z (8,813, sha256 54f8ddc7); the 30 query
+pages on 1.9.101 (20:59:01Z to 21:00:28Z, sha256 408895b7). Captures stay in
+the lane's scratch directory; `capture.mjs` and the commands below reproduce
+them. The numbers below are the post-review run.
 
 Criterion 1, true positives. Sweep (`sweep.mts`, output `sweep.json`) with
 the listing the enrich-tvl lane would write under today's mapping: 18 rows
@@ -99,23 +110,32 @@ gain `statusChecks` and `statusCaveat`; only Allbridge in B changes
 `statusConfidence` (0.9 to 0.45). Pass.
 
 Criterion 4, trinary: `src/lib/__tests__/status-checks.test.ts` pins each
-could-not-check path (no listing, slug not found, null TVL, no contracts,
-contracts not measured, 59 days of silence). Tests failed first on the base
-(`failing-first.txt`).
+could-not-check path (no listing, slug not found, a dead slug beside a
+missing one, a superseded slug including the review's Live DEX with $35M
+locked, null TVL, a TVL reading older than 14 days, no contracts, contracts
+not measured, 59 days of silence) and the one-run TVL gap. Tests failed
+first, on the base and again for the review fixes (`failing-first.txt`).
 
 After the Allbridge fix (scenario C: mapping allbridge-next, tvlUSD null,
-the curated description, routes cleared), Allbridge's listing check is clear,
-its TVL check could-not-check, no caveat, statusConfidence 0.9.
+the curated description, routes and networks cleared), Allbridge's listing
+check is clear, its TVL check could-not-check, no caveat, statusConfidence
+0.9. For "solana to stellar bridge" it moves from rank 1 to rank 19 of 20
+(the chain-corridor rule, now that its networks no longer claim Solana); the
+top 5 are axelar, circle-cctp, rozo, usdc-swap and rubic, so the golden case
+`bridge-solana-to-stellar` drops its "allbridge" expectation (re-baselined in
+`scripts/eval/eval-baselines.json`).
 
 ## The class beyond the guard
 
 The guard sees only DefiLlama-linked rows. The same dead product reaches the
 API elsewhere:
 
-- `estrela` (Live, basis repo-activity) carried Allbridge Core's bridge routes,
-  copied in curate-projects on the belief that Estrela is Core; its SCF page
-  (#22 and #35) describes Allbridge's Soroban stablecoin AMM. This change
-  clears the copied routes; its networks and status are left for review.
+- `estrela` (Live, basis repo-activity) carried Allbridge Core's bridge routes
+  and network matrix, copied in curate-projects on the belief that Estrela is
+  Core; its SCF page (#22 and #35) describes Allbridge's Soroban stablecoin
+  AMM. This change clears both, so its networks serve the derived basis
+  (scf-award) instead of a curated claim; its identity and status are left
+  for review.
 - The served skill recommends the Allbridge Core SDK for EVM to Stellar USDC
   (`src/lib/stellar-scout-skill.ts`; `src/lib/integrations/curated-skills.ts`
   slug allbridge-sdk), while Core on Stellar is unavailable.

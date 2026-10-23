@@ -1160,7 +1160,13 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	// synonym layer (ethereum/polygon/base/bnb/arbitrum → evm).
 	// This list is EXACT-SYNC for its slugs (see apply loop): the canonical
 	// place to update a listed project's networks is HERE, not the admin.
-	allbridge: ["stellar", "evm", "solana", "tron", "sui"], // docs-core.allbridge.io + live SRB USDC pool on core API
+	// Lane DQ1 (2026-10-23): empty = exact-sync clears the curated matrix,
+	// so the row serves its derived evidence (onchain-activity: contracts on
+	// Stellar) with networksBasis saying so. The old matrix came from Core's
+	// pool API, which ended in July 2026; docs-core now lists EVM chains,
+	// Tron, Solana, Sui and Stacks, with Stellar unavailable pending audit,
+	// and the operator states no Stellar route for Allbridge Next.
+	allbridge: [],
 	"circle-cctp-cross-chain-transfer-protocol": [
 		"stellar", // CCTP V2 domain 27 (standard transfer)
 		"evm",
@@ -1199,7 +1205,11 @@ const SUPPORTED_NETWORKS: Record<string, string[]> = {
 	"bim-exchange": ["evm"], // bim.finance: swap/bridge interface aggregating Kyberswap/Bungee — EVM aggregator stacks; no non-EVM chain named
 	"usdc-swap": ["stellar", "evm", "solana"], // usdcswap.com sitemap: STE↔ETH/ARB/OPT/BASE/POL/AVA/SOL routes; Circle CCTP + horizon in app bundle
 	houdiniswap: ["stellar", "evm", "solana", "bitcoin", "tron"], // app.houdiniswap.com token picker: XLM/USDC-on-Stellar verified live; BTC/ETH/SOL/TRON named
-	estrela: ["stellar", "evm", "solana", "tron", "sui"], // Estrela = Allbridge Core (SCF #22; links → allbridge.io); docs-core.allbridge.io chain list
+	// Not reviewed (TODO): the matrix was copied from Allbridge Core, but
+	// Estrela's SCF page describes a Soroban stablecoin AMM. Empty until
+	// reviewed, so its served networks are derived (basis scf-award), never
+	// claimed as curated.
+	estrela: [],
 	rarible: ["evm"], // sls-037 precision fix: SCF award + Rarible STELLAR schema enum establish the RELATIONSHIP, but public Stellar support is not verifiable on Rarible's live API/UI (Tyler GT-19 blind lane + our recheck) — evm only until it is; the award/integration story lives in prose+statusSourceUrl, not the deployment field
 	// sls-029 oracle network evidence (Live oracles with EMPTY networks made
 	// materially different deployment claims look equivalent). Both rows below
@@ -1275,7 +1285,7 @@ const ROUTES_SET: Record<string, CuratedRoute[]> = {
 	// July 2026 and Stellar is unavailable on the relaunched, CCTP-based Core
 	// pending audit (read 2026-10-23, lane DQ1). Empty = exact-sync clears the
 	// stored rows, served as routes null (not curated), not as route-free.
-	// Allbridge Next's Stellar routes are not curated yet. estrela carried a
+	// The operator states no Stellar route for Allbridge Next. estrela carried a
 	// copy of the Core matrix, but its SCF page (SCF #22 and #35, read
 	// 2026-10-23) describes Allbridge's Soroban stablecoin AMM
 	// (allbridge-io/dex-soroban-contracts), not the Core bridge: the copied

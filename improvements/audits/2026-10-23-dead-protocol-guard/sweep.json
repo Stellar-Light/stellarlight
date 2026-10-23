@@ -1,12 +1,12 @@
 {
 	"corpus": {
 		"start": {
-			"apiVersion": "1.9.101",
-			"at": "2026-10-23T20:31:35.224885Z"
+			"apiVersion": "1.9.102",
+			"at": "2026-10-23T21:51:42.409364Z"
 		},
 		"end": {
-			"apiVersion": "1.9.101",
-			"at": "2026-10-23T20:32:06.211491Z"
+			"apiVersion": "1.9.102",
+			"at": "2026-10-23T21:52:15.394639Z"
 		},
 		"rows": 1005,
 		"byStatus": {
@@ -17,7 +17,7 @@
 		}
 	},
 	"defillama": {
-		"protocols": 8807,
+		"protocols": 8813,
 		"stellarChain": 44,
 		"stellarChainDeprecatedOrDead": [
 			{
