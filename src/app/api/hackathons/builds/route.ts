@@ -28,6 +28,7 @@ import {
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
+	wordsNoBuildUses,
 } from "@/lib/hackathon-builds";
 import { heldSecurity } from "@/lib/held-repos";
 import { clampLimit, clampOffset } from "@/lib/http-params";
@@ -115,6 +116,25 @@ export async function GET(req: NextRequest) {
 		countEntries: true,
 	});
 	warnings.unshift(...parsed.warnings);
+	// Most of q's words in no submission: a build listed by its words alone
+	// matches only part of q. One found by meaning was scored on all of it.
+	const unused =
+		q && scored.some((s) => s.matched.length && s.similarity === undefined)
+			? wordsNoBuildUses(indexed, q)
+			: null;
+	if (unused && unused.absent.length * 2 > unused.concepts) {
+		const { absent, concepts } = unused;
+		const words = `searched in q (${absent.join(", ")})`;
+		// Every word in no submission: a words-alone build holds them only
+		// inside longer words ("1 of the 1 words ... part of q" said less).
+		warnings.push(
+			absent.length < concepts
+				? `${absent.length} of the ${concepts} words ${words} occur as a whole word in no submission in the index (a matchedTerms entry naming one was found inside a longer word), so a build listed by its words alone, with no similarity, matches only part of q and is not evidence that this idea was built`
+				: concepts === 1
+					? `the word ${words} occurs as a whole word in no submission in the index: a build listed by its words alone, with no similarity, holds it only inside a longer word and is not evidence that this idea was built`
+					: `none of the ${concepts} words ${words} occurs as a whole word in any submission in the index: a build listed by its words alone, with no similarity, holds them only inside longer words and is not evidence that this idea was built`,
+		);
+	}
 
 	const builds = scored
 		.slice(offset, offset + limit)

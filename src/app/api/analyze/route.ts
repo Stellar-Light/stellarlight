@@ -7,7 +7,7 @@
  *   GET /api/analyze?dimension=funding        — SCF funding distribution
  *   GET /api/analyze?dimension=tvl            — DeFi TVL rollup (DefiLlama)
  *
- * Mirrors Colosseum Copilot's /analyze. Returns the macro picture that
+ * Returns the macro picture that
  * `/api/hackathons/{slug}` (single-event detail) and `/api/clusters`
  * (project clustering) can't answer alone:
  *

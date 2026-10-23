@@ -3,8 +3,7 @@ import { adminOnly } from "./access";
 
 /**
  * ScoutFeedback — write-only public ingestion of feedback from agents
- * running the stellar-scout skill. Mirrors Colosseum Copilot's /feedback
- * endpoint pattern so the skill has a built-in error-reporting and
+ * running the stellar-scout skill, so the skill has a built-in error-reporting and
  * quality-signal loop, not a separate GitHub-issues workflow.
  *
  * Submission shape (from POST /api/feedback):

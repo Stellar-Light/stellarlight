@@ -3486,6 +3486,8 @@ export const spec: OpenAPISpec = {
 											type: "array",
 											items: {
 												type: "object",
+												description:
+													"Every row carries prizePoolUSD, hackersCount, submissionCount and winnerCount; null means no source gave the value (could not check), never zero.",
 												properties: {
 													slug: { type: "string" },
 													name: { type: "string" },
@@ -3497,21 +3499,31 @@ export const spec: OpenAPISpec = {
 														type: "number",
 														nullable: true,
 														description:
-															"null when the source publishes none: unknown, never zero.",
+															"null when the source publishes none (a 0 counts as none): unknown, never zero.",
 													},
 													source: {
 														type: "string",
 														description:
 															"curated, dorahacks or not-found: where the event's row came from, as getHackathons labels it: curated (a hand-kept event) or dorahacks. not-found = no listing holds the slug; when the listing could not be read, deltas.notes says so and the miss is unchecked.",
 													},
-													hackersCount: { type: "integer", nullable: true },
+													hackersCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Registered hackers, from the event listing. null when the listing publishes none (a 0 counts as none) or the row comes from a curated event record, which carries none: unknown, never zero.",
+													},
 													submissionCount: {
 														type: "integer",
 														nullable: true,
 														description:
-															"Curated events: directory projects tied to the event. DoraHacks events: stored submissions. Absent when neither is held; deltas.notes then names the event, and absent is not zero.",
+															"Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event.",
 													},
-													winnerCount: { type: "integer", nullable: true },
+													winnerCount: {
+														type: "integer",
+														nullable: true,
+														description:
+															"Winners, on the same basis as submissionCount. null when neither is held: could not check, never zero.",
+													},
 													prizePerWinnerUSD: { type: "number", nullable: true },
 													stillActiveCount: {
 														type: "integer",
@@ -3620,7 +3632,7 @@ export const spec: OpenAPISpec = {
 				},
 				parameters: [
 					...buildFilterParams(
-						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup).",
+						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when its name holds one of q's words or it covers half of them, and a word of four letters or more also matches inside a longer word, so one word of a longer q can list a build; when most of q's words occur as a whole word in no submission and a build is listed by its words alone, meta.warnings says so.",
 						"hybrid",
 					),
 					{
@@ -3685,7 +3697,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), or the event listing could not be read to check a hackathon value ('could not check hackathon ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built.",
+														"Present only when something limited this answer: search by meaning could not run, a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or most of the words searched in q occur as a whole word in no submission while a build is listed by its words alone ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built; the q line means a build listed by its words alone, with no similarity, matches only part of q and is not evidence that the idea was built.",
 												},
 												filters: BUILD_FILTERS_ECHO_SCHEMA,
 												counts: {

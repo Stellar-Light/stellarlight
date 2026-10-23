@@ -1,0 +1,40 @@
+diff --git a/src/lib/hackathon-builds.ts b/src/lib/hackathon-builds.ts
+index e170e5fc..a282abf2 100644
+--- a/src/lib/hackathon-builds.ts
++++ b/src/lib/hackathon-builds.ts
+@@ -618,7 +618,10 @@ const QUERY_FILLER = new Set(["like", "similar"]);
+ /** A term of three letters or fewer ("ai", "zk", "nft") matches as a whole
+  * word only: as a substring, "ai" hit every "chain", "paid" and "maintain". */
+ function termMatcher(v: string): (hay: string) => boolean {
+-	if (v.length > 3) return (hay) => hay.includes(v);
++	return v.length > 3 ? (hay) => hay.includes(v) : wholeWord(v);
++}
++
++function wholeWord(v: string): (hay: string) => boolean {
+ 	const escaped = v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+ 	const re = new RegExp(`\\b${escaped}\\b`);
+ 	return (hay) => re.test(hay);
+@@ -729,8 +732,13 @@ export function searchHackathonBuilds(
+ 			variants: [...expandBuildTerm(t), ...joined].map(termMatcher),
+ 			// The word as typed, without synonyms: what textShare reads.
+ 			own: [...wordForms(t), ...joined].map(termMatcher),
++			whole: [...expandBuildTerm(t), ...joined].map(wholeWord),
+ 		};
+ 	});
++	const absent = terms.filter(
++		({ whole }) => !indexed.some((b) => whole.some((hit) => hit(b.haystack))),
++	).length;
++	const namesAdmit = absent * 2 <= terms.length;
+ 	const hay = new Map(
+ 		opts.packages ? pool.map((b) => [b, withPackages(b)] as const) : [],
+ 	);
+@@ -770,7 +778,8 @@ export function searchHackathonBuilds(
+ 		}
+ 		if (
+ 			score > 0 &&
+-			(nameMatched || matched.size >= Math.ceil(tokens.length / 2))
++			((nameMatched && namesAdmit) ||
++				matched.size >= Math.ceil(tokens.length / 2))
+ 		) {
+ 			score += b.isWinner ? 2 : 0;
+ 			score += Math.min(b.voteCount ?? 0, 20) * 0.05;

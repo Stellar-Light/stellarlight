@@ -166,3 +166,227 @@ author's.
     a known ceiling for a later guard.
   - The exclusion test also passes on base.
   - The committed replay files are slimmed.
+
+## Lane L: nonsense queries should find nothing
+
+### Scope
+
+Problem 1 above, with lane K's unmeasured lead: turn a name match off when
+most of the query's words appear in no build as whole words. Judged on a
+fresh battery written by a separate agent that was told no rule.
+
+| lane | model and effort | write set | output |
+| --- | --- | --- | --- |
+| L: nonsense queries | Claude Opus 5.5, xhigh | own worktree, branch `lane/l-nonsense-queries`: `src/lib/hackathon-builds.ts`, its tests, spec text, changelog, version, `improvements/audits/2026-10-23-nonsense-queries/`, this ledger | a commit on the branch, not pushed |
+
+### Ship criteria (fixed in the brief, before any result)
+
+- (a) Recall: on all 140 labeled ideas, keyword and hybrid, on the builds
+  route, no build graded 2 leaves the matched list or the top 20.
+- (b) Shared code: if the rule touches shared code, vetIdea's five and
+  hackathonBrief's picks are identical to the base on all 140 ideas, or no
+  build graded 2 leaves them.
+- (c) Nonsense: on the fresh battery, the builds returned fall by at least
+  half, and at least 12 of 24 queries return 0, in keyword and in hybrid.
+- (d) Probe: `quantum llama sandwich` returns 0 in keyword mode.
+- Everything lost and gained named. If no rule meets (a) to (d), an
+  honesty-only meta note may ship instead, with (c) reported as not met.
+
+### Log
+
+- 2026-10-23 (lane L): `git fetch origin main && git switch -c
+  lane/l-nonsense-queries origin/main`; HEAD 44407222 (spec 1.9.93).
+  `pnpm install --frozen-lockfile --prefer-offline`: exit 0;
+  `pnpm generate:importmap`: exit 0.
+- Fresh battery `nonsense-fresh.frozen.json` (24 queries: 8 plain, 8 with one
+  tech word, 8 with a Stellar or payments word; written by Claude Sonnet 5.5,
+  told no rule; frozen 2026-10-23T02:09:22Z) copied unchanged, sha256
+  `bcf55577f7671d057e5e140a82073715ac8315434992424b587dc294256dc60a`.
+- `node improvements/audits/2026-10-23-nonsense-queries/capture.mjs
+  <scratch>/fresh-live.json` started (2 s apart, read-only); its log prints
+  progress only, and no fresh result was read before the rule below was
+  fixed.
+- Base replay of lane K's capture (1.9.91, 1,344 submissions, 140 ideas) with
+  this tree's code (1.9.93): `replay.mts <live.json> base`. Parity with the
+  1.9.91 live answers is lower than lane K's (keyword matched 127 of 140)
+  because 1.9.93 matches packages on the builds route; before and after are
+  both this tree's code on the same capture.
+- Rule L, written once, before any fresh result was read
+  (2026-10-23T02:15Z): a query concept is absent when none of its forms
+  (plural or singular, synonyms, a hyphenated phrase spaced or joined)
+  occurs as a whole word in any build's text (name, description, track,
+  award) across the whole index, not the filtered pool. When more than half
+  of the concepts are absent, a name match no longer admits a build alone;
+  it needs half of the concepts like any other build. One threshold, "more
+  than half", read from the lead's "most". In the shared scorer, so vetIdea,
+  hackathonBrief and analyze get it too. A one- or two-concept query cannot
+  change: half of it is one concept, which any match covers.
+- Rule L on lane K's capture (`compare.mts`): grade-2 builds lost from the
+  matched list, top 20 or top 5, any set, either mode: 0; grade 1: 0.
+  vetIdea's five and the brief's picks differ from the base for 0 of 140
+  ideas; the plain rankings for 1 (i31 "loyalty points issued as tokens":
+  Stellar Health Point, graded 0, leaves keyword and hybrid; loyalty and
+  issued occur in no build). Lane K's battery 20 -> 9 keyword, 21 -> 10
+  hybrid (reported, not deciding). Probe 2 -> 0 in both modes.
+- Fresh capture done: corpus 1,344, 25 queries (the 24 and the probe), 55
+  pages, every one 200, every hybrid request served hybrid; apiVersion
+  1.9.93 at 02:13:07Z and 1.9.93 at 02:15:48Z. Base replay against these
+  live answers: matched count equal on 25 of 25 in both modes, keyword order
+  25 of 25, hybrid order 21 of 25 (close-score swaps).
+- Rule L on the fresh battery (`compare.mts`, base -> rule L): builds
+  returned, keyword 538 -> 436 (down 19%), hybrid 683 -> 584 (down 14%);
+  queries returning 0, keyword 9 -> 17, hybrid 9 -> 15. Probe 2 -> 0 in both
+  modes. (c) is not met: the total does not fall by half. What remains is
+  not name matches: 132 builds match only "pay" for "pay per yodel" (two
+  concepts, so half is one word, which no rule of this kind can change),
+  144 match "zero" and "knowledge" for "zero knowledge pogo stick" and 67
+  "smart" and "contract" for "smart contract hamster wheel" (half of four
+  concepts, admitted by the half rule, not a name).
+- Decision: rule L meets (a), (b) and (d) but not (c), so it does not ship.
+  No other rule is tried: any rule written now would be written after
+  reading the fresh battery. Its diff and both comparisons are kept in
+  `../audits/2026-10-23-nonsense-queries/rule-l/`. Fallback per the brief:
+  an honesty-only change on the builds route that alters no row, a
+  meta.warnings line when most of the query's concepts occur in no build as
+  whole words, with (c) reported as not met.
+- Honesty-only change: `wordsNoBuildUses` (the concepts of q no build in the
+  index uses as a whole word, text or declared packages) and a builds-route
+  meta.warnings line when they are more than half of q's concepts. The term
+  building moved into `queryTerms`, shared with the scorer. A first draft
+  fired whenever rows were listed; on i31 in hybrid mode it would have said
+  that Loyal Local (graded 2, found by meaning) was not evidence. The line
+  now fires only when a build is listed by its words alone (matchedTerms, no
+  similarity), and says it covers only those.
+- Tests first (`npx vitest run
+  src/app/api/hackathons/builds/__tests__/route.test.ts -t "most of q matches
+  no build"`), with the base `hackathon-builds.ts` and builds route: 2
+  failed (`expected undefined to deeply equal [ Array(1) ]`; `.toMatch()
+  expects to receive a string, but got undefined`), 2 passed (the silent
+  cases). With the change: 11 of 11 in the file pass.
+- Replay with the change against the base on both captures: identical, every
+  field of every ranking (140 ideas: the builds route in both modes,
+  vetIdea's five, the brief's picks, the prior-art rankings' hash; 25 fresh
+  queries; lane K's extra queries).
+- Where the line fires (`note.mts`): fresh battery 9 of the 15 queries that
+  list builds, in keyword and hybrid; the probe; lane K's battery 6 of 7
+  keyword and 6 of 8 hybrid; labeled ideas 1 of 140 (i31, whose only
+  words-alone build, Stellar Health Point, is graded 0).
+- Spec 1.9.94: the builds `q` text says a name holding one of q's words lists
+  a build and a word of four letters or more matches inside a longer word;
+  meta.warnings names the new line. Changelog entry. `pnpm contract:write`:
+  exit 0.
+- The battery file is committed as `nonsense-fresh.frozen.json.txt`, bytes
+  unchanged (sha256 above): biome reformats `.json` and ignores `.txt`.
+
+### Outcome (lane L)
+
+- Rule L, the row-dropping rule, is not shipped: (a), (b) and (d) met, (c)
+  not met (538 -> 436 keyword, 683 -> 584 hybrid; 17 and 15 of 24 at 0).
+- Shipped on branch `lane/l-nonsense-queries` (committed, not pushed), spec
+  1.9.94: the honesty-only meta.warnings line, no row changed. Against the
+  criteria: (a) met, (b) met, (c) not met, (d) not met (the probe still lists
+  2, now with the line).
+- Not verified live: nothing is deployed from this lane.
+- Evidence: `../audits/2026-10-23-nonsense-queries/README.md`.
+
+### Lane L, second commit: compareHackathons counts as null (same spec, 1.9.94)
+
+- Found live on 1.9.93 (orchestrator):
+  `/api/hackathons/compare?slugs=stellar-hacks-zk,hackmeridian-2025` gives
+  stellar-hacks-zk `submissionCount` 319, and the hackmeridian-2025 row has
+  no such key, while deltas.notes calls the counts "absent, not zero".
+- Cause: a listed event with no stored submissions and no curated event
+  record gets no count from any source, and the route left the keys out.
+  prizePoolUSD and hackersCount were left out for the same reason (the event
+  listing publishes none, a 0 read as none, or the row comes from a curated
+  event record, which carries neither), so they get the same treatment.
+  stillActiveCount, liveCount and activeRatePct (curated only) and
+  prizePerWinnerUSD (derived) are left out where they do not apply, a
+  different reason, and are unchanged.
+- Tests first (`npx vitest run
+  src/app/api/hackathons/analyze/__tests__/route.test.ts -t "compare:
+  curated events"`), base route: 1 failed (`submissionCount: expected {
+  slug: 'hackmeridian-2025', ...(6) } to have property "submissionCount"
+  with value null`, received undefined), 2 passed. With the change: 13 of 13
+  in the file pass. The old assertion that the key is undefined was removed.
+- Change: every row carries submissionCount, winnerCount, prizePoolUSD and
+  hackersCount, null when no source gave the value; the deltas note now says
+  "null, not zero". Spec: the row description says so, hackersCount and
+  winnerCount gain descriptions of null, submissionCount's says null instead
+  of absent. Skill reference (`public/skills/references/api-reference.md`):
+  the compare paragraph said the keys are absent; it now says null.
+  Changelog: a line in the 1.9.94 entry.
+- Live baseline before deploy (read-only GET, apiVersion 1.9.93,
+  2026-10-23T12:10:07Z):
+  `/api/hackathons/compare?slugs=hackmeridian-2025,hackmeridian-2026`:
+  hackmeridian-2025 has no submissionCount, winnerCount or prizePoolUSD key
+  (hackersCount 400); hackmeridian-2026 has no submissionCount, winnerCount
+  or hackersCount key (prizePoolUSD 30000); deltas.notes names both as
+  absent, not zero.
+- Live check to run after deploy: on the same URL, both rows carry
+  submissionCount and winnerCount as keys, null for hackmeridian-2025.
+  hackmeridian-2026 has no stored submissions today either, so it will
+  also show null unless they are stored by then.
+
+## Live verification of #1857 (orchestrator's check)
+
+- 1.9.93 was live at 02:11:24Z on 2026-10-23.
+- `/api/hackathons/builds?q=passkey&winnersOnly=1&mode=keyword` lists Tukar
+  and "DeFi Quest - From Zero to DeFi in Minutes", each with matchedTerms
+  passkey; it was empty on 1.9.92.
+- meta.counts shows matched 2 and entries 2.
+- vetIdea's priorArt.builds for "passkey wallet", "soroban sdk" and
+  "stablecoin wallet for remittances" equals the 1.9.92 capture, id for id.
+
+### Lane L review (Claude Fable 5.1, effort high, fresh context)
+
+- GATE: fix. Verified: the term-building refactor is byte-identical, the
+  trigger logic, the compare keys on every row, and that each test fails
+  with its fix reverted. Four findings, all fixed in a fourth commit on top
+  of the orchestrator's comment-only third commit (87be134e):
+  1. Medium: the warning could say something false. Its whole-word test
+     used the scorer's `\b`, ASCII-only and needing a word character beside
+     the token, while the scorer admits a token of four or more letters by
+     substring. `q=agents, payments` lists Agent Pay with matchedTerms
+     ["agents,", "payments"] yet reported "agents," absent; "café" the same;
+     `q=AI agents, payments, café` fired the line with both clauses false.
+     Fix, in the warning path only: a form counts as used when it occurs
+     with no letter or digit on either side (Unicode lookarounds), edge
+     punctuation dropped. termMatcher is back to its base text; rankings
+     do not change.
+  2. Low: prizePoolUSD's description gains "(a 0 counts as none)": the
+     listing's 0 pool is served as null.
+  3. Low: the skill reference said an event with no stored submissions has
+     null counts; a curated record serves directory counts, a real 0
+     included. It now says "no stored submissions and no curated record".
+  4. Low: for a one-word q the line said "1 of the 1 words ... matches only
+     part of q". When every word is in no submission it now says "the word
+     searched in q (...) ... holds it only inside a longer word", or "none
+     of the <m> words ... holds them only inside longer words".
+- Tests first, against 87be134e: `npx vitest run
+  src/lib/__tests__/hackathon-builds.test.ts -t "words no build uses"`: 2
+  failed (`expected { absent: [ 'agents,', 'café' ], ...(1) } to deeply
+  equal { absent: [], concepts: 2 }`; `expected { absent: [ 'gents',
+  'cafés' ], ...(1) } to deeply equal { absent: [ 'gents' ], concepts: 3
+  }`). `npx vitest run src/app/api/hackathons/builds/__tests__/route.test.ts
+  -t "most of q matches no build"`: 2 failed (`expected [ Array(1) ] to be
+  undefined` for `AI agents, payments, café`; the one-word line received
+  "1 of the 1 words searched in q (nread) ..."), 4 passed. With the fixes:
+  58 of 58 in the two files pass.
+- Replay with the fixes on lane K's capture (140 ideas) and the fresh
+  capture: every ranking identical to the base; `note.mts` output identical
+  to the committed `note-fresh.txt` and `note-labeled.txt`, so where the
+  line fires did not change anywhere measured.
+- Spec: prizePoolUSD clause; meta.warnings names the all-absent wordings.
+  Changelog 1.9.94: the wordings and the whole-word rule.
+- Re-check (same reviewer) of db1ff05d: GATE: push. Rankings cannot move,
+  since termMatcher is byte-identical to base. Every earlier probe now
+  reports nothing absent.
+  - One low residual: a token with no letter or digit ("!!!") counted as a
+    word and read as absent through its plural form, so q=`agents !!! ???`
+    would warn about "2 of the 3 words".
+  - Fixed by the orchestrator: wordsNoBuildUses drops such tokens before
+    counting.
+  - Test first: `wordsNoBuildUses(pool, "agents !!! ???")` gave absent
+    ['!!!', '???'] on db1ff05d, and absent [] with 1 concept after the fix.
+    The two touched test files pass (59).

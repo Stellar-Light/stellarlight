@@ -624,6 +624,85 @@ function termMatcher(v: string): (hay: string) => boolean {
 	return (hay) => re.test(hay);
 }
 
+/** A form as a whole word in any script, edge punctuation dropped ("agents,"
+ * is agents), or null for a form with no letter or digit. `\b` is ASCII-only
+ * and needs a word character beside the form, so it called "agents," and
+ * "café" in no build while the scorer, matching them by substring, listed
+ * builds that hold them (review, 2026-10-23). The warning reads this; the
+ * scorer's own matching is unchanged. */
+function anyScriptWord(v: string): ((hay: string) => boolean) | null {
+	const core = v.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+	if (!core) return null;
+	const escaped = core.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+	const re = new RegExp(`(?<![\\p{L}\\p{N}])${escaped}(?![\\p{L}\\p{N}])`, "u");
+	return (hay) => re.test(hay);
+}
+
+/** The concepts a query is searched by: its words less query filler and the
+ * generic words every submission says, each with the forms it matches. */
+function queryTerms(query: string) {
+	const raw = [
+		...new Set(
+			contentTokens(query).filter(
+				(t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t),
+			),
+		),
+	];
+	// A hyphenated phrase is one concept: "pay-per-call" also matches
+	// "pay per call" and "paypercall", and its parts stop counting on their
+	// own (they made one phrase weigh three times).
+	const parts = new Set(
+		raw.filter((t) => t.includes("-")).flatMap((t) => t.split("-")),
+	);
+	return raw
+		.filter((t) => !parts.has(t))
+		.map((t) => {
+			const joined = t.includes("-")
+				? [t.replace(/-/g, " "), t.replace(/-/g, "")]
+				: [];
+			const forms = [...expandBuildTerm(t), ...joined];
+			return {
+				t,
+				forms,
+				variants: forms.map(termMatcher),
+				// The word as typed, without synonyms: what textShare reads.
+				own: [...wordForms(t), ...joined].map(termMatcher),
+			};
+		});
+}
+
+/**
+ * The concepts of `q` that no build in `indexed` uses as a whole word in any
+ * form (plural or singular, synonym, phrase spaced or joined) in its text or
+ * declared packages, and how many concepts `q` has. The builds route warns
+ * when they are most of q and keeps its rows. Dropping name matches in that
+ * case (2026-10-23) emptied "quantum llama sandwich" and lost no labeled
+ * same-idea build, but cut a fresh 24-query nonsense battery's builds by
+ * only 19% (538 to 436): most of the rest match half of q's concepts, or one
+ * word of a two-word q. On 140 labeled ideas the warning fires for one, whose
+ * only build listed by words alone is graded not the idea.
+ */
+export function wordsNoBuildUses(
+	indexed: IndexedBuild[],
+	q: string,
+): { absent: string[]; concepts: number } {
+	// A token with no letter or digit ("!!!") is not a word: it neither counts
+	// as one nor reads as absent.
+	const terms = queryTerms(q.trim().toLowerCase()).filter(({ t }) =>
+		/[\p{L}\p{N}]/u.test(t),
+	);
+	const hays = indexed.map(withPackages);
+	const absent = terms
+		.filter(({ forms }) => {
+			const hits = forms.flatMap((f) => anyScriptWord(f) ?? []);
+			return (
+				hits.length > 0 && !hays.some((hay) => hits.some((hit) => hit(hay)))
+			);
+		})
+		.map(({ t }) => t);
+	return { absent, concepts: terms.length };
+}
+
 /**
  * Score + rank builds for a topic query. Prior-art favors RECALL (a missed
  * existing build is the costly error): a NAME match always surfaces (on
@@ -706,31 +785,7 @@ export function searchHackathonBuilds(
 			}))
 			.sort((a, b) => b.score - a.score);
 	}
-	const raw = [
-		...new Set(
-			contentTokens(query).filter(
-				(t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t),
-			),
-		),
-	];
-	// A hyphenated phrase is one concept: "pay-per-call" also matches
-	// "pay per call" and "paypercall", and its parts stop counting on their
-	// own (they made one phrase weigh three times).
-	const parts = new Set(
-		raw.filter((t) => t.includes("-")).flatMap((t) => t.split("-")),
-	);
-	const tokens = raw.filter((t) => !parts.has(t));
-	const terms = tokens.map((t) => {
-		const joined = t.includes("-")
-			? [t.replace(/-/g, " "), t.replace(/-/g, "")]
-			: [];
-		return {
-			t,
-			variants: [...expandBuildTerm(t), ...joined].map(termMatcher),
-			// The word as typed, without synonyms: what textShare reads.
-			own: [...wordForms(t), ...joined].map(termMatcher),
-		};
-	});
+	const terms = queryTerms(query);
 	const hay = new Map(
 		opts.packages ? pool.map((b) => [b, withPackages(b)] as const) : [],
 	);
@@ -770,7 +825,7 @@ export function searchHackathonBuilds(
 		}
 		if (
 			score > 0 &&
-			(nameMatched || matched.size >= Math.ceil(tokens.length / 2))
+			(nameMatched || matched.size >= Math.ceil(terms.length / 2))
 		) {
 			score += b.isWinner ? 2 : 0;
 			score += Math.min(b.voteCount ?? 0, 20) * 0.05;
@@ -783,8 +838,8 @@ export function searchHackathonBuilds(
 				score,
 				matched: [...matched],
 				coverage,
-				share: matched.size / (tokens.length || 1),
-				textShare: inText.size / (tokens.length || 1),
+				share: matched.size / (terms.length || 1),
+				textShare: inText.size / (terms.length || 1),
 			});
 		}
 	}

@@ -1,0 +1,84 @@
+before: base; after: L
+capture: api 1.9.91 -> 1.9.91, 2026-10-23T01:14:29.183Z to 2026-10-23T01:24:27.460Z; corpus 1344
+
+== Labeled builds graded 2 (same idea): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 99 | 58 -> 58 | 51 -> 51 | 27 -> 27
+40 working | hybrid | 99 | 95 -> 95 | 78 -> 78 | 45 -> 45
+40 holdout | keyword | 19 | 8 -> 8 | 8 -> 8 | 7 -> 7
+40 holdout | hybrid | 19 | 16 -> 16 | 15 -> 15 | 11 -> 11
+short | keyword | 73 | 71 -> 71 | 70 -> 70 | 62 -> 62
+short | hybrid | 73 | 73 -> 73 | 73 -> 73 | 71 -> 71
+tests | keyword | 3 | 1 -> 1 | 1 -> 1 | 1 -> 1
+tests | hybrid | 3 | 3 -> 3 | 3 -> 3 | 3 -> 3
+fresh | keyword | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+fresh | hybrid | 0 | 0 -> 0 | 0 -> 0 | 0 -> 0
+  nothing lost or gained
+
+== Labeled builds graded 1 (related): found in the matched list, top 20, top 5 ==
+set | mode | labeled | matched before -> after | top 20 | top 5
+40 working | keyword | 249 | 105 -> 105 | 83 -> 83 | 48 -> 48
+40 working | hybrid | 249 | 214 -> 214 | 146 -> 146 | 64 -> 64
+40 holdout | keyword | 100 | 42 -> 42 | 41 -> 41 | 26 -> 26
+40 holdout | hybrid | 100 | 82 -> 82 | 71 -> 71 | 33 -> 33
+short | keyword | 65 | 61 -> 61 | 54 -> 54 | 48 -> 48
+short | hybrid | 65 | 65 -> 65 | 65 -> 65 | 60 -> 60
+tests | keyword | 6 | 4 -> 4 | 4 -> 4 | 4 -> 4
+tests | hybrid | 6 | 6 -> 6 | 6 -> 6 | 6 -> 6
+fresh | keyword | 15 | 9 -> 9 | 9 -> 9 | 9 -> 9
+fresh | hybrid | 15 | 15 -> 15 | 15 -> 15 | 15 -> 15
+  nothing lost or gained
+
+== vetIdea's five and the brief's picks (hybrid), every change ==
+ideas that differ from before, of 140: vetIdea's five 0, the brief's picks 0, the plain rankings prior art and analyze read (every row and field) 1
+
+== nonsense: builds returned, before -> after ==
+purple elephant trampoline | keyword | 0 -> 0
+purple elephant trampoline | hybrid | 0 -> 0
+volcano knitting subscription | keyword | 1 -> 0 | removed: FixedRateX Tagline: A Stellar-powered payment gateway for cr [subscription]
+volcano knitting subscription | hybrid | 1 -> 0 | removed: FixedRateX Tagline: A Stellar-powered payment gateway for cr [subscription]
+haunted spoon orchestra | keyword | 1 -> 0 | removed: StellarOrchestra [orchestra]
+haunted spoon orchestra | hybrid | 1 -> 0 | removed: StellarOrchestra [orchestra]
+telepathic cactus insurance | keyword | 2 -> 0 | removed: FireBastion - Decentralized Fire Damage Insurance for Homes [insurance]; LumenSure - Private Proof-Backed Insurance Payouts on Stella [insurance]
+telepathic cactus insurance | hybrid | 2 -> 0 | removed: FireBastion - Decentralized Fire Damage Insurance for Homes [insurance]; LumenSure - Private Proof-Backed Insurance Payouts on Stella [insurance]
+submarine pancake festival | keyword | 0 -> 0
+submarine pancake festival | hybrid | 0 -> 0
+invisible giraffe tax | keyword | 0 -> 0
+invisible giraffe tax | hybrid | 0 -> 0
+moon cheese lottery | keyword | 2 -> 0 | removed: No Loss Lottery [lottery]; Herbal Moonlight [moon]
+moon cheese lottery | hybrid | 2 -> 0 | removed: No Loss Lottery [lottery]; Herbal Moonlight [moon]
+dancing penguin mortgage | keyword | 0 -> 0
+dancing penguin mortgage | hybrid | 0 -> 0
+banana origami parliament | keyword | 0 -> 0
+banana origami parliament | hybrid | 0 -> 0
+time travel sock exchange | keyword | 9 -> 9
+time travel sock exchange | hybrid | 9 -> 9
+underwater bicycle courier | keyword | 0 -> 0
+underwater bicycle courier | hybrid | 0 -> 0
+whispering teapot ledger | keyword | 4 -> 0 | removed: LuckyLedgers [ledger]; TerraLedger [ledger]; ProofChain - The Unbreakable Truth Ledger [ledger]; TrulyLedger [ledger]
+whispering teapot ledger | hybrid | 4 -> 0 | removed: LuckyLedgers [ledger]; TerraLedger [ledger]; ProofChain - The Unbreakable Truth Ledger [ledger]; TrulyLedger [ledger]
+glitter dinosaur karaoke | keyword | 0 -> 0
+glitter dinosaur karaoke | hybrid | 0 -> 0
+sleepy walrus accountant | keyword | 0 -> 0
+sleepy walrus accountant | hybrid | 1 -> 1
+cosmic broccoli wrestling league | keyword | 1 -> 0 | removed: Cosmic Coders [cosmic]
+cosmic broccoli wrestling league | hybrid | 1 -> 0 | removed: Cosmic Coders [cosmic]
+total | keyword 20 -> 9 | hybrid 21 -> 10
+
+== probe: builds returned, before -> after ==
+quantum llama sandwich | keyword | 2 -> 0 | removed: Quantum Shield Exchange [quantum]; MellaMate [llama]
+    after, top 5: 
+quantum llama sandwich | hybrid | 2 -> 0 | removed: Quantum Shield Exchange [quantum]; MellaMate [llama]
+    after, top 5: 
+
+== passkey: builds returned, before -> after ==
+passkey (winnersOnly) | keyword | 2 -> 2
+    after, top 5: DeFi Quest - From Zero to DeFi in Minutes [passkey]; Tukar [passkey]
+passkey (winnersOnly) | hybrid | 2 -> 2
+    after, top 5: DeFi Quest - From Zero to DeFi in Minutes [passkey]; Tukar [passkey]
+passkey | keyword | 15 -> 15
+    after, top 5: DeFi Quest - From Zero to DeFi in Minutes [passkey]; Tukar [passkey]; Passkey-Kit integration [passkey]; Buckspay SDK [passkey]; Druid [passkey]
+passkey | hybrid | 15 -> 15
+    after, top 5: DeFi Quest - From Zero to DeFi in Minutes [passkey]; Tukar [passkey]; Passkey-Kit integration [passkey]; Buckspay SDK [passkey]; Druid [passkey]
+
+grade-2 builds lost from the matched list or the top 20 (the ship criterion): 0
