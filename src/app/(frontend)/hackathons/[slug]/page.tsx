@@ -138,10 +138,11 @@ const load = cache(async (slug: string): Promise<Loaded> => {
 			? null
 			: fetchAllDoraHacksHackathons().catch(() => null);
 		const detail = await Promise.race([
-			// The store down is the API's 503: an outage, never "no such event".
-			getPayloadSafe().then((payload) =>
-				payload ? getHackathonDetail(payload, slug) : null,
-			),
+			// The store down is the API's 503, and a read that throws its 500:
+			// both are outages, never "no such event".
+			getPayloadSafe()
+				.then((payload) => (payload ? getHackathonDetail(payload, slug) : null))
+				.catch(() => null),
 			deadline,
 		]);
 		if (detail) {

@@ -433,6 +433,20 @@ describe("/hackathons/<slug>", () => {
 		expect(detail).not.toHaveBeenCalled();
 	});
 
+	// Re-check: a store that starts but whose read throws (the API's 500) is
+	// an outage too; a known event degrades to its facts, an unknown one errors.
+	it("a read that throws: a curated event renders from its record, a slug nothing knows is an error", async () => {
+		detail.mockRejectedValue(new Error("read failed mid-way"));
+		const html = await render("hackmeridian-2026");
+		expect(html).toContain("HackMeridian 2026</h1>");
+		expect(html).toContain("could not be loaded right now");
+		const error = await render("no-such-event").catch(
+			(e: { digest?: string }) => e,
+		);
+		expect(error).toBeInstanceOf(Error);
+		expect((error as { digest?: string }).digest).toBeUndefined();
+	});
+
 	it("metadata: the event's name, its description's first prose and a canonical", async () => {
 		serve(event({ description: `${"Builders meet in Lisbon. ".repeat(10)}` }));
 		const meta = await generateMetadata({

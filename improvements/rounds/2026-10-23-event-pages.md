@@ -310,3 +310,7 @@ receipt is still the PR preview, now also with a read past the deadline
 seen to render rather than wait.
 That supersedes the open item above on the detail read's deadline: the page
 now bounds it at 6 s; the API's own read is still unbounded.
+
+## Re-check of 4f18e384 and one fix (2026-10-23)
+
+The re-check said GATE: push (its own replay byte-identical; every slow or outage path measured at about 6 s with nothing implying an empty roster), with one low: a store that starts but whose read throws (the API's 500) made the page error even for a curated event whose facts are in the repo. The raced read now catches that as an outage, so a known event degrades to its facts with the could-not-load line and an unknown slug still errors. A page test pins it (failed before the catch, passes after). The API is untouched by this commit.
