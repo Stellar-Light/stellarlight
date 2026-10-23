@@ -1,0 +1,14 @@
+   ✓ withView > returns the body itself when view is absent or full 1ms
+   ✓ withView > compact: same keys on every row, null never a missing key 1ms
+   ✓ withView > compact: meta stays first and says it is compact and how to get full rows 0ms
+   ✓ withView > the shipped plans keep identity, rank and score keys 0ms
+   ✓ viewParamError > accepts absent, full and compact 0ms
+   ✓ viewParamError > an unknown value is an error naming the valid values 0ms
+   ✓ viewParamError > compact with fields is an error rather than two projections 0ms
+   × compact project rows keep via > a semantic fallback row stays tagged; a row without via reads null 3ms
+   × the spec declares the 400 a view can answer > /api/projects/search 0ms
+   × the spec declares the 400 a view can answer > /api/repos/search 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ undefined, undefined ] to deeply equal [ 'semantic', null ]
+AssertionError: expected undefined to be defined
+      Tests  3 failed | 7 passed (10)

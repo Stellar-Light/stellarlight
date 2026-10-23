@@ -1105,6 +1105,24 @@ export interface components {
             /** Format: uri */
             skill?: string;
         };
+        /** @description Present in meta only when the request had view=compact; absent means full rows. Compact project rows (projects/search `projects`) carry exactly: id, name, slug, canonicalSlug, url, category, types, shortDescription, status, statusAsOf, deployment, tvlUSD, tvlAsOf, scfAwarded, scfTotalAwardedUSD, audits, score, via, confidence, reposCount, onchainContractsCount; deployment keeps only network, confidence only score and label. Compact repo rows (repos/search `repos`, projects/search `codeReferences`) carry exactly: fullName, url, description, primaryLanguage, stars, lastCommitAt, isArchived, activityState, project, hackathonWinner, scfAwarded, repoScore, repoScoreLabel, tier, kind, stellarEvidence, score, knowledgeNotesCount. Every key is on every row, null where there is no value. */
+        CompactView: {
+            /** @description Always `compact`: this page carries compact rows. */
+            mode: string;
+            /** @description One entry per compacted row array, keyed by its name in the response (projects, codeReferences, repos). */
+            rows: {
+                [key: string]: {
+                    /** @description Each count key on these rows, mapped to the left-out field it counts (a dotted path into the full row). */
+                    counts: {
+                        [key: string]: string;
+                    };
+                    /** @description Where the left-out fields of these rows are read, as a request to make. */
+                    detail: string;
+                };
+            };
+            /** @description How to read compact rows, in one line. */
+            note: string;
+        };
         Project: {
             id: string;
             name: string;
@@ -1361,6 +1379,10 @@ export interface components {
                 authority?: number;
                 ageDays?: number | null;
             } | null;
+            /** @description view=compact rows only: how many entries the left-out `repos` list has (0 = that list is empty on the full row). Null = not known. Absent on full rows, which carry `repos` itself. */
+            reposCount?: number | null;
+            /** @description view=compact rows only: how many entries the left-out `onchain.contracts` list has. Null = no on-chain record was read for this project, not zero contracts. Absent on full rows, which carry `onchain` itself. */
+            onchainContractsCount?: number | null;
             /** @description This project’s top indexed GitHub repos, surfaced inline (same shape as /api/repos/search items). Cite as the project’s code references. */
             repos?: components["schemas"]["Repo"][];
             /**
@@ -1368,8 +1390,8 @@ export interface components {
              * @description Most recent commit across the project's own indexed repos — attach as the as-of date for 'is this project active?' answers. Null = no indexed repo with a known commit date (an INDEX gap — e.g. a closed-source product), never 'no activity'.
              */
             lastActivityAt?: string | null;
-            /** @description How this result was matched: keyword (token/synonym overlap) or vector (semantic fallback). */
-            via?: string;
+            /** @description How this result was matched: keyword (token or synonym overlap) or semantic (vector-similarity fallback, a guess to verify, not a match). Null only on a view=compact row whose full row had no via. */
+            via?: string | null;
             /** Format: uri */
             url?: string;
             /** @description Editorial ranking boost (0-100); higher = more canonical for its category. */
@@ -1398,6 +1420,7 @@ export interface components {
         };
         ProjectSearchResponse: {
             meta: components["schemas"]["Meta"] & {
+                view?: components["schemas"]["CompactView"];
                 /**
                  * @description Tier of match relaxation that produced these results. `semantic` means NO keyword tier matched: every row is a vector-similarity fallback guess (each tagged `via: "semantic"`, confidence capped at medium), so verify relevance before relying on them. `corrected` means the rows matched only through a spelling correction, either a known one (e.g. strupey to stroopy) or a typo-distance name recovery reported in `didYouMean` (e.g. frieghter to Freighter): the query token does not occur in them, so verify the identity before treating them as evidence about the queried name.
                  * @enum {string}
@@ -1771,6 +1794,8 @@ export interface components {
                 subinvocationsDelta?: number | null;
                 asOf?: string;
             } | null;
+            /** @description view=compact rows only: how many entries the left-out `knowledgeNotes` list has (0 = none on record). Null = not known. Absent on full rows, which carry `knowledgeNotes` itself. */
+            knowledgeNotesCount?: number | null;
             /** @description Dated FACTS about this repo with named sources — curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record. */
             knowledgeNotes?: {
                 note?: string;
@@ -1879,6 +1904,7 @@ export interface components {
                 canonical?: string | null;
                 /** @description How to read the results (e.g. code references graded by repoScore 0-100). */
                 note?: string;
+                view?: components["schemas"]["CompactView"];
                 /**
                  * @description How well this page matched the query, judged by its best row. strict = the best row matched every query term (other rows may match fewer; counts.total counts every row that matched at least one term, plus curated canonical and flagship repos and exact owner or name matches); partial = the best row matched some terms; corrected = the best rows matched only through a known spelling correction (e.g. strupey → stroopy), so the query token does not occur in them: verify the identity before treating them as evidence about the queried name; weak = NONE did and the rows are ranked neighbours, not matches; all = no query supplied; none = the search failed (NOT evidence of absence). Treat corrected/weak/none rows as candidates requiring verification, never as findings.
                  * @enum {string}
@@ -2284,6 +2310,8 @@ export interface components {
         offset: number;
         /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
         fields: string;
+        /** @description Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues. */
+        view: "full" | "compact";
     };
     requestBodies: never;
     headers: never;
@@ -3131,6 +3159,8 @@ export interface operations {
                 offset?: components["parameters"]["offset"];
                 /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
+                /** @description Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues. */
+                view?: components["parameters"]["view"];
             };
             header?: never;
             path?: never;
@@ -3145,6 +3175,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ProjectSearchResponse"];
+                };
+            };
+            /** @description The call is wrong; fix it, do not retry it as is. Answered before any read when: view is not full or compact (validValues), view=compact is sent with fields (validValues), status is not a resolvable status (validStatuses), type is not a product type (validTypes), category is not a category (validCategories), or scfAwarded is not a boolean form (acceptedValues). An unknown parameter is not a 400: it is named in meta.warnings. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestError"] & {
+                        validValues?: string[];
+                        validStatuses?: string[];
+                        validTypes?: string[];
+                        validCategories?: string[];
+                        /** @description The boolean forms scfAwarded takes. */
+                        acceptedValues?: {
+                            true?: string[];
+                            false?: string[];
+                        };
+                    };
                 };
             };
             /** @description A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead. */
@@ -3177,6 +3226,8 @@ export interface operations {
                 offset?: components["parameters"]["offset"];
                 /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
+                /** @description Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues. */
+                view?: components["parameters"]["view"];
             };
             header?: never;
             path?: never;
@@ -3191,6 +3242,17 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RepoSearchResponse"];
+                };
+            };
+            /** @description The call is wrong; fix it, do not retry it as is. Answered before any read, with error and validValues, when: view is not full or compact, view=compact is sent with fields, or activity, capability or domain is not one of its values. An unknown parameter is not a 400: it is named in meta.warnings. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RequestError"] & {
+                        validValues: string[];
+                    };
                 };
             };
             /** @description A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead. */

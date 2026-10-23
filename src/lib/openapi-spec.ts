@@ -18,6 +18,7 @@ import {
 	RWA_VERIFICATION_LEVELS,
 } from "../data/rwa-registry";
 import { CODE_DOMAINS } from "./code-domains";
+import { PROJECT_COMPACT, REPO_COMPACT, VIEW_VALUES } from "./compact-view";
 import {
 	AFTER_EVENT_VALUES,
 	FACET_IDS,
@@ -2759,8 +2760,51 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
 					{ $ref: "#/components/parameters/fields" },
+					{ $ref: "#/components/parameters/view" },
 				],
 				responses: {
+					"400": {
+						description:
+							"The call is wrong; fix it, do not retry it as is. Answered before any read when: view is not full or compact (validValues), view=compact is sent with fields (validValues), status is not a resolvable status (validStatuses), type is not a product type (validTypes), category is not a category (validCategories), or scfAwarded is not a boolean form (acceptedValues). An unknown parameter is not a 400: it is named in meta.warnings.",
+						content: {
+							"application/json": {
+								schema: {
+									allOf: [
+										{ $ref: "#/components/schemas/RequestError" },
+										{
+											type: "object",
+											properties: {
+												validValues: {
+													type: "array",
+													items: { type: "string" },
+												},
+												validStatuses: {
+													type: "array",
+													items: { type: "string" },
+												},
+												validTypes: {
+													type: "array",
+													items: { type: "string" },
+												},
+												validCategories: {
+													type: "array",
+													items: { type: "string" },
+												},
+												acceptedValues: {
+													type: "object",
+													description: "The boolean forms scfAwarded takes.",
+													properties: {
+														true: { type: "array", items: { type: "string" } },
+														false: { type: "array", items: { type: "string" } },
+													},
+												},
+											},
+										},
+									],
+								},
+							},
+						},
+					},
 					"503": {
 						description:
 							"A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead.",
@@ -2892,8 +2936,32 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
 					{ $ref: "#/components/parameters/fields" },
+					{ $ref: "#/components/parameters/view" },
 				],
 				responses: {
+					"400": {
+						description:
+							"The call is wrong; fix it, do not retry it as is. Answered before any read, with error and validValues, when: view is not full or compact, view=compact is sent with fields, or activity, capability or domain is not one of its values. An unknown parameter is not a 400: it is named in meta.warnings.",
+						content: {
+							"application/json": {
+								schema: {
+									allOf: [
+										{ $ref: "#/components/schemas/RequestError" },
+										{
+											type: "object",
+											required: ["validValues"],
+											properties: {
+												validValues: {
+													type: "array",
+													items: { type: "string" },
+												},
+											},
+										},
+									],
+								},
+							},
+						},
+					},
 					"503": {
 						description:
 							"A read failed and the page would have been empty: an outage, NOT an empty result. Retry after Retry-After. A read that fails while rows can still be served answers 200 with meta.partial true instead.",
@@ -9320,6 +9388,13 @@ export const spec: OpenAPISpec = {
 					"Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths).",
 				schema: { type: "string" },
 			},
+			view: {
+				name: "view",
+				in: "query",
+				description:
+					"Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues.",
+				schema: { type: "string", enum: [...VIEW_VALUES], default: "full" },
+			},
 		},
 		schemas: {
 			RetryableError: {
@@ -9885,6 +9960,43 @@ export const spec: OpenAPISpec = {
 					skill: { type: "string", format: "uri" },
 				},
 			},
+			CompactView: {
+				type: "object",
+				description: `Present in meta only when the request had view=compact; absent means full rows. Compact project rows (projects/search \`projects\`) carry exactly: ${[...Object.keys(PROJECT_COMPACT.keep), ...Object.keys(PROJECT_COMPACT.counts)].join(", ")}; deployment keeps only network, confidence only score and label. Compact repo rows (repos/search \`repos\`, projects/search \`codeReferences\`) carry exactly: ${[...Object.keys(REPO_COMPACT.keep), ...Object.keys(REPO_COMPACT.counts)].join(", ")}. Every key is on every row, null where there is no value.`,
+				required: ["mode", "rows", "note"],
+				properties: {
+					mode: {
+						type: "string",
+						description: "Always `compact`: this page carries compact rows.",
+					},
+					rows: {
+						type: "object",
+						description:
+							"One entry per compacted row array, keyed by its name in the response (projects, codeReferences, repos).",
+						additionalProperties: {
+							type: "object",
+							required: ["counts", "detail"],
+							properties: {
+								counts: {
+									type: "object",
+									description:
+										"Each count key on these rows, mapped to the left-out field it counts (a dotted path into the full row).",
+									additionalProperties: { type: "string" },
+								},
+								detail: {
+									type: "string",
+									description:
+										"Where the left-out fields of these rows are read, as a request to make.",
+								},
+							},
+						},
+					},
+					note: {
+						type: "string",
+						description: "How to read compact rows, in one line.",
+					},
+				},
+			},
 			Project: {
 				type: "object",
 				required: ["id", "name", "slug", "category", "status"],
@@ -10411,6 +10523,18 @@ export const spec: OpenAPISpec = {
 							ageDays: { type: "integer", nullable: true },
 						},
 					},
+					reposCount: {
+						type: "integer",
+						nullable: true,
+						description:
+							"view=compact rows only: how many entries the left-out `repos` list has (0 = that list is empty on the full row). Null = not known. Absent on full rows, which carry `repos` itself.",
+					},
+					onchainContractsCount: {
+						type: "integer",
+						nullable: true,
+						description:
+							"view=compact rows only: how many entries the left-out `onchain.contracts` list has. Null = no on-chain record was read for this project, not zero contracts. Absent on full rows, which carry `onchain` itself.",
+					},
 					repos: {
 						type: "array",
 						description:
@@ -10426,8 +10550,9 @@ export const spec: OpenAPISpec = {
 					},
 					via: {
 						type: "string",
+						nullable: true,
 						description:
-							"How this result was matched: keyword (token/synonym overlap) or vector (semantic fallback).",
+							"How this result was matched: keyword (token or synonym overlap) or semantic (vector-similarity fallback, a guess to verify, not a match). Null only on a view=compact row whose full row had no via.",
 					},
 					url: { type: "string", format: "uri" },
 					prominence: {
@@ -10488,6 +10613,7 @@ export const spec: OpenAPISpec = {
 							{
 								type: "object",
 								properties: {
+									view: { $ref: "#/components/schemas/CompactView" },
 									matchMode: {
 										type: "string",
 										enum: [...PROJECT_MATCH_MODES],
@@ -10921,6 +11047,12 @@ export const spec: OpenAPISpec = {
 							asOf: { type: "string" },
 						},
 					},
+					knowledgeNotesCount: {
+						type: "integer",
+						nullable: true,
+						description:
+							"view=compact rows only: how many entries the left-out `knowledgeNotes` list has (0 = none on record). Null = not known. Absent on full rows, which carry `knowledgeNotes` itself.",
+					},
 					knowledgeNotes: {
 						type: "array",
 						description:
@@ -11150,6 +11282,7 @@ export const spec: OpenAPISpec = {
 										description:
 											"How to read the results (e.g. code references graded by repoScore 0-100).",
 									},
+									view: { $ref: "#/components/schemas/CompactView" },
 									matchMode: {
 										type: "string",
 										enum: [...REPO_MATCH_MODES],
