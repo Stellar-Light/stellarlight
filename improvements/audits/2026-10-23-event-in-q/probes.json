@@ -1,5 +1,7 @@
 {
 	"writtenAt": "2026-10-23T14:45:00Z",
+	"extendedAt": "2026-10-23T15:47:00Z",
+	"extension": "After the independent review and before any re-run: p24 to p29 (the review's six failing q) added, and p04's expected warnings extended with textless = the line saying the rest matched none of an inferred event's stored submissions, which hold no description. A warning value may list several kinds, in order.",
 	"note": "The probes of improvements/rounds/2026-10-23-event-in-q.md with their expected outcome, written before any capture or replay. warning: inferred = the line saying what was inferred and how to opt out; partial = a name start shared by several events; multiple = full names of more than one event; explicit = q names another event than an explicit hackathon filter; none = no line from event inference (other warnings may still appear). candidatesTitlePrefix: every event whose title starts with these words. filtersQ and filtersHackathon: meta.filters.q and meta.filters.hackathon as served; omitted where not checked.",
 	"probes": [
 		{
@@ -44,7 +46,7 @@
 			"expect": {
 				"inferred": "hackmeridian-2025",
 				"matched": "HackMeridian 2025",
-				"warning": "inferred",
+				"warning": ["inferred", "textless"],
 				"filtersQ": "payments app",
 				"filtersHackathon": ["hackmeridian-2025"]
 			}
@@ -244,7 +246,71 @@
 				"filtersQ": "hackmeridian 2025",
 				"filtersHackathon": null
 			}
+		},
+		{
+			"id": "p24",
+			"q": "HackMeridian 2025 top three",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": ["inferred", "textless"],
+				"filtersQ": "top three",
+				"filtersHackathon": ["hackmeridian-2025"]
+			}
+		},
+		{
+			"id": "p25",
+			"q": "HackMeridian 2025 awards",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p26",
+			"q": "HackMeridian 2025 first place",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p27",
+			"q": "HackMeridian 2025 leaderboard",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p28",
+			"q": "HackMeridian 2025 participants",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": "inferred",
+				"filtersQ": null,
+				"filtersHackathon": ["hackmeridian-2025"],
+				"sixWinners": true
+			}
+		},
+		{
+			"id": "p29",
+			"q": "HackMeridian 2025 give me",
+			"expect": {
+				"inferred": "hackmeridian-2025",
+				"warning": ["inferred", "textless"],
+				"filtersQ": "give me",
+				"filtersHackathon": ["hackmeridian-2025"]
+			}
 		}
 	],
-	"restQueries": ["payments app", "winners"]
+	"restQueries": ["payments app", "winners", "top three", "give me"]
 }

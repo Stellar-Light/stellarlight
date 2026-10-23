@@ -26,9 +26,10 @@ export type EventInQuery =
 	| { kind: "none" };
 
 /** Words that ask for an event's own entries rather than a topic: after an
- * event's name, "winners" or "builds from" leave nothing to search.
- * ponytail: a hand list; a rest such as "give me" is still searched as
- * text. */
+ * event's name, "winners", "builds from" or "first place" leave nothing to
+ * search. ponytail: a hand list; a rest such as "give me" is still searched
+ * as text, and textlessEventWarning says when that finds none of an event's
+ * text-less rows. */
 const ENTRY_WORDS = new Set([
 	"build",
 	"builds",
@@ -52,9 +53,30 @@ const ENTRY_WORDS = new Set([
 	"winning",
 	"prize",
 	"prizes",
+	"award",
+	"awards",
+	"place",
+	"places",
 	"placed",
+	"placement",
+	"placements",
+	"first",
+	"second",
+	"third",
+	"1st",
+	"2nd",
+	"3rd",
+	"top",
+	"ranking",
+	"rankings",
+	"leaderboard",
+	"leaderboards",
 	"finalist",
 	"finalists",
+	"participant",
+	"participants",
+	"demo",
+	"demos",
 	"result",
 	"results",
 	"hackathon",
@@ -95,9 +117,9 @@ interface Span {
 }
 
 /** Every place q holds an event's title (its words as one run of q's
- * words) or its slug as typed. A slug is matched with its hyphens: dropped,
- * build-on-stellar and stellar-latam would be "build on Stellar" and
- * "Stellar LATAM" in topic queries. */
+ * words) or its slug, in any case. A slug is matched with its hyphens:
+ * dropped, build-on-stellar and stellar-latam would be "build on Stellar"
+ * and "Stellar LATAM" in topic queries. */
 function namesIn(q: string, qw: Word[], events: NamedEvent[]): Span[] {
 	const out: Span[] = [];
 	for (const { slug, title } of events) {
@@ -132,6 +154,9 @@ function cut(q: string, qw: Word[], spans: Span[]): string {
 	let out = "";
 	let last: Word | null = null;
 	let parted = false;
+	// ponytail: words times spans, quadratic only when q repeats a name; the
+	// ceiling is eventInQuery's kept loop below. Walk words and the sorted
+	// spans together if q is ever allowed past the URL cap.
 	for (const w of qw) {
 		if (spans.some((s) => w.start >= s.start && w.end <= s.end)) {
 			parted = true;
@@ -160,6 +185,10 @@ export function eventInQuery(q: string, events: NamedEvent[]): EventInQuery {
 	const kept: Span[] = [];
 	// Longest first. A name at the very place of a kept one is kept too: two
 	// events that share a title.
+	// ponytail: names times kept names, quadratic when q repeats a name: one
+	// name 900 times (16 KB) took 15 ms, 10,000 times (176 KB) 1 s. Live
+	// URLs stop near 16 KB (414 at 40 KB), so the slow end is unreachable;
+	// sweep the sorted spans with an end index if q is ever read from a body.
 	for (const m of namesIn(q, qw, events).sort(
 		(a, b) => b.end - b.start - (a.end - a.start) || a.start - b.start,
 	))
@@ -235,7 +264,9 @@ export interface InferredFilter {
  * The builds route's request with an event named in q applied as the
  * hackathon filter, and the warnings that say so. Events: those the cached
  * index holds plus the curated events off DoraHacks (hackmeridian-2026 has
- * no stored submissions), with no read added. ponytail: a DoraHacks event
+ * no stored submissions), found with no read. Inferring an event with no
+ * stored submissions makes parseBuildFilters read the event listing, the
+ * read an explicit hackathon=<that slug> makes. ponytail: a DoraHacks event
  * with no stored submissions is not inferred; read the listing if one
  * matters. Any hackathon parameter turns inference off; empty, it is the
  * opt-out that searches q's words as text in every event.
@@ -308,4 +339,25 @@ export function inferEventFilter(
 			`q holds the event name '${found.matched}', so hackathon=${found.slug} was applied and the name removed from q (meta.inferredFilter); to search q's words as text in every event instead, send hackathon= with no value`,
 		],
 	};
+}
+
+/**
+ * The line for a rest of q that matched none of an inferred event's stored
+ * submissions when none of them holds a description: their 0 says the rows
+ * hold nothing to search, not that the event built nothing of the kind (the
+ * six curated HackMeridian 2025 winners hold a name and a track). Read from
+ * the rows, so it holds for any event, curated or not; null otherwise.
+ */
+export function textlessEventWarning(
+	inferred: InferredFilter | undefined,
+	rest: string | undefined,
+	matched: number,
+	indexed: IndexedBuild[],
+): string | null {
+	if (!inferred || !rest || matched) return null;
+	const rows = indexed.filter((b) => b.hackathon.slug === inferred.hackathon);
+	if (!rows.length || rows.some((b) => b.description?.trim())) return null;
+	const n = new Set(rows.map((b) => b.id)).size;
+	const slug = inferred.hackathon;
+	return `'${rest}' matched no stored submission of ${slug}: ${n === 1 ? "its 1 stored submission holds" : `its ${n} stored submissions hold`} no description to search; hackathon=${slug} alone lists ${n === 1 ? "it" : "them"}`;
 }

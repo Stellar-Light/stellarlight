@@ -98,7 +98,11 @@ const kindOf = (w) =>
 				? "multiple"
 				: w.startsWith("q names the event '")
 					? "explicit"
-					: null;
+					: /^'.*' matched no stored submission of \S+: its \d+ stored submissions? holds? no description/.test(
+								w,
+							)
+						? "textless"
+						: null;
 const listed = (w, kind) =>
 	kind === "explicit"
 		? [/\(([^)]+)\), which/.exec(w)?.[1]]
@@ -150,12 +154,7 @@ for (const p of probes) {
 		["status 200", a.status === 200],
 		["inferred", (a.inferred?.hackathon ?? null) === e.inferred],
 		...(e.matched ? [["matched", a.inferred?.matched === e.matched]] : []),
-		[
-			"warning",
-			e.warning === "none"
-				? a.kinds.length === 0
-				: same(a.kinds, [e.warning === "multiple" ? "multiple" : e.warning]),
-		],
+		["warning", same(a.kinds, e.warning === "none" ? [] : [e.warning].flat())],
 		...(cands ? [["candidates", same(a.candidates, [...cands].sort())]] : []),
 		...("filtersQ" in e ? [["filters.q", a.q === e.filtersQ]] : []),
 		...("filtersHackathon" in e
@@ -198,7 +197,10 @@ out(
 	`base replay ${p01.builds.length} rows [${p01.builds.map((r) => `${r.id}@${r.hackathonSlug}`).join(", ")}]; same ids in the same order: ${same(
 		liveRows.map((r) => r.id),
 		p01.builds.map((r) => r.id),
-	)}`,
+	)}; same ids in any order: ${same(
+		liveRows.map((r) => r.id).sort(),
+		p01.builds.map((r) => r.id).sort(),
+	)} (live reranks hybrid rows when it holds the reranker key; the replay runs without it)`,
 );
 
 // (c) the v1 questions on the branch.

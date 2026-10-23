@@ -1,0 +1,58 @@
+## Capture
+apiVersion 1.9.99 at 2026-10-23T15:46:56.564Z, 1.9.99 at 2026-10-23T16:00:00.754Z
+events listed 27 ({"curated":7,"dorahacks":20,"returned":27,"total":27}); stored submissions 1356 (counts {"indexedBuilds":1356,"matched":1356,"entries":1383,"withheldByName":0,"returned":56})
+hackmeridian-2025 rows: 6: Panorama Block (Composability, 3rd Place, winner true, githubUrl null, project absent); Star Lends (Composability, 2nd Place, winner true, githubUrl null, project absent); Lance (Composability, 1st Place, winner true, githubUrl null, project absent); Stellar Forge (Open Innovation, 3rd Place, winner true, githubUrl null, project absent); 4Bridge (Open Innovation, 2nd Place, winner true, githubUrl null, project absent); The Simple Fund (Open Innovation, 1st Place, winner true, githubUrl null, project absent)
+rankings 212; any page not 200: 0; served keyword (meaning could not run): 0; cut at 600 rows: 0; fewer rows than the first page's matched count (the count moved between pages; only the first page's is kept): none
+events the branch reads: 27 (index 23, plus curated); listed but not read: none; read but not listed: none
+
+## Frozen queries holding an event name or slug
+270 entries, 180 unique q; holding a title or slug (hyphens kept or dropped): 0
+
+## Probes (replay, limit 20)
+| probe | q | params | before: filter, warning, matched | after: inferred, warning, filters.q, matched | expected | result |
+| --- | --- | --- | --- | --- | --- | --- |
+| p01 | HackMeridian 2025 |  | none; none; 5 (stellar-hacks-kale-reflector stellar-agents-x402-stripe-mpp stellar-hacks-zk-gaming) | hackmeridian-2025 'HackMeridian 2025'; inferred; q null; 6 (hackmeridian-2025) | hackmeridian-2025; inferred | pass |
+| p02 | hackmeridian-2025 |  | none; none; 20 (stellar-hacks-kale-reflector stellar-agents-x402-stripe-mpp stellar-hacks-zk-gaming stellar-hacks-blend) | hackmeridian-2025 'hackmeridian-2025'; inferred; q null; 6 (hackmeridian-2025) | hackmeridian-2025; inferred | pass |
+| p03 | HackMeridian 2025 winners |  | none; none; 9 (stellar-hacks-kale-reflector stellar-hacks-blend stellar-latam stellar-agents-x402-stripe-mpp) | hackmeridian-2025 'HackMeridian 2025'; inferred; q null; 6 (hackmeridian-2025) | hackmeridian-2025; inferred | pass |
+| p04 | HackMeridian 2025 payments app |  | none; none; 277 (stellar-hacks-kale-reflector stellar-agents-x402-stripe-mpp telluscoop-ideaton stellarhack) | hackmeridian-2025 'HackMeridian 2025'; inferred,textless; q "payments app"; 0 (-) | hackmeridian-2025; inferred,textless | pass |
+| p05 | hackmeridian |  | none; none; 0 (-) | none; partial [hackmeridian-2025 hackmeridian-2026]; q "hackmeridian"; 0 (-) | none; partial [hackmeridian-2025 hackmeridian-2026] | pass |
+| p06 | Stellar Hacks |  | none; none; 15 (scaffoldstellar stellar-hacks-zk codigoraiz2025 stellar-hacks-kale-reflector) | none; partial [stellar-agents-x402-stripe-mpp stellar-hacks-blend stellar-hacks-kale-reflector stellar-hacks-paltalabs stellar-hacks-zk stellar-hacks-zk-gaming]; q "stellar hacks"; 15 (scaffoldstellar stellar-hacks-zk codigoraiz2025 stellar-hacks-kale-reflector) | none; partial [stellar-agents-x402-stripe-mpp stellar-hacks-blend stellar-hacks-kale-reflector stellar-hacks-paltalabs stellar-hacks-zk stellar-hacks-zk-gaming] | pass |
+| p07 | blend lending vault |  | none; none; 70 (stellar-hacks-blend scaffoldstellar stellar-hacks-zk stellar-pulso-hackathon) | none; none; q "blend lending vault"; 70 (stellar-hacks-blend scaffoldstellar stellar-hacks-zk stellar-pulso-hackathon) | none; none | pass |
+| p08 | Stellar Hacks: Blend |  | none; none; 56 (stellar-hacks-blend stellar-hacks-zk scaffoldstellar stellar-hacks-paltalabs) | stellar-hacks-blend 'Stellar Hacks: Blend'; inferred; q null; 36 (stellar-hacks-blend) | stellar-hacks-blend; inferred | pass |
+| p09 | stellar hacks blend |  | none; none; 119 (stellar-hacks-zk-gaming build-on-stellar ideaton2026 stellar-hacks-zk) | stellar-hacks-blend 'stellar hacks blend'; inferred; q null; 36 (stellar-hacks-blend) | stellar-hacks-blend; inferred | pass |
+| p10 | ZK Gaming |  | none; none; 286 (stellar-hacks-zk-gaming stellar-hacks-zk build-on-stellar buildonstellarhack) | none; none; q "zk gaming"; 286 (stellar-hacks-zk-gaming stellar-hacks-zk build-on-stellar buildonstellarhack) | none; none | pass |
+| p11 | Ideaton Fin de Ano Powered by Stellar Chile |  | none; none; 24 (buildonstellarchile telluscoop-ideaton alebrije2026 build-on-stellar) | ideaton2026 'Ideaton Fin de Ano Powered by Stellar Chile'; inferred; q null; 63 (ideaton2026) | ideaton2026; inferred | pass |
+| p12 | HackMeridian 2024 |  | none; none; 6 (stellar-hacks-zk stellar-agents-x402-stripe-mpp stellar-hacks-kale-reflector stellar-hacks-blend) | none; partial [hackmeridian-2025 hackmeridian-2026]; q "hackmeridian 2024"; 6 (stellar-hacks-zk stellar-agents-x402-stripe-mpp stellar-hacks-kale-reflector stellar-hacks-blend) | none; partial [hackmeridian-2025 hackmeridian-2026] | pass |
+| p13 | HackMeridian 2025 | {"hackathon":"stellar-hacks-zk"} | stellar-hacks-zk; none; 0 (-) | none; explicit [hackmeridian-2025]; q "hackmeridian 2025"; 0 (-) | none; explicit [hackmeridian-2025] | pass |
+| p14 | (empty) |  | none; none; 1356 (apac-stellar-hackathon-2026 build-on-stellar-philippines-2026 hackmeridian-2025 stellar-hacks-blend) | none; none; q null; 1356 (apac-stellar-hackathon-2026 build-on-stellar-philippines-2026 hackmeridian-2025 stellar-hacks-blend) | none; none | pass |
+| p15a | !!! |  | none; none; 0 (-) | none; none; q "!!!"; 0 (-) | none; none | pass |
+| p15b | : , | |  | none; none; 0 (-) | none; none; q ": , |"; 0 (-) | none; none | pass |
+| p16 | build on stellar lending app |  | none; none; 316 (stellar-hacks-blend stellar-hacks-zk scaffoldstellar stellar-pulso-hackathon) | none; none; q "build on stellar lending app"; 316 (stellar-hacks-blend stellar-hacks-zk scaffoldstellar stellar-pulso-hackathon) | none; none | pass |
+| p17 | stellar latam remittances |  | none; none; 156 (scaffoldstellar build-on-stellar telluscoop-ideaton stellar-pulso-hackathon) | none; partial [ideatontelluscoop stellar-latam]; q "stellar latam remittances"; 156 (scaffoldstellar build-on-stellar telluscoop-ideaton stellar-pulso-hackathon) | none; partial [ideatontelluscoop stellar-latam] | pass |
+| p18 | real world assets tokenization |  | none; none; 121 (scaffoldstellar stellar-hacks-blend stellar-hacks-zk stellar-agents-x402-stripe-mpp) | none; none; q "real world assets tokenization"; 121 (scaffoldstellar stellar-hacks-blend stellar-hacks-zk stellar-agents-x402-stripe-mpp) | none; none | pass |
+| p19 | Meridian |  | none; none; 2 (stellar-hacks-kale-reflector stellar-agents-x402-stripe-mpp) | none; none; q "meridian"; 2 (stellar-hacks-kale-reflector stellar-agents-x402-stripe-mpp) | none; none | pass |
+| p20 | KALE Markets |  | none; none; 118 (stellar-hacks-kale-reflector) | none; none; q "kale markets"; 118 (stellar-hacks-kale-reflector) | none; none | pass |
+| p21 | scaffold stellar templates |  | none; none; 58 (ideaton2026 scaffoldstellar stellar-agents-x402-stripe-mpp stellar-hacks-zk-gaming) | none; none; q "scaffold stellar templates"; 58 (ideaton2026 scaffoldstellar stellar-agents-x402-stripe-mpp stellar-hacks-zk-gaming) | none; none | pass |
+| p22 | HackMeridian 2025 vs HackMeridian 2026 |  | none; none; 5 (stellar-hacks-kale-reflector stellar-hacks-zk-gaming ideaton2026 stellar-agents-x402-stripe-mpp) | none; multiple [hackmeridian-2025 hackmeridian-2026]; q "hackmeridian 2025 vs hackmeridian 2026"; 5 (stellar-hacks-kale-reflector stellar-hacks-zk-gaming ideaton2026 stellar-agents-x402-stripe-mpp) | none; multiple [hackmeridian-2025 hackmeridian-2026] | pass |
+| p23 | HackMeridian 2025 | {"hackathon":""} | none; none; 5 (stellar-hacks-kale-reflector stellar-agents-x402-stripe-mpp stellar-hacks-zk-gaming) | none; none; q "hackmeridian 2025"; 5 (stellar-hacks-kale-reflector stellar-agents-x402-stripe-mpp stellar-hacks-zk-gaming) | none; none | pass |
+| p24 | HackMeridian 2025 top three |  | none; none; 11 (stellar-hacks-kale-reflector stellar-hacks-blend stellar-agents-x402-stripe-mpp stellar-latam) | hackmeridian-2025 'HackMeridian 2025'; inferred,textless; q "top three"; 0 (-) | hackmeridian-2025; inferred,textless | pass |
+| p25 | HackMeridian 2025 awards |  | none; none; 6 (stellar-hacks-blend stellar-agents-x402-stripe-mpp stellar-hacks-kale-reflector stellar-latam) | hackmeridian-2025 'HackMeridian 2025'; inferred; q null; 6 (hackmeridian-2025) | hackmeridian-2025; inferred | pass |
+| p26 | HackMeridian 2025 first place |  | none; none; 34 (stellar-hacks-blend stellar-latam stellar-hacks-zk stellar-hacks-kale-reflector) | hackmeridian-2025 'HackMeridian 2025'; inferred; q null; 6 (hackmeridian-2025) | hackmeridian-2025; inferred | pass |
+| p27 | HackMeridian 2025 leaderboard |  | none; none; 20 (stellar-hacks-kale-reflector stellar-hacks-zk-gaming stellar-hacks-blend stellar-latam) | hackmeridian-2025 'HackMeridian 2025'; inferred; q null; 6 (hackmeridian-2025) | hackmeridian-2025; inferred | pass |
+| p28 | HackMeridian 2025 participants |  | none; none; 5 (stellar-hacks-kale-reflector stellar-hacks-blend stellar-agents-x402-stripe-mpp stellar-latam) | hackmeridian-2025 'HackMeridian 2025'; inferred; q null; 6 (hackmeridian-2025) | hackmeridian-2025; inferred | pass |
+| p29 | HackMeridian 2025 give me |  | none; none; 8 (stellar-hacks-kale-reflector stellar-agents-x402-stripe-mpp stellar-hacks-zk-gaming give-hackathon-argentina) | hackmeridian-2025 'HackMeridian 2025'; inferred,textless; q "give me"; 0 (-) | hackmeridian-2025; inferred,textless | pass |
+
+30 of 30 probes pass.
+
+## Parity of the base replay with live, q=HackMeridian 2025, limit 20
+live 5 rows [dorahacks-buidl-32712@stellar-hacks-kale-reflector, dorahacks-buidl-42829@stellar-agents-x402-stripe-mpp, dorahacks-buidl-39857@stellar-hacks-zk-gaming, dorahacks-buidl-39825@stellar-hacks-zk-gaming, dorahacks-buidl-39916@stellar-hacks-zk-gaming]
+base replay 5 rows [dorahacks-buidl-32712@stellar-hacks-kale-reflector, dorahacks-buidl-42829@stellar-agents-x402-stripe-mpp, dorahacks-buidl-39916@stellar-hacks-zk-gaming, dorahacks-buidl-39825@stellar-hacks-zk-gaming, dorahacks-buidl-39857@stellar-hacks-zk-gaming]; same ids in the same order: false; same ids in any order: true (live reranks hybrid rows when it holds the reranker key; the replay runs without it)
+
+## v1 questions (branch replay, q=HackMeridian 2025, limit 20)
+hackmeridian-2025 builds served: 6: Panorama Block | Star Lends | Lance | Stellar Forge | 4Bridge | The Simple Fund
+tracks: Panorama Block=Composability, Star Lends=Composability, Lance=Composability, Stellar Forge=Open Innovation, 4Bridge=Open Innovation, The Simple Fund=Open Innovation; every one a winner: true
+q08 names present: true; q08/q11 no repo link: true; q11 six with tracks: true; q12 no project link: true
+
+## Frozen responses
+base 724 lines, branch 724; differing 0
+statuses: {"200":724}

@@ -628,6 +628,58 @@ describe("GET /api/hackathons/builds reads an event named in q as the filter", (
 			"no submissions are stored for hackmeridian-2026; 0 matched from it is not evidence that nothing was built",
 		]);
 	});
+
+	// Review 2026-10-23: q=HackMeridian 2025 give me answered matched 0 with
+	// only the inference line, though the event's rows hold no description.
+	// (payroll: a word other rows hold, so no unused-word line joins in.)
+	it("says when the rest matched none of an event's rows, which hold no description", async () => {
+		const { body } = await get("q=HackMeridian%202025%20payroll&mode=keyword");
+		expect(body.meta.inferredFilter?.hackathon).toBe("hackmeridian-2025");
+		expect(body.meta.filters.q).toBe("payroll");
+		expect(body.meta.counts.matched).toBe(0);
+		expect(body.meta.warnings).toEqual([
+			"q holds the event name 'HackMeridian 2025', so hackathon=hackmeridian-2025 was applied and the name removed from q (meta.inferredFilter); to search q's words as text in every event instead, send hackathon= with no value",
+			"'payroll' matched no stored submission of hackmeridian-2025: its 2 stored submissions hold no description to search; hackathon=hackmeridian-2025 alone lists them",
+		]);
+	});
+
+	it("says nothing more when the event's rows hold text to search", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			...index(),
+			build("agentpay", {
+				hackathon: {
+					title: "Stellar Hacks: Agents",
+					slug: "stellar-agents-x402-stripe-mpp",
+					endedAt: "2026-04-13",
+				},
+				description: "Pays for API calls with USDC",
+				haystack: "agentpay pays for api calls with usdc",
+			}),
+		]);
+		const { GET } = await import("../route");
+		const res = await GET(
+			new NextRequest(
+				"https://x.test/api/hackathons/builds?q=Stellar%20Hacks%3A%20Agents%20payroll&mode=keyword",
+			),
+		);
+		const body = await res.json();
+		expect(body.meta.inferredFilter?.hackathon).toBe(
+			"stellar-agents-x402-stripe-mpp",
+		);
+		expect(body.meta.counts.matched).toBe(0);
+		expect(
+			(body.meta.warnings as string[]).filter((w) =>
+				w.includes("no description"),
+			),
+		).toEqual([]);
+	});
+
+	it("lists the event's entries for a placement word after its name", async () => {
+		const { body } = await get("q=HackMeridian%202025%20first%20place");
+		expect(body.meta.filters.q).toBeNull();
+		expect(ids(body)).toEqual(["lance", "simple-fund"]);
+	});
 });
 
 // 2026-10-23: in hybrid mode the top 50 are reordered by a reranker that

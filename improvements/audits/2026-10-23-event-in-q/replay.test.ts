@@ -169,6 +169,8 @@ describe("event-in-q replay", () => {
 			now: new Date("2026-10-23T15:00:00.000Z"),
 			toFake: ["Date"],
 		});
+		// No outbound call: without a key the reranker is not attempted.
+		vi.stubEnv("VOYAGE_API_KEY", "");
 	});
 	afterAll(() => {
 		vi.useRealTimers();

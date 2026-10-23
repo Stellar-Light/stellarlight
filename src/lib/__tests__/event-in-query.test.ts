@@ -149,6 +149,30 @@ describe("eventInQuery finds an event named in full", () => {
 			expect(find(q)).toMatchObject({ kind: "event", rest: "" });
 		expect(restOf("HackMeridian 2025 payments app")).toBe("payments app");
 	});
+
+	// Review 2026-10-23: each of these was searched as text inside an event
+	// whose rows hold no text, and answered a bare 0.
+	it("reads placement, award and ranking words as asking for the entries", () => {
+		for (const q of [
+			"HackMeridian 2025 first place",
+			"HackMeridian 2025 awards",
+			"HackMeridian 2025 leaderboard",
+			"HackMeridian 2025 participants",
+			"HackMeridian 2025 1st 2nd 3rd",
+			"HackMeridian 2025 second and third placements",
+			"HackMeridian 2025 rankings and demos",
+			"HackMeridian 2025 top",
+			// Words the scorer never searches leave nothing too.
+			"HackMeridian 2025 crypto tokens on github",
+		])
+			expect([q, restOf(q)]).toEqual([q, ""]);
+		// A topic word keeps the whole rest, entry words included.
+		expect(restOf("HackMeridian 2025 top three")).toBe("top three");
+		expect(restOf("HackMeridian 2025 give me")).toBe("give me");
+		expect(restOf("HackMeridian 2025 first time users")).toBe(
+			"first time users",
+		);
+	});
 });
 
 describe("eventInQuery infers nothing from a partial or shared name", () => {

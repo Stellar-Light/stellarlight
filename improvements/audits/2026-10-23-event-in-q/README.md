@@ -7,7 +7,10 @@ over a fresh capture of production (1.9.97 at the start and the end), all
 24 probes behave as the table written before the capture says, the six
 curated HackMeridian 2025 winners are served for `q=HackMeridian 2025`
 with their tracks, and every one of the 724 frozen builds-search requests
-answers byte for byte as the base commit does (`cmp` exit 0).
+answers byte for byte as the base commit does (`cmp` exit 0). After the
+independent review's fixes, on the branch merged with main and a third
+capture (1.9.99 at both ends): 30 of 30 probes, `cmp` exit 0 again (see
+"Review fixes" below).
 
 ## Results
 
@@ -73,6 +76,44 @@ committed). Probes p16 to p21 are this lane's false-positive probes.
   Stellar (Stellar Hacks)", gets the partial-name line, which its name
   earns.
 
+## Review fixes (after the independent review, on 71802a4f)
+
+The review (GATE: push) asked for two code changes, tests first, and doc
+corrections. The branch was then merged with main by the orchestrator
+(33769bc1, bringing the reranker of #1864; this lane is spec 1.9.100).
+
+- **Words that mean "list the entries".** place, placement, first to third,
+  1st to 3rd, award, top, ranking, leaderboard, participant, demo (and
+  plurals) joined the entry words.
+- **Rows with no text.** When the rest of q, searched inside an inferred
+  event, matches none of its rows and none of them holds a description, a
+  line says so and that `hackathon=<slug>` alone lists them.
+- **Failing first** (`failing-first-review.txt`, on 71802a4f): the new
+  module test and two of the three new route tests failed; the third (an
+  event whose rows hold text gets no such line) passed, as it should.
+- **Re-run.** Probes p24 to p29 (the review's six failing q) were added to
+  `probes.json`, and p04's expectation gained the new line, at 15:47Z
+  before the re-run. Capture 3: 2026-10-23T15:46:56Z to 16:00:00Z, apiVersion
+  1.9.99 at both ends, 1,356 stored submissions, 212 rankings, every page
+  200. Base: a clean export of 0735c116 (the main merged into the branch).
+  `summary-review.txt`:
+  - **30 of 30 probes as specified.** p25 to p28 (awards, first place,
+    leaderboard, participants) now list the six winners. p24 (top three),
+    p29 (give me) and p04 (payments app) still match 0 inside the event,
+    and each now carries the line: "'top three' matched no stored
+    submission of hackmeridian-2025: its 6 stored submissions hold no
+    description to search; hackathon=hackmeridian-2025 alone lists them".
+  - **Byte-identical:** `cmp` exit 0 on the 724 frozen requests, sha256
+    `3546ab4f2032d47cd940ca984727dfd31067f6be6ad94090d42dd0aa966b1925`; 0 of
+    the 180 frozen queries holds an event name or slug, so neither change
+    can reach them.
+  - **v1 questions:** unchanged, met.
+  - **Base parity:** the base replay of `q=HackMeridian 2025` serves the
+    same 5 ids as live, in another order. Live 1.9.99 reranks hybrid rows
+    with the reranker key; the replay pins the key empty, so it serves the
+    hybrid order.
+  - Build names as q: unchanged (1,331 names, 0 inferred, 1 partial line).
+
 ## Open risks
 
 - The partial line also fires on topic queries that start two titles: "Stellar
@@ -80,11 +121,21 @@ committed). Probes p16 to p21 are this lane's false-positive probes.
   and says q was searched as text, but it is noise for a region query.
 - A topic searched inside an event whose rows hold no text answers 0: p04
   ("payments app" inside HackMeridian 2025, whose six curated rows have no
-  description). Nothing says those rows hold no text.
+  description). Closed after the review for inferred events whose rows all
+  lack a description: a line now says so. Still unsaid: the same search
+  under an explicit `hackathon=`, and an event where only some rows lack a
+  description.
 - The words that leave nothing after a name are a hand list; a rest such as
-  "give me" is searched as text, and inside a text-less event answers 0.
+  "give me" is searched as text (inside a text-less event the line above
+  then says why it found none).
 - A DoraHacks event with no stored submissions is not inferred (none today;
   the index plus the curated file hold all 27 listed events).
+- Titles made of common words infer on topic queries ("scaffold stellar
+  hackathon projects", "apac stellar hackathon"); "stellar hacks zk" gets the
+  partial line naming 6 events where one title holds every word. Both found
+  by the review and queued.
+- A q that repeats an event name is quadratic (176 KB: 1 s); live URLs stop
+  near 16 KB (15 ms), so it is unreachable today (`ponytail:` comments).
 - Filter-only answers keep today's note ("prize winners first across all
   Stellar hackathons") under an event filter, inferred or explicit, as the
   brief asked.
@@ -133,14 +184,16 @@ committed). Probes p16 to p21 are this lane's false-positive probes.
 
 ## Design decisions
 
-- **Slugs only as typed.** Titles are compared without case, accents or
-  punctuation; a slug only with its hyphens. Of the 27 slugs, two are made
-  of common words: `build-on-stellar` (the title is "Stellar Build Better
-  Hackathon") and `stellar-latam`. With hyphens ignored they would turn
-  "build on Stellar lending app" (probe p16) and "Stellar LATAM remittances"
-  (p17) into event filters. A title made of common words is still matched;
-  none of the 27 is one a topic query holds by accident (the frozen sets
-  hold none).
+- **Slugs only with their hyphens.** Titles are compared without case,
+  accents or punctuation; a slug only with its hyphens, in any case. Of the
+  27 slugs, two are made of common words: `build-on-stellar` (the title is
+  "Stellar Build Better Hackathon") and `stellar-latam`. With hyphens
+  ignored they would turn "build on Stellar lending app" (probe p16) and
+  "Stellar LATAM remittances" (p17) into event filters. A title made of
+  common words is still matched: the review found "scaffold stellar
+  hackathon projects" inferring scaffoldstellar and "apac stellar
+  hackathon" inferring apac-stellar-hackathon-2026 (queued in the ledger).
+  The frozen sets hold none.
 - **ZK Gaming (p10).** It is the end of one title ("Stellar Hacks: ZK
   Gaming"). The whole-name rule infers nothing, and the partial warning
   stays silent too, because it reads only words that start the titles of
@@ -153,20 +206,34 @@ committed). Probes p16 to p21 are this lane's false-positive probes.
   word other than a stopword: "Stellar" starts 17 titles and "Build on
   Stellar" 3, and either would put an event warning on ordinary topic
   queries.
-- **Nothing left.** After the name, a rest of stopwords, the scorer's
-  generic words (app, project, tool) and words that ask for the event's own
-  entries (winners, builds, projects, submissions, teams, won, hackathon,
-  list and their forms) is nothing to search: the event is served as
-  `hackathon=<slug>` alone serves it, winners first. Searched as text,
-  "winners" matched none of the six HackMeridian 2025 rows, which hold no
-  description (p03 would have served nothing). The list is a hand list (a
-  `ponytail:` comment says so): a rest such as "give me" is still searched.
+- **Nothing left.** After the name, a rest made only of words the search
+  skips (stopwords and the scorer's generic words: app, project, tool,
+  token, crypto, money, stellar, github) and words that ask for the event's
+  own entries is nothing to search: the event is served as
+  `hackathon=<slug>` alone serves it, winners first. The entry words:
+  winners, builds, projects, submissions, teams, won, hackathon, list and
+  their forms; after the review also place, placement, first to third (and
+  1st to 3rd), award, top, ranking, leaderboard, participant, demo and their
+  plurals. Searched as text, "winners" matched none of the six HackMeridian
+  2025 rows, which hold no description (p03 would have served nothing). The
+  list is a hand list (a `ponytail:` comment says so): a rest such as "give
+  me" or "top three" is still searched, and the next line covers what that
+  finds.
+- **Rows with no text** (added after the review). When an inferred event's
+  search of the rest matches 0 and none of the event's stored rows holds a
+  description, one more line says so and that `hackathon=<slug>` alone lists
+  them ("'give me' matched no stored submission of hackmeridian-2025: its 6
+  stored submissions hold no description to search; ..."). It reads the
+  rows, so it holds for any event, curated or not. Only inferred events get
+  it, and only when every row lacks a description.
 - **Event list.** The events the cached builds index holds plus the curated
   events off DoraHacks (`src/data/curated-hackathons.ts`, which holds
-  hackmeridian-2026, an event with no stored submissions). No database or
-  network read is added. Today that is all 27 events getHackathons lists; a
-  DoraHacks event with no stored submissions would not be inferred (none
-  today).
+  hackmeridian-2026, an event with no stored submissions), found with no
+  read. Inferring an event with no stored submissions makes
+  `parseBuildFilters` read the event listing, the same read an explicit
+  `hackathon=<that slug>` makes. Today the list is all 27 events
+  getHackathons lists; a DoraHacks event with no stored submissions would
+  not be inferred (none today).
 - **Opt-out.** Any `hackathon` parameter turns inference off; empty, it
   searches q's words as text in every event, as before. scout-mcp's
   search_hackathon_builds forwards an empty hackathon so MCP callers can
@@ -181,7 +248,11 @@ committed). Probes p16 to p21 are this lane's false-positive probes.
 - `replay.test.ts`, `vitest.replay.config.mts`: the replay.
 - `summarize.mjs`: reads the capture and both replays and prints
   `summary.txt`.
-- `summary.txt`: its output for the run above.
+- `summary.txt`: its output for the first run (capture 2, base bf8262db).
+- `summary-review.txt`: its output for the review re-run (capture 3, base
+  0735c116).
+- `failing-first-review.txt`: the review's new tests failing before its
+  fixes.
 - `names-as-q.mts`, `names-as-q.txt`: every stored build name as q, and its
   output.
 - `failing-first.txt`: the new tests failing before the implementation

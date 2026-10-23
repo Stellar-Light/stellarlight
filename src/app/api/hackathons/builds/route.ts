@@ -19,7 +19,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { RERANK_TOP } from "@/lib/build-rerank";
-import { inferEventFilter } from "@/lib/event-in-query";
+import { inferEventFilter, textlessEventWarning } from "@/lib/event-in-query";
 import { afterEventFields, distribution } from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
@@ -134,6 +134,13 @@ export async function GET(req: NextRequest) {
 	// Any of q's words in no submission: say which, and what the rows are.
 	const unused = q ? unusedWordsWarning(indexed, q, scored, withheld) : null;
 	if (unused) warnings.push(unused);
+	const textless = textlessEventWarning(
+		ev.inferredFilter,
+		q,
+		scored.length,
+		indexed,
+	);
+	if (textless) warnings.push(textless);
 
 	const builds = scored
 		.slice(offset, offset + limit)
