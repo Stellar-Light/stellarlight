@@ -572,6 +572,14 @@ export function buildsForRepos(
 // the two can never drift.
 
 /** A query token and its plural or singular. */
+/** A hyphenated phrase's two numbers vary on its last part only: forms of
+ * the whole token stripped a short last part's s ("stellar-ens" became
+ * "stellar en", which matched prose). */
+function phraseForms(token: string): string[] {
+	const cut = token.lastIndexOf("-") + 1;
+	return wordForms(token.slice(cut)).map((f) => token.slice(0, cut) + f);
+}
+
 function wordForms(token: string): string[] {
 	if (token.length > 3 && token.endsWith("s"))
 		return [token, token.slice(0, -1)];
@@ -678,7 +686,7 @@ function queryTerms(query: string) {
 		.filter((t) => !parts.has(t))
 		.map((t) => {
 			const joined = t.includes("-")
-				? wordForms(t).flatMap((f) => [
+				? phraseForms(t).flatMap((f) => [
 						f.replace(/-/g, " "),
 						f.replace(/-/g, ""),
 					])

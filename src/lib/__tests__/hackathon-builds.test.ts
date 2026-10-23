@@ -405,6 +405,32 @@ describe("rarity and phrases", () => {
 			),
 		).toEqual({ absent: [], concepts: 1 });
 	});
+
+	// Review: the number varies on the last part only. Whole-token forms
+	// stripped a short last part's s ("stellar-ens" became "stellar en"),
+	// which matched prose and read the phrase as used.
+	it("varies a hyphenated phrase's number on its last part only", () => {
+		const prose = [build("Segundos", "Paga con stellar en segundos.")];
+		expect(searchHackathonBuilds(prose, "stellar-ens")).toEqual([]);
+		expect(wordsNoBuildUses(prose, "stellar-ens")).toEqual({
+			absent: ["stellar-ens"],
+			concepts: 1,
+		});
+		// The other directions: a singular q finds the plural in text, and a
+		// plural q is read as used beside the singular.
+		expect(
+			searchHackathonBuilds(
+				[build("Accounts", "Smart accounts for teams.")],
+				"smart-account",
+			).map((s) => s.b.name),
+		).toEqual(["Accounts"]);
+		expect(
+			wordsNoBuildUses(
+				[build("Meter", "Pay per call for data.")],
+				"pay-per-calls",
+			),
+		).toEqual({ absent: [], concepts: 1 });
+	});
 });
 
 describe("words no build uses", () => {

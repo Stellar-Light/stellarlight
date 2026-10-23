@@ -36,9 +36,9 @@ export const CHANGELOG: ChangelogEntry[] = [
 		version: "spec@1.9.102",
 		type: "fixed",
 		summary:
-			"searchHackathonBuilds: a hyphenated phrase in q now matches its other number too, spaced or joined. q=smart-accounts missed one of the three submissions that write the phrase as smart account, and the unused-words line read q=smart-account as used by one of them.",
+			"searchHackathonBuilds: a hyphenated phrase in q now matches its other number too, spaced or joined. q=smart-accounts missed a submission that writes smart account, and the unused-words line called q=pay-per-call unused beside a submission writing pay per calls. The number varies on the phrase's last part only, so q=stellar-ens does not turn into stellar en.",
 		detail:
-			"A hyphenated phrase is one concept, matched spaced (smart account) or joined (smartaccount); it matched only the number typed. It now matches both, the same way single words already did. Replayed over every frozen builds query that holds a hyphen (23 runs): 21 are byte-identical, 2 change order only (no build enters or leaves any list, and no warning changes).",
+			"A hyphenated phrase is one concept, matched spaced (smart account) or joined (smartaccount); it matched only the number typed. It now matches both, the same way single words already did. Replayed over every frozen builds query that holds a hyphen (23 runs): 21 are byte-identical, one changes one score and one changes order only (no build enters or leaves any list, and no warning changes).",
 	},
 	{
 		date: "2026-10-23",
