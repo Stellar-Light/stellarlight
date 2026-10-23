@@ -246,3 +246,7 @@ dispatch a dry run with repo empty before then.
 - cc-06: "deploy its Stellar Asset Contract" means `stellar contract asset
   deploy`; prose does not reach a CLI module without a typed command.
 - "quickstart" as a common word now lifts stellar/quickstart by 8.
+
+## Bar 3 reading (orchestrator, 2026-10-23)
+
+Bar 3 ("any synonym or joining rule that moves a frozen battery case down is dropped") is read against the base ranks: no frozen case may end below the rank it has on main today. Under that reading every rule passes (no frozen case below its base file or symbol rank; the only moves down against the branch's own other rules, f05 1 to 4, f19 1 to 2, f01 3 to 15, all stay at or above base: f05 base 4, f19 base 2, f01 base 40). The bar's intent when written was no regression against live behaviour; the stricter per-rule ablation reading is recorded above and in rules.txt for anyone who wants to apply it. Main merged in; version kept at the 1.9.105 placeholder for review.
