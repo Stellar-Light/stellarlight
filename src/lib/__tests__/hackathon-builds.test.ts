@@ -433,6 +433,160 @@ describe("rarity and phrases", () => {
 	});
 });
 
+describe("a smart wallet in q is one concept that passkey evidence satisfies", () => {
+	// Live 1.9.101: q=passkey smart wallet&winnersOnly=1 read three words, so
+	// a build had to cover two or hold one in its name. It listed a build for
+	// wallet in its name and dropped the winner Tukar, whose declared
+	// passkey-kit covers one word of the three.
+	const pool = [
+		{
+			...build("Tukar", "Cross-border transfers in local currencies.", true),
+			stack: ["passkey-kit"],
+		},
+		build("Quest", "DeFi onboarding with a passkey smart wallet.", true),
+		build("Signers", "Policy signers for smart accounts."),
+		build("Safe", "Multisig SmartWallets."),
+		build("Veil", "Biometric sign-in, WebAuthn verified on-chain."),
+		build("Umbra Wallet", "A private wallet with smart contract escrow.", true),
+		build("Shield", "Smart contract audits that score wallet risk."),
+		build("Smart Escrow", "Smart contract escrow for any account."),
+	];
+	const run = (q: string, winnersOnly = false) =>
+		searchHackathonBuilds(pool, q, { winnersOnly, packages: true });
+	const names = (q: string, winnersOnly = false) =>
+		run(q, winnersOnly)
+			.map((s) => s.b.name)
+			.sort();
+	const matched = (q: string, winnersOnly = false) =>
+		Object.fromEntries(run(q, winnersOnly).map((s) => [s.b.name, s.matched]));
+	const smartWallets = ["Quest", "Safe", "Signers", "Tukar", "Veil"];
+
+	it("lists the passkey winners for passkey smart wallet, not a wallet named build", () => {
+		expect(matched("passkey smart wallet", true)).toEqual({
+			Quest: ["passkey", "smart-wallet"],
+			Tukar: ["passkey"],
+		});
+		expect(wordsNoBuildUses(pool, "passkey smart wallet").concepts).toBe(2);
+	});
+
+	// Lane Z3 (2026-10-23): when q said passkey and the phrase, one passkey
+	// mention covered both, so passkey builds that miss the rest of q passed
+	// the builds that do it.
+	it("lets one passkey mention satisfy one concept of q, q's own word first", () => {
+		expect(matched("passkey smart wallet")).toEqual({
+			Quest: ["passkey", "smart-wallet"],
+			Safe: ["smart-wallet"],
+			Signers: ["smart-wallet"],
+			Tukar: ["passkey"],
+			Veil: ["smart-wallet"],
+		});
+		const onboarding = [
+			build("Onboard", "Passkey onboarding for new users."),
+			build("Phrase", "Smart wallet onboarding."),
+			build("Key", "Passkey sign-in, WebAuthn verified."),
+		];
+		expect(
+			Object.fromEntries(
+				searchHackathonBuilds(
+					onboarding,
+					"passkey or smart-wallet onboarding",
+				).map((s) => [s.b.name, s.matched]),
+			),
+		).toEqual({
+			Onboard: ["passkey", "onboarding"],
+			Phrase: ["onboarding", "smart-wallet"],
+		});
+	});
+
+	it("reads either phrase, in any spelling or number, as one concept passkey evidence also satisfies", () => {
+		for (const q of [
+			"smart wallet",
+			"smart wallets",
+			"smart_wallet",
+			"smartwallet",
+			"smart-wallet",
+			"smart-wallets",
+			"smart wallet?",
+			"smart account",
+			"smart-accounts",
+			"smartaccounts",
+		])
+			expect(names(q), q).toEqual(smartWallets);
+		expect(run("smart-accounts").map((s) => s.matched)).toEqual(
+			smartWallets.map(() => ["smart-account"]),
+		);
+	});
+
+	it("reads both phrases in one q as one concept, named by the first", () => {
+		expect(
+			wordsNoBuildUses(pool, "smart wallet or smart account").concepts,
+		).toBe(1);
+		expect(names("smart wallet or smart account")).toEqual(smartWallets);
+		expect(run("smart account or smart wallet").map((s) => s.matched)).toEqual(
+			smartWallets.map(() => ["smart-account"]),
+		);
+	});
+
+	// Lane Z3 (2026-10-23): vetIdea's evidence rule read only q's own phrase,
+	// so q=smart account dropped builds that write smart wallet.
+	it("counts the concept's equivalents in a build's own words, a passkey for one concept only", () => {
+		const share = (q: string) =>
+			Object.fromEntries(run(q).map((s) => [s.b.name, s.textShare]));
+		expect(share("smart wallet")).toEqual({
+			Quest: 1,
+			Safe: 1,
+			Signers: 1,
+			Tukar: 0,
+			Veil: 1,
+		});
+		expect(share("passkey smart wallet")).toEqual({
+			Quest: 1,
+			Safe: 0.5,
+			Signers: 0.5,
+			Tukar: 0,
+			Veil: 0.5,
+		});
+		const one = [build("One", "Deploys a smart account per user.")];
+		expect(wordsNoBuildUses(one, "smart-accounts")).toEqual({
+			absent: [],
+			concepts: 1,
+		});
+		expect(wordsNoBuildUses(pool, "smart account llama")).toEqual({
+			absent: ["llama"],
+			concepts: 2,
+		});
+	});
+
+	it("never expands passkey, and leaves smart, wallet and account to their own words", () => {
+		expect(names("passkey")).toEqual(["Quest", "Tukar"]);
+		expect(names("passkey-kit")).toEqual(["Tukar"]);
+		expect(names("passkey wallet")).toEqual([
+			"Quest",
+			"Safe",
+			"Shield",
+			"Tukar",
+			"Umbra Wallet",
+		]);
+		const smart = [
+			"Quest",
+			"Safe",
+			"Shield",
+			"Signers",
+			"Smart Escrow",
+			"Umbra Wallet",
+		];
+		expect(names("smart")).toEqual(smart);
+		expect(names("smart contract")).toEqual(smart);
+		expect(names("wallet")).toEqual([
+			"Quest",
+			"Safe",
+			"Shield",
+			"Umbra Wallet",
+		]);
+		expect(names("account abstraction")).toEqual(["Signers", "Smart Escrow"]);
+	});
+});
+
 describe("words no build uses", () => {
 	const pool = [build("Agent Pay", "AI agents, payments at the café.")];
 

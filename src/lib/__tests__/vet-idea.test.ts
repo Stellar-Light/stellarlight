@@ -601,6 +601,57 @@ describe("vet-idea prior-art builds for short ideas", () => {
 });
 
 /**
+ * Lane Z3 (2026-10-23): q=smart account read as one concept, but the
+ * evidence rule's one-word path took only the phrase as typed, so a build
+ * writing smart wallet, the same thing, left vetIdea's five.
+ */
+describe("vet-idea prior-art builds for a smart wallet or smart account", () => {
+	const build = (id: string, description: string): IndexedBuild => ({
+		id,
+		name: id,
+		description,
+		githubUrl: null,
+		demoUrl: null,
+		videoUrl: null,
+		track: null,
+		hackathonPlacement: null,
+		award: null,
+		isWinner: false,
+		voteCount: null,
+		url: `https://dorahacks.io/buidl/${id}`,
+		source: "dorahacks",
+		hackathon: { title: "E", slug: "e", endedAt: "2025-01-15" },
+		haystack: `${id} ${description}`.toLowerCase(),
+	});
+	beforeAll(() => {
+		buildsIndex.push(
+			build("aa-kit", "Deploys a smart account per user."),
+			build("wallet-ui", "A smart wallet for savings."),
+			build("key-login", "Passkey login for payments."),
+			build("escrow", "Smart contract escrow for any account."),
+		);
+	});
+	afterAll(() => {
+		buildsIndex.length = 0;
+	});
+	const payload = {
+		find: async () => ({ docs: [], totalDocs: 0 }),
+	} as never;
+
+	it("lists a build that writes the other phrase or a passkey, and says so", async () => {
+		const p = (await buildVetIdea(payload, "smart account")).priorArt;
+		expect(p.builds?.map((b) => b.id).sort()).toEqual([
+			"aa-kit",
+			"key-login",
+			"wallet-ui",
+		]);
+		expect(p.note).toMatch(
+			/reads this idea as one word, "smart-account": each listed build need only mention smart wallet, smart account, a passkey or WebAuthn in its name or description/,
+		);
+	});
+});
+
+/**
  * 2026-10-23: the hybrid top 50 reordered by a reranker that reads the idea
  * with each build's name and summary; of the five it puts first, those it
  * scores at least RERANK_FLOOR are listed. On held-out labeled ideas:

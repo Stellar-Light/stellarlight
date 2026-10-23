@@ -252,3 +252,33 @@ to 6th; on the battery's sa-01 topic form Zelyo, matched in the base on
 smart from "smart contracts", falls below the half rule once its passkey
 counts for q's passkey alone. Open for the owner, as after Z3: whether bar
 (i) should count same-grade swaps inside a fixed window.
+
+## Decision (2026-10-23, after the round)
+
+- Shipped, over bar (i) as written. The owner's standing instruction is to
+  ship lanes once review passes; asked about this one, the owner did not
+  pick, so the coordinating session made the call and said so in plain
+  words before shipping.
+- Why:
+  1. Bar (i) counts same-grade swaps as failures. 30 of its 37 rows are an
+     on-topic build replaced by another on-topic build in the same window;
+     whether those should count is the question left open after Z3.
+  2. The real losses are 7 rows on 3 pairs: two one-place drops (5th to
+     6th) on q=passkey or smart-wallet onboarding, and one matched-list
+     exit on the battery's sa-01 topic form, for a build matched there
+     partly on smart in "smart contracts".
+  3. The gains sit on a HackMeridian 2026 priority topic. q=smart wallet
+     and q=smart account (all builds, hybrid first 10): on-topic 5 to 10,
+     off-topic 4 and 5 to 0; winners graded on-topic 0 and 1 to 2; L1-02
+     met; 23 off-topic builds leave a top 5 and none enters. Byte identity
+     holds on all 269 queries without either phrase or a hyphen; rule L's
+     claims are 0 false of 529; the adversarial probes are 10 of 10.
+- Composition with main at cb6c4d63 (spec 1.9.104, after #1874 and #1875):
+  `git apply -3` of `o2.diff` applies all four files cleanly; the replay
+  over all seven captures equals lane Z4's o2m replay (O2 merged onto the H
+  that merged) on 305 of 305 queries, note lines too, so every result above
+  holds on main.
+- Disclosed in the changelog entry: the 3 real-loss pairs and vetIdea's
+  prior art for q=smart account policy signers (4 builds to 1, the three
+  that leave graded 1). Spec placeholder 1.9.112, renumbered at merge.
+

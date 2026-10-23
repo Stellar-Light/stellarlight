@@ -2,6 +2,10 @@
 
 Evidence for `improvements/rounds/2026-10-23-smart-wallet-o2.md` (lane Z4).
 
+**Update, same day: shipped after the round, over bar (i) as written;
+the ledger's Decision section says why.** The verdict below is the
+round's own.
+
 **Verdict: not shipped.** O2, the one candidate written and pinned before
 any replay (`o2.diff`: lane Z3's O1H with H and two fixes), meets (a) L1-02
 (2 on-topic winners where the base has 1), (b) byte identity (269 of 269

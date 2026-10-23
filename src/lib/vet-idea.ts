@@ -27,6 +27,7 @@ import { queryBuilds } from "./hackathon-build-query";
 import {
 	type BuildSearchMode,
 	getHackathonBuildsIndex,
+	SMART_CONCEPT,
 } from "./hackathon-builds";
 import { ACTIVE_PROJECT_STATUSES } from "./population";
 import {
@@ -550,12 +551,13 @@ export async function buildVetIdea(
 			? `builds is empty because ${n === 1 ? "the nearest submission" : `the ${n} nearest submissions`} did not meet the evidence rule: ${why}. That is not a finding that nobody built this; searchHackathonBuilds with the same q lists them with the words each matched.`
 			: null;
 	// A listed build that met only the one-word path: the idea reads as one
-	// word, and the build need only use it. Not a path when reranked.
+	// word, and the build need only use it (a smart wallet or smart account,
+	// any of the words that satisfy it). Not a path when reranked.
 	const oneWord = rerank
 		? undefined
 		: evidence?.find((s) => !twoWordsOrMeaning(s))?.matched[0];
 	const oneWordNote = oneWord
-		? `The search reads this idea as one word, "${oneWord}": each listed build need only mention it in its name or description, which does not make it the same idea.`
+		? `The search reads this idea as one word, "${oneWord}": each listed build need only mention ${SMART_CONCEPT.test(oneWord) ? "smart wallet, smart account, a passkey or WebAuthn" : "it"} in its name or description, which does not make it the same idea.`
 		: null;
 	const priorArtBuilds = evidence
 		? evidence.map(({ b, matched, similarity }) => ({
