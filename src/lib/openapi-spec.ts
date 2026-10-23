@@ -6917,7 +6917,7 @@ export const spec: OpenAPISpec = {
 						name: "repo",
 						in: "query",
 						description:
-							"Only this allowlisted repo, as owner/name or name. Anything else answers 400 with the valid values.",
+							"Only this allowlisted repo, as owner/name (e.g. stellar/quickstart). Anything else answers 400 with the valid values.",
 						schema: { type: "string", enum: [...SOURCE_REPO_NAMES] },
 					},
 					{
@@ -6929,8 +6929,9 @@ export const spec: OpenAPISpec = {
 					{
 						name: "page",
 						in: "query",
-						description: "Page of 10 pointers, from 1.",
-						schema: { type: "integer", minimum: 1, default: 1 },
+						description:
+							"Page of 10 pointers: a whole number from 1 to 2000 written as plain digits.",
+						schema: { type: "integer", minimum: 1, maximum: 2000, default: 1 },
 					},
 				],
 				responses: {
@@ -7053,7 +7054,7 @@ export const spec: OpenAPISpec = {
 					},
 					"400": {
 						description:
-							"q missing, over 300 characters or all filler; an unknown parameter, repo or kind; a page below 1. Never silently ignored.",
+							"q missing, over 300 characters or all filler; an unknown parameter, repo or kind; a page that is not a whole number from 1 to 2000. Never silently ignored.",
 						content: {
 							"application/json": {
 								schema: {
@@ -7069,6 +7070,12 @@ export const spec: OpenAPISpec = {
 												validValues: {
 													type: "array",
 													items: { type: "string" },
+												},
+												validRange: {
+													type: "array",
+													items: { type: "integer" },
+													description:
+														"For page: the lowest and highest page, [1, 2000].",
 												},
 											},
 										},

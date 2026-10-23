@@ -30,12 +30,13 @@ import {
 	authorityRole,
 	CANDIDATE_CAP,
 	candidateTerms,
-	type IndexRow,
 	LOCATE_MATCH_MODES,
 	LOCATE_TOTAL_BASES,
 	LOCATOR_KINDS,
 	type PointerKind,
 	parseQuery,
+	RANK_FIELDS,
+	type RankRow,
 	rankRows,
 	resolveRepo,
 	SOURCE_REPO_NAMES,
@@ -48,6 +49,13 @@ export const maxDuration = 20;
 const ENDPOINT = "/api/sources/locate";
 const VALID_PARAMS = ["q", "repo", "kind", "page"];
 const PAGE_SIZE = 10;
+/** The last page the candidate cap can fill. */
+const MAX_PAGE = CANDIDATE_CAP / PAGE_SIZE;
+/** Only what ranking and the pointer read: key and terms are about half of a row. */
+const READ_PROJECTION = Object.fromEntries([
+	["_id", 0],
+	...RANK_FIELDS.map((f) => [f, 1]),
+]);
 const MAX_Q_CHARS = 300;
 const NOTE =
 	"Pointers, not content: fetch verificationUrl (the file at the pinned commit, at the line) to read the fact. ref is the commit the pointer was read at; an unchanged file keeps its first ref, which stays valid (same blob, same lines) and was re-confirmed at verifiedAt. Ranking is lexical: an exact symbol or file name scores highest, then an identifier held in a name, then words in a symbol or heading, then path words; score is 0 to 100 against this q. pointers [] means the indexed repos hold no match; null means they could not be searched.";
@@ -96,16 +104,24 @@ export async function GET(req: NextRequest) {
 	if (repoParam && !repo)
 		return bad(`unknown repo: ${repoParam}`, {
 			validValues: SOURCE_REPO_NAMES,
-			hint: "repo takes an allowlisted repo, as owner/name or name.",
+			hint: "repo takes an allowlisted repo as owner/name, e.g. stellar/quickstart.",
 		});
 	const kindParam = sp.get("kind")?.trim() || null;
 	if (kindParam && !(LOCATOR_KINDS as readonly string[]).includes(kindParam))
 		return bad(`unknown kind: ${kindParam}`, { validValues: LOCATOR_KINDS });
 	const kind = kindParam as PointerKind | null;
+	// Digits only: Number() would take 1e2, 0x2, +1 and " 1" as pages.
 	const pageParam = sp.get("page");
-	const page = pageParam === null ? 1 : Number(pageParam);
-	if (!Number.isInteger(page) || page < 1)
-		return bad("page must be a whole number from 1");
+	const page =
+		pageParam === null
+			? 1
+			: /^\d{1,4}$/.test(pageParam)
+				? Number(pageParam)
+				: 0;
+	if (page < 1 || page > MAX_PAGE)
+		return bad(`page must be a whole number from 1 to ${MAX_PAGE}`, {
+			validRange: [1, MAX_PAGE],
+		});
 	const pq = parseQuery(q, isContentStopword);
 	if (!pq.units.length)
 		return bad("q has no searchable words", {
@@ -230,10 +246,10 @@ export async function GET(req: NextRequest) {
 							repo: { $in: indexed },
 							...(kind ? { locatorKind: kind } : {}),
 						},
-						{ projection: { _id: 0, createdAt: 0, updatedAt: 0 } },
+						{ projection: READ_PROJECTION },
 					)
 					.limit(CANDIDATE_CAP + 1)
-					.toArray() as Promise<IndexRow[]>,
+					.toArray() as Promise<RankRow[]>,
 			null,
 			DEFAULT_READ_TIMEOUT_MS,
 		)

@@ -107,6 +107,18 @@ export interface IndexRow {
 	terms: string[];
 }
 
+/** The fields ranking and the served pointer read; the route fetches only these. */
+export const RANK_FIELDS = [
+	"repo",
+	"ref",
+	"path",
+	"locatorKind",
+	"locator",
+	"line",
+	"blobSha",
+] as const;
+export type RankRow = Pick<IndexRow, (typeof RANK_FIELDS)[number]>;
+
 export function rowKey(
 	repo: string,
 	path: string,
@@ -351,7 +363,7 @@ export const WEIGHTS = {
 } as const;
 
 export interface Scored {
-	row: IndexRow;
+	row: RankRow;
 	/** How many of q's words this pointer matched at all. */
 	matched: number;
 	total: number;
@@ -362,7 +374,7 @@ export interface Scored {
 
 type Hit = "exact" | "prefix" | "word" | "path";
 
-export function scoreRow(pq: ParsedQuery, row: IndexRow): Scored | null {
+export function scoreRow(pq: ParsedQuery, row: RankRow): Scored | null {
 	const isFile = row.locatorKind === "file" || !row.locator;
 	const isSymbol = row.locatorKind === "symbol";
 	const locator = row.locator ?? "";
@@ -457,7 +469,7 @@ const KIND_ORDER: Record<PointerKind, number> = {
 
 export function rankRows(
 	pq: ParsedQuery,
-	rows: IndexRow[],
+	rows: RankRow[],
 	filter: { repo?: string | null; kind?: PointerKind | null } = {},
 ): Scored[] {
 	const out: Scored[] = [];

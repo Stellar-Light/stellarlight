@@ -6180,11 +6180,11 @@ export interface operations {
             query: {
                 /** @description What to locate: a symbol, flag, option, config key or topic words (at most 300 characters), e.g. --enable-core-manual-close or getTransactions default limit. Naming a repo in q (stellar-rpc, quickstart) lifts its pointers. */
                 q: string;
-                /** @description Only this allowlisted repo, as owner/name or name. Anything else answers 400 with the valid values. */
+                /** @description Only this allowlisted repo, as owner/name (e.g. stellar/quickstart). Anything else answers 400 with the valid values. */
                 repo?: "stellar/stellar-core" | "stellar/rs-soroban-sdk" | "stellar/rs-soroban-env" | "stellar/js-stellar-sdk" | "stellar/stellar-rpc" | "stellar/quickstart" | "stellar/stellar-cli" | "stellar/soroban-examples";
                 /** @description Only this locator kind. */
                 kind?: "file" | "symbol" | "heading";
-                /** @description Page of 10 pointers, from 1. */
+                /** @description Page of 10 pointers: a whole number from 1 to 2000 written as plain digits. */
                 page?: number;
             };
             header?: never;
@@ -6256,7 +6256,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description q missing, over 300 characters or all filler; an unknown parameter, repo or kind; a page below 1. Never silently ignored. */
+            /** @description q missing, over 300 characters or all filler; an unknown parameter, repo or kind; a page that is not a whole number from 1 to 2000. Never silently ignored. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -6265,6 +6265,8 @@ export interface operations {
                     "application/json": components["schemas"]["RequestError"] & {
                         validParams?: string[];
                         validValues?: string[];
+                        /** @description For page: the lowest and highest page, [1, 2000]. */
+                        validRange?: number[];
                     };
                 };
             };

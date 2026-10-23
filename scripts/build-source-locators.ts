@@ -10,8 +10,11 @@
  *   pnpm exec tsx scripts/build-source-locators.ts                # dry run: plan vs the stored index
  *   pnpm exec tsx scripts/build-source-locators.ts --execute      # write, read back, stamp repo state
  *   pnpm exec tsx scripts/build-source-locators.ts --execute --scheduled
- *       # the schedule's form: writes only once the index has been seeded by
- *       # a hand-dispatched execute (after its dry run was read); dry before
+ *       # the schedule's form: writes a repo only once that repo has a state
+ *       # row, i.e. a hand-dispatched execute filled it after its dry run
+ *       # was read; a repo without one stays dry
+ *   pnpm exec tsx scripts/build-source-locators.ts --execute --allow-shrink
+ *       # lets a plan delete more than max(50, half) of a repo's pointers
  *   pnpm exec tsx scripts/build-source-locators.ts --replan       # rebuild at each repo's STORED ref; must plan 0
  *   pnpm exec tsx scripts/build-source-locators.ts --no-db --out f.json [--repo quickstart]
  *       # no database at all: counts, plus the rows as JSON for offline evaluation
@@ -21,6 +24,12 @@
  * leaves a file untouched rewrites none of its pointers (the stored ref
  * stays a valid permalink: same blob, same lines). The one writer of both
  * collections.
+ *
+ * Refusals (no write, the repo's state row kept, exit 1 at the end): a
+ * tarball that yields no indexable file is unreadable, never an empty repo,
+ * since writing it would delete the index and turn the route's null into
+ * []; and a plan deleting more than max(50, half the stored pointers) needs
+ * --allow-shrink, which the schedule never passes.
  *
  * Cost: 8 GitHub API reads (HEAD sha) and 8 tarballs per run, about 45 MB
  * in total; GITHUB_TOKEN is optional (lifts the 60/hour API limit).
@@ -42,8 +51,9 @@ const BUILDER_VERSION = "1";
 const args = process.argv.slice(2);
 const flag = (name: string) =>
 	args.includes(name) ? (args[args.indexOf(name) + 1] ?? "") : null;
-let execute = args.includes("--execute");
+const execute = args.includes("--execute");
 const scheduled = args.includes("--scheduled");
+const allowShrink = args.includes("--allow-shrink");
 const replan = args.includes("--replan");
 const noDb = args.includes("--no-db");
 const outPath = flag("--out");
@@ -108,12 +118,6 @@ async function run() {
 		};
 		if (!models.rows || !models.repos)
 			throw new Error("source-locators collections missing from Payload");
-		if (execute && scheduled && !(await models.repos.countDocuments())) {
-			console.log(
-				"scheduled run on an unseeded index: dry run only. The first fill is a hand-dispatched execute, after its dry run is read.",
-			);
-			execute = false;
-		}
 		if (execute) {
 			await models.rows.createIndexes();
 			await models.repos.createIndexes();
@@ -141,6 +145,13 @@ async function run() {
 				ref = state.ref;
 			} else ref = await headRef(repo);
 			const build = buildRows(repo, ref, tarFiles(await tarball(repo, ref)));
+			if (!build.files) {
+				console.error(
+					`${repo}@${ref.slice(0, 12)}: the tarball held no indexable file (empty, or entries outside a top directory). Treated as unreadable, not as an empty repo: nothing written, state kept.`,
+				);
+				failures++;
+				continue;
+			}
 			const byKind = { file: 0, symbol: 0, heading: 0 };
 			for (const r of build.rows) byKind[r.locatorKind]++;
 			const bytes = Buffer.byteLength(JSON.stringify(build.rows));
@@ -175,7 +186,21 @@ async function run() {
 			console.log(
 				`  plan: writes=${writes} (create ${creates}, update ${upserts.length - creates}, delete ${deletes.length}); stored ${existing.size}`,
 			);
+			const shrinkCap = Math.max(50, Math.floor(existing.size / 2));
+			if (deletes.length > shrinkCap && !allowShrink) {
+				console.error(
+					`  ✗ ${repo}: the plan deletes ${deletes.length} of ${existing.size} stored pointers, over the cap of ${shrinkCap}. Refused: nothing written, state kept. Read the plan, then rerun with --allow-shrink if the shrink is real.`,
+				);
+				failures++;
+				continue;
+			}
 			if (!execute) continue;
+			if (scheduled && !(await models.repos.findOne({ repo }).lean())) {
+				console.log(
+					`  ${repo}: no state row yet, so this scheduled run stays dry for it. Its first fill is a hand-dispatched execute, after its dry run is read.`,
+				);
+				continue;
+			}
 
 			for (let i = 0; i < upserts.length; i += 1000)
 				await models.rows.bulkWrite(

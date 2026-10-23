@@ -215,3 +215,49 @@ Open: the builder's database modes have not run against a database (no
 local Mongo; the driver calls are covered only by the route test's mock);
 m2 passes by a thin margin; JSON files (env.json) have no locator rule;
 routing reaches the operation mostly for short, intent-worded questions.
+
+## Log, continued (review fixes)
+
+- The orchestrator merged origin/main into the branch as `9949c58b` (one
+  conflict, a generated comment in `payload-types.ts`, main's text kept)
+  and renumbered it to spec 1.9.98. It ships as 1.9.98: the 1.9.99 in the
+  lines above is the number it carried before the renumber.
+- Provenance of the fresh run: the fresh battery's sha256
+  (`b051ae9e...`) was fixed in the orchestrator's brief before the run;
+  the ranking fix `9083b2fd` was committed at 14:00:47Z, before the battery
+  was frozen (14:05:01Z) and before the run; the battery file and its
+  result landed together in `f4843849` (14:07:39Z).
+- Independent review verdict: GATE, fix first (re-run battery identical,
+  15/20). Fixes, tests first (failing outputs, then green):
+  1. Data safety in the builder. A tarball yielding no indexable file
+     (an empty archive, entries outside a top directory) is treated as
+     unreadable: no write, the state row kept, exit 1. A plan deleting
+     more than max(50, half the stored pointers) is refused the same way
+     unless `--allow-shrink`, which the schedule never passes; the
+     workflow gains an `allow_shrink` input, default false.
+     `src/lib/__tests__/build-source-locators.test.ts` drives the script
+     against in-memory models and a stubbed fetch (adapted from the
+     reviewer's scenarios): before the fix, the empty-tar, flat-tar and
+     shrink cases failed (exit 0 with the deletes carried out).
+  2. `--scheduled` checks a state row per repo, not one for any repo; a
+     repo without its own stays dry. Same test file: failed first.
+  3. The route reads only `repo, ref, path, locatorKind, locator, line,
+     blobSha` (an inclusion projection from `RANK_FIELDS`), never `key` or
+     `terms`; ranking now types rows as `RankRow`. Route test pins the
+     projection: failed first (it saw the exclusion projection).
+  4. `repo` text recommends only what the enum allows (owner/name) in the
+     spec, the 400 hint and the changelog; the route still resolves a bare
+     name but no longer advertises it. Enum parity unchanged.
+  5. `page` accepts digits only, 1 to 2000 (the candidate cap over the
+     page size); anything else answers 400 with `validRange`. Route test
+     covers 1e2, 0x2, +1, " 1", 1.5, 2001, empty and a 20-digit value:
+     failed first (1e2 answered 200).
+  6. README version text: 1.9.98.
+- 14:55Z, checks: `tsc --noEmit -p tsconfig.json` 0; scripts type ratchet
+  0 (no new errors, 28 known); `vitest run src/lib/__tests__ src/app/api
+  src/collections/__tests__` 0 (193 files, 2432 tests); `pnpm
+  contract:write` 0; `CONTRACT_BASE=origin/main pnpm contract:check` 0
+  (base resolved to `eb9ef225`); writer conformance 0; biome clean on the
+  changed files; Raven gate ACCEPT 1.9.98 at 220/298/326/112, 0
+  hit-to-miss, full output in `../audits/2026-10-23-source-locator/raven-gate.txt`
+  (local paths replaced by placeholders).

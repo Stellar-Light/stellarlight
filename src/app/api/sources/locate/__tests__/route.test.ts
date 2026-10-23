@@ -33,7 +33,28 @@ const store: {
 	repos: Array<Record<string, unknown>>;
 	fail: "none" | "payload" | "repos" | "rows";
 	lastFilter: Record<string, unknown> | null;
-} = { rows: [], repos: [], fail: "none", lastFilter: null };
+	lastProjection: Record<string, number> | null;
+} = {
+	rows: [],
+	repos: [],
+	fail: "none",
+	lastFilter: null,
+	lastProjection: null,
+};
+
+/** A driver projection applied as Mongo would: inclusion keeps only the 1s, exclusion drops the 0s. */
+function project(r: IndexRow, projection: Record<string, number> | undefined) {
+	if (!projection) return r;
+	const entries = Object.entries(r);
+	const inclusion = Object.entries(projection).some(
+		([k, v]) => k !== "_id" && v === 1,
+	);
+	return Object.fromEntries(
+		entries.filter(([k]) =>
+			inclusion ? projection[k] === 1 : projection[k] !== 0,
+		),
+	);
+}
 
 /** The driver calls the route makes, evaluated over the fixture rows. */
 function matches(r: IndexRow, filter: Record<string, unknown>): boolean {
@@ -57,7 +78,10 @@ vi.mock("@/lib/payload-client", () => ({
 						connection: {
 							db: {
 								collection: (name: string) => ({
-									find: (filter: Record<string, unknown>) => {
+									find: (
+										filter: Record<string, unknown>,
+										opts?: { projection?: Record<string, number> },
+									) => {
 										if (name === "source-locator-repos")
 											return {
 												toArray: async () => {
@@ -66,13 +90,15 @@ vi.mock("@/lib/payload-client", () => ({
 												},
 											};
 										store.lastFilter = filter;
+										store.lastProjection = opts?.projection ?? null;
 										return {
 											limit: (n: number) => ({
 												toArray: async () => {
 													if (store.fail === "rows") throw new Error("boom");
 													return store.rows
 														.filter((r) => matches(r, filter))
-														.slice(0, n);
+														.slice(0, n)
+														.map((r) => project(r, opts?.projection));
 												},
 											}),
 										};
@@ -168,6 +194,26 @@ describe("GET /api/sources/locate", () => {
 		});
 	});
 
+	it("reads only the fields it ranks and serves, never key or terms", async () => {
+		const { body } = await get("q=ENABLE_CORE_MANUAL_CLOSE");
+		expect(store.lastProjection).toEqual({
+			_id: 0,
+			repo: 1,
+			ref: 1,
+			path: 1,
+			locatorKind: 1,
+			locator: 1,
+			line: 1,
+			blobSha: 1,
+		});
+		expect(body.pointers[0]).toMatchObject({
+			locator: "ENABLE_CORE_MANUAL_CLOSE",
+			line: 47,
+			blobSha: "a".repeat(40),
+		});
+		expect(declared(body)).toEqual([]);
+	});
+
 	it("no match is a data-shaped empty: pointers [] and total 0", async () => {
 		const { status, body } = await get("q=quantum llama sandwich");
 		expect(status).toBe(200);
@@ -253,10 +299,18 @@ describe("GET /api/sources/locate", () => {
 	it("rejects what it cannot honour with 400 and the valid values", async () => {
 		const cases: Array<[string, string]> = [
 			["", "q"],
-			["q=x&repo=stellar/horizon", "stellar/stellar-core"],
-			["q=x&kind=line", "heading"],
-			["q=x&page=0", "page"],
-			["q=x&limit=5", "limit"],
+			["q=limit&repo=stellar/horizon", "stellar/stellar-core"],
+			["q=limit&kind=line", "heading"],
+			["q=limit&page=0", "page"],
+			["q=limit&page=1e2", "1 to 2000"],
+			["q=limit&page=0x2", "1 to 2000"],
+			["q=limit&page=%2B1", "1 to 2000"],
+			["q=limit&page=%201", "1 to 2000"],
+			["q=limit&page=1.5", "1 to 2000"],
+			["q=limit&page=99999999999999999999", "1 to 2000"],
+			["q=limit&page=2001", "1 to 2000"],
+			["q=limit&page=", "1 to 2000"],
+			["q=limit&limit=5", "limit"],
 			["q=where is the", "q"],
 			[`q=${"a".repeat(301)}`, "300"],
 		];

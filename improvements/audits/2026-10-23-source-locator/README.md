@@ -234,7 +234,7 @@ intent-worded questions. A client that calls it by name is unaffected.
 
 ## Second pass: what was built
 
-- `GET /api/sources/locate` (`locateSource`, spec 1.9.99, x-side-effecting
+- `GET /api/sources/locate` (`locateSource`, spec 1.9.98, x-side-effecting
   false): q, repo, kind, page of 10; the SourcePointer shape plus rank and
   line; `pointers []` and `total 0` for no match; `null` with a note when
   the repo is not indexed yet (200) or the index cannot be read (503).
@@ -242,11 +242,16 @@ intent-worded questions. A client that calls it by name is unaffected.
   writes them through the driver and reads every written row back.
 - `.github/workflows/build-source-locators.yml`: daily and dispatchable,
   dry run by default, an Idempotence step that must plan 0; the schedule
-  writes only after a hand-dispatched first fill.
-- The Raven gate: ACCEPT 1.9.99, totals unchanged (220/298/326/112), 0
-  hit-to-miss, locateSource top 1 on no gate question. A first draft's
-  example question ("Where is the Map type defined in soroban-sdk?") took a
-  docs question about Instance storage on admission and was dropped.
+  writes a repo only after its own hand-dispatched first fill.
+- Data-safety refusals after the independent review: a tarball with no
+  indexable file is unreadable (no write, state kept, exit 1), and a plan
+  deleting more than max(50, half) of a repo's pointers needs
+  `--allow-shrink` (a manual input, never the schedule).
+- The Raven gate: ACCEPT 1.9.98, totals unchanged (220/298/326/112), 0
+  hit-to-miss, locateSource top 1 on no gate question (full output in
+  `raven-gate.txt`). A first draft's example question ("Where is the Map
+  type defined in soroban-sdk?") took a docs question about Instance
+  storage on admission and was dropped.
 
 ## Reproduce
 
