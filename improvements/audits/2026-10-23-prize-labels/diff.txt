@@ -1,0 +1,241 @@
+# Base replay against the live capture (meta.generatedAt aside)
+
+build_dorahacks-buidl-25335.json: 0 differences from the live body
+build_dorahacks-buidl-27456.json: 0 differences from the live body
+build_dorahacks-buidl-28436.json: 0 differences from the live body
+build_dorahacks-buidl-30677.json: 0 differences from the live body
+build_dorahacks-buidl-32712.json: 0 differences from the live body
+build_dorahacks-buidl-36328.json: 0 differences from the live body
+build_dorahacks-buidl-39840.json: 0 differences from the live body
+build_dorahacks-buidl-40191.json: 0 differences from the live body
+build_dorahacks-buidl-42585.json: 1 differences from the live body: .build.project.factsReadAt
+build_dorahacks-buidl-46541.json: 0 differences from the live body
+builds_hackathon=build-on-stellar&limit=100&offset=0.json: 0 differences from the live rows
+builds_hackathon=buildonstellarchile&limit=100&offset=0.json: 0 differences from the live rows
+builds_hackathon=scaffoldstellar&limit=100&offset=0.json: 0 differences from the live rows
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=0.json: 0 differences from the live rows
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=100.json: 0 differences from the live rows
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=200.json: 0 differences from the live rows
+builds_hackathon=stellar-hacks-blend&limit=100&offset=0.json: 0 differences from the live rows
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json: 0 differences from the live rows
+builds_hackathon=stellar-hacks-paltalabs&limit=100&offset=0.json: 0 differences from the live rows
+builds_hackathon=stellar-hacks-zk&limit=100&offset=0.json: 0 differences from the live rows
+builds_hackathon=stellar-hacks-zk&limit=100&offset=100.json: 0 differences from the live rows
+builds_hackathon=stellar-hacks-zk&limit=100&offset=200.json: 0 differences from the live rows
+builds_hackathon=stellar-hacks-zk&limit=100&offset=300.json: 0 differences from the live rows
+builds_hackathon=stellar-hacks-zk-gaming&limit=100&offset=0.json: 0 differences from the live rows
+builds_hackathon=stellar-latam&limit=100&offset=0.json: 0 differences from the live rows
+event_build-on-stellar.json: 0 differences from the live body
+event_buildonstellarchile.json: 0 differences from the live body
+event_scaffoldstellar.json: 0 differences from the live body
+event_stellar-agents-x402-stripe-mpp.json: 0 differences from the live body
+event_stellar-hacks-blend.json: 0 differences from the live body
+event_stellar-hacks-kale-reflector.json: 0 differences from the live body
+event_stellar-hacks-paltalabs.json: 0 differences from the live body
+event_stellar-hacks-zk-gaming.json: 0 differences from the live body
+event_stellar-hacks-zk.json: 0 differences from the live body
+event_stellar-latam.json: 0 differences from the live body
+
+# Base against lane, per request
+
+build_dorahacks-buidl-25335.json: 4 differences (2 allowed (2): listed event, award text moved to awardCategory; 2 allowed (1): awardCategory added beside award)
+build_dorahacks-buidl-27456.json: 4 differences (2 allowed (2): listed event, award text moved to awardCategory; 2 allowed (1): awardCategory added beside award)
+build_dorahacks-buidl-28436.json: 2 differences (2 allowed (1): awardCategory added beside award)
+build_dorahacks-buidl-30677.json: 6 differences (2 allowed (2): listed event, award text moved to awardCategory; 4 allowed (1): awardCategory added beside award)
+build_dorahacks-buidl-32712.json: 4 differences (2 allowed (2): listed event, award text moved to awardCategory; 2 allowed (1): awardCategory added beside award)
+build_dorahacks-buidl-36328.json: 4 differences (2 allowed (2): listed event, award text moved to awardCategory; 2 allowed (1): awardCategory added beside award)
+build_dorahacks-buidl-39840.json: 2 differences (2 allowed (1): awardCategory added beside award)
+build_dorahacks-buidl-40191.json: 2 differences (2 allowed (1): awardCategory added beside award)
+build_dorahacks-buidl-42585.json: 4 differences (2 allowed (2): listed event, award text moved to awardCategory; 2 allowed (1): awardCategory added beside award)
+build_dorahacks-buidl-46541.json: 4 differences (2 allowed (2): listed event, award text moved to awardCategory; 2 allowed (1): awardCategory added beside award)
+builds_hackathon=build-on-stellar&limit=100&offset=0.json: 85 differences (3 allowed (2): listed event, award text moved to awardCategory; 82 allowed (1): awardCategory added beside award)
+builds_hackathon=buildonstellarchile&limit=100&offset=0.json: 41 differences (41 allowed (1): awardCategory added beside award)
+builds_hackathon=scaffoldstellar&limit=100&offset=0.json: 68 differences (5 allowed (2): listed event, award text moved to awardCategory; 63 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=0.json: 105 differences (5 allowed (2): listed event, award text moved to awardCategory; 100 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=100.json: 100 differences (100 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=200.json: 49 differences (49 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-hacks-blend&limit=100&offset=0.json: 42 differences (3 allowed (2): listed event, award text moved to awardCategory; 39 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json: 55 differences (10 allowed (2): listed event, award text moved to awardCategory; 45 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-hacks-paltalabs&limit=100&offset=0.json: 29 differences (3 allowed (2): listed event, award text moved to awardCategory; 26 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-hacks-zk&limit=100&offset=0.json: 105 differences (5 allowed (2): listed event, award text moved to awardCategory; 100 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-hacks-zk&limit=100&offset=100.json: 100 differences (100 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-hacks-zk&limit=100&offset=200.json: 100 differences (100 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-hacks-zk&limit=100&offset=300.json: 19 differences (19 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-hacks-zk-gaming&limit=100&offset=0.json: 95 differences (95 allowed (1): awardCategory added beside award)
+builds_hackathon=stellar-latam&limit=100&offset=0.json: 22 differences (22 allowed (1): awardCategory added beside award)
+builds_q=xlm_20prize&hackathon=stellar-hacks-zk&limit=100.json: 18 differences (5 allowed (2): listed event, award text moved to awardCategory; 13 allowed (1): awardCategory added beside award)
+builds_winnersOnly=1&limit=100.json: 91 differences (34 allowed (2): listed event, award text moved to awardCategory; 57 allowed (1): awardCategory added beside award)
+event_build-on-stellar.json: 91 differences (6 allowed (2): listed event, award text moved to awardCategory; 85 allowed (1): awardCategory added beside award)
+event_buildonstellarchile.json: 56 differences (56 allowed (1): awardCategory added beside award)
+event_scaffoldstellar.json: 78 differences (10 allowed (2): listed event, award text moved to awardCategory; 68 allowed (1): awardCategory added beside award)
+event_stellar-agents-x402-stripe-mpp.json: 264 differences (10 allowed (2): listed event, award text moved to awardCategory; 254 allowed (1): awardCategory added beside award)
+event_stellar-hacks-blend.json: 48 differences (6 allowed (2): listed event, award text moved to awardCategory; 42 allowed (1): awardCategory added beside award)
+event_stellar-hacks-kale-reflector.json: 75 differences (20 allowed (2): listed event, award text moved to awardCategory; 55 allowed (1): awardCategory added beside award)
+event_stellar-hacks-paltalabs.json: 35 differences (6 allowed (2): listed event, award text moved to awardCategory; 29 allowed (1): awardCategory added beside award)
+event_stellar-hacks-zk-gaming.json: 100 differences (100 allowed (1): awardCategory added beside award)
+event_stellar-hacks-zk.json: 334 differences (10 allowed (2): listed event, award text moved to awardCategory; 324 allowed (1): awardCategory added beside award)
+event_stellar-latam.json: 26 differences (26 allowed (1): awardCategory added beside award)
+
+# Every award that moved (155) and every other difference not of kind (1)
+
+build_dorahacks-buidl-25335.json  .build.award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+build_dorahacks-buidl-25335.json  .build.entries[0].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+build_dorahacks-buidl-27456.json  .build.award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+build_dorahacks-buidl-27456.json  .build.entries[0].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+build_dorahacks-buidl-30677.json  .build.award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+build_dorahacks-buidl-30677.json  .build.entries[0].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+build_dorahacks-buidl-32712.json  .build.award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+build_dorahacks-buidl-32712.json  .build.entries[0].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+build_dorahacks-buidl-36328.json  .build.award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+build_dorahacks-buidl-36328.json  .build.entries[0].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+build_dorahacks-buidl-42585.json  .build.award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+build_dorahacks-buidl-42585.json  .build.entries[0].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+build_dorahacks-buidl-46541.json  .build.award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+build_dorahacks-buidl-46541.json  .build.entries[0].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_hackathon=build-on-stellar&limit=100&offset=0.json  .builds[0].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+builds_hackathon=build-on-stellar&limit=100&offset=0.json  .builds[1].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+builds_hackathon=build-on-stellar&limit=100&offset=0.json  .builds[2].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+builds_hackathon=scaffoldstellar&limit=100&offset=0.json  .builds[0].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_hackathon=scaffoldstellar&limit=100&offset=0.json  .builds[1].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_hackathon=scaffoldstellar&limit=100&offset=0.json  .builds[2].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_hackathon=scaffoldstellar&limit=100&offset=0.json  .builds[3].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_hackathon=scaffoldstellar&limit=100&offset=0.json  .builds[4].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=0.json  .builds[0].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=0.json  .builds[1].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=0.json  .builds[2].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=0.json  .builds[3].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_hackathon=stellar-agents-x402-stripe-mpp&limit=100&offset=0.json  .builds[4].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_hackathon=stellar-hacks-blend&limit=100&offset=0.json  .builds[0].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+builds_hackathon=stellar-hacks-blend&limit=100&offset=0.json  .builds[1].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+builds_hackathon=stellar-hacks-blend&limit=100&offset=0.json  .builds[2].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[0].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[1].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[2].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[3].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[4].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[5].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[6].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[7].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[8].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-kale-reflector&limit=100&offset=0.json  .builds[9].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_hackathon=stellar-hacks-paltalabs&limit=100&offset=0.json  .builds[0].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+builds_hackathon=stellar-hacks-paltalabs&limit=100&offset=0.json  .builds[1].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+builds_hackathon=stellar-hacks-paltalabs&limit=100&offset=0.json  .builds[2].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+builds_hackathon=stellar-hacks-zk&limit=100&offset=0.json  .builds[0].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_hackathon=stellar-hacks-zk&limit=100&offset=0.json  .builds[1].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_hackathon=stellar-hacks-zk&limit=100&offset=0.json  .builds[2].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_hackathon=stellar-hacks-zk&limit=100&offset=0.json  .builds[3].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_hackathon=stellar-hacks-zk&limit=100&offset=0.json  .builds[4].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_q=xlm_20prize&hackathon=stellar-hacks-zk&limit=100.json  .builds[0].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_q=xlm_20prize&hackathon=stellar-hacks-zk&limit=100.json  .builds[1].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_q=xlm_20prize&hackathon=stellar-hacks-zk&limit=100.json  .builds[2].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_q=xlm_20prize&hackathon=stellar-hacks-zk&limit=100.json  .builds[3].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_q=xlm_20prize&hackathon=stellar-hacks-zk&limit=100.json  .builds[4].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_winnersOnly=1&limit=100.json  .builds[0].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_winnersOnly=1&limit=100.json  .builds[1].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_winnersOnly=1&limit=100.json  .builds[2].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_winnersOnly=1&limit=100.json  .builds[3].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_winnersOnly=1&limit=100.json  .builds[4].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+builds_winnersOnly=1&limit=100.json  .builds[5].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_winnersOnly=1&limit=100.json  .builds[6].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_winnersOnly=1&limit=100.json  .builds[7].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_winnersOnly=1&limit=100.json  .builds[8].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_winnersOnly=1&limit=100.json  .builds[9].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+builds_winnersOnly=1&limit=100.json  .builds[10].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_winnersOnly=1&limit=100.json  .builds[11].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_winnersOnly=1&limit=100.json  .builds[12].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_winnersOnly=1&limit=100.json  .builds[13].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_winnersOnly=1&limit=100.json  .builds[14].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+builds_winnersOnly=1&limit=100.json  .builds[15].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+builds_winnersOnly=1&limit=100.json  .builds[16].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+builds_winnersOnly=1&limit=100.json  .builds[17].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+builds_winnersOnly=1&limit=100.json  .builds[18].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[19].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[20].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[21].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[22].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[23].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[24].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[25].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[26].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[27].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+builds_winnersOnly=1&limit=100.json  .builds[28].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+builds_winnersOnly=1&limit=100.json  .builds[29].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+builds_winnersOnly=1&limit=100.json  .builds[30].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+builds_winnersOnly=1&limit=100.json  .builds[31].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+builds_winnersOnly=1&limit=100.json  .builds[32].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+builds_winnersOnly=1&limit=100.json  .builds[33].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+event_build-on-stellar.json  .winners[0].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+event_build-on-stellar.json  .winners[1].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+event_build-on-stellar.json  .winners[2].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+event_build-on-stellar.json  .submissions[47].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+event_build-on-stellar.json  .submissions[59].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+event_build-on-stellar.json  .submissions[73].award  award "Build Better Prizes" -> null, awardCategory "Build Better Prizes"
+event_scaffoldstellar.json  .winners[0].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_scaffoldstellar.json  .winners[1].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_scaffoldstellar.json  .winners[2].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_scaffoldstellar.json  .winners[3].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_scaffoldstellar.json  .winners[4].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_scaffoldstellar.json  .submissions[10].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_scaffoldstellar.json  .submissions[13].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_scaffoldstellar.json  .submissions[37].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_scaffoldstellar.json  .submissions[45].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_scaffoldstellar.json  .submissions[52].award  award "Hackathon Winners" -> null, awardCategory "Hackathon Winners"
+event_stellar-agents-x402-stripe-mpp.json  .winners[0].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-agents-x402-stripe-mpp.json  .winners[1].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-agents-x402-stripe-mpp.json  .winners[2].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-agents-x402-stripe-mpp.json  .winners[3].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-agents-x402-stripe-mpp.json  .winners[4].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-agents-x402-stripe-mpp.json  .submissions[77].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-agents-x402-stripe-mpp.json  .submissions[78].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-agents-x402-stripe-mpp.json  .submissions[120].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-agents-x402-stripe-mpp.json  .submissions[224].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-agents-x402-stripe-mpp.json  .submissions[235].award  award "10K Prize Pool" -> null, awardCategory "10K Prize Pool"
+event_stellar-hacks-blend.json  .winners[0].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+event_stellar-hacks-blend.json  .winners[1].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+event_stellar-hacks-blend.json  .winners[2].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+event_stellar-hacks-blend.json  .submissions[3].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+event_stellar-hacks-blend.json  .submissions[20].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+event_stellar-hacks-blend.json  .submissions[35].award  award "Blend Composability Award" -> null, awardCategory "Blend Composability Award"
+event_stellar-hacks-kale-reflector.json  .winners[0].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .winners[1].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .winners[2].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .winners[3].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .winners[4].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .winners[5].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .winners[6].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .winners[7].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .winners[8].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .winners[9].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[3].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[4].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[6].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[9].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[13].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[18].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[19].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[27].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[30].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-kale-reflector.json  .submissions[42].award  award "KALE x Reflector Winners" -> null, awardCategory "KALE x Reflector Winners"
+event_stellar-hacks-paltalabs.json  .winners[0].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+event_stellar-hacks-paltalabs.json  .winners[1].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+event_stellar-hacks-paltalabs.json  .winners[2].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+event_stellar-hacks-paltalabs.json  .submissions[0].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+event_stellar-hacks-paltalabs.json  .submissions[14].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+event_stellar-hacks-paltalabs.json  .submissions[15].award  award "Soroswap - Defindex Composability Award" -> null, awardCategory "Soroswap - Defindex Composability Award"
+event_stellar-hacks-zk.json  .winners[0].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+event_stellar-hacks-zk.json  .winners[1].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+event_stellar-hacks-zk.json  .winners[2].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+event_stellar-hacks-zk.json  .winners[3].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+event_stellar-hacks-zk.json  .winners[4].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+event_stellar-hacks-zk.json  .submissions[160].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+event_stellar-hacks-zk.json  .submissions[176].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+event_stellar-hacks-zk.json  .submissions[254].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+event_stellar-hacks-zk.json  .submissions[277].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+event_stellar-hacks-zk.json  .submissions[299].award  award "$10,000 XLM Prize" -> null, awardCategory "$10,000 XLM Prize"
+
+# Criterion (a) over the lane's bodies
+
+rows with an award field on the listed events: 1741; with award text: 0; with awardCategory: 155. Rows with an award field elsewhere: 371; with awardCategory: 0.
+
+unintended differences: 0

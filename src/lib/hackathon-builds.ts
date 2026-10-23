@@ -9,7 +9,7 @@
  */
 import { unstable_cache } from "next/cache";
 import { overlayWinnerOf } from "@/data/winner-overlay";
-import { withReadTimeout } from "@/lib/degraded-read";
+import { DEFAULT_READ_TIMEOUT_MS, withReadTimeout } from "@/lib/degraded-read";
 import { libraryOf } from "@/lib/hackathon-analytics";
 import {
 	BUILD_SEARCH_MODES,
@@ -27,6 +27,8 @@ import {
 	fetchAllDoraHacksHackathons,
 	fetchHackathonSubmissions,
 	parsePlacement,
+	prizeCategories,
+	prizeLabels,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { contentTokens } from "@/lib/repo-search";
@@ -229,6 +231,39 @@ export async function readProjectFacts(
 	}
 }
 
+/** The award categories of a submission's events (prizeCategories), read
+ * from their stored winners, hidden ones too: a hidden winner's placement is
+ * in its award though not served. Read only when a row carries award text;
+ * a failed read throws, since award has no honest could-not-check value. */
+export async function readAwardCategories(
+	payload: NonNullable<Awaited<ReturnType<typeof getPayloadSafe>>>,
+	rows: HackathonBuild[],
+): Promise<Set<string>> {
+	if (!rows.some((r) => r.award)) return new Set();
+	const res = await withReadTimeout(
+		payload.find({
+			collection: "hackathon-builds",
+			where: {
+				and: [
+					{ hackathonSlug: { in: rows.map((r) => r.hackathonSlug) } },
+					{ isWinner: { equals: true } },
+				],
+			},
+			pagination: false,
+			depth: 0,
+			select: { hackathonSlug: true, placement: true, award: true },
+		}),
+		DEFAULT_READ_TIMEOUT_MS,
+	);
+	return prizeCategories(
+		(res.docs as HackathonBuild[]).map((w) => ({
+			award: w.award,
+			hackathonPlacement: w.placement,
+			hackathon: { slug: w.hackathonSlug },
+		})),
+	);
+}
+
 const linkedProject = (d: HackathonBuild, facts?: ProjectFacts) =>
 	d.projectSlug
 		? {
@@ -305,7 +340,10 @@ export interface BuildDetail {
 	hackathon: { title: string; slug: string; endedAt: string | null };
 	track: string | null;
 	placement: string | null;
+	/** This entry's own award; null when its text names a category other
+	 * placements share (awardCategory). */
 	award: string | null;
+	awardCategory: string | null;
 	prizeUsd: number | null;
 	isWinner: boolean;
 	/** Present only when the best entry's win is named off DoraHacks. */
@@ -345,6 +383,7 @@ export interface BuildEntry {
 	track: string | null;
 	placement: string | null;
 	award: string | null;
+	awardCategory: string | null;
 	prizeUsd: number | null;
 	isWinner: boolean;
 	/** Present only when a page off DoraHacks names this entry's win. */
@@ -379,7 +418,10 @@ export function onePerSubmission(builds: IndexedBuild[]): IndexedBuild[] {
 	return builds.filter((b) => best.get(b.id) === b);
 }
 
-function entryOf(d: HackathonBuild): BuildEntry {
+function entryOf(
+	d: HackathonBuild,
+	categories: ReadonlySet<string>,
+): BuildEntry {
 	const won = overlayWinner(d.buildId, d.hackathonSlug, !!d.isWinner);
 	const placement = won?.placement ?? d.placement ?? null;
 	return {
@@ -390,7 +432,10 @@ function entryOf(d: HackathonBuild): BuildEntry {
 		},
 		track: d.track ?? null,
 		placement,
-		award: d.award ?? null,
+		...prizeLabels(categories, {
+			award: d.award,
+			hackathon: { slug: d.hackathonSlug },
+		}),
 		prizeUsd: parsePlacement(placement).prizeUsd || null,
 		isWinner: !!d.isWinner || !!won,
 		...(won ? { winnerSource: won.winnerSource } : {}),
@@ -399,14 +444,16 @@ function entryOf(d: HackathonBuild): BuildEntry {
 
 /** One submission from its stored rows, one per event it entered (sls-092:
  * a submission entered in two events is two rows). The top-level event
- * fields are its best entry: a placed one first, then the latest event. */
+ * fields are its best entry: a placed one first, then the latest event.
+ * `categories`: prizeCategories over its events' winners. */
 export function buildDetailFromStored(
 	rows: HackathonBuild[],
+	categories: ReadonlySet<string>,
 	facts?: ProjectFacts,
 ): BuildDetail {
 	// Ordered by the entries as served, so a win named off DoraHacks counts.
 	const key = (r: HackathonBuild) => ({
-		isWinner: entryOf(r).isWinner,
+		isWinner: entryOf(r, categories).isWinner,
 		endedAt: r.endedAt,
 	});
 	const sorted = [...rows].sort((a, b) => entryOrder(key(a), key(b)));
@@ -421,8 +468,8 @@ export function buildDetailFromStored(
 		summary: d.vision ?? null,
 		writeUp: d.description ?? null,
 		selfTags: d.selfTags ?? [],
-		...entryOf(d),
-		entries: sorted.map(entryOf),
+		...entryOf(d, categories),
+		entries: sorted.map((r) => entryOf(r, categories)),
 		links: {
 			dorahacks: d.url,
 			github: d.githubUrl ?? null,
@@ -571,6 +618,14 @@ export function buildsForRepos(
 // self-referential SSR fetches fail on Vercel). The route calls this too, so
 // the two can never drift.
 
+/** A hyphenated phrase's two numbers vary on its last part only: forms of
+ * the whole token stripped a short last part's s ("stellar-ens" became
+ * "stellar en", which matched prose). */
+function phraseForms(token: string): string[] {
+	const cut = token.lastIndexOf("-") + 1;
+	return wordForms(token.slice(cut)).map((f) => token.slice(0, cut) + f);
+}
+
 /** A query token and its plural or singular. */
 function wordForms(token: string): string[] {
 	if (token.length > 3 && token.endsWith("s"))
@@ -669,8 +724,8 @@ function queryTerms(query: string) {
 		),
 	];
 	// A hyphenated phrase is one concept: "pay-per-call" also matches
-	// "pay per call" and "paypercall", and its parts stop counting on their
-	// own (they made one phrase weigh three times).
+	// "pay per call", "paypercall" and the plural, and its parts stop
+	// counting on their own (they made one phrase weigh three times).
 	const parts = new Set(
 		raw.filter((t) => t.includes("-")).flatMap((t) => t.split("-")),
 	);
@@ -678,7 +733,10 @@ function queryTerms(query: string) {
 		.filter((t) => !parts.has(t))
 		.map((t) => {
 			const joined = t.includes("-")
-				? [t.replace(/-/g, " "), t.replace(/-/g, "")]
+				? phraseForms(t).flatMap((f) => [
+						f.replace(/-/g, " "),
+						f.replace(/-/g, ""),
+					])
 				: [];
 			const forms = [...expandBuildTerm(t), ...joined];
 			return {

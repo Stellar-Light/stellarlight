@@ -1,6 +1,11 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
+import { spec } from "@/lib/openapi-spec";
+import {
+	responseSchema,
+	undeclaredInServed,
+} from "../../../../../../scripts/contract/served-shape";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 // What getHackathons lists: one DoraHacks event the index holds, and
@@ -446,6 +451,78 @@ describe("GET /api/hackathons/builds rows say what the repo did after the event"
 		// Read, but the event ended too recently to say the team stopped.
 		expect("afterEvent" in (rows.get("recent") ?? {})).toBe(false);
 		expect(rows.get("recent")?.lastCommitAt).toBeNull();
+	});
+});
+
+describe("GET /api/hackathons/builds labels a shared award as a category", () => {
+	it("serves an award its winners of different placements share as awardCategory, never as a build's award", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const zk = { title: "ZK", slug: "zk", endedAt: "2025-10-09" };
+		const gaming = { title: "G", slug: "g", endedAt: "2026-01-20" };
+		const solo = { title: "S", slug: "s", endedAt: "2026-01-20" };
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([
+			// Real-World ZK: three of the placements in its one award.
+			build("w1", {
+				hackathon: zk,
+				isWinner: true,
+				hackathonPlacement: "1st Place - $5,000 in XLM",
+				award: "$10,000 XLM Prize",
+			}),
+			build("w3", {
+				hackathon: zk,
+				isWinner: true,
+				hackathonPlacement: "3rd Place - $1,250 in XLM",
+				award: "$10,000 XLM Prize",
+			}),
+			build("w5", {
+				hackathon: zk,
+				isWinner: true,
+				hackathonPlacement: "5th Place - $750 in XLM",
+				award: "$10,000 XLM Prize",
+			}),
+			// ZK Gaming: one award per winner, its place in the title.
+			build("g1", {
+				hackathon: gaming,
+				isWinner: true,
+				hackathonPlacement: "Winners",
+				award: "1st Place - $5,000",
+			}),
+			// The same text, but the only winner its event placed in it.
+			build("s1", {
+				hackathon: solo,
+				isWinner: true,
+				hackathonPlacement: "1st Place",
+				award: "$10,000 XLM Prize",
+			}),
+			build("n", { hackathon: zk }),
+		]);
+		const { GET } = await import("../route");
+		const res = await GET(
+			new NextRequest("https://x.test/api/hackathons/builds?limit=10"),
+		);
+		expect(res.status).toBe(200);
+		const body = await res.json();
+		const rows = new Map(
+			(body.builds as Array<Record<string, unknown>>).map((r) => [
+				r.id,
+				[r.award, r.awardCategory, r.prizeUsd],
+			]),
+		);
+		expect(Object.fromEntries(rows)).toEqual({
+			w1: [null, "$10,000 XLM Prize", 5000],
+			w3: [null, "$10,000 XLM Prize", 1250],
+			w5: [null, "$10,000 XLM Prize", 750],
+			g1: ["1st Place - $5,000", null, null],
+			s1: ["$10,000 XLM Prize", null, null],
+			n: [null, null, null],
+		});
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/builds"),
+				body,
+			),
+		).toEqual([]);
 	});
 });
 

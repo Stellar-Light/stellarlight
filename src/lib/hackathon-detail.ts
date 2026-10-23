@@ -34,6 +34,8 @@ import {
 	fetchHackathonSubmissions,
 	getHackathonUrl,
 	parsePlacement,
+	prizeCategories,
+	prizeLabels,
 } from "@/lib/integrations/dorahacks";
 import type { getPayloadSafe } from "@/lib/payload-client";
 import type { HackathonEvent } from "@/payload-types";
@@ -470,6 +472,16 @@ export async function getHackathonDetail(
 				await fetchHackathonSubmissions(dora).catch(
 					() => [] as DoraHacksSubmission[],
 				);
+		// Award text this event's winners of different placements share
+		// names their category, never one winner's prize. A hidden winner's
+		// placement counts: it is in the award though not served.
+		const categories = prizeCategories([
+			...liveSubmissions,
+			...(hiddenWinners ?? []).map((h) => ({
+				award: h.award,
+				hackathonPlacement: h.placement,
+			})),
+		]);
 		// Hidden winners this page does not serve. The index is cached for
 		// an hour and its live fallback still lists hidden submissions, so
 		// a row flagged hidden can be on this page. [] claims a stored
@@ -482,7 +494,10 @@ export async function getHackathonDetail(
 						.filter((h) => !served.has(h.buildId))
 						.map((h) => ({
 							placement: h.placement ?? null,
-							award: h.award ?? null,
+							...prizeLabels(categories, {
+								award: h.award,
+								hackathonPlacement: h.placement,
+							}),
 							placementRank:
 								placementRank(h.placement) ?? placementRank(h.award),
 						}))
@@ -491,8 +506,7 @@ export async function getHackathonDetail(
 		const liveWinners = liveSubmissions.filter((sub) => sub.isWinner);
 		// What each winner won and became, on winner rows only (the
 		// submissions list keeps its shape): prizeUsd from its own
-		// placement, since award is the category title every placement in
-		// it shares, and from the stored row its directory project and what
+		// placement, and from the stored row its directory project and what
 		// its repo did after the event.
 		const storedById = new Map(stored.map((b) => [b.id, b]));
 		const winners = liveWinners.length
@@ -500,6 +514,7 @@ export async function getHackathonDetail(
 					const b = storedById.get(w.id);
 					return {
 						...w,
+						...prizeLabels(categories, w),
 						prizeUsd: parsePlacement(w.hackathonPlacement).prizeUsd || null,
 						...(b?.project !== undefined ? { project: b.project } : {}),
 						// A win named off DoraHacks: the page that names it.
@@ -710,7 +725,10 @@ export async function getHackathonDetail(
 				winnersRanked: winners.length
 					? winners.some((w) => w.placementRank !== null)
 					: null,
-				submissions: liveSubmissions,
+				submissions: liveSubmissions.map((s) => ({
+					...s,
+					...prizeLabels(categories, s),
+				})),
 				// Top-level `tracks` (drift report #12) so `data.tracks` isn't
 				// undefined for a consumer (also present under hackathon.tracks).
 				tracks: servedTracks,

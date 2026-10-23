@@ -1,0 +1,33 @@
+# Tuning-slice prototypes (2026-10-23, 21:00Z to 21:12Z). Dev set tuning
+# slice only (17 ids; the 8 held-out ids were neither run nor printed).
+# Each line: expected repo in the top 5, then each question's rank of its
+# expected repo ("-" = not in the results). Prototypes ran on a scratch
+# copy of this branch as of 21:00Z (D1 to D3, with D3 still sinking the old
+# row; the later slot change moves no dev rank) over the same captured
+# corpus, switched by environment flags; none is on the branch. Decision rule (ledger, fixed
+# before the last three groups ran): a mechanism joins only with at least 3
+# tuning gains and no loss. None qualified.
+#
+# rarity = each query word weighted by its rarity in the candidate pool,
+#   ln((n + 1) / (df + 0.5)) as in src/lib/prior-art-rank.ts, divided by the
+#   query's largest weight, for questions of 4 or more words; the coverage
+#   multiplier counted as today (count), by summed weights (weighted), or
+#   dropped (none).
+# rare anchors = for questions, the identity supplement fetches only the 3
+#   anchors rarest in the main pool's names, topics and descriptions.
+# vocabulary = python also matches py, command-line also matches cli.
+# cap 3 = the coverage multiplier counts at most 3 matched words (questions).
+# symbols 2 = a code-symbol hit weighs 2 instead of 4 (questions).
+
+branch D1-D3                tuning top5 6/17 | dev-01:52 dev-02:2 dev-03:35 dev-04:4 dev-05:2 dev-08:- dev-09:- dev-11:2 dev-12:- dev-13:36 dev-15:87 dev-16:1 dev-17:28 dev-19:414 dev-20:4 dev-21:- dev-24:17
+rarity, weighted            tuning top5 6/17 | dev-01:22 dev-02:2 dev-03:6 dev-04:4 dev-05:2 dev-08:- dev-09:- dev-11:2 dev-12:- dev-13:70 dev-15:13 dev-16:1 dev-17:58 dev-19:413 dev-20:3 dev-21:- dev-24:24
+rarity, none                tuning top5 6/17 | dev-01:32 dev-02:2 dev-03:6 dev-04:4 dev-05:2 dev-08:- dev-09:- dev-11:2 dev-12:- dev-13:70 dev-15:11 dev-16:1 dev-17:58 dev-19:413 dev-20:3 dev-21:- dev-24:24
+rarity, count               tuning top5 6/17 | dev-01:27 dev-02:2 dev-03:6 dev-04:4 dev-05:1 dev-08:- dev-09:- dev-11:2 dev-12:- dev-13:68 dev-15:22 dev-16:1 dev-17:39 dev-19:413 dev-20:3 dev-21:- dev-24:23
+rare anchors                tuning top5 6/17 | dev-01:53 dev-02:2 dev-03:36 dev-04:4 dev-05:3 dev-08:- dev-09:222 dev-11:2 dev-12:- dev-13:38 dev-15:79 dev-16:1 dev-17:26 dev-19:409 dev-20:4 dev-21:- dev-24:19
+rarity none + rare anchors  tuning top5 6/17 | dev-01:36 dev-02:2 dev-03:7 dev-04:4 dev-05:3 dev-08:- dev-09:25 dev-11:2 dev-12:- dev-13:71 dev-15:10 dev-16:1 dev-17:56 dev-19:408 dev-20:3 dev-21:- dev-24:27
+rarity weighted + anchors   tuning top5 6/17 | dev-01:32 dev-02:2 dev-03:8 dev-04:4 dev-05:2 dev-08:- dev-09:36 dev-11:2 dev-12:- dev-13:71 dev-15:10 dev-16:1 dev-17:56 dev-19:408 dev-20:3 dev-21:- dev-24:28
+vocabulary                  tuning top5 6/17 | dev-01:41 dev-02:2 dev-03:35 dev-04:4 dev-05:2 dev-08:- dev-09:- dev-11:2 dev-12:- dev-13:11 dev-15:87 dev-16:1 dev-17:28 dev-19:414 dev-20:4 dev-21:- dev-24:17
+rarity none + anchors + voc tuning top5 6/17 | dev-01:12 dev-02:2 dev-03:7 dev-04:4 dev-05:3 dev-08:- dev-09:25 dev-11:2 dev-12:- dev-13:24 dev-15:10 dev-16:1 dev-17:56 dev-19:408 dev-20:3 dev-21:- dev-24:27
+cap 3                       tuning top5 6/17 | dev-01:104 dev-02:2 dev-03:31 dev-04:4 dev-05:2 dev-08:- dev-09:- dev-11:2 dev-12:- dev-13:36 dev-15:87 dev-16:1 dev-17:28 dev-19:414 dev-20:4 dev-21:- dev-24:16
+symbols 2                   tuning top5 6/17 | dev-01:15 dev-02:2 dev-03:16 dev-04:4 dev-05:1 dev-08:- dev-09:- dev-11:2 dev-12:- dev-13:51 dev-15:35 dev-16:1 dev-17:16 dev-19:413 dev-20:3 dev-21:- dev-24:21
+cap 3 + symbols 2           tuning top5 5/17 | dev-01:19 dev-02:2 dev-03:8 dev-04:4 dev-05:1 dev-08:- dev-09:- dev-11:2 dev-12:- dev-13:51 dev-15:26 dev-16:1 dev-17:14 dev-19:413 dev-20:6 dev-21:- dev-24:23

@@ -36,14 +36,31 @@ const stored = {
 	updatedAt: "2026-10-05T00:00:00Z",
 	createdAt: "2026-10-05T00:00:00Z",
 };
+// The event's stored winners, when the submission carries award text.
+let winners: Array<{
+	hackathonSlug: string;
+	placement: string;
+	award: string;
+}> = [];
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({
-		find: vi.fn(async ({ collection }: { collection: string }) =>
-			collection === "projects"
-				? {
-						docs: [{ slug: "tollpay", status: "Live", scf: { awarded: true } }],
-					}
-				: { docs: [stored] },
+		find: vi.fn(
+			async ({
+				collection,
+				where,
+			}: {
+				collection: string;
+				where?: { and?: Array<Record<string, unknown>> };
+			}) =>
+				collection === "projects"
+					? {
+							docs: [
+								{ slug: "tollpay", status: "Live", scf: { awarded: true } },
+							],
+						}
+					: where?.and?.[0]?.hackathonSlug
+						? { docs: winners }
+						: { docs: [stored] },
 		),
 	})),
 }));
@@ -220,6 +237,49 @@ describe("how crowded a category is, across every stored submission", () => {
 			});
 		} finally {
 			index.pop();
+		}
+	});
+});
+
+describe("a submission placed in an award its event's other placements share", () => {
+	it("serves the award's title as awardCategory, read from the event's stored winners", async () => {
+		// Stellar Hacks: Agents: five placements in one award, "10K Prize Pool".
+		const s = stored as Record<string, unknown>;
+		try {
+			s.award = "10K Prize Pool";
+			winners = [
+				{
+					hackathonSlug: "agents",
+					placement: "5th Place",
+					award: "10K Prize Pool",
+				},
+				{
+					hackathonSlug: "agents",
+					placement: "3rd Place",
+					award: "10K Prize Pool",
+				},
+			];
+			const { body } = await get("link=github.com/rajkaria/toll");
+			const sub = body.review.submission;
+			expect([sub.placement, sub.award, sub.awardCategory]).toEqual([
+				"5th Place",
+				null,
+				"10K Prize Pool",
+			]);
+			expect(sub.entries[0]).toMatchObject({
+				award: null,
+				awardCategory: "10K Prize Pool",
+			});
+			expect(
+				undeclaredInServed(
+					spec,
+					responseSchema(spec, "/api/hackathons/review"),
+					body,
+				),
+			).toEqual([]);
+		} finally {
+			delete s.award;
+			winners = [];
 		}
 	});
 });

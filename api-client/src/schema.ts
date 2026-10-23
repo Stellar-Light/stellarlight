@@ -1216,13 +1216,31 @@ export interface components {
             statusAsOf?: string | null;
             /** @description Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe). Null on legacy rows. */
             statusSourceUrl?: string | null;
-            /** @description Deterministic trust score for the lifecycle status fact: basis-class weight × stepwise freshness decay. score 0–1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance ⇒ same score — cacheable. */
+            /** @description Deterministic trust score for the lifecycle status fact: basis-class weight times stepwise freshness decay. score 0 to 1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). The same provenance gives the same score, so it can be cached. Halved on a Live row when a statusChecks entry is a hit (statusCaveat says why). */
             statusConfidence?: {
                 score?: number;
                 /** @enum {string} */
                 label?: "high" | "medium" | "low";
                 ageDays?: number | null;
             } | null;
+            /** @description Checks of the status label against stored upstream facts, present only on rows with a DefiLlama link (llamaSlugs); absent means the row has no DefiLlama link, so neither check applies. defillama-listing: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for DEX, Lending, Bridge and Yield rows: hit when a DefiLlama TVL of 0 read within the last 14 days meets 60 or more days of observed time in which no tracked contract emitted an event or took a sub-call, clear when a fresh TVL is above 0 or a contract moved in the latest window, could-not-check otherwise (no TVL figure, a TVL reading older than 14 days, no tracked contract, or under 60 days observed). A could-not-check result is not a clean bill. */
+            statusChecks?: {
+                /** @enum {string} */
+                check: "defillama-listing" | "tvl-zero-onchain-quiet";
+                /** @enum {string} */
+                result: "hit" | "clear" | "could-not-check";
+                /** @description What was read, or why it could not be read, in plain words with dates. */
+                detail: string;
+                /** @description Date (YYYY-MM-DD) of the reading the result rests on; null when there was none. */
+                asOf: string | null;
+                /**
+                 * Format: uri
+                 * @description Where to check the fact: the first linked protocol's DefiLlama page (its listing and TVL figure); the contract readings behind the TVL check are the row's onchain block.
+                 */
+                sourceUrl: string;
+            }[];
+            /** @description Present only with statusChecks. On a Live row with a hit, one sentence to relay with the status: the label may describe a product that stopped or moved (a protocol deprecated upstream can have a successor), so treat Live as unconfirmed. A check never changes the status itself. Null = no check hit, or the row is not Live; read statusChecks for what was checked. */
+            statusCaveat?: string | null;
             /**
              * @description What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'package-release' = a versioned artifact shipped to a package registry (npm, jsr.io) whose own metadata names this project's repository as its source, published inside a dated window — publication evidence for a library, never proof anything is deployed, 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.
              * @enum {string|null}
@@ -1397,7 +1415,7 @@ export interface components {
                 driftDays?: number | null;
                 codeChangedSinceAudit?: boolean | null;
             } | null;
-            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'). Refreshed weekly; see tvlAsOf. */
+            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf. */
             tvlUSD?: number | null;
             /** @description When tvlUSD was fetched from DefiLlama (ISO 8601). */
             tvlAsOf?: string | null;
@@ -1734,10 +1752,11 @@ export interface components {
                     totalPrizeUSD?: number | null;
                     /** @description DoraHacks' own count of the event's submissions (its buidls_count), read daily with the stored event page. null = not a DoraHacks event, or the page has not been read. */
                     upstreamSubmissions?: number | null;
-                    /** @description Winning submissions of this event that this page does not serve because their teams hid or deleted them on DoraHacks: each one's placement and award, never the submission itself. placementRank is parsed as served winners' is (placement, else award), so a missing ranked tier joins to it. [] = none; null = no stored DoraHacks roster backs this page, or the read failed. */
+                    /** @description Winning submissions of this event that this page does not serve because their teams hid or deleted them on DoraHacks: each one's placement, award and awardCategory (read as on winners), never the submission itself. placementRank is parsed as served winners' is (placement, else the award's text), so a missing ranked tier joins to it. [] = none; null = no stored DoraHacks roster backs this page, or the read failed. */
                     hiddenWinners?: {
                         placement?: string | null;
                         award?: string | null;
+                        awardCategory?: string | null;
                         placementRank?: number | null;
                     }[] | null;
                     /** @description Why the winners are what they are, so a missing winner or a 0 is explained rather than silent. When hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award. On an event off DoraHacks: a dated note that its winners are published only in part, or not announced upstream. When winners carry winnerSource: the page that names them and which named winners are not served. On an ended DoraHacks event with no winner served: DoraHacks' winner_announced flag, from its event listing (refreshed hourly), says not announced upstream, or announced but not recorded here. Not announced is never a claim that no one won. null = nothing to add, or the flag could not be read. */
@@ -1768,8 +1787,10 @@ export interface components {
                 /** @description Project blurb from the submission (markdown stripped). */
                 description?: string | null;
                 track?: string | null;
-                /** @description Award CATEGORY title, shared by every placement inside it — NOT this project's prize. DoraHacks nests placements under an award category, so all five winners of a '$10,000 XLM Prize' category carry that same string while placing 1st ($5,000) through 5th ($750); the placements sum to the category pool. Reading this as one winner's prize overstates 3rd place by 8x and makes the winners sum to 5x the pot. For what this project actually won, use `prizeUsd` (or parse `placement`). */
+                /** @description This winner's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = no award named, or an award that names a category (`awardCategory`); what this winner won is then `hackathonPlacement` and `prizeUsd`. */
                 award?: string | null;
+                /** @description The award this winner placed in, when its title names a category or pool, never this winner's prize: this event's winners of other placements share it (a hidden winner's placement counts), or the title states more than this winner's placement. All five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750); reading it as a winner's prize overstates 3rd place 8 times. null = no other placement of this event is on record under the award and its title states no more than this winner's placement, so the award, if any, reads as the winner's own. */
+                awardCategory?: string | null;
                 /** @description What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250); on curated roster rows, the roster's own figure. null when the placement carries no amount (tier-labelled winners like 'Track Winner'), never 0, which would assert a prize of nothing. */
                 prizeUsd?: number | null;
                 isWinner?: boolean;
@@ -1838,9 +1859,13 @@ export interface components {
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
-            submissions?: {
+            /** @description Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`. */
+            submissions?: ({
+                award?: string | null;
+                awardCategory?: string | null;
+            } & {
                 [key: string]: unknown;
-            }[];
+            })[];
             /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which. */
             tracks?: ({
                 name?: string;
@@ -1863,7 +1888,7 @@ export interface components {
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
-            /** @description Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements — never inferred from names). Null = not superseded or not yet classified. Superseded generations rank below their successors at equal relevance. */
+            /** @description Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements, never inferred from names). Null = not superseded or not yet classified. In searchRepos, when the successor (this field, else supersededBy) is also in the results, the successor takes this repo's place and this repo moves below it, unless q is an exact alias of this repo's owner, name or path. */
             successorRepo?: string | null;
             /** @description Where to go instead, as GitHub spells it — from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'. */
             supersededBy?: string | null;
@@ -2960,10 +2985,10 @@ export interface operations {
                         verdict?: "supported" | "contradicted" | "unsupported" | "unresolved";
                         /** @description One-sentence verdict with dates and denominators, safe to relay verbatim. */
                         statement?: string;
-                        /** @description Typed evidence rows — discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source). */
+                        /** @description Typed evidence rows; discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source); status-check = a check of a Live label that hit (note, source, asOf), the same check searchProjects serves in statusChecks: the verdict stays supported, the statement carries the caveat and confidence is halved. */
                         evidence?: {
                             /** @enum {string} */
-                            kind?: "audit-report" | "status-record" | "code-activity" | "curated-note";
+                            kind?: "audit-report" | "status-record" | "code-activity" | "curated-note" | "status-check";
                             auditor?: string | null;
                             title?: string | null;
                             reportUrl?: string | null;
@@ -3978,11 +4003,13 @@ export interface operations {
                             track?: string | null;
                             /** @description This build's own placement inside its award category ('1st Place', '3rd Place') as DoraHacks published it; null = placed without a rank or not a winner. */
                             placement?: string | null;
-                            /** @description Award CATEGORY title as DoraHacks published it ('10K Prize Pool', '$10,000 XLM Prize'), shared by every placement inside that category — NOT this build's payout. For what the build itself won use `prizeUsd` (null = undisclosed) or `placement`; reading this string as the prize overstates a 3rd place several times over. */
+                            /** @description This build's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what this build won is then `placement` and `prizeUsd`. */
                             award?: string | null;
+                            /** @description The award this build placed in, when its title names a category or pool, never this build's prize: its event's winners of other placements share it, or the title states more than this build's placement. All five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750). null = no other placement of this event is served under the award and its title states no more than this build's placement, so the award, if any, reads as the build's own. */
+                            awardCategory?: string | null;
                             /** @description Placed in the event; absence of a win is not a quality judgement. */
                             isWinner?: boolean;
-                            /** @description What this build itself won in USD, parsed from its own placement string; null = not stated there (DoraHacks often names the amount only on the award category). */
+                            /** @description What this build itself won in USD, parsed from its own placement string; null = not stated there, never 0. An `award` of its own can name the amount ('1st Place - $5,000'); an `awardCategory` names a category or pool, never this build's amount. */
                             prizeUsd?: number | null;
                             votes?: number | null;
                             endedAt?: string | null;
@@ -4022,7 +4049,7 @@ export interface operations {
                             stack?: string[];
                             /** @description Directory project types this build was sorted into, best first. Present only when categorized; scores and method are on getHackathonSubmission. */
                             categories?: string[];
-                            /** @description Which query terms this build matched: the evidence behind its inclusion. A term matches in the name, summary, track, award or a package in `stack`, except the Stellar JS SDK, Soroban Rust SDK, Freighter API, Stellar Wallets Kit and x402 packages, which more than a tenth of read repos declare. A package says what a build was made with, not what it does, so only this operation matches packages: prior art in vetIdea and hackathonBrief, and analyzeHackathonSubmissions' q, read the text alone. */
+                            /** @description Which query terms this build matched: the evidence behind its inclusion. A term matches in the name, summary, track, award or award category, or a package in `stack`, except the Stellar JS SDK, Soroban Rust SDK, Freighter API, Stellar Wallets Kit and x402 packages, which more than a tenth of read repos declare. A package says what a build was made with, not what it does, so only this operation matches packages: prior art in vetIdea and hackathonBrief, and analyzeHackathonSubmissions' q, read the text alone. */
                             matchedTerms?: string[];
                             /** @description Vector similarity to the query (0 to 1), present when mode was meaning or hybrid and the build cleared the floor. A row with similarity and no matchedTerms was found by meaning alone: verify it. */
                             similarity?: number;
@@ -4100,7 +4127,7 @@ export interface operations {
                             writeUp?: string | null;
                             /** @description What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported. */
                             selfTags?: string[];
-                            /** @description The submission's best entry, entries[0]: a placed event first, then the latest. The track, placement, award, prizeUsd and isWinner beside it are that entry's. */
+                            /** @description The submission's best entry, entries[0]: a placed event first, then the latest. The track, placement, award, awardCategory, prizeUsd and isWinner beside it are that entry's. */
                             hackathon?: {
                                 title?: string;
                                 slug?: string;
@@ -4108,12 +4135,15 @@ export interface operations {
                             };
                             track?: string | null;
                             placement?: string | null;
+                            /** @description This entry's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what it won is then `placement` and `prizeUsd`. */
                             award?: string | null;
+                            /** @description The award this entry placed in, when its title names a category or pool, never this submission's prize: its event's winners of other placements share it (a hidden winner's placement counts), or the title states more than the entry's placement ('$10,000 XLM Prize' on '3rd Place - $1,250 in XLM'). null = no other placement of the event is on record under the award and its title states no more than the placement, so the award, if any, reads as the entry's own. */
+                            awardCategory?: string | null;
                             prizeUsd?: number | null;
                             isWinner?: boolean;
                             /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
                             winnerSource?: string;
-                            /** @description Every event this submission entered, best first, each with its own track, placement and award. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
+                            /** @description Every event this submission entered, best first, each with its own track, placement, award and awardCategory. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
                             entries?: {
                                 hackathon?: {
                                     title?: string;
@@ -4123,6 +4153,7 @@ export interface operations {
                                 track?: string | null;
                                 placement?: string | null;
                                 award?: string | null;
+                                awardCategory?: string | null;
                                 prizeUsd?: number | null;
                                 isWinner?: boolean;
                                 /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
@@ -4219,7 +4250,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The store did not answer; retry after Retry-After. */
+            /** @description The store did not answer; retry after Retry-After. Also when the submission carries award text and its events' winners cannot be read: whether that text is its own award or a category other placements share cannot be told, and `award` has no honest could-not-check value. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -4456,7 +4487,7 @@ export interface operations {
                                 writeUp?: string | null;
                                 /** @description What the team tagged itself with on DoraHacks ('layer1:Stellar', 'category:...'). Self-reported. */
                                 selfTags?: string[];
-                                /** @description The submission's best entry, entries[0]: a placed event first, then the latest. The track, placement, award, prizeUsd and isWinner beside it are that entry's. */
+                                /** @description The submission's best entry, entries[0]: a placed event first, then the latest. The track, placement, award, awardCategory, prizeUsd and isWinner beside it are that entry's. */
                                 hackathon?: {
                                     title?: string;
                                     slug?: string;
@@ -4464,12 +4495,15 @@ export interface operations {
                                 };
                                 track?: string | null;
                                 placement?: string | null;
+                                /** @description This entry's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what it won is then `placement` and `prizeUsd`. */
                                 award?: string | null;
+                                /** @description The award this entry placed in, when its title names a category or pool, never this submission's prize: its event's winners of other placements share it (a hidden winner's placement counts), or the title states more than the entry's placement ('$10,000 XLM Prize' on '3rd Place - $1,250 in XLM'). null = no other placement of the event is on record under the award and its title states no more than the placement, so the award, if any, reads as the entry's own. */
+                                awardCategory?: string | null;
                                 prizeUsd?: number | null;
                                 isWinner?: boolean;
                                 /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
                                 winnerSource?: string;
-                                /** @description Every event this submission entered, best first, each with its own track, placement and award. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
+                                /** @description Every event this submission entered, best first, each with its own track, placement, award and awardCategory. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
                                 entries?: {
                                     hackathon?: {
                                         title?: string;
@@ -4479,6 +4513,7 @@ export interface operations {
                                     track?: string | null;
                                     placement?: string | null;
                                     award?: string | null;
+                                    awardCategory?: string | null;
                                     prizeUsd?: number | null;
                                     isWinner?: boolean;
                                     /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
@@ -4739,7 +4774,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description The store did not answer; retry. */
+            /** @description The store did not answer, including the read of the submission's events' winners that decides `award` and `awardCategory`; retry. */
             503: {
                 headers: {
                     [name: string]: unknown;

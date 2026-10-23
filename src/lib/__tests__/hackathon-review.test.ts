@@ -97,6 +97,7 @@ const detail = (over: Partial<BuildDetail> = {}): BuildDetail => ({
 	track: null,
 	placement: "5th Place",
 	award: null,
+	awardCategory: null,
 	prizeUsd: null,
 	isWinner: true,
 	entries: [],

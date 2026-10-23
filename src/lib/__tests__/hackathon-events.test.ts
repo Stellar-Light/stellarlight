@@ -156,4 +156,18 @@ describe("hiddenWinnersNote", () => {
 		expect(hiddenWinnersNote([])).toBeNull();
 		expect(hiddenWinnersNote(null)).toBeNull();
 	});
+
+	it("names the award category a hidden winner placed in, never as its prize", () => {
+		expect(
+			hiddenWinnersNote([
+				{
+					placement: "6th Place",
+					award: null,
+					awardCategory: "$10,000 XLM Prize",
+				},
+			]),
+		).toBe(
+			"One winning submission is not served here: its team hid or deleted it on DoraHacks (6th Place in $10,000 XLM Prize).",
+		);
+	});
 });

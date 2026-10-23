@@ -93,11 +93,19 @@ export function hiddenWinnersNote(
 	hidden: ReadonlyArray<{
 		placement: string | null;
 		award?: string | null;
+		awardCategory?: string | null;
 	}> | null,
 ): string | null {
 	if (!hidden?.length) return null;
+	// A category is named as what the placement sits in, never as its prize.
 	const places = hidden
-		.map((h) => [h.placement || "Winner", h.award].filter(Boolean).join(", "))
+		.map((h) =>
+			h.award
+				? `${h.placement || "Winner"}, ${h.award}`
+				: h.awardCategory
+					? `${h.placement || "Winner"} in ${h.awardCategory}`
+					: h.placement || "Winner",
+		)
 		.join("; ");
 	return hidden.length === 1
 		? `One winning submission is not served here: its team hid or deleted it on DoraHacks (${places}).`

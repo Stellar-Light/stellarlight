@@ -232,6 +232,26 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     `facet=placement` 68 winners of 1,371 with the left-out line;
     hackmeridian-2026 its four declared tracks and `prizeTiers` null.
 
+11. **A Live row whose DefiLlama protocol is dead reads as plainly Live.**
+    Probe: `/api/projects/search?q=allbridge` serves Allbridge `status:
+    Live`, `statusConfidence` 0.9 high and no `statusCaveat`, while
+    `https://api.llama.fi/protocols` marks `allbridge-core` deprecated with
+    `deadFrom` 2026-08-31; `/api/verify?type=live&subject=allbridge` answers
+    supported, 0.9 high (live 1.9.101, 2026-10-23).
+    Found by the owner's read of the row; measured in
+    `improvements/rounds/2026-10-23-dead-protocol-guard.md`.
+    State: fixed on branch `lane/dq1-dead-protocol-guard` (spec 1.9.105),
+    in review as a pull request. The guard needs the enrich-tvl lane to store
+    `llamaListing`; the Allbridge description and routes need a curate-projects
+    execute; the dispatch steps are in the ledger.
+    Done when: merged and deployed; the enrich-tvl and curate-projects lanes
+    ran (dry run read first); live, re-checked by someone other than the
+    author: every DefiLlama-linked row serves `statusChecks`, Allbridge serves
+    the reworded description, `llamaSlugs` [allbridge-next], `tvlUSD` null,
+    `routes` null, derived `supportedNetworks` and a clear listing check, and
+    no other row carries a `statusCaveat` unless DefiLlama dates its protocol
+    dead or retired it with nothing locked and no live successor.
+
 ## Next
 
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
@@ -365,6 +385,102 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   (`improvements/audits/2026-10-23-locate-ranking/rules.txt`, r-lift8).
   The likely fix is a split that also handles f15's case; measure it in a
   later round.
+- searchRepos rarely finds the repo a natural-language question asks for:
+  on 25 builder questions written blind (round
+  `2026-10-23-repos-ranking`, evidence
+  `improvements/audits/2026-10-23-repos-ranking/`), 10 have an expected
+  repo in the top 5 after that round's fixes. Of the 15 misses, 2 repos are
+  not indexed, 3 are indexed but never enter the 600-row candidate window
+  (no description, repoScore 30 to 43), and 10 are outranked by rows that
+  match many common words in code symbols, by curated floats firing on a
+  word in passing, or for lack of vocabulary ("command-line" for
+  stellar-cli, "python" for py-stellar-base). Rarity weighting, a
+  rare-anchor supplement and two synonyms moved ranks both ways and gained
+  no tuning question (`prototypes.txt`). Needs a labeled set larger than 17
+  tuning questions before another attempt.
+- DeFindex's project row links the archived paltalabs/defindex, and its
+  curated successor defindex-io/stellar-contracts is not indexed
+  (2026-10-23, read-only). Data change: `GITHUB_REPOS_ADD` and
+  `GITHUB_LINK_FIX` entries for `defindex` in
+  `scripts/data/curation-maps.ts`, then the curate-projects and
+  enrich-repos lanes (steps in the round's audit README). No check asserts
+  that a curated successor is indexed.
+
+Found 2026-10-23 by the prize-labels lane and its review
+(`improvements/rounds/2026-10-23-prize-labels.md`):
+
+- An award's structure is inferred, not stored. `fetchWinnerPrizeMap`
+  (`src/lib/integrations/dorahacks.ts`) sees how many prizes each
+  `award_list` entry holds but stores only its title (`award`) on each
+  winner, so `prizeCategories` can call an award a category only from other
+  winners on record under it or from a title that states more than the
+  placement. A lone winner of a multi-prize award whose title names no
+  amount reads as the winner's own award, and search and the builder page
+  read served winners only, so a hidden sibling counts on getHackathon and
+  the submission detail but not in search. Probe:
+  `prizeCategories([{ award: "10K Prize Pool", hackathonPlacement: "1st Place" }])`
+  is empty (a unit call; on 2026-10-23 every category event serves every
+  placement, so no live row has this shape). Plan: (1) in
+  `fetchWinnerPrizeMap`, give each winner `awardPrizes: a.prizes.length`;
+  (2) carry it on `DoraHacksSubmission`, add it to the `hackathon-builds`
+  collection (`src/collections/HackathonBuilds.ts`) and to the fields and
+  row mapping of `scripts/sync-hackathon-builds.ts`; (3) run the sync lane
+  dry, read the printed diff (expect the 67 winner rows with award text to
+  gain the field and nothing else to move), execute it on its own, read the
+  rows back through the API; (4) make `prizeCategories` call an award a
+  category when a row's `awardPrizes` is above 1, keeping the co-winner and
+  amount rules for rows not yet re-synced; (5) drop the hidden-winner reads
+  that only feed the rule once every winner row carries the count. Done
+  when every winner row with award text carries its award's prize count and
+  every surface labels from it.
+- `prizeUsd` is parsed from the placement only, so it is null on the 22
+  served winners whose own award names the amount (zk-gaming 5,
+  ideatontelluscoop 3, buildonstellarchile 14), and vetIdea and
+  hackathonBrief serve those winners' placement "Winners" with no amount.
+  Probe: getHackathon `stellar-hacks-zk-gaming` serves `winners[0].prizeUsd`
+  null beside `award` "1st Place - $5,000" (1.9.101, 2026-10-23).
+
+Found 2026-10-23 by the dead-protocol guard round
+(`improvements/rounds/2026-10-23-dead-protocol-guard.md`):
+
+- Two DefiLlama slugs in `scripts/enrich-tvl.ts` LLAMA_MAP no longer
+  resolve, so their TVL freezes and the listing check reads could-not-check:
+  `soroswap` (now `soroswap-amm`, Stellar slice $1,177,991 on 2026-10-23;
+  stored tvlAsOf 2026-10-19) and `sentora` (now `sentora-curator`, which no
+  longer lists Stellar; stored $10,393,904 at tvlAsOf 2026-08-10).
+- Three LLAMA_MAP keys match no public directory row, so those rows carry
+  no DefiLlama link and the status checks never see them:
+  `phoenix-protocol` (the row is `phoenix`, Live; DefiLlama
+  `phoenix-defi-hub` $47,473 on Stellar), `normal-stellar-amm` (the row is
+  `normal`, Live, human-verified 2026-09-02; DefiLlama `normal` TVL $0, and
+  normalfinance.io's own stellar.toml marks all ten of its currencies
+  `status = "dead"`, read 2026-10-23) and `whalehub` (no row).
+- Estrela is served Live (basis repo-activity) with Allbridge Core's bridge
+  routes copied in curate-projects, but its SCF page (#22 and #35) describes
+  Allbridge's Soroban stablecoin AMM (allbridge-io/dex-soroban-contracts, last
+  commit 2025-07-24), not the bridge. The round clears the copied routes and
+  network matrix (it now serves derived networks, basis scf-award); its
+  identity (a separate product, or a duplicate to fold) and its Live status
+  are unreviewed.
+- The research golden case `bridge-evm-to-stellar` still expects Allbridge as
+  a current EVM to Stellar route, while docs-core.allbridge.io says Stellar
+  support on the relaunched Core is unavailable pending audit (read
+  2026-10-23); the projects-mode case `bridge-solana-to-stellar` was updated
+  in the dead-protocol guard round.
+- Agent-facing text still recommends the Allbridge Core SDK for moving USDC
+  from EVM chains to Stellar (`src/lib/stellar-scout-skill.ts`, the Allbridge
+  SDK bullet; `src/lib/integrations/curated-skills.ts`, slug allbridge-sdk),
+  while docs-core.allbridge.io says Stellar is unavailable on the relaunched
+  Core pending audit (read 2026-10-23).
+- `view=compact` project rows do not carry `statusCaveat`; adding it gives
+  every compact row a new null key.
+- The TVL rule of the status checks cannot speak until enrich-onchain has
+  stored 60 days of `onchain.quietSince`; today no row has more than 7 days of
+  observed silence on record.
+- The status checks see only the 18 of 1,005 public rows with a DefiLlama
+  link; a dead product with no link (or a stale slug, above) is not checked.
+- enrich-onchain writes `projects.onchain` without reading it back (only
+  `codeInUse` is verified).
 
 
 ## Owner decisions (safe default in brackets)
@@ -382,6 +498,11 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
 - Set `ADMIN_ROUTE_SECRET` (32 or more characters) in the production environment, for scripted
   calls to the five `/api/admin/*` routes and `/api/import/airtable` through
   the `x-admin-secret` header [unset: admin session only].
+- Allbridge's status stamp: human-verified 2026-09-05 rested on a 200 page
+  and an SDK repo push while Allbridge Core on Stellar held $0 (DefiLlama's
+  Stellar series reads $0 from 2026-08-21). Re-stamp it on Allbridge Next
+  evidence, or withdraw it [withdraw to site-liveness, status unchanged,
+  until the owner re-checks Next on Stellar].
 - Rotate `PAYLOAD_SECRET`: until the admin-auth round, every blog preview
   put it in a URL (request logs, browser history). It signs every session,
   so rotating logs every admin and partner out [no rotation unless a log

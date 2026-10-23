@@ -61,6 +61,7 @@ import {
 	SOURCE_REPO_NAMES,
 } from "./source-locator";
 import { PRICE_BASES } from "./stablecoins";
+import { CHECK_RESULTS, STATUS_CHECKS } from "./status-checks";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
 
@@ -813,7 +814,7 @@ const BUILD_DETAIL_SCHEMA = {
 		hackathon: {
 			type: "object",
 			description:
-				"The submission's best entry, entries[0]: a placed event first, then the latest. The track, placement, award, prizeUsd and isWinner beside it are that entry's.",
+				"The submission's best entry, entries[0]: a placed event first, then the latest. The track, placement, award, awardCategory, prizeUsd and isWinner beside it are that entry's.",
 			properties: {
 				title: { type: "string" },
 				slug: { type: "string" },
@@ -822,14 +823,25 @@ const BUILD_DETAIL_SCHEMA = {
 		},
 		track: { type: "string", nullable: true },
 		placement: { type: "string", nullable: true },
-		award: { type: "string", nullable: true },
+		award: {
+			type: "string",
+			nullable: true,
+			description:
+				"This entry's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what it won is then `placement` and `prizeUsd`.",
+		},
+		awardCategory: {
+			type: "string",
+			nullable: true,
+			description:
+				"The award this entry placed in, when its title names a category or pool, never this submission's prize: its event's winners of other placements share it (a hidden winner's placement counts), or the title states more than the entry's placement ('$10,000 XLM Prize' on '3rd Place - $1,250 in XLM'). null = no other placement of the event is on record under the award and its title states no more than the placement, so the award, if any, reads as the entry's own.",
+		},
 		prizeUsd: { type: "number", nullable: true },
 		isWinner: { type: "boolean" },
 		winnerSource: BUILD_WINNER_SOURCE_SCHEMA,
 		entries: {
 			type: "array",
 			description:
-				"Every event this submission entered, best first, each with its own track, placement and award. DoraHacks lets one submission enter several events, and a placement belongs to one of them.",
+				"Every event this submission entered, best first, each with its own track, placement, award and awardCategory. DoraHacks lets one submission enter several events, and a placement belongs to one of them.",
 			items: {
 				type: "object",
 				properties: {
@@ -844,6 +856,7 @@ const BUILD_DETAIL_SCHEMA = {
 					track: { type: "string", nullable: true },
 					placement: { type: "string", nullable: true },
 					award: { type: "string", nullable: true },
+					awardCategory: { type: "string", nullable: true },
 					prizeUsd: { type: "number", nullable: true },
 					isWinner: { type: "boolean" },
 					winnerSource: BUILD_WINNER_SOURCE_SCHEMA,
@@ -2085,7 +2098,7 @@ export const spec: OpenAPISpec = {
 										evidence: {
 											type: "array",
 											description:
-												"Typed evidence rows — discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source).",
+												"Typed evidence rows; discriminate on kind. audit-report = the audit registry; status-record = the lifecycle status with its provenance trio; code-activity = per-repo activity with the existing quality label; curated-note = a repo knowledgeNote (dated fact with source); status-check = a check of a Live label that hit (note, source, asOf), the same check searchProjects serves in statusChecks: the verdict stays supported, the statement carries the caveat and confidence is halved.",
 											items: {
 												type: "object",
 												properties: {
@@ -2096,6 +2109,7 @@ export const spec: OpenAPISpec = {
 															"status-record",
 															"code-activity",
 															"curated-note",
+															"status-check",
 														],
 													},
 													auditor: { type: "string", nullable: true },
@@ -4003,7 +4017,13 @@ export const spec: OpenAPISpec = {
 														type: "string",
 														nullable: true,
 														description:
-															"Award CATEGORY title as DoraHacks published it ('10K Prize Pool', '$10,000 XLM Prize'), shared by every placement inside that category — NOT this build's payout. For what the build itself won use `prizeUsd` (null = undisclosed) or `placement`; reading this string as the prize overstates a 3rd place several times over.",
+															"This build's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = not a winner, no award named, or an award that names a category (`awardCategory`); what this build won is then `placement` and `prizeUsd`.",
+													},
+													awardCategory: {
+														type: "string",
+														nullable: true,
+														description:
+															"The award this build placed in, when its title names a category or pool, never this build's prize: its event's winners of other placements share it, or the title states more than this build's placement. All five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750). null = no other placement of this event is served under the award and its title states no more than this build's placement, so the award, if any, reads as the build's own.",
 													},
 													isWinner: {
 														type: "boolean",
@@ -4014,7 +4034,7 @@ export const spec: OpenAPISpec = {
 														type: "number",
 														nullable: true,
 														description:
-															"What this build itself won in USD, parsed from its own placement string; null = not stated there (DoraHacks often names the amount only on the award category).",
+															"What this build itself won in USD, parsed from its own placement string; null = not stated there, never 0. An `award` of its own can name the amount ('1st Place - $5,000'); an `awardCategory` names a category or pool, never this build's amount.",
 													},
 													votes: { type: "integer", nullable: true },
 													endedAt: { type: "string", nullable: true },
@@ -4036,7 +4056,7 @@ export const spec: OpenAPISpec = {
 														type: "array",
 														items: { type: "string" },
 														description:
-															"Which query terms this build matched: the evidence behind its inclusion. A term matches in the name, summary, track, award or a package in `stack`, except the Stellar JS SDK, Soroban Rust SDK, Freighter API, Stellar Wallets Kit and x402 packages, which more than a tenth of read repos declare. A package says what a build was made with, not what it does, so only this operation matches packages: prior art in vetIdea and hackathonBrief, and analyzeHackathonSubmissions' q, read the text alone.",
+															"Which query terms this build matched: the evidence behind its inclusion. A term matches in the name, summary, track, award or award category, or a package in `stack`, except the Stellar JS SDK, Soroban Rust SDK, Freighter API, Stellar Wallets Kit and x402 packages, which more than a tenth of read repos declare. A package says what a build was made with, not what it does, so only this operation matches packages: prior art in vetIdea and hackathonBrief, and analyzeHackathonSubmissions' q, read the text alone.",
 													},
 													similarity: {
 														type: "number",
@@ -4146,7 +4166,8 @@ export const spec: OpenAPISpec = {
 							"Not in Scout's store (absence of a record, not proof the submission never existed).",
 					},
 					"503": {
-						description: "The store did not answer; retry after Retry-After.",
+						description:
+							"The store did not answer; retry after Retry-After. Also when the submission carries award text and its events' winners cannot be read: whether that text is its own award or a category other placements share cannot be told, and `award` has no honest could-not-check value.",
 					},
 				},
 			},
@@ -4576,7 +4597,10 @@ export const spec: OpenAPISpec = {
 						description:
 							"No stored submission matches the link (not proof it was never submitted).",
 					},
-					"503": { description: "The store did not answer; retry." },
+					"503": {
+						description:
+							"The store did not answer, including the read of the submission's events' winners that decides `award` and `awardCategory`; retry.",
+					},
 				},
 			},
 		},
@@ -10580,12 +10604,48 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Deterministic trust score for the lifecycle status fact: basis-class weight \u00d7 stepwise freshness decay. score 0\u20131, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance \u21d2 same score \u2014 cacheable.",
+							"Deterministic trust score for the lifecycle status fact: basis-class weight times stepwise freshness decay. score 0 to 1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). The same provenance gives the same score, so it can be cached. Halved on a Live row when a statusChecks entry is a hit (statusCaveat says why).",
 						properties: {
 							score: { type: "number" },
 							label: { type: "string", enum: ["high", "medium", "low"] },
 							ageDays: { type: "integer", nullable: true },
 						},
+					},
+					statusChecks: {
+						type: "array",
+						description:
+							"Checks of the status label against stored upstream facts, present only on rows with a DefiLlama link (llamaSlugs); absent means the row has no DefiLlama link, so neither check applies. defillama-listing: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for DEX, Lending, Bridge and Yield rows: hit when a DefiLlama TVL of 0 read within the last 14 days meets 60 or more days of observed time in which no tracked contract emitted an event or took a sub-call, clear when a fresh TVL is above 0 or a contract moved in the latest window, could-not-check otherwise (no TVL figure, a TVL reading older than 14 days, no tracked contract, or under 60 days observed). A could-not-check result is not a clean bill.",
+						items: {
+							type: "object",
+							required: ["check", "result", "detail", "asOf", "sourceUrl"],
+							properties: {
+								check: { type: "string", enum: [...STATUS_CHECKS] },
+								result: { type: "string", enum: [...CHECK_RESULTS] },
+								detail: {
+									type: "string",
+									description:
+										"What was read, or why it could not be read, in plain words with dates.",
+								},
+								asOf: {
+									type: "string",
+									nullable: true,
+									description:
+										"Date (YYYY-MM-DD) of the reading the result rests on; null when there was none.",
+								},
+								sourceUrl: {
+									type: "string",
+									format: "uri",
+									description:
+										"Where to check the fact: the first linked protocol's DefiLlama page (its listing and TVL figure); the contract readings behind the TVL check are the row's onchain block.",
+								},
+							},
+						},
+					},
+					statusCaveat: {
+						type: "string",
+						nullable: true,
+						description:
+							"Present only with statusChecks. On a Live row with a hit, one sentence to relay with the status: the label may describe a product that stopped or moved (a protocol deprecated upstream can have a successor), so treat Live as unconfirmed. A check never changes the status itself. Null = no check hit, or the row is not Live; read statusChecks for what was checked.",
 					},
 					statusBasis: {
 						type: "string",
@@ -10950,7 +11010,7 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'). Refreshed weekly; see tvlAsOf.",
+							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf.",
 					},
 					tvlAsOf: {
 						type: "string",
@@ -11357,12 +11417,13 @@ export const spec: OpenAPISpec = {
 										type: "array",
 										nullable: true,
 										description:
-											"Winning submissions of this event that this page does not serve because their teams hid or deleted them on DoraHacks: each one's placement and award, never the submission itself. placementRank is parsed as served winners' is (placement, else award), so a missing ranked tier joins to it. [] = none; null = no stored DoraHacks roster backs this page, or the read failed.",
+											"Winning submissions of this event that this page does not serve because their teams hid or deleted them on DoraHacks: each one's placement, award and awardCategory (read as on winners), never the submission itself. placementRank is parsed as served winners' is (placement, else the award's text), so a missing ranked tier joins to it. [] = none; null = no stored DoraHacks roster backs this page, or the read failed.",
 										items: {
 											type: "object",
 											properties: {
 												placement: { type: "string", nullable: true },
 												award: { type: "string", nullable: true },
+												awardCategory: { type: "string", nullable: true },
 												placementRank: { type: "integer", nullable: true },
 											},
 										},
@@ -11426,7 +11487,13 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									nullable: true,
 									description:
-										"Award CATEGORY title, shared by every placement inside it — NOT this project's prize. DoraHacks nests placements under an award category, so all five winners of a '$10,000 XLM Prize' category carry that same string while placing 1st ($5,000) through 5th ($750); the placements sum to the category pool. Reading this as one winner's prize overstates 3rd place by 8x and makes the winners sum to 5x the pot. For what this project actually won, use `prizeUsd` (or parse `placement`).",
+										"This winner's own award as DoraHacks published it: one award per winner ('1st Place - $5,000'), or one prize several winners each won. null = no award named, or an award that names a category (`awardCategory`); what this winner won is then `hackathonPlacement` and `prizeUsd`.",
+								},
+								awardCategory: {
+									type: "string",
+									nullable: true,
+									description:
+										"The award this winner placed in, when its title names a category or pool, never this winner's prize: this event's winners of other placements share it (a hidden winner's placement counts), or the title states more than this winner's placement. All five Real-World ZK winners share '$10,000 XLM Prize' while placing 1st ($5,000) to 5th ($750); reading it as a winner's prize overstates 3rd place 8 times. null = no other placement of this event is on record under the award and its title states no more than this winner's placement, so the award, if any, reads as the winner's own.",
 								},
 								prizeUsd: {
 									type: "number",
@@ -11510,7 +11577,16 @@ export const spec: OpenAPISpec = {
 					},
 					submissions: {
 						type: "array",
-						items: { type: "object", additionalProperties: true },
+						description:
+							"Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`.",
+						items: {
+							type: "object",
+							additionalProperties: true,
+							properties: {
+								award: { type: "string", nullable: true },
+								awardCategory: { type: "string", nullable: true },
+							},
+						},
 					},
 					tracks: HACKATHON_TRACKS_SCHEMA,
 				},
@@ -11525,7 +11601,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements — never inferred from names). Null = not superseded or not yet classified. Superseded generations rank below their successors at equal relevance.",
+							"Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements, never inferred from names). Null = not superseded or not yet classified. In searchRepos, when the successor (this field, else supersededBy) is also in the results, the successor takes this repo's place and this repo moves below it, unless q is an exact alias of this repo's owner, name or path.",
 					},
 					supersededBy: {
 						type: "string",

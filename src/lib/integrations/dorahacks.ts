@@ -279,7 +279,10 @@ export interface DoraHacksSubmission {
 	videoUrl: string | null;
 	track: string | null;
 	hackathonPlacement: string | null; // e.g. "1st Place" / "Winners" — null if not a winner
-	award: string | null; // e.g. "Blend Composability Award"
+	/** The title of the DoraHacks award its prize sits in ("$10,000 XLM
+	 * Prize"); served as award or, when several placements share it, as
+	 * awardCategory (prizeLabels). */
+	award: string | null;
 	isWinner: boolean;
 	/** null when the source does not expose votes — NOT zero. The v1 hub API
 	 *  stopped serving vote counts; publishing 0 asserted a measurement. */
@@ -596,6 +599,57 @@ export function parsePlacement(raw: string | null): {
 	const money = raw.match(/\$\s*([\d,]+)/);
 	const prizeUsd = money ? Number(money[1].replace(/,/g, "")) : 0;
 	return { rank, label, prizeUsd };
+}
+
+/** What the award labels read of a row. Rows of one event may leave out
+ * `hackathon`: they are read as one event. */
+interface PrizeRow {
+	award?: string | null;
+	hackathonPlacement?: string | null;
+	hackathon?: { slug: string };
+}
+
+const categoryKey = (r: PrizeRow) => `${r.hackathon?.slug ?? ""}\n${r.award}`;
+
+/**
+ * The award texts that name a category, not a winner's prize: within one
+ * event, the same text on winners of different placements, or a title that
+ * states more money than a winner's own placement ("$10,000 XLM Prize" on
+ * "1st Place - $5,000 in XLM"). DoraHacks nests prizes under an award and
+ * the sync stores the award's title on each winner, so all five Real-World
+ * ZK winners carry "$10,000 XLM Prize" while placing 1st ($5,000) to 5th
+ * ($750). The same text on winners of one placement is each one's own prize
+ * (co-winners, or one prize given ten times).
+ * ponytail: reads the winners a caller holds. An award whose other
+ * placements are not on record and whose title states no amount reads as
+ * the winner's own until the sync stores each award's prize count
+ * (improvements/TODO.md).
+ */
+export function prizeCategories(rows: Iterable<PrizeRow>): Set<string> {
+	const places = new Map<string, Set<string>>();
+	const pools = new Set<string>();
+	for (const r of rows) {
+		if (!r.award) continue;
+		const key = categoryKey(r);
+		const seen = places.get(key) ?? new Set<string>();
+		seen.add((r.hackathonPlacement ?? "").trim().toLowerCase());
+		places.set(key, seen);
+		const own = parsePlacement(r.hackathonPlacement ?? null).prizeUsd;
+		if (own > 0 && parsePlacement(r.award).prizeUsd > own) pools.add(key);
+	}
+	for (const [key, p] of places) if (p.size > 1) pools.add(key);
+	return pools;
+}
+
+/** A row's award as served: its own award text, or, when the text names a
+ * category of `categories`, award null and the text as awardCategory. */
+export function prizeLabels(
+	categories: ReadonlySet<string>,
+	r: PrizeRow,
+): { award: string | null; awardCategory: string | null } {
+	return r.award && categories.has(categoryKey(r))
+		? { award: null, awardCategory: r.award }
+		: { award: r.award ?? null, awardCategory: null };
 }
 
 /** Shape the /hackathons "Recent Winners" highlight consumes. Kept structurally

@@ -223,7 +223,7 @@
 			"workflow": "enrich-onchain.yml",
 			"cadence": "cron 0 6 * * 2",
 			"executeInput": "execute",
-			"writeSet": "projects.onchain per contract \u2014 lifetime events, subinvocations, storage entries, created date, wasm-validation repo \u2014 from stellar.expert",
+			"writeSet": "projects.onchain per contract (lifetime events, subinvocations, storage entries, created date, wasm-validation repo) from stellar.expert, and onchain.quietSince, the start of the run of snapshots with no contract movement (since 2026-10-23)",
 			"since": null
 		},
 		{
@@ -274,13 +274,13 @@
 			"id": "enrich-tvl",
 			"workflow": "enrich-tvl.yml",
 			"cadence": "cron 0 5 * * 1",
-			"executeInput": "flag",
-			"writeSet": "projects tvlUSD / tvlAsOf / tvlSource / tvlMethod from DefiLlama; null means NOT TRACKED, never zero",
+			"executeInput": "execute",
+			"writeSet": "projects tvlUSD / tvlAsOf / llamaSlugs / tvlSource / tvlMethod from DefiLlama, and llamaListing (DefiLlama's listed / deprecated / not-found verdict on the mapped slugs, since 2026-10-23); null means NOT TRACKED, never zero",
 			"since": null,
 			"stage": 2,
 			"promotedAt": "2026-09-13",
 			"promotedBy": "owner \u2014 8 of 8 intervention-free weeks in the 8-week window, and the end-state claim below",
-			"endStateClaim": "read-back of every written row via verifyWrites (src/lib/utils/read-back) against the exact payload sent, fields tvlUSD / tvlAsOf / tvlSource / tvlMethod; exit 1 on any field that did not persist as sent; skipped rows counted and printed"
+			"endStateClaim": "read-back of every written row via verifyWrites (src/lib/utils/read-back) against the exact payload sent, fields tvlUSD / tvlAsOf / llamaSlugs / tvlSource / tvlMethod / llamaListing; exit 1 on any field that did not persist as sent; skipped rows counted and printed"
 		},
 		{
 			"id": "fix-dev-docs-titles",

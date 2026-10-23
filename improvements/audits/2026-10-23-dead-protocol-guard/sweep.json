@@ -1,0 +1,395 @@
+{
+	"corpus": {
+		"start": {
+			"apiVersion": "1.9.102",
+			"at": "2026-10-23T21:51:42.409364Z"
+		},
+		"end": {
+			"apiVersion": "1.9.102",
+			"at": "2026-10-23T21:52:15.394639Z"
+		},
+		"rows": 1005,
+		"byStatus": {
+			"Live": 848,
+			"Pre-Release": 8,
+			"Development": 49,
+			"Inactive": 100
+		}
+	},
+	"defillama": {
+		"protocols": 8813,
+		"stellarChain": 44,
+		"stellarChainDeprecatedOrDead": [
+			{
+				"slug": "allbridge-core",
+				"deprecated": true,
+				"deadFrom": "2026-08-31"
+			}
+		]
+	},
+	"linkedRows": 18,
+	"caveated": [
+		{
+			"slug": "allbridge",
+			"status": "Live",
+			"statusCaveat": "Live on record, but DefiLlama marks allbridge-core deprecated, dead from 2026-08-31 (checked 2026-10-23). Treat the Live label as unconfirmed: the product may have stopped or moved. Check the project's own channels before relying on it.",
+			"statusConfidence": {
+				"score": 0.45,
+				"label": "low",
+				"ageDays": 48
+			}
+		}
+	],
+	"hits": [
+		{
+			"slug": "allbridge",
+			"status": "Live",
+			"checks": [
+				{
+					"check": "defillama-listing",
+					"asOf": "2026-10-23",
+					"sourceUrl": "https://defillama.com/protocol/allbridge-core",
+					"result": "hit",
+					"detail": "DefiLlama marks allbridge-core deprecated, dead from 2026-08-31 (checked 2026-10-23)"
+				},
+				{
+					"check": "tvl-zero-onchain-quiet",
+					"result": "could-not-check",
+					"detail": "TVL is $0 and its 2 tracked contracts have been quiet since 2026-10-13 (6 days on record 2026-10-20); 60 days of observed silence are needed.",
+					"asOf": "2026-10-20",
+					"sourceUrl": "https://defillama.com/protocol/allbridge-core"
+				}
+			]
+		}
+	],
+	"perLinkedRow": [
+		{
+			"slug": "blend",
+			"status": "Live",
+			"types": ["Lending"],
+			"llamaSlugs": [
+				"blend-pools",
+				"blend-pools-v2",
+				"blend-backstop",
+				"blend-backstop-v2"
+			],
+			"tvlUSD": 135776808,
+			"checks": ["defillama-listing: clear", "tvl-zero-onchain-quiet: clear"],
+			"detail": [
+				"DefiLlama lists blend-pools, blend-pools-v2, blend-backstop, blend-backstop-v2 as active (checked 2026-10-23).",
+				"DefiLlama TVL $135,776,808 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "soroswap",
+			"status": "Live",
+			"types": ["DEX"],
+			"llamaSlugs": ["soroswap"],
+			"tvlUSD": 1183140,
+			"checks": [
+				"defillama-listing: could-not-check",
+				"tvl-zero-onchain-quiet: clear"
+			],
+			"detail": [
+				"soroswap not in DefiLlama's protocol list on 2026-10-23: renamed or removed upstream, which is not a death signal.",
+				"DefiLlama TVL $1,183,140 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "allbridge",
+			"status": "Live",
+			"types": ["Bridge"],
+			"llamaSlugs": ["allbridge-core"],
+			"tvlUSD": 0,
+			"checks": [
+				"defillama-listing: hit",
+				"tvl-zero-onchain-quiet: could-not-check"
+			],
+			"detail": [
+				"DefiLlama marks allbridge-core deprecated, dead from 2026-08-31 (checked 2026-10-23)",
+				"TVL is $0 and its 2 tracked contracts have been quiet since 2026-10-13 (6 days on record 2026-10-20); 60 days of observed silence are needed."
+			]
+		},
+		{
+			"slug": "aquarius",
+			"status": "Live",
+			"types": ["DEX"],
+			"llamaSlugs": ["aquarius-stellar"],
+			"tvlUSD": 38706080,
+			"checks": ["defillama-listing: clear", "tvl-zero-onchain-quiet: clear"],
+			"detail": [
+				"DefiLlama lists aquarius-stellar as active (checked 2026-10-23).",
+				"DefiLlama TVL $38,706,080 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "defindex",
+			"status": "Live",
+			"types": ["Infrastructure", "SDK", "Yield"],
+			"llamaSlugs": ["defindex"],
+			"tvlUSD": 19481312,
+			"checks": ["defillama-listing: clear", "tvl-zero-onchain-quiet: clear"],
+			"detail": [
+				"DefiLlama lists defindex as active (checked 2026-10-23).",
+				"DefiLlama TVL $19,481,312 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "spiko",
+			"status": "Live",
+			"types": ["RWA"],
+			"llamaSlugs": ["spiko"],
+			"tvlUSD": 1653789314,
+			"checks": ["defillama-listing: clear"],
+			"detail": ["DefiLlama lists spiko as active (checked 2026-10-23)."]
+		},
+		{
+			"slug": "etherfuse",
+			"status": "Live",
+			"types": ["RWA", "Anchor", "Stablecoin"],
+			"llamaSlugs": ["etherfuse"],
+			"tvlUSD": 2,
+			"checks": ["defillama-listing: clear"],
+			"detail": ["DefiLlama lists etherfuse as active (checked 2026-10-23)."]
+		},
+		{
+			"slug": "scopuly",
+			"status": "Live",
+			"types": ["Wallet", "DEX"],
+			"llamaSlugs": ["scopuly"],
+			"tvlUSD": 1019404,
+			"checks": ["defillama-listing: clear", "tvl-zero-onchain-quiet: clear"],
+			"detail": [
+				"DefiLlama lists scopuly as active (checked 2026-10-23).",
+				"DefiLlama TVL $1,019,404 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "excellar",
+			"status": "Live",
+			"types": ["RWA"],
+			"llamaSlugs": ["excellar"],
+			"tvlUSD": 184189,
+			"checks": ["defillama-listing: clear"],
+			"detail": ["DefiLlama lists excellar as active (checked 2026-10-23)."]
+		},
+		{
+			"slug": "templar-protocol",
+			"status": "Live",
+			"types": ["Lending"],
+			"llamaSlugs": ["templar-protocol"],
+			"tvlUSD": 12128709,
+			"checks": ["defillama-listing: clear", "tvl-zero-onchain-quiet: clear"],
+			"detail": [
+				"DefiLlama lists templar-protocol as active (checked 2026-10-23).",
+				"DefiLlama TVL $12,128,709 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "defa-invoicemate",
+			"status": "Live",
+			"types": ["Lending", "RWA"],
+			"llamaSlugs": ["defa-by-invoicemate"],
+			"tvlUSD": 4014251,
+			"checks": ["defillama-listing: clear", "tvl-zero-onchain-quiet: clear"],
+			"detail": [
+				"DefiLlama lists defa-by-invoicemate as active (checked 2026-10-23).",
+				"DefiLlama TVL $4,014,251 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "gami-labs",
+			"status": "Live",
+			"types": ["Infrastructure"],
+			"llamaSlugs": ["gami-labs"],
+			"tvlUSD": 28909163,
+			"checks": ["defillama-listing: clear"],
+			"detail": ["DefiLlama lists gami-labs as active (checked 2026-10-23)."]
+		},
+		{
+			"slug": "sentora",
+			"status": "Live",
+			"types": ["Infrastructure", "RWA"],
+			"llamaSlugs": ["sentora"],
+			"tvlUSD": 10393904,
+			"checks": ["defillama-listing: could-not-check"],
+			"detail": [
+				"sentora not in DefiLlama's protocol list on 2026-10-23: renamed or removed upstream, which is not a death signal."
+			]
+		},
+		{
+			"slug": "spectra-finance",
+			"status": "Live",
+			"types": ["Bridge", "Yield"],
+			"llamaSlugs": ["spectra-v2"],
+			"tvlUSD": 501191,
+			"checks": ["defillama-listing: clear", "tvl-zero-onchain-quiet: clear"],
+			"detail": [
+				"DefiLlama lists spectra-v2 as active (checked 2026-10-23).",
+				"DefiLlama TVL $501,191 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "upshift",
+			"status": "Live",
+			"types": ["RWA"],
+			"llamaSlugs": ["upshift"],
+			"tvlUSD": 28909163,
+			"checks": ["defillama-listing: clear"],
+			"detail": ["DefiLlama lists upshift as active (checked 2026-10-23)."]
+		},
+		{
+			"slug": "sushi",
+			"status": "Live",
+			"types": ["DEX"],
+			"llamaSlugs": ["sushi-stellar"],
+			"tvlUSD": 15121456,
+			"checks": ["defillama-listing: clear", "tvl-zero-onchain-quiet: clear"],
+			"detail": [
+				"DefiLlama lists sushi-stellar as active (checked 2026-10-23).",
+				"DefiLlama TVL $15,121,456 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "slender",
+			"status": "Inactive",
+			"types": ["Lending"],
+			"llamaSlugs": ["slender"],
+			"tvlUSD": 92,
+			"checks": ["defillama-listing: clear", "tvl-zero-onchain-quiet: clear"],
+			"detail": [
+				"DefiLlama lists slender as active (checked 2026-10-23).",
+				"DefiLlama TVL $92 on 2026-10-19."
+			]
+		},
+		{
+			"slug": "fxdao",
+			"status": "Inactive",
+			"types": ["Stablecoin", "Lending"],
+			"llamaSlugs": ["fxdao"],
+			"tvlUSD": 0,
+			"checks": [
+				"defillama-listing: clear",
+				"tvl-zero-onchain-quiet: could-not-check"
+			],
+			"detail": [
+				"DefiLlama lists fxdao as active (checked 2026-10-23).",
+				"TVL is $0, but no contract of this project is tracked, so its on-chain use could not be read."
+			]
+		}
+	],
+	"flagship20": [
+		{
+			"slug": "soroban-rust-sdk",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "javascript-stellar-sdk",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "blend",
+			"caveated": false,
+			"linked": true
+		},
+		{
+			"slug": "circle",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "freighter",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "kale",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "lobstr",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "moneygram",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "reflector",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "soroswap",
+			"caveated": false,
+			"linked": true
+		},
+		{
+			"slug": "stellar-cli",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "xbull",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "benji",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "go-stellar-sdk",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "hubble",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "idos",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "aquarius",
+			"caveated": false,
+			"linked": true
+		},
+		{
+			"slug": "friendbot",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "ondo",
+			"caveated": false,
+			"linked": false
+		},
+		{
+			"slug": "python-stellar-sdk",
+			"caveated": false,
+			"linked": false
+		}
+	],
+	"tvlZeroRows": [
+		{
+			"slug": "allbridge",
+			"status": "Live",
+			"types": ["Bridge"]
+		},
+		{
+			"slug": "fxdao",
+			"status": "Inactive",
+			"types": ["Stablecoin", "Lending"]
+		}
+	]
+}
