@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-22T13:08:30.097Z",
+ "generatedAt": "2026-10-23T12:47:27.602Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 91,
+   "oldestDays": 92,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -295,11 +295,11 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 29
+    "count": 9
    },
    {
     "bucket": "8–30d",
-    "count": 35
+    "count": 55
    },
    {
     "bucket": "31–60d",
@@ -435,7 +435,7 @@
  },
  "projects": {
   "read": 1005,
-  "population": 1136,
+  "population": 1137,
   "servedPopulation": 1005,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
@@ -9545,11 +9545,11 @@
     },
     {
      "label": "slowing",
-     "count": 1067
+     "count": 1070
     },
     {
      "label": "active",
-     "count": 1019
+     "count": 1016
     },
     {
      "label": "unknown",
