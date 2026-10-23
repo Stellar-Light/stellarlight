@@ -930,7 +930,7 @@ async function handle(req: NextRequest) {
 	if (scfRaw && !SCF_TRUE.includes(scfRaw) && !SCF_FALSE.includes(scfRaw)) {
 		return NextResponse.json(
 			{
-				error: `Invalid scfAwarded value '${scfRaw}' — it is a boolean filter.`,
+				error: `Invalid scfAwarded value '${scfRaw}': it is a boolean filter.`,
 				acceptedValues: { true: SCF_TRUE, false: SCF_FALSE },
 			},
 			{ status: 400 },
