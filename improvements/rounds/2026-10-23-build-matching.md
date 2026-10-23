@@ -466,3 +466,51 @@ fresh battery written by a separate agent that was told no rule.
 - Text: builds `q` and `meta.warnings` descriptions; changelog 1.9.95
   (says the owner chose to ship past the bar, with the numbers);
   api-reference.md; `pnpm contract:write`.
+
+### Lane L2, second commit: three gaps the first left open (spec 1.9.95)
+
+- Orchestrator, on the owner's "not half done": close three of the first
+  commit's own open risks, rows unchanged, tests first. (1) Builds found by
+  meaning had no caveat (blockchain sourdough starter, 99 in hybrid mode).
+  (2) A word with a used related form (cashing, cash) could be over-read.
+  (3) A query that listed nothing said nothing (remitance app).
+- Tests first, against 499988e9: `npx vitest run
+  src/lib/__tests__/hackathon-builds.test.ts -t "related forms"`: 2 failed
+  (`unusedWordsWarning is not a function`); `npx vitest run
+  src/app/api/hackathons/builds/__tests__/route.test.ts -t "words are in no
+  build"`: 4 failed (three `expected undefined to deeply equal [ Array(1) ]`
+  for the zero-row, meaning and spelling lines; the related-form line
+  differed), 5 passed. The spelling-clarity tests were added with the
+  frequency rule and fail on 499988e9 the same way.
+- Change: `unusedWordsWarning` in `src/lib/hackathon-builds.ts` builds the
+  one line; the route pushes it. It fires whenever any word of q is in no
+  submission, whatever found the rows, and words the rows by kind (words,
+  meaning, both, none); names related forms; when nothing is listed, asks
+  to check the spelling.
+- Two rules were narrowed after their first measurement, before shipping,
+  both on what a claim may say, not on rows:
+  - spelling: any word within two edits named summarise for submarine,
+    royalty for loyalty, gambling for gargling and tempo for teapot. Now:
+    one edit (a swap of adjacent letters counts as one), the same first
+    letter, neither a prefix of the other, and no other such word used more
+    than a fifth as often. Remittance for remitance is named (the corpus
+    also holds remmitance once against remittance 9 times);
+  - related forms: tractor named traction. Now a stem found by dropping er,
+    or or ic takes back only inflections.
+- Re-measured on the final code:
+  - rows: every replay output identical to 499988e9's (lane K's capture, 140
+    ideas; the fresh battery; the 34 probes);
+  - the line fires for 32 of 140 ideas in keyword mode and 32 in hybrid (was
+    30 and 29), 24 of 24 battery queries in both modes (was 7 and 7), 15 of
+    15 on lane K's battery (was 1), and 16 of 34 probes in both modes (was
+    10 and 9). Every line's text is in `shipped/note-*.txt`;
+  - `check-unused.py`, rewritten to read back every claim in every line
+    (each named word unused, each related form used, each spelling used and
+    one edit away): 0 false on all three sets. Related forms named: 12
+    ideas (cash, shopping, issue, back, mint, algorithms, cheap, generate,
+    rent, hedge, delegation and their forms), 4 battery queries (start,
+    flips, schedules, whisper), 1 probe (shopping). Spellings named: one,
+    remittance for remitance.
+- Text: the builds `q` and `meta.warnings` descriptions, the 1.9.95
+  changelog entry and api-reference.md describe the line's forms, the
+  related-form rule and the spelling rule.

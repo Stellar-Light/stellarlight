@@ -709,12 +709,7 @@ export function wordsNoBuildUses(
 	const terms = queryTerms(q.trim().toLowerCase()).filter(({ t }) =>
 		/[\p{L}\p{N}]/u.test(t),
 	);
-	// Every declared package counts here, the common libraries too: a word
-	// only soroban-sdk holds is a word submissions use, though matching
-	// leaves that library out.
-	const hays = indexed.map(
-		(b) => `${b.haystack} ${(b.stack ?? []).join(" ").toLowerCase()}`,
-	);
+	const hays = indexed.map(usedText);
 	const absent = terms
 		.filter(({ t, forms }) => {
 			const hits = [...forms, ...otherNumber(wordCore(t))].flatMap(
@@ -726,6 +721,165 @@ export function wordsNoBuildUses(
 		})
 		.map(({ t }) => wordCore(t));
 	return { absent, concepts: terms.length };
+}
+
+/** A build's text and every package it declares, the common libraries too:
+ * a word only soroban-sdk holds is a word submissions use, though matching
+ * leaves that library out. */
+const usedText = (b: IndexedBuild) =>
+	`${b.haystack} ${(b.stack ?? []).join(" ").toLowerCase()}`;
+
+/** Suffixes stripped to find a word's stem, and grown back onto it, for the
+ * related forms the warning names: cashing is cash, hedging is hedge,
+ * shops is shopping, algorithmic is algorithms. A stem found by stripping
+ * er, or or ic takes back only inflections (generator is generate; tractor
+ * is not traction). er is never grown (stick is not sticker), and ers is
+ * never stripped (vouchers is not vouch). */
+const INFLECTIONS = ["ing", "est", "ed", "es", "s", "e"];
+const DERIVATIONS = ["er", "or", "ic"];
+const GROW_INFLECTED = ["", "e", "s", "es", "ed", "ing"];
+const GROW_ANY = [...GROW_INFLECTED, "al", "als", "ic", "ion"];
+
+/** Forms of `w` some build uses, most used first, at most 3: a stem of at
+ * least four letters with a suffix grown back, never `w`'s own plural or
+ * singular, all of which are unused when this is asked. */
+function relatedUsed(w: string, used: Map<string, number>): string[] {
+	if (!/^\p{L}+$/u.test(w)) return [];
+	const stems = new Map<string, string[]>();
+	for (const suffix of [...INFLECTIONS, ...DERIVATIONS]) {
+		const stem = w.slice(0, -suffix.length);
+		if (!w.endsWith(suffix) || stem.length < 4) continue;
+		const grow = DERIVATIONS.includes(suffix) ? GROW_INFLECTED : GROW_ANY;
+		stems.set(stem, grow);
+		// shopping is shop.
+		if (stem.length > 4 && /([^aeiou])\1$/.test(stem))
+			stems.set(stem.slice(0, -1), grow);
+	}
+	if (w.length >= 4) stems.set(w, GROW_ANY);
+	const own = new Set([w, ...wordForms(w), ...otherNumber(w)]);
+	const out = new Set<string>();
+	for (const [stem, grows] of stems)
+		for (const grow of grows)
+			for (const form of [
+				stem + grow,
+				// shop is shopping.
+				...(/^(ed|ing)$/.test(grow) && /[^aeiou]$/.test(stem)
+					? [stem + stem.slice(-1) + grow]
+					: []),
+			])
+				if (!own.has(form) && used.has(form)) out.add(form);
+	return [...out]
+		.sort((a, b) => (used.get(b) ?? 0) - (used.get(a) ?? 0))
+		.slice(0, 3);
+}
+
+/** One edit apart: a letter added, dropped or changed, or two adjacent
+ * letters swapped (exchnage, exchange). A swap is two edits counted one at
+ * a time, so this stays within the two edits a suggestion may be. */
+function oneEdit(a: string, b: string): boolean {
+	if (a.length < b.length) [a, b] = [b, a];
+	let i = 0;
+	while (i < b.length && a[i] === b[i]) i++;
+	if (a.length === b.length + 1) return a.slice(i + 1) === b.slice(i);
+	if (a.length !== b.length || i === a.length) return false;
+	return (
+		a.slice(i + 1) === b.slice(i + 1) ||
+		(a[i] === b[i + 1] &&
+			a[i + 1] === b[i] &&
+			a.slice(i + 2) === b.slice(i + 2))
+	);
+}
+
+/** The one word some build uses that `w` looks like a typo of, or null: one
+ * edit away, the same first letter, neither a prefix of the other (sleepy
+ * and sleep are two words, not a typo), and no second such word unless the
+ * first is used at least five times as often (submissions misspell too:
+ * remmitance beside remittance). On the 2026-10-23 batteries, any word
+ * within two edits named summarise for submarine and royalty for loyalty;
+ * this rule names neither. */
+function oneSpelling(w: string, used: Map<string, number>): string | null {
+	if (!/^\p{L}{5,}$/u.test(w)) return null;
+	const found = [...used.keys()]
+		.filter(
+			(u) =>
+				u[0] === w[0] &&
+				/^\p{L}{4,}$/u.test(u) &&
+				!u.startsWith(w) &&
+				!w.startsWith(u) &&
+				oneEdit(w, u),
+		)
+		.sort((a, b) => (used.get(b) ?? 0) - (used.get(a) ?? 0));
+	const [first, second] = found.map((u) => used.get(u) ?? 0);
+	return found.length && (second === undefined || first >= 5 * second)
+		? found[0]
+		: null;
+}
+
+const andList = (xs: string[]) =>
+	xs.length < 2
+		? xs.join("")
+		: `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
+
+/**
+ * The builds route's line when any word of `q` occurs as a whole word in no
+ * submission (wordsNoBuildUses), or null. It never changes rows. It names
+ * the words; says what the rows are (one listed by its words matches only
+ * q's other words, one found by meaning is close to q as a whole); names a
+ * related form submissions do use (cash for cashing), so the line is not
+ * read as nobody building for cash-out; and, when nothing is listed, asks to
+ * check the spelling, naming a used word only when it is the one oneSpelling
+ * finds and the word has no related form.
+ */
+export function unusedWordsWarning(
+	indexed: IndexedBuild[],
+	q: string,
+	scored: ScoredBuild[],
+): string | null {
+	const { absent, concepts } = wordsNoBuildUses(indexed, q);
+	if (!absent.length) return null;
+	const used = new Map<string, number>();
+	for (const b of indexed)
+		for (const w of usedText(b).match(/[\p{L}\p{N}]+/gu) ?? [])
+			used.set(w, (used.get(w) ?? 0) + 1);
+	const one = absent.length === 1;
+	const all = absent.length === concepts;
+	const words = `searched in q (${absent.join(", ")})`;
+	const head = !all
+		? `${absent.length} of the ${concepts} words ${words} ${one ? "occurs" : "occur"} as a whole word in no submission in the index`
+		: one
+			? `the word ${words} occurs as a whole word in no submission in the index`
+			: `none of the ${concepts} words ${words} occurs as a whole word in any submission in the index`;
+	const byWords = scored.some((s) => s.matched.length);
+	const byMeaning = scored.some((s) => s.similarity !== undefined);
+	const those = one ? "that word" : "those words";
+	const inside = one
+		? "it only inside a longer word"
+		: "them only inside longer words";
+	const named = one ? "it" : "one of them";
+	const related = absent.map((w) => [w, relatedUsed(w, used)] as const);
+	const spelling = scored.length
+		? []
+		: related.flatMap(([w, r]) => {
+				const s = r.length ? null : oneSpelling(w, used);
+				return s ? [`${s}, used in submissions, is one edit from ${w}`] : [];
+			});
+	const body = !scored.length
+		? `, and no build matched q; check the spelling${spelling.length ? ` (${spelling.join("; ")})` : ""}`
+		: !byMeaning
+			? all
+				? `: a build listed by its words alone, with no similarity, holds ${inside} and is not evidence that this idea was built`
+				: `, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names ${named}, it was found inside a longer word`
+			: !byWords
+				? `: every build listed was found by meaning (similarity, no matchedTerms) and is close to q as a whole, not to ${those}`
+				: all
+					? `: a build listed by its words holds ${inside}, and a build with similarity is close to q as a whole, not to ${those}; neither is evidence that this idea was built`
+					: `: a build listed by its words matches only the other words of q (where its matchedTerms names ${named}, it was found inside a longer word), and a build with similarity is close to q as a whole, not to ${those}`;
+	const forms = related.filter(([, r]) => r.length);
+	const formCount = forms.reduce((n, [, r]) => n + r.length, 0);
+	const relatedText = forms.length
+		? `; ${formCount === 1 ? "a related form is" : "related forms are"} used: ${forms.map(([w, r]) => `${andList(r)} for ${w}`).join("; ")}`
+		: "";
+	return head + body + relatedText;
 }
 
 /**

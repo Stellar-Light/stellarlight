@@ -1,11 +1,49 @@
-group | q | word | submissions using it as a whole word | related words used (count)
-adversarial one word | llama | llama | 0 | none
-adversarial typo | sorobn wallet | sorobn | 0 | soroban-sdk (669), soroban (151), soroban-token-sdk (38), soroban-env-host (25)
-adversarial typo | pasky wallet | pasky | 0 | none
-adversarial typo | decentralised exchnage for stablecoins | exchnage | 0 | none
-adversarial accent or punctuation | café payments | café | 0 | none
-adversarial two words | pogo payments | pogo | 0 | none
-adversarial two words | escrow sandwich | sandwich | 0 | none
-adversarial two words | llama wallet | llama | 0 | none
-adversarial five words | crowdfunding platform for indie game developers | indie | 0 | individuals (12), individual (7), india (3), indian (1)
-adversarial five words | trombone lessons marketplace with escrow payments | trombone | 0 | none
+group | q | mode | claim | checked
+adversarial one word | llama | keyword | unused: llama | ok (0 uses)
+adversarial one word | llama | hybrid | unused: llama | ok (0 uses)
+adversarial typo | sorobn wallet | keyword | unused: sorobn | ok (0 uses)
+adversarial typo | sorobn wallet | hybrid | unused: sorobn | ok (0 uses)
+adversarial typo | remitance app | keyword | unused: remitance | ok (0 uses)
+adversarial typo | remitance app | keyword | spelling: remittance for remitance | ok (9 uses, 1 edits)
+adversarial typo | remitance app | hybrid | unused: remitance | ok (0 uses)
+adversarial typo | remitance app | hybrid | spelling: remittance for remitance | ok (9 uses, 1 edits)
+adversarial typo | pasky wallet | keyword | unused: pasky | ok (0 uses)
+adversarial typo | pasky wallet | hybrid | unused: pasky | ok (0 uses)
+adversarial typo | decentralised exchnage for stablecoins | keyword | unused: exchnage | ok (0 uses)
+adversarial typo | decentralised exchnage for stablecoins | hybrid | unused: exchnage | ok (0 uses)
+adversarial accent or punctuation | café payments | keyword | unused: café | ok (0 uses)
+adversarial accent or punctuation | café payments | hybrid | unused: café | ok (0 uses)
+adversarial accent or punctuation | paiement mobile sécurisé | keyword | unused: paiement | ok (0 uses)
+adversarial accent or punctuation | paiement mobile sécurisé | keyword | unused: sécurisé | ok (0 uses)
+adversarial accent or punctuation | paiement mobile sécurisé | hybrid | unused: paiement | ok (0 uses)
+adversarial accent or punctuation | paiement mobile sécurisé | hybrid | unused: sécurisé | ok (0 uses)
+adversarial two words | pogo payments | keyword | unused: pogo | ok (0 uses)
+adversarial two words | pogo payments | hybrid | unused: pogo | ok (0 uses)
+adversarial two words | escrow sandwich | keyword | unused: sandwich | ok (0 uses)
+adversarial two words | escrow sandwich | hybrid | unused: sandwich | ok (0 uses)
+adversarial two words | llama wallet | keyword | unused: llama | ok (0 uses)
+adversarial two words | llama wallet | hybrid | unused: llama | ok (0 uses)
+adversarial five words | loyalty points for coffee shops | keyword | unused: loyalty | ok (0 uses)
+adversarial five words | loyalty points for coffee shops | keyword | unused: coffee | ok (0 uses)
+adversarial five words | loyalty points for coffee shops | keyword | unused: shops | ok (0 uses)
+adversarial five words | loyalty points for coffee shops | keyword | related: shopping for shops | ok (1 uses)
+adversarial five words | loyalty points for coffee shops | hybrid | unused: loyalty | ok (0 uses)
+adversarial five words | loyalty points for coffee shops | hybrid | unused: coffee | ok (0 uses)
+adversarial five words | loyalty points for coffee shops | hybrid | unused: shops | ok (0 uses)
+adversarial five words | loyalty points for coffee shops | hybrid | related: shopping for shops | ok (1 uses)
+adversarial five words | crowdfunding platform for indie game developers | keyword | unused: indie | ok (0 uses)
+adversarial five words | crowdfunding platform for indie game developers | hybrid | unused: indie | ok (0 uses)
+adversarial five words | trombone lessons marketplace with escrow payments | keyword | unused: trombone | ok (0 uses)
+adversarial five words | trombone lessons marketplace with escrow payments | hybrid | unused: trombone | ok (0 uses)
+adversarial only stellar | stellar zorblax | keyword | unused: zorblax | ok (0 uses)
+adversarial only stellar | stellar zorblax | hybrid | unused: zorblax | ok (0 uses)
+adversarial only stellar | stellar zorblax quibbet | keyword | unused: zorblax | ok (0 uses)
+adversarial only stellar | stellar zorblax quibbet | keyword | unused: quibbet | ok (0 uses)
+adversarial only stellar | stellar zorblax quibbet | hybrid | unused: zorblax | ok (0 uses)
+adversarial only stellar | stellar zorblax quibbet | hybrid | unused: quibbet | ok (0 uses)
+adversarial hyphenated | zero-knowledge pogo stick | keyword | unused: pogo | ok (0 uses)
+adversarial hyphenated | zero-knowledge pogo stick | keyword | unused: stick | ok (0 uses)
+adversarial hyphenated | zero-knowledge pogo stick | hybrid | unused: pogo | ok (0 uses)
+adversarial hyphenated | zero-knowledge pogo stick | hybrid | unused: stick | ok (0 uses)
+
+false claims: 0

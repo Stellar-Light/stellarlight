@@ -215,18 +215,22 @@ added. Lane K's battery: 20 -> 9 keyword, 21 -> 10 hybrid.
 **(e) Where the warning fires among the 140 labeled ideas**
 (`shipped/note-labeled.txt`; each word checked by `check-unused.py`, a
 separate Python whole-word search over every submission's text and every
-declared package, `shipped/unused-labeled.txt`): 30 ideas in keyword mode,
-29 in hybrid. Every word named occurs as a whole word in no submission (37
-words, 0 uses each).
+declared package, and every related form and spelling the line names,
+`shipped/unused-labeled.txt`): after the second commit, 32 ideas in
+keyword mode and 32 in hybrid, every line's exact text in
+`shipped/note-labeled.txt`. 0 false claims: every word named is used by no
+submission, and every related form named is used.
 
-| idea | words named | a related form some submission uses |
+| idea | words named | related forms the line names |
 | --- | --- | --- |
 | cross-border remittance app cashing out through local anchors | cashing | cash |
 | NFT event ticketing with resale royalties | resale | none |
 | savings circle (ROSCA, tanda) with automatic payouts | rosca | none |
 | merchant QR code payments for small shops | shops | shopping |
 | fiat on-ramp and off-ramp for a local currency | on-ramp | none (nor onramp, on ramp) |
-| a stablecoin with 1:1 backing for merchant payments | backing | backed |
+| loyalty points issued as tokens (0 rows keyword, meaning only hybrid) | loyalty, issued | issue, issues, issuing |
+| tokenized gold or commodities (0 rows keyword, meaning only hybrid) | gold, commodities | none |
+| a stablecoin with 1:1 backing for merchant payments | backing | backed, back |
 | fiat-backed stablecoin for payments | fiat-backed | none |
 | a minted stablecoin for payments | minted | mint, minting |
 | a stablecoin pegging the dollar for payments | pegging | none |
@@ -237,26 +241,26 @@ words, 0 uses each).
 | an algorithmic stablecoin for merchant payments | algorithmic | algorithms |
 | a depegged stablecoin for merchant payments | depegged | none |
 | a stablecoin that anchors its peg to gold | peg, gold | none |
-| donation matching for nonprofits (keyword only) | nonprofits | none |
+| donation matching for nonprofits | nonprofits | none |
 | tokenized farmland | farmland | none |
 | crop insurance | crop | none |
 | refugee aid vouchers | vouchers | none |
-| cheapest route to swap USDC into naira | cheapest | cheap, cheaper |
-| Soroban contract template generator from plain English | generator, plain, english | generate (for generator) |
+| cheapest route to swap USDC into naira | cheapest | cheap |
+| Soroban contract template generator from plain English | generator, plain, english | generated, generate, generating |
 | quadratic voting for community grants | quadratic | none |
 | verifiable diploma credentials for university graduates | diploma | none |
 | NGO tool to track disaster relief cash transfers ... | relief | none |
 | onchain fantasy sports game where winners are paid ... | fantasy | none |
 | round up savings app that sweeps spare change ... | sweeps, spare | none |
-| marketplace for renting out tools and equipment ... | renting, held | rent, rental (for renting) |
-| forex hedging tool for exporters ... | forex, hedging | hedge (for hedging) |
-| DAO tool that lets members delegate votes ... revoke any time | delegate, revoke | delegation, revocable |
+| marketplace for renting out tools and equipment ... | renting, held | rent, rental, rentals |
+| forex hedging tool for exporters ... | forex, hedging | hedge, hedged |
+| DAO tool that lets members delegate votes ... revoke any time | delegate, revoke | delegation, delegating |
 
 Real ideas with one rare word no submission uses get a true line: quadratic
 voting, diploma credentials, tokenized farmland, crop insurance, resale
-royalties, an overcollateralized stablecoin, fantasy sports. For 12 words a
-related form is used; the line names the word as typed and says only that
-it occurs as a whole word in no submission, which holds.
+royalties, an overcollateralized stablecoin, fantasy sports. 12 ideas name a
+related form; revoke names none (revocable is related, but k to c is past
+the rule), nor do vouchers (vouch), relief (reliable) or forex (forever).
 
 **(f) Adversarial probes** (`probes.json`, fixed before any probe ran;
 captured live on 1.9.94 to 1.9.94, 98 pages, every one 200;
@@ -313,11 +317,46 @@ Read with care:
   3 concepts in no submission, so rule L holds back its four zero-knowledge
   builds, while `zero knowledge pogo stick` (2 of 4) keeps 156 with the
   warning.
-- The warning covers builds listed by their words alone. A build found by
-  meaning carries similarity and no caveat: `blockchain sourdough starter`
-  lists 99 such builds in hybrid mode with no line, and `stellar zorblax
-  quibbet` 47.
-- A typo that matches nothing returns nothing and no line (`remitance app`).
+- Closed in the second commit: a build found by meaning had no caveat
+  (`blockchain sourdough starter`, 99 in hybrid mode), a word with a used
+  related form could be over-read, and a query that listed nothing said
+  nothing (`remitance app`). See "Second commit" below.
+
+**Second commit: meaning rows, related forms, spelling.** Rows are
+identical to the first commit's on the 140 ideas, the battery and the 34
+probes (every field of every replay). The line now fires whenever any word
+of q is in no submission:
+
+| set | queries | line fires, keyword / hybrid | was |
+| --- | --- | --- | --- |
+| 140 labeled ideas | 140 | 32 / 32 | 30 / 29 |
+| fresh battery | 24 | 24 / 24 | 7 / 7 |
+| lane K's battery | 15 | 15 / 15 | 1 / 1 |
+| adversarial probes | 34 | 16 / 16 | 10 / 9 |
+
+- Rows found by meaning: "every build listed was found by meaning
+  (similarity, no matchedTerms) and is close to q as a whole, not to those
+  words" when no build is listed by words (`blockchain sourdough starter`,
+  hybrid, 99 rows); both kinds together: "a build listed by its words
+  matches only the other words of q (...), and a build with similarity is
+  close to q as a whole, not to those words".
+- Related forms: "; a related form is used: cash for cashing". A stem of
+  four letters or more takes an ending back; a stem found by dropping er,
+  or or ic takes back only inflections (tractor is not traction), er is
+  never grown (stick is not sticker), ers is never dropped (vouchers is not
+  vouch). The first measured version named traction for tractor; this rule
+  was then narrowed, and a test holds it.
+- Zero rows: ", and no build matched q; check the spelling", naming a used
+  word only when it is one edit away (a letter added, dropped or changed,
+  or two adjacent letters swapped), starts with the same letter, neither is
+  a prefix of the other, and no other such word is used more than a fifth
+  as often. A first version took any word within two edits and named
+  summarise for submarine, royalty for loyalty, gambling for gargling and
+  tempo for teapot on these sets; it was replaced before shipping. The one
+  spelling named now on all three sets is remittance for remitance (probe
+  p09); the corpus also holds remmitance once, against remittance 9 times.
+- `check-unused.py` reads back every claim in every line on all three
+  sets: 0 false (`shipped/unused-*.txt`).
 
 ## Open risks
 

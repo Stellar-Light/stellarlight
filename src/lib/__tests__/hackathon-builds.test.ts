@@ -7,6 +7,7 @@ import {
 	indexedFromStored,
 	onePerSubmission,
 	searchHackathonBuilds,
+	unusedWordsWarning,
 	wordsNoBuildUses,
 } from "@/lib/hackathon-builds";
 import {
@@ -419,6 +420,81 @@ describe("words no build uses", () => {
 		expect(
 			wordsNoBuildUses(more, "charities family soroban-sdk (rosca,"),
 		).toEqual({ absent: ["rosca"], concepts: 4 });
+	});
+});
+
+describe("the warning names related forms submissions do use", () => {
+	// The 12 words on 140 labeled ideas (2026-10-23) whose related form is
+	// used, and look-alikes that are not related forms.
+	const pool = [
+		build("Cash", "Cash out, with cashback."),
+		build("Mint", "Mint and minting tools."),
+		build("Hedge", "Hedge positions."),
+		build("Rent", "Rent, rental and rentals."),
+		build("Cart", "A shopping cart."),
+		build("Office", "Back office, backed by assets, background jobs."),
+		build("Algo", "Trading algorithms."),
+		build("Fees", "Cheap and cheaper fees."),
+		build("Gen", "Generate a generation."),
+		build("Votes", "Delegation and delegating."),
+		build("Keys", "Revocable keys."),
+		build("Misc", "Reliable, forever, vouch, sticker, traction."),
+	];
+	const line = (q: string) => unusedWordsWarning(pool, q, []) ?? "";
+
+	it("names each related form that is used", () => {
+		for (const [word, clause] of [
+			["cashing", "cash for cashing"],
+			["minted", "mint and minting for minted"],
+			["minter", "mint and minting for minter"],
+			["hedging", "hedge for hedging"],
+			["renting", "rent, rental and rentals for renting"],
+			["shops", "shopping for shops"],
+			["backing", "back and backed for backing"],
+			["algorithmic", "algorithms for algorithmic"],
+			["cheapest", "cheap for cheapest"],
+			["generator", "generate for generator"],
+			["delegate", "delegating and delegation for delegate"],
+		])
+			expect(line(word), word).toContain(`used: ${clause}`);
+	});
+
+	it("claims no related form a shared prefix only looks like", () => {
+		// revocable is related to revoke, but k to c is past the rule.
+		for (const word of [
+			"revoke",
+			"relief",
+			"forex",
+			"vouchers",
+			"stick",
+			"tractor",
+		])
+			expect(line(word), word).not.toMatch(/related form/);
+	});
+});
+
+describe("the warning names a spelling only when one is clear", () => {
+	const remit = (n: number, typo: number) => [
+		...Array.from({ length: n }, (_, i) =>
+			build(`Remit ${i}`, "Remittance app."),
+		),
+		...Array.from({ length: typo }, (_, i) =>
+			build(`Typo ${i}`, "Remmitance app."),
+		),
+	];
+	const suggestion =
+		"(remittance, used in submissions, is one edit from remitance)";
+
+	it("names a word five times as used as any other one edit away", () => {
+		expect(unusedWordsWarning(remit(5, 1), "remitance", [])).toContain(
+			suggestion,
+		);
+	});
+
+	it("names none when two are close in use", () => {
+		expect(unusedWordsWarning(remit(5, 2), "remitance", [])).not.toContain(
+			suggestion,
+		);
 	});
 });
 

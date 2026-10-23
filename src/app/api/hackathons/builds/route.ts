@@ -28,7 +28,7 @@ import {
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
-	wordsNoBuildUses,
+	unusedWordsWarning,
 } from "@/lib/hackathon-builds";
 import { heldSecurity } from "@/lib/held-repos";
 import { clampLimit, clampOffset } from "@/lib/http-params";
@@ -116,26 +116,9 @@ export async function GET(req: NextRequest) {
 		countEntries: true,
 	});
 	warnings.unshift(...parsed.warnings);
-	// Any of q's words in no submission: a build listed by its words alone
-	// matches only the others. One found by meaning was scored on all of q.
-	const unused =
-		q && scored.some((s) => s.matched.length && s.similarity === undefined)
-			? wordsNoBuildUses(indexed, q)
-			: null;
-	if (unused?.absent.length) {
-		const { absent, concepts } = unused;
-		const one = absent.length === 1;
-		const words = `searched in q (${absent.join(", ")})`;
-		// Every word in no submission: a words-alone build holds them only
-		// inside longer words ("1 of the 1 words ... part of q" said less).
-		warnings.push(
-			absent.length < concepts
-				? `${absent.length} of the ${concepts} words ${words} ${one ? "occurs" : "occur"} as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names ${one ? "it" : "one of them"}, it was found inside a longer word`
-				: concepts === 1
-					? `the word ${words} occurs as a whole word in no submission in the index: a build listed by its words alone, with no similarity, holds it only inside a longer word and is not evidence that this idea was built`
-					: `none of the ${concepts} words ${words} occurs as a whole word in any submission in the index: a build listed by its words alone, with no similarity, holds them only inside longer words and is not evidence that this idea was built`,
-		);
-	}
+	// Any of q's words in no submission: say which, and what the rows are.
+	const unused = q ? unusedWordsWarning(indexed, q, scored) : null;
+	if (unused) warnings.push(unused);
 
 	const builds = scored
 		.slice(offset, offset + limit)

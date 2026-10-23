@@ -1,33 +1,58 @@
 capture: api 1.9.93 -> 1.9.93, corpus 1344
-group | q | concepts | in no submission | keyword rows | hybrid rows | fires keyword | fires hybrid
-nonsense plain | crimson accordion volcano | 3 | crimson, accordion, volcano | 0 | 0 | no | no
-nonsense plain | sleepy giraffe bakery | 3 | sleepy, giraffe, bakery | 0 | 0 | no | no
-nonsense plain | marmalade thunderstorm trombone | 3 | marmalade, thunderstorm, trombone | 0 | 0 | no | no
-nonsense plain | polka dot submarine | 3 | polka, dot, submarine | 0 | 0 | no | no
-nonsense plain | gargling penguin lighthouse | 3 | gargling, penguin, lighthouse | 0 | 0 | no | no
-nonsense plain | knitted cactus parliament | 3 | knitted, cactus, parliament | 0 | 0 | no | no
-nonsense plain | yodeling teapot glacier | 3 | yodeling, teapot, glacier | 0 | 0 | no | no
-nonsense plain | bashful pineapple tractor | 3 | bashful, pineapple, tractor | 0 | 0 | no | no
-nonsense tech | blockchain sourdough starter | 3 | sourdough, starter | 0 | 99 | no | no
-nonsense tech | NFT lawnmower marathon | 3 | lawnmower, marathon | 0 | 0 | no | no
-nonsense tech | smart contract hamster wheel | 4 | hamster, wheel | 80 | 85 | yes | yes
-nonsense tech | DeFi pancake flipping | 3 | pancake, flipping | 0 | 0 | no | no
-nonsense tech | bitcoin origami zeppelin | 3 | origami, zeppelin | 0 | 11 | no | no
-nonsense tech | ethereum bagpipe tuner | 3 | bagpipe, tuner | 0 | 0 | no | no
-nonsense tech | AI toaster opera | 3 | toaster, opera | 10 | 10 | yes | yes
-nonsense tech | zero knowledge pogo stick | 4 | pogo, stick | 156 | 188 | yes | yes
-nonsense stellar | soroban pickle juggling | 3 | pickle | 21 | 21 | yes | yes
-nonsense stellar | stellar mattress comparison | 2 | mattress, comparison | 0 | 0 | no | no
-nonsense stellar | wallet for pet iguanas | 3 | pet, iguanas | 0 | 0 | no | no
-nonsense stellar | lumen bowling alley scheduler | 4 | bowling, alley, scheduler | 0 | 0 | no | no
-nonsense stellar | anchor ship knot tutorial | 4 | knot, tutorial | 14 | 15 | yes | yes
-nonsense stellar | pay per yodel | 2 | yodel | 132 | 132 | yes | yes
-nonsense stellar | stellar kazoo orchestra tickets | 3 | kazoo, orchestra | 0 | 0 | no | no
-nonsense stellar | soroban garden gnome registry | 4 | garden, gnome | 23 | 23 | yes | yes
-probe | quantum llama sandwich | 3 | llama, sandwich | 0 | 0 | no | no
+group | q | mode | rows | line (none = no line)
+nonsense plain | crimson accordion volcano | keyword | 0 | none of the 3 words searched in q (crimson, accordion, volcano) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | crimson accordion volcano | hybrid | 0 | none of the 3 words searched in q (crimson, accordion, volcano) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | sleepy giraffe bakery | keyword | 0 | none of the 3 words searched in q (sleepy, giraffe, bakery) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | sleepy giraffe bakery | hybrid | 0 | none of the 3 words searched in q (sleepy, giraffe, bakery) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | marmalade thunderstorm trombone | keyword | 0 | none of the 3 words searched in q (marmalade, thunderstorm, trombone) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | marmalade thunderstorm trombone | hybrid | 0 | none of the 3 words searched in q (marmalade, thunderstorm, trombone) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | polka dot submarine | keyword | 0 | none of the 3 words searched in q (polka, dot, submarine) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | polka dot submarine | hybrid | 0 | none of the 3 words searched in q (polka, dot, submarine) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | gargling penguin lighthouse | keyword | 0 | none of the 3 words searched in q (gargling, penguin, lighthouse) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | gargling penguin lighthouse | hybrid | 0 | none of the 3 words searched in q (gargling, penguin, lighthouse) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | knitted cactus parliament | keyword | 0 | none of the 3 words searched in q (knitted, cactus, parliament) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | knitted cactus parliament | hybrid | 0 | none of the 3 words searched in q (knitted, cactus, parliament) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | yodeling teapot glacier | keyword | 0 | none of the 3 words searched in q (yodeling, teapot, glacier) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | yodeling teapot glacier | hybrid | 0 | none of the 3 words searched in q (yodeling, teapot, glacier) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | bashful pineapple tractor | keyword | 0 | none of the 3 words searched in q (bashful, pineapple, tractor) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense plain | bashful pineapple tractor | hybrid | 0 | none of the 3 words searched in q (bashful, pineapple, tractor) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense tech | blockchain sourdough starter | keyword | 0 | 2 of the 3 words searched in q (sourdough, starter) occur as a whole word in no submission in the index, and no build matched q; check the spelling; related forms are used: starting, start and starts for starter
+nonsense tech | blockchain sourdough starter | hybrid | 99 | 2 of the 3 words searched in q (sourdough, starter) occur as a whole word in no submission in the index: every build listed was found by meaning (similarity, no matchedTerms) and is close to q as a whole, not to those words; related forms are used: starting, start and starts for starter
+nonsense tech | NFT lawnmower marathon | keyword | 0 | 2 of the 3 words searched in q (lawnmower, marathon) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+nonsense tech | NFT lawnmower marathon | hybrid | 0 | 2 of the 3 words searched in q (lawnmower, marathon) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+nonsense tech | smart contract hamster wheel | keyword | 80 | 2 of the 4 words searched in q (hamster, wheel) occur as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names one of them, it was found inside a longer word
+nonsense tech | smart contract hamster wheel | hybrid | 85 | 2 of the 4 words searched in q (hamster, wheel) occur as a whole word in no submission in the index: a build listed by its words matches only the other words of q (where its matchedTerms names one of them, it was found inside a longer word), and a build with similarity is close to q as a whole, not to those words
+nonsense tech | DeFi pancake flipping | keyword | 0 | 2 of the 3 words searched in q (pancake, flipping) occur as a whole word in no submission in the index, and no build matched q; check the spelling; a related form is used: flips for flipping
+nonsense tech | DeFi pancake flipping | hybrid | 0 | 2 of the 3 words searched in q (pancake, flipping) occur as a whole word in no submission in the index, and no build matched q; check the spelling; a related form is used: flips for flipping
+nonsense tech | bitcoin origami zeppelin | keyword | 0 | 2 of the 3 words searched in q (origami, zeppelin) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+nonsense tech | bitcoin origami zeppelin | hybrid | 11 | 2 of the 3 words searched in q (origami, zeppelin) occur as a whole word in no submission in the index: every build listed was found by meaning (similarity, no matchedTerms) and is close to q as a whole, not to those words
+nonsense tech | ethereum bagpipe tuner | keyword | 0 | 2 of the 3 words searched in q (bagpipe, tuner) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+nonsense tech | ethereum bagpipe tuner | hybrid | 0 | 2 of the 3 words searched in q (bagpipe, tuner) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+nonsense tech | AI toaster opera | keyword | 10 | 2 of the 3 words searched in q (toaster, opera) occur as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names one of them, it was found inside a longer word
+nonsense tech | AI toaster opera | hybrid | 10 | 2 of the 3 words searched in q (toaster, opera) occur as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names one of them, it was found inside a longer word
+nonsense tech | zero knowledge pogo stick | keyword | 156 | 2 of the 4 words searched in q (pogo, stick) occur as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names one of them, it was found inside a longer word
+nonsense tech | zero knowledge pogo stick | hybrid | 188 | 2 of the 4 words searched in q (pogo, stick) occur as a whole word in no submission in the index: a build listed by its words matches only the other words of q (where its matchedTerms names one of them, it was found inside a longer word), and a build with similarity is close to q as a whole, not to those words
+nonsense stellar | soroban pickle juggling | keyword | 21 | 1 of the 3 words searched in q (pickle) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+nonsense stellar | soroban pickle juggling | hybrid | 21 | 1 of the 3 words searched in q (pickle) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+nonsense stellar | stellar mattress comparison | keyword | 0 | none of the 2 words searched in q (mattress, comparison) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense stellar | stellar mattress comparison | hybrid | 0 | none of the 2 words searched in q (mattress, comparison) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+nonsense stellar | wallet for pet iguanas | keyword | 0 | 2 of the 3 words searched in q (pet, iguanas) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+nonsense stellar | wallet for pet iguanas | hybrid | 0 | 2 of the 3 words searched in q (pet, iguanas) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+nonsense stellar | lumen bowling alley scheduler | keyword | 0 | 3 of the 4 words searched in q (bowling, alley, scheduler) occur as a whole word in no submission in the index, and no build matched q; check the spelling; a related form is used: schedules for scheduler
+nonsense stellar | lumen bowling alley scheduler | hybrid | 0 | 3 of the 4 words searched in q (bowling, alley, scheduler) occur as a whole word in no submission in the index, and no build matched q; check the spelling; a related form is used: schedules for scheduler
+nonsense stellar | anchor ship knot tutorial | keyword | 14 | 2 of the 4 words searched in q (knot, tutorial) occur as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names one of them, it was found inside a longer word
+nonsense stellar | anchor ship knot tutorial | hybrid | 15 | 2 of the 4 words searched in q (knot, tutorial) occur as a whole word in no submission in the index: a build listed by its words matches only the other words of q (where its matchedTerms names one of them, it was found inside a longer word), and a build with similarity is close to q as a whole, not to those words
+nonsense stellar | pay per yodel | keyword | 132 | 1 of the 2 words searched in q (yodel) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+nonsense stellar | pay per yodel | hybrid | 132 | 1 of the 2 words searched in q (yodel) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+nonsense stellar | stellar kazoo orchestra tickets | keyword | 0 | 2 of the 3 words searched in q (kazoo, orchestra) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+nonsense stellar | stellar kazoo orchestra tickets | hybrid | 0 | 2 of the 3 words searched in q (kazoo, orchestra) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+nonsense stellar | soroban garden gnome registry | keyword | 23 | 2 of the 4 words searched in q (garden, gnome) occur as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names one of them, it was found inside a longer word
+nonsense stellar | soroban garden gnome registry | hybrid | 23 | 2 of the 4 words searched in q (garden, gnome) occur as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names one of them, it was found inside a longer word
+probe | quantum llama sandwich | keyword | 0 | 2 of the 3 words searched in q (llama, sandwich) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+probe | quantum llama sandwich | hybrid | 0 | 2 of the 3 words searched in q (llama, sandwich) occur as a whole word in no submission in the index, and no build matched q; check the spelling
 
 group | queries | with rows, keyword / hybrid | line fires, keyword / hybrid
-nonsense plain | 8 | 0 / 0 | 0 / 0
-nonsense tech | 8 | 3 / 5 | 3 / 3
-nonsense stellar | 8 | 4 / 4 | 4 / 4
-probe | 1 | 0 / 0 | 0 / 0
+nonsense plain | 8 | 0 / 0 | 8 / 8
+nonsense tech | 8 | 3 / 5 | 8 / 8
+nonsense stellar | 8 | 4 / 4 | 8 / 8
+probe | 1 | 0 / 0 | 1 / 1

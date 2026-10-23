@@ -1,47 +1,81 @@
 capture: api 1.9.94 -> 1.9.94, corpus 1344
-group | q | concepts | in no submission | keyword rows | hybrid rows | fires keyword | fires hybrid
-adversarial one word | escrow | 1 | none | 34 | 34 | no | no
-adversarial one word | llama | 1 | llama | 1 | 1 | yes | yes
-adversarial product name | soroswap | 1 | none | 15 | 18 | no | no
-adversarial product name | blend | 1 | none | 47 | 47 | no | no
-adversarial product name | reflector | 1 | none | 14 | 14 | no | no
-adversarial product name | soroswap aggregator | 2 | none | 19 | 50 | no | no
-adversarial product name | blend lending pool | 3 | none | 77 | 77 | no | no
-adversarial typo | sorobn wallet | 2 | sorobn | 89 | 141 | yes | yes
-adversarial typo | remitance app | 1 | remitance | 0 | 0 | no | no
-adversarial typo | pasky wallet | 2 | pasky | 89 | 91 | yes | yes
-adversarial typo | decentralised exchnage for stablecoins | 3 | exchnage | 1 | 285 | yes | no
-adversarial accent or punctuation | café payments | 2 | café | 270 | 270 | yes | yes
-adversarial accent or punctuation | AI agents, payments | 3 | none | 147 | 147 | no | no
-adversarial accent or punctuation | pagos en línea para comercios | 5 | none | 22 | 26 | no | no
-adversarial accent or punctuation | paiement mobile sécurisé | 3 | paiement, sécurisé | 0 | 0 | no | no
-adversarial accent or punctuation | x402!!! paywall??? | 2 | none | 0 | 83 | no | no
-adversarial two words | pogo payments | 2 | pogo | 270 | 270 | yes | yes
-adversarial two words | escrow sandwich | 2 | sandwich | 34 | 34 | yes | yes
-adversarial two words | llama wallet | 2 | llama | 90 | 90 | yes | yes
-adversarial five words | loyalty points for coffee shops | 4 | loyalty, coffee, shops | 0 | 1 | no | no
-adversarial five words | tokenized carbon credits for farmers | 4 | none | 8 | 27 | no | no
-adversarial five words | proof of reserves for stablecoin issuers | 4 | none | 64 | 109 | no | no
-adversarial five words | crowdfunding platform for indie game developers | 4 | indie | 6 | 11 | yes | yes
-adversarial five words | trombone lessons marketplace with escrow payments | 5 | trombone | 30 | 31 | yes | yes
-adversarial only stellar | stellar | 1 | none | 874 | 874 | no | no
-adversarial only stellar | stellar zorblax | 1 | zorblax | 0 | 1 | no | no
-adversarial only stellar | stellar zorblax quibbet | 2 | zorblax, quibbet | 0 | 47 | no | no
-adversarial hyphenated | pay-per-call | 1 | none | 5 | 5 | no | no
-adversarial hyphenated | zero-knowledge pogo stick | 3 | pogo, stick | 0 | 220 | no | no
-adversarial hyphenated | cross-border remittance | 2 | none | 34 | 36 | no | no
-adversarial package | passkey-kit | 1 | none | 12 | 19 | no | no
-adversarial package | soroban-sdk | 1 | none | 0 | 57 | no | no
-adversarial package | @creit.tech/stellar-wallets-kit | 1 | none | 0 | 284 | no | no
-adversarial package | stellar-hd-wallet | 1 | none | 7 | 286 | no | no
+group | q | mode | rows | line (none = no line)
+adversarial one word | escrow | keyword | 34 | none
+adversarial one word | escrow | hybrid | 34 | none
+adversarial one word | llama | keyword | 1 | the word searched in q (llama) occurs as a whole word in no submission in the index: a build listed by its words alone, with no similarity, holds it only inside a longer word and is not evidence that this idea was built
+adversarial one word | llama | hybrid | 1 | the word searched in q (llama) occurs as a whole word in no submission in the index: a build listed by its words alone, with no similarity, holds it only inside a longer word and is not evidence that this idea was built
+adversarial product name | soroswap | keyword | 15 | none
+adversarial product name | soroswap | hybrid | 18 | none
+adversarial product name | blend | keyword | 47 | none
+adversarial product name | blend | hybrid | 47 | none
+adversarial product name | reflector | keyword | 14 | none
+adversarial product name | reflector | hybrid | 14 | none
+adversarial product name | soroswap aggregator | keyword | 19 | none
+adversarial product name | soroswap aggregator | hybrid | 50 | none
+adversarial product name | blend lending pool | keyword | 77 | none
+adversarial product name | blend lending pool | hybrid | 77 | none
+adversarial typo | sorobn wallet | keyword | 89 | 1 of the 2 words searched in q (sorobn) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial typo | sorobn wallet | hybrid | 141 | 1 of the 2 words searched in q (sorobn) occurs as a whole word in no submission in the index: a build listed by its words matches only the other words of q (where its matchedTerms names it, it was found inside a longer word), and a build with similarity is close to q as a whole, not to that word
+adversarial typo | remitance app | keyword | 0 | the word searched in q (remitance) occurs as a whole word in no submission in the index, and no build matched q; check the spelling (remittance, used in submissions, is one edit from remitance)
+adversarial typo | remitance app | hybrid | 0 | the word searched in q (remitance) occurs as a whole word in no submission in the index, and no build matched q; check the spelling (remittance, used in submissions, is one edit from remitance)
+adversarial typo | pasky wallet | keyword | 89 | 1 of the 2 words searched in q (pasky) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial typo | pasky wallet | hybrid | 91 | 1 of the 2 words searched in q (pasky) occurs as a whole word in no submission in the index: a build listed by its words matches only the other words of q (where its matchedTerms names it, it was found inside a longer word), and a build with similarity is close to q as a whole, not to that word
+adversarial typo | decentralised exchnage for stablecoins | keyword | 1 | 1 of the 3 words searched in q (exchnage) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial typo | decentralised exchnage for stablecoins | hybrid | 285 | 1 of the 3 words searched in q (exchnage) occurs as a whole word in no submission in the index: a build listed by its words matches only the other words of q (where its matchedTerms names it, it was found inside a longer word), and a build with similarity is close to q as a whole, not to that word
+adversarial accent or punctuation | café payments | keyword | 270 | 1 of the 2 words searched in q (café) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial accent or punctuation | café payments | hybrid | 270 | 1 of the 2 words searched in q (café) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial accent or punctuation | AI agents, payments | keyword | 147 | none
+adversarial accent or punctuation | AI agents, payments | hybrid | 147 | none
+adversarial accent or punctuation | pagos en línea para comercios | keyword | 22 | none
+adversarial accent or punctuation | pagos en línea para comercios | hybrid | 26 | none
+adversarial accent or punctuation | paiement mobile sécurisé | keyword | 0 | 2 of the 3 words searched in q (paiement, sécurisé) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+adversarial accent or punctuation | paiement mobile sécurisé | hybrid | 0 | 2 of the 3 words searched in q (paiement, sécurisé) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+adversarial accent or punctuation | x402!!! paywall??? | keyword | 0 | none
+adversarial accent or punctuation | x402!!! paywall??? | hybrid | 83 | none
+adversarial two words | pogo payments | keyword | 270 | 1 of the 2 words searched in q (pogo) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial two words | pogo payments | hybrid | 270 | 1 of the 2 words searched in q (pogo) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial two words | escrow sandwich | keyword | 34 | 1 of the 2 words searched in q (sandwich) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial two words | escrow sandwich | hybrid | 34 | 1 of the 2 words searched in q (sandwich) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial two words | llama wallet | keyword | 90 | 1 of the 2 words searched in q (llama) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial two words | llama wallet | hybrid | 90 | 1 of the 2 words searched in q (llama) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial five words | loyalty points for coffee shops | keyword | 0 | 3 of the 4 words searched in q (loyalty, coffee, shops) occur as a whole word in no submission in the index, and no build matched q; check the spelling; a related form is used: shopping for shops
+adversarial five words | loyalty points for coffee shops | hybrid | 1 | 3 of the 4 words searched in q (loyalty, coffee, shops) occur as a whole word in no submission in the index: every build listed was found by meaning (similarity, no matchedTerms) and is close to q as a whole, not to those words; a related form is used: shopping for shops
+adversarial five words | tokenized carbon credits for farmers | keyword | 8 | none
+adversarial five words | tokenized carbon credits for farmers | hybrid | 27 | none
+adversarial five words | proof of reserves for stablecoin issuers | keyword | 64 | none
+adversarial five words | proof of reserves for stablecoin issuers | hybrid | 109 | none
+adversarial five words | crowdfunding platform for indie game developers | keyword | 6 | 1 of the 4 words searched in q (indie) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial five words | crowdfunding platform for indie game developers | hybrid | 11 | 1 of the 4 words searched in q (indie) occurs as a whole word in no submission in the index: a build listed by its words matches only the other words of q (where its matchedTerms names it, it was found inside a longer word), and a build with similarity is close to q as a whole, not to that word
+adversarial five words | trombone lessons marketplace with escrow payments | keyword | 30 | 1 of the 5 words searched in q (trombone) occurs as a whole word in no submission in the index, so a build listed by its words alone, with no similarity, matches only the other words of q; where its matchedTerms names it, it was found inside a longer word
+adversarial five words | trombone lessons marketplace with escrow payments | hybrid | 31 | 1 of the 5 words searched in q (trombone) occurs as a whole word in no submission in the index: a build listed by its words matches only the other words of q (where its matchedTerms names it, it was found inside a longer word), and a build with similarity is close to q as a whole, not to that word
+adversarial only stellar | stellar | keyword | 874 | none
+adversarial only stellar | stellar | hybrid | 874 | none
+adversarial only stellar | stellar zorblax | keyword | 0 | the word searched in q (zorblax) occurs as a whole word in no submission in the index, and no build matched q; check the spelling
+adversarial only stellar | stellar zorblax | hybrid | 1 | the word searched in q (zorblax) occurs as a whole word in no submission in the index: every build listed was found by meaning (similarity, no matchedTerms) and is close to q as a whole, not to that word
+adversarial only stellar | stellar zorblax quibbet | keyword | 0 | none of the 2 words searched in q (zorblax, quibbet) occurs as a whole word in any submission in the index, and no build matched q; check the spelling
+adversarial only stellar | stellar zorblax quibbet | hybrid | 47 | none of the 2 words searched in q (zorblax, quibbet) occurs as a whole word in any submission in the index: every build listed was found by meaning (similarity, no matchedTerms) and is close to q as a whole, not to those words
+adversarial hyphenated | pay-per-call | keyword | 5 | none
+adversarial hyphenated | pay-per-call | hybrid | 5 | none
+adversarial hyphenated | zero-knowledge pogo stick | keyword | 0 | 2 of the 3 words searched in q (pogo, stick) occur as a whole word in no submission in the index, and no build matched q; check the spelling
+adversarial hyphenated | zero-knowledge pogo stick | hybrid | 220 | 2 of the 3 words searched in q (pogo, stick) occur as a whole word in no submission in the index: every build listed was found by meaning (similarity, no matchedTerms) and is close to q as a whole, not to those words
+adversarial hyphenated | cross-border remittance | keyword | 34 | none
+adversarial hyphenated | cross-border remittance | hybrid | 36 | none
+adversarial package | passkey-kit | keyword | 12 | none
+adversarial package | passkey-kit | hybrid | 19 | none
+adversarial package | soroban-sdk | keyword | 0 | none
+adversarial package | soroban-sdk | hybrid | 57 | none
+adversarial package | @creit.tech/stellar-wallets-kit | keyword | 0 | none
+adversarial package | @creit.tech/stellar-wallets-kit | hybrid | 284 | none
+adversarial package | stellar-hd-wallet | keyword | 7 | none
+adversarial package | stellar-hd-wallet | hybrid | 286 | none
 
 group | queries | with rows, keyword / hybrid | line fires, keyword / hybrid
 adversarial one word | 2 | 2 / 2 | 1 / 1
 adversarial product name | 5 | 5 / 5 | 0 / 0
-adversarial typo | 4 | 3 / 3 | 3 / 2
-adversarial accent or punctuation | 5 | 3 / 4 | 1 / 1
+adversarial typo | 4 | 3 / 3 | 4 / 4
+adversarial accent or punctuation | 5 | 3 / 4 | 2 / 2
 adversarial two words | 3 | 3 / 3 | 3 / 3
-adversarial five words | 5 | 4 / 5 | 2 / 2
-adversarial only stellar | 3 | 1 / 3 | 0 / 0
-adversarial hyphenated | 3 | 2 / 3 | 0 / 0
+adversarial five words | 5 | 4 / 5 | 3 / 3
+adversarial only stellar | 3 | 1 / 3 | 2 / 2
+adversarial hyphenated | 3 | 2 / 3 | 1 / 1
 adversarial package | 4 | 2 / 4 | 0 / 0

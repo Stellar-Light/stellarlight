@@ -2,14 +2,15 @@
 // tree's search reads in no submission (wordsNoBuildUses), the builds listed
 // before and after in keyword and hybrid mode (two replay.mts outputs over
 // the probe capture), every build removed or added by name, and whether the
-// builds route's warning fires after (a build listed by its words alone and
-// at least one word in no submission).
+// builds route's line about unused words fires after (unusedWordsWarning;
+// its text is in note.mts's output for the same capture).
 // Usage, from the repository root:
 //   pnpm exec tsx improvements/audits/2026-10-23-nonsense-queries/probes.mts <probes-live.json> <before.json> <after.json>
 import { readFileSync } from "node:fs";
 import {
 	indexedFromStored,
 	searchHackathonBuilds,
+	unusedWordsWarning,
 	wordsNoBuildUses,
 } from "../../../src/lib/hackathon-builds";
 import type { HackathonBuild } from "../../../src/payload-types";
@@ -86,12 +87,14 @@ live.extra.forEach(
 		);
 		const opts = { perSubmission: true, packages: true };
 		const { absent, concepts } = wordsNoBuildUses(pool, x.q);
+		const q = x.q.trim().toLowerCase();
 		const fires = (["keyword", "hybrid"] as const).map(
 			(mode) =>
-				absent.length > 0 &&
-				searchHackathonBuilds(pool, x.q, { ...opts, mode, semantic }).some(
-					(s) => s.matched.length && s.similarity === undefined,
-				),
+				unusedWordsWarning(
+					pool,
+					q,
+					searchHackathonBuilds(pool, q, { ...opts, mode, semantic }),
+				) !== null,
 		);
 		const b = before[i];
 		const a = after[i];
