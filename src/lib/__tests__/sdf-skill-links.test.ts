@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+	fetchSdfSkillCatalog,
 	mergeSkillLists,
 	parseLlmsRegistry,
 	parseLlmsSkillLinks,
@@ -163,5 +164,33 @@ describe("mergeSkillLists", () => {
 			"mine",
 		]);
 		expect(merged).toBe(2);
+	});
+});
+
+describe("fetchSdfSkillCatalog freshness", () => {
+	const registry = [
+		"## Included Stellar Skills",
+		"- [A](https://skills.stellar.org/skills/a/SKILL.md): a",
+		"- [B](https://skills.stellar.org/skills/b/SKILL.md): b",
+		"- [C](https://skills.stellar.org/skills/c/SKILL.md): c",
+	].join("\n");
+	const serve = (lastModified: string | null) =>
+		vi.spyOn(globalThis, "fetch").mockImplementation(async (input) =>
+			String(input).endsWith("/llms.txt")
+				? new Response(registry, {
+						headers: lastModified ? { "last-modified": lastModified } : {},
+					})
+				: new Response("---\ndescription: d\n---\nbody"),
+		);
+	afterEach(() => vi.restoreAllMocks());
+
+	it("dates the catalog by the registry's Last-Modified, null when it sends none", async () => {
+		serve("Wed, 21 Oct 2026 14:31:05 GMT");
+		const dated = await fetchSdfSkillCatalog();
+		expect(dated.skills).toHaveLength(3);
+		expect(dated.updatedAt).toBe("2026-10-21T14:31:05.000Z");
+		vi.restoreAllMocks();
+		serve(null);
+		expect((await fetchSdfSkillCatalog()).updatedAt).toBeNull();
 	});
 });

@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-23",
+		surfaces: ["api"],
+		version: "spec@1.9.92",
+		type: "fixed",
+		summary:
+			"Eight hackathon and directory answers that read a gap as a zero or gave no way forward now say what they hold: a package name counts under its library in analyze, ramp providers typed anchor answer type=on-off-ramp, compare labels curated events and names missing counts, an unknown event slug points to getHackathons, builds counts both units, and review says why a submission has no category context.",
+		detail:
+			"Found by a 55-question hackathon battery (kept outside the repo) that scored 44 of 55 on 1.9.91. analyzeHackathonSubmissions: facet=library&value=soroban-sdk counted 0 with no warning while value=Soroban Rust SDK counted 682; a package name asked of the library facet now counts as its library, and a value no stored submission carries, on any facet, adds a meta.warnings line naming the values seen (the category facet already warned and now names its types too). Its description names projectStatus and grant funding among the facets, so after-the-event questions reach it, and states its unit, event entries. getPartners: type=on-off-ramp returned 0 because the ramp providers are typed anchor; it now also takes anchors whose rampTypes record a ramp, warns that an anchor with no ramp recorded is left out, and its empty answer points to type=anchor. compareHackathons: curated events were labelled source dorahacks and a failed curated read was swallowed; the source now comes from the event row, an event with no stored submissions is named in deltas.notes (its counts are absent, not zero), and a failed read is said there instead of being read as not found. getHackathon: an unknown slug answered a bare 404; the error text itself now points to GET /api/hackathons?q= and names up to three closest known slugs, also served as hint and closestSlugs, since some clients keep only error. searchHackathonBuilds: meta.counts.entries counts matching event entries beside matched (unique submissions), so it equals analyze's total for the same filters and mode (category=RWA was 64 against 65 with neither saying why); both descriptions name their unit. reviewSubmission: categoryNote says why categoryContext is null, a submission with no confident category (uncertain, not missing) or one not categorized yet. getStatus: sdfSkills.lastUpdatedAt is the skills registry's Last-Modified, where it was always null. getHackathon rules: the spec now says what a null judgingCriteria or requirements means, a read page with no such section. SEP passages in searchResearch served observedAt null when unchanged since before the stamp existed; the SEP ingester now re-stamps every chunk it reads, which takes effect on its next run.",
+	},
+	{
 		date: "2026-10-22",
 		surfaces: ["api"],
 		version: "spec@1.9.91",

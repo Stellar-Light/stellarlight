@@ -266,3 +266,82 @@ describe("category counts carry their measurement", () => {
 		);
 	});
 });
+
+describe("a value that names no stored value", () => {
+	it("counts a package name asked of the library facet as its library", async () => {
+		const pkg = await get("analyze", "facet=library&value=soroban-sdk");
+		const label = await get(
+			"analyze",
+			"facet=library&value=Soroban%20Rust%20SDK",
+		);
+		expect(pkg.body.total.values).toEqual([
+			{ value: "Soroban Rust SDK", builds: 1, winners: 0, share: 0.333 },
+		]);
+		expect(pkg.body.total.values).toEqual(label.body.total.values);
+		expect(pkg.body.meta.warnings).toBeUndefined();
+	});
+
+	it("warns on every facet and names the values seen", async () => {
+		for (const [facet, value] of [
+			["package", "no-such-pkg"],
+			["library", "no-such-lib"],
+			["placement", "runner-up"],
+			["event", "nope"],
+		]) {
+			const { body } = await get("analyze", `facet=${facet}&value=${value}`);
+			expect(body.total.values[0]).toMatchObject({ value, builds: 0 });
+			const w = (body.meta.warnings ?? []).join(" ");
+			expect(w, facet).toContain(`'${value}'`);
+		}
+		const pkg = await get("analyze", "facet=package&value=no-such-pkg");
+		expect(pkg.body.meta.warnings.join(" ")).toContain(
+			"@x402/stellar, soroban-sdk",
+		);
+		const placed = await get("analyze", "facet=placement&value=runner-up");
+		expect(placed.body.meta.warnings.join(" ")).toContain("winner");
+	});
+});
+
+describe("compare: curated events and missing counts", () => {
+	it("takes the source from the event row and says when a count is unavailable", async () => {
+		const { body } = await get("compare", "slugs=kale,hackmeridian-2025");
+		const [kale, meridian] = body.hackathons;
+		expect(kale.source).toBe("dorahacks");
+		expect(meridian.source).toBe("curated");
+		expect(meridian.submissionCount).toBeUndefined();
+		expect(
+			body.deltas.notes.some(
+				(n: string) =>
+					n.includes("hackmeridian-2025") && n.includes("not zero"),
+			),
+		).toBe(true);
+	});
+
+	it("says so when the curated lookup fails instead of swallowing it", async () => {
+		const pc = await import("@/lib/payload-client");
+		const failing = {
+			find: async () => {
+				throw new Error("db down");
+			},
+		};
+		vi.mocked(pc.getPayloadSafe).mockImplementation(
+			async () => failing as never,
+		);
+		try {
+			const { body } = await get("compare", "slugs=kale,agents");
+			expect(body.hackathons[0].source).toBe("dorahacks");
+			expect(
+				body.deltas.notes.some(
+					(n: string) => n.includes("kale") && /could not be read/.test(n),
+				),
+			).toBe(true);
+		} finally {
+			vi.mocked(pc.getPayloadSafe).mockImplementation(
+				async () =>
+					({
+						find: async () => ({ docs: [], totalDocs: 0 }),
+					}) as never,
+			);
+		}
+	});
+});

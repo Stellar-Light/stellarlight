@@ -22,6 +22,7 @@ import { createHash } from "node:crypto";
 import { getPayload } from "payload";
 import { preambleDate, toPublishedAt } from "../src/lib/doc-dates";
 import { embedBatch } from "../src/lib/embed";
+import { restampObservedAt } from "../src/lib/research-ingest";
 import configPromise from "../src/payload.config";
 
 const args = process.argv.slice(2);
@@ -249,6 +250,10 @@ async function run() {
 	}
 
 	const toEmbed: SepChunk[] = [];
+	// Every run reads each SEP live, so every chunk it keeps is observed now.
+	// Rows untouched since before this stamp existed served observedAt null.
+	const runObservedAt = new Date().toISOString();
+	const restampIds: string[] = [];
 
 	for (const file of files) {
 		const parentDocId = file.name.replace(/\.md$/i, "").toLowerCase();
@@ -289,6 +294,7 @@ async function run() {
 								id: prev.id,
 								data: {
 									title: chunk.title,
+									observedAt: runObservedAt,
 									...(dateDrift
 										? { publishedAt: toPublishedAt(chunk.publishedAt!) }
 										: {}),
@@ -305,6 +311,7 @@ async function run() {
 						}
 					} else {
 						stats.chunksUnchanged++;
+						restampIds.push(prev.id);
 					}
 					continue;
 				}
@@ -333,6 +340,20 @@ async function run() {
 		console.log("");
 		console.log("Dry run complete. Pass --execute to embed + write.");
 		return;
+	}
+
+	// Not a planned write (it advances every run by design), so --replan
+	// above never counts it.
+	if (payload && restampIds.length) {
+		console.log(
+			`Re-stamping observedAt on ${restampIds.length} unchanged chunk(s) (bulk)…`,
+		);
+		try {
+			await restampObservedAt(payload, restampIds, runObservedAt);
+		} catch (err) {
+			console.error(`  ✗ observedAt bulk re-stamp: ${(err as Error).message}`);
+			stats.errors++;
+		}
 	}
 
 	if (toEmbed.length === 0) {
@@ -367,7 +388,7 @@ async function run() {
 		// derived once per doc via preambleDate() and carried on every chunk.
 		const data = {
 			source: "sep" as const,
-			observedAt: new Date().toISOString(),
+			observedAt: runObservedAt,
 			...(chunk.publishedAt
 				? { publishedAt: toPublishedAt(chunk.publishedAt) }
 				: {}),

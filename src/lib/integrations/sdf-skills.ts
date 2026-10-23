@@ -140,7 +140,12 @@ export function parseLlmsSkillLinks(txt: string): Map<string, string> {
 	);
 }
 
-async function fetchRegistry(): Promise<Map<string, RegistryEntry>> {
+/** The registry and when it last changed: its Last-Modified as ISO, null
+ * when unread or not sent. */
+async function readRegistry(): Promise<{
+	entries: Map<string, RegistryEntry>;
+	updatedAt: string | null;
+}> {
 	try {
 		const res = await fetch(`${BASE}/llms.txt`, {
 			next: { revalidate: 86_400 }, // 24h, same cadence as the skills
@@ -149,11 +154,21 @@ async function fetchRegistry(): Promise<Map<string, RegistryEntry>> {
 				"User-Agent": "StellarLight/1.0 (https://stellarlight.xyz/scout)",
 			},
 		});
-		if (!res.ok) return new Map();
-		return parseLlmsRegistry(await res.text());
+		if (!res.ok) return { entries: new Map(), updatedAt: null };
+		const modified = Date.parse(res.headers.get("last-modified") ?? "");
+		return {
+			entries: parseLlmsRegistry(await res.text()),
+			updatedAt: Number.isFinite(modified)
+				? new Date(modified).toISOString()
+				: null,
+		};
 	} catch {
-		return new Map();
+		return { entries: new Map(), updatedAt: null };
 	}
+}
+
+async function fetchRegistry(): Promise<Map<string, RegistryEntry>> {
+	return (await readRegistry()).entries;
 }
 
 /** The live registry, or null when it is unreadable (fewer than 3 entries). */
@@ -288,12 +303,18 @@ export interface SdfSkillCatalog {
 	/** false = the registry did not answer and the SDF fallback list was used,
 	 * so community-built entries are missing. */
 	live: boolean;
+	/** When the registry last changed (its Last-Modified); null when it was
+	 * not read or sent none. */
+	updatedAt: string | null;
 }
 
 /** Fetch the full catalog (parallel): every listed entry that resolves, and
  * the names of those that did not. */
 export async function fetchSdfSkillCatalog(): Promise<SdfSkillCatalog> {
-	const liveNames = await fetchSdfSkillNamesLive();
+	const registry = await readRegistry();
+	// Under 3 entries the registry read is not trusted (fetchRegistryLive).
+	const liveNames =
+		registry.entries.size >= 3 ? [...registry.entries.keys()] : null;
 	const names = liveNames ?? [...SDF_SKILL_NAMES];
 	const results = await Promise.allSettled(names.map((n) => fetchSdfSkill(n)));
 	const skills: SdfSkillSummary[] = [];
@@ -311,6 +332,7 @@ export async function fetchSdfSkillCatalog(): Promise<SdfSkillCatalog> {
 		listed: names.length,
 		unreachable,
 		live: liveNames !== null,
+		updatedAt: liveNames ? registry.updatedAt : null,
 	};
 }
 

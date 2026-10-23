@@ -162,9 +162,9 @@ export async function GET() {
 		count: sdfSkillCatalog
 			? sdfSkillCatalog.skills.filter((s) => !s.community).length
 			: null,
-		lastUpdatedAt: null,
+		lastUpdatedAt: sdfSkillCatalog?.updatedAt ?? null,
 		notes:
-			"Proxied from skills.stellar.org (server-cached 24h); count = the SDF-authored section, the same rows /api/skills?source=sdf serves. The registry's Community Built section is served as source=community. Live freshness shown on the upstream site.",
+			"Proxied from skills.stellar.org (server-cached 24h); count = the SDF-authored section, the same rows /api/skills?source=sdf serves. The registry's Community Built section is served as source=community. lastUpdatedAt = when the registry last changed (its Last-Modified header, as of our last read); null when it could not be read.",
 	};
 
 	const usage = await getUsageStats();

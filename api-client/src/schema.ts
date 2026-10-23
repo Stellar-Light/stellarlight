@@ -259,7 +259,7 @@ export interface paths {
         };
         /**
          * Search what was BUILT at Stellar hackathons (prior-art over prototypes)
-         * @description Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; `track` filters. Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.
+         * @description Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event (hackathonSlug opens getHackathon), placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals. Unit: submissions (counts.entries = event entries). Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.
          */
         get: operations["searchHackathonBuilds"];
         put?: never;
@@ -299,7 +299,7 @@ export interface paths {
         };
         /**
          * Trends and counts across Stellar hackathon submissions, with lift
-         * @description Counts over every stored Stellar hackathon submission. `facet` = what to count: category (directory project types), library or package (Stellar SDKs a repo declares), activity (commits 90+ days after the event), project (became a directory project), placement, event or year. `by=event` or `by=year` makes it a trend; every answer compares the placed builds with the rest (lift). Same filters as searchHackathonBuilds. Shares are over known values; unknown builds are counted apart. A submission entered in several events counts once in each. For the builds themselves → use searchHackathonBuilds.
+         * @description Counts over every stored Stellar hackathon submission, during and after its event. `facet`: category (project types), library or package (Stellar SDKs declared), activity (commits 90+ days after), project (became a directory project), projectStatus (its status today) and its grant funding, placement, event or year. `by=event` or `by=year` makes a trend; every answer compares winners with the rest (lift). Shares are over known values. Unit: event entries (a submission in two events counts twice). Same filters as searchHackathonBuilds; for the builds themselves → use searchHackathonBuilds.
          */
         get: operations["analyzeHackathonSubmissions"];
         put?: never;
@@ -1464,7 +1464,9 @@ export interface components {
                     repoRequired?: boolean;
                     videoRequired?: boolean;
                     submissionQuestions?: string[];
+                    /** @description The page's submission-requirements section, in markdown. null = the page was read (readAt) and has no requirements section: the organizer published none there. */
                     requirements?: string | null;
+                    /** @description The page's judging section, in markdown. null = the page was read (readAt) and has no judging section: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all. */
                     judgingCriteria?: string | null;
                     /** Format: date-time */
                     readAt?: string;
@@ -3397,13 +3399,19 @@ export interface operations {
                     "application/json": components["schemas"]["HackathonDetailResponse"];
                 };
             };
-            /** @description Hackathon not found */
+            /** @description Hackathon not found. `error` itself carries the way forward (getHackathons with q, and the closest known slugs), since some clients keep only `error`. */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": {
+                        error: string;
+                        /** @description How to find the slug: GET /api/hackathons?q=<one word of the event's name>. */
+                        hint?: string;
+                        /** @description Up to three listed slugs sharing the most distinguishing words with the one asked for. A word more than half the listed slugs carry (stellar) does not count, so [] means no listed slug shares a distinguishing word; the error text then names none. */
+                        closestSlugs?: string[];
+                    };
                 };
             };
         };
@@ -3447,9 +3455,10 @@ export interface operations {
                             externalUrl?: string | null;
                             /** @description null when the source publishes none: unknown, never zero. */
                             prizePoolUSD?: number | null;
+                            /** @description curated, dorahacks or not-found: where the event's row came from, as getHackathons labels it: curated (a hand-kept event) or dorahacks. not-found = no listing holds the slug; when the listing could not be read, deltas.notes says so and the miss is unchecked. */
                             source?: string;
                             hackersCount?: number | null;
-                            /** @description Curated events: directory projects tied to the event. DoraHacks events: stored submissions. */
+                            /** @description Curated events: directory projects tied to the event. DoraHacks events: stored submissions. Absent when neither is held; deltas.notes then names the event, and absent is not zero. */
                             submissionCount?: number | null;
                             winnerCount?: number | null;
                             prizePerWinnerUSD?: number | null;
@@ -3578,6 +3587,7 @@ export interface operations {
                         }[];
                         /** @description What differs across the compared events. */
                         deltas?: {
+                            /** @description Plain-language differences, plus every gap: an event whose counts are unavailable, and any read that failed (a failed read is never served as an absent event or a zero). */
                             notes?: string[];
                             /** @description Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set. */
                             facetShifts?: {
@@ -3670,7 +3680,10 @@ export interface operations {
                             counts?: {
                                 /** @description Submissions in the index. A submission entered in several events counts once. */
                                 indexedBuilds?: number;
+                                /** @description Unique submissions that match: the rows this search pages through. */
                                 matched?: number;
+                                /** @description Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched. */
+                                entries?: number;
                                 returned?: number;
                             };
                             /** @description Which Stellar packages the matched builds' repos declare, over every matched build (not just this page). winnersOnly=1 with no q = what winners build on; add q for a topic. */
@@ -3964,7 +3977,7 @@ export interface operations {
                 facet?: "category" | "package" | "library" | "activity" | "project" | "projectStatus" | "scf" | "placement" | "track" | "event" | "year";
                 /** @description Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. */
                 by?: "event" | "year" | "placement" | "track";
-                /** @description Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value. */
+                /** @description Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value. With facet=library a package name counts as the library it belongs to (soroban-sdk = Soroban Rust SDK). A value no stored submission carries adds a meta.warnings line naming the values seen: its 0 is a miss, not a measured count. */
                 value?: string;
                 /** @description Most values to report per set (default 10, or 5 with by; max 30). */
                 top?: number;
@@ -4325,7 +4338,7 @@ export interface operations {
                                     } | null;
                                 }[];
                             };
-                            /** @description How crowded the submission's top category is across every stored submission. null when it is not categorized. */
+                            /** @description How crowded the submission's top category is across every stored submission. null when it has no confident category or is not categorized yet; categoryNote says which. */
                             categoryContext?: {
                                 /** @enum {string} */
                                 type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
@@ -4333,6 +4346,8 @@ export interface operations {
                                 winners?: number;
                                 shareOfSubmissions?: number | null;
                             } | null;
+                            /** @description Why categoryContext is null: the submission has no confident category (uncertain, not missing), or it is not categorized yet. null when categoryContext is served. */
+                            categoryNote?: string | null;
                             pitch?: {
                                 idea?: string;
                                 vertical?: string | null;
@@ -4590,7 +4605,7 @@ export interface operations {
     getPartners: {
         parameters: {
             query?: {
-                /** @description Filter by partner type */
+                /** @description Filter by partner type. on-off-ramp also takes anchors whose rampTypes record a ramp (most ramp providers are typed anchor); an anchor with no ramp recorded is left out and a meta.warnings line says so, so type=anchor is the full anchor list. */
                 type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "asset-issuer" | "other";
                 /** @description Filter by sector served (defi, payments, rwa, stablecoins, …) */
                 sector?: string;
