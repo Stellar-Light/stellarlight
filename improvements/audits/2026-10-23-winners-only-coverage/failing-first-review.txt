@@ -1,0 +1,284 @@
+
+ RUN  v3.2.3 <worktree>
+
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated winners notes > say why a curated event's winners are missing, dated, for curated events only 2ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated winners notes > an event noted as not announced serves no winner 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > serves every date as written: no timestamp crosses a UTC date 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > records a shifted timestamp written through the rows' helper 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > detects a timestamp whose UTC date is not the date written 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > keeps HackMeridian 2026 on the organizer's figures, not 2024's 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > curated hackathons > says HackMeridian 2025's days are derived, and stores them at midday 0ms
+ ✓ src/data/__tests__/curated-hackathons.test.ts > tracks and judging a curated record declares > come from the record's own description, with no new claim 0ms
+ × src/data/__tests__/curated-hackathons.test.ts > tracks and judging a curated record declares > rejects a description from another track's clause, or a word lifted from elsewhere 4ms
+   → expected true to be false // Object.is equality
+ ✓ src/data/__tests__/curated-hackathons.test.ts > tracks and judging a curated record declares > names HackMeridian 2026's two categories and two thematic tracks 0ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/analyze > answers payments share event by event, oldest first, with known and unknown apart 92ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/analyze > counts packages over the builds whose repo was read 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/analyze > rejects what it cannot honour 3ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/analyze > splits a listed event with no stored submissions from a value that names none, and takes a title 4ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > serves the stored submissions, page, rules and profile without a live roster read 85ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > names a winner its team hid upstream instead of leaving a gap 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > a row flagged hidden that this page still serves is not called missing 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > with no stored roster the record cannot say none are hidden 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > a curated event has no DoraHacks roster to hide from 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > winner rows carry what the winner won and became; submissions keep their shape 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > the curated roster gives each winner its own id, its project and its SCF record 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > an ended DoraHacks event with no winner says what DoraHacks' flag reports, never 'none won' 4ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > with no stored copy and a failed live roster, the winners could not be checked 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > winners named off DoraHacks carry the page that names them, and the note says who is not served 2ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > an event off DoraHacks says why its winners are missing, from its dated note 3ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > ranks a Champion first and its runners-up after it 3ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > a failed hidden-winner read says nothing, not none 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > GET /api/hackathons/{slug} for a DoraHacks event > declares every served field and null outside the open maps: winners, stats, rules, profile 3ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > serves null field counts, keeps the winners and says why 1ms
+ × src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > each stored row serves its own source: a curated winner is curated 5ms
+   → expected [ 'dorahacks' ] to deeply equal [ 'curated' ]
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > its profile counts the winners and serves no share over them 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > one published winner: its track's winner count stays and its dated note stays 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > a DoraHacks event with stored rows keeps its counts and carries no coverage 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > serves the categories and tracks a record declares, with counts not known, and its judging 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > a record that declares no tracks serves null tracks, and no rules 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > winners that name no track give no track list 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > a DoraHacks event with a stored roster keeps its tracks and tiers, with no notes 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > tracks and prize tiers that are not known are null, never [] > a DoraHacks event with no roster read serves null tracks, not none 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an unknown slug > 404s with a way forward in the error text itself and the closest known slugs 1ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an unknown slug > still finds the event behind a typo 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > an unknown slug > names no slug when only words most slugs carry match 0ms
+ ✓ src/app/api/hackathons/[slug]/__tests__/route.test.ts > rules: what a null section means > says in the spec that a null judgingCriteria is a read page with no judging section 0ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > GET /api/hackathons/compare > gives DoraHacks events their stored counts, a profile and the shifts between them 23ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > a type the method never assigns > is reported as unknown, not as a share of zero 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > counting by meaning > says the count is bounded and a neighbour is not proof of the topic 5ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > category counts carry their measurement > lists precision and recall for each reported type 3ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > a value that names no stored value > counts a package name asked of the library facet as its library 3ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > a value that names no stored value > warns on every facet and names the values seen 4ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > compare: curated events and missing counts > takes the source from the event row and says when a count is unavailable 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > compare: curated events and missing counts > serves a count it could not read as null, so every row has the same keys 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > compare: curated events and missing counts > says so when the curated lookup fails instead of swallowing it 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > compare serves their submission counts as null, keeps the winners and says why 2ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > benchmark: comparing HackMeridian 2025 with 2026 gives 2025 a null submission count 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a full event beside one keeps its counts, profile and shape 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > compare withholds a prize per winner over incomplete winners, and says why on the row 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a curated record's still-active rate over a winners-only event is withheld by the same rule 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > analyze with a hackathon filter counts its winners and serves no share over them 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > filters that leave winners-only rows alone name them even without a hackathon value 0ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > analyze across every event leaves winners-only rows out of every count and share, in one line 3ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a hackathon value naming a full and a winners-only event counts only the full one 1ms
+ ✓ src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a winners-only group by event says so when it is all there is 1ms
+ × src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a value only left-out rows carry serves no share, and says why 7ms
+   → expected [ Array(1) ] to deeply equal [ Array(1) ]
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > an event's coverage, from its stored rows > is winners-only when every row is a curated winner, full when the sync stored the rows, null when none are stored 4ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > an event's coverage, from its stored rows > every curated row is a winner, so each curated event is winners-only 1ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > an event's coverage, from its stored rows > names each winners-only event in an index with its winners 1ms
+ × src/lib/__tests__/hackathon-coverage.test.ts > no ratio over incomplete rows > says why an event's rows are incomplete: winners only, or winners published in part 7ms
+   → expected 'its winners are published only in par…' to be 'its winners are not announced upstrea…' // Object.is equality
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > no ratio over incomplete rows > a winners note is kept only for curated events, so any rows it covers are curated winners 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the event profile > says it describes the winners only and serves no submission count on a winners-only event 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the event profile > serves no share over a winners-only event's rows, only their counts 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the event profile > is unchanged on a full event: same keys, same order, no coverage 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > a hackathon filter naming a winners-only event > warns that its rows are its winners, not its field 1ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > a hackathon filter naming a winners-only event > names several in one line, and says nothing for a full event 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > names one value, with no null in the enum, everywhere coverage is served 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > declares nullable every count a winners-only event serves as null 0ms
+ ✓ src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > declares the row notes that say why a ratio is null 0ms
+ × src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > says where builds' entries and analyze's total differ: declared packages and left-out rows 1ms
+   → expected 'Event entries that match: a submissio…' to match /winners-only event's rows/
+ × src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > says across every event that the left-out events are not listed 0ms
+   → expected 'Present only when something limited t…' to match /facet=event and by=event do not list …/
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/data/__tests__/curated-hackathons.test.ts > tracks and judging a curated record declares > rejects a description from another track's clause, or a word lifted from elsewhere
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/data/__tests__/curated-hackathons.test.ts:140:72
+    138|   const [genesis, scale] = h?.tracks ?? [];
+    139|   const text = h?.description ?? "";
+    140|   expect(backed(text, { ...genesis, description: scale.description }))…
+       |                                                                        ^
+    141|    false,
+    142|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯
+
+ FAIL  src/lib/__tests__/hackathon-coverage.test.ts > no ratio over incomplete rows > says why an event's rows are incomplete: winners only, or winners published in part
+AssertionError: expected 'its winners are published only in par…' to be 'its winners are not announced upstrea…' // Object.is equality
+
+Expected: "its winners are not announced upstream (getHackathon stats.winnersNote)"
+Received: "its winners are published only in part (getHackathon stats.winnersNote)"
+
+ ❯ src/lib/__tests__/hackathon-coverage.test.ts:110:69
+    108|   expect(incompleteRows("stellar-hacks-zk", null)).toBeNull();
+    109|   // A note that says not announced gives that reason, not "in part".
+    110|   expect(incompleteRows("stellar-builders-camp-jaipur-2026", null)).to…
+       |                                                                     ^
+    111|    "its winners are not announced upstream (getHackathon stats.winners…
+    112|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯
+
+ FAIL  src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > says where builds' entries and analyze's total differ: declared packages and left-out rows
+AssertionError: expected 'Event entries that match: a submissio…' to match /winners-only event's rows/
+
+- Expected: 
+/winners-only event's rows/
+
++ Received: 
+"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze."
+
+ ❯ src/lib/__tests__/hackathon-coverage.test.ts:276:19
+    274|   )?.description;
+    275|   expect(entries).toMatch(/declared package/);
+    276|   expect(entries).toMatch(/winners-only event's rows/);
+       |                   ^
+    277|   const ref = readFileSync(
+    278|    join(process.cwd(), "public/skills/references/api-reference.md"),
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯
+
+ FAIL  src/lib/__tests__/hackathon-coverage.test.ts > the spec declares coverage and the nulls it brings > says across every event that the left-out events are not listed
+AssertionError: expected 'Present only when something limited t…' to match /facet=event and by=event do not list …/
+
+- Expected: 
+/facet=event and by=event do not list those events/
+
++ Received: 
+"Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. No rate is computed over incomplete rows (an event whose stored rows are its winners only). When the set also holds full listings, those rows are left out of every count and share, and one line names the events and the rows left out ('left out of every count and share: 12 rows of <slug> (6), ...'). When they are all the set holds (a hackathon value naming only such events, or filters that leave only them), their counts stay, every share is null, and a line names them ('only the winners of <slug> are stored ...')."
+
+ ❯ src/lib/__tests__/hackathon-coverage.test.ts:291:20
+    289|     ?.warnings as { description?: string } | undefined
+    290|   )?.description;
+    291|   expect(warnings).toMatch(
+       |                    ^
+    292|    /facet=event and by=event do not list those events/,
+    293|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯
+
+ FAIL  src/app/api/hackathons/[slug]/__tests__/route.test.ts > an event whose stored rows are its winners only > each stored row serves its own source: a curated winner is curated
+AssertionError: expected [ 'dorahacks' ] to deeply equal [ 'curated' ]
+
+- Expected
++ Received
+
+  [
+-   "curated",
++   "dorahacks",
+  ]
+
+ ❯ src/app/api/hackathons/[slug]/__tests__/route.test.ts:752:37
+    750|   const sources = (rows: Array<{ source: string }>) =>
+    751|    [...new Set(rows.map((r) => r.source))].sort();
+    752|   expect(sources(body.submissions)).toEqual(["curated"]);
+       |                                     ^
+    753|   expect(sources(body.winners)).toEqual(["curated"]);
+    754|   // A DoraHacks event's stored rows stay dorahacks.
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯
+
+ FAIL  src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a value only left-out rows carry serves no share, and says why
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+  [
+    {
+      "builds": 0,
+-     "share": null,
++     "share": 0,
+      "value": "hackmeridian-2025",
+      "winners": 0,
+    },
+  ]
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts:705:35
+    703|    "facet=event&value=hackmeridian-2025",
+    704|   );
+    705|   expect(event.body.total.values).toEqual([
+       |                                   ^
+    706|    { value: "hackmeridian-2025", builds: 0, winners: 0, share: null },
+    707|   ]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯
+
+
+ Test Files  4 failed (4)
+      Tests  6 failed | 71 passed (77)
+   Start at  12:50:55
+   Duration  2.31s (transform 728ms, setup 43ms, collect 2.46s, tests 310ms, environment 1.81s, prepare 363ms)
+
+
+=== Added after the first run: the same value in winnersVsOthers (share 0 for a value only left-out rows carry), run before its fix ===
+
+ RUN  v3.2.3 <worktree>
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts (24 tests | 1 failed | 23 skipped) 110ms
+   ↓ GET /api/hackathons/analyze > answers payments share event by event, oldest first, with known and unknown apart
+   ↓ GET /api/hackathons/analyze > counts packages over the builds whose repo was read
+   ↓ GET /api/hackathons/analyze > rejects what it cannot honour
+   ↓ GET /api/hackathons/analyze > splits a listed event with no stored submissions from a value that names none, and takes a title
+   ↓ GET /api/hackathons/compare > gives DoraHacks events their stored counts, a profile and the shifts between them
+   ↓ a type the method never assigns > is reported as unknown, not as a share of zero
+   ↓ counting by meaning > says the count is bounded and a neighbour is not proof of the topic
+   ↓ category counts carry their measurement > lists precision and recall for each reported type
+   ↓ a value that names no stored value > counts a package name asked of the library facet as its library
+   ↓ a value that names no stored value > warns on every facet and names the values seen
+   ↓ compare: curated events and missing counts > takes the source from the event row and says when a count is unavailable
+   ↓ compare: curated events and missing counts > serves a count it could not read as null, so every row has the same keys
+   ↓ compare: curated events and missing counts > says so when the curated lookup fails instead of swallowing it
+   ↓ events whose stored rows are their winners only > compare serves their submission counts as null, keeps the winners and says why
+   ↓ events whose stored rows are their winners only > benchmark: comparing HackMeridian 2025 with 2026 gives 2025 a null submission count
+   ↓ events whose stored rows are their winners only > a full event beside one keeps its counts, profile and shape
+   ↓ events whose stored rows are their winners only > compare withholds a prize per winner over incomplete winners, and says why on the row
+   ↓ events whose stored rows are their winners only > a curated record's still-active rate over a winners-only event is withheld by the same rule
+   ↓ events whose stored rows are their winners only > analyze with a hackathon filter counts its winners and serves no share over them
+   ↓ events whose stored rows are their winners only > filters that leave winners-only rows alone name them even without a hackathon value
+   ↓ events whose stored rows are their winners only > analyze across every event leaves winners-only rows out of every count and share, in one line
+   ↓ events whose stored rows are their winners only > a hackathon value naming a full and a winners-only event counts only the full one
+   ↓ events whose stored rows are their winners only > a winners-only group by event says so when it is all there is
+   × events whose stored rows are their winners only > a value only left-out rows carry serves no share, and says why 107ms
+     → expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/app/api/hackathons/analyze/__tests__/route.test.ts > events whose stored rows are their winners only > a value only left-out rows carry serves no share, and says why
+AssertionError: expected [ Array(1) ] to deeply equal [ Array(1) ]
+
+- Expected
++ Received
+
+  [
+    {
+      "lift": null,
+      "others": 0,
+-     "othersShare": null,
++     "othersShare": 0,
+      "value": "hackmeridian-2025",
+      "winners": 0,
+-     "winnersShare": null,
++     "winnersShare": 0,
+    },
+  ]
+
+ ❯ src/app/api/hackathons/analyze/__tests__/route.test.ts:713:45
+    711|   ]);
+    712|   // Winners against the rest: no share of 0 either.
+    713|   expect(event.body.winnersVsOthers.values).toEqual([
+       |                                             ^
+    714|    {
+    715|     value: "hackmeridian-2025",
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  1 failed | 23 skipped (24)
+   Start at  12:55:59
+   Duration  1.18s (transform 398ms, setup 15ms, collect 436ms, tests 110ms, environment 286ms, prepare 67ms)
+

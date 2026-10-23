@@ -1,0 +1,2782 @@
+{
+ "capturedNow": "2026-10-23T15:10:00.000Z",
+ "events": {
+  "hackmeridian-2026": "none",
+  "stellar-builders-camp-jaipur-2026": "none",
+  "stellar-builder-summit-2026": "none",
+  "stellar-hacks-zk": "full",
+  "stellar-pulso-hackathon": "full",
+  "stellar-journey-to-mastery-2026": "none",
+  "build-on-stellar-philippines-2026": "winners-only",
+  "apac-stellar-hackathon-2026": "winners-only",
+  "stellar-agents-x402-stripe-mpp": "full",
+  "alebrije2026": "full",
+  "buildonstellarchile": "full",
+  "stellar-hacks-zk-gaming": "full",
+  "mqcstellar": "full",
+  "ideaton2026": "full",
+  "stellarhack": "full",
+  "codigoraiz2025": "full",
+  "scaffoldstellar": "full",
+  "ideatontelluscoop": "full",
+  "hackmeridian-2025": "winners-only",
+  "buildonstellarhack": "full",
+  "stellar-hacks-kale-reflector": "full",
+  "give-hackathon-argentina": "full",
+  "telluscoop-ideaton": "full",
+  "stellar-hacks-paltalabs": "full",
+  "stellar-latam": "full",
+  "stellar-hacks-blend": "full",
+  "build-on-stellar": "full"
+ },
+ "results": {
+  "compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1147,
+   "sha256": "aa87832b18f50434ee32118fb241d41f801a07a4fc8c9e18a11f84252a7c79d2"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-builder-summit-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 958,
+   "sha256": "d29e21dd658011b1522fd3a18eacebd54a0c647b9d6faf99cafc5d17097fda0b"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-hacks-zk": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2782,
+   "sha256": "61d449f9097658d4053233d01ba29f9d0e72366985dea4edef270a662e69b177"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-pulso-hackathon": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2713,
+   "sha256": "b499ed769525f6a755619cddbfc3557bfb24382744fbf6992b10ffb6eeba6625"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-journey-to-mastery-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1225,
+   "sha256": "f773afdb9bc184c5da8ac292978678a7b336e9d605c19cda36f7f263af591857"
+  },
+  "compare?slugs=hackmeridian-2026,build-on-stellar-philippines-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1392,
+   "sha256": "72151085c09f15a13041c55d9a80c9948de85b57d12fc5a01f45da8352ecfaa0"
+  },
+  "compare?slugs=hackmeridian-2026,apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1580,
+   "sha256": "f64d9ce5da7f9bd3ab5710bb0d4f5474961ff76a928dab53d3835397b77b675e"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-agents-x402-stripe-mpp": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3070,
+   "sha256": "917c65022f86f5c265e2e7eeb5aa6d6dd62d0ce593943327de19f3acac56f313"
+  },
+  "compare?slugs=hackmeridian-2026,alebrije2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2707,
+   "sha256": "e2d5c969945634e5fe7800132e8d25c6c41bed072f2156b70c5e1c0f1c214831"
+  },
+  "compare?slugs=hackmeridian-2026,buildonstellarchile": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2941,
+   "sha256": "24d00fad9e1c400bcb499d437654e84c43d7a2b6082c019d25ed1a5d70d7484f"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-hacks-zk-gaming": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2660,
+   "sha256": "6b4fa2aeb0db4b526271b72198043f1abeb8583332674f910a4a33d9428e49dc"
+  },
+  "compare?slugs=hackmeridian-2026,mqcstellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1768,
+   "sha256": "169643d5cde46093d1cdae4e7be1eb0db706250ae9f4c7ef5280ca2636a00ec9"
+  },
+  "compare?slugs=hackmeridian-2026,ideaton2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2907,
+   "sha256": "2648a9aed0828a24464c4e00d8754d614eca39fe3a55b61c33b91f2a4e1c4931"
+  },
+  "compare?slugs=hackmeridian-2026,stellarhack": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2900,
+   "sha256": "880628bc1e560f34873ffca2e7171203021d6666a72cf541cc102f30c440fd6d"
+  },
+  "compare?slugs=hackmeridian-2026,codigoraiz2025": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2713,
+   "sha256": "c4d284a8e6758e490c10966786894e874e69de84d700069ba28fb9d4a159a726"
+  },
+  "compare?slugs=hackmeridian-2026,scaffoldstellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2766,
+   "sha256": "cfa5d6aac056f33b914b82268b19c57b2f615ac339b99e364fe8b2627aeda5f0"
+  },
+  "compare?slugs=hackmeridian-2026,ideatontelluscoop": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2652,
+   "sha256": "1e468c2284fbfa10c68cb165518baa8cc712b078495f0e30f7fdd3ce303ea763"
+  },
+  "compare?slugs=hackmeridian-2026,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1356,
+   "sha256": "69ffbdaf60b18a7c5bede0228f87503f89bb1fb8573afeec50c0fb258929bd1c"
+  },
+  "compare?slugs=hackmeridian-2026,buildonstellarhack": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2653,
+   "sha256": "ea4f7385b0b49796dfcab58796810bade6cb12276f35c93fc1a4acfeeb65ae61"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-hacks-kale-reflector": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2963,
+   "sha256": "78d761744f622ad5bd0d772cd90b8429dbbc31ac04d7ae7a84a1bad2ac7b7580"
+  },
+  "compare?slugs=hackmeridian-2026,give-hackathon-argentina": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2163,
+   "sha256": "d6c1051c2a4ab347ac582b0873aa47e1f142f5df2e63b69fb9ff6cb76b4e61a9"
+  },
+  "compare?slugs=hackmeridian-2026,telluscoop-ideaton": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2736,
+   "sha256": "4c813f11f1b38b2a44dc9315b0ea1a9bf43a54717c2e11008dc01df8c41ed3cf"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-hacks-paltalabs": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2768,
+   "sha256": "a23b3ed2ce6fb9ffda1086c023fcc1a22cf8f5e5001391396f3befb702699f05"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-latam": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2674,
+   "sha256": "577d7ae741150b7e1fe2f85be4b33529b5192b9d1eb7072e520bd673783f5088"
+  },
+  "compare?slugs=hackmeridian-2026,stellar-hacks-blend": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2916,
+   "sha256": "b93177bb471497f46fec233023ae42bdb77ba8a6d825429fbf03bae0f5dfc126"
+  },
+  "compare?slugs=hackmeridian-2026,build-on-stellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2906,
+   "sha256": "b68baf1965a525515346c3016551b6f52edcfcdb11be78b5235c10a5039845eb"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-builder-summit-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 986,
+   "sha256": "e58c90945405461d257fa9689161aacb41822cdab9c16cf0e2ad74d981e52262"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-hacks-zk": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2840,
+   "sha256": "ab05876cc752be1424634b4fae7b34780021e5edc943f9801063f0ae3d37f5ce"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-pulso-hackathon": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2741,
+   "sha256": "09a521755e982cbfd7df4a220f5b1f270285f5156fd1cc726b79beed9cb43125"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-journey-to-mastery-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1285,
+   "sha256": "66447c9415f78f75f80e4f4a00b8009350e368645d952386a379eaa2957ef6a7"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,build-on-stellar-philippines-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1420,
+   "sha256": "73fb1c44806ed6bfcdd88acb87fa14384ab1d6c6b298cacfb6f7965343cdc923"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1640,
+   "sha256": "a20369205f685666f0d84170acc1aedbd4836a309c82fe8d11692cee796caf71"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-agents-x402-stripe-mpp": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3128,
+   "sha256": "a6f56518468abd6f6b45642c2a7084630aa3951162d23f2beea2d1da79a02bd8"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,alebrije2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2765,
+   "sha256": "5e44a9dec8d0c613863618caa673867e7aa3916d9432e395c011af1f9fd1ec41"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,buildonstellarchile": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2998,
+   "sha256": "89bd27ab9b21fe396403df0f0057e9ae7c51880c6b8a3e780056311b0c08621f"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-hacks-zk-gaming": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2718,
+   "sha256": "4c9614068f466281db919252449276d52c703a360575e71632f2a2ad1e1bd2e3"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,mqcstellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1825,
+   "sha256": "45b22b5b45df088bd724ce52355a4ed4872d29be1b80e30d5c98617b3eced68c"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,ideaton2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2964,
+   "sha256": "f425da716c400b7072ad2dfdc3bcbdd5922db781618e998f6369c6604b5a7300"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellarhack": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2959,
+   "sha256": "1dda8a40e10336dcfdf9e80a78525278262bc4bc384719ac01010dcd7dbc8573"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,codigoraiz2025": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2770,
+   "sha256": "1e9aa4eb7b6d5b2e268eaf820ec8679969c0a682433dcc4a0e51700cc5aa7a8e"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,scaffoldstellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2824,
+   "sha256": "cfa9c1a1e5544d2ad231b00d47cae8d9cfbd043f9a72950e8ff4e987b968fec4"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,ideatontelluscoop": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2709,
+   "sha256": "3cbc2f699674bc24f679b0bc91d2e3d937306d8a65d5a4117aeacf3101b0fb05"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1384,
+   "sha256": "ba0bbba38c1b78153b67684536cc311dad5a975ffdd56a896cf803640470a9aa"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,buildonstellarhack": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2710,
+   "sha256": "eeac4cc51e537dd8af0354af3888a8578e607a616c45ed8b1cb3c2657fed3c2e"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-hacks-kale-reflector": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3022,
+   "sha256": "b7fa56c41d1c9a5f103c18056196fbe8bd633166ab4a41b85cd0f181e214bdd1"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,give-hackathon-argentina": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2221,
+   "sha256": "34b6effd56fbdcb1d33d30e477902c70ffcf222f0bac96f75afce4e82aae7c15"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,telluscoop-ideaton": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2794,
+   "sha256": "927ae12fdf500bf25652c6cd4d1366b420dd29276f5a532934f07a016865d63e"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-hacks-paltalabs": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2826,
+   "sha256": "39e1b3fdb2af7e8623cc9a824550015d88154686a70ca93672bff29838a8941e"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-latam": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2731,
+   "sha256": "33674bee3428c896adee7108a1684fa9f79405e5f08d1176b11cd5df8b46f91e"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,stellar-hacks-blend": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2974,
+   "sha256": "e16a668df7ee1365fa96cd47650a210b715236d99a12e7bb56fb30cc41324c2c"
+  },
+  "compare?slugs=stellar-builders-camp-jaipur-2026,build-on-stellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2967,
+   "sha256": "076640ec6c60d6e4cd39b8ed5216d792663fad7effc570787b56096167e85b71"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellar-hacks-zk": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2836,
+   "sha256": "eaacd72ffaf2d09735a4b19e584a174645388491b12a6bce5b91f468b009a1fa"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellar-pulso-hackathon": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2957,
+   "sha256": "fb0c38e8315d2956362160571a35036a0e231dd7914ace3e26b1ac407ca2d400"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellar-journey-to-mastery-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1068,
+   "sha256": "733c9e5081a50e84a28083e7945e9b716a96f63ac2e81254f43c0f942a82b971"
+  },
+  "compare?slugs=stellar-builder-summit-2026,build-on-stellar-philippines-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1656,
+   "sha256": "1bb89e6b098f351f83fe48f28110176a3ce41d7d83ea25c5ce5b2b218d407839"
+  },
+  "compare?slugs=stellar-builder-summit-2026,apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1431,
+   "sha256": "b56a865182274213764760174298b7fb0f671823673061acd95e893e89ae1f90"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellar-agents-x402-stripe-mpp": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3124,
+   "sha256": "adef4b52e08762690f2ca0be3e39edc9776715523df97d518699621b94ff7d02"
+  },
+  "compare?slugs=stellar-builder-summit-2026,alebrije2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2762,
+   "sha256": "07f5d09143e971dd0df2b6b20baf65efab9f415e492631fdc40d14a748107c55"
+  },
+  "compare?slugs=stellar-builder-summit-2026,buildonstellarchile": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2995,
+   "sha256": "1ccaf902d7398b298351ba41401a918bb22170abe8428f2ae09c9c9c889f4dd7"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellar-hacks-zk-gaming": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2714,
+   "sha256": "d7e7ea9c9d642ced60e0365981f7b60e07b554aeea21c31bc5dc3edfccb8ec00"
+  },
+  "compare?slugs=stellar-builder-summit-2026,mqcstellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1823,
+   "sha256": "0a0238ac621fbc5f6e34af8e802fe9235141f0ee04469c041d40eae0f58813cc"
+  },
+  "compare?slugs=stellar-builder-summit-2026,ideaton2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2961,
+   "sha256": "c6916edd22b84561ecc861b166bade6dd4505daf18d7003991a4a1fb7d3ab8bc"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellarhack": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2954,
+   "sha256": "b343363d96a2d419923f1b0cb5696fb6028b5493898f3c3137c3c4c1d2d4de46"
+  },
+  "compare?slugs=stellar-builder-summit-2026,codigoraiz2025": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2767,
+   "sha256": "6850c17928c36236789cb1ec1fce29da92a37489a97da87d3df570b95187311b"
+  },
+  "compare?slugs=stellar-builder-summit-2026,scaffoldstellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2820,
+   "sha256": "8c64cdf7dd1908bfef01b50ae4560ee49f4f53208c244f8676dc8e1e92dceb61"
+  },
+  "compare?slugs=stellar-builder-summit-2026,ideatontelluscoop": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2705,
+   "sha256": "261970730fe6be757bd86882bb38f654dc8296f92642fe231f27e50dbe7942df"
+  },
+  "compare?slugs=stellar-builder-summit-2026,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1588,
+   "sha256": "7dc7e9c75cc29b84314ce10e732827005ab8d51ea64042796770c7a5f7246800"
+  },
+  "compare?slugs=stellar-builder-summit-2026,buildonstellarhack": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2706,
+   "sha256": "38791f245b93c592bbad27b8c1a674797e8326080ac02dd511d6b6401932d0be"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellar-hacks-kale-reflector": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3017,
+   "sha256": "8d27e3fef5b6012ff641eb2c11f4d76d68c63deaa5b37709b166bf77263c4d73"
+  },
+  "compare?slugs=stellar-builder-summit-2026,give-hackathon-argentina": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2217,
+   "sha256": "38196935ac4f9cb9402afc8c9cf8cd1f2112fa5e2c59cfcc1ac90b6435708515"
+  },
+  "compare?slugs=stellar-builder-summit-2026,telluscoop-ideaton": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2791,
+   "sha256": "0ab7651c56b4237e05c973fdc0d21f8417a9b67a1abb12dba2236150fb5b4bd6"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellar-hacks-paltalabs": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2823,
+   "sha256": "c5ce808ff68c998566fd8103327407d51966ab8371942d41496d0807fd0b9d1d"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellar-latam": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2728,
+   "sha256": "f985a11f27f3ab3ce2576f56d5dd24e973a394be94cb0ef738b295c947fb15cf"
+  },
+  "compare?slugs=stellar-builder-summit-2026,stellar-hacks-blend": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2971,
+   "sha256": "af4d66c6da69f76ead14c3814d0f73bcafa59500a01e2c742bc81ba41c1b14f4"
+  },
+  "compare?slugs=stellar-builder-summit-2026,build-on-stellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2961,
+   "sha256": "6e85eedbdd6d6fc16940dc05c79ebd616264bb1d3f297b84a13bd26179d2d0c6"
+  },
+  "compare?slugs=stellar-hacks-zk,stellar-pulso-hackathon": {
+   "class": "full",
+   "status": 200,
+   "chars": 5952,
+   "sha256": "85c70f71e2ade6fd189a3e09c98c9f16a32ed380e50eb86c18ac063183b486a2"
+  },
+  "compare?slugs=stellar-hacks-zk,stellar-journey-to-mastery-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2920,
+   "sha256": "cd319310d63d38e3051e83afd67ca38d1d538ff2c1ef21fb15ee670567f57367"
+  },
+  "compare?slugs=stellar-hacks-zk,build-on-stellar-philippines-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3369,
+   "sha256": "533896517d4f6751596b4ec21ef3460a4e8b12bd4ff9a446e67b6df4ef6d4339"
+  },
+  "compare?slugs=stellar-hacks-zk,apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3541,
+   "sha256": "c2b41b6342aacc775308c037da05d74d726fd7790d8c9c2c06b6d878bea1246a"
+  },
+  "compare?slugs=stellar-hacks-zk,stellar-agents-x402-stripe-mpp": {
+   "class": "full",
+   "status": 200,
+   "chars": 6361,
+   "sha256": "d72360a65bf036609d5f0965070ea569ad6a68d7d9805bc8f3378aec7a3af202"
+  },
+  "compare?slugs=stellar-hacks-zk,alebrije2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 5940,
+   "sha256": "30da8085dacb953644d41033b0757b891a7f308591cbf59e51eb2c0e8a8e6e1f"
+  },
+  "compare?slugs=stellar-hacks-zk,buildonstellarchile": {
+   "class": "full",
+   "status": 200,
+   "chars": 6316,
+   "sha256": "509318b1ffa992264805be9310712878ce726b0d938ff78bdcf654ecf6bdaf25"
+  },
+  "compare?slugs=stellar-hacks-zk,stellar-hacks-zk-gaming": {
+   "class": "full",
+   "status": 200,
+   "chars": 5934,
+   "sha256": "dd88ab447ccf6dde228a8a1c738169471c22f62c98014680adb58c16b4a2855a"
+  },
+  "compare?slugs=stellar-hacks-zk,mqcstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 4830,
+   "sha256": "92283ff3ab77fae7a6b8491904f1fb1b7fcb77784adeaa6412a65ae7017f2534"
+  },
+  "compare?slugs=stellar-hacks-zk,ideaton2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 6137,
+   "sha256": "09e4f9c3fd006963d52a1e79a796125f9e1fad212ab3983083d9d2812169e85b"
+  },
+  "compare?slugs=stellar-hacks-zk,stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 6014,
+   "sha256": "3647d414e6d9c5899b0b82bb013917a027c048b4f12f6381625a364abaa8a161"
+  },
+  "compare?slugs=stellar-hacks-zk,codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 5846,
+   "sha256": "e61581bcec97d01316feab1d3fe09e2e2aa448924877c0a741eb1fe670e8c738"
+  },
+  "compare?slugs=stellar-hacks-zk,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5960,
+   "sha256": "47e5b5bfc4219615220c0ea6f65f9548e4dfc44160e69b42972f5da3964cb0ec"
+  },
+  "compare?slugs=stellar-hacks-zk,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 5987,
+   "sha256": "42ed054bca1b8eec6ce75e29c72f0277adcc971f5cc5799edf9be7a22390f7d8"
+  },
+  "compare?slugs=stellar-hacks-zk,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3269,
+   "sha256": "538bb3f68efd83eb144ed365a7e6d13966ab9d39f514caa522c0fbd268eb58c0"
+  },
+  "compare?slugs=stellar-hacks-zk,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5827,
+   "sha256": "76c25d130852e1f9b07edefcdb032a2ed6b4f7db852bc7dad85cccb9e4683ec9"
+  },
+  "compare?slugs=stellar-hacks-zk,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6425,
+   "sha256": "a4bb7053174f4d3342bac0c87c2cbd7272551d28ff4fdae07d5555502c0384f2"
+  },
+  "compare?slugs=stellar-hacks-zk,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5406,
+   "sha256": "0235e09f6917ccb7e6a8ac102acc52b3166f99f5dfa78ee850e5b851a83468b4"
+  },
+  "compare?slugs=stellar-hacks-zk,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5902,
+   "sha256": "764d5999b10e32dbc8addb1e35ce3a9bfeb5f3a75ee47010620c2d4c29186506"
+  },
+  "compare?slugs=stellar-hacks-zk,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6069,
+   "sha256": "3b663e4e10875180b24708207602d973eea56f79d5d5bcc9d92a8fedd05be2b9"
+  },
+  "compare?slugs=stellar-hacks-zk,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5963,
+   "sha256": "b51abb1300456fe415f3d4b0f17f798b5b1e51e624277636438977c96aa1a2cd"
+  },
+  "compare?slugs=stellar-hacks-zk,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6186,
+   "sha256": "d55a53309d5a577cdfd79485f1ae23b903d4532356a3f59e23fd575c211b0dc3"
+  },
+  "compare?slugs=stellar-hacks-zk,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6221,
+   "sha256": "4256b9d4287553bf0f04712aa1f109c286283fe69577187e6edfab22c799b929"
+  },
+  "compare?slugs=stellar-pulso-hackathon,stellar-journey-to-mastery-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2823,
+   "sha256": "d6245b20747ed0495d584232815acbef1066739d4fd86947ba8281618b814b95"
+  },
+  "compare?slugs=stellar-pulso-hackathon,build-on-stellar-philippines-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3502,
+   "sha256": "3a36d3cf3ad0c02140820a7229057492f7657807dd14b8ed5a5ddf468b112948"
+  },
+  "compare?slugs=stellar-pulso-hackathon,apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3273,
+   "sha256": "6174c53f5708ab4dace9b7d45a755f820e2d29318abbafee38b6ea47e4ffce68"
+  },
+  "compare?slugs=stellar-pulso-hackathon,stellar-agents-x402-stripe-mpp": {
+   "class": "full",
+   "status": 200,
+   "chars": 6370,
+   "sha256": "e97967262c7e41a6e9179a93c085e750b368030a6df6f3ee97f0bcb33704b56b"
+  },
+  "compare?slugs=stellar-pulso-hackathon,alebrije2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 5860,
+   "sha256": "7946bd5fe359fe40c80cc9bda06482ac7acd7efb4c2ca8783ddc5055b7d9b5f9"
+  },
+  "compare?slugs=stellar-pulso-hackathon,buildonstellarchile": {
+   "class": "full",
+   "status": 200,
+   "chars": 6175,
+   "sha256": "db5e23865514c4d7780d6d84bbc29c06cdc8e69b666c04ea86f45d19cf2590e4"
+  },
+  "compare?slugs=stellar-pulso-hackathon,stellar-hacks-zk-gaming": {
+   "class": "full",
+   "status": 200,
+   "chars": 5931,
+   "sha256": "88c0c54ab5f0d41cacfaad8b1e14cdc6c99a4d86f08306d9125c170eef6159c2"
+  },
+  "compare?slugs=stellar-pulso-hackathon,mqcstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 4869,
+   "sha256": "7c0c45b079e9d792a32a6f0b55f17cf7761370f1040a8fc1174a980342ae0ab0"
+  },
+  "compare?slugs=stellar-pulso-hackathon,ideaton2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 6033,
+   "sha256": "3ab5f4a6ad2d986f130b3841a51ec7b120d0e3cef62dca31cadf00b025da7203"
+  },
+  "compare?slugs=stellar-pulso-hackathon,stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 6037,
+   "sha256": "e4e8f82757730fe00d344727e4376690f3e3b106ebf86643362ea8f39f18a5eb"
+  },
+  "compare?slugs=stellar-pulso-hackathon,codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 5887,
+   "sha256": "9565dd64950b9eceed17f0425a4dff857501d9d47bf68e0d2ee8f2f6cd64af50"
+  },
+  "compare?slugs=stellar-pulso-hackathon,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5990,
+   "sha256": "5d12596f52eafb29391e216646412a60e1fe06a610992ef42ae77b8a0a1efecd"
+  },
+  "compare?slugs=stellar-pulso-hackathon,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 5864,
+   "sha256": "58e5386c806a8915cfddcb803b4572260a8e7a2be0d9f48a0bd363507817df85"
+  },
+  "compare?slugs=stellar-pulso-hackathon,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3402,
+   "sha256": "d6abca66fb204f657eee193d5ca00b0d77e92318d75cbff006ce487f085d2c0f"
+  },
+  "compare?slugs=stellar-pulso-hackathon,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5858,
+   "sha256": "96aa6477f3e011c6adb6cb894d2c1f5da3b8f6966d7a749c52f143717988e36d"
+  },
+  "compare?slugs=stellar-pulso-hackathon,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6236,
+   "sha256": "435e882b0a5e148b077658246b1a31ce7e5594371bc5ef67669e611dca9e529a"
+  },
+  "compare?slugs=stellar-pulso-hackathon,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5416,
+   "sha256": "0af5ae925ec9c135ef8b84350da128d3824805cb58a588c4654a598a943b4fd7"
+  },
+  "compare?slugs=stellar-pulso-hackathon,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5958,
+   "sha256": "194e7ed2cf1c15dec5a5eb9651464ec6f40f4413937c627bb1525d918a6d4ae4"
+  },
+  "compare?slugs=stellar-pulso-hackathon,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6023,
+   "sha256": "897ec8f8bf9a71f9eb46ad76c8658198c36633a0f1ab5637075a9b5d90dadca5"
+  },
+  "compare?slugs=stellar-pulso-hackathon,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5853,
+   "sha256": "3de730810b0b97d981498b06f1d0cd5caa88298a07023409ce0d26b47256edf0"
+  },
+  "compare?slugs=stellar-pulso-hackathon,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6116,
+   "sha256": "8d661cbb147bdfbd9ec694d222c7574cba486b72f41ddd2a931d761f566a1cfd"
+  },
+  "compare?slugs=stellar-pulso-hackathon,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6097,
+   "sha256": "fbf5ff06d18d38b77ed5ed42f5a4fc3bf97f5b4e7b86143709e8a93472983c03"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,build-on-stellar-philippines-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1502,
+   "sha256": "fb999e8faf80efadebed7e48aa77d576bd9de440460d74a91559d98e95a3b2f2"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1718,
+   "sha256": "c69fd7ab8c4df0c336968467b3e9e8179b997046e11a295403e4db4e6cc8c4d0"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,stellar-agents-x402-stripe-mpp": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3208,
+   "sha256": "6cff1c6bea513bc03903f1c24ffbcc5ef43f7b3f30f35a7ba10227f4b8c53902"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,alebrije2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2845,
+   "sha256": "14c8e5b6ed1593916d0b2170e30b07521c4b40bb3c060bd9ff53288ede1a9a2c"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,buildonstellarchile": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3079,
+   "sha256": "f3487b7cc947e71d530ca102a080c70e9db4cd789d94c309f0d012150a217a72"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,stellar-hacks-zk-gaming": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2798,
+   "sha256": "b7e4d8ae57a7503b3aeb74fab875331aa08e065677684fbd4b159d95157a0067"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,mqcstellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1906,
+   "sha256": "afb8f4d7cb207ab57b2e0b4ed8880747da4aedfe758f09dbd0d89e7781fe46dc"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,ideaton2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3045,
+   "sha256": "98bebd3f2f89880ff3bc9b4dc3a18cead65d5dae67c2f7ff68338bb84fb2a32f"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,stellarhack": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3037,
+   "sha256": "baa8de5132cd5d062ac9be87bd1a310e93ae9ea324ef9d9954c9241db52fcc49"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,codigoraiz2025": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2850,
+   "sha256": "88765c7684f00531e435a57f577b9e8ab00be0d292935752f423ac01b6ed819e"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,scaffoldstellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2904,
+   "sha256": "cb2bd6cf1ed132becca96f82c485db3f95c4c082363bc18e2fed6dc6cfda8bef"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,ideatontelluscoop": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2790,
+   "sha256": "e023dbfceb292931ea11e14dfaff058ddca240c1beb7a99cde55a19d648f260a"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1466,
+   "sha256": "32a8ad7f908a61394bd2d872d7f90ee1ad53c5343b59aef266513eb178a98eff"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,buildonstellarhack": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2791,
+   "sha256": "9038e0904bd7d07c889b7a3edb6abbcb071448f1ce98dcf447fcefcac8115818"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,stellar-hacks-kale-reflector": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3100,
+   "sha256": "b8ffdadb5a1d7d572e33b1746eb730b6a68a60d752173b08722c5859623b8f7f"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,give-hackathon-argentina": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2301,
+   "sha256": "d35061d80e3fbe43fbdedd6fe8048f549f4504a1ee2e6797ce1d492f2727e1b3"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,telluscoop-ideaton": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2874,
+   "sha256": "d3f2b82a549d23419e289194c0193e87d0ed89f7f55194f4aedbdb4dab842fc4"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,stellar-hacks-paltalabs": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2906,
+   "sha256": "db226243d80bd2599763589dd8c138c7d2e11d7e18b602cc3f38350ce16b5520"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,stellar-latam": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2811,
+   "sha256": "3bc6401c2c791f89d59e732bbee33a36ad0f0ec30cc512dd0739b9766e700cf7"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,stellar-hacks-blend": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3054,
+   "sha256": "a9d0e7118beb4eefbb08f883ab39c9c9d9ee065414148df170d698e636781d86"
+  },
+  "compare?slugs=stellar-journey-to-mastery-2026,build-on-stellar": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 3044,
+   "sha256": "4ff73b0446d1f24d1f9c0028ad89eff5ff00360a6ffd1c3f04192fd79f5f9919"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1969,
+   "sha256": "b8728118941529062133fb992cde1eab92f3ce01a8e9196bb28abe6200e78960"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,stellar-agents-x402-stripe-mpp": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3685,
+   "sha256": "13a33c2531457f02e4474509d4dac0601d4d78f8d50160539c6f2e16ea4be9e1"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,alebrije2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3284,
+   "sha256": "fee93ba8ed2a30b858d2eaa1dad49de3348110502356c4bb487814200303f205"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,buildonstellarchile": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3531,
+   "sha256": "c652f72ccd872fd922d9a35d7a4fb337a784ed3ad7bab8c5f7e64f4c2ae7a178"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,stellar-hacks-zk-gaming": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3259,
+   "sha256": "b4e8868b2b4808659ad13acad9faa40d4603a1779d0fe63a1fe48ebc1ed9425a"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,mqcstellar": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 2339,
+   "sha256": "ada09c803203621f4ff5e1e1e193a2f0e890e27d377f1361f7e8dae86640c4f5"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,ideaton2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3482,
+   "sha256": "2afb50ae58bfb2e9ab83a213f79e9d79d1ed3a91eaa8deebc030d369c2c82945"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,stellarhack": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3474,
+   "sha256": "9f326913c06b31d505907eabcc159f201390f870dca8f9f1a4eb3aab0fdd4c39"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,codigoraiz2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3294,
+   "sha256": "ad8f166e646cae953da9f0ddcc3f6519b5cae85ca367c8a6a3c18b04d8c1c6ec"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,scaffoldstellar": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3349,
+   "sha256": "eb29cff9b20e4a41eef5cd5d48116fc9b268c7f62ad477778a2d611164cdef3b"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,ideatontelluscoop": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3237,
+   "sha256": "40de3d2253276bc71f26f80613ab4d1b1b8de57847d95514bd9c67bf3d7ff9af"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 2118,
+   "sha256": "3079ee7fee5904571eea1308d83e4889faf4d530be0a6407aa94d0b7c230278e"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,buildonstellarhack": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3240,
+   "sha256": "0d94620a811aee89811b8290cbe5fc1e4452a059dc887eee671ef6e575a1a88a"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,stellar-hacks-kale-reflector": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3571,
+   "sha256": "ff337196fe6cd6b2f6628849ddc62f9fe03c0277221383c448be9147a26af070"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,give-hackathon-argentina": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 2761,
+   "sha256": "7ff40812f274bcea44e82a29191dabafb5d0fcfa14b11e69afa092756f69c0d0"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,telluscoop-ideaton": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3326,
+   "sha256": "fd1f918e7ceebc07d91e1fdc6e0018e1f3e4329335a46a14ce1f2186a202f4bb"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,stellar-hacks-paltalabs": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3367,
+   "sha256": "bed21f34b442902cb642645ec29bf4e9200653a43bd6b01f9a5a7150ed9149f5"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,stellar-latam": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3252,
+   "sha256": "600ffcb80f584a38cfd52b66371fbc44ca5bc39d554ba5202caaecefb878e266"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,stellar-hacks-blend": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3507,
+   "sha256": "7f0b6b7d6bdbfa1bf08523dc9d9584b000dca3d9dfe262cbd11111c53e4fa563"
+  },
+  "compare?slugs=build-on-stellar-philippines-2026,build-on-stellar": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3492,
+   "sha256": "ac0f039b207be8474a0b5abc03d01bf0c5caa37e4c348ab7d3c52d876032c569"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,stellar-agents-x402-stripe-mpp": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3885,
+   "sha256": "1531cdae28737ae14667c005c3f21f41966525cff635d2b65c393b8e9d65d31b"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,alebrije2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3447,
+   "sha256": "74979ef49706da40f09e756a8bd3f68687432aa06ffa7837250de76b9ca97a0f"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,buildonstellarchile": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3707,
+   "sha256": "c47f5b83c9720bd89ce4da61bd92562da66f66cb9342ec22e387423dd5014df3"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,stellar-hacks-zk-gaming": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3444,
+   "sha256": "0ea591bc4d81958e84613cf96a9dbf94d2f96f26ce06464aea8c94ba1bdf1149"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,mqcstellar": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 2320,
+   "sha256": "08913b94e7a4e4fe7398cc332217cc336daad39054fa6580e715a6d4dd1aca3f"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,ideaton2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3642,
+   "sha256": "1c2a809869ce7f380a4a175fe3a1b1e6e410da1a4bd27f2fba0a657f238ab83d"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,stellarhack": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3456,
+   "sha256": "3ecddadf4900400f19ce12c788a49e22fbe4231210d304f60853bbd44eba909b"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,codigoraiz2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3275,
+   "sha256": "819e4c9c4f4cc27ea80f9b7d64a4e175b776804039a6913015f6633f3f317618"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,scaffoldstellar": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3518,
+   "sha256": "221e18b545c0f000781fc402709b4f62860a4591ba85ab62ff1b4d3b0f2422a1"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,ideatontelluscoop": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3411,
+   "sha256": "f483d3e70629acb988842afe56aa593534718bd3c29fd2792b31e73d6b5b7820"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1901,
+   "sha256": "640b03857c81c43f889a9d7c87ed36767690397c432ebf2e51e6a5ad4c83b51e"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,buildonstellarhack": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3223,
+   "sha256": "14dc41ace6a83a8ac4217508bc64551843c059a2c471af1c73a1f857dffb8971"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,stellar-hacks-kale-reflector": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3767,
+   "sha256": "032584d0a7e1a7b57ba22f9e2ed3499cf37a06ae87b2df76396cc60b2fbcb7df"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,give-hackathon-argentina": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 2743,
+   "sha256": "c59d5c263bc39e100bfbe7c312c6e995092895df09dec8b4c23d2f6bfd163e20"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,telluscoop-ideaton": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3307,
+   "sha256": "0892d02991abfefba06ef57813e1c24d6c2abf3e6ce84f963f7bb02dad3cb2b9"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,stellar-hacks-paltalabs": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3553,
+   "sha256": "79107e949c40e7ceec116899b0480adee6dfe602cad0343d10f141d69ba2afd2"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,stellar-latam": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3416,
+   "sha256": "7a766f4165053d836ca81ee724046b44d500ea8205680648c7cbf568b631c865"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,stellar-hacks-blend": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3685,
+   "sha256": "0b1b057dce90b495f8201f40266fae1f2768bc033af4a3947241b350f4ba3408"
+  },
+  "compare?slugs=apac-stellar-hackathon-2026,build-on-stellar": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3662,
+   "sha256": "8575829495be309d8bc4a95a74fe933d637c3d7b7f70d981079af25341c2ead6"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,alebrije2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 6397,
+   "sha256": "23758ab7514762fbe93cb65785703bcc8d3d5c471dc2cee086474fe18a63efa8"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,buildonstellarchile": {
+   "class": "full",
+   "status": 200,
+   "chars": 6746,
+   "sha256": "477a308a859cfebe6a28b90b3fe65bd9fe18c9c2a40af98bd2708c9ffefcd6db"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,stellar-hacks-zk-gaming": {
+   "class": "full",
+   "status": 200,
+   "chars": 6312,
+   "sha256": "5e8ea2f69e73547bf1a78b162040a2d8449b5b711376943b7a553498a904fc58"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,mqcstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5276,
+   "sha256": "cab29e67e40d077057548e63eed401b367310f5b72601e8e8c08c68baa18caf3"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,ideaton2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 6592,
+   "sha256": "5aaf61b8ec934ea5ab5403034e548299512c70b890a4240cf04fdb7cca4bd470"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 6390,
+   "sha256": "a33e327886e5c490d51819490d623f2a0b1c7879847b592b80ce1358175eb900"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 6259,
+   "sha256": "563eebf3c504d131d60c9a2ed3fc96dc0cd29fd217b88db447e101973b2b4c61"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6416,
+   "sha256": "4543e2ec8c42e2f3c49241517e1d7dcb863a878a63be7d80dc108aa7e65ebebd"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 6442,
+   "sha256": "e4e397274491109c4550f5abcc9ada2c6f2898d2c71b6a64d490c7603a440d18"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3585,
+   "sha256": "89d0d101aba5b4b529d0526b300e53aceea90ccd4585196439dbb67047c3c21d"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 6260,
+   "sha256": "ba26e341997837c1f7223cd233fa5708931f6b81bad2248b02ef9096692fcf25"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6895,
+   "sha256": "bba09d0924440d086976e303324bd76977fb54c974d9fd27f444b48c376ac791"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5834,
+   "sha256": "e375c8bcac99345d9d2302b1aced3f2465a62c896eda4a7894d79d15c925b314"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 6347,
+   "sha256": "8ae37110143320f8811478cea2417c4b884f6d5fb7cc3a1ddbc437307c6d558b"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6538,
+   "sha256": "64d10766e91d7535a6eafa0c9994679a920e28b9e6217a728c289d372a3628cb"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 6381,
+   "sha256": "60faafac8f378a29722a521bc42b84f37f60b12561b08d47e8c72fef3e8fb02f"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6620,
+   "sha256": "b63cd799ed5a4a4fa15a92addb2070d979bb2b80fa6463d15f786c077a80863e"
+  },
+  "compare?slugs=stellar-agents-x402-stripe-mpp,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6686,
+   "sha256": "f26ca2ccdae0057185f8d4a1862db062eb70928d121c83b08f703d042e7addaa"
+  },
+  "compare?slugs=alebrije2026,buildonstellarchile": {
+   "class": "full",
+   "status": 200,
+   "chars": 6186,
+   "sha256": "29f7fc0f5cbb1c59e975baaebee9892f5924b3b7f2ccf0b8e1da2117222ce0db"
+  },
+  "compare?slugs=alebrije2026,stellar-hacks-zk-gaming": {
+   "class": "full",
+   "status": 200,
+   "chars": 5966,
+   "sha256": "6844d8664453289d7b1507e830961d9ccf0f82cfd9c56150646a0399af15a353"
+  },
+  "compare?slugs=alebrije2026,mqcstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 4710,
+   "sha256": "47f80851242d8b9c32f0474f4606a5ba37721dc9cf7c92b08f8ab16667e0215c"
+  },
+  "compare?slugs=alebrije2026,ideaton2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 5998,
+   "sha256": "743bf74af215976fde35e04005af2adef7d4dda3c54f40693568546ec69be473"
+  },
+  "compare?slugs=alebrije2026,stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5914,
+   "sha256": "d07d8f2f82fe9800094b3a935ba436d9b98fc6985aeb1b439bea58a8d285c3e3"
+  },
+  "compare?slugs=alebrije2026,codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 5732,
+   "sha256": "d7221cf2c303edc1a4c8cbcc380dad1671f8acc96d9340a3a9b59a00eb4af70c"
+  },
+  "compare?slugs=alebrije2026,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5985,
+   "sha256": "fb43a687cc8b1a199c7323c09da9f4ae28a19e48e2357e8f4f9a6acd5cb85f90"
+  },
+  "compare?slugs=alebrije2026,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 5850,
+   "sha256": "cfa1c04695a88c52272a96a74121a9cb459bfbd1095b36f7c8e0cd102bd72229"
+  },
+  "compare?slugs=alebrije2026,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3184,
+   "sha256": "14a8cde7bba086106c1bfec0edd6ef3449aa64f702901b2be3bb074a9c127749"
+  },
+  "compare?slugs=alebrije2026,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5702,
+   "sha256": "a5f81ba6a4222ee9c27bdffb95a9159bb196f709170f407441eebab8c7b87e71"
+  },
+  "compare?slugs=alebrije2026,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6281,
+   "sha256": "12519a70bb0483d164c46d2c9de2a716c9c3bc8426444d43dd95b0803ffa89e0"
+  },
+  "compare?slugs=alebrije2026,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5321,
+   "sha256": "fe0067fc7b9de7d4e349ac3e7f71428e935232a1026f3274c6647124cf95c24f"
+  },
+  "compare?slugs=alebrije2026,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5785,
+   "sha256": "d32eaafb9f47f419d4c6000eb45d9e4ef053e0d4439b24bf18ce7db98a495bfd"
+  },
+  "compare?slugs=alebrije2026,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6050,
+   "sha256": "916e508c086e0ce3fc612993b0aff28fb8ad8cc5536708d22ffbec1203c8a5e8"
+  },
+  "compare?slugs=alebrije2026,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5798,
+   "sha256": "fcd7ff0bc8898c0df1ccfa6dd964a6b4bef3982f3b8afc6aa9fee7e05dfe676f"
+  },
+  "compare?slugs=alebrije2026,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6173,
+   "sha256": "8ac5dcb8cb7f14972c14a9c5254b985658c3b1ffdf769c811c028626c55c8c2d"
+  },
+  "compare?slugs=alebrije2026,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6082,
+   "sha256": "8c5e392ead39bf00716abdee20099a600ee995aa96fbedd45fc9d37c4207b5c3"
+  },
+  "compare?slugs=buildonstellarchile,stellar-hacks-zk-gaming": {
+   "class": "full",
+   "status": 200,
+   "chars": 6285,
+   "sha256": "8199e712bf4a720be2fa4a83c984cb7dfe32e45189d998aeb26ab9e62e3d2bb2"
+  },
+  "compare?slugs=buildonstellarchile,mqcstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5001,
+   "sha256": "dfd300953923d2660f4df4872e1c1397d44793442c295a434ec358a385325182"
+  },
+  "compare?slugs=buildonstellarchile,ideaton2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 6275,
+   "sha256": "12b6f999344d538fc0f0f67d49a6c414264afeabf79548242fcf4e77a01c1ab8"
+  },
+  "compare?slugs=buildonstellarchile,stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 6229,
+   "sha256": "75e473dc91de61ad399633c32fe82b6ede82cbc66d7d5e83e21d8c6ebcba9522"
+  },
+  "compare?slugs=buildonstellarchile,codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 6018,
+   "sha256": "e021fe8988347fd1dbd28bd0bfaf0b912555f2f5e504d54ccbce5fd40bdad6bf"
+  },
+  "compare?slugs=buildonstellarchile,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6321,
+   "sha256": "bb90cfab8ffc854b06f636507eb76fc06f91c305281c977fc48f5de3aa4b5f7a"
+  },
+  "compare?slugs=buildonstellarchile,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 6087,
+   "sha256": "fac812744885c06d0656071923ac68de30c9897e0ba4fb91022a3522b89a9a8f"
+  },
+  "compare?slugs=buildonstellarchile,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3431,
+   "sha256": "14c43902cb8f5cfc43a17b43c2d1c4a6715d956892558d9e90c2a06d2fc63c65"
+  },
+  "compare?slugs=buildonstellarchile,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5905,
+   "sha256": "5fa2797e0380c196ff7e830381a440a24311861a4733e9b4d6915fed5bac3c0c"
+  },
+  "compare?slugs=buildonstellarchile,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6672,
+   "sha256": "05a7389aeaf32c2b563100e1939dea58eb836fa5f3ced385c65c5b2b14f90bd8"
+  },
+  "compare?slugs=buildonstellarchile,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5621,
+   "sha256": "53c0d1c3516e3c8ddcf77ecba915586eec808843bf7ede88b418d2ea137b2e62"
+  },
+  "compare?slugs=buildonstellarchile,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 6110,
+   "sha256": "e682f68ed77d6c423f6feee25bc570fda02d28d10118e78413a943aa899fad2f"
+  },
+  "compare?slugs=buildonstellarchile,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6413,
+   "sha256": "5835981bbb3c960991c4c985fb5bf6d5476083fe6dccea9220a7646b3bbe31a7"
+  },
+  "compare?slugs=buildonstellarchile,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 6120,
+   "sha256": "d6238cf4623d384f582c82f5c0c9282902e498016d5e8ba35ae21708e6cff571"
+  },
+  "compare?slugs=buildonstellarchile,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6519,
+   "sha256": "654725a14caeecb1e289181e62ecf83c058093d4a199ff267e0356b8026ab9e2"
+  },
+  "compare?slugs=buildonstellarchile,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6425,
+   "sha256": "f60051fca745017b340eef5d727ecf03a2d6a5c31cc92ad36feea288d1369522"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,mqcstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 4803,
+   "sha256": "324455bd4073c8194b5524396c0aaf5ef26000cce6aab8441328dcc04f1097e5"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,ideaton2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 6145,
+   "sha256": "bea83b99912e28c238402209dcd63de5daac2bdbf3a03d1d85bac90aa3ee7f96"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 6015,
+   "sha256": "9974048aae58382a060c6c616622e61f5d044eec582c9d7690b1328f2e2827e6"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 5812,
+   "sha256": "dc8954e51e6a46e1e323f2d0d254e39b603cabffa9a9fd2f91026798de9b2a50"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5947,
+   "sha256": "30be731194d5e482cbab3570a371f496fab501388736ec42457d206e77089795"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 5956,
+   "sha256": "c6f6a61943d1ba80f6b16dd55119ff20fc7359ac30d2ae8a7ce758245d819455"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3159,
+   "sha256": "ac05f5c05bc686ef04561dd8264b7bf41e44dabc4666297ecab05ca43d319a13"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5812,
+   "sha256": "2f9364f4d40fc5af38c02faed1ce501b13bba75a236fe5b26f0ddbfaf134a605"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6483,
+   "sha256": "356d65e66fdf4772d65da157cd13fcd7bd7526cec5a47d01c1ec60e1dc9abc7c"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5411,
+   "sha256": "561a480e385d4aa7bf2526d70de403947766ff7e4372442278e4484f5f7632ee"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5893,
+   "sha256": "ef8d54228a6ad1949bfd35c856619842db764ae74656afabc71cc0ac3f27d9ff"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6095,
+   "sha256": "1a633cccf503b58aa7a22177731d996bed93115aab82018ff16445664637d1da"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5945,
+   "sha256": "3009adfa05656deab07fbc023d1dd6659006c0ff32c0430d8ea5117d0c5308e1"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6186,
+   "sha256": "9aa44d67ff84cc577ca01914e47f8822c813c0cfbdcf94e2c142265ad77e4461"
+  },
+  "compare?slugs=stellar-hacks-zk-gaming,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6211,
+   "sha256": "2d7f85a3f1f9ac44d35ce0c08048891197617c8382b3c36749ee8ded481b7a72"
+  },
+  "compare?slugs=mqcstellar,ideaton2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 4897,
+   "sha256": "f877e4b797c0b6123568d778b522293cfed1d19eb9f93ef7f3643d796b089dd1"
+  },
+  "compare?slugs=mqcstellar,stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 4917,
+   "sha256": "46c8031b002d259b8670bd3d0aab3a12ab33de5d5baed6dad2f805052d5a8a63"
+  },
+  "compare?slugs=mqcstellar,codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 4680,
+   "sha256": "85fb78f6efe617c1db183abec5d00abd86fc3c2bc57576c439e4e87a2b0b5c26"
+  },
+  "compare?slugs=mqcstellar,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 4838,
+   "sha256": "b84930bf5e23f493c16a0716f086c568909b8a79e2f52cb0cd98f799b8657166"
+  },
+  "compare?slugs=mqcstellar,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 4689,
+   "sha256": "ca76d7eb8eb0b18de8fc624ef715385c95c7f0747c325bf1656c248f547fa965"
+  },
+  "compare?slugs=mqcstellar,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 2166,
+   "sha256": "97c78fe02c357296b48a638305c4af7e1ca91799114438677daa479f54ccebec"
+  },
+  "compare?slugs=mqcstellar,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 4720,
+   "sha256": "ea9f7616a5bb1eaa70042c3a299df41a6057e6a3ff9d9c06006a73b92745bf0c"
+  },
+  "compare?slugs=mqcstellar,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 5169,
+   "sha256": "c5a633b79fa2e1fb8d90f617018d9d28a348d88da45318cde5122af8f5dcb7d7"
+  },
+  "compare?slugs=mqcstellar,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 4058,
+   "sha256": "60814f2743ced5c0a29172829ef99a44b8c64e0652f8ab0e7d2129177b64760a"
+  },
+  "compare?slugs=mqcstellar,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 4800,
+   "sha256": "9f2c35c23636092bf900a6403eddef57b92e0d81e66e3583531afacede93f98e"
+  },
+  "compare?slugs=mqcstellar,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 4918,
+   "sha256": "267815c2208123d12624f11d5009a7a2795cba4cd87003edc3ca8716787b933e"
+  },
+  "compare?slugs=mqcstellar,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 4651,
+   "sha256": "68dfc2b59d1b7a677e75596d5867932604f00288901c53e212413dbb1226d5cc"
+  },
+  "compare?slugs=mqcstellar,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 5045,
+   "sha256": "4fcefa712dbad670606fe97b4f9b839b64ba68833222c679bb2551c4ab3375c6"
+  },
+  "compare?slugs=mqcstellar,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 4958,
+   "sha256": "5b73aff33f3da71b242e3f3e060fe667e003fb84c2ebedfaf7fc2672b94dfc57"
+  },
+  "compare?slugs=ideaton2026,stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 6092,
+   "sha256": "20d94d4d21c9724fcdb2175a0db973978bedefca6b3a93ceceeb7a7a78a60201"
+  },
+  "compare?slugs=ideaton2026,codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 5885,
+   "sha256": "bf085a88e58b8eedfc9712727b8b08f6eb4a39908753cc003b7e7f9c1a4bc2c5"
+  },
+  "compare?slugs=ideaton2026,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6180,
+   "sha256": "0d93b8a4f9971408a6cb74e3e6d52df3cb46e6768d13cd119d63566ee3c115f7"
+  },
+  "compare?slugs=ideaton2026,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 5963,
+   "sha256": "4b12a1c7ea9e52aeef7911d529e76060aa23f964f413ba80084b9b63d10c806d"
+  },
+  "compare?slugs=ideaton2026,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3382,
+   "sha256": "a90d53959654b250e12802e759664b0126097a9804b05849303adced98644565"
+  },
+  "compare?slugs=ideaton2026,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5821,
+   "sha256": "1e2496169d29b0c778a5fae7de59790416e215073bc19608deb9140b8ab0c064"
+  },
+  "compare?slugs=ideaton2026,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6502,
+   "sha256": "c2de087e85ed644245fb51234c32a1aa0ea610d694e96ad1750810e18f233d36"
+  },
+  "compare?slugs=ideaton2026,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5478,
+   "sha256": "5e0ba3fc7d219e2fc51f88b3fc5b98cc733d0914ae4f1d5fca93b69e2aded960"
+  },
+  "compare?slugs=ideaton2026,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5975,
+   "sha256": "740d43f74e35e4f6035876a1a7f429a2942a5b399a9333c867f539d23ef43e8c"
+  },
+  "compare?slugs=ideaton2026,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6218,
+   "sha256": "7525ca8ee038970ef8675f1c4cc382c867c4ea4932c63b401895a0c28bba4515"
+  },
+  "compare?slugs=ideaton2026,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5967,
+   "sha256": "83cf0d8f78d4a9d6daa6fc50214889b8bda1e69187f7155e8b1ed3f3ebe6d88c"
+  },
+  "compare?slugs=ideaton2026,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6347,
+   "sha256": "0ec21a2496b8ee6ebe096e8ebdd62e3581f12330dae0b53a7bd2af175c173945"
+  },
+  "compare?slugs=ideaton2026,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6273,
+   "sha256": "b4108ca4259c6bf7ad5d6cfcae5b89b0ce675ae7de12983aaed657e8d93340ed"
+  },
+  "compare?slugs=stellarhack,codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 5859,
+   "sha256": "d1e8acd3c91eb2f49662305ba2579909cdd10ff7ab27d1ee03e2159b8199bb0e"
+  },
+  "compare?slugs=stellarhack,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6000,
+   "sha256": "a34b19ccd747768075d226ca7e8266b74e159290928ab1232868ec2e4d18f189"
+  },
+  "compare?slugs=stellarhack,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 5903,
+   "sha256": "5e3f5f2f253b0d472e58081823af88b36622924a608032685b69f614140caff0"
+  },
+  "compare?slugs=stellarhack,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3374,
+   "sha256": "f27756d489e4b82f4278e419092559369f85018c52edb59ffd909daf0b0ccbc6"
+  },
+  "compare?slugs=stellarhack,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5938,
+   "sha256": "ac931dc27a20bd602019537adb99db636007c40a8afdae70bfe8b0080ba763ea"
+  },
+  "compare?slugs=stellarhack,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6319,
+   "sha256": "3ad473f7c960f2ab33a6cb3d2128f4ad43d67dc31e4532985402b893201b8b09"
+  },
+  "compare?slugs=stellarhack,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5485,
+   "sha256": "b4a0529edf661eab94f9872817d28e1628aba3b3435b8b550940a232f41e26fe"
+  },
+  "compare?slugs=stellarhack,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 6009,
+   "sha256": "aa163483979a44007411f674d1c777a673f29de606582ccef81139a3306d1465"
+  },
+  "compare?slugs=stellarhack,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6084,
+   "sha256": "ef4879995ea6149cd68ad9b7074004d1da8f989e5cc11992ce22967946df4c42"
+  },
+  "compare?slugs=stellarhack,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5897,
+   "sha256": "88751157cf051eee467111fa04c4cf3ca0dac36d452ee307864c4d6d0af9d5f3"
+  },
+  "compare?slugs=stellarhack,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6170,
+   "sha256": "c658818d82556e85b7188e1b07ca61cdda71a4a5323994da965d610df7ac44e4"
+  },
+  "compare?slugs=stellarhack,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6080,
+   "sha256": "23c042808abe0aac6095eecb1bbb0f43dbdfd484fe1c969b016f4f8ca700809c"
+  },
+  "compare?slugs=codigoraiz2025,scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5864,
+   "sha256": "193311a25723363e835cb5eeae9013423c2259cbbafcc7430d199b62b0d6b31f"
+  },
+  "compare?slugs=codigoraiz2025,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 5695,
+   "sha256": "51aa135d955da509689d1ae24902cf0fce17e3b57c1d4c701b7f713b993eb38b"
+  },
+  "compare?slugs=codigoraiz2025,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3193,
+   "sha256": "a64733ea8fb5e2518fdf0c2432787aff59dd41d1248038f49521323c68dbea94"
+  },
+  "compare?slugs=codigoraiz2025,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5711,
+   "sha256": "76710a168f8b6aba5b02019425a335742dae5378aac7ad81964bcd46e8970992"
+  },
+  "compare?slugs=codigoraiz2025,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6178,
+   "sha256": "fc8c9ed517311c9fbac4c199627babf5c582eb5a76f7eec1864cb38a492a8f18"
+  },
+  "compare?slugs=codigoraiz2025,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5327,
+   "sha256": "ea158ee28c500c256380f309a13cfc6a8e04fe898e8842ce286d7013aee4a2ab"
+  },
+  "compare?slugs=codigoraiz2025,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5793,
+   "sha256": "a3148a96d1b00ec9938c6bfccda573614cbaa55ddcb77ffd033d70374f71ff76"
+  },
+  "compare?slugs=codigoraiz2025,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 5923,
+   "sha256": "d735a51dd25dfef2603d25bc17d06dfaeeb239f4593c1e3470a5ae319b116d91"
+  },
+  "compare?slugs=codigoraiz2025,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5569,
+   "sha256": "64d834c5ef3cba46d7e0330dee744410cfe350aba681f34b0fe6f6757263b37c"
+  },
+  "compare?slugs=codigoraiz2025,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6032,
+   "sha256": "2127656ef6948d635fe36b41b84259876acca7ff80fa990241e962388cea3c05"
+  },
+  "compare?slugs=codigoraiz2025,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5834,
+   "sha256": "f0e13abdbb9b2684c56e1760b6dc7e80169f94c555cb7e583e188fb358dcc273"
+  },
+  "compare?slugs=scaffoldstellar,ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 6001,
+   "sha256": "593f71d06241beffdeb2e661d66b10f1e208fdee001544954fc35522b73259e2"
+  },
+  "compare?slugs=scaffoldstellar,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3249,
+   "sha256": "505220af34b236e28fde9d796917713218119d5fb3515998c0365ab8d9304362"
+  },
+  "compare?slugs=scaffoldstellar,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5866,
+   "sha256": "2a4fce3b420d673a041706b632606b08efec490b008805c929e5799358da33cf"
+  },
+  "compare?slugs=scaffoldstellar,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6489,
+   "sha256": "9f10af969dbcccef98db9bdc907fd63b29712c42a60599abb296adabfc9425f4"
+  },
+  "compare?slugs=scaffoldstellar,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5420,
+   "sha256": "11a085017caa096e0428f8f8c16491c9e7c6bf422f7fc798e1c0752628079346"
+  },
+  "compare?slugs=scaffoldstellar,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5938,
+   "sha256": "c552e4fd1e4d3897f604318427705a36714720400506abd252bbc8f888420949"
+  },
+  "compare?slugs=scaffoldstellar,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6138,
+   "sha256": "25f4cdf508049ab6ef7f44dbcbdb21431da78faae9107c035f75f261a1980797"
+  },
+  "compare?slugs=scaffoldstellar,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5959,
+   "sha256": "9b87121fbd86b498238ba22fcd0311902ab75800a4f6ba0d23f2a177149717fe"
+  },
+  "compare?slugs=scaffoldstellar,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6211,
+   "sha256": "1500c65286c0036c08402da389dd043e765575c86154076ee23c00f01eca22f9"
+  },
+  "compare?slugs=scaffoldstellar,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6248,
+   "sha256": "cae2773a2f2d70c2f4e6a0626c44a7622a6ef6d63fcdadafa46f216ae331e538"
+  },
+  "compare?slugs=ideatontelluscoop,hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3138,
+   "sha256": "dc8259a56d50d39ec312989e6a037a74e9aa26a874b06338aff190fdf970bfe9"
+  },
+  "compare?slugs=ideatontelluscoop,buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 5617,
+   "sha256": "9f7fb86f2a2eed63198754608a3d174d8b458d64d4e63f95ba943e6cb6b2229a"
+  },
+  "compare?slugs=ideatontelluscoop,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6356,
+   "sha256": "0715ece50a4eedd6160785adffd26a66a8450c9e6338fa27d106cd743b3faca9"
+  },
+  "compare?slugs=ideatontelluscoop,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5303,
+   "sha256": "01100987c26756b858fd44efe227460bf66b9437bc23fd5fe36c200432682b8d"
+  },
+  "compare?slugs=ideatontelluscoop,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5825,
+   "sha256": "c880ccee72090fbbc1147707bd043f96b8d292115aec1e5d81b6b50494dc21ed"
+  },
+  "compare?slugs=ideatontelluscoop,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6102,
+   "sha256": "5697bd5fd912d5ef503370f223821a4c40786c091135496f37153bd24dd9b49f"
+  },
+  "compare?slugs=ideatontelluscoop,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5707,
+   "sha256": "95599dbce7491d398cbac0605b50ac19c71689784ee0fba315e9de62b9402bb2"
+  },
+  "compare?slugs=ideatontelluscoop,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6190,
+   "sha256": "459728bb62f68ac4570a5d111d8d495b3192aa0cd48693523098b4805c48a6a6"
+  },
+  "compare?slugs=ideatontelluscoop,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6089,
+   "sha256": "24a54f9344d09ec198d302454f6d31f69920741ac804e732caf034e7af01bd36"
+  },
+  "compare?slugs=hackmeridian-2025,buildonstellarhack": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3140,
+   "sha256": "4a0cdeff46160bb56b7a18c244e74f6b220f7d8a9db636f6fa8ebebda16fb1a6"
+  },
+  "compare?slugs=hackmeridian-2025,stellar-hacks-kale-reflector": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3471,
+   "sha256": "0874184ef74e37f9e550229afea2d3987e8317c2483aed00d70de67c6f22ffe5"
+  },
+  "compare?slugs=hackmeridian-2025,give-hackathon-argentina": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 2574,
+   "sha256": "e18df9c721d4f92aa417551cb65062f190f56203bfed351536f255c6f7d560dc"
+  },
+  "compare?slugs=hackmeridian-2025,telluscoop-ideaton": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3226,
+   "sha256": "1fcf8c663a6defb12faca7016f72a438cb0b56eba7b0c5c785e88c567b366240"
+  },
+  "compare?slugs=hackmeridian-2025,stellar-hacks-paltalabs": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3267,
+   "sha256": "bb26e9a9a7faca667b4c7d52a5bfa6a9446bdc9fbeab757f54d8a874c0b94865"
+  },
+  "compare?slugs=hackmeridian-2025,stellar-latam": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3152,
+   "sha256": "78939a00a6f2fe21299b39bd252816bc3c3903d40ca13e0b31600793f4dbe9ea"
+  },
+  "compare?slugs=hackmeridian-2025,stellar-hacks-blend": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3407,
+   "sha256": "b1d353cb401f609e43109bf9382a98d6da93df4999004d4b5c13b314e1d45972"
+  },
+  "compare?slugs=hackmeridian-2025,build-on-stellar": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3392,
+   "sha256": "1ca62aa294c9b6524c0911591f14945731872954fd24c0f1308b6018c0ea386a"
+  },
+  "compare?slugs=buildonstellarhack,stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 6162,
+   "sha256": "d6293f86044d1d117065b8513dc279d937357091d584e373a4199f7333ec8084"
+  },
+  "compare?slugs=buildonstellarhack,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5337,
+   "sha256": "9db56648310fc39671271f69c95e0cdfa3ef19ec860f7c83f2cee466cbf1639b"
+  },
+  "compare?slugs=buildonstellarhack,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5823,
+   "sha256": "16b654eec40440e654e44df50d40aaec055120bf7d79fa42562b37e1dcabad1b"
+  },
+  "compare?slugs=buildonstellarhack,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 5874,
+   "sha256": "a300361226c3de4f036aaff5ba362623e46a81812373c797ccd0784debea7023"
+  },
+  "compare?slugs=buildonstellarhack,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5653,
+   "sha256": "dce560956002bd7277d7a9dfcb7c3da85dad085d70bb223a613f2076faa614bf"
+  },
+  "compare?slugs=buildonstellarhack,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6027,
+   "sha256": "05a1ca09cd7c4b98a72e944a8ac3f27e946354b699929c5950fa5b77dcb42be4"
+  },
+  "compare?slugs=buildonstellarhack,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5968,
+   "sha256": "f20b5fc35d512822e4e587f4a6d627eae446f62f2f48493533dd8c107d41e8e8"
+  },
+  "compare?slugs=stellar-hacks-kale-reflector,give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5730,
+   "sha256": "2d025b661ca0558f576bf19f19e1738f4e55bea4bae058033722be214149587c"
+  },
+  "compare?slugs=stellar-hacks-kale-reflector,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 6262,
+   "sha256": "3492e485e7b2d6471d04596d7a230556b8e71443925e309254f11916476df907"
+  },
+  "compare?slugs=stellar-hacks-kale-reflector,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6520,
+   "sha256": "9ffea782eaef671550e16ea9ab9385cb043fc0fb2e42731537ff838559bb96c5"
+  },
+  "compare?slugs=stellar-hacks-kale-reflector,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 6301,
+   "sha256": "bb0f5bbda757b0be3c20f9b9b42c3fd1083149465ebba6a177a1028bc7ad6ebc"
+  },
+  "compare?slugs=stellar-hacks-kale-reflector,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6637,
+   "sha256": "a81882cf9d9cf6fe49dd3df2b6ee04f6fd33d83b9c1313a824a2159660e14098"
+  },
+  "compare?slugs=stellar-hacks-kale-reflector,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6589,
+   "sha256": "dd8dd98f764f6743a1fc8b3d4addef897a2fb98ca05972b52c58ad49ff9a2f39"
+  },
+  "compare?slugs=give-hackathon-argentina,telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 5312,
+   "sha256": "1298cf7f23d8a54f27c241fb1ee5d8b2e05d4626a09c201d121a23ad1a36e1a3"
+  },
+  "compare?slugs=give-hackathon-argentina,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 5478,
+   "sha256": "069755778ed3c0837df751278acd90c42545c5d9cf4b751490b0885dea12d227"
+  },
+  "compare?slugs=give-hackathon-argentina,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5297,
+   "sha256": "31bfc93b045cf551999479bb4dbfabad7229f9c0f6e50dd4f9ae12673b1abeb7"
+  },
+  "compare?slugs=give-hackathon-argentina,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 5588,
+   "sha256": "9439d910512a151b59d651141f20d991282e2cd222b4878d5fcf2a974657ca92"
+  },
+  "compare?slugs=give-hackathon-argentina,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 5547,
+   "sha256": "5e548864d073befd8a6ea2643872bda784658fda42257320278a9fd43e7f93ed"
+  },
+  "compare?slugs=telluscoop-ideaton,stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 6011,
+   "sha256": "e16baac1d9b65f041f6f59fa698e34de2680dbe4c1d981f8e2b07434a0a91f0a"
+  },
+  "compare?slugs=telluscoop-ideaton,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 5755,
+   "sha256": "2f2146f4e10535bd94e3d684ac17053454ffede9d3538d49b0310bfa804dfc33"
+  },
+  "compare?slugs=telluscoop-ideaton,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6130,
+   "sha256": "a84e32846e1c0c6cfa4b32ae72ba0d29fa9e55564625ceb605cb3ae9e13b31d3"
+  },
+  "compare?slugs=telluscoop-ideaton,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6041,
+   "sha256": "b57dfd3ba765614fbd1e4d3615cca47bcb08c910067f6e9e80653e387cea5910"
+  },
+  "compare?slugs=stellar-hacks-paltalabs,stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 6020,
+   "sha256": "9005d830dcbe730d43ce99df37a2d40727276497128e3b08291fddad8ea4893a"
+  },
+  "compare?slugs=stellar-hacks-paltalabs,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6213,
+   "sha256": "384f13e354392ce34818f019c54637c0f9ee626213bdd78aaf98082025d762f0"
+  },
+  "compare?slugs=stellar-hacks-paltalabs,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6330,
+   "sha256": "875b590fa649b58dcabdfffbdcee8b88f2fc8d812a5bfedb44fbe159541ee314"
+  },
+  "compare?slugs=stellar-latam,stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 6071,
+   "sha256": "2466397b68eeca42d07a6938a7388b88729e2fe4c28305ffc47b454108bef351"
+  },
+  "compare?slugs=stellar-latam,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6030,
+   "sha256": "dc0b396bd5fbf4aeb315bb57e37ce3303c3dc8ec13f3a4273324a9b817dbd31e"
+  },
+  "compare?slugs=stellar-hacks-blend,build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6446,
+   "sha256": "dd301f4a8ae2457df47355b9f1f0d0a81ff0cfe881c918075b493f5b93f5c676"
+  },
+  "compare?slugs=hackmeridian-2025,build-on-stellar-philippines-2026,apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 2882,
+   "sha256": "72cafd688e16556aaf943c4d7995ad7eac08dd5aecfb830c1b69a59a0b7714fe"
+  },
+  "event/hackmeridian-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 2478,
+   "sha256": "f05dff0eb5eae388495a2fbce852e7e4201f4d1927aeee24c988430fa8539829"
+  },
+  "event/stellar-builders-camp-jaipur-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1148,
+   "sha256": "c78e474f77078f37617dffbbee378ec2325de8089afbd3dd917330181625a57b"
+  },
+  "event/stellar-builder-summit-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 6578,
+   "sha256": "e7b36629730501b3cf5f818ee0f96b08667c099986cbf41320da8cffcf18e14e"
+  },
+  "event/stellar-hacks-zk": {
+   "class": "full",
+   "status": 200,
+   "chars": 206982,
+   "sha256": "daee663b6db9cc6218a542456fbc3cc53a272b890ab0782c955f96c2c1205011"
+  },
+  "event/stellar-pulso-hackathon": {
+   "class": "full",
+   "status": 200,
+   "chars": 53051,
+   "sha256": "6703bb3283aed6d0009b56ad7db61440a0f3737079f2121b81e565df5a7d28a6"
+  },
+  "event/stellar-journey-to-mastery-2026": {
+   "class": "names-unstored",
+   "status": 200,
+   "chars": 1317,
+   "sha256": "71075a21e6cdcc8dd1ca6ecc4bd36f681d24632a671331010e56c58a5ba1c009"
+  },
+  "event/build-on-stellar-philippines-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 6257,
+   "sha256": "9174bff69672ae220bd8e00b81ad27e074d7d7b4a2d994424b577adb8114ccfb"
+  },
+  "event/apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3108,
+   "sha256": "6c97e3954b7c4b0db17bd6515ff3268c5fcbda0ce5fa34a42015d226cbab662c"
+  },
+  "event/stellar-agents-x402-stripe-mpp": {
+   "class": "full",
+   "status": 200,
+   "chars": 169838,
+   "sha256": "29c62f9b0e19d3744c9a669d4766b56ec99ca320ae946a4e6e076cd06ad8afd3"
+  },
+  "event/alebrije2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 29264,
+   "sha256": "36c70b1d7eaf6a3b6aa84596cc60a37dcde3ddae7d3648e7b9e99fa8ea0cb0ab"
+  },
+  "event/buildonstellarchile": {
+   "class": "full",
+   "status": 200,
+   "chars": 40208,
+   "sha256": "3c74c5e994358c827ac87ed2ecbba035ffed22e2373fa461ae155ec8d9a434fb"
+  },
+  "event/stellar-hacks-zk-gaming": {
+   "class": "full",
+   "status": 200,
+   "chars": 72494,
+   "sha256": "12586e5131a22cef820f7af90bcf9438d2db29c41cd954966833d7650efa9003"
+  },
+  "event/mqcstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 6172,
+   "sha256": "87cd58d0e9d4c596d0ce8deb057164108aa20d3af0c066fdef67099b30bbc6b0"
+  },
+  "event/ideaton2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 50066,
+   "sha256": "c808f26db8531b86d2addc7006ff6aa29a8b22cea0e1b78cd3866af086669a2f"
+  },
+  "event/stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 36675,
+   "sha256": "d166e3819e71b2ed6198c9b8011912d8eddb6460c7e662db437a7545a9e9531f"
+  },
+  "event/codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 39266,
+   "sha256": "f59513d72a00faf8188d0dc21459f7ed3c4c45b8d60d1c030c1dee12f142614c"
+  },
+  "event/scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 44064,
+   "sha256": "6111af72cf8d5070f020f21204819869781cba4232dda71c647f4240de56a8dc"
+  },
+  "event/ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 18882,
+   "sha256": "2f51a02c419d0e61e0ddf3b6a271540ceb1ef299adc8d8222ed7fa8853a475b7"
+  },
+  "event/hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 6584,
+   "sha256": "12dcc6c7c603d5ddd2b42eebac7efb0701076ef9654a653eee32174ff865754f"
+  },
+  "event/buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 15907,
+   "sha256": "75936f72667db0f2a4a2c634f6bd1932e3745dd94fb2a803170f489b633658d9"
+  },
+  "event/stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 43829,
+   "sha256": "b510ac4b3c22a40314fc7d1935637ba5c0d2bd7931ab05c3d9df23fee5eb3570"
+  },
+  "event/give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 12353,
+   "sha256": "58aea3c3e9faa715a7b1419c5a74f9be65097beb74cbe9558e9ce78939737d86"
+  },
+  "event/telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 43697,
+   "sha256": "ae41f9cc9c1651b8b39e06d452bb884a20061e24d8da1d24f1053ffba673defd"
+  },
+  "event/stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 29910,
+   "sha256": "0b22cde90216e58da17abce468785e3e90189d8edd5e9785167d743dbc3f30b1"
+  },
+  "event/stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 26837,
+   "sha256": "f634ed76fc03b647a2a20e95668cea268de6e19e18ede9af3af4b54b90793bc0"
+  },
+  "event/stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 33796,
+   "sha256": "6d351bfa07f811a80a0422f54cf5dc7c77a8873e6faedd2c70779ff8d374d47e"
+  },
+  "event/build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 56031,
+   "sha256": "1be1342287bf4916cc978d214fd738932601dc2975249e66063623992031b97e"
+  },
+  "analyze?hackathon=stellar-hacks-zk&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2937,
+   "sha256": "0d08c46972df98019fcb9c6f74e8b8bf57300ade454832d3cf0b95220ec3e3ec"
+  },
+  "analyze?hackathon=stellar-hacks-zk&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2276,
+   "sha256": "9a65f49f3dfa049877de7c4f188bd99bd4d90ef8ddc2d07a066e54360c9ca808"
+  },
+  "builds?hackathon=stellar-hacks-zk": {
+   "class": "full",
+   "status": 200,
+   "chars": 17219,
+   "sha256": "bedaae9ef65b6e091fa1d73d9718e4d84e083416eb809dc031a9e94324c690d0"
+  },
+  "analyze?hackathon=stellar-agents-x402-stripe-mpp&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2502,
+   "sha256": "ec3ab2b7721c4fb1f8690188b44c48d26dde8d13307a6f06a4668a706a1ba6b9"
+  },
+  "analyze?hackathon=stellar-agents-x402-stripe-mpp&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2663,
+   "sha256": "4a4a6064a3dc0b0904ded09b2f9c0d6d27d4a7e1899bb71221ca33e5642c401a"
+  },
+  "builds?hackathon=stellar-agents-x402-stripe-mpp": {
+   "class": "full",
+   "status": 200,
+   "chars": 17410,
+   "sha256": "76b88f691a02d0a0d7b4b7e33ebd60faed0b4f4ca2beba9a0047fe0807724c57"
+  },
+  "analyze?hackathon=stellar-hacks-zk-gaming&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2092,
+   "sha256": "d3613620bcbe154460da82aaa62e48ef67f3d18a6ebe4c84283bb3b77fd6c7d8"
+  },
+  "analyze?hackathon=stellar-hacks-zk-gaming&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2684,
+   "sha256": "71b670e1ce4a7a5cb12c28d021f07fab0a0fbbe4ec21c4774679b7e32007f550"
+  },
+  "builds?hackathon=stellar-hacks-zk-gaming": {
+   "class": "full",
+   "status": 200,
+   "chars": 16939,
+   "sha256": "fdc9c06feee867c6325436feb99dcf881097468eb8a9a94fdad125719cb27da6"
+  },
+  "analyze?hackathon=build-on-stellar&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2930,
+   "sha256": "b6e84a01cb1cfa792e9f305fcd7edc879e02e2cc359bdc47bddd31fe8f90b7d3"
+  },
+  "analyze?hackathon=build-on-stellar&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 3190,
+   "sha256": "06ac98d9a8c0785c33301ab1304526801c1f01504e0915aaca1fa55925f59497"
+  },
+  "builds?hackathon=build-on-stellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 14964,
+   "sha256": "c463b39f5473153749910cf60878cdb02973521450bd0a6690c498acbd37b0dd"
+  },
+  "analyze?hackathon=telluscoop-ideaton&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2670,
+   "sha256": "2d34769a4902bc98fb064b71b1055b61153e8d4d7c2fcb2f053e5f0d9e0c7871"
+  },
+  "analyze?hackathon=telluscoop-ideaton&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2444,
+   "sha256": "a65123717a11d4e358481db9591534c21a139fbbd8b60580c8810381c1e1eb13"
+  },
+  "builds?hackathon=telluscoop-ideaton": {
+   "class": "full",
+   "status": 200,
+   "chars": 15083,
+   "sha256": "e5cbb7f42e2fb434a48d5b50953b9592ab4e2cf41e5e1257133edde36ecb6bf9"
+  },
+  "analyze?hackathon=ideaton2026&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 3117,
+   "sha256": "c5a84cbe7e45216f36762a392da4f9eb77b59389ac0f256e4e677a79f9092a2c"
+  },
+  "analyze?hackathon=ideaton2026&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2571,
+   "sha256": "462af20b3133684bf4a1ce8a83a6195c36a2c4622e18da3ef21fe8c0c7c94bfe"
+  },
+  "builds?hackathon=ideaton2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 15928,
+   "sha256": "7e2d065d3d3678d4e5acdc4c0c4decc1065e0963c24cff61e20453d1b60f59f8"
+  },
+  "analyze?hackathon=stellar-pulso-hackathon&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2568,
+   "sha256": "f067e6b5b8c479d261739886341701e0f8cb3194fd14ea8a6206f1c4459235ef"
+  },
+  "analyze?hackathon=stellar-pulso-hackathon&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2911,
+   "sha256": "0aeae4f5c014d8a72e43ded49661e7bd1455d1960a6675b585d631941ebc8c45"
+  },
+  "builds?hackathon=stellar-pulso-hackathon": {
+   "class": "full",
+   "status": 200,
+   "chars": 17363,
+   "sha256": "dc76060f2096d4f823f5cf3ebe9646e34f563dced7deb71384589ec004d56b13"
+  },
+  "analyze?hackathon=scaffoldstellar&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 3108,
+   "sha256": "667dbd230732100dfadafe066206b0a08ce3a61562eb87354b502e2757c7b670"
+  },
+  "analyze?hackathon=scaffoldstellar&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2730,
+   "sha256": "b3466babf53c2c7648001d9b9fdd8d3a0c5003b140e9b4d251868038c92b72b4"
+  },
+  "builds?hackathon=scaffoldstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 16998,
+   "sha256": "01c52fedcba4feaca5de536172a7457da3e286390674e9f378b291b6eae337ed"
+  },
+  "analyze?hackathon=codigoraiz2025&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2465,
+   "sha256": "11a75407646b7a331e8928e6a9245c0776ebb0fb9391de5831189d6daf746649"
+  },
+  "analyze?hackathon=codigoraiz2025&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 3084,
+   "sha256": "286923fd53abc4873f6c2813c796457ddf59a73333b76bea076a1c67eee58504"
+  },
+  "builds?hackathon=codigoraiz2025": {
+   "class": "full",
+   "status": 200,
+   "chars": 16026,
+   "sha256": "9132e31b11b76c691371b71faaa84c742603d526dbcc336c007f781b83fff11f"
+  },
+  "analyze?hackathon=stellar-hacks-kale-reflector&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2592,
+   "sha256": "23d8224a32b8a75b17298115fa4e077d0e4dfd6de5fb853f501938e956ff7eca"
+  },
+  "analyze?hackathon=stellar-hacks-kale-reflector&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2727,
+   "sha256": "a806059ff68b334f6ce991e8187d9a130aeb3721938af73edd7ac52c97965fd4"
+  },
+  "builds?hackathon=stellar-hacks-kale-reflector": {
+   "class": "full",
+   "status": 200,
+   "chars": 16736,
+   "sha256": "08d68a151244f72fb96ba7c7d641650ba4eca18fafce9780f85ac15a550fa8a0"
+  },
+  "analyze?hackathon=stellarhack&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2251,
+   "sha256": "dfed8a6c7427bf196bb3222eac897f4081a0a76731358253f1d249e8a150ed47"
+  },
+  "analyze?hackathon=stellarhack&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2560,
+   "sha256": "13d8034ddbc20e861188da12774348d3e5d9b917ffd477bd690352b6d27480e5"
+  },
+  "builds?hackathon=stellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 16102,
+   "sha256": "b1da78743dacb442ef7ae37179a31844b719b845f7f87db4b6e640a120d2d0b4"
+  },
+  "analyze?hackathon=buildonstellarchile&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 3026,
+   "sha256": "da7b4d5ebd8928b7565eb683415fd49ac78238e29f44577c41b712561df65c7e"
+  },
+  "analyze?hackathon=buildonstellarchile&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2408,
+   "sha256": "716a59097bf9f159022ba293b87b06e0ca0b3a9a2a759bc87879d2d14f9c862b"
+  },
+  "builds?hackathon=buildonstellarchile": {
+   "class": "full",
+   "status": 200,
+   "chars": 15891,
+   "sha256": "7841aff6b38f7426eaecbb41f1c9d651b6d94018908b8e251d75a1d25e504d52"
+  },
+  "analyze?hackathon=stellar-hacks-blend&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2609,
+   "sha256": "3298d78970ce61a580247dfc1e3948f922c8e14def4c815497c349fd13193a96"
+  },
+  "analyze?hackathon=stellar-hacks-blend&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2545,
+   "sha256": "84633181f2875a624cf2e6d919825b5fd97df9469c61b773ce26fb5bfd7c51dc"
+  },
+  "builds?hackathon=stellar-hacks-blend": {
+   "class": "full",
+   "status": 200,
+   "chars": 15170,
+   "sha256": "4c10d4c461c406d3a5a2c8dae3b5066435d4806f7a6b49cac554f45ad8933216"
+  },
+  "analyze?hackathon=alebrije2026&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2212,
+   "sha256": "6b0ccb178e382f27f83271769c60f70e3ebd4856d484a1fc3d3f7cc183ad07ef"
+  },
+  "analyze?hackathon=alebrije2026&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2469,
+   "sha256": "883e0574630eff99474718b3192e1a91e4e9f5fcd11880cfe5aee64eb69cd053"
+  },
+  "builds?hackathon=alebrije2026": {
+   "class": "full",
+   "status": 200,
+   "chars": 16688,
+   "sha256": "0030f80f2437cc6c6d0d045c1a13dd990ffe7259ac2920787185ea4b3186cd57"
+  },
+  "analyze?hackathon=stellar-hacks-paltalabs&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2430,
+   "sha256": "56f2ac16eaddb377c543b6c7083f45246054037f83e9332c8b2c074e9dec85b7"
+  },
+  "analyze?hackathon=stellar-hacks-paltalabs&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2245,
+   "sha256": "7571e3eca6a3655391b4c048f23e724c34eab3c46158d6d96b64467f015ac527"
+  },
+  "builds?hackathon=stellar-hacks-paltalabs": {
+   "class": "full",
+   "status": 200,
+   "chars": 15262,
+   "sha256": "ee92e678e6945b1a8be2e560f9254df9f7f3cb85a9a4e56480d09f1c369f8c5d"
+  },
+  "analyze?hackathon=stellar-latam&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2207,
+   "sha256": "4e96d482ef6987d00f23ef2530a5b7485b680900e1874c3f29102d44e6cbbbdb"
+  },
+  "analyze?hackathon=stellar-latam&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 2945,
+   "sha256": "acbd63099049a2cdd38765d7c8c8ba376915b58131092f486279223f6ab4aa4c"
+  },
+  "builds?hackathon=stellar-latam": {
+   "class": "full",
+   "status": 200,
+   "chars": 16389,
+   "sha256": "9ea875b94e75cf45e0ef01f274b5c832d5c4e0a22b30527dd4e371d894ffb4d2"
+  },
+  "analyze?hackathon=ideatontelluscoop&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2509,
+   "sha256": "c68d30576b4803b8657d4834c84ba2c8f962d502527cc8e8b855407f9147bf64"
+  },
+  "analyze?hackathon=ideatontelluscoop&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 1900,
+   "sha256": "f36acb28d12c4b0e5896c9d39fb3a749eb0b962c4172bd0cd13954f1c9b478b9"
+  },
+  "builds?hackathon=ideatontelluscoop": {
+   "class": "full",
+   "status": 200,
+   "chars": 16584,
+   "sha256": "80c3acf7dd5203e0f0158247672b68ab91676993bf7335caa5c5fcabbcf6ec10"
+  },
+  "analyze?hackathon=buildonstellarhack&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 2571,
+   "sha256": "8b4555e8c1f48287f62d6993f6cf4622ebd861001e190619e0f06130c1ab8b5d"
+  },
+  "analyze?hackathon=buildonstellarhack&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 1626,
+   "sha256": "93ded77480a6a27b664c44a6bb85ff30fbe8c24519ea28f527569d3c6dfd0400"
+  },
+  "builds?hackathon=buildonstellarhack": {
+   "class": "full",
+   "status": 200,
+   "chars": 15057,
+   "sha256": "b987303a568cdfc74c3012ebb86b2ca3e8d92ec9d8a9d301179216acd5c25bca"
+  },
+  "analyze?hackathon=hackmeridian-2025&facet=category": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1613,
+   "sha256": "27d95131a6337df79e49b4ee57443b45fb8c2eb2dc0b5c110ce07188dad0b8ed"
+  },
+  "analyze?hackathon=hackmeridian-2025&facet=library&by=track": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1521,
+   "sha256": "d1ce37027f494ed7a5898f77784b7975f7a2b5bb1256f159629cb8b2349b290e"
+  },
+  "builds?hackathon=hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3424,
+   "sha256": "f74caa5ea99de346dc60f52debb589f57cc7fc49b52d6d25e64f21836bd9d77e"
+  },
+  "analyze?hackathon=give-hackathon-argentina&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 1842,
+   "sha256": "22eab245dedee10ad13d07181e25d8a782cf61fae9778778de63d169b413cbd3"
+  },
+  "analyze?hackathon=give-hackathon-argentina&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 1910,
+   "sha256": "c45efa36bbe561597344479df6d03e090c6632e9b49a9fe26b7c112e3a86a49b"
+  },
+  "builds?hackathon=give-hackathon-argentina": {
+   "class": "full",
+   "status": 200,
+   "chars": 5153,
+   "sha256": "7f1a97b5c727f89651f8038803d884521725803d8d3840d2a0ebbb458e2a010f"
+  },
+  "analyze?hackathon=mqcstellar&facet=category": {
+   "class": "full",
+   "status": 200,
+   "chars": 1705,
+   "sha256": "76b53f50c7de60592cb5ccc53ec3729863280a529e66fbfdfc5772cdf4211bab"
+  },
+  "analyze?hackathon=mqcstellar&facet=library&by=track": {
+   "class": "full",
+   "status": 200,
+   "chars": 1518,
+   "sha256": "764ea61aab79515077f7e093883eb3398aef047ed65a676c9777740e8458175f"
+  },
+  "builds?hackathon=mqcstellar": {
+   "class": "full",
+   "status": 200,
+   "chars": 4803,
+   "sha256": "ca932b4119289a83bfa1435ef0df12367eae3f9b6467549ae27fda29a2289000"
+  },
+  "analyze?hackathon=build-on-stellar-philippines-2026&facet=category": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1629,
+   "sha256": "4296e9921428fcc191ef25777e9689821ffdc12a2280f84098b028722267b896"
+  },
+  "analyze?hackathon=build-on-stellar-philippines-2026&facet=library&by=track": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1374,
+   "sha256": "31ac6bb76a75d5e5a84fa6c9903f9f4f8991149b632248e68d367bf77b624c5f"
+  },
+  "builds?hackathon=build-on-stellar-philippines-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 3727,
+   "sha256": "8199f644dd1d0c2cdcabdd53f5e10d2c8a22ac966ac90c51ebbc2b919a4a2cf0"
+  },
+  "analyze?hackathon=apac-stellar-hackathon-2026&facet=category": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1623,
+   "sha256": "0c03bb68c68e8bdc43d76339036499813908bdac3479d64ed9189ab9326d8a09"
+  },
+  "analyze?hackathon=apac-stellar-hackathon-2026&facet=library&by=track": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1465,
+   "sha256": "89b09b9a6bbb27d277251c397dce91f1df88bffbf4cc524b2b255aa8ddf58e8e"
+  },
+  "builds?hackathon=apac-stellar-hackathon-2026": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1495,
+   "sha256": "00672928f2ad6ed582265654217376c589877738b12ed04dddc4c80026350aab"
+  },
+  "analyze?facet=event&top=30": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 4531,
+   "sha256": "02a4b2b295f11728ad9bcc8815afdc7dd3ea1ae144c3798817821e667b857ff0"
+  },
+  "analyze?facet=category&by=event": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 11812,
+   "sha256": "92472262db367619d9862ff5a43518d6337de3823d6b28afb740c740f9ccc60e"
+  },
+  "analyze?facet=placement": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1243,
+   "sha256": "07473d4b633aa2f6ce85c0f96f7e37da98bcb27b349ce6d434e0e69b1efbfb70"
+  },
+  "analyze?winnersOnly=1&facet=package": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1908,
+   "sha256": "80498a308d299b0290c8d3b2575ecdbf5beee4674caa656e02c9a1c94c28285d"
+  },
+  "analyze?facet=event&value=hackmeridian-2025": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1366,
+   "sha256": "1545e4c69797f4ad4f81da626fa2a5067d05a37168e0da6e07061b1d3987159f"
+  },
+  "analyze?facet=track&value=Open%20Innovation": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1353,
+   "sha256": "acbba80803b9e4fecd550bb27ebe79c89ce5fd1fef4037a63e0987d3dc00ba77"
+  },
+  "analyze?facet=event&value=stellar-hacks-zk": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1371,
+   "sha256": "5ef6a0ac042d99e77783594918d6b091c4cb494267418a1f567a5a0e42cc9021"
+  },
+  "analyze?track=open%20innovation&facet=placement": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1178,
+   "sha256": "fd57a040365a8f35165ffe0e81d3155c39e7233ef20d4c036dbff49ad1d8dd50"
+  },
+  "analyze?track=composability&facet=placement": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 1246,
+   "sha256": "a96ae4d6c99060ef89a94bb8c6906747f12e5205247b6dff62927fa2101c52cb"
+  },
+  "analyze?hackathon=stellar-hacks-zk,hackmeridian-2025&facet=category": {
+   "class": "names-winners-only",
+   "status": 200,
+   "chars": 2957,
+   "sha256": "5c95406345bbc12c6edeb0dfe5411043af5e8f83c658beb31b2a575ec06b3bc6"
+  }
+ }
+}

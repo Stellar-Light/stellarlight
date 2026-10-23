@@ -33,21 +33,11 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    spec passes every gate in it, and Raven's accepted snapshot moves past
    1.9.61.
 
-2. **HackMeridian 2025 winners are not served, while the 1.9.83 changelog
-   says they are.**
-   Probe: `/api/hackathons/hackmeridian-2025` has `winners.length == 0`;
-   `/api/hackathons/builds/curated-hackmeridian-2025-lance` answers 404.
-   State: the curated-builds lane's dry run on 2026-10-20 planned 6 creates,
-   0 updates, 0 hides; the execute has not run.
-   Done when: the execute ran, every row was read back, and both probes flip.
-
-3. **Served fields the spec still does not declare.**
+2. **Served fields the spec still does not declare.**
    Probe: `/api/stablecoins` rows serve `paymentsCount24h` while the 1.9.90
    spec never mentions it (2026-10-22). Found with one live request per GET
-   operation on 2026-10-22: getQualityReport (14 fields); compareHackathons
-   `deltas.prizePoolUSD`, `prizePerWinnerUSD`, `hackersCount`,
-   `submissionCount`; getSkill `skill.argumentHint`, `rawUrl`, `registry`,
-   `userInvocable`; searchProjects and searchRepos
+   operation on 2026-10-22: getQualityReport (14 fields); getSkill
+   `skill.argumentHint`, `rawUrl`, `registry`, `userInvocable`; searchProjects and searchRepos
    `codeVerified.ciPresent` and `codeVerified.testsPresent`; getHackathons
    `meta.counts.curated` and `meta.counts.dorahacks`; getChanges
    `meta.generatedAt`; getPartners `meta.counts.filteredOut`; listAudits
@@ -55,11 +45,12 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    `stablecoins[].paymentsCount24h`.
    State: the four operations named on 2026-10-20 are declared (#1850), and
    `scripts/contract/served-shape.ts` lists any undeclared field, null or
-   enum value in a body.
+   enum value in a body. compareHackathons' deltas are declared by the
+   winners-only coverage round.
    Done when: every operation's served fields and nulls are declared and a
    test walks each operation's body with served-shape.
 
-4. **Five confirmed build-to-project links are missing.**
+3. **Five confirmed build-to-project links are missing.**
    Probe: `/api/hackathons/review?link=https://github.com/hoops-finance/cometswap`
    says no project lists the repo, while searchProjects lists
    `Hoops-Finance/cometswap` among the hoops project's repos.
@@ -77,7 +68,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    the link lane reads (a spec enum entry for the basis), the lane re-ran
    (dry run, then execute), and the five links are live.
 
-5. **Events with announced winners show 0 winners.**
+4. **Events with announced winners show 0 winners.**
    Probe: `/api/hackathons/build-on-stellar-philippines-2026` has
    `stats.winners == 0`, while bitpinas.com (2026-06-08) names five winners
    with their places.
@@ -99,7 +90,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    then the curated-builds lane run), a partial event says it is partial,
    and the 9 say winners were not announced upstream instead of a bare 0.
 
-6. **Secret scanning covers new commits only.**
+5. **Secret scanning covers new commits only.**
    Probe: `gh api repos/Stellar-Light/stellarlight --jq
    .security_and_analysis.secret_scanning_push_protection.status` answers
    `disabled`, and `grep -l -i gitleaks .githooks/*` prints nothing (the
@@ -117,7 +108,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    changes (either flips the probe); CI scans only after the push, when
    the commit is already public.
 
-7. **Repos deleted on GitHub are still served.**
+6. **Repos deleted on GitHub are still served.**
    Found: the gone-repos probe (`improvements/audits/gone-repos-latest.json`,
    `tally`, the same counts on 2026-10-20 and 2026-10-22) counts 56 newly
    gone repos still served and 2 that came back. The ledger calls a high
@@ -131,7 +122,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    Done when: the execute ran (dry run read first) and its read-back
    passed.
 
-8. **"Recent mainnet upgrade" leads with an upgrade not yet on mainnet.**
+7. **"Recent mainnet upgrade" leads with an upgrade not yet on mainnet.**
    Probe: in `/api/research?q=recent mainnet upgrade&limit=5`, no row
    names Protocol 26 to 29 or Zipper. Rows 1 and 2 are "Introducing Bell,
    Protocol 30 on Stellar" and the Bell upgrade guide (published
@@ -152,7 +143,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    below it, and the golden case accepts Protocol 30 once its mainnet vote
    passes.
 
-9. **vetIdea lists prior-art builds that share only words, admitted by the
+8. **vetIdea lists prior-art builds that share only words, admitted by the
    meaning score.**
    Probe: `/api/vet-idea?q=tokenized real estate with fractional ownership`
    lists QR Mint (`dorahacks-buidl-14609`, similarity 0.727, no matched
@@ -189,7 +180,7 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
    labeled set, and QR Mint and Stellar Automations Studio are no longer
    listed for those two ideas.
 
-10. **vetIdea and hackathonBrief list builds admitted on two matched words
+9. **vetIdea and hackathonBrief list builds admitted on two matched words
     that have no meaning score (not close in meaning, or not embedded yet).**
     Probe: `/api/vet-idea?q=marketplace for renting out tools and equipment
     with deposits held in escrow contracts` lists LumenSure
@@ -215,6 +206,31 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
     fewer builds graded 0 on it with no build graded 2 removed there or
     lost on any earlier labeled set (the short ideas included), measured as
     in that directory.
+
+10. **Events whose stored rows are their winners only serve the winners as
+    their whole field.**
+    Probe: `/api/hackathons/compare?slugs=hackmeridian-2025,hackmeridian-2026`
+    serves hackmeridian-2025 `submissionCount` 6, its `winnerCount`, and no
+    `coverage` (live 1.9.99, 2026-10-23 15:38Z); `/api/hackathons/hackmeridian-2025`
+    serves `stats.totalSubmissions` 6 and tracks of 3 and 3, where its
+    record says 110+ submissions.
+    Found by the benchmark check "2025 submission count is null or >= 100"
+    (null on 1.9.94, 6 after the curated import stored the winners of three
+    events off DoraHacks).
+    The same class, found in the round: compare serves
+    apac-stellar-hackathon-2026 `prizePerWinnerUSD` 60,000 (its pool over
+    the 1 winner it publishes); `/api/hackathons/analyze?facet=placement`
+    counts 80 winners of 1,383, 12 of them curated winners whose field is
+    not stored; `/api/hackathons/hackmeridian-2026` serves `tracks: []` and
+    `prizeTiers: []` beside two categories and two tracks its record states.
+    State: all three fixed on branch `lane/v-winners-only-coverage` (spec
+    1.9.101), not pushed. Replay and sweep:
+    `improvements/audits/2026-10-23-winners-only-coverage/`.
+    Done when: merged and deployed, and live, re-checked by someone other
+    than the author: the probe serves `submissionCount` null with
+    `coverage: "winners-only"`; APAC `prizePerWinnerUSD` null with a note;
+    `facet=placement` 68 winners of 1,371 with the left-out line;
+    hackmeridian-2026 its four declared tracks and `prizeTiers` null.
 
 ## Next
 
@@ -249,8 +265,6 @@ unless noted.
   `profile.project` says 12 became directory projects.
 - Winners-only search is not in placement order; its rows carry no
   `placementRank`.
-- HackMeridian 2026 tracks, categories, venue, deadline hour and judging live
-  only in prose while `tracks` and `prizeTiers` are `[]`.
 - Curated event pages say "live submission feed unavailable".
 - `meta.counts.indexedBuilds` is 1,344 in search and 1,371 in analyze under
   one name; the analyze `q` description says it matches like search while its
@@ -335,7 +349,6 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
 
 ## Owner decisions (safe default in brackets)
 
-- Run the curated-builds execute [run].
 - Run the gone-repos execute before 2026-10-27 10:59 UTC [run].
 - Turn on GitHub secret scanning and push protection; repository settings
   only the owner can change [on].

@@ -11,6 +11,7 @@
  * otherwise.
  */
 
+import { TRACK_KINDS } from "../data/curated-hackathons";
 import {
 	RWA_KINDS,
 	RWA_PRODUCT_KINDS,
@@ -21,6 +22,7 @@ import { CODE_DOMAINS } from "./code-domains";
 import { PROJECT_COMPACT, REPO_COMPACT, VIEW_VALUES } from "./compact-view";
 import {
 	AFTER_EVENT_VALUES,
+	COVERAGE_VALUES,
 	FACET_IDS,
 	GROUP_FACETS,
 	SHIFT_FACETS,
@@ -480,7 +482,7 @@ const FACET_VALUE_SCHEMA = {
 			type: "number",
 			nullable: true,
 			description:
-				"builds / known (0 to 1); null when no build's value is known.",
+				"builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them.",
 		},
 	},
 };
@@ -500,14 +502,86 @@ const FACET_COUNT_PROPS = {
 	values: { type: "array", items: FACET_VALUE_SCHEMA },
 };
 
+/** `coverage` on an event, its profile and analyze's per-event groups. No
+ * null in the enum: the field is absent, never null, on a full listing. */
+const EVENT_COVERAGE_SCHEMA = {
+	type: "string",
+	enum: [...COVERAGE_VALUES],
+	description:
+		"Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.",
+};
+
+/** compareHackathons' deltas for one field: the events with its highest and
+ * lowest value, over the rows that serve a number (a null is left out). */
+const COMPARE_SPREAD_SCHEMA = {
+	type: "object",
+	description:
+		"Present when at least two events serve a number for the field: which serves the highest and which the lowest. An event whose value is null (unknown or withheld) is left out.",
+	properties: {
+		highest: { type: "string", description: "Slug." },
+		lowest: { type: "string", description: "Slug." },
+	},
+};
+
+/** One of getHackathon's `tracks`, derived from the event's rows. */
+const HACKATHON_TRACK_SCHEMA = {
+	type: "object",
+	additionalProperties: true,
+	properties: {
+		name: { type: "string" },
+		kind: {
+			type: "string",
+			enum: [...TRACK_KINDS],
+			description:
+				"Present only on a track the event's record declares (an event with no submission roster): category, a division every entry picks; track, a theme an entry can target.",
+		},
+		description: {
+			type: "string",
+			description:
+				"Present only on a declared track: one line, in the words of the event's record.",
+		},
+		submissionCount: {
+			type: "integer",
+			nullable: true,
+			description:
+				"Submissions in the track. null when the event's coverage is winners-only (only its winners are on record, so the track's field is unknown, never its winner count) and on a declared track (no roster held: not known).",
+		},
+		winnerCount: {
+			type: "integer",
+			nullable: true,
+			description:
+				"Winners in the track. null on a declared track: no roster held, not known.",
+		},
+		totalPrizeUSD: {
+			type: "number",
+			description: "Directory rows only: the prize money its winners took.",
+		},
+	},
+};
+
+/** getHackathon's `tracks`, at hackathon.tracks and the top level. */
+const HACKATHON_TRACKS_SCHEMA = {
+	type: "array",
+	nullable: true,
+	description:
+		"The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which.",
+	items: HACKATHON_TRACK_SCHEMA,
+};
+
 /** One event's stored submissions profiled by the analytics engine:
  * compareHackathons' and getHackathon's `profile`. */
 const EVENT_PROFILE_SCHEMA = {
 	type: "object",
 	description:
-		"What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions.",
+		"What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, not the event's field, and every share in it is null.",
 	properties: {
-		submissions: { type: "integer" },
+		coverage: EVENT_COVERAGE_SCHEMA,
+		submissions: {
+			type: "integer",
+			nullable: true,
+			description:
+				"Stored submissions profiled. null when coverage is winners-only: only the winners are on record, so the size of the field is unknown.",
+		},
 		winners: { type: "integer" },
 		category: { type: "object", properties: FACET_COUNT_PROPS },
 		library: { type: "object", properties: FACET_COUNT_PROPS },
@@ -3570,7 +3644,7 @@ export const spec: OpenAPISpec = {
 											items: {
 												type: "object",
 												description:
-													"Every row carries prizePoolUSD, hackersCount, submissionCount and winnerCount; null means no source gave the value (could not check), never zero.",
+													"Every row carries prizePoolUSD, hackersCount, submissionCount and winnerCount; null means no source gave the value (could not check), never zero, or for submissionCount on a winners-only event (coverage) that only its winners are on record.",
 												properties: {
 													slug: { type: "string" },
 													name: { type: "string" },
@@ -3599,15 +3673,21 @@ export const spec: OpenAPISpec = {
 														type: "integer",
 														nullable: true,
 														description:
-															"Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event.",
+															"Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event. Also null on a winners-only event (coverage): only its winners are stored, so the size of its field is unknown, never the winner count.",
 													},
 													winnerCount: {
 														type: "integer",
 														nullable: true,
 														description:
-															"Winners, on the same basis as submissionCount. null when neither is held: could not check, never zero.",
+															"Winners, on the same basis as submissionCount; on a winners-only event, its stored winners. null when neither is held: could not check, never zero.",
 													},
-													prizePerWinnerUSD: { type: "number", nullable: true },
+													coverage: EVENT_COVERAGE_SCHEMA,
+													prizePerWinnerUSD: {
+														type: "number",
+														nullable: true,
+														description:
+															"prizePoolUSD / winnerCount, rounded. Absent when either is missing or zero. null when the winners on record are incomplete rows: only the winners are stored (coverage winners-only) or they are published only in part (getHackathon stats.winnersNote); notes says which. Never computed over incomplete rows.",
+													},
 													stillActiveCount: {
 														type: "integer",
 														nullable: true,
@@ -3615,8 +3695,19 @@ export const spec: OpenAPISpec = {
 															"Curated events only: the event's directory projects still active today.",
 													},
 													liveCount: { type: "integer", nullable: true },
-													activeRatePct: { type: "number", nullable: true },
+													activeRatePct: {
+														type: "number",
+														nullable: true,
+														description:
+															"Curated events only: stillActiveCount / submissionCount as a percent. null over incomplete rows, as prizePerWinnerUSD; notes says why.",
+													},
 													profile: EVENT_PROFILE_SCHEMA,
+													notes: {
+														type: "array",
+														items: { type: "string" },
+														description:
+															"Present only when a ratio on this row is withheld (null): one line per ratio saying why.",
+													},
 												},
 											},
 										},
@@ -3624,16 +3715,33 @@ export const spec: OpenAPISpec = {
 											type: "object",
 											description: "What differs across the compared events.",
 											properties: {
+												prizePoolUSD: {
+													...COMPARE_SPREAD_SCHEMA,
+													properties: {
+														...COMPARE_SPREAD_SCHEMA.properties,
+														rangeUSD: { type: "number" },
+													},
+												},
+												submissionCount: {
+													...COMPARE_SPREAD_SCHEMA,
+													properties: {
+														...COMPARE_SPREAD_SCHEMA.properties,
+														range: { type: "integer" },
+													},
+												},
+												prizePerWinnerUSD: COMPARE_SPREAD_SCHEMA,
+												hackersCount: COMPARE_SPREAD_SCHEMA,
+												activeRatePct: COMPARE_SPREAD_SCHEMA,
 												notes: {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Plain-language differences, plus every gap: an event whose counts are unavailable, and any read that failed (a failed read is never served as an absent event or a zero).",
+														"Plain-language differences, plus every gap: an event whose counts are unavailable, a winners-only event whose submission count is unknown, and any read that failed (a failed read is never served as an absent event or a zero).",
 												},
 												facetShifts: {
 													type: "array",
 													description:
-														"Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set.",
+														"Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set. A winners-only event (coverage) is left out: its winners' mix is not its field's.",
 													items: {
 														type: "object",
 														properties: {
@@ -3785,7 +3893,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Present only when something limited this answer: search by meaning could not run, the reranker could not run or was skipped ('the reranker could not run this request ...' or 'the reranker was skipped because search by meaning took longer than 3 s ...'; rows are then in hybrid order), a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other. An event named in q adds one line, first: 'q holds the event name ...' when it became the filter (meta.inferredFilter), with the opt-out; 'q holds '<words>', the start of the names of <n> events (<slugs>) ...' or 'q names <n> events (<slugs>) ...' when nothing was inferred and q was searched as text; 'q names the event ... which hackathon= does not select ...' when an explicit hackathon filter won. When the rest of q matched none of an inferred event's stored submissions, none of them holds a description and no other filter (track, package, category, winnersOnly) narrowed the search, a line says so ('<rest>' matched no stored submission of <slug>: its <n> stored submissions hold no description to search; hackathon=<slug> alone lists them): that 0 says the rows hold nothing to search, not that nothing of the kind was built.",
+														"Present only when something limited this answer: search by meaning could not run, the reranker could not run or was skipped ('the reranker could not run this request ...' or 'the reranker was skipped because search by meaning took longer than 3 s ...'; rows are then in hybrid order), a hackathon value names an event whose submissions are not stored ('no submissions are stored for <slug>'), the event listing could not be read to check a hackathon value ('could not check hackathon ...'), or a word searched in q occurs as a whole word in no submission ('<n> of the <m> words searched in q (<words>) occur as a whole word in no submission in the index ...'; when every word does, 'the word searched in q ...' or 'none of the <m> words searched in q ...'). Either hackathon line means 0 matched from that event is not evidence that nothing was built. A hackathon value naming an event whose stored rows are its winners only adds 'only the winners of <slug> are stored ...': its rows are its winners, not its field. The q line says what the rows are: a build listed by its words (matchedTerms) matches only q's other words, or holds the named words only inside longer words when every word is absent; a build with similarity is close to q as a whole, not to the named words. It names related forms some submission does use ('a related form is used: cash for cashing'). When builds whose name matched q were held back because most of q's words occur in no submission, it says so ('1 build matched by name for donations is not listed, because most of the words searched in q occur in no submission'; a word found only inside a longer word of a name is named as 'inside a longer word for llama'); counts.withheldByName counts them. When nothing is listed it adds 'no build is listed; if one of them is misspelled, correct it', and names a used word ('remittance is a used word one edit from remitance') only when the word has five or more letters and no related form, and the used word is one edit away (a letter added, dropped or changed, or two adjacent letters swapped), starts with the same letter, is not a prefix of the word nor the word of it, and is the only such word or is used at least five times as often as any other. An event named in q adds one line, first: 'q holds the event name ...' when it became the filter (meta.inferredFilter), with the opt-out; 'q holds '<words>', the start of the names of <n> events (<slugs>) ...' or 'q names <n> events (<slugs>) ...' when nothing was inferred and q was searched as text; 'q names the event ... which hackathon= does not select ...' when an explicit hackathon filter won. When the rest of q matched none of an inferred event's stored submissions, none of them holds a description and no other filter (track, package, category, winnersOnly) narrowed the search, a line says so ('<rest>' matched no stored submission of <slug>: its <n> stored submissions hold no description to search; hackathon=<slug> alone lists them): that 0 says the rows hold nothing to search, not that nothing of the kind was built.",
 												},
 												inferredFilter: {
 													type: "object",
@@ -3823,7 +3931,7 @@ export const spec: OpenAPISpec = {
 														entries: {
 															type: "integer",
 															description:
-																"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, except where q matched a declared package, which counts here and not in analyze.",
+																"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows analyze leaves out beside full listings (its meta.warnings names them).",
 														},
 														withheldByName: {
 															type: "integer",
@@ -4173,7 +4281,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built.",
+														"Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. No rate is computed over incomplete rows (an event whose stored rows are its winners only). When the set also holds full listings, those rows are left out of every count and share, and one line names the events and the rows left out ('left out of every count and share: 12 rows of <slug> (6), ...'), so facet=event and by=event do not list those events. A value only left-out rows carry serves its 0 with every share null (in total, in a group holding those rows and in winnersVsOthers), and a line names it (value '<v>': only rows left out above carry it ...). When they are all the set holds (a hackathon value naming only such events, or filters that leave only them), their counts stay, every share is null, and a line names them ('only the winners of <slug> are stored ...').",
 												},
 												source: { type: "string" },
 												upstream: { type: "string" },
@@ -4229,12 +4337,13 @@ export const spec: OpenAPISpec = {
 										},
 										total: {
 											type: "object",
-											description: "The facet over every matched submission.",
+											description:
+												"The facet over every matched submission, less the incomplete rows meta.warnings says were left out.",
 											properties: {
 												field: {
 													type: "integer",
 													description:
-														"Builds passing every filter except q; builds / field is the share that matched q.",
+														"Builds passing every filter except q, less incomplete rows left out (meta.warnings); builds / field is the share that matched q. When only a winners-only event's rows are counted, they are its winners, not its field.",
 												},
 												...FACET_COUNT_PROPS,
 											},
@@ -4255,7 +4364,12 @@ export const spec: OpenAPISpec = {
 													field: {
 														type: "integer",
 														description:
-															"Builds in this group before q: the group's whole field.",
+															"Builds in this group before q: the group's whole field. On a group with coverage winners-only, the event's winners on record, not its field, and every share in the group is null.",
+													},
+													coverage: {
+														...EVENT_COVERAGE_SCHEMA,
+														description:
+															"by=event only, present only when the event's stored rows are its winners alone (winners-only), which happens only when such rows are all the set holds: its counts describe its winners, the size and mix of its field are unknown, and every share in the group is null.",
 													},
 													...FACET_COUNT_PROPS,
 												},
@@ -4264,7 +4378,7 @@ export const spec: OpenAPISpec = {
 										winnersVsOthers: {
 											type: "object",
 											description:
-												"Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement.",
+												"Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement, or when the set is only a winners-only event's rows. Incomplete rows left out of the set (meta.warnings) are not among the winners.",
 											properties: {
 												winnersKnown: { type: "integer" },
 												othersKnown: { type: "integer" },
@@ -4432,7 +4546,7 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													nullable: true,
 													description:
-														"How crowded the submission's top category is across every stored submission. null when it has no confident category or is not categorized yet; categoryNote says which.",
+														"How crowded the submission's top category is across every stored submission of events whose full listing is stored: a winners-only event's winners are left out, so no share mixes them in. null when it has no confident category or is not categorized yet; categoryNote says which.",
 													properties: {
 														type: { type: "string", enum: [...PROJECT_TYPES] },
 														submissions: { type: "integer" },
@@ -11158,8 +11272,19 @@ export const spec: OpenAPISpec = {
 							rules: {
 								type: "object",
 								description:
-									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section).",
+									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn; the other keys are absent, not known.",
 								properties: {
+									source: {
+										type: "string",
+										description:
+											"Curated events only: the page the judging sentence was checked against.",
+									},
+									checkedOn: {
+										type: "string",
+										format: "date",
+										description:
+											"Curated events only: the day that page was checked.",
+									},
 									repoRequired: { type: "boolean" },
 									videoRequired: { type: "boolean" },
 									submissionQuestions: {
@@ -11182,12 +11307,40 @@ export const spec: OpenAPISpec = {
 								},
 							},
 							profile: EVENT_PROFILE_SCHEMA,
+							coverage: EVENT_COVERAGE_SCHEMA,
+							tracks: HACKATHON_TRACKS_SCHEMA,
+							prizeTiers: {
+								type: "array",
+								nullable: true,
+								description:
+									"The per-place split parsed from the event page. [] = the organizer's page itemizes no prize by place. null = an event off DoraHacks whose record, a summary, itemizes none, so whether the organizer did is not known; notes says so.",
+								items: {
+									type: "object",
+									properties: {
+										place: { type: "string" },
+										rank: { type: "integer", nullable: true },
+										amountUSD: { type: "number", nullable: true },
+										asset: { type: "string", nullable: true },
+									},
+								},
+							},
+							notes: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"Present only when tracks or prizeTiers is null: why each one is not known.",
+							},
 							stats: {
 								type: "object",
 								description:
-									"Counts for the event. totalSubmissions counts the submissions served here (null = no submission list).",
+									"Counts for the event. totalSubmissions counts the submissions served here (null = no submission list, or only the winners are on record).",
 								properties: {
-									totalSubmissions: { type: "integer", nullable: true },
+									totalSubmissions: {
+										type: "integer",
+										nullable: true,
+										description:
+											"The submissions served here. null when no submission list is held, and when coverage is winners-only: only the winners are on record, so the size of the field is unknown, never the winner count.",
+									},
 									totalPrizeUSD: {
 										type: "number",
 										nullable: true,
@@ -11224,7 +11377,7 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										nullable: true,
 										description:
-											"Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept.",
+											"Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. When coverage is winners-only: that only the winners are on record, so the size and mix of the field are unknown and the counts of it are null.",
 									},
 									winners: {
 										type: "integer",
@@ -11234,7 +11387,7 @@ export const spec: OpenAPISpec = {
 										type: "object",
 										nullable: true,
 										description:
-											"Submissions by status after the event, summing to totalSubmissions; null when no submission list is held. Only submissions that are directory projects carry a status; DoraHacks submissions are not classified, so on a DoraHacks event built, inProgress and abandoned are 0 and unknown counts every submission. `profile` says what they became.",
+											"Submissions by status after the event, summing to totalSubmissions; null when no submission list is held, or only the winners are (coverage winners-only). Only submissions that are directory projects carry a status; DoraHacks submissions are not classified, so on a DoraHacks event built, inProgress and abandoned are 0 and unknown counts every submission. `profile` says what they became.",
 										properties: {
 											built: { type: "integer" },
 											inProgress: { type: "integer" },
@@ -11299,7 +11452,8 @@ export const spec: OpenAPISpec = {
 								},
 								source: {
 									type: "string",
-									description: "'dorahacks' for live rows.",
+									description:
+										"'dorahacks' for a DoraHacks submission; 'curated' for a winner stored from a curated record (a curated-{event}-{name} id, an event off DoraHacks). The submissions rows carry the same. Absent on curated roster and directory rows.",
 								},
 								security: BUILD_HOLD_SCHEMA,
 								project: BUILD_PROJECT_SCHEMA,
@@ -11358,10 +11512,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						items: { type: "object", additionalProperties: true },
 					},
-					tracks: {
-						type: "array",
-						items: { type: "object", additionalProperties: true },
-					},
+					tracks: HACKATHON_TRACKS_SCHEMA,
 				},
 			},
 			Repo: {

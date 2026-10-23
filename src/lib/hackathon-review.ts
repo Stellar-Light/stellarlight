@@ -12,7 +12,11 @@
  *     the builder decides what matters for their pitch.
  */
 import type { Payload } from "payload";
-import { distribution, KEPT_BUILDING_DAYS } from "@/lib/hackathon-analytics";
+import {
+	distribution,
+	incompleteEvents,
+	KEPT_BUILDING_DAYS,
+} from "@/lib/hackathon-analytics";
 import {
 	parseBuildId,
 	type REVIEW_CHECK_IDS,
@@ -305,7 +309,11 @@ export async function buildHackathonReview(
 	// Each similar submission as its best entry, as getHackathonSubmission shows it.
 	const byId = new Map(onePerSubmission(index).map((b) => [b.id, b]));
 	const top = submission.categories?.[0]?.type;
-	const cat = top ? distribution(index, "category", { value: top }) : null;
+	// No share over incomplete rows (incompleteRows): a winners-only event's
+	// winners are left out of the share across every stored submission.
+	const incomplete = incompleteEvents(index);
+	const full = index.filter((b) => !incomplete.has(b.hackathon.slug));
+	const cat = top ? distribution(full, "category", { value: top }) : null;
 	return {
 		link,
 		resolvedBy: subject.resolvedBy,

@@ -30,7 +30,30 @@ const ts = (iso: string) => {
 /** The rows' timestamp helper, exported so a test can check it records. */
 export { ts as curatedTimestamp };
 
-export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
+/** What a declared track is: category, a division every entry picks; track,
+ * a theme an entry can target. The spec spreads this list. */
+export const TRACK_KINDS = ["category", "track"] as const;
+
+/** A track or category an event's description states. */
+export interface CuratedTrack {
+	name: string;
+	kind: (typeof TRACK_KINDS)[number];
+	/** One line, in the description's own words. */
+	description: string;
+}
+
+/** A curated row, plus what its description states that getHackathon
+ * serves as data. A test holds every declared track and judging sentence to
+ * the row's own description: no new claim. */
+export interface CuratedHackathon extends DoraHacksHackathon {
+	/** Absent: the description names no track, so tracks are not known. */
+	tracks?: CuratedTrack[];
+	/** The judging sentence copied verbatim from the description, the page
+	 * it was checked against and the day. */
+	judging?: { text: string; source: string; checkedOn: string };
+}
+
+export const CURATED_HACKATHONS: CuratedHackathon[] = [
 	{
 		id: -1001,
 		title: "HackMeridian 2026",
@@ -55,6 +78,35 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		field: "IRL,Meridian",
 		ecosystem: "Stellar",
 		organization: { id: 3096, name: "Stellar Development Foundation" },
+		// As the description states them, from hackmeridian.com (2026-10-20).
+		tracks: [
+			{
+				name: "Genesis",
+				kind: "category",
+				description: "Takes a new idea or early prototype to a working MVP.",
+			},
+			{
+				name: "Scale",
+				kind: "category",
+				description:
+					"Moves an existing product or advanced prototype toward production.",
+			},
+			{
+				name: "Stellar Unlocked",
+				kind: "track",
+				description: "New uses of Stellar's core protocol features.",
+			},
+			{
+				name: "Stellar Composed",
+				kind: "track",
+				description: "Two or more ecosystem tools or projects combined.",
+			},
+		],
+		judging: {
+			text: "Judging is an async review of the demo video, pitch deck, GitHub repo and submission answers: Genesis on problem clarity, MVP quality, Stellar integration and continued development potential; Scale on milestones against goals set at pre-event intake, SCF eligibility, production readiness and ecosystem impact.",
+			source: "https://hackmeridian.com",
+			checkedOn: "2026-10-20",
+		},
 		external_url: "https://meridian.stellar.org/hackmeridian",
 		image_url:
 			"https://cdn.sanity.io/images/e2r40yh6/production-i18n/4771a62228f9c6e297d71d2a006fa401416257d8-1200x630.jpg",
@@ -77,6 +129,19 @@ export const CURATED_HACKATHONS: DoraHacksHackathon[] = [
 		field: "Online,Payments,Stablecoins,AI",
 		ecosystem: "Stellar",
 		organization: { id: -20, name: "Rise In" },
+		tracks: [
+			{
+				name: "Builder track",
+				kind: "track",
+				description: "Belt progression.",
+			},
+			{
+				name: "Startup track",
+				kind: "track",
+				description:
+					"Payments, stablecoins, RWAs, cross-border, wallets, AI + blockchain, anchors.",
+			},
+		],
 		external_url:
 			"https://www.risein.com/programs/stellar-journey-to-mastery-monthly-builder-challenges",
 		image_url:

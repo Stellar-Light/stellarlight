@@ -7,6 +7,10 @@ import {
 	RERANK_TIMEOUT_MS,
 	rerankBuilds,
 } from "@/lib/build-rerank";
+import {
+	winnersOnlyEvents,
+	winnersOnlyWarning,
+} from "@/lib/hackathon-analytics";
 import { semanticBuildScores } from "@/lib/hackathon-build-semantic";
 import {
 	BUILD_SEARCH_MODES,
@@ -241,6 +245,13 @@ export async function parseBuildFilters(
 				`could not check hackathon '${v}': the event listing could not be read; 0 matched from it is not evidence that nothing was built`,
 		),
 	];
+	// A winners-only event's stored rows are its winners, never its field.
+	const onlyWinners = winnersOnlyEvents(indexed);
+	const named = [...slugs].flatMap((s): Array<[string, number]> => {
+		const n = onlyWinners.get(s);
+		return n ? [[s, n]] : [];
+	});
+	if (named.length) warnings.push(winnersOnlyWarning(named));
 	const opt = (k: string) => sp.get(k)?.trim().toLowerCase() || undefined;
 	return {
 		filters: {

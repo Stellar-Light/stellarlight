@@ -1,0 +1,64 @@
+benchmark (c): hackmeridian-2025 submissionCount = null
+checked analyze (mixed set) left-out line names the events: 9
+checked analyze (mixed set) no winners-only event in any value, group or lift: 9
+checked analyze (every event) left-out line counts 12 rows: 7
+checked analyze (every event) total.field over full listings only: 7
+checked analyze (value only left-out rows carry) its 0 with share null, and the line: 2
+checked analyze (value only left-out rows carry) winnersVsOthers shares null: 2
+checked analyze (value the full listings carry) a share over the full listings, no value line: 1
+checked analyze (every event) winners 68 of 1,371: 1
+checked analyze (hackathon filter) meta.warnings (winners-only line): 7
+checked analyze (winners-only rows alone) every share null: 7
+checked analyze (winners-only rows alone) no winnersVsOthers: 7
+checked analyze (winners-only rows alone) meta.warnings names them: 7
+checked builds (hackathon filter) meta.warnings (winners-only line): 3
+checked compare full or unstored row: no notes: 72
+checked compare submissionCount: 81
+checked compare winnerCount: 81
+checked compare hackersCount: 81
+checked compare coverage: 81
+checked compare activeRatePct: 81
+checked compare profile.coverage: 81
+checked compare profile.submissions: 81
+checked compare profile.winners: 81
+checked compare profile shares all null: 81
+checked compare deltas.prizePerWinnerUSD: 81
+checked compare deltas.notes (no prize per winner line): 81
+checked compare deltas.submissionCount: 81
+checked compare deltas.notes (no submission count line): 81
+checked compare deltas.notes (winners-only line): 81
+checked compare deltas.notes (not 'none stored'): 81
+checked compare deltas.facetShifts: 81
+checked compare prizePerWinnerUSD null over incomplete winners: 27
+checked compare notes say why prizePerWinnerUSD is null: 27
+checked benchmark (c) 2025 submissionCount null or >= 100: 1
+checked getHackathon hackathon.tracks never []: 7
+checked getHackathon tracks never []: 7
+checked getHackathon prizeTiers never []: 7
+checked getHackathon prizeTiers null with the note: 7
+checked getHackathon hackathon.coverage: 3
+checked getHackathon hackathon.hackersCount: 3
+checked getHackathon stats.totalSubmissions: 3
+checked getHackathon stats.upstreamSubmissions: 3
+checked getHackathon stats.outcomes: 3
+checked getHackathon stats.winners: 3
+checked getHackathon stats.coverageNote: 3
+checked getHackathon profile.coverage: 3
+checked getHackathon profile.submissions: 3
+checked getHackathon profile.winners: 3
+checked getHackathon profile shares all null: 3
+checked getHackathon hackathon.tracks[].submissionCount: 2
+checked getHackathon hackathon.tracks[].winnerCount: 2
+checked getHackathon tracks[].submissionCount: 2
+checked getHackathon tracks[].winnerCount: 2
+checked getHackathon winners[] (listed): 3
+checked getHackathon submissions[] and winners[] source curated: 3
+checked getHackathon meta.note: 3
+checked getHackathon hackathon.tracks null: winners name no track: 1
+checked getHackathon tracks null: winners name no track: 1
+checked getHackathon declared tracks served: 2
+checked getHackathon declared tracks: kind, description, counts null: 2
+checked getHackathon rules: judging from the record, with source and day: 1
+checked getHackathon tracks null with the note: 2
+checked getHackathon no rules without a judging sentence: 3
+PASS: 1582 checks

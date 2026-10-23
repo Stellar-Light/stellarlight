@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CURATED_BUILDS } from "@/data/curated-builds";
 import { CURATED_WINNERS_NOTES } from "@/data/curated-hackathons";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
@@ -27,6 +27,9 @@ const storedEvent = {
 	firstSeenAt: "2026-10-05T18:00:00.000Z",
 	lastSeenAt: "2026-10-05T18:00:00.000Z",
 };
+// The stored DoraHacks page every event reads here; an event off DoraHacks
+// has none in production, so its tests clear this.
+let eventPage: typeof storedEvent | undefined = storedEvent;
 // Winning rows their teams hid on DoraHacks (sls-092); an Error fails the read.
 let hiddenRows:
 	| Array<{ buildId: string; placement: string | null; award?: string }>
@@ -54,7 +57,10 @@ vi.mock("@/lib/payload-client", () => ({
 					return { docs: projectDocs };
 				}
 				return {
-					docs: args.collection === "hackathon-events" ? [storedEvent] : [],
+					docs:
+						args.collection === "hackathon-events" && eventPage
+							? [eventPage]
+							: [],
 				};
 			},
 		),
@@ -663,6 +669,291 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 			roster: undeclared(roster),
 			overlay: undeclared(overlay),
 		}).toEqual({ stored: [], roster: [], overlay: [] });
+	});
+});
+
+// Live 1.9.97: hackmeridian-2025's six curated winners were served as the
+// event's whole field (totalSubmissions 6, tracks 3 and 3) where its record
+// says 110+ submissions.
+describe("an event whose stored rows are its winners only", () => {
+	const curatedEvent = (
+		uname: string,
+		over: Partial<DoraHacksHackathon> = {},
+	) =>
+		({
+			...doraEvent,
+			uname,
+			source: "curated",
+			winner_announced: true,
+			...over,
+		}) as DoraHacksHackathon;
+	const serve = async (slug: string, hackers = 0) => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			curatedEvent(slug, { hackers_count: hackers }),
+		]);
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(
+			await storedCurated(slug),
+		);
+		return getEvent(slug);
+	};
+	beforeEach(() => {
+		hiddenRows = [];
+	});
+
+	it("serves null field counts, keeps the winners and says why", async () => {
+		const body = await serve("hackmeridian-2025", 400);
+		const h = body.hackathon;
+		expect(h.coverage).toBe("winners-only");
+		expect(h.hackersCount).toBe(400);
+		expect(h.stats).toMatchObject({
+			totalSubmissions: null,
+			outcomes: null,
+			winners: 6,
+			winnersNote: null,
+		});
+		expect(h.stats.coverageNote).toBe(
+			"Only this event's winners are on record here (6 rows, with the page that names each win as url); its other submissions are not stored. The size and mix of its field are unknown, so totalSubmissions, each track's submissionCount and outcomes are null, never the winner count, and profile counts the winners only, with every share null.",
+		);
+		expect(h.profile).toMatchObject({
+			coverage: "winners-only",
+			submissions: null,
+			winners: 6,
+		});
+		for (const tracks of [h.tracks, body.tracks])
+			expect(tracks).toEqual([
+				{ name: "Open Innovation", submissionCount: null, winnerCount: 3 },
+				{ name: "Composability", submissionCount: null, winnerCount: 3 },
+			]);
+		// The winners stay listed, ranked within their tracks.
+		expect(body.winners).toHaveLength(6);
+		expect(body.submissions).toHaveLength(6);
+		expect(body.meta.note).toBe(
+			"Event off DoraHacks with only its winners on record (hackathon.coverage winners-only): submissions and winners list them, from Scout's stored copy; stats.coverageNote says what that leaves unknown.",
+		);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	// Review: the page said "Event off DoraHacks" while every submission and
+	// winner row claimed source dorahacks.
+	it("each stored row serves its own source: a curated winner is curated", async () => {
+		const body = await serve("hackmeridian-2025", 400);
+		const sources = (rows: Array<{ source: string }>) =>
+			[...new Set(rows.map((r) => r.source))].sort();
+		expect(sources(body.submissions)).toEqual(["curated"]);
+		expect(sources(body.winners)).toEqual(["curated"]);
+		// A DoraHacks event's stored rows stay dorahacks.
+		const dora = await getEvent();
+		expect(sources(dora.submissions)).toEqual(["dorahacks"]);
+		expect(sources(dora.winners)).toEqual(["dorahacks"]);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("its profile counts the winners and serves no share over them", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			curatedEvent("build-on-stellar-philippines-2026"),
+		]);
+		// Once the categorizer reads the curated write-ups.
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(
+			(await storedCurated("build-on-stellar-philippines-2026")).map((b) => ({
+				...b,
+				categories: [{ type: "Payments", score: 0.8 }],
+			})),
+		);
+		const body = await getEvent("build-on-stellar-philippines-2026");
+		expect(body.hackathon.profile.category).toEqual({
+			builds: 5,
+			known: 5,
+			unknown: 0,
+			values: [{ value: "Payments", builds: 5, winners: 5, share: null }],
+		});
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("one published winner: its track's winner count stays and its dated note stays", async () => {
+		const body = await serve("apac-stellar-hackathon-2026");
+		const s = body.hackathon.stats;
+		expect(s.totalSubmissions).toBeNull();
+		expect(s.winners).toBe(1);
+		expect(s.winnersNote).toBe(
+			CURATED_WINNERS_NOTES["apac-stellar-hackathon-2026"],
+		);
+		expect(s.coverageNote).toMatch(
+			/^Only this event's winners are on record here \(1 row, with the page that names the win as url\)/,
+		);
+		expect(body.hackathon.tracks).toEqual([
+			{
+				name: "Payment & Consumer Application",
+				submissionCount: null,
+				winnerCount: 1,
+			},
+		]);
+	});
+
+	it("a DoraHacks event with stored rows keeps its counts and carries no coverage", async () => {
+		const body = await getEvent();
+		expect("coverage" in body.hackathon).toBe(false);
+		expect("coverage" in body.hackathon.profile).toBe(false);
+		expect(body.hackathon.stats.totalSubmissions).toBe(2);
+		expect(body.hackathon.profile.submissions).toBe(2);
+		expect(body.meta.note).toMatch(/^DoraHacks event\./);
+	});
+});
+
+// Live 1.9.99: hackmeridian-2026 served tracks [] and prizeTiers [], each
+// asserting none, while its record states two categories, two thematic
+// tracks and judging per category.
+describe("tracks and prize tiers that are not known are null, never []", () => {
+	const TIERS_NOTE =
+		"prizeTiers is null: this event's record is a summary kept off DoraHacks, not the organizer's page, and it itemizes no prize by place, so whether the organizer did is not known here.";
+	const NO_ROSTER_NOTE =
+		"tracks is null: no submission roster is held for this event and no record of it declares tracks, so its tracks are not known here, not none.";
+	const serveCurated = async (uname: string, rows: IndexedBuild[] = []) => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			{ ...doraEvent, uname, source: "curated" } as DoraHacksHackathon,
+		]);
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(rows);
+		return getEvent(uname);
+	};
+	beforeEach(() => {
+		hiddenRows = [];
+		// No DoraHacks page behind an event off DoraHacks.
+		eventPage = undefined;
+	});
+	afterEach(() => {
+		eventPage = storedEvent;
+	});
+
+	it("serves the categories and tracks a record declares, with counts not known, and its judging", async () => {
+		const body = await serveCurated("hackmeridian-2026");
+		const declared = [
+			{
+				name: "Genesis",
+				kind: "category",
+				description: "Takes a new idea or early prototype to a working MVP.",
+				submissionCount: null,
+				winnerCount: null,
+			},
+			{
+				name: "Scale",
+				kind: "category",
+				description:
+					"Moves an existing product or advanced prototype toward production.",
+				submissionCount: null,
+				winnerCount: null,
+			},
+			{
+				name: "Stellar Unlocked",
+				kind: "track",
+				description: "New uses of Stellar's core protocol features.",
+				submissionCount: null,
+				winnerCount: null,
+			},
+			{
+				name: "Stellar Composed",
+				kind: "track",
+				description: "Two or more ecosystem tools or projects combined.",
+				submissionCount: null,
+				winnerCount: null,
+			},
+		];
+		expect(body.hackathon.tracks).toEqual(declared);
+		expect(body.tracks).toEqual(declared);
+		expect(body.hackathon.prizeTiers).toBeNull();
+		expect(body.hackathon.notes).toEqual([TIERS_NOTE]);
+		expect(body.hackathon.rules).toEqual({
+			judgingCriteria:
+				"Judging is an async review of the demo video, pitch deck, GitHub repo and submission answers: Genesis on problem clarity, MVP quality, Stellar integration and continued development potential; Scale on milestones against goals set at pre-event intake, SCF eligibility, production readiness and ecosystem impact.",
+			source: "https://hackmeridian.com",
+			checkedOn: "2026-10-20",
+		});
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("a record that declares no tracks serves null tracks, and no rules", async () => {
+		const body = await serveCurated("stellar-builders-camp-jaipur-2026");
+		expect(body.hackathon.tracks).toBeNull();
+		expect(body.tracks).toBeNull();
+		expect(body.hackathon.prizeTiers).toBeNull();
+		expect(body.hackathon.notes).toEqual([NO_ROSTER_NOTE, TIERS_NOTE]);
+		expect("rules" in body.hackathon).toBe(false);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("winners that name no track give no track list", async () => {
+		const body = await serveCurated(
+			"build-on-stellar-philippines-2026",
+			await storedCurated("build-on-stellar-philippines-2026"),
+		);
+		expect(body.hackathon.tracks).toBeNull();
+		expect(body.tracks).toBeNull();
+		expect(body.hackathon.notes).toEqual([
+			"tracks is null: only its winners are stored and none of them names a track, and no record of it declares tracks, so its tracks are not known here, not none.",
+			TIERS_NOTE,
+		]);
+	});
+
+	it("a DoraHacks event with a stored roster keeps its tracks and tiers, with no notes", async () => {
+		eventPage = storedEvent;
+		const body = await getEvent();
+		// Its stored page itemizes 1st place; its submissions name no track.
+		expect(body.hackathon.prizeTiers).toEqual([
+			{ place: "1st Place", rank: 1, amountUSD: 5000, asset: null },
+		]);
+		expect(body.hackathon.tracks).toEqual([]);
+		expect("notes" in body.hackathon).toBe(false);
+	});
+
+	it("a DoraHacks event with no roster read serves null tracks, not none", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
+		live.mockResolvedValueOnce([]);
+		eventPage = storedEvent;
+		const body = await getEvent();
+		expect(body.hackathon.tracks).toBeNull();
+		expect(body.tracks).toBeNull();
+		expect(body.hackathon.notes).toEqual([NO_ROSTER_NOTE]);
 	});
 });
 

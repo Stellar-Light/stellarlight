@@ -13,6 +13,8 @@
  * apart and left out of every share's denominator, so "not read" never reads
  * as "none".
  */
+import { CURATED_WINNERS_NOTES } from "@/data/curated-hackathons";
+import { CURATED_BUILD_ID } from "@/lib/hackathon-build-links";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 
 const DAY = 86_400_000;
@@ -97,21 +99,147 @@ const LIBRARY_SCOPES: Array<[string, string]> = [
 /** The library a declared package belongs to. */
 /** One event's submissions profiled by the engine: what they were about,
  * what they built with, and what became of them. compareHackathons and
- * getHackathon serve this same shape. */
+ * getHackathon serve this same shape. On a winners-only event it says so
+ * and serves no submission count: it describes the winners only. Over
+ * incomplete rows (incompleteRows) it counts and serves no share. */
 export function eventProfile(builds: IndexedBuild[]) {
+	const coverage = eventCoverage(builds);
+	const winnersOnly = coverage === "winners-only";
+	const noShares =
+		!!builds.length && !!incompleteRows(builds[0].hackathon.slug, coverage);
+	const d: typeof distribution = (...args) => {
+		const out = distribution(...args);
+		return noShares ? withoutShares(out) : out;
+	};
 	return {
-		submissions: builds.length,
+		...(winnersOnly ? { coverage: COVERAGE_VALUES[0] } : {}),
+		submissions: winnersOnly ? null : builds.length,
 		winners: builds.filter((b) => b.isWinner).length,
-		category: distribution(builds, "category", { top: 5 }),
-		library: distribution(builds, "library", { top: 5 }),
-		package: distribution(builds, "package", { top: 5 }),
-		activity: distribution(builds, "activity", { top: 4 }),
-		project: distribution(builds, "project"),
-		projectStatus: distribution(builds, "projectStatus", { top: 4 }),
-		scf: distribution(builds, "scf"),
+		category: d(builds, "category", { top: 5 }),
+		library: d(builds, "library", { top: 5 }),
+		package: d(builds, "package", { top: 5 }),
+		activity: d(builds, "activity", { top: 4 }),
+		project: d(builds, "project"),
+		projectStatus: d(builds, "projectStatus", { top: 4 }),
+		scf: d(builds, "scf"),
 	};
 }
 export type EventProfile = ReturnType<typeof eventProfile>;
+
+/** Why no ratio may be computed over an event's stored rows, or null when
+ * one may. The one rule for every ratio served over stored rows (a share, a
+ * winner share, a rate, a prize per winner): its denominator never comes
+ * from incomplete rows. Incomplete: only the winners are stored (coverage
+ * winners-only), or the winners are published only in part or not at all,
+ * which today only a curated event's dated winners note records. */
+export function incompleteRows(
+	slug: string,
+	coverage: ReturnType<typeof eventCoverage> | undefined,
+): string | null {
+	const note = CURATED_WINNERS_NOTES[slug];
+	const why = [
+		...(coverage === "winners-only"
+			? ["only its winners are stored (coverage winners-only)"]
+			: []),
+		// Each note's own kind: a test keeps "Not announced upstream" the
+		// prefix of every note that says so.
+		...(note
+			? [
+					note.startsWith("Not announced upstream")
+						? "its winners are not announced upstream (getHackathon stats.winnersNote)"
+						: "its winners are published only in part (getHackathon stats.winnersNote)",
+				]
+			: []),
+	];
+	return why.length ? why.join(", and ") : null;
+}
+
+/** The events in an index whose rows no rate may count (incompleteRows). */
+export function incompleteEvents(builds: IndexedBuild[]): Set<string> {
+	const winnersOnly = winnersOnlyEvents(builds);
+	return new Set(
+		[...new Set(builds.map((b) => b.hackathon.slug))].filter((slug) =>
+			incompleteRows(slug, winnersOnly.has(slug) ? "winners-only" : "full"),
+		),
+	);
+}
+
+/** The same counts with every share withheld: their rows are incomplete. */
+export function withoutShares<T extends Distribution>(d: T): T {
+	return { ...d, values: d.values.map((v) => ({ ...v, share: null })) } as T;
+}
+
+/** The `coverage` values served. Absent means the stored rows are the
+ * event's listing, so "full" is never served. The spec spreads this list. */
+export const COVERAGE_VALUES = ["winners-only"] as const;
+
+/** What one event's stored rows cover, decided from the rows alone; every
+ * reader of an event's counts asks this. full: the event's listing as the
+ * DoraHacks sync stores it. winners-only: every row is a curated winner
+ * (scripts/import-curated-builds.ts), so only the winners are on record and
+ * the size and mix of the field are unknown. null: none stored.
+ * ponytail: a curated row that is not a winner makes its event full; a
+ * partial curated listing needs its own value (a test keeps every curated
+ * row a winner until then). */
+export function eventCoverage(
+	builds: IndexedBuild[],
+): "full" | (typeof COVERAGE_VALUES)[number] | null {
+	if (!builds.length) return null;
+	return builds.every((b) => b.isWinner && CURATED_BUILD_ID.test(b.id))
+		? "winners-only"
+		: "full";
+}
+
+/** Each winners-only event in the index, in index order, with its winners. */
+export function winnersOnlyEvents(builds: IndexedBuild[]): Map<string, number> {
+	const byEvent = new Map<string, IndexedBuild[]>();
+	for (const b of builds) {
+		const rows = byEvent.get(b.hackathon.slug);
+		if (rows) rows.push(b);
+		else byEvent.set(b.hackathon.slug, [b]);
+	}
+	return new Map(
+		[...byEvent]
+			.filter(([, rows]) => eventCoverage(rows) === "winners-only")
+			.map(([slug, rows]) => [slug, rows.length]),
+	);
+}
+
+/** getHackathon's stats.coverageNote on a winners-only event. */
+export function winnersOnlyNote(winners: number): string {
+	const rows =
+		winners === 1
+			? "1 row, with the page that names the win as url"
+			: `${winners} rows, with the page that names each win as url`;
+	return `Only this event's winners are on record here (${rows}); its other submissions are not stored. The size and mix of its field are unknown, so totalSubmissions, each track's submissionCount and outcomes are null, never the winner count, and profile counts the winners only, with every share null.`;
+}
+
+/** "a (6), b (5) and c (1)" */
+const listEvents = (events: Array<[string, number]>) => {
+	const named = events.map(([slug, n]) => `${slug} (${n})`);
+	return `${named.slice(0, -1).join(", ")} and ${named.at(-1)}`;
+};
+
+/** The meta.warnings line for winners-only events a request names or
+ * leaves alone: their rows are their winners, never their fields. */
+export function winnersOnlyWarning(events: Array<[string, number]>): string {
+	if (events.length === 1) {
+		const [slug, n] = events[0];
+		return `only the winners of ${slug} are stored (${n} ${n === 1 ? "row" : "rows"}, coverage winners-only); its other submissions are not, so its rows are its winners, not its field, whose size and mix are unknown, and no share is computed over them`;
+	}
+	return `only the winners of ${listEvents(events)} are stored (coverage winners-only); their other submissions are not, so their rows are their winners, not their fields, whose size and mix are unknown, and no share is computed over them`;
+}
+
+/** The meta.warnings line for winners-only rows analyze left out of a set
+ * that also holds full listings, with the rows left out per event. */
+export function leftOutWarning(events: Array<[string, number]>): string {
+	if (events.length === 1) {
+		const [slug, n] = events[0];
+		return `left out of every count and share: the ${n} ${n === 1 ? "row" : "rows"} of ${slug}, whose stored rows are its winners only; the rest covers events whose full listing is stored`;
+	}
+	const rows = events.reduce((a, [, n]) => a + n, 0);
+	return `left out of every count and share: ${rows} rows of ${listEvents(events)}, whose stored rows are their winners only; the rest covers events whose full listing is stored`;
+}
 
 /** Each assigned type's measured precision and recall, as the lane stamped
  * them on the builds that carry it. */

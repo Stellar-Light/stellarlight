@@ -192,3 +192,34 @@ describe("a submission with no confident category", () => {
 		expect(typed.review.categoryNote).toBeNull();
 	});
 });
+
+describe("how crowded a category is, across every stored submission", () => {
+	it("leaves out an event whose stored rows are its winners only", async () => {
+		// A curated winner in the same category: its event's other
+		// submissions are not stored, so it must not move the share.
+		index.push(
+			build("curated-hackmeridian-2025-lance", {
+				name: "Lance",
+				isWinner: true,
+				hackathonPlacement: "1st Place",
+				categories: [{ type: "Payments", score: 0.8 }],
+				hackathon: {
+					title: "HackMeridian 2025",
+					slug: "hackmeridian-2025",
+					endedAt: "2025-09-16",
+				},
+			}),
+		);
+		try {
+			const { body } = await get("link=github.com/rajkaria/toll");
+			expect(body.review.categoryContext).toEqual({
+				type: "Payments",
+				submissions: 2,
+				winners: 2,
+				shareOfSubmissions: 0.667,
+			});
+		} finally {
+			index.pop();
+		}
+	});
+});
