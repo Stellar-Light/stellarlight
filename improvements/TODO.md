@@ -453,6 +453,8 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
 
 Found 2026-10-24 with the production GitHub token rejected:
 
+- `/api/projects/<slug>/github` (a slug where the route takes an id) answers 500 with an empty
+  body, not a 404 naming the id it expects (review of the token fallback, 2026-10-24).
 - `/api/projects/<id>/github` serves `stargazerCount: 0`, `openIssues: 0` and `totalStars: 0` beside a
   repo's `error` when GitHub could not be read (freighter, 2026-10-24): a zero is a claim, so a repo
   that could not be read should serve null counts. Probe: the route for freighter while the token is

@@ -375,7 +375,11 @@ const bytes = (b: Uint8Array) =>
 	});
 
 beforeEach(() => resetLiveReadForTests());
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+	vi.unstubAllGlobals();
+	vi.unstubAllEnvs();
+	vi.restoreAllMocks();
+});
 
 describe("readRepoLive", () => {
 	it("reads a public repo: 4 REST calls, the rest from raw files at the commit read", async () => {
