@@ -17,6 +17,14 @@
  *                 against scanned repos with none). Baseline: the keyword gate
  *                 that admits repos from multi-chain orgs (STELLAR_SIGNAL).
  *
+ *   --task sources  How good are the research passages we serve? The golden
+ *                 research questions are asked of all 16 sources the way
+ *                 Raven asks (--per passages each). Jev scores every passage
+ *                 in two separate passes: relevance to the question, then
+ *                 substance and currency against today's date. Baselines:
+ *                 the questions' answer patterns and the golden junk rule;
+ *                 calibration: the 12 questions that name their expected doc.
+ *
  *   --eval    (default) score against the labels and list every disagreement
  *             for a human look (a label is dated; the row may have changed).
  *   --review  page: weak-basis Live rows either reader calls not the product.
@@ -33,13 +41,18 @@
  *
  *   pnpm exec tsx scripts/eval/jev-eval.ts [--task page|types|repos] [--review] [--limit N] [--bar 0.9] [--out file.json]
  */
-import { appendFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import {
+	choiceConfidence,
 	type JevAnswer,
 	type JevQuestion,
 	jevEvaluate,
 	jevKey,
 } from "../../src/lib/jev";
+import {
+	QUALITY_QUESTIONS,
+	RELEVANCE_QUESTIONS,
+} from "../../src/lib/jev-research";
 import {
 	classifyPage,
 	JEV_NON_PRODUCT,
@@ -51,12 +64,14 @@ import {
 } from "../../src/lib/page-verdict";
 import { PROJECT_TYPES, TYPE_DEFINITIONS } from "../../src/lib/project-types";
 import { STELLAR_SIGNAL } from "../../src/lib/repo-org-attribution";
+import { RESEARCH_SOURCES } from "../../src/lib/research-sources";
 import {
 	STATUS_FIX,
 	TYPES_ADD,
 	TYPES_SET,
 	WEBSITE_REMOVE,
 } from "../data/curation-maps";
+import { isThin, JUNK_TITLE } from "./research-junk";
 
 const args = process.argv.slice(2);
 const arg = (name: string) => {
@@ -64,8 +79,8 @@ const arg = (name: string) => {
 	return i >= 0 ? args[i + 1] : undefined;
 };
 const TASK = arg("--task") ?? "page";
-if (TASK !== "page" && TASK !== "types" && TASK !== "repos")
-	throw new Error(`--task must be page, types or repos, got ${TASK}`);
+if (!["page", "types", "repos", "sources"].includes(TASK))
+	throw new Error(`--task must be page, types, repos or sources, got ${TASK}`);
 const REVIEW = args.includes("--review");
 const LIMIT = Number(arg("--limit") ?? 0);
 const BAR = Number(arg("--bar") ?? 0.9);
@@ -742,8 +757,257 @@ async function reposTask(key: string | null) {
 		appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
 }
 
+// ── Task: sources ───────────────────────────────────────────────────────────
+
+/** Passages per source per question: the multi-source call Raven makes. */
+const PER_SOURCE = Number(arg("--per") ?? 4);
+const TODAY = new Date().toISOString().slice(0, 10);
+
+interface GoldenQuestion {
+	id: string;
+	mode: string;
+	question: string;
+	expect: {
+		answerRegex?: string[];
+		expectUrlIncludes?: string;
+		top1UrlIncludes?: string;
+	};
+}
+
+interface Passage {
+	qid: string;
+	question: string;
+	rank: number;
+	source: string;
+	title: string;
+	url: string;
+	publishedAt: string | null;
+	docVersionStatus: string | null;
+	text: string;
+	/** Baseline: how many of the question's answer patterns the passage hits. */
+	answerHits: number;
+	patterns: number;
+	/** Baseline: the golden eval's junk rule. */
+	junk: boolean;
+	expected: boolean;
+	answers?: number | null;
+	substance?: number | null;
+	currency?: { choice: string; p: number | null } | null;
+	jevError?: string;
+	inputTokens?: number;
+}
+
+async function researchRows(q: GoldenQuestion): Promise<Passage[]> {
+	const u = `${BASE}/api/research?q=${encodeURIComponent(q.question)}&source=${RESEARCH_SOURCES.join(",")}&perSource=${PER_SOURCE}`;
+	let res = await fetch(u);
+	for (let t = 1; t <= 2 && res.status >= 500; t++) {
+		await new Promise((r) => setTimeout(r, 3000 * t));
+		res = await fetch(u);
+	}
+	if (!res.ok) throw new Error(`research ${q.id}: HTTP ${res.status}`);
+	const rows =
+		((await res.json()) as { results?: Array<Record<string, unknown>> })
+			.results ?? [];
+	const patterns = (q.expect.answerRegex ?? []).map((p) => new RegExp(p, "i"));
+	const want = q.expect.top1UrlIncludes ?? q.expect.expectUrlIncludes ?? null;
+	return rows.map((r, rank) => {
+		const title = String(r.title ?? "");
+		const text = String(r.content ?? "").slice(0, 1500);
+		const url = String(r.url ?? "");
+		return {
+			qid: q.id,
+			question: q.question,
+			rank,
+			source: String(r.source ?? ""),
+			title,
+			url,
+			publishedAt: (r.publishedAt as string | null) ?? null,
+			docVersionStatus: (r.docVersionStatus as string | null) ?? null,
+			text,
+			answerHits: patterns.filter((p) => p.test(`${title} ${text}`)).length,
+			patterns: patterns.length,
+			junk: JUNK_TITLE.test(title.trim()) || isThin(String(r.content ?? "")),
+			expected: !!want && url.includes(want),
+		};
+	});
+}
+
+async function judgePassage(p: Passage, key: string): Promise<Passage> {
+	try {
+		const passage = { source: p.source, title: p.title, text: p.text };
+		const [rel, qual] = await Promise.all([
+			jevEvaluate({ question: p.question, passage }, RELEVANCE_QUESTIONS, {
+				apiKey: key,
+				signal: AbortSignal.timeout(20_000),
+			}),
+			jevEvaluate(
+				{
+					today: TODAY,
+					passage: {
+						...passage,
+						url: p.url,
+						publishedAt: p.publishedAt,
+						versionStatus: p.docVersionStatus,
+					},
+				},
+				QUALITY_QUESTIONS,
+				{ apiKey: key, signal: AbortSignal.timeout(20_000) },
+			),
+		]);
+		const a = rel.answers.answers;
+		const s = qual.answers.substance;
+		const c = qual.answers.currency;
+		return {
+			...p,
+			answers: a.type === "score" ? a.score : null,
+			substance: s.type === "boolean" ? s.probability : null,
+			currency:
+				c.type === "choice"
+					? { choice: c.choice, p: choiceConfidence(c) }
+					: null,
+			inputTokens: (rel.inputTokens ?? 0) + (qual.inputTokens ?? 0),
+		};
+	} catch (e) {
+		return { ...p, jevError: String(e).slice(0, 160) };
+	}
+}
+
+async function sourcesTask(key: string | null) {
+	const lines: string[] = [];
+	const say = (x = "") => {
+		lines.push(x);
+		console.log(x);
+	};
+	const golden = JSON.parse(
+		readFileSync(new URL("./golden-questions.json", import.meta.url), "utf8"),
+	) as { questions: GoldenQuestion[] };
+	let questions = golden.questions.filter((q) => q.mode === "research");
+	if (LIMIT > 0) questions = questions.slice(0, LIMIT);
+	const passages = (await mapLimit(questions, 4, researchRows)).flat();
+	const judged = key
+		? await mapLimit(passages, 8, (p) => judgePassage(p, key))
+		: passages;
+	const answered = judged.filter((p) => !p.jevError && p.answers != null);
+	const tokens = judged.reduce((n, p) => n + (p.inputTokens ?? 0), 0);
+	const pct = (a: number, b: number) =>
+		b ? `${Math.round((100 * a) / b)}%` : "n/a";
+	const confident = (p: number | null | undefined) =>
+		p != null && p >= BAR ? "yes" : p != null && p <= 1 - BAR ? "no" : "?";
+
+	say(`## Jev source scoring (${REVIEW ? "review" : "eval"})`);
+	say();
+	say(
+		`${questions.length} golden research questions, ${PER_SOURCE} per source across ${RESEARCH_SOURCES.length} sources: ${passages.length} served passages.`,
+	);
+	say(
+		key
+			? `Jev: ${answered.length} scored, ${judged.length - answered.length} failed; bar ${BAR}; ${tokens} input tokens, about $${((tokens / 1e6) * USD_PER_M_INPUT).toFixed(4)}.`
+			: "Jev: could not check (AI_GATEWAY_API_KEY is not set). Baseline columns only: answer patterns and the golden junk rule.",
+	);
+	const firstError = judged.find((p) => p.jevError);
+	if (firstError) say(`First Jev error: ${firstError.jevError}`);
+	say();
+
+	if (!REVIEW) {
+		const bySource = new Map<string, Passage[]>();
+		for (const p of judged)
+			bySource.set(p.source, [...(bySource.get(p.source) ?? []), p]);
+		say(
+			key
+				? "| Source | Passages | Hit an answer pattern | Junk rule | Jev answers (0-3) | Jev substantive | Jev outdated or maybe |"
+				: "| Source | Passages | Hit an answer pattern | Junk rule |",
+		);
+		say(
+			key
+				? "| --- | --- | --- | --- | --- | --- | --- |"
+				: "| --- | --- | --- | --- |",
+		);
+		for (const [source, ps] of [...bySource].sort((a, b) =>
+			a[0].localeCompare(b[0]),
+		)) {
+			const base = `| ${source} | ${ps.length} | ${pct(ps.filter((p) => p.patterns && p.answerHits > 0).length, ps.filter((p) => p.patterns).length)} | ${pct(ps.filter((p) => p.junk).length, ps.length)} |`;
+			if (!key) {
+				say(base);
+				continue;
+			}
+			const scored = ps.filter((p) => p.answers != null);
+			const mean = scored.length
+				? (
+						scored.reduce((n, p) => n + (p.answers ?? 0), 0) / scored.length
+					).toFixed(2)
+				: "n/a";
+			const sub = ps.filter((p) => confident(p.substance) !== "?");
+			const cur = ps.filter((p) => p.currency && (p.currency.p ?? 0) >= BAR);
+			const stale = cur.filter(
+				(p) =>
+					p.currency?.choice !== "current" && p.currency?.choice !== "unclear",
+			);
+			say(
+				`${base} ${mean} | ${pct(sub.filter((p) => confident(p.substance) === "yes").length, sub.length)} | ${pct(stale.length, cur.length)} |`,
+			);
+		}
+		if (key) {
+			say();
+			// Calibration: the 12 questions that name the document that should answer.
+			const exp = answered.filter((p) => p.expected);
+			say(
+				`Calibration: ${exp.length} served passages are a question's expected document; Jev scores ${exp.filter((p) => (p.answers ?? 0) >= 2).length} of them as answering (2 or 3).`,
+			);
+			const junkAgree = answered.filter((p) => confident(p.substance) !== "?");
+			say(
+				`Junk: the golden rule and Jev agree on ${junkAgree.filter((p) => p.junk === (confident(p.substance) === "no")).length} of ${junkAgree.length} passages Jev decided.`,
+			);
+			say();
+			say(
+				"Questions where our first passage does not answer but a lower one does:",
+			);
+			const byQ = new Map<string, Passage[]>();
+			for (const p of answered) byQ.set(p.qid, [...(byQ.get(p.qid) ?? []), p]);
+			for (const [qid, ps] of byQ) {
+				const top = ps.find((p) => p.rank === 0);
+				const best = [...ps].sort(
+					(a, b) => (b.answers ?? 0) - (a.answers ?? 0),
+				)[0];
+				if (top && best && (top.answers ?? 0) <= 1 && (best.answers ?? 0) === 3)
+					say(
+						`- ${qid}: first "${top.title.slice(0, 50)}" (${top.source}) scores ${top.answers}; "${best.title.slice(0, 50)}" (${best.source}, rank ${best.rank + 1}) scores 3`,
+					);
+			}
+		}
+	} else {
+		say(
+			key
+				? "Passages Jev reads as not substantive or as outdated, for a human look:"
+				: "Passages the golden junk rule flags:",
+		);
+		const flagged = key
+			? answered.filter(
+					(p) =>
+						confident(p.substance) === "no" ||
+						(p.currency &&
+							(p.currency.p ?? 0) >= BAR &&
+							p.currency.choice === "outdated"),
+				)
+			: judged.filter((p) => p.junk);
+		const seen = new Set<string>();
+		for (const p of flagged) {
+			if (seen.has(p.url)) continue;
+			seen.add(p.url);
+			say(
+				`- ${p.source}: "${p.title.slice(0, 60)}"${p.publishedAt ? ` (${p.publishedAt.slice(0, 10)})` : ""}${key ? ` substance=${confident(p.substance)} currency=${p.currency?.choice ?? "?"}` : ""} ${p.url}`,
+			);
+		}
+		say();
+		say(`${seen.size} distinct documents flagged.`);
+	}
+	if (OUT) writeFileSync(OUT, JSON.stringify(judged, null, 1));
+	if (process.env.GITHUB_STEP_SUMMARY)
+		appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${lines.join("\n")}\n`);
+}
+
 async function main() {
 	const key = jevKey();
+	if (TASK === "sources") return sourcesTask(key);
 	if (TASK === "repos") return reposTask(key);
 	const projects = await loadProjects();
 	if (TASK === "types") return typesTask(projects, key);
