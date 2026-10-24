@@ -3,9 +3,11 @@
  *
  *   pnpm test          (builds first via the test script)
  *
- * Exercises all 13 read methods + validates response shapes have the
- * fields each method's consumers depend on. submit_feedback is excluded
- * (write op) — its transport path is identical to the read methods.
+ * Exercises the read methods + validates response shapes have the
+ * fields each method's consumers depend on. submitFeedback and the partner
+ * POST flows are excluded (write ops); their transport path is identical to
+ * the read methods. Spec coverage itself is enforced by
+ * src/lib/__tests__/api-client-coverage.test.ts at the repo root.
  */
 
 import { ScoutApiError, ScoutClient } from "../dist/index.js";
@@ -116,6 +118,63 @@ await check("analyzeEcosystem", async () => {
 await check("getLeaderboard", async () => {
 	const r = await scout.getLeaderboard();
 	assert(r && typeof r === "object", "no leaderboard body");
+});
+
+await check(
+	"searchHackathonBuilds (widened params) + getHackathonSubmission",
+	async () => {
+		const r = await scout.searchHackathonBuilds({
+			q: "payments",
+			mode: "keyword",
+			winnersOnly: false,
+			limit: 2,
+			offset: 0,
+		});
+		assert(Array.isArray(r.builds) && r.builds.length > 0, "no builds");
+		const id = r.builds[0].id;
+		assert(typeof id === "string", "build missing id");
+		const one = await scout.getHackathonSubmission(id);
+		assert(one.build && one.build.id === id, "submission id mismatch");
+	},
+);
+
+await check("analyzeHackathonSubmissions", async () => {
+	const r = await scout.analyzeHackathonSubmissions({
+		facet: "category",
+		top: 3,
+	});
+	assert(r.meta.facet.id === "category", "facet not echoed");
+	assert(r.total && Array.isArray(r.total.values), "no total.values");
+});
+
+await check("reviewSubmission", async () => {
+	const r = await scout.reviewSubmission({
+		link: "github.com/stellar/soroban-examples",
+	});
+	assert(r.review && Array.isArray(r.review.checks), "no review.checks");
+});
+
+await check("locateSource", async () => {
+	const r = await scout.locateSource({ q: "TokenInterface" });
+	assert(Array.isArray(r.pointers) && r.pointers.length > 0, "no pointers");
+	assert(typeof r.pointers[0].repo === "string", "pointer missing repo");
+});
+
+await check("verifyClaim", async () => {
+	const r = await scout.verifyClaim({ claim: "Is Blend audited?" });
+	assert(typeof r.verdict === "string", "no verdict");
+	assert(Array.isArray(r.evidence), "no evidence array");
+});
+
+await check("getRwaAssets", async () => {
+	const r = await scout.getRwaAssets({ limit: 2 });
+	assert(Array.isArray(r.assets) && r.assets.length > 0, "no assets");
+});
+
+await check("getQualityReport", async () => {
+	const r = await scout.getQualityReport();
+	assert(r.verdict && typeof r.verdict === "object", "no verdict block");
+	assert(Array.isArray(r.knownLimitations), "no knownLimitations");
 });
 
 await check("404 raises ScoutApiError", async () => {

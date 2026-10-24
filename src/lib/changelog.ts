@@ -33,12 +33,41 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-24",
 		surfaces: ["api", "mcp", "skill"],
-		version: "spec@1.9.116",
+		version: "spec@1.9.111",
 		type: "changed",
 		summary:
 			"No em or en dashes remain in served text: the operation and field descriptions, this changelog, the skill and its references, and the MCP tool text now use colons, commas, semicolons and parentheses instead. No meaning changed.",
 		detail:
 			"Every sentence keeps its words; only the punctuation moved (a range such as 1-500 now takes a hyphen). Text quoted verbatim from an upstream README or description is left as it was written. A check in the contract gate (scripts/check-no-dashes.ts) now fails any new dash in served text, so they cannot return. No path, parameter, enum value or response shape changed. Two text formats changed their separator, with their readers: the degraded-read warning in meta.warnings now reads '<prefix>: <op>; results may be incomplete (<class>)', where a dash separated the op from the rest before; and the audit report titles written by the audit ingest read 'Protocol: Auditor', where a dash joined them before, so the next ingest retitles the audit chunks of all 58 reports and re-embeds the first chunk of each.",
+	},
+	{
+		date: "2026-10-24",
+		surfaces: ["api-client"],
+		version: "api-client@1.10.0",
+		type: "added",
+		summary:
+			"The client catches up with the spec: new methods `getHackathonSubmission`, `analyzeHackathonSubmissions`, `reviewSubmission` (with its `hackathon` parameter), `verifyClaim`, `locateSource`, `getRwaAssets` and `getQualityReport`, and `searchHackathonBuilds`, `getPeople` and `getPartners` accept every query parameter the spec declares.",
+		detail:
+			"Version 1.9.1 was cut at spec 1.9.52. Three of the seven operations (`getQualityReport`, `verifyClaim`, `getRwaAssets`) were already served then and never got a method; the other four (`getHackathonSubmission`, `analyzeHackathonSubmissions`, `reviewSubmission`, `locateSource`) shipped after it. Either way a consumer of the package had to hand-roll fetch calls for them. `searchHackathonBuilds` now also takes `mode`, `hackathon`, `category`, `package` and `offset`; `getPeople` takes `limit` and `offset`; `getPartners` now lists the spec's parameters. Additive: every call form 1.9.1 accepted still compiles (`searchHackathonBuilds` keeps a boolean `winnersOnly`, `getPartners` keeps accepting an open record), which a repo test checks against the compiler. A repo test now fails when the spec has an operation without a client method or a query parameter a method's type rejects, so the client cannot fall behind silently again.",
+	},
+	{
+		date: "2026-10-24",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.8.1",
+		type: "added",
+		summary:
+			"scout-mcp 1.8.1: review_submission takes `hackathon` (spec 1.9.109): each of that event's judging criteria with the evidence a judge would find in the repo, read live, also for a GitHub repo Scout never stored. locate_source takes OpenZeppelin/stellar-contracts in `repo` (spec 1.9.106) and says what the API weighs (a repo named in q, a typed stellar-cli command) and that trait implementations are pointers.",
+		detail:
+			"review_submission forwards hackathon only when it is set, so a call without it is unchanged. locate_source's repo values match the API's allowlist again (nine repos); OpenZeppelin/stellar-contracts answers with pointers null and a note until its first index fill. Its q text now says a repo named in q strongly lifts its pointers and a typed stellar-cli command lifts the module that implements it, as the API does since 1.9.106. 28 tools.",
+	},
+	{
+		date: "2026-10-24",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"reviewSubmission's live GitHub read no longer fails when GitHub rejects the server's token. On 1.9.109 every repo evidence item with hackathon=hackmeridian-2026 answered could-not-check, \"GitHub answered 401 for the repo.\", because GitHub answers 401 for the token the server reads with. A rejected token is now left out for 15 minutes and the call is made again without it, which GitHub serves for a public repo at its unauthenticated limit.",
+		detail:
+			"The 401 response is not read as the token's pool: it carries the unauthenticated pool's headers (about 60 calls an hour), which read against the token's floor of 1,500 would have stopped every read until GitHub's reset. Without a token the pool is the server's address, so reads stop only when GitHub reports none left, and the reason says so. After 15 minutes the token is tried again, so a replaced token is used without a deploy. Raw files were always read without a token. Reads through GitHub's GraphQL API, such as a project's GitHub stats, still need a token GitHub accepts.",
 	},
 	{
 		date: "2026-10-23",
