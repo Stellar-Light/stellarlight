@@ -1,0 +1,30 @@
+[31m+ [][39m
+
+ ❯ src/data/__tests__/curated-hackathons.test.ts:172:38
+    170|  it("hold each category's judging criteria to one clause of the judgin…
+    171|   const judged = CURATED_HACKATHONS.filter((h) => h.judging?.criteria);
+    172|   expect(judged.map((h) => h.uname)).toEqual(["hackmeridian-2026"]);
+       |                                      ^
+    173|   for (const h of judged) {
+    174|    const categories = (h.tracks ?? [])
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  src/data/__tests__/curated-hackathons.test.ts > tracks and judging a curated record declares > rejects criteria moved between categories, reordered, cut short or invented
+TypeError: Cannot read properties of undefined (reading 'criteria')
+ ❯ src/data/__tests__/curated-hackathons.test.ts:197:57
+    195|   const text = h?.judging?.text ?? "";
+    196|   const [genesis, scale] = h?.judging?.criteria ?? [];
+    197|   expect(clauseHeld(text, { ...genesis, criteria: scale.criteria })).t…
+       |                                                         ^
+    198|    false,
+    199|   );
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 10 passed (12)
+   Start at  13:45:34
+   Duration  924ms (transform 68ms, setup 20ms, collect 42ms, tests 6ms, environment 465ms, prepare 148ms)
+

@@ -1,0 +1,80 @@
+Review round 1: each new test run against the code before its change.
+
+## The reviewer's ten findings (the round's tests on the code at 83a69cd9)
+
+ ✓ src/data/__tests__/curated-hackathons.test.ts (13 tests) 5ms
+   ✓ each judged criterion maps to evidence or to a reason > covers every criterion of every judged event 1ms
+   × each judged criterion maps to evidence or to a reason > serves HackMeridian 2026's criteria in its record's words, three of them not checkable 9ms
+   ✓ repo evidence never claims a missing thing it did not read > says could-not-check for every item when the repo was not read 1ms
+   × repo evidence never claims a missing thing it did not read > says could-not-check for the items a part that did not answer holds 2ms
+   × repo evidence never claims a missing thing it did not read > reads the README items could-not-check over a listing cut short without it 0ms
+   × repo evidence never claims a missing thing it did not read > reports the website as the website, never as a demo 1ms
+   ✓ repo evidence never claims a missing thing it did not read > does not call a short or partly read tree or README empty 10ms
+   ✓ repo evidence never claims a missing thing it did not read > does not call an unlabelled README link no demo 0ms
+   × repo evidence never claims a missing thing it did not read > states what it found with the values and counts it cites 1ms
+   ✓ repo evidence never claims a missing thing it did not read > never serves a count over a partial read, and says what was not read 0ms
+   × repo evidence never claims a missing thing it did not read > says not-found, scoped to what was read, when a full read holds none 0ms
+   × repo evidence never claims a missing thing it did not read > reads an empty repo as empty, item by item 0ms
+   ✓ SCF eligibility evidence > names the open round, or says none is open, or could not check 0ms
+   ✓ served text > has no em or en dash 0ms
+   ✓ test files in a tree > counts files that follow a test-naming convention, the Soroban and Rust ones included 3ms
+   ✓ test files in a tree > never counts a file that only looks test-named 0ms
+   ✓ CI config, manifests and the README in a tree > reads CI config files at their conventional paths only 1ms
+   ✓ CI config, manifests and the README in a tree > orders manifests shallow first, examples and tests last, and skips vendored ones 2ms
+   ✓ CI config, manifests and the README in a tree > takes the README at the root, Markdown first 1ms
+   ✓ what a README head shows a judge > labels a link a demo from its own words, its cell, or the words before it on its line 13ms
+   ✓ what a README head shows a judge > never lends one link's label to the next link on its line 4ms
+   ✓ what a README head shows a judge > never lends the line above to a link, in a badge row or a wrapped sentence 3ms
+   ✓ the total behind a per_page=1 list > reads the last page, or the rows when there is one page 1ms
+   × readRepoLive > reads a public repo: 4 REST calls, the rest from raw files at the commit read 28ms
+   ✓ readRepoLive > serves a second ask from the cache with no call 25ms
+   ✓ readRepoLive > answers missing for a 404 or a repo that is not public, and reads nothing past its metadata 36ms
+   ✓ readRepoLive > reads an empty repo as empty: no files, no commits 26ms
+   × readRepoLive > lists a part that did not answer as unread, never as empty, with its own reason 8ms
+   × readRepoLive > reads every part at the default branch's newest commit, never a branch named HEAD 6ms
+   × readRepoLive > reads no tree when the newest commit did not answer, and says so 5ms
+   × readRepoLive > gives the tree's own reason when GitHub answers an error for it 5ms
+   × readRepoLive > leaves the README unread, not absent, when the listing was cut short without it 21ms
+   ↓ readRepoLive > reads a raw file only to its byte cap, asking for no compression and cutting the stream
+   × readRepoLive > keeps an npm alias of the Stellar SDK as declared 3ms
+   ✓ readRepoLive > returns at its deadline when GitHub never answers  307ms
+   × readRepoLive > makes no call once the hour's cap is spent 17ms
+   × readRepoLive > holds one caller to its share of the hour, leaving the rest to others 4ms
+   ✓ readRepoLive > makes no call while the token's pool is under the floor 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  9 failed | 14 passed | 1 skipped (24)
+(the byte-cap test, run alone on the old code: worker crash, Error: Channel closed, ERR_IPC_CHANNEL_CLOSED: the endless body is read without a cap)
+
+## Reviewer's set: a workspace reference cited as an SDK version (test before the fix)
+
+   × readRepoLive > cites no SDK version for a workspace, file or git reference, which names none 3ms
+     → workspace:*: expected '@stellar/freighter-api@workspace:*' to be null
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/lib/__tests__/repo-live-read.test.ts > readRepoLive > cites no SDK version for a workspace, file or git reference, which names none
+AssertionError: workspace:*: expected '@stellar/freighter-api@workspace:*' to be null
+"@stellar/freighter-api@workspace:*"
+      Tests  1 failed | 24 passed (25)
+
+## Reviewer's set: the could-not-check demo sentence states its scope (test before the wording)
+
+   × repo evidence never claims a missing thing it did not read > does not call an unlabelled README link no demo 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected 'No link in README.md is labelled as a…' to match /^No link in README\.md outside code h…/
+      Tests  1 failed | 13 passed (14)
+
+## Fifth set: a passing verb or docs words never make a demo label (test before the fix)
+
+   × what a README head shows a judge > never calls a link a demo for a passing verb, or when its words say docs 4ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected [ 'https://portal.example.net/', …(4) ] to deeply equal [ 'https://hosted.example.net', …(1) ]
+      Tests  1 failed | 25 passed (26)
+
+## Sixth set: both demo sentences speak of what Scout reads (tests before the wording)
+
+   × repo evidence never claims a missing thing it did not read > does not call an unlabelled README link no demo 3ms
+   × repo evidence never claims a missing thing it did not read > states what it found with the values and counts it cites 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected 'No link in README.md outside code hos…' to match /^Scout reads no demo or live-app labe…/
+AssertionError: expected 'README.md links 2 page(s) its text la…' to match /^In README\.md, Scout reads 2 link\(s…/
+      Tests  2 failed | 12 passed (14)
+

@@ -1,0 +1,290 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T22:31:17.660Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/repo-17",
+		"stored": false,
+		"repo": {
+			"fullName": "repo-17",
+			"url": "https://github.com/repo-17",
+			"commit": "<redacted>",
+			"readAt": "2026-10-23T22:31:16.651Z",
+			"readMs": 1009,
+			"unread": ["manifests"]
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "71 file(s) follow a test-naming convention, e.g. contracts/passkey-signer/src/tests.rs, contracts/stream-nft/src/test.rs, contracts/streaming-payments/src/client_parity_test.rs and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at the default branch's newest commit.",
+									"values": [
+										"contracts/passkey-signer/src/tests.rs",
+										"contracts/stream-nft/src/test.rs",
+										"contracts/streaming-payments/src/client_parity_test.rs",
+										"contracts/streaming-payments/src/clock_skew_test.rs",
+										"contracts/streaming-payments/src/differential_test.rs",
+										"contracts/streaming-payments/src/error_surface_test.rs",
+										"contracts/streaming-payments/src/governance_test.rs",
+										"contracts/streaming-payments/src/hostile_token_fuzz_test.rs",
+										"contracts/streaming-payments/src/schedule_test.rs",
+										"contracts/streaming-payments/src/sponsor_test.rs"
+									],
+									"count": 71
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "17 CI config file(s): .github/workflows/attestation.yml, .github/workflows/ci.yml, .github/workflows/client-parity-nightly.yml, .github/workflows/fuzz-campaign.yml, .github/workflows/fuzz.yml and 12 more. Whether the jobs run or pass is not read. Read at the default branch's newest commit.",
+									"values": [
+										".github/workflows/attestation.yml",
+										".github/workflows/ci.yml",
+										".github/workflows/client-parity-nightly.yml",
+										".github/workflows/fuzz-campaign.yml",
+										".github/workflows/fuzz.yml",
+										".github/workflows/infra.yml",
+										".github/workflows/key-rotation-drill.yml",
+										".github/workflows/mutation.yml",
+										".github/workflows/nightly-clock-skew.yml",
+										".github/workflows/nightly-fuzz.yml",
+										".github/workflows/oncall-ping.yml",
+										".github/workflows/promote.yml",
+										".github/workflows/rehearsal.yml",
+										".github/workflows/release.yml",
+										".github/workflows/security-triage.yml",
+										".github/workflows/whitepaper-claims.yml",
+										".github/workflows/workflow-integrity.yml"
+									],
+									"count": 17
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "1 GitHub release(s); the latest, v0.3.0, published 2026-10-04.",
+									"values": ["v0.3.0"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at the default branch's newest commit.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "found",
+									"finding": "The repo's website field: https://streampay-org.netlify.app/. Not opened, so what it shows is not checked, nor whether it loads.",
+									"values": ["https://streampay-org.netlify.app/"],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "not-found",
+									"finding": "README.md links nothing outside code hosts, docs, explorers, badges, chats and local addresses. Read at the default branch's newest commit.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "The 12 of 18 manifests read declare 3 Stellar package(s) Scout recognises: @stellar/freighter-api, @stellar/stellar-sdk, soroban-sdk. SDK versions as declared: soroban-sdk 29, @stellar/stellar-sdk@^17.2.1. The 6 not read may declare more: 6 of 18 manifests were not read: 6 beyond the 12 a read takes. Read at the default branch's newest commit.",
+									"values": [
+										"@stellar/freighter-api",
+										"@stellar/stellar-sdk",
+										"soroban-sdk"
+									],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "In the 7 of 8 Cargo.toml files read, 4 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/passkey-signer, contracts/stream-nft, contracts/streaming-payments, contracts/vault; soroban-sdk 29 as declared. The 1 not read may hold more. Whether they build or are deployed is not read here. Read at the default branch's newest commit.",
+									"values": [
+										"contracts/passkey-signer",
+										"contracts/stream-nft",
+										"contracts/streaming-payments",
+										"contracts/vault"
+									],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at the default branch's newest commit.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "443 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-09-13.",
+									"values": ["2026-10-23T22:17:33Z"],
+									"count": 443
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "71 file(s) follow a test-naming convention, e.g. contracts/passkey-signer/src/tests.rs, contracts/stream-nft/src/test.rs, contracts/streaming-payments/src/client_parity_test.rs and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at the default branch's newest commit.",
+									"values": [
+										"contracts/passkey-signer/src/tests.rs",
+										"contracts/stream-nft/src/test.rs",
+										"contracts/streaming-payments/src/client_parity_test.rs",
+										"contracts/streaming-payments/src/clock_skew_test.rs",
+										"contracts/streaming-payments/src/differential_test.rs",
+										"contracts/streaming-payments/src/error_surface_test.rs",
+										"contracts/streaming-payments/src/governance_test.rs",
+										"contracts/streaming-payments/src/hostile_token_fuzz_test.rs",
+										"contracts/streaming-payments/src/schedule_test.rs",
+										"contracts/streaming-payments/src/sponsor_test.rs"
+									],
+									"count": 71
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "17 CI config file(s): .github/workflows/attestation.yml, .github/workflows/ci.yml, .github/workflows/client-parity-nightly.yml, .github/workflows/fuzz-campaign.yml, .github/workflows/fuzz.yml and 12 more. Whether the jobs run or pass is not read. Read at the default branch's newest commit.",
+									"values": [
+										".github/workflows/attestation.yml",
+										".github/workflows/ci.yml",
+										".github/workflows/client-parity-nightly.yml",
+										".github/workflows/fuzz-campaign.yml",
+										".github/workflows/fuzz.yml",
+										".github/workflows/infra.yml",
+										".github/workflows/key-rotation-drill.yml",
+										".github/workflows/mutation.yml",
+										".github/workflows/nightly-clock-skew.yml",
+										".github/workflows/nightly-fuzz.yml",
+										".github/workflows/oncall-ping.yml",
+										".github/workflows/promote.yml",
+										".github/workflows/rehearsal.yml",
+										".github/workflows/release.yml",
+										".github/workflows/security-triage.yml",
+										".github/workflows/whitepaper-claims.yml",
+										".github/workflows/workflow-integrity.yml"
+									],
+									"count": 17
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "1 GitHub release(s); the latest, v0.3.0, published 2026-10-04.",
+									"values": ["v0.3.0"],
+									"count": 1
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "In the 7 of 8 Cargo.toml files read, 4 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/passkey-signer, contracts/stream-nft, contracts/streaming-payments, contracts/vault; soroban-sdk 29 as declared. The 1 not read may hold more. Whether they build or are deployed is not read here. Read at the default branch's newest commit.",
+									"values": [
+										"contracts/passkey-signer",
+										"contracts/stream-nft",
+										"contracts/streaming-payments",
+										"contracts/vault"
+									],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at the default branch's newest commit.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "found",
+									"finding": "The repo's website field: https://streampay-org.netlify.app/. Not opened, so what it shows is not checked, nor whether it loads.",
+									"values": ["https://streampay-org.netlify.app/"],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "not-found",
+									"finding": "README.md links nothing outside code hosts, docs, explorers, badges, chats and local addresses. Read at the default branch's newest commit.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

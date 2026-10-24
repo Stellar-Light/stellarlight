@@ -1,0 +1,240 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T20:35:29.167Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/Pathnomic/stellar-hackathon-starter",
+		"stored": false,
+		"repo": {
+			"fullName": "Pathnomic/stellar-hackathon-starter",
+			"url": "https://github.com/Pathnomic/stellar-hackathon-starter",
+			"readAt": "2026-10-23T20:35:28.365Z",
+			"readMs": 802,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "15 file(s) follow a test-naming convention, e.g. contracts/fundraiser/src/test.rs, tests/data.test.mjs, tests/fixtures/stellar/fake-network.mjs and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read.",
+									"values": [
+										"contracts/fundraiser/src/test.rs",
+										"tests/data.test.mjs",
+										"tests/fixtures/stellar/fake-network.mjs",
+										"tests/fundraiser-page.test.mjs",
+										"tests/i18n.test.mjs",
+										"tests/stellar-deployment.test.mjs",
+										"tests/stellar-freighter-browser.test.mjs",
+										"tests/stellar-freighter.test.mjs",
+										"tests/stellar-friendbot.test.mjs",
+										"tests/stellar-fundraiser.test.mjs"
+									],
+									"count": 15
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "2 CI config file(s): .github/workflows/release.yml, .github/workflows/test.yml. Whether the jobs run or pass is not read.",
+									"values": [
+										".github/workflows/release.yml",
+										".github/workflows/test.yml"
+									],
+									"count": 2
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "1 GitHub release(s); the latest, v1.0.0_contracts_fundraiser_fundraiser_cli27.0.0, published 2026-09-29.",
+									"values": [
+										"v1.0.0_contracts_fundraiser_fundraiser_cli27.0.0"
+									],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "The repo sets no website, and no link in README.md is labelled as a demo or live app; whether one of its 1 other link(s) is a demo is not judged: https://www.freighter.app.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 4 Stellar package(s) Scout recognises: @stellar/freighter-api, @stellar/stellar-sdk, soroban-sdk, stellar-contract-utils. SDK versions as declared: soroban-sdk =26.1.1, @stellar/stellar-sdk@16.3.0.",
+									"values": [
+										"@stellar/freighter-api",
+										"@stellar/stellar-sdk",
+										"soroban-sdk",
+										"stellar-contract-utils"
+									],
+									"count": 4
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/fundraiser; soroban-sdk =26.1.1 as declared. Whether they build or are deployed is not read here.",
+									"values": ["contracts/fundraiser"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "5 commit(s) on main, the last on 2026-10-02; the repo was created on 2026-09-29.",
+									"values": ["2026-10-02T07:23:05Z"],
+									"count": 5
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "15 file(s) follow a test-naming convention, e.g. contracts/fundraiser/src/test.rs, tests/data.test.mjs, tests/fixtures/stellar/fake-network.mjs and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read.",
+									"values": [
+										"contracts/fundraiser/src/test.rs",
+										"tests/data.test.mjs",
+										"tests/fixtures/stellar/fake-network.mjs",
+										"tests/fundraiser-page.test.mjs",
+										"tests/i18n.test.mjs",
+										"tests/stellar-deployment.test.mjs",
+										"tests/stellar-freighter-browser.test.mjs",
+										"tests/stellar-freighter.test.mjs",
+										"tests/stellar-friendbot.test.mjs",
+										"tests/stellar-fundraiser.test.mjs"
+									],
+									"count": 15
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "2 CI config file(s): .github/workflows/release.yml, .github/workflows/test.yml. Whether the jobs run or pass is not read.",
+									"values": [
+										".github/workflows/release.yml",
+										".github/workflows/test.yml"
+									],
+									"count": 2
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "1 GitHub release(s); the latest, v1.0.0_contracts_fundraiser_fundraiser_cli27.0.0, published 2026-09-29.",
+									"values": [
+										"v1.0.0_contracts_fundraiser_fundraiser_cli27.0.0"
+									],
+									"count": 1
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/fundraiser; soroban-sdk =26.1.1 as declared. Whether they build or are deployed is not read here.",
+									"values": ["contracts/fundraiser"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "The repo sets no website, and no link in README.md is labelled as a demo or live app; whether one of its 1 other link(s) is a demo is not judged: https://www.freighter.app.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

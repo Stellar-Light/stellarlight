@@ -153,6 +153,99 @@ describe("tracks and judging a curated record declares", () => {
 		expect(backed(text, { name: "Scale", description: "Stellar" })).toBe(false);
 	});
 
+	/** "<category> on <a>, <b> and <c>", ended by ; or . in the sentence: the
+	 * category and its list in one clause, nothing cut short or added. */
+	const clauseHeld = (
+		text: string,
+		c: { category: string; criteria: string[] },
+	) => {
+		const list =
+			c.criteria.length < 2
+				? c.criteria.join("")
+				: `${c.criteria.slice(0, -1).join(", ")} and ${c.criteria.at(-1)}`;
+		const clause = `${c.category} on ${list}`;
+		return text.includes(`${clause};`) || text.includes(`${clause}.`);
+	};
+
+	/** No entry holds a list separator, so "a, b and c" maps to its entries
+	 * one way only. */
+	const splitsCleanly = (c: { criteria: string[] }) =>
+		c.criteria.every((name) => !/, | and /.test(name));
+
+	it("hold each category's judging criteria to one clause of the judging sentence", () => {
+		const judged = CURATED_HACKATHONS.filter((h) => h.judging?.criteria);
+		expect(judged.map((h) => h.uname)).toEqual(["hackmeridian-2026"]);
+		for (const h of judged) {
+			const categories = (h.tracks ?? [])
+				.filter((t) => t.kind === "category")
+				.map((t) => t.name);
+			for (const c of h.judging?.criteria ?? []) {
+				expect(clauseHeld(h.judging?.text ?? "", c), c.category).toBe(true);
+				// One criterion per entry, so the clause splits one way only.
+				expect(splitsCleanly(c), c.category).toBe(true);
+				// A judged category is one the record declares.
+				expect(categories, c.category).toContain(c.category);
+				for (const name of c.criteria)
+					expect(name).not.toMatch(/[\u2013\u2014]/);
+			}
+		}
+		const h = judged[0];
+		expect(h.judging?.criteria?.map((c) => c.category)).toEqual([
+			"Genesis",
+			"Scale",
+		]);
+	});
+
+	// Review round 1, finding 7: the clause alone accepts criteria merged into
+	// one entry, which only a count pin caught; the rule catches it for any
+	// event.
+	it("rejects criteria merged into one entry, which the clause alone accepts", () => {
+		const h = CURATED_HACKATHONS.find((x) => x.uname === "hackmeridian-2026");
+		const text = h?.judging?.text ?? "";
+		const [genesis] = h?.judging?.criteria ?? [];
+		const merged = {
+			...genesis,
+			criteria: [
+				`${genesis.criteria[0]}, ${genesis.criteria[1]}`,
+				...genesis.criteria.slice(2),
+			],
+		};
+		expect(clauseHeld(text, merged)).toBe(true);
+		expect(splitsCleanly(merged)).toBe(false);
+		const joined = {
+			...genesis,
+			criteria: [
+				...genesis.criteria.slice(0, 2),
+				`${genesis.criteria[2]} and ${genesis.criteria[3]}`,
+			],
+		};
+		expect(splitsCleanly(joined)).toBe(false);
+	});
+
+	it("rejects criteria moved between categories, reordered, cut short or invented", () => {
+		const h = CURATED_HACKATHONS.find((x) => x.uname === "hackmeridian-2026");
+		const text = h?.judging?.text ?? "";
+		const [genesis, scale] = h?.judging?.criteria ?? [];
+		expect(clauseHeld(text, { ...genesis, criteria: scale.criteria })).toBe(
+			false,
+		);
+		expect(
+			clauseHeld(text, {
+				...genesis,
+				criteria: [...genesis.criteria].reverse(),
+			}),
+		).toBe(false);
+		expect(
+			clauseHeld(text, { ...genesis, criteria: [...genesis.criteria, "team"] }),
+		).toBe(false);
+		expect(
+			clauseHeld(text, { ...genesis, criteria: genesis.criteria.slice(0, 3) }),
+		).toBe(false);
+		// The last criterion cut short still sits inside the sentence.
+		const cut = [...genesis.criteria.slice(0, 3), "continued development"];
+		expect(clauseHeld(text, { ...genesis, criteria: cut })).toBe(false);
+	});
+
 	it("names HackMeridian 2026's two categories and two thematic tracks", () => {
 		const h = CURATED_HACKATHONS.find((x) => x.uname === "hackmeridian-2026");
 		expect(h?.tracks?.map((t) => [t.kind, t.name])).toEqual([

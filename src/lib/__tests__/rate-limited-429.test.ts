@@ -33,6 +33,7 @@ const ROUTES: Record<string, "GET" | "POST"> = {
 	contracts: "GET",
 	feedback: "POST",
 	"hackathon-brief": "GET",
+	"hackathons/review": "GET",
 	"idea-submissions": "POST",
 	lifecycle: "GET",
 	"partners/assistant": "POST",
@@ -45,6 +46,12 @@ const ROUTES: Record<string, "GET" | "POST"> = {
 	research: "GET",
 	"scf-pitch": "GET",
 	"vet-idea": "GET",
+};
+
+/** The query a route needs before it checks its window: reviewSubmission
+ * checks one only for a request with hackathon. */
+const QUERY: Record<string, string> = {
+	"hackathons/review": "?link=github.com/team/app&hackathon=hackmeridian-2026",
 };
 
 const API = join(process.cwd(), "src/app/api");
@@ -71,7 +78,7 @@ describe("every 429 states the wait where any consumer keeps it", () => {
 		async (path, method) => {
 			const mod = await import(`@/app/api/${path}/route`);
 			const res: Response = await mod[method](
-				new NextRequest(`https://x.test/api/${path}`, {
+				new NextRequest(`https://x.test/api/${path}${QUERY[path] ?? ""}`, {
 					method,
 					...(method === "POST"
 						? { body: "{}", headers: { "content-type": "application/json" } }

@@ -1,0 +1,233 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T20:48:00.865Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/repo-13",
+		"stored": false,
+		"repo": {
+			"fullName": "repo-13",
+			"url": "https://github.com/repo-13",
+			"readAt": "2026-10-23T20:47:59.942Z",
+			"readMs": 923,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "28 file(s) follow a test-naming convention, e.g. sdk/src/amounts.test.ts, sdk/src/arbitrage.test.ts, sdk/src/arbitrageExecutor.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read.",
+									"values": [
+										"sdk/src/amounts.test.ts",
+										"sdk/src/arbitrage.test.ts",
+										"sdk/src/arbitrageExecutor.test.ts",
+										"sdk/src/bots/autoRebalancer.test.ts",
+										"sdk/src/eventListener.test.ts",
+										"sdk/src/governance.test.ts",
+										"sdk/src/index.test.ts",
+										"sdk/src/pauseEvents.test.ts",
+										"sdk/src/persistence.test.ts",
+										"sdk/src/rebalancer.keeper.test.ts"
+									],
+									"count": 28
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "3 CI config file(s): .github/workflows/ci.yml, .github/workflows/sdk-ci.yml, .github/workflows/ui-ci.yml. Whether the jobs run or pass is not read.",
+									"values": [
+										".github/workflows/ci.yml",
+										".github/workflows/sdk-ci.yml",
+										".github/workflows/ui-ci.yml"
+									],
+									"count": 3
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "not-found",
+									"finding": "The repo sets no website, and README.md links nothing outside code hosts, docs, explorers, badges, chats and local addresses.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 2 Stellar package(s) Scout recognises: soroban-sdk, stellar-sdk. SDK versions as declared: soroban-sdk 22.0.0, stellar-sdk@^12.0.0.",
+									"values": ["soroban-sdk", "stellar-sdk"],
+									"count": 2
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): .; soroban-sdk 22.0.0 as declared. Whether they build or are deployed is not read here.",
+									"values": ["."],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "258 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-03-16.",
+									"values": ["2026-10-23T17:13:28Z"],
+									"count": 258
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "28 file(s) follow a test-naming convention, e.g. sdk/src/amounts.test.ts, sdk/src/arbitrage.test.ts, sdk/src/arbitrageExecutor.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read.",
+									"values": [
+										"sdk/src/amounts.test.ts",
+										"sdk/src/arbitrage.test.ts",
+										"sdk/src/arbitrageExecutor.test.ts",
+										"sdk/src/bots/autoRebalancer.test.ts",
+										"sdk/src/eventListener.test.ts",
+										"sdk/src/governance.test.ts",
+										"sdk/src/index.test.ts",
+										"sdk/src/pauseEvents.test.ts",
+										"sdk/src/persistence.test.ts",
+										"sdk/src/rebalancer.keeper.test.ts"
+									],
+									"count": 28
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "3 CI config file(s): .github/workflows/ci.yml, .github/workflows/sdk-ci.yml, .github/workflows/ui-ci.yml. Whether the jobs run or pass is not read.",
+									"values": [
+										".github/workflows/ci.yml",
+										".github/workflows/sdk-ci.yml",
+										".github/workflows/ui-ci.yml"
+									],
+									"count": 3
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): .; soroban-sdk 22.0.0 as declared. Whether they build or are deployed is not read here.",
+									"values": ["."],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "not-found",
+									"finding": "The repo sets no website, and README.md links nothing outside code hosts, docs, explorers, badges, chats and local addresses.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

@@ -1,0 +1,29 @@
+TTL-Legacy__TTL-Legacy.json stellarPackages:
+   was ('found', ['soroban-sdk', 'stellar-xdr'], 2)
+   now ('found', ['soroban-sdk', 'stellar-xdr'], None)
+   The 12 of 14 manifests read declare 2 Stellar package(s) Scout recognises: soroban-sdk, stellar-xdr. SDK versions as declared: soroban-sdk 21. The 2 not read may declare more.
+repo-09.json demoLinks:
+   was ('found', ['https://ekisler.vercel.app'], 1)
+   now ('found', ['https://ekisler.vercel.app'], None)
+   The repo's website field: https://ekisler.vercel.app. Not opened, so whether they load is not checked.
+repo-11.json demoLinks:
+   was ('found', ['https://stellar-intel.vercel.app', 'https://www.conventionalcommits.org', 'https://stellar-intel.vercel.app/docs'], None)
+   now ('found', ['https://stellar-intel.vercel.app'], None)
+   The repo's website field: https://stellar-intel.vercel.app. Not opened, so whether they load is not checked.
+nirium-protocol__nirium.json demoLinks:
+   was ('found', ['https://nirium.xyz', 'https://nirium.xyz/stats'], None)
+   now ('found', ['https://nirium.xyz'], None)
+   The repo's website field: https://nirium.xyz. Not opened, so whether they load is not checked.
+repo-10.json demoLinks:
+   was ('found', ['https://quilltip.me'], None)
+   now ('found', ['https://quilltip.me', 'https://youtu.be/OqOkbAm9_T8'], None)
+   The repo's website field: https://quilltip.me. README.md links 1 page(s) its text labels as a demo or live app (words such as demo, live, deployed, website): https://youtu.be/OqOkbAm9_T8. Not opened, so whether they load is not checked.
+repo-08.json stellarPackages:
+   was ('found', ['soroban-sdk'], 1)
+   now ('found', ['soroban-sdk'], None)
+   The 12 of 38 manifests read declare 1 Stellar package(s) Scout recognises: soroban-sdk. SDK versions as declared: soroban-sdk 21.7.7. The 26 not read may declare more.
+repo-08.json contractCrates:
+   was ('found', ['contracts/amm-sdk', 'contracts/amm', 'contracts/batch_auction', 'contracts/batch_router', 'contracts/cl_position_nft', 'contracts/concentrated_liquidity', 'contracts/dex_aggregator', 'contracts/factory', 'contracts/governance'], 9)
+   now ('found', ['contracts/amm-sdk', 'contracts/amm', 'contracts/batch_auction', 'contracts/batch_router', 'contracts/cl_position_nft', 'contracts/concentrated_liquidity', 'contracts/dex_aggregator', 'contracts/factory', 'contracts/governance'], None)
+   In the 11 of 27 Cargo.toml files read, 9 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/amm-sdk, contracts/amm, contracts/batch_auction, contracts/batch_router, contracts/cl_position_nft and 4 more; soroban-sdk 21.7.7 as declared. The 16 not read may hold more. 
+same 83 changed 7

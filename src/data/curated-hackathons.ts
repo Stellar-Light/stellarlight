@@ -50,7 +50,15 @@ export interface CuratedHackathon extends DoraHacksHackathon {
 	tracks?: CuratedTrack[];
 	/** The judging sentence copied verbatim from the description, the page
 	 * it was checked against and the day. */
-	judging?: { text: string; source: string; checkedOn: string };
+	judging?: {
+		text: string;
+		source: string;
+		checkedOn: string;
+		/** Each category's criteria in the sentence's own words and order. A
+		 * test holds each to one clause of it: "<category> on <a>, <b> and
+		 * <c>". reviewSubmission's judging block reads these. */
+		criteria?: Array<{ category: string; criteria: string[] }>;
+	};
 }
 
 export const CURATED_HACKATHONS: CuratedHackathon[] = [
@@ -106,6 +114,26 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 			text: "Judging is an async review of the demo video, pitch deck, GitHub repo and submission answers: Genesis on problem clarity, MVP quality, Stellar integration and continued development potential; Scale on milestones against goals set at pre-event intake, SCF eligibility, production readiness and ecosystem impact.",
 			source: "https://hackmeridian.com",
 			checkedOn: "2026-10-20",
+			criteria: [
+				{
+					category: "Genesis",
+					criteria: [
+						"problem clarity",
+						"MVP quality",
+						"Stellar integration",
+						"continued development potential",
+					],
+				},
+				{
+					category: "Scale",
+					criteria: [
+						"milestones against goals set at pre-event intake",
+						"SCF eligibility",
+						"production readiness",
+						"ecosystem impact",
+					],
+				},
+			],
 		},
 		external_url: "https://meridian.stellar.org/hackmeridian",
 		image_url:

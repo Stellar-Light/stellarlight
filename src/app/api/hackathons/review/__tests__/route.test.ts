@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 import { spec } from "@/lib/openapi-spec";
 import {
@@ -20,8 +20,8 @@ const stored = {
 	placement: "5th Place",
 	isWinner: true,
 	url: "https://dorahacks.io/buidl/42585",
-	githubUrl: "https://github.com/rajkaria/toll",
-	repoFullName: "rajkaria/toll",
+	githubUrl: "https://github.com/team/toll",
+	repoFullName: "team/toll",
 	linkCheckedAt: "2026-10-05T00:00:00Z",
 	projectSlug: "tollpay",
 	projectName: "TollPay",
@@ -85,6 +85,22 @@ vi.mock("@/lib/scf-pitch", () => ({
 		angles: [],
 	})),
 }));
+vi.mock("@/lib/scf-rounds", () => ({
+	fetchScfRounds: vi.fn(async () => ({
+		currentRound: 46,
+		currentPhase: "Submission",
+		lastConcludedRound: 44,
+		roundsInProgress: [
+			{ round: 46, phase: "Submission", submissionDeadline: "2026-11-02" },
+		],
+		submissionWindow: { opens: null, closes: "2026-11-02" },
+		fetchedAt: "2026-10-23T12:00:00Z",
+	})),
+}));
+vi.mock("@/lib/held-repos", async (orig) => ({
+	...(await orig<typeof import("@/lib/held-repos")>()),
+	heldRepoNames: vi.fn(async () => new Set(["team/held"])),
+}));
 
 const build = (id: string, over: Partial<IndexedBuild> = {}): IndexedBuild => ({
 	id,
@@ -110,7 +126,7 @@ const build = (id: string, over: Partial<IndexedBuild> = {}): IndexedBuild => ({
 });
 index.push(
 	build("dorahacks-buidl-42585", {
-		githubUrl: "https://github.com/rajkaria/toll",
+		githubUrl: "https://github.com/team/toll",
 		isWinner: true,
 		categories: [{ type: "Payments", score: 0.8 }],
 	}),
@@ -122,7 +138,7 @@ index.push(
 	build("dorahacks-buidl-8", { categories: [{ type: "DEX", score: 0.7 }] }),
 	build("dorahacks-buidl-9", {
 		name: "TollPay again",
-		githubUrl: "https://github.com/rajkaria/toll",
+		githubUrl: "https://github.com/team/toll",
 		hackathon: { title: "Older", slug: "older", endedAt: "2025-01-01" },
 	}),
 );
@@ -137,7 +153,7 @@ const get = async (qs: string) => {
 
 describe("GET /api/hackathons/review", () => {
 	it("reviews a submission from its repo link", async () => {
-		const { status, body } = await get("link=github.com/rajkaria/toll");
+		const { status, body } = await get("link=github.com/team/toll");
 		expect(status).toBe(200);
 		const r = body.review;
 		expect(r.resolvedBy).toBe("repo");
@@ -163,7 +179,7 @@ describe("GET /api/hackathons/review", () => {
 	it("declares every served field and null of the review; the pitch is mocked here", async () => {
 		// review.pitch is the scfPitch report, served as built: the real one
 		// is checked against this schema in scf-pitch.test.ts.
-		const { body } = await get("link=github.com/rajkaria/toll");
+		const { body } = await get("link=github.com/team/toll");
 		expect(
 			undeclaredInServed(
 				spec,
@@ -186,7 +202,7 @@ describe("a submission with no confident category", () => {
 		const s = stored as Record<string, unknown>;
 		try {
 			s.categories = [];
-			const uncertain = (await get("link=github.com/rajkaria/toll")).body;
+			const uncertain = (await get("link=github.com/team/toll")).body;
 			expect(uncertain.review.categoryContext).toBeNull();
 			expect(uncertain.review.categoryNote).toMatch(/uncertain, not missing/);
 			expect(
@@ -199,13 +215,13 @@ describe("a submission with no confident category", () => {
 
 			delete s.categories;
 			s.categoriesAt = null;
-			const unread = (await get("link=github.com/rajkaria/toll")).body;
+			const unread = (await get("link=github.com/team/toll")).body;
 			expect(unread.review.categoryContext).toBeNull();
 			expect(unread.review.categoryNote).toMatch(/not categorized yet/);
 		} finally {
 			Object.assign(stored, saved);
 		}
-		const typed = (await get("link=github.com/rajkaria/toll")).body;
+		const typed = (await get("link=github.com/team/toll")).body;
 		expect(typed.review.categoryNote).toBeNull();
 	});
 });
@@ -228,7 +244,7 @@ describe("how crowded a category is, across every stored submission", () => {
 			}),
 		);
 		try {
-			const { body } = await get("link=github.com/rajkaria/toll");
+			const { body } = await get("link=github.com/team/toll");
 			expect(body.review.categoryContext).toEqual({
 				type: "Payments",
 				submissions: 2,
@@ -238,6 +254,226 @@ describe("how crowded a category is, across every stored submission", () => {
 		} finally {
 			index.pop();
 		}
+	});
+});
+
+// ── hackathon=<slug>: the event's judging criteria against the repo ─────────
+
+const GH_META = (full: string, over: Record<string, unknown> = {}) => ({
+	full_name: full,
+	html_url: `https://github.com/${full}`,
+	private: false,
+	archived: false,
+	default_branch: "main",
+	homepage: null,
+	created_at: "2026-10-01T00:00:00Z",
+	...over,
+});
+const gh = (
+	body: unknown,
+	status = 200,
+	headers: Record<string, string> = {},
+) =>
+	new Response(typeof body === "string" ? body : JSON.stringify(body), {
+		status,
+		headers: { "x-ratelimit-remaining": "4000", ...headers },
+	});
+/** A scripted GitHub: team/app is a small Soroban dapp, team/private is not
+ * public, anything else answers 404. */
+const github = async (input: string) => {
+	const url = String(input);
+	if (url.endsWith("/repos/team/app")) return gh(GH_META("Team/App"));
+	if (url.endsWith("/repos/team/toll")) return gh(GH_META("team/toll"));
+	if (url.endsWith("/repos/team/private"))
+		return gh(GH_META("Team/Private", { private: true }));
+	if (url.includes("/git/trees/c0ffee?recursive=1"))
+		return gh({
+			truncated: false,
+			tree: [
+				{ path: "README.md", type: "blob" },
+				{ path: "package.json", type: "blob" },
+				{ path: "contracts/hello/src/test.rs", type: "blob" },
+			],
+		});
+	if (url.includes("/commits?per_page=1"))
+		return gh([
+			{
+				sha: "c0ffee",
+				commit: { committer: { date: "2026-10-23T09:00:00Z" } },
+			},
+		]);
+	if (url.includes("/releases?per_page=1")) return gh([]);
+	if (url.endsWith("/c0ffee/README.md"))
+		return gh("# App\n- Live demo: https://app.example.net\n");
+	if (url.endsWith("/c0ffee/package.json"))
+		return gh(
+			JSON.stringify({ dependencies: { "@stellar/stellar-sdk": "^14.2.0" } }),
+		);
+	return gh({}, 404);
+};
+
+describe("GET /api/hackathons/review?hackathon=<slug>", () => {
+	beforeEach(async () => {
+		const { resetLiveReadForTests } = await import("@/lib/repo-live-read");
+		resetLiveReadForTests();
+		vi.stubGlobal("fetch", vi.fn(github));
+	});
+	afterEach(() => vi.unstubAllGlobals());
+
+	it("reviews a repo it never stored from the live read, every criterion with evidence or a reason", async () => {
+		const { status, body } = await get(
+			"link=github.com/team/app&hackathon=hackmeridian-2026",
+		);
+		expect(status).toBe(200);
+		const r = body.review;
+		expect(r).toMatchObject({ link: "github.com/team/app", stored: false });
+		expect(r.submission).toBeUndefined();
+		expect(r.repo).toMatchObject({
+			fullName: "Team/App",
+			commit: "c0ffee",
+			unread: [],
+		});
+		expect(r.judging.hackathon.slug).toBe("hackmeridian-2026");
+		const criteria = r.judging.categories.flatMap(
+			(c: { criteria: unknown[] }) => c.criteria,
+		) as Array<{
+			criterion: string;
+			checkable: boolean;
+			reason: string | null;
+			evidence: Array<{
+				id: string;
+				state: string;
+				values: string[] | null;
+			}> | null;
+		}>;
+		expect(criteria).toHaveLength(8);
+		expect(
+			criteria.filter((c) => !c.checkable).map((c) => c.criterion),
+		).toEqual([
+			"problem clarity",
+			"milestones against goals set at pre-event intake",
+			"ecosystem impact",
+		]);
+		for (const c of criteria)
+			c.checkable
+				? expect(c.evidence?.length).toBeGreaterThan(0)
+				: expect([c.evidence, typeof c.reason]).toEqual([null, "string"]);
+		const stellar = criteria.find((c) => c.criterion === "Stellar integration");
+		expect(stellar?.evidence?.[0]).toMatchObject({
+			id: "stellarPackages",
+			state: "found",
+			values: ["@stellar/stellar-sdk"],
+		});
+		const scf = criteria.find((c) => c.criterion === "SCF eligibility");
+		expect(scf?.evidence?.[0]).toMatchObject({
+			id: "scfRound",
+			state: "found",
+			values: ["Round 46: Submission, deadline 2026-11-02"],
+		});
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/review"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("adds the judging block to a stored submission and keeps every stored field", async () => {
+		// Stored facts carry their read time; one clock for both requests.
+		vi.useFakeTimers({
+			toFake: ["Date"],
+			now: new Date("2026-10-23T12:00:00Z"),
+		});
+		const plain = (await get("link=github.com/team/toll")).body;
+		const { status, body } = await get(
+			"link=github.com/team/toll&hackathon=hackmeridian-2026",
+		);
+		vi.useRealTimers();
+		expect(status).toBe(200);
+		const { stored, repo, judging, ...rest } = body.review;
+		expect(stored).toBe(true);
+		expect(rest).toEqual(plain.review);
+		expect(repo.fullName).toBe("team/toll");
+		expect(
+			judging.categories.map((c: { category: string }) => c.category),
+		).toEqual(["Genesis", "Scale"]);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/review"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("serves a stored submission without hackathon exactly as before", async () => {
+		const { body } = await get("link=github.com/team/toll");
+		expect(Object.keys(body)).toEqual(["meta", "review"]);
+		expect(Object.keys(body.review)).toEqual([
+			"link",
+			"resolvedBy",
+			"otherSubmissionsOfRepo",
+			"submission",
+			"checks",
+			"similar",
+			"categoryContext",
+			"categoryNote",
+			"pitch",
+		]);
+		expect(body.meta.note).toBe(
+			"Evidence, not a verdict. Each check is a fact about the submission (ok null = could not be checked, never a no). similar = the stored submissions closest in meaning to it. pitch = the SCF pitch view over its summary: live round, funded peers, competitors, maturity, prior art and the vertical's supply gap.",
+		);
+		// No live read without hackathon.
+		expect(vi.mocked(fetch)).not.toHaveBeenCalled();
+	});
+
+	it("answers 404 for a repo that is missing or not public, and 400 for an event without criteria", async () => {
+		for (const link of ["github.com/team/private", "github.com/team/none"]) {
+			const { status, body } = await get(
+				`link=${link}&hackathon=hackmeridian-2026`,
+			);
+			expect(status).toBe(404);
+			expect(body.error).toMatch(/No public GitHub repo/);
+		}
+		const bad = await get(
+			"link=github.com/team/app&hackathon=stellar-hacks-agents",
+		);
+		expect(bad.status).toBe(400);
+		expect(bad.body.validHackathons).toEqual(["hackmeridian-2026"]);
+		expect((await get("link=github.com/team/app&hackathon=")).status).toBe(400);
+		// Without hackathon an unstored repo is still a 404, now naming the parameter.
+		const plain = await get("link=github.com/team/app");
+		expect(plain.status).toBe(404);
+		expect(plain.body.advisory).toMatch(/hackathon=<slug>/);
+	});
+
+	it("never reads a repo held for malware", async () => {
+		const { status, body } = await get(
+			"link=github.com/team/held&hackathon=hackmeridian-2026",
+		);
+		expect(status).toBe(200);
+		expect(body.review.security.held).toBe(true);
+		// The caller's link is echoed, so the note never says it is withheld.
+		expect(body.review.security.note).toMatch(/Scout does not read it/);
+		expect(body.review.security.note).not.toMatch(/withheld/);
+		expect(body.review.repo).toBeNull();
+		expect(vi.mocked(fetch)).not.toHaveBeenCalled();
+		const states = body.review.judging.categories
+			.flatMap(
+				(c: {
+					criteria: Array<{
+						evidence: Array<{ id: string; state: string }> | null;
+					}>;
+				}) => c.criteria,
+			)
+			.flatMap(
+				(c: { evidence: Array<{ id: string; state: string }> | null }) =>
+					c.evidence ?? [],
+			)
+			.filter((e: { id: string }) => e.id !== "scfRound")
+			.map((e: { state: string }) => e.state);
+		expect(new Set(states)).toEqual(new Set(["could-not-check"]));
 	});
 });
 
@@ -259,7 +495,7 @@ describe("a submission placed in an award its event's other placements share", (
 					award: "10K Prize Pool",
 				},
 			];
-			const { body } = await get("link=github.com/rajkaria/toll");
+			const { body } = await get("link=github.com/team/toll");
 			const sub = body.review.submission;
 			expect([sub.placement, sub.award, sub.awardCategory]).toEqual([
 				"5th Place",

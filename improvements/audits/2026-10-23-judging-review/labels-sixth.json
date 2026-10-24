@@ -1,0 +1,221 @@
+{
+	"note": "Sixth-set labels, the gate for the fifth set's fix (a passing verb or docs words never make a demo label), written before the run on these five. Picked by the fifth set's rule from the first GitHub search read again at 2026-10-23T22:46:49Z (soroban, by update): the first five not yet used, with a description and about Stellar, each answering 404 on live reviewSubmission (22:47:04Z). Source: gh CLI answers 22:47:13Z to 22:48:19Z (dump.py, the tree at the default branch's newest commit), contents-API reads of the manifests a read takes (label_packages.py), README links printed by readme_links.py and read by eye, test and CI counts from label_tests.py. Individuals' repos are named by pseudonym. demoLinks.byEye lists what a reader sees labelled; scoutsRules says which of those Scout's label words read, so a sentence about the rest can be checked.",
+	"labeledAt": "2026-10-23T22:52:10Z",
+	"repos": [
+		{
+			"repo": "MMM-pay/payflow-frontend",
+			"commit": "40edfea5bfc54bd16338898ceeff47baa94e6d4a",
+			"stellarPackages": {
+				"manifests": { "total": 1, "read": 1 },
+				"onList": [
+					"@creit.tech/stellar-wallets-kit",
+					"@stellar/stellar-sdk (^17.2.1)"
+				],
+				"count": 2
+			},
+			"deployableContracts": "not-found: no Cargo.toml in the tree",
+			"testFiles": { "byConvention": 75, "complete": true },
+			"ci": 4,
+			"releases": {
+				"count": 1,
+				"latest": "v0.2.0",
+				"latestAt": "2026-10-09T21:27:02Z"
+			},
+			"lastCommit": {
+				"count": 114,
+				"at": "2026-10-23T22:43:22Z",
+				"branch": "main",
+				"createdAt": "2026-09-02"
+			},
+			"website": "https://mmm-pay.github.io/payflow-frontend/",
+			"demoLinks": {
+				"byEye": [
+					"https://mmm-pay.github.io/payflow-frontend/ (\"**Livedemo:**\", one word)"
+				],
+				"scoutsRules": "none: \"Livedemo\" is not one of its label words, so a sentence must not say the README labels no link as a demo"
+			},
+			"otherReadmeLinks": ["mmm-pay.github.io/payflow-docs/ (labelled Docs)"],
+			"contractIds": [],
+			"readme": { "bytes": 8133, "truncated": false }
+		},
+		{
+			"repo": "nirium-protocol/nirium-core",
+			"commit": "8baac265df17c50b1289827cc1417ef60b638f2d",
+			"stellarPackages": {
+				"manifests": {
+					"total": 13,
+					"read": 12,
+					"left": "packages/sdk/package.json"
+				},
+				"onList": [
+					"@creit.tech/stellar-wallets-kit",
+					"@stellar/freighter-api",
+					"@stellar/mpp",
+					"@stellar/stellar-sdk (^14.5.0 in apps/web)",
+					"@x402/core",
+					"@x402/express",
+					"@x402/fetch",
+					"@x402/stellar",
+					"soroban-sdk (22.0.0)",
+					"stellar-xdr",
+					"python:pyproject.toml (stellar-sdk>=11.0.0)"
+				],
+				"count": "none: a partial read (1 not read)"
+			},
+			"deployableContracts": {
+				"inRead": 3,
+				"cargo": { "total": 5, "read": 5 },
+				"names": [
+					"nirium-soroban-contracts",
+					"nirium-soroban-contracts/protocol",
+					"packages/policy-account"
+				],
+				"count": 3
+			},
+			"testFiles": { "byConvention": 10, "complete": true },
+			"ci": 4,
+			"releases": { "count": 0 },
+			"lastCommit": {
+				"count": 375,
+				"at": "2026-10-23T22:25:43Z",
+				"branch": "main",
+				"createdAt": "2026-02-01"
+			},
+			"website": "https://nirium.xyz",
+			"demoLinks": {
+				"byEye": [
+					"https://nirium.xyz/build (\"Live:\", and the Build Hub row)",
+					"https://nirium.xyz (the Website row)",
+					"https://nirium-agent.fly.dev/api/loop/status (\"Live and open: this is the demonstration\")"
+				],
+				"scoutsRules": "the first two; \"demonstration\" is not one of its label words, so a found sentence must not read as every demo the README names"
+			},
+			"otherReadmeLinks": [
+				"the API hosts on fly.dev (health, nodes, payroll, audit, signals)",
+				"gateway.pinata.cloud",
+				"freighter.app",
+				"apache.org",
+				"stellar.gitbook.io"
+			],
+			"contractIds": [
+				"CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH",
+				"CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU",
+				"CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5",
+				"CCZW2WIFAD7OQX35U5AILTNF32TCHQUYVPNB32GGKEKKPII2HF7B5LML"
+			],
+			"readme": { "bytes": 47380, "truncated": false }
+		},
+		{
+			"repo": "repo-19",
+			"commit": "<redacted>",
+			"stellarPackages": {
+				"manifests": { "total": 11, "read": 11 },
+				"onList": [
+					"@stellar/freighter-api (^6.0.1)",
+					"@stellar/stellar-sdk",
+					"soroban-sdk (22.0.0)",
+					"soroban-token-sdk",
+					"stellar-xdr"
+				],
+				"count": 5
+			},
+			"deployableContracts": {
+				"inRead": 1,
+				"names": [". (the root crate)"],
+				"cargo": { "total": 3, "read": 3 },
+				"count": 1
+			},
+			"testFiles": { "byConvention": 252, "complete": true },
+			"ci": 50,
+			"releases": {
+				"count": 1,
+				"latest": "vesting-backend-0.1.0",
+				"latestAt": "2026-07-29T18:25:04Z"
+			},
+			"lastCommit": {
+				"count": 1133,
+				"at": "2026-10-23T21:40:36Z",
+				"branch": "main",
+				"createdAt": "2026-06-03"
+			},
+			"website": null,
+			"demoLinks": { "byEye": [], "scoutsRules": "none" },
+			"otherReadmeLinks": "none: GitHub, rust-lang.org and developers.stellar.org only",
+			"contractIds": [],
+			"readme": { "bytes": 16933, "truncated": false }
+		},
+		{
+			"repo": "repo-20",
+			"commit": "<redacted>",
+			"stellarPackages": {
+				"manifests": { "total": 3, "read": 3 },
+				"onList": ["@stellar/stellar-sdk (^13.0.0)", "soroban-sdk (22)"],
+				"count": 2
+			},
+			"deployableContracts": {
+				"inRead": 1,
+				"names": ["contracts/split-escrow"],
+				"count": 1
+			},
+			"testFiles": { "byConvention": 0, "complete": true },
+			"ci": 0,
+			"releases": { "count": 0 },
+			"lastCommit": {
+				"count": 1,
+				"at": "2026-10-23T21:44:37Z",
+				"branch": "main",
+				"createdAt": "2026-10-23"
+			},
+			"website": null,
+			"demoLinks": { "byEye": [], "scoutsRules": "none" },
+			"otherReadmeLinks": "none: the README links nothing",
+			"contractIds": [],
+			"readme": { "bytes": 919, "truncated": false }
+		},
+		{
+			"repo": "repo-21",
+			"commit": "<redacted>",
+			"stellarPackages": {
+				"manifests": { "total": 12, "read": 12 },
+				"onList": [
+					"@creit.tech/stellar-wallets-kit",
+					"@stellar/stellar-sdk (^17.2.1)",
+					"soroban-sdk (27.0.5)"
+				],
+				"count": 3
+			},
+			"deployableContracts": {
+				"inRead": 8,
+				"cargo": { "total": 10, "read": 10 },
+				"names": [
+					"contracts/fee-vault",
+					"contracts/rfq",
+					"contracts/router",
+					"contracts/swap-book",
+					"contracts/twap-book",
+					"contracts/adapters/aqua",
+					"contracts/adapters/curve",
+					"contracts/adapters/sushiswap"
+				],
+				"count": 8
+			},
+			"testFiles": { "byConvention": 13, "complete": true },
+			"ci": 1,
+			"releases": { "count": 0 },
+			"lastCommit": {
+				"count": 160,
+				"at": "2026-10-23T21:42:55Z",
+				"branch": "main",
+				"createdAt": "2026-04-18"
+			},
+			"website": "https://ufama.trade",
+			"demoLinks": {
+				"byEye": ["https://ufama.trade (\"**Live at ufama.trade**\")"],
+				"scoutsRules": "none: \"Live at\" is not one of its label forms, so a sentence must not say the README labels no link as live"
+			},
+			"otherReadmeLinks": ["ufama.trade/docs"],
+			"contractIds": [],
+			"readme": { "bytes": 9327, "truncated": false }
+		}
+	]
+}

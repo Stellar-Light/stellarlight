@@ -1,0 +1,284 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T22:14:18.303Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/stellar/soroban-cli",
+		"stored": false,
+		"repo": {
+			"fullName": "stellar/stellar-cli",
+			"url": "https://github.com/stellar/stellar-cli",
+			"commit": "90a3d42d9327ccfaa0d301373766f45beae3e6d9",
+			"readAt": "2026-10-23T22:14:16.460Z",
+			"readMs": 1842,
+			"unread": ["manifests"]
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "108 file(s) follow a test-naming convention, e.g. cmd/crates/soroban-spec-tools/src/test_utils.rs, cmd/crates/soroban-spec-tools/tests/contract_sanitize.rs, cmd/crates/soroban-test/tests/fixtures/bye/src/main.rs and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit 90a3d42.",
+									"values": [
+										"cmd/crates/soroban-spec-tools/src/test_utils.rs",
+										"cmd/crates/soroban-spec-tools/tests/contract_sanitize.rs",
+										"cmd/crates/soroban-test/tests/fixtures/bye/src/main.rs",
+										"cmd/crates/soroban-test/tests/fixtures/eth_abi/src/lib.rs",
+										"cmd/crates/soroban-test/tests/fixtures/eth_abi/src/test.rs",
+										"cmd/crates/soroban-test/tests/fixtures/hello/src/main.rs",
+										"cmd/crates/soroban-test/tests/fixtures/test-wasms/auth/src/lib.rs",
+										"cmd/crates/soroban-test/tests/fixtures/test-wasms/constructor/src/lib.rs",
+										"cmd/crates/soroban-test/tests/fixtures/test-wasms/custom_account/src/lib.rs",
+										"cmd/crates/soroban-test/tests/fixtures/test-wasms/custom_type/src/lib.rs"
+									],
+									"count": 108
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "15 CI config file(s): .github/workflows/action.yml, .github/workflows/binaries.yml, .github/workflows/bindings-ts.yml, .github/workflows/bump-version.yml, .github/workflows/docs.yml and 10 more. Whether the jobs run or pass is not read. Read at commit 90a3d42.",
+									"values": [
+										".github/workflows/action.yml",
+										".github/workflows/binaries.yml",
+										".github/workflows/bindings-ts.yml",
+										".github/workflows/bump-version.yml",
+										".github/workflows/docs.yml",
+										".github/workflows/ledger-emulator.yml",
+										".github/workflows/publish.yml",
+										".github/workflows/rpc-tests.yml",
+										".github/workflows/rust.yml",
+										".github/workflows/socket-basics.yml",
+										".github/workflows/socket-scan.yml",
+										".github/workflows/stale.yml",
+										".github/workflows/test-install.yml",
+										".github/workflows/test-with-openzeppelin-contracts.yml",
+										".github/workflows/test-with-soroban-examples.yml"
+									],
+									"count": 15
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "85 GitHub release(s); the latest, v28.1.0, published 2026-09-26.",
+									"values": ["v28.1.0"],
+									"count": 85
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit 90a3d42.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "not-found",
+									"finding": "The repo sets no website field.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "No link in README.md is labelled as a demo or live app; whether one of its 2 other link(s) is a demo is not judged: https://deepwiki.com/stellar/stellar-cli, https://hub.docker.com/r/stellar/stellar-cli/.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "The 12 of 37 manifests read declare 11 Stellar package(s) Scout recognises: @stellar/prettier-config, @stellar/stellar-sdk, soroban-env-host, soroban-sdk, soroban-spec, soroban-spec-rust, soroban-spec-tools, soroban-spec-typescript and 3 more. SDK versions as declared: @stellar/stellar-sdk@^16.0.1. The 25 not read may declare more: 25 of 37 manifests were not read: 25 beyond the 12 a read takes. Read at commit 90a3d42.",
+									"values": [
+										"@stellar/prettier-config",
+										"@stellar/stellar-sdk",
+										"soroban-env-host",
+										"soroban-sdk",
+										"soroban-spec",
+										"soroban-spec-rust",
+										"soroban-spec-tools",
+										"soroban-spec-typescript",
+										"soroban-token-sdk",
+										"stellar-strkey",
+										"stellar-xdr"
+									],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "could-not-check",
+									"finding": "No Cargo.toml read declares a deployable Soroban contract, but 24 Cargo.toml file(s) were not read: 25 of 37 manifests were not read: 25 beyond the 12 a read takes.",
+									"values": null,
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit 90a3d42.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "1533 commit(s) on main, the last on 2026-10-22; the repo was created on 2022-05-24.",
+									"values": ["2026-10-22T19:33:10Z"],
+									"count": 1533
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "108 file(s) follow a test-naming convention, e.g. cmd/crates/soroban-spec-tools/src/test_utils.rs, cmd/crates/soroban-spec-tools/tests/contract_sanitize.rs, cmd/crates/soroban-test/tests/fixtures/bye/src/main.rs and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit 90a3d42.",
+									"values": [
+										"cmd/crates/soroban-spec-tools/src/test_utils.rs",
+										"cmd/crates/soroban-spec-tools/tests/contract_sanitize.rs",
+										"cmd/crates/soroban-test/tests/fixtures/bye/src/main.rs",
+										"cmd/crates/soroban-test/tests/fixtures/eth_abi/src/lib.rs",
+										"cmd/crates/soroban-test/tests/fixtures/eth_abi/src/test.rs",
+										"cmd/crates/soroban-test/tests/fixtures/hello/src/main.rs",
+										"cmd/crates/soroban-test/tests/fixtures/test-wasms/auth/src/lib.rs",
+										"cmd/crates/soroban-test/tests/fixtures/test-wasms/constructor/src/lib.rs",
+										"cmd/crates/soroban-test/tests/fixtures/test-wasms/custom_account/src/lib.rs",
+										"cmd/crates/soroban-test/tests/fixtures/test-wasms/custom_type/src/lib.rs"
+									],
+									"count": 108
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "15 CI config file(s): .github/workflows/action.yml, .github/workflows/binaries.yml, .github/workflows/bindings-ts.yml, .github/workflows/bump-version.yml, .github/workflows/docs.yml and 10 more. Whether the jobs run or pass is not read. Read at commit 90a3d42.",
+									"values": [
+										".github/workflows/action.yml",
+										".github/workflows/binaries.yml",
+										".github/workflows/bindings-ts.yml",
+										".github/workflows/bump-version.yml",
+										".github/workflows/docs.yml",
+										".github/workflows/ledger-emulator.yml",
+										".github/workflows/publish.yml",
+										".github/workflows/rpc-tests.yml",
+										".github/workflows/rust.yml",
+										".github/workflows/socket-basics.yml",
+										".github/workflows/socket-scan.yml",
+										".github/workflows/stale.yml",
+										".github/workflows/test-install.yml",
+										".github/workflows/test-with-openzeppelin-contracts.yml",
+										".github/workflows/test-with-soroban-examples.yml"
+									],
+									"count": 15
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "85 GitHub release(s); the latest, v28.1.0, published 2026-09-26.",
+									"values": ["v28.1.0"],
+									"count": 85
+								},
+								{
+									"id": "contractCrates",
+									"state": "could-not-check",
+									"finding": "No Cargo.toml read declares a deployable Soroban contract, but 24 Cargo.toml file(s) were not read: 25 of 37 manifests were not read: 25 beyond the 12 a read takes.",
+									"values": null,
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit 90a3d42.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "not-found",
+									"finding": "The repo sets no website field.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "No link in README.md is labelled as a demo or live app; whether one of its 2 other link(s) is a demo is not judged: https://deepwiki.com/stellar/stellar-cli, https://hub.docker.com/r/stellar/stellar-cli/.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

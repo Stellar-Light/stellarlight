@@ -102,6 +102,13 @@ function take(
 	};
 }
 
+/** Who a request counts as for a per-caller budget, keyed as rateLimit keys
+ * it: its partner key when it carries one, else its client IP. */
+export function callerKey(req: NextRequest): string {
+	const partner = partnerOf(req);
+	return partner ? `key:${partner}` : `ip:${getClientIp(req)}`;
+}
+
 /**
  * Allow `limit` requests per `windowMs` per (endpoint, client-IP) pair.
  *

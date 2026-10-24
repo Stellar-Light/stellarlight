@@ -1,0 +1,40 @@
+{
+	"at": "2026-10-23T20:42:50.202Z",
+	"rows": [
+		{
+			"repo": "repo-10",
+			"status": 200,
+			"readMs": 946,
+			"coldHandlerMs": 951,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "nirium-protocol/nirium",
+			"status": 200,
+			"readMs": 1019,
+			"coldHandlerMs": 1022,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "repo-11",
+			"status": 200,
+			"readMs": 635,
+			"coldHandlerMs": 637,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-12",
+			"status": 200,
+			"readMs": 749,
+			"coldHandlerMs": 751,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "Stellar-Cost-Labs/soroban-cost-estimator",
+			"status": 200,
+			"readMs": 676,
+			"coldHandlerMs": 683,
+			"warmHandlerMs": 2
+		}
+	]
+}

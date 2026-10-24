@@ -1,0 +1,262 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T18:04:27.375Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/Foryield/soroban-yield-vault",
+		"stored": false,
+		"repo": {
+			"fullName": "Foryield/soroban-yield-vault",
+			"url": "https://github.com/Foryield/soroban-yield-vault",
+			"readAt": "2026-10-23T18:04:26.488Z",
+			"readMs": 887,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "24 file(s) named or placed as tests, e.g. contracts/router/src/test.rs, contracts/router/src/test_aqua_stack.rs, contracts/router/src/test_mocks.rs and 7 more. Whether they run or pass is not read.",
+									"values": [
+										"contracts/router/src/test.rs",
+										"contracts/router/src/test_aqua_stack.rs",
+										"contracts/router/src/test_mocks.rs",
+										"contracts/router/src/test_props.rs",
+										"contracts/router/src/test_rebalance.rs",
+										"contracts/router/src/test_stack_common.rs",
+										"contracts/strategy-aquarius/src/test.rs",
+										"contracts/strategy-aquarius/src/test_vault.rs",
+										"contracts/vault/src/test.rs",
+										"contracts/vault/src/test_blend.rs"
+									],
+									"count": 24
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "2 CI config file(s): .github/workflows/ci.yml, .github/workflows/ops-daily.yml. Whether the jobs run or pass is not read.",
+									"values": [
+										".github/workflows/ci.yml",
+										".github/workflows/ops-daily.yml"
+									],
+									"count": 2
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 11 contract id(s): CCE5ITQQF4GWG5FA47D2XJBKXASWJ2E5V5AWW5U5BBAFWIXA77YYGWNI, CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU, CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF and 8 more. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses).",
+									"values": [
+										"CCE5ITQQF4GWG5FA47D2XJBKXASWJ2E5V5AWW5U5BBAFWIXA77YYGWNI",
+										"CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU",
+										"CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF",
+										"CDZR2IY4V3GXUONLTVXJNCMTIR2LLFC55ZRPPEHCTI4RM7LVF25UKG5K",
+										"CCUUDM434BMZMYWYDITHFXHDMIVTGGD6T2I5UKNX5BSLXLW7HVR4MCGZ"
+									],
+									"count": 11
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "README.md links 1 page(s) its text labels as a demo or live app (words such as demo, live, deployed, website): https://vault.for-yield.com/?vault=eurc. Not opened, so whether they load is not checked.",
+									"values": ["https://vault.for-yield.com/?vault=eurc"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 4 Stellar package(s) Scout recognises: @creit.tech/stellar-wallets-kit, @stellar/stellar-sdk, blend-contract-sdk, soroban-sdk. SDK versions as declared: soroban-sdk 25, @stellar/stellar-sdk@^16.0.1.",
+									"values": [
+										"@creit.tech/stellar-wallets-kit",
+										"@stellar/stellar-sdk",
+										"blend-contract-sdk",
+										"soroban-sdk"
+									],
+									"count": 4
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "3 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/router, contracts/strategy-aquarius, contracts/vault; soroban-sdk 25 as declared. Whether they build or are deployed is not read here.",
+									"values": [
+										"contracts/router",
+										"contracts/strategy-aquarius",
+										"contracts/vault"
+									],
+									"count": 3
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 11 contract id(s): CCE5ITQQF4GWG5FA47D2XJBKXASWJ2E5V5AWW5U5BBAFWIXA77YYGWNI, CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU, CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF and 8 more. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses).",
+									"values": [
+										"CCE5ITQQF4GWG5FA47D2XJBKXASWJ2E5V5AWW5U5BBAFWIXA77YYGWNI",
+										"CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU",
+										"CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF",
+										"CDZR2IY4V3GXUONLTVXJNCMTIR2LLFC55ZRPPEHCTI4RM7LVF25UKG5K",
+										"CCUUDM434BMZMYWYDITHFXHDMIVTGGD6T2I5UKNX5BSLXLW7HVR4MCGZ"
+									],
+									"count": 11
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "144 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-06-09.",
+									"values": ["2026-10-23T15:57:02Z"],
+									"count": 144
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "24 file(s) named or placed as tests, e.g. contracts/router/src/test.rs, contracts/router/src/test_aqua_stack.rs, contracts/router/src/test_mocks.rs and 7 more. Whether they run or pass is not read.",
+									"values": [
+										"contracts/router/src/test.rs",
+										"contracts/router/src/test_aqua_stack.rs",
+										"contracts/router/src/test_mocks.rs",
+										"contracts/router/src/test_props.rs",
+										"contracts/router/src/test_rebalance.rs",
+										"contracts/router/src/test_stack_common.rs",
+										"contracts/strategy-aquarius/src/test.rs",
+										"contracts/strategy-aquarius/src/test_vault.rs",
+										"contracts/vault/src/test.rs",
+										"contracts/vault/src/test_blend.rs"
+									],
+									"count": 24
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "2 CI config file(s): .github/workflows/ci.yml, .github/workflows/ops-daily.yml. Whether the jobs run or pass is not read.",
+									"values": [
+										".github/workflows/ci.yml",
+										".github/workflows/ops-daily.yml"
+									],
+									"count": 2
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "3 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/router, contracts/strategy-aquarius, contracts/vault; soroban-sdk 25 as declared. Whether they build or are deployed is not read here.",
+									"values": [
+										"contracts/router",
+										"contracts/strategy-aquarius",
+										"contracts/vault"
+									],
+									"count": 3
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 11 contract id(s): CCE5ITQQF4GWG5FA47D2XJBKXASWJ2E5V5AWW5U5BBAFWIXA77YYGWNI, CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU, CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF and 8 more. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses).",
+									"values": [
+										"CCE5ITQQF4GWG5FA47D2XJBKXASWJ2E5V5AWW5U5BBAFWIXA77YYGWNI",
+										"CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU",
+										"CCEBVDYM32YNYCVNRXQKDFFPISJJCV557CDZEIRBEE4NCV4KHPQ44HGF",
+										"CDZR2IY4V3GXUONLTVXJNCMTIR2LLFC55ZRPPEHCTI4RM7LVF25UKG5K",
+										"CCUUDM434BMZMYWYDITHFXHDMIVTGGD6T2I5UKNX5BSLXLW7HVR4MCGZ"
+									],
+									"count": 11
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "README.md links 1 page(s) its text labels as a demo or live app (words such as demo, live, deployed, website): https://vault.for-yield.com/?vault=eurc. Not opened, so whether they load is not checked.",
+									"values": ["https://vault.for-yield.com/?vault=eurc"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}
