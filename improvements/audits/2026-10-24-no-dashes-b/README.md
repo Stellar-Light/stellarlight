@@ -187,5 +187,5 @@ See the ledger (`improvements/rounds/2026-10-24-no-dashes-b.md`).
 - Briefs in `src/data/ideas.ts` (LayerZero DVN, x402 Bazaar; five lines): rewritten as our own text. Git history (befeb7fa3) says they were "distilled faithfully from the published RFP text", i.e. condensed, not copied; the published page could not be compared (no network in this lane). If the owner knows they were pasted verbatim, restore the dashes and list them as `quote`.
 - `scout-mcp` is not republished: the tool text reaches clients with the next
   `scout-mcp` release (`package.json` unchanged).
-- The version is a placeholder (1.9.116) and the changelog entry is dated
-  2026-10-24; both are renumbered at merge.
+- Shipped as spec 1.9.111 (1.9.116 was the placeholder in review); the
+  changelog entry is dated 2026-10-24.

@@ -209,3 +209,29 @@ with a dash.
 - `origin/main` has moved (#1885, api-client 1.10.0, and others) since this
   branch was cut; this branch is still based on 08543ae9. `api-client/src/index.ts`
   is edited at line 89 only.
+
+## Merge (2026-10-24)
+
+- Re-check of c6aabcd1 (same reviewer, Claude Fable 5.1, high effort):
+  GATE push. Every label now splits under the page's own pattern; the new
+  label test fails on the colon form; its own reader sweep found no other
+  runtime reader of a rewritten string; the normalizing check shows only the
+  requested possessive inserted.
+- Merge: main merged in at 5b1ea34f (spec 1.9.110; the token fallback,
+  scout-mcp 1.8.1 and api-client 1.10.0 since this branch's base). This
+  change is spec 1.9.111, renumbered from the 1.9.116 placeholder. The
+  changelog was merged entry by entry with this branch's file kept (its
+  rewritten history) and main's three new entries inserted below this one:
+  342 entries, this branch's 339 plus main's 3. The usual merge rule (main's
+  file, the branch's entries on top) would have restored the dashes in every
+  old entry. Main's new code and entries carry no dash: the guard passes on
+  the merged tree.
+- Checks on the merged tree: tsc exit 0; vitest (src/lib, src/components,
+  src/app, src/collections, src/data) 224 files, 2,888 tests passed;
+  contract:write, contract:check exit 0; writer conformance, answer
+  dating, route exports, changelog contract, scripts types and the new
+  check-no-dashes all exit 0 (95 listed, 0 unlisted, 0 stale); Raven gate
+  ACCEPT 1.9.111 (2 gains, 0 hit to miss, 64 top-5 lists changed);
+  scout-mcp SMOKE_READ_ONLY=1 smoke 86 passed, 0 failed, 3 skipped (main
+  fixed the parameter count); api-client smoke 21 passed.
+
