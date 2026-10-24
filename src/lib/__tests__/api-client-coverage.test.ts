@@ -164,13 +164,16 @@ describe("api-client covers the spec", () => {
 	// a boolean where it has a string enum, a number where it has a boolean, an
 	// undeclared key.
 	it("accepts every call form 1.9.1 accepted", () => {
-		const errors = diagnose(`import { ScoutClient } from "./index";
+		const errors =
+			diagnose(`import { ScoutClient, type FeedbackRequest } from "./index";
 declare const c: ScoutClient;
+declare const fb: FeedbackRequest;
 declare const s: string;
 declare const n: number;
 declare const b: boolean;
 declare const r: Record<string, unknown>;
 c.getStatus();
+c.submitFeedback(fb);
 c.searchProjects({ q: s, scfAwarded: true, limit: n });
 c.searchRepos({ q: s, language: s, limit: n });
 c.explainRepo({ q: s, repo: s });
