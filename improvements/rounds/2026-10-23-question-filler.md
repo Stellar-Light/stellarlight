@@ -218,3 +218,19 @@ contract:write and contract:check exit 0, routing-surface-check OK; Raven
 gate ACCEPT 1.9.115 (exit 0, 2 gains, no losses); check-answer-dating
 GREEN; route-exports-check and changelog-contract-check pass; biome clean;
 gitleaks over origin/main..HEAD no leaks; no em or en dash in added lines.
+
+## Re-check and merge (2026-10-24)
+
+- Re-check of c5f1b0f4 (same reviewer, Claude Fable 5.1, high effort):
+  GATE push. The opener fix changes exactly the hyphen and apostrophe
+  inputs, every question form still reads as a question, and its own replay
+  of all nine captures equals the earlier C2 outputs (18 of 18 files). One
+  miscount fixed: the nine captures hold 328 queries, not 325.
+- Merge: main merged in at 093a4217 (spec 1.9.109, the judging review); this
+  change is spec 1.9.110, renumbered from the 1.9.115 placeholder. Checks on
+  the merged tree: tsc exit 0; vitest (src/lib, src/components, src/app,
+  src/collections, src/data) 222 files, 2,882 tests passed; contract:write
+  no diff; contract:check exit 0; writer conformance, answer dating, route
+  exports, changelog contract and scripts types all exit 0; Raven gate
+  ACCEPT 1.9.110; gitleaks clean over the branch.
+
