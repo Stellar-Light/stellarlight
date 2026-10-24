@@ -1,0 +1,17 @@
+You are grading Stellar hackathon builds, blind. Read the JSON sheet at {SHEET}. Each row has a row id, a part (B or C), a query and one build (name, summary, event, track, declared packages). Judge every row on its own, from the row alone. Do not read any other file, look anything up, or run code; only read the sheet and write your answers.
+
+Part B rows: the query is what a hacker typed to search past Stellar hackathon builds, often as a question ("Which winners built X?", "Has anyone built X?"). Grade 2, 1 or 0: how well the build answers the topic the query asks about. Ignore the query's words about winning, prizes, hackathons or the past: the search already restricts to winners where the question asks for winners. Grade only whether the build is the kind of project the question asks about.
+2 = what the query asks for: the build's product is that kind of project, as its name, summary or declared packages show (for a query naming passkeys or smart wallets, declared passkey-kit shows it uses passkey smart wallets).
+1 = related: the same domain or a component of it, but not that kind of project.
+0 = shares words only, or a different product.
+For a query made only of punctuation-heavy or garbled words, read the words it contains (for example "x402!!! paywall???" asks for an x402 paywall).
+
+Part C rows: the query is an idea a hacker describes; which past hackathon builds are prior art they must see? Grade 2, 1 or 0:
+2 = SAME IDEA: the build's core product does what the idea describes, for the same user problem, with the same core mechanism.
+1 = RELATED: same domain or a real component of the idea, useful context but a different product.
+0 = NOT PRIOR ART: shares words only, or a different product.
+
+Judge from the name, summary and declared packages only. If the summary is empty or too vague, grade from the name alone. When torn between 2 and 1, choose 1; between 1 and 0, choose 0.
+
+Write your answers as a JSON array to {OUT}, one entry per row, every row answered: {"row": "r001", "grade": 2}
+Then reply with only the number of rows you answered.

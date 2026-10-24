@@ -1,0 +1,473 @@
+{
+ "writtenAt": "2026-10-23T23:29:14Z",
+ "writer": "Claude Sonnet, blind to the search system and its results",
+ "source": "submission summaries as published on DoraHacks or curated event pages, read from the two files named",
+ "questions": [
+  {
+   "id": "f01",
+   "q": "Did any project that pays prizes out of pooled deposit yield, without anyone losing their stake, win at a Stellar hackathon?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-36214",
+     "name": "No Loss Lottery",
+     "why": "Its summary is a fun way of playing as a community while generating DeFi yield, i.e. a lottery where principal is safe."
+    }
+   ],
+   "should": []
+  },
+  {
+   "id": "f02",
+   "q": "Which prize winners let AI agents pay per request with tiny USDC payments?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-42585",
+     "name": "TollPay",
+     "why": "Adds per-call USDC micropayments so agents can pay MCP tools."
+    },
+    {
+     "id": "dorahacks-buidl-42807",
+     "name": "RenderGate",
+     "why": "Pay-per-render browser API for agents using x402 micropayments."
+    },
+    {
+     "id": "dorahacks-buidl-42579",
+     "name": "x402-mcp-stellar-template",
+     "why": "Drop-in middleware so any SaaS accepts autonomous agent payments in USDC."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-42656",
+     "name": "clevercon",
+     "why": "Agents pay other agents for services via x402 and streaming micropayments."
+    },
+    {
+     "id": "dorahacks-buidl-42819",
+     "name": "Cards402.com",
+     "why": "Wallets and Visa cards for agents, spend management rather than per-call fees."
+    }
+   ]
+  },
+  {
+   "id": "f03",
+   "q": "Has a card game where players' hands stay private ever won a prize at a Stellar hackathon?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-39840",
+     "name": "Stellar Poker",
+     "why": "A verifiably private Poker game, so hands stay hidden."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-39622",
+     "name": "xray.games - The Arcade Evolved | skill proven onchain",
+     "why": "Trustless arcade with player skill proven by zero-knowledge, a related private-gaming winner."
+    }
+   ]
+  },
+  {
+   "id": "f04",
+   "q": "Which winners hide payment amounts on-chain while still letting an auditor verify compliance?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-46541",
+     "name": "Umbra Wallet",
+     "why": "Confidential wallet built with an auditor key."
+    },
+    {
+     "id": "dorahacks-buidl-46474",
+     "name": "Tukar",
+     "why": "Shielded ZK transfer hides amount and counterparties, proofs keep it compliant."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-46348",
+     "name": "Wraith",
+     "why": "Described only as ZK privacy on Stellar."
+    }
+   ]
+  },
+  {
+   "id": "f05",
+   "q": "Did any winner let a token issuer show it holds enough backing without exposing customer data?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-46507",
+     "name": "zkProofofReserve",
+     "why": "On-chain solvency for issuers with zero customer data exposed."
+    }
+   ],
+   "should": []
+  },
+  {
+   "id": "f06",
+   "q": "Are there winning projects that prove a person passed identity screening without putting any identity on-chain?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-46373",
+     "name": "ANCHORSHIELD",
+     "why": "Proves KYC and sanctions clearance in zero knowledge, no identity on-chain."
+    }
+   ],
+   "should": []
+  },
+  {
+   "id": "f07",
+   "q": "Has a tool that locks your money until you reach a personal target, sending it to a cause if you fail, won a prize?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-28437",
+     "name": "GoLazy",
+     "why": "Locks funds so goals become commitments, and failure funds a social impact pool."
+    }
+   ],
+   "should": []
+  },
+  {
+   "id": "f08",
+   "q": "Which winners are built for people with weak or no internet access?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "curated-build-on-stellar-philippines-2026-abotpera",
+     "name": "AbotPera",
+     "why": "Payments app that works with little or no connectivity."
+    },
+    {
+     "id": "dorahacks-buidl-40156",
+     "name": "Amaru ID",
+     "why": "Identity and records for low-connectivity environments."
+    }
+   ],
+   "should": []
+  },
+  {
+   "id": "f09",
+   "q": "Did anyone win with a pension or old-age saving tool for workers outside formal employment?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-41505",
+     "name": "MañanaSeguro",
+     "why": "Retirement savings for millions of informal workers in Mexico."
+    }
+   ],
+   "should": []
+  },
+  {
+   "id": "f10",
+   "q": "Who won with a way to rein in resale prices for event admissions?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-40067",
+     "name": "TicketReal",
+     "why": "Sells tickets while controlling the secondary market."
+    }
+   ],
+   "should": []
+  },
+  {
+   "id": "f11",
+   "q": "Have any winners rewarded people for returning used batteries for recycling?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-34078",
+     "name": "ByeSiduos ♻️⚡ - Blockchain para un planeta limpio.",
+     "why": "Tokenizes batteries, tracks their life cycle, rewards returns with green incentives."
+    }
+   ],
+   "should": []
+  },
+  {
+   "id": "f12",
+   "q": "What winners automate salary payments to employees?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-25141",
+     "name": "PayZoll_Stellar",
+     "why": "Payroll made fast, secure and seamless."
+    }
+   ],
+   "should": [
+    {
+     "id": "curated-build-on-stellar-philippines-2026-axial",
+     "name": "Axial",
+     "why": "Automates payroll contributions among other small business finance features."
+    }
+   ]
+  },
+  {
+   "id": "f13",
+   "q": "Did a betting game on a country's currency swings take a prize?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-32676",
+     "name": "ARS Price Arena",
+     "why": "Gamified betting platform focused on Argentine Peso volatility."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-32653",
+     "name": "Reflector TradeBet",
+     "why": "Includes prediction markets inside a trading platform."
+    },
+    {
+     "id": "dorahacks-buidl-40206",
+     "name": "BetSocial",
+     "why": "Social app for bets and challenges between friends."
+    }
+   ]
+  },
+  {
+   "id": "f14",
+   "q": "Are there winners where people give money to animal care?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-34215",
+     "name": "VETCHAIN",
+     "why": "Lets people donate to veterinary clinics for animal aid."
+    }
+   ],
+   "should": []
+  },
+  {
+   "id": "f15",
+   "q": "Which winners make approvals that need several signers easier?",
+   "winnersOnly": true,
+   "required": [
+    {
+     "id": "dorahacks-buidl-32404",
+     "name": "Stratum",
+     "why": "Multi-signature transactions made simple."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-40214",
+     "name": "AuthFlow",
+     "why": "On-chain enterprise approval flows using authorization trees."
+    }
+   ]
+  },
+  {
+   "id": "f16",
+   "q": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?",
+   "winnersOnly": false,
+   "required": [
+    {
+     "id": "dorahacks-buidl-46115",
+     "name": "Sotto - Sealed-Bid Procurement Auctions Settled with ZK Winner Proofs on Stellar",
+     "why": "Sealed-bid auctions where the lowest valid bid wins by ZK proof."
+    },
+    {
+     "id": "dorahacks-buidl-46325",
+     "name": "SealedStellar",
+     "why": "Seals bids in the browser and settles with a ZK proof of the right winner."
+    },
+    {
+     "id": "dorahacks-buidl-46386",
+     "name": "Zk Sealed",
+     "why": "Sealed-bid auction privacy with bids provably valid by ZK."
+    },
+    {
+     "id": "dorahacks-buidl-46464",
+     "name": "Segel",
+     "why": "Sealed-bid OTC with the clearing price proven in zero knowledge."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-46311",
+     "name": "Noir Market",
+     "why": "Sealed-bid NFT auction protocol."
+    },
+    {
+     "id": "dorahacks-buidl-46353",
+     "name": "Astraea",
+     "why": "Sealed-bid auctions with clearing proven by ZK."
+    },
+    {
+     "id": "dorahacks-buidl-46561",
+     "name": "IDIO",
+     "why": "Private verifiable auctions with ZK."
+    },
+    {
+     "id": "dorahacks-buidl-46499",
+     "name": "Orbis",
+     "why": "Confidential vendor bidding with verifiable winner selection."
+    }
+   ]
+  },
+  {
+   "id": "f17",
+   "q": "Is there a project offering insurance that pays automatically once conditions are met?",
+   "winnersOnly": false,
+   "required": [
+    {
+     "id": "dorahacks-buidl-25263",
+     "name": "FireBastion - Decentralized Fire Damage Insurance for Homes",
+     "why": "Decentralized fire insurance with automated payouts."
+    },
+    {
+     "id": "dorahacks-buidl-46105",
+     "name": "ClaimProof",
+     "why": "Insurance that pays itself the moment conditions are met."
+    },
+    {
+     "id": "dorahacks-buidl-46284",
+     "name": "LumenSure - Private Proof-Backed Insurance Payouts on Stellar",
+     "why": "Parametric insurance payouts proven with ZK and oracle data."
+    },
+    {
+     "id": "dorahacks-buidl-42373",
+     "name": "Alusa",
+     "why": "Fast, fair and automated insurance."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-32658",
+     "name": "KaleShield",
+     "why": "On-chain insurance against hacks and crashes."
+    }
+   ]
+  },
+  {
+   "id": "f18",
+   "q": "Has anyone built a system where patients control their own medical records?",
+   "winnersOnly": false,
+   "required": [
+    {
+     "id": "dorahacks-buidl-25231",
+     "name": "StellarMed",
+     "why": "Decentralized health record management with portable credentials."
+    },
+    {
+     "id": "dorahacks-buidl-46220",
+     "name": "MedVault",
+     "why": "Patient-owned medical records with on-chain access control."
+    },
+    {
+     "id": "dorahacks-buidl-31218",
+     "name": "doctory",
+     "why": "Empowers patients with their own clinical data."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-46114",
+     "name": "ZK-Med Portal",
+     "why": "Verifies medical records and vaccination status without exposing data."
+    },
+    {
+     "id": "dorahacks-buidl-24671",
+     "name": "SOS - Safety On Stellar",
+     "why": "Emergency medical information system."
+    },
+    {
+     "id": "dorahacks-buidl-25325",
+     "name": "Stellar Health Point",
+     "why": "Lets individuals log and control personal health data."
+    }
+   ]
+  },
+  {
+   "id": "f19",
+   "q": "Is there anything that lets a business turn unpaid bills into immediate cash?",
+   "winnersOnly": false,
+   "required": [
+    {
+     "id": "dorahacks-buidl-36316",
+     "name": "StellarInvoice",
+     "why": "Turns unpaid bills into instant cash on-chain."
+    },
+    {
+     "id": "dorahacks-buidl-41513",
+     "name": "Settler",
+     "why": "Freelancers tokenize invoices, investors buy them for instant liquidity."
+    },
+    {
+     "id": "dorahacks-buidl-38101",
+     "name": "Adelanta",
+     "why": "Programmable factoring for instant liquidity."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-36771",
+     "name": "The Simple Fund",
+     "why": "Receivables fund advancing payments to businesses."
+    },
+    {
+     "id": "dorahacks-buidl-45921",
+     "name": "AgroFactoring",
+     "why": "Agricultural factoring, thin summary."
+    },
+    {
+     "id": "curated-build-on-stellar-philippines-2026-axial",
+     "name": "Axial",
+     "why": "Capital from tokenized receivables."
+    }
+   ]
+  },
+  {
+   "id": "f20",
+   "q": "Has anyone turned emissions offsets from farmers' crops into tokens?",
+   "winnersOnly": false,
+   "required": [
+    {
+     "id": "dorahacks-buidl-35587",
+     "name": "CarbonChain Morelos",
+     "why": "Tokenizes sustainable practices into traceable carbon bonds for cane farmers."
+    },
+    {
+     "id": "dorahacks-buidl-35524",
+     "name": "Zucane",
+     "why": "Tokenizes carbon credits from local farming."
+    },
+    {
+     "id": "dorahacks-buidl-35598",
+     "name": "Co2 Green",
+     "why": "Tokenizes CO2 credits from sustainable crops."
+    },
+    {
+     "id": "dorahacks-buidl-35610",
+     "name": "SugarCane",
+     "why": "Platform to certify and sell carbon credits from the sector."
+    }
+   ],
+   "should": [
+    {
+     "id": "dorahacks-buidl-35564",
+     "name": "AgroCane",
+     "why": "Tokenized carbon infrastructure for farmers."
+    },
+    {
+     "id": "dorahacks-buidl-35591",
+     "name": "Tokenización de caña y azúcar",
+     "why": "Tokenizes CO2 reductions for farmers."
+    },
+    {
+     "id": "dorahacks-buidl-35601",
+     "name": "BioTon",
+     "why": "App turning carbon credits into real value."
+    }
+   ]
+  }
+ ]
+}
