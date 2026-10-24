@@ -1,0 +1,40 @@
+{
+	"at": "2026-10-23T20:35:35.867Z",
+	"rows": [
+		{
+			"repo": "repo-08",
+			"status": 200,
+			"readMs": 1001,
+			"coldHandlerMs": 1005,
+			"warmHandlerMs": 0
+		},
+		{
+			"repo": "TTL-Legacy/TTL-Legacy",
+			"status": 200,
+			"readMs": 765,
+			"coldHandlerMs": 767,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "BudakGPT/apac-stellar-hackathon",
+			"status": 200,
+			"readMs": 756,
+			"coldHandlerMs": 757,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "Pathnomic/stellar-hackathon-starter",
+			"status": 200,
+			"readMs": 802,
+			"coldHandlerMs": 804,
+			"warmHandlerMs": 0
+		},
+		{
+			"repo": "repo-09",
+			"status": 200,
+			"readMs": 695,
+			"coldHandlerMs": 696,
+			"warmHandlerMs": 1
+		}
+	]
+}

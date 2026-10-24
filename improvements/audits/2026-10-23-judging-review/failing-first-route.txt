@@ -1,0 +1,17 @@
+   ✓ GET /api/hackathons/review > reviews a submission from its repo link 66ms
+   ✓ GET /api/hackathons/review > declares every served field and null of the review; the pitch is mocked here 2ms
+   ✓ GET /api/hackathons/review > answers 400 without a link and 404 for one it does not hold 2ms
+   ✓ a submission with no confident category > says why categoryContext is null: uncertain, or not categorized yet 2ms
+   ✓ how crowded a category is, across every stored submission > leaves out an event whose stored rows are its winners only 1ms
+   × GET /api/hackathons/review?hackathon=<slug> > reviews a repo it never stored from the live read, every criterion with evidence or a reason 7ms
+   × GET /api/hackathons/review?hackathon=<slug> > adds the judging block to a stored submission and keeps every stored field 2ms
+   ✓ GET /api/hackathons/review?hackathon=<slug> > serves a stored submission without hackathon exactly as before 1ms
+   × GET /api/hackathons/review?hackathon=<slug> > answers 404 for a repo that is missing or not public, and 400 for an event without criteria 1ms
+   × GET /api/hackathons/review?hackathon=<slug> > never reads a repo held for malware 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/app/api/hackathons/review/__tests__/route.test.ts > GET /api/hackathons/review?hackathon=<slug> > reviews a repo it never stored from the live read, every criterion with evidence or a reason
+ FAIL  src/app/api/hackathons/review/__tests__/route.test.ts > GET /api/hackathons/review?hackathon=<slug> > adds the judging block to a stored submission and keeps every stored field
+ FAIL  src/app/api/hackathons/review/__tests__/route.test.ts > GET /api/hackathons/review?hackathon=<slug> > answers 404 for a repo that is missing or not public, and 400 for an event without criteria
+ FAIL  src/app/api/hackathons/review/__tests__/route.test.ts > GET /api/hackathons/review?hackathon=<slug> > never reads a repo held for malware
+ Test Files  1 failed (1)
+      Tests  4 failed | 6 passed (10)

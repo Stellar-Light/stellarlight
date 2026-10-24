@@ -1,0 +1,203 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T20:35:25.360Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/BudakGPT/apac-stellar-hackathon",
+		"stored": false,
+		"repo": {
+			"fullName": "BudakGPT/apac-stellar-hackathon",
+			"url": "https://github.com/BudakGPT/apac-stellar-hackathon",
+			"readAt": "2026-10-23T20:35:24.603Z",
+			"readMs": 756,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "not-found",
+									"finding": "No file in the tree follows a test-naming convention (test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py). Tests named otherwise, or written inside source files such as Rust #[cfg(test)] modules, are not seen.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "1 CI config file(s): .github/workflows/build.yml. Whether the jobs run or pass is not read.",
+									"values": [".github/workflows/build.yml"],
+									"count": 1
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "The repo sets no website, and no link in README.md is labelled as a demo or live app; whether one of its 3 other link(s) is a demo is not judged: https://www.risein.com/programs/apac-stellar-hackathon, https://canva.link/m9isikrjvmeirxf, https://canva.link/gvjou3adgwds8h3.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 1 Stellar package(s) Scout recognises: soroban-sdk. SDK versions as declared: soroban-sdk 22.0.0.",
+									"values": ["soroban-sdk"],
+									"count": 1
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): prototype-arisan/contracts/arisan; soroban-sdk 22.0.0 as declared. Whether they build or are deployed is not read here.",
+									"values": ["prototype-arisan/contracts/arisan"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "122 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-06-26.",
+									"values": ["2026-10-23T04:54:05Z"],
+									"count": 122
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "not-found",
+									"finding": "No file in the tree follows a test-naming convention (test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py). Tests named otherwise, or written inside source files such as Rust #[cfg(test)] modules, are not seen.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "1 CI config file(s): .github/workflows/build.yml. Whether the jobs run or pass is not read.",
+									"values": [".github/workflows/build.yml"],
+									"count": 1
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): prototype-arisan/contracts/arisan; soroban-sdk 22.0.0 as declared. Whether they build or are deployed is not read here.",
+									"values": ["prototype-arisan/contracts/arisan"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "The repo sets no website, and no link in README.md is labelled as a demo or live app; whether one of its 3 other link(s) is a demo is not judged: https://www.risein.com/programs/apac-stellar-hackathon, https://canva.link/m9isikrjvmeirxf, https://canva.link/gvjou3adgwds8h3.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

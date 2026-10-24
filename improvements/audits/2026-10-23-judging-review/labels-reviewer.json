@@ -1,0 +1,211 @@
+{
+	"note": "Review round 1 labels for the reviewer's five repos, written before their run on the round's code. Source: gh CLI answers 2026-10-23T22:04:30Z to 22:05:54Z (dump.py, now reading the tree at the default branch's newest commit), contents-API reads at that commit of the manifests a read takes (label_packages.py), README links and C addresses printed by readme_links.py and read by eye, test and CI counts from label_tests.py. Packages are Scout's list; a package off it is not a miss of the label. stellar/soroban-cli is asked by its old name: GitHub answers stellar/stellar-cli.",
+	"labeledAt": "2026-10-23T22:11:30Z",
+	"repos": [
+		{
+			"repo": "stellar/soroban-cli",
+			"answersAs": "stellar/stellar-cli",
+			"commit": "90a3d42d9327ccfaa0d301373766f45beae3e6d9",
+			"headBranch": "a branch named HEAD exists at 4ff88b7 (2025-09-15), 338 commits behind main: every part must come from main's 90a3d42, not from it",
+			"stellarPackages": {
+				"manifests": { "total": 37, "read": 12 },
+				"onList": [
+					"@stellar/prettier-config",
+					"@stellar/stellar-sdk",
+					"soroban-env-host",
+					"soroban-sdk",
+					"soroban-spec",
+					"soroban-spec-rust",
+					"soroban-spec-tools",
+					"soroban-spec-typescript",
+					"soroban-token-sdk",
+					"stellar-strkey",
+					"stellar-xdr"
+				],
+				"count": "none: a partial read (25 of 37 not read, beyond the 12)"
+			},
+			"deployableContracts": "could-not-check: none in the 8 Cargo.toml read (soroban-test builds a cdylib but declares no soroban-sdk); the Cargo.toml files not read are test fixtures",
+			"testFiles": { "byConvention": 108, "complete": true },
+			"ci": 15,
+			"releases": {
+				"count": 85,
+				"latest": "v28.1.0",
+				"latestAt": "2026-09-26T16:33:53Z"
+			},
+			"lastCommit": {
+				"count": 1533,
+				"at": "2026-10-22T19:33:10Z",
+				"branch": "main",
+				"createdAt": "2022-05-24"
+			},
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"hub.docker.com (Docker Hub images)",
+				"github.com and developers.stellar.org links, not judged"
+			],
+			"contractIds": [],
+			"readme": { "bytes": 4198, "truncated": false }
+		},
+		{
+			"repo": "stellar/soroban-examples",
+			"commit": "03d42aa6b973dcf3a453a99d0c6a6e8d25a196e2",
+			"stellarPackages": {
+				"manifests": {
+					"total": 57,
+					"read": 12,
+					"kinds": "55 Cargo.toml, 2 go.mod"
+				},
+				"onList": ["soroban-sdk (28.0.0 in all 12 read)"],
+				"count": "none: a partial read (45 not read, beyond the 12)"
+			},
+			"deployableContracts": {
+				"inRead": 12,
+				"cargo": { "total": 55, "read": 12 },
+				"names": [
+					"account",
+					"alloc",
+					"atomic_multiswap",
+					"atomic_swap",
+					"auth",
+					"bls_signature",
+					"custom_types",
+					"deep_contract_auth",
+					"errors",
+					"eth_abi",
+					"events",
+					"fuzzing"
+				],
+				"count": "none: 43 Cargo.toml not read"
+			},
+			"testFiles": { "byConvention": 58, "complete": true },
+			"ci": 5,
+			"releases": {
+				"count": 22,
+				"latest": "v23.0.0",
+				"latestAt": "2025-09-08T16:53:06Z"
+			},
+			"lastCommit": {
+				"count": 283,
+				"at": "2026-10-06T02:12:40Z",
+				"branch": "main",
+				"createdAt": "2022-07-19"
+			},
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"deepwiki.com (badge alt Ask DeepWiki)",
+				"app.codeanywhere.com (an image button, no words)",
+				"rust-lang.org and developers.stellar.org, not judged"
+			],
+			"contractIds": [
+				"CACDYF3CYMJEJTIVFESQYZTN67GO2R5D5IUABTCUG3HXQSRXCSOROBAN (a placeholder in a command example; the finding must not call it the project's own)"
+			],
+			"readme": { "bytes": 9782, "truncated": false }
+		},
+		{
+			"repo": "stellar/js-stellar-sdk",
+			"commit": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+			"stellarPackages": {
+				"manifests": { "total": 1, "read": 1 },
+				"onList": ["@stellar/js-xdr", "@stellar/stellar-xdr-json"],
+				"count": 2
+			},
+			"deployableContracts": "not-found: no Cargo.toml in the tree",
+			"testFiles": { "byConvention": 183, "complete": true },
+			"ci": 11,
+			"releases": {
+				"count": 157,
+				"latest": "v16.4.1",
+				"latestAt": "2026-10-22T19:04:42Z"
+			},
+			"lastCommit": {
+				"count": 1205,
+				"at": "2026-10-21T18:55:06Z",
+				"branch": "main",
+				"createdAt": "2015-04-09"
+			},
+			"website": "https://stellar.github.io/js-stellar-sdk/ (the API doc site: the website item, never a demo)",
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"badge.fury.io and deepwiki badges (no words)",
+				"the API doc site and llms files on stellar.github.io (no demo words)",
+				"cdnjs, MDN, Cloudflare docs",
+				"my-rpc-provider.com and my-rpc-server.com in CLI examples"
+			],
+			"contractIds": [],
+			"readme": { "bytes": 21702, "truncated": false }
+		},
+		{
+			"repo": "stellar/freighter",
+			"commit": "b1e795cf66c4c1eaa4ad68a86af3b12ce467dbee",
+			"stellarPackages": {
+				"manifests": { "total": 7, "read": 7 },
+				"onList": [
+					"@stellar/design-system",
+					"@stellar/freighter-api",
+					"@stellar/typescript-wallet-sdk-km",
+					"stellar-hd-wallet",
+					"stellar-sdk (an npm alias, npm:@stellar/stellar-sdk@17.0.1, in extension and three @shared packages)"
+				],
+				"count": 5,
+				"sdkVersion": "the alias value npm:@stellar/stellar-sdk@17.0.1 may be cited; it must not be nulled"
+			},
+			"deployableContracts": "not-found: no Cargo.toml in the tree",
+			"testFiles": { "byConvention": 271, "complete": true },
+			"ci": 14,
+			"releases": {
+				"count": 422,
+				"latest": "5.49.0",
+				"latestAt": "2026-10-06T21:08:38Z"
+			},
+			"lastCommit": {
+				"count": 1097,
+				"at": "2026-10-20T16:45:44Z",
+				"branch": "master",
+				"createdAt": "2020-03-23"
+			},
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"www.freighter.app (Learn more at: no demo words)",
+				"localhost playground links (local addresses, never a demo)"
+			],
+			"contractIds": [],
+			"readme": { "bytes": 5980, "truncated": false }
+		},
+		{
+			"repo": "stellar/quickstart",
+			"commit": "0ff76e336a438370ba900db7f437dcbe5b90dda7",
+			"stellarPackages": {
+				"manifests": { "total": 0, "read": 0 },
+				"onList": [],
+				"note": "a Docker image repo: no manifest Scout reads"
+			},
+			"deployableContracts": "not-found: no Cargo.toml in the tree",
+			"testFiles": {
+				"byConvention": 8,
+				"complete": true,
+				"note": "Go files under tests/"
+			},
+			"ci": 12,
+			"releases": { "count": 0 },
+			"lastCommit": {
+				"count": 742,
+				"at": "2026-10-23T02:28:14Z",
+				"branch": "main",
+				"createdAt": "2015-12-18"
+			},
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"cloud.digitalocean.com (the Deploy to DO button: no demo words)",
+				"hub.docker.com tags",
+				"localhost addresses",
+				"postgresql.org, supervisord.org"
+			],
+			"contractIds": [],
+			"readme": { "bytes": 30707, "truncated": false }
+		}
+	]
+}

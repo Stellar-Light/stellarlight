@@ -117,7 +117,7 @@ All 28 tools wrap stellarlight.xyz public APIs. They're rate-limited but require
 | `get_hackathon` | One hackathon's full detail (submissions, winners, prize tracks, status funnel). |
 | `search_hackathon_builds` | Prior art over every Stellar hackathon submission on DoraHacks: has anyone built X? Winners first; `project` names the directory project a build became. |
 | `get_hackathon_submission` | One stored submission in full: the team's write-up, self-reported tags, placement, links and the directory project it became. |
-| `review_submission` | Feedback on one hackathon submission from its GitHub or DoraHacks link: its facts, checks, the closest submissions and the SCF pitch view. |
+| `review_submission` | Feedback on one hackathon submission from its GitHub or DoraHacks link: its facts, checks, the closest submissions and the SCF pitch view. With `hackathon`, each of that event's judging criteria with the evidence in the repo, read live, also for a repo never stored. |
 | `analyze_hackathon_submissions` | Counts and trends over every submission: categories, Stellar packages, activity after the event, event by event, with winners against everyone else. |
 | `vet_idea` | One-call idea check: competitors, maturity, hackathon prior art, the vertical's supply-side gap and SCF funding. |
 | `hackathon_brief` | A hackathon team's first hour: prior art (winners first), starter repos with trust summaries, live contracts, SCF funding after the event. |

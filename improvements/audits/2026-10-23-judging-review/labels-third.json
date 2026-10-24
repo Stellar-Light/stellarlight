@@ -1,0 +1,152 @@
+{
+	"note": "Third-set labels, the gate for both fixes, written before the run on these five. Picked by rule: the first five repos of the first GitHub search (soroban, by update) not yet used and not stored. Source: gh CLI answers 2026-10-23T20:38:50Z to 20:40:11Z, plus contents-API reads of every manifest the dump skipped, read by eye. testFiles.byConvention from label_tests.py (a Python re-implementation of the conventions the finding states); manifests.read lists what a read takes by the stated order (manifest_order.py), so a partial read is known before the run.",
+	"labeledAt": "2026-10-23T20:42:30Z",
+	"repos": [
+		{
+			"repo": "repo-10",
+			"stellarPackages": [
+				"@creit.tech/stellar-wallets-kit (^1.9.5)",
+				"@stellar/stellar-sdk (^14.6.1)",
+				"soroban-sdk (23.0.2)",
+				"stellar-contract-utils",
+				"stellar-access and stellar-macros (off Scout's list)"
+			],
+			"manifests": { "total": 3, "read": 3 },
+			"deployableContracts": ["contracts/article-nft", "contracts/tipping"],
+			"testFiles": { "byConvention": 19, "readerSees": [] },
+			"ci": [".github/workflows/ci.yml", ".github/workflows/pr-hygiene.yml"],
+			"lastCommitAt": "2026-10-23T18:16:33Z",
+			"commitCount": 625,
+			"releases": {
+				"count": 3,
+				"latest": "v1.2.0",
+				"latestAt": "2026-08-25T14:25:31Z"
+			},
+			"website": "https://quilltip.me",
+			"demoLinks": [
+				"https://quilltip.me (website)",
+				"https://youtu.be/OqOkbAm9_T8 (a Watch Demo thumbnail link)"
+			],
+			"contractIds": [
+				"CAS44OQK7A6W5FDRAH3K3ZN7TTQTJ5ESRVG6MB2HBVFWZ5TVH26UUB4S",
+				"CC7Q3HDXQHMSI2WUE6C2KC35TRLPL22T3WEGZ67AB7KK5PDDJHQPZMZY"
+			]
+		},
+		{
+			"repo": "nirium-protocol/nirium",
+			"stellarPackages": [
+				"@stellar/stellar-sdk",
+				"@stellar/mpp",
+				"@x402/core",
+				"@x402/express",
+				"@x402/fetch",
+				"@x402/stellar",
+				"Python stellar-sdk (packages/sdk-python)",
+				"Go github.com/stellar/go (examples/go-x402)",
+				"Rust stellar-xdr, stellar-strkey, stellar-rpc-client (examples/rust-x402, unread by the read)"
+			],
+			"manifests": {
+				"total": 19,
+				"read": 12,
+				"left": "seven examples/* manifests, examples/rust-x402/Cargo.toml among them"
+			},
+			"deployableContracts": "none seen; the one Cargo.toml (examples/rust-x402) is a client and is not read",
+			"testFiles": { "byConvention": 37, "readerSees": [] },
+			"ci": "6 files under .github/workflows",
+			"lastCommitAt": "2026-10-23T17:30:51Z",
+			"commitCount": 181,
+			"releases": {
+				"count": 5,
+				"latest": "nirium@0.16.1",
+				"latestAt": "2026-10-11T09:17:04Z"
+			},
+			"website": "https://nirium.xyz",
+			"demoLinks": [
+				"https://nirium.xyz (website)",
+				"https://nirium.xyz/stats (README: Live usage)"
+			],
+			"contractIds": [
+				"CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU",
+				"CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5"
+			]
+		},
+		{
+			"repo": "repo-11",
+			"stellarPackages": [
+				"@blend-capital/blend-sdk (^3.3.0)",
+				"@stellar/freighter-api (^6.0.1)",
+				"@stellar/stellar-sdk (^17.0.1)",
+				"soroban-sdk (22.0.0)"
+			],
+			"manifests": { "total": 9, "read": 9 },
+			"deployableContracts": ["contracts/reputation"],
+			"testFiles": { "byConvention": 375, "readerSees": [] },
+			"ci": "25 files under .github/workflows",
+			"lastCommitAt": "2026-10-23T17:28:09Z",
+			"commitCount": 1220,
+			"releases": { "count": 0 },
+			"website": "https://stellar-intel.vercel.app",
+			"demoLinks": [
+				"https://stellar-intel.vercel.app (website and README Live demo)"
+			],
+			"contractIds": [],
+			"notes": "examples/consumer-contract builds a cdylib but sits under examples/, so it is not a product crate."
+		},
+		{
+			"repo": "repo-12",
+			"stellarPackages": [
+				"@creit.tech/stellar-wallets-kit (^2.5.0)",
+				"@stellar/freighter-api (^6.0.1)",
+				"@stellar/stellar-sdk (^16.0.1)",
+				"soroban-sdk (22.0.4)"
+			],
+			"manifests": {
+				"total": 21,
+				"read": 12,
+				"left": "nine contracts/*/Cargo.toml"
+			},
+			"deployableContracts": "18: 17 contracts/* crates and contracts/mocks/mock_oracle, each crate-type cdylib with soroban-sdk; 9 of them sit in the Cargo.toml files a read takes",
+			"testFiles": { "byConvention": 85, "readerSees": [] },
+			"ci": "8 files under .github/workflows",
+			"lastCommitAt": "2026-10-23T17:26:08Z",
+			"commitCount": 536,
+			"releases": { "count": 0 },
+			"website": "https://trustlendborrow.vercel.app/",
+			"demoLinks": [
+				"https://trustlendborrow.vercel.app/ (website and README Live demo)",
+				"https://youtu.be/V-SQxunQLow (README Video walkthrough)"
+			],
+			"contractIds": []
+		},
+		{
+			"repo": "Stellar-Cost-Labs/soroban-cost-estimator",
+			"stellarPackages": [
+				"stellar-xdr (27.0.0)",
+				"soroban-sdk (25.3.0, in the tests/fixtures/contract test fixture)"
+			],
+			"manifests": { "total": 4, "read": 4 },
+			"deployableContracts": "none outside tests: tests/fixtures/contract builds a cdylib, as a test fixture",
+			"testFiles": {
+				"byConvention": 18,
+				"readerSees": ["the test_comfy crate"]
+			},
+			"ci": [
+				".github/workflows/cargo-release.yml",
+				".github/workflows/ci.yml",
+				".github/workflows/coverage.yml",
+				".github/workflows/release.yml"
+			],
+			"lastCommitAt": "2026-10-23T19:58:35Z",
+			"commitCount": 1006,
+			"releases": { "count": 0 },
+			"website": "https://stellar-cost-labs.github.io/soroban-cost-estimator/",
+			"demoLinks": [
+				"https://stellar-cost-labs.github.io/soroban-cost-estimator/ (website)"
+			],
+			"contractIds": [
+				"CC4WIEYYSCFGDJXMLZ73FKUUJNDEOJRNOOBZHI55QR27NW4RCNTHAQ5T"
+			],
+			"notes": "README 33,261 characters."
+		}
+	]
+}

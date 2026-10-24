@@ -1,0 +1,225 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T18:04:12.285Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/repo-05",
+		"stored": false,
+		"repo": {
+			"fullName": "repo-05",
+			"url": "https://github.com/repo-05",
+			"readAt": "2026-10-23T18:04:11.639Z",
+			"readMs": 646,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "26 file(s) named or placed as tests, e.g. contracts/orbital-pool/src/test.rs, src/components/attack/AttackView.test.tsx, src/components/pool/ClassicCurve.test.tsx and 7 more. Whether they run or pass is not read.",
+									"values": [
+										"contracts/orbital-pool/src/test.rs",
+										"src/components/attack/AttackView.test.tsx",
+										"src/components/pool/ClassicCurve.test.tsx",
+										"src/components/pool/PoolView.balance.test.tsx",
+										"src/components/pool/PoolView.mode.test.tsx",
+										"src/components/pool/PoolView.test.tsx",
+										"src/components/wallet/ConnectButton.test.tsx",
+										"src/components/wallet/WalletPanel.test.tsx",
+										"src/components/wallet/WalletProvider.test.tsx",
+										"src/hooks/usePool.test.tsx"
+									],
+									"count": 26
+								},
+								{
+									"id": "ciConfig",
+									"state": "not-found",
+									"finding": "No CI config in the tree (.github/workflows, .gitlab-ci.yml, .circleci, Travis, Azure Pipelines, Jenkinsfile or Bitbucket Pipelines).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "The repo's website field: https://b2b-orbital.vercel.app. Not opened, so whether they load is not checked.",
+									"values": ["https://b2b-orbital.vercel.app"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 2 Stellar package(s) Scout recognises: @stellar/stellar-sdk, soroban-sdk. SDK versions as declared: soroban-sdk 27, @stellar/stellar-sdk@16.3.0.",
+									"values": ["@stellar/stellar-sdk", "soroban-sdk"],
+									"count": 2
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/orbital-pool; soroban-sdk 27 as declared. Whether they build or are deployed is not read here.",
+									"values": ["contracts/orbital-pool"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "61 commit(s) on main, the last on 2026-09-20; the repo was created on 2026-09-19.",
+									"values": ["2026-09-20T11:27:04Z"],
+									"count": 61
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "26 file(s) named or placed as tests, e.g. contracts/orbital-pool/src/test.rs, src/components/attack/AttackView.test.tsx, src/components/pool/ClassicCurve.test.tsx and 7 more. Whether they run or pass is not read.",
+									"values": [
+										"contracts/orbital-pool/src/test.rs",
+										"src/components/attack/AttackView.test.tsx",
+										"src/components/pool/ClassicCurve.test.tsx",
+										"src/components/pool/PoolView.balance.test.tsx",
+										"src/components/pool/PoolView.mode.test.tsx",
+										"src/components/pool/PoolView.test.tsx",
+										"src/components/wallet/ConnectButton.test.tsx",
+										"src/components/wallet/WalletPanel.test.tsx",
+										"src/components/wallet/WalletProvider.test.tsx",
+										"src/hooks/usePool.test.tsx"
+									],
+									"count": 26
+								},
+								{
+									"id": "ciConfig",
+									"state": "not-found",
+									"finding": "No CI config in the tree (.github/workflows, .gitlab-ci.yml, .circleci, Travis, Azure Pipelines, Jenkinsfile or Bitbucket Pipelines).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/orbital-pool; soroban-sdk 27 as declared. Whether they build or are deployed is not read here.",
+									"values": ["contracts/orbital-pool"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "The repo's website field: https://b2b-orbital.vercel.app. Not opened, so whether they load is not checked.",
+									"values": ["https://b2b-orbital.vercel.app"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

@@ -1,0 +1,21 @@
+Re-check 2: the new tests run against the code at d7fc841b, before the fixes.
+A README or manifest that is not UTF-8 text; a 200 whose body stalls past the deadline;
+a link inside an HTML comment; the demo sentences' scope naming HTML comments.
+
+   × repo evidence never claims a missing thing it did not read > reports the website as the website, never as a demo 3ms
+     → expected 'README.md links nothing outside code …' to match /links nothing outside code hosts, doc…/
+   × repo evidence never claims a missing thing it did not read > does not call an unlabelled README link no demo 0ms
+     → expected 'Scout reads no demo or live-app label…' to match /^Scout reads no demo or live-app labe…/
+   × what a README head shows a judge > reads no link inside an HTML comment 4ms
+     → expected [ 'https://old.example.net', …(2) ] to deeply equal [ 'https://app.example.net' ]
+   × readRepoLive > leaves a file that is not UTF-8 text unread, with that reason 1ms
+     → expected { path: 'README.md', chars: 86, …(4) } to be undefined
+   × readRepoLive > says a body that stalled past the deadline did not arrive in time 304ms
+     → expected 'GitHub answered 200 for the newest co…' to match /did not arrive within the 0\.3-second…/
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: expected 'README.md links nothing outside code …' to match /links nothing outside code hosts, doc…/
+AssertionError: expected 'Scout reads no demo or live-app label…' to match /^Scout reads no demo or live-app labe…/
+AssertionError: expected [ 'https://old.example.net', …(2) ] to deeply equal [ 'https://app.example.net' ]
+AssertionError: expected { path: 'README.md', chars: 86, …(4) } to be undefined
+AssertionError: expected 'GitHub answered 200 for the newest co…' to match /did not arrive within the 0\.3-second…/
+      Tests  5 failed | 38 passed (43)

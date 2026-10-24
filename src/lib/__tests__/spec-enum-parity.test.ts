@@ -411,6 +411,23 @@ describe("hackathon submission vocabularies are their constants (spec 1.9.69)", 
 		expect(sorted(review.checks.items.properties.id.enum)).toEqual(
 			sorted(REVIEW_CHECK_IDS),
 		);
+		const { EVIDENCE_STATES, JUDGED_EVENT_SLUGS, JUDGING_EVIDENCE_IDS } =
+			await import("../hackathon-judging");
+		const { LIVE_READ_PARTS } = await import("../repo-live-read");
+		const evidence =
+			review.judging.properties.categories.items.properties.criteria.items
+				.properties.evidence.items.properties;
+		expect(sorted(evidence.id.enum)).toEqual(sorted(JUDGING_EVIDENCE_IDS));
+		expect(sorted(evidence.state.enum)).toEqual(sorted(EVIDENCE_STATES));
+		expect(sorted(review.repo.properties.unread.items.enum)).toEqual(
+			sorted(LIVE_READ_PARTS),
+		);
+		const hackathonParam = (
+			S.paths["/api/hackathons/review"].get.parameters as Param[]
+		).find((x) => (x as { name?: string }).name === "hackathon");
+		expect(sorted(hackathonParam?.schema.enum ?? [])).toEqual(
+			sorted(JUDGED_EVENT_SLUGS),
+		);
 		const row =
 			S.paths["/api/hackathons/builds"].get.responses["200"].content[
 				"application/json"

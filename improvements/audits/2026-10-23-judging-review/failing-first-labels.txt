@@ -1,0 +1,4 @@
+   × what a README head shows a judge > labels a link a demo from its own words, its cell, or the words before it on its line 7ms
+   × what a README head shows a judge > never lends the line above to a link, in a badge row or a wrapped sentence 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 15 passed (17)
