@@ -66,6 +66,30 @@ export type GetLeaderboardParams = NonNullable<
 	paths["/api/leaderboard"]["get"]["parameters"]["query"]
 >;
 
+/** Query params of any GET path, lifted from the generated schema. */
+type QueryOf<P extends keyof paths> = paths[P] extends {
+	get: { parameters: { query?: infer Q } };
+}
+	? NonNullable<Q>
+	: never;
+
+export type GetPartnersParams = QueryOf<"/api/partners">;
+export type GetPeopleParams = QueryOf<"/api/people">;
+// 1.9.1 typed winnersOnly as a boolean; the schema has it as a string enum, so
+// keep accepting both rather than break a call that compiled before.
+export type SearchHackathonBuildsParams = Omit<
+	QueryOf<"/api/hackathons/builds">,
+	"winnersOnly"
+> & {
+	winnersOnly?: boolean | QueryOf<"/api/hackathons/builds">["winnersOnly"];
+};
+export type AnalyzeHackathonSubmissionsParams =
+	QueryOf<"/api/hackathons/analyze">;
+export type ReviewSubmissionParams = QueryOf<"/api/hackathons/review">;
+export type VerifyClaimParams = QueryOf<"/api/verify">;
+export type LocateSourceParams = QueryOf<"/api/sources/locate">;
+export type GetRwaAssetsParams = QueryOf<"/api/rwa">;
+
 export interface ScoutClientOptions {
 	/** API origin. Defaults to https://stellarlight.xyz */
 	baseUrl?: string;
@@ -153,7 +177,9 @@ export class ScoutClient {
 
 	/** Curated directory of ecosystem partners (audit firms, anchors, on/off-ramps, infra). */
 	getPartners(
-		params: Record<string, unknown> = {},
+		// 1.9.1 took an open record, and the API normalizes labels ("Europe",
+		// accepting=1), so the open form stays legal beside the typed one.
+		params: GetPartnersParams | Record<string, unknown> = {},
 	): Promise<Record<string, unknown>> {
 		return this.get("/api/partners", params);
 	}
@@ -264,14 +290,32 @@ export class ScoutClient {
 
 	/** Search what was BUILT at Stellar hackathons (prior-art over prototypes). */
 	searchHackathonBuilds(
-		params: {
-			q?: string;
-			winnersOnly?: boolean;
-			track?: string;
-			limit?: number;
-		} = {},
+		params: SearchHackathonBuildsParams = {},
 	): Promise<Record<string, unknown>> {
 		return this.get("/api/hackathons/builds", params);
+	}
+
+	/** One hackathon submission in full, by the `id` searchHackathonBuilds returns (or a bare DoraHacks buidl number). */
+	getHackathonSubmission(id: string): Promise<Record<string, unknown>> {
+		return this.get(`/api/hackathons/builds/${encodeURIComponent(id)}`);
+	}
+
+	/** Facet rollup over the build index (winners vs others by category, package, track, event, year and more). */
+	analyzeHackathonSubmissions(
+		params: AnalyzeHackathonSubmissionsParams = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/hackathons/analyze", params);
+	}
+
+	/**
+	 * Evidence review of one submission or repo: checks, similar builds, pitch
+	 * view. Pass `hackathon` to map that event's judging criteria to the repo's
+	 * evidence (a repo with no stored submission is read live).
+	 */
+	reviewSubmission(
+		params: ReviewSubmissionParams,
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/hackathons/review", params);
 	}
 
 	/** Enumerable registry of Stellar security-audit reports. */
@@ -311,10 +355,32 @@ export class ScoutClient {
 	}
 
 	/** SDF team / people index. */
-	getPeople(
-		params: { q?: string; section?: string } = {},
-	): Promise<Record<string, unknown>> {
+	getPeople(params: GetPeopleParams = {}): Promise<Record<string, unknown>> {
 		return this.get("/api/people", params);
+	}
+
+	/** Scout's self-report: known limitations, guards, open findings, coverage. Read it to calibrate how far to rely on the other endpoints. */
+	getQualityReport(): Promise<Record<string, unknown>> {
+		return this.get("/api/quality");
+	}
+
+	/** Verify an audit claim ("Is Blend audited?") against indexed evidence: verdict, dated evidence, confidence. */
+	verifyClaim(
+		params: VerifyClaimParams = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/verify", params);
+	}
+
+	/** Point a symbol, flag, config key or stellar-cli command at the file and line that defines it in the Stellar core repos. */
+	locateSource(params: LocateSourceParams): Promise<Record<string, unknown>> {
+		return this.get("/api/sources/locate", params);
+	}
+
+	/** Registry of tokenized real-world assets on Stellar, with product state and verification level. */
+	getRwaAssets(
+		params: GetRwaAssetsParams = {},
+	): Promise<Record<string, unknown>> {
+		return this.get("/api/rwa", params);
 	}
 
 	/** One partner's full profile by slug. */

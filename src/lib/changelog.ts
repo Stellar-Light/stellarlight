@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-24",
+		surfaces: ["api-client"],
+		version: "api-client@1.10.0",
+		type: "added",
+		summary:
+			"The client catches up with the spec: new methods `getHackathonSubmission`, `analyzeHackathonSubmissions`, `reviewSubmission` (with its `hackathon` parameter), `verifyClaim`, `locateSource`, `getRwaAssets` and `getQualityReport`, and `searchHackathonBuilds`, `getPeople` and `getPartners` accept every query parameter the spec declares.",
+		detail:
+			"Version 1.9.1 was cut at spec 1.9.52. Three of the seven operations (`getQualityReport`, `verifyClaim`, `getRwaAssets`) were already served then and never got a method; the other four (`getHackathonSubmission`, `analyzeHackathonSubmissions`, `reviewSubmission`, `locateSource`) shipped after it. Either way a consumer of the package had to hand-roll fetch calls for them. `searchHackathonBuilds` now also takes `mode`, `hackathon`, `category`, `package` and `offset`; `getPeople` takes `limit` and `offset`; `getPartners` now lists the spec's parameters. Additive: every call form 1.9.1 accepted still compiles (`searchHackathonBuilds` keeps a boolean `winnersOnly`, `getPartners` keeps accepting an open record), which a repo test checks against the compiler. A repo test now fails when the spec has an operation without a client method or a query parameter a method's type rejects, so the client cannot fall behind silently again.",
+	},
+	{
+		date: "2026-10-24",
 		surfaces: ["mcp"],
 		version: "scout-mcp@1.8.1",
 		type: "added",

@@ -73,6 +73,13 @@ const research = await scout.searchResearch({
 | `scfPitch(params)` | `GET /api/scf-pitch` |
 | `hackathonBrief(params)` | `GET /api/hackathon-brief` |
 | `searchHackathonBuilds(params)` | `GET /api/hackathons/builds` |
+| `getHackathonSubmission(id)` | `GET /api/hackathons/builds/{id}` |
+| `analyzeHackathonSubmissions(params)` | `GET /api/hackathons/analyze` |
+| `reviewSubmission(params)` | `GET /api/hackathons/review` |
+| `verifyClaim(params)` | `GET /api/verify` |
+| `locateSource(params)` | `GET /api/sources/locate` |
+| `getRwaAssets(params)` | `GET /api/rwa` |
+| `getQualityReport()` | `GET /api/quality` |
 | `getPeople(params)` | `GET /api/people` |
 | `getPartner(slug)` | `GET /api/partners/{slug}` |
 | `matchPartners(body)` | `POST /api/partners/match` |
@@ -84,7 +91,7 @@ const research = await scout.searchResearch({
 | `getFeedbackSchema()` | `GET /api/feedback` |
 | `submitFeedback(body)` | `POST /api/feedback` |
 
-Full coverage of the live OpenAPI spec (35 operations). All endpoints are
+Full coverage of the live OpenAPI spec (42 operations, enforced by a repo test that fails when the spec gains an operation or query parameter the client lacks). All endpoints are
 public and read-only except feedback and the partner POST flows; no auth,
 edge-cached.
 
