@@ -92,7 +92,7 @@ export const Projects: CollectionConfig = {
 			defaultValue: "Draft",
 			admin: {
 				description:
-					"Draft = hidden pending approval. Development/Pre-Release/Live = active, shown + ranked. Inactive = defunct/abandoned (e.g. dead repo, product shut down) — dropped from the leaderboard, directory, and home, and heavily down-ranked in search so it never outranks a live project on borrowed GitHub clout (the Keybase-at-#2 problem).",
+					"Draft = hidden pending approval. Development/Pre-Release/Live = active, shown + ranked. Inactive = defunct/abandoned (e.g. dead repo, product shut down); dropped from the leaderboard, directory, and home, and heavily down-ranked in search so it never outranks a live project on borrowed GitHub clout (the Keybase-at-#2 problem).",
 			},
 		},
 		{
@@ -184,7 +184,7 @@ export const Projects: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record — pair with status: Draft to suppress a duplicate (a duplicate is hidden, never dead; Inactive is a death verdict and is reserved for projects that actually shut down). Search still admits the row as a fold candidate so a lookup of the old name resolves to the canonical.",
+					"Slug of the canonical project this record is a duplicate/rename of (leave empty for standalone projects). Does not delete or hide this record: pair with status: Draft to suppress a duplicate (a duplicate is hidden, never dead; Inactive is a death verdict and is reserved for projects that actually shut down). Search still admits the row as a fold candidate so a lookup of the old name resolves to the canonical.",
 			},
 		},
 		{
@@ -211,7 +211,7 @@ export const Projects: CollectionConfig = {
 					type: "textarea",
 					admin: {
 						description:
-							"Short historical note for a defunct/changed project, e.g. 'Live CDP protocol; shut down 2026, team pivoted to Zenex.' Quoted verbatim by agents — keep it factual and dated.",
+							"Short historical note for a defunct/changed project, e.g. 'Live CDP protocol; shut down 2026, team pivoted to Zenex.' Quoted verbatim by agents; keep it factual and dated.",
 					},
 				},
 			],
@@ -343,7 +343,7 @@ export const Projects: CollectionConfig = {
 							type: "number",
 							admin: {
 								description:
-									"Events since the previous snapshot (over deltaDays). null until a second snapshot exists — NOT zero activity",
+									"Events since the previous snapshot (over deltaDays). null until a second snapshot exists. NOT zero activity",
 							},
 						},
 						{
@@ -358,7 +358,7 @@ export const Projects: CollectionConfig = {
 							type: "number",
 							admin: {
 								description:
-									"Lifetime times called as a subcall — low for contracts users hit directly; read WITH events",
+									"Lifetime times called as a subcall: low for contracts users hit directly; read WITH events",
 							},
 						},
 						{ name: "storageEntries", type: "number" },
@@ -383,7 +383,7 @@ export const Projects: CollectionConfig = {
 					type: "number",
 					admin: {
 						description:
-							"Accounts that have EVER opened a trustline to the asset (reach). Paired with assetHolders, which counts accounts holding a balance today (active) — reach is always >= active, so never read this one as the active-address count",
+							"Accounts that have EVER opened a trustline to the asset (reach). Paired with assetHolders, which counts accounts holding a balance today (active); reach is always >= active, so never read this one as the active-address count",
 					},
 				},
 				{
@@ -391,7 +391,7 @@ export const Projects: CollectionConfig = {
 					type: "number",
 					admin: {
 						description:
-							"Lifetime count of payment operations in this asset — the transaction-volume metric. A count, not an amount",
+							"Lifetime count of payment operations in this asset: the transaction-volume metric. A count, not an amount",
 					},
 				},
 				{
@@ -399,7 +399,7 @@ export const Projects: CollectionConfig = {
 					type: "number",
 					admin: {
 						description:
-							"Lifetime payment volume in whole asset units (NOT USD — a unit count in the asset's own denomination, so it is not comparable across assets without a price)",
+							"Lifetime payment volume in whole asset units (NOT USD; a unit count in the asset's own denomination, so it is not comparable across assets without a price)",
 					},
 				},
 				{
@@ -407,7 +407,7 @@ export const Projects: CollectionConfig = {
 					type: "number",
 					admin: {
 						description:
-							"Payment-count change since the previous snapshot — the 'is it still being used' signal a lifetime total can't give",
+							"Payment-count change since the previous snapshot: the 'is it still being used' signal a lifetime total can't give",
 					},
 				},
 				{
@@ -495,7 +495,7 @@ export const Projects: CollectionConfig = {
 			type: "array",
 			admin: {
 				description:
-					"Curated route-level bridge evidence (sls-032): chain pair, direction, assets, destination representation, mechanism, source URL, as-of date. Populated by scripts/data/curate-projects.ts ROUTES_SET only — empty means not-yet-curated, not route-free.",
+					"Curated route-level bridge evidence (sls-032): chain pair, direction, assets, destination representation, mechanism, source URL, as-of date. Populated by scripts/data/curate-projects.ts ROUTES_SET only; empty means not-yet-curated, not route-free.",
 			},
 			fields: [
 				{ name: "fromChain", type: "text", required: true },
@@ -511,7 +511,7 @@ export const Projects: CollectionConfig = {
 					hasMany: true,
 					admin: {
 						description:
-							"Asset codes moved on this route (e.g. USDC). Empty = asset scope not curated (aggregator/router routes are quote-time) — unknown, not none.",
+							"Asset codes moved on this route (e.g. USDC). Empty = asset scope not curated (aggregator/router routes are quote-time); unknown, not none.",
 					},
 				},
 				{
@@ -576,7 +576,7 @@ export const Projects: CollectionConfig = {
 			type: "array",
 			admin: {
 				description:
-					"#742 (sls-023/029): per-PRODUCT deployment records — provider Live and product-live-on-network are DIFFERENT statements. Curated only (PRODUCTS_FIX); evidenceUrl + asOf are REQUIRED so every product claim is citable by construction. Empty = no product-level records yet (never 'no products').",
+					"#742 (sls-023/029): per-PRODUCT deployment records: provider Live and product-live-on-network are DIFFERENT statements. Curated only (PRODUCTS_FIX); evidenceUrl + asOf are REQUIRED so every product claim is citable by construction. Empty = no product-level records yet (never 'no products').",
 			},
 			fields: [
 				{ name: "name", type: "text", required: true },
@@ -640,7 +640,7 @@ export const Projects: CollectionConfig = {
 			type: "array",
 			admin: {
 				description:
-					"Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Populated by scripts/data/curate-projects.ts AVAILABILITY_SET only — empty means not-yet-curated, not unavailable.",
+					"Per-platform app availability (sls-033): platform, reachable/unavailable state, store URL, and the date it was checked. Distinct from `status` (project lifecycle). Populated by scripts/data/curate-projects.ts AVAILABILITY_SET only; empty means not-yet-curated, not unavailable.",
 			},
 			fields: [
 				{
@@ -679,7 +679,7 @@ export const Projects: CollectionConfig = {
 					type: "text",
 					admin: {
 						description:
-							"YYYY-MM-DD the availability state was last verified — availability is a dated fact, re-check before relying on it.",
+							"YYYY-MM-DD the availability state was last verified; availability is a dated fact, re-check before relying on it.",
 					},
 				},
 				{
@@ -697,7 +697,7 @@ export const Projects: CollectionConfig = {
 			type: "group",
 			admin: {
 				description:
-					"SCF Public Goods Award (Pilots) recipient data — CSV-confirmed rounds only (pg-atlas-frontend Airtable exports), never merged-proposal inference (both accepted AND rejected proposals get merged upstream). Q2'26 outcomes live on Tansu and are excluded until readable.",
+					"SCF Public Goods Award (Pilots) recipient data: CSV-confirmed rounds only (pg-atlas-frontend Airtable exports), never merged-proposal inference (both accepted AND rejected proposals get merged upstream). Q2'26 outcomes live on Tansu and are excluded until readable.",
 			},
 			fields: [
 				{
@@ -787,7 +787,7 @@ export const Projects: CollectionConfig = {
 							type: "number",
 							admin: {
 								description:
-									"SCF round number, or empty for an award SCF does not number — read awardName for those",
+									"SCF round number, or empty for an award SCF does not number; read awardName for those",
 							},
 						},
 						{
@@ -997,7 +997,7 @@ export const Projects: CollectionConfig = {
 			defaultValue: 0,
 			admin: {
 				description:
-					"Editorial search-ranking boost (0-100). Lifts canonical/flagship projects above incidental keyword mentions in /api/projects/search. Guide: 90 = the canonical pick for its category (Freighter, Soroswap, Blend, Reflector, USDC); 70 = established; 50 = notable; 0 = default. Distinct from relevanceScore (auto-computed) — this is curated.",
+					"Editorial search-ranking boost (0-100). Lifts canonical/flagship projects above incidental keyword mentions in /api/projects/search. Guide: 90 = the canonical pick for its category (Freighter, Soroswap, Blend, Reflector, USDC); 70 = established; 50 = notable; 0 = default. Distinct from relevanceScore (auto-computed); this is curated.",
 				position: "sidebar",
 			},
 		},

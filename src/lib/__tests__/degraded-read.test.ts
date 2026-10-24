@@ -35,7 +35,7 @@ describe("degradedRead", () => {
 		);
 		expect(r.value).toEqual({ docs: [] });
 		expect(r.warning).toBe(
-			"backend read failed: repos candidate fetch — results may be incomplete (MongoServerSelectionError)",
+			"backend read failed: repos candidate fetch; results may be incomplete (MongoServerSelectionError)",
 		);
 		expect(r.warning).not.toContain("mongodb.net");
 	});
@@ -65,7 +65,7 @@ describe("degradedRead", () => {
 		expect(await p).toEqual({
 			value: 0,
 			warning:
-				"backend read failed: builders roster — results may be incomplete (timeout after 50ms)",
+				"backend read failed: builders roster; results may be incomplete (timeout after 50ms)",
 		});
 	});
 
@@ -106,7 +106,7 @@ describe("withReadTimeout", () => {
 		);
 		await vi.advanceTimersByTimeAsync(30);
 		expect(await p).toBe(
-			"backend read failed: audits rollup — results may be incomplete (timeout after 30ms)",
+			"backend read failed: audits rollup; results may be incomplete (timeout after 30ms)",
 		);
 	});
 });
@@ -121,7 +121,7 @@ describe("degradedWarning / isDegraded", () => {
 
 	it("a string cause is the class; an unknown value is not pretended to be one", () => {
 		expect(degradedWarning("db", "no database handle")).toBe(
-			"backend read failed: db — results may be incomplete (no database handle)",
+			"backend read failed: db; results may be incomplete (no database handle)",
 		);
 		expect(degradedWarning("db", 42)).toContain("(unknown error)");
 	});

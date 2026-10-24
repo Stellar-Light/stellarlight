@@ -118,14 +118,14 @@ export type RepoMatchMode = (typeof REPO_MATCH_MODES)[number];
 
 export const MATCH_MODE_LABEL: Record<RepoMatchMode, string> = {
 	strict: "every query term matched in the best row on this page",
-	partial: "some query terms matched — rows may be adjacent to the intent",
+	partial: "some query terms matched: rows may be adjacent to the intent",
 	// sls-093, the repo port of sls-076: strupey reached Stroopy rows through
 	// the correction table and was labelled "every query term matched".
 	corrected:
 		"matched via a known spelling correction: the query token does not occur in these rows, so verify the identity before relying on them",
 	// The one that matters: rows exist but nothing the caller asked for hit.
-	weak: "no query term matched — these are ranked neighbours, NOT matches (verify relevance before relying on them; an empty result would have been the honest answer if none are right)",
-	all: "no query supplied — ranked by repo quality",
+	weak: "no query term matched: these are ranked neighbours, NOT matches (verify relevance before relying on them; an empty result would have been the honest answer if none are right)",
+	all: "no query supplied: ranked by repo quality",
 	none: "the search failed; this is not evidence of absence",
 };
 

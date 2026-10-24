@@ -9,7 +9,7 @@
  */
 export const STELLAR_DEVELOPER_ACTIVITY_SKILL = `---
 name: stellar-developer-activity
-description: Query developer activity metrics for the Stellar blockchain ecosystem — active developers, commits, country breakdown, and a ranked leaderboard of Stellar projects. Use this skill when the user asks about who is building on Stellar, how many devs are active, which projects are most active, or how Stellar compares to other L1 chains.
+description: Query developer activity metrics for the Stellar blockchain ecosystem: active developers, commits, country breakdown, and a ranked leaderboard of Stellar projects. Use this skill when the user asks about who is building on Stellar, how many devs are active, which projects are most active, or how Stellar compares to other L1 chains.
 ---
 
 # Stellar Developer Activity
@@ -38,8 +38,8 @@ Returns ranked projects + ecosystem-wide developer stats. Cached for 5 minutes a
 |---|---|---|---|
 | \`sort\` | string | \`activity\` | \`activity\`, \`stars\`, \`issues\` |
 | \`range\` | string | \`all\` | \`7d\`, \`30d\`, \`90d\`, \`1y\`, \`all\` |
-| \`category\` | string | — | \`Infrastructure\`, \`Tooling\`, \`Partner Integration\`, \`User-Facing App\`, \`Asset\`, \`Protocol/Contract\`, \`Anchor\` |
-| \`limit\` | number | \`50\` | 1–300 |
+| \`category\` | string | - | \`Infrastructure\`, \`Tooling\`, \`Partner Integration\`, \`User-Facing App\`, \`Asset\`, \`Protocol/Contract\`, \`Anchor\` |
+| \`limit\` | number | \`50\` | 1-300 |
 | \`format\` | string | \`json\` | \`json\`, \`csv\` |
 
 ### Response shape
@@ -101,5 +101,5 @@ Each project has a public profile at \`https://stellarlight.xyz/project/{slug}\`
 
 ## Attribution
 
-Attribute to **Electric Capital — Open Dev Data** (ecosystem stats) and **stellarlight.xyz** (project leaderboard).
+Attribute to **Electric Capital's Open Dev Data** (ecosystem stats) and **stellarlight.xyz** (project leaderboard).
 `;

@@ -229,7 +229,7 @@ export function composeAuditTitle(
 	auditorName: string,
 	reportName?: string | null,
 ): string {
-	const base = `${normalizeIdentityText(protocolName)} — ${canonicalAuditor(auditorName)}`;
+	const base = `${normalizeIdentityText(protocolName)}: ${canonicalAuditor(auditorName)}`;
 	const name = reportName ? normalizeIdentityText(reportName) : "";
 	if (!name) return base;
 

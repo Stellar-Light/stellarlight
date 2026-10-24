@@ -93,7 +93,7 @@ export const AwardNominees: CollectionConfig = {
 			type: "textarea",
 			admin: {
 				description:
-					"Why nominated — shown on the ballot card instead of the project's shortDescription when set.",
+					"Why nominated: shown on the ballot card instead of the project's shortDescription when set.",
 			},
 		},
 	],

@@ -41,7 +41,7 @@ export const DIRECTORY_CATEGORIES: DirectoryCategory[] = [
 		type: "Wallet",
 		heading: "Stellar Wallets",
 		description:
-			"Wallets that hold XLM and Stellar-issued assets — custodial, self-custody, smart-contract and passkey wallets — with the platforms each one ships on and whether it is still maintained.",
+			"Wallets that hold XLM and Stellar-issued assets (custodial, self-custody, smart-contract and passkey wallets) with the platforms each one ships on and whether it is still maintained.",
 	},
 	{
 		slug: "rwa",

@@ -19,7 +19,7 @@ export interface paths {
         };
         /**
          * Service health + endpoint enumeration
-         * @description Self-describe / health endpoint — service ok + versions, per-source freshness and counts (`sources[]`), recent usage, and an enumeration of every /api/* endpoint. Cheap, no params. Use to check how fresh/large the data is or to discover endpoints. Not for the data itself → call the matching search operation.
+         * @description Self-describe / health endpoint: service ok + versions, per-source freshness and counts (`sources[]`), recent usage, and an enumeration of every /api/* endpoint. Cheap, no params. Use to check how fresh/large the data is or to discover endpoints. Not for the data itself → call the matching search operation.
          */
         get: operations["getStatus"];
         put?: never;
@@ -38,8 +38,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Stellar Light's OWN data-quality self-report — this source's known limitations, per-surface health, guard state
-         * @description Scout / Stellar Light's SELF-REPORT, for calibrating how much to rely on THIS service's answers — not a general trust, health, or quality tool. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what THIS directory is missing WHERE, with real slugs; missFunnel replays this service's open recall findings to say at which STAGE each dies. Also: per-surface open findings, the row-score definition, status-basis mix, repo coverage, every guard with its promise and whether it holds, and the trend. Counts carry denominators. No parameters.
+         * Stellar Light's OWN data-quality self-report: this source's known limitations, per-surface health, guard state
+         * @description Scout / Stellar Light's SELF-REPORT, for calibrating how much to rely on THIS service's answers; not a general trust, health, or quality tool. knownLimitations is DERIVED from our measurements and says what to do INSTEAD; read it first. gapMatrix names what THIS directory is missing WHERE, with real slugs; missFunnel replays this service's open recall findings to say at which STAGE each dies. Also: per-surface open findings, the row-score definition, status-basis mix, repo coverage, every guard with its promise and whether it holds, and the trend. Counts carry denominators. No parameters.
          */
         get: operations["getQualityReport"];
         put?: never;
@@ -58,8 +58,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Verify a claim (audited / live / maintained / issued) against indexed evidence — verdict + evidence + confidence
-         * @description Claim in → verdict out, dated evidence attached. Types: audited (audit registry), live (the status record + provenance tier — Pre-Release CONTRADICTS a live claim, source attached), maintained (indexed code activity + curated knowledgeNotes), issued ('is EURC issued by Circle' — the stablecoin registry; a multi-issuer ticker names EVERY issuer, so attribution is checkable, never conflated). Verdicts assert OUR corpus, never the world: supported / contradicted / unsupported (statement carries the denominator) / unresolved. Answers carry the full subject card.
+         * Verify a claim (audited / live / maintained / issued) against indexed evidence: verdict + evidence + confidence
+         * @description Claim in → verdict out, dated evidence attached. Types: audited (audit registry), live (the status record + provenance tier; Pre-Release CONTRADICTS a live claim, source attached), maintained (indexed code activity + curated knowledgeNotes), issued ('is EURC issued by Circle': the stablecoin registry; a multi-issuer ticker names EVERY issuer, so attribution is checkable, never conflated). Verdicts assert OUR corpus, never the world: supported / contradicted / unsupported (statement carries the denominator) / unresolved. Answers carry the full subject card.
          */
         get: operations["verifyClaim"];
         put?: never;
@@ -79,7 +79,7 @@ export interface paths {
         };
         /**
          * Resolve a historical project name to what it is now
-         * @description Reconciles a name found in an old post, changelog, README or repo against the current directory: returns the record it names, where to look NOW if that record was superseded, and the evidence behind any inactive status. **Use when:** you hit a project name that matches nothing current and need to know whether it was renamed, replaced, or is simply untracked. **Not for:** searching for projects by topic (→ searchProjects). A miss means NOT TRACKED HERE — never that the name never existed, never that it is defunct.
+         * @description Reconciles a name found in an old post, changelog, README or repo against the current directory: returns the record it names, where to look NOW if that record was superseded, and the evidence behind any inactive status. **Use when:** you hit a project name that matches nothing current and need to know whether it was renamed, replaced, or is simply untracked. **Not for:** searching for projects by topic (→ searchProjects). A miss means NOT TRACKED HERE: never that the name never existed, never that it is defunct.
          */
         get: operations["resolveProject"];
         put?: never;
@@ -119,7 +119,7 @@ export interface paths {
         };
         /**
          * Recent changes to the API, MCP tools, and client
-         * @description A curated, latest-first feed of contract-affecting changes — new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here to see what changed lately without reading git history. **Use when:** you cached the API surface earlier and want to know what moved before relying on it, or you're debugging a field/param that changed. **Not for:** the actual ecosystem data → use the relevant search endpoint; current health / source freshness / version → use /api/status.
+         * @description A curated, latest-first feed of contract-affecting changes: new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here to see what changed lately without reading git history. **Use when:** you cached the API surface earlier and want to know what moved before relying on it, or you're debugging a field/param that changed. **Not for:** the actual ecosystem data → use the relevant search endpoint; current health / source freshness / version → use /api/status.
          */
         get: operations["getChangelog"];
         put?: never;
@@ -138,8 +138,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Search Stellar projects — look up a project by name, or find prior art / competitors
-         * @description Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. THE way to LOOK UP a specific project by its name (a named protocol/app/wallet/tool) AND to discover 'who/what already exists for X'; the `type` filter gives exact product-type rosters (Wallet, DEX, Oracle, Lending, Payments, Stablecoin, RWA…). Not for docs, standards, or how-to/reference knowledge → use searchResearch.
+         * Search Stellar projects: look up a project by name, or find prior art / competitors
+         * @description Search the curated directory of Stellar projects/products: what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. THE way to LOOK UP a specific project by its name (a named protocol/app/wallet/tool) AND to discover 'who/what already exists for X'; the `type` filter gives exact product-type rosters (Wallet, DEX, Oracle, Lending, Payments, Stablecoin, RWA…). Not for docs, standards, or how-to/reference knowledge → use searchResearch.
          */
         get: operations["searchProjects"];
         put?: never;
@@ -159,7 +159,7 @@ export interface paths {
         };
         /**
          * Search the Stellar GitHub repo / code-reference index
-         * @description Search the indexed Stellar ecosystem GitHub code repos — actual source graded by repoScore (0-100: freshness + traction + ecosystem authority), filterable by `language`/`minScore`. Use for 'show me the code/repos for X' or 'find a Rust/Soroban implementation of X' — prior-art source to read, fork, or cite. Not for products/companies and their funding/status → use searchProjects.
+         * @description Search the indexed Stellar ecosystem GitHub code repos: actual source graded by repoScore (0-100: freshness + traction + ecosystem authority), filterable by `language`/`minScore`. Use for 'show me the code/repos for X' or 'find a Rust/Soroban implementation of X'; prior-art source to read, fork, or cite. Not for products/companies and their funding/status → use searchProjects.
          */
         get: operations["searchRepos"];
         put?: never;
@@ -179,7 +179,7 @@ export interface paths {
         };
         /**
          * Deep code answer about a Stellar repo (routing × DeepWiki)
-         * @description Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo — 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Degrades to the routed repo + deepWikiUrl when DeepWiki is unavailable. Not for discovering which repos/projects exist → use searchRepos.
+         * @description Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo: 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Degrades to the routed repo + deepWikiUrl when DeepWiki is unavailable. Not for discovering which repos/projects exist → use searchRepos.
          */
         get: operations["explainRepo"];
         put?: never;
@@ -199,7 +199,7 @@ export interface paths {
         };
         /**
          * List Stellar hackathons
-         * @description Browse/LIST Stellar hackathon events — a merged, de-duplicated curated + live DoraHacks feed (dates, status, organizer, prize pools), sorted upcoming→active→completed then newest-first. The entry point for event slugs; zero-result forward-looking queries return `meta.fallbackChannels` (surface them, don't dead-end). Not for one event's winners/submissions/tracks → use getHackathon.
+         * @description Browse/LIST Stellar hackathon events: a merged, de-duplicated curated + live DoraHacks feed (dates, status, organizer, prize pools), sorted upcoming→active→completed then newest-first. The entry point for event slugs; zero-result forward-looking queries return `meta.fallbackChannels` (surface them, don't dead-end). Not for one event's winners/submissions/tracks → use getHackathon.
          */
         get: operations["getHackathons"];
         put?: never;
@@ -238,8 +238,8 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Compare 2–5 hackathons side-by-side
-         * @description Side-by-side comparison of 2–5 hackathons by slug: prize pool, submissions, winners, prize per winner and, for every event with stored submissions, a `profile` (top categories, Stellar packages, repo activity after the event) counted like analyzeHackathonSubmissions. `deltas.facetShifts` names the category and package shares that moved most between the events. Curated events add cohort durability. Unresolved slugs return source:'not-found'; resolve slugs via getHackathons. Ecosystem-wide totals → use analyzeEcosystem.
+         * Compare 2-5 hackathons side-by-side
+         * @description Side-by-side comparison of 2-5 hackathons by slug: prize pool, submissions, winners, prize per winner and, for every event with stored submissions, a `profile` (top categories, Stellar packages, repo activity after the event) counted like analyzeHackathonSubmissions. `deltas.facetShifts` names the category and package shares that moved most between the events. Curated events add cohort durability. Unresolved slugs return source:'not-found'; resolve slugs via getHackathons. Ecosystem-wide totals → use analyzeEcosystem.
          */
         get: operations["compareHackathons"];
         put?: never;
@@ -339,7 +339,7 @@ export interface paths {
         };
         /**
          * Search Stellar builders
-         * @description The Stellar PEOPLE directory — builder profiles synced from Stellar Passport (bio, role, location, shipped projects[]), searchable by `q`/`skill` and `location`. Use to find a person to recruit, hire, or collaborate with. Not for the company/product behind a project ('who built X') → use searchProjects. Profiles carry NO populated SCF-tier/award data.
+         * @description The Stellar PEOPLE directory: builder profiles synced from Stellar Passport (bio, role, location, shipped projects[]), searchable by `q`/`skill` and `location`. Use to find a person to recruit, hire, or collaborate with. Not for the company/product behind a project ('who built X') → use searchProjects. Profiles carry NO populated SCF-tier/award data.
          */
         get: operations["getBuilders"];
         put?: never;
@@ -359,7 +359,7 @@ export interface paths {
         };
         /**
          * SDF team / people index
-         * @description The Stellar Development Foundation org/people index — leadership, board of directors, and advisors (name → role → org), quoted from stellar.org/foundation/team with provenance. Use for 'who is <person>', 'what is <person>'s role at SDF', 'who leads <area>', 'who's on the SDF board'. Distinct from getBuilders (GitHub-contributor profiles) — an SDF VP or board member is NOT a 'builder'. Not for doc/spec authorship → use searchResearch.
+         * @description The Stellar Development Foundation org/people index: leadership, board of directors, and advisors (name → role → org), quoted from stellar.org/foundation/team with provenance. Use for 'who is <person>', 'what is <person>'s role at SDF', 'who leads <area>', 'who's on the SDF board'. Distinct from getBuilders (GitHub-contributor profiles); an SDF VP or board member is NOT a 'builder'. Not for doc/spec authorship → use searchResearch.
          */
         get: operations["getPeople"];
         put?: never;
@@ -379,7 +379,7 @@ export interface paths {
         };
         /**
          * List ecosystem partners
-         * @description Published Stellar ecosystem partner directory — service providers a builder hires or integrates: anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.
+         * @description Published Stellar ecosystem partner directory; service providers a builder hires or integrates: anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.
          */
         get: operations["getPartners"];
         put?: never;
@@ -399,7 +399,7 @@ export interface paths {
         };
         /**
          * Get one partner's full profile
-         * @description Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs. **Use when:** you already know a partner's slug (from /api/partners) and need their full public profile — services, sectors, regions, docs, contact, freshness. **Not for:** discovering partners for a need → use /api/partners with ?type/?sector/?region/?q; a project/product rather than a service provider → use /api/projects/search.
+         * @description Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs. **Use when:** you already know a partner's slug (from /api/partners) and need their full public profile: services, sectors, regions, docs, contact, freshness. **Not for:** discovering partners for a need → use /api/partners with ?type/?sector/?region/?q; a project/product rather than a service provider → use /api/projects/search.
          */
         get: operations["getPartner"];
         put?: never;
@@ -421,7 +421,7 @@ export interface paths {
         put?: never;
         /**
          * AI-rank partners against a plain-language need
-         * @description Describe a builder need in plain language (e.g. 'I need a USDC off-ramp in Mexico with SEP-24') and get the published partners RANKED by fit, each with a one-line reason. Grounded: only real published partners are ranked — nothing is invented. Requires the service to have AI configured; returns 503 `unavailable:true` otherwise (fall back to GET /api/partners filters). **Use when:** an agent needs a scored shortlist for a concrete integration need. **Not for:** browsing the full directory → GET /api/partners; interactive human chat → the /partners/chat page (backed by /api/partners/assistant).
+         * @description Describe a builder need in plain language (e.g. 'I need a USDC off-ramp in Mexico with SEP-24') and get the published partners RANKED by fit, each with a one-line reason. Grounded: only real published partners are ranked; nothing is invented. Requires the service to have AI configured; returns 503 `unavailable:true` otherwise (fall back to GET /api/partners filters). **Use when:** an agent needs a scored shortlist for a concrete integration need. **Not for:** browsing the full directory → GET /api/partners; interactive human chat → the /partners/chat page (backed by /api/partners/assistant).
          */
         post: operations["matchPartners"];
         delete?: never;
@@ -461,7 +461,7 @@ export interface paths {
         put?: never;
         /**
          * AI onboarding helpers: interview chat + profile extraction
-         * @description Two modes for the get-listed flow. `{mode:'chat', messages}` → interview-style reply for a company describing itself. `{mode:'extract', messages}` → structures the transcript into partner-profile `fields` (tagline, services, sectors, regions, contact…; null where nothing was stated — nothing invented). 503 `unavailable:true` without AI configured. **Use when:** turning a get-listed conversation into structured profile fields (then submit via POST /api/partners/submit-listing). **Not for:** finding partners → /api/partners/match or /assistant.
+         * @description Two modes for the get-listed flow. `{mode:'chat', messages}` → interview-style reply for a company describing itself. `{mode:'extract', messages}` → structures the transcript into partner-profile `fields` (tagline, services, sectors, regions, contact…; null where nothing was stated; nothing invented). 503 `unavailable:true` without AI configured. **Use when:** turning a get-listed conversation into structured profile fields (then submit via POST /api/partners/submit-listing). **Not for:** finding partners → /api/partners/match or /assistant.
          */
         post: operations["partnerOnboard"];
         delete?: never;
@@ -481,7 +481,7 @@ export interface paths {
         put?: never;
         /**
          * Submit a new-partner listing (or claim an existing one)
-         * @description Submits a company for directory listing. New companies become a DRAFT partner account reviewed by the Stellar Light team before publication (publishing emails the contact an account invite). If the company is already listed, the submission is recorded as a CLAIM REQUEST on the existing profile instead — no duplicates. Returns `{ok:true, mode:'draft'|'claim'}`. Rate-limited; contactEmail becomes the account login. **Use when:** completing a get-listed flow (fields usually come from /api/partners/onboard extract). **Not for:** editing an existing claimed profile → the partner dashboard.
+         * @description Submits a company for directory listing. New companies become a DRAFT partner account reviewed by the Stellar Light team before publication (publishing emails the contact an account invite). If the company is already listed, the submission is recorded as a CLAIM REQUEST on the existing profile instead; no duplicates. Returns `{ok:true, mode:'draft'|'claim'}`. Rate-limited; contactEmail becomes the account login. **Use when:** completing a get-listed flow (fields usually come from /api/partners/onboard extract). **Not for:** editing an existing claimed profile → the partner dashboard.
          */
         post: operations["submitPartnerListing"];
         delete?: never;
@@ -499,7 +499,7 @@ export interface paths {
         };
         /**
          * List Stellar RFPs (SCF-funded sponsor briefs)
-         * @description Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — `open` means the sponsor brief is still soliciting; it does NOT prove the SCF proposal window accepts submissions today (check meta.scfRound.submissionWindow + currentPhase for that). Closed briefs are past rounds. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built' and where the paid work is: jobs, bounties, freelance briefs for Stellar contributors. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.
+         * @description Curated Stellar RFPs / sponsor briefs (mirrors /ideas); `open` means the sponsor brief is still soliciting; it does NOT prove the SCF proposal window accepts submissions today (check meta.scfRound.submissionWindow + currentPhase for that). Closed briefs are past rounds. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built' and where the paid work is: jobs, bounties, freelance briefs for Stellar contributors. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.
          */
         get: operations["getRfps"];
         put?: never;
@@ -518,7 +518,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * SCF pitch prep — live round, funded peers, gap, prior art, angles in one call
+         * SCF pitch prep: live round, funded peers, gap, prior art, angles in one call
          * @description The 'help me prep a Stellar Community Fund pitch' composite: LIVE round state (open submissions + deadline, never asserting a negative on fetch failure), the vertical's already-funded ACTIVE projects with recorded award totals (differentiation targets), the vet-idea view (competitors, supply-side gap, prior art), and deterministic pitch angles that each name the fact they stand on. No prose generation. Unknown params 400.
          */
         get: operations["scfPitch"];
@@ -538,7 +538,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Hackathon brief — vet + starter repos with trust + live contracts + funding + what not to claim, in one call
+         * Hackathon brief: vet + starter repos with trust + live contracts + funding + what not to claim, in one call
          * @description One call for a hackathon team's first hour: vet (same as vet-idea: competitors, maturity, gap, judged prior art), builds (prototype-layer prior art, hybrid search), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.
          */
         get: operations["hackathonBrief"];
@@ -558,7 +558,7 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Vet a build idea — competitors, maturity, prior art, gap, funding in one call
+         * Vet a build idea: competitors, maturity, prior art, gap, funding in one call
          * @description The 'I want to build X on Stellar' composite: competitor repos (full search stack) + active directory projects in the detected vertical, their maturity from verified evidence (audit registry, live on-chain usage), hackathon prior art from our index (dead prior art is a signal), the vertical's supply-side gap verdict (same computation as analyze?dimension=gaps), and SCF funding presence. Every block carries its basis; no verdict synthesis. vertical=null means the idea doesn't map onto the measurable vertical axis, not that no market exists. Unknown params 400.
          */
         get: operations["vetIdea"];
@@ -579,7 +579,7 @@ export interface paths {
         };
         /**
          * Trust report for one Stellar GitHub repo: maintained, audited, used on mainnet
-         * @description One evidence-grounded answer to 'should I depend on this repo?': scanned code truth (proof, depth, domains, the FULL extracted contract interface), live on-chain usage, audit reports with drift since the latest one, succession both directions, and activity — joined server-side. `signals` is a closed deterministic vocabulary of facts that hold; no synthetic scores. Verify generated calls against codeTruth.contractInterface before invoking a contract. 404 for unindexed repos — absence is not nonexistence. Unknown params 400.
+         * @description One evidence-grounded answer to 'should I depend on this repo?': scanned code truth (proof, depth, domains, the FULL extracted contract interface), live on-chain usage, audit reports with drift since the latest one, succession both directions, and activity; joined server-side. `signals` is a closed deterministic vocabulary of facts that hold; no synthetic scores. Verify generated calls against codeTruth.contractInterface before invoking a contract. 404 for unindexed repos; absence is not nonexistence. Unknown params 400.
          */
         get: operations["getRepoTrust"];
         put?: never;
@@ -599,7 +599,7 @@ export interface paths {
         };
         /**
          * Evidence-gated registry of verified mainnet Soroban contracts
-         * @description Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence — the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist — coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.
+         * @description Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence; the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.
          */
         get: operations["listContracts"];
         put?: never;
@@ -639,7 +639,7 @@ export interface paths {
         };
         /**
          * Enumerable registry of Stellar security-audit reports
-         * @description One row per security-audit report from stellarsecurityportal.com — the structured, enumerable half of the audit corpus (full report text is chunk-served by searchResearch with source=audit). Rows carry a normalized auditor, publication date, and a hand-verified link to the directory project (`projectSlug`). Semantics: a project ABSENT here has no audit on record at our source — NOT a claim it is unaudited; `findingsTotal`/`severityCounts` null = not extracted, NOT zero. Unknown query params are rejected with 400, never silently ignored.
+         * @description One row per security-audit report from stellarsecurityportal.com; the structured, enumerable half of the audit corpus (full report text is chunk-served by searchResearch with source=audit). Rows carry a normalized auditor, publication date, and a hand-verified link to the directory project (`projectSlug`). Semantics: a project ABSENT here has no audit on record at our source. NOT a claim it is unaudited; `findingsTotal`/`severityCounts` null = not extracted, NOT zero. Unknown query params are rejected with 400, never silently ignored.
          */
         get: operations["listAudits"];
         put?: never;
@@ -659,7 +659,7 @@ export interface paths {
         };
         /**
          * Vector search over the Stellar research corpus
-         * @description Semantic search over the Stellar knowledge corpus — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence, and provenance dates (`publishedAt` = the source's own stated date; `observedAt` = when ingest last crawled the page; audits add auditor/severity — filterable; report-level enumeration → listAudits). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.
+         * @description Semantic search over the Stellar knowledge corpus. SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence, and provenance dates (`publishedAt` = the source's own stated date; `observedAt` = when ingest last crawled the page; audits add auditor/severity, filterable; report-level enumeration → listAudits). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.
          */
         get: operations["searchResearch"];
         put?: never;
@@ -699,7 +699,7 @@ export interface paths {
         };
         /**
          * Get one skill's full content
-         * @description Full detail for ONE skill by slug or display name — metadata plus, for entries listed on skills.stellar.org (SDF authored and community-built), the complete raw SKILL.md text (`.skill.content`, fetched live from where the registry links it). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.
+         * @description Full detail for ONE skill by slug or display name: metadata plus, for entries listed on skills.stellar.org (SDF authored and community-built), the complete raw SKILL.md text (`.skill.content`, fetched live from where the registry links it). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.
          */
         get: operations["getSkill"];
         put?: never;
@@ -719,7 +719,7 @@ export interface paths {
         };
         /**
          * Topic clusters with crowdedness scores
-         * @description Groups the active Stellar project directory into topic clusters scored on crowdedness (1–10, log-scaled) — the market-map view of saturated vs underbuilt lanes, i.e. WHERE TO BUILD. Per cluster: size, SCF funding, hackathon winners, sample projects; `dimension=category|types`. Answers 'what's crowded / where is whitespace'. Not for looking up a named project → use searchProjects.
+         * @description Groups the active Stellar project directory into topic clusters scored on crowdedness (1-10, log-scaled): the market-map view of saturated vs underbuilt lanes, i.e. WHERE TO BUILD. Per cluster: size, SCF funding, hackathon winners, sample projects; `dimension=category|types`. Answers 'what's crowded / where is whitespace'. Not for looking up a named project → use searchProjects.
          */
         get: operations["getClusters"];
         put?: never;
@@ -739,7 +739,7 @@ export interface paths {
         };
         /**
          * Cross-event Stellar ecosystem analytics rollup
-         * @description The cross-ecosystem macro rollup — totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers|toolchain`: hackathon + SCF-funding totals, category distribution, DeFi TVL (dated), `gaps` (per-vertical whitespace — what should I build), `developers` (Electric Capital monthly-active devs + trend), and `toolchain` (Soroban-SDK version-status distribution + deprecated-toolchain roster + CI/test presence). gaps/developers/toolchain are SUPPLY/commit-side and as-of dated — never demand or a headcount.
+         * @description The cross-ecosystem macro rollup: totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers|toolchain`: hackathon + SCF-funding totals, category distribution, DeFi TVL (dated), `gaps` (per-vertical whitespace: what should I build), `developers` (Electric Capital monthly-active devs + trend), and `toolchain` (Soroban-SDK version-status distribution + deprecated-toolchain roster + CI/test presence). gaps/developers/toolchain are SUPPLY/commit-side and as-of dated; never demand or a headcount.
          */
         get: operations["analyzeEcosystem"];
         put?: never;
@@ -759,7 +759,7 @@ export interface paths {
         };
         /**
          * Stellar ecosystem developer activity
-         * @description Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.
+         * @description Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric; activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.
          */
         get: operations["getLeaderboard"];
         put?: never;
@@ -779,13 +779,13 @@ export interface paths {
         };
         /**
          * Get the feedback request schema (discovery)
-         * @description Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects. **Use when:** you're about to POST feedback and want the schema first — kind enum, required fields, size limits. **Not for:** actually submitting feedback → POST /api/feedback; browsing what's been reported → not exposed (curator queue is private).
+         * @description Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects. **Use when:** you're about to POST feedback and want the schema first: kind enum, required fields, size limits. **Not for:** actually submitting feedback → POST /api/feedback; browsing what's been reported → not exposed (curator queue is private).
          */
         get: operations["getFeedbackSchema"];
         put?: never;
         /**
          * Submit feedback on Scout's output
-         * @description Send a feedback report when the skill returns wrong / missing / misleading information. Lands in the curator queue. Rate-limited to 6/min/IP (IP hashed with PAYLOAD_SECRET, never stored raw). **Use when:** a Scout query returned something wrong / stale / empty that you believe SHOULD exist — file it so the corpus/endpoint gets fixed. **Not for:** discovering the schema first → GET /api/feedback; reading data (this is a write endpoint) → use the relevant search endpoint.
+         * @description Send a feedback report when the skill returns wrong / missing / misleading information. Lands in the curator queue. Rate-limited to 6/min/IP (IP hashed with PAYLOAD_SECRET, never stored raw). **Use when:** a Scout query returned something wrong / stale / empty that you believe SHOULD exist; file it so the corpus/endpoint gets fixed. **Not for:** discovering the schema first → GET /api/feedback; reading data (this is a write endpoint) → use the relevant search endpoint.
          */
         post: operations["submitFeedback"];
         delete?: never;
@@ -823,7 +823,7 @@ export interface paths {
         };
         /**
          * Stellar stablecoins ranked by USD market cap
-         * @description Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.
+         * @description Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.
          */
         get: operations["getStablecoins"];
         put?: never;
@@ -913,7 +913,7 @@ export interface components {
             filters?: {
                 [key: string]: unknown;
             };
-            /** @description Optional endpoint-specific reading note — semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say. */
+            /** @description Optional endpoint-specific reading note: semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say. */
             note?: string;
             /** @description Present only when there is something to disclose. Two kinds of line share it. (1) A backend read that failed or timed out: the line starts with "backend read failed" and the page may be incomplete; `partial` and `failedReads` carry the same fact as fields. (2) Query parameters this endpoint does not read: names them and states the results are NOT filtered by them. Additive-contract disclosure: the request still succeeds. Two policies, by operation kind, both naming the supported set: the search operations (searchResearch, searchProjects, searchRepos, getPartners, listSkills, getHackathons, getClusters, getLeaderboard, getRfps, getChangelog, getQualityReport, verifyClaim) ignore an unknown parameter and name it here; the registry and lookup operations (listAudits, getChanges, getRwaAssets, getStablecoins, getBuilders, listContracts, searchHackathonBuilds, getPeople, resolveProject, getRepoTrust) reject it with 400 and list the supported parameters in the body (hint, supportedParams or validParams), because a list that looks filtered is worse than a 400. */
             warnings?: string[];
@@ -933,7 +933,7 @@ export interface components {
                 total?: number | null;
                 /** @description Present only when `total` is null: names why no total exists, 'unbounded-similarity-ranking' or 'partial-read'. Disambiguates the null so it is never read as zero or as a missing field. */
                 totalBasis?: string;
-                /** @description projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in `returned` but NOT in `total`). `total` is the keyword match set and is stable across limit AND offset — it used to include these page-one-only rows, so the same query reported total 17 on page one and 6 on page two. On page one `returned` can therefore exceed `total`, and this count is exactly the difference. */
+                /** @description projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in `returned` but NOT in `total`). `total` is the keyword match set and is stable across limit AND offset; it used to include these page-one-only rows, so the same query reported total 17 on page one and 6 on page two. On page one `returned` can therefore exceed `total`, and this count is exactly the difference. */
                 semantic?: number;
             };
         };
@@ -945,7 +945,7 @@ export interface components {
         };
         /** @description One security-audit report row from the /api/audits registry. Null semantics: projectSlug null = the audited codebase has no directory project (NOT 'unaudited'); findingsTotal/severityCounts null = not extracted, NOT zero. */
         Audit: {
-            /** @description Relation metadata: shared by every report of ONE engagement, distinct across engagements — lets a consumer tell a revision from a separate yearly engagement. Null = unclassified (curation pending), never asserted independent. */
+            /** @description Relation metadata: shared by every report of ONE engagement, distinct across engagements; lets a consumer tell a revision from a separate yearly engagement. Null = unclassified (curation pending), never asserted independent. */
             engagementId?: string | null;
             /** @description Version the report states about itself (e.g. 'V2'); null when the source states none. */
             reportVersion?: string | null;
@@ -956,7 +956,7 @@ export interface components {
             /** @description Engagement window end as stated IN the report (YYYY-MM-DD). */
             engagementEnd?: string | null;
             /**
-             * @description Completeness of the deterministic findings extraction — read findingsTotal 7 vs null as different states of KNOWLEDGE, not conflicting counts. Null on rows ingested before this field existed.
+             * @description Completeness of the deterministic findings extraction: read findingsTotal 7 vs null as different states of KNOWLEDGE, not conflicting counts. Null on rows ingested before this field existed.
              * @enum {string|null}
              */
             findingsExtraction?: "extracted" | "not-extracted" | "partial" | null;
@@ -975,7 +975,7 @@ export interface components {
             linkBasis?: string | null;
             /** Format: date-time */
             publishedAt?: string | null;
-            /** @description published = real date-stamp; portal-record = wall-clock portal timestamp (likely upload time) — not publication recency; null = pre-dateBasis row */
+            /** @description published = real date-stamp; portal-record = wall-clock portal timestamp (likely upload time); not publication recency; null = pre-dateBasis row */
             dateBasis?: string | null;
             /**
              * Format: date-time
@@ -1010,17 +1010,17 @@ export interface components {
             protocol?: string | null;
             /** @description Audit-source chunks only; section-inferred and CHUNK-level (labels the matched chunk's section, not the report or a finding), 'unknown' for most PDF-derived chunks */
             severity?: string | null;
-            /** @description source=cap only: the CAP's own declared Status from its preamble (Final, Implemented, Accepted, Draft, Rejected). Cite it before treating a CAP as protocol truth — a Draft describes an intention, not the network. */
+            /** @description source=cap only: the CAP's own declared Status from its preamble (Final, Implemented, Accepted, Draft, Rejected). Cite it before treating a CAP as protocol truth; a Draft describes an intention, not the network. */
             capStatus?: string | null;
-            /** @description source=cap only: the protocol version this CAP shipped in, from its own preamble. Null = not declared upstream (drafts/TBD) — never guessed. The join key between protocol history and soroban-sdk versions. */
+            /** @description source=cap only: the protocol version this CAP shipped in, from its own preamble. Null = not declared upstream (drafts/TBD); never guessed. The join key between protocol history and soroban-sdk versions. */
             capProtocolVersion?: number | null;
             /**
-             * @description Deterministic document class stamped at ingest: spec (canonical — old AND authoritative, e.g. SEPs/CAPs), guide (staleness-sensitive how-to), article, data. Null = not classified. Use it to weigh age: an old spec is still the truth, an old guide may not be.
+             * @description Deterministic document class stamped at ingest: spec (canonical; old AND authoritative, e.g. SEPs/CAPs), guide (staleness-sensitive how-to), article, data. Null = not classified. Use it to weigh age: an old spec is still the truth, an old guide may not be.
              * @enum {string|null}
              */
             docKind?: "spec" | "guide" | "article" | "data" | null;
             /**
-             * @description SDK-version verdict for version-bearing content (e.g. a guide targeting wasm32-unknown-unknown is deprecated), from the same dated version table repo rows use. Null = the content names no version signal — not a claim it is current.
+             * @description SDK-version verdict for version-bearing content (e.g. a guide targeting wasm32-unknown-unknown is deprecated), from the same dated version table repo rows use. Null = the content names no version signal; not a claim it is current.
              * @enum {string|null}
              */
             docVersionStatus?: "current" | "supported" | "deprecated" | null;
@@ -1030,7 +1030,7 @@ export interface components {
                 [key: string]: unknown;
             };
         };
-        /** @description An ecosystem partner (anchor, ramp, infrastructure, tooling, protocol, wallet, audit firm…). Partner-claimed facts and system-verified signals are SEPARATE fields — `verified` and `trust` are system-computed and cannot be self-reported; everything else is partner/curator-maintained. */
+        /** @description An ecosystem partner (anchor, ramp, infrastructure, tooling, protocol, wallet, audit firm…). Partner-claimed facts and system-verified signals are SEPARATE fields: `verified` and `trust` are system-computed and cannot be self-reported; everything else is partner/curator-maintained. */
         Partner: {
             slug?: string;
             name?: string;
@@ -1048,9 +1048,9 @@ export interface components {
             regions?: string[];
             /** @description Asset codes this partner issues/supports, read from their stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt), so this is UNKNOWN and never 'issues no assets'. [] = we did fetch it and it declares no CURRENCIES. */
             assets?: string[] | null;
-            /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none — so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null. */
+            /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null. */
             seps?: string[] | null;
-            /** @description The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from — re-verify there. Null = never toml-enriched (curated/self-reported only). */
+            /** @description The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from; re-verify there. Null = never toml-enriched (curated/self-reported only). */
             tomlSourceUrl?: string | null;
             /** @description Deterministic trust score for toml-derived anchor facts (basis stellar-toml × freshness of tomlFetchedAt). Null when no toml was ever fetched. */
             tomlConfidence?: {
@@ -1074,7 +1074,7 @@ export interface components {
             contactEmail?: string | null;
             contactChannel?: string | null;
             responseSla?: string | null;
-            /** @description Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies') — currently null for every partner, as none have been curated yet. */
+            /** @description Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies'); currently null for every partner, as none have been curated yet. */
             caseStudies?: {
                 [key: string]: unknown;
             }[] | null;
@@ -1111,10 +1111,10 @@ export interface components {
                 validTypes?: string[];
                 /** @description Every value the ramps filter accepts (unknown values 400 with this list). */
                 validRamps?: string[];
-                /** @description Every value the region filter accepts (unknown values 400 with this list). Countries and currencies are not regions — they go in q. */
+                /** @description Every value the region filter accepts (unknown values 400 with this list). Countries and currencies are not regions; they go in q. */
                 validRegions?: string[];
                 /**
-                 * @description Present only when q was supplied and rows were returned. scored = ranked by the shared partner scorer over structured capability fields. weak = NOTHING matched q and these are fresh/accepting partners shown as a fallback, NOT matches — treat them as candidates, never as an answer to the query.
+                 * @description Present only when q was supplied and rows were returned. scored = ranked by the shared partner scorer over structured capability fields. weak = NOTHING matched q and these are fresh/accepting partners shown as a fallback, NOT matches; treat them as candidates, never as an answer to the query.
                  * @enum {string}
                  */
                 matchMode?: "scored" | "weak";
@@ -1123,7 +1123,7 @@ export interface components {
             };
             partners?: components["schemas"]["Partner"][];
         };
-        /** @description The population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations — never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed. */
+        /** @description The population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations; never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed. */
         PopulationScope: {
             /** @description Stable digest of collection + filters (NOT count/time), e.g. 'projects|status:Development+Live+Pre-Release'. /api/status sources use 'projects|status:all' (full collection). */
             id?: string;
@@ -1134,7 +1134,7 @@ export interface components {
             totalAvailable?: number;
             /** @description Docs actually aggregated into this response. */
             included?: number;
-            /** @description included < totalAvailable — the response is a sample, not the population. */
+            /** @description included < totalAvailable: the response is a sample, not the population. */
             truncated?: boolean;
             /** Format: date-time */
             generatedAt?: string;
@@ -1145,7 +1145,7 @@ export interface components {
             service: "Stellar Scout";
             /** @description Scout skill/service release line. */
             version: string;
-            /** @description API contract (OpenAPI) version — equals /api/openapi.json info.version. Reason about the live contract from this rather than the service version. */
+            /** @description API contract (OpenAPI) version: equals /api/openapi.json info.version. Reason about the live contract from this rather than the service version. */
             apiVersion?: string;
             /** Format: date-time */
             generatedAt: string;
@@ -1154,7 +1154,7 @@ export interface components {
                 count?: number;
                 /** Format: date-time */
                 lastUpdatedAt?: string | null;
-                /** @description Scope digest of what `count` counts — same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes. */
+                /** @description Scope digest of what `count` counts: same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes. */
                 populationId?: string;
                 notes?: string;
             }[];
@@ -1199,11 +1199,11 @@ export interface components {
             category: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
             shortDescription?: string;
             /**
-             * @description Lifecycle status of the PROJECT, never a deployment claim (sls-079). 'Live' means the product is operating for users somewhere; it does NOT assert Stellar mainnet deployment — read the sibling `deployment` field for that fact. 'Pre-Release' includes testnet-only products. 'Inactive' = defunct/archived — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. statusAsOf/statusSourceUrl/statusBasis carry the label's provenance.
+             * @description Lifecycle status of the PROJECT, never a deployment claim (sls-079). 'Live' means the product is operating for users somewhere; it does NOT assert Stellar mainnet deployment; read the sibling `deployment` field for that fact. 'Pre-Release' includes testnet-only products. 'Inactive' = defunct/archived; such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. statusAsOf/statusSourceUrl/statusBasis carry the label's provenance.
              * @enum {string}
              */
             status: "Draft" | "Development" | "Pre-Release" | "Live" | "Inactive";
-            /** @description Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). This is a PROJECT-level fact: mainnet means at least one of the project's products is minted on mainnet, not that every product is — read `products` for per-product state. Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, a minted product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'. */
+            /** @description Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). This is a PROJECT-level fact: mainnet means at least one of the project's products is minted on mainnet, not that every product is; read `products` for per-product state. Populated only from evidence: a verified mainnet contract join, an on-chain activity reading, a minted product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'. */
             deployment?: {
                 /** @enum {string} */
                 network?: "mainnet" | "testnet" | "unknown";
@@ -1212,7 +1212,7 @@ export interface components {
                 sourceUrl?: string | null;
                 asOf?: string | null;
             };
-            /** @description When the current status value was last asserted/verified (ISO 8601). Null = undated legacy label — treat the status as source-relative, not freshly confirmed. */
+            /** @description When the current status value was last asserted/verified (ISO 8601). Null = undated legacy label: treat the status as source-relative, not freshly confirmed. */
             statusAsOf?: string | null;
             /** @description Primary evidence URL behind the current status (operator announcement, checked product surface, on-chain probe). Null on legacy rows. */
             statusSourceUrl?: string | null;
@@ -1242,20 +1242,20 @@ export interface components {
             /** @description Present only with statusChecks. On a Live row with a hit, one sentence to relay with the status: the label may describe a product that stopped or moved (a protocol deprecated upstream can have a successor), so treat Live as unconfirmed. A check never changes the status itself. Null = no check hit, or the row is not Live; read statusChecks for what was checked. */
             statusCaveat?: string | null;
             /**
-             * @description What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'package-release' = a versioned artifact shipped to a package registry (npm, jsr.io) whose own metadata names this project's repository as its source, published inside a dated window — publication evidence for a library, never proof anything is deployed, 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.
+             * @description What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'package-release' = a versioned artifact shipped to a package registry (npm, jsr.io) whose own metadata names this project's repository as its source, published inside a dated window; publication evidence for a library, never proof anything is deployed, 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle); an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment; read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT; it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.
              * @enum {string|null}
              */
             statusBasis?: "operator-announcement" | "site-liveness" | "repo-activity" | "package-release" | "product-integration" | "onchain-activity" | "human-verified" | "source-inherited" | "unverified" | null;
-            /** @description Deterministic trust score for the SCF award facts: basis-class weight × stepwise freshness decay. score 0–1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance ⇒ same score — cacheable. */
+            /** @description Deterministic trust score for the SCF award facts: basis-class weight × stepwise freshness decay. score 0-1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance ⇒ same score: cacheable. */
             scfConfidence?: {
                 score?: number;
                 /** @enum {string} */
                 label?: "high" | "medium" | "low";
                 ageDays?: number | null;
             } | null;
-            /** @description Aggregated consumer votes for this project (feedback→quality loop): votes = distinct voters (one per hashed IP, latest vote wins), worked = of those, how many voted 'worked'. score = worked/votes, present ONLY once votes pass the anti-gaming floor (≥5 distinct voters) — null score with visible counts means 'signal accruing, no ranking influence yet'. Null object = no votes recorded. Aggregated nightly from POST /api/feedback vote kinds. */
+            /** @description Aggregated consumer votes for this project (feedback→quality loop): votes = distinct voters (one per hashed IP, latest vote wins), worked = of those, how many voted 'worked'. score = worked/votes, present ONLY once votes pass the anti-gaming floor (≥5 distinct voters); null score with visible counts means 'signal accruing, no ranking influence yet'. Null object = no votes recorded. Aggregated nightly from POST /api/feedback vote kinds. */
             feedbackSignal?: {
-                /** @description Community votes on the submission, or null — the DoraHacks v1 hub API no longer serves vote counts, and this was previously 0 on every row, asserting that nobody voted rather than that we cannot see votes. An unknown count contributes nothing to build ranking; it neither boosts nor penalises. */
+                /** @description Community votes on the submission, or null; the DoraHacks v1 hub API no longer serves vote counts, and this was previously 0 on every row, asserting that nobody voted rather than that we cannot see votes. An unknown count contributes nothing to build ranking; it neither boosts nor penalises. */
                 votes?: number | null;
                 worked?: number;
                 score?: number | null;
@@ -1268,9 +1268,9 @@ export interface components {
             scfBasis?: "official-record" | "human-verified" | null;
             /** @description ISO date the SCF award facts were last verified against the source. Pair with scfSourceUrl to re-verify a stored claim. */
             scfAsOf?: string | null;
-            /** @description Official SCF project page the award facts were read from — the citation for scfAwardedRounds/scfRoundAwards/scfTotalAwardedUSD. */
+            /** @description Official SCF project page the award facts were read from; the citation for scfAwardedRounds/scfRoundAwards/scfTotalAwardedUSD. */
             scfSourceUrl?: string | null;
-            /** @description The organization/entity behind this project ('who built X') — e.g. LOBSTR → Ultra Stellar, Soroswap → Paltalabs. Null when no org is linked. Browse the org's portfolio at https://stellarlight.xyz/entities/{slug}. */
+            /** @description The organization/entity behind this project ('who built X'), e.g. LOBSTR → Ultra Stellar, Soroswap → Paltalabs. Null when no org is linked. Browse the org's portfolio at https://stellarlight.xyz/entities/{slug}. */
             builtBy?: {
                 name?: string;
                 slug?: string;
@@ -1279,13 +1279,13 @@ export interface components {
             scfAwarded?: boolean;
             scfTotalAwardedUSD?: number | null;
             /**
-             * @description Disambiguates a null award amount: 'undisclosed' = the SCF award is confirmed but no amount is published in the source data (NOT a data gap — do not guess); 'disclosed' = scfTotalAwardedUSD carries the number; null = not awarded.
+             * @description Disambiguates a null award amount: 'undisclosed' = the SCF award is confirmed but no amount is published in the source data (NOT a data gap; do not guess); 'disclosed' = scfTotalAwardedUSD carries the number; null = not awarded.
              * @enum {string|null}
              */
             scfAmountStatus?: "disclosed" | "undisclosed" | null;
-            /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. EMPTY IS NOT 'NO SCF FUNDING': SCF grants awards outside the numbered rounds (a Liquidity Award carries no SCF #N), so a project can hold real award money with this array empty — check scfTotalAwardedUSD and read scfRoundAwards, where such awards appear with round null and their own awardName. Per-award official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round). */
+            /** @description SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. EMPTY IS NOT 'NO SCF FUNDING': SCF grants awards outside the numbered rounds (a Liquidity Award carries no SCF #N), so a project can hold real award money with this array empty; check scfTotalAwardedUSD and read scfRoundAwards, where such awards appear with round null and their own awardName. Per-award official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round). */
             scfAwardedRounds?: number[];
-            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row — WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others — plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage` — declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. */
+            /** @description Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired. */
             products?: {
                 name?: string;
                 kind?: string;
@@ -1297,17 +1297,17 @@ export interface components {
                 note?: string | null;
                 /** @description Issuing entity as the RWA registry attributes it; null on hand-curated rows. */
                 issuer?: string | null;
-                /** @description CODE-GISSUER for a classic asset, the contract id for a Soroban token — the product's identity. */
+                /** @description CODE-GISSUER for a classic asset, the contract id for a Soroban token; the product's identity. */
                 assetId?: string | null;
                 /** @description How the registry verified this product (see getRwaAssets methodology); null on hand-curated rows. */
                 verificationLevel?: string | null;
-                /** @description The registry's own state — live | issued-single-holder — since `status` (the stored enum) cannot say 'minted but held only by the issuer'. */
+                /** @description The registry's own state: live | issued-single-holder, since `status` (the stored enum) cannot say 'minted but held only by the issuer'. */
                 registryState?: string | null;
-                /** @description The issuer toml's own `status` for the asset where it was read (live | private | test …); null = not read. `private` = a restricted offering — minted and held, not a public market — and `note` says so. Hand-curated records: null. */
+                /** @description The issuer toml's own `status` for the asset where it was read (live | private | test …); null = not read. `private` = a restricted offering (minted and held, not a public market) and `note` says so. Hand-curated records: null. */
                 tomlStatus?: string | null;
                 /** @description Contract creation date (Soroban); null for classic assets, which Horizon does not date. */
                 launchedAt?: string | null;
-                /** @description Issuer flags from Horizon for a classic asset — authRequired (whitelist), authRevocable (freeze), clawbackEnabled, authImmutable. null on Soroban tokens and hand-curated rows. */
+                /** @description Issuer flags from Horizon for a classic asset: authRequired (whitelist), authRevocable (freeze), clawbackEnabled, authImmutable. null on Soroban tokens and hand-curated rows. */
                 controls?: {
                     authRequired?: boolean;
                     authRevocable?: boolean;
@@ -1315,10 +1315,10 @@ export interface components {
                     clawbackEnabled?: boolean;
                 } | null;
             }[] | null;
-            /** @description Whether `products` is COMPLETE for the issuer accounts this project joins (sls-083). The comparison set is what those accounts' own stellar.toml declared on asOf (the RWA registry's issuer coverage table): declared = (code, issuer) pairs the tomls declare under the covered accounts; tracked = of those, registry rows in any state; complete = declared === tracked AND issuersUnreconciled === 0 — a project with an issuer whose toml could not be read is never 'complete' (Circle: false). served = REGISTRY-fed product records on this row (minted states only, one per paired tranche; `products` may also carry hand-curated records) — it is a different count from tracked: it can be smaller (a zero-supply asset is tracked but not a product) or larger (the registry tracks an issued asset the toml omits, verificationLevel on-chain-home-domain). NULL = completeness cannot be stated: no joined issuer has a toml to reconcile and no deployer entry exists (on-chain-only classic issuers, hand-curated products) — null is never 'complete'. issuersUnreconciled counts the issuer accounts the statement does NOT cover: classic issuers whose toml could not be read, plus one for the project's Soroban tokens when it has any (they have no toml). */
+            /** @description Whether `products` is COMPLETE for the issuer accounts this project joins (sls-083). The comparison set is what those accounts' own stellar.toml declared on asOf (the RWA registry's issuer coverage table): declared = (code, issuer) pairs the tomls declare under the covered accounts; tracked = of those, registry rows in any state; complete = declared === tracked AND issuersUnreconciled === 0; a project with an issuer whose toml could not be read is never 'complete' (Circle: false). served = REGISTRY-fed product records on this row (minted states only, one per paired tranche; `products` may also carry hand-curated records); it is a different count from tracked: it can be smaller (a zero-supply asset is tracked but not a product) or larger (the registry tracks an issued asset the toml omits, verificationLevel on-chain-home-domain). NULL = completeness cannot be stated: no joined issuer has a toml to reconcile and no deployer entry exists (on-chain-only classic issuers, hand-curated products); null is never 'complete'. issuersUnreconciled counts the issuer accounts the statement does NOT cover: classic issuers whose toml could not be read, plus one for the project's Soroban tokens when it has any (they have no toml). */
             productsCoverage?: {
                 /**
-                 * @description issuer-stellar-toml = classic assets, compared against what the issuer accounts' own stellar.toml declares. deployer-contracts = Soroban tokens (no toml), compared against every SEP-41 token contract the deployer account behind this project's tokens has created, read from Horizon's create-contract history — the issuer's own act, and wider than rwa.xyz's listing (Spiko: 17 token contracts deployed, 9 listed, 8 with zero supply tracked as deployed-no-supply). A deployer can be a platform creating tokens for several issuers (Centrifuge deploys for Anemoy too), so declared counts the deployer's tokens the registry attributes to this project plus any it has attributed to nobody; test and superseded contracts are excluded with a recorded reason, and a token that is neither a row nor excluded makes complete false for every client of that deployer.
+                 * @description issuer-stellar-toml = classic assets, compared against what the issuer accounts' own stellar.toml declares. deployer-contracts = Soroban tokens (no toml), compared against every SEP-41 token contract the deployer account behind this project's tokens has created, read from Horizon's create-contract history; the issuer's own act, and wider than rwa.xyz's listing (Spiko: 17 token contracts deployed, 9 listed, 8 with zero supply tracked as deployed-no-supply). A deployer can be a platform creating tokens for several issuers (Centrifuge deploys for Anemoy too), so declared counts the deployer's tokens the registry attributes to this project plus any it has attributed to nobody; test and superseded contracts are excluded with a recorded reason, and a token that is neither a row nor excluded makes complete false for every client of that deployer.
                  * @enum {string}
                  */
                 basis?: "issuer-stellar-toml" | "deployer-contracts";
@@ -1330,34 +1330,34 @@ export interface components {
                 served?: number;
                 complete?: boolean;
             } | null;
-            /** @description The official submission record per AWARD — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number (null for an award SCF does not number), the award's own name (present only on those), the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). Not every SCF award belongs to a numbered round: a Liquidity Award carries no SCF #N, so a project can hold real award money while scfAwardedRounds is empty — read this array before treating an empty scfAwardedRounds as 'no SCF funding'. scfAwardedRounds stays numeric-only by design. The page-level total can legitimately exceed the sum of these budgets; treat these as the per-award truth and the total as SCF's own aggregate. */
+            /** @description The official submission record per AWARD: the reconciling basis for scfTotalAwardedUSD. Each entry: the round number (null for an award SCF does not number), the award's own name (present only on those), the published submission budget in USD (null = award confirmed, budget not published; never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). Not every SCF award belongs to a numbered round: a Liquidity Award carries no SCF #N, so a project can hold real award money while scfAwardedRounds is empty; read this array before treating an empty scfAwardedRounds as 'no SCF funding'. scfAwardedRounds stays numeric-only by design. The page-level total can legitimately exceed the sum of these budgets; treat these as the per-award truth and the total as SCF's own aggregate. */
             scfRoundAwards?: {
                 round?: number | null;
                 awardName?: string | null;
                 amountUSD?: number | null;
                 awardType?: string | null;
             }[];
-            /** @description Structured corridor/coverage for Anchor-typed projects — answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches. */
+            /** @description Structured corridor/coverage for Anchor-typed projects: answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches. */
             coverage?: {
                 /** @description Primary market/jurisdiction country names. */
                 countries?: string[];
                 /** @description Fiat currencies supported (e.g. MXN, EUR, PHP). */
                 currencies?: string[];
-                /** @description Supported SEPs (sep-6, sep-24, sep-31) — the on/off-ramp interop surface. */
+                /** @description Supported SEPs (sep-6, sep-24, sep-31); the on/off-ramp interop surface. */
                 seps?: string[];
-                /** @description Date (YYYY-MM-DD) the coverage was synced from the partner record — cite as the as-of date. */
+                /** @description Date (YYYY-MM-DD) the coverage was synced from the partner record; cite as the as-of date. */
                 asOf?: string | null;
             } | null;
-            /** @description Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']). READ THIS WITH networksBasis. Only when networksBasis is 'curated' is the array intended to be COMPLETE — that is the case where a missing chain is meaningful. For every other basis the array is DERIVED from evidence that the project operates on Stellar, lists only ['stellar'], and says NOTHING about any other chain: a derived row is not a claim of Stellar-only. NULL = we hold neither curation nor evidence (UNKNOWN, never 'supports no networks'). To establish that a project does NOT support a chain you need a source, not this field. */
+            /** @description Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']). READ THIS WITH networksBasis. Only when networksBasis is 'curated' is the array intended to be COMPLETE; that is the case where a missing chain is meaningful. For every other basis the array is DERIVED from evidence that the project operates on Stellar, lists only ['stellar'], and says NOTHING about any other chain: a derived row is not a claim of Stellar-only. NULL = we hold neither curation nor evidence (UNKNOWN, never 'supports no networks'). To establish that a project does NOT support a chain you need a source, not this field. */
             supportedNetworks?: string[] | null;
             /**
-             * @description What evidence stands behind supportedNetworks, and therefore whether the list is exhaustive. 'curated' = curator-maintained from the project's own docs; the list is intended to be complete, so an absent chain is informative. The rest are DERIVED proofs that the project operates on Stellar, strongest first: 'onchain-activity' (contract records observed on Stellar), 'defillama-tvl' (DefiLlama tracks its Stellar TVL), 'anchor-coverage' (SEP/corridor rails), 'scf-award' (the Stellar Community Fund funds only Stellar work). A derived basis yields exactly ['stellar'] and is NOT exhaustive — other chains are unknown, not excluded. NULL = no basis, which pairs with a null supportedNetworks.
+             * @description What evidence stands behind supportedNetworks, and therefore whether the list is exhaustive. 'curated' = curator-maintained from the project's own docs; the list is intended to be complete, so an absent chain is informative. The rest are DERIVED proofs that the project operates on Stellar, strongest first: 'onchain-activity' (contract records observed on Stellar), 'defillama-tvl' (DefiLlama tracks its Stellar TVL), 'anchor-coverage' (SEP/corridor rails), 'scf-award' (the Stellar Community Fund funds only Stellar work). A derived basis yields exactly ['stellar'] and is NOT exhaustive; other chains are unknown, not excluded. NULL = no basis, which pairs with a null supportedNetworks.
              * @enum {string|null}
              */
             networksBasis?: "curated" | "onchain-activity" | "defillama-tvl" | "anchor-coverage" | "scf-award" | null;
-            /** @description Curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only — it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded — confirm those with the provider at transfer time. */
+            /** @description Curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only: it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded; confirm those with the provider at transfer time. */
             routes?: {
-                /** @description Source network, lowercase — same vocabulary as supportedNetworks ('evm' is the EVM umbrella). */
+                /** @description Source network, lowercase: same vocabulary as supportedNetworks ('evm' is the EVM umbrella). */
                 fromChain: string;
                 toChain: string;
                 /**
@@ -1368,7 +1368,7 @@ export interface components {
                 /** @description Asset codes moved on this route (e.g. USDC). Empty = asset scope not curated (unknown, not none). */
                 assets?: string[];
                 /**
-                 * @description What the DESTINATION asset is: 'canonical' = issuer-native (e.g. Circle-issued USDC via CCTP burn-mint), 'wrapped'/'bridged'/'interchain' = a representation (e.g. USDC.axl). Null = quote-time/unverified — never assume canonical.
+                 * @description What the DESTINATION asset is: 'canonical' = issuer-native (e.g. Circle-issued USDC via CCTP burn-mint), 'wrapped'/'bridged'/'interchain' = a representation (e.g. USDC.axl). Null = quote-time/unverified; never assume canonical.
                  * @enum {string|null}
                  */
                 assetRepresentation?: "canonical" | "wrapped" | "bridged" | "interchain" | null;
@@ -1376,15 +1376,15 @@ export interface components {
                 mechanism?: string | null;
                 /** @description Provider source the route evidence was verified from. */
                 sourceUrl?: string | null;
-                /** @description YYYY-MM-DD the route evidence was verified — routes are dated facts, re-verify before relying on them for a live transfer. */
+                /** @description YYYY-MM-DD the route evidence was verified; routes are dated facts, re-verify before relying on them for a live transfer. */
                 asOf?: string | null;
             }[] | null;
             /**
-             * @description Role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count — count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').
+             * @description Role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count; count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').
              * @enum {string|null}
              */
             venueRole?: "amm" | "native-orderbook" | "aggregator-router" | "trading-ui" | "wallet-integrated" | null;
-            /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'` — unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile. */
+            /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'`; unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile. */
             anchorProfile?: {
                 slug?: string;
                 country?: string | null;
@@ -1400,14 +1400,14 @@ export interface components {
                  */
                 profileState?: "profiled" | "not-profiled";
             } | null;
-            /** @description On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry — NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo} — events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). Asset-issuer activity: assetHolders = accounts holding a balance TODAY (the active-address count); assetTrustlines = accounts that have EVER opened a trustline (reach, always >= assetHolders — do NOT read it as the active count); assetPayments = lifetime count of payment operations (the transaction-volume metric); assetTrades = lifetime trade count; assetPaymentsAmount = lifetime payment volume in WHOLE ASSET UNITS, not USD (a same-denomination count, not comparable across assets without a price); assetSupply = whole asset units. From the second weekly snapshot, delta fields activate: per-contract eventsDelta/subinvocationsDelta, assetHoldersDelta, assetPaymentsDelta, with prevAsOf + deltaDays defining the window — null deltas mean no prior snapshot yet, NOT zero activity. source + asOf date every payload. */
+            /** @description On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry. NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo}; events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). Asset-issuer activity: assetHolders = accounts holding a balance TODAY (the active-address count); assetTrustlines = accounts that have EVER opened a trustline (reach, always >= assetHolders; do NOT read it as the active count); assetPayments = lifetime count of payment operations (the transaction-volume metric); assetTrades = lifetime trade count; assetPaymentsAmount = lifetime payment volume in WHOLE ASSET UNITS, not USD (a same-denomination count, not comparable across assets without a price); assetSupply = whole asset units. From the second weekly snapshot, delta fields activate: per-contract eventsDelta/subinvocationsDelta, assetHoldersDelta, assetPaymentsDelta, with prevAsOf + deltaDays defining the window; null deltas mean no prior snapshot yet, NOT zero activity. source + asOf date every payload. */
             onchain?: Record<string, never> | null;
-            /** @description SCF Public Goods Award recipient data: {awardRounds[] (e.g. 2025Q4 — CSV-confirmed rounds only, requested-amount tranches with Status=Awarded, not payout proof), evidenceUrl}. null = not a confirmed recipient at our source — NEVER 'not a public good'. Q2'26 outcomes live on Tansu and are excluded until readable. */
+            /** @description SCF Public Goods Award recipient data: {awardRounds[] (e.g. 2025Q4: CSV-confirmed rounds only, requested-amount tranches with Status=Awarded, not payout proof), evidenceUrl}. null = not a confirmed recipient at our source. NEVER 'not a public good'. Q2'26 outcomes live on Tansu and are excluded until readable. */
             publicGoods?: {
                 awardRounds?: string[];
                 evidenceUrl?: string | null;
             } | null;
-            /** @description Security-audit rollup from the /api/audits registry (hand-verified projectSlug links): {count, auditors[] (normalized firm names), latestAt (YYYY-MM-DD of the newest report)}. Drift context: driftDays = whole days since the latest report; codeChangedSinceAudit = whether any of the project's joined repos committed on a later day than that report (day-granular; null when either side lacks a date). 'Audited' with high drift is a materially weaker claim — read both. null rollup = no audit on record at our source — NOT a claim the project is unaudited (same absence semantics as /api/audits). Full report rows via /api/audits?project=<slug>; findings text via searchResearch with source=audit. */
+            /** @description Security-audit rollup from the /api/audits registry (hand-verified projectSlug links): {count, auditors[] (normalized firm names), latestAt (YYYY-MM-DD of the newest report)}. Drift context: driftDays = whole days since the latest report; codeChangedSinceAudit = whether any of the project's joined repos committed on a later day than that report (day-granular; null when either side lacks a date). 'Audited' with high drift is a materially weaker claim; read both. null rollup = no audit on record at our source; NOT a claim the project is unaudited (same absence semantics as /api/audits). Full report rows via /api/audits?project=<slug>; findings text via searchResearch with source=audit. */
             audits?: {
                 count?: number;
                 auditors?: string[];
@@ -1419,15 +1419,15 @@ export interface components {
             tvlUSD?: number | null;
             /** @description When tvlUSD was fetched from DefiLlama (ISO 8601). */
             tvlAsOf?: string | null;
-            /** @description Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope — cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth. */
+            /** @description Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope; cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth. */
             tvlSource?: string | null;
-            /** @description How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time) — the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions. */
+            /** @description How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time): the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions. */
             tvlMethod?: string | null;
-            /** @description The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project — e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider — this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked). */
+            /** @description The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project, e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider; this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked). */
             llamaSlugs?: string[] | null;
             /**
              * Format: uri
-             * @description Citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs) — the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum — enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.
+             * @description Citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs): the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum; enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.
              */
             tvlMethodUrl?: string | null;
             /** @description When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding. */
@@ -1443,14 +1443,14 @@ export interface components {
                 renamedAt?: string | null;
                 sourceUrl?: string | null;
             } | null;
-            /** @description Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live) — narrate as 'used to be live', not as a current offering. Null for ordinary live records. */
+            /** @description Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live); narrate as 'used to be live', not as a current offering. Null for ordinary live records. */
             lifecycle?: {
                 wasLive?: boolean;
                 note?: string | null;
             } | null;
             hackathon?: string | null;
             hackathonPlacement?: string | null;
-            /** @description Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals — or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label. */
+            /** @description Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals, or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label. */
             placementRank?: number | null;
             hackathonPrize?: number | null;
             hackathonPrizeTrack?: string | null;
@@ -1473,7 +1473,7 @@ export interface components {
             repos?: components["schemas"]["Repo"][];
             /**
              * Format: date-time
-             * @description Most recent commit across the project's own indexed repos — attach as the as-of date for 'is this project active?' answers. Null = no indexed repo with a known commit date (an INDEX gap — e.g. a closed-source product), never 'no activity'.
+             * @description Most recent commit across the project's own indexed repos; attach as the as-of date for 'is this project active?' answers. Null = no indexed repo with a known commit date (an INDEX gap, e.g. a closed-source product), never 'no activity'.
              */
             lastActivityAt?: string | null;
             /** @description How this result was matched: keyword (token or synonym overlap) or semantic (vector-similarity fallback, a guess to verify, not a match). Null only on a view=compact row whose full row had no via. */
@@ -1522,7 +1522,7 @@ export interface components {
                     slug?: string;
                     note?: string;
                 };
-                /** @description Present when the page does NOT contain a keyword match for the query — either nothing was found at all, or `matchMode` is `semantic`, meaning every row is a vector neighbour rather than a match. In the semantic case the rows are still returned (a neighbour is occasionally the right answer for a conceptual query) but they must NOT be reported as the thing asked for: a query for a project name that lands here means we hold no project by that name. `suggestions[]` carries the endpoints that can still answer it (repo search for code-only entities, the research corpus for prose mentions). */
+                /** @description Present when the page does NOT contain a keyword match for the query; either nothing was found at all, or `matchMode` is `semantic`, meaning every row is a vector neighbour rather than a match. In the semantic case the rows are still returned (a neighbour is occasionally the right answer for a conceptual query) but they must NOT be reported as the thing asked for: a query for a project name that lands here means we hold no project by that name. `suggestions[]` carries the endpoints that can still answer it (repo search for code-only entities, the research corpus for prose mentions). */
                 advisory?: {
                     summary?: string;
                     suggestions?: {
@@ -1531,7 +1531,7 @@ export interface components {
                         why?: string;
                     }[];
                 };
-                /** @description Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
+                /** @description Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join; empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
                 anchorProfileBasis?: string;
                 /** @description Counting basis for the SCF fields on rows: scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups). */
                 scfCountBasis?: string;
@@ -1550,7 +1550,7 @@ export interface components {
                  */
                 matchMode?: "all" | "filtered";
                 matchModeLabel?: string;
-                /** @description Present when the query returns 0 events — a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array. */
+                /** @description Present when the query returns 0 events: a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array. */
                 fallbackChannels?: {
                     summary?: string;
                     channels?: {
@@ -1776,7 +1776,7 @@ export interface components {
             } & {
                 [key: string]: unknown;
             };
-            /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first. */
+            /** @description Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal; never infer finishing order from array position; check winnersRanked first. */
             winners?: {
                 /** @description Stable row id (dorahacks-buidl-{id} for live rows, curated-{event}-{name} for a stored submission from an event off DoraHacks, winner-{event}-{name} for a curated roster, from the winner's name). */
                 id?: string;
@@ -1857,7 +1857,7 @@ export interface components {
                 /** @description Curated roster rows: who built it, as the roster names them; absent when it names no one. */
                 builder?: string;
             }[];
-            /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded. */
+            /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null; array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
             /** @description Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`. */
             submissions?: ({
@@ -1890,9 +1890,9 @@ export interface components {
         Repo: {
             /** @description Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements, never inferred from names). Null = not superseded or not yet classified. In searchRepos, when the successor (this field, else supersededBy) is also in the results, the successor takes this repo's place and this repo moves below it, unless q is an exact alias of this repo's owner, name or path. */
             successorRepo?: string | null;
-            /** @description Where to go instead, as GitHub spells it — from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'. */
+            /** @description Where to go instead, as GitHub spells it; from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'. */
             supersededBy?: string | null;
-            /** @description The date the repo ITSELF gives for its archive or deprecation (YYYY-MM-DD) — GitHub's archive banner, a release notice. null when the repo gives none; never the date we read it. */
+            /** @description The date the repo ITSELF gives for its archive or deprecation (YYYY-MM-DD): GitHub's archive banner, a release notice. null when the repo gives none; never the date we read it. */
             deprecatedAt?: string | null;
             /**
              * @description archived = GitHub archived the repo; renamed = the path 301s to a new one; deprecated = the package or repo carries a deprecation notice; superseded = a newer generation exists and the repo says so.
@@ -1916,18 +1916,18 @@ export interface components {
             isFork?: boolean;
             isArchived?: boolean;
             /**
-             * @description Observable activity state derived at serve time from lastCommitAt + isArchived: active = commit ≤45d; maintained = ≤180d; dormant = a KNOWN commit older than 180d (an observation — dormant repos can be complete, not dead); archived = the owner's own declaration (the only death verdict); unknown = no commit date held — never read unknown or dormant as defunct.
+             * @description Observable activity state derived at serve time from lastCommitAt + isArchived: active = commit ≤45d; maintained = ≤180d; dormant = a KNOWN commit older than 180d (an observation; dormant repos can be complete, not dead); archived = the owner's own declaration (the only death verdict); unknown = no commit date held; never read unknown or dormant as defunct.
              * @enum {string}
              */
             activityState?: "active" | "maintained" | "dormant" | "archived" | "unknown";
             /**
-             * @description What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a curated Stellar platform repo (protocol, network services such as Horizon and RPC, SDKs, CLI) → platform; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.
+             * @description What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a curated Stellar platform repo (protocol, network services such as Horizon and RPC, SDKs, CLI) → platform; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product; one that became a product is an application: the product link outranks where the code was first submitted); else code; a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.
              * @enum {string}
              */
             kind?: "archived" | "fork" | "platform" | "template-or-tutorial" | "contract" | "application" | "hackathon" | "code";
-            /** @description The signal that decided kind, so the label can be weighed: isArchived | isFork | knownPlatform (the curated Stellar platform registry) | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code). */
+            /** @description The signal that decided kind, so the label can be weighed: isArchived | isFork | knownPlatform (the curated Stellar platform registry) | judgedHackathon | nameLooksTemplate (the one heuristic: a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code). */
             kindBasis?: string;
-            /** @description Velocity + release snapshot captured by the enrich pass, dated by asOf. Null = not yet captured for this repo (rows backfill on the weekly refresh), never zero-activity. commits90d counts default-branch commits in the 90 days before asOf — the velocity discriminator WITHIN activityState (two 'active' repos can differ 50x here). */
+            /** @description Velocity + release snapshot captured by the enrich pass, dated by asOf. Null = not yet captured for this repo (rows backfill on the weekly refresh), never zero-activity. commits90d counts default-branch commits in the 90 days before asOf; the velocity discriminator WITHIN activityState (two 'active' repos can differ 50x here). */
             activitySignals?: {
                 commits90d?: number | null;
                 /** Format: date-time */
@@ -1937,11 +1937,11 @@ export interface components {
                 /** Format: date-time */
                 asOf?: string | null;
             } | null;
-            /** @description CI config present in-tree (.github/workflows, CircleCI, GitLab CI) per the latest code scan. Presence only — NOT a claim CI passes. null = not yet scanned for this fact. */
+            /** @description CI config present in-tree (.github/workflows, CircleCI, GitLab CI) per the latest code scan. Presence only. NOT a claim CI passes. null = not yet scanned for this fact. */
             ciPresent?: boolean | null;
-            /** @description Test files/dirs present in-tree (tests/, __tests__, *.test.*, *_test.*) per the latest code scan. Presence only — NOT a coverage or quality claim. null = not yet scanned for this fact. */
+            /** @description Test files/dirs present in-tree (tests/, __tests__, *.test.*, *_test.*) per the latest code scan. Presence only. NOT a coverage or quality claim. null = not yet scanned for this fact. */
             testsPresent?: boolean | null;
-            /** @description Mainnet usage rollup for contracts attributed to this repo (scanner-verified contract ids + stellar.expert wasm validation; refreshed weekly): contracts = attributed contract count; events/subinvocations = LIFETIME counts summed across them; eventsDelta/subinvocationsDelta = change since the prior weekly snapshot (null until one exists — NOT zero activity). null object = no verified mainnet contract joined to this repo — absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is LIVE. */
+            /** @description Mainnet usage rollup for contracts attributed to this repo (scanner-verified contract ids + stellar.expert wasm validation; refreshed weekly): contracts = attributed contract count; events/subinvocations = LIFETIME counts summed across them; eventsDelta/subinvocationsDelta = change since the prior weekly snapshot (null until one exists; NOT zero activity). null object = no verified mainnet contract joined to this repo: absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is LIVE. */
             codeInUse?: {
                 contracts?: number;
                 events?: number | null;
@@ -1952,7 +1952,7 @@ export interface components {
             } | null;
             /** @description view=compact rows only: how many entries the left-out `knowledgeNotes` list has (0 = none on record). Null = not known. Absent on full rows, which carry `knowledgeNotes` itself. */
             knowledgeNotesCount?: number | null;
-            /** @description Dated FACTS about this repo with named sources — curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record. */
+            /** @description Dated FACTS about this repo with named sources: curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record. */
             knowledgeNotes?: {
                 note?: string;
                 source?: string;
@@ -1968,18 +1968,18 @@ export interface components {
             builderReputation?: number;
             judgeScore?: number | null;
             judgedHackathon?: string | null;
-            /** @description Quality grade (0–100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos. */
+            /** @description Quality grade (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos. */
             repoScore: number;
             repoScoreLabel?: string | null;
-            /** @description WHY the tier is what it is — the enum reasons the code-tier lane recorded when it last judged this row (e.g. curated-canonical, or the archive keys). Null until that lane has judged the row: a bare tier with no reason means the value is the schema default, not a verdict. */
+            /** @description WHY the tier is what it is: the enum reasons the code-tier lane recorded when it last judged this row (e.g. curated-canonical, or the archive keys). Null until that lane has judged the row: a bare tier with no reason means the value is the schema default, not a verdict. */
             tierReason?: string[] | null;
             /**
              * Format: date-time
-             * @description When the tier last changed — the date that covers `tier` and `tierReason`. Null when the lane has never judged the row; do not date the tier from scannedAt or lastCommitAt, which describe the scan and the repo.
+             * @description When the tier last changed: the date that covers `tier` and `tierReason`. Null when the lane has never judged the row; do not date the tier from scannedAt or lastCommitAt, which describe the scan and the repo.
              */
             tierChangedAt?: string | null;
             /**
-             * @description Quality tier (tag-and-demote): quality = high-grade, community = alive but unproven, archive = GitHub-archived or dead-and-unstarred — demoted in ranking and excluded from inline code references, but never deleted (name lookups still find it). Lead with quality-tier repos.
+             * @description Quality tier (tag-and-demote): quality = high-grade, community = alive but unproven, archive = GitHub-archived or dead-and-unstarred; demoted in ranking and excluded from inline code references, but never deleted (name lookups still find it). Lead with quality-tier repos.
              * @enum {string}
              */
             tier?: "quality" | "community" | "archive";
@@ -1990,27 +1990,27 @@ export interface components {
             source?: "project-link" | "ec-taxonomy";
             /** @description Keyword-relevance score for the current query (higher = better match). */
             score?: number;
-            /** @description DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions — e.g. where error codes / consensus / XDR are defined — beyond which-repo discovery. */
+            /** @description DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions (e.g. where error codes / consensus / XDR are defined) beyond which-repo discovery. */
             deepWikiUrl?: string;
             /** @description True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them. */
             canonical?: boolean;
             /**
-             * @description WHY this repo ranks as Stellar-relevant — ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none — a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.
+             * @description WHY this repo ranks as Stellar-relevant: ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none: a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.
              * @enum {string}
              */
             stellarEvidence?: "code-verified" | "sdf-org" | "curated" | "mentioned" | "none";
-            /** @description Code-verified truth from analyzing the repo's ACTUAL source (not stars/topics) — the discriminator between 'popular' and 'real, current, deep Soroban code'. Null until the repo has been code-scanned. Use to qualify an answer: prefer a deployable contract on a supported soroban-sdk over tooling that merely uses Stellar. */
+            /** @description Code-verified truth from analyzing the repo's ACTUAL source (not stars/topics): the discriminator between 'popular' and 'real, current, deep Soroban code'. Null until the repo has been code-scanned. Use to qualify an answer: prefer a deployable contract on a supported soroban-sdk over tooling that merely uses Stellar. */
             codeVerified?: {
                 /**
-                 * @description How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml. 'none' = the repo WAS scanned and no direct Stellar code evidence was found (a scanned general-purpose dependency) — such repos rank below Stellar-evidenced ones and carry stellarEvidence 'none' unless their own text mentions Stellar.
+                 * @description How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml. 'none' = the repo WAS scanned and no direct Stellar code evidence was found (a scanned general-purpose dependency); such repos rank below Stellar-evidenced ones and carry stellarEvidence 'none' unless their own text mentions Stellar.
                  * @enum {string}
                  */
                 stellarProof?: "cargo-sdk" | "contract-macros" | "lang-sdk" | "js-sdk" | "stellar-toml" | "none";
                 /** @description 0-1 substance of the actual contract code (auth/storage/arith/branch, not mere presence). ~0.6+ = a real, non-trivial contract; low = scaffold/template. Null for non-Rust proofs. */
                 codeDepth?: number | null;
-                /** @description This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib — vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates — those are runtime/fixtures, not a deployable contract product. */
+                /** @description This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib; vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates; those are runtime/fixtures, not a deployable contract product. */
                 isDeployableContract?: boolean;
-                /** @description Raw soroban-sdk version requirement (a sourced fact — never a bare protocol integer). */
+                /** @description Raw soroban-sdk version requirement (a sourced fact; never a bare protocol integer). */
                 sorobanSdkVersion?: string | null;
                 /**
                  * @description soroban-sdk status vs the latest protocol at scan time. 'unknown' (rc/git/unpinned) never implies staleness.
@@ -2029,28 +2029,28 @@ export interface components {
                  * @description When the code was last scanned.
                  */
                 scannedAt?: string | null;
-                /** @description Commit SHA the facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12. */
+                /** @description Commit SHA the facts were computed at; cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12. */
                 scannedRef?: string | null;
-                /** @description Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources — what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs. */
+                /** @description Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources: what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs. */
                 symbols?: string[];
                 /** @description Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08. */
                 contractInterface?: string[];
-                /** @description Stellar protocol the pinned soroban-sdk MAJOR targets, derived from the maintained sdk→protocol table (dated; the mapping has documented irregularities — 23.x spans P24→P25). ADVISORY, not an attestation: null = unknown major, never guessed. */
+                /** @description Stellar protocol the pinned soroban-sdk MAJOR targets, derived from the maintained sdk→protocol table (dated; the mapping has documented irregularities: 23.x spans P24→P25). ADVISORY, not an attestation: null = unknown major, never guessed. */
                 targetProtocol?: number | null;
-                /** @description CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null. */
+                /** @description CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol: the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null. */
                 protocolCaps?: {
                     cap?: number;
                     title?: string;
                     status?: string | null;
                     url?: string;
                 }[];
-                /** @description Stellar-ecosystem dependencies from the repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched package names stored verbatim — the dependency graph. Forward read: the repo's stack. Reverse read: search the package name to find dependents (adoption evidence no README mention can fake). Empty until a post-2026-08-10 scan. */
+                /** @description Stellar-ecosystem dependencies from the repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched package names stored verbatim: the dependency graph. Forward read: the repo's stack. Reverse read: search the package name to find dependents (adoption evidence no README mention can fake). Empty until a post-2026-08-10 scan. */
                 stellarDeps?: string[];
-                /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address. */
+                /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check): unfakeable deployment evidence. Null when no verified address. */
                 mainnetContractId?: string | null;
-                /** @description Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
+                /** @description Stellar SDK capability tags detected in the repo's JS/TS sources; what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
                 sdkCapabilities?: string[];
-                /** @description Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits — what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null). */
+                /** @description Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits; what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null). */
                 codeDomains?: string[];
             } | null;
         };
@@ -2071,7 +2071,7 @@ export interface components {
             };
             repos: components["schemas"]["Repo"][];
         };
-        /** @description A builder profile row from /api/builders. Profile text (bio/roleTitle) is builder-claimed, NOT verified experience; when the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance. Nullable profile fields are null (or empty-string) when unset — never a negative claim. */
+        /** @description A builder profile row from /api/builders. Profile text (bio/roleTitle) is builder-claimed, NOT verified experience; when the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance. Nullable profile fields are null (or empty-string) when unset; never a negative claim. */
         Builder: {
             /** @description Natural key; also the stellarlight.xyz/builders/{githubUsername} page slug. */
             githubUsername?: string;
@@ -2079,14 +2079,14 @@ export interface components {
             displayName?: string;
             bio?: string | null;
             roleTitle?: string | null;
-            /** @description Free-text location as entered (e.g. 'Rio de Janeiro, RJ, Brasil') — the ?location= filter substring-matches this. */
+            /** @description Free-text location as entered (e.g. 'Rio de Janeiro, RJ, Brasil'); the ?location= filter substring-matches this. */
             location?: string | null;
             websiteUrl?: string | null;
-            /** @description As entered by the builder — can be a bare handle OR a full profile URL; normalize before constructing links. */
+            /** @description As entered by the builder: can be a bare handle OR a full profile URL; normalize before constructing links. */
             twitterHandle?: string | null;
             avatarUrl?: string | null;
             isFeatured?: boolean;
-            /** @description Length of `projects` — the builder's own synced entries, not an ecosystem-wide attribution count. */
+            /** @description Length of `projects`: the builder's own synced entries, not an ecosystem-wide attribution count. */
             projectCount?: number;
             /** @description Projects synced from the builder's Stellar Passport profile. Raw sync rows: keys are snake_case, and extra passthrough fields (id, website_url, demo_url, docs_url, contract_address, repos, heatmap…) may ride along. */
             projects?: ({
@@ -2102,7 +2102,7 @@ export interface components {
              * @description Canonical builder profile page on stellarlight.xyz.
              */
             url?: string;
-            /** @description WHY this row matched (null without a q/skill filter). Free-text profile evidence — treat bio/role text as claims, not verified experience. */
+            /** @description WHY this row matched (null without a q/skill filter). Free-text profile evidence: treat bio/role text as claims, not verified experience. */
             match?: {
                 /** @description Profile fields the query hit (bio, roleTitle, displayName, githubUsername, location, projects). */
                 matchedFields?: string[];
@@ -2111,17 +2111,17 @@ export interface components {
                     name?: string;
                     slug?: string | null;
                 }[];
-                /** @description Per query token, the literal term that hit — a token can match via a synonym (e.g. 'payments' via 'remittance'). */
+                /** @description Per query token, the literal term that hit: a token can match via a synonym (e.g. 'payments' via 'remittance'). */
                 matchedTerms?: {
                     [key: string]: string;
                 };
                 /**
-                 * @description 'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence) — every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.
+                 * @description 'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence); every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.
                  * @enum {string}
                  */
                 basis?: "profile-text" | "repo-owner" | "code-language";
             } | null;
-            /** @description Indexed repos owned by this builder's GitHub account that match the query — observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter. */
+            /** @description Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter. */
             codeEvidence?: {
                 fullName?: string;
                 url?: string | null;
@@ -2131,7 +2131,7 @@ export interface components {
                 lastCommitAt?: string | null;
                 repoScore?: number;
             }[] | null;
-            /** @description What this person has actually shipped on Stellar, from the repos we index — QUERY-INDEPENDENT and present on every row (the profile page's 'On Stellar' card as data). Attribution rule: `builds` = projects reached through repos they OWN or an org that IS them; `contributesTo` = projects reached only through repos they committed to; `commits90d` counts OWN repos only; `contributedCommits12m` is their own share of others' repos — a repo's total is never credited to a contributor. `null` = the join could not run (never 'nothing'); an all-zero block = the join ran and found no indexed code for this login. `projects` above stays Passport-declared and `codeEvidence` stays query-scoped, unchanged. */
+            /** @description What this person has actually shipped on Stellar, from the repos we index; QUERY-INDEPENDENT and present on every row (the profile page's 'On Stellar' card as data). Attribution rule: `builds` = projects reached through repos they OWN or an org that IS them; `contributesTo` = projects reached only through repos they committed to; `commits90d` counts OWN repos only; `contributedCommits12m` is their own share of others' repos; a repo's total is never credited to a contributor. `null` = the join could not run (never 'nothing'); an all-zero block = the join ran and found no indexed code for this login. `projects` above stays Passport-declared and `codeEvidence` stays query-scoped, unchanged. */
             onStellar?: {
                 repoCount?: number;
                 stars?: number;
@@ -2151,51 +2151,51 @@ export interface components {
                     slug?: string;
                     name?: string;
                 }[];
-                /** @description Up to 5 — owned repos first, then by this person's own commits, then the repo's 90d activity. Never ordered by the repo's total alone. */
+                /** @description Up to 5: owned repos first, then by this person's own commits, then the repo's 90d activity. Never ordered by the repo's total alone. */
                 topRepos?: {
                     fullName?: string;
                     url?: string;
                     stars?: number;
                     /** Format: date-time */
                     lastCommitAt?: string | null;
-                    /** @description The REPO's 90-day commits (everyone's work) — context, not this person's count. */
+                    /** @description The REPO's 90-day commits (everyone's work); context, not this person's count. */
                     commits90d?: number;
                     projectSlug?: string | null;
                     /** @enum {string} */
                     via?: "owner" | "declared" | "contributor";
-                    /** @description This person's own commits into this repo, last 12 months; null for owned repos (their own repo — the whole history is theirs). */
+                    /** @description This person's own commits into this repo, last 12 months; null for owned repos (their own repo; the whole history is theirs). */
                     myCommits12m?: number | null;
                 }[];
             } | null;
         };
-        /** @description One SDF roster entry from /api/people: person, current role, section, and affiliation — quoted from stellar.org/foundation/team with provenance (sourceUrl + observedAt). Roster facts, not verified availability. */
+        /** @description One SDF roster entry from /api/people: person, current role, section, and affiliation: quoted from stellar.org/foundation/team with provenance (sourceUrl + observedAt). Roster facts, not verified availability. */
         Person: {
             name?: string;
             /** @description Current role/title, e.g. 'VP of Ecosystem', 'CEO of Stripe'. */
             role?: string;
             /** @description Roster section: 'Leadership' | 'Board of directors' | 'Advisors'. */
             section?: string;
-            /** @description Affiliation — 'Stellar Development Foundation' for leadership, the external org for board/advisors, '' when the role names none. */
+            /** @description Affiliation: 'Stellar Development Foundation' for leadership, the external org for board/advisors, '' when the role names none. */
             org?: string;
             sourceUrl?: string;
             /** @description Date this entry was last observed from the source (YYYY-MM-DD). */
             observedAt?: string;
         };
-        /** @description An RFP row from /api/rfps. rowType discriminates real briefs from the synthetic live-round row — count/render briefs by filtering rowType === 'rfp'. */
+        /** @description An RFP row from /api/rfps. rowType discriminates real briefs from the synthetic live-round row; count/render briefs by filtering rowType === 'rfp'. */
         Rfp: {
             /** @description Brief slug (also the stellarlight.xyz/ideas/{id} page). Synthetic rows use 'scf-round-{n}'. */
             id?: string;
             title?: string;
             description?: string;
-            /** @description The sponsor's technical requirements text. Null when the brief carries none — and always null on synthetic scf-round rows. */
+            /** @description The sponsor's technical requirements text. Null when the brief carries none, and always null on synthetic scf-round rows. */
             technicalRequirements?: string | null;
-            /** @description Category slug — the ?category= filter vocabulary (an unrecognized filter value returns 400 with validCategories). 'scf' is carried by the synthetic live-round row. */
+            /** @description Category slug: the ?category= filter vocabulary (an unrecognized filter value returns 400 with validCategories). 'scf' is carried by the synthetic live-round row. */
             category?: string;
             /** @description Display label for category (e.g. 'DeFi'). */
             categoryLabel?: string;
             /** @description Sponsor/author of the brief; 'Stellar Community Fund' on synthetic rows. */
             authorName?: string;
-            /** @description Quarter slug (e.g. 'q1-2026') — the ?quarter= filter vocabulary. Synthetic rows carry the active quarter. */
+            /** @description Quarter slug (e.g. 'q1-2026'): the ?quarter= filter vocabulary. Synthetic rows carry the active quarter. */
             quarter?: string;
             /** @description Display label ('Q1 2026'); 'Live round' on synthetic rows. */
             quarterLabel?: string;
@@ -2210,19 +2210,19 @@ export interface components {
              */
             url?: string;
             /**
-             * @description 'rfp' = a curated sponsor brief. 'scf-round' = a SYNTHETIC row representing the live SCF round's open submission window (served as a row so row-reading agents don't miss the open round). Synthetic rows are NOT briefs — count/render briefs by filtering rowType === 'rfp'.
+             * @description 'rfp' = a curated sponsor brief. 'scf-round' = a SYNTHETIC row representing the live SCF round's open submission window (served as a row so row-reading agents don't miss the open round). Synthetic rows are NOT briefs: count/render briefs by filtering rowType === 'rfp'.
              * @enum {string}
              */
             rowType?: "rfp" | "scf-round";
-            /** @description True only on synthetic scf-round rows — mirror of rowType. */
+            /** @description True only on synthetic scf-round rows: mirror of rowType. */
             synthetic?: boolean;
         };
-        /** @description One hackathon event row from /api/hackathons — merged from the curated collection and the live DoraHacks feed (`source` says which). prizePoolUSD/hackersCount are ABSENT when the source publishes none: unknown, never zero. */
+        /** @description One hackathon event row from /api/hackathons: merged from the curated collection and the live DoraHacks feed (`source` says which). prizePoolUSD/hackersCount are ABSENT when the source publishes none: unknown, never zero. */
         Hackathon: {
             /** @description 'dorahacks-{id}' for DoraHacks rows; the curated collection id otherwise. */
             id?: string;
             name?: string;
-            /** @description Event slug — the key /api/hackathons/{slug} (getHackathon) resolves. */
+            /** @description Event slug: the key /api/hackathons/{slug} (getHackathon) resolves. */
             slug?: string;
             /** @description Event description (DoraHacks rows carry markdown). */
             description?: string | null;
@@ -2249,18 +2249,18 @@ export interface components {
              */
             url?: string;
             /**
-             * @description Which feed served this row — the ?source= filter vocabulary.
+             * @description Which feed served this row: the ?source= filter vocabulary.
              * @enum {string}
              */
             source?: "curated" | "dorahacks";
-            /** @description Total prize pool in USD. ABSENT when the source publishes none — unknown, not zero. */
+            /** @description Total prize pool in USD. ABSENT when the source publishes none: unknown, not zero. */
             prizePoolUSD?: number;
             /** @description Registered hackers (DoraHacks). Absent when unknown; individual builder names are not available from the source. */
             hackersCount?: number;
         };
-        /** @description One installable Stellar AI skill/tool from /api/skills — SDF's skills.stellar.org set, curated entries, and approved community submissions mapped onto one unified shape. Optional fields are OMITTED when not applicable (absent = not applicable, never null and never false). */
+        /** @description One installable Stellar AI skill/tool from /api/skills: SDF's skills.stellar.org set, curated entries, and approved community submissions mapped onto one unified shape. Optional fields are OMITTED when not applicable (absent = not applicable, never null and never false). */
         Skill: {
-            /** @description Skill slug — resolves via /api/skills/{name} (getSkill). */
+            /** @description Skill slug: resolves via /api/skills/{name} (getSkill). */
             slug?: string;
             name?: string;
             /** @description One-line summary. Absent on some rows. */
@@ -2277,7 +2277,7 @@ export interface components {
             registry?: string;
             /** @description Primary install command, e.g. 'npx skills add https://github.com/stellar/stellar-dev-skill' for the SDF set (the registry's own command) or 'npx skills add <that repository>' for a community-built entry. Absent when the entry has no one-line install. */
             install?: string;
-            /** @description Alternate install commands for other agent runtimes — an ARRAY of {label, command} entries (label = the runtime, e.g. 'Codex'). Absent when only the primary install applies. */
+            /** @description Alternate install commands for other agent runtimes: an ARRAY of {label, command} entries (label = the runtime, e.g. 'Codex'). Absent when only the primary install applies. */
             installAlt?: {
                 label?: string;
                 command?: string;
@@ -2301,26 +2301,26 @@ export interface components {
             /** @description Registry entries only: argument hint (e.g. '[payment task]'). Absent elsewhere. */
             argumentHint?: string;
         };
-        /** @description One category/type cluster from /api/clusters — crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count: the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues. */
+        /** @description One category/type cluster from /api/clusters: crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count: the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues. */
         Cluster: {
-            /** @description The cluster label — a category (dimension=category) or a types[] value (dimension=types), e.g. 'RWA'. */
+            /** @description The cluster label: a category (dimension=category) or a types[] value (dimension=types), e.g. 'RWA'. */
             key?: string;
             /**
              * @description Which taxonomy this cluster was computed over (echoes ?dimension=).
              * @enum {string}
              */
             dimension?: "category" | "types";
-            /** @description Projects in the cluster — a taxonomy count (see component description). */
+            /** @description Projects in the cluster: a taxonomy count (see component description). */
             size?: number;
             /** @description Cluster projects with an SCF award. */
             scfFundedCount?: number;
-            /** @description Sum of known SCF award amounts across the cluster — an in-house reconstruction (per-award amounts aren't published for all rounds): comparable across clusters, not an official figure. */
+            /** @description Sum of known SCF award amounts across the cluster; an in-house reconstruction (per-award amounts aren't published for all rounds): comparable across clusters, not an official figure. */
             scfTotalUSD?: number;
             /** @description Cluster projects with a top hackathon placement. */
             hackathonWinnerCount?: number;
-            /** @description 1-10 log-scaled crowding score: round(log2(size+1) + log2(scfFundedCount+1) + 0.5*log2(hackathonWinnerCount+1)), clamped to 1..10 — SCF funding and winners add a modifier, so a well-funded small cluster can outrank a huge unfunded one. Sort descending for 'most crowded', ascending for whitespace. */
+            /** @description 1-10 log-scaled crowding score: round(log2(size+1) + log2(scfFundedCount+1) + 0.5*log2(hackathonWinnerCount+1)), clamped to 1..10. SCF funding and winners add a modifier, so a well-funded small cluster can outrank a huge unfunded one. Sort descending for 'most crowded', ascending for whitespace. */
             crowdedness?: number;
-            /** @description A few showcase projects, sorted by SCF funding + hackathon prize — a SAMPLE of the cluster, not its full membership (enumerate via searchProjects). */
+            /** @description A few showcase projects, sorted by SCF funding + hackathon prize; a SAMPLE of the cluster, not its full membership (enumerate via searchProjects). */
             sampleProjects?: {
                 name?: string;
                 slug?: string;
@@ -2330,20 +2330,20 @@ export interface components {
                 url?: string;
             }[];
         };
-        /** @description One ranked project row from /api/leaderboard. Every github.* number is as-of meta.dataAsOf (the repo-index rollup timestamp), NOT a live GitHub read — meta.metricDefinitions states what each metric IS. */
+        /** @description One ranked project row from /api/leaderboard. Every github.* number is as-of meta.dataAsOf (the repo-index rollup timestamp), NOT a live GitHub read; meta.metricDefinitions states what each metric IS. */
         LeaderboardProject: {
-            /** @description 1-based position under THIS response's sort/range/category/type scope — recomputed per request, not a stable global rank. Cite alongside the applied filters (meta.filters). */
+            /** @description 1-based position under THIS response's sort/range/category/type scope; recomputed per request, not a stable global rank. Cite alongside the applied filters (meta.filters). */
             rank?: number;
             id?: string;
             name?: string;
-            /** @description Directory slug — join key to searchProjects for the full profile. */
+            /** @description Directory slug: join key to searchProjects for the full profile. */
             slug?: string;
             category?: string;
-            /** @description Granular product-type tags — the same types[] taxonomy as project-search rows, echoed so a consumer can see WHY a row matched a ?type= filter (#524). */
+            /** @description Granular product-type tags: the same types[] taxonomy as project-search rows, echoed so a consumer can see WHY a row matched a ?type= filter (#524). */
             types?: string[];
             shortDescription?: string | null;
             scfAwarded?: boolean;
-            /** @description DefiLlama-verified TVL in USD. null = NOT TRACKED on DefiLlama — never 'zero TVL'; most non-DeFi projects are legitimately untracked. Dated by tvlAsOf. */
+            /** @description DefiLlama-verified TVL in USD. null = NOT TRACKED on DefiLlama; never 'zero TVL'; most non-DeFi projects are legitimately untracked. Dated by tvlAsOf. */
             tvlUSD?: number | null;
             /**
              * Format: date-time
@@ -2352,7 +2352,7 @@ export interface components {
             tvlAsOf?: string | null;
             /** @description Code of the project's issued on-chain asset (USDC, CETES, …), from stellar.expert. Null = no verified issued asset in our on-chain seed set. */
             assetCode?: string | null;
-            /** @description Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED — never 'zero supply'; untracked issuers sort below every tracked one. */
+            /** @description Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED; never 'zero supply'; untracked issuers sort below every tracked one. */
             assetSupply?: number | null;
             /** @description Trustline holder count of the issued asset. Null when untracked. */
             assetHolders?: number | null;
@@ -2360,13 +2360,13 @@ export interface components {
             github?: {
                 /** @description Sum of stargazer counts across indexed repos. */
                 totalStars?: number;
-                /** @description Sum of OPEN issues (EXCLUDES pull requests — will not match GitHub's REST open_issues_count). A backlog snapshot, not an activity or quality ranking. */
+                /** @description Sum of OPEN issues (EXCLUDES pull requests; will not match GitHub's REST open_issues_count). A backlog snapshot, not an activity or quality ranking. */
                 openIssuesTotal?: number;
-                /** @description Default-branch commits over the trailing 90 days, summed across the project's indexed repos whose scanned code proves Stellar use (stellarProof other than none), from the enrich pass's activitySignals. The sort=activity key. null = no such repo carries a count (an INDEX gap, never zero activity); such rows sort last. This service's own rows are excluded from every ranking — the directory is the instrument, not a subject. */
+                /** @description Default-branch commits over the trailing 90 days, summed across the project's indexed repos whose scanned code proves Stellar use (stellarProof other than none), from the enrich pass's activitySignals. The sort=activity key. null = no such repo carries a count (an INDEX gap, never zero activity); such rows sort last. This service's own rows are excluded from every ranking; the directory is the instrument, not a subject. */
                 commits90d?: number | null;
                 /**
                  * Format: date-time
-                 * @description The newest activitySignals.asOf among the repos summed into commits90d — the date the count is good for. null when commits90d is null.
+                 * @description The newest activitySignals.asOf among the repos summed into commits90d; the date the count is good for. null when commits90d is null.
                  */
                 commits90dAsOf?: string | null;
                 /**
@@ -2374,37 +2374,37 @@ export interface components {
                  * @description Latest default-branch commit (fallback: last push) across indexed repos. Null when no indexed repo has a known date.
                  */
                 lastActivityAt?: string | null;
-                /** @description Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint. */
+                /** @description Indexed repos attributed to the project: our index's coverage, not the project's total GitHub footprint. */
                 repoCount?: number;
-                /** @description The exact repositories (owner/name) the stats above aggregate over — repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column. */
+                /** @description The exact repositories (owner/name) the stats above aggregate over; repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column. */
                 repos?: string[];
             };
         };
-        /** @description One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer) — two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`. */
+        /** @description One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer); two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`. */
         Stablecoin: {
-            /** @description `CODE-<first 8 of issuer>` — the stable natural key, and the safe join key when a ticker is ambiguous. */
+            /** @description `CODE-<first 8 of issuer>`: the stable natural key, and the safe join key when a ticker is ambiguous. */
             assetId?: string | null;
-            /** @description Asset code (USDC, USDY, GYEN, …). NOT unique on its own — see assetId. */
+            /** @description Asset code (USDC, USDY, GYEN, …). NOT unique on its own: see assetId. */
             ticker?: string;
             name?: string | null;
-            /** @description Full mainnet issuer account (G…) — the universal join key. With `ticker` this IS the asset's identity. */
+            /** @description Full mainnet issuer account (G…): the universal join key. With `ticker` this IS the asset's identity. */
             issuer?: string | null;
             issuerDomain?: string | null;
             company?: string | null;
             website?: string | null;
-            /** @description Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit — so raw supply is NOT comparable across rows with different pegs; use marketCapUSD. */
+            /** @description Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit, so raw supply is NOT comparable across rows with different pegs; use marketCapUSD. */
             peg?: string | null;
             country?: string | null;
-            /** @description Qualifier where the asset is not a pure peg — e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg. */
+            /** @description Qualifier where the asset is not a pure peg, e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg. */
             assetType?: string | null;
-            /** @description Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not measured. */
+            /** @description Circulating supply in whole asset units of its own peg. NOT USD, NOT comparable across pegs. Null = not measured. */
             supply?: number | null;
-            /** @description Supply valued in USD (supply × priceUSD) — THE comparable ranking metric (default sort). Null = unpriced. Read it with `priceBasis`: on an assumed-peg row this is supply at par, not a market valuation. */
+            /** @description Supply valued in USD (supply × priceUSD). THE comparable ranking metric (default sort). Null = unpriced. Read it with `priceBasis`: on an assumed-peg row this is supply at par, not a market valuation. */
             marketCapUSD?: number | null;
-            /** @description USD price of one unit. At the peg's live FX rate for a par-redeemable asset (≈1 for USD pegs); the token's own market price where the unit is NOT 1:1 with its peg. `priceBasis` says which — do not assume ≈1 on a USD row. */
+            /** @description USD price of one unit. At the peg's live FX rate for a par-redeemable asset (≈1 for USD pegs); the token's own market price where the unit is NOT 1:1 with its peg. `priceBasis` says which; do not assume ≈1 on a USD row. */
             priceUSD?: number | null;
             /**
-             * @description How priceUSD was obtained. assumed-peg = the peg's live FX rate; the asset claims par and peg DEVIATION IS NOT MEASURED. measured-market = the unit's own market price, used where the unit is not 1:1 with its peg — Ondo's USDY accrues (it was $1.14 against a $1.00 peg on 2026-09-09) and USDM1 is a bond trading above par. Null exactly when priceUSD is null.
+             * @description How priceUSD was obtained. assumed-peg = the peg's live FX rate; the asset claims par and peg DEVIATION IS NOT MEASURED. measured-market = the unit's own market price, used where the unit is not 1:1 with its peg. Ondo's USDY accrues (it was $1.14 against a $1.00 peg on 2026-09-09) and USDM1 is a bond trading above par. Null exactly when priceUSD is null.
              * @enum {string|null}
              */
             priceBasis?: "assumed-peg" | "measured-market" | null;
@@ -2412,23 +2412,23 @@ export interface components {
             holders?: number | null;
             /** @description 24h transfer volume in USD. */
             volume24hUSD?: number | null;
-            /** @description Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist — never 0 for 'no data'. */
+            /** @description Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist; never 0 for 'no data'. */
             supplyChange7d?: number | null;
             /**
-             * @description How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement — say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting; its metrics are the last known values, dated by updatedAt.
+             * @description How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement; say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting; its metrics are the last known values, dated by updatedAt.
              * @enum {string|null}
              */
             basis?: "live" | "curated-static" | "unmeasured" | null;
             /** @description Plain-words reason a row is curated-static or unmeasured. Null for live rows. */
             note?: string | null;
-            /** @description The issuer's own mark, when one resolves. Null means render your own fallback (e.g. a peg flag) — absence is not itself an error. */
+            /** @description The issuer's own mark, when one resolves. Null means render your own fallback (e.g. a peg flag); absence is not itself an error. */
             logoUrl?: string | null;
             /**
              * @description Provenance of logoUrl. toml = the issuer's own per-currency image. toml-org = the same toml's org-level mark, used when no per-currency image exists but the org one resolves. fallback = a hand-curated override. country-flag = the peg's flag IS the intended mark, not a stand-in. none = nothing resolved, logoUrl is null.
              * @enum {string|null}
              */
             logoSource?: "toml" | "toml-org" | "fallback" | "country-flag" | "none" | null;
-            /** @description True by construction — every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal. */
+            /** @description True by construction: every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal. */
             verified?: boolean;
             /**
              * Format: date-time
@@ -2464,7 +2464,7 @@ export interface components {
         limit: number;
         /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
         offset: number;
-        /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+        /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array: meta is unaffected. Nested objects are selected whole (no dot-paths). */
         fields: string;
         /** @description Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues. */
         view: "full" | "compact";
@@ -2570,7 +2570,7 @@ export interface operations {
                             shippedSoFar?: string | null;
                             remaining?: string | null;
                         }[];
-                        /** @description The written record behind the numbers — lesson write-ups per defect class, committed fetch receipts for human-verified corrections, and audit reports. Paths are repo-relative. */
+                        /** @description The written record behind the numbers: lesson write-ups per defect class, committed fetch receipts for human-verified corrections, and audit reports. Paths are repo-relative. */
                         library?: {
                             lessons?: {
                                 file?: string;
@@ -2680,7 +2680,7 @@ export interface operations {
                                 value?: number;
                             }[];
                         };
-                        /** @description Where known-item misses die. Every open recall finding is replayed live and classified at the FIRST failing stage — passing (no longer reproduces) / ranking (returned but below top-3) / admission (not returned for the query) / identity (own exact name does not return it) / corpus (not in the directory at all). Stages are mutually exclusive and each names its owning area. A high 'passing' share means the open finding count is carrying STALE entries rather than real debt. */
+                        /** @description Where known-item misses die. Every open recall finding is replayed live and classified at the FIRST failing stage: passing (no longer reproduces) / ranking (returned but below top-3) / admission (not returned for the query) / identity (own exact name does not return it) / corpus (not in the directory at all). Stages are mutually exclusive and each names its owning area. A high 'passing' share means the open finding count is carrying STALE entries rather than real debt. */
                         missFunnel?: {
                             /** Format: date-time */
                             generatedAt?: string;
@@ -2708,7 +2708,7 @@ export interface operations {
                                 examples?: string[];
                             }[];
                         };
-                        /** @description Entity x missing-field map with REAL identifiers — the actionable half of this report. Each row: what is missing, the count and denominator (a sample, never a census), why it matters to a caller, what closes it, and example slugs/repos so the gap can be worked or independently checked. */
+                        /** @description Entity x missing-field map with REAL identifiers: the actionable half of this report. Each row: what is missing, the count and denominator (a sample, never a census), why it matters to a caller, what closes it, and example slugs/repos so the gap can be worked or independently checked. */
                         gapMatrix?: {
                             definition?: string;
                             rows?: {
@@ -2846,7 +2846,7 @@ export interface operations {
                                 /** @description a verified mainnet contract is attributed to this repo (raw field mainnetContractId) */
                                 mainnetJoined?: boolean;
                             }[];
-                            /** @description Indexed but thinly evidenced — the repo work queue. */
+                            /** @description Indexed but thinly evidenced: the repo work queue. */
                             thinnestEvidence?: {
                                 fullName?: string;
                                 repoScore?: number | null;
@@ -2914,7 +2914,7 @@ export interface operations {
     verifyClaim: {
         parameters: {
             query?: {
-                /** @description Natural-language audit claim in the closed grammar: 'is <project> audited', 'was <project> audited by <firm>'. Anything else 400s with the supported forms — refusal over guessing. */
+                /** @description Natural-language audit claim in the closed grammar: 'is <project> audited', 'was <project> audited by <firm>'. Anything else 400s with the supported forms; refusal over guessing. */
                 claim?: string;
                 /** @description Structured alternative to claim. */
                 type?: "audited" | "live" | "maintained" | "issued";
@@ -2942,7 +2942,7 @@ export interface operations {
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
-                            /** @description What each verdict asserts — quote it rather than paraphrasing. */
+                            /** @description What each verdict asserts: quote it rather than paraphrasing. */
                             methodology?: string;
                             /** @description The denominators behind the verdict. */
                             searched?: {
@@ -2957,7 +2957,7 @@ export interface operations {
                             auditor?: string;
                             since?: string;
                         };
-                        /** @description The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence — the same labeled data the directory serves. */
+                        /** @description The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence; the same labeled data the directory serves. */
                         subject?: {
                             asked?: string;
                             resolvedSlug?: string;
@@ -2979,7 +2979,7 @@ export interface operations {
                             prominence?: number | null;
                         };
                         /**
-                         * @description supported = evidence on record; contradicted = we hold a dated record saying otherwise (Pre-Release vs a live claim; every repo archived vs maintained); unsupported = nothing in OUR corpus either way (never 'false' — see statement); unresolved = unknown subject.
+                         * @description supported = evidence on record; contradicted = we hold a dated record saying otherwise (Pre-Release vs a live claim; every repo archived vs maintained); unsupported = nothing in OUR corpus either way (never 'false'; see statement); unresolved = unknown subject.
                          * @enum {string}
                          */
                         verdict?: "supported" | "contradicted" | "unsupported" | "unresolved";
@@ -3067,7 +3067,7 @@ export interface operations {
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
-                            /** @description How many project records were searched — the denominator behind a miss. */
+                            /** @description How many project records were searched: the denominator behind a miss. */
                             searched?: number;
                             /** @description Match order and what a miss does and does not claim. Safe to surface to a user. */
                             methodology?: string;
@@ -3084,7 +3084,7 @@ export interface operations {
                         subject?: {
                             slug?: string;
                             name?: string;
-                            /** @description Lifecycle label at statusAsOf. Weigh it with evidence.statusBasis — a label alone is not proof. */
+                            /** @description Lifecycle label at statusAsOf. Weigh it with evidence.statusBasis: a label alone is not proof. */
                             status?: string;
                         } | null;
                         /** @description Where to look now. Identical to subject when nothing moved. */
@@ -3099,7 +3099,7 @@ export interface operations {
                             url?: string;
                         } | null;
                         superseded?: boolean;
-                        /** @description Dated basis for the status. `unsourced: true` means we assert it with no citable source — our unverified record, not an established fact about a named company. */
+                        /** @description Dated basis for the status. `unsourced: true` means we assert it with no citable source, our unverified record, not an established fact about a named company. */
                         evidence?: {
                             /**
                              * Format: date-time
@@ -3136,7 +3136,7 @@ export interface operations {
                 since: string;
                 /** @description CSV subset of projects,repos,partners (default all three). */
                 surfaces?: string;
-                /** @description Max rows PER SURFACE, newest-first (1–500, default 100). meta.truncated.<surface> signals more. */
+                /** @description Max rows PER SURFACE, newest-first (1-500, default 100). meta.truncated.<surface> signals more. */
                 limit?: number;
             };
             header?: never;
@@ -3171,7 +3171,7 @@ export interface operations {
                             asOf?: string;
                             surfaces?: string[];
                             limitPerSurface?: number;
-                            /** @description Present ONLY when a source filter returned weak neighbors while stronger corpus-wide matches exist (a source-scoped vector search never goes empty — it returns the nearest in-source rows however weak). Carries inSourceTopScore, corpusWideTopScore, corpusWideTopSource and a note; treat it as the honest 'category is thin for this query' signal and consider dropping the filter. */
+                            /** @description Present ONLY when a source filter returned weak neighbors while stronger corpus-wide matches exist (a source-scoped vector search never goes empty; it returns the nearest in-source rows however weak). Carries inSourceTopScore, corpusWideTopScore, corpusWideTopSource and a note; treat it as the honest 'category is thin for this query' signal and consider dropping the filter. */
                             sourceAdvisory?: {
                                 note?: string;
                                 inSourceTopScore?: number;
@@ -3231,7 +3231,7 @@ export interface operations {
             query?: {
                 /** @description Only entries on/after this ISO date (YYYY-MM-DD). */
                 since?: string;
-                /** @description Max entries to return, latest-first (1–100). */
+                /** @description Max entries to return, latest-first (1-100). */
                 limit?: number;
             };
             header?: never;
@@ -3261,12 +3261,12 @@ export interface operations {
                             };
                             /**
                              * @deprecated
-                             * @description Deprecated flat copy — read meta.counts.returned.
+                             * @description Deprecated flat copy: read meta.counts.returned.
                              */
                             returned?: number;
                             /**
                              * @deprecated
-                             * @description Deprecated flat copy — read meta.counts.total.
+                             * @description Deprecated flat copy: read meta.counts.total.
                              */
                             total?: number;
                             /**
@@ -3303,17 +3303,17 @@ export interface operations {
                 q?: components["parameters"]["q"];
                 /** @description Filter by category */
                 category?: "Infrastructure" | "Tooling" | "User-Facing App" | "Asset" | "Protocol/Contract" | "Anchor" | "Partner Integration";
-                /** @description Filter to projects whose `types[]` includes this product type — server-side exact membership, e.g. `type=Wallet` enumerates Wallet-typed records (combine with `q` and/or `status` to scope further, or use alone to list a type). Distinct from `category` (a project has ONE category but can carry several types). Unknown values return 400 with validTypes. */
+                /** @description Filter to projects whose `types[]` includes this product type; server-side exact membership, e.g. `type=Wallet` enumerates Wallet-typed records (combine with `q` and/or `status` to scope further, or use alone to list a type). Distinct from `category` (a project has ONE category but can carry several types). Unknown values return 400 with validTypes. */
                 type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
                 /** @description Filter to SCF-funded projects only */
                 scfAwarded?: boolean;
-                /** @description Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence — `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses. */
+                /** @description Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence: `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses. */
                 status?: "Development" | "Pre-Release" | "Live" | "Inactive";
                 /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                 limit?: components["parameters"]["limit"];
                 /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                 offset?: components["parameters"]["offset"];
-                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array: meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
                 /** @description Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues. */
                 view?: components["parameters"]["view"];
@@ -3372,15 +3372,15 @@ export interface operations {
                 q?: components["parameters"]["q"];
                 /** @description Filter by primary language (case-insensitive substring, e.g. 'Rust', 'TypeScript') */
                 language?: string;
-                /** @description Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references. */
+                /** @description Only return repos with repoScore ≥ this (0-100). Use 40+ for high-signal references. */
                 minScore?: number;
-                /** @description Filter by observable activity state (each row also carries it as activityState). 'archived' is the owner's own verdict; 'dormant' means a KNOWN commit older than 180 days — an observation, not a death verdict; 'unknown' means no commit date held. Unknown values return 400 with the valid list. */
+                /** @description Filter by observable activity state (each row also carries it as activityState). 'archived' is the owner's own verdict; 'dormant' means a KNOWN commit older than 180 days: an observation, not a death verdict; 'unknown' means no commit date held. Unknown values return 400 with the valid list. */
                 activity?: "active" | "maintained" | "dormant" | "archived" | "unknown";
                 /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                 limit?: components["parameters"]["limit"];
                 /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                 offset?: components["parameters"]["offset"];
-                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array: meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
                 /** @description Row shape. `full` (the default) returns every row field, unchanged. `compact` is for callers whose tool output is capped: each row is rebuilt from a fixed key list (identity, rank and score, and the fields that answer the usual question), and list fields left out come back as counts. A default projects/search page for q=lending measured 87,157 characters full and 23,091 compact (2026-10-23). Every compact row carries the same keys, null where there is no value; a field missing from a compact row was left out, not found empty. `meta.view` (first in meta) says the page is compact and where the left-out detail is read: repeat the request without view, or without view and with fields=<names>. The key lists are in the CompactView schema. Cannot be combined with fields (400). Any other value answers 400 with validValues. */
                 view?: components["parameters"]["view"];
@@ -3457,9 +3457,9 @@ export interface operations {
                         };
                         q?: string;
                         repo?: string | null;
-                        /** @description How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name — that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed. */
+                        /** @description How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed. */
                         routedVia?: string | null;
-                        /** @description Freshness/status of the routed repo from the StellarLight INDEX — these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed. */
+                        /** @description Freshness/status of the routed repo from the StellarLight INDEX: these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed. */
                         repoMeta?: {
                             /** Format: date-time */
                             lastCommitAt?: string | null;
@@ -3467,11 +3467,11 @@ export interface operations {
                             isArchived?: boolean;
                             repoScoreLabel?: string | null;
                             /**
-                             * @description What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a curated Stellar platform repo (protocol, network services such as Horizon and RPC, SDKs, CLI) → platform; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.
+                             * @description What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a curated Stellar platform repo (protocol, network services such as Horizon and RPC, SDKs, CLI) → platform; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product; one that became a product is an application: the product link outranks where the code was first submitted); else code; a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.
                              * @enum {string}
                              */
                             kind?: "archived" | "fork" | "platform" | "template-or-tutorial" | "contract" | "application" | "hackathon" | "code";
-                            /** @description The signal that decided kind, so the label can be weighed: isArchived | isFork | knownPlatform (the curated Stellar platform registry) | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code). */
+                            /** @description The signal that decided kind, so the label can be weighed: isArchived | isFork | knownPlatform (the curated Stellar platform registry) | judgedHackathon | nameLooksTemplate (the one heuristic: a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code). */
                             kindBasis?: string;
                         } | null;
                         /** @description A malware hold: this repo's default branch carried the payload of a known campaign, a task or script that runs a font file as a program, or a font file that is really code beside a task that runs on folder open or an install script. `indicators` lists what was found, including the folder-open task and the setting that runs it unasked, which alone never hold a repo. A held repo is left out of repo search and every read of the repo index; only a request naming it returns it, with this block. A hackathon build linking it is still served with the link withheld (its own `security`); project links are not checked yet. Do not open a held repo in an editor or run npm install in it, and say so to the user. null = no hold on record, which is not a claim that the repo is safe. */
@@ -3490,11 +3490,11 @@ export interface operations {
                             /** @description The warning to relay: what was found and what not to do, in Scout's words only (the files are in `indicators`). */
                             note?: string;
                         } | null;
-                        /** @description Code-verified truth from analyzing the routed repo's ACTUAL source — qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned. */
+                        /** @description Code-verified truth from analyzing the routed repo's ACTUAL source; qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned. */
                         codeVerified?: {
                             stellarProof?: string;
                             codeDepth?: number | null;
-                            /** @description The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE — they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable'. */
+                            /** @description The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE: they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable'. */
                             isDeployableContract?: boolean;
                             sorobanSdkVersion?: string | null;
                             versionStatus?: string | null;
@@ -3507,7 +3507,7 @@ export interface operations {
                             } | null;
                             /** Format: date-time */
                             scannedAt?: string | null;
-                            /** @description Commit SHA of the default branch the code facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12. */
+                            /** @description Commit SHA of the default branch the code facts were computed at; cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12. */
                             scannedRef?: string | null;
                             symbols?: string[];
                             contractInterface?: string[];
@@ -3524,14 +3524,14 @@ export interface operations {
                         } | null;
                         /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
                         answer?: string | null;
-                        /** @description Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced — cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it — where they disagree, the dated fact wins. */
+                        /** @description Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it; where they disagree, the dated fact wins. */
                         answerSource?: string | null;
                         /**
                          * Format: date-time
-                         * @description When the answer was true. NULL WHENEVER answerSource is 'deepwiki' — DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf — day-granular, serialized as that day's 00:00:00Z — such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.
+                         * @description When the answer was true. NULL WHENEVER answerSource is 'deepwiki'. DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf: day-granular, serialized as that day's 00:00:00Z; such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.
                          */
                         answerAsOf?: string | null;
-                        /** @description Every public, curated, dated, source-cited fact StellarLight holds for the routed repo — deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories — whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date. */
+                        /** @description Every public, curated, dated, source-cited fact StellarLight holds for the routed repo: deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories, whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date. */
                         knowledgeNotes?: {
                             note: string;
                             /** @description 'curated' (hand-verified) or 'derived:audit'. */
@@ -3549,7 +3549,7 @@ export interface operations {
                             deepWikiUrl?: string | null;
                             deepWikiSearchUrl?: string | null;
                         };
-                        /** @description Present when routing failed entirely — a hint to use search_repos or pin ?repo=. */
+                        /** @description Present when routing failed entirely: a hint to use search_repos or pin ?repo=. */
                         note?: string | null;
                         /** @description Present when a repo routed but DeepWiki had no answer. */
                         note2?: string | null;
@@ -3572,7 +3572,7 @@ export interface operations {
                 status?: "upcoming" | "active" | "completed";
                 /** @description Filter by organizer slug */
                 organizer?: string;
-                /** @description Free-text name lookup — matches event name/title and organizer (case-insensitive substring). Resolves a NAMED event without paging the catalog (e.g. q=blend, q=agents). */
+                /** @description Free-text name lookup: matches event name/title and organizer (case-insensitive substring). Resolves a NAMED event without paging the catalog (e.g. q=blend, q=agents). */
                 q?: string;
                 /** @description Restrict to one feed (curated vs DoraHacks) */
                 source?: "curated" | "dorahacks";
@@ -3637,7 +3637,7 @@ export interface operations {
     compareHackathons: {
         parameters: {
             query: {
-                /** @description 2–5 hackathon slugs, comma-separated (?slugs=a,b) */
+                /** @description 2-5 hackathon slugs, comma-separated (?slugs=a,b) */
                 slugs: string[];
             };
             header?: never;
@@ -3957,7 +3957,7 @@ export interface operations {
                                 /** @enum {string} */
                                 mode?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description returned vs total — how much the filters narrowed. */
+                            /** @description returned vs total: how much the filters narrowed. */
                             counts?: {
                                 /** @description Submissions in the index. A submission entered in several events counts once. */
                                 indexedBuilds?: number;
@@ -4871,7 +4871,7 @@ export interface operations {
                 limit?: components["parameters"]["limit"];
                 /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
                 offset?: components["parameters"]["offset"];
-                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array: meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
             };
             header?: never;
@@ -4894,7 +4894,7 @@ export interface operations {
                              */
                             matchMode?: "all" | "expanded";
                             matchModeLabel?: string;
-                            /** @description THIS OPERATION ONLY: unknown query parameters are rejected with 400 here, so `warnings` never reports them. It reports a TRUNCATED code-language pass instead — the owned-repo roster behind `match.basis: 'code-language'` is read in pages up to a ceiling, and when the match count exceeds it the warning names how many repos were read of how many matched, so a missing builder reads as 'capped', never as 'not found'. A lookup that failed outright says so too (results are then prose-only). */
+                            /** @description THIS OPERATION ONLY: unknown query parameters are rejected with 400 here, so `warnings` never reports them. It reports a TRUNCATED code-language pass instead: the owned-repo roster behind `match.basis: 'code-language'` is read in pages up to a ceiling, and when the match count exceeds it the warning names how many repos were read of how many matched, so a missing builder reads as 'capped', never as 'not found'. A lookup that failed outright says so too (results are then prose-only). */
                             warnings?: string[];
                             /** @description What a skill match IS: free-text hits over profile + project prose = candidate discovery, NOT verified experience/seniority/availability. Read each row's `match` for where the query hit, and `codeEvidence` for repository-backed facts. */
                             matchBasis?: string;
@@ -4951,17 +4951,17 @@ export interface operations {
                             /** @description The roster page each row is quoted from (stellar.org/foundation/team). */
                             source?: string;
                             /**
-                             * @description Doc class, stamped deterministically at ingest: spec = canonical (CAPs/SEPs/papers/audits — old AND authoritative), guide = staleness-sensitive instructional content, article = dated commentary, data = structured datasets. Null = ingested before 2026-08-13.
+                             * @description Doc class, stamped deterministically at ingest: spec = canonical (CAPs/SEPs/papers/audits; old AND authoritative), guide = staleness-sensitive instructional content, article = dated commentary, data = structured datasets. Null = ingested before 2026-08-13.
                              * @enum {string|null}
                              */
                             docKind?: "spec" | "guide" | "article" | "data" | null;
-                            /** @description SDK-version verdict for version-bearing content via the same dated table repos use: current | supported | deprecated (e.g. a guide showing wasm32-unknown-unknown is deprecated regardless of crawl recency). Null = the chunk names no version signal — honest absence, never unknown. */
+                            /** @description SDK-version verdict for version-bearing content via the same dated table repos use: current | supported | deprecated (e.g. a guide showing wasm32-unknown-unknown is deprecated regardless of crawl recency). Null = the chunk names no version signal; honest absence, never unknown. */
                             docVersionStatus?: string | null;
                             /** @description Date the roster was last observed from the source (YYYY-MM-DD). */
                             observedAt?: string;
                             /** @description Distinct roster sections present (Leadership, Board of directors, Advisors). */
                             sections?: string[];
-                            /** @description This is an org/people reference index, NOT a builder/contributor index — roster facts, not verified availability. */
+                            /** @description This is an org/people reference index, NOT a builder/contributor index; roster facts, not verified availability. */
                             matchBasis?: string;
                         };
                         people?: components["schemas"]["Person"][];
@@ -4984,7 +4984,7 @@ export interface operations {
                 type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "asset-issuer" | "other";
                 /** @description Filter by sector served (defi, payments, rwa, stablecoins, …) */
                 sector?: string;
-                /** @description Filter by region served — a closed vocabulary of continents/blocs. Labels and case normalise ("North America" → north-america); values outside the vocabulary return 400 with `validRegions`. A country or currency is NOT a region: put it in q (e.g. ?q=nigeria) — coverage.countries is matched from query text. */
+                /** @description Filter by region served: a closed vocabulary of continents/blocs. Labels and case normalise ("North America" → north-america); values outside the vocabulary return 400 with `validRegions`. A country or currency is NOT a region: put it in q (e.g. ?q=nigeria); coverage.countries is matched from query text. */
                 region?: "global" | "north-america" | "latam" | "europe" | "africa" | "mena" | "asia" | "oceania";
                 /** @description Filter by fiat-ramp capability: `on-ramp` (fiat → Stellar), `off-ramp` (Stellar → fiat), or `on-ramp,off-ramp` to require both. Unknown values return 400 with `validRamps`. Combine with `region`/`q` for corridor lookups (e.g. ramps=on-ramp&q=mexico). */
                 ramps?: string;
@@ -4996,7 +4996,7 @@ export interface operations {
                 q?: components["parameters"]["q"];
                 /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                 limit?: components["parameters"]["limit"];
-                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array: meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
             };
             header?: never;
@@ -5040,7 +5040,7 @@ export interface operations {
                             /** Format: date-time */
                             generatedAt?: string;
                         };
-                        /** @description The full partner profile — every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing. */
+                        /** @description The full partner profile: every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing. */
                         partner?: {
                             slug?: string;
                             name?: string;
@@ -5056,7 +5056,7 @@ export interface operations {
                             assets?: string[];
                             /** @description SEP standards the partner implements. */
                             seps?: string[];
-                            /** @description Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed — the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner. */
+                            /** @description Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed; the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner. */
                             rampTypes?: ("on-ramp" | "off-ramp")[] | null;
                             country?: string | null;
                             acceptingClients?: boolean;
@@ -5077,7 +5077,7 @@ export interface operations {
                                 /** @description Slug in the projects directory, when the case study's project is listed there. */
                                 projectSlug?: string | null;
                             }[];
-                            /** @description Automated verification signals. Null members mean not yet probed — absence of evidence, not a failing grade. */
+                            /** @description Automated verification signals. Null members mean not yet probed: absence of evidence, not a failing grade. */
                             verified?: {
                                 githubLastCommitAt?: string | null;
                                 githubCommits90d?: number | null;
@@ -5162,7 +5162,7 @@ export interface operations {
                             };
                             /** @description Relevance of this partner to the need. */
                             score?: number;
-                            /** @description Why it matched — safe to surface. */
+                            /** @description Why it matched: safe to surface. */
                             reason?: string;
                         }[];
                         summary?: string | null;
@@ -5184,7 +5184,7 @@ export interface operations {
                     "application/json": components["schemas"]["RetryableError"];
                 };
             };
-            /** @description AI backend unavailable — fall back to GET /api/partners */
+            /** @description AI backend unavailable: fall back to GET /api/partners */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -5193,7 +5193,7 @@ export interface operations {
                     "application/json": {
                         /** @description Human-readable reason, safe to show. */
                         error?: string;
-                        /** @description Always true here — the feature is off, not the request wrong. */
+                        /** @description Always true here: the feature is off, not the request wrong. */
                         unavailable?: boolean;
                     };
                 };
@@ -5229,13 +5229,13 @@ export interface operations {
                     "application/json": {
                         /** @description The assistant's next message, plain text. */
                         reply?: string;
-                        /** @description Partners referenced in the reply — present only when the turn actually grounded on directory rows. */
+                        /** @description Partners referenced in the reply: present only when the turn actually grounded on directory rows. */
                         matches?: {
                             slug?: string;
                             name?: string;
                             partnerType?: string;
                             tagline?: string | null;
-                            /** @description Truncated (≤180 chars) — card fallback when tagline is empty. */
+                            /** @description Truncated (≤180 chars): card fallback when tagline is empty. */
                             description?: string | null;
                             websiteUrl?: string | null;
                             acceptingClients?: boolean | null;
@@ -5288,7 +5288,7 @@ export interface operations {
                     "application/json": {
                         /** @description Human-readable reason, safe to show. */
                         error?: string;
-                        /** @description Always true here — the feature is off, not the request wrong. */
+                        /** @description Always true here: the feature is off, not the request wrong. */
                         unavailable?: boolean;
                     };
                 };
@@ -5325,7 +5325,7 @@ export interface operations {
                     "application/json": {
                         /** @description mode=chat: the next assistant turn. */
                         reply?: string | null;
-                        /** @description mode=extract: partner-owned fields only (served as `fields`, not `profile`). A null value means the partner did not say it — never a fabricated specific. */
+                        /** @description mode=extract: partner-owned fields only (served as `fields`, not `profile`). A null value means the partner did not say it; never a fabricated specific. */
                         fields?: {
                             /** @description One of: anchor | on-off-ramp | infrastructure | tooling | protocol | wallet | audit-firm | legal | agency | asset-issuer | other. Null when genuinely unclear from the transcript. */
                             partnerType?: string | null;
@@ -5374,7 +5374,7 @@ export interface operations {
                     "application/json": {
                         /** @description Human-readable reason, safe to show. */
                         error?: string;
-                        /** @description Always true here — the feature is off, not the request wrong. */
+                        /** @description Always true here: the feature is off, not the request wrong. */
                         unavailable?: boolean;
                     };
                 };
@@ -5502,11 +5502,11 @@ export interface operations {
                             activeQuarterLabel?: string;
                             /** @description Every quarter key the quarter filter accepts, newest first. */
                             quarters?: string[];
-                            /** @description Every category value present in the current brief set — the category filter's live vocabulary. */
+                            /** @description Every category value present in the current brief set; the category filter's live vocabulary. */
                             categories?: string[];
                             /**
                              * Format: uri
-                             * @description Where a team submits a NEW brief/idea (the SCF ideas board) — hand off here when asked how to propose one.
+                             * @description Where a team submits a NEW brief/idea (the SCF ideas board); hand off here when asked how to propose one.
                              */
                             submitNewBriefAt?: string;
                             /** Format: uri */
@@ -5522,7 +5522,7 @@ export interface operations {
                                 limit?: number;
                                 offset?: number;
                             };
-                            /** @description total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows — so open=5 with returned=6 is consistent, not a discrepancy. See countBasis. */
+                            /** @description total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows, so open=5 with returned=6 is consistent, not a discrepancy. See countBasis. */
                             counts?: {
                                 total?: number;
                                 open?: number;
@@ -5534,13 +5534,13 @@ export interface operations {
                             };
                             /** @description Plain-language statement of what each count counts and how to count briefs (filter rowType === 'rfp'). */
                             countBasis?: string;
-                            /** @description SCF round identity + submission window (curated — SCF publishes no machine-readable round feed): fields are null when unconfirmed rather than guessed. Always cite asOf alongside answers built on this. */
+                            /** @description SCF round identity + submission window (curated; SCF publishes no machine-readable round feed): fields are null when unconfirmed rather than guessed. Always cite asOf alongside answers built on this. */
                             scfRound?: {
-                                /** @description Scout's current SCF round IDENTITY as of asOf — NOT a claim that submissions are open. A round in Panel Review has a currentRound and a closed window. Read submissionWindow + currentPhase for whether you can submit. */
+                                /** @description Scout's current SCF round IDENTITY as of asOf. NOT a claim that submissions are open. A round in Panel Review has a currentRound and a closed window. Read submissionWindow + currentPhase for whether you can submit. */
                                 currentRound?: number | null;
                                 /** @description Where currentRound is in the SCF process as of asOf (e.g. 'Panel Review', 'Submissions Open'). A non-submission phase means an open brief is NOT submittable today. */
                                 currentPhase?: string | null;
-                                /** @description Every SCF round currently in flight, each with its own phase and deadline — a round can be in Panel Review while the next opens. */
+                                /** @description Every SCF round currently in flight, each with its own phase and deadline; a round can be in Panel Review while the next opens. */
                                 roundsInProgress?: {
                                     round?: number;
                                     phase?: string | null;
@@ -5558,7 +5558,7 @@ export interface operations {
                                 /** Format: date */
                                 asOf?: string;
                                 /**
-                                 * @description Whether the live SCF round feed was reachable when this response was built. `live` = the round state below was read from the feed. `unavailable` = the fetch FAILED, so an empty roundsInProgress means WE COULD NOT LOOK, never that no round is open — verify at verifyAt before asserting any negative about round state.
+                                 * @description Whether the live SCF round feed was reachable when this response was built. `live` = the round state below was read from the feed. `unavailable` = the fetch FAILED, so an empty roundsInProgress means WE COULD NOT LOOK, never that no round is open; verify at verifyAt before asserting any negative about round state.
                                  * @enum {string}
                                  */
                                 source?: "live" | "unavailable";
@@ -5567,7 +5567,7 @@ export interface operations {
                             };
                         };
                         rfps?: components["schemas"]["Rfp"][];
-                        /** @description Funding-context sentence for the whole list. Names the SCF connection without asserting an open submission window — that fact lives in meta.scfRound (submissionWindow, currentPhase, roundsInProgress) and is dated by asOf. */
+                        /** @description Funding-context sentence for the whole list. Names the SCF connection without asserting an open submission window; that fact lives in meta.scfRound (submissionWindow, currentPhase, roundsInProgress) and is dated by asOf. */
                         funding?: string;
                     };
                 };
@@ -5879,7 +5879,7 @@ export interface operations {
                                     factsReadAt?: string;
                                 } | null;
                             }[] | null;
-                            /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */
+                            /** @description Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface; interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template. */
                             startFrom?: {
                                 repo?: {
                                     fullName?: string;
@@ -5935,16 +5935,16 @@ export interface operations {
                                     successorRepo?: string | null;
                                     predecessors?: string[];
                                 };
-                                /** @description Closed deterministic fact vocabulary (same set as /api/repos/trust signals) — not a score. */
+                                /** @description Closed deterministic fact vocabulary (same set as /api/repos/trust signals); not a score. */
                                 signals?: string[];
                                 /** @description Path to the full /api/repos/trust report (incl. the complete contractInterface). */
                                 fullReport?: string;
                             }[];
                             liveContracts?: {
-                                /** @description Closest code domain to the idea (idea-text hint first, then the vertical); null when neither maps — see basis. */
+                                /** @description Closest code domain to the idea (idea-text hint first, then the vertical); null when neither maps; see basis. */
                                 domain?: string | null;
                                 basis?: string;
-                                /** @description Verified-contract rows for the domain — the /api/contracts row minus codeDepth/interfacePreview/audits/successorRepo/scannedAt. */
+                                /** @description Verified-contract rows for the domain: the /api/contracts row minus codeDepth/interfacePreview/audits/successorRepo/scannedAt. */
                                 contracts?: {
                                     contractId?: string | null;
                                     repo?: {
@@ -6000,7 +6000,7 @@ export interface operations {
                                     basis?: string;
                                 } | null;
                             };
-                            /** @description Deterministic cautions derived from THIS brief's own facts — each names the fact it stands on. Empty when the brief gives no reason for one. */
+                            /** @description Deterministic cautions derived from THIS brief's own facts; each names the fact it stands on. Empty when the brief gives no reason for one. */
                             whatNotToClaim?: string[];
                         };
                     };
@@ -6219,7 +6219,7 @@ export interface operations {
                                 codeDomains?: string[];
                                 sdkCapabilities?: string[];
                                 interfaceSize?: number;
-                                /** @description Scanned public fn signatures (up to 60) — verify generated calls against these. */
+                                /** @description Scanned public fn signatures (up to 60); verify generated calls against these. */
                                 contractInterface?: string[];
                                 mainnetContractId?: string | null;
                             };
@@ -6231,7 +6231,7 @@ export interface operations {
                                 /** Format: date-time */
                                 asOf?: string;
                             } | null;
-                            /** @description Null = no PUBLISHED audit at our registry — never 'unaudited'. */
+                            /** @description Null = no PUBLISHED audit at our registry; never 'unaudited'. */
                             audits?: {
                                 count?: number;
                                 latest?: {
@@ -6247,7 +6247,7 @@ export interface operations {
                                     title?: string | null;
                                 }[];
                             } | null;
-                            /** @description Present when commits landed AFTER the latest audit — audited code is not necessarily the code running today. */
+                            /** @description Present when commits landed AFTER the latest audit; audited code is not necessarily the code running today. */
                             auditDrift?: {
                                 latestAuditAt?: string;
                                 lastCommitAt?: string;
@@ -6604,7 +6604,7 @@ export interface operations {
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
-                            /** @description The filters actually applied — echoed so a caller can tell a narrow query from an empty corpus. */
+                            /** @description The filters actually applied: echoed so a caller can tell a narrow query from an empty corpus. */
                             filters?: {
                                 project?: string | null;
                                 auditor?: string | null;
@@ -6630,7 +6630,7 @@ export interface operations {
                             /** @description Directory project this report is linked to, when the link is hand-verified. */
                             projectSlug?: string | null;
                             projectName?: string | null;
-                            /** @description How the project link was established — provenance, not a guess. */
+                            /** @description How the project link was established: provenance, not a guess. */
                             linkBasis?: string | null;
                             publishedAt?: string | null;
                             /** @description Where the date came from; absent means we do not know it. */
@@ -6667,7 +6667,7 @@ export interface operations {
     searchResearch: {
         parameters: {
             query?: {
-                /** @description Natural-language search query. Required unless the `query` alias is supplied — requests with neither return 400. */
+                /** @description Natural-language search query. Required unless the `query` alias is supplied; requests with neither return 400. */
                 q?: string;
                 /** @description Alias of `q` (agents commonly send the term under this name; both are accepted, `q` wins when both are present). */
                 query?: string;
@@ -6677,7 +6677,7 @@ export interface operations {
                 auditor?: string;
                 /** @description Audit-metadata filter: audited protocol/codebase name (substring match). Narrows results to audit-source chunks. */
                 protocol?: string;
-                /** @description Audit-metadata filter, case-insensitive. CAVEAT: severity labels the MATCHED CHUNK's section (inferred from PDF-derived headings), not the report or a specific finding — an architecture chunk can carry 'high' while the findings table reads 'unknown' — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400. */
+                /** @description Audit-metadata filter, case-insensitive. CAVEAT: severity labels the MATCHED CHUNK's section (inferred from PDF-derived headings), not the report or a specific finding: an architecture chunk can carry 'high' while the findings table reads 'unknown'; do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400. */
                 severity?: "critical" | "high" | "medium" | "low" | "informational" | "unknown";
                 /** @description Max results (default 8, max 25) */
                 limit?: number;
@@ -6685,7 +6685,7 @@ export interface operations {
                 sources?: ("sdf-blog" | "scf-handbook" | "sep" | "cap" | "dev-docs" | "paper" | "scf-proposal" | "lumenloop" | "lumenloop-research" | "repo-docs" | "audit" | "incident" | "security-program" | "sdf-org" | "ec-developer-report" | "release")[];
                 /** @description Rows per source when several sources are requested (default 8, max 25; `limit` is read when absent). With one source it is the same as `limit`. */
                 perSource?: number;
-                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths). */
+                /** @description Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array: meta is unaffected. Nested objects are selected whole (no dot-paths). */
                 fields?: components["parameters"]["fields"];
             };
             header?: never;
@@ -6801,7 +6801,7 @@ export interface operations {
     listSkills: {
         parameters: {
             query?: {
-                /** @description Free-text filter over skill name, tagline, description and tags (all terms must match). Omit to list everything. Previously accepted and ignored — a query returned the full catalog. */
+                /** @description Free-text filter over skill name, tagline, description and tags (all terms must match). Omit to list everything. Previously accepted and ignored: a query returned the full catalog. */
                 q?: string;
                 /** @description Filter by source */
                 source?: "sdf" | "stellarlight" | "lumenloop" | "external" | "community";
@@ -6895,7 +6895,7 @@ export interface operations {
                             featured?: boolean;
                             /** @description Agent hosts known to run it. */
                             compatibility?: string[];
-                            /** @description Full SKILL.md text; null when the source ships no file — absence of content is not absence of the skill. */
+                            /** @description Full SKILL.md text; null when the source ships no file; absence of content is not absence of the skill. */
                             content?: string | null;
                         };
                     };
@@ -6935,7 +6935,7 @@ export interface operations {
                     "application/json": {
                         meta?: components["schemas"]["Meta"] & {
                             population?: components["schemas"]["PopulationScope"];
-                            /** @description Every value the dimension param accepts — the live vocabulary for cluster views. */
+                            /** @description Every value the dimension param accepts: the live vocabulary for cluster views. */
                             dimensions?: string[];
                             /** @description Reading notes for the active dimension (counting caveats, taxonomy conventions). May be empty. */
                             notes?: string[];
@@ -6978,7 +6978,7 @@ export interface operations {
                         };
                         /** @description Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain. */
                         toolchain?: {
-                            /** @description Repos in the corpus carrying a soroban-sdk version — the POPULATION, not the sample the buckets were computed over. Divide rates by measuredRepos, not by this. */
+                            /** @description Repos in the corpus carrying a soroban-sdk version: the POPULATION, not the sample the buckets were computed over. Divide rates by measuredRepos, not by this. */
                             scannedRepos?: number;
                             /** @description How many repos byVersionStatus was actually computed over. Equal to scannedRepos when measurementComplete is true; smaller when the scan hit its cap. THIS is the denominator for any rate. */
                             measuredRepos?: number;
@@ -7009,18 +7009,18 @@ export interface operations {
                                 hackathonWinnerCount?: number;
                             }[];
                         };
-                        /** @description Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date — cite the snapshot date, not generatedAt. */
+                        /** @description Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date; cite the snapshot date, not generatedAt. */
                         developers?: {
                             /**
                              * Format: date
-                             * @description Electric Capital snapshot date — cite THIS, not generatedAt.
+                             * @description Electric Capital snapshot date: cite THIS, not generatedAt.
                              */
                             asOf?: string;
                             source?: string;
                             sourceUrl?: string | null;
                             monthlyActiveDevs?: {
                                 total?: number;
-                                /** @description Devs building ONLY on Stellar — the truer measure of committed builders. */
+                                /** @description Devs building ONLY on Stellar: the truer measure of committed builders. */
                                 exclusive?: number;
                                 multichain?: number;
                                 allTimePeak?: number;
@@ -7055,7 +7055,7 @@ export interface operations {
                             }[];
                             basis?: string;
                         };
-                        /** @description Present for dimension=gaps: whitespace analysis — product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof. */
+                        /** @description Present for dimension=gaps: whitespace analysis; product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof. */
                         gaps?: {
                             scope?: string;
                             basis?: string;
@@ -7089,13 +7089,13 @@ export interface operations {
                             totalPrizePoolUSD?: number;
                             totalRegisteredHackers?: number;
                         };
-                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup — null/absent projects are NOT tracked there, never 'zero TVL'. */
+                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. */
                         tvl?: {
                             totalTvlUSD?: number;
                             trackedProjects?: number;
                             /**
                              * Format: date-time
-                             * @description Most recent per-project tvlAsOf refresh — null when nothing is tracked.
+                             * @description Most recent per-project tvlAsOf refresh; null when nothing is tracked.
                              */
                             asOf?: string | null;
                             provider?: string;
@@ -7108,7 +7108,7 @@ export interface operations {
                             }[];
                             basis?: string;
                         };
-                        /** @description Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash: a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable). */
+                        /** @description Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound, and projectSetHash: a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications): the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE: which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable). */
                         funding?: {
                             /**
                              * Format: date-time
@@ -7120,13 +7120,13 @@ export interface operations {
                             countBasis?: string;
                             /** @description Projects in the awarded set this rollup sums over. */
                             scfAwardedProjects?: number;
-                            /** @description Sum of scfTotalAwardedUSD over the awarded set — an in-house rollup; reconcile per-project via scfRoundAwards. */
+                            /** @description Sum of scfTotalAwardedUSD over the awarded set; an in-house rollup; reconcile per-project via scfRoundAwards. */
                             scfTotalDistributedUSD?: number;
                             meanAwardUSD?: number | null;
-                            /** @description Per-round totals (round number, projects, USD) — the breakdown scfCountBasis points at. */
+                            /** @description Per-round totals (round number, projects, USD): the breakdown scfCountBasis points at. */
                             byRound?: {
                                 round?: string;
-                                /** @description Per-round MEMBERSHIP — a project counts in each round it won, so summing counts exceeds scfAwardedProjects. */
+                                /** @description Per-round MEMBERSHIP: a project counts in each round it won, so summing counts exceeds scfAwardedProjects. */
                                 count?: number;
                                 totalUSD?: number;
                             }[];
@@ -7160,7 +7160,7 @@ export interface operations {
                                 removedCount?: number;
                                 /** @description This response's scfTotalDistributedUSD minus the previous snapshot's. */
                                 totalUSDDelta?: number;
-                                /** @description Per removed slug, a MECHANICAL reason from the record's current state — never a guess. */
+                                /** @description Per removed slug, a MECHANICAL reason from the record's current state; never a guess. */
                                 removedReasons?: {
                                     slug?: string;
                                     /**
@@ -7170,7 +7170,7 @@ export interface operations {
                                     reason?: "dedupe" | "eligibility-reclassification" | "source-correction" | "unknown";
                                 }[];
                             } | null;
-                            /** @description Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable) — an explicit reason, never a silent omission. */
+                            /** @description Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable); an explicit reason, never a silent omission. */
                             deltaUnavailable?: string | null;
                             deltaBasis?: string;
                         };
@@ -7188,7 +7188,7 @@ export interface operations {
                 range?: "7d" | "30d" | "90d" | "1y" | "all";
                 /** @description Filter the leaderboard to one project category (e.g. 'Tooling', 'Infrastructure'). An unrecognized value returns 400 with the valid list. */
                 category?: string;
-                /** @description Filter to one or more granular project types — the same `types[]` taxonomy on project-search rows and echoed on each leaderboard row. Repeatable (`?type=DEX&type=Lending`) and comma-separable (`?type=DEX,Lending`); membership is EITHER (a project typed DEX OR Lending is kept), so you can build an explicit DEX/Lending-style grouping. Exact whole-element match, NOT substring. Unknown values return 400 with validTypes. Applied at the DB layer before ranking and limiting; `meta.filters.type` echoes the applied scope. */
+                /** @description Filter to one or more granular project types; the same `types[]` taxonomy on project-search rows and echoed on each leaderboard row. Repeatable (`?type=DEX&type=Lending`) and comma-separable (`?type=DEX,Lending`); membership is EITHER (a project typed DEX OR Lending is kept), so you can build an explicit DEX/Lending-style grouping. Exact whole-element match, NOT substring. Unknown values return 400 with validTypes. Applied at the DB layer before ranking and limiting; `meta.filters.type` echoes the applied scope. */
                 type?: ("Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield")[];
                 /** @description Response format. */
                 format?: "json" | "csv";
@@ -7233,14 +7233,14 @@ export interface operations {
                             docs?: string;
                             /**
                              * Format: date-time
-                             * @description The repository-index rollup timestamp — the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.
+                             * @description The repository-index rollup timestamp: the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.
                              */
                             dataAsOf?: string | null;
                             metricDefinitions?: {
                                 [key: string]: string;
                             };
                         };
-                        /** @description Electric Capital Developer Report snapshot — ecosystem-wide developer activity. Dated numbers: always cite asOf (they are NOT live). stellarOnlyDevs28d + multichainDevs28d sum to activeDevs28d; fullTimeDevs + partTimeDevs + oneTimeDevs is the same 28-day-active population split by EC tenure class. */
+                        /** @description Electric Capital Developer Report snapshot: ecosystem-wide developer activity. Dated numbers: always cite asOf (they are NOT live). stellarOnlyDevs28d + multichainDevs28d sum to activeDevs28d; fullTimeDevs + partTimeDevs + oneTimeDevs is the same 28-day-active population split by EC tenure class. */
                         ecosystem?: {
                             /**
                              * Format: date
@@ -7289,7 +7289,7 @@ export interface operations {
                         schema?: {
                             method?: string;
                             contentType?: string;
-                            /** @description Field-by-field description of the POST body — values are human-readable usage notes, except kind, which lists the allowed values. */
+                            /** @description Field-by-field description of the POST body: values are human-readable usage notes, except kind, which lists the allowed values. */
                             body?: {
                                 /** @description The allowed kind values (the POST field takes ONE of them). */
                                 kind?: string[];
@@ -7391,13 +7391,13 @@ export interface operations {
     getRwaAssets: {
         parameters: {
             query?: {
-                /** @description Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity — a real security, not a live market; deployed-no-supply = nothing minted: a Soroban contract with zero supply and zero events, or a classic asset the issuer declares whose trustlines exist but whose supply is zero (Etherfuse CETESZ, Franklin FOCGX); not-found = a listing that no longer resolves on mainnet. live and issued-single-holder are decided by holder count (balance > 0): two or more, or exactly one. */
+                /** @description Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity: a real security, not a live market; deployed-no-supply = nothing minted: a Soroban contract with zero supply and zero events, or a classic asset the issuer declares whose trustlines exist but whose supply is zero (Etherfuse CETESZ, Franklin FOCGX); not-found = a listing that no longer resolves on mainnet. live and issued-single-holder are decided by holder count (balance > 0): two or more, or exactly one. */
                 state?: "live" | "issued-single-holder" | "deployed-no-supply" | "not-found";
                 /** @description Filter by verificationLevel (see methodology). */
                 level?: "toml-bidirectional" | "entity-toml" | "contract-metadata" | "on-chain-home-domain" | "on-chain-only";
                 /** @description classic = a Stellar asset (code + issuer); soroban = a contract token (invisible to Horizon /assets). */
                 kind?: "classic" | "soroban";
-                /** @description Directory project slug — the rows that feed that project's `products`. */
+                /** @description Directory project slug: the rows that feed that project's `products`. */
                 project?: string;
                 /** @description Max rows (default 100, max 100). */
                 limit?: number;
@@ -7423,15 +7423,15 @@ export interface operations {
                             registryAsOf?: string;
                             /** @description The filters this response was computed under; null = not applied. */
                             filters?: {
-                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
                                 state?: string | null;
-                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
                                 level?: string | null;
-                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
                                 kind?: string | null;
-                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
                                 project?: string | null;
-                                /** @description Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
+                                /** @description Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry. */
                                 limit?: number;
                             };
                             counts?: {
@@ -7459,7 +7459,7 @@ export interface operations {
                             methodology?: string;
                         };
                         assets: {
-                            /** @description `CODE-GISSUER` for a classic asset; the `C…` contract id for a Soroban token. The asset's identity — a ticker alone identifies nothing. */
+                            /** @description `CODE-GISSUER` for a classic asset; the `C…` contract id for a Soroban token. The asset's identity: a ticker alone identifies nothing. */
                             id?: string;
                             /** @enum {string} */
                             kind?: "classic" | "soroban";
@@ -7481,7 +7481,7 @@ export interface operations {
                             network?: "mainnet";
                             /** @enum {string} */
                             state?: "live" | "issued-single-holder" | "deployed-no-supply" | "not-found";
-                            /** @description Contract creation date (Soroban). null for classic assets — Horizon does not date issuance. */
+                            /** @description Contract creation date (Soroban). null for classic assets. Horizon does not date issuance. */
                             launchedAt?: string | null;
                             verifiedAt?: string;
                             /** @description Where to re-verify: the issuer's stellar.toml, or the asset/contract on stellar.expert. */
@@ -7495,14 +7495,14 @@ export interface operations {
                             horizonNote?: string | null;
                             /** @description The issuer toml's own `status` for this asset (SEP-1: live | private | test …) on rows whose toml block was read; null = not read, never 'live'. `private` = the issuer calls it a restricted offering (SBRL: KYC-gated platform accounts, not publicly tradable) and the project row's product record carries that in `note`. */
                             tomlStatus?: string | null;
-                            /** @description true = rwa.xyz lists this token on Stellar (the original inclusion rule); false = admitted because a tracked issuer's own stellar.toml declares it under a tracked issuer account — rwa.xyz figures are null on those rows (not provided, never zero). */
+                            /** @description true = rwa.xyz lists this token on Stellar (the original inclusion rule); false = admitted because a tracked issuer's own stellar.toml declares it under a tracked issuer account; rwa.xyz figures are null on those rows (not provided, never zero). */
                             rwaxyzListed?: boolean;
-                            /** @description rwa.xyz's own USD value — a valuation, not activity. Read beside totalSupply and holders. */
+                            /** @description rwa.xyz's own USD value: a valuation, not activity. Read beside totalSupply and holders. */
                             rwaxyzValueUsd?: number | null;
                             rwaxyzHolders?: number | null;
                             /** @description The sibling contract when the same tranche was deployed twice (same wasm, same deployer, minutes apart, one holder each; rwa.xyz lists both). Neither is provably canonical, so both rows stay, linked; a project row receives one product per pair. */
                             pairedWith?: string | null;
-                            /** @description The issuer's on-chain flags, read from Horizon (classic assets only) — the whitelisting and clawback controls a regulated security carries, as facts: authRequired = holders must be approved by the issuer (a whitelist); authRevocable = the issuer can freeze a holder; clawbackEnabled = the issuer can pull tokens back; authImmutable = those powers are given up for good. null on Soroban tokens, whose controls live in contract logic. */
+                            /** @description The issuer's on-chain flags, read from Horizon (classic assets only): the whitelisting and clawback controls a regulated security carries, as facts: authRequired = holders must be approved by the issuer (a whitelist); authRevocable = the issuer can freeze a holder; clawbackEnabled = the issuer can pull tokens back; authImmutable = those powers are given up for good. null on Soroban tokens, whose controls live in contract logic. */
                             controls?: {
                                 authRequired?: boolean;
                                 authRevocable?: boolean;
@@ -7514,7 +7514,7 @@ export interface operations {
                              * @enum {string|null}
                              */
                             controlsBasis?: "horizon-issuer-flags" | null;
-                            /** @description What the six-hour refresh lane measured about this asset — supply, holders, activityCount — dated by measuredAt. null until the lane has measured it: an admission, never zero. measureBasis live = read that cycle; unmeasured = the fetch failed and the previous good numbers were kept (note says why). */
+                            /** @description What the six-hour refresh lane measured about this asset: supply, holders, activityCount, dated by measuredAt. null until the lane has measured it: an admission, never zero. measureBasis live = read that cycle; unmeasured = the fetch failed and the previous good numbers were kept (note says why). */
                             measured?: {
                                 supply?: number | null;
                                 holders?: number | null;
@@ -7541,7 +7541,7 @@ export interface operations {
     getStablecoins: {
         parameters: {
             query?: {
-                /** @description Ranking order. marketcap (default, USD-comparable) | supply (raw peg units — comparable only within one peg) | holders | volume. Unrecognized values return 400. */
+                /** @description Ranking order. marketcap (default, USD-comparable) | supply (raw peg units; comparable only within one peg) | holders | volume. Unrecognized values return 400. */
                 sort?: "marketcap" | "supply" | "holders" | "volume";
                 /** @description Filter to one fiat peg (e.g. USD, EUR, JPY, ARS). Case-insensitive. Omit for all pegs. */
                 peg?: string;
@@ -7562,7 +7562,7 @@ export interface operations {
                 content: {
                     "application/json": {
                         meta?: components["schemas"]["Meta"] & {
-                            /** @description Tickers issued on Stellar by MULTIPLE distinct companies (computed over the whole inventory, unaffected by peg/limit). A ticker listed here is not an identity — attribute by issuer account, never by ticker alone (the Circle-vs-MyKobo EURC class). */
+                            /** @description Tickers issued on Stellar by MULTIPLE distinct companies (computed over the whole inventory, unaffected by peg/limit). A ticker listed here is not an identity; attribute by issuer account, never by ticker alone (the Circle-vs-MyKobo EURC class). */
                             multiIssuerTickers?: {
                                 ticker?: string;
                                 companies?: string[];
@@ -7570,10 +7570,10 @@ export interface operations {
                             }[];
                             /**
                              * Format: date-time
-                             * @description The freshest measurement among the served rows — cite this as the as-of date for every ranking answer.
+                             * @description The freshest measurement among the served rows; cite this as the as-of date for every ranking answer.
                              */
                             dataAsOf?: string;
-                            /** @description `total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint. `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement. */
+                            /** @description `total` is the count AFTER the peg filter and BEFORE the limit slice; the same meaning as counts.total on every other endpoint. `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement. */
                             counts?: {
                                 /** @description Assets in the registry, before any filter. */
                                 tracked?: number;
@@ -7594,7 +7594,7 @@ export interface operations {
                                 basis?: "curated-registry";
                                 note?: string;
                             };
-                            /** @description How rows are ranked: USD MARKET CAP (unit supply × USD price at the asset's peg), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars. Also states what `basis` means per row and that peg deviation is not measured. */
+                            /** @description How rows are ranked: USD MARKET CAP (unit supply × USD price at the asset's peg), never raw unit counts; a yen- or peso-denominated supply must not be read as dollars. Also states what `basis` means per row and that peg deviation is not measured. */
                             methodology?: string;
                         };
                         stablecoins?: components["schemas"]["Stablecoin"][];

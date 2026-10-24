@@ -120,7 +120,7 @@ class RateLimitedError extends Error {
 			// keep the "upstream" fallback
 		}
 		super(
-			`${host} ${RATE_LIMIT_MARK} after ${retries} attempt${retries === 1 ? "" : "s"} — not evidence the asset is gone`,
+			`${host} ${RATE_LIMIT_MARK} after ${retries} attempt${retries === 1 ? "" : "s"}; not evidence the asset is gone`,
 		);
 		this.name = "RateLimitedError";
 	}
@@ -543,7 +543,7 @@ export async function measureStablecoin(
 					logoUrl,
 					logoSource,
 					basis: "unmeasured",
-					note: "Not confirmed on Horizon at measurement time. This is a lookup failure, not a claim the asset was retired — the row stays so its absence is never read as delisting.",
+					note: "Not confirmed on Horizon at measurement time. This is a lookup failure, not a claim the asset was retired; the row stays so its absence is never read as delisting.",
 				};
 			}
 		}

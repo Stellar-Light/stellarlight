@@ -87,7 +87,7 @@ export const LinkChecks: CollectionConfig = {
 				{ label: "OK (2xx)", value: "ok" },
 				{ label: "Redirect (3xx)", value: "redirect" },
 				{
-					label: "Blocked (bot-protection — unverifiable, not dead)",
+					label: "Blocked (bot-protection: unverifiable, not dead)",
 					value: "blocked",
 				},
 				{ label: "Error (4xx/5xx/timeout/dns)", value: "error" },
@@ -106,7 +106,7 @@ export const LinkChecks: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Short reason the check did not return a clean 2xx — e.g. 'timeout 10s', 'ENOTFOUND', 'self-signed-cert', 'bot-protection', 'server-error HTTP 503'. Shown for both error (proven broken) and blocked (unverifiable).",
+					"Short reason the check did not return a clean 2xx, e.g. 'timeout 10s', 'ENOTFOUND', 'self-signed-cert', 'bot-protection', 'server-error HTTP 503'. Shown for both error (proven broken) and blocked (unverifiable).",
 				condition: (data) =>
 					data?.status === "error" || data?.status === "blocked",
 			},
@@ -145,7 +145,7 @@ export const LinkChecks: CollectionConfig = {
 			],
 			admin: {
 				description:
-					"What the URL served (src/lib/page-verdict.ts). Anything but product/unknown means the 2xx is NOT evidence the product is alive — the basis upgrader refuses it and downgrades an existing site-liveness basis to unverified. Never changes status.",
+					"What the URL served (src/lib/page-verdict.ts). Anything but product/unknown means the 2xx is NOT evidence the product is alive; the basis upgrader refuses it and downgrades an existing site-liveness basis to unverified. Never changes status.",
 			},
 		},
 		{
@@ -163,7 +163,7 @@ export const LinkChecks: CollectionConfig = {
 			index: true,
 			admin: {
 				description:
-					"How many consecutive check runs this URL has been PROVEN broken — 404/410, host does not resolve, connection refused. Anything else (redirect, bot wall, 5xx, timeout) resets it: those are reachability problems, not death. 0 = not proven broken.",
+					"How many consecutive check runs this URL has been PROVEN broken; 404/410, host does not resolve, connection refused. Anything else (redirect, bot wall, 5xx, timeout) resets it: those are reachability problems, not death. 0 = not proven broken.",
 			},
 		},
 		{
@@ -182,7 +182,7 @@ export const LinkChecks: CollectionConfig = {
 			index: true,
 			admin: {
 				description:
-					"How many consecutive runs the check could not reach a verdict — 5xx, bot wall, timeout, bad certificate. One such run proves nothing; a long streak means we have had no idea about this link for that many days.",
+					"How many consecutive runs the check could not reach a verdict; 5xx, bot wall, timeout, bad certificate. One such run proves nothing; a long streak means we have had no idea about this link for that many days.",
 			},
 		},
 		{
@@ -234,7 +234,7 @@ export const LinkChecks: CollectionConfig = {
 					required: true,
 					admin: {
 						description:
-							"Source collection slug — projects / builders / entities / hackathons / curated-skills.",
+							"Source collection slug: projects / builders / entities / hackathons / curated-skills.",
 					},
 				},
 				{
@@ -258,7 +258,7 @@ export const LinkChecks: CollectionConfig = {
 					required: true,
 					admin: {
 						description:
-							"Field path within the record — e.g. 'links.github', 'website_url', 'docs'.",
+							"Field path within the record, e.g. 'links.github', 'website_url', 'docs'.",
 					},
 				},
 			],

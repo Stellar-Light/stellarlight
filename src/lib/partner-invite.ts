@@ -133,7 +133,7 @@ export async function sendPartnerInviteEmail(
 	const url = `${base}/partners/reset-password?token=${token}`;
 	await payload.sendEmail({
 		to: doc.email,
-		subject: "You're live on Stellar Light — set your password",
+		subject: "You're live on Stellar Light: set your password",
 		text: [
 			`${doc.name} is now yours to manage in the Stellar Light partner directory.`,
 			"",

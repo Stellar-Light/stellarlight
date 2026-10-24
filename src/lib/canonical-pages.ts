@@ -112,7 +112,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		url: "https://stellar.org/foundation",
 		family: "foundation",
 		title:
-			"Stellar Development Foundation — Built for a mission (stellar.org/foundation)",
+			"Stellar Development Foundation: Built for a mission (stellar.org/foundation)",
 		source: "sdf-org",
 		ingestedBy: "ingest-sdf-org.ts",
 		signatures: ["nonprofit organization created and structured"],
@@ -125,7 +125,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		url: "https://stellar.org/foundation/team",
 		family: "foundation",
 		title:
-			"SDF Team — leadership and board of directors (stellar.org/foundation/team)",
+			"SDF Team: leadership and board of directors (stellar.org/foundation/team)",
 		source: "sdf-org",
 		ingestedBy: "ingest-sdf-org.ts",
 		// Leadership-rendering probe (sls-055 / Tyler 2026-07-14): names render as
@@ -149,7 +149,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		url: "https://stellar.org/foundation/mandate",
 		family: "mandate",
 		title:
-			"SDF Mandate (current) — mission, structure, and funding (stellar.org/foundation/mandate)",
+			"SDF Mandate (current): mission, structure, and funding (stellar.org/foundation/mandate)",
 		source: "sdf-org",
 		ingestedBy: "ingest-sdf-org.ts",
 		// The sls-055 q-org-sdf-structure-mandate wording, verbatim from the
@@ -195,7 +195,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		url: "https://stellar.org/enterprise-fund",
 		family: "enterprise-fund",
 		title:
-			"Stellar Enterprise Fund — venture-style fund (stellar.org/enterprise-fund)",
+			"Stellar Enterprise Fund: venture-style fund (stellar.org/enterprise-fund)",
 		source: "sdf-org",
 		ingestedBy: "ingest-sdf-org.ts",
 		// The sls-055 q-org-sdf-enterprise-fund wording, verbatim from the
@@ -210,7 +210,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		url: "https://research.stellar.org/research-grants",
 		family: "research-grants",
 		title:
-			"Stellar Academic Research Grants — eligibility, deadlines, budget cap (research.stellar.org)",
+			"Stellar Academic Research Grants: eligibility, deadlines, budget cap (research.stellar.org)",
 		source: "sdf-org",
 		ingestedBy: "ingest-sdf-org.ts",
 		// sls-055 recurrence (2026-08-04 evals): q-scf-academic-research-grant
@@ -245,7 +245,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		url: "https://stellar.org/quarterly-reports",
 		family: "quarterly-reports",
 		title:
-			"SDF Quarterly Reports — index of every quarterly report since 2020 (stellar.org/quarterly-reports)",
+			"SDF Quarterly Reports: index of every quarterly report since 2020 (stellar.org/quarterly-reports)",
 		source: "sdf-org",
 		ingestedBy: "ingest-sdf-org.ts",
 		// Report-discovery probe: the index page's own framing prose.
@@ -283,7 +283,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		url: "https://hackerone.com/stellar",
 		family: "security-program",
 		title:
-			"Stellar Bug Bounty Program — SDF consolidated HackerOne program policy",
+			"Stellar Bug Bounty Program: SDF consolidated HackerOne program policy",
 		source: "security-program",
 		ingestedBy: "ingest-security-program.ts",
 		signatures: ["consolidated"],
@@ -298,7 +298,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		id: "security-program-supersession",
 		url: "https://stellar.org/grants-and-funding/bug-bounty",
 		family: "security-program",
-		title: "SDF bug-bounty consolidation — stellar.org landing page superseded",
+		title: "SDF bug-bounty consolidation: stellar.org landing page superseded",
 		source: "security-program",
 		ingestedBy: "ingest-security-program.ts",
 		signatures: ["superseded"],
@@ -318,7 +318,7 @@ export const CANONICAL_PAGES: CanonicalPage[] = [
 		url: "https://developers.stellar.org/launch/usdt0",
 		family: "asset-launches",
 		title:
-			"USDT0 on Stellar — developer launch page (asset, SAC + OFT contracts)",
+			"USDT0 on Stellar: developer launch page (asset, SAC + OFT contracts)",
 		source: "dev-docs",
 		ingestedBy: "ingest-developers-docs.ts",
 		signatures: [

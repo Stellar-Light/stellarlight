@@ -384,7 +384,7 @@ export const REPO_SUPERSESSIONS: Record<string, RepoSupersession> = {
 		supersededBy: "stellar/stellar-horizon",
 		deprecatedAt: "2019-11-16",
 		source:
-			"GitHub banner 'archived by the owner on Nov 16, 2019'; README: 'not in active development anymore. Please use https://github.com/stellar/horizon' — which now lives in stellar/stellar-horizon",
+			"GitHub banner 'archived by the owner on Nov 16, 2019'; README: 'not in active development anymore. Please use https://github.com/stellar/horizon', which now lives in stellar/stellar-horizon",
 		asOf: "2026-09-01",
 	},
 	"stellar-deprecated/bridge-server": {
@@ -567,7 +567,7 @@ export const REPO_SUPERSESSIONS: Record<string, RepoSupersession> = {
 		supersededBy: null,
 		deprecatedAt: "2026-08-25",
 		source:
-			"GitHub archived:true (archivedAt 2026-08-25); README: a PoC — 'One Ed25519 key can authenticate to idOS and sign for a Canton external party' — names no successor",
+			"GitHub archived:true (archivedAt 2026-08-25); README: a PoC; 'One Ed25519 key can authenticate to idOS and sign for a Canton external party', names no successor",
 		asOf: "2026-09-13",
 	},
 	"idos-network/node-staking-gas-tests": {
@@ -575,7 +575,7 @@ export const REPO_SUPERSESSIONS: Record<string, RepoSupersession> = {
 		supersededBy: null,
 		deprecatedAt: "2026-08-25",
 		source:
-			"GitHub archived:true (archivedAt 2026-08-25); README names idos-network/contracts as CONTEXT ('Context: https://github.com/idos-network/contracts'), the live repo these gas experiments fed — not a successor",
+			"GitHub archived:true (archivedAt 2026-08-25); README names idos-network/contracts as CONTEXT ('Context: https://github.com/idos-network/contracts'), the live repo these gas experiments fed; not a successor",
 		asOf: "2026-09-13",
 	},
 	"idos-network/oauth-proxy": {

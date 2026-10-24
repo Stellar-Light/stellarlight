@@ -110,7 +110,7 @@ export class ScoutApiError extends Error {
 	constructor(status: number, url: string, body: unknown) {
 		const detail =
 			body && typeof body === "object" && "error" in body
-				? ` — ${(body as { error: string }).error}`
+				? `: ${(body as { error: string }).error}`
 				: "";
 		super(`Scout API ${status} on ${url}${detail}`);
 		this.name = "ScoutApiError";

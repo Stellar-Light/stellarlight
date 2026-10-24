@@ -32,7 +32,7 @@ export const AwardBallots: CollectionConfig = {
 		defaultColumns: ["address", "round", "submissions", "lastSubmittedAt"],
 		group: "Awards",
 		description:
-			"Recorded ballots, one per address per round. The FIRST entry in `history` is the ballot that counts — nothing on chain remembers it, because a manageData overwrite destroys what it replaces.",
+			"Recorded ballots, one per address per round. The FIRST entry in `history` is the ballot that counts; nothing on chain remembers it, because a manageData overwrite destroys what it replaces.",
 	},
 	access: {
 		read: ({ req }) => isAdmin(req.user),

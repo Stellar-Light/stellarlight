@@ -89,7 +89,7 @@ export function degradedWarning(op: string, cause: unknown): string {
 				: typeof cause === "string"
 					? cause
 					: "unknown error";
-	return `${DEGRADED_READ_PREFIX}: ${op} — results may be incomplete (${cls})`;
+	return `${DEGRADED_READ_PREFIX}: ${op}; results may be incomplete (${cls})`;
 }
 
 /** `w` attributed to `scope` (e.g. "source=cap"). A failed-read line keeps
@@ -115,7 +115,7 @@ export interface FailedRead {
 }
 
 const LINE = new RegExp(
-	`^${DEGRADED_READ_PREFIX}: (.+?) \u2014 results may be incomplete \\((.*)\\)$`,
+	`^${DEGRADED_READ_PREFIX}: (.+?); results may be incomplete \\((.*)\\)$`,
 	"s",
 );
 

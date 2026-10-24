@@ -119,12 +119,12 @@ export function classifyMirrorComponent(
 	if (sources.size > 1)
 		return {
 			kind: "ambiguous",
-			reason: `cross-source mirror (${[...sources].join(", ")}) — needs a human pick`,
+			reason: `cross-source mirror (${[...sources].join(", ")}); needs a human pick`,
 		};
 	if (urls.length === 2 && digitSiblingPaths(urls[0], urls[1]))
 		return {
 			kind: "template-siblings",
-			reason: "slugs differ only by digits — versioned/numbered siblings",
+			reason: "slugs differ only by digits: versioned/numbered siblings",
 		};
 	const [a, b] = urls;
 	const ha = byUrl.get(a)?.hashes ?? new Set();
@@ -139,8 +139,8 @@ export function classifyMirrorComponent(
 			kind: "boilerplate-overlap",
 			reason:
 				urls.length === 2
-					? "docs share some chunks but are not identical — template/boilerplate text"
-					: `${urls.length} URLs share chunk text — template/boilerplate class`,
+					? "docs share some chunks but are not identical; template/boilerplate text"
+					: `${urls.length} URLs share chunk text: template/boilerplate class`,
 		};
 
 	// Whole-doc-identical same-source pair: canonical pick needs PROOF.
@@ -181,6 +181,6 @@ export function classifyMirrorComponent(
 	return {
 		kind: "ambiguous",
 		reason:
-			"whole-doc-identical pair, both URLs live with no redirect — needs a human pick",
+			"whole-doc-identical pair, both URLs live with no redirect; needs a human pick",
 	};
 }

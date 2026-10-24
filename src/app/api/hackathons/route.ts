@@ -287,12 +287,12 @@ export async function GET(req: NextRequest) {
 		isForwardLookingQuery && hackathons.length === 0
 			? {
 					summary:
-						"No upcoming or active hackathons in stellarlight's feed right now — between events. Check live channels for the next announcement.",
+						"No upcoming or active hackathons in stellarlight's feed right now: between events. Check live channels for the next announcement.",
 					channels: [
 						{
 							name: "@BuildOnStellar on X/Twitter",
 							url: "https://x.com/BuildOnStellar",
-							why: "Official Stellar Foundation builder channel — first to announce hackathons + sponsor briefs",
+							why: "Official Stellar Foundation builder channel: first to announce hackathons + sponsor briefs",
 						},
 						{
 							name: "stellarlight.xyz/hackathons",
@@ -300,7 +300,7 @@ export async function GET(req: NextRequest) {
 							why: "Live page including any curated upcoming events not yet in the API feed",
 						},
 						{
-							name: "DoraHacks — Stellar Development Foundation",
+							name: "DoraHacks: Stellar Development Foundation",
 							url: "https://dorahacks.io/org/3096",
 							why: "DoraHacks org page where SDF posts new Stellar Hacks; prizes appear the moment registration opens",
 						},

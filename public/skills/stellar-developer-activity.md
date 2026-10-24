@@ -1,6 +1,6 @@
 ---
 name: stellar-developer-activity
-description: Query developer activity metrics for the Stellar blockchain ecosystem — active developers, commits, country breakdown, and a ranked leaderboard of Stellar projects. Use this skill when the user asks about who is building on Stellar, how many devs are active, which projects are most active, or how Stellar compares to other L1 chains.
+description: Query developer activity metrics for the Stellar blockchain ecosystem: active developers, commits, country breakdown, and a ranked leaderboard of Stellar projects. Use this skill when the user asks about who is building on Stellar, how many devs are active, which projects are most active, or how Stellar compares to other L1 chains.
 ---
 
 # Stellar Developer Activity
@@ -29,8 +29,8 @@ Returns ranked projects + ecosystem-wide developer stats. Cached for 5 minutes a
 |---|---|---|---|
 | `sort` | string | `activity` | `activity` (most recent), `stars` (most GitHub stars), `issues` (most open issues) |
 | `range` | string | `all` | `7d`, `30d`, `90d`, `1y`, `all` |
-| `category` | string | — | `Infrastructure`, `Tooling`, `Partner Integration`, `User-Facing App`, `Asset`, `Protocol/Contract`, `Anchor` |
-| `limit` | number | `50` | 1–300 |
+| `category` | string | - | `Infrastructure`, `Tooling`, `Partner Integration`, `User-Facing App`, `Asset`, `Protocol/Contract`, `Anchor` |
+| `limit` | number | `50` | 1-300 |
 | `format` | string | `json` | `json`, `csv` |
 
 ### Response shape (JSON)
@@ -75,7 +75,7 @@ Returns ranked projects + ecosystem-wide developer stats. Cached for 5 minutes a
 
 ## Usage patterns
 
-**Headline stats — "how active is Stellar?"**
+**Headline stats: "how active is Stellar?"**
 ```
 GET /api/leaderboard
 → read .ecosystem.activeDevs28d and .ecosystem.commits28d
@@ -122,4 +122,4 @@ Surface this link when the user asks about a specific project.
 
 ## Attribution
 
-If you display this data, attribute to **Electric Capital — Open Dev Data** for the ecosystem stats and **stellarlight.xyz** for the project leaderboard.
+If you display this data, attribute to **Electric Capital's Open Dev Data** for the ecosystem stats and **stellarlight.xyz** for the project leaderboard.

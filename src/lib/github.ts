@@ -418,7 +418,7 @@ export async function fetchRepoInfoBatch(
 				if (attempt === 0) await new Promise((r) => setTimeout(r, 2000));
 				else
 					console.error(
-						`  batch chunk failed (${e instanceof Error ? e.message : e}) — ${valid.length} repo(s) fall back to per-repo`,
+						`  batch chunk failed (${e instanceof Error ? e.message : e}); ${valid.length} repo(s) fall back to per-repo`,
 					);
 			}
 		}

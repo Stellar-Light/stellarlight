@@ -207,12 +207,12 @@ const REPO_KIND_PROPS = {
 		type: "string",
 		enum: [...REPO_KINDS],
 		description:
-			"What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a curated Stellar platform repo (protocol, network services such as Horizon and RPC, SDKs, CLI) → platform; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product — one that became a product is an application: the product link outranks where the code was first submitted); else code — a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.",
+			"What KIND of repo this is, DERIVED at read time from the row's own stored signals (nothing new is stored or researched), first match wins: isArchived → archived; isFork → fork; a curated Stellar platform repo (protocol, network services such as Horizon and RPC, SDKs, CLI) → platform; a template/example/tutorial-looking name → template-or-tutorial; codeVerified.isDeployableContract → contract; linked to a directory product (project) → application; judgedHackathon → hackathon (a judged entry that is neither a contract nor a listed product; one that became a product is an application: the product link outranks where the code was first submitted); else code; a hackathon demo, a fork and a shipped product are not equal references, so weigh it by kindBasis.",
 	},
 	kindBasis: {
 		type: "string",
 		description:
-			"The signal that decided kind, so the label can be weighed: isArchived | isFork | knownPlatform (the curated Stellar platform registry) | judgedHackathon | nameLooksTemplate (the one heuristic — a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code).",
+			"The signal that decided kind, so the label can be weighed: isArchived | isFork | knownPlatform (the curated Stellar platform registry) | judgedHackathon | nameLooksTemplate (the one heuristic: a name pattern such as '*-template', 'hello-world', 'example', 'tutorial'; the rest are stored facts) | isDeployableContract | projectSlug | none (fell through to code).",
 	},
 };
 
@@ -1153,16 +1153,16 @@ export const spec: OpenAPISpec = {
 		title: "Stellar Scout API",
 		version: VERSION,
 		summary:
-			"Agent-native data layer for the Stellar ecosystem — projects, builders, hackathons, SCF, audits, research.",
+			"Agent-native data layer for the Stellar ecosystem: projects, builders, hackathons, SCF, audits, research.",
 		description: [
 			"Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.",
 			"",
 			"All endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).",
 			"",
-			"Data sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]) — counts are intentionally not hardcoded here to avoid drift.",
+			"Data sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]); counts are intentionally not hardcoded here to avoid drift.",
 			"",
 			"## Routing metadata (description vs x-routing)",
-			"Operation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose — category/product enumerations, synonym chains, example question phrasings — lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.",
+			"Operation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose (category/product enumerations, synonym chains, example question phrasings) lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.",
 			"",
 			"## Versioning",
 			"Every response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.",
@@ -1171,10 +1171,10 @@ export const spec: OpenAPISpec = {
 			"Rate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.",
 			"",
 			"## Pagination",
-			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice) — compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility — those flat fields are DEPRECATED, read `meta.counts`.",
+			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`.",
 			"",
 			"## Ordering & relevance",
-			'`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all — the rows are vector-similarity guesses (`via: "semantic"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it — matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0–1 cosine). Use these for cross-source ranking when merging with other aggregators.',
+			'`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all; the rows are vector-similarity guesses (`via: "semantic"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it; matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0-1 cosine). Use these for cross-source ranking when merging with other aggregators.',
 		].join("\n"),
 		contact: {
 			name: "Stellar Light",
@@ -1231,7 +1231,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Discovery"],
 				summary: "Service health + endpoint enumeration",
 				description:
-					"Self-describe / health endpoint — service ok + versions, per-source freshness and counts (`sources[]`), recent usage, and an enumeration of every /api/* endpoint. Cheap, no params. Use to check how fresh/large the data is or to discover endpoints. Not for the data itself → call the matching search operation.",
+					"Self-describe / health endpoint: service ok + versions, per-source freshness and counts (`sources[]`), recent usage, and an enumeration of every /api/* endpoint. Cheap, no params. Use to check how fresh/large the data is or to discover endpoints. Not for the data itself → call the matching search operation.",
 				"x-routing": {
 					purpose:
 						"Service health, per-source data freshness, and endpoint discovery.",
@@ -1288,9 +1288,9 @@ export const spec: OpenAPISpec = {
 				operationId: "getQualityReport",
 				tags: ["Verification"],
 				summary:
-					"Stellar Light's OWN data-quality self-report — this source's known limitations, per-surface health, guard state",
+					"Stellar Light's OWN data-quality self-report: this source's known limitations, per-surface health, guard state",
 				description:
-					"Scout / Stellar Light's SELF-REPORT, for calibrating how much to rely on THIS service's answers — not a general trust, health, or quality tool. knownLimitations is DERIVED from our measurements and says what to do INSTEAD — read it first. gapMatrix names what THIS directory is missing WHERE, with real slugs; missFunnel replays this service's open recall findings to say at which STAGE each dies. Also: per-surface open findings, the row-score definition, status-basis mix, repo coverage, every guard with its promise and whether it holds, and the trend. Counts carry denominators. No parameters.",
+					"Scout / Stellar Light's SELF-REPORT, for calibrating how much to rely on THIS service's answers; not a general trust, health, or quality tool. knownLimitations is DERIVED from our measurements and says what to do INSTEAD; read it first. gapMatrix names what THIS directory is missing WHERE, with real slugs; missFunnel replays this service's open recall findings to say at which STAGE each dies. Also: per-surface open findings, the row-score definition, status-basis mix, repo coverage, every guard with its promise and whether it holds, and the trend. Counts carry denominators. No parameters.",
 				// sls-078: every keyword ANCHORED to this source. The prior list carried
 				// standalone words (trust, coverage, health, provenance, limitations)
 				// and Raven measured the op hijacking 56 of 338 unrelated top-5
@@ -1438,7 +1438,7 @@ export const spec: OpenAPISpec = {
 										library: {
 											type: "object",
 											description:
-												"The written record behind the numbers — lesson write-ups per defect class, committed fetch receipts for human-verified corrections, and audit reports. Paths are repo-relative.",
+												"The written record behind the numbers: lesson write-ups per defect class, committed fetch receipts for human-verified corrections, and audit reports. Paths are repo-relative.",
 											properties: {
 												lessons: {
 													type: "array",
@@ -1649,7 +1649,7 @@ export const spec: OpenAPISpec = {
 										missFunnel: {
 											type: "object",
 											description:
-												"Where known-item misses die. Every open recall finding is replayed live and classified at the FIRST failing stage — passing (no longer reproduces) / ranking (returned but below top-3) / admission (not returned for the query) / identity (own exact name does not return it) / corpus (not in the directory at all). Stages are mutually exclusive and each names its owning area. A high 'passing' share means the open finding count is carrying STALE entries rather than real debt.",
+												"Where known-item misses die. Every open recall finding is replayed live and classified at the FIRST failing stage: passing (no longer reproduces) / ranking (returned but below top-3) / admission (not returned for the query) / identity (own exact name does not return it) / corpus (not in the directory at all). Stages are mutually exclusive and each names its owning area. A high 'passing' share means the open finding count is carrying STALE entries rather than real debt.",
 											properties: {
 												generatedAt: { type: "string", format: "date-time" },
 												population: {
@@ -1709,7 +1709,7 @@ export const spec: OpenAPISpec = {
 										gapMatrix: {
 											type: "object",
 											description:
-												"Entity x missing-field map with REAL identifiers — the actionable half of this report. Each row: what is missing, the count and denominator (a sample, never a census), why it matters to a caller, what closes it, and example slugs/repos so the gap can be worked or independently checked.",
+												"Entity x missing-field map with REAL identifiers: the actionable half of this report. Each row: what is missing, the count and denominator (a sample, never a census), why it matters to a caller, what closes it, and example slugs/repos so the gap can be worked or independently checked.",
 											properties: {
 												definition: { type: "string" },
 												rows: {
@@ -1966,7 +1966,7 @@ export const spec: OpenAPISpec = {
 												thinnestEvidence: {
 													type: "array",
 													description:
-														"Indexed but thinly evidenced — the repo work queue.",
+														"Indexed but thinly evidenced: the repo work queue.",
 													items: {
 														type: "object",
 														properties: {
@@ -2081,9 +2081,9 @@ export const spec: OpenAPISpec = {
 				operationId: "verifyClaim",
 				tags: ["Verification"],
 				summary:
-					"Verify a claim (audited / live / maintained / issued) against indexed evidence — verdict + evidence + confidence",
+					"Verify a claim (audited / live / maintained / issued) against indexed evidence: verdict + evidence + confidence",
 				description:
-					"Claim in → verdict out, dated evidence attached. Types: audited (audit registry), live (the status record + provenance tier — Pre-Release CONTRADICTS a live claim, source attached), maintained (indexed code activity + curated knowledgeNotes), issued ('is EURC issued by Circle' — the stablecoin registry; a multi-issuer ticker names EVERY issuer, so attribution is checkable, never conflated). Verdicts assert OUR corpus, never the world: supported / contradicted / unsupported (statement carries the denominator) / unresolved. Answers carry the full subject card.",
+					"Claim in → verdict out, dated evidence attached. Types: audited (audit registry), live (the status record + provenance tier; Pre-Release CONTRADICTS a live claim, source attached), maintained (indexed code activity + curated knowledgeNotes), issued ('is EURC issued by Circle': the stablecoin registry; a multi-issuer ticker names EVERY issuer, so attribution is checkable, never conflated). Verdicts assert OUR corpus, never the world: supported / contradicted / unsupported (statement carries the denominator) / unresolved. Answers carry the full subject card.",
 				"x-routing": {
 					purpose:
 						"Fact-check an audit claim about a project with dated evidence, instead of inferring from search results.",
@@ -2118,7 +2118,7 @@ export const spec: OpenAPISpec = {
 						name: "claim",
 						in: "query",
 						description:
-							"Natural-language audit claim in the closed grammar: 'is <project> audited', 'was <project> audited by <firm>'. Anything else 400s with the supported forms — refusal over guessing.",
+							"Natural-language audit claim in the closed grammar: 'is <project> audited', 'was <project> audited by <firm>'. Anything else 400s with the supported forms; refusal over guessing.",
 						schema: { type: "string" },
 					},
 					{
@@ -2169,7 +2169,7 @@ export const spec: OpenAPISpec = {
 												methodology: {
 													type: "string",
 													description:
-														"What each verdict asserts — quote it rather than paraphrasing.",
+														"What each verdict asserts: quote it rather than paraphrasing.",
 												},
 												searched: {
 													type: "object",
@@ -2194,7 +2194,7 @@ export const spec: OpenAPISpec = {
 										subject: {
 											type: "object",
 											description:
-												"The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence — the same labeled data the directory serves.",
+												"The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence; the same labeled data the directory serves.",
 											properties: {
 												asked: { type: "string" },
 												resolvedSlug: { type: "string" },
@@ -2239,7 +2239,7 @@ export const spec: OpenAPISpec = {
 												"unresolved",
 											],
 											description:
-												"supported = evidence on record; contradicted = we hold a dated record saying otherwise (Pre-Release vs a live claim; every repo archived vs maintained); unsupported = nothing in OUR corpus either way (never 'false' — see statement); unresolved = unknown subject.",
+												"supported = evidence on record; contradicted = we hold a dated record saying otherwise (Pre-Release vs a live claim; every repo archived vs maintained); unsupported = nothing in OUR corpus either way (never 'false'; see statement); unresolved = unknown subject.",
 										},
 										statement: {
 											type: "string",
@@ -2346,7 +2346,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Discovery"],
 				summary: "Resolve a historical project name to what it is now",
 				description:
-					"Reconciles a name found in an old post, changelog, README or repo against the current directory: returns the record it names, where to look NOW if that record was superseded, and the evidence behind any inactive status. **Use when:** you hit a project name that matches nothing current and need to know whether it was renamed, replaced, or is simply untracked. **Not for:** searching for projects by topic (\u2192 searchProjects). A miss means NOT TRACKED HERE \u2014 never that the name never existed, never that it is defunct.",
+					"Reconciles a name found in an old post, changelog, README or repo against the current directory: returns the record it names, where to look NOW if that record was superseded, and the evidence behind any inactive status. **Use when:** you hit a project name that matches nothing current and need to know whether it was renamed, replaced, or is simply untracked. **Not for:** searching for projects by topic (\u2192 searchProjects). A miss means NOT TRACKED HERE: never that the name never existed, never that it is defunct.",
 				"x-routing": {
 					purpose:
 						"Turn a stale or unfamiliar project name into its current identity, successor, and status evidence.",
@@ -2380,7 +2380,7 @@ export const spec: OpenAPISpec = {
 					exampleQuestions: [
 						"What happened to Passport on Stellar?",
 						"Is this project still around or was it renamed?",
-						"This blog post mentions a project I cannot find \u2014 what is it now?",
+						"This blog post mentions a project I cannot find: what is it now?",
 					],
 				},
 				parameters: [
@@ -2412,7 +2412,7 @@ export const spec: OpenAPISpec = {
 												searched: {
 													type: "integer",
 													description:
-														"How many project records were searched \u2014 the denominator behind a miss.",
+														"How many project records were searched: the denominator behind a miss.",
 												},
 												methodology: {
 													type: "string",
@@ -2445,7 +2445,7 @@ export const spec: OpenAPISpec = {
 												status: {
 													type: "string",
 													description:
-														"Lifecycle label at statusAsOf. Weigh it with evidence.statusBasis \u2014 a label alone is not proof.",
+														"Lifecycle label at statusAsOf. Weigh it with evidence.statusBasis: a label alone is not proof.",
 												},
 											},
 										},
@@ -2471,7 +2471,7 @@ export const spec: OpenAPISpec = {
 											type: "object",
 											nullable: true,
 											description:
-												"Dated basis for the status. `unsourced: true` means we assert it with no citable source \u2014 our unverified record, not an established fact about a named company.",
+												"Dated basis for the status. `unsourced: true` means we assert it with no citable source, our unverified record, not an established fact about a named company.",
 											properties: {
 												statusAsOf: {
 													type: "string",
@@ -2525,7 +2525,7 @@ export const spec: OpenAPISpec = {
 				operationId: "getChanges",
 				"x-routing": {
 					purpose:
-						"Which directory rows changed since a timestamp — a reconciliation feed for cached or remembered claims.",
+						"Which directory rows changed since a timestamp: a reconciliation feed for cached or remembered claims.",
 					keywords: [
 						"what changed",
 						"changed since",
@@ -2577,7 +2577,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: false,
 						description:
-							"Max rows PER SURFACE, newest-first (1\u2013500, default 100). meta.truncated.<surface> signals more.",
+							"Max rows PER SURFACE, newest-first (1-500, default 100). meta.truncated.<surface> signals more.",
 						schema: { type: "integer", minimum: 1, maximum: 500 },
 					},
 				],
@@ -2631,7 +2631,7 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													nullable: true,
 													description:
-														"Present ONLY when a source filter returned weak neighbors while stronger corpus-wide matches exist (a source-scoped vector search never goes empty \u2014 it returns the nearest in-source rows however weak). Carries inSourceTopScore, corpusWideTopScore, corpusWideTopSource and a note; treat it as the honest \u0027category is thin for this query\u0027 signal and consider dropping the filter.",
+														"Present ONLY when a source filter returned weak neighbors while stronger corpus-wide matches exist (a source-scoped vector search never goes empty; it returns the nearest in-source rows however weak). Carries inSourceTopScore, corpusWideTopScore, corpusWideTopSource and a note; treat it as the honest \u0027category is thin for this query\u0027 signal and consider dropping the filter.",
 													properties: {
 														note: { type: "string" },
 														inSourceTopScore: { type: "number" },
@@ -2699,7 +2699,7 @@ export const spec: OpenAPISpec = {
 				operationId: "getChangelog",
 				"x-routing": {
 					purpose:
-						"What changed in the Scout API, MCP tools, and client — the contract-level changelog.",
+						"What changed in the Scout API, MCP tools, and client: the contract-level changelog.",
 					keywords: [
 						"changelog",
 						"api changelog",
@@ -2728,7 +2728,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Discovery"],
 				summary: "Recent changes to the API, MCP tools, and client",
 				description:
-					"A curated, latest-first feed of contract-affecting changes — new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here to see what changed lately without reading git history. **Use when:** you cached the API surface earlier and want to know what moved before relying on it, or you're debugging a field/param that changed. **Not for:** the actual ecosystem data → use the relevant search endpoint; current health / source freshness / version → use /api/status.",
+					"A curated, latest-first feed of contract-affecting changes: new/removed endpoints & tools, param/enum changes, description rewrites. Point an agent here to see what changed lately without reading git history. **Use when:** you cached the API surface earlier and want to know what moved before relying on it, or you're debugging a field/param that changed. **Not for:** the actual ecosystem data → use the relevant search endpoint; current health / source freshness / version → use /api/status.",
 				parameters: [
 					{
 						name: "since",
@@ -2741,7 +2741,7 @@ export const spec: OpenAPISpec = {
 						name: "limit",
 						in: "query",
 						required: false,
-						description: "Max entries to return, latest-first (1–100).",
+						description: "Max entries to return, latest-first (1-100).",
 						schema: { type: "integer", minimum: 1, maximum: 100 },
 					},
 				],
@@ -2777,13 +2777,13 @@ export const spec: OpenAPISpec = {
 													type: "integer",
 													deprecated: true,
 													description:
-														"Deprecated flat copy — read meta.counts.returned.",
+														"Deprecated flat copy: read meta.counts.returned.",
 												},
 												total: {
 													type: "integer",
 													deprecated: true,
 													description:
-														"Deprecated flat copy — read meta.counts.total.",
+														"Deprecated flat copy: read meta.counts.total.",
 												},
 												latest: {
 													type: "string",
@@ -2841,12 +2841,12 @@ export const spec: OpenAPISpec = {
 				operationId: "searchProjects",
 				tags: ["Projects"],
 				summary:
-					"Search Stellar projects — look up a project by name, or find prior art / competitors",
+					"Search Stellar projects: look up a project by name, or find prior art / competitors",
 				description:
-					"Search the curated directory of Stellar projects/products — what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. THE way to LOOK UP a specific project by its name (a named protocol/app/wallet/tool) AND to discover 'who/what already exists for X'; the `type` filter gives exact product-type rosters (Wallet, DEX, Oracle, Lending, Payments, Stablecoin, RWA…). Not for docs, standards, or how-to/reference knowledge → use searchResearch.",
+					"Search the curated directory of Stellar projects/products: what has been BUILT, by whom, with SCF funding, lifecycle status, `builtBy`, links, indexed repos, and verified on-chain metrics (`onchain`) inline. THE way to LOOK UP a specific project by its name (a named protocol/app/wallet/tool) AND to discover 'who/what already exists for X'; the `type` filter gives exact product-type rosters (Wallet, DEX, Oracle, Lending, Payments, Stablecoin, RWA…). Not for docs, standards, or how-to/reference knowledge → use searchResearch.",
 				"x-routing": {
 					purpose:
-						"Directory lookup of built Stellar projects/products — status, SCF funding, builder, links. Keyword+synonym ranked by prominence/verification/funding/Live status, semantic fallback when keyword hits are thin.",
+						"Directory lookup of built Stellar projects/products: status, SCF funding, builder, links. Keyword+synonym ranked by prominence/verification/funding/Live status, semantic fallback when keyword hits are thin.",
 					keywords: [
 						"projects",
 						"products",
@@ -2943,10 +2943,10 @@ export const spec: OpenAPISpec = {
 					useWhen: [
 						"who has built / has anyone built / is there a live or SCF-funded project for X",
 						"which projects exist / give me a directory or market map of a category (wallets, DeFi, NFT marketplaces, anchors and anchor infrastructure, explorers)",
-						"DIRECTORY FACTS about a named product — status, funding, builder, links (e.g. Etherfuse Stablebonds USTRY/CETES, Soroswap)",
+						"DIRECTORY FACTS about a named product: status, funding, builder, links (e.g. Etherfuse Stablebonds USTRY/CETES, Soroswap)",
 						"is there a mature X I could integrate / who is building Y / projects operating as anchors",
 						"list/enumerate/compare from the curated directory: which wallets exist and how they differ, main DeFi projects, perpetuals/derivatives DEXes, AMM/liquidity protocols and their yields",
-						"ACCOUNTABILITY / DILIGENCE by composing structured filters — which SCF-funded projects went inactive (`?scfAwarded=1&status=Inactive`), which Live projects a category has (`?type=Wallet&status=Live`); the natural-language words 'inactive/defunct/abandoned/dead' do NOT route from `q`, they must be passed as `status=Inactive`. `meta.counts.total` answers the 'how many' form.",
+						"ACCOUNTABILITY / DILIGENCE by composing structured filters: which SCF-funded projects went inactive (`?scfAwarded=1&status=Inactive`), which Live projects a category has (`?type=Wallet&status=Live`); the natural-language words 'inactive/defunct/abandoned/dead' do NOT route from `q`, they must be passed as `status=Inactive`. `meta.counts.total` answers the 'how many' form.",
 					],
 					notFor: [
 						"how-to / reference / docs questions (CLI usage, bindings, SEP or standards text, feasibility) -> searchResearch",
@@ -2989,7 +2989,7 @@ export const spec: OpenAPISpec = {
 						name: "type",
 						in: "query",
 						description:
-							"Filter to projects whose `types[]` includes this product type — server-side exact membership, e.g. `type=Wallet` enumerates Wallet-typed records (combine with `q` and/or `status` to scope further, or use alone to list a type). Distinct from `category` (a project has ONE category but can carry several types). Unknown values return 400 with validTypes.",
+							"Filter to projects whose `types[]` includes this product type; server-side exact membership, e.g. `type=Wallet` enumerates Wallet-typed records (combine with `q` and/or `status` to scope further, or use alone to list a type). Distinct from `category` (a project has ONE category but can carry several types). Unknown values return 400 with validTypes.",
 						schema: {
 							type: "string",
 							enum: [...PROJECT_TYPES],
@@ -3005,7 +3005,7 @@ export const spec: OpenAPISpec = {
 						name: "status",
 						in: "query",
 						description:
-							"Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence — `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses.",
+							"Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence: `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses.",
 						schema: {
 							type: "string",
 							enum: [...RESOLVABLE_PROJECT_STATUSES],
@@ -3091,10 +3091,10 @@ export const spec: OpenAPISpec = {
 				tags: ["Repos"],
 				summary: "Search the Stellar GitHub repo / code-reference index",
 				description:
-					"Search the indexed Stellar ecosystem GitHub code repos — actual source graded by repoScore (0-100: freshness + traction + ecosystem authority), filterable by `language`/`minScore`. Use for 'show me the code/repos for X' or 'find a Rust/Soroban implementation of X' — prior-art source to read, fork, or cite. Not for products/companies and their funding/status → use searchProjects.",
+					"Search the indexed Stellar ecosystem GitHub code repos: actual source graded by repoScore (0-100: freshness + traction + ecosystem authority), filterable by `language`/`minScore`. Use for 'show me the code/repos for X' or 'find a Rust/Soroban implementation of X'; prior-art source to read, fork, or cite. Not for products/companies and their funding/status → use searchProjects.",
 				"x-routing": {
 					purpose:
-						"Find quality-graded Stellar GitHub source code — libraries, contracts, SDKs, templates. Indexes topics + description + language + README; expands tech synonyms.",
+						"Find quality-graded Stellar GitHub source code: libraries, contracts, SDKs, templates. Indexes topics + description + language + README; expands tech synonyms.",
 					keywords: [
 						"code",
 						"repos",
@@ -3174,14 +3174,14 @@ export const spec: OpenAPISpec = {
 						name: "minScore",
 						in: "query",
 						description:
-							"Only return repos with repoScore ≥ this (0–100). Use 40+ for high-signal references.",
+							"Only return repos with repoScore ≥ this (0-100). Use 40+ for high-signal references.",
 						schema: { type: "integer", minimum: 0, maximum: 100, default: 0 },
 					},
 					{
 						name: "activity",
 						in: "query",
 						description:
-							"Filter by observable activity state (each row also carries it as activityState). 'archived' is the owner's own verdict; 'dormant' means a KNOWN commit older than 180 days — an observation, not a death verdict; 'unknown' means no commit date held. Unknown values return 400 with the valid list.",
+							"Filter by observable activity state (each row also carries it as activityState). 'archived' is the owner's own verdict; 'dormant' means a KNOWN commit older than 180 days: an observation, not a death verdict; 'unknown' means no commit date held. Unknown values return 400 with the valid list.",
 						schema: {
 							type: "string",
 							enum: ["active", "maintained", "dormant", "archived", "unknown"],
@@ -3248,7 +3248,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Repos"],
 				summary: "Deep code answer about a Stellar repo (routing × DeepWiki)",
 				description:
-					"Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo — 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Degrades to the routed repo + deepWikiUrl when DeepWiki is unavailable. Not for discovering which repos/projects exist → use searchRepos.",
+					"Source-grounded ANSWER to a deep code question about a Stellar internal or any indexed ecosystem repo: 'how does X implement/calculate Y in its code'. Routes the question to the authoritative repo (stellar-core, Horizon/go, RPC, SDKs, SEP reference impls) or the graded repo index, then DeepWiki answers from that repo's source files. Degrades to the routed repo + deepWikiUrl when DeepWiki is unavailable. Not for discovering which repos/projects exist → use searchRepos.",
 				"x-routing": {
 					purpose:
 						"Deep 'where/how' code answers grounded in the authoritative Stellar repo's internals.",
@@ -3346,13 +3346,13 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name — that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
+												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
 										},
 										repoMeta: {
 											type: "object",
 											nullable: true,
 											description:
-												"Freshness/status of the routed repo from the StellarLight INDEX — these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed.",
+												"Freshness/status of the routed repo from the StellarLight INDEX: these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed.",
 											properties: {
 												lastCommitAt: {
 													type: "string",
@@ -3370,14 +3370,14 @@ export const spec: OpenAPISpec = {
 											type: "object",
 											nullable: true,
 											description:
-												"Code-verified truth from analyzing the routed repo's ACTUAL source — qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned.",
+												"Code-verified truth from analyzing the routed repo's ACTUAL source; qualify the answer with it: a deployable contract on a supported soroban-sdk is authoritative; tooling that merely uses Stellar is not. Null until code-scanned.",
 											properties: {
 												stellarProof: { type: "string" },
 												codeDepth: { type: "number", nullable: true },
 												isDeployableContract: {
 													type: "boolean",
 													description:
-														"The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE — they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable'.",
+														"The routed repo's PRODUCT is a deployable Soroban contract. Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE: they vendor cdylib crates as runtime/fixtures, and this flag must never be read as 'Stellar Core itself is deployable'.",
 												},
 												sorobanSdkVersion: { type: "string", nullable: true },
 												versionStatus: { type: "string", nullable: true },
@@ -3404,7 +3404,7 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													nullable: true,
 													description:
-														"Commit SHA of the default branch the code facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12.",
+														"Commit SHA of the default branch the code facts were computed at; cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12.",
 												},
 												symbols: {
 													type: "array",
@@ -3454,19 +3454,19 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced — cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it — where they disagree, the dated fact wins.",
+												"Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it; where they disagree, the dated fact wins.",
 										},
 										answerAsOf: {
 											type: "string",
 											format: "date-time",
 											nullable: true,
 											description:
-												"When the answer was true. NULL WHENEVER answerSource is 'deepwiki' — DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf — day-granular, serialized as that day's 00:00:00Z — such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.",
+												"When the answer was true. NULL WHENEVER answerSource is 'deepwiki'. DeepWiki exposes no index date, so the age of such an answer is genuinely unknown and we will not invent one. Do NOT substitute codeVerified.scannedAt, codeVerified.scannedRef or repoMeta.lastCommitAt: those date OUR SOURCE SCAN, and a DeepWiki answer can be older than the scanned ref and contradict it (reported 2026-08-31: an answer said MaxSupportedProtocolVersion = 25 while the source at the scanned ref defined 28). Populated for answerSource 'knowledge-note' (the note's own verification asOf: day-granular, serialized as that day's 00:00:00Z; such notes now LEAD answers that name the exact identifier, precisely the reported class) and 'stellarlight-code-scan' (the answer IS the scan; scannedAt dates it). When null, verify any specific value against repoUrl at scannedRef.",
 										},
 										knowledgeNotes: {
 											type: "array",
 											description:
-												"Every public, curated, dated, source-cited fact StellarLight holds for the routed repo — deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories — whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date.",
+												"Every public, curated, dated, source-cited fact StellarLight holds for the routed repo: deprecations, renames and moved paths, registry identity (npm / PyPI / crates / Maven names), release trains, security advisories, whether or not one of them led the answer. Empty when none are curated. Read these even when answerSource is 'deepwiki': a walkthrough describes mechanism; it never says the package is deprecated or the path moved. Each note cites its own source URL and carries its verification date.",
 											items: {
 												type: "object",
 												required: ["note", "source", "asOf"],
@@ -3509,7 +3509,7 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"Present when routing failed entirely — a hint to use search_repos or pin ?repo=.",
+												"Present when routing failed entirely: a hint to use search_repos or pin ?repo=.",
 										},
 										note2: {
 											type: "string",
@@ -3532,7 +3532,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "List Stellar hackathons",
 				description:
-					"Browse/LIST Stellar hackathon events — a merged, de-duplicated curated + live DoraHacks feed (dates, status, organizer, prize pools), sorted upcoming→active→completed then newest-first. The entry point for event slugs; zero-result forward-looking queries return `meta.fallbackChannels` (surface them, don't dead-end). Not for one event's winners/submissions/tracks → use getHackathon.",
+					"Browse/LIST Stellar hackathon events: a merged, de-duplicated curated + live DoraHacks feed (dates, status, organizer, prize pools), sorted upcoming→active→completed then newest-first. The entry point for event slugs; zero-result forward-looking queries return `meta.fallbackChannels` (surface them, don't dead-end). Not for one event's winners/submissions/tracks → use getHackathon.",
 				"x-routing": {
 					purpose:
 						"List/browse Stellar hackathon events (curated + every Stellar organizer on DoraHacks) and resolve event slugs.",
@@ -3586,7 +3586,7 @@ export const spec: OpenAPISpec = {
 						name: "q",
 						in: "query",
 						description:
-							"Free-text name lookup — matches event name/title and organizer (case-insensitive substring). Resolves a NAMED event without paging the catalog (e.g. q=blend, q=agents).",
+							"Free-text name lookup: matches event name/title and organizer (case-insensitive substring). Resolves a NAMED event without paging the catalog (e.g. q=blend, q=agents).",
 						schema: { type: "string" },
 					},
 					{
@@ -3715,12 +3715,12 @@ export const spec: OpenAPISpec = {
 			get: {
 				operationId: "compareHackathons",
 				tags: ["Hackathons"],
-				summary: "Compare 2–5 hackathons side-by-side",
+				summary: "Compare 2-5 hackathons side-by-side",
 				description:
-					"Side-by-side comparison of 2–5 hackathons by slug: prize pool, submissions, winners, prize per winner and, for every event with stored submissions, a `profile` (top categories, Stellar packages, repo activity after the event) counted like analyzeHackathonSubmissions. `deltas.facetShifts` names the category and package shares that moved most between the events. Curated events add cohort durability. Unresolved slugs return source:'not-found'; resolve slugs via getHackathons. Ecosystem-wide totals → use analyzeEcosystem.",
+					"Side-by-side comparison of 2-5 hackathons by slug: prize pool, submissions, winners, prize per winner and, for every event with stored submissions, a `profile` (top categories, Stellar packages, repo activity after the event) counted like analyzeHackathonSubmissions. `deltas.facetShifts` names the category and package shares that moved most between the events. Curated events add cohort durability. Unresolved slugs return source:'not-found'; resolve slugs via getHackathons. Ecosystem-wide totals → use analyzeEcosystem.",
 				"x-routing": {
 					purpose:
-						"Compare 2–5 named hackathons on prizes, turnout, and outcomes.",
+						"Compare 2-5 named hackathons on prizes, turnout, and outcomes.",
 					keywords: [
 						"compare",
 						"versus",
@@ -3745,7 +3745,7 @@ export const spec: OpenAPISpec = {
 						"which Stellar hackathon should I enter",
 						"how did [event A] compare to [event B] on prizes/turnout",
 						"was [A] or [B] bigger",
-						"which event's projects are still active/alive today (cohort durability — curated events only)",
+						"which event's projects are still active/alive today (cohort durability; curated events only)",
 					],
 					notFor: [
 						"one event's deep detail/winners -> getHackathon",
@@ -3764,7 +3764,7 @@ export const spec: OpenAPISpec = {
 						name: "slugs",
 						in: "query",
 						required: true,
-						description: "2–5 hackathon slugs, comma-separated (?slugs=a,b)",
+						description: "2-5 hackathon slugs, comma-separated (?slugs=a,b)",
 						schema: {
 							type: "array",
 							items: { type: "string" },
@@ -3949,7 +3949,7 @@ export const spec: OpenAPISpec = {
 					"Topic search across every stored Stellar hackathon submission ('buidl') on DoraHacks: the PROTOTYPE layer of prior art. Answers 'has anyone built X at a hackathon?' with each build's event, placement, repo/demo links, `project` (the directory project listing its exact repo) and `stack`. meta.stack counts the Stellar SDKs the matched repos declare: winnersOnly=1 = which SDKs winners use. Winners first among equals; in hybrid mode a reranker orders the top 50. Unit: submissions (counts.entries = event entries). Absence is a whitespace signal, not proof. For SHIPPED products → use searchProjects.",
 				"x-routing": {
 					purpose:
-						"Prior-art over hackathon PROTOTYPES — has this idea already been hacked together at a Stellar hackathon?",
+						"Prior-art over hackathon PROTOTYPES: has this idea already been hacked together at a Stellar hackathon?",
 					keywords: [
 						"hackathon builds",
 						"buidls",
@@ -3968,7 +3968,7 @@ export const spec: OpenAPISpec = {
 						"similar hackathon projects",
 					],
 					useWhen: [
-						"I want to build X — has anyone prototyped it at a Stellar hackathon?",
+						"I want to build X: has anyone prototyped it at a Stellar hackathon?",
 						"what got built around <topic> at hackathons",
 						"which hackathon projects did <topic>",
 						"winning builds for <topic>",
@@ -4081,7 +4081,7 @@ export const spec: OpenAPISpec = {
 												counts: {
 													type: "object",
 													description:
-														"returned vs total — how much the filters narrowed.",
+														"returned vs total: how much the filters narrowed.",
 													properties: {
 														indexedBuilds: {
 															type: "integer",
@@ -4780,10 +4780,10 @@ export const spec: OpenAPISpec = {
 				tags: ["Builders"],
 				summary: "Search Stellar builders",
 				description:
-					"The Stellar PEOPLE directory — builder profiles synced from Stellar Passport (bio, role, location, shipped projects[]), searchable by `q`/`skill` and `location`. Use to find a person to recruit, hire, or collaborate with. Not for the company/product behind a project ('who built X') → use searchProjects. Profiles carry NO populated SCF-tier/award data.",
+					"The Stellar PEOPLE directory: builder profiles synced from Stellar Passport (bio, role, location, shipped projects[]), searchable by `q`/`skill` and `location`. Use to find a person to recruit, hire, or collaborate with. Not for the company/product behind a project ('who built X') → use searchProjects. Profiles carry NO populated SCF-tier/award data.",
 				"x-routing": {
 					purpose:
-						"Find Stellar builders (people) by skill, location, or shipped projects — recruiting/hiring.",
+						"Find Stellar builders (people) by skill, location, or shipped projects: recruiting/hiring.",
 					keywords: [
 						// sls-052: stack+role/seniority question family
 						"developers",
@@ -4828,7 +4828,7 @@ export const spec: OpenAPISpec = {
 						"find developers by stack + role/seniority (e.g. experienced Rust Soroban devs)",
 						"find me a teammate/collaborator who has shipped X",
 						"Stellar devs in [place] who've done Soroban / 'Rust builders to hire' / 'builders in LatAm working on payments'",
-						"who can I hire for an anchor build — you want a PERSON to contact",
+						"who can I hire for an anchor build: you want a PERSON to contact",
 						"filter/find PEOPLE by region (Latin America, India, Africa, Asia, Europe) or by stack",
 					],
 					notFor: [
@@ -4836,7 +4836,7 @@ export const spec: OpenAPISpec = {
 						"the GitHub repo/code itself -> searchRepos",
 						"ecosystem-wide dev counts/activity stats -> getLeaderboard",
 						"paid work / jobs / bounties FOR a contributor (worker side, not who-to-hire) -> getRfps",
-						"SCF-tier or award-track filtering (unsupported — no SCF-tier data exists on profiles; the never-populated `scfTier` response field was removed in 1.7.19; a project's award history) -> searchProjects",
+						"SCF-tier or award-track filtering (unsupported; no SCF-tier data exists on profiles; the never-populated `scfTier` response field was removed in 1.7.19; a project's award history) -> searchProjects",
 					],
 					exampleQuestions: [
 						"Who are experienced Rust Soroban devs I could work with?",
@@ -4910,7 +4910,7 @@ export const spec: OpenAPISpec = {
 															type: "array",
 															items: { type: "string" },
 															description:
-																"THIS OPERATION ONLY: unknown query parameters are rejected with 400 here, so `warnings` never reports them. It reports a TRUNCATED code-language pass instead — the owned-repo roster behind `match.basis: 'code-language'` is read in pages up to a ceiling, and when the match count exceeds it the warning names how many repos were read of how many matched, so a missing builder reads as 'capped', never as 'not found'. A lookup that failed outright says so too (results are then prose-only).",
+																"THIS OPERATION ONLY: unknown query parameters are rejected with 400 here, so `warnings` never reports them. It reports a TRUNCATED code-language pass instead: the owned-repo roster behind `match.basis: 'code-language'` is read in pages up to a ceiling, and when the match count exceeds it the warning names how many repos were read of how many matched, so a missing builder reads as 'capped', never as 'not found'. A lookup that failed outright says so too (results are then prose-only).",
 														},
 														matchBasis: {
 															type: "string",
@@ -4939,7 +4939,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Builders"],
 				summary: "SDF team / people index",
 				description:
-					"The Stellar Development Foundation org/people index — leadership, board of directors, and advisors (name → role → org), quoted from stellar.org/foundation/team with provenance. Use for 'who is <person>', 'what is <person>'s role at SDF', 'who leads <area>', 'who's on the SDF board'. Distinct from getBuilders (GitHub-contributor profiles) — an SDF VP or board member is NOT a 'builder'. Not for doc/spec authorship → use searchResearch.",
+					"The Stellar Development Foundation org/people index: leadership, board of directors, and advisors (name → role → org), quoted from stellar.org/foundation/team with provenance. Use for 'who is <person>', 'what is <person>'s role at SDF', 'who leads <area>', 'who's on the SDF board'. Distinct from getBuilders (GitHub-contributor profiles); an SDF VP or board member is NOT a 'builder'. Not for doc/spec authorship → use searchResearch.",
 				"x-routing": {
 					purpose:
 						"Look up a named person on the SDF roster (leadership / board / advisors) and their current role/affiliation.",
@@ -5033,13 +5033,13 @@ export const spec: OpenAPISpec = {
 															nullable: true,
 															enum: ["spec", "guide", "article", "data"],
 															description:
-																"Doc class, stamped deterministically at ingest: spec = canonical (CAPs/SEPs/papers/audits \u2014 old AND authoritative), guide = staleness-sensitive instructional content, article = dated commentary, data = structured datasets. Null = ingested before 2026-08-13.",
+																"Doc class, stamped deterministically at ingest: spec = canonical (CAPs/SEPs/papers/audits; old AND authoritative), guide = staleness-sensitive instructional content, article = dated commentary, data = structured datasets. Null = ingested before 2026-08-13.",
 														},
 														docVersionStatus: {
 															type: "string",
 															nullable: true,
 															description:
-																"SDK-version verdict for version-bearing content via the same dated table repos use: current | supported | deprecated (e.g. a guide showing wasm32-unknown-unknown is deprecated regardless of crawl recency). Null = the chunk names no version signal \u2014 honest absence, never unknown.",
+																"SDK-version verdict for version-bearing content via the same dated table repos use: current | supported | deprecated (e.g. a guide showing wasm32-unknown-unknown is deprecated regardless of crawl recency). Null = the chunk names no version signal; honest absence, never unknown.",
 														},
 														observedAt: {
 															type: "string",
@@ -5055,7 +5055,7 @@ export const spec: OpenAPISpec = {
 														matchBasis: {
 															type: "string",
 															description:
-																"This is an org/people reference index, NOT a builder/contributor index — roster facts, not verified availability.",
+																"This is an org/people reference index, NOT a builder/contributor index; roster facts, not verified availability.",
 														},
 													},
 												},
@@ -5083,7 +5083,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Partners"],
 				summary: "List ecosystem partners",
 				description:
-					"Published Stellar ecosystem partner directory — service providers a builder hires or integrates: anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.",
+					"Published Stellar ecosystem partner directory; service providers a builder hires or integrates: anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Directory of hireable/integratable ecosystem partners with verified activity signals.",
@@ -5136,11 +5136,11 @@ export const spec: OpenAPISpec = {
 						// against 42 type=Anchor projects in the directory. Direction and
 						// corridor are the facts only this side holds; the roster is
 						// larger on the other.
-						"which anchors on-ramp vs off-ramp, and in which corridor — rampTypes lives here, not on the project row",
+						"which anchors on-ramp vs off-ramp, and in which corridor; rampTypes lives here, not on the project row",
 						// 2026-09-05 routing battery (T3): partner rows carry `seps`
 						// (SEP-6 / SEP-24 / SEP-31, read from stellar.toml), but no field
 						// said "implement" or "SEP-24", so the question gated out.
-						"which anchors implement SEP-24 / SEP-6 / SEP-31 — `seps` is read from each partner's stellar.toml (null = not fetched, [] = none implemented)",
+						"which anchors implement SEP-24 / SEP-6 / SEP-31; `seps` is read from each partner's stellar.toml (null = not fetched, [] = none implemented)",
 					],
 					notFor: [
 						"projects/products that were BUILT -> searchProjects",
@@ -5175,7 +5175,7 @@ export const spec: OpenAPISpec = {
 						name: "region",
 						in: "query",
 						description:
-							'Filter by region served — a closed vocabulary of continents/blocs. Labels and case normalise ("North America" → north-america); values outside the vocabulary return 400 with `validRegions`. A country or currency is NOT a region: put it in q (e.g. ?q=nigeria) — coverage.countries is matched from query text.',
+							'Filter by region served: a closed vocabulary of continents/blocs. Labels and case normalise ("North America" → north-america); values outside the vocabulary return 400 with `validRegions`. A country or currency is NOT a region: put it in q (e.g. ?q=nigeria); coverage.countries is matched from query text.',
 						schema: {
 							type: "string",
 							enum: [
@@ -5248,7 +5248,7 @@ export const spec: OpenAPISpec = {
 						"partner freshness",
 					],
 					useWhen: [
-						"you already know the partner's slug (from getPartners) and need the full profile — services, sectors, regions, docs, contact, freshness",
+						"you already know the partner's slug (from getPartners) and need the full profile: services, sectors, regions, docs, contact, freshness",
 					],
 					exampleQuestions: [
 						"Show me the full profile for partner X",
@@ -5262,7 +5262,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Partners"],
 				summary: "Get one partner's full profile",
 				description:
-					"Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs. **Use when:** you already know a partner's slug (from /api/partners) and need their full public profile — services, sectors, regions, docs, contact, freshness. **Not for:** discovering partners for a need → use /api/partners with ?type/?sector/?region/?q; a project/product rather than a service provider → use /api/projects/search.",
+					"Full published profile for one partner by slug, including verified signals + freshness. 404 for unknown or unpublished slugs. **Use when:** you already know a partner's slug (from /api/partners) and need their full public profile: services, sectors, regions, docs, contact, freshness. **Not for:** discovering partners for a need → use /api/partners with ?type/?sector/?region/?q; a project/product rather than a service provider → use /api/projects/search.",
 				parameters: [
 					{
 						name: "slug",
@@ -5292,7 +5292,7 @@ export const spec: OpenAPISpec = {
 										partner: {
 											type: "object",
 											description:
-												"The full partner profile — every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing.",
+												"The full partner profile: every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing.",
 											properties: {
 												slug: { type: "string" },
 												name: { type: "string" },
@@ -5319,7 +5319,7 @@ export const spec: OpenAPISpec = {
 														enum: ["on-ramp", "off-ramp"],
 													},
 													description:
-														"Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed — the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner.",
+														"Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed; the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner.",
 												},
 												country: { type: "string", nullable: true },
 												acceptingClients: { type: "boolean" },
@@ -5353,7 +5353,7 @@ export const spec: OpenAPISpec = {
 												verified: {
 													type: "object",
 													description:
-														"Automated verification signals. Null members mean not yet probed — absence of evidence, not a failing grade.",
+														"Automated verification signals. Null members mean not yet probed: absence of evidence, not a failing grade.",
 													properties: {
 														githubLastCommitAt: {
 															type: "string",
@@ -5444,7 +5444,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Partners"],
 				summary: "AI-rank partners against a plain-language need",
 				description:
-					"Describe a builder need in plain language (e.g. 'I need a USDC off-ramp in Mexico with SEP-24') and get the published partners RANKED by fit, each with a one-line reason. Grounded: only real published partners are ranked — nothing is invented. Requires the service to have AI configured; returns 503 `unavailable:true` otherwise (fall back to GET /api/partners filters). **Use when:** an agent needs a scored shortlist for a concrete integration need. **Not for:** browsing the full directory → GET /api/partners; interactive human chat → the /partners/chat page (backed by /api/partners/assistant).",
+					"Describe a builder need in plain language (e.g. 'I need a USDC off-ramp in Mexico with SEP-24') and get the published partners RANKED by fit, each with a one-line reason. Grounded: only real published partners are ranked; nothing is invented. Requires the service to have AI configured; returns 503 `unavailable:true` otherwise (fall back to GET /api/partners filters). **Use when:** an agent needs a scored shortlist for a concrete integration need. **Not for:** browsing the full directory → GET /api/partners; interactive human chat → the /partners/chat page (backed by /api/partners/assistant).",
 				requestBody: {
 					required: true,
 					content: {
@@ -5531,7 +5531,7 @@ export const spec: OpenAPISpec = {
 													},
 													reason: {
 														type: "string",
-														description: "Why it matched — safe to surface.",
+														description: "Why it matched: safe to surface.",
 													},
 												},
 											},
@@ -5545,7 +5545,7 @@ export const spec: OpenAPISpec = {
 					"429": rateLimited429(true),
 					"503": {
 						description:
-							"AI backend unavailable — fall back to GET /api/partners",
+							"AI backend unavailable: fall back to GET /api/partners",
 						content: {
 							"application/json": {
 								schema: {
@@ -5560,7 +5560,7 @@ export const spec: OpenAPISpec = {
 										unavailable: {
 											type: "boolean",
 											description:
-												"Always true here — the feature is off, not the request wrong.",
+												"Always true here: the feature is off, not the request wrong.",
 										},
 									},
 								},
@@ -5580,7 +5580,7 @@ export const spec: OpenAPISpec = {
 					"Chat backend for /partners/chat. Send the running message history; intent-routed: a builder need returns real matched partners in `matches[]` (never hallucinated), a company describing itself gets interviewed (`canList:true` → offer profile extraction). Returns `{reply, matches?, intent, canList}`; 503 without AI. Not for one-shot programmatic ranking → use matchPartners.",
 				"x-routing": {
 					purpose:
-						"Conversational partner concierge — find partners or start a get-listed flow. Matches are deterministically searched; surfaced partners are logged as leads for the weekly partner digest.",
+						"Conversational partner concierge: find partners or start a get-listed flow. Matches are deterministically searched; surfaced partners are logged as leads for the weekly partner digest.",
 					keywords: [
 						"chat",
 						"concierge",
@@ -5597,7 +5597,7 @@ export const spec: OpenAPISpec = {
 						"browsing the directory -> getPartners",
 					],
 					exampleQuestions: [
-						"(chat turn) I need a SEP-24 anchor in Brazil — who should I talk to?",
+						"(chat turn) I need a SEP-24 anchor in Brazil, who should I talk to?",
 					],
 				},
 				requestBody: {
@@ -5642,7 +5642,7 @@ export const spec: OpenAPISpec = {
 										matches: {
 											type: "array",
 											description:
-												"Partners referenced in the reply — present only when the turn actually grounded on directory rows.",
+												"Partners referenced in the reply: present only when the turn actually grounded on directory rows.",
 											items: {
 												type: "object",
 												description: "A public partner record.",
@@ -5655,7 +5655,7 @@ export const spec: OpenAPISpec = {
 														type: "string",
 														nullable: true,
 														description:
-															"Truncated (≤180 chars) — card fallback when tagline is empty.",
+															"Truncated (≤180 chars): card fallback when tagline is empty.",
 													},
 													websiteUrl: { type: "string", nullable: true },
 													acceptingClients: {
@@ -5738,7 +5738,7 @@ export const spec: OpenAPISpec = {
 										unavailable: {
 											type: "boolean",
 											description:
-												"Always true here — the feature is off, not the request wrong.",
+												"Always true here: the feature is off, not the request wrong.",
 										},
 									},
 								},
@@ -5758,7 +5758,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Partners"],
 				summary: "AI onboarding helpers: interview chat + profile extraction",
 				description:
-					"Two modes for the get-listed flow. `{mode:'chat', messages}` → interview-style reply for a company describing itself. `{mode:'extract', messages}` → structures the transcript into partner-profile `fields` (tagline, services, sectors, regions, contact…; null where nothing was stated — nothing invented). 503 `unavailable:true` without AI configured. **Use when:** turning a get-listed conversation into structured profile fields (then submit via POST /api/partners/submit-listing). **Not for:** finding partners → /api/partners/match or /assistant.",
+					"Two modes for the get-listed flow. `{mode:'chat', messages}` → interview-style reply for a company describing itself. `{mode:'extract', messages}` → structures the transcript into partner-profile `fields` (tagline, services, sectors, regions, contact…; null where nothing was stated; nothing invented). 503 `unavailable:true` without AI configured. **Use when:** turning a get-listed conversation into structured profile fields (then submit via POST /api/partners/submit-listing). **Not for:** finding partners → /api/partners/match or /assistant.",
 				requestBody: {
 					required: true,
 					content: {
@@ -5792,7 +5792,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									description:
-										"mode=chat returns the next assistant turn; mode=extract returns structured partner-owned profile fields. The extract schema contains ONLY partner-owned manual fields — a verified/auto field can never be emitted here, and nothing is written by this endpoint.",
+										"mode=chat returns the next assistant turn; mode=extract returns structured partner-owned profile fields. The extract schema contains ONLY partner-owned manual fields; a verified/auto field can never be emitted here, and nothing is written by this endpoint.",
 									properties: {
 										reply: {
 											type: "string",
@@ -5803,7 +5803,7 @@ export const spec: OpenAPISpec = {
 											type: "object",
 											nullable: true,
 											description:
-												"mode=extract: partner-owned fields only (served as `fields`, not `profile`). A null value means the partner did not say it — never a fabricated specific.",
+												"mode=extract: partner-owned fields only (served as `fields`, not `profile`). A null value means the partner did not say it; never a fabricated specific.",
 											properties: {
 												partnerType: {
 													type: "string",
@@ -5868,7 +5868,7 @@ export const spec: OpenAPISpec = {
 										unavailable: {
 											type: "boolean",
 											description:
-												"Always true here — the feature is off, not the request wrong.",
+												"Always true here: the feature is off, not the request wrong.",
 										},
 									},
 								},
@@ -5885,7 +5885,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Partners"],
 				summary: "Submit a new-partner listing (or claim an existing one)",
 				description:
-					"Submits a company for directory listing. New companies become a DRAFT partner account reviewed by the Stellar Light team before publication (publishing emails the contact an account invite). If the company is already listed, the submission is recorded as a CLAIM REQUEST on the existing profile instead — no duplicates. Returns `{ok:true, mode:'draft'|'claim'}`. Rate-limited; contactEmail becomes the account login. **Use when:** completing a get-listed flow (fields usually come from /api/partners/onboard extract). **Not for:** editing an existing claimed profile → the partner dashboard.",
+					"Submits a company for directory listing. New companies become a DRAFT partner account reviewed by the Stellar Light team before publication (publishing emails the contact an account invite). If the company is already listed, the submission is recorded as a CLAIM REQUEST on the existing profile instead; no duplicates. Returns `{ok:true, mode:'draft'|'claim'}`. Rate-limited; contactEmail becomes the account login. **Use when:** completing a get-listed flow (fields usually come from /api/partners/onboard extract). **Not for:** editing an existing claimed profile → the partner dashboard.",
 				requestBody: {
 					required: true,
 					content: {
@@ -6019,7 +6019,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Funding"],
 				summary: "List Stellar RFPs (SCF-funded sponsor briefs)",
 				description:
-					"Curated Stellar RFPs / sponsor briefs (mirrors /ideas) — `open` means the sponsor brief is still soliciting; it does NOT prove the SCF proposal window accepts submissions today (check meta.scfRound.submissionWindow + currentPhase for that). Closed briefs are past rounds. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built' and where the paid work is: jobs, bounties, freelance briefs for Stellar contributors. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.",
+					"Curated Stellar RFPs / sponsor briefs (mirrors /ideas); `open` means the sponsor brief is still soliciting; it does NOT prove the SCF proposal window accepts submissions today (check meta.scfRound.submissionWindow + currentPhase for that). Closed briefs are past rounds. Response carries open/closed counts, the activeQuarter, and the live SCF round + submission window (`meta.scfRound`). Answers 'what does the ecosystem want built' and where the paid work is: jobs, bounties, freelance briefs for Stellar contributors. Not for how-to-apply / SCF Handbook knowledge → use searchResearch.",
 				"x-routing": {
 					purpose:
 						"Open/closed Stellar RFPs, sponsor briefs, and the live SCF round submission window.",
@@ -6144,13 +6144,13 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Every category value present in the current brief set — the category filter's live vocabulary.",
+														"Every category value present in the current brief set; the category filter's live vocabulary.",
 												},
 												submitNewBriefAt: {
 													type: "string",
 													format: "uri",
 													description:
-														"Where a team submits a NEW brief/idea (the SCF ideas board) — hand off here when asked how to propose one.",
+														"Where a team submits a NEW brief/idea (the SCF ideas board); hand off here when asked how to propose one.",
 												},
 												source: { type: "string", format: "uri" },
 												generatedAt: { type: "string", format: "date-time" },
@@ -6170,7 +6170,7 @@ export const spec: OpenAPISpec = {
 												counts: {
 													type: "object",
 													description:
-														"total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows — so open=5 with returned=6 is consistent, not a discrepancy. See countBasis.",
+														"total/open/closed count curated BRIEFS only; matched/returned count result ROWS, which also include synthetic scf-round rows, so open=5 with returned=6 is consistent, not a discrepancy. See countBasis.",
 													properties: {
 														total: { type: "integer" },
 														open: { type: "integer" },
@@ -6192,13 +6192,13 @@ export const spec: OpenAPISpec = {
 												scfRound: {
 													type: "object",
 													description:
-														"SCF round identity + submission window (curated — SCF publishes no machine-readable round feed): fields are null when unconfirmed rather than guessed. Always cite asOf alongside answers built on this.",
+														"SCF round identity + submission window (curated; SCF publishes no machine-readable round feed): fields are null when unconfirmed rather than guessed. Always cite asOf alongside answers built on this.",
 													properties: {
 														currentRound: {
 															type: "integer",
 															nullable: true,
 															description:
-																"Scout's current SCF round IDENTITY as of asOf — NOT a claim that submissions are open. A round in Panel Review has a currentRound and a closed window. Read submissionWindow + currentPhase for whether you can submit.",
+																"Scout's current SCF round IDENTITY as of asOf. NOT a claim that submissions are open. A round in Panel Review has a currentRound and a closed window. Read submissionWindow + currentPhase for whether you can submit.",
 														},
 														currentPhase: {
 															type: "string",
@@ -6210,7 +6210,7 @@ export const spec: OpenAPISpec = {
 															type: "array",
 															nullable: true,
 															description:
-																"Every SCF round currently in flight, each with its own phase and deadline — a round can be in Panel Review while the next opens.",
+																"Every SCF round currently in flight, each with its own phase and deadline; a round can be in Panel Review while the next opens.",
 															items: {
 																type: "object",
 																properties: {
@@ -6253,7 +6253,7 @@ export const spec: OpenAPISpec = {
 															type: "string",
 															enum: ["live", "unavailable"],
 															description:
-																"Whether the live SCF round feed was reachable when this response was built. `live` = the round state below was read from the feed. `unavailable` = the fetch FAILED, so an empty roundsInProgress means WE COULD NOT LOOK, never that no round is open — verify at verifyAt before asserting any negative about round state.",
+																"Whether the live SCF round feed was reachable when this response was built. `live` = the round state below was read from the feed. `unavailable` = the fetch FAILED, so an empty roundsInProgress means WE COULD NOT LOOK, never that no round is open; verify at verifyAt before asserting any negative about round state.",
 														},
 														verifyAt: { type: "string", format: "uri" },
 													},
@@ -6267,7 +6267,7 @@ export const spec: OpenAPISpec = {
 										funding: {
 											type: "string",
 											description:
-												"Funding-context sentence for the whole list. Names the SCF connection without asserting an open submission window — that fact lives in meta.scfRound (submissionWindow, currentPhase, roundsInProgress) and is dated by asOf.",
+												"Funding-context sentence for the whole list. Names the SCF connection without asserting an open submission window; that fact lives in meta.scfRound (submissionWindow, currentPhase, roundsInProgress) and is dated by asOf.",
 										},
 									},
 								},
@@ -6282,7 +6282,7 @@ export const spec: OpenAPISpec = {
 				operationId: "scfPitch",
 				tags: ["Composite"],
 				summary:
-					"SCF pitch prep — live round, funded peers, gap, prior art, angles in one call",
+					"SCF pitch prep: live round, funded peers, gap, prior art, angles in one call",
 				description:
 					"The 'help me prep a Stellar Community Fund pitch' composite: LIVE round state (open submissions + deadline, never asserting a negative on fetch failure), the vertical's already-funded ACTIVE projects with recorded award totals (differentiation targets), the vet-idea view (competitors, supply-side gap, prior art), and deterministic pitch angles that each name the fact they stand on. No prose generation. Unknown params 400.",
 				"x-routing": {
@@ -6300,7 +6300,7 @@ export const spec: OpenAPISpec = {
 						"pitch my idea",
 					],
 					useWhen: [
-						"'i want to apply to SCF with X — what should the pitch say' (one call)",
+						"'i want to apply to SCF with X: what should the pitch say' (one call)",
 						"'is an SCF round open right now and when does it close'",
 						"'who already got SCF money in this vertical and how much'",
 					],
@@ -6348,7 +6348,7 @@ export const spec: OpenAPISpec = {
 				operationId: "hackathonBrief",
 				tags: ["Composite"],
 				summary:
-					"Hackathon brief — vet + starter repos with trust + live contracts + funding + what not to claim, in one call",
+					"Hackathon brief: vet + starter repos with trust + live contracts + funding + what not to claim, in one call",
 				description:
 					"One call for a hackathon team's first hour: vet (same as vet-idea: competitors, maturity, gap, judged prior art), builds (prototype-layer prior art, hybrid search), startFrom (top non-archived competitor repos with a trust SUMMARY; full contractInterface at fullReport), liveContracts (verified mainnet contracts for the idea's closest code domain; empty = no verified contract on record, never nothing on mainnet), funding (live SCF round + funded peers), whatNotToClaim (cautions derived from this brief's own facts). No verdicts; rails and RFPs not bundled. Unknown params 400.",
 				"x-routing": {
@@ -6369,14 +6369,14 @@ export const spec: OpenAPISpec = {
 						"what not to claim",
 					],
 					useWhen: [
-						"'we're at HackMeridian and want to build X — where do we start' (one call instead of five)",
+						"'we're at HackMeridian and want to build X, where do we start' (one call instead of five)",
 						"'give us a brief for a confidential-token payroll idea'",
 						"'is this idea taken and what's safe to fork'",
 					],
 					notFor: [
 						"a single question that one lower-level call answers (vetIdea / getRepoTrust / listContracts / scfPitch)",
-						"rails — stablecoins and partners are separate calls; open RFPs → getRfps",
-						"non-Stellar ideas — vertical will not resolve; say so",
+						"rails: stablecoins and partners are separate calls; open RFPs → getRfps",
+						"non-Stellar ideas: vertical will not resolve; say so",
 					],
 					exampleQuestions: [
 						"We have 48 hours at a hackathon to build an x402 paywall. Where do we start?",
@@ -6442,7 +6442,7 @@ export const spec: OpenAPISpec = {
 												startFrom: {
 													type: "array",
 													description:
-														"Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface — interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template.",
+														"Top non-archived competitor repos (≤2) with a trust SUMMARY each: repo, project, codeTruth (without the full contractInterface; interfaceSize is kept), usage, audits {count, latest}, auditDrift, succession, signals (closed vocabulary of facts, NOT a score), fullReport (link to /api/repos/trust). A competitor is a starting point to READ, not necessarily a template.",
 													items: {
 														type: "object",
 														properties: {
@@ -6543,7 +6543,7 @@ export const spec: OpenAPISpec = {
 																type: "array",
 																items: { type: "string" },
 																description:
-																	"Closed deterministic fact vocabulary (same set as /api/repos/trust signals) — not a score.",
+																	"Closed deterministic fact vocabulary (same set as /api/repos/trust signals); not a score.",
 															},
 															fullReport: {
 																type: "string",
@@ -6560,13 +6560,13 @@ export const spec: OpenAPISpec = {
 															type: "string",
 															nullable: true,
 															description:
-																"Closest code domain to the idea (idea-text hint first, then the vertical); null when neither maps — see basis.",
+																"Closest code domain to the idea (idea-text hint first, then the vertical); null when neither maps; see basis.",
 														},
 														basis: { type: "string" },
 														contracts: {
 															type: "array",
 															description:
-																"Verified-contract rows for the domain — the /api/contracts row minus codeDepth/interfacePreview/audits/successorRepo/scannedAt.",
+																"Verified-contract rows for the domain: the /api/contracts row minus codeDepth/interfacePreview/audits/successorRepo/scannedAt.",
 															items: {
 																type: "object",
 																properties: {
@@ -6629,7 +6629,7 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 													description:
-														"Deterministic cautions derived from THIS brief's own facts — each names the fact it stands on. Empty when the brief gives no reason for one.",
+														"Deterministic cautions derived from THIS brief's own facts; each names the fact it stands on. Empty when the brief gives no reason for one.",
 												},
 											},
 										},
@@ -6649,7 +6649,7 @@ export const spec: OpenAPISpec = {
 				operationId: "vetIdea",
 				tags: ["Composite"],
 				summary:
-					"Vet a build idea — competitors, maturity, prior art, gap, funding in one call",
+					"Vet a build idea: competitors, maturity, prior art, gap, funding in one call",
 				description:
 					"The 'I want to build X on Stellar' composite: competitor repos (full search stack) + active directory projects in the detected vertical, their maturity from verified evidence (audit registry, live on-chain usage), hackathon prior art from our index (dead prior art is a signal), the vertical's supply-side gap verdict (same computation as analyze?dimension=gaps), and SCF funding presence. Every block carries its basis; no verdict synthesis. vertical=null means the idea doesn't map onto the measurable vertical axis, not that no market exists. Unknown params 400.",
 				"x-routing": {
@@ -6668,13 +6668,13 @@ export const spec: OpenAPISpec = {
 						"scf fundable",
 					],
 					useWhen: [
-						"'i want to build a lending protocol — what exists already' (one call instead of five)",
-						"'is the wallet space crowded on stellar' — gap + competitors + maturity",
-						"'has anyone tried this at a hackathon' — priorArt with alive/dead state",
+						"'i want to build a lending protocol: what exists already' (one call instead of five)",
+						"'is the wallet space crowded on stellar'; gap + competitors + maturity",
+						"'has anyone tried this at a hackathon'; priorArt with alive/dead state",
 					],
 					notFor: [
 						"single-repo assessment (getRepoTrust) or plain discovery (searchRepos/searchProjects)",
-						"demand claims — gap is SUPPLY-side coverage only",
+						"demand claims: gap is SUPPLY-side coverage only",
 					],
 					exampleQuestions: [
 						"Does a lending protocol like mine already exist?",
@@ -6814,7 +6814,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Trust report for one Stellar GitHub repo: maintained, audited, used on mainnet",
 				description:
-					"One evidence-grounded answer to 'should I depend on this repo?': scanned code truth (proof, depth, domains, the FULL extracted contract interface), live on-chain usage, audit reports with drift since the latest one, succession both directions, and activity — joined server-side. `signals` is a closed deterministic vocabulary of facts that hold; no synthetic scores. Verify generated calls against codeTruth.contractInterface before invoking a contract. 404 for unindexed repos — absence is not nonexistence. Unknown params 400.",
+					"One evidence-grounded answer to 'should I depend on this repo?': scanned code truth (proof, depth, domains, the FULL extracted contract interface), live on-chain usage, audit reports with drift since the latest one, succession both directions, and activity; joined server-side. `signals` is a closed deterministic vocabulary of facts that hold; no synthetic scores. Verify generated calls against codeTruth.contractInterface before invoking a contract. 404 for unindexed repos; absence is not nonexistence. Unknown params 400.",
 				"x-routing": {
 					purpose:
 						"Assess ONE repo's trustworthiness/maintenance/audit state from verified evidence in a single call.",
@@ -6832,13 +6832,13 @@ export const spec: OpenAPISpec = {
 						"contract interface",
 					],
 					useWhen: [
-						"'is <repo> still maintained / audited / used on mainnet' — one call instead of five",
+						"'is <repo> still maintained / audited / used on mainnet'; one call instead of five",
 						"'has the code changed since its last audit' (auditDrift)",
 						"verifying generated contract calls against the real scanned interface",
 					],
 					notFor: [
 						"discovering which repos exist (searchRepos) or contract enumeration (listContracts)",
-						"repos we have not indexed — 404 is absence of evidence, not a verdict",
+						"repos we have not indexed: 404 is absence of evidence, not a verdict",
 					],
 					exampleQuestions: [
 						"Is stellar/passkey-kit maintained and audited?",
@@ -6914,7 +6914,7 @@ export const spec: OpenAPISpec = {
 															type: "array",
 															items: { type: "string" },
 															description:
-																"Scanned public fn signatures (up to 60) — verify generated calls against these.",
+																"Scanned public fn signatures (up to 60); verify generated calls against these.",
 														},
 														mainnetContractId: {
 															type: "string",
@@ -6927,7 +6927,7 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													nullable: true,
 													description:
-														"Null = no PUBLISHED audit at our registry — never 'unaudited'.",
+														"Null = no PUBLISHED audit at our registry; never 'unaudited'.",
 													properties: {
 														count: { type: "integer" },
 														latest: AUDIT_REPORT_ROW_SCHEMA,
@@ -6941,7 +6941,7 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													nullable: true,
 													description:
-														"Present when commits landed AFTER the latest audit — audited code is not necessarily the code running today.",
+														"Present when commits landed AFTER the latest audit; audited code is not necessarily the code running today.",
 													properties: {
 														latestAuditAt: { type: "string" },
 														lastCommitAt: { type: "string" },
@@ -6993,10 +6993,10 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Evidence-gated registry of verified mainnet Soroban contracts",
 				description:
-					"Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence — the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist — coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
+					"Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence; the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
 				"x-routing": {
 					purpose:
-						"Enumerate/filter VERIFIED mainnet contracts as entities — which contracts exist with code+usage+audit evidence, per domain or project.",
+						"Enumerate/filter VERIFIED mainnet contracts as entities: which contracts exist with code+usage+audit evidence, per domain or project.",
 					keywords: [
 						"contracts",
 						"mainnet contracts",
@@ -7009,12 +7009,12 @@ export const spec: OpenAPISpec = {
 					],
 					useWhen: [
 						"'which verified contracts are live on mainnet' / 'show deployed DeFi contracts' (filter with domain=)",
-						"'what contract does project X run' — q=<project>",
+						"'what contract does project X run': q=<project>",
 						"joining a contract to its code, usage, and audit evidence in one call",
 					],
 					notFor: [
 						"repo-level discovery (searchRepos) or full audit rows (listAudits)",
-						"any claim about contracts we have NOT verified — absence is not nonexistence",
+						"any claim about contracts we have NOT verified; absence is not nonexistence",
 						// This operation is ENTITY-shaped — "which contracts exist" —
 						// and every one of its keywords contains the token "contract",
 						// so a short blob with total term concentration outscores
@@ -7474,7 +7474,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Research"],
 				summary: "Enumerable registry of Stellar security-audit reports",
 				description:
-					"One row per security-audit report from stellarsecurityportal.com — the structured, enumerable half of the audit corpus (full report text is chunk-served by searchResearch with source=audit). Rows carry a normalized auditor, publication date, and a hand-verified link to the directory project (`projectSlug`). Semantics: a project ABSENT here has no audit on record at our source — NOT a claim it is unaudited; `findingsTotal`/`severityCounts` null = not extracted, NOT zero. Unknown query params are rejected with 400, never silently ignored.",
+					"One row per security-audit report from stellarsecurityportal.com; the structured, enumerable half of the audit corpus (full report text is chunk-served by searchResearch with source=audit). Rows carry a normalized auditor, publication date, and a hand-verified link to the directory project (`projectSlug`). Semantics: a project ABSENT here has no audit on record at our source. NOT a claim it is unaudited; `findingsTotal`/`severityCounts` null = not extracted, NOT zero. Unknown query params are rejected with 400, never silently ignored.",
 				"x-routing": {
 					purpose:
 						"List/filter security-audit reports as structured rows: which audits exist, for which project, by which firm, when.",
@@ -7598,7 +7598,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									description:
-										"The structured audit registry — one row per published report, so an agent can enumerate and filter audits instead of hoping vector retrieval surfaces the right chunk.",
+										"The structured audit registry: one row per published report, so an agent can enumerate and filter audits instead of hoping vector retrieval surfaces the right chunk.",
 									properties: {
 										meta: {
 											type: "object",
@@ -7608,7 +7608,7 @@ export const spec: OpenAPISpec = {
 												filters: {
 													type: "object",
 													description:
-														"The filters actually applied — echoed so a caller can tell a narrow query from an empty corpus.",
+														"The filters actually applied: echoed so a caller can tell a narrow query from an empty corpus.",
 													properties: {
 														project: { type: "string", nullable: true },
 														auditor: { type: "string", nullable: true },
@@ -7652,7 +7652,7 @@ export const spec: OpenAPISpec = {
 														type: "string",
 														nullable: true,
 														description:
-															"How the project link was established — provenance, not a guess.",
+															"How the project link was established: provenance, not a guess.",
 													},
 													publishedAt: { type: "string", nullable: true },
 													dateBasis: {
@@ -7693,7 +7693,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Research"],
 				summary: "Vector search over the Stellar research corpus",
 				description:
-					"Semantic search over the Stellar knowledge corpus — SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence, and provenance dates (`publishedAt` = the source's own stated date; `observedAt` = when ingest last crawled the page; audits add auditor/severity — filterable; report-level enumeration → listAudits). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.",
+					"Semantic search over the Stellar knowledge corpus. SDF blog, SCF Handbook, SEPs/standards, dev docs, papers, audits, incident reports. Returns cited text chunks with source, section, URL, confidence, and provenance dates (`publishedAt` = the source's own stated date; `observedAt` = when ingest last crawled the page; audits add auditor/severity, filterable; report-level enumeration → listAudits). THE surface for 'how does X work', 'what does the SEP/spec/audit say', and how-to/feasibility questions. Not for products and their funding/status → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Cited knowledge/docs answers from the Stellar research corpus ($vectorSearch over Voyage embeddings; BM25-lite keyword fallback when vectors are unavailable).",
@@ -7837,11 +7837,11 @@ export const spec: OpenAPISpec = {
 						"primary-source citations for a thesis or design question; ecosystem KNOWLEDGE & explainer questions ('what is / how does / who / why / is it true that…')",
 						"security & risk (audits, exploits, incidents, post-mortems, oracle manipulation), bug-bounty / disclosure program status (source=security-program: which program is current, HackerOne vs Immunefi, where to report), compliance & regulation (Travel Rule, FATF, KYC/AML, sanctions)",
 						"SDF's canonical organizational pages (source=sdf-org): mandate incl. self-funded/pays-taxes structure, terms of service / Delaware non-profit legal form, foundation mission, leadership & board roster, Enterprise Fund scope & portfolio size, quarterly-reports index",
-						"funding & governance (SCF v7.0, award tiers, Neural Quorum Governance) and SCF program mechanics — how to apply step-by-step, Build/Instawards/Liquidity/Public-Goods awards, eligibility, review timeline (prescreen, panel review, community vote, KYC), deadlines",
+						"funding & governance (SCF v7.0, award tiers, Neural Quorum Governance) and SCF program mechanics: how to apply step-by-step, Build/Instawards/Liquidity/Public-Goods awards, eligibility, review timeline (prescreen, panel review, community vote, KYC), deadlines",
 						"SDF org/mission/legal structure; protocol history (SCP whitepaper, authors); ecosystem programs (ambassadors, regional chapters, bootcamps)",
 						"Soroban security incidents (reentrancy, sdk advisories/CVEs, DoS); ecosystem history (Protocol 20 mainnet launch, XLM initial supply, UNHCR aid, Enterprise Fund)",
 						"making an issued asset tradable/visible on exchanges, wallets, explorers, aggregators; contract source verification (release.yml, Stellar Lab vs stellar.expert); fact-checking a claim about Stellar",
-						"protocol upgrade HISTORY and WHY a version shipped (Protocol 19 → latest, each release's headline feature, timelines); incidents and post-mortems of network upgrades (e.g. the Protocol 24 state-archival bug) — history and causes, not how-a-feature-works docs",
+						"protocol upgrade HISTORY and WHY a version shipped (Protocol 19 → latest, each release's headline feature, timelines); incidents and post-mortems of network upgrades (e.g. the Protocol 24 state-archival bug); history and causes, not how-a-feature-works docs",
 					],
 					notFor: [
 						"what products exist or their funding/status -> searchProjects",
@@ -7863,7 +7863,7 @@ export const spec: OpenAPISpec = {
 						name: "q",
 						in: "query",
 						description:
-							"Natural-language search query. Required unless the `query` alias is supplied — requests with neither return 400.",
+							"Natural-language search query. Required unless the `query` alias is supplied; requests with neither return 400.",
 						schema: { type: "string", minLength: 2 },
 					},
 					{
@@ -7898,7 +7898,7 @@ export const spec: OpenAPISpec = {
 						name: "severity",
 						in: "query",
 						description:
-							"Audit-metadata filter, case-insensitive. CAVEAT: severity labels the MATCHED CHUNK's section (inferred from PDF-derived headings), not the report or a specific finding \u2014 an architecture chunk can carry 'high' while the findings table reads 'unknown' — do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400.",
+							"Audit-metadata filter, case-insensitive. CAVEAT: severity labels the MATCHED CHUNK's section (inferred from PDF-derived headings), not the report or a specific finding: an architecture chunk can carry 'high' while the findings table reads 'unknown'; do not treat a filtered result set as a complete list of findings at that severity. Unknown values are rejected with a 400.",
 						schema: {
 							type: "string",
 							enum: [
@@ -8156,7 +8156,7 @@ export const spec: OpenAPISpec = {
 						name: "q",
 						in: "query",
 						description:
-							"Free-text filter over skill name, tagline, description and tags (all terms must match). Omit to list everything. Previously accepted and ignored — a query returned the full catalog.",
+							"Free-text filter over skill name, tagline, description and tags (all terms must match). Omit to list everything. Previously accepted and ignored: a query returned the full catalog.",
 						schema: { type: "string" },
 					},
 
@@ -8263,7 +8263,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Skills"],
 				summary: "Get one skill's full content",
 				description:
-					"Full detail for ONE skill by slug or display name — metadata plus, for entries listed on skills.stellar.org (SDF authored and community-built), the complete raw SKILL.md text (`.skill.content`, fetched live from where the registry links it). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.",
+					"Full detail for ONE skill by slug or display name: metadata plus, for entries listed on skills.stellar.org (SDF authored and community-built), the complete raw SKILL.md text (`.skill.content`, fetched live from where the registry links it). 404s with a hint to list /api/skills when unknown. Use when you know the skill and need its actual instructions or install command. Not for discovering which skills exist → use listSkills.",
 				"x-routing": {
 					purpose:
 						"One skill's full SKILL.md content, metadata, and install command.",
@@ -8362,7 +8362,7 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													nullable: true,
 													description:
-														"Full SKILL.md text; null when the source ships no file — absence of content is not absence of the skill.",
+														"Full SKILL.md text; null when the source ships no file; absence of content is not absence of the skill.",
 												},
 											},
 										},
@@ -8388,7 +8388,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Analytics"],
 				summary: "Topic clusters with crowdedness scores",
 				description:
-					"Groups the active Stellar project directory into topic clusters scored on crowdedness (1–10, log-scaled) — the market-map view of saturated vs underbuilt lanes, i.e. WHERE TO BUILD. Per cluster: size, SCF funding, hackathon winners, sample projects; `dimension=category|types`. Answers 'what's crowded / where is whitespace'. Not for looking up a named project → use searchProjects.",
+					"Groups the active Stellar project directory into topic clusters scored on crowdedness (1-10, log-scaled): the market-map view of saturated vs underbuilt lanes, i.e. WHERE TO BUILD. Per cluster: size, SCF funding, hackathon winners, sample projects; `dimension=category|types`. Answers 'what's crowded / where is whitespace'. Not for looking up a named project → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Category crowdedness / whitespace analysis over the project directory.",
@@ -8474,7 +8474,7 @@ export const spec: OpenAPISpec = {
 															type: "array",
 															items: { type: "string" },
 															description:
-																"Every value the dimension param accepts — the live vocabulary for cluster views.",
+																"Every value the dimension param accepts: the live vocabulary for cluster views.",
 														},
 														notes: {
 															type: "array",
@@ -8504,7 +8504,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Analytics"],
 				summary: "Cross-event Stellar ecosystem analytics rollup",
 				description:
-					"The cross-ecosystem macro rollup — totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers|toolchain`: hackathon + SCF-funding totals, category distribution, DeFi TVL (dated), `gaps` (per-vertical whitespace — what should I build), `developers` (Electric Capital monthly-active devs + trend), and `toolchain` (Soroban-SDK version-status distribution + deprecated-toolchain roster + CI/test presence). gaps/developers/toolchain are SUPPLY/commit-side and as-of dated — never demand or a headcount.",
+					"The cross-ecosystem macro rollup: totals no single-event tool answers. Slice via `dimension=hackathons|categories|funding|tvl|gaps|developers|toolchain`: hackathon + SCF-funding totals, category distribution, DeFi TVL (dated), `gaps` (per-vertical whitespace: what should I build), `developers` (Electric Capital monthly-active devs + trend), and `toolchain` (Soroban-SDK version-status distribution + deprecated-toolchain roster + CI/test presence). gaps/developers/toolchain are SUPPLY/commit-side and as-of dated; never demand or a headcount.",
 				"x-routing": {
 					purpose:
 						"Ecosystem-wide macro totals: hackathons, SCF funding, category distribution, TVL.",
@@ -8558,11 +8558,11 @@ export const spec: OpenAPISpec = {
 					useWhen: [
 						"what's the overall state of Stellar hackathons/grants",
 						"total SCF funding distributed / mean award size",
-						"how much prize money across all hackathons (totalEvents, prize pools, registered hackers — live from DoraHacks)",
+						"how much prize money across all hackathons (totalEvents, prize pools, registered hackers; live from DoraHacks)",
 						"how many projects get built vs abandoned after hackathons",
-						"total/top DeFi TVL on Stellar (DefiLlama-tracked protocols only — undercounts chain-wide TVL; as-of dated, never an exact to-the-dollar live figure)",
-						"what to build / where the whitespace is: dimension=gaps returns per-vertical coverage + which product types are under-built, built-but-unproven (nothing Live), or absent — SUPPLY-side, not demand",
-						"how many active developers build on Stellar / developer growth or trend / where they are: dimension=developers returns the current Electric Capital monthly-active-dev count (total + Stellar-exclusive), month/year deltas, full-time/part-time tenure, top countries, and peer-chain scale — commit-derived and as-of dated, not a headcount",
+						"total/top DeFi TVL on Stellar (DefiLlama-tracked protocols only; undercounts chain-wide TVL; as-of dated, never an exact to-the-dollar live figure)",
+						"what to build / where the whitespace is: dimension=gaps returns per-vertical coverage + which product types are under-built, built-but-unproven (nothing Live), or absent, SUPPLY-side, not demand",
+						"how many active developers build on Stellar / developer growth or trend / where they are: dimension=developers returns the current Electric Capital monthly-active-dev count (total + Stellar-exclusive), month/year deltas, full-time/part-time tenure, top countries, and peer-chain scale; commit-derived and as-of dated, not a headcount",
 					],
 					notFor: [
 						"per-category project COUNTS / crowdedness (raw distribution) -> getClusters; dimension=gaps is the richer whitespace view (proven/funded/absent)",
@@ -8642,7 +8642,7 @@ export const spec: OpenAPISpec = {
 												scannedRepos: {
 													type: "integer",
 													description:
-														"Repos in the corpus carrying a soroban-sdk version — the POPULATION, not the sample the buckets were computed over. Divide rates by measuredRepos, not by this.",
+														"Repos in the corpus carrying a soroban-sdk version: the POPULATION, not the sample the buckets were computed over. Divide rates by measuredRepos, not by this.",
 												},
 												measuredRepos: {
 													type: "integer",
@@ -8707,13 +8707,13 @@ export const spec: OpenAPISpec = {
 										developers: {
 											type: "object",
 											description:
-												"Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date — cite the snapshot date, not generatedAt.",
+												"Present for dimension=all|developers: Electric Capital ecosystem developer counts with their snapshot date; cite the snapshot date, not generatedAt.",
 											properties: {
 												asOf: {
 													type: "string",
 													format: "date",
 													description:
-														"Electric Capital snapshot date — cite THIS, not generatedAt.",
+														"Electric Capital snapshot date: cite THIS, not generatedAt.",
 												},
 												source: { type: "string" },
 												sourceUrl: { type: "string", nullable: true },
@@ -8724,7 +8724,7 @@ export const spec: OpenAPISpec = {
 														exclusive: {
 															type: "integer",
 															description:
-																"Devs building ONLY on Stellar — the truer measure of committed builders.",
+																"Devs building ONLY on Stellar: the truer measure of committed builders.",
 														},
 														multichain: { type: "integer" },
 														allTimePeak: { type: "integer" },
@@ -8790,7 +8790,7 @@ export const spec: OpenAPISpec = {
 										gaps: {
 											type: "object",
 											description:
-												"Present for dimension=gaps: whitespace analysis — product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof.",
+												"Present for dimension=gaps: whitespace analysis; product types unproven/underbuilt/absent in the active population. SUPPLY-side evidence only, never demand proof.",
 											properties: {
 												scope: { type: "string" },
 												basis: { type: "string" },
@@ -8849,7 +8849,7 @@ export const spec: OpenAPISpec = {
 										tvl: {
 											type: "object",
 											description:
-												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup — null/absent projects are NOT tracked there, never 'zero TVL'.",
+												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'.",
 											properties: {
 												totalTvlUSD: { type: "number" },
 												trackedProjects: { type: "integer" },
@@ -8858,7 +8858,7 @@ export const spec: OpenAPISpec = {
 													format: "date-time",
 													nullable: true,
 													description:
-														"Most recent per-project tvlAsOf refresh — null when nothing is tracked.",
+														"Most recent per-project tvlAsOf refresh; null when nothing is tracked.",
 												},
 												provider: { type: "string" },
 												top10: {
@@ -8883,7 +8883,7 @@ export const spec: OpenAPISpec = {
 										funding: {
 											type: "object",
 											description:
-												"Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound — and projectSetHash: a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications) — the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE — which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable).",
+												"Present for dimension=all|funding. Carries computedAt, methodologyVersion, countBasis, byRound, and projectSetHash: a stable sha256-prefix digest of the sorted awarded-project slug set. Same hash across your snapshots ⇒ same project SET (only amounts/labels can differ); different hash ⇒ membership changed (adds/removals/reclassifications): the honest explanation for a moving cumulative total under an unchanged methodology. #520 delta provenance: snapshotAsOf / previousSnapshot / snapshotDelta make the set change ANSWER-VISIBLE: which slugs were added/removed vs the preceding persisted snapshot and mechanical reason codes for removals; deltaBasis documents the semantics and deltaUnavailable states explicitly when the comparison cannot be served (no differing prior snapshot yet, or store unavailable).",
 											properties: {
 												computedAt: {
 													type: "string",
@@ -8905,13 +8905,13 @@ export const spec: OpenAPISpec = {
 												scfTotalDistributedUSD: {
 													type: "number",
 													description:
-														"Sum of scfTotalAwardedUSD over the awarded set — an in-house rollup; reconcile per-project via scfRoundAwards.",
+														"Sum of scfTotalAwardedUSD over the awarded set; an in-house rollup; reconcile per-project via scfRoundAwards.",
 												},
 												meanAwardUSD: { type: "number", nullable: true },
 												byRound: {
 													type: "array",
 													description:
-														"Per-round totals (round number, projects, USD) — the breakdown scfCountBasis points at.",
+														"Per-round totals (round number, projects, USD): the breakdown scfCountBasis points at.",
 													items: {
 														type: "object",
 														properties: {
@@ -8919,7 +8919,7 @@ export const spec: OpenAPISpec = {
 															count: {
 																type: "integer",
 																description:
-																	"Per-round MEMBERSHIP — a project counts in each round it won, so summing counts exceeds scfAwardedProjects.",
+																	"Per-round MEMBERSHIP: a project counts in each round it won, so summing counts exceeds scfAwardedProjects.",
 															},
 															totalUSD: { type: "number" },
 														},
@@ -8994,7 +8994,7 @@ export const spec: OpenAPISpec = {
 														removedReasons: {
 															type: "array",
 															description:
-																"Per removed slug, a MECHANICAL reason from the record's current state — never a guess.",
+																"Per removed slug, a MECHANICAL reason from the record's current state; never a guess.",
 															items: {
 																type: "object",
 																properties: {
@@ -9019,7 +9019,7 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													nullable: true,
 													description:
-														"Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable) — an explicit reason, never a silent omission.",
+														"Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable); an explicit reason, never a silent omission.",
 												},
 												deltaBasis: { type: "string" },
 											},
@@ -9038,10 +9038,10 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar ecosystem developer activity",
 				description:
-					"Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric — activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.",
+					"Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric; activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.",
 				"x-routing": {
 					purpose:
-						"Ranked active-project leaderboard + Electric Capital ecosystem developer stats. Population = EVERY Live/Development/Pre-Release project with its indexed-repo rollup (default range=all); absence from the top-N means ranked below N or no indexed repos — never a liveness verdict.",
+						"Ranked active-project leaderboard + Electric Capital ecosystem developer stats. Population = EVERY Live/Development/Pre-Release project with its indexed-repo rollup (default range=all); absence from the top-N means ranked below N or no indexed repos; never a liveness verdict.",
 					keywords: [
 						// sls-052: repo-health question family
 						"open issues",
@@ -9104,8 +9104,8 @@ export const spec: OpenAPISpec = {
 						"who/what are the top/most-active Stellar projects",
 						"most-starred projects; which projects shipped recently (last 30d)",
 						"how many active Stellar devs / how does Stellar's dev activity look (EC 28-day active / Stellar-only / multichain splits)",
-						"top DeFi protocols by TVL (sort=tvl, e.g. with type=DEX,Lending) — DefiLlama-verified, dated per-row by tvlAsOf",
-						"biggest stablecoin / issued asset by circulating supply (sort=supply, pair with type=Stablecoin) — assetSupply + assetHolders from stellar.expert",
+						"top DeFi protocols by TVL (sort=tvl, e.g. with type=DEX,Lending): DefiLlama-verified, dated per-row by tvlAsOf",
+						"biggest stablecoin / issued asset by circulating supply (sort=supply, pair with type=Stablecoin): assetSupply + assetHolders from stellar.expert",
 						"a CSV/Dune-style export of ranked projects (default top 50, max 300)",
 					],
 					notFor: [
@@ -9156,7 +9156,7 @@ export const spec: OpenAPISpec = {
 						name: "type",
 						in: "query",
 						description:
-							"Filter to one or more granular project types — the same `types[]` taxonomy on project-search rows and echoed on each leaderboard row. Repeatable (`?type=DEX&type=Lending`) and comma-separable (`?type=DEX,Lending`); membership is EITHER (a project typed DEX OR Lending is kept), so you can build an explicit DEX/Lending-style grouping. Exact whole-element match, NOT substring. Unknown values return 400 with validTypes. Applied at the DB layer before ranking and limiting; `meta.filters.type` echoes the applied scope.",
+							"Filter to one or more granular project types; the same `types[]` taxonomy on project-search rows and echoed on each leaderboard row. Repeatable (`?type=DEX&type=Lending`) and comma-separable (`?type=DEX,Lending`); membership is EITHER (a project typed DEX OR Lending is kept), so you can build an explicit DEX/Lending-style grouping. Exact whole-element match, NOT substring. Unknown values return 400 with validTypes. Applied at the DB layer before ranking and limiting; `meta.filters.type` echoes the applied scope.",
 						schema: {
 							type: "array",
 							items: {
@@ -9231,7 +9231,7 @@ export const spec: OpenAPISpec = {
 													format: "date-time",
 													nullable: true,
 													description:
-														"The repository-index rollup timestamp — the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.",
+														"The repository-index rollup timestamp: the most recent index refresh across the repo rows this response aggregated. Every github.* number (stars/issues/lastActivityAt) is as-of THIS moment, not a live GitHub read. Distinct from generatedAt (response serialization time). Null when no indexed repos matched.",
 												},
 												metricDefinitions: {
 													type: "object",
@@ -9242,7 +9242,7 @@ export const spec: OpenAPISpec = {
 										ecosystem: {
 											type: "object",
 											description:
-												"Electric Capital Developer Report snapshot — ecosystem-wide developer activity. Dated numbers: always cite asOf (they are NOT live). stellarOnlyDevs28d + multichainDevs28d sum to activeDevs28d; fullTimeDevs + partTimeDevs + oneTimeDevs is the same 28-day-active population split by EC tenure class.",
+												"Electric Capital Developer Report snapshot: ecosystem-wide developer activity. Dated numbers: always cite asOf (they are NOT live). stellarOnlyDevs28d + multichainDevs28d sum to activeDevs28d; fullTimeDevs + partTimeDevs + oneTimeDevs is the same 28-day-active population split by EC tenure class.",
 											properties: {
 												asOf: {
 													type: "string",
@@ -9294,7 +9294,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Feedback"],
 				summary: "Get the feedback request schema (discovery)",
 				description:
-					"Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects. **Use when:** you're about to POST feedback and want the schema first — kind enum, required fields, size limits. **Not for:** actually submitting feedback → POST /api/feedback; browsing what's been reported → not exposed (curator queue is private).",
+					"Returns the expected POST body shape + valid `kind` values, so an agent can self-discover how to submit feedback without guessing. No side effects. **Use when:** you're about to POST feedback and want the schema first: kind enum, required fields, size limits. **Not for:** actually submitting feedback → POST /api/feedback; browsing what's been reported → not exposed (curator queue is private).",
 				responses: {
 					"200": {
 						description: "Feedback request schema",
@@ -9303,7 +9303,7 @@ export const spec: OpenAPISpec = {
 								schema: {
 									type: "object",
 									description:
-										"Self-describing contract for POST /api/feedback — GET it to learn the body shape rather than guessing.",
+										"Self-describing contract for POST /api/feedback. GET it to learn the body shape rather than guessing.",
 									properties: {
 										meta: {
 											type: "object",
@@ -9320,7 +9320,7 @@ export const spec: OpenAPISpec = {
 												body: {
 													type: "object",
 													description:
-														"Field-by-field description of the POST body — values are human-readable usage notes, except kind, which lists the allowed values.",
+														"Field-by-field description of the POST body: values are human-readable usage notes, except kind, which lists the allowed values.",
 													properties: {
 														kind: {
 															type: "array",
@@ -9405,7 +9405,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Feedback"],
 				summary: "Submit feedback on Scout's output",
 				description:
-					"Send a feedback report when the skill returns wrong / missing / misleading information. Lands in the curator queue. Rate-limited to 6/min/IP (IP hashed with PAYLOAD_SECRET, never stored raw). **Use when:** a Scout query returned something wrong / stale / empty that you believe SHOULD exist — file it so the corpus/endpoint gets fixed. **Not for:** discovering the schema first → GET /api/feedback; reading data (this is a write endpoint) → use the relevant search endpoint.",
+					"Send a feedback report when the skill returns wrong / missing / misleading information. Lands in the curator queue. Rate-limited to 6/min/IP (IP hashed with PAYLOAD_SECRET, never stored raw). **Use when:** a Scout query returned something wrong / stale / empty that you believe SHOULD exist; file it so the corpus/endpoint gets fixed. **Not for:** discovering the schema first → GET /api/feedback; reading data (this is a write endpoint) → use the relevant search endpoint.",
 				requestBody: {
 					required: true,
 					content: {
@@ -9474,7 +9474,7 @@ export const spec: OpenAPISpec = {
 					],
 					useWhen: [
 						"which RWA / tokenized funds / treasuries / bonds / real estate are live on Stellar, and who issues them",
-						"is product X (BENJI, WisdomTree GOLD, Spiko USTBL, Etherfuse CETES) actually issued on Stellar today — with the contract or issuer and evidence",
+						"is product X (BENJI, WisdomTree GOLD, Spiko USTBL, Etherfuse CETES) actually issued on Stellar today; with the contract or issuer and evidence",
 						"the largest RWA tokens or issuers on Stellar by rwa.xyz value",
 					],
 					notFor: [
@@ -9494,7 +9494,7 @@ export const spec: OpenAPISpec = {
 						name: "state",
 						in: "query",
 						description:
-							"Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity — a real security, not a live market; deployed-no-supply = nothing minted: a Soroban contract with zero supply and zero events, or a classic asset the issuer declares whose trustlines exist but whose supply is zero (Etherfuse CETESZ, Franklin FOCGX); not-found = a listing that no longer resolves on mainnet. live and issued-single-holder are decided by holder count (balance > 0): two or more, or exactly one.",
+							"Filter by product state. live = minted with at least two holders (someone other than the issuer holds it); issued-single-holder = minted, exactly one holder (the issuer or its custodian) and no secondary activity: a real security, not a live market; deployed-no-supply = nothing minted: a Soroban contract with zero supply and zero events, or a classic asset the issuer declares whose trustlines exist but whose supply is zero (Etherfuse CETESZ, Franklin FOCGX); not-found = a listing that no longer resolves on mainnet. live and issued-single-holder are decided by holder count (balance > 0): two or more, or exactly one.",
 						schema: {
 							type: "string",
 							enum: [...RWA_STATES],
@@ -9520,7 +9520,7 @@ export const spec: OpenAPISpec = {
 						name: "project",
 						in: "query",
 						description:
-							"Directory project slug — the rows that feed that project's `products`.",
+							"Directory project slug: the rows that feed that project's `products`.",
 						schema: { type: "string" },
 					},
 					{
@@ -9559,30 +9559,30 @@ export const spec: OpenAPISpec = {
 															type: "string",
 															nullable: true,
 															description:
-																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
 														},
 														level: {
 															type: "string",
 															nullable: true,
 															description:
-																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
 														},
 														kind: {
 															type: "string",
 															nullable: true,
 															description:
-																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
 														},
 														project: {
 															type: "string",
 															nullable: true,
 															description:
-																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
 														},
 														limit: {
 															type: "integer",
 															description:
-																"Echo of the request parameter, not a served fact — it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
+																"Echo of the request parameter, not a served fact; it cannot be dated, because nothing was measured to produce it. Every asset row is dated by its own verifiedAt; meta.registryAsOf dates the registry.",
 														},
 													},
 												},
@@ -9636,7 +9636,7 @@ export const spec: OpenAPISpec = {
 													id: {
 														type: "string",
 														description:
-															"`CODE-GISSUER` for a classic asset; the `C…` contract id for a Soroban token. The asset's identity — a ticker alone identifies nothing.",
+															"`CODE-GISSUER` for a classic asset; the `C…` contract id for a Soroban token. The asset's identity: a ticker alone identifies nothing.",
 													},
 													kind: {
 														type: "string",
@@ -9681,7 +9681,7 @@ export const spec: OpenAPISpec = {
 														type: "string",
 														nullable: true,
 														description:
-															"Contract creation date (Soroban). null for classic assets — Horizon does not date issuance.",
+															"Contract creation date (Soroban). null for classic assets. Horizon does not date issuance.",
 													},
 													verifiedAt: { type: "string" },
 													evidenceUrl: {
@@ -9711,13 +9711,13 @@ export const spec: OpenAPISpec = {
 													rwaxyzListed: {
 														type: "boolean",
 														description:
-															"true = rwa.xyz lists this token on Stellar (the original inclusion rule); false = admitted because a tracked issuer's own stellar.toml declares it under a tracked issuer account — rwa.xyz figures are null on those rows (not provided, never zero).",
+															"true = rwa.xyz lists this token on Stellar (the original inclusion rule); false = admitted because a tracked issuer's own stellar.toml declares it under a tracked issuer account; rwa.xyz figures are null on those rows (not provided, never zero).",
 													},
 													rwaxyzValueUsd: {
 														type: "number",
 														nullable: true,
 														description:
-															"rwa.xyz's own USD value — a valuation, not activity. Read beside totalSupply and holders.",
+															"rwa.xyz's own USD value: a valuation, not activity. Read beside totalSupply and holders.",
 													},
 													rwaxyzHolders: { type: "integer", nullable: true },
 													pairedWith: {
@@ -9730,7 +9730,7 @@ export const spec: OpenAPISpec = {
 														type: "object",
 														nullable: true,
 														description:
-															"The issuer's on-chain flags, read from Horizon (classic assets only) — the whitelisting and clawback controls a regulated security carries, as facts: authRequired = holders must be approved by the issuer (a whitelist); authRevocable = the issuer can freeze a holder; clawbackEnabled = the issuer can pull tokens back; authImmutable = those powers are given up for good. null on Soroban tokens, whose controls live in contract logic.",
+															"The issuer's on-chain flags, read from Horizon (classic assets only): the whitelisting and clawback controls a regulated security carries, as facts: authRequired = holders must be approved by the issuer (a whitelist); authRevocable = the issuer can freeze a holder; clawbackEnabled = the issuer can pull tokens back; authImmutable = those powers are given up for good. null on Soroban tokens, whose controls live in contract logic.",
 														properties: {
 															authRequired: { type: "boolean" },
 															authRevocable: { type: "boolean" },
@@ -9749,7 +9749,7 @@ export const spec: OpenAPISpec = {
 														type: "object",
 														nullable: true,
 														description:
-															"What the six-hour refresh lane measured about this asset — supply, holders, activityCount — dated by measuredAt. null until the lane has measured it: an admission, never zero. measureBasis live = read that cycle; unmeasured = the fetch failed and the previous good numbers were kept (note says why).",
+															"What the six-hour refresh lane measured about this asset: supply, holders, activityCount, dated by measuredAt. null until the lane has measured it: an admission, never zero. measureBasis live = read that cycle; unmeasured = the fetch failed and the previous good numbers were kept (note says why).",
 														properties: {
 															supply: { type: "number", nullable: true },
 															holders: { type: "number", nullable: true },
@@ -9788,10 +9788,10 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar stablecoins ranked by USD market cap",
 				description:
-					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs — GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
+					"Every tracked Stellar stablecoin, ranked by USD market cap by default (sort=marketcap|supply|holders|volume; peg filter). Rows carry marketCapUSD (comparable), raw supply + its peg (NOT comparable across pegs; GYEN supply is yen, ARST is pesos), holders, price, full issuer account, and `basis` (live | curated-static | unmeasured) so an estimate is never mistaken for a live measurement. Measured every 6h from Horizon, Stellar Expert and live peg FX; null = not measured, never zero.",
 				"x-routing": {
 					purpose:
-						"Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap — NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
+						"Authoritative USD-comparable stablecoin ranking. Answers 'biggest stablecoin', 'largest issuer', 'total stablecoin market cap' with USD market cap, NOT raw supply, which is denominated in each asset's own peg and not comparable across rows.",
 					keywords: [
 						"stablecoin",
 						"stablecoins",
@@ -9813,7 +9813,7 @@ export const spec: OpenAPISpec = {
 					useWhen: [
 						"the biggest / largest stablecoin on Stellar (by USD market cap)",
 						"top stablecoin issuers, total stablecoin market cap, or a stablecoin's supply/holders/peg",
-						"comparing stablecoins by size — use marketCapUSD, never raw supply across different pegs",
+						"comparing stablecoins by size: use marketCapUSD, never raw supply across different pegs",
 					],
 					notFor: [
 						"DeFi protocol TVL -> getLeaderboard sort=tvl",
@@ -9832,7 +9832,7 @@ export const spec: OpenAPISpec = {
 						name: "sort",
 						in: "query",
 						description:
-							"Ranking order. marketcap (default, USD-comparable) | supply (raw peg units — comparable only within one peg) | holders | volume. Unrecognized values return 400.",
+							"Ranking order. marketcap (default, USD-comparable) | supply (raw peg units; comparable only within one peg) | holders | volume. Unrecognized values return 400.",
 						schema: {
 							type: "string",
 							enum: ["marketcap", "supply", "holders", "volume"],
@@ -9870,7 +9870,7 @@ export const spec: OpenAPISpec = {
 														multiIssuerTickers: {
 															type: "array",
 															description:
-																"Tickers issued on Stellar by MULTIPLE distinct companies (computed over the whole inventory, unaffected by peg/limit). A ticker listed here is not an identity — attribute by issuer account, never by ticker alone (the Circle-vs-MyKobo EURC class).",
+																"Tickers issued on Stellar by MULTIPLE distinct companies (computed over the whole inventory, unaffected by peg/limit). A ticker listed here is not an identity; attribute by issuer account, never by ticker alone (the Circle-vs-MyKobo EURC class).",
 															items: {
 																type: "object",
 																properties: {
@@ -9887,12 +9887,12 @@ export const spec: OpenAPISpec = {
 															type: "string",
 															format: "date-time",
 															description:
-																"The freshest measurement among the served rows — cite this as the as-of date for every ranking answer.",
+																"The freshest measurement among the served rows; cite this as the as-of date for every ranking answer.",
 														},
 														counts: {
 															type: "object",
 															description:
-																"`total` is the count AFTER the peg filter and BEFORE the limit slice — the same meaning as counts.total on every other endpoint. `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement.",
+																"`total` is the count AFTER the peg filter and BEFORE the limit slice; the same meaning as counts.total on every other endpoint. `tracked` is the whole registry regardless of filter. `byBasis` breaks the SERVED rows down by provenance, so a caller aggregating across rows can see whether any figure is a hand-checked estimate rather than a live measurement.",
 															properties: {
 																tracked: {
 																	type: "integer",
@@ -9941,7 +9941,7 @@ export const spec: OpenAPISpec = {
 														methodology: {
 															type: "string",
 															description:
-																"How rows are ranked: USD MARKET CAP (unit supply × USD price at the asset's peg), never raw unit counts — a yen- or peso-denominated supply must not be read as dollars. Also states what `basis` means per row and that peg deviation is not measured.",
+																"How rows are ranked: USD MARKET CAP (unit supply × USD price at the asset's peg), never raw unit counts; a yen- or peso-denominated supply must not be read as dollars. Also states what `basis` means per row and that peg deviation is not measured.",
 														},
 													},
 												},
@@ -9995,7 +9995,7 @@ export const spec: OpenAPISpec = {
 				name: "fields",
 				in: "query",
 				description:
-					"Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array — meta is unaffected. Nested objects are selected whole (no dot-paths).",
+					"Comma-separated top-level field names to return per row (e.g. fields=name,slug,tvlUSD), shrinking the payload. Case-insensitive. Each row's identity keys (id/slug/fullName/githubUsername/url/source, where present) are always included; unknown names are ignored, not rejected. Applies only to the rows array: meta is unaffected. Nested objects are selected whole (no dot-paths).",
 				schema: { type: "string" },
 			},
 			view: {
@@ -10162,7 +10162,7 @@ export const spec: OpenAPISpec = {
 					note: {
 						type: "string",
 						description:
-							"Optional endpoint-specific reading note — semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say.",
+							"Optional endpoint-specific reading note: semantics a consumer needs to interpret the rows correctly (counting basis, absence semantics, handoff pointers). Present only where the endpoint has something non-obvious to say.",
 					},
 					warnings: {
 						type: "array",
@@ -10220,7 +10220,7 @@ export const spec: OpenAPISpec = {
 								type: "integer",
 								minimum: 0,
 								description:
-									'projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in `returned` but NOT in `total`). `total` is the keyword match set and is stable across limit AND offset — it used to include these page-one-only rows, so the same query reported total 17 on page one and 6 on page two. On page one `returned` can therefore exceed `total`, and this count is exactly the difference.',
+									'projects/search only: rows in this page served by the vector-similarity fallback rather than a keyword match (each tagged via:"semantic"; included in `returned` but NOT in `total`). `total` is the keyword match set and is stable across limit AND offset; it used to include these page-one-only rows, so the same query reported total 17 on page one and 6 on page two. On page one `returned` can therefore exceed `total`, and this count is exactly the difference.',
 							},
 						},
 					},
@@ -10243,7 +10243,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"Relation metadata: shared by every report of ONE engagement, distinct across engagements — lets a consumer tell a revision from a separate yearly engagement. Null = unclassified (curation pending), never asserted independent.",
+							"Relation metadata: shared by every report of ONE engagement, distinct across engagements; lets a consumer tell a revision from a separate yearly engagement. Null = unclassified (curation pending), never asserted independent.",
 					},
 					reportVersion: {
 						type: "string",
@@ -10274,7 +10274,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						enum: ["extracted", "not-extracted", "partial"],
 						description:
-							"Completeness of the deterministic findings extraction — read findingsTotal 7 vs null as different states of KNOWLEDGE, not conflicting counts. Null on rows ingested before this field existed.",
+							"Completeness of the deterministic findings extraction: read findingsTotal 7 vs null as different states of KNOWLEDGE, not conflicting counts. Null on rows ingested before this field existed.",
 					},
 					reportId: {
 						type: "integer",
@@ -10305,7 +10305,7 @@ export const spec: OpenAPISpec = {
 					dateBasis: {
 						type: ["string", "null"],
 						description:
-							"published = real date-stamp; portal-record = wall-clock portal timestamp (likely upload time) — not publication recency; null = pre-dateBasis row",
+							"published = real date-stamp; portal-record = wall-clock portal timestamp (likely upload time); not publication recency; null = pre-dateBasis row",
 					},
 					observedAt: {
 						type: ["string", "null"],
@@ -10372,27 +10372,27 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"source=cap only: the CAP's own declared Status from its preamble (Final, Implemented, Accepted, Draft, Rejected). Cite it before treating a CAP as protocol truth — a Draft describes an intention, not the network.",
+							"source=cap only: the CAP's own declared Status from its preamble (Final, Implemented, Accepted, Draft, Rejected). Cite it before treating a CAP as protocol truth; a Draft describes an intention, not the network.",
 					},
 					capProtocolVersion: {
 						type: "integer",
 						nullable: true,
 						description:
-							"source=cap only: the protocol version this CAP shipped in, from its own preamble. Null = not declared upstream (drafts/TBD) — never guessed. The join key between protocol history and soroban-sdk versions.",
+							"source=cap only: the protocol version this CAP shipped in, from its own preamble. Null = not declared upstream (drafts/TBD); never guessed. The join key between protocol history and soroban-sdk versions.",
 					},
 					docKind: {
 						type: "string",
 						nullable: true,
 						enum: ["spec", "guide", "article", "data"],
 						description:
-							"Deterministic document class stamped at ingest: spec (canonical — old AND authoritative, e.g. SEPs/CAPs), guide (staleness-sensitive how-to), article, data. Null = not classified. Use it to weigh age: an old spec is still the truth, an old guide may not be.",
+							"Deterministic document class stamped at ingest: spec (canonical; old AND authoritative, e.g. SEPs/CAPs), guide (staleness-sensitive how-to), article, data. Null = not classified. Use it to weigh age: an old spec is still the truth, an old guide may not be.",
 					},
 					docVersionStatus: {
 						type: "string",
 						nullable: true,
 						enum: ["current", "supported", "deprecated"],
 						description:
-							"SDK-version verdict for version-bearing content (e.g. a guide targeting wasm32-unknown-unknown is deprecated), from the same dated version table repo rows use. Null = the content names no version signal — not a claim it is current.",
+							"SDK-version verdict for version-bearing content (e.g. a guide targeting wasm32-unknown-unknown is deprecated), from the same dated version table repo rows use. Null = the content names no version signal; not a claim it is current.",
 					},
 					score: { type: ["number", "null"] },
 					confidence: {
@@ -10406,7 +10406,7 @@ export const spec: OpenAPISpec = {
 			Partner: {
 				type: "object",
 				description:
-					"An ecosystem partner (anchor, ramp, infrastructure, tooling, protocol, wallet, audit firm…). Partner-claimed facts and system-verified signals are SEPARATE fields — `verified` and `trust` are system-computed and cannot be self-reported; everything else is partner/curator-maintained.",
+					"An ecosystem partner (anchor, ramp, infrastructure, tooling, protocol, wallet, audit firm…). Partner-claimed facts and system-verified signals are SEPARATE fields: `verified` and `trust` are system-computed and cannot be self-reported; everything else is partner/curator-maintained.",
 				properties: {
 					slug: { type: "string" },
 					name: { type: "string" },
@@ -10439,13 +10439,13 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none — so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null.",
+							"SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null.",
 					},
 					tomlSourceUrl: {
 						type: "string",
 						nullable: true,
 						description:
-							"The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from — re-verify there. Null = never toml-enriched (curated/self-reported only).",
+							"The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from; re-verify there. Null = never toml-enriched (curated/self-reported only).",
 					},
 					tomlConfidence: {
 						type: "object",
@@ -10487,7 +10487,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "object", additionalProperties: true },
 						description:
-							"Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies') — currently null for every partner, as none have been curated yet.",
+							"Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies'); currently null for every partner, as none have been curated yet.",
 					},
 					verified: {
 						type: "object",
@@ -10558,13 +10558,13 @@ export const spec: OpenAPISpec = {
 										type: "array",
 										items: { type: "string" },
 										description:
-											"Every value the region filter accepts (unknown values 400 with this list). Countries and currencies are not regions — they go in q.",
+											"Every value the region filter accepts (unknown values 400 with this list). Countries and currencies are not regions; they go in q.",
 									},
 									matchMode: {
 										type: "string",
 										enum: ["scored", "weak"],
 										description:
-											"Present only when q was supplied and rows were returned. scored = ranked by the shared partner scorer over structured capability fields. weak = NOTHING matched q and these are fresh/accepting partners shown as a fallback, NOT matches — treat them as candidates, never as an answer to the query.",
+											"Present only when q was supplied and rows were returned. scored = ranked by the shared partner scorer over structured capability fields. weak = NOTHING matched q and these are fresh/accepting partners shown as a fallback, NOT matches; treat them as candidates, never as an answer to the query.",
 									},
 									matchModeLabel: {
 										type: "string",
@@ -10585,7 +10585,7 @@ export const spec: OpenAPISpec = {
 				type: "object",
 				nullable: true,
 				description:
-					"The population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations — never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed.",
+					"The population a quantitative response aggregated, made answer-visible. Identical `id`s across responses (e.g. analyze vs clusters) mean the numbers are mechanically comparable; different `id`s are DIFFERENT populations; never merge/sum them without labeling the scopes. `truncated: true` means the result is a sample of the population, not a census. Null when the underlying fetch failed.",
 				properties: {
 					id: {
 						type: "string",
@@ -10611,7 +10611,7 @@ export const spec: OpenAPISpec = {
 					truncated: {
 						type: "boolean",
 						description:
-							"included < totalAvailable — the response is a sample, not the population.",
+							"included < totalAvailable: the response is a sample, not the population.",
 					},
 					generatedAt: { type: "string", format: "date-time" },
 				},
@@ -10629,7 +10629,7 @@ export const spec: OpenAPISpec = {
 					apiVersion: {
 						type: "string",
 						description:
-							"API contract (OpenAPI) version \u2014 equals /api/openapi.json info.version. Reason about the live contract from this rather than the service version.",
+							"API contract (OpenAPI) version: equals /api/openapi.json info.version. Reason about the live contract from this rather than the service version.",
 					},
 					generatedAt: { type: "string", format: "date-time" },
 					sources: {
@@ -10647,7 +10647,7 @@ export const spec: OpenAPISpec = {
 								populationId: {
 									type: "string",
 									description:
-										"Scope digest of what `count` counts — same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes.",
+										"Scope digest of what `count` counts: same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes.",
 								},
 								notes: { type: "string" },
 							},
@@ -10737,12 +10737,12 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: [...PROJECT_STATUSES],
 						description:
-							"Lifecycle status of the PROJECT, never a deployment claim (sls-079). 'Live' means the product is operating for users somewhere; it does NOT assert Stellar mainnet deployment — read the sibling `deployment` field for that fact. 'Pre-Release' includes testnet-only products. 'Inactive' = defunct/archived — such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. statusAsOf/statusSourceUrl/statusBasis carry the label's provenance.",
+							"Lifecycle status of the PROJECT, never a deployment claim (sls-079). 'Live' means the product is operating for users somewhere; it does NOT assert Stellar mainnet deployment; read the sibling `deployment` field for that fact. 'Pre-Release' includes testnet-only products. 'Inactive' = defunct/archived; such projects stay name-searchable but are heavily down-ranked and excluded from the leaderboard/directory. statusAsOf/statusSourceUrl/statusBasis carry the label's provenance.",
 					},
 					deployment: {
 						type: "object",
 						description:
-							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). This is a PROJECT-level fact: mainnet means at least one of the project's products is minted on mainnet, not that every product is — read `products` for per-product state. Populated only from evidence — a verified mainnet contract join, an on-chain activity reading, a minted product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'.",
+							"Which network the product is actually deployed on, as a SEPARATE fact from lifecycle status (sls-079: 'Live' used to be read as mainnet-deployed). This is a PROJECT-level fact: mainnet means at least one of the project's products is minted on mainnet, not that every product is; read `products` for per-product state. Populated only from evidence: a verified mainnet contract join, an on-chain activity reading, a minted product in the verified RWA registry (basis rwa-registry, sls-023), or a human-verified operator artifact. A stored network is never overwritten by the registry; only an unknown is filled. network 'unknown' means exactly that: no evidence either way, never 'not deployed'.",
 						properties: {
 							network: {
 								type: "string",
@@ -10762,7 +10762,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"When the current status value was last asserted/verified (ISO 8601). Null = undated legacy label — treat the status as source-relative, not freshly confirmed.",
+							"When the current status value was last asserted/verified (ISO 8601). Null = undated legacy label: treat the status as source-relative, not freshly confirmed.",
 					},
 					statusSourceUrl: {
 						type: "string",
@@ -10826,13 +10826,13 @@ export const spec: OpenAPISpec = {
 						// missing package-release while nine live rows served it.
 						enum: [...STATUS_BASES],
 						description:
-							"What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'package-release' = a versioned artifact shipped to a package registry (npm, jsr.io) whose own metadata names this project's repository as its source, published inside a dated window — publication evidence for a library, never proof anything is deployed, 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle) — an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment — read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT — it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.",
+							"What kind of evidence backs the current status, WEAKEST LAST: 'human-verified' = a curator confirmed it, 'onchain-activity' = a contract/network probe, 'repo-activity' = the project's OWN indexed repository committed inside a dated window, which for a LIBRARY or SDK is what liveness means (it is deliberately not awarded to deployed products, where a commit shows the team is working but not that the service runs), 'package-release' = a versioned artifact shipped to a package registry (npm, jsr.io) whose own metadata names this project's repository as its source, published inside a dated window; publication evidence for a library, never proof anything is deployed, 'product-integration' = the LIVE product itself was found to reference Stellar infrastructure (a SEP-1 stellar.toml, a Horizon/Soroban RPC endpoint, an on-chain address, or a Stellar SDK in its own bundle); an integration OBSERVED on the deployed surface, stronger than a page merely answering but NEVER a claim the product works or that a human looked, 'site-liveness' = the product surface was reachable when checked (reachable is not maintained; a parked domain and a dead product's marketing site both pass it), 'operator-announcement' = the team said so, and it can describe PLANS rather than deployment; read statusAsOf and the description. The last two are ADMISSIONS, not evidence: 'source-inherited' means the label was carried over from the upstream ecosystem database and NOBODY HAS INDEPENDENTLY CHECKED IT; it is the default and currently the majority of rows; 'unverified' means the same with no citable source. A Live label on either basis is a record of what a seed list said, never proof the project is running or that anything is deployed on mainnet. Null = provenance not recorded. statusAsOf dates the OBSERVATION behind the basis, not the last sync.",
 					},
 					scfConfidence: {
 						type: "object",
 						nullable: true,
 						description:
-							"Deterministic trust score for the SCF award facts: basis-class weight \u00d7 stepwise freshness decay. score 0\u20131, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance \u21d2 same score \u2014 cacheable.",
+							"Deterministic trust score for the SCF award facts: basis-class weight \u00d7 stepwise freshness decay. score 0-1, label high/medium/low, ageDays since last verification. Null = no recorded provenance (absence of evidence, never a low score). Same provenance \u21d2 same score: cacheable.",
 						properties: {
 							score: { type: "number" },
 							label: { type: "string", enum: ["high", "medium", "low"] },
@@ -10843,13 +10843,13 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Aggregated consumer votes for this project (feedback→quality loop): votes = distinct voters (one per hashed IP, latest vote wins), worked = of those, how many voted 'worked'. score = worked/votes, present ONLY once votes pass the anti-gaming floor (≥5 distinct voters) — null score with visible counts means 'signal accruing, no ranking influence yet'. Null object = no votes recorded. Aggregated nightly from POST /api/feedback vote kinds.",
+							"Aggregated consumer votes for this project (feedback→quality loop): votes = distinct voters (one per hashed IP, latest vote wins), worked = of those, how many voted 'worked'. score = worked/votes, present ONLY once votes pass the anti-gaming floor (≥5 distinct voters); null score with visible counts means 'signal accruing, no ranking influence yet'. Null object = no votes recorded. Aggregated nightly from POST /api/feedback vote kinds.",
 						properties: {
 							votes: {
 								type: "integer",
 								nullable: true,
 								description:
-									"Community votes on the submission, or null — the DoraHacks v1 hub API no longer serves vote counts, and this was previously 0 on every row, asserting that nobody voted rather than that we cannot see votes. An unknown count contributes nothing to build ranking; it neither boosts nor penalises.",
+									"Community votes on the submission, or null; the DoraHacks v1 hub API no longer serves vote counts, and this was previously 0 on every row, asserting that nobody voted rather than that we cannot see votes. An unknown count contributes nothing to build ranking; it neither boosts nor penalises.",
 							},
 							worked: { type: "integer" },
 							score: { type: "number", nullable: true },
@@ -10873,13 +10873,13 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"Official SCF project page the award facts were read from — the citation for scfAwardedRounds/scfRoundAwards/scfTotalAwardedUSD.",
+							"Official SCF project page the award facts were read from; the citation for scfAwardedRounds/scfRoundAwards/scfTotalAwardedUSD.",
 					},
 					builtBy: {
 						type: "object",
 						nullable: true,
 						description:
-							"The organization/entity behind this project ('who built X') — e.g. LOBSTR → Ultra Stellar, Soroswap → Paltalabs. Null when no org is linked. Browse the org's portfolio at https://stellarlight.xyz/entities/{slug}.",
+							"The organization/entity behind this project ('who built X'), e.g. LOBSTR → Ultra Stellar, Soroswap → Paltalabs. Null when no org is linked. Browse the org's portfolio at https://stellarlight.xyz/entities/{slug}.",
 						properties: {
 							name: { type: "string" },
 							slug: { type: "string" },
@@ -10896,19 +10896,19 @@ export const spec: OpenAPISpec = {
 						// 3 days on it. `nullable: true` already carries the null case.
 						enum: ["disclosed", "undisclosed"],
 						description:
-							"Disambiguates a null award amount: 'undisclosed' = the SCF award is confirmed but no amount is published in the source data (NOT a data gap — do not guess); 'disclosed' = scfTotalAwardedUSD carries the number; null = not awarded.",
+							"Disambiguates a null award amount: 'undisclosed' = the SCF award is confirmed but no amount is published in the source data (NOT a data gap; do not guess); 'disclosed' = scfTotalAwardedUSD carries the number; null = not awarded.",
 					},
 					scfAwardedRounds: {
 						type: "array",
 						items: { type: "integer" },
 						description:
-							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. EMPTY IS NOT 'NO SCF FUNDING': SCF grants awards outside the numbered rounds (a Liquidity Award carries no SCF #N), so a project can hold real award money with this array empty — check scfTotalAwardedUSD and read scfRoundAwards, where such awards appear with round null and their own awardName. Per-award official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round).",
+							"SCF round numbers this project was awarded in (e.g. [2, 17, 22]), from official award pages. Rounds are authoritative. EMPTY IS NOT 'NO SCF FUNDING': SCF grants awards outside the numbered rounds (a Liquidity Award carries no SCF #N), so a project can hold real award money with this array empty; check scfTotalAwardedUSD and read scfRoundAwards, where such awards appear with round null and their own awardName. Per-award official amounts live in scfRoundAwards; scfTotalAwardedUSD is the project's SCF-page total and can exceed their sum (top-ups SCF doesn't itemize per round).",
 					},
 					products: {
 						type: "array",
 						nullable: true,
 						description:
-							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network — read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row — WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others — plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage` — declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
+							"Per-PRODUCT deployment records (#742): provider status and product-on-network status are DIFFERENT statements. A Live project row NEVER establishes that a given product is live on a given network; read this array for that, and if it is null you do not have the answer and must go to the operator. Curated only; every record carries evidenceUrl + asOf so the claim is re-verifiable at its source. NULL = no product-level records modelled for this project (UNKNOWN, never 'this project ships no products'). Fed by the verified RWA registry (/api/rwa; every row dated by its own verifiedAt) for the issuers that have a project row: WisdomTree, Spiko, Etherfuse, Ondo, Figure, Circle, Paxos, Centrifuge and others, plus hand-curated rows. Only MINTED registry rows are served here (registryState live or issued-single-holder); an asset the issuer declares or deployed with zero supply is tracked in the registry but is not a product. WHETHER THIS LIST IS COMPLETE for the issuer is a separate fact: read the sibling `productsCoverage`; declared / tracked / served against the issuer's own declaration (its stellar.toml, or its deployer's contract history), `complete` only when every declared asset is tracked and every issuer account was reconciled, null when that cannot be stated. Still null on most projects. kind: oracle-feed | rwa-asset | stablecoin | wallet-app | bridge | ramp | other; network: mainnet | testnet | futurenet; status: live | development | announced | retired.",
 						items: {
 							type: "object",
 							properties: {
@@ -10930,7 +10930,7 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									nullable: true,
 									description:
-										"CODE-GISSUER for a classic asset, the contract id for a Soroban token — the product's identity.",
+										"CODE-GISSUER for a classic asset, the contract id for a Soroban token; the product's identity.",
 								},
 								verificationLevel: {
 									type: "string",
@@ -10942,13 +10942,13 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									nullable: true,
 									description:
-										"The registry's own state — live | issued-single-holder — since `status` (the stored enum) cannot say 'minted but held only by the issuer'.",
+										"The registry's own state: live | issued-single-holder, since `status` (the stored enum) cannot say 'minted but held only by the issuer'.",
 								},
 								tomlStatus: {
 									type: "string",
 									nullable: true,
 									description:
-										"The issuer toml's own `status` for the asset where it was read (live | private | test …); null = not read. `private` = a restricted offering — minted and held, not a public market — and `note` says so. Hand-curated records: null.",
+										"The issuer toml's own `status` for the asset where it was read (live | private | test …); null = not read. `private` = a restricted offering (minted and held, not a public market) and `note` says so. Hand-curated records: null.",
 								},
 								launchedAt: {
 									type: "string",
@@ -10960,7 +10960,7 @@ export const spec: OpenAPISpec = {
 									type: "object",
 									nullable: true,
 									description:
-										"Issuer flags from Horizon for a classic asset — authRequired (whitelist), authRevocable (freeze), clawbackEnabled, authImmutable. null on Soroban tokens and hand-curated rows.",
+										"Issuer flags from Horizon for a classic asset: authRequired (whitelist), authRevocable (freeze), clawbackEnabled, authImmutable. null on Soroban tokens and hand-curated rows.",
 									properties: {
 										authRequired: { type: "boolean" },
 										authRevocable: { type: "boolean" },
@@ -10975,13 +10975,13 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Whether `products` is COMPLETE for the issuer accounts this project joins (sls-083). The comparison set is what those accounts' own stellar.toml declared on asOf (the RWA registry's issuer coverage table): declared = (code, issuer) pairs the tomls declare under the covered accounts; tracked = of those, registry rows in any state; complete = declared === tracked AND issuersUnreconciled === 0 — a project with an issuer whose toml could not be read is never 'complete' (Circle: false). served = REGISTRY-fed product records on this row (minted states only, one per paired tranche; `products` may also carry hand-curated records) — it is a different count from tracked: it can be smaller (a zero-supply asset is tracked but not a product) or larger (the registry tracks an issued asset the toml omits, verificationLevel on-chain-home-domain). NULL = completeness cannot be stated: no joined issuer has a toml to reconcile and no deployer entry exists (on-chain-only classic issuers, hand-curated products) — null is never 'complete'. issuersUnreconciled counts the issuer accounts the statement does NOT cover: classic issuers whose toml could not be read, plus one for the project's Soroban tokens when it has any (they have no toml).",
+							"Whether `products` is COMPLETE for the issuer accounts this project joins (sls-083). The comparison set is what those accounts' own stellar.toml declared on asOf (the RWA registry's issuer coverage table): declared = (code, issuer) pairs the tomls declare under the covered accounts; tracked = of those, registry rows in any state; complete = declared === tracked AND issuersUnreconciled === 0; a project with an issuer whose toml could not be read is never 'complete' (Circle: false). served = REGISTRY-fed product records on this row (minted states only, one per paired tranche; `products` may also carry hand-curated records); it is a different count from tracked: it can be smaller (a zero-supply asset is tracked but not a product) or larger (the registry tracks an issued asset the toml omits, verificationLevel on-chain-home-domain). NULL = completeness cannot be stated: no joined issuer has a toml to reconcile and no deployer entry exists (on-chain-only classic issuers, hand-curated products); null is never 'complete'. issuersUnreconciled counts the issuer accounts the statement does NOT cover: classic issuers whose toml could not be read, plus one for the project's Soroban tokens when it has any (they have no toml).",
 						properties: {
 							basis: {
 								type: "string",
 								enum: [...PRODUCTS_COVERAGE_BASES],
 								description:
-									"issuer-stellar-toml = classic assets, compared against what the issuer accounts' own stellar.toml declares. deployer-contracts = Soroban tokens (no toml), compared against every SEP-41 token contract the deployer account behind this project's tokens has created, read from Horizon's create-contract history — the issuer's own act, and wider than rwa.xyz's listing (Spiko: 17 token contracts deployed, 9 listed, 8 with zero supply tracked as deployed-no-supply). A deployer can be a platform creating tokens for several issuers (Centrifuge deploys for Anemoy too), so declared counts the deployer's tokens the registry attributes to this project plus any it has attributed to nobody; test and superseded contracts are excluded with a recorded reason, and a token that is neither a row nor excluded makes complete false for every client of that deployer.",
+									"issuer-stellar-toml = classic assets, compared against what the issuer accounts' own stellar.toml declares. deployer-contracts = Soroban tokens (no toml), compared against every SEP-41 token contract the deployer account behind this project's tokens has created, read from Horizon's create-contract history; the issuer's own act, and wider than rwa.xyz's listing (Spiko: 17 token contracts deployed, 9 listed, 8 with zero supply tracked as deployed-no-supply). A deployer can be a platform creating tokens for several issuers (Centrifuge deploys for Anemoy too), so declared counts the deployer's tokens the registry attributes to this project plus any it has attributed to nobody; test and superseded contracts are excluded with a recorded reason, and a token that is neither a row nor excluded makes complete false for every client of that deployer.",
 							},
 							asOf: { type: "string" },
 							issuers: { type: "integer" },
@@ -10995,7 +10995,7 @@ export const spec: OpenAPISpec = {
 					scfRoundAwards: {
 						type: "array",
 						description:
-							"The official submission record per AWARD — the reconciling basis for scfTotalAwardedUSD. Each entry: the round number (null for an award SCF does not number), the award's own name (present only on those), the published submission budget in USD (null = award confirmed, budget not published — never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). Not every SCF award belongs to a numbered round: a Liquidity Award carries no SCF #N, so a project can hold real award money while scfAwardedRounds is empty — read this array before treating an empty scfAwardedRounds as 'no SCF funding'. scfAwardedRounds stays numeric-only by design. The page-level total can legitimately exceed the sum of these budgets; treat these as the per-award truth and the total as SCF's own aggregate.",
+							"The official submission record per AWARD: the reconciling basis for scfTotalAwardedUSD. Each entry: the round number (null for an award SCF does not number), the award's own name (present only on those), the published submission budget in USD (null = award confirmed, budget not published; never guessed), and the official award type (e.g. 'Legacy v5.0 Community Award'). Not every SCF award belongs to a numbered round: a Liquidity Award carries no SCF #N, so a project can hold real award money while scfAwardedRounds is empty; read this array before treating an empty scfAwardedRounds as 'no SCF funding'. scfAwardedRounds stays numeric-only by design. The page-level total can legitimately exceed the sum of these budgets; treat these as the per-award truth and the total as SCF's own aggregate.",
 						items: {
 							type: "object",
 							properties: {
@@ -11010,7 +11010,7 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Structured corridor/coverage for Anchor-typed projects — answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches.",
+							"Structured corridor/coverage for Anchor-typed projects: answers 'which anchors serve currency/corridor X?' with filterable, dated fields instead of prose. Synced from the matching partner record; null for non-anchors or when no partner record matches.",
 						properties: {
 							countries: {
 								type: "array",
@@ -11026,13 +11026,13 @@ export const spec: OpenAPISpec = {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"Supported SEPs (sep-6, sep-24, sep-31) — the on/off-ramp interop surface.",
+									"Supported SEPs (sep-6, sep-24, sep-31); the on/off-ramp interop surface.",
 							},
 							asOf: {
 								type: "string",
 								nullable: true,
 								description:
-									"Date (YYYY-MM-DD) the coverage was synced from the partner record — cite as the as-of date.",
+									"Date (YYYY-MM-DD) the coverage was synced from the partner record; cite as the as-of date.",
 							},
 						},
 					},
@@ -11041,7 +11041,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']). READ THIS WITH networksBasis. Only when networksBasis is 'curated' is the array intended to be COMPLETE — that is the case where a missing chain is meaningful. For every other basis the array is DERIVED from evidence that the project operates on Stellar, lists only ['stellar'], and says NOTHING about any other chain: a derived row is not a claim of Stellar-only. NULL = we hold neither curation nor evidence (UNKNOWN, never 'supports no networks'). To establish that a project does NOT support a chain you need a source, not this field.",
+							"Blockchain networks this project supports, lowercase (e.g. ['stellar','xrpl']). READ THIS WITH networksBasis. Only when networksBasis is 'curated' is the array intended to be COMPLETE; that is the case where a missing chain is meaningful. For every other basis the array is DERIVED from evidence that the project operates on Stellar, lists only ['stellar'], and says NOTHING about any other chain: a derived row is not a claim of Stellar-only. NULL = we hold neither curation nor evidence (UNKNOWN, never 'supports no networks'). To establish that a project does NOT support a chain you need a source, not this field.",
 					},
 					networksBasis: {
 						type: "string",
@@ -11054,13 +11054,13 @@ export const spec: OpenAPISpec = {
 							"scf-award",
 						],
 						description:
-							"What evidence stands behind supportedNetworks, and therefore whether the list is exhaustive. 'curated' = curator-maintained from the project's own docs; the list is intended to be complete, so an absent chain is informative. The rest are DERIVED proofs that the project operates on Stellar, strongest first: 'onchain-activity' (contract records observed on Stellar), 'defillama-tvl' (DefiLlama tracks its Stellar TVL), 'anchor-coverage' (SEP/corridor rails), 'scf-award' (the Stellar Community Fund funds only Stellar work). A derived basis yields exactly ['stellar'] and is NOT exhaustive — other chains are unknown, not excluded. NULL = no basis, which pairs with a null supportedNetworks.",
+							"What evidence stands behind supportedNetworks, and therefore whether the list is exhaustive. 'curated' = curator-maintained from the project's own docs; the list is intended to be complete, so an absent chain is informative. The rest are DERIVED proofs that the project operates on Stellar, strongest first: 'onchain-activity' (contract records observed on Stellar), 'defillama-tvl' (DefiLlama tracks its Stellar TVL), 'anchor-coverage' (SEP/corridor rails), 'scf-award' (the Stellar Community Fund funds only Stellar work). A derived basis yields exactly ['stellar'] and is NOT exhaustive; other chains are unknown, not excluded. NULL = no basis, which pairs with a null supportedNetworks.",
 					},
 					routes: {
 						type: "array",
 						nullable: true,
 						description:
-							"Curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only — it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded — confirm those with the provider at transfer time.",
+							"Curated ROUTE-LEVEL bridge evidence for Bridge-typed records. A project hit alone is DISCOVERY-only: it never establishes that a specific transfer route exists, which direction is supported, or what the destination asset representation is (canonical Circle-issued USDC vs a bridged representation like USDC.axl). Each row here is a curator-verified route fact grounded in the provider's own docs (sourceUrl + asOf). Null = no curated route evidence (UNKNOWN, never 'no routes exist'). Quote-time facts (fees, live availability, current quotes) are intentionally NOT encoded; confirm those with the provider at transfer time.",
 						items: {
 							type: "object",
 							required: ["fromChain", "toChain"],
@@ -11068,7 +11068,7 @@ export const spec: OpenAPISpec = {
 								fromChain: {
 									type: "string",
 									description:
-										"Source network, lowercase — same vocabulary as supportedNetworks ('evm' is the EVM umbrella).",
+										"Source network, lowercase: same vocabulary as supportedNetworks ('evm' is the EVM umbrella).",
 								},
 								toChain: { type: "string" },
 								direction: {
@@ -11089,7 +11089,7 @@ export const spec: OpenAPISpec = {
 									nullable: true,
 									enum: ["canonical", "wrapped", "bridged", "interchain"],
 									description:
-										"What the DESTINATION asset is: 'canonical' = issuer-native (e.g. Circle-issued USDC via CCTP burn-mint), 'wrapped'/'bridged'/'interchain' = a representation (e.g. USDC.axl). Null = quote-time/unverified — never assume canonical.",
+										"What the DESTINATION asset is: 'canonical' = issuer-native (e.g. Circle-issued USDC via CCTP burn-mint), 'wrapped'/'bridged'/'interchain' = a representation (e.g. USDC.axl). Null = quote-time/unverified; never assume canonical.",
 								},
 								mechanism: {
 									type: "string",
@@ -11107,7 +11107,7 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									nullable: true,
 									description:
-										"YYYY-MM-DD the route evidence was verified — routes are dated facts, re-verify before relying on them for a live transfer.",
+										"YYYY-MM-DD the route evidence was verified; routes are dated facts, re-verify before relying on them for a live transfer.",
 								},
 							},
 						},
@@ -11123,13 +11123,13 @@ export const spec: OpenAPISpec = {
 							"wallet-integrated",
 						],
 						description:
-							"Role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count — count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').",
+							"Role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count; count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').",
 					},
 					anchorProfile: {
 						type: "object",
 						nullable: true,
 						description:
-							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface — `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'` — unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile.",
+							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'`; unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile.",
 						properties: {
 							slug: { type: "string" },
 							country: { type: "string", nullable: true },
@@ -11153,12 +11153,12 @@ export const spec: OpenAPISpec = {
 					onchain: {
 						type: ["object", "null"],
 						description:
-							"On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry — NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo} — events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). Asset-issuer activity: assetHolders = accounts holding a balance TODAY (the active-address count); assetTrustlines = accounts that have EVER opened a trustline (reach, always >= assetHolders — do NOT read it as the active count); assetPayments = lifetime count of payment operations (the transaction-volume metric); assetTrades = lifetime trade count; assetPaymentsAmount = lifetime payment volume in WHOLE ASSET UNITS, not USD (a same-denomination count, not comparable across assets without a price); assetSupply = whole asset units. From the second weekly snapshot, delta fields activate: per-contract eventsDelta/subinvocationsDelta, assetHoldersDelta, assetPaymentsDelta, with prevAsOf + deltaDays defining the window — null deltas mean no prior snapshot yet, NOT zero activity. source + asOf date every payload.",
+							"On-chain metrics from stellar.expert for hand-verified contract/asset join keys. null = not tracked in our registry. NEVER 'no on-chain activity'. contracts[]: {address, label, events, subinvocations, storageEntries, createdAt, verifiedRepo}; events and subinvocations are LIFETIME counts (a contract users call directly at top level can show low subinvocations despite heavy use; read events alongside). Asset-issuer activity: assetHolders = accounts holding a balance TODAY (the active-address count); assetTrustlines = accounts that have EVER opened a trustline (reach, always >= assetHolders; do NOT read it as the active count); assetPayments = lifetime count of payment operations (the transaction-volume metric); assetTrades = lifetime trade count; assetPaymentsAmount = lifetime payment volume in WHOLE ASSET UNITS, not USD (a same-denomination count, not comparable across assets without a price); assetSupply = whole asset units. From the second weekly snapshot, delta fields activate: per-contract eventsDelta/subinvocationsDelta, assetHoldersDelta, assetPaymentsDelta, with prevAsOf + deltaDays defining the window; null deltas mean no prior snapshot yet, NOT zero activity. source + asOf date every payload.",
 					},
 					publicGoods: {
 						type: ["object", "null"],
 						description:
-							"SCF Public Goods Award recipient data: {awardRounds[] (e.g. 2025Q4 \u2014 CSV-confirmed rounds only, requested-amount tranches with Status=Awarded, not payout proof), evidenceUrl}. null = not a confirmed recipient at our source \u2014 NEVER 'not a public good'. Q2'26 outcomes live on Tansu and are excluded until readable.",
+							"SCF Public Goods Award recipient data: {awardRounds[] (e.g. 2025Q4: CSV-confirmed rounds only, requested-amount tranches with Status=Awarded, not payout proof), evidenceUrl}. null = not a confirmed recipient at our source. NEVER 'not a public good'. Q2'26 outcomes live on Tansu and are excluded until readable.",
 						properties: {
 							awardRounds: { type: "array", items: { type: "string" } },
 							evidenceUrl: { type: ["string", "null"] },
@@ -11167,7 +11167,7 @@ export const spec: OpenAPISpec = {
 					audits: {
 						type: ["object", "null"],
 						description:
-							"Security-audit rollup from the /api/audits registry (hand-verified projectSlug links): {count, auditors[] (normalized firm names), latestAt (YYYY-MM-DD of the newest report)}. Drift context: driftDays = whole days since the latest report; codeChangedSinceAudit = whether any of the project's joined repos committed on a later day than that report (day-granular; null when either side lacks a date). 'Audited' with high drift is a materially weaker claim — read both. null rollup = no audit on record at our source — NOT a claim the project is unaudited (same absence semantics as /api/audits). Full report rows via /api/audits?project=<slug>; findings text via searchResearch with source=audit.",
+							"Security-audit rollup from the /api/audits registry (hand-verified projectSlug links): {count, auditors[] (normalized firm names), latestAt (YYYY-MM-DD of the newest report)}. Drift context: driftDays = whole days since the latest report; codeChangedSinceAudit = whether any of the project's joined repos committed on a later day than that report (day-granular; null when either side lacks a date). 'Audited' with high drift is a materially weaker claim; read both. null rollup = no audit on record at our source; NOT a claim the project is unaudited (same absence semantics as /api/audits). Full report rows via /api/audits?project=<slug>; findings text via searchResearch with source=audit.",
 						properties: {
 							count: { type: "integer" },
 							auditors: { type: "array", items: { type: "string" } },
@@ -11191,27 +11191,27 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope — cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth.",
+							"Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope; cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth.",
 					},
 					tvlMethod: {
 						type: "string",
 						nullable: true,
 						description:
-							"How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time) — the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions.",
+							"How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time): the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions.",
 					},
 					llamaSlugs: {
 						type: "array",
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project — e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider — this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked).",
+							"The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project, e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider; this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked).",
 					},
 					tvlMethodUrl: {
 						type: "string",
 						nullable: true,
 						format: "uri",
 						description:
-							"Citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs) — the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum — enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.",
+							"Citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs): the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum; enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.",
 					},
 					canonicalSlug: {
 						type: "string",
@@ -11240,7 +11240,7 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live) — narrate as 'used to be live', not as a current offering. Null for ordinary live records.",
+							"Historical-archive context, present only when a record carries real history (e.g. a defunct project that used to be live); narrate as 'used to be live', not as a current offering. Null for ordinary live records.",
 						properties: {
 							wasLive: { type: "boolean" },
 							note: { type: "string", nullable: true },
@@ -11252,7 +11252,7 @@ export const spec: OpenAPISpec = {
 						type: "integer",
 						nullable: true,
 						description:
-							"Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals — or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label.",
+							"Numeric rank parsed from hackathonPlacement (1 = best), handling both digit ('1st Place') and word ('First Place') ordinals, or null when the source gives no ordinal (a flat 'Winners' bucket). winners[] is sorted by placementRank, so winners[0] is the 1st-place entry when the event has ranked placements; unranked winners (placementRank: null) sort last and their order is not significant. Sort/filter on placementRank instead of parsing the label.",
 					},
 					hackathonPrize: { type: "number", nullable: true },
 					hackathonPrizeTrack: { type: "string", nullable: true },
@@ -11298,7 +11298,7 @@ export const spec: OpenAPISpec = {
 						format: "date-time",
 						nullable: true,
 						description:
-							"Most recent commit across the project's own indexed repos \u2014 attach as the as-of date for 'is this project active?' answers. Null = no indexed repo with a known commit date (an INDEX gap \u2014 e.g. a closed-source product), never 'no activity'.",
+							"Most recent commit across the project's own indexed repos; attach as the as-of date for 'is this project active?' answers. Null = no indexed repo with a known commit date (an INDEX gap, e.g. a closed-source product), never 'no activity'.",
 					},
 					via: {
 						type: "string",
@@ -11393,7 +11393,7 @@ export const spec: OpenAPISpec = {
 									advisory: {
 										type: "object",
 										description:
-											"Present when the page does NOT contain a keyword match for the query — either nothing was found at all, or `matchMode` is `semantic`, meaning every row is a vector neighbour rather than a match. In the semantic case the rows are still returned (a neighbour is occasionally the right answer for a conceptual query) but they must NOT be reported as the thing asked for: a query for a project name that lands here means we hold no project by that name. `suggestions[]` carries the endpoints that can still answer it (repo search for code-only entities, the research corpus for prose mentions).",
+											"Present when the page does NOT contain a keyword match for the query; either nothing was found at all, or `matchMode` is `semantic`, meaning every row is a vector neighbour rather than a match. In the semantic case the rows are still returned (a neighbour is occasionally the right answer for a conceptual query) but they must NOT be reported as the thing asked for: a query for a project name that lands here means we hold no project by that name. `suggestions[]` carries the endpoints that can still answer it (repo search for code-only entities, the research corpus for prose mentions).",
 										properties: {
 											summary: { type: "string" },
 											suggestions: {
@@ -11412,7 +11412,7 @@ export const spec: OpenAPISpec = {
 									anchorProfileBasis: {
 										type: "string",
 										description:
-											"Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join — empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+											"Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join; empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
 									},
 									scfCountBasis: {
 										type: "string",
@@ -11459,7 +11459,7 @@ export const spec: OpenAPISpec = {
 									fallbackChannels: {
 										type: "object",
 										description:
-											"Present when the query returns 0 events — a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array.",
+											"Present when the query returns 0 events: a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array.",
 										properties: {
 											summary: { type: "string" },
 											channels: {
@@ -11633,7 +11633,7 @@ export const spec: OpenAPISpec = {
 					winners: {
 						type: "array",
 						description:
-							"Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal — never infer finishing order from array position; check winnersRanked first.",
+							"Winner entries. Ordering contract: placementRank is the ONLY per-entry ordering signal; never infer finishing order from array position; check winnersRanked first.",
 						items: {
 							type: "object",
 							properties: {
@@ -11743,7 +11743,7 @@ export const spec: OpenAPISpec = {
 						type: "boolean",
 						nullable: true,
 						description:
-							"Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null — array order is meaningless, treat as an unordered set); null = no winners recorded.",
+							"Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null; array order is meaningless, treat as an unordered set); null = no winners recorded.",
 					},
 					submissions: {
 						type: "array",
@@ -11777,13 +11777,13 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"Where to go instead, as GitHub spells it — from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'.",
+							"Where to go instead, as GitHub spells it; from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'.",
 					},
 					deprecatedAt: {
 						type: "string",
 						nullable: true,
 						description:
-							"The date the repo ITSELF gives for its archive or deprecation (YYYY-MM-DD) — GitHub's archive banner, a release notice. null when the repo gives none; never the date we read it.",
+							"The date the repo ITSELF gives for its archive or deprecation (YYYY-MM-DD): GitHub's archive banner, a release notice. null when the repo gives none; never the date we read it.",
 					},
 					supersessionKind: {
 						type: "string",
@@ -11809,14 +11809,14 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: ["active", "maintained", "dormant", "archived", "unknown"],
 						description:
-							"Observable activity state derived at serve time from lastCommitAt + isArchived: active = commit ≤45d; maintained = ≤180d; dormant = a KNOWN commit older than 180d (an observation — dormant repos can be complete, not dead); archived = the owner's own declaration (the only death verdict); unknown = no commit date held — never read unknown or dormant as defunct.",
+							"Observable activity state derived at serve time from lastCommitAt + isArchived: active = commit ≤45d; maintained = ≤180d; dormant = a KNOWN commit older than 180d (an observation; dormant repos can be complete, not dead); archived = the owner's own declaration (the only death verdict); unknown = no commit date held; never read unknown or dormant as defunct.",
 					},
 					...REPO_KIND_PROPS,
 					activitySignals: {
 						type: "object",
 						nullable: true,
 						description:
-							"Velocity + release snapshot captured by the enrich pass, dated by asOf. Null = not yet captured for this repo (rows backfill on the weekly refresh), never zero-activity. commits90d counts default-branch commits in the 90 days before asOf — the velocity discriminator WITHIN activityState (two 'active' repos can differ 50x here).",
+							"Velocity + release snapshot captured by the enrich pass, dated by asOf. Null = not yet captured for this repo (rows backfill on the weekly refresh), never zero-activity. commits90d counts default-branch commits in the 90 days before asOf; the velocity discriminator WITHIN activityState (two 'active' repos can differ 50x here).",
 						properties: {
 							commits90d: { type: "integer", nullable: true },
 							lastReleaseAt: {
@@ -11832,17 +11832,17 @@ export const spec: OpenAPISpec = {
 					ciPresent: {
 						type: ["boolean", "null"],
 						description:
-							"CI config present in-tree (.github/workflows, CircleCI, GitLab CI) per the latest code scan. Presence only — NOT a claim CI passes. null = not yet scanned for this fact.",
+							"CI config present in-tree (.github/workflows, CircleCI, GitLab CI) per the latest code scan. Presence only. NOT a claim CI passes. null = not yet scanned for this fact.",
 					},
 					testsPresent: {
 						type: ["boolean", "null"],
 						description:
-							"Test files/dirs present in-tree (tests/, __tests__, *.test.*, *_test.*) per the latest code scan. Presence only — NOT a coverage or quality claim. null = not yet scanned for this fact.",
+							"Test files/dirs present in-tree (tests/, __tests__, *.test.*, *_test.*) per the latest code scan. Presence only. NOT a coverage or quality claim. null = not yet scanned for this fact.",
 					},
 					codeInUse: {
 						type: ["object", "null"],
 						description:
-							"Mainnet usage rollup for contracts attributed to this repo (scanner-verified contract ids + stellar.expert wasm validation; refreshed weekly): contracts = attributed contract count; events/subinvocations = LIFETIME counts summed across them; eventsDelta/subinvocationsDelta = change since the prior weekly snapshot (null until one exists — NOT zero activity). null object = no verified mainnet contract joined to this repo — absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is LIVE.",
+							"Mainnet usage rollup for contracts attributed to this repo (scanner-verified contract ids + stellar.expert wasm validation; refreshed weekly): contracts = attributed contract count; events/subinvocations = LIFETIME counts summed across them; eventsDelta/subinvocationsDelta = change since the prior weekly snapshot (null until one exists; NOT zero activity). null object = no verified mainnet contract joined to this repo: absence of a join, never a claim the code is unused. The dynamic half of code truth: codeDepth says the code is serious, codeInUse says it is LIVE.",
 						properties: {
 							contracts: { type: "integer" },
 							events: { type: ["integer", "null"] },
@@ -11861,7 +11861,7 @@ export const spec: OpenAPISpec = {
 					knowledgeNotes: {
 						type: "array",
 						description:
-							"Dated FACTS about this repo with named sources — curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record.",
+							"Dated FACTS about this repo with named sources: curated (hand-verified: packaging, doc maps, companion repos) or derived:audit (the owning project has verified security-audit reports in the registry; exact projectSlug join). Never summaries, never guesses; empty when nothing is on record.",
 						items: {
 							type: "object",
 							properties: {
@@ -11890,7 +11890,7 @@ export const spec: OpenAPISpec = {
 						minimum: 0,
 						maximum: 100,
 						description:
-							"Quality grade (0–100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos.",
+							"Quality grade (0-100) = freshness + traction + hackathon/SCF/builder authority. Lead with high-score repos.",
 					},
 					repoScoreLabel: { type: "string", nullable: true },
 					tierReason: {
@@ -11898,20 +11898,20 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"WHY the tier is what it is — the enum reasons the code-tier lane recorded when it last judged this row (e.g. curated-canonical, or the archive keys). Null until that lane has judged the row: a bare tier with no reason means the value is the schema default, not a verdict.",
+							"WHY the tier is what it is: the enum reasons the code-tier lane recorded when it last judged this row (e.g. curated-canonical, or the archive keys). Null until that lane has judged the row: a bare tier with no reason means the value is the schema default, not a verdict.",
 					},
 					tierChangedAt: {
 						type: "string",
 						format: "date-time",
 						nullable: true,
 						description:
-							"When the tier last changed — the date that covers `tier` and `tierReason`. Null when the lane has never judged the row; do not date the tier from scannedAt or lastCommitAt, which describe the scan and the repo.",
+							"When the tier last changed: the date that covers `tier` and `tierReason`. Null when the lane has never judged the row; do not date the tier from scannedAt or lastCommitAt, which describe the scan and the repo.",
 					},
 					tier: {
 						type: "string",
 						enum: ["quality", "community", "archive"],
 						description:
-							"Quality tier (tag-and-demote): quality = high-grade, community = alive but unproven, archive = GitHub-archived or dead-and-unstarred — demoted in ranking and excluded from inline code references, but never deleted (name lookups still find it). Lead with quality-tier repos.",
+							"Quality tier (tag-and-demote): quality = high-grade, community = alive but unproven, archive = GitHub-archived or dead-and-unstarred; demoted in ranking and excluded from inline code references, but never deleted (name lookups still find it). Lead with quality-tier repos.",
 					},
 					source: {
 						type: "string",
@@ -11927,7 +11927,7 @@ export const spec: OpenAPISpec = {
 					deepWikiUrl: {
 						type: "string",
 						description:
-							"DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions — e.g. where error codes / consensus / XDR are defined — beyond which-repo discovery.",
+							"DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions (e.g. where error codes / consensus / XDR are defined) beyond which-repo discovery.",
 					},
 					canonical: {
 						type: "boolean",
@@ -11938,13 +11938,13 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: ["code-verified", "sdf-org", "curated", "mentioned", "none"],
 						description:
-							"WHY this repo ranks as Stellar-relevant — ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none — a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.",
+							"WHY this repo ranks as Stellar-relevant: ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none: a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.",
 					},
 					codeVerified: {
 						type: "object",
 						nullable: true,
 						description:
-							"Code-verified truth from analyzing the repo's ACTUAL source (not stars/topics) — the discriminator between 'popular' and 'real, current, deep Soroban code'. Null until the repo has been code-scanned. Use to qualify an answer: prefer a deployable contract on a supported soroban-sdk over tooling that merely uses Stellar.",
+							"Code-verified truth from analyzing the repo's ACTUAL source (not stars/topics): the discriminator between 'popular' and 'real, current, deep Soroban code'. Null until the repo has been code-scanned. Use to qualify an answer: prefer a deployable contract on a supported soroban-sdk over tooling that merely uses Stellar.",
 						properties: {
 							stellarProof: {
 								type: "string",
@@ -11957,7 +11957,7 @@ export const spec: OpenAPISpec = {
 									"none",
 								],
 								description:
-									"How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml. 'none' = the repo WAS scanned and no direct Stellar code evidence was found (a scanned general-purpose dependency) — such repos rank below Stellar-evidenced ones and carry stellarEvidence 'none' unless their own text mentions Stellar.",
+									"How we verified it's Stellar, strongest→weakest: cargo-sdk (soroban-sdk dep) / contract-macros (#[contract] usage) / lang-sdk (Swift/Kotlin/Go/Python Stellar SDK) / js-sdk / stellar-toml. 'none' = the repo WAS scanned and no direct Stellar code evidence was found (a scanned general-purpose dependency); such repos rank below Stellar-evidenced ones and carry stellarEvidence 'none' unless their own text mentions Stellar.",
 							},
 							codeDepth: {
 								type: "number",
@@ -11968,13 +11968,13 @@ export const spec: OpenAPISpec = {
 							isDeployableContract: {
 								type: "boolean",
 								description:
-									"This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib — vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates — those are runtime/fixtures, not a deployable contract product.",
+									"This repo's PRODUCT is a deployable Soroban contract (Cargo cdylib; vs a CLI/indexer/frontend that only uses Stellar). Known platform/SDK/tooling repos (stellar-core, rs-soroban-env, the SDKs/CLI/RPC…) are pinned FALSE even though they vendor cdylib crates; those are runtime/fixtures, not a deployable contract product.",
 							},
 							sorobanSdkVersion: {
 								type: "string",
 								nullable: true,
 								description:
-									"Raw soroban-sdk version requirement (a sourced fact — never a bare protocol integer).",
+									"Raw soroban-sdk version requirement (a sourced fact; never a bare protocol integer).",
 							},
 							versionStatus: {
 								type: "string",
@@ -12004,13 +12004,13 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								nullable: true,
 								description:
-									"Commit SHA the facts were computed at — cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12.",
+									"Commit SHA the facts were computed at; cite github.com/<fullName>/tree/<scannedRef>. Null on scans before 2026-08-12.",
 							},
 							symbols: {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources — what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs.",
+									"Public code-symbol surface (pub fn/struct/enum/trait names) extracted from the scanned Rust sources: what the repo IMPLEMENTS (e.g. release_escrow, swap_exact_tokens). Also a search signal: queries match these. Empty for repos scanned before 2026-07-08 or non-Rust proofs.",
 							},
 							contractInterface: {
 								type: "array",
@@ -12022,7 +12022,7 @@ export const spec: OpenAPISpec = {
 								type: "integer",
 								nullable: true,
 								description:
-									"Stellar protocol the pinned soroban-sdk MAJOR targets, derived from the maintained sdk→protocol table (dated; the mapping has documented irregularities — 23.x spans P24→P25). ADVISORY, not an attestation: null = unknown major, never guessed.",
+									"Stellar protocol the pinned soroban-sdk MAJOR targets, derived from the maintained sdk→protocol table (dated; the mapping has documented irregularities: 23.x spans P24→P25). ADVISORY, not an attestation: null = unknown major, never guessed.",
 							},
 							protocolCaps: {
 								type: "array",
@@ -12036,31 +12036,31 @@ export const spec: OpenAPISpec = {
 									},
 								},
 								description:
-									"CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null.",
+									"CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol: the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null.",
 							},
 							stellarDeps: {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"Stellar-ecosystem dependencies from the repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched package names stored verbatim — the dependency graph. Forward read: the repo's stack. Reverse read: search the package name to find dependents (adoption evidence no README mention can fake). Empty until a post-2026-08-10 scan.",
+									"Stellar-ecosystem dependencies from the repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched package names stored verbatim: the dependency graph. Forward read: the repo's stack. Reverse read: search the package name to find dependents (adoption evidence no README mention can fake). Empty until a post-2026-08-10 scan.",
 							},
 							mainnetContractId: {
 								type: "string",
 								nullable: true,
 								description:
-									"README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check) — unfakeable deployment evidence. Null when no verified address.",
+									"README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check): unfakeable deployment evidence. Null when no verified address.",
 							},
 							sdkCapabilities: {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"Stellar SDK capability tags detected in the repo's JS/TS sources — what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative).",
+									"Stellar SDK capability tags detected in the repo's JS/TS sources; what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative).",
 							},
 							codeDomains: {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits — what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null).",
+									"Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits; what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null).",
 							},
 						},
 					},
@@ -12112,7 +12112,7 @@ export const spec: OpenAPISpec = {
 			Builder: {
 				type: "object",
 				description:
-					"A builder profile row from /api/builders. Profile text (bio/roleTitle) is builder-claimed, NOT verified experience; when the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance. Nullable profile fields are null (or empty-string) when unset — never a negative claim.",
+					"A builder profile row from /api/builders. Profile text (bio/roleTitle) is builder-claimed, NOT verified experience; when the request had a q/skill filter, `match` and `codeEvidence` carry the match provenance. Nullable profile fields are null (or empty-string) when unset; never a negative claim.",
 				properties: {
 					githubUsername: {
 						type: "string",
@@ -12130,21 +12130,21 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"Free-text location as entered (e.g. 'Rio de Janeiro, RJ, Brasil') — the ?location= filter substring-matches this.",
+							"Free-text location as entered (e.g. 'Rio de Janeiro, RJ, Brasil'); the ?location= filter substring-matches this.",
 					},
 					websiteUrl: { type: "string", nullable: true },
 					twitterHandle: {
 						type: "string",
 						nullable: true,
 						description:
-							"As entered by the builder — can be a bare handle OR a full profile URL; normalize before constructing links.",
+							"As entered by the builder: can be a bare handle OR a full profile URL; normalize before constructing links.",
 					},
 					avatarUrl: { type: "string", nullable: true },
 					isFeatured: { type: "boolean" },
 					projectCount: {
 						type: "integer",
 						description:
-							"Length of `projects` — the builder's own synced entries, not an ecosystem-wide attribution count.",
+							"Length of `projects`: the builder's own synced entries, not an ecosystem-wide attribution count.",
 					},
 					projects: {
 						type: "array",
@@ -12170,7 +12170,7 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"WHY this row matched (null without a q/skill filter). Free-text profile evidence — treat bio/role text as claims, not verified experience.",
+							"WHY this row matched (null without a q/skill filter). Free-text profile evidence: treat bio/role text as claims, not verified experience.",
 						properties: {
 							matchedFields: {
 								type: "array",
@@ -12194,13 +12194,13 @@ export const spec: OpenAPISpec = {
 								type: "object",
 								additionalProperties: { type: "string" },
 								description:
-									"Per query token, the literal term that hit — a token can match via a synonym (e.g. 'payments' via 'remittance').",
+									"Per query token, the literal term that hit: a token can match via a synonym (e.g. 'payments' via 'remittance').",
 							},
 							basis: {
 								type: "string",
 								enum: ["profile-text", "repo-owner", "code-language"],
 								description:
-									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence) — every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.",
+									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence); every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.",
 							},
 						},
 					},
@@ -12208,7 +12208,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						nullable: true,
 						description:
-							"Indexed repos owned by this builder's GitHub account that match the query — observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter.",
+							"Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter.",
 						items: {
 							type: "object",
 							properties: {
@@ -12229,7 +12229,7 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"What this person has actually shipped on Stellar, from the repos we index — QUERY-INDEPENDENT and present on every row (the profile page's 'On Stellar' card as data). Attribution rule: `builds` = projects reached through repos they OWN or an org that IS them; `contributesTo` = projects reached only through repos they committed to; `commits90d` counts OWN repos only; `contributedCommits12m` is their own share of others' repos — a repo's total is never credited to a contributor. `null` = the join could not run (never 'nothing'); an all-zero block = the join ran and found no indexed code for this login. `projects` above stays Passport-declared and `codeEvidence` stays query-scoped, unchanged.",
+							"What this person has actually shipped on Stellar, from the repos we index; QUERY-INDEPENDENT and present on every row (the profile page's 'On Stellar' card as data). Attribution rule: `builds` = projects reached through repos they OWN or an org that IS them; `contributesTo` = projects reached only through repos they committed to; `commits90d` counts OWN repos only; `contributedCommits12m` is their own share of others' repos; a repo's total is never credited to a contributor. `null` = the join could not run (never 'nothing'); an all-zero block = the join ran and found no indexed code for this login. `projects` above stays Passport-declared and `codeEvidence` stays query-scoped, unchanged.",
 						properties: {
 							repoCount: { type: "integer" },
 							stars: { type: "integer" },
@@ -12277,7 +12277,7 @@ export const spec: OpenAPISpec = {
 							topRepos: {
 								type: "array",
 								description:
-									"Up to 5 — owned repos first, then by this person's own commits, then the repo's 90d activity. Never ordered by the repo's total alone.",
+									"Up to 5: owned repos first, then by this person's own commits, then the repo's 90d activity. Never ordered by the repo's total alone.",
 								items: {
 									type: "object",
 									properties: {
@@ -12292,7 +12292,7 @@ export const spec: OpenAPISpec = {
 										commits90d: {
 											type: "integer",
 											description:
-												"The REPO's 90-day commits (everyone's work) — context, not this person's count.",
+												"The REPO's 90-day commits (everyone's work); context, not this person's count.",
 										},
 										projectSlug: { type: "string", nullable: true },
 										via: {
@@ -12303,7 +12303,7 @@ export const spec: OpenAPISpec = {
 											type: "integer",
 											nullable: true,
 											description:
-												"This person's own commits into this repo, last 12 months; null for owned repos (their own repo — the whole history is theirs).",
+												"This person's own commits into this repo, last 12 months; null for owned repos (their own repo; the whole history is theirs).",
 										},
 									},
 								},
@@ -12315,7 +12315,7 @@ export const spec: OpenAPISpec = {
 			Person: {
 				type: "object",
 				description:
-					"One SDF roster entry from /api/people: person, current role, section, and affiliation — quoted from stellar.org/foundation/team with provenance (sourceUrl + observedAt). Roster facts, not verified availability.",
+					"One SDF roster entry from /api/people: person, current role, section, and affiliation: quoted from stellar.org/foundation/team with provenance (sourceUrl + observedAt). Roster facts, not verified availability.",
 				properties: {
 					name: { type: "string" },
 					role: {
@@ -12331,7 +12331,7 @@ export const spec: OpenAPISpec = {
 					org: {
 						type: "string",
 						description:
-							"Affiliation — 'Stellar Development Foundation' for leadership, the external org for board/advisors, '' when the role names none.",
+							"Affiliation: 'Stellar Development Foundation' for leadership, the external org for board/advisors, '' when the role names none.",
 					},
 					sourceUrl: { type: "string" },
 					observedAt: {
@@ -12344,7 +12344,7 @@ export const spec: OpenAPISpec = {
 			Rfp: {
 				type: "object",
 				description:
-					"An RFP row from /api/rfps. rowType discriminates real briefs from the synthetic live-round row — count/render briefs by filtering rowType === 'rfp'.",
+					"An RFP row from /api/rfps. rowType discriminates real briefs from the synthetic live-round row; count/render briefs by filtering rowType === 'rfp'.",
 				properties: {
 					id: {
 						type: "string",
@@ -12357,12 +12357,12 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"The sponsor's technical requirements text. Null when the brief carries none — and always null on synthetic scf-round rows.",
+							"The sponsor's technical requirements text. Null when the brief carries none, and always null on synthetic scf-round rows.",
 					},
 					category: {
 						type: "string",
 						description:
-							"Category slug — the ?category= filter vocabulary (an unrecognized filter value returns 400 with validCategories). 'scf' is carried by the synthetic live-round row.",
+							"Category slug: the ?category= filter vocabulary (an unrecognized filter value returns 400 with validCategories). 'scf' is carried by the synthetic live-round row.",
 					},
 					categoryLabel: {
 						type: "string",
@@ -12376,7 +12376,7 @@ export const spec: OpenAPISpec = {
 					quarter: {
 						type: "string",
 						description:
-							"Quarter slug (e.g. 'q1-2026') — the ?quarter= filter vocabulary. Synthetic rows carry the active quarter.",
+							"Quarter slug (e.g. 'q1-2026'): the ?quarter= filter vocabulary. Synthetic rows carry the active quarter.",
 					},
 					quarterLabel: {
 						type: "string",
@@ -12399,19 +12399,19 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: ["rfp", "scf-round"],
 						description:
-							"'rfp' = a curated sponsor brief. 'scf-round' = a SYNTHETIC row representing the live SCF round's open submission window (served as a row so row-reading agents don't miss the open round). Synthetic rows are NOT briefs — count/render briefs by filtering rowType === 'rfp'.",
+							"'rfp' = a curated sponsor brief. 'scf-round' = a SYNTHETIC row representing the live SCF round's open submission window (served as a row so row-reading agents don't miss the open round). Synthetic rows are NOT briefs: count/render briefs by filtering rowType === 'rfp'.",
 					},
 					synthetic: {
 						type: "boolean",
 						description:
-							"True only on synthetic scf-round rows — mirror of rowType.",
+							"True only on synthetic scf-round rows: mirror of rowType.",
 					},
 				},
 			},
 			Hackathon: {
 				type: "object",
 				description:
-					"One hackathon event row from /api/hackathons — merged from the curated collection and the live DoraHacks feed (`source` says which). prizePoolUSD/hackersCount are ABSENT when the source publishes none: unknown, never zero.",
+					"One hackathon event row from /api/hackathons: merged from the curated collection and the live DoraHacks feed (`source` says which). prizePoolUSD/hackersCount are ABSENT when the source publishes none: unknown, never zero.",
 				properties: {
 					id: {
 						type: "string",
@@ -12422,7 +12422,7 @@ export const spec: OpenAPISpec = {
 					slug: {
 						type: "string",
 						description:
-							"Event slug — the key /api/hackathons/{slug} (getHackathon) resolves.",
+							"Event slug: the key /api/hackathons/{slug} (getHackathon) resolves.",
 					},
 					description: {
 						type: "string",
@@ -12464,12 +12464,12 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						enum: ["curated", "dorahacks"],
 						description:
-							"Which feed served this row — the ?source= filter vocabulary.",
+							"Which feed served this row: the ?source= filter vocabulary.",
 					},
 					prizePoolUSD: {
 						type: "number",
 						description:
-							"Total prize pool in USD. ABSENT when the source publishes none — unknown, not zero.",
+							"Total prize pool in USD. ABSENT when the source publishes none: unknown, not zero.",
 					},
 					hackersCount: {
 						type: "integer",
@@ -12481,12 +12481,12 @@ export const spec: OpenAPISpec = {
 			Skill: {
 				type: "object",
 				description:
-					"One installable Stellar AI skill/tool from /api/skills — SDF's skills.stellar.org set, curated entries, and approved community submissions mapped onto one unified shape. Optional fields are OMITTED when not applicable (absent = not applicable, never null and never false).",
+					"One installable Stellar AI skill/tool from /api/skills: SDF's skills.stellar.org set, curated entries, and approved community submissions mapped onto one unified shape. Optional fields are OMITTED when not applicable (absent = not applicable, never null and never false).",
 				properties: {
 					slug: {
 						type: "string",
 						description:
-							"Skill slug — resolves via /api/skills/{name} (getSkill).",
+							"Skill slug: resolves via /api/skills/{name} (getSkill).",
 					},
 					name: { type: "string" },
 					tagline: {
@@ -12517,7 +12517,7 @@ export const spec: OpenAPISpec = {
 					installAlt: {
 						type: "array",
 						description:
-							"Alternate install commands for other agent runtimes — an ARRAY of {label, command} entries (label = the runtime, e.g. 'Codex'). Absent when only the primary install applies.",
+							"Alternate install commands for other agent runtimes: an ARRAY of {label, command} entries (label = the runtime, e.g. 'Codex'). Absent when only the primary install applies.",
 						items: {
 							type: "object",
 							properties: {
@@ -12572,12 +12572,12 @@ export const spec: OpenAPISpec = {
 			Cluster: {
 				type: "object",
 				description:
-					"One category/type cluster from /api/clusters — crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count: the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues.",
+					"One category/type cluster from /api/clusters: crowdedness/whitespace over the active project directory. size is a directory TAXONOMY count (how many projects carry the tag), NOT a venue or competitor count: the DEX cluster, e.g., includes aggregators and trading UIs alongside independent venues.",
 				properties: {
 					key: {
 						type: "string",
 						description:
-							"The cluster label — a category (dimension=category) or a types[] value (dimension=types), e.g. 'RWA'.",
+							"The cluster label: a category (dimension=category) or a types[] value (dimension=types), e.g. 'RWA'.",
 					},
 					dimension: {
 						type: "string",
@@ -12588,7 +12588,7 @@ export const spec: OpenAPISpec = {
 					size: {
 						type: "integer",
 						description:
-							"Projects in the cluster — a taxonomy count (see component description).",
+							"Projects in the cluster: a taxonomy count (see component description).",
 					},
 					scfFundedCount: {
 						type: "integer",
@@ -12597,7 +12597,7 @@ export const spec: OpenAPISpec = {
 					scfTotalUSD: {
 						type: "number",
 						description:
-							"Sum of known SCF award amounts across the cluster — an in-house reconstruction (per-award amounts aren't published for all rounds): comparable across clusters, not an official figure.",
+							"Sum of known SCF award amounts across the cluster; an in-house reconstruction (per-award amounts aren't published for all rounds): comparable across clusters, not an official figure.",
 					},
 					hackathonWinnerCount: {
 						type: "integer",
@@ -12608,12 +12608,12 @@ export const spec: OpenAPISpec = {
 						minimum: 1,
 						maximum: 10,
 						description:
-							"1-10 log-scaled crowding score: round(log2(size+1) + log2(scfFundedCount+1) + 0.5*log2(hackathonWinnerCount+1)), clamped to 1..10 — SCF funding and winners add a modifier, so a well-funded small cluster can outrank a huge unfunded one. Sort descending for 'most crowded', ascending for whitespace.",
+							"1-10 log-scaled crowding score: round(log2(size+1) + log2(scfFundedCount+1) + 0.5*log2(hackathonWinnerCount+1)), clamped to 1..10. SCF funding and winners add a modifier, so a well-funded small cluster can outrank a huge unfunded one. Sort descending for 'most crowded', ascending for whitespace.",
 					},
 					sampleProjects: {
 						type: "array",
 						description:
-							"A few showcase projects, sorted by SCF funding + hackathon prize — a SAMPLE of the cluster, not its full membership (enumerate via searchProjects).",
+							"A few showcase projects, sorted by SCF funding + hackathon prize; a SAMPLE of the cluster, not its full membership (enumerate via searchProjects).",
 						items: {
 							type: "object",
 							properties: {
@@ -12630,26 +12630,26 @@ export const spec: OpenAPISpec = {
 			LeaderboardProject: {
 				type: "object",
 				description:
-					"One ranked project row from /api/leaderboard. Every github.* number is as-of meta.dataAsOf (the repo-index rollup timestamp), NOT a live GitHub read — meta.metricDefinitions states what each metric IS.",
+					"One ranked project row from /api/leaderboard. Every github.* number is as-of meta.dataAsOf (the repo-index rollup timestamp), NOT a live GitHub read; meta.metricDefinitions states what each metric IS.",
 				properties: {
 					rank: {
 						type: "integer",
 						description:
-							"1-based position under THIS response's sort/range/category/type scope — recomputed per request, not a stable global rank. Cite alongside the applied filters (meta.filters).",
+							"1-based position under THIS response's sort/range/category/type scope; recomputed per request, not a stable global rank. Cite alongside the applied filters (meta.filters).",
 					},
 					id: { type: "string" },
 					name: { type: "string" },
 					slug: {
 						type: "string",
 						description:
-							"Directory slug — join key to searchProjects for the full profile.",
+							"Directory slug: join key to searchProjects for the full profile.",
 					},
 					category: { type: "string" },
 					types: {
 						type: "array",
 						items: { type: "string" },
 						description:
-							"Granular product-type tags — the same types[] taxonomy as project-search rows, echoed so a consumer can see WHY a row matched a ?type= filter (#524).",
+							"Granular product-type tags: the same types[] taxonomy as project-search rows, echoed so a consumer can see WHY a row matched a ?type= filter (#524).",
 					},
 					shortDescription: { type: "string", nullable: true },
 					scfAwarded: { type: "boolean" },
@@ -12657,7 +12657,7 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"DefiLlama-verified TVL in USD. null = NOT TRACKED on DefiLlama — never 'zero TVL'; most non-DeFi projects are legitimately untracked. Dated by tvlAsOf.",
+							"DefiLlama-verified TVL in USD. null = NOT TRACKED on DefiLlama; never 'zero TVL'; most non-DeFi projects are legitimately untracked. Dated by tvlAsOf.",
 					},
 					tvlAsOf: {
 						type: "string",
@@ -12676,7 +12676,7 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED — never 'zero supply'; untracked issuers sort below every tracked one.",
+							"Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED; never 'zero supply'; untracked issuers sort below every tracked one.",
 					},
 					assetHolders: {
 						type: "number",
@@ -12696,20 +12696,20 @@ export const spec: OpenAPISpec = {
 							openIssuesTotal: {
 								type: "integer",
 								description:
-									"Sum of OPEN issues (EXCLUDES pull requests — will not match GitHub's REST open_issues_count). A backlog snapshot, not an activity or quality ranking.",
+									"Sum of OPEN issues (EXCLUDES pull requests; will not match GitHub's REST open_issues_count). A backlog snapshot, not an activity or quality ranking.",
 							},
 							commits90d: {
 								type: "integer",
 								nullable: true,
 								description:
-									"Default-branch commits over the trailing 90 days, summed across the project's indexed repos whose scanned code proves Stellar use (stellarProof other than none), from the enrich pass's activitySignals. The sort=activity key. null = no such repo carries a count (an INDEX gap, never zero activity); such rows sort last. This service's own rows are excluded from every ranking — the directory is the instrument, not a subject.",
+									"Default-branch commits over the trailing 90 days, summed across the project's indexed repos whose scanned code proves Stellar use (stellarProof other than none), from the enrich pass's activitySignals. The sort=activity key. null = no such repo carries a count (an INDEX gap, never zero activity); such rows sort last. This service's own rows are excluded from every ranking; the directory is the instrument, not a subject.",
 							},
 							commits90dAsOf: {
 								type: "string",
 								format: "date-time",
 								nullable: true,
 								description:
-									"The newest activitySignals.asOf among the repos summed into commits90d — the date the count is good for. null when commits90d is null.",
+									"The newest activitySignals.asOf among the repos summed into commits90d; the date the count is good for. null when commits90d is null.",
 							},
 							lastActivityAt: {
 								type: "string",
@@ -12721,13 +12721,13 @@ export const spec: OpenAPISpec = {
 							repoCount: {
 								type: "integer",
 								description:
-									"Indexed repos attributed to the project — our index's coverage, not the project's total GitHub footprint.",
+									"Indexed repos attributed to the project: our index's coverage, not the project's total GitHub footprint.",
 							},
 							repos: {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"The exact repositories (owner/name) the stats above aggregate over — repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column.",
+									"The exact repositories (owner/name) the stats above aggregate over; repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column.",
 							},
 						},
 					},
@@ -12736,25 +12736,25 @@ export const spec: OpenAPISpec = {
 			Stablecoin: {
 				type: "object",
 				description:
-					"One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer) — two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`.",
+					"One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer); two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`.",
 				properties: {
 					assetId: {
 						type: "string",
 						nullable: true,
 						description:
-							"`CODE-<first 8 of issuer>` — the stable natural key, and the safe join key when a ticker is ambiguous.",
+							"`CODE-<first 8 of issuer>`: the stable natural key, and the safe join key when a ticker is ambiguous.",
 					},
 					ticker: {
 						type: "string",
 						description:
-							"Asset code (USDC, USDY, GYEN, …). NOT unique on its own — see assetId.",
+							"Asset code (USDC, USDY, GYEN, …). NOT unique on its own: see assetId.",
 					},
 					name: { type: "string", nullable: true },
 					issuer: {
 						type: "string",
 						nullable: true,
 						description:
-							"Full mainnet issuer account (G…) — the universal join key. With `ticker` this IS the asset's identity.",
+							"Full mainnet issuer account (G…): the universal join key. With `ticker` this IS the asset's identity.",
 					},
 					issuerDomain: { type: "string", nullable: true },
 					company: { type: "string", nullable: true },
@@ -12763,39 +12763,39 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit — so raw supply is NOT comparable across rows with different pegs; use marketCapUSD.",
+							"Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit, so raw supply is NOT comparable across rows with different pegs; use marketCapUSD.",
 					},
 					country: { type: "string", nullable: true },
 					assetType: {
 						type: "string",
 						nullable: true,
 						description:
-							"Qualifier where the asset is not a pure peg — e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg.",
+							"Qualifier where the asset is not a pure peg, e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg.",
 					},
 					supply: {
 						type: "number",
 						nullable: true,
 						description:
-							"Circulating supply in whole asset units of its own peg — NOT USD, NOT comparable across pegs. Null = not measured.",
+							"Circulating supply in whole asset units of its own peg. NOT USD, NOT comparable across pegs. Null = not measured.",
 					},
 					marketCapUSD: {
 						type: "number",
 						nullable: true,
 						description:
-							"Supply valued in USD (supply × priceUSD) — THE comparable ranking metric (default sort). Null = unpriced. Read it with `priceBasis`: on an assumed-peg row this is supply at par, not a market valuation.",
+							"Supply valued in USD (supply × priceUSD). THE comparable ranking metric (default sort). Null = unpriced. Read it with `priceBasis`: on an assumed-peg row this is supply at par, not a market valuation.",
 					},
 					priceUSD: {
 						type: "number",
 						nullable: true,
 						description:
-							"USD price of one unit. At the peg's live FX rate for a par-redeemable asset (≈1 for USD pegs); the token's own market price where the unit is NOT 1:1 with its peg. `priceBasis` says which — do not assume ≈1 on a USD row.",
+							"USD price of one unit. At the peg's live FX rate for a par-redeemable asset (≈1 for USD pegs); the token's own market price where the unit is NOT 1:1 with its peg. `priceBasis` says which; do not assume ≈1 on a USD row.",
 					},
 					priceBasis: {
 						type: "string",
 						nullable: true,
 						enum: [...PRICE_BASES],
 						description:
-							"How priceUSD was obtained. assumed-peg = the peg's live FX rate; the asset claims par and peg DEVIATION IS NOT MEASURED. measured-market = the unit's own market price, used where the unit is not 1:1 with its peg — Ondo's USDY accrues (it was $1.14 against a $1.00 peg on 2026-09-09) and USDM1 is a bond trading above par. Null exactly when priceUSD is null.",
+							"How priceUSD was obtained. assumed-peg = the peg's live FX rate; the asset claims par and peg DEVIATION IS NOT MEASURED. measured-market = the unit's own market price, used where the unit is not 1:1 with its peg. Ondo's USDY accrues (it was $1.14 against a $1.00 peg on 2026-09-09) and USDM1 is a bond trading above par. Null exactly when priceUSD is null.",
 					},
 					holders: {
 						type: "number",
@@ -12811,7 +12811,7 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist — never 0 for 'no data'.",
+							"Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist; never 0 for 'no data'.",
 					},
 					basis: {
 						type: "string",
@@ -12821,7 +12821,7 @@ export const spec: OpenAPISpec = {
 						// `nullable: true` already carries it.
 						enum: ["live", "curated-static", "unmeasured"],
 						description:
-							"How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement — say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting; its metrics are the last known values, dated by updatedAt.",
+							"How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement; say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting; its metrics are the last known values, dated by updatedAt.",
 					},
 					note: {
 						type: "string",
@@ -12833,7 +12833,7 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"The issuer's own mark, when one resolves. Null means render your own fallback (e.g. a peg flag) — absence is not itself an error.",
+							"The issuer's own mark, when one resolves. Null means render your own fallback (e.g. a peg flag); absence is not itself an error.",
 					},
 					logoSource: {
 						type: "string",
@@ -12848,7 +12848,7 @@ export const spec: OpenAPISpec = {
 					verified: {
 						type: "boolean",
 						description:
-							"True by construction — every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal.",
+							"True by construction: every issuer in the registry is hand-verified against the issuer's own domain. It does NOT discriminate between rows and is not a quality signal.",
 					},
 					updatedAt: {
 						type: "string",

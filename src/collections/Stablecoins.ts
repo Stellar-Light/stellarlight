@@ -45,7 +45,7 @@ export const Stablecoins: CollectionConfig = {
 			required: true,
 			index: true,
 			unique: true,
-			admin: { description: "CODE-<issuer[0:8]> — the natural key" },
+			admin: { description: "CODE-<issuer[0:8]>: the natural key" },
 		},
 		{ name: "code", type: "text", required: true, index: true },
 		{
@@ -111,7 +111,7 @@ export const Stablecoins: CollectionConfig = {
 			index: true,
 			admin: {
 				description:
-					"supply × priceUSD — the only cross-asset comparable size metric.",
+					"supply × priceUSD: the only cross-asset comparable size metric.",
 			},
 		},
 		{ name: "holders", type: "number", admin: { description: "Trustlines" } },
@@ -120,7 +120,7 @@ export const Stablecoins: CollectionConfig = {
 			type: "number",
 			admin: {
 				description:
-					"24h on-chain TRADE volume in USD (SDEX), not payments; falls back to 7d/7 when the 24h figure is absent (an estimate — see basis).",
+					"24h on-chain TRADE volume in USD (SDEX), not payments; falls back to 7d/7 when the 24h figure is absent (an estimate; see basis).",
 			},
 		},
 		{
@@ -128,7 +128,7 @@ export const Stablecoins: CollectionConfig = {
 			type: "number",
 			admin: {
 				description:
-					"Stellar Expert's lifetime count of payment operations for this asset (not SDEX trades, not an amount). Internal bookkeeping — refresh-stablecoins.ts diffs it against yesterday's snapshot into paymentsCount24h below; not comparable across assets on its own.",
+					"Stellar Expert's lifetime count of payment operations for this asset (not SDEX trades, not an amount). Internal bookkeeping: refresh-stablecoins.ts diffs it against yesterday's snapshot into paymentsCount24h below; not comparable across assets on its own.",
 			},
 		},
 		{
@@ -136,7 +136,7 @@ export const Stablecoins: CollectionConfig = {
 			type: "number",
 			admin: {
 				description:
-					"Count of payment operations in the last ~24h (delta of paymentsCountLifetime vs the closest snapshot ~1 day back). A COUNT, not a dollar amount — includes mint, redemption and peer-to-peer payments undifferentiated; not adjusted for CEX/DeFi/infrastructure activity the way a figure like Allium's 'adjusted transfers' is. Null until two snapshots roughly a day apart exist.",
+					"Count of payment operations in the last ~24h (delta of paymentsCountLifetime vs the closest snapshot ~1 day back). A COUNT, not a dollar amount; includes mint, redemption and peer-to-peer payments undifferentiated; not adjusted for CEX/DeFi/infrastructure activity the way a figure like Allium's 'adjusted transfers' is. Null until two snapshots roughly a day apart exist.",
 			},
 		},
 		{
@@ -144,7 +144,7 @@ export const Stablecoins: CollectionConfig = {
 			type: "number",
 			admin: {
 				description:
-					"Percent change vs the snapshot ~7 days ago. Null until two snapshots exist — never 0 for 'no data'.",
+					"Percent change vs the snapshot ~7 days ago. Null until two snapshots exist: never 0 for 'no data'.",
 			},
 		},
 

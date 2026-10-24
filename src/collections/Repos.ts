@@ -141,7 +141,7 @@ export const Repos: CollectionConfig = {
 			type: "text",
 			required: true,
 			index: true,
-			admin: { description: "owner/name — natural key" },
+			admin: { description: "owner/name: natural key" },
 		},
 		{ name: "owner", type: "text", index: true },
 		{ name: "name", type: "text" },
@@ -152,7 +152,7 @@ export const Repos: CollectionConfig = {
 			type: "json",
 			admin: {
 				description:
-					"GitHub topics (array of strings) — the tech signal for search (zk, soroban, oracle, ...)",
+					"GitHub topics (array of strings): the tech signal for search (zk, soroban, oracle, ...)",
 			},
 		},
 		{ name: "primaryLanguage", type: "text" },
@@ -211,7 +211,7 @@ export const Repos: CollectionConfig = {
 			type: "textarea",
 			admin: {
 				description:
-					"First ~4k chars of the README — the main recall signal (topics are sparse; READMEs name the tech: zk, snark, oracle...)",
+					"First ~4k chars of the README: the main recall signal (topics are sparse; READMEs name the tech: zk, snark, oracle...)",
 			},
 		},
 		// link to the owning project + denormalized grade inputs
@@ -281,7 +281,7 @@ export const Repos: CollectionConfig = {
 			index: true,
 			admin: {
 				position: "sidebar",
-				description: "Internal triage labels — never served",
+				description: "Internal triage labels: never served",
 			},
 		},
 		{
@@ -315,7 +315,7 @@ export const Repos: CollectionConfig = {
 			index: true,
 			admin: {
 				position: "sidebar",
-				description: "Quality tier — archive is demoted, never deleted",
+				description: "Quality tier: archive is demoted, never deleted",
 			},
 		},
 
@@ -386,7 +386,7 @@ export const Repos: CollectionConfig = {
 			type: "checkbox",
 			admin: {
 				position: "sidebar",
-				description: "Cargo cdylib — real deployable contract",
+				description: "Cargo cdylib: real deployable contract",
 			},
 		},
 		{
@@ -465,7 +465,7 @@ export const Repos: CollectionConfig = {
 			type: "json",
 			admin: {
 				position: "sidebar",
-				description: "Farm reasons — so explain can say WHY it declined",
+				description: "Farm reasons, so explain can say WHY it declined",
 			},
 		},
 		// Public code-symbol surface (pub fn/struct/enum/trait names) extracted
@@ -477,7 +477,7 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Extracted pub fn/type names (array of strings) — code-content search signal",
+					"Extracted pub fn/type names (array of strings): code-content search signal",
 			},
 		},
 		{
@@ -495,7 +495,7 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Stellar-ecosystem dependencies (array of package names) from Cargo.toml/package.json — allowlist-matched, the dependency-graph signal",
+					"Stellar-ecosystem dependencies (array of package names) from Cargo.toml/package.json: allowlist-matched, the dependency-graph signal",
 			},
 		},
 		{
@@ -504,7 +504,7 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"JS/TS SDK capability tags (tx-building, signing, soroban-rpc, x402, mpp, \u2026) detected in actual sources \u2014 computed since 2026-07-09 but unpersisted until 2026-08-12 (write-shape omitted it)",
+					"JS/TS SDK capability tags (tx-building, signing, soroban-rpc, x402, mpp, \u2026) detected in actual sources; computed since 2026-07-09 but unpersisted until 2026-08-12 (write-shape omitted it)",
 			},
 		},
 		{
@@ -527,7 +527,7 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Commit SHA of the default branch the code facts were computed at — provenance pin (github.com/<fullName>/tree/<scannedRef>)",
+					"Commit SHA of the default branch the code facts were computed at: provenance pin (github.com/<fullName>/tree/<scannedRef>)",
 			},
 		},
 		{
@@ -562,7 +562,7 @@ export const Repos: CollectionConfig = {
 			index: true,
 			admin: {
 				position: "sidebar",
-				description: "Alive but no code-proof — soft-excluded, never archived",
+				description: "Alive but no code-proof: soft-excluded, never archived",
 			},
 		},
 		// Scan lifecycle. pending = never successfully scanned (never demoted).
@@ -577,7 +577,7 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"CTL scan state — pending/error/incomplete are never demoted; gone = GitHub 404s the repo",
+					"CTL scan state: pending/error/incomplete are never demoted; gone = GitHub 404s the repo",
 			},
 		},
 		{ name: "codeScanError", type: "text", admin: { position: "sidebar" } },
@@ -636,7 +636,7 @@ export const Repos: CollectionConfig = {
 			index: true,
 			admin: {
 				position: "sidebar",
-				description: "Scan run that set the signals — rollback key",
+				description: "Scan run that set the signals: rollback key",
 			},
 		},
 		{
