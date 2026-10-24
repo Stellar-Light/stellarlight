@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-10-23T10:43:26.835Z",
-	"specVersion": "1.9.93",
+	"generatedAt": "2026-10-24T09:59:56.515Z",
+	"specVersion": "1.9.110",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
@@ -29,6 +29,7 @@
 		"listAudits",
 		"listContracts",
 		"listSkills",
+		"locateSource",
 		"matchPartners",
 		"resolveProject",
 		"reviewSubmission",
@@ -78,12 +79,26 @@
 	"uncataloged": [
 		"analyzeHackathonSubmissions",
 		"getHackathonSubmission",
-		"getQualityReport",
 		"getRwaAssets",
-		"reviewSubmission",
-		"verifyClaim"
+		"reviewSubmission"
 	],
-	"laggingInCatalog": [],
+	"laggingInCatalog": [
+		{
+			"op": "getQualityReport",
+			"addedAt": "2026-10-24",
+			"ageDays": 0
+		},
+		{
+			"op": "locateSource",
+			"addedAt": "2026-10-23",
+			"ageDays": 1
+		},
+		{
+			"op": "verifyClaim",
+			"addedAt": "2026-10-23",
+			"ageDays": 1
+		}
+	],
 	"extraInCatalog": [],
 	"claimedOpCount": 30,
 	"auditArchetypeRoutesToRegistry": true,
