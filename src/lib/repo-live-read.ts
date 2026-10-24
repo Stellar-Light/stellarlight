@@ -309,7 +309,7 @@ const budget = {
 };
 type Denial = "pool" | "server" | "caller";
 const DENIED: Record<Denial, string> = {
-	pool: "GitHub reports the calls left on the token Scout reads with under the floor it keeps for its scan, so no live read runs until GitHub's reset time.",
+	pool: "GitHub reports too few calls left for Scout's reads (under the floor kept for its scan on its token, or none left without one), so no live read runs until GitHub's reset time.",
 	server:
 		"Scout's hourly budget for live GitHub reads on this server is spent; it frees up within the hour.",
 	caller:
@@ -362,10 +362,19 @@ function notePool(res: Response, withToken: boolean) {
 
 const left = (deadline: number) => Math.max(1, deadline - Date.now());
 
+/** How long a token GitHub answered 401 for is left out before it is tried
+ * again, so a rotated token is picked up. */
+export const TOKEN_RETRY_MS = 15 * 60_000;
+let tokenRejectedUntil = 0;
+
+/** One REST call. A token GitHub rejects (401: expired or revoked) is left
+ * out for TOKEN_RETRY_MS and the call is made again without it: GitHub serves
+ * a public repo with no token, at its unauthenticated limit, which notePool
+ * then guards. The 401 itself is not read as the token's pool: it carries the
+ * unauthenticated pool's headers. */
 async function rest(path: string, deadline: number): Promise<Response | null> {
-	const token = githubToken();
-	try {
-		const res = await fetch(`https://api.github.com${path}`, {
+	const call = (token: string | null) =>
+		fetch(`https://api.github.com${path}`, {
 			headers: {
 				accept: "application/vnd.github+json",
 				"user-agent": UA,
@@ -375,8 +384,17 @@ async function rest(path: string, deadline: number): Promise<Response | null> {
 			cache: "no-store",
 			signal: AbortSignal.timeout(left(deadline)),
 		});
-		notePool(res, !!token);
-		return res;
+	const token = Date.now() < tokenRejectedUntil ? null : githubToken();
+	try {
+		const res = await call(token);
+		if (!(token && res.status === 401)) {
+			notePool(res, !!token);
+			return res;
+		}
+		tokenRejectedUntil = Date.now() + TOKEN_RETRY_MS;
+		const anon = await call(null);
+		notePool(anon, false);
+		return anon;
 	} catch {
 		return null;
 	}
@@ -784,4 +802,5 @@ export function resetLiveReadForTests() {
 	budget.calls = 0;
 	budget.poolLowUntil = 0;
 	budget.byCaller.clear();
+	tokenRejectedUntil = 0;
 }

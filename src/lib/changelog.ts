@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-24",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"reviewSubmission's live GitHub read no longer fails when GitHub rejects the server's token. On 1.9.109 every repo evidence item with hackathon=hackmeridian-2026 answered could-not-check, \"GitHub answered 401 for the repo.\", because GitHub answers 401 for the token the server reads with. A rejected token is now left out for 15 minutes and the call is made again without it, which GitHub serves for a public repo at its unauthenticated limit.",
+		detail:
+			"The 401 response is not read as the token's pool: it carries the unauthenticated pool's headers (about 60 calls an hour), which read against the token's floor of 1,500 would have stopped every read until GitHub's reset. Without a token the pool is the server's address, so reads stop only when GitHub reports none left, and the reason says so. After 15 minutes the token is tried again, so a replaced token is used without a deploy. Raw files were always read without a token. Reads through GitHub's GraphQL API, such as a project's GitHub stats, still need a token GitHub accepts.",
+	},
+	{
 		date: "2026-10-23",
 		surfaces: ["api"],
 		version: "spec@1.9.110",
