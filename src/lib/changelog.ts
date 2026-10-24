@@ -36,7 +36,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		version: "scout-mcp@1.8.1",
 		type: "added",
 		summary:
-			"scout-mcp 1.8.1: review_submission takes `hackathon` (spec 1.9.109): each of that event's judging criteria with the evidence a judge would find in the repo, read live, also for a GitHub repo Scout never stored. locate_source takes OpenZeppelin/stellar-contracts in `repo` (spec 1.9.106) and says what the API weighs: a repo named in q, stellar-cli commands and trait implementations.",
+			"scout-mcp 1.8.1: review_submission takes `hackathon` (spec 1.9.109): each of that event's judging criteria with the evidence a judge would find in the repo, read live, also for a GitHub repo Scout never stored. locate_source takes OpenZeppelin/stellar-contracts in `repo` (spec 1.9.106) and says what the API weighs (a repo named in q, a typed stellar-cli command) and that trait implementations are pointers.",
 		detail:
 			"review_submission forwards hackathon only when it is set, so a call without it is unchanged. locate_source's repo values match the API's allowlist again (nine repos); OpenZeppelin/stellar-contracts answers with pointers null and a note until its first index fill. Its q text now says a repo named in q strongly lifts its pointers and a typed stellar-cli command lifts the module that implements it, as the API does since 1.9.106. 28 tools.",
 	},
