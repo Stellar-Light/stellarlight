@@ -784,21 +784,21 @@ server.registerTool(
 	},
 );
 
-// 6d. locate_source: scored pointers into Stellar's own source (API spec 1.9.99)
+// 6d. locate_source: scored pointers into Stellar source (API spec 1.9.99; OpenZeppelin and stellar-cli commands from 1.9.106)
 server.registerTool(
 	"locate_source",
 	{
 		title:
-			"Locate where a flag, option default, function or interface is defined in Stellar's own source",
+			"Locate where a flag, command, option default, function or interface is defined in Stellar source code",
 		description:
-			"Where in Stellar's own code is X defined or implemented: scored pointers into eight allowlisted Stellar repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples). Each pointer gives the file, symbol or heading, line, commit and blob sha where a CLI flag, config option default, SDK or host function, or contract interface is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read and cite it. Ten a page, best first; truncated true means a later page holds more. `pointers: []` with total 0 = the indexed repos were searched and nothing matched; `pointers: null` = could not search (the repo is not indexed yet, which meta.note says, or the index could not be read, an HTTP 503 to retry), so never read null as no match. Not for docs, protocol text, SEPs or CAPs → use search_research; how a repo works, in prose → explain_repo; ecosystem projects' repos or code examples → search_repos.",
+			"Where in Stellar source code is X defined or implemented: scored pointers into nine allowlisted repos (stellar-core, rs-soroban-sdk, rs-soroban-env, js-stellar-sdk, stellar-rpc, quickstart, stellar-cli, soroban-examples, OpenZeppelin/stellar-contracts). Each pointer gives the file, symbol or heading, line, commit and blob sha where a CLI flag or command, config option default, SDK or host function, contract interface or trait implementation is defined, why it matched, and a pinned GitHub URL. Pointers, never file content: fetch verificationUrl to read and cite it. Ten a page, best first; truncated true means a later page holds more. `pointers: []` with total 0 = the indexed repos were searched and nothing matched; `pointers: null` = could not search (the repo is not indexed yet, which meta.note says, or the index could not be read, an HTTP 503 to retry), so never read null as no match. Not for docs, protocol text, SEPs or CAPs → use search_research; how a repo works, in prose → explain_repo; ecosystem projects' repos or code examples → search_repos.",
 		inputSchema: {
 			q: z
 				.string()
 				.min(1)
 				.max(300)
 				.describe(
-					"What to locate: a symbol, flag, option, config key or topic words (at most 300 characters), e.g. --enable-core-manual-close or getTransactions default limit. Naming a repo in q (stellar-rpc, quickstart) lifts its pointers.",
+					"What to locate: a symbol, flag, option, config key, stellar-cli command or topic words (at most 300 characters), e.g. --enable-core-manual-close, getTransactions default limit or stellar contract invoke. A repo named in q (stellar-rpc, quickstart, OpenZeppelin) strongly lifts its pointers; a typed stellar-cli command lifts the module that implements it.",
 				),
 			repo: z
 				.enum([
@@ -812,6 +812,7 @@ server.registerTool(
 					"stellar/quickstart",
 					"stellar/stellar-cli",
 					"stellar/soroban-examples",
+					"OpenZeppelin/stellar-contracts",
 				])
 				.optional()
 				.describe(
