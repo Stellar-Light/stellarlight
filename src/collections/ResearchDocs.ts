@@ -54,7 +54,7 @@ export const ResearchDocs: CollectionConfig = {
 		],
 		group: "Research",
 		description:
-			"Embedded primary-source chunks powering Stellar Scout's /api/research endpoint. Append-only — managed by ingestion scripts in /scripts.",
+			"Embedded primary-source chunks powering Stellar Scout's /api/research endpoint. Append-only: managed by ingestion scripts in /scripts.",
 	},
 	access: {
 		read: adminOnly,
@@ -171,7 +171,7 @@ export const ResearchDocs: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Section heading this chunk lives under (H2/H3) — used to scope citations",
+					"Section heading this chunk lives under (H2/H3); used to scope citations",
 			},
 		},
 		{
@@ -216,7 +216,7 @@ export const ResearchDocs: CollectionConfig = {
 			index: true,
 			admin: {
 				description:
-					"SHA-256 of `content` — used by ingestion scripts to skip re-embedding unchanged chunks",
+					"SHA-256 of `content`: used by ingestion scripts to skip re-embedding unchanged chunks",
 			},
 		},
 		{
@@ -240,7 +240,7 @@ export const ResearchDocs: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"spec | guide | article | data — separates staleness-sensitive docs (guides) from canonical ones (specs: old AND authoritative). Deterministic, stamped at ingest.",
+					"spec | guide | article | data: separates staleness-sensitive docs (guides) from canonical ones (specs: old AND authoritative). Deterministic, stamped at ingest.",
 			},
 		},
 		{
@@ -248,7 +248,7 @@ export const ResearchDocs: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"current | supported | deprecated — SDK-version verdict for version-bearing content (wasm32-unknown-unknown => deprecated), via the same dated table repos use. Null = names no version signal.",
+					"current | supported | deprecated: SDK-version verdict for version-bearing content (wasm32-unknown-unknown => deprecated), via the same dated table repos use. Null = names no version signal.",
 			},
 		},
 		{

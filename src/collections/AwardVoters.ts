@@ -64,7 +64,7 @@ export const AwardVoters: CollectionConfig = {
 			name: "label",
 			type: "text",
 			admin: {
-				description: 'Human label, e.g. "Pilot — Decaf team" (never public).',
+				description: 'Human label, e.g. "Pilot. Decaf team" (never public).',
 			},
 		},
 	],

@@ -318,7 +318,7 @@ function computeDeltas(snaps: HackathonSnapshot[]): ComparisonDeltas {
 	const notFound = snaps.filter((s) => s.source === "not-found");
 	if (notFound.length > 0) {
 		deltas.notes.push(
-			`not found in our feed: ${notFound.map((s) => s.slug).join(", ")} — these slugs aren't in the curated DB or DoraHacks org IDs 3096/3853.`,
+			`not found in our feed: ${notFound.map((s) => s.slug).join(", ")}; these slugs aren't in the curated DB or DoraHacks org IDs 3096/3853.`,
 		);
 	}
 
@@ -339,7 +339,7 @@ async function compare(slugs: string[], req: NextRequest) {
 		return NextResponse.json(
 			{
 				error: "max 5 slugs per request",
-				hint: "iterate for more — the comparison gets noisy past 5 anyway",
+				hint: "iterate for more; the comparison gets noisy past 5 anyway",
 			},
 			{ status: 400 },
 		);

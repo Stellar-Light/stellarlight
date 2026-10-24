@@ -23,7 +23,7 @@ export const CommunitySkills: CollectionConfig = {
 		defaultColumns: ["name", "status", "kind", "submittedBy", "submittedAt"],
 		group: "Scout",
 		description:
-			"Community-submitted AI skills for the Stellar marketplace. POST submissions land here as 'pending' — review and approve to publish.",
+			"Community-submitted AI skills for the Stellar marketplace. POST submissions land here as 'pending'; review and approve to publish.",
 	},
 	access: {
 		// Anyone can submit via POST /api/community-skills (which uses the

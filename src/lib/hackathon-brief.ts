@@ -241,15 +241,15 @@ export function deriveWhatNotToClaim(
 	const out: string[] = [];
 	if (b.vet.gap)
 		out.push(
-			"'There is a gap' means SUPPLY-side coverage is thin — it is not evidence anyone wants this. Do not pitch demand from the gap number.",
+			"'There is a gap' means SUPPLY-side coverage is thin; it is not evidence anyone wants this. Do not pitch demand from the gap number.",
 		);
 	if (b.vet.maturity.auditedProjects === 0)
 		out.push(
-			"'Nobody in this space is audited' — an audit absent from the registry means no PUBLISHED audit at our source, never that a protocol is unaudited.",
+			"'Nobody in this space is audited': an audit absent from the registry means no PUBLISHED audit at our source, never that a protocol is unaudited.",
 		);
 	if (b.startFrom.length)
 		out.push(
-			"A repo's `signals` is a closed vocabulary of facts that hold ('audited', 'live-on-mainnet', 'code-changed-since-audit'…) — not a safety score. Do not rank repos by counting them.",
+			"A repo's `signals` is a closed vocabulary of facts that hold ('audited', 'live-on-mainnet', 'code-changed-since-audit'…); not a safety score. Do not rank repos by counting them.",
 		);
 	if (b.startFrom.some((s) => s.auditDrift && s.auditDrift.daysOfDrift > 0))
 		out.push(
@@ -257,11 +257,11 @@ export function deriveWhatNotToClaim(
 		);
 	if (b.liveContracts.contracts.length === 0)
 		out.push(
-			"No verified contract in the registry for this domain is NOT 'nothing exists on mainnet' — the registry is evidence-gated. Say 'no verified contract on record'.",
+			"No verified contract in the registry for this domain is NOT 'nothing exists on mainnet'; the registry is evidence-gated. Say 'no verified contract on record'.",
 		);
 	if (b.funding.round.source === "unavailable")
 		out.push(
-			"SCF round state came back unavailable — do not say the round is closed. Verify at communityfund.stellar.org.",
+			"SCF round state came back unavailable; do not say the round is closed. Verify at communityfund.stellar.org.",
 		);
 	// Dormant or archived only, as the pitch counts it: "not active" also
 	// caught maintained repos (a commit within 180 days) and unread ones.
@@ -271,7 +271,7 @@ export function deriveWhatNotToClaim(
 		);
 	if (b.vertical === null)
 		out.push(
-			"The idea did not resolve to a Stellar vertical — competitor and gap blocks are best-effort keyword hits, not a vertical census.",
+			"The idea did not resolve to a Stellar vertical; competitor and gap blocks are best-effort keyword hits, not a vertical census.",
 		);
 	return out;
 }
@@ -360,8 +360,8 @@ export async function buildHackathonBrief(
 			})),
 			note:
 				contractsRes.contracts.length === 0
-					? "No verified contract on record for this domain — evidence-gated registry; absence is not nonexistence."
-					: `${contractsRes.total} verified contract(s) in the registry for this domain; showing up to 5 — full list at /api/contracts?domain=${domain.domain}.`,
+					? "No verified contract on record for this domain: evidence-gated registry; absence is not nonexistence."
+					: `${contractsRes.total} verified contract(s) in the registry for this domain; showing up to 5, full list at /api/contracts?domain=${domain.domain}.`,
 		},
 		funding: {
 			round: pitch.round,

@@ -140,7 +140,7 @@ export const ONCHAIN_SEEDS: OnchainSeed[] = [
 			},
 			{
 				address: "CAOTMWRKNMV5GWSVOMWCTCM5ZZFEQFUSWNLCZXA2KAXD4YG5A4DIPNFT",
-				label: "Liquidity Pool — USDC (Stellar)",
+				label: "Liquidity Pool: USDC (Stellar)",
 			},
 		],
 		source:

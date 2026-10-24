@@ -64,6 +64,13 @@ jobs:
       # and none dated the answer. Ratcheted at 40 — new ones fail.
       - name: Served values are datable
         run: pnpm exec tsx scripts/check-answer-dating.ts
+      # The owner reads em and en dashes as machine-written text (2026-10-23).
+      # Fails on any dash in served text (strings, templates, JSX text, skill
+      # markdown, MCP tool text) that is not listed in
+      # scripts/no-dashes-allowed.json with a kind (quote, prompt, internal,
+      # functional).
+      - name: No em or en dashes in served text
+        run: pnpm exec tsx scripts/check-no-dashes.ts --check
       - name: Route files export only handlers + config (2026-07-21 — non-handler exports break next build, tsc/vitest miss it)
         run: pnpm exec tsx scripts/eval/route-exports-check.ts
       - name: Changelog⇄contract assertion (sls-054)

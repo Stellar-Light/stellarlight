@@ -36,7 +36,7 @@ export const Audits: CollectionConfig = {
 			index: true,
 			unique: true,
 			admin: {
-				description: "stellarsecurityportal.com report id — natural key",
+				description: "stellarsecurityportal.com report id; natural key",
 			},
 		},
 		{ name: "title", type: "text", required: true },
@@ -89,7 +89,7 @@ export const Audits: CollectionConfig = {
 			options: ["published", "portal-record"],
 			admin: {
 				description:
-					"published = a real date-stamp; portal-record = the portal stored a wall-clock timestamp (likely upload time) — do not treat as publication recency",
+					"published = a real date-stamp; portal-record = the portal stored a wall-clock timestamp (likely upload time); do not treat as publication recency",
 			},
 		},
 		{

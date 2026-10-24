@@ -107,7 +107,7 @@ export function resolveProject(
 		evidence: null,
 		note,
 	});
-	if (!key) return miss("Empty query — nothing to resolve.");
+	if (!key) return miss("Empty query. Nothing to resolve.");
 
 	const bySlug = new Map<string, ResolvableProject>();
 	for (const p of projects) if (p.slug) bySlug.set(p.slug.toLowerCase(), p);
@@ -127,7 +127,7 @@ export function resolveProject(
 			matchedOn = "alias";
 		} else if (aliasHits.length > 1) {
 			return miss(
-				`"${query}" is an alias of more than one project (${aliasHits.map((p) => p.slug).join(", ")}) — resolve by slug instead.`,
+				`"${query}" is an alias of more than one project (${aliasHits.map((p) => p.slug).join(", ")}). Resolve by slug instead.`,
 			);
 		}
 	}
@@ -141,14 +141,14 @@ export function resolveProject(
 			matchedOn = "name";
 		} else if (nameHits.length > 1) {
 			return miss(
-				`"${query}" matches the name of more than one project (${nameHits.map((p) => p.slug).join(", ")}) — resolve by slug instead.`,
+				`"${query}" matches the name of more than one project (${nameHits.map((p) => p.slug).join(", ")}). Resolve by slug instead.`,
 			);
 		}
 	}
 
 	if (!hit) {
 		return miss(
-			`No project in this directory is named "${query}". That means it is NOT TRACKED HERE — never that it never existed, and never that it is defunct.`,
+			`No project in this directory is named "${query}". That means it is NOT TRACKED HERE; never that it never existed, and never that it is defunct.`,
 		);
 	}
 
@@ -178,11 +178,11 @@ export function resolveProject(
 	const parts: string[] = [];
 	if (superseded) {
 		parts.push(
-			`"${hit.slug}" is superseded — look at "${current.slug}" instead.`,
+			`"${hit.slug}" is superseded. Look at "${current.slug}" instead.`,
 		);
 	} else if (hit.status === "Inactive") {
 		parts.push(
-			`"${hit.slug}" is recorded inactive and we hold NO successor for it. That is not a claim nothing succeeded it — only that we do not know of one.`,
+			`"${hit.slug}" is recorded inactive and we hold NO successor for it. That is not a claim nothing succeeded it; only that we do not know of one.`,
 		);
 	} else {
 		parts.push(`"${hit.slug}" is current.`);

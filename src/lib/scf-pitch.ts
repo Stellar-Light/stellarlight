@@ -70,13 +70,13 @@ export async function buildScfPitch(
 				source: "live",
 				open,
 				note: open.length
-					? "Apply via https://communityfund.stellar.org — rules in the SCF Handbook."
+					? "Apply via https://communityfund.stellar.org. Rules in the SCF Handbook."
 					: "No round currently in Submission phase; the next opening is announced on communityfund.stellar.org.",
 			}
 		: {
 				source: "unavailable",
 				open: [],
-				note: "Live round check failed — verify at https://communityfund.stellar.org before assuming anything about round state.",
+				note: "Live round check failed. Verify at https://communityfund.stellar.org before assuming anything about round state.",
 			};
 
 	// Funded peers: vertical-wide over ACTIVE projects, structured scf truth.
@@ -107,11 +107,11 @@ export async function buildScfPitch(
 	const angles: string[] = [];
 	if (open.length)
 		angles.push(
-			`SCF Round #${open[0].round} is in Submission now${open[0].submissionDeadline ? ` (deadline ${open[0].submissionDeadline})` : ""} — a live window, not a someday plan.`,
+			`SCF Round #${open[0].round} is in Submission now${open[0].submissionDeadline ? ` (deadline ${open[0].submissionDeadline})` : ""}; a live window, not a someday plan.`,
 		);
 	if (vet.gap && vet.gap.total <= 3)
 		angles.push(
-			`Coverage argument: only ${vet.gap.total} active ${vet.vertical} project(s) in the directory — supply-side gap (not a demand claim).`,
+			`Coverage argument: only ${vet.gap.total} active ${vet.vertical} project(s) in the directory; supply-side gap (not a demand claim).`,
 		);
 	if (vet.gap && vet.gap.total > 3 && fundedCount)
 		angles.push(
@@ -124,7 +124,7 @@ export async function buildScfPitch(
 		);
 	if (fundedCount === 0 && vet.vertical)
 		angles.push(
-			`No ACTIVE ${vet.vertical} project carries an SCF award on record — first-mover framing available (absence of a record, not proof none exists).`,
+			`No ACTIVE ${vet.vertical} project carries an SCF award on record; first-mover framing available (absence of a record, not proof none exists).`,
 		);
 	const deadPrior = countWentQuiet(vet.priorArt.repos);
 	if (deadPrior > 0)
@@ -133,7 +133,7 @@ export async function buildScfPitch(
 		);
 	if (vet.maturity.liveOnMainnetRepos > 0)
 		angles.push(
-			`${vet.maturity.liveOnMainnetRepos} competitor repo(s) verified live on mainnet — working-code bar is set; a deck-only pitch underperforms here.`,
+			`${vet.maturity.liveOnMainnetRepos} competitor repo(s) verified live on mainnet; working-code bar is set; a deck-only pitch underperforms here.`,
 		);
 
 	return {

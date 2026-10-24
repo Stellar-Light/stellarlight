@@ -145,7 +145,7 @@ describe("extractPersonCards", () => {
 				section: "Board of directors",
 			},
 		]);
-		expect(md).toContain("- David Mazières — Founder and Chief Scientist");
+		expect(md).toContain("- David Mazières: Founder and Chief Scientist");
 		expect(md).toMatch(/^## SDF team/);
 		expect(md).toContain("### Leadership");
 		expect(md).toContain("### Board of directors");

@@ -138,9 +138,9 @@ export function renderRosterMarkdown(cards: PersonCard[]): string {
 	}
 	const blocks = order.map((section) => {
 		const lines = (bySection.get(section) ?? []).map(
-			(c) => `- ${c.name} — ${c.role}`,
+			(c) => `- ${c.name}: ${c.role}`,
 		);
 		return `### ${section}\n${lines.join("\n")}`;
 	});
-	return `## SDF team — names and current roles\n\n${blocks.join("\n\n")}`;
+	return `## SDF team: names and current roles\n\n${blocks.join("\n\n")}`;
 }

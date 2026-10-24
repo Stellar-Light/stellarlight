@@ -164,7 +164,7 @@ export async function probeProduct(
 	if (parked)
 		return {
 			kind: null,
-			detail: `${parked} — answered, but is not a product`,
+			detail: `${parked}: answered, but is not a product`,
 			url: rawUrl,
 			couldNotCheck: false,
 		};

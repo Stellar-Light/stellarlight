@@ -276,7 +276,7 @@ export function auditVerdict(o: {
 		const gapDays =
 			(Date.parse(o.codeLastActiveAt) - Date.parse(newest)) / 86400000;
 		if (Number.isFinite(gapDays) && gapDays > 90) {
-			result.currencyNote = `The newest report (${newest.slice(0, 10)}) predates the subject's latest code activity (${o.codeLastActiveAt.slice(0, 10)}) by ${Math.round(gapDays)} days — an audit is a statement about the code as it was, not as it is.`;
+			result.currencyNote = `The newest report (${newest.slice(0, 10)}) predates the subject's latest code activity (${o.codeLastActiveAt.slice(0, 10)}) by ${Math.round(gapDays)} days; an audit is a statement about the code as it was, not as it is.`;
 		}
 	}
 	return result;
@@ -351,7 +351,7 @@ export function liveVerdict(f: SubjectFacts): VerifyResult {
 		};
 	return {
 		verdict: "unsupported",
-		statement: `${f.name} has no lifecycle status on record — this is a gap in our record, not a claim about the project.`,
+		statement: `${f.name} has no lifecycle status on record; this is a gap in our record, not a claim about the project.`,
 		evidence: [rec],
 		confidence: null,
 	};
@@ -398,7 +398,7 @@ export function maintainedVerdict(
 	if (!repos.length)
 		return {
 			verdict: "unsupported",
-			statement: `No indexed repository is linked to ${name}${corpusNote ? ` (${corpusNote})` : ""} — we hold no code evidence either way.`,
+			statement: `No indexed repository is linked to ${name}${corpusNote ? ` (${corpusNote})` : ""}; we hold no code evidence either way.`,
 			evidence: [],
 			confidence: null,
 		};
@@ -414,7 +414,7 @@ export function maintainedVerdict(
 	if (liveRepos.length && days <= 180)
 		return {
 			verdict: "supported",
-			statement: `${name} shows active development — newest commit ${newest?.slice(0, 10)} across ${liveRepos.length} non-archived repo(s).`,
+			statement: `${name} shows active development: newest commit ${newest?.slice(0, 10)} across ${liveRepos.length} non-archived repo(s).`,
 			evidence: ev,
 			confidence: factConfidence("code-scan", newest),
 		};
@@ -423,13 +423,13 @@ export function maintainedVerdict(
 			verdict: "contradicted",
 			statement: !liveRepos.length
 				? `Every indexed repo of ${name} is archived.`
-				: `${name}'s newest indexed commit is ${newest?.slice(0, 10)} — over a year old.`,
+				: `${name}'s newest indexed commit is ${newest?.slice(0, 10)}, over a year old.`,
 			evidence: ev,
 			confidence: factConfidence("code-scan", newest),
 		};
 	return {
 		verdict: "unsupported",
-		statement: `${name}'s newest indexed commit is ${newest?.slice(0, 10)} (${Math.round(days)} days ago) — quiet, but not provably abandoned. Judge from the dates.`,
+		statement: `${name}'s newest indexed commit is ${newest?.slice(0, 10)} (${Math.round(days)} days ago); quiet, but not provably abandoned. Judge from the dates.`,
 		evidence: ev,
 		confidence: factConfidence("code-scan", newest),
 	};
@@ -463,14 +463,14 @@ export function issuedVerdict(o: {
 	const tickerRows = o.rows.filter((r) => norm(String(r.ticker ?? "")) === t);
 	const ev = (r: StablecoinIssuerRow): EvidenceItem => ({
 		kind: "curated-note",
-		note: `${String(r.ticker ?? "").toUpperCase()} issued by ${r.company ?? "unknown"} — issuer account ${r.issuer ?? "?"}${r.issuerDomain ? ` (home domain ${r.issuerDomain})` : ""}`,
+		note: `${String(r.ticker ?? "").toUpperCase()} issued by ${r.company ?? "unknown"}; issuer account ${r.issuer ?? "?"}${r.issuerDomain ? ` (home domain ${r.issuerDomain})` : ""}`,
 		source: `https://stellarlight.xyz/api/stablecoins`,
 		asOf: r.updatedAt ?? null,
 	});
 	if (!tickerRows.length)
 		return {
 			verdict: "unsupported",
-			statement: `${o.ticker.toUpperCase()} is not in our stablecoin registry (${o.corpusTotal} tracked issuances) — a statement about our registry, not proof the asset does not exist.`,
+			statement: `${o.ticker.toUpperCase()} is not in our stablecoin registry (${o.corpusTotal} tracked issuances); a statement about our registry, not proof the asset does not exist.`,
 			evidence: [],
 			confidence: null,
 		};
@@ -491,7 +491,7 @@ export function issuedVerdict(o: {
 			statement:
 				`${o.company} issues ${o.ticker.toUpperCase()} on Stellar (issuer account on record).` +
 				(multi
-					? ` NOTE: ${o.ticker.toUpperCase()} is also issued by ${others.filter((c) => !match.some((m) => m.company === c)).join(", ")} — attribute by issuer account, never by ticker alone.`
+					? ` NOTE: ${o.ticker.toUpperCase()} is also issued by ${others.filter((c) => !match.some((m) => m.company === c)).join(", ")}; attribute by issuer account, never by ticker alone.`
 					: ""),
 			evidence: tickerRows.map(ev),
 			confidence: factConfidence("human-verified", match[0].updatedAt ?? null),
@@ -500,7 +500,7 @@ export function issuedVerdict(o: {
 	}
 	return {
 		verdict: "contradicted",
-		statement: `Our registry records ${o.ticker.toUpperCase()} issued by ${others.join(", ")} — not by ${o.company}. This asserts our curated registry (${o.corpusTotal} tracked issuances), which is hand-verified but not the world.`,
+		statement: `Our registry records ${o.ticker.toUpperCase()} issued by ${others.join(", ")}, not by ${o.company}. This asserts our curated registry (${o.corpusTotal} tracked issuances), which is hand-verified but not the world.`,
 		evidence: tickerRows.map(ev),
 		confidence: factConfidence(
 			"human-verified",

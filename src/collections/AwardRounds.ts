@@ -58,7 +58,7 @@ export const AwardRounds: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Lowercase, hyphenated. Becomes part of the on-chain vote key (i3.<slug>.<category>) — keep it short and NEVER change it after voting opens.",
+					"Lowercase, hyphenated. Becomes part of the on-chain vote key (i3.<slug>.<category>); keep it short and NEVER change it after voting opens.",
 			},
 			validate: (value: unknown) => {
 				if (typeof value !== "string" || !SLUG_SHAPE.test(value)) {
@@ -90,7 +90,7 @@ export const AwardRounds: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Pilot/test round — stamps every ballot on-chain with an 'i3-test' memo so throwaway votes are obvious. Leave OFF for the real round.",
+					"Pilot/test round: stamps every ballot on-chain with an 'i3-test' memo so throwaway votes are obvious. Leave OFF for the real round.",
 			},
 		},
 		{
@@ -112,7 +112,7 @@ export const AwardRounds: CollectionConfig = {
 			max: 10,
 			admin: {
 				description:
-					"How many nominees a voter may pick in each category. 1 = pick the winner (the final round: 4 finalists, 1 winner). 4 = pick your four favourites from the nominee pool to produce that shortlist. Order never matters — every pick is one vote for that nominee.",
+					"How many nominees a voter may pick in each category. 1 = pick the winner (the final round: 4 finalists, 1 winner). 4 = pick your four favourites from the nominee pool to produce that shortlist. Order never matters: every pick is one vote for that nominee.",
 			},
 		},
 		{
@@ -150,7 +150,7 @@ export const AwardRounds: CollectionConfig = {
 			],
 			admin: {
 				description:
-					"Ballot categories. `key` goes on-chain (i3.<round>.<key>) — lowercase, short, never renamed mid-round.",
+					"Ballot categories. `key` goes on-chain (i3.<round>.<key>): lowercase, short, never renamed mid-round.",
 			},
 			fields: [
 				{

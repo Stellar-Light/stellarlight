@@ -16,19 +16,19 @@ describe("composeAuditTitle — the live overlong cases", () => {
 			protocol: "PhoenixDeFiHub",
 			auditor: "Veridise",
 			name: "Auditing Report Hardening Blockchain Security with Formal Methods for PhoenixDeFiHub",
-			want: "PhoenixDeFiHub — Veridise",
+			want: "PhoenixDeFiHub: Veridise",
 		},
 		{
 			protocol: "Stellar Timelock Contract",
 			auditor: "Veridise",
 			name: "Auditing Report Hardening Blockchain Security with Formal Methods for Stellar Timelock Contract",
-			want: "Stellar Timelock Contract — Veridise",
+			want: "Stellar Timelock Contract: Veridise",
 		},
 		{
 			protocol: "Soroban - Band Standard Reference Contract",
 			auditor: "Runtime Verification",
 			name: "Band Protocol: Soroban - Band Standard Reference Contract Audit Report",
-			want: "Soroban - Band Standard Reference Contract — Runtime Verification",
+			want: "Soroban - Band Standard Reference Contract: Runtime Verification",
 		},
 	];
 
@@ -42,25 +42,25 @@ describe("composeAuditTitle — the live overlong cases", () => {
 describe("composeAuditTitle — what it must NOT throw away", () => {
 	it("keeps a short name that adds a real distinction", () => {
 		expect(composeAuditTitle("Blend", "Certora", "V2.1")).toBe(
-			"Blend — Certora (V2.1)",
+			"Blend: Certora (V2.1)",
 		);
 	});
 
 	it("keeps a name that distinguishes two audits of the same pair", () => {
 		expect(composeAuditTitle("Soroswap", "OtterSec", "Phase 2 Re-audit")).toBe(
-			"Soroswap — OtterSec (Phase 2 Re-audit)",
+			"Soroswap: OtterSec (Phase 2 Re-audit)",
 		);
 	});
 
 	it("drops a name that only restates the prefix, even when short", () => {
 		expect(composeAuditTitle("Blend", "Certora", "Blend Certora")).toBe(
-			"Blend — Certora",
+			"Blend: Certora",
 		);
 	});
 
 	it("handles a missing report name", () => {
-		expect(composeAuditTitle("Blend", "Certora", null)).toBe("Blend — Certora");
-		expect(composeAuditTitle("Blend", "Certora", "")).toBe("Blend — Certora");
+		expect(composeAuditTitle("Blend", "Certora", null)).toBe("Blend: Certora");
+		expect(composeAuditTitle("Blend", "Certora", "")).toBe("Blend: Certora");
 	});
 
 	it("never exceeds the bar, whatever it is handed", () => {
@@ -75,7 +75,7 @@ describe("composeAuditTitle — what it must NOT throw away", () => {
 	it("still repairs the identity text it always did (homoglyph auditor)", () => {
 		// canonicalAuditor fixes the portal's Cyrillic-Es "Сoinspect"
 		expect(composeAuditTitle("Blend", "Сoinspect", null)).toBe(
-			"Blend — Coinspect",
+			"Blend: Coinspect",
 		);
 	});
 });

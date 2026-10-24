@@ -562,7 +562,7 @@ export const RWA_REGISTRY: RwaAsset[] = [
 			"https://stellar.expert/explorer/public/contract/CBNT35PZXQBXKCNKPA6AL6TXHANGLAZMPE35TJUPI2BCO7OGHVKW3WYA",
 		verificationLevel: "contract-metadata",
 		basisNote:
-			"soroban on-chain metadata (name/symbol/decimals read from the contract; total_supply via RPC = 0) + deployer-contracts basis: created 2026-08-24 by Centrifuge's platform deployer GASIX3XBHMFJGHOMC2FEELMO2E6JYE5LL2V2QBW3GX23GJI2EHWM4R5E; the contract names the NYLIM US High Yield Bond Fund — the issuing entity is not attributed here until a listing or the manager names it (Anemoy's JAAA/JTRSY are the same shape); not rwa.xyz-listed",
+			"soroban on-chain metadata (name/symbol/decimals read from the contract; total_supply via RPC = 0) + deployer-contracts basis: created 2026-08-24 by Centrifuge's platform deployer GASIX3XBHMFJGHOMC2FEELMO2E6JYE5LL2V2QBW3GX23GJI2EHWM4R5E; the contract names the NYLIM US High Yield Bond Fund; the issuing entity is not attributed here until a listing or the manager names it (Anemoy's JAAA/JTRSY are the same shape); not rwa.xyz-listed",
 		decimals: 18,
 		totalSupply: 0,
 		horizonNote: null,
@@ -4446,7 +4446,7 @@ export const RWA_DEPLOYER_COVERAGE: RwaDeployerCoverage[] = [
 			{
 				contract: "CBJ4HDRS657QQGHDEOJ2VRMKBE2PXSOAAZDNTPINO6GUVYMHKSVD24KZ",
 				reason:
-					"pre-launch deployment 2026-05-20, one month before XAUM, with XAUM's original wasm: symbol MAUM, name MAUM, supply 999, 44 events, listed nowhere — treated as a rehearsal until Matrixdock says otherwise; surfaced here rather than hidden",
+					"pre-launch deployment 2026-05-20, one month before XAUM, with XAUM's original wasm: symbol MAUM, name MAUM, supply 999, 44 events, listed nowhere; treated as a rehearsal until Matrixdock says otherwise; surfaced here rather than hidden",
 			},
 		],
 		reconciledAt: "2026-09-09",

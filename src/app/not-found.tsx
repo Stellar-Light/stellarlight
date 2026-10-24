@@ -43,7 +43,7 @@ export default function RootNotFound() {
 						We don&apos;t have a page at this address
 					</h1>
 					<p className="text-muted-foreground mb-10 max-w-prose">
-						The link may be out of date — projects get renamed, merged into
+						The link may be out of date: projects get renamed, merged into
 						another record, or withdrawn. Searching the directory is usually the
 						fastest way to find what you were after.
 					</p>

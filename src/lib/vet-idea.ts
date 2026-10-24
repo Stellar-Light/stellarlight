@@ -599,7 +599,7 @@ export async function buildVetIdea(
 			gap = {
 				...row,
 				basis:
-					"Supply-side coverage of ACTIVE directory projects — a gap is not demand, and crowded is not saturation.",
+					"Supply-side coverage of ACTIVE directory projects: a gap is not demand, and crowded is not saturation.",
 			};
 		const scfAwardedProjects = activeDocs.filter(
 			(p) =>
@@ -628,10 +628,10 @@ export async function buildVetIdea(
 				: competitorMatch === "vertical"
 					? "typed members of the idea's vertical"
 					: competitorMatch === "vertical+scored"
-						? "typed members of the idea's vertical, plus rows that matched the idea's own terms — a product ABOUT a vertical competes with tools, not only with members of that vertical"
+						? "typed members of the idea's vertical, plus rows that matched the idea's own terms; a product ABOUT a vertical competes with tools, not only with members of that vertical"
 						: competitorMatch === "scored"
 							? "matched the idea's own terms"
-							: "only generic words matched — nearest rows, not evidence a competitor exists",
+							: "only generic words matched: nearest rows, not evidence a competitor exists",
 		},
 		maturity: {
 			auditedProjects,

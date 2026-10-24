@@ -47,5 +47,5 @@ const SUPERLATIVE_RE =
 
 export function superlativeNote(q: string): string | undefined {
 	if (!SUPERLATIVE_RE.test(q)) return undefined;
-	return "Superlative detected: result ORDER here reflects relevance + curated prominence + liveness — NOT a ranking by size, usage, or fees. Where DefiLlama tracks a protocol, rows carry tvlUSD/tvlAsOf (null = not tracked, not zero). Ecosystem aggregates → /api/analyze.";
+	return "Superlative detected: result ORDER here reflects relevance + curated prominence + liveness. NOT a ranking by size, usage, or fees. Where DefiLlama tracks a protocol, rows carry tvlUSD/tvlAsOf (null = not tracked, not zero). Ecosystem aggregates → /api/analyze.";
 }

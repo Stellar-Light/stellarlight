@@ -40,7 +40,7 @@ export const FundingSnapshots: CollectionConfig = {
 			index: true,
 			admin: {
 				description:
-					"sha256-prefix digest of the sorted awarded-project slug set — identical to funding.projectSetHash in the API response.",
+					"sha256-prefix digest of the sorted awarded-project slug set; identical to funding.projectSetHash in the API response.",
 			},
 		},
 		{

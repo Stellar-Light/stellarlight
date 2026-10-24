@@ -323,7 +323,7 @@ export const Partners: CollectionConfig = {
 			labels: { singular: "Service", plural: "Services" },
 			admin: {
 				description:
-					"Granular, searchable service tags — e.g. 'sep-24-ngn', 'soroban-audit-rust', 'usdc-off-ramp-mexico'. The AI matchmaker matches on these.",
+					"Granular, searchable service tags, e.g. 'sep-24-ngn', 'soroban-audit-rust', 'usdc-off-ramp-mexico'. The AI matchmaker matches on these.",
 			},
 			fields: [{ name: "tag", type: "text", required: true }],
 		},
@@ -399,7 +399,7 @@ export const Partners: CollectionConfig = {
 			type: "group",
 			admin: {
 				description:
-					"VERIFIED regulatory + corridor facts. Populated by the curator from the partner's own site / a regulator registry — never inferred.",
+					"VERIFIED regulatory + corridor facts. Populated by the curator from the partner's own site / a regulator registry; never inferred.",
 			},
 			fields: [
 				{
@@ -408,7 +408,7 @@ export const Partners: CollectionConfig = {
 					labels: { singular: "License", plural: "Licenses" },
 					admin: {
 						description:
-							"Regulatory licenses/registrations — cite the authority + jurisdiction.",
+							"Regulatory licenses/registrations: cite the authority + jurisdiction.",
 					},
 					fields: [
 						{ name: "authority", type: "text", required: true },
@@ -564,7 +564,7 @@ export const Partners: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Preferred channel — Discord handle, Telegram, lead form URL…",
+					"Preferred channel: Discord handle, Telegram, lead form URL…",
 			},
 		},
 		{
@@ -595,7 +595,7 @@ export const Partners: CollectionConfig = {
 			type: "group",
 			admin: {
 				description:
-					"Auto-computed from GitHub / on-chain / SCF data. Partners can see but not edit — this is what makes profiles trustworthy to agents and the matchmaker.",
+					"Auto-computed from GitHub / on-chain / SCF data. Partners can see but not edit; this is what makes profiles trustworthy to agents and the matchmaker.",
 			},
 			fields: [
 				autoField({ name: "githubLastCommitAt", type: "date" }),
@@ -614,7 +614,7 @@ export const Partners: CollectionConfig = {
 					type: "text",
 					admin: {
 						description:
-							"e.g. 'SCF #38 awardee ($148k)' — read from our SCF data.",
+							"e.g. 'SCF #38 awardee ($148k)': read from our SCF data.",
 					},
 				}),
 				autoField({ name: "lastAutoVerifyAt", type: "date" }),
@@ -629,8 +629,8 @@ export const Partners: CollectionConfig = {
 			index: true,
 			options: [
 				{ label: "Fresh (updated <90d)", value: "fresh" },
-				{ label: "Aging (90–180d, reminder sent)", value: "aging" },
-				{ label: "Stale (180–365d, public badge)", value: "stale" },
+				{ label: "Aging (90-180d, reminder sent)", value: "aging" },
+				{ label: "Stale (180-365d, public badge)", value: "stale" },
 				{
 					label: "Archived (>365d, hidden from AI matches)",
 					value: "archived",
@@ -658,7 +658,7 @@ export const Partners: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Pilot cohort — the select partners Anke tests with. Featured first in the directory with a badge. Admin-set only.",
+					"Pilot cohort: the select partners Anke tests with. Featured first in the directory with a badge. Admin-set only.",
 			},
 		}),
 		autoField({
@@ -674,7 +674,7 @@ export const Partners: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Someone asked to claim this profile. TO APPROVE: check this email's domain matches the website, then set the account Email (sidebar) to this address and Save — that auto-sends them a set-your-password invite and clears this field.",
+					"Someone asked to claim this profile. TO APPROVE: check this email's domain matches the website, then set the account Email (sidebar) to this address and Save; that auto-sends them a set-your-password invite and clears this field.",
 			},
 		}),
 		autoField({ name: "claimRequestedAt", type: "date" }),

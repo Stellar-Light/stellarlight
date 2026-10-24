@@ -16,21 +16,21 @@ describe("formatters", () => {
 	});
 
 	it("shows an em dash, never $0, for a missing value", () => {
-		expect(formatUSD(null)).toBe("—");
-		expect(formatUSD(undefined)).toBe("—");
-		expect(formatUSD(Number.NaN)).toBe("—");
+		expect(formatUSD(null)).toBe("-");
+		expect(formatUSD(undefined)).toBe("-");
+		expect(formatUSD(Number.NaN)).toBe("-");
 	});
 
 	it("spells out the peg on supply so yen is never read as dollars", () => {
 		expect(formatSupply(100_870_000, "JPY")).toBe("100.9M JPY");
 		expect(formatSupply(467_502_181, "USD")).toBe("467.5M USD");
-		expect(formatSupply(null, "USD")).toBe("—");
+		expect(formatSupply(null, "USD")).toBe("-");
 	});
 
 	it("signs percentages and never renders null as 0%", () => {
 		expect(formatPct(2.4)).toBe("+2.40%");
 		expect(formatPct(-5.8)).toBe("−5.80%");
-		expect(formatPct(null)).toBe("—");
+		expect(formatPct(null)).toBe("-");
 	});
 
 	it("maps a peg to its flag", () => {

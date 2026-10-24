@@ -21,14 +21,14 @@ export type SimpleMatchMode =
 	| "hybrid"; // keyword matches and vector similarity blended
 
 export const SIMPLE_MATCH_LABEL: Record<SimpleMatchMode, string> = {
-	all: "no text query — full set (structured filters only)",
+	all: "no text query: full set (structured filters only)",
 	filtered: "rows contain the query terms literally",
 	expanded:
-		"matched via synonym/stem expansion of the query terms — verify relevance for niche terms",
+		"matched via synonym/stem expansion of the query terms; verify relevance for niche terms",
 	keyword:
-		"vector search unavailable — coarse keyword match over title and content",
+		"vector search unavailable: coarse keyword match over title and content",
 	vector:
-		"vector-similarity ranking — conceptually related, not literal keyword truth (verify before relying)",
+		"vector-similarity ranking: conceptually related, not literal keyword truth (verify before relying)",
 	hybrid:
 		"keyword matches and vector similarity blended; each row's matchedTerms and similarity show which (verify meaning-only rows before relying)",
 };

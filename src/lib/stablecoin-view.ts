@@ -10,7 +10,7 @@ import { PEG_COUNTRY } from "@/data/stablecoin-registry";
 
 /** Compact USD: $467.5M, $675.8K, $1.2B. Null → em dash. */
 export function formatUSD(n: number | null | undefined): string {
-	if (n == null || !Number.isFinite(n)) return "—";
+	if (n == null || !Number.isFinite(n)) return "-";
 	const abs = Math.abs(n);
 	if (abs >= 1e9) return `$${(n / 1e9).toFixed(2)}B`;
 	if (abs >= 1e6) return `$${(n / 1e6).toFixed(1)}M`;
@@ -20,7 +20,7 @@ export function formatUSD(n: number | null | undefined): string {
 
 /** Thousands-separated integer. Null → em dash. */
 export function formatCount(n: number | null | undefined): string {
-	if (n == null || !Number.isFinite(n)) return "—";
+	if (n == null || !Number.isFinite(n)) return "-";
 	return Math.round(n).toLocaleString("en-US");
 }
 
@@ -32,7 +32,7 @@ export function formatSupply(
 	n: number | null | undefined,
 	peg: string | null | undefined,
 ): string {
-	if (n == null || !Number.isFinite(n)) return "—";
+	if (n == null || !Number.isFinite(n)) return "-";
 	const abs = Math.abs(n);
 	const v =
 		abs >= 1e9
@@ -47,7 +47,7 @@ export function formatSupply(
 
 /** Signed percent, e.g. "+2.4%" / "−5.8%". Null → em dash (never "0%"). */
 export function formatPct(n: number | null | undefined): string {
-	if (n == null || !Number.isFinite(n)) return "—";
+	if (n == null || !Number.isFinite(n)) return "-";
 	const sign = n > 0 ? "+" : n < 0 ? "−" : "";
 	return `${sign}${Math.abs(n).toFixed(2)}%`;
 }

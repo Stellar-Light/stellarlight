@@ -29,7 +29,7 @@ export function summarize(report: unknown): { count: number; text: string } {
 		: [];
 	const n = rows.length;
 	const lines: string[] = [
-		`# SCF round-membership drift — ${n} record(s) overstated`,
+		`# SCF round-membership drift: ${n} record(s) overstated`,
 		"",
 	];
 	if (n === 0) {
@@ -40,7 +40,7 @@ export function summarize(report: unknown): { count: number; text: string } {
 	}
 	lines.push(
 		'We list an SCF round the official communityfund.stellar.org page marks "Not Awarded" ' +
-			"on every submission in that round (precision-verified — ambiguous rounds are never accused). " +
+			"on every submission in that round (precision-verified; ambiguous rounds are never accused). " +
 			"Fix: dispatch `fix-scf-rounds.yml` (dry-run → execute); it syncs scf.awardedRounds to the " +
 			"official per-submission verdicts.",
 		"",
@@ -50,7 +50,7 @@ export function summarize(report: unknown): { count: number; text: string } {
 	for (const r of rows) {
 		const off = fmt(r.officialAwardedRounds) || "(none awarded)";
 		lines.push(
-			`- ${r.slug}: ours [${fmt(r.ourRounds)}] → official awarded [${off}] — ${r.url ?? ""}`,
+			`- ${r.slug}: ours [${fmt(r.ourRounds)}] → official awarded [${off}]; ${r.url ?? ""}`,
 		);
 	}
 	return { count: n, text: lines.join("\n") };

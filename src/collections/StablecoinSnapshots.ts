@@ -39,7 +39,7 @@ export const StablecoinSnapshots: CollectionConfig = {
 			unique: true,
 			admin: {
 				description:
-					"`${assetId}:${day}` — the natural key the writer upserts on, one row per asset per UTC day",
+					"`${assetId}:${day}`: the natural key the writer upserts on, one row per asset per UTC day",
 			},
 		},
 		{ name: "assetId", type: "text", required: true, index: true },
@@ -63,7 +63,7 @@ export const StablecoinSnapshots: CollectionConfig = {
 			type: "number",
 			admin: {
 				description:
-					"Stellar Expert's lifetime payment-op counter on this day — the raw value the CURRENT row's paymentsCount24h is diffed from, same role supply plays for supplyChange7d.",
+					"Stellar Expert's lifetime payment-op counter on this day: the raw value the CURRENT row's paymentsCount24h is diffed from, same role supply plays for supplyChange7d.",
 			},
 		},
 
@@ -91,7 +91,7 @@ export const StablecoinSnapshots: CollectionConfig = {
 			type: "text",
 			admin: {
 				description:
-					"Which pipeline wrote it — 'stellarlight' now; 'replit-import' for history imported from the retired service.",
+					"Which pipeline wrote it: 'stellarlight' now; 'replit-import' for history imported from the retired service.",
 			},
 		},
 	],

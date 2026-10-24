@@ -99,7 +99,7 @@ describe("financialProductNode", () => {
 			"@type": "Organization",
 			name: "Ondo Finance",
 		});
-		expect(n.name).toBe("USDY — Ondo US Dollar Yield");
+		expect(n.name).toBe("USDY: Ondo US Dollar Yield");
 		expect(n.currenciesAccepted).toBe("USD");
 		// The markup must never carry commerce signals we cannot source.
 		expect(n.offers).toBeUndefined();

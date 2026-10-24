@@ -43,15 +43,15 @@ export const IdeaSubmissions: CollectionConfig = {
 			label: "Need Size",
 			options: [
 				{
-					label: "Critical — Essential for ecosystem growth",
+					label: "Critical: Essential for ecosystem growth",
 					value: "critical",
 				},
 				{
-					label: "Important — Would significantly improve ecosystem",
+					label: "Important: Would significantly improve ecosystem",
 					value: "important",
 				},
 				{
-					label: "Nice to have — Better suited for bounties or hackathons",
+					label: "Nice to have: Better suited for bounties or hackathons",
 					value: "nice-to-have",
 				},
 			],
@@ -67,7 +67,7 @@ export const IdeaSubmissions: CollectionConfig = {
 					label: "Ask an existing team to add the feature",
 					value: "existing-team",
 				},
-				{ label: "Not sure — reviewers should decide", value: "unsure" },
+				{ label: "Not sure: reviewers should decide", value: "unsure" },
 			],
 		},
 		{

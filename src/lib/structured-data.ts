@@ -115,7 +115,7 @@ export function financialProductNode(
 		"@type": "FinancialProduct",
 		"@id": `${base}${a.path}#asset`,
 		url: `${base}${a.path}`,
-		name: a.name && a.name !== a.ticker ? `${a.ticker} — ${a.name}` : a.ticker,
+		name: a.name && a.name !== a.ticker ? `${a.ticker}: ${a.name}` : a.ticker,
 		alternateName: a.ticker,
 	};
 	if (a.description) node.description = a.description;
