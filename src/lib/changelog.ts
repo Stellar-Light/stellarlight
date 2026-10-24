@@ -32,6 +32,26 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-24",
+		surfaces: ["mcp"],
+		version: "scout-mcp@1.8.2",
+		type: "changed",
+		summary:
+			"scout-mcp 1.8.2: the tool titles, descriptions and parameter text carry no em or en dashes (spec 1.9.111). No tool, parameter or behavior changed.",
+		detail:
+			"The text was rewritten with the API's own descriptions, punctuation only, and is held by the contract gate's no-dashes check. 28 tools.",
+	},
+	{
+		date: "2026-10-24",
+		surfaces: ["api-client"],
+		version: "api-client@1.10.1",
+		type: "changed",
+		summary:
+			'api-client 1.10.1: ScoutApiError messages read "Scout API <status> on <url>: <error>", with a colon where an em dash separated the error. No method or type changed.',
+		detail:
+			"Code that matched the old message text should match the new separator; code that reads error.status or error.body is unaffected.",
+	},
+	{
+		date: "2026-10-24",
 		surfaces: ["api", "mcp", "skill"],
 		version: "spec@1.9.111",
 		type: "changed",
