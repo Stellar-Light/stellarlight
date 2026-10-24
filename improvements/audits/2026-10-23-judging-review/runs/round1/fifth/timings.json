@@ -1,0 +1,40 @@
+{
+	"at": "2026-10-23T22:31:32.445Z",
+	"rows": [
+		{
+			"repo": "soroworks/soroforge",
+			"status": 200,
+			"readMs": 1426,
+			"coldHandlerMs": 1429,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "repo-17",
+			"status": 200,
+			"readMs": 1009,
+			"coldHandlerMs": 1009,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-18",
+			"status": 200,
+			"readMs": 797,
+			"coldHandlerMs": 798,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "Lumeeena/lumina-contracts",
+			"status": 200,
+			"readMs": 938,
+			"coldHandlerMs": 940,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "StellarCanary/ProtocolCanary-Fixtures",
+			"status": 200,
+			"readMs": 1031,
+			"coldHandlerMs": 1034,
+			"warmHandlerMs": 1
+		}
+	]
+}

@@ -1,0 +1,285 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T22:52:48.173Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/nirium-protocol/nirium-core",
+		"stored": false,
+		"repo": {
+			"fullName": "nirium-protocol/nirium-core",
+			"url": "https://github.com/nirium-protocol/nirium-core",
+			"commit": "8baac265df17c50b1289827cc1417ef60b638f2d",
+			"readAt": "2026-10-23T22:52:47.105Z",
+			"readMs": 1068,
+			"unread": ["manifests"]
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "10 file(s) follow a test-naming convention, e.g. nirium-soroban-contracts/tests/vault_tests.rs, packages/sdk/src/metrics.test.ts, packages/sdk/src/x402-guard.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit 8baac26.",
+									"values": [
+										"nirium-soroban-contracts/tests/vault_tests.rs",
+										"packages/sdk/src/metrics.test.ts",
+										"packages/sdk/src/x402-guard.test.ts",
+										"packages/sdk/src/x402serve-smoke.test.ts",
+										"packages/sdk/test/helpers/x402-edges.ts",
+										"packages/sdk/test/ws-resilient.test.ts",
+										"packages/sdk/test/x402-mpp-init.test.ts",
+										"packages/sdk/test/x402-policy-fetch.test.ts",
+										"packages/sdk/test/x402-policy.test.ts",
+										"packages/sdk/test/x402-spend-cap.test.ts"
+									],
+									"count": 10
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "4 CI config file(s): .github/workflows/ci.yml, .github/workflows/release.yml, .github/workflows/release_desktop.yml, .github/workflows/security-gate.yml. Whether the jobs run or pass is not read. Read at commit 8baac26.",
+									"values": [
+										".github/workflows/ci.yml",
+										".github/workflows/release.yml",
+										".github/workflows/release_desktop.yml",
+										".github/workflows/security-gate.yml"
+									],
+									"count": 4
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 4 contract id(s): CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH, CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU, CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5 and 1 more. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses). Read at commit 8baac26.",
+									"values": [
+										"CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH",
+										"CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU",
+										"CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5",
+										"CCZW2WIFAD7OQX35U5AILTNF32TCHQUYVPNB32GGKEKKPII2HF7B5LML"
+									],
+									"count": 4
+								},
+								{
+									"id": "website",
+									"state": "found",
+									"finding": "The repo's website field: https://nirium.xyz. Not opened, so what it shows is not checked, nor whether it loads.",
+									"values": ["https://nirium.xyz"],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "README.md links 2 page(s) its text labels as a demo or live app (words such as demo, live app, deployed, website): https://nirium.xyz/build, https://nirium.xyz. Not opened, so whether they load is not checked. Read at commit 8baac26.",
+									"values": ["https://nirium.xyz/build", "https://nirium.xyz"],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "The 12 of 13 manifests read declare 11 Stellar package(s) Scout recognises: @creit.tech/stellar-wallets-kit, @stellar/freighter-api, @stellar/mpp, @stellar/stellar-sdk, @x402/core, @x402/express, @x402/fetch, @x402/stellar and 3 more. SDK versions as declared: soroban-sdk 22.0.0, @stellar/stellar-sdk@^14.5.0. python:pyproject.toml: a pyproject.toml declares a Stellar SDK or library (python). The 1 not read may declare more: 1 of 13 manifests were not read: 1 beyond the 12 a read takes. Read at commit 8baac26.",
+									"values": [
+										"@creit.tech/stellar-wallets-kit",
+										"@stellar/freighter-api",
+										"@stellar/mpp",
+										"@stellar/stellar-sdk",
+										"@x402/core",
+										"@x402/express",
+										"@x402/fetch",
+										"@x402/stellar",
+										"soroban-sdk",
+										"stellar-xdr",
+										"python:pyproject.toml"
+									],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "3 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): nirium-soroban-contracts, nirium-soroban-contracts/protocol, packages/policy-account; soroban-sdk 22.0.0 as declared. Whether they build or are deployed is not read here. Read at commit 8baac26.",
+									"values": [
+										"nirium-soroban-contracts",
+										"nirium-soroban-contracts/protocol",
+										"packages/policy-account"
+									],
+									"count": 3
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 4 contract id(s): CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH, CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU, CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5 and 1 more. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses). Read at commit 8baac26.",
+									"values": [
+										"CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH",
+										"CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU",
+										"CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5",
+										"CCZW2WIFAD7OQX35U5AILTNF32TCHQUYVPNB32GGKEKKPII2HF7B5LML"
+									],
+									"count": 4
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "375 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-02-01.",
+									"values": ["2026-10-23T22:25:43Z"],
+									"count": 375
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "10 file(s) follow a test-naming convention, e.g. nirium-soroban-contracts/tests/vault_tests.rs, packages/sdk/src/metrics.test.ts, packages/sdk/src/x402-guard.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit 8baac26.",
+									"values": [
+										"nirium-soroban-contracts/tests/vault_tests.rs",
+										"packages/sdk/src/metrics.test.ts",
+										"packages/sdk/src/x402-guard.test.ts",
+										"packages/sdk/src/x402serve-smoke.test.ts",
+										"packages/sdk/test/helpers/x402-edges.ts",
+										"packages/sdk/test/ws-resilient.test.ts",
+										"packages/sdk/test/x402-mpp-init.test.ts",
+										"packages/sdk/test/x402-policy-fetch.test.ts",
+										"packages/sdk/test/x402-policy.test.ts",
+										"packages/sdk/test/x402-spend-cap.test.ts"
+									],
+									"count": 10
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "4 CI config file(s): .github/workflows/ci.yml, .github/workflows/release.yml, .github/workflows/release_desktop.yml, .github/workflows/security-gate.yml. Whether the jobs run or pass is not read. Read at commit 8baac26.",
+									"values": [
+										".github/workflows/ci.yml",
+										".github/workflows/release.yml",
+										".github/workflows/release_desktop.yml",
+										".github/workflows/security-gate.yml"
+									],
+									"count": 4
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "3 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): nirium-soroban-contracts, nirium-soroban-contracts/protocol, packages/policy-account; soroban-sdk 22.0.0 as declared. Whether they build or are deployed is not read here. Read at commit 8baac26.",
+									"values": [
+										"nirium-soroban-contracts",
+										"nirium-soroban-contracts/protocol",
+										"packages/policy-account"
+									],
+									"count": 3
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 4 contract id(s): CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH, CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU, CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5 and 1 more. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses). Read at commit 8baac26.",
+									"values": [
+										"CAMDXG6L4LXLXXV675KZSHM3BMSETZ4NVMC7JYIQCZ2JTG54OMSK57MH",
+										"CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU",
+										"CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5",
+										"CCZW2WIFAD7OQX35U5AILTNF32TCHQUYVPNB32GGKEKKPII2HF7B5LML"
+									],
+									"count": 4
+								},
+								{
+									"id": "website",
+									"state": "found",
+									"finding": "The repo's website field: https://nirium.xyz. Not opened, so what it shows is not checked, nor whether it loads.",
+									"values": ["https://nirium.xyz"],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "README.md links 2 page(s) its text labels as a demo or live app (words such as demo, live app, deployed, website): https://nirium.xyz/build, https://nirium.xyz. Not opened, so whether they load is not checked. Read at commit 8baac26.",
+									"values": ["https://nirium.xyz/build", "https://nirium.xyz"],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

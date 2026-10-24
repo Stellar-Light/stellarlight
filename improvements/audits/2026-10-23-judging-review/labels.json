@@ -1,0 +1,330 @@
+{
+	"note": "Hand labels, written before the live read existed. Source: GitHub's own answers read with the gh CLI between 2026-10-23T17:34:08Z and 17:35:54Z (repo metadata, the recursive tree at HEAD, commits?per_page=1 with its Link header, releases?per_page=1, and each package.json, Cargo.toml and README through the contents API), read by eye 17:36Z to 17:41Z. stellarPackages lists every Stellar-ecosystem package the labeller saw in package.json, Cargo.toml and other manifests, whether or not Scout's list holds it; testFiles counts code files named or placed as tests in the tree (snapshots and docs not counted); demoLinks are the repo's website field and README links a reader would take for the team's own demo, live app or demo video; contractIds are every C... id the README names, whoever owns it.",
+	"labeledAt": "2026-10-23T17:41:45Z",
+	"repos": [
+		{
+			"repo": "repo-01",
+			"stellarPackages": [
+				"@stellar/stellar-sdk",
+				"@creit.tech/stellar-wallets-kit",
+				"soroban-sdk",
+				"stellar-xdr",
+				"stellar-access",
+				"stellar-macros",
+				"stellar-tokens",
+				"stellar-registry"
+			],
+			"sorobanSdk": "26.1.0 (workspace)",
+			"deployableContracts": ["contracts/pay-shift", "contracts/payout_vault"],
+			"testFiles": {
+				"count": "about 35",
+				"examples": [
+					"contracts/pay-shift/src/test.rs",
+					"apps/api/test/api.test.ts",
+					"tests/e2e/harness.test.ts",
+					"tests/e2e-ui/tests/smoke.spec.ts"
+				]
+			},
+			"ci": [".github/workflows/guards.yml"],
+			"lastCommitAt": "2026-10-23T17:15:07Z",
+			"commitCount": 141,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"http://127.0.0.1:5173/ (local)",
+				"lab.stellar.org contract page",
+				"stellar.expert testnet tx"
+			],
+			"contractIds": [
+				"CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC (the native XLM SAC, not theirs)",
+				"CBPCPL6JJTVLYFT2DLTLA3FAFQHPD3LZYARCMF3CFCZF4D2JS32FNDVO"
+			],
+			"notes": "Active today: pushed 17:18Z, so the run may see newer commits."
+		},
+		{
+			"repo": "repo-02",
+			"stellarPackages": [],
+			"deployableContracts": [],
+			"testFiles": { "count": 0 },
+			"ci": [],
+			"lastCommitAt": null,
+			"commitCount": 0,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"contractIds": [],
+			"notes": "Empty repository: size 0, no commits, no tree, no README. Created 2026-10-03."
+		},
+		{
+			"repo": "repo-03",
+			"stellarPackages": ["@stellar/stellar-sdk", "soroban-sdk"],
+			"sorobanSdk": "25 (workspace)",
+			"deployableContracts": ["internstellar-contract/contracts/internstellar"],
+			"testFiles": {
+				"count": "1 by convention, plus 5 test scripts",
+				"examples": [
+					"internstellar-contract/contracts/internstellar/src/test.rs",
+					"scripts/_test-binding.ts",
+					"scripts/test-realtime.ts"
+				]
+			},
+			"ci": [],
+			"lastCommitAt": "2026-05-22T09:48:51Z",
+			"commitCount": 162,
+			"releases": { "count": 0 },
+			"website": "https://internstellar-eight.vercel.app",
+			"demoLinks": [
+				"https://internstellar-eight.vercel.app",
+				"https://internstellar-hackathon.vercel.app/ (Live App)",
+				"https://youtu.be/TpqybyqjGao (Demo Video)"
+			],
+			"otherReadmeLinks": ["https://canva.link/nd7t6mpg7whz6d8 (Pitch Deck)"],
+			"contractIds": [
+				"CB3VGM6SU3RRJLRJMT7CRX36ARKCH222ZKGKVPMS2DU5MIAHKUFZGRDF (testnet)",
+				"CCSK35NQQR46C7ULBEGL6FG7JJ7XPLR427ZN5HHN2FLBXTZNKT57GKRW (mainnet)"
+			],
+			"notes": "pushed_at 2026-10-01 is later than the default branch's last commit (2026-05-22)."
+		},
+		{
+			"repo": "repo-04",
+			"stellarPackages": [
+				"@stellar/stellar-sdk",
+				"@creit.tech/stellar-wallets-kit",
+				"soroban-sdk"
+			],
+			"sorobanSdk": "28",
+			"deployableContracts": ["contracts/plink"],
+			"testFiles": {
+				"count": "1 by convention, plus one test script",
+				"examples": [
+					"contracts/plink/src/test.rs",
+					"frontend/scripts/withdraw-test.mts"
+				]
+			},
+			"ci": [],
+			"lastCommitAt": "2026-09-20T21:20:38Z",
+			"commitCount": 22,
+			"releases": { "count": 0 },
+			"website": "https://stellar-hackathon-grand-pera.owner-04.example/",
+			"demoLinks": [
+				"https://stellar-hackathon-grand-pera.owner-04.example/ (website and README Live app)"
+			],
+			"otherReadmeLinks": [
+				"claude.ai artifact (Product cheat sheet)",
+				"docs.google.com presentation (Pitch deck)",
+				"stellar.expert contract",
+				"https://tr-mock-anchor.fly.dev/ (Fiat rail, not theirs)"
+			],
+			"contractIds": [
+				"CDTYAFC6LL2DSZYOIPRLXN2TU4OJ6B7TMZCKVDTJATUAJZMKWTNE564L (testnet)"
+			]
+		},
+		{
+			"repo": "repo-05",
+			"stellarPackages": ["@stellar/stellar-sdk", "soroban-sdk"],
+			"sorobanSdk": "27 (workspace)",
+			"deployableContracts": ["contracts/orbital-pool"],
+			"testFiles": {
+				"count": 28,
+				"examples": [
+					"contracts/orbital-pool/src/test.rs",
+					"src/lib/orbital/swap.test.ts",
+					"src/hooks/usePool.test.tsx"
+				]
+			},
+			"ci": [],
+			"lastCommitAt": "2026-09-20T11:27:04Z",
+			"commitCount": 61,
+			"releases": { "count": 0 },
+			"website": "https://b2b-orbital.vercel.app",
+			"demoLinks": ["https://b2b-orbital.vercel.app (website)"],
+			"otherReadmeLinks": [
+				"paradigm.xyz article",
+				"a third party's GitHub repo",
+				"http://localhost:3000",
+				"soroban-testnet.stellar.org RPC"
+			],
+			"contractIds": [],
+			"notes": "Also @sembol/passkey-react (passkeys, not named for Stellar)."
+		},
+		{
+			"repo": "repo-06",
+			"stellarPackages": [
+				"@creit.tech/stellar-wallets-kit",
+				"stellar-sdk==12.1.0 (Python, backend/requirements.txt)"
+			],
+			"deployableContracts": [],
+			"testFiles": { "count": 0 },
+			"ci": [],
+			"lastCommitAt": "2026-09-20T02:29:48Z",
+			"commitCount": 26,
+			"releases": { "count": 0 },
+			"website": "https://hammerhead-app-hfcgi.ondigitalocean.app/",
+			"demoLinks": [
+				"https://hammerhead-app-hfcgi.ondigitalocean.app (website and README Live Project Link)"
+			],
+			"otherReadmeLinks": [
+				"pitch deck PDF in the repo",
+				"stellar.expert testnet txs and accounts",
+				"tr-mock-anchor.fly.dev (an anchor they integrate)",
+				"skills.stellar.org",
+				"settlex.example.com (placeholder)"
+			],
+			"contractIds": [],
+			"notes": "README 32,254 characters."
+		},
+		{
+			"repo": "repo-07",
+			"stellarPackages": [
+				"@stellar/stellar-sdk",
+				"@stellar/freighter-api",
+				"@trustless-work/escrow (Stellar escrow SDK, not named for Stellar)",
+				"accesly (Stellar social wallet, not named for Stellar)"
+			],
+			"deployableContracts": [],
+			"testFiles": {
+				"count": "3, plus a test setup file",
+				"examples": [
+					"Kivo/src/context/LanguageContext.test.jsx",
+					"Kivo/src/i18n/translations.test.js",
+					"Kivo/src/test/setup.js"
+				]
+			},
+			"ci": [],
+			"lastCommitAt": "2026-09-05T01:01:23Z",
+			"commitCount": 19,
+			"releases": { "count": 0 },
+			"website": "https://kivo-app-five.vercel.app",
+			"demoLinks": ["https://kivo-app-five.vercel.app (website)"],
+			"otherReadmeLinks": [
+				"https://stellar.expert/explorer/testnet (explorer home)"
+			],
+			"contractIds": []
+		},
+		{
+			"repo": "DocForum/docforum-escrow",
+			"stellarPackages": [
+				"@stellar/stellar-sdk",
+				"@creit.tech/stellar-wallets-kit",
+				"soroban-sdk",
+				"@subql/node-stellar",
+				"@subql/types-stellar",
+				"Go: sdk-go/go.mod (not read)"
+			],
+			"sorobanSdk": "27.0.6",
+			"deployableContracts": ["contracts/escrow", "contracts/releaser-account"],
+			"testFiles": {
+				"count": "about 40",
+				"examples": [
+					"contracts/escrow/tests/cancel.rs",
+					"contracts/releaser-account/src/tests.rs",
+					"sdk/tests/batch.test.ts",
+					"sdk-go/client_test.go"
+				]
+			},
+			"ci": [
+				".github/workflows/ci.yml",
+				".github/workflows/contract-mutation-testing.yml",
+				".github/workflows/nightly-testnet-soak.yml",
+				".github/workflows/pr-conflict-notifier.yml",
+				".github/workflows/pr-malware-scan.yml",
+				".github/workflows/release-contract.yml",
+				".github/workflows/release-sdk.yml",
+				".github/workflows/sdk-go.yml"
+			],
+			"lastCommitAt": "2026-10-23T17:04:14Z",
+			"commitCount": 83,
+			"releases": {
+				"count": 2,
+				"latest": "sdk-v0.2.0",
+				"latestAt": "2026-09-15T12:32:08Z"
+			},
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"shields.io badges",
+				"stellar.expert contract (Live on testnet)",
+				"developers.stellar.org",
+				"GitHub issues and repos",
+				"docs.drips.network",
+				"t.me"
+			],
+			"contractIds": [
+				"CAFI5QOTNLK5OIHEHGGQ7B22RN5IUOFGKKEID2OQCZSCJAQS4FLSS2DR (testnet)"
+			],
+			"notes": "README 22,180 characters; no root package.json; examples/web-demo is code, not a hosted link."
+		},
+		{
+			"repo": "Foryield/soroban-yield-vault",
+			"stellarPackages": [
+				"@stellar/stellar-sdk",
+				"@creit.tech/stellar-wallets-kit",
+				"soroban-sdk",
+				"blend-contract-sdk (dev)"
+			],
+			"sorobanSdk": "25",
+			"deployableContracts": [
+				"contracts/router",
+				"contracts/strategy-aquarius",
+				"contracts/vault"
+			],
+			"testFiles": {
+				"count": 23,
+				"examples": [
+					"contracts/vault/src/test.rs",
+					"contracts/vault/src/test_blend.rs",
+					"onboarding/test/onboard.test.ts"
+				]
+			},
+			"ci": [".github/workflows/ci.yml", ".github/workflows/ops-daily.yml"],
+			"lastCommitAt": "2026-10-23T15:57:02Z",
+			"commitCount": 144,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [
+				"https://vault.for-yield.com/?vault=eurc (the demo UI, named in the sentence before the link)"
+			],
+			"otherReadmeLinks": [
+				"https://vault.for-yield.com/dashboard/ (audit trail)",
+				"https://faucet.circle.com/",
+				"stellar.expert contracts"
+			],
+			"contractIds": [
+				"11 ids: their vault instances plus SACs and pools they use, e.g. CCE5ITQQF4GWG5FA47D2XJBKXASWJ2E5V5AWW5U5BBAFWIXA77YYGWNI (D1 vault), CAQCFVLOBK5GIULPNZRGATJJMIZL5BSP7X5YJVMGCPTUEPFM4AVSRCJU (Blend testnet USDC SAC)"
+			]
+		},
+		{
+			"repo": "Presago-Labs/presago-contracts",
+			"stellarPackages": ["soroban-sdk"],
+			"sorobanSdk": "26.0.1 (workspace)",
+			"deployableContracts": [
+				"leaderboard",
+				"prediction_market",
+				"pulse_token",
+				"referral_registry"
+			],
+			"testFiles": {
+				"count": 8,
+				"examples": [
+					"leaderboard/src/tests.rs",
+					"leaderboard/src/admin_tests.rs",
+					"prediction_market/src/tests.rs"
+				]
+			},
+			"ci": [".github/workflows/ci.yml"],
+			"lastCommitAt": "2026-10-19T10:34:33Z",
+			"commitCount": 298,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"CI badge",
+				"shields.io badges",
+				"github.com/Presago-Labs/presago"
+			],
+			"contractIds": [],
+			"notes": "pushed_at 2026-10-23 is later than the default branch's last commit; 395 test_snapshots JSON files; cross_contract_invariants is a test crate whose only source is src/lib.rs."
+		}
+	]
+}

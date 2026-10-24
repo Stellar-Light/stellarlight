@@ -1,0 +1,15 @@
+   ✓ each judged criterion maps to evidence or to a reason > covers every criterion of every judged event 1ms
+   ✓ each judged criterion maps to evidence or to a reason > serves HackMeridian 2026's criteria in its record's words, three of them not checkable 1ms
+   ✓ repo evidence never claims a missing thing it did not read > says could-not-check for every item when the repo was not read 0ms
+   ✓ repo evidence never claims a missing thing it did not read > says could-not-check for the items a part that did not answer holds 0ms
+   ✓ repo evidence never claims a missing thing it did not read > does not call a short or partly read tree or README empty 9ms
+   ✓ repo evidence never claims a missing thing it did not read > does not call an unlabelled README link no demo 0ms
+   ✓ repo evidence never claims a missing thing it did not read > states what it found with the values and counts it cites 1ms
+   × repo evidence never claims a missing thing it did not read > never serves a count over a partial read, and says what was not read 3ms
+   ✓ repo evidence never claims a missing thing it did not read > says not-found, scoped to what was read, when a full read holds none 1ms
+   ✓ repo evidence never claims a missing thing it did not read > reads an empty repo as empty, item by item 1ms
+   ✓ SCF eligibility evidence > names the open round, or says none is open, or could not check 0ms
+   ✓ served text > has no em or en dash 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+AssertionError: stellarPackages: expected 1 to be null
+      Tests  1 failed | 11 passed (12)

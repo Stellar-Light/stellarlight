@@ -1,5 +1,15 @@
 const GQL = "https://api.github.com/graphql";
 
+/** The app's GitHub token, in the order every read here takes it; null
+ * when none is set. */
+export function githubToken(): string | null {
+	return (
+		process.env.GITHUB_TOKEN?.trim() ||
+		process.env.NEXT_PUBLIC_GITHUB_TOKEN?.trim() ||
+		null
+	);
+}
+
 // Shared field set so the single and BATCHED fetch stay byte-identical.
 const REPO_FRAGMENT = `
   fragment RepoFields on Repository {

@@ -1,0 +1,133 @@
+{
+	"note": "Fourth-set labels, the gate for the label-window fix, written before the run on these five. Picked by rule: the next five repos of the first GitHub search, in its order, not yet used, not stored and listed with a description. Source: gh CLI answers 2026-10-23T20:46:14Z to 20:46:53Z, plus contents-API reads of the manifests the dump skipped, read by eye; test counts from label_tests.py; manifests read from manifest_order.py.",
+	"labeledAt": "2026-10-23T20:50:00Z",
+	"repos": [
+		{
+			"repo": "Heliobond/frontend",
+			"stellarPackages": [
+				"@creit.tech/stellar-wallets-kit (^2.6.0)",
+				"@stellar/stellar-sdk (^16.3.0)"
+			],
+			"manifests": { "total": 1, "read": 1 },
+			"deployableContracts": [],
+			"testFiles": {
+				"byConvention": 145,
+				"readerSees": ["src/wallet/e2eTestWallet.ts (a test helper)"]
+			},
+			"ci": "8 files under .github/workflows",
+			"lastCommitAt": "2026-10-23T20:22:38Z",
+			"commitCount": 965,
+			"releases": {
+				"count": 1,
+				"latest": "v0.1.0",
+				"latestAt": "2026-06-15T11:52:31Z"
+			},
+			"website": "https://heliobond.vercel.app",
+			"demoLinks": ["https://heliobond.vercel.app (website)"],
+			"otherReadmeLinks": ["bun.sh", "localhost addresses"],
+			"contractIds": [],
+			"notes": "Active: pushed 20:22Z."
+		},
+		{
+			"repo": "repo-13",
+			"stellarPackages": [
+				"soroban-sdk (22.0.0)",
+				"stellar-sdk (^12.0.0, the npm package npm marks deprecated, in package.json and ui/package.json)"
+			],
+			"manifests": { "total": 3, "read": 3 },
+			"deployableContracts": [
+				"the root crate (Cargo.toml at the root, crate-type cdylib)"
+			],
+			"testFiles": { "byConvention": 28, "readerSees": [] },
+			"ci": [
+				".github/workflows/ci.yml",
+				".github/workflows/sdk-ci.yml",
+				".github/workflows/ui-ci.yml"
+			],
+			"lastCommitAt": "2026-10-23T17:13:28Z",
+			"commitCount": 258,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"rustup, Stellar RPC and Horizon endpoints, GitHub and Discord links only"
+			],
+			"contractIds": []
+		},
+		{
+			"repo": "repo-14",
+			"stellarPackages": ["@stellar/stellar-sdk (^15.0.1)"],
+			"manifests": {
+				"total": 6,
+				"read": 6,
+				"note": "go.mod and pyproject.toml declare no Stellar SDK"
+			},
+			"deployableContracts": [],
+			"testFiles": {
+				"byConvention": 102,
+				"readerSees": ["policies/authz_test.rego"]
+			},
+			"ci": "9 files under .github/workflows",
+			"lastCommitAt": "2026-10-23T17:04:18Z",
+			"commitCount": 258,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"the public API instance api.wraith.veil.co",
+				"TypeDoc reference on github.io",
+				"Swagger, Postman, Redoc",
+				"RPC providers",
+				"localhost addresses"
+			],
+			"contractIds": [
+				"CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
+				"CBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBD2KM"
+			],
+			"notes": "The two ids are placeholders in examples; the README names them all the same."
+		},
+		{
+			"repo": "Specula-Labs/specula-contracts",
+			"stellarPackages": ["soroban-sdk (22.0.8)"],
+			"manifests": { "total": 1, "read": 1 },
+			"deployableContracts": ["the root crate (crate-type cdylib)"],
+			"testFiles": { "byConvention": 1, "readerSees": [] },
+			"ci": [".github/workflows/ci.yml"],
+			"lastCommitAt": "2026-10-13T18:19:14Z",
+			"commitCount": 30,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"GitHub, Stellar RPC, stellar.expert and rustup links only"
+			],
+			"contractIds": [
+				"CCZAAZ3FJ7LKZA7E7A6EKQTU2HCNVI3YUVIHKWHSULGZSWAJFS2D2XVX"
+			],
+			"notes": "pushed_at 2026-10-23 is later than the default branch's last commit."
+		},
+		{
+			"repo": "Specula-Labs/specula-app",
+			"stellarPackages": [],
+			"manifests": {
+				"total": 1,
+				"read": 1,
+				"note": "package.json declares no Stellar package; the app calls its backend"
+			},
+			"deployableContracts": [],
+			"testFiles": { "byConvention": 3, "readerSees": [] },
+			"ci": [".github/workflows/ci.yml"],
+			"lastCommitAt": "2026-10-13T18:19:14Z",
+			"commitCount": 76,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"GitHub, stellar.expert, nodejs.org and localhost links only"
+			],
+			"contractIds": [
+				"CCZAAZ3FJ7LKZA7E7A6EKQTU2HCNVI3YUVIHKWHSULGZSWAJFS2D2XVX"
+			]
+		}
+	]
+}

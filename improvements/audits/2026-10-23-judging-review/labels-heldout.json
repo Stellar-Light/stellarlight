@@ -1,0 +1,168 @@
+{
+	"note": "Held-out labels for the test-rule fix, written before the run on these five. Picked by rule (the two pre-registered spares, then the next three unused repos of the second GitHub search, in its order). Source: gh CLI answers 2026-10-23T20:30:01Z to 20:31:10Z (metadata, tree at HEAD, commits and releases with their Link headers, manifests and README through the contents API), read by eye. testFiles.byConvention comes from label_tests.py, a Python re-implementation of the conventions the finding states (written from that text, not from the TypeScript); testFiles.readerSees lists files a reader would call tests that the conventions do not name, from an eye scan of every path containing test or spec. stellarPackages lists every Stellar package seen in every manifest, read in full for the two large repos.",
+	"labeledAt": "2026-10-23T20:45:00Z",
+	"repos": [
+		{
+			"repo": "repo-08",
+			"stellarPackages": [
+				"soroban-sdk (21.7.7, workspace)",
+				"@stellar/stellar-sdk (packages/sdk, packages/ts-advanced-client, examples/client, services/graphql-api, services/webhook-streamer)",
+				"stellar-sdk==16.1.0 (Python, examples/python/requirements.txt)"
+			],
+			"manifests": "38 by the code's manifest rule (27 Cargo.toml, 8 package.json, go.mod, pyproject.toml, requirements.txt); the read takes 12",
+			"deployableContracts": "15 or more contracts/* crates with crate-type cdylib (amm, amm-sdk, batch_auction, batch_router, cl_position_nft, concentrated_liquidity, dex_aggregator, factory, governance, incentive_campaigns, oracle_adapters, oracle_aggregator, pol_vesting, reserve_manager, router, and others not checked)",
+			"testFiles": {
+				"byConvention": 79,
+				"readerSees": [
+					"contracts/concentrated_liquidity/src/tests_issue_1100.rs and three more tests_issue_*.rs",
+					"the contracts/integration-tests crate",
+					"scripts/*.test.sh"
+				]
+			},
+			"ci": [
+				".github/workflows/ci.yml",
+				".github/workflows/release.yml",
+				".github/workflows/smoke-test.yml"
+			],
+			"lastCommitAt": "2026-10-23T19:52:00Z",
+			"commitCount": 1082,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"conventionalcommits.org",
+				"editorconfig.org",
+				"semver.org",
+				"GitHub, rust-lang.org and Stellar docs links"
+			],
+			"contractIds": [],
+			"notes": "Very active (pushed 19:55Z); README 36,117 characters."
+		},
+		{
+			"repo": "TTL-Legacy/TTL-Legacy",
+			"stellarPackages": [
+				"soroban-sdk (21.0.0)",
+				"stellar-xdr (21.2.0, the fuzz crate)"
+			],
+			"manifests": "11 (8 Cargo.toml, 3 package.json): all within the 12 a read takes",
+			"deployableContracts": [
+				"contracts/ttl_vault",
+				"contracts/vault",
+				"contracts/zk_verifier"
+			],
+			"testFiles": {
+				"byConvention": 146,
+				"readerSees": [
+					"contracts/ttl_vault/src/bug_fix_tests_1264_1265_1266_1267.rs",
+					"contracts/ttl_vault/src/waterfall_proptests.rs",
+					"frontend/src/setupTests.ts",
+					"two mobile/android/.../androidTest/*.kt",
+					"shell test scripts"
+				]
+			},
+			"ci": "10 files under .github/workflows",
+			"lastCommitAt": "2026-10-23T16:41:22Z",
+			"commitCount": 1491,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"CI and codecov badges",
+				"just.systems",
+				"mainnet.sorobanrpc.com (an RPC endpoint)",
+				"soroban-testnet.stellar.org",
+				"stellar.org"
+			],
+			"contractIds": []
+		},
+		{
+			"repo": "BudakGPT/apac-stellar-hackathon",
+			"stellarPackages": ["soroban-sdk (22.0.0)"],
+			"manifests": "prototype-arisan/contracts/arisan/Cargo.toml and requirements.txt (pyyaml only)",
+			"deployableContracts": ["prototype-arisan/contracts/arisan"],
+			"testFiles": { "byConvention": 0, "readerSees": [] },
+			"ci": [".github/workflows/build.yml"],
+			"lastCommitAt": "2026-10-23T04:54:05Z",
+			"commitCount": 122,
+			"releases": { "count": 0 },
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"risein.com registration page",
+				"two canva.link pitch-deck references",
+				"Stellar docs and communityfund.stellar.org"
+			],
+			"contractIds": [],
+			"notes": "A competition tracker with a prototype contract; prototype-arisan/demo/index.html is in the repo but no hosted link."
+		},
+		{
+			"repo": "Pathnomic/stellar-hackathon-starter",
+			"stellarPackages": [
+				"@stellar/freighter-api (6.0.1)",
+				"@stellar/stellar-sdk (16.3.0)",
+				"soroban-sdk (=26.1.1)",
+				"stellar-contract-utils (=0.7.2)",
+				"stellar-access (=0.7.2)",
+				"stellar-macros (=0.7.2)"
+			],
+			"manifests": "package.json and contracts/fundraiser/Cargo.toml",
+			"deployableContracts": ["contracts/fundraiser"],
+			"testFiles": { "byConvention": 15, "readerSees": [] },
+			"ci": [".github/workflows/release.yml", ".github/workflows/test.yml"],
+			"lastCommitAt": "2026-10-02T07:23:05Z",
+			"commitCount": 5,
+			"releases": {
+				"count": 1,
+				"latest": "v1.0.0_contracts_fundraiser_fundraiser_cli27.0.0",
+				"latestAt": "2026-09-29T06:02:18Z"
+			},
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"freighter.app (the wallet's site)",
+				"http://localhost:3000",
+				"a GitHub link"
+			],
+			"contractIds": [],
+			"notes": "byConvention includes tests/fixtures/stellar/fake-network.mjs, placed in tests/."
+		},
+		{
+			"repo": "repo-09",
+			"stellarPackages": [
+				"@creit.tech/stellar-wallets-kit (^2.6.0)",
+				"@stellar/stellar-sdk (^17.1.0)",
+				"soroban-sdk (28, workspace)"
+			],
+			"manifests": "Cargo.toml, contracts/ek_isler/Cargo.toml, frontend/package.json",
+			"deployableContracts": ["contracts/ek_isler"],
+			"testFiles": {
+				"byConvention": 1,
+				"readerSees": [
+					"frontend/scripts/e2e.ts",
+					"frontend/scripts/e2e-dispute.ts"
+				]
+			},
+			"ci": [],
+			"lastCommitAt": "2026-09-20T08:24:55Z",
+			"commitCount": 37,
+			"releases": { "count": 0 },
+			"website": "https://ekisler.vercel.app",
+			"demoLinks": [
+				"https://ekisler.vercel.app (website and README Live demo)"
+			],
+			"otherReadmeLinks": [
+				"viewer.trustlesswork.com",
+				"tr-mock-anchor.fly.dev",
+				"stellar.expert links",
+				"GitHub links",
+				"localhost"
+			],
+			"contractIds": [
+				"CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
+				"CBPHNMV5DZ3IFT43GRQ6NS65U5W6KTRBENHK3NWFUXJCWTIK3BD72BMT (their contract)",
+				"CCP4T3O5SC6BG23XGYU32RRQ3VM6E2NF6F2XVVTHMEL3CP7NEGTRPQ7J (a sample Trustless Work escrow)"
+			],
+			"notes": "README 77,940 characters, under the 100,000 read."
+		}
+	]
+}

@@ -383,6 +383,20 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   User-Agent, no timeout and no retries, from Cloudflare's network, so its
   users likely share one per-IP limit [inferred]. See the owner decision on
   a key below.
+- The scan's test rule (`testsPresent` in `src/lib/code-signals.ts`,
+  served as `codeVerified.testsPresent` and read by the repo grade) does
+  not match Rust test-module files (`src/test.rs`, `tests.rs`,
+  `*_tests.rs`); a Soroban repo is seen only through a test directory or
+  committed `test_snapshots`. Found by the judging-review round
+  (2026-10-23), whose live read counts them: Specula-Labs/specula-contracts
+  keeps its tests only in `src/test.rs`. The effect on stored rows is not
+  measured; a change moves stored facts and, after a regrade, grades.
+- Judging-review demo links: a demo named only in the sentence wrapped
+  above its link is not judged (Foryield/soroban-yield-vault reads
+  could-not-check), nor is a reference-style link. The third set showed a
+  previous-line window lending labels (a badge row, a docs link), so a
+  wider window needs a labelled set of README demo links first
+  (`improvements/rounds/2026-10-23-judging-review.md`).
 - scout-mcp `locate_source` trails the API from spec 1.9.106 (found in the
   review of `lane/l3-locate-ranking`, 2026-10-23): its `repo` enum
   (`scout-mcp/src/index.ts`, "keep in sync with SOURCE_REPOS") lacks
@@ -529,6 +543,12 @@ Found 2026-10-23 in review of the smart wallet O2 ship
 ## Owner decisions (safe default in brackets)
 
 - Run the gone-repos execute before 2026-10-27 10:59 UTC [run].
+- Check which GitHub token production holds for reviewSubmission's live
+  read (`GITHUB_TOKEN`, else `NEXT_PUBLIC_GITHUB_TOKEN`). If it is the scan
+  PAT's identity, the read's floor (no call under 1,500 left) and cap (240
+  calls an hour per instance) keep the scan's budget. If it is unset, reads
+  run unauthenticated at 60 an hour per egress address and mostly answer
+  could-not-check [check before HackMeridian relies on it; no change].
 - Turn on GitHub secret scanning and push protection; repository settings
   only the owner can change [on].
 - Add Yield as a gap vertical [no].

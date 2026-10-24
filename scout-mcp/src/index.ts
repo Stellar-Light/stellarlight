@@ -450,7 +450,7 @@ server.registerTool(
 	{
 		title: "Review a Stellar hackathon project from its link",
 		description:
-			"Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, how crowded its category is, and the SCF pitch view over its summary (live round, funded peers, competitors, prior art). Evidence, not a verdict. For an idea with no link → use vet_idea or scf_pitch.",
+			"Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, how crowded its category is, and the SCF pitch view over its summary (live round, funded peers, competitors, prior art). With hackathon (an event whose judging criteria Scout holds, e.g. hackmeridian-2026), each criterion comes with the evidence a judge would find in the repo, read live from GitHub, or checkable false with the reason; a GitHub repo never stored is reviewed from that read alone (stored: false). Evidence, not a verdict: an item that could not be checked is never a no. For an idea with no link → use vet_idea or scf_pitch.",
 		inputSchema: {
 			link: z
 				.string()
@@ -458,12 +458,19 @@ server.registerTool(
 				.describe(
 					"The submission's GitHub repo (owner/name or URL) or its DoraHacks link or id.",
 				),
+			hackathon: z
+				.string()
+				.min(1)
+				.optional()
+				.describe(
+					"Optional: an event slug whose judging criteria Scout holds (hackmeridian-2026). Adds review.judging and reviews a GitHub repo that is not stored from a live read; another value answers 400 with validHackathons.",
+				),
 		},
 	},
-	async ({ link }) =>
+	async ({ link, hackathon }) =>
 		asToolResult(
 			await callScout(
-				`/api/hackathons/review?link=${encodeURIComponent(link)}`,
+				`/api/hackathons/review?link=${encodeURIComponent(link)}${hackathon ? `&hackathon=${encodeURIComponent(hackathon)}` : ""}`,
 			),
 		),
 );

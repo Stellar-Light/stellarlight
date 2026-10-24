@@ -1,0 +1,264 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T22:14:26.932Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/stellar/js-stellar-sdk",
+		"stored": false,
+		"repo": {
+			"fullName": "stellar/js-stellar-sdk",
+			"url": "https://github.com/stellar/js-stellar-sdk",
+			"commit": "0f2fd40ba6db761390e3e5e4eb5c432234696a61",
+			"readAt": "2026-10-23T22:14:25.584Z",
+			"readMs": 1348,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "183 file(s) follow a test-naming convention, e.g. test/constants.ts, test/e2e/src/bindings.test.ts, test/e2e/src/cli.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit 0f2fd40.",
+									"values": [
+										"test/constants.ts",
+										"test/e2e/src/bindings.test.ts",
+										"test/e2e/src/cli.test.ts",
+										"test/e2e/src/constructor-args.test.ts",
+										"test/e2e/src/contract-client-constructor.test.ts",
+										"test/e2e/src/custom-types.test.ts",
+										"test/e2e/src/methods-as-args.test.ts",
+										"test/e2e/src/non-invoker-signing-by-contracts.test.ts",
+										"test/e2e/src/non-sim-sac-transfer.test.ts",
+										"test/e2e/src/query-contract.test.ts"
+									],
+									"count": 183
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "11 CI config file(s): .github/workflows/codeql-analysis.yml, .github/workflows/docs_build.yml, .github/workflows/docs_deploy.yml, .github/workflows/e2e.yml, .github/workflows/format.yml and 6 more. Whether the jobs run or pass is not read. Read at commit 0f2fd40.",
+									"values": [
+										".github/workflows/codeql-analysis.yml",
+										".github/workflows/docs_build.yml",
+										".github/workflows/docs_deploy.yml",
+										".github/workflows/e2e.yml",
+										".github/workflows/format.yml",
+										".github/workflows/guides_pr.yml",
+										".github/workflows/npm_publish.yml",
+										".github/workflows/socket-basics.yml",
+										".github/workflows/socket-scan.yml",
+										".github/workflows/tests.yml",
+										".github/workflows/update-completed-sprint-on-issue-closed.yml"
+									],
+									"count": 11
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "157 GitHub release(s); the latest, v16.4.1, published 2026-10-22.",
+									"values": ["v16.4.1"],
+									"count": 157
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit 0f2fd40.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "found",
+									"finding": "The repo's website field: https://stellar.github.io/js-stellar-sdk/. Not opened, so what it shows is not checked, nor whether it loads.",
+									"values": ["https://stellar.github.io/js-stellar-sdk/"],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "No link in README.md is labelled as a demo or live app; whether one of its 19 other link(s) is a demo is not judged: https://badge.fury.io/js/@stellar%2Fstellar-sdk, https://deepwiki.com/stellar/js-stellar-sdk, https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/{version}/stellar-sdk.js and 16 more.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 2 Stellar package(s) Scout recognises: @stellar/js-xdr, @stellar/stellar-xdr-json. Read at commit 0f2fd40.",
+									"values": ["@stellar/js-xdr", "@stellar/stellar-xdr-json"],
+									"count": 2
+								},
+								{
+									"id": "contractCrates",
+									"state": "not-found",
+									"finding": "No Cargo.toml in the tree, so no Soroban contract crate. A dapp that calls contracts deployed elsewhere has none. Read at commit 0f2fd40.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit 0f2fd40.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "1205 commit(s) on main, the last on 2026-10-21; the repo was created on 2015-04-09.",
+									"values": ["2026-10-21T18:55:06Z"],
+									"count": 1205
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "183 file(s) follow a test-naming convention, e.g. test/constants.ts, test/e2e/src/bindings.test.ts, test/e2e/src/cli.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit 0f2fd40.",
+									"values": [
+										"test/constants.ts",
+										"test/e2e/src/bindings.test.ts",
+										"test/e2e/src/cli.test.ts",
+										"test/e2e/src/constructor-args.test.ts",
+										"test/e2e/src/contract-client-constructor.test.ts",
+										"test/e2e/src/custom-types.test.ts",
+										"test/e2e/src/methods-as-args.test.ts",
+										"test/e2e/src/non-invoker-signing-by-contracts.test.ts",
+										"test/e2e/src/non-sim-sac-transfer.test.ts",
+										"test/e2e/src/query-contract.test.ts"
+									],
+									"count": 183
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "11 CI config file(s): .github/workflows/codeql-analysis.yml, .github/workflows/docs_build.yml, .github/workflows/docs_deploy.yml, .github/workflows/e2e.yml, .github/workflows/format.yml and 6 more. Whether the jobs run or pass is not read. Read at commit 0f2fd40.",
+									"values": [
+										".github/workflows/codeql-analysis.yml",
+										".github/workflows/docs_build.yml",
+										".github/workflows/docs_deploy.yml",
+										".github/workflows/e2e.yml",
+										".github/workflows/format.yml",
+										".github/workflows/guides_pr.yml",
+										".github/workflows/npm_publish.yml",
+										".github/workflows/socket-basics.yml",
+										".github/workflows/socket-scan.yml",
+										".github/workflows/tests.yml",
+										".github/workflows/update-completed-sprint-on-issue-closed.yml"
+									],
+									"count": 11
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "157 GitHub release(s); the latest, v16.4.1, published 2026-10-22.",
+									"values": ["v16.4.1"],
+									"count": 157
+								},
+								{
+									"id": "contractCrates",
+									"state": "not-found",
+									"finding": "No Cargo.toml in the tree, so no Soroban contract crate. A dapp that calls contracts deployed elsewhere has none. Read at commit 0f2fd40.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit 0f2fd40.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "found",
+									"finding": "The repo's website field: https://stellar.github.io/js-stellar-sdk/. Not opened, so what it shows is not checked, nor whether it loads.",
+									"values": ["https://stellar.github.io/js-stellar-sdk/"],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "No link in README.md is labelled as a demo or live app; whether one of its 19 other link(s) is a demo is not judged: https://badge.fury.io/js/@stellar%2Fstellar-sdk, https://deepwiki.com/stellar/js-stellar-sdk, https://cdnjs.cloudflare.com/ajax/libs/stellar-sdk/{version}/stellar-sdk.js and 16 more.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

@@ -1,0 +1,276 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T22:14:31.413Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/stellar/freighter",
+		"stored": false,
+		"repo": {
+			"fullName": "stellar/freighter",
+			"url": "https://github.com/stellar/freighter",
+			"commit": "b1e795cf66c4c1eaa4ad68a86af3b12ce467dbee",
+			"readAt": "2026-10-23T22:14:29.935Z",
+			"readMs": 1478,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "271 file(s) follow a test-naming convention, e.g. @shared/api/__tests__/getAccountBalancesV2.test.ts, @shared/api/__tests__/internal.test.ts, @shared/api/helpers/__tests__/addBlockaidScanResults.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit b1e795c.",
+									"values": [
+										"@shared/api/__tests__/getAccountBalancesV2.test.ts",
+										"@shared/api/__tests__/internal.test.ts",
+										"@shared/api/helpers/__tests__/addBlockaidScanResults.test.ts",
+										"@shared/api/helpers/__tests__/authedFetch.test.ts",
+										"@shared/api/helpers/__tests__/buildAuthJwt.test.ts",
+										"@shared/api/helpers/__tests__/deriveAuthKeypair.test.ts",
+										"@shared/api/helpers/__tests__/extensionMessaging.test.ts",
+										"@shared/api/helpers/__tests__/fetchBackendV2.test.ts",
+										"@shared/api/helpers/__tests__/fetchCollectibles.test.ts",
+										"@shared/api/helpers/__tests__/fetchMetadataJson.test.ts"
+									],
+									"count": 271
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "14 CI config file(s): .github/workflows/codeql.yml, .github/workflows/deployFreighterApiBeta.yml, .github/workflows/deployFreighterApiProduction.yml, .github/workflows/newRelease.yml, .github/workflows/notifySlackNewIssue.yml and 9 more. Whether the jobs run or pass is not read. Read at commit b1e795c.",
+									"values": [
+										".github/workflows/codeql.yml",
+										".github/workflows/deployFreighterApiBeta.yml",
+										".github/workflows/deployFreighterApiProduction.yml",
+										".github/workflows/newRelease.yml",
+										".github/workflows/notifySlackNewIssue.yml",
+										".github/workflows/prPreview.yml",
+										".github/workflows/runIntegrationTests.yml",
+										".github/workflows/runTests.yml",
+										".github/workflows/socket-basics.yml",
+										".github/workflows/socket-scan.yml",
+										".github/workflows/submitBeta.yml",
+										".github/workflows/submitProduction.yml",
+										".github/workflows/submitSafari.yml",
+										".github/workflows/testSlack.yml"
+									],
+									"count": 14
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "422 GitHub release(s); the latest, 5.49.0, published 2026-10-06.",
+									"values": ["5.49.0"],
+									"count": 422
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit b1e795c.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "not-found",
+									"finding": "The repo sets no website field.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "No link in README.md is labelled as a demo or live app; whether one of its 2 other link(s) is a demo is not judged: https://www.freighter.app/, https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 5 Stellar package(s) Scout recognises: @stellar/design-system, @stellar/freighter-api, @stellar/typescript-wallet-sdk-km, stellar-hd-wallet, stellar-sdk. SDK versions as declared: @stellar/freighter-api@workspace:*. Read at commit b1e795c.",
+									"values": [
+										"@stellar/design-system",
+										"@stellar/freighter-api",
+										"@stellar/typescript-wallet-sdk-km",
+										"stellar-hd-wallet",
+										"stellar-sdk"
+									],
+									"count": 5
+								},
+								{
+									"id": "contractCrates",
+									"state": "not-found",
+									"finding": "No Cargo.toml in the tree, so no Soroban contract crate. A dapp that calls contracts deployed elsewhere has none. Read at commit b1e795c.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit b1e795c.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "1097 commit(s) on master, the last on 2026-10-20; the repo was created on 2020-03-23.",
+									"values": ["2026-10-20T16:45:44Z"],
+									"count": 1097
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "271 file(s) follow a test-naming convention, e.g. @shared/api/__tests__/getAccountBalancesV2.test.ts, @shared/api/__tests__/internal.test.ts, @shared/api/helpers/__tests__/addBlockaidScanResults.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit b1e795c.",
+									"values": [
+										"@shared/api/__tests__/getAccountBalancesV2.test.ts",
+										"@shared/api/__tests__/internal.test.ts",
+										"@shared/api/helpers/__tests__/addBlockaidScanResults.test.ts",
+										"@shared/api/helpers/__tests__/authedFetch.test.ts",
+										"@shared/api/helpers/__tests__/buildAuthJwt.test.ts",
+										"@shared/api/helpers/__tests__/deriveAuthKeypair.test.ts",
+										"@shared/api/helpers/__tests__/extensionMessaging.test.ts",
+										"@shared/api/helpers/__tests__/fetchBackendV2.test.ts",
+										"@shared/api/helpers/__tests__/fetchCollectibles.test.ts",
+										"@shared/api/helpers/__tests__/fetchMetadataJson.test.ts"
+									],
+									"count": 271
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "14 CI config file(s): .github/workflows/codeql.yml, .github/workflows/deployFreighterApiBeta.yml, .github/workflows/deployFreighterApiProduction.yml, .github/workflows/newRelease.yml, .github/workflows/notifySlackNewIssue.yml and 9 more. Whether the jobs run or pass is not read. Read at commit b1e795c.",
+									"values": [
+										".github/workflows/codeql.yml",
+										".github/workflows/deployFreighterApiBeta.yml",
+										".github/workflows/deployFreighterApiProduction.yml",
+										".github/workflows/newRelease.yml",
+										".github/workflows/notifySlackNewIssue.yml",
+										".github/workflows/prPreview.yml",
+										".github/workflows/runIntegrationTests.yml",
+										".github/workflows/runTests.yml",
+										".github/workflows/socket-basics.yml",
+										".github/workflows/socket-scan.yml",
+										".github/workflows/submitBeta.yml",
+										".github/workflows/submitProduction.yml",
+										".github/workflows/submitSafari.yml",
+										".github/workflows/testSlack.yml"
+									],
+									"count": 14
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "422 GitHub release(s); the latest, 5.49.0, published 2026-10-06.",
+									"values": ["5.49.0"],
+									"count": 422
+								},
+								{
+									"id": "contractCrates",
+									"state": "not-found",
+									"finding": "No Cargo.toml in the tree, so no Soroban contract crate. A dapp that calls contracts deployed elsewhere has none. Read at commit b1e795c.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit b1e795c.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "not-found",
+									"finding": "The repo sets no website field.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "No link in README.md is labelled as a demo or live app; whether one of its 2 other link(s) is a demo is not judged: https://www.freighter.app/, https://developer.apple.com/documentation/safariservices/safari_web_extensions/running_your_safari_web_extension#3744467.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

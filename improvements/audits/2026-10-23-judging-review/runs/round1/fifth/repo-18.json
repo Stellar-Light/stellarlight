@@ -1,0 +1,228 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T22:31:21.462Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/repo-18",
+		"stored": false,
+		"repo": {
+			"fullName": "repo-18",
+			"url": "https://github.com/repo-18",
+			"commit": "<redacted>",
+			"readAt": "2026-10-23T22:31:20.665Z",
+			"readMs": 797,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "1 file(s) follow a test-naming convention, e.g. contracts/invoice_registry/src/test.rs. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at the default branch's newest commit.",
+									"values": ["contracts/invoice_registry/src/test.rs"],
+									"count": 1
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "1 CI config file(s): .github/workflows/ci.yml. Whether the jobs run or pass is not read. Read at the default branch's newest commit.",
+									"values": [".github/workflows/ci.yml"],
+									"count": 1
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 1 contract id(s): CCG6V5QEJZ2QI7EXIRVQXCHUIFUROXUBMZPTSCRJHOO35CAQ2HZ6IJGC. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses). Read at the default branch's newest commit.",
+									"values": [
+										"CCG6V5QEJZ2QI7EXIRVQXCHUIFUROXUBMZPTSCRJHOO35CAQ2HZ6IJGC"
+									],
+									"count": 1
+								},
+								{
+									"id": "website",
+									"state": "not-found",
+									"finding": "The repo sets no website field.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "README.md links 1 page(s) its text labels as a demo or live app (words such as demo, live app, deployed, website): https://owner-17.github.io/bill-generator-frontend/. Not opened, so whether they load is not checked. Read at the default branch's newest commit.",
+									"values": [
+										"https://owner-17.github.io/bill-generator-frontend/"
+									],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 1 Stellar package(s) Scout recognises: soroban-sdk. SDK versions as declared: soroban-sdk 22.0.0. Read at the default branch's newest commit.",
+									"values": ["soroban-sdk"],
+									"count": 1
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/invoice_registry; soroban-sdk 22.0.0 as declared. Whether they build or are deployed is not read here. Read at the default branch's newest commit.",
+									"values": ["contracts/invoice_registry"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 1 contract id(s): CCG6V5QEJZ2QI7EXIRVQXCHUIFUROXUBMZPTSCRJHOO35CAQ2HZ6IJGC. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses). Read at the default branch's newest commit.",
+									"values": [
+										"CCG6V5QEJZ2QI7EXIRVQXCHUIFUROXUBMZPTSCRJHOO35CAQ2HZ6IJGC"
+									],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "8 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-10-19.",
+									"values": ["2026-10-23T22:10:35Z"],
+									"count": 8
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "1 file(s) follow a test-naming convention, e.g. contracts/invoice_registry/src/test.rs. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at the default branch's newest commit.",
+									"values": ["contracts/invoice_registry/src/test.rs"],
+									"count": 1
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "1 CI config file(s): .github/workflows/ci.yml. Whether the jobs run or pass is not read. Read at the default branch's newest commit.",
+									"values": [".github/workflows/ci.yml"],
+									"count": 1
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "1 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/invoice_registry; soroban-sdk 22.0.0 as declared. Whether they build or are deployed is not read here. Read at the default branch's newest commit.",
+									"values": ["contracts/invoice_registry"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 1 contract id(s): CCG6V5QEJZ2QI7EXIRVQXCHUIFUROXUBMZPTSCRJHOO35CAQ2HZ6IJGC. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses). Read at the default branch's newest commit.",
+									"values": [
+										"CCG6V5QEJZ2QI7EXIRVQXCHUIFUROXUBMZPTSCRJHOO35CAQ2HZ6IJGC"
+									],
+									"count": 1
+								},
+								{
+									"id": "website",
+									"state": "not-found",
+									"finding": "The repo sets no website field.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "README.md links 1 page(s) its text labels as a demo or live app (words such as demo, live app, deployed, website): https://owner-17.github.io/bill-generator-frontend/. Not opened, so whether they load is not checked. Read at the default branch's newest commit.",
+									"values": [
+										"https://owner-17.github.io/bill-generator-frontend/"
+									],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

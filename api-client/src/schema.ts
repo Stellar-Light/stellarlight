@@ -319,7 +319,7 @@ export interface paths {
         };
         /**
          * Review a hackathon project from its GitHub or DoraHacks link
-         * @description Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, and the SCF pitch view over its summary (live round, funded peers, competitors, prior art). Evidence, not a verdict. For an idea with no link → use vetIdea or scfPitch.
+         * @description Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, and the SCF pitch view (live round, funded peers, competitors, prior art). hackathon=<slug> adds its judging criteria with the repo's evidence, read live, even for a repo not stored. Evidence, not a verdict. For an idea with no link → use vetIdea or scfPitch.
          */
         get: operations["reviewSubmission"];
         put?: never;
@@ -4450,8 +4450,10 @@ export interface operations {
     reviewSubmission: {
         parameters: {
             query: {
-                /** @description The submission's GitHub repo (owner/name or its URL) or its DoraHacks link or id. A repo submitted more than once resolves to its placed entry, then the newest. */
+                /** @description The submission's GitHub repo (owner/name or its URL) or its DoraHacks link or id. A repo submitted more than once resolves to its placed entry, then the newest. With hackathon, a GitHub repo with no stored submission is read live instead of answering 404. */
                 link: string;
+                /** @description An event whose judging criteria Scout holds as data. Adds review.judging: each of the event's criteria, in its record's words, with the evidence a judge would find in the repo, or checkable false with the reason (decks, videos, submission answers and intake goals are not read). The repo is read live from GitHub at its default branch's newest commit: read-only, inside 4 seconds, cached 5 minutes per repo, at most 20 such requests a minute per caller, and never past a repo that is not public. One caller may spend at most a quarter of a server's hourly live-read budget; past it, its reads answer could-not-check. Any other value answers 400 with validHackathons. */
+                hackathon?: "hackmeridian-2026";
             };
             header?: never;
             path?: never;
@@ -4756,19 +4758,92 @@ export interface operations {
                                 /** @description Deterministic derivations from served facts: each names its evidence; not judgments. */
                                 angles?: string[];
                             };
+                            /** @description Present only with hackathon. true: the link is a stored submission, and every field above is served as without hackathon. false: a GitHub repo with no stored submission, read live; only link, stored, security, repo and judging are served, since there are no stored facts, checks, similar submissions or pitch. */
+                            stored?: boolean;
+                            /** @description Present only on a review with stored false whose repo is held for malware: the repo is not read, so every repo item says could-not-check. A stored submission carries its hold in submission.security. Absent means no hold on record, not that the repo is safe. */
+                            security?: {
+                                held?: boolean;
+                                note?: string;
+                            };
+                            /** @description Present only with hackathon: the live GitHub read the judging evidence rests on. null when no read ran (no repo on the submission, a repo held for malware) or GitHub answered 404 for a stored submission's repo; the evidence then says could-not-check with the reason. */
+                            repo?: {
+                                /** @description owner/name as GitHub answers it (a renamed repo answers its new name). */
+                                fullName?: string;
+                                url?: string;
+                                /** @description The default branch's newest commit: the tree, manifests and README were all read at it, and findings read from them name it. null for an empty repository, or when the commits did not answer (then those parts were not read either). */
+                                commit?: string | null;
+                                /**
+                                 * Format: date-time
+                                 * @description When the read ran. A read is kept 5 minutes per repo, 1 minute when a part did not answer.
+                                 */
+                                readAt?: string;
+                                /** @description How long the read took, inside its 4-second budget. */
+                                readMs?: number;
+                                /** @description The parts not read; every evidence item resting on one says could-not-check, and its finding gives that part's own reason (GitHub's answer or silence for it, a listing cut short, a file that is not UTF-8 text, a manifest over 512 KB, more manifests than the 12 a read takes). [] when every part was read. */
+                                unread?: ("metadata" | "tree" | "manifests" | "readme" | "commits" | "releases")[];
+                            } | null;
+                            /** @description Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason. Evidence, not a verdict: no score, no pass or fail. Categories and criteria keep the sentence's order; the order is not a rank. */
+                            judging?: {
+                                hackathon?: {
+                                    slug?: string;
+                                    title?: string;
+                                };
+                                /** @description The organizer's page the criteria were checked against. */
+                                source?: string;
+                                /** Format: date */
+                                checkedOn?: string;
+                                categories?: {
+                                    /** @description A category the event judges entries in (getHackathon tracks with kind category). */
+                                    category?: string;
+                                    criteria?: {
+                                        /** @description In the judging sentence's own words. */
+                                        criterion?: string;
+                                        /** @description false: judged from what Scout does not read (pitch deck, demo video, submission answers, goals set at pre-event intake); reason says which, and evidence is null. */
+                                        checkable?: boolean;
+                                        /** @description Why it cannot be checked from the repo; null when checkable. */
+                                        reason?: string | null;
+                                        /** @description The facts that bear on the criterion; null when not checkable. One fact can serve several criteria and repeats in each. */
+                                        evidence?: {
+                                            /**
+                                             * @description stellarPackages: Stellar packages its manifests declare (Scout's list). contractCrates: Cargo.toml crates building a deployable Soroban contract. contractIds: contract ids the README names, not checked on chain. testFiles: files that follow a test-naming convention (the finding lists the conventions; a test named otherwise is not counted). ciConfig: CI config files. releases: GitHub releases. website: the repo's website field, whatever it points at, not opened and not called a demo. demoLinks: README links Scout reads as labelled a demo or live app (by its label words; a link labelled otherwise is not listed, a link whose words say docs is not a demo, and links inside HTML comments are not read), not opened. lastCommit: commits on the default branch and the last one's date. scfRound: the live SCF round state from communityfund.stellar.org, the source scfPitch reads.
+                                             * @enum {string}
+                                             */
+                                            id?: "stellarPackages" | "contractCrates" | "contractIds" | "testFiles" | "ciConfig" | "releases" | "website" | "demoLinks" | "lastCommit" | "scfRound";
+                                            /**
+                                             * @description found: read and present. not-found: read and absent, only within what the finding says was read. could-not-check: not read (GitHub did not answer, the budget was spent, a file was cut short, or a link could not be judged); never a no. Not dated here: every item rests on the one live read, dated by review.repo.readAt at the commit in review.repo.commit.
+                                             * @enum {string}
+                                             */
+                                            state?: "found" | "not-found" | "could-not-check";
+                                            /** @description One sentence: the fact, what was read, and what was not. */
+                                            finding?: string;
+                                            /** @description The cited values as written (package names, crate directories, contract ids, file paths, the latest release tag, URLs, the last commit's ISO date, open SCF rounds); a sample when count is larger. [] with not-found; null with could-not-check. */
+                                            values?: string[] | null;
+                                            /** @description The total behind values (test files following a convention, a floor of the repo's tests; CI files; releases; commits on the default branch; contract ids; Stellar packages; contract crates). null when not counted, and whenever the part read was partial (a manifest unread, the tree listing or the README cut short), since a count over part of the repo is not its total; the finding then says what was not read. */
+                                            count?: number | null;
+                                        }[] | null;
+                                    }[];
+                                }[];
+                            };
                         };
                     };
                 };
             };
-            /** @description No link, or a parameter other than link. */
+            /** @description No link, a parameter other than link and hackathon, or a hackathon value whose judging criteria Scout does not hold (validHackathons lists those it does). */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description No stored submission matches the link (not proof it was never submitted). */
+            /** @description No stored submission matches the link (not proof it was never submitted). With hackathon, a GitHub repo link answers 404 only when no public repo answers there (it does not exist or is private). */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description With hackathon, this caller's window (20 a minute per IP or partner key, per server instance) is spent; Retry-After says when to retry. */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };
