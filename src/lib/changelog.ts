@@ -31,7 +31,7 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
-		date: "2026-10-23",
+		date: "2026-10-24",
 		surfaces: ["api-client"],
 		version: "api-client@1.10.0",
 		type: "added",
