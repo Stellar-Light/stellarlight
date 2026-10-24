@@ -2,7 +2,7 @@
 
 Evidence for `improvements/rounds/2026-10-23-question-filler.md` (lane Q1).
 
-**Verdict: C2 ships** (spec@1.9.115 as a placeholder). It meets (a) to (e)
+**Verdict: C2 ships** as spec 1.9.110 (1.9.115 was the placeholder in review). It meets (a) to (e)
 as the ledger fixed them before any replay. One limit the orchestrator
 should weigh: criterion (b) is read before the reranker, as the ledger
 says. The live order also runs the reranker, which reorders the first 50
