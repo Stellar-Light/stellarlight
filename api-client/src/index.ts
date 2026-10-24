@@ -75,7 +75,14 @@ type QueryOf<P extends keyof paths> = paths[P] extends {
 
 export type GetPartnersParams = QueryOf<"/api/partners">;
 export type GetPeopleParams = QueryOf<"/api/people">;
-export type SearchHackathonBuildsParams = QueryOf<"/api/hackathons/builds">;
+// 1.9.1 typed winnersOnly as a boolean; the schema has it as a string enum, so
+// keep accepting both rather than break a call that compiled before.
+export type SearchHackathonBuildsParams = Omit<
+	QueryOf<"/api/hackathons/builds">,
+	"winnersOnly"
+> & {
+	winnersOnly?: boolean | QueryOf<"/api/hackathons/builds">["winnersOnly"];
+};
 export type AnalyzeHackathonSubmissionsParams =
 	QueryOf<"/api/hackathons/analyze">;
 export type ReviewSubmissionParams = QueryOf<"/api/hackathons/review">;
@@ -170,7 +177,9 @@ export class ScoutClient {
 
 	/** Curated directory of ecosystem partners (audit firms, anchors, on/off-ramps, infra). */
 	getPartners(
-		params: GetPartnersParams = {},
+		// 1.9.1 took an open record, and the API normalizes labels ("Europe",
+		// accepting=1), so the open form stays legal beside the typed one.
+		params: GetPartnersParams | Record<string, unknown> = {},
 	): Promise<Record<string, unknown>> {
 		return this.get("/api/partners", params);
 	}

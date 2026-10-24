@@ -14,11 +14,14 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import ts from "typescript";
 import { describe, expect, it } from "vitest";
+import { spec as specSource } from "../openapi-spec";
 
+// The same source the rest of the suite reads (specs/openapi.json is generated from it).
+const spec = specSource as unknown as {
+	paths: Record<string, PathItem>;
+	components: { parameters: Record<string, Param> };
+};
 const root = process.cwd();
-const spec = JSON.parse(
-	readFileSync(path.join(root, "specs/openapi.json"), "utf8"),
-);
 const clientDir = path.join(root, "api-client");
 
 interface Op {
@@ -44,7 +47,7 @@ const resolveParam = (p: Param): Param =>
 	p.$ref ? spec.components.parameters[p.$ref.split("/").pop() as string] : p;
 
 const ops: Op[] = [];
-for (const item of Object.values<PathItem>(spec.paths)) {
+for (const item of Object.values(spec.paths)) {
 	for (const [method, op] of Object.entries(item)) {
 		if (!op || Array.isArray(op) || !op.operationId) continue;
 		ops.push({
@@ -78,8 +81,9 @@ function diagnose(source: string): string[] {
 		skipLibCheck: true,
 		resolveJsonModule: true,
 		noEmit: true,
-		types: ["node"],
-		typeRoots: [path.join(clientDir, "node_modules/@types")],
+		// index.ts needs no Node globals, and CI installs only the root, so there is
+		// no api-client/node_modules/@types to point at.
+		types: [],
 	};
 	const host = ts.createCompilerHost(options);
 	const read = host.readFile.bind(host);
@@ -151,5 +155,63 @@ describe("api-client covers the spec", () => {
 			return e;
 		});
 		expect(bad, "query parameters a method's params type rejects").toEqual([]);
+	}, 120_000);
+
+	// A minor version must not break callers. Every call below compiled against
+	// 1.9.1's signatures (inline string/number/boolean params, an open record for
+	// getPartners, the schema aliases for the rest), including ones a stricter
+	// schema type would reject: a string variable where the schema has an enum,
+	// a boolean where it has a string enum, a number where it has a boolean, an
+	// undeclared key.
+	it("accepts every call form 1.9.1 accepted", () => {
+		const errors = diagnose(`import { ScoutClient } from "./index";
+declare const c: ScoutClient;
+declare const s: string;
+declare const n: number;
+declare const b: boolean;
+declare const r: Record<string, unknown>;
+c.getStatus();
+c.searchProjects({ q: s, scfAwarded: true, limit: n });
+c.searchRepos({ q: s, language: s, limit: n });
+c.explainRepo({ q: s, repo: s });
+c.getPartners();
+c.getPartners({});
+c.getPartners(r);
+c.getPartners({ accepting: 1, all: 1, region: "Europe", type: s, offset: 10 });
+c.getPartners({ q: s, sector: s, ramps: s, limit: n, fields: s });
+c.getChangelog({ since: s, limit: n });
+c.getHackathons({ limit: n });
+c.getHackathon(s);
+c.compareHackathons([s, s]);
+c.getBuilders({ q: s, limit: n });
+c.getRfps({ status: "open", limit: n });
+c.searchResearch({ q: s, limit: n });
+c.listSkills();
+c.getSkill(s);
+c.getClusters({ dimension: "category" });
+c.analyzeEcosystem({ dimension: "all" });
+c.getLeaderboard();
+c.getStablecoins({ sort: s, peg: s, limit: n });
+c.vetIdea({ q: s });
+c.scfPitch({ q: s });
+c.hackathonBrief({ q: s });
+c.searchHackathonBuilds();
+c.searchHackathonBuilds({ q: s, winnersOnly: true, track: s, limit: n });
+c.searchHackathonBuilds({ winnersOnly: b });
+c.listAudits({ project: s, auditor: s, q: s, since: s, limit: n, offset: n });
+c.listContracts({ q: s, domain: s, limit: n, offset: n });
+c.getRepoTrust({ repo: s });
+c.resolveProject({ q: s });
+c.getPeople();
+c.getPeople({ q: s, section: s });
+c.getPartner(s);
+c.matchPartners(r);
+c.partnerAssistant(r);
+c.partnerOnboard(r);
+c.submitPartnerListing(r);
+c.getChanges({ since: s, surfaces: s, limit: n });
+c.getFeedbackSchema();
+`);
+		expect(errors, "1.9.1 call forms the current types reject").toEqual([]);
 	}, 120_000);
 });
