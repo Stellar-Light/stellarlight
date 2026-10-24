@@ -32,7 +32,7 @@ query that is not a question is unchanged.
 shipped `src/lib/hackathon-builds.ts` is that file with one review fix:
 the opener must be followed by a space (`(?=\s)` in place of `\b`), so
 "how-to win hackathon prizes" is a topic, not a question. Replayed over
-every capture (325 queries), C2 with the fix is byte-identical to the
+every capture (328 queries), C2 with the fix is byte-identical to the
 measured C2, note lines included, so every result below holds. C1
 (`c1.diff`) drops the same words in every q, question or not.
 `ENTRY_WORDS` is not reused because it also holds topic words (event,

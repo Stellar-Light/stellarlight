@@ -191,7 +191,7 @@ Its four items, each answered:
    after it (`(?=\s)`). Test first: "reads an opener as a question word
    only before a space" failed on 49f4974c (1 concept where 4 are due) and
    passes with the fix (`failing-first.txt`). Replayed over every capture
-   (325 queries), C2 with the fix is byte-identical to the measured C2,
+   (328 queries), C2 with the fix is byte-identical to the measured C2,
    note lines included; nothing moved. Not changed by the fix, as designed:
    "is prize pool game live" opens with is and a space, so it is read as a
    question asked without its mark and searches pool and game; the
