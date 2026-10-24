@@ -707,10 +707,12 @@ const QUESTION_FILLER = new Set([
 ]);
 
 /** q asks a question: it ends with a question mark or opens with a question
- * word or an auxiliary ("which", "has", "did"). */
+ * word or an auxiliary ("which", "has", "did") followed by a space. A hyphen
+ * or an apostrophe after it ("how-to", "do-it-yourself", "who's") is a
+ * topic, not a question (review, 2026-10-23). */
 const isQuestion = (q: string) =>
 	/\?\s*$/.test(q) ||
-	/^(which|who|whom|whose|what|where|when|why|how|has|have|had|did|does|do|is|are|was|were|can|could|will|would|should)\b/.test(
+	/^(which|who|whom|whose|what|where|when|why|how|has|have|had|did|does|do|is|are|was|were|can|could|will|would|should)(?=\s)/.test(
 		q,
 	);
 

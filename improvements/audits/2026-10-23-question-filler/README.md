@@ -23,12 +23,17 @@ counting as concepts:
 - past, ever, previous, previously, anyone, someone, already, before.
 
 A question here means q ends with "?" or opens with a question word or an
-auxiliary (which, who, has, did, is, can and similar). If dropping the
+auxiliary (which, who, has, did, is, can and similar) followed by a
+space. If dropping the
 words leaves no concept, they stay (q=who won? still searches won). A
 query that is not a question is unchanged.
 
 `c2.diff` is the candidate as pinned in the method commit (971c9b78). The
-shipped `src/lib/hackathon-builds.ts` is byte-identical to it. C1
+shipped `src/lib/hackathon-builds.ts` is that file with one review fix:
+the opener must be followed by a space (`(?=\s)` in place of `\b`), so
+"how-to win hackathon prizes" is a topic, not a question. Replayed over
+every capture (325 queries), C2 with the fix is byte-identical to the
+measured C2, note lines included, so every result below holds. C1
 (`c1.diff`) drops the same words in every q, question or not.
 `ENTRY_WORDS` is not reused because it also holds topic words (event,
 team, leaderboard).
@@ -192,13 +197,17 @@ The data shows why gating matters:
 
 ## Grades (`grades.json`, `grader-prompt.txt`)
 
-- **77 rows** a criterion or the report reads had no earlier grade. They
-  went on one shuffled sheet with no mark of which variant listed a build.
+- **81 rows** in `grades.json`: every row a criterion or the report reads
+  that had no earlier grade. They came from 77 rows on one shuffled sheet
+  with no mark of which variant listed a build; the 4 rows of the
+  battery's sa-02 question appear twice in the file, once under each
+  capture's id (held out sa02-verbatim, held out hm26-sa-02).
   The rows are every build entering or leaving a top 5, top 20 or matched
   list on a changed query (frozen sets, battery capture, fresh set), base
   to c1 or c2.
 - **Two independent Claude Sonnet passes**, each in its own order, agree
-  on 76 of 77. The stricter grade is kept.
+  on 80 of the 81 rows (76 of the 77 sheet rows). The one disagreement,
+  4Bridge on held out hm26-cc-02 (2 against 1), keeps the stricter 1.
 - **Earlier grades reused:** the O2 round's `grades.json` and the labeled
   sets' labels.
 - Battery questions are named by id; their text stays in scratch.
@@ -232,10 +241,14 @@ the q parameter's description.
   count their words as concepts: "Did any team...", "first place",
   "entries", "exist". A question whose topic is one of the 24 words (a game
   where players win prizes) searches that word only by meaning. f01 and f13
-  are such questions; neither loses its required item.
-- **Questions with "?" inside q** but neither ending in "?" nor opening
-  with a listed word are not treated as questions. No frozen or fresh
-  query has that shape.
+  are such questions; neither loses its required item. So does a question
+  asked without its mark: "is prize pool game live" searches pool and game.
+- **The opener list is a hand list too.** Not read as questions, so their
+  outcome words still count: an imperative ("show me winners that...",
+  "list winners who..."), a leading "any", a quoted question, and a q whose
+  only "?" is mid-query. An opener joined by a hyphen or an apostrophe
+  ("how-to", "do-it-yourself", "who's") is read as a topic (review fix).
+  No frozen or fresh query has any of these shapes.
 - **Labels come from summaries.** The fresh set was labelled from stored
   summaries (identical to the public DoraHacks text), not from the full
   write-ups.

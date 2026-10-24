@@ -149,8 +149,10 @@ by two independent Claude Sonnet passes; the stricter grade is kept.
 - Base replays equal the O2 round's shipped replays on all 305 frozen
   queries, byte for byte, note lines too. Then c1 and c2 replays over the
   frozen captures, the battery capture and the fresh set.
-- 77 moved rows graded blind, two Claude Sonnet passes, agreement 76 of
-  77; stricter grade kept.
+- 77 moved rows graded blind on one sheet, two Claude Sonnet passes,
+  agreement 76 of 77; stricter grade kept. `grades.json` holds 81 rows (the
+  4 sa-02 rows under both captures' ids), agreement 80 of 81 (corrected
+  after review; see Review and fix).
 - Rule L claims: `check-unused.py`, 0 false of 592 (c2 and c1).
 
 ## Outcome
@@ -174,3 +176,45 @@ by two independent Claude Sonnet passes; the stricter grade is kept.
 
 C1 meets the same criteria and changes 4 more frozen non-questions; by the
 rule fixed above, C2 ships.
+
+## Review and fix
+
+Independent review of 49f4974c by Claude Fable 5.1, high effort: GATE
+push. It reproduced the pinned candidate, all 36 replay outputs byte for
+byte, 297 of 297 identical non-questions and 0 false unused-word claims.
+Its four items, each answered:
+
+1. **Opener boundary.** `\b` after the opener group accepted a hyphen or
+   an apostrophe, so "how-to win hackathon prizes" became the one concept
+   how-to, "do-it-yourself prize wheel" lost prize and "who's who directory
+   of past winners" lost past and winners. Fixed: the opener needs a space
+   after it (`(?=\s)`). Test first: "reads an opener as a question word
+   only before a space" failed on 49f4974c (1 concept where 4 are due) and
+   passes with the fix (`failing-first.txt`). Replayed over every capture
+   (325 queries), C2 with the fix is byte-identical to the measured C2,
+   note lines included; nothing moved. Not changed by the fix, as designed:
+   "is prize pool game live" opens with is and a space, so it is read as a
+   question asked without its mark and searches pool and game; the
+   changelog and README say so.
+2. **Changelog.** The detail now says plainly that live, after the
+   reranker, the three battery questions are expected to meet 3 of 6
+   required winners, not the replay's 4, and why (the reranker is not
+   replayed; DeFi Quest's passkey is only a declared package, which the
+   reranker does not read). It names the shapes not read as questions: an
+   imperative (show me, list), a leading any, a quoted question, a "?"
+   only mid-query, and an opener joined by a hyphen or an apostrophe. The
+   q parameter's description and the skill reference say "followed by a
+   space".
+3. **Grade count.** `grades.json` holds 81 rows: the 77 sheet rows, with
+   the 4 rows of the sa-02 question under both captures' ids. The passes
+   agree on 80 of 81 (76 of 77 sheet rows); the one disagreement is
+   4Bridge on hm26-cc-02, 2 against 1, kept at 1. The file's `agreement`
+   field, the README and the log line above now say so.
+4. **README open risks.** The imperative class and the other shapes not
+   read as questions sit beside the hand list.
+
+Checks after the fix: tsc exit 0; vitest 2,830 of 2,830 (220 files);
+contract:write and contract:check exit 0, routing-surface-check OK; Raven
+gate ACCEPT 1.9.115 (exit 0, 2 gains, no losses); check-answer-dating
+GREEN; route-exports-check and changelog-contract-check pass; biome clean;
+gitleaks over origin/main..HEAD no leaks; no em or en dash in added lines.

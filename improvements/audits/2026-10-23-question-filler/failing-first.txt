@@ -25,3 +25,13 @@
    ✓ a question's outcome words are not concepts > counts the question's topic words for the unused-words rule 4ms
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
       Tests  1 failed | 4 passed | 73 skipped (78)
+
+# Review fix (opener boundary): the new test on the shipped C2 (49f4974c), before the fix.
+   × a question's outcome words are not concepts > reads an opener as a question word only before a space 11ms
+     → expected 1 to be 4 // Object.is equality
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 78 skipped (79)
+
+# With the fix:
+ ✓ src/lib/__tests__/hackathon-builds.test.ts (79 tests | 73 skipped) 25ms
+      Tests  6 passed | 73 skipped (79)

@@ -1871,6 +1871,15 @@ describe("a question's outcome words are not concepts", () => {
 		expect(out[0].matched).toEqual(["won"]);
 	});
 
+	// Review, 2026-10-23: an opener joined by a hyphen or an apostrophe
+	// ("how-to", "do-it-yourself", "who's") read a topic as a question.
+	it("reads an opener as a question word only before a space", () => {
+		const concepts = (q: string) => wordsNoBuildUses(pool, q).concepts;
+		expect(concepts("how-to win hackathon prizes")).toBe(4);
+		expect(concepts("do-it-yourself prize wheel")).toBe(3);
+		expect(concepts("which passkey projects won prizes")).toBe(1);
+	});
+
 	it("counts the question's topic words for the unused-words rule", () => {
 		expect(
 			wordsNoBuildUses(

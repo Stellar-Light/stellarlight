@@ -10,5 +10,5 @@ for n in "$@"; do
   cap=$(python3 -I -c "import json,sys;print(json.load(open('$S/captures.json'))[sys.argv[1]])" "$n")
   pnpm exec tsx improvements/audits/2026-10-23-smart-wallet-o2/replay.mts "$cap" "$v" "$S/out/$n-$v.json" "$S/out/$n-$v.note.txt"
 done
-cp "$S/hb.base.ts" src/lib/hackathon-builds.ts
-cmp src/lib/hackathon-builds.ts "$S/hb.base.ts" && git diff --quiet src/lib/hackathon-builds.ts && echo restored
+cp "${RESTORE:-$S/hb.base.ts}" src/lib/hackathon-builds.ts
+cmp src/lib/hackathon-builds.ts "${RESTORE:-$S/hb.base.ts}" && echo restored
