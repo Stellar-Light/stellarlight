@@ -672,6 +672,50 @@ const WINNER_EDGE = 1.25;
  * question about X, so "like" must not count as a concept a build covers. */
 const QUERY_FILLER = new Set(["like", "similar"]);
 
+/** Words a question uses to ask about a build's outcome or history, not
+ * what it does: "Which passkey projects have won prizes at hackathons?"
+ * asks for passkey builds. Counted as concepts, they matched games with
+ * prize pools and halved the share a passkey build could cover. Dropped in
+ * a question only: in "a fantasy game whose winners split the prize pool"
+ * they are the idea. ponytail: a hand list, as ENTRY_WORDS is; that list
+ * also holds topic words (event, team, leaderboard), so it is not reused. */
+const QUESTION_FILLER = new Set([
+	"won",
+	"win",
+	"wins",
+	"winner",
+	"winners",
+	"winning",
+	"prize",
+	"prizes",
+	"award",
+	"awards",
+	"awarded",
+	"placed",
+	"hackathon",
+	"hackathons",
+	"built",
+	"builds",
+	"past",
+	"ever",
+	"previous",
+	"previously",
+	"anyone",
+	"someone",
+	"already",
+	"before",
+]);
+
+/** q asks a question: it ends with a question mark or opens with a question
+ * word or an auxiliary ("which", "has", "did") followed by a space. A hyphen
+ * or an apostrophe after it ("how-to", "do-it-yourself", "who's") is a
+ * topic, not a question (review, 2026-10-23). */
+const isQuestion = (q: string) =>
+	/\?\s*$/.test(q) ||
+	/^(which|who|whom|whose|what|where|when|why|how|has|have|had|did|does|do|is|are|was|were|can|could|will|would|should)(?=\s)/.test(
+		q,
+	);
+
 /** A term of three letters or fewer ("ai", "zk", "nft") matches as a whole
  * word only: as a substring, "ai" hit every "chain", "paid" and "maintain". */
 function termMatcher(v: string): (hay: string) => boolean {
@@ -756,13 +800,20 @@ type Term = {
 /** The concepts a query is searched by: its words less query filler and the
  * generic words every submission says, each with the forms it matches. */
 function queryTerms(query: string): Term[] {
-	const raw = [
-		...new Set(
-			contentTokens(query.replace(SMART_PHRASE, "smart-$1")).filter(
-				(t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t),
-			),
+	// A question's question marks are punctuation: "hackathons?" was a
+	// concept no build holds, and "protocol?" escaped the stopword list.
+	const question = isQuestion(query);
+	const words = contentTokens(
+		(question ? query.replace(/\?/g, " ") : query).replace(
+			SMART_PHRASE,
+			"smart-$1",
 		),
-	];
+	).filter((t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t));
+	// A question of filler alone ("who won?") still searches its words.
+	const topical = question
+		? words.filter((t) => !QUESTION_FILLER.has(t))
+		: words;
+	const raw = [...new Set(topical.length ? topical : words)];
 	// A hyphenated phrase is one concept: "pay-per-call" also matches
 	// "pay per call", "paypercall" and the plural, and its parts stop
 	// counting on their own (they made one phrase weigh three times).
