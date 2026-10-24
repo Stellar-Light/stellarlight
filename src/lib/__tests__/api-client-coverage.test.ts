@@ -1,0 +1,142 @@
+/**
+ * The published client must not drift from the spec again: every operationId in
+ * specs/openapi.json has a ScoutClient method of the same name, and for every
+ * GET the method's params type accepts each query parameter the spec declares.
+ *
+ * Checked with the TypeScript compiler against api-client/src/index.ts, so a
+ * `Record<string, unknown>` or a stale inline type that omits a parameter fails
+ * the same way a missing method does. POST operations (submitFeedback and the
+ * partner flows) are checked for the method only: their bodies are typed by the
+ * spec's request schemas or left open, and they declare no query parameters.
+ */
+
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import ts from "typescript";
+import { describe, expect, it } from "vitest";
+
+const root = process.cwd();
+const spec = JSON.parse(
+	readFileSync(path.join(root, "specs/openapi.json"), "utf8"),
+);
+const clientDir = path.join(root, "api-client");
+
+interface Op {
+	id: string;
+	method: string;
+	queryParams: string[];
+}
+
+const resolveParam = (p: { $ref?: string; name?: string; in?: string }) =>
+	p.$ref ? spec.components.parameters[p.$ref.split("/").pop() as string] : p;
+
+const ops: Op[] = [];
+for (const item of Object.values<Record<string, any>>(spec.paths)) {
+	for (const [method, op] of Object.entries<any>(item)) {
+		if (!op?.operationId) continue;
+		ops.push({
+			id: op.operationId,
+			method: method.toUpperCase(),
+			queryParams: [...(item.parameters ?? []), ...(op.parameters ?? [])]
+				.map(resolveParam)
+				.filter((p) => p.in === "query")
+				.map((p) => p.name),
+		});
+	}
+}
+
+// Operations deliberately without a client method, with the reason. Empty today.
+const EXCLUDED_OPERATIONS: Record<string, string> = {};
+// Query parameters a method deliberately does not accept: "operationId.param".
+const EXCLUDED_PARAMS: Record<string, string> = {
+	"compareHackathons.slugs":
+		"takes the slugs as a positional string[] and joins them into ?slugs=",
+};
+
+const virtual = path.join(clientDir, "src/__coverage__.ts");
+
+function diagnose(source: string): string[] {
+	const options: ts.CompilerOptions = {
+		target: ts.ScriptTarget.ES2022,
+		module: ts.ModuleKind.ESNext,
+		moduleResolution: ts.ModuleResolutionKind.Bundler,
+		lib: ["lib.es2022.d.ts", "lib.dom.d.ts"],
+		strict: true,
+		skipLibCheck: true,
+		resolveJsonModule: true,
+		noEmit: true,
+		types: ["node"],
+		typeRoots: [path.join(clientDir, "node_modules/@types")],
+	};
+	const host = ts.createCompilerHost(options);
+	const read = host.readFile.bind(host);
+	const exists = host.fileExists.bind(host);
+	host.fileExists = (f) => f === virtual || exists(f);
+	host.readFile = (f) => (f === virtual ? source : read(f));
+	host.getSourceFile = (
+		(orig) =>
+		(f, lang, ...rest) =>
+			f === virtual
+				? ts.createSourceFile(f, source, lang)
+				: orig(f, lang, ...rest)
+	)(host.getSourceFile.bind(host));
+	const program = ts.createProgram([virtual], options, host);
+	return ts
+		.getPreEmitDiagnostics(program, program.getSourceFile(virtual))
+		.map((d) => {
+			const line = d.file
+				? d.file.getLineAndCharacterOfPosition(d.start ?? 0).line
+				: -1;
+			return `${line}:${ts.flattenDiagnosticMessageText(d.messageText, " ")}`;
+		});
+}
+
+describe("api-client covers the spec", () => {
+	it("has a method for every operationId", () => {
+		const src = readFileSync(path.join(clientDir, "src/index.ts"), "utf8");
+		const missing = ops
+			.filter((o) => !EXCLUDED_OPERATIONS[o.id])
+			.filter((o) => !new RegExp(`^\\t${o.id}\\(`, "m").test(src))
+			.map((o) => `${o.method} ${o.id}`);
+		expect(missing, "operations without a ScoutClient method").toEqual([]);
+	});
+
+	it("every GET method accepts every query parameter the spec declares", () => {
+		const checks = ops
+			.filter((o) => o.method === "GET")
+			.flatMap((o) =>
+				o.queryParams
+					.filter((p) => !EXCLUDED_PARAMS[`${o.id}.${p}`])
+					.map((p) => ({ o, p })),
+			);
+		// One line per (operation, parameter): assigning the parameter name to the
+		// keys of the method's first argument fails when the key is absent.
+		const arg = (id: string) =>
+			`NonNullable<Parameters<ScoutClient["${id}" & keyof ScoutClient]>[0]>`;
+		const lines = checks.map(
+			({ o, p }) =>
+				`const _${o.id}_${p}: keyof ${arg(o.id)} = ${JSON.stringify(p)};`,
+		);
+		// A string index signature (Record<string, unknown>) would accept any name,
+		// so it counts as a miss: the type must list the spec's parameters.
+		const open = [...new Set(checks.map(({ o }) => o.id))];
+		lines.push(
+			...open.map(
+				(id) =>
+					`const _open_${id}: string extends keyof ${arg(id)} ? never : true = true;`,
+			),
+		);
+		const errors = diagnose(
+			`import type { ScoutClient } from "./index";\n${lines.join("\n")}\n`,
+		);
+		const bad = errors.map((e) => {
+			const i = Number(e.split(":")[0]) - 1; // line 0 is the import
+			if (i >= 0 && i < checks.length)
+				return `${checks[i].o.id}.${checks[i].p}`;
+			if (i >= checks.length)
+				return `${open[i - checks.length]} (untyped params)`;
+			return e;
+		});
+		expect(bad, "query parameters a method's params type rejects").toEqual([]);
+	}, 120_000);
+});
