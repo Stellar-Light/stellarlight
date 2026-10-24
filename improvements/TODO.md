@@ -451,6 +451,13 @@ Found 2026-10-22 by reading how Raven calls and reads Scout
   DeFindex's living contracts repo labelled a fork. A repo that is a
   curated successor (REPO_SUCCESSIONS) could skip the fork label.
 
+Found 2026-10-24 with the production GitHub token rejected:
+
+- `/api/projects/<id>/github` serves `stargazerCount: 0`, `openIssues: 0` and `totalStars: 0` beside a
+  repo's `error` when GitHub could not be read (freighter, 2026-10-24): a zero is a claim, so a repo
+  that could not be read should serve null counts. Probe: the route for freighter while the token is
+  rejected.
+
 Found 2026-10-23 by the prize-labels lane and its review
 (`improvements/rounds/2026-10-23-prize-labels.md`):
 
@@ -542,6 +549,10 @@ Found 2026-10-23 in review of the smart wallet O2 ship
 
 ## Owner decisions (safe default in brackets)
 
+- Replace the production `GITHUB_TOKEN` (and `NEXT_PUBLIC_GITHUB_TOKEN` if set): on 2026-10-24
+  GitHub answered 401 for the token the server reads with. Live judging reads now fall back to
+  GitHub's unauthenticated limit; reads through GraphQL cannot: `/api/projects/<id>/github` for
+  freighter serves each repo with `error` "401 Unauthorized - Invalid or expired token" [replace].
 - Run the gone-repos execute before 2026-10-27 10:59 UTC [run].
 - Check which GitHub token production holds for reviewSubmission's live
   read (`GITHUB_TOKEN`, else `NEXT_PUBLIC_GITHUB_TOKEN`). If it is the scan

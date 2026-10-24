@@ -10,6 +10,7 @@ import {
 	readmePath,
 	readRepoLive,
 	resetLiveReadForTests,
+	TOKEN_RETRY_MS,
 	testPaths,
 } from "../repo-live-read";
 
@@ -672,6 +673,65 @@ describe("readRepoLive", () => {
 		// A refused read is not kept for others: another caller reads it.
 		await readRepoLive("team/g-more", { caller: "ip:other" });
 		expect(calls.length).toBe(spent + 1);
+	});
+
+	it("drops a token GitHub rejects (401) and reads the public repo without it", async () => {
+		vi.stubEnv("GITHUB_TOKEN", ["test", "only", "value"].join("-"));
+		// GitHub's 401 carries the unauthenticated pool's headers (60 an hour),
+		// which must not read as the token's pool under its floor.
+		const rejected = () =>
+			new Response('{"message":"Bad credentials"}', {
+				status: 401,
+				headers: {
+					"x-ratelimit-remaining": "55",
+					"x-ratelimit-reset": String(Math.floor(Date.now() / 1000) + 3000),
+				},
+			});
+		script((url, init) => {
+			const sent = (init as { headers?: Record<string, string> } | undefined)
+				?.headers?.authorization;
+			return url.startsWith("https://api.github.com") && sent
+				? rejected()
+				: happy(url);
+		});
+		const r = await readRepoLive("team/app");
+		expect(r.state).toBe("read");
+		if (r.state === "read") expect(r.unread).toEqual([]);
+		// One rejected call, then every REST call goes without the token.
+		const authed = inits.filter((i) => i.headers?.authorization).length;
+		expect(authed).toBe(1);
+		// A later read in the window sends no token and is not held by the pool.
+		const before = inits.length;
+		const again = await readRepoLive("team/other-app", { caller: "ip:2" });
+		expect(again.state).not.toBe("unread");
+		expect(inits.slice(before).some((i) => i.headers?.authorization)).toBe(
+			false,
+		);
+		vi.unstubAllEnvs();
+	});
+
+	it("tries the token again after the retry window, so a rotated token is used", async () => {
+		vi.stubEnv("GITHUB_TOKEN", ["test", "only", "value"].join("-"));
+		let reject = true;
+		script((url, init) => {
+			const sent = (init as { headers?: Record<string, string> } | undefined)
+				?.headers?.authorization;
+			if (url.startsWith("https://api.github.com") && sent && reject)
+				return new Response("{}", { status: 401 });
+			return happy(url);
+		});
+		const now = Date.now();
+		const spy = vi.spyOn(Date, "now").mockReturnValue(now);
+		await readRepoLive("team/app");
+		reject = false;
+		spy.mockReturnValue(now + TOKEN_RETRY_MS + 1);
+		const before = inits.length;
+		await readRepoLive("team/next-app", { caller: "ip:3" });
+		expect(inits.slice(before).some((i) => i.headers?.authorization)).toBe(
+			true,
+		);
+		spy.mockRestore();
+		vi.unstubAllEnvs();
 	});
 
 	it("makes no call while the token's pool is under the floor", async () => {
