@@ -27,20 +27,33 @@ interface Op {
 	queryParams: string[];
 }
 
-const resolveParam = (p: { $ref?: string; name?: string; in?: string }) =>
+interface Param {
+	$ref?: string;
+	name?: string;
+	in?: string;
+}
+interface PathItem {
+	parameters?: Param[];
+	[method: string]:
+		| { operationId?: string; parameters?: Param[] }
+		| Param[]
+		| undefined;
+}
+
+const resolveParam = (p: Param): Param =>
 	p.$ref ? spec.components.parameters[p.$ref.split("/").pop() as string] : p;
 
 const ops: Op[] = [];
-for (const item of Object.values<Record<string, any>>(spec.paths)) {
-	for (const [method, op] of Object.entries<any>(item)) {
-		if (!op?.operationId) continue;
+for (const item of Object.values<PathItem>(spec.paths)) {
+	for (const [method, op] of Object.entries(item)) {
+		if (!op || Array.isArray(op) || !op.operationId) continue;
 		ops.push({
 			id: op.operationId,
 			method: method.toUpperCase(),
 			queryParams: [...(item.parameters ?? []), ...(op.parameters ?? [])]
 				.map(resolveParam)
 				.filter((p) => p.in === "query")
-				.map((p) => p.name),
+				.map((p) => p.name as string),
 		});
 	}
 }

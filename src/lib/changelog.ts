@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-23",
+		surfaces: ["api-client"],
+		version: "api-client@1.10.0",
+		type: "added",
+		summary:
+			"The client catches up with the spec: new methods `getHackathonSubmission`, `analyzeHackathonSubmissions`, `reviewSubmission` (with its `hackathon` parameter), `verifyClaim`, `locateSource`, `getRwaAssets` and `getQualityReport`, and `searchHackathonBuilds`, `getPeople` and `getPartners` accept every query parameter the spec declares.",
+		detail:
+			"Version 1.9.1 was cut at spec 1.9.52 and never gained a method for seven operations the API now serves, so a consumer of the package had to hand-roll fetch calls for them. `searchHackathonBuilds` now also takes `mode`, `hackathon`, `category`, `package` and `offset`; `getPeople` takes `limit` and `offset`; `getPartners` is typed from the spec instead of an open record. Additive: every earlier call compiles unchanged. A repo test now fails when the spec has an operation without a client method or a query parameter a method's type rejects, so the client cannot fall behind silently again.",
+	},
+	{
+		date: "2026-10-23",
 		surfaces: ["api"],
 		version: "spec@1.9.110",
 		type: "fixed",
