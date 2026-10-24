@@ -379,7 +379,7 @@ export interface paths {
         };
         /**
          * List ecosystem partners
-         * @description Published Stellar ecosystem partner directory: service providers a builder hires or integrates: anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.
+         * @description Published Stellar ecosystem partner directory; service providers a builder hires or integrates: anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.
          */
         get: operations["getPartners"];
         put?: never;
@@ -1531,7 +1531,7 @@ export interface components {
                         why?: string;
                     }[];
                 };
-                /** @description Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join: empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
+                /** @description Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join; empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
                 anchorProfileBasis?: string;
                 /** @description Counting basis for the SCF fields on rows: scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups). */
                 scfCountBasis?: string;
@@ -2048,9 +2048,9 @@ export interface components {
                 stellarDeps?: string[];
                 /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check): unfakeable deployment evidence. Null when no verified address. */
                 mainnetContractId?: string | null;
-                /** @description Stellar SDK capability tags detected in the repo's JS/TS sources: what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
+                /** @description Stellar SDK capability tags detected in the repo's JS/TS sources; what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
                 sdkCapabilities?: string[];
-                /** @description Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits: what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null). */
+                /** @description Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits; what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null). */
                 codeDomains?: string[];
             } | null;
         };
@@ -2957,7 +2957,7 @@ export interface operations {
                             auditor?: string;
                             since?: string;
                         };
-                        /** @description The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence: the same labeled data the directory serves. */
+                        /** @description The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence; the same labeled data the directory serves. */
                         subject?: {
                             asked?: string;
                             resolvedSlug?: string;
@@ -3524,7 +3524,7 @@ export interface operations {
                         } | null;
                         /** @description DeepWiki source-grounded answer; null if DeepWiki had no answer (routed repo still returned). */
                         answer?: string | null;
-                        /** @description Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it, where they disagree, the dated fact wins. */
+                        /** @description Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it; where they disagree, the dated fact wins. */
                         answerSource?: string | null;
                         /**
                          * Format: date-time
@@ -7089,7 +7089,7 @@ export interface operations {
                             totalPrizePoolUSD?: number;
                             totalRegisteredHackers?: number;
                         };
-                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup: null/absent projects are NOT tracked there, never 'zero TVL'. */
+                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. */
                         tvl?: {
                             totalTvlUSD?: number;
                             trackedProjects?: number;

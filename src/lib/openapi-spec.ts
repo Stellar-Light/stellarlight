@@ -2194,7 +2194,7 @@ export const spec: OpenAPISpec = {
 										subject: {
 											type: "object",
 											description:
-												"The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence: the same labeled data the directory serves.",
+												"The full subject card (absent when verdict=unresolved): identity, links, types, status with provenance, prominence; the same labeled data the directory serves.",
 											properties: {
 												asked: { type: "string" },
 												resolvedSlug: { type: "string" },
@@ -3454,7 +3454,7 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it, where they disagree, the dated fact wins.",
+												"Where the answer text came from ('knowledge-note' | 'deepwiki' | 'stellarlight-code-scan'); null when no answer was produced; cite it alongside the answer. It states the GROUNDING, never the age: see answerAsOf. 'knowledge-note' = a curated, dated, source-cited fact that directly names the identifier asked about; it LEADS the answer, and any DeepWiki walkthrough appended after it is an undated index that can lag it; where they disagree, the dated fact wins.",
 										},
 										answerAsOf: {
 											type: "string",
@@ -5083,7 +5083,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Partners"],
 				summary: "List ecosystem partners",
 				description:
-					"Published Stellar ecosystem partner directory: service providers a builder hires or integrates: anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.",
+					"Published Stellar ecosystem partner directory; service providers a builder hires or integrates: anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, protocols, wallets, audit firms. Partner-claimed facts ride WITH system-verified signals + `freshness` (down-rank/skip `excludeFromMatching`). Filter by `type`/`sector`/`region`/`ramps`/`accepting`/`q`. Not for built products/projects → use searchProjects.",
 				"x-routing": {
 					purpose:
 						"Directory of hireable/integratable ecosystem partners with verified activity signals.",
@@ -6996,7 +6996,7 @@ export const spec: OpenAPISpec = {
 					"Contracts as first-class entities: one row per mainnet contract with VERIFIED evidence; the scanner echo-checked a README-claimed contract id live on-chain, or weekly on-chain enrichment attributed real activity to the repo. Each row joins code truth (stellarProof, codeDepth, interface preview, codeDomains), live usage stats (codeInUse), per-project audit records, and succession. Absence here is NOT a claim a contract doesn't exist; coverage grows as scans reach repos. Most-evidenced first: live usage > verified id > depth. Unknown params 400.",
 				"x-routing": {
 					purpose:
-						"Enumerate/filter VERIFIED mainnet contracts as entities, which contracts exist with code+usage+audit evidence, per domain or project.",
+						"Enumerate/filter VERIFIED mainnet contracts as entities: which contracts exist with code+usage+audit evidence, per domain or project.",
 					keywords: [
 						"contracts",
 						"mainnet contracts",
@@ -8849,7 +8849,7 @@ export const spec: OpenAPISpec = {
 										tvl: {
 											type: "object",
 											description:
-												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup: null/absent projects are NOT tracked there, never 'zero TVL'.",
+												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'.",
 											properties: {
 												totalTvlUSD: { type: "number" },
 												trackedProjects: { type: "integer" },
@@ -11412,7 +11412,7 @@ export const spec: OpenAPISpec = {
 									anchorProfileBasis: {
 										type: "string",
 										description:
-											"Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join: empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+											"Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join; empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
 									},
 									scfCountBasis: {
 										type: "string",
@@ -12054,13 +12054,13 @@ export const spec: OpenAPISpec = {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"Stellar SDK capability tags detected in the repo's JS/TS sources: what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative).",
+									"Stellar SDK capability tags detected in the repo's JS/TS sources; what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative).",
 							},
 							codeDomains: {
 								type: "array",
 								items: { type: "string" },
 								description:
-									"Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits: what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null).",
+									"Evidence-only domain labels derived at scan time from ecosystem dependencies + capability tags + contract-interface traits; what the CODE proves the repo does, never README self-description: defi-lending, defi-amm, defi-yield, oracle, payments-x402, wallet-infra, anchor-ramp, indexer. [] = nothing domain-specific proven (an honest null).",
 							},
 						},
 					},

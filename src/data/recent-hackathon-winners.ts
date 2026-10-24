@@ -52,7 +52,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 	winners: [
 		{
 			rank: 1,
-			placementLabel: "1st: Confidential Wallets",
+			placementLabel: "1st - Confidential Wallets",
 			projectName: "OpenZeppelin Stellar Privacy Wallet",
 			builder: "coderipper",
 			description:
@@ -63,7 +63,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 1,
-			placementLabel: "1st: Agentic Payments (x402/MPP)",
+			placementLabel: "1st - Agentic Payments (x402/MPP)",
 			projectName: "StellarPay (x402)",
 			builder: "coderipper",
 			description: "Agentic payments over x402/MPP on Stellar.",
@@ -72,7 +72,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 1,
-			placementLabel: "1st: Brazil Ramps & Regional Kits",
+			placementLabel: "1st - Brazil Ramps & Regional Kits",
 			projectName: "ACTA Brazil Regional Kit",
 			builder: "ACTA",
 			description: "Brazil-first ramps and regional integration kit.",
@@ -81,7 +81,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 1,
-			placementLabel: "1st: Enterprise, Compliance & RWA",
+			placementLabel: "1st - Enterprise, Compliance & RWA",
 			projectName: "QuietBook",
 			builder: "Kaptan_web3",
 			description: "Enterprise compliance and RWA build.",
@@ -90,7 +90,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 1,
-			placementLabel: "1st: CLI Plugins for Agents",
+			placementLabel: "1st - CLI Plugins for Agents",
 			projectName: "Stellar Memory",
 			builder: "Raiz Protocol",
 			description: "Memory CLI plugin for Stellar agents.",
@@ -99,7 +99,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 1,
-			placementLabel: "1st: Emerging-Market Yield",
+			placementLabel: "1st - Emerging-Market Yield",
 			projectName: "Truway",
 			builder: "Truway",
 			description: "Brazil-first emerging-market yield build.",
@@ -108,7 +108,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 2,
-			placementLabel: "2nd: Agentic Payments (x402/MPP)",
+			placementLabel: "2nd - Agentic Payments (x402/MPP)",
 			projectName: "Sextant",
 			builder: "El Guri",
 			description: "Agentic payments build over x402/MPP.",
@@ -117,7 +117,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 2,
-			placementLabel: "2nd: Brazil Ramps & Regional Kits",
+			placementLabel: "2nd - Brazil Ramps & Regional Kits",
 			projectName: "LatAm Ramp Kit",
 			builder: "TrustlessWork",
 			description: "LatAm on/off-ramp integration kit.",
@@ -126,7 +126,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 2,
-			placementLabel: "2nd: Confidential Wallets",
+			placementLabel: "2nd - Confidential Wallets",
 			projectName: "Stellar Confidential Token SDK",
 			builder: "aguilar1x",
 			description: "SDK for confidential tokens on Stellar.",
@@ -136,7 +136,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 2,
-			placementLabel: "2nd: CLI Plugins for Agents",
+			placementLabel: "2nd - CLI Plugins for Agents",
 			projectName: "Teji",
 			builder: "Always Cooking",
 			description: "CLI plugin for Stellar agents.",
@@ -145,7 +145,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 2,
-			placementLabel: "2nd: Emerging-Market Yield",
+			placementLabel: "2nd - Emerging-Market Yield",
 			projectName: "EnergyPay Tesouro Yield",
 			builder: "Fenix",
 			description: "Brazilian treasury-yield energy-payments build.",
@@ -155,7 +155,7 @@ export const LATEST_WINNERS: RecentHackathonWinners = {
 		},
 		{
 			rank: 2,
-			placementLabel: "2nd: Enterprise, Compliance & RWA",
+			placementLabel: "2nd - Enterprise, Compliance & RWA",
 			projectName: "Trustless Work privacy PoC",
 			builder: "Green Road",
 			description: "Privacy proof-of-concept on Trustless Work.",

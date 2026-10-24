@@ -567,7 +567,7 @@ export const REPO_SUPERSESSIONS: Record<string, RepoSupersession> = {
 		supersededBy: null,
 		deprecatedAt: "2026-08-25",
 		source:
-			"GitHub archived:true (archivedAt 2026-08-25); README: a PoC: 'One Ed25519 key can authenticate to idOS and sign for a Canton external party', names no successor",
+			"GitHub archived:true (archivedAt 2026-08-25); README: a PoC; 'One Ed25519 key can authenticate to idOS and sign for a Canton external party', names no successor",
 		asOf: "2026-09-13",
 	},
 	"idos-network/node-staking-gas-tests": {

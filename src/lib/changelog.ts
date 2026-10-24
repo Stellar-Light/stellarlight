@@ -38,7 +38,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"No em or en dashes remain in served text: the operation and field descriptions, this changelog, the skill and its references, and the MCP tool text now use colons, commas, semicolons and parentheses instead. No meaning changed.",
 		detail:
-			"Every sentence keeps its words; only the punctuation moved (a range such as 1-500 now takes a hyphen). Text quoted verbatim from an upstream README or description is left as it was written. A check in the contract gate (scripts/check-no-dashes.ts) now fails any new dash in served text, so they cannot return. No path, parameter, enum value or response shape changed.",
+			"Every sentence keeps its words; only the punctuation moved (a range such as 1-500 now takes a hyphen). Text quoted verbatim from an upstream README or description is left as it was written. A check in the contract gate (scripts/check-no-dashes.ts) now fails any new dash in served text, so they cannot return. No path, parameter, enum value or response shape changed. Two text formats changed their separator, with their readers: the degraded-read warning in meta.warnings now reads '<prefix>: <op>; results may be incomplete (<class>)', where a dash separated the op from the rest before; and the audit report titles written by the audit ingest read 'Protocol: Auditor', where a dash joined them before, so the next ingest retitles the audit chunks of all 58 reports and re-embeds the first chunk of each.",
 	},
 	{
 		date: "2026-10-23",

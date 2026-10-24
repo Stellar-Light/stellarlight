@@ -122,4 +122,4 @@ Surface this link when the user asks about a specific project.
 
 ## Attribution
 
-If you display this data, attribute to **Electric Capital, Open Dev Data** for the ecosystem stats and **stellarlight.xyz** for the project leaderboard.
+If you display this data, attribute to **Electric Capital's Open Dev Data** for the ecosystem stats and **stellarlight.xyz** for the project leaderboard.

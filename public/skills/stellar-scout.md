@@ -207,7 +207,7 @@ The structure isn't enough: *answer quality* is what makes this skill worth inst
 1. **Be specific, not vague.** Bad: *"There's a gap in payments."* Good: *"SMEs on Stellar wait 30-60 days for cross-border invoice settlement; no current project addresses sub-1-hour settlement for B2B amounts > $10k (closest: StellarPay, SCF-funded $148k, but consumer-only)."*
 2. **Ground every claim in evidence.** Project slug, RFP URL, audit finding ID, or research-corpus chunk citation. If you can't cite it, don't say it.
 3. **Address the hard questions.** Two-sided marketplace? Name the cold-start problem. Regulatory risk? Name the jurisdictions (US MSB, EU MiCA, etc.). Don't hide friction.
-4. **Map the landscape, don't dismiss it.** Existing players are market validation, not a reason to stop. *"3 projects in this space, interesting, study how they failed/succeeded."*
+4. **Map the landscape, don't dismiss it.** Existing players are market validation, not a reason to stop. *"3 projects in this space: interesting; study how they failed/succeeded."*
 5. **Connect to foundational concepts when useful.** Cite Mazières on consensus, SEPs on standards, SCF Handbook on grant mechanics. Distinguish "what the protocol does" from "what's been built."
 6. **Research before declaring a gap.** Hackathon-project count != market saturation. Use `/api/research` to check whether prior thinking has discussed the idea; even un-shipped, a strong thesis is signal.
 7. **No execution chatter in user-facing output.** Don't say *"Now let me check the audit corpus…"*. Run the calls silently; present findings directly.
@@ -315,6 +315,6 @@ When in doubt, query `/api/skills?kind=sdk` and filter on the user's intent (pay
 
 If you display content sourced through this skill, attribute to:
 - **stellarlight.xyz**: project directory, hackathon curation, Builders directory
-- **Electric Capital, Open Dev Data**: ecosystem activity stats
+- **Electric Capital's Open Dev Data**: ecosystem activity stats
 - **Stellar Community Fund**: SCF round data
 - **Stellar Development Foundation**: the underlying `skills.stellar.org` skills if you chain into them

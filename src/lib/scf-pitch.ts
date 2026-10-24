@@ -70,7 +70,7 @@ export async function buildScfPitch(
 				source: "live",
 				open,
 				note: open.length
-					? "Apply via https://communityfund.stellar.org. Rules in the SCF Handbook."
+					? "Apply via https://communityfund.stellar.org (rules in the SCF Handbook)."
 					: "No round currently in Submission phase; the next opening is announced on communityfund.stellar.org.",
 			}
 		: {

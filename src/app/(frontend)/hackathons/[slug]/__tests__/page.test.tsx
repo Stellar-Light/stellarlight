@@ -335,7 +335,7 @@ describe("/hackathons/<slug>", () => {
 					category: null,
 					shortDescription: "Private payroll.",
 					hackathonStatus: null,
-					hackathonPlacement: "1st \u2014 Confidential Wallets",
+					hackathonPlacement: "1st - Confidential Wallets",
 					placementRank: 1,
 					hackathonPrize: 1250,
 					prizeUsd: 1250,

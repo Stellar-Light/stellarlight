@@ -1046,7 +1046,7 @@ server.registerTool(
 	{
 		title: "Cross-event Stellar ecosystem analytics rollup",
 		description:
-			"The cross-ecosystem macro rollup: totals no single-event tool answers: hackathon totals (prize pools, hackers), SCF funding distributed (per-round + the Built/In-Progress/Abandoned funnel), and per-category distribution. Slice via `dimension=hackathons|categories|funding`. Not for per-category crowdedness/whitespace → use get_clusters.",
+			"The cross-ecosystem macro rollup; totals no single-event tool answers: hackathon totals (prize pools, hackers), SCF funding distributed (per-round + the Built/In-Progress/Abandoned funnel), and per-category distribution. Slice via `dimension=hackathons|categories|funding`. Not for per-category crowdedness/whitespace → use get_clusters.",
 		inputSchema: {
 			dimension: z
 				.enum(["all", "hackathons", "categories", "funding"])
@@ -1067,7 +1067,7 @@ server.registerTool(
 	{
 		title: "Search Stellar ecosystem partners (audit firms, anchors, infra)",
 		description:
-			"The curated Stellar ecosystem partner directory: vetted service providers a builder hires or integrates: audit firms, anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, wallets, legal, agencies. Filter by `type`/`sector`/`region` or free-text `q` (capability-fit ranked). Answers 'who can audit my Soroban contract / find an anchor or ramp in <region>'. Not for a built product/project → use search_projects.",
+			"The curated Stellar ecosystem partner directory; vetted service providers a builder hires or integrates: audit firms, anchors, on and off ramps (fiat on-ramp/off-ramp providers), KYC, infrastructure, tooling, wallets, legal, agencies. Filter by `type`/`sector`/`region` or free-text `q` (capability-fit ranked). Answers 'who can audit my Soroban contract / find an anchor or ramp in <region>'. Not for a built product/project → use search_projects.",
 		inputSchema: {
 			type: z
 				.string()

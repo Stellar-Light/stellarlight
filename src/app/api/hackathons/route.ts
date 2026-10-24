@@ -287,7 +287,7 @@ export async function GET(req: NextRequest) {
 		isForwardLookingQuery && hackathons.length === 0
 			? {
 					summary:
-						"No upcoming or active hackathons in stellarlight's feed right now, between events. Check live channels for the next announcement.",
+						"No upcoming or active hackathons in stellarlight's feed right now: between events. Check live channels for the next announcement.",
 					channels: [
 						{
 							name: "@BuildOnStellar on X/Twitter",

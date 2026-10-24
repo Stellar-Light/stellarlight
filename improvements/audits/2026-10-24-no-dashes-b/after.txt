@@ -1,4 +1,4 @@
-dash audit: branch after part B (git 08543ae9)
+dash audit: branch after part B and review fixes (git 6ea34fe7)
 served text only (strings, templates, JSX text, skill markdown); comments and test files skipped
 
 area                             lines  dashes  listed  unlisted
@@ -17,9 +17,10 @@ data                                 0       0       0         0
 payload-types                        0       0       0         0
 skills (markdown)                    0       0       0         0
 scout-mcp tool text                  0       0       0         0
+api-client error text                0       0       0         0
 other src                           25      32      25         0
 TOTAL                               95     115      95         0
-test files (not counted)           234     261
+test files (not counted)           233     260
 
 dashes left on purpose (listed), by kind:
   functional    4  a search pattern for the dash character, not served text

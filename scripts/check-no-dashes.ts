@@ -10,15 +10,19 @@
  * Served text is:
  *   - a string literal, template string, JSX text or JSX attribute string in a
  *     non-test `.ts`, `.tsx` or `.mts` file under `src/`, plus the tool text in
- *     `scout-mcp/src/index.ts` (parsed with the TypeScript compiler, so a
- *     comment is never counted, even on the same line as code);
+ *     `scout-mcp/src/index.ts` and the error text in `api-client/src/index.ts`
+ *     (parsed with the TypeScript compiler, so a comment is never counted,
+ *     even on the same line as code);
  *   - every line of the markdown under `public/skills/**` (served to agents).
  * A dash counts in literal form or as an escape or entity (a JavaScript
  * unicode escape, `&mdash;`, `&ndash;`, a numeric entity).
  *
  * Not counted: comments, test files, stored database text (an owner
- * decision), and scripts. Output never carries a literal dash: they print as
- * <EM> and <EN>.
+ * decision), and scripts. Known gaps, served or published text this check
+ * does not read: other markdown (`scout-mcp/README.md`, `api-client/README.md`,
+ * the repository docs), JSON (`package.json` descriptions, which are npm page
+ * text) and MDX. Output never carries a literal dash: they print as <EM> and
+ * <EN>.
  *
  * Usage, from the repository root:
  *   pnpm exec tsx scripts/check-no-dashes.ts            # the table
@@ -103,6 +107,7 @@ const AREAS: Area[] = [
 	{ name: "payload-types", test: (r) => r === "src/payload-types.ts" },
 	{ name: "skills (markdown)", test: (r) => r.startsWith("public/skills/") },
 	{ name: "scout-mcp tool text", test: (r) => r.startsWith("scout-mcp/") },
+	{ name: "api-client error text", test: (r) => r.startsWith("api-client/") },
 	{ name: "other src", test: (r) => r.startsWith("src/") },
 ];
 
@@ -222,8 +227,10 @@ function scan(rel: string, text: string): Hit[] {
 const files: string[] = [];
 walk(join(ROOT, "src"), /\.(ts|tsx|mts)$/, files);
 walk(join(ROOT, "public/skills"), /\.md$/, files);
-const mcp = join(ROOT, "scout-mcp/src/index.ts");
-if (existsSync(mcp)) files.push(mcp);
+for (const extra of ["scout-mcp/src/index.ts", "api-client/src/index.ts"]) {
+	const p = join(ROOT, extra);
+	if (existsSync(p)) files.push(p);
+}
 
 type Row = { lines: number; dashes: number; listed: number; unlisted: number };
 const blank = (): Row => ({ lines: 0, dashes: 0, listed: 0, unlisted: 0 });
