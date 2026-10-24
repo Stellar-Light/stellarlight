@@ -1,0 +1,75 @@
+{
+	"at": "2026-10-23T23:34:37.468Z",
+	"rows": [
+		{
+			"repo": "soroworks/soroforge",
+			"status": 200,
+			"readMs": 1251,
+			"coldHandlerMs": 1255,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "repo-17",
+			"status": 200,
+			"readMs": 955,
+			"coldHandlerMs": 958,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-18",
+			"status": 200,
+			"readMs": 773,
+			"coldHandlerMs": 776,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "Lumeeena/lumina-contracts",
+			"status": 200,
+			"readMs": 950,
+			"coldHandlerMs": 952,
+			"warmHandlerMs": 0
+		},
+		{
+			"repo": "StellarCanary/ProtocolCanary-Fixtures",
+			"status": 200,
+			"readMs": 944,
+			"coldHandlerMs": 948,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "MMM-pay/payflow-frontend",
+			"status": 200,
+			"readMs": 793,
+			"coldHandlerMs": 793,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "nirium-protocol/nirium-core",
+			"status": 200,
+			"readMs": 1013,
+			"coldHandlerMs": 1015,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "repo-19",
+			"status": 200,
+			"readMs": 1099,
+			"coldHandlerMs": 1101,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-20",
+			"status": 200,
+			"readMs": 770,
+			"coldHandlerMs": 772,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-21",
+			"status": 200,
+			"readMs": 781,
+			"coldHandlerMs": 782,
+			"warmHandlerMs": 1
+		}
+	]
+}

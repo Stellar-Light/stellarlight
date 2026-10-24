@@ -1,0 +1,40 @@
+{
+	"at": "2026-10-23T22:14:38.716Z",
+	"rows": [
+		{
+			"repo": "stellar/soroban-cli",
+			"status": 200,
+			"readMs": 1842,
+			"coldHandlerMs": 1846,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "stellar/soroban-examples",
+			"status": 200,
+			"readMs": 1276,
+			"coldHandlerMs": 1276,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "stellar/js-stellar-sdk",
+			"status": 200,
+			"readMs": 1348,
+			"coldHandlerMs": 1349,
+			"warmHandlerMs": 0
+		},
+		{
+			"repo": "stellar/freighter",
+			"status": 200,
+			"readMs": 1478,
+			"coldHandlerMs": 1478,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "stellar/quickstart",
+			"status": 200,
+			"readMs": 1294,
+			"coldHandlerMs": 1298,
+			"warmHandlerMs": 2
+		}
+	]
+}

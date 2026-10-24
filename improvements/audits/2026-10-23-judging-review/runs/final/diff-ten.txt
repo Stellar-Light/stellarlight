@@ -1,0 +1,45 @@
+repo-07.json demoLinks:
+   was ('found', ['https://kivo-app-five.vercel.app'], 1)
+   now ('found', ['https://kivo-app-five.vercel.app'], None)
+   The repo's website field: https://kivo-app-five.vercel.app. Not opened, so whether they load is not checked.
+repo-03.json testFiles:
+   was ('found', ['internstellar-contract/contracts/internstellar/src/test.rs', 'scripts/_test-binding.ts', 'scripts/_test-device.ts', 'scripts/_test-escrow-wiring.ts', 'scripts/_test-no-stacktrace-leak.ts', 'scripts/_test-stellar-lib.ts', 'scripts/test-realtime.ts'], 7)
+   now ('found', ['internstellar-contract/contracts/internstellar/src/test.rs'], 1)
+   1 file(s) follow a test-naming convention, e.g. internstellar-contract/contracts/internstellar/src/test.rs. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*
+repo-03.json demoLinks:
+   was ('found', ['https://internstellar-eight.vercel.app', 'https://internstellar-hackathon.vercel.app/', 'https://youtu.be/TpqybyqjGao'], 3)
+   now ('found', ['https://internstellar-eight.vercel.app', 'https://internstellar-hackathon.vercel.app/', 'https://youtu.be/TpqybyqjGao'], None)
+   The repo's website field: https://internstellar-eight.vercel.app. README.md links 2 page(s) its text labels as a demo or live app (words such as demo, live, deployed, website): https://internstellar-hackathon.vercel.app/, https://youtu.be/TpqybyqjGao. Not opened, so whether they load is not checked.
+repo-01.json testFiles:
+   was ('found', ['apps/api/test/api.test.ts', 'apps/api/test/cc3a-payments.test.ts', 'apps/api/test/cc3b-claim-sandbox.test.ts', 'apps/api/test/fix-embedded-pg-dylibs.test.ts', 'apps/api/test/helpers.ts', 'apps/api/test/openapi.test.ts', 'apps/api/test/orchestrator.test.ts', 'apps/api/test/settlement-factory.test.ts', 'contracts/pay-shift/src/test.rs', 'contracts/payout_vault/src/test.rs'], 38)
+   now ('found', ['apps/api/test/api.test.ts', 'apps/api/test/cc3a-payments.test.ts', 'apps/api/test/cc3b-claim-sandbox.test.ts', 'apps/api/test/cc3b-remaining.test.ts', 'apps/api/test/ccr15-public-api.test.ts', 'apps/api/test/fix-embedded-pg-dylibs.test.ts', 'apps/api/test/helpers.ts', 'apps/api/test/openapi.test.ts', 'apps/api/test/orchestrator.test.ts', 'apps/api/test/settlement-factory.test.ts'], 46)
+   46 file(s) follow a test-naming convention, e.g. apps/api/test/api.test.ts, apps/api/test/cc3a-payments.test.ts, apps/api/test/cc3b-claim-sandbox.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.r
+repo-01.json stellarPackages:
+   was ('found', ['@creit.tech/stellar-wallets-kit', '@stellar/stellar-sdk', 'soroban-sdk', 'stellar-xdr'], 4)
+   now ('found', ['@creit.tech/stellar-wallets-kit', '@stellar/stellar-sdk', 'soroban-sdk', 'stellar-xdr'], None)
+   The 12 of 14 manifests read declare 4 Stellar package(s) Scout recognises: @creit.tech/stellar-wallets-kit, @stellar/stellar-sdk, soroban-sdk, stellar-xdr. SDK versions as declared: soroban-sdk 26.1.0, @stellar/stellar-sdk@^16.1.0. The 2 not read may declare more.
+repo-01.json lastCommit:
+   was ('found', ['2026-10-23T17:40:55Z'], 143)
+   now ('found', ['2026-10-23T19:44:26Z'], 196)
+   196 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-09-12.
+Foryield__soroban-yield-vault.json testFiles:
+   was ('found', ['contracts/router/src/test.rs', 'contracts/router/src/test_aqua_stack.rs', 'contracts/router/src/test_mocks.rs', 'contracts/router/src/test_props.rs', 'contracts/router/src/test_rebalance.rs', 'contracts/router/src/test_stack_common.rs', 'contracts/strategy-aquarius/src/test.rs', 'contracts/strategy-aquarius/src/test_vault.rs', 'contracts/vault/src/test.rs', 'contracts/vault/src/test_blend.rs'], 24)
+   now ('found', ['contracts/router/src/test.rs', 'contracts/router/src/test_aqua_stack.rs', 'contracts/router/src/test_mocks.rs', 'contracts/router/src/test_props.rs', 'contracts/router/src/test_rebalance.rs', 'contracts/router/src/test_stack_common.rs', 'contracts/strategy-aquarius/src/test.rs', 'contracts/strategy-aquarius/src/test_vault.rs', 'contracts/vault/src/test.rs', 'contracts/vault/src/test_blend.rs'], 23)
+   23 file(s) follow a test-naming convention, e.g. contracts/router/src/test.rs, contracts/router/src/test_aqua_stack.rs, contracts/router/src/test_mocks.rs and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.
+Foryield__soroban-yield-vault.json demoLinks:
+   was ('found', ['https://vault.for-yield.com/?vault=eurc'], 1)
+   now ('could-not-check', None, None)
+   The repo sets no website, and no link in README.md is labelled as a demo or live app; whether one of its 3 other link(s) is a demo is not judged: https://vault.for-yield.com/?vault=eurc, https://faucet.circle.com/, https://vault.for-yield.com/dashboard/.
+repo-05.json demoLinks:
+   was ('found', ['https://b2b-orbital.vercel.app'], 1)
+   now ('found', ['https://b2b-orbital.vercel.app'], None)
+   The repo's website field: https://b2b-orbital.vercel.app. Not opened, so whether they load is not checked.
+repo-06.json demoLinks:
+   was ('found', ['https://hammerhead-app-hfcgi.ondigitalocean.app/'], 1)
+   now ('found', ['https://hammerhead-app-hfcgi.ondigitalocean.app/'], None)
+   The repo's website field: https://hammerhead-app-hfcgi.ondigitalocean.app/. Not opened, so whether they load is not checked.
+repo-04.json demoLinks:
+   was ('found', ['https://stellar-hackathon-grand-pera.owner-04.example/'], 1)
+   now ('found', ['https://stellar-hackathon-grand-pera.owner-04.example/'], None)
+   The repo's website field: https://stellar-hackathon-grand-pera.owner-04.example/. Not opened, so whether they load is not checked.
+same 79 changed 11

@@ -1,0 +1,239 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T18:03:57.406Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/repo-01",
+		"stored": false,
+		"repo": {
+			"fullName": "repo-01",
+			"url": "https://github.com/repo-01",
+			"readAt": "2026-10-23T18:03:56.341Z",
+			"readMs": 1064,
+			"unread": ["manifests"]
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "38 file(s) named or placed as tests, e.g. apps/api/test/api.test.ts, apps/api/test/cc3a-payments.test.ts, apps/api/test/cc3b-claim-sandbox.test.ts and 7 more. Whether they run or pass is not read.",
+									"values": [
+										"apps/api/test/api.test.ts",
+										"apps/api/test/cc3a-payments.test.ts",
+										"apps/api/test/cc3b-claim-sandbox.test.ts",
+										"apps/api/test/fix-embedded-pg-dylibs.test.ts",
+										"apps/api/test/helpers.ts",
+										"apps/api/test/openapi.test.ts",
+										"apps/api/test/orchestrator.test.ts",
+										"apps/api/test/settlement-factory.test.ts",
+										"contracts/pay-shift/src/test.rs",
+										"contracts/payout_vault/src/test.rs"
+									],
+									"count": 38
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "1 CI config file(s): .github/workflows/guards.yml. Whether the jobs run or pass is not read.",
+									"values": [".github/workflows/guards.yml"],
+									"count": 1
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 2 contract id(s): CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC, CBPCPL6JJTVLYFT2DLTLA3FAFQHPD3LZYARCMF3CFCZF4D2JS32FNDVO. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses).",
+									"values": [
+										"CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+										"CBPCPL6JJTVLYFT2DLTLA3FAFQHPD3LZYARCMF3CFCZF4D2JS32FNDVO"
+									],
+									"count": 2
+								},
+								{
+									"id": "demoLinks",
+									"state": "not-found",
+									"finding": "The repo sets no website, and README.md links nothing outside code hosts, docs, explorers, badges, chats and local addresses.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 4 Stellar package(s) Scout recognises: @creit.tech/stellar-wallets-kit, @stellar/stellar-sdk, soroban-sdk, stellar-xdr. SDK versions as declared: soroban-sdk 26.1.0, @stellar/stellar-sdk@^16.1.0. 12 of 14 manifests were read.",
+									"values": [
+										"@creit.tech/stellar-wallets-kit",
+										"@stellar/stellar-sdk",
+										"soroban-sdk",
+										"stellar-xdr"
+									],
+									"count": 4
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "2 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/pay-shift, contracts/payout_vault; soroban-sdk 26.1.0 as declared. Whether they build or are deployed is not read here.",
+									"values": ["contracts/pay-shift", "contracts/payout_vault"],
+									"count": 2
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 2 contract id(s): CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC, CBPCPL6JJTVLYFT2DLTLA3FAFQHPD3LZYARCMF3CFCZF4D2JS32FNDVO. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses).",
+									"values": [
+										"CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+										"CBPCPL6JJTVLYFT2DLTLA3FAFQHPD3LZYARCMF3CFCZF4D2JS32FNDVO"
+									],
+									"count": 2
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "143 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-09-12.",
+									"values": ["2026-10-23T17:40:55Z"],
+									"count": 143
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "38 file(s) named or placed as tests, e.g. apps/api/test/api.test.ts, apps/api/test/cc3a-payments.test.ts, apps/api/test/cc3b-claim-sandbox.test.ts and 7 more. Whether they run or pass is not read.",
+									"values": [
+										"apps/api/test/api.test.ts",
+										"apps/api/test/cc3a-payments.test.ts",
+										"apps/api/test/cc3b-claim-sandbox.test.ts",
+										"apps/api/test/fix-embedded-pg-dylibs.test.ts",
+										"apps/api/test/helpers.ts",
+										"apps/api/test/openapi.test.ts",
+										"apps/api/test/orchestrator.test.ts",
+										"apps/api/test/settlement-factory.test.ts",
+										"contracts/pay-shift/src/test.rs",
+										"contracts/payout_vault/src/test.rs"
+									],
+									"count": 38
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "1 CI config file(s): .github/workflows/guards.yml. Whether the jobs run or pass is not read.",
+									"values": [".github/workflows/guards.yml"],
+									"count": 1
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "2 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): contracts/pay-shift, contracts/payout_vault; soroban-sdk 26.1.0 as declared. Whether they build or are deployed is not read here.",
+									"values": ["contracts/pay-shift", "contracts/payout_vault"],
+									"count": 2
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 2 contract id(s): CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC, CBPCPL6JJTVLYFT2DLTLA3FAFQHPD3LZYARCMF3CFCZF4D2JS32FNDVO. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses).",
+									"values": [
+										"CDLZFC3SYJYDZT7K67VZ75HPJVIEUVNIXF47ZG2FB2RMQQVU2HHGCYSC",
+										"CBPCPL6JJTVLYFT2DLTLA3FAFQHPD3LZYARCMF3CFCZF4D2JS32FNDVO"
+									],
+									"count": 2
+								},
+								{
+									"id": "demoLinks",
+									"state": "not-found",
+									"finding": "The repo sets no website, and README.md links nothing outside code hosts, docs, explorers, badges, chats and local addresses.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

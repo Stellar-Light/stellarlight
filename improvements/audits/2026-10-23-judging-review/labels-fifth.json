@@ -1,0 +1,176 @@
+{
+	"note": "Fifth-set labels, the gate for review round 1's last two changes (no SDK version cited for a workspace, file or git reference; the scope of the could-not-check demo sentence), written before the run on these five. Picked by rule: the first five repos of the first GitHub search (soroban, by update, read 2026-10-23T22:25:08Z), in its order, not yet used, listed with a description and about Stellar (two repos with no description and an abacus app the word also finds were passed over), each answering 404 on live reviewSubmission (22:25:48Z). Source: gh CLI answers 2026-10-23T22:25:57Z to 22:26:53Z (dump.py, the tree at the default branch's newest commit), contents-API reads of the manifests a read takes (label_packages.py), README links printed by readme_links.py and read by eye, test and CI counts from label_tests.py. Individuals' repos are named by pseudonym.",
+	"labeledAt": "2026-10-23T22:30:40Z",
+	"repos": [
+		{
+			"repo": "soroworks/soroforge",
+			"commit": "772fba56d90a65dd014fc73c3546fa407c07c751",
+			"stellarPackages": {
+				"manifests": { "total": 2, "read": 2 },
+				"onList": [
+					"soroban-sdk (\"25\", in internal/e2e/testdata/upgradeable/Cargo.toml)",
+					"go:go.mod (github.com/stellar/go-stellar-sdk v0.7.3)"
+				],
+				"count": 2
+			},
+			"deployableContracts": "not-found: the one Cargo.toml (soroban-sdk, cdylib) lies under testdata, which the deployable rule leaves out",
+			"testFiles": { "byConvention": 84, "complete": true },
+			"ci": 11,
+			"releases": {
+				"count": 2,
+				"latest": "v0.2.0",
+				"latestAt": "2026-10-09T19:45:35Z"
+			},
+			"lastCommit": {
+				"count": 77,
+				"at": "2026-10-23T22:22:30Z",
+				"branch": "main",
+				"createdAt": "2026-08-07"
+			},
+			"website": "https://github.com/soroworks/docs (a GitHub page: the website item, never a demo)",
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"securityscorecards.dev viewer (badge alt OpenSSF Scorecard)",
+				"mainnet.sorobanrpc.com, provider.example and hooks.slack.com in config examples"
+			],
+			"contractIds": [],
+			"readme": { "bytes": 53955, "truncated": false }
+		},
+		{
+			"repo": "repo-17",
+			"commit": "<redacted>",
+			"stellarPackages": {
+				"manifests": { "total": 18, "read": 12 },
+				"onList": [
+					"@stellar/freighter-api",
+					"@stellar/stellar-sdk",
+					"soroban-sdk"
+				],
+				"count": "none: a partial read (6 not read, beyond the 12)",
+				"sdkVersions": "soroban-sdk \"29\" (root Cargo.toml); @stellar/stellar-sdk ^17.2.1 (frontend/package.json)"
+			},
+			"deployableContracts": {
+				"inRead": 4,
+				"cargo": { "total": 8, "read": 7 },
+				"names": [
+					"contracts/passkey-signer",
+					"contracts/stream-nft",
+					"contracts/streaming-payments",
+					"contracts/vault"
+				],
+				"count": "none: 1 Cargo.toml not read (tools/streampay-state)"
+			},
+			"testFiles": { "byConvention": 71, "complete": true },
+			"ci": 17,
+			"releases": {
+				"count": 1,
+				"latest": "v0.3.0",
+				"latestAt": "2026-10-04T17:05:31Z"
+			},
+			"lastCommit": {
+				"count": 443,
+				"at": "2026-10-23T22:17:33Z",
+				"branch": "main",
+				"createdAt": "2026-09-13"
+			},
+			"website": "https://streampay-org.netlify.app/",
+			"demoLinks": [],
+			"otherReadmeLinks": "none: every link is a badge, GitHub, rustup.rs, nodejs.org or localhost",
+			"contractIds": [],
+			"readme": { "bytes": 26846, "truncated": false }
+		},
+		{
+			"repo": "repo-18",
+			"commit": "<redacted>",
+			"stellarPackages": {
+				"manifests": { "total": 2, "read": 2 },
+				"onList": ["soroban-sdk (22.0.0, the workspace's)"],
+				"count": 1
+			},
+			"deployableContracts": {
+				"inRead": 1,
+				"names": ["contracts/invoice_registry"],
+				"count": 1
+			},
+			"testFiles": { "byConvention": 1, "complete": true },
+			"ci": 1,
+			"releases": { "count": 0 },
+			"lastCommit": {
+				"count": 8,
+				"at": "2026-10-23T22:10:35Z",
+				"branch": "main",
+				"createdAt": "2026-10-19"
+			},
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"owner-17.github.io/bill-generator-frontend/: the README calls it the Live Documentation Portal (\"specifications ... are hosted at\") and its badge says Docs; a documentation site, not labelled as a demo or live app"
+			],
+			"contractIds": [
+				"CCG6V5QEJZ2QI7EXIRVQXCHUIFUROXUBMZPTSCRJHOO35CAQ2HZ6IJGC (testnet, the README's deployed contract)"
+			],
+			"readme": { "bytes": 8256, "truncated": false }
+		},
+		{
+			"repo": "Lumeeena/lumina-contracts",
+			"commit": "a9c0f6bdc78254b53aaf5965942bb95449867347",
+			"stellarPackages": {
+				"manifests": { "total": 7, "read": 7 },
+				"onList": ["soroban-sdk (22.0.0)", "soroban-spec (22.0.11)"],
+				"count": 2
+			},
+			"deployableContracts": {
+				"inRead": 2,
+				"names": ["registry", "registry-v2"],
+				"count": 2,
+				"note": "examples/registry-consumer and examples/registry-registrant build cdylibs under examples, which the rule leaves out; registry-interface is an rlib"
+			},
+			"testFiles": { "byConvention": 12, "complete": true },
+			"ci": 1,
+			"releases": { "count": 0 },
+			"lastCommit": {
+				"count": 93,
+				"at": "2026-10-18T20:18:07Z",
+				"branch": "main",
+				"createdAt": "2026-08-10"
+			},
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": "none: every link is to GitHub",
+			"contractIds": [
+				"CAYUDQPV3RKPM3EXDFGI3457FV677JLUCJ4OLKWGCUBPRIHYKXK3WFAZ"
+			],
+			"readme": { "bytes": 32793, "truncated": false }
+		},
+		{
+			"repo": "StellarCanary/ProtocolCanary-Fixtures",
+			"commit": "fae94c5e3ef6689a019b6fbb4810164e4df5583b",
+			"stellarPackages": {
+				"manifests": { "total": 0, "read": 0 },
+				"onList": [],
+				"note": "Python test scripts with no manifest Scout reads"
+			},
+			"deployableContracts": "not-found: no Cargo.toml in the tree",
+			"testFiles": { "byConvention": 67, "complete": true },
+			"ci": 6,
+			"releases": {
+				"count": 1,
+				"latest": "protocol-28",
+				"latestAt": "2026-09-14T10:22:17Z"
+			},
+			"lastCommit": {
+				"count": 437,
+				"at": "2026-10-23T21:55:06Z",
+				"branch": "main",
+				"createdAt": "2026-09-02"
+			},
+			"website": null,
+			"demoLinks": [],
+			"otherReadmeLinks": [
+				"stellarcanary.github.io/Protocol-Canary/ (labelled Documentation)"
+			],
+			"contractIds": [],
+			"readme": { "bytes": 18630, "truncated": false }
+		}
+	]
+}

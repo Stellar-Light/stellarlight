@@ -1,0 +1,231 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T18:04:31.192Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/Presago-Labs/presago-contracts",
+		"stored": false,
+		"repo": {
+			"fullName": "Presago-Labs/presago-contracts",
+			"url": "https://github.com/Presago-Labs/presago-contracts",
+			"readAt": "2026-10-23T18:04:30.388Z",
+			"readMs": 804,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "8 file(s) named or placed as tests, e.g. leaderboard/src/admin_tests.rs, leaderboard/src/decay_tests.rs, leaderboard/src/penalty_tests.rs and 5 more. Whether they run or pass is not read.",
+									"values": [
+										"leaderboard/src/admin_tests.rs",
+										"leaderboard/src/decay_tests.rs",
+										"leaderboard/src/penalty_tests.rs",
+										"leaderboard/src/tests.rs",
+										"leaderboard/src/ttl_tests.rs",
+										"prediction_market/src/tests.rs",
+										"pulse_token/src/tests.rs",
+										"referral_registry/src/tests.rs"
+									],
+									"count": 8
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "1 CI config file(s): .github/workflows/ci.yml. Whether the jobs run or pass is not read.",
+									"values": [".github/workflows/ci.yml"],
+									"count": 1
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "not-found",
+									"finding": "The repo sets no website, and README.md links nothing outside code hosts, docs, explorers, badges, chats and local addresses.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 1 Stellar package(s) Scout recognises: soroban-sdk. SDK versions as declared: soroban-sdk 26.0.1.",
+									"values": ["soroban-sdk"],
+									"count": 1
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "4 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): leaderboard, prediction_market, pulse_token, referral_registry; soroban-sdk 26.0.1 as declared. Whether they build or are deployed is not read here.",
+									"values": [
+										"leaderboard",
+										"prediction_market",
+										"pulse_token",
+										"referral_registry"
+									],
+									"count": 4
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "298 commit(s) on main, the last on 2026-10-19; the repo was created on 2026-10-08.",
+									"values": ["2026-10-19T10:34:33Z"],
+									"count": 298
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "8 file(s) named or placed as tests, e.g. leaderboard/src/admin_tests.rs, leaderboard/src/decay_tests.rs, leaderboard/src/penalty_tests.rs and 5 more. Whether they run or pass is not read.",
+									"values": [
+										"leaderboard/src/admin_tests.rs",
+										"leaderboard/src/decay_tests.rs",
+										"leaderboard/src/penalty_tests.rs",
+										"leaderboard/src/tests.rs",
+										"leaderboard/src/ttl_tests.rs",
+										"prediction_market/src/tests.rs",
+										"pulse_token/src/tests.rs",
+										"referral_registry/src/tests.rs"
+									],
+									"count": 8
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "1 CI config file(s): .github/workflows/ci.yml. Whether the jobs run or pass is not read.",
+									"values": [".github/workflows/ci.yml"],
+									"count": 1
+								},
+								{
+									"id": "releases",
+									"state": "not-found",
+									"finding": "No GitHub release is published (tags without a release are not read).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "found",
+									"finding": "4 deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): leaderboard, prediction_market, pulse_token, referral_registry; soroban-sdk 26.0.1 as declared. Whether they build or are deployed is not read here.",
+									"values": [
+										"leaderboard",
+										"prediction_market",
+										"pulse_token",
+										"referral_registry"
+									],
+									"count": 4
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C).",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "not-found",
+									"finding": "The repo sets no website, and README.md links nothing outside code hosts, docs, explorers, badges, chats and local addresses.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

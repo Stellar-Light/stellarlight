@@ -1,0 +1,75 @@
+{
+	"at": "2026-10-23T22:56:12.517Z",
+	"rows": [
+		{
+			"repo": "repo-08",
+			"status": 200,
+			"readMs": 1512,
+			"coldHandlerMs": 1517,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "TTL-Legacy/TTL-Legacy",
+			"status": 200,
+			"readMs": 986,
+			"coldHandlerMs": 988,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "BudakGPT/apac-stellar-hackathon",
+			"status": 200,
+			"readMs": 1199,
+			"coldHandlerMs": 1201,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "Pathnomic/stellar-hackathon-starter",
+			"status": 200,
+			"readMs": 1030,
+			"coldHandlerMs": 1031,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-09",
+			"status": 200,
+			"readMs": 841,
+			"coldHandlerMs": 846,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-10",
+			"status": 200,
+			"readMs": 920,
+			"coldHandlerMs": 920,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "nirium-protocol/nirium",
+			"status": 200,
+			"readMs": 1032,
+			"coldHandlerMs": 1034,
+			"warmHandlerMs": 0
+		},
+		{
+			"repo": "repo-11",
+			"status": 200,
+			"readMs": 971,
+			"coldHandlerMs": 972,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-12",
+			"status": 200,
+			"readMs": 967,
+			"coldHandlerMs": 969,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "Stellar-Cost-Labs/soroban-cost-estimator",
+			"status": 200,
+			"readMs": 990,
+			"coldHandlerMs": 990,
+			"warmHandlerMs": 2
+		}
+	]
+}

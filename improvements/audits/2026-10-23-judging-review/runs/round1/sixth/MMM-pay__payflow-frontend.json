@@ -1,0 +1,253 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T22:52:44.098Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/MMM-pay/payflow-frontend",
+		"stored": false,
+		"repo": {
+			"fullName": "MMM-pay/payflow-frontend",
+			"url": "https://github.com/MMM-pay/payflow-frontend",
+			"commit": "40edfea5bfc54bd16338898ceeff47baa94e6d4a",
+			"readAt": "2026-10-23T22:52:42.790Z",
+			"readMs": 1307,
+			"unread": []
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "75 file(s) follow a test-naming convention, e.g. test/account-discount.test.tsx, test/account-page.test.tsx, test/account-readonly.test.tsx and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit 40edfea.",
+									"values": [
+										"test/account-discount.test.tsx",
+										"test/account-page.test.tsx",
+										"test/account-readonly.test.tsx",
+										"test/account-trial.test.tsx",
+										"test/account.test.ts",
+										"test/amount-input.test.tsx",
+										"test/api.test.ts",
+										"test/availability-chain.test.ts",
+										"test/availability-page.test.tsx",
+										"test/availability.test.ts"
+									],
+									"count": 75
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "4 CI config file(s): .github/workflows/automerge.yml, .github/workflows/ci.yml, .github/workflows/pages.yml, .github/workflows/security.yml. Whether the jobs run or pass is not read. Read at commit 40edfea.",
+									"values": [
+										".github/workflows/automerge.yml",
+										".github/workflows/ci.yml",
+										".github/workflows/pages.yml",
+										".github/workflows/security.yml"
+									],
+									"count": 4
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "1 GitHub release(s); the latest, v0.2.0, published 2026-10-09.",
+									"values": ["v0.2.0"],
+									"count": 1
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit 40edfea.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "found",
+									"finding": "The repo's website field: https://mmm-pay.github.io/payflow-frontend/. Not opened, so what it shows is not checked, nor whether it loads.",
+									"values": ["https://mmm-pay.github.io/payflow-frontend/"],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "No link in README.md outside code hosts, docs, explorers, badges, chats and local addresses is labelled as a demo or live app; whether one of its 2 other link(s) is a demo is not judged: https://mmm-pay.github.io/payflow-frontend/, https://mmm-pay.github.io/payflow-docs/.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "Declares 2 Stellar package(s) Scout recognises: @creit.tech/stellar-wallets-kit, @stellar/stellar-sdk. SDK versions as declared: @stellar/stellar-sdk@^17.2.1. Read at commit 40edfea.",
+									"values": [
+										"@creit.tech/stellar-wallets-kit",
+										"@stellar/stellar-sdk"
+									],
+									"count": 2
+								},
+								{
+									"id": "contractCrates",
+									"state": "not-found",
+									"finding": "No Cargo.toml in the tree, so no Soroban contract crate. A dapp that calls contracts deployed elsewhere has none. Read at commit 40edfea.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit 40edfea.",
+									"values": [],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "114 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-09-02.",
+									"values": ["2026-10-23T22:43:22Z"],
+									"count": 114
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "75 file(s) follow a test-naming convention, e.g. test/account-discount.test.tsx, test/account-page.test.tsx, test/account-readonly.test.tsx and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read. Read at commit 40edfea.",
+									"values": [
+										"test/account-discount.test.tsx",
+										"test/account-page.test.tsx",
+										"test/account-readonly.test.tsx",
+										"test/account-trial.test.tsx",
+										"test/account.test.ts",
+										"test/amount-input.test.tsx",
+										"test/api.test.ts",
+										"test/availability-chain.test.ts",
+										"test/availability-page.test.tsx",
+										"test/availability.test.ts"
+									],
+									"count": 75
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "4 CI config file(s): .github/workflows/automerge.yml, .github/workflows/ci.yml, .github/workflows/pages.yml, .github/workflows/security.yml. Whether the jobs run or pass is not read. Read at commit 40edfea.",
+									"values": [
+										".github/workflows/automerge.yml",
+										".github/workflows/ci.yml",
+										".github/workflows/pages.yml",
+										".github/workflows/security.yml"
+									],
+									"count": 4
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "1 GitHub release(s); the latest, v0.2.0, published 2026-10-09.",
+									"values": ["v0.2.0"],
+									"count": 1
+								},
+								{
+									"id": "contractCrates",
+									"state": "not-found",
+									"finding": "No Cargo.toml in the tree, so no Soroban contract crate. A dapp that calls contracts deployed elsewhere has none. Read at commit 40edfea.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "not-found",
+									"finding": "README.md names no contract id (a 56-character address starting with C). Read at commit 40edfea.",
+									"values": [],
+									"count": null
+								},
+								{
+									"id": "website",
+									"state": "found",
+									"finding": "The repo's website field: https://mmm-pay.github.io/payflow-frontend/. Not opened, so what it shows is not checked, nor whether it loads.",
+									"values": ["https://mmm-pay.github.io/payflow-frontend/"],
+									"count": null
+								},
+								{
+									"id": "demoLinks",
+									"state": "could-not-check",
+									"finding": "No link in README.md outside code hosts, docs, explorers, badges, chats and local addresses is labelled as a demo or live app; whether one of its 2 other link(s) is a demo is not judged: https://mmm-pay.github.io/payflow-frontend/, https://mmm-pay.github.io/payflow-docs/.",
+									"values": null,
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

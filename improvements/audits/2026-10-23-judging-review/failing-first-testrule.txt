@@ -1,0 +1,18 @@
+   ✓ test files in a tree > counts files that follow a test-naming convention, the Soroban and Rust ones included 5ms
+   × test files in a tree > never counts a file that only looks test-named 14ms
+   ✓ CI config, manifests and the README in a tree > reads CI config files at their conventional paths only 2ms
+   ✓ CI config, manifests and the README in a tree > orders manifests shallow first, examples and tests last, and skips vendored ones 2ms
+   ✓ CI config, manifests and the README in a tree > takes the README at the root, Markdown first 1ms
+   ✓ what a README head shows a judge > labels a link a demo from its own words, its cell, or its sentence 9ms
+   ✓ what a README head shows a judge > never lends one link's label to the next link on its line 1ms
+   ✓ the total behind a per_page=1 list > reads the last page, or the rows when there is one page 1ms
+   ✓ readRepoLive > reads a public repo: 4 REST calls, the rest from raw files at the commit read 21ms
+   ✓ readRepoLive > serves a second ask from the cache with no call 5ms
+   ✓ readRepoLive > answers missing for a 404 or a repo that is not public, and reads nothing past its metadata 1ms
+   ✓ readRepoLive > reads an empty repo as empty: no files, no commits 1ms
+   ✓ readRepoLive > lists a part that did not answer as unread, never as empty 1ms
+   ✓ readRepoLive > returns at its deadline when GitHub never answers  306ms
+   ✓ readRepoLive > makes no call once the hour's cap is spent 8ms
+   ✓ readRepoLive > makes no call while the token's pool is under the floor 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 15 passed (16)

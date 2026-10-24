@@ -1,0 +1,40 @@
+{
+	"at": "2026-10-23T22:53:03.107Z",
+	"rows": [
+		{
+			"repo": "MMM-pay/payflow-frontend",
+			"status": 200,
+			"readMs": 1307,
+			"coldHandlerMs": 1311,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "nirium-protocol/nirium-core",
+			"status": 200,
+			"readMs": 1068,
+			"coldHandlerMs": 1071,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-19",
+			"status": 200,
+			"readMs": 1126,
+			"coldHandlerMs": 1127,
+			"warmHandlerMs": 0
+		},
+		{
+			"repo": "repo-20",
+			"status": 200,
+			"readMs": 890,
+			"coldHandlerMs": 893,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-21",
+			"status": 200,
+			"readMs": 895,
+			"coldHandlerMs": 899,
+			"warmHandlerMs": 1
+		}
+	]
+}

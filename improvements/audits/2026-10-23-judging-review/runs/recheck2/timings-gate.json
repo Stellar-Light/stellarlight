@@ -1,0 +1,75 @@
+{
+	"at": "2026-10-23T23:33:56.757Z",
+	"rows": [
+		{
+			"repo": "Heliobond/frontend",
+			"status": 200,
+			"readMs": 1193,
+			"coldHandlerMs": 1196,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-13",
+			"status": 200,
+			"readMs": 900,
+			"coldHandlerMs": 903,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "repo-14",
+			"status": 200,
+			"readMs": 873,
+			"coldHandlerMs": 876,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "Specula-Labs/specula-contracts",
+			"status": 200,
+			"readMs": 939,
+			"coldHandlerMs": 941,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "Specula-Labs/specula-app",
+			"status": 200,
+			"readMs": 880,
+			"coldHandlerMs": 884,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "stellar/soroban-cli",
+			"status": 200,
+			"readMs": 1245,
+			"coldHandlerMs": 1247,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "stellar/soroban-examples",
+			"status": 200,
+			"readMs": 1031,
+			"coldHandlerMs": 1033,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "stellar/js-stellar-sdk",
+			"status": 200,
+			"readMs": 1159,
+			"coldHandlerMs": 1161,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "stellar/freighter",
+			"status": 200,
+			"readMs": 1281,
+			"coldHandlerMs": 1283,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "stellar/quickstart",
+			"status": 200,
+			"readMs": 1222,
+			"coldHandlerMs": 1224,
+			"warmHandlerMs": 1
+		}
+	]
+}

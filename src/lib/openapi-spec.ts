@@ -34,6 +34,11 @@ import {
 	REVIEW_CHECK_IDS,
 	REVIEW_RESOLVED_BY,
 } from "./hackathon-build-links";
+import {
+	EVIDENCE_STATES,
+	JUDGED_EVENT_SLUGS,
+	JUDGING_EVIDENCE_IDS,
+} from "./hackathon-judging";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "./http-params";
 import { RESEARCH_MODES } from "./match-mode";
 import { PARTNER_TYPES } from "./partner-match";
@@ -47,6 +52,7 @@ import {
 import { PROJECT_TYPES } from "./project-types";
 import { RATE_LIMIT_SCOPE } from "./rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
+import { LIVE_READ_PARTS } from "./repo-live-read";
 import { REPO_MATCH_MODES } from "./repo-search";
 import { INDICATOR_KINDS } from "./repo-security";
 import { RESEARCH_SOURCES } from "./research-sources";
@@ -992,6 +998,151 @@ const SCF_PITCH_REPORT_SCHEMA = {
 			items: { type: "string" },
 			description:
 				"Deterministic derivations from served facts: each names its evidence; not judgments.",
+		},
+	},
+};
+
+/** One fact a judging criterion rests on (src/lib/hackathon-judging.ts). */
+const JUDGING_EVIDENCE_SCHEMA = {
+	type: "object",
+	properties: {
+		id: {
+			type: "string",
+			enum: [...JUDGING_EVIDENCE_IDS],
+			description:
+				"stellarPackages: Stellar packages its manifests declare (Scout's list). contractCrates: Cargo.toml crates building a deployable Soroban contract. contractIds: contract ids the README names, not checked on chain. testFiles: files that follow a test-naming convention (the finding lists the conventions; a test named otherwise is not counted). ciConfig: CI config files. releases: GitHub releases. website: the repo's website field, whatever it points at, not opened and not called a demo. demoLinks: README links Scout reads as labelled a demo or live app (by its label words; a link labelled otherwise is not listed, a link whose words say docs is not a demo, and links inside HTML comments are not read), not opened. lastCommit: commits on the default branch and the last one's date. scfRound: the live SCF round state from communityfund.stellar.org, the source scfPitch reads.",
+		},
+		state: {
+			type: "string",
+			enum: [...EVIDENCE_STATES],
+			description:
+				"found: read and present. not-found: read and absent, only within what the finding says was read. could-not-check: not read (GitHub did not answer, the budget was spent, a file was cut short, or a link could not be judged); never a no. Not dated here: every item rests on the one live read, dated by review.repo.readAt at the commit in review.repo.commit.",
+		},
+		finding: {
+			type: "string",
+			description: "One sentence: the fact, what was read, and what was not.",
+		},
+		values: {
+			type: "array",
+			nullable: true,
+			description:
+				"The cited values as written (package names, crate directories, contract ids, file paths, the latest release tag, URLs, the last commit's ISO date, open SCF rounds); a sample when count is larger. [] with not-found; null with could-not-check.",
+			items: { type: "string" },
+		},
+		count: {
+			type: "integer",
+			nullable: true,
+			description:
+				"The total behind values (test files following a convention, a floor of the repo's tests; CI files; releases; commits on the default branch; contract ids; Stellar packages; contract crates). null when not counted, and whenever the part read was partial (a manifest unread, the tree listing or the README cut short), since a count over part of the repo is not its total; the finding then says what was not read.",
+		},
+	},
+};
+
+/** What reviewSubmission adds with `hackathon`. */
+const REVIEW_JUDGING_PROPERTIES = {
+	stored: {
+		type: "boolean",
+		description:
+			"Present only with hackathon. true: the link is a stored submission, and every field above is served as without hackathon. false: a GitHub repo with no stored submission, read live; only link, stored, security, repo and judging are served, since there are no stored facts, checks, similar submissions or pitch.",
+	},
+	security: {
+		...BUILD_HOLD_SCHEMA,
+		description:
+			"Present only on a review with stored false whose repo is held for malware: the repo is not read, so every repo item says could-not-check. A stored submission carries its hold in submission.security. Absent means no hold on record, not that the repo is safe.",
+	},
+	repo: {
+		type: "object",
+		nullable: true,
+		description:
+			"Present only with hackathon: the live GitHub read the judging evidence rests on. null when no read ran (no repo on the submission, a repo held for malware) or GitHub answered 404 for a stored submission's repo; the evidence then says could-not-check with the reason.",
+		properties: {
+			fullName: {
+				type: "string",
+				description:
+					"owner/name as GitHub answers it (a renamed repo answers its new name).",
+			},
+			url: { type: "string" },
+			commit: {
+				type: "string",
+				nullable: true,
+				description:
+					"The default branch's newest commit: the tree, manifests and README were all read at it, and findings read from them name it. null for an empty repository, or when the commits did not answer (then those parts were not read either).",
+			},
+			readAt: {
+				type: "string",
+				format: "date-time",
+				description:
+					"When the read ran. A read is kept 5 minutes per repo, 1 minute when a part did not answer.",
+			},
+			readMs: {
+				type: "integer",
+				description: "How long the read took, inside its 4-second budget.",
+			},
+			unread: {
+				type: "array",
+				description:
+					"The parts not read; every evidence item resting on one says could-not-check, and its finding gives that part's own reason (GitHub's answer or silence for it, a listing cut short, a file that is not UTF-8 text, a manifest over 512 KB, more manifests than the 12 a read takes). [] when every part was read.",
+				items: { type: "string", enum: [...LIVE_READ_PARTS] },
+			},
+		},
+	},
+	judging: {
+		type: "object",
+		description:
+			"Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason. Evidence, not a verdict: no score, no pass or fail. Categories and criteria keep the sentence's order; the order is not a rank.",
+		properties: {
+			hackathon: {
+				type: "object",
+				properties: { slug: { type: "string" }, title: { type: "string" } },
+			},
+			source: {
+				type: "string",
+				description: "The organizer's page the criteria were checked against.",
+			},
+			checkedOn: { type: "string", format: "date" },
+			categories: {
+				type: "array",
+				items: {
+					type: "object",
+					properties: {
+						category: {
+							type: "string",
+							description:
+								"A category the event judges entries in (getHackathon tracks with kind category).",
+						},
+						criteria: {
+							type: "array",
+							items: {
+								type: "object",
+								properties: {
+									criterion: {
+										type: "string",
+										description: "In the judging sentence's own words.",
+									},
+									checkable: {
+										type: "boolean",
+										description:
+											"false: judged from what Scout does not read (pitch deck, demo video, submission answers, goals set at pre-event intake); reason says which, and evidence is null.",
+									},
+									reason: {
+										type: "string",
+										nullable: true,
+										description:
+											"Why it cannot be checked from the repo; null when checkable.",
+									},
+									evidence: {
+										type: "array",
+										nullable: true,
+										description:
+											"The facts that bear on the criterion; null when not checkable. One fact can serve several criteria and repeats in each.",
+										items: JUDGING_EVIDENCE_SCHEMA,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	},
 };
@@ -4443,10 +4594,10 @@ export const spec: OpenAPISpec = {
 				tags: ["Hackathons"],
 				summary: "Review a hackathon project from its GitHub or DoraHacks link",
 				description:
-					"Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, and the SCF pitch view over its summary (live round, funded peers, competitors, prior art). Evidence, not a verdict. For an idea with no link → use vetIdea or scfPitch.",
+					"Feedback on one Stellar hackathon submission from its GitHub repo or DoraHacks link, no sign-in: its stored facts (Stellar packages, category, repo activity after the event, the directory project it became with status and SCF funding), checks that each state a fact (ok null = could not be checked), the submissions closest in meaning, and the SCF pitch view (live round, funded peers, competitors, prior art). hackathon=<slug> adds its judging criteria with the repo's evidence, read live, even for a repo not stored. Evidence, not a verdict. For an idea with no link → use vetIdea or scfPitch.",
 				"x-routing": {
 					purpose:
-						"Get feedback on your own hackathon project before you apply to SCF: what the evidence shows, what is missing, who built close to it, and who is funded.",
+						"Get feedback on your own hackathon project before you apply to SCF or submit it: what the evidence shows, what is missing, who built close to it, and who is funded.",
 					keywords: [
 						"review my project",
 						"feedback on my project",
@@ -4459,16 +4610,19 @@ export const spec: OpenAPISpec = {
 						"github link",
 						"dorahacks link",
 						"is my project ready",
+						"what will judges find",
 					],
 					useWhen: [
 						"here is my hackathon project (a GitHub or DoraHacks link): what is weak about it",
 						"what is missing before I apply to SCF with this project",
 						"who built something close to my submission, and did they win",
+						"my repo for [event]: what evidence will the judges find for each criterion",
 					],
 					notFor: [
 						"an idea with no link -> vetIdea / scfPitch",
 						"a repo's own trust signals outside hackathons -> getRepoTrust",
 						"one submission's full write-up only -> getHackathonSubmission",
+						"an event's judging criteria or rules with no repo -> getHackathon",
 					],
 					exampleQuestions: [
 						"Here is my hackathon project: github.com/rajkaria/toll. What's weak about it before I apply to SCF?",
@@ -4481,8 +4635,16 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: true,
 						description:
-							"The submission's GitHub repo (owner/name or its URL) or its DoraHacks link or id. A repo submitted more than once resolves to its placed entry, then the newest.",
+							"The submission's GitHub repo (owner/name or its URL) or its DoraHacks link or id. A repo submitted more than once resolves to its placed entry, then the newest. With hackathon, a GitHub repo with no stored submission is read live instead of answering 404.",
 						schema: { type: "string" },
+					},
+					{
+						name: "hackathon",
+						in: "query",
+						required: false,
+						description:
+							"An event whose judging criteria Scout holds as data. Adds review.judging: each of the event's criteria, in its record's words, with the evidence a judge would find in the repo, or checkable false with the reason (decks, videos, submission answers and intake goals are not read). The repo is read live from GitHub at its default branch's newest commit: read-only, inside 4 seconds, cached 5 minutes per repo, at most 20 such requests a minute per caller, and never past a repo that is not public. One caller may spend at most a quarter of a server's hourly live-read budget; past it, its reads answer could-not-check. Any other value answers 400 with validHackathons.",
+						schema: { type: "string", enum: [...JUDGED_EVENT_SLUGS] },
 					},
 				],
 				responses: {
@@ -4585,6 +4747,7 @@ export const spec: OpenAPISpec = {
 														"Why categoryContext is null: the submission has no confident category (uncertain, not missing), or it is not categorized yet. null when categoryContext is served.",
 												},
 												pitch: SCF_PITCH_REPORT_SCHEMA,
+												...REVIEW_JUDGING_PROPERTIES,
 											},
 										},
 									},
@@ -4592,10 +4755,17 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"400": { description: "No link, or a parameter other than link." },
+					"400": {
+						description:
+							"No link, a parameter other than link and hackathon, or a hackathon value whose judging criteria Scout does not hold (validHackathons lists those it does).",
+					},
 					"404": {
 						description:
-							"No stored submission matches the link (not proof it was never submitted).",
+							"No stored submission matches the link (not proof it was never submitted). With hackathon, a GitHub repo link answers 404 only when no public repo answers there (it does not exist or is private).",
+					},
+					"429": {
+						description:
+							"With hackathon, this caller's window (20 a minute per IP or partner key, per server instance) is spent; Retry-After says when to retry.",
 					},
 					"503": {
 						description:

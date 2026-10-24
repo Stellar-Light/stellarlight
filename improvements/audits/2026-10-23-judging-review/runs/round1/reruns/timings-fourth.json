@@ -1,0 +1,40 @@
+{
+	"at": "2026-10-23T22:19:16.998Z",
+	"rows": [
+		{
+			"repo": "Heliobond/frontend",
+			"status": 200,
+			"readMs": 1385,
+			"coldHandlerMs": 1390,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-13",
+			"status": 200,
+			"readMs": 843,
+			"coldHandlerMs": 844,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-14",
+			"status": 200,
+			"readMs": 981,
+			"coldHandlerMs": 983,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "Specula-Labs/specula-contracts",
+			"status": 200,
+			"readMs": 950,
+			"coldHandlerMs": 951,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "Specula-Labs/specula-app",
+			"status": 200,
+			"readMs": 1138,
+			"coldHandlerMs": 1141,
+			"warmHandlerMs": 2
+		}
+	]
+}

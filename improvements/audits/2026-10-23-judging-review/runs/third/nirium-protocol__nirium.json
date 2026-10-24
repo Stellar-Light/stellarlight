@@ -1,0 +1,256 @@
+{
+	"meta": {
+		"source": "https://stellarlight.xyz/api/hackathons/review",
+		"generatedAt": "2026-10-23T20:42:36.118Z",
+		"note": "Evidence, not a verdict. stored false: no stored submission matches the link, so the review is the live read of the GitHub repo alone, with no stored checks, similar submissions or pitch. judging = each of the event's judging criteria, in its record's words, with the evidence a judge would find in the repo, read live from GitHub (repo.readAt), or checkable false with the reason. An item's state could-not-check is never a no; not-found holds only within what its finding says was read. No score and no pass or fail."
+	},
+	"review": {
+		"link": "https://github.com/nirium-protocol/nirium",
+		"stored": false,
+		"repo": {
+			"fullName": "nirium-protocol/nirium",
+			"url": "https://github.com/nirium-protocol/nirium",
+			"readAt": "2026-10-23T20:42:35.098Z",
+			"readMs": 1019,
+			"unread": ["manifests"]
+		},
+		"judging": {
+			"hackathon": {
+				"slug": "hackmeridian-2026",
+				"title": "HackMeridian 2026"
+			},
+			"source": "https://hackmeridian.com",
+			"checkedOn": "2026-10-20",
+			"categories": [
+				{
+					"category": "Genesis",
+					"criteria": [
+						{
+							"criterion": "problem clarity",
+							"checkable": false,
+							"reason": "Judged from the pitch deck, demo video and submission answers, which Scout does not read.",
+							"evidence": null
+						},
+						{
+							"criterion": "MVP quality",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "37 file(s) follow a test-naming convention, e.g. actions/verify-audit-cid/test/action.test.js, actions/verify-audit-cid/test/fixtures/server.mjs, examples/audit-forensic-bridge/test/bridge.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read.",
+									"values": [
+										"actions/verify-audit-cid/test/action.test.js",
+										"actions/verify-audit-cid/test/fixtures/server.mjs",
+										"examples/audit-forensic-bridge/test/bridge.test.ts",
+										"examples/deploy-x402-vercel/test/smoke.test.js",
+										"examples/go-x402/x402_test.go",
+										"examples/nextjs-x402/test/smoke.test.js",
+										"examples/routedock-manifest/test/manifest.schema.test.ts",
+										"examples/routedock-manifest/test/routedock-client.test.ts",
+										"examples/rust-x402/tests/integration.rs",
+										"examples/sdp-audit-bridge/test/audit.test.ts"
+									],
+									"count": 37
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "6 CI config file(s): .github/workflows/ci.yml, .github/workflows/examples-typecheck.yml, .github/workflows/mcp-ci.yml, .github/workflows/sdk-test.yml, .github/workflows/security-gate.yml and 1 more. Whether the jobs run or pass is not read.",
+									"values": [
+										".github/workflows/ci.yml",
+										".github/workflows/examples-typecheck.yml",
+										".github/workflows/mcp-ci.yml",
+										".github/workflows/sdk-test.yml",
+										".github/workflows/security-gate.yml",
+										".github/workflows/test-verify-audit-cid.yml"
+									],
+									"count": 6
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "5 GitHub release(s); the latest, nirium@0.16.1, published 2026-10-11.",
+									"values": ["nirium@0.16.1"],
+									"count": 5
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 2 contract id(s): CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU, CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses).",
+									"values": [
+										"CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU",
+										"CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5"
+									],
+									"count": 2
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "The repo's website field: https://nirium.xyz. README.md links 1 page(s) its text labels as a demo or live app (words such as demo, live, deployed, website): https://nirium.xyz/stats. Not opened, so whether they load is not checked.",
+									"values": ["https://nirium.xyz", "https://nirium.xyz/stats"],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "Stellar integration",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "stellarPackages",
+									"state": "found",
+									"finding": "The 12 of 19 manifests read declare 7 Stellar package(s) Scout recognises: @stellar/mpp, @stellar/stellar-sdk, @x402/core, @x402/express, @x402/fetch, @x402/stellar, python:pyproject.toml. SDK versions as declared: @stellar/stellar-sdk@^14.5.0. python:pyproject.toml: a pyproject.toml declares a Stellar SDK or library (python). The 7 not read may declare more.",
+									"values": [
+										"@stellar/mpp",
+										"@stellar/stellar-sdk",
+										"@x402/core",
+										"@x402/express",
+										"@x402/fetch",
+										"@x402/stellar",
+										"python:pyproject.toml"
+									],
+									"count": null
+								},
+								{
+									"id": "contractCrates",
+									"state": "could-not-check",
+									"finding": "No Cargo.toml read declares a deployable Soroban contract, but 1 Cargo.toml file(s) were not read. Not read: manifests. GitHub did not answer within the 4-second budget or answered an error, or the repo holds more manifests than the 12 a read takes.",
+									"values": null,
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 2 contract id(s): CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU, CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses).",
+									"values": [
+										"CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU",
+										"CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5"
+									],
+									"count": 2
+								}
+							]
+						},
+						{
+							"criterion": "continued development potential",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "lastCommit",
+									"state": "found",
+									"finding": "181 commit(s) on main, the last on 2026-10-23; the repo was created on 2026-06-15.",
+									"values": ["2026-10-23T17:30:51Z"],
+									"count": 181
+								}
+							]
+						}
+					]
+				},
+				{
+					"category": "Scale",
+					"criteria": [
+						{
+							"criterion": "milestones against goals set at pre-event intake",
+							"checkable": false,
+							"reason": "The goals are set with the organizer at pre-event intake and are not published, so Scout cannot read them or the progress against them.",
+							"evidence": null
+						},
+						{
+							"criterion": "SCF eligibility",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "scfRound",
+									"state": "found",
+									"finding": "SCF is taking submissions: Round 46: Submission, deadline 2026-11-08 (read live from communityfund.stellar.org). Eligibility itself is SCF's call under its own rules (communityfund.stellar.org, the SCF Handbook); Scout's scf-prescreen-checker skill (getSkill) simulates the prescreen.",
+									"values": ["Round 46: Submission, deadline 2026-11-08"],
+									"count": 1
+								}
+							]
+						},
+						{
+							"criterion": "production readiness",
+							"checkable": true,
+							"reason": null,
+							"evidence": [
+								{
+									"id": "testFiles",
+									"state": "found",
+									"finding": "37 file(s) follow a test-naming convention, e.g. actions/verify-audit-cid/test/action.test.js, actions/verify-audit-cid/test/fixtures/server.mjs, examples/audit-forensic-bridge/test/bridge.test.ts and 7 more. Conventions counted: test directories (tests/, test/, __tests__/, spec/, e2e/, cypress/); *.test.* and *.spec.*; Rust test.rs, tests.rs, test_*.rs and *_test(s).rs; Go *_test.go; Python test_*.py, *_test.py and conftest.py; a test named otherwise is not counted, and whether tests run or pass is not read.",
+									"values": [
+										"actions/verify-audit-cid/test/action.test.js",
+										"actions/verify-audit-cid/test/fixtures/server.mjs",
+										"examples/audit-forensic-bridge/test/bridge.test.ts",
+										"examples/deploy-x402-vercel/test/smoke.test.js",
+										"examples/go-x402/x402_test.go",
+										"examples/nextjs-x402/test/smoke.test.js",
+										"examples/routedock-manifest/test/manifest.schema.test.ts",
+										"examples/routedock-manifest/test/routedock-client.test.ts",
+										"examples/rust-x402/tests/integration.rs",
+										"examples/sdp-audit-bridge/test/audit.test.ts"
+									],
+									"count": 37
+								},
+								{
+									"id": "ciConfig",
+									"state": "found",
+									"finding": "6 CI config file(s): .github/workflows/ci.yml, .github/workflows/examples-typecheck.yml, .github/workflows/mcp-ci.yml, .github/workflows/sdk-test.yml, .github/workflows/security-gate.yml and 1 more. Whether the jobs run or pass is not read.",
+									"values": [
+										".github/workflows/ci.yml",
+										".github/workflows/examples-typecheck.yml",
+										".github/workflows/mcp-ci.yml",
+										".github/workflows/sdk-test.yml",
+										".github/workflows/security-gate.yml",
+										".github/workflows/test-verify-audit-cid.yml"
+									],
+									"count": 6
+								},
+								{
+									"id": "releases",
+									"state": "found",
+									"finding": "5 GitHub release(s); the latest, nirium@0.16.1, published 2026-10-11.",
+									"values": ["nirium@0.16.1"],
+									"count": 5
+								},
+								{
+									"id": "contractCrates",
+									"state": "could-not-check",
+									"finding": "No Cargo.toml read declares a deployable Soroban contract, but 1 Cargo.toml file(s) were not read. Not read: manifests. GitHub did not answer within the 4-second budget or answered an error, or the repo holds more manifests than the 12 a read takes.",
+									"values": null,
+									"count": null
+								},
+								{
+									"id": "contractIds",
+									"state": "found",
+									"finding": "README.md names 2 contract id(s): CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU, CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5. Scout does not check them on chain or confirm they are this project's own (a README also names the token and pool contracts it uses).",
+									"values": [
+										"CBTWMZCG3P72EHFAQ4ZLSEBIOFYJC244H5J6DHZIJ56FHFWJ2CFAWSZU",
+										"CC2TU5BDTKTPRRRQPEF77I54XYHFQ25XGIRO2TCWKSR7NRJDFR5L5NR5"
+									],
+									"count": 2
+								},
+								{
+									"id": "demoLinks",
+									"state": "found",
+									"finding": "The repo's website field: https://nirium.xyz. README.md links 1 page(s) its text labels as a demo or live app (words such as demo, live, deployed, website): https://nirium.xyz/stats. Not opened, so whether they load is not checked.",
+									"values": ["https://nirium.xyz", "https://nirium.xyz/stats"],
+									"count": null
+								}
+							]
+						},
+						{
+							"criterion": "ecosystem impact",
+							"checkable": false,
+							"reason": "A judgment on the pitch and the project's place in the ecosystem, from the deck, video and submission answers, which Scout does not read.",
+							"evidence": null
+						}
+					]
+				}
+			]
+		}
+	}
+}

@@ -1,0 +1,75 @@
+{
+	"at": "2026-10-23T18:04:34.198Z",
+	"rows": [
+		{
+			"repo": "repo-01",
+			"status": 200,
+			"readMs": 1064,
+			"coldHandlerMs": 1075,
+			"warmHandlerMs": 4
+		},
+		{
+			"repo": "repo-02",
+			"status": 200,
+			"readMs": 527,
+			"coldHandlerMs": 529,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-03",
+			"status": 200,
+			"readMs": 813,
+			"coldHandlerMs": 815,
+			"warmHandlerMs": 0
+		},
+		{
+			"repo": "repo-04",
+			"status": 200,
+			"readMs": 851,
+			"coldHandlerMs": 854,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-05",
+			"status": 200,
+			"readMs": 646,
+			"coldHandlerMs": 660,
+			"warmHandlerMs": 0
+		},
+		{
+			"repo": "repo-06",
+			"status": 200,
+			"readMs": 697,
+			"coldHandlerMs": 704,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "repo-07",
+			"status": 200,
+			"readMs": 635,
+			"coldHandlerMs": 641,
+			"warmHandlerMs": 0
+		},
+		{
+			"repo": "DocForum/docforum-escrow",
+			"status": 200,
+			"readMs": 825,
+			"coldHandlerMs": 830,
+			"warmHandlerMs": 1
+		},
+		{
+			"repo": "Foryield/soroban-yield-vault",
+			"status": 200,
+			"readMs": 887,
+			"coldHandlerMs": 894,
+			"warmHandlerMs": 2
+		},
+		{
+			"repo": "Presago-Labs/presago-contracts",
+			"status": 200,
+			"readMs": 804,
+			"coldHandlerMs": 813,
+			"warmHandlerMs": 1
+		}
+	]
+}
