@@ -1,5 +1,14 @@
 {
-	"generatedAt": "2026-10-21T10:37:42.819Z",
+	"generatedAt": "2026-10-25T10:11:25.137Z",
 	"detector": "api-drift",
-	"failures": []
+	"failures": [
+		{
+			"probe": "/api/sources/locate emits X-API-Version",
+			"note": "got \"none\" — add \"/api/sources/locate\" to next.config.mjs publicApi[]"
+		},
+		{
+			"probe": "/api/sources/locate emits CORS (Access-Control-Allow-Origin)",
+			"note": "got \"none\" — add \"/api/sources/locate\" to next.config.mjs publicApi[]"
+		}
+	]
 }
