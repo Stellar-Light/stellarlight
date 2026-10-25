@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8269702196121216,
+      "topScore": 0.8270648717880249,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -135,7 +135,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8234843611717224,
+      "topScore": 0.8239147663116455,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -161,7 +161,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Blend Protocol — Certora (Blend Security Assessment Report)"
+      "sample": "Blend Protocol: Certora (Blend Security Assessment Report)"
     },
     {
       "id": "audit-reentrancy",
@@ -179,7 +179,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Soroban Core — Veridise (Auditing Report for Soroban"
+      "sample": "Stellar Soroban Core: Veridise (Auditing Report for Soroban "
     },
     {
       "id": "ecosystem-rwa-map",
@@ -377,7 +377,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "StellarBroker — Runtime Verification (Security Audit Report "
+      "sample": "StellarBroker: Runtime Verification (Security Audit Report f"
     },
     {
       "id": "ec-developer-count",
@@ -449,7 +449,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Live network value — served by adapters/RPC, not the static research corpus."
+      "sample": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
     },
     {
       "id": "soroban-sdk-version",
@@ -467,7 +467,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
+      "sample": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
     },
     {
       "id": "repos-zk",
@@ -585,15 +585,15 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7978503704071045,
+      "topScore": 0.7966394424438477,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": true,
+      "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Smart Contract Asset Interoperability"
+      "sample": "Cross-Chain USDC Transfers with CCTP"
     },
     {
       "id": "bridge-solana-to-stellar",
@@ -703,7 +703,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "yieldblox-incident-facts",
@@ -721,7 +721,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "cap-exact-id-0038",
@@ -785,7 +785,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6957977414131165,
+      "topScore": 0.6947882175445557,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -847,7 +847,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Stellar Enterprise Fund — venture-style fund (stellar.org/en"
+      "sample": "Stellar Enterprise Fund: venture-style fund (stellar.org/ent"
     },
     {
       "id": "q-org-sdf-leadership-roles",
@@ -857,7 +857,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8258647918701172,
+      "topScore": 0.8303924798965454,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -865,7 +865,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "SDF Team — leadership and board of directors (stellar.org/fo"
+      "sample": "SDF Team: leadership and board of directors (stellar.org/fou"
     },
     {
       "id": "capability-custody-identity",
@@ -937,7 +937,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Soroban - Band Standard Reference Contract — Runtime Verific"
+      "sample": "Soroban - Band Standard Reference Contract: Runtime Verifica"
     },
     {
       "id": "soroban-test-event-assertions",
@@ -958,5 +958,6 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-10-25T10:12:00Z"
+  "generatedAt": "2026-10-25T13:46:01Z",
+  "evalKey": "golden-eval"
 }

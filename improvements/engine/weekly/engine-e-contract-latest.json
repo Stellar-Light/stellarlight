@@ -1,15 +1,18 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-10-18T13:09:39Z",
-  "specVersion": "1.9.80",
+  "generatedAt": "2026-10-25T13:46:01Z",
+  "specVersion": "1.9.111",
   "frame": {
-    "ops": 41,
-    "paramsProbed": 35,
-    "fieldsChecked": 973,
+    "ops": 42,
+    "paramsProbed": 40,
+    "fieldsChecked": 1047,
     "postChecked": 5,
     "skipped": [
       "GET /api/hackathons/builds/{id} (no sample for path params)",
       "GET /api/verify ?type (baseline 400)",
+      "GET /api/hackathons/review ?hackathon (baseline 400)",
+      "GET /api/sources/locate ?repo (baseline 400)",
+      "GET /api/sources/locate ?kind (baseline 400)",
       "GET /api/verify (field check: live call 400)",
       "GET /api/projects/resolve (field check: live call 400)",
       "GET /api/changes (field check: live call 400)",
@@ -17,7 +20,8 @@
       "GET /api/scf-pitch (field check: live call 400)",
       "GET /api/hackathon-brief (field check: live call 400)",
       "GET /api/vet-idea (field check: live call 400)",
-      "GET /api/repos/trust (field check: live call 400)"
+      "GET /api/repos/trust (field check: live call 400)",
+      "GET /api/sources/locate (field check: live call 400)"
     ],
     "opsReached": [
       "GET /api/analyze",
@@ -51,39 +55,14 @@
       "GET /api/scf-pitch",
       "GET /api/skills",
       "GET /api/skills/{name}",
+      "GET /api/sources/locate",
       "GET /api/stablecoins",
       "GET /api/status",
       "GET /api/verify",
       "GET /api/vet-idea"
     ]
   },
-  "silentParams": [
-    {
-      "op": "GET /api/hackathons/builds",
-      "param": "mode",
-      "evidence": "all 3 valid value(s) [keyword, meaning, hybrid] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/builds?limit=200)"
-    },
-    {
-      "op": "GET /api/hackathons/analyze",
-      "param": "mode",
-      "evidence": "all 3 valid value(s) [keyword, meaning, hybrid] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/analyze)"
-    },
-    {
-      "op": "GET /api/hackathons/analyze",
-      "param": "facet",
-      "evidence": "all 11 valid value(s) [category, package, library, activity, project, projectStatus, scf, placement, track, event, year] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/analyze)"
-    },
-    {
-      "op": "GET /api/hackathons/analyze",
-      "param": "winnersOnly",
-      "evidence": "all 8 valid value(s) [1, true, yes, on, 0, false, no, off] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/analyze)"
-    },
-    {
-      "op": "GET /api/hackathons/analyze",
-      "param": "category",
-      "evidence": "all 25 valid value(s) [Wallet, DEX, Lending, Bridge, Infrastructure, Payments, Anchor, SDK, Indexer, Explorer, Analytics, AI, Gaming, Education, Security, NFT, RWA, Stablecoin, Social Impact, RPC, Faucet, Card Issuing, Exchange, Oracle, Yield] returned rows+counts byte-identical to the baseline (https://stellarlight.xyz/api/hackathons/analyze)"
-    }
-  ],
+  "silentParams": [],
   "invalidAccepted": [],
   "rejectedParams": [],
   "missingFields": [],
@@ -115,6 +94,11 @@
     },
     {
       "op": "GET /api/projects/search",
+      "field": "meta.view",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/projects/search",
       "field": "meta.didYouMean",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
@@ -129,8 +113,38 @@
       "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
+      "op": "GET /api/projects/search",
+      "field": "projects[].reposCount",
+      "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+    },
+    {
+      "op": "GET /api/projects/search",
+      "field": "projects[].onchainContractsCount",
+      "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+    },
+    {
+      "op": "GET /api/projects/search",
+      "field": "codeReferences[].ciPresent",
+      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+    },
+    {
+      "op": "GET /api/projects/search",
+      "field": "codeReferences[].testsPresent",
+      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+    },
+    {
+      "op": "GET /api/projects/search",
+      "field": "codeReferences[].knowledgeNotesCount",
+      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
+    },
+    {
       "op": "GET /api/repos/search",
       "field": "meta.warnings",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/repos/search?q=soroban&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/repos/search",
+      "field": "meta.view",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/repos/search?q=soroban&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
@@ -142,6 +156,16 @@
       "op": "GET /api/repos/search",
       "field": "repos[].testsPresent",
       "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/repos/search?q=soroban&limit=200) \u2014 allowed by the schema, not drift"
+    },
+    {
+      "op": "GET /api/repos/search",
+      "field": "repos[].knowledgeNotesCount",
+      "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/repos/search?q=soroban&limit=200) \u2014 allowed by the schema, not drift"
+    },
+    {
+      "op": "GET /api/repos/explain",
+      "field": "security",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/repos/explain?q=soroban) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
       "op": "GET /api/repos/explain",
@@ -210,27 +234,22 @@
     },
     {
       "op": "GET /api/hackathons/{slug}",
-      "field": "hackathon.rules",
-      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
-    },
-    {
-      "op": "GET /api/hackathons/{slug}",
       "field": "hackathon.profile",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
-      "op": "GET /api/hackathons/compare",
-      "field": "hackathons[].hackersCount",
-      "evidence": "documented optional item property absent from all 2 sampled rows (https://stellarlight.xyz/api/hackathons/compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026) \u2014 allowed by the schema, not drift"
+      "op": "GET /api/hackathons/{slug}",
+      "field": "hackathon.coverage",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/hackathons/{slug}",
+      "field": "tracks[].totalPrizeUSD",
+      "evidence": "documented optional item property absent from all 4 sampled rows (https://stellarlight.xyz/api/hackathons/hackmeridian-2026) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/hackathons/compare",
-      "field": "hackathons[].submissionCount",
-      "evidence": "documented optional item property absent from all 2 sampled rows (https://stellarlight.xyz/api/hackathons/compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026) \u2014 allowed by the schema, not drift"
-    },
-    {
-      "op": "GET /api/hackathons/compare",
-      "field": "hackathons[].winnerCount",
+      "field": "hackathons[].coverage",
       "evidence": "documented optional item property absent from all 2 sampled rows (https://stellarlight.xyz/api/hackathons/compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026) \u2014 allowed by the schema, not drift"
     },
     {
@@ -260,33 +279,58 @@
     },
     {
       "op": "GET /api/hackathons/compare",
+      "field": "hackathons[].notes",
+      "evidence": "documented optional item property absent from all 2 sampled rows (https://stellarlight.xyz/api/hackathons/compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026) \u2014 allowed by the schema, not drift"
+    },
+    {
+      "op": "GET /api/hackathons/compare",
+      "field": "deltas.submissionCount",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/hackathons/compare",
+      "field": "deltas.prizePerWinnerUSD",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/hackathons/compare",
+      "field": "deltas.hackersCount",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/hackathons/compare",
+      "field": "deltas.activeRatePct",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/hackathons/compare",
       "field": "deltas.facetShifts",
       "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/compare?slugs=hackmeridian-2026,stellar-builders-camp-jaipur-2026) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
       "op": "GET /api/hackathons/builds",
       "field": "meta.warnings",
-      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/builds?limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/builds?q=wallet&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
       "op": "GET /api/hackathons/builds",
-      "field": "builds[].matchedTerms",
-      "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/hackathons/builds?limit=200) \u2014 allowed by the schema, not drift"
+      "field": "meta.inferredFilter",
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/builds?q=wallet&limit=200) \u2014 allowed by the schema (conditional/unreached), not drift"
+    },
+    {
+      "op": "GET /api/hackathons/builds",
+      "field": "builds[].security",
+      "evidence": "documented optional item property absent from all 89 sampled rows (https://stellarlight.xyz/api/hackathons/builds?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/hackathons/builds",
       "field": "builds[].similarity",
-      "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/hackathons/builds?limit=200) \u2014 allowed by the schema, not drift"
+      "evidence": "documented optional item property absent from all 89 sampled rows (https://stellarlight.xyz/api/hackathons/builds?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/hackathons/analyze",
       "field": "groups",
-      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/analyze) \u2014 allowed by the schema (conditional/unreached), not drift"
-    },
-    {
-      "op": "GET /api/hackathons/analyze",
-      "field": "meta.warnings",
-      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/analyze) \u2014 allowed by the schema (conditional/unreached), not drift"
+      "evidence": "documented optional field absent from this sample (https://stellarlight.xyz/api/hackathons/analyze?q=wallet) \u2014 allowed by the schema (conditional/unreached), not drift"
     },
     {
       "op": "GET /api/builders",

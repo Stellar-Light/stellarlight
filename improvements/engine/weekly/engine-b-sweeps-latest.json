@@ -1,6 +1,6 @@
 {
   "s1_prose_structure_divergence": {
-    "count": 42,
+    "count": 43,
     "sample": [
       {
         "slug": "hito-wallet",
@@ -147,9 +147,9 @@
         "missing": "evm"
       },
       {
-        "slug": "neon-wallet",
+        "slug": "sorted",
         "field": "supportedNetworks",
-        "prose": "ethereum",
+        "prose": "polygon",
         "missing": "evm"
       }
     ]
@@ -162,15 +162,15 @@
       "logoUrl": "77% (157/205)"
     },
     "Tooling": {
-      "shortDescription": "97% (178/183)",
-      "types": "100% (183/183)",
-      "logoUrl": "82% (150/183)"
+      "shortDescription": "97% (179/184)",
+      "types": "100% (184/184)",
+      "logoUrl": "82% (151/184)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (401/407)",
-      "types": "99% (404/407)",
-      "supportedNetworks": "74% (301/407)",
-      "logoUrl": "85% (346/407)"
+      "shortDescription": "99% (401/406)",
+      "types": "99% (403/406)",
+      "supportedNetworks": "74% (300/406)",
+      "logoUrl": "85% (345/406)"
     },
     "Asset": {
       "shortDescription": "33% (12/36)",
@@ -364,19 +364,19 @@
   },
   "s4_staleness": {
     "liveNoDatedSignal": 383,
-    "liveStale365": 132,
+    "liveStale365": 133,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 594,
+        "ageDays": 601,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 962,
+        "ageDays": 969,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -418,7 +418,7 @@
       {
         "slug": "lightecho",
         "name": "Lightecho",
-        "ageDays": 405,
+        "ageDays": 412,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -508,6 +508,6 @@
       }
     ]
   },
-  "generatedAt": "2026-10-18T13:09:39Z",
+  "generatedAt": "2026-10-25T13:46:01Z",
   "evalKey": "engine-b-sweeps"
 }

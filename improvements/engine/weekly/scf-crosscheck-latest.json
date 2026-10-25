@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-18T13:09:39Z",
+  "generatedAt": "2026-10-25T13:46:01Z",
   "frame": {
     "scf": 531,
     "directory": 1005,
@@ -131,19 +131,6 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
-      "slug": "untangled",
-      "name": "Untangled",
-      "ourRounds": [
-        "31",
-        "41"
-      ],
-      "url": "https://communityfund.stellar.org/project/untangled-qcs",
-      "officialAwardedRounds": [
-        "31"
-      ],
-      "reason": "no submission verdict found for round(s) #41"
-    },
-    {
       "slug": "lobster",
       "name": "Lobster",
       "ourRounds": [
@@ -155,6 +142,19 @@
         "36"
       ],
       "reason": "no submission verdict found for round(s) #42"
+    },
+    {
+      "slug": "untangled",
+      "name": "Untangled",
+      "ourRounds": [
+        "31",
+        "41"
+      ],
+      "url": "https://communityfund.stellar.org/project/untangled-qcs",
+      "officialAwardedRounds": [
+        "31"
+      ],
+      "reason": "no submission verdict found for round(s) #41"
     }
   ],
   "evalKey": "scf-crosscheck"

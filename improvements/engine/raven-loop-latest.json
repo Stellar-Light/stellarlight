@@ -1,13 +1,20 @@
 {
-	"generatedAt": "2026-10-18T13:09:39.167Z",
+	"generatedAt": "2026-10-25T13:46:01.478Z",
 	"gateway": "https://agents.stellar.buzz/mcp",
 	"frame": {
 		"graded": 47,
-		"passed": 47,
-		"failed": 0
+		"passed": 46,
+		"failed": 1
 	},
-	"okRate": 1,
-	"misses": [],
+	"okRate": 0.98,
+	"misses": [
+		{
+			"query": "recent mainnet upgrade",
+			"mode": "research",
+			"failureMode": "mismatch",
+			"expected": "protocol\\s*2[6-9]|zipper"
+		}
+	],
 	"demand": {
 		"checked": 0,
 		"parityHeld": 0,
@@ -17,19 +24,15 @@
 	"demandDeadends": [],
 	"code": {
 		"checked": 3,
-		"passed": 1,
+		"passed": 2,
 		"misses": 0,
-		"noCoverage": 2
+		"noCoverage": 1
 	},
 	"codeMisses": [],
 	"codeNoCoverage": [
 		{
 			"query": "how does passkey-kit verify a WebAuthn signature on Soroban",
 			"repo": "passkey-kit"
-		},
-		{
-			"query": "how does the KALE proof-of-teamwork farming reward mechanism work",
-			"repo": "kale"
 		}
 	]
 }

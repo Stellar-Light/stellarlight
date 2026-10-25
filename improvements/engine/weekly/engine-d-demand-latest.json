@@ -1,18 +1,18 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 45544,
-    "realHits": 8093,
-    "distinctQueries": 3961,
+    "loggedHits": 60069,
+    "realHits": 8554,
+    "distinctQueries": 3996,
     "replayed": 250
   },
-  "okRate": 99,
+  "okRate": 98,
   "misses": [
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 38,
-      "lastSeen": "2026-10-18T09:56:28.929Z",
+      "hits": 77,
+      "lastSeen": "2026-10-25T10:12:18.260Z",
       "days": 14,
       "buckets": [
         "other"
@@ -24,7 +24,7 @@
       "endpoint": "/api/repos/search",
       "query": "flurbomatic quantifold widgetron on stellar",
       "hits": 15,
-      "lastSeen": "2026-10-18T12:10:32.784Z",
+      "lastSeen": "2026-10-25T12:43:07.517Z",
       "days": 15,
       "buckets": [
         "other"
@@ -33,18 +33,42 @@
       "evidence": "0 results"
     },
     {
-      "endpoint": "/api/repos/search",
-      "query": "frieghter",
+      "endpoint": "/api/projects/search",
+      "query": "paytag",
       "hits": 5,
-      "lastSeen": "2026-10-15T18:06:10.837Z",
-      "days": 2,
+      "lastSeen": "2026-10-20T16:14:20.187Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+    },
+    {
+      "endpoint": "/api/repos/search",
+      "query": "calcy",
+      "hits": 5,
+      "lastSeen": "2026-10-19T12:47:35.769Z",
+      "days": 1,
       "buckets": [
         "other"
       ],
       "class": "EMPTY",
       "evidence": "0 results"
+    },
+    {
+      "endpoint": "/api/projects/search",
+      "query": "specguard",
+      "hits": 5,
+      "lastSeen": "2026-10-20T16:14:17.810Z",
+      "days": 1,
+      "buckets": [
+        "other"
+      ],
+      "class": "GAP",
+      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     }
   ],
-  "generatedAt": "2026-10-18T13:09:39Z",
+  "generatedAt": "2026-10-25T13:46:01Z",
   "evalKey": "engine-d-demand"
 }
