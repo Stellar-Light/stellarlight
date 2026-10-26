@@ -45,7 +45,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8270648717880249,
+      "topScore": 0.8269702196121216,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -243,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8266825675964355,
+      "topScore": 0.8264495134353638,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -315,7 +315,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8192351460456848,
+      "topScore": 0.819124162197113,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -449,7 +449,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
+      "sample": "Live network value — served by adapters/RPC, not the static research corpus."
     },
     {
       "id": "soroban-sdk-version",
@@ -467,7 +467,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
+      "sample": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
     },
     {
       "id": "repos-zk",
@@ -585,7 +585,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7966394424438477,
+      "topScore": 0.79648756980896,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -703,7 +703,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "yieldblox-incident-facts",
@@ -721,7 +721,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "cap-exact-id-0038",
@@ -821,7 +821,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8622249960899353,
+      "topScore": 0.8620872497558594,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -958,6 +958,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-10-25T13:46:01Z",
-  "evalKey": "golden-eval"
+  "generatedAt": "2026-10-26T11:35:22Z"
 }
