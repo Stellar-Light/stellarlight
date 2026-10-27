@@ -1,16 +1,16 @@
 {
  "lane": "operator-toml",
- "generatedAt": "2026-10-26T14:31:06.319Z",
+ "generatedAt": "2026-10-27T13:31:13.192Z",
  "stage": 1,
- "cleanWeeks": 5,
+ "cleanWeeks": 6,
  "stageEntryThresholdWeeks": 2,
  "lastRun": {
-  "id": 39425232258,
-  "at": "2026-10-20T12:49:04Z",
+  "id": 40511875303,
+  "at": "2026-10-27T13:25:16Z",
   "event": "schedule",
   "conclusion": "success"
  },
- "lastCountedRunId": 39425232258,
+ "lastCountedRunId": 40511875303,
  "stamps": [
   {
    "slug": "agtrail",

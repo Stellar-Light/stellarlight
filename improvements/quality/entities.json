@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-27T11:15:42.323Z",
+ "generatedAt": "2026-10-27T13:31:05.644Z",
  "surfaces": [
   {
    "surface": "code",
@@ -8529,11 +8529,11 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 912
+    "count": 910
    },
    {
     "network": "mainnet",
-    "count": 89
+    "count": 91
    },
    {
     "network": "testnet",
@@ -8541,9 +8541,9 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 912,
+   "unknown": 910,
    "applicableUnknown": 199,
-   "notApplicable": 713,
+   "notApplicable": 711,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
@@ -11152,10 +11152,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 912,
+    "missing": 910,
     "of": 1005,
-    "share": 90.7,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 912 unknown rows, 199 are on-chain product types where the question applies and an agent will ask it; the other 713 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "share": 90.5,
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 910 unknown rows, 199 are on-chain product types where the question applies and an agent will ask it; the other 711 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
