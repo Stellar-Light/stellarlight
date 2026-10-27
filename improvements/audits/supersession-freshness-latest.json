@@ -1,8 +1,8 @@
 {
-	"generatedAt": "2026-10-20T13:00:51.809Z",
+	"generatedAt": "2026-10-27T13:35:43.491Z",
 	"basis": "archived repos from the public repos API (isArchived=true), restricted to the curated pool (project-linked or repoScore >= 60), compared against REPO_SUPERSESSIONS keys",
-	"archivedTotal": 274,
-	"archivedInPool": 50,
+	"archivedTotal": 278,
+	"archivedInPool": 53,
 	"covered": 40,
 	"missing": [
 		{
@@ -58,6 +58,24 @@
 			"projectSlug": "trace",
 			"repoScore": 16,
 			"url": "https://github.com/tracefinance/backend-challenge"
+		},
+		{
+			"fullName": "bidalihq/commerce-sdk-ios",
+			"projectSlug": "bidali",
+			"repoScore": 12,
+			"url": "https://github.com/bidalihq/commerce-sdk-ios"
+		},
+		{
+			"fullName": "bidalihq/commerce-sdk-android",
+			"projectSlug": "bidali",
+			"repoScore": 9,
+			"url": "https://github.com/bidalihq/commerce-sdk-android"
+		},
+		{
+			"fullName": "bidalihq/giftcards-contract",
+			"projectSlug": "bidali",
+			"repoScore": 9,
+			"url": "https://github.com/bidalihq/giftcards-contract"
 		},
 		{
 			"fullName": "inventure/Forex_Rate_Service",
