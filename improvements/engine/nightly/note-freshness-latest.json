@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-26T11:46:21.639Z",
+	"generatedAt": "2026-10-27T11:14:50.539Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -94,7 +94,7 @@
 		},
 		{
 			"probe": "note-stale:blend-capital/blend-sdk-js:npm:@blend-capital/blend-sdk",
-			"note": "note (asOf 2026-09-01) cites 3.3.0; registry latest is 3.3.1 (published 2026-09-16)",
+			"note": "note (asOf 2026-09-01) cites 3.3.0; registry latest is 4.0.0 (published 2026-10-26)",
 			"surface": "code"
 		},
 		{
@@ -159,7 +159,7 @@
 		},
 		{
 			"probe": "note-stale:stellar/smart-account-kit:npm:smart-account-kit",
-			"note": "note (asOf 2026-09-13) cites 0.8.0; registry latest is 0.9.1 (published 2026-10-25)",
+			"note": "note (asOf 2026-09-13) cites 0.8.0; registry latest is 0.10.0 (published 2026-10-27)",
 			"surface": "code"
 		},
 		{
@@ -244,12 +244,17 @@
 		},
 		{
 			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
-			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 2.2.1 (published 2026-10-22)",
+			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 2.2.3 (published 2026-10-26)",
 			"surface": "code"
 		},
 		{
 			"probe": "note-stale:Dione-b/caatinga:npm:@caatinga/cli",
 			"note": "note (asOf 2026-09-14) cites 3.9.2; registry latest is 3.12.0 (published 2026-10-03)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-predates-archival:Wadzzo2023/brand-wadzzo",
+			"note": "public note asOf 2026-09-07; repo archived 2026-10-27 — the note describes a live repo",
 			"surface": "code"
 		},
 		{

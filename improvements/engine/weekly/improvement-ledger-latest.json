@@ -1,57 +1,57 @@
 {
-	"generatedAt": "2026-10-26T11:46:58.559Z",
-	"total": 873,
+	"generatedAt": "2026-10-27T11:15:32.748Z",
+	"total": 874,
 	"open": 64,
-	"refreshQueue": 96,
+	"refreshQueue": 97,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
 		"count": 11,
 		"graceDays": 20,
-		"oldestDays": 95,
+		"oldestDays": 96,
 		"probes": [
 			{
 				"id": "raven-routing:reflector-oracle-on-stellar",
-				"days": 95
+				"days": 96
 			},
 			{
 				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-				"days": 95
+				"days": 96
 			},
 			{
 				"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
-				"days": 59
+				"days": 60
 			},
 			{
 				"id": "raven-routing:who-gives-out-grants-for-building-on-stellar",
-				"days": 51
+				"days": 52
 			},
 			{
 				"id": "raven-routing:show-me-some-example-stellar-projects-i-can-copy",
-				"days": 51
+				"days": 52
 			},
 			{
 				"id": "raven-routing:which-stellar-wallets-support-soroban-contracts",
-				"days": 51
+				"days": 52
 			},
 			{
 				"id": "raven-routing:which-stellar-projects-had-a-smart-contract-audi",
-				"days": 51
+				"days": 52
 			},
 			{
 				"id": "raven-routing:how-does-blend-calculate-interest-accrual",
-				"days": 51
+				"days": 52
 			},
 			{
 				"id": "raven-routing:which-anchors-actually-implement-sep-24",
-				"days": 51
+				"days": 52
 			},
 			{
 				"id": "raven-routing:how-much-has-the-stellar-community-fund-awarded-",
-				"days": 51
+				"days": 52
 			},
 			{
 				"id": "raven-routing:which-verticals-on-stellar-have-the-least-compet",
-				"days": 51
+				"days": 52
 			}
 		]
 	},
@@ -72,26 +72,26 @@
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 152,
+				"newFindings": 151,
 				"recurred": 135,
-				"ratePct": 88.8
+				"ratePct": 89.4
 			},
 			"lifetime": {
-				"newFindings": 873,
-				"recurred": 323,
-				"ratePct": 37
+				"newFindings": 874,
+				"recurred": 324,
+				"ratePct": 37.1
 			}
 		}
 	},
-	"oldestOpenDays": 29,
+	"oldestOpenDays": 30,
 	"inWave": 0,
 	"highOpen": 61,
-	"staleHighOpen": 0,
+	"staleHighOpen": 1,
 	"bySurface": [
 		{
 			"surface": "code",
 			"open": 56,
-			"total": 162
+			"total": 163
 		},
 		{
 			"surface": "directory",
@@ -129,7 +129,7 @@
 		{
 			"source": "raven-routing",
 			"open": 17,
-			"days": 42
+			"days": 43
 		}
 	],
 	"topOpen": [
