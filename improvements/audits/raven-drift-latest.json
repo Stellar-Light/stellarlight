@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-10-26T11:53:27.053Z",
+	"generatedAt": "2026-10-27T11:16:55.361Z",
 	"specVersion": "1.9.111",
 	"graceDays": 10,
 	"expectedOps": [
@@ -86,17 +86,17 @@
 		{
 			"op": "getQualityReport",
 			"addedAt": "2026-10-24",
-			"ageDays": 2
+			"ageDays": 3
 		},
 		{
 			"op": "locateSource",
 			"addedAt": "2026-10-23",
-			"ageDays": 3
+			"ageDays": 4
 		},
 		{
 			"op": "verifyClaim",
 			"addedAt": "2026-10-23",
-			"ageDays": 3
+			"ageDays": 4
 		}
 	],
 	"extraInCatalog": [],
