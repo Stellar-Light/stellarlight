@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-28T14:20:40.190Z",
+ "generatedAt": "2026-10-29T14:36:43.061Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 97,
+   "oldestDays": 98,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -9501,7 +9501,7 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5867,
+    "pool": 5866,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
     "joined": 135
    }
@@ -9553,15 +9553,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1399
+     "count": 1404
     },
     {
      "label": "slowing",
-     "count": 1082
+     "count": 1085
     },
     {
      "label": "active",
-     "count": 1062
+     "count": 1054
     },
     {
      "label": "unknown",
@@ -11099,7 +11099,7 @@
     "missing": 365,
     "of": 389,
     "share": 93.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5478 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5477 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
     "examplePoolSize": 365,
