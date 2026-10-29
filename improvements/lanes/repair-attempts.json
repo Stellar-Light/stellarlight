@@ -413,6 +413,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-d-demand:paytag",
+   "date": "2026-10-29",
+   "run": "40902690286",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
