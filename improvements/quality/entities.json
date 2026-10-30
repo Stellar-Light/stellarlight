@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-29T14:36:43.061Z",
+ "generatedAt": "2026-10-30T14:28:46.415Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 98,
+   "oldestDays": 99,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -449,14 +449,24 @@
   }
  },
  "projects": {
-  "read": 1005,
-  "population": 1138,
-  "servedPopulation": 1005,
+  "read": 1006,
+  "population": 1139,
+  "servedPopulation": 1006,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 1005,
+  "sampled": 1006,
   "scatter": [
+   {
+    "slug": "kast",
+    "prominence": 0,
+    "factsPresent": 3,
+    "missing": [
+     "strongBasis",
+     "typed"
+    ],
+    "status": "Live"
+   },
    {
     "slug": "stellar-atlas",
     "prominence": 0,
@@ -529,10 +539,9 @@
    {
     "slug": "lendwise",
     "prominence": 0,
-    "factsPresent": 3,
+    "factsPresent": 4,
     "missing": [
-     "strongBasis",
-     "typed"
+     "strongBasis"
     ],
     "status": "Live"
    },
@@ -8527,7 +8536,7 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 910
+    "count": 911
    },
    {
     "network": "mainnet",
@@ -8539,8 +8548,8 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 910,
-   "applicableUnknown": 199,
+   "unknown": 911,
+   "applicableUnknown": 200,
    "notApplicable": 711,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
@@ -8552,13 +8561,13 @@
    "package-release": 9
   },
   "strongBasisSplit": {
-   "population": 1005,
+   "population": 1006,
    "populationMeans": "every project row this artifact scored, all statuses — weakLiveRows is counted over exactly this set, despite its historical name",
-   "livePopulation": 848,
-   "weakLiveOnly": 457,
-   "weakLiveRows": 474,
+   "livePopulation": 849,
+   "weakLiveOnly": 458,
+   "weakLiveRows": 475,
    "onchainEligible": 6,
-   "appOnly": 468,
+   "appOnly": 469,
    "deploymentStrongStatusWeak": 1,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
@@ -8577,7 +8586,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 75
+    "count": 76
    },
    {
     "basis": "product-integration",
@@ -8601,7 +8610,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 502,
+  "weakestTotal": 503,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8733,10 +8742,10 @@
     ]
    },
    {
-    "slug": "lendoor",
-    "name": "Lendoor",
+    "slug": "kast",
+    "name": "Kast",
     "status": "Live",
-    "statusBasis": "site-liveness",
+    "statusBasis": "source-inherited",
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "deploymentBasis": null,
@@ -8752,8 +8761,8 @@
     ]
    },
    {
-    "slug": "lendwise",
-    "name": "LendWise",
+    "slug": "lendoor",
+    "name": "Lendoor",
     "status": "Live",
     "statusBasis": "site-liveness",
     "prominence": 0,
@@ -9436,7 +9445,7 @@
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 474
+    "count": 475
    },
    {
     "field": "dated",
@@ -9553,7 +9562,7 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1404
+     "count": 1407
     },
     {
      "label": "slowing",
@@ -9561,7 +9570,7 @@
     },
     {
      "label": "active",
-     "count": 1054
+     "count": 1051
     },
     {
      "label": "unknown",
@@ -10668,13 +10677,13 @@
   {
    "area": "project status",
    "limit": "45% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "454 of 1005 rows (census)",
+   "measurement": "455 of 1006 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "5 of 1005 sampled rows untyped",
+   "measurement": "5 of 1006 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
@@ -11150,10 +11159,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 910,
-    "of": 1005,
-    "share": 90.5,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 910 unknown rows, 199 are on-chain product types where the question applies and an agent will ask it; the other 711 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "missing": 911,
+    "of": 1006,
+    "share": 90.6,
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 911 unknown rows, 200 are on-chain product types where the question applies and an agent will ask it; the other 711 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -11168,10 +11177,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 474,
-    "of": 1005,
+    "missing": 475,
+    "of": 1006,
     "share": 47.2,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 6 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 468 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 6 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 469 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
@@ -11215,7 +11224,7 @@
     "entity": "project",
     "field": "typed",
     "missing": 5,
-    "of": 1005,
+    "of": 1006,
     "share": 0.5,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
@@ -11224,10 +11233,10 @@
     "exampleCap": 12,
     "exampleTruncated": false,
     "examples": [
+     "kast",
      "stellar-atlas",
      "tilt-pay",
      "pigfi",
-     "lendwise",
      "lendoor"
     ]
    },
@@ -11235,7 +11244,7 @@
     "entity": "project",
     "field": "sourced",
     "missing": 0,
-    "of": 1005,
+    "of": 1006,
     "share": 0,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
