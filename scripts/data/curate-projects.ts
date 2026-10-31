@@ -640,6 +640,14 @@ const IDENTITY_FIX: Record<
 		renameSourceUrl:
 			"https://vesseoapp.com/blog-ar/adi%C3%B3s-vibrant-hola-vesseo",
 	},
+	// REBRANDS freighter: SDF's own announcement; the rename PRs in
+	// stellar/freighter-mobile and stellar/stellar-docs merged 2026-10-29.
+	freighter: {
+		aliases: ["Freighter"],
+		renamedAt: "2026-10-29",
+		renameSourceUrl:
+			"https://stellar.org/blog/foundation-news/freighter-is-now-varial",
+	},
 };
 
 /** sls-033 (#519): productKind — WHAT KIND of wallet-landscape product each row
