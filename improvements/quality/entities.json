@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-30T14:28:46.415Z",
+ "generatedAt": "2026-10-31T13:49:43.721Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 99,
+   "oldestDays": 100,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -308,11 +308,11 @@
    },
    {
     "bucket": "8–30d",
-    "count": 56
+    "count": 49
    },
    {
     "bucket": "31–60d",
-    "count": 1
+    "count": 8
    },
    {
     "bucket": ">60d",
@@ -373,9 +373,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 149,
-     "recurred": 133,
-     "ratePct": 89.3
+     "newFindings": 133,
+     "recurred": 117,
+     "ratePct": 88
     },
     "lifetime": {
      "newFindings": 874,
@@ -392,9 +392,9 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 149,
-     "repeats": 148,
-     "ratePct": 99.3
+     "newFindings": 133,
+     "repeats": 132,
+     "ratePct": 99.2
     },
     "lifetime": {
      "newFindings": 874,
@@ -8574,7 +8574,7 @@
   "basisMix": [
    {
     "basis": "site-liveness",
-    "count": 379
+    "count": 380
    },
    {
     "basis": "human-verified",
@@ -8586,7 +8586,7 @@
    },
    {
     "basis": "source-inherited",
-    "count": 76
+    "count": 75
    },
    {
     "basis": "product-integration",
@@ -8745,7 +8745,7 @@
     "slug": "kast",
     "name": "Kast",
     "status": "Live",
-    "statusBasis": "source-inherited",
+    "statusBasis": "site-liveness",
     "prominence": 0,
     "deploymentNetwork": "unknown",
     "deploymentBasis": null,
@@ -9512,7 +9512,7 @@
    "mainnetJoin": {
     "pool": 5866,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 135
+    "joined": 134
    }
   },
   "curatedShape": {
@@ -9562,7 +9562,7 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1407
+     "count": 1409
     },
     {
      "label": "slowing",
@@ -9570,7 +9570,7 @@
     },
     {
      "label": "active",
-     "count": 1051
+     "count": 1049
     },
     {
      "label": "unknown",
@@ -9627,7 +9627,7 @@
   },
   "withCodeDepth": 11414,
   "withNotes": 1071,
-  "withMainnet": 135,
+  "withMainnet": 134,
   "top": [
    {
     "fullName": "stellar/go-stellar-sdk",
