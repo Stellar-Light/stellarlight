@@ -29,7 +29,7 @@ const MARKERS: Array<{ re: RegExp; kind: string }> = [
 		kind: "network-passphrase",
 	},
 	{
-		re: /@creit\.tech\/stellar-wallets-kit|freighter-api|albedo\.link/i,
+		re: /@creit\.tech\/stellar-wallets-kit|freighter-api|varial-sdk|albedo\.link/i,
 		kind: "wallet-integration",
 	},
 	{ re: /\bG[A-Z2-7]{55}\b/, kind: "stellar-address" },

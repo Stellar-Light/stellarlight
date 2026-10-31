@@ -136,6 +136,9 @@ const URL_CORRECTIONS: Record<string, string> = {
 	"anchor-boss-pay": "https://www.bossmoney.com",
 	// 2026-07-09: hanawallet.io 301s permanently to hana.money (rebrand; live).
 	"hana-wallet": "https://hana.money",
+	// 2026-10-31: freighter.app 301s to varialwallet.com (SDF renamed
+	// Freighter to Varial on 2026-10-29; curate-projects REBRANDS freighter).
+	freighter: "https://varialwallet.com",
 };
 
 // Explicit TYPE CORRECTIONS — OVERWRITE a wrong partnerType (the other place,

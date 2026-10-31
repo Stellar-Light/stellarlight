@@ -2677,6 +2677,19 @@ export const REBRANDS: Record<
 		description:
 			"Utexo (formerly Tricorn) is a live cross-chain bridge supporting EVM and non-EVM chains, moving assets to and from Stellar. Its Stellar/Soroban bridge integration was audited by Coinspect. Rebranded from tricorn.network to utexo.com.",
 	},
+	// 2026-10-31: SDF renamed Freighter to Varial ("Today, Freighter becomes
+	// Varial", stellar.org/blog/foundation-news/freighter-is-now-varial).
+	// freighter.app 301s to varialwallet.com; the extension, mobile and docs
+	// rename PRs merged 2026-10-28 and 2026-10-29, and the SDK moved from
+	// @stellar/freighter-api to @stellar/varial-sdk (7.0.0, 2026-10-28; the
+	// docs PR says dapps on the old package keep working). The GitHub repos
+	// keep their names, so links.github is unchanged.
+	freighter: {
+		name: "Varial",
+		website: "https://varialwallet.com",
+		description:
+			"Varial (formerly Freighter, renamed 2026-10-29) is the Stellar Development Foundation's official non-custodial Stellar wallet: a browser extension (Chrome, Firefox, Brave) and iOS/Android apps. Users self-custody their private keys to hold, send and receive XLM and Stellar assets and sign Stellar and Soroban transactions, across Mainnet, Testnet and Futurenet (Friendbot funding). Dapps integrate it through @stellar/varial-sdk, formerly @stellar/freighter-api.",
+	},
 };
 
 /** Name corrections. The lumenloop mapper writes `name`, so a rename that is

@@ -121,6 +121,7 @@ const JS_SDK_DEPS = [
 	"js-stellar-sdk",
 	"@stellar/stellar-base",
 	"@stellar/freighter-api",
+	"@stellar/varial-sdk",
 	"soroban-client",
 	"@creit.tech/stellar-wallets-kit",
 	"@stellar/wallet-sdk",
