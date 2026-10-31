@@ -391,6 +391,18 @@ describe("links the page rules make", () => {
 		).toBeNull();
 	});
 
+	it("a stored SCF page link stays while the project's SCF page is not known", () => {
+		// The row's SCF link can flap; nothing was read, so nothing decides.
+		expect(
+			pageRuleLink(
+				"dorahacks-buidl-25141",
+				{ ...named("payzoll"), scfPage: null },
+				{ scfBuidls: null, pageLinks: ["https://youtu.be/x"] },
+				{ projectSlug: "payzoll", projectLinkBasis: "scf-page-and-name" },
+			)?.basis,
+		).toBe("scf-page-and-name");
+	});
+
 	it("never a submission off DoraHacks", () => {
 		expect(
 			pageRuleLink("curated-hackmeridian-2025-payzoll", named("payzoll"), {
@@ -541,10 +553,10 @@ describe("review fixes", () => {
 	it("names why a stored link is dropped, for every rule", () => {
 		const won = (name: string, extra: Record<string, unknown> = {}) =>
 			winner(name, extra);
-		// A page rule link whose pages were read and say nothing now.
+		// A page rule link whose own page was read and says nothing now.
 		expect(
 			linkDropReason(won("PayZoll_Stellar"), stored, idx, names()),
-		).toMatch(/pages read/);
+		).toMatch(/page was read/);
 		// The directory changed: a second project took the name.
 		expect(
 			linkDropReason(
