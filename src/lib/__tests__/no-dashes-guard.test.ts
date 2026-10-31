@@ -4,7 +4,7 @@
  * 2026-10-31).
  */
 import { execFileSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -37,6 +37,8 @@ function run(files: Record<string, string>): { code: number; out: string } {
 	} catch (e) {
 		const err = e as { status: number; stdout: string };
 		return { code: err.status, out: err.stdout };
+	} finally {
+		rmSync(root, { recursive: true, force: true });
 	}
 }
 
@@ -47,14 +49,15 @@ describe("no-dashes check", () => {
 			"src/b.ts": 'export const b = "&MDASH; renders as written";\n',
 			"src/c.ts": `export const c = "the text ${BS}${BS}u2014 is no dash";\n`,
 			"src/d.test.mts": `export const d = "a ${EM} b";\n`,
-			"src/fixtures/e.json": `{ "k": "a ${EM} b" }\n`,
+			"src/e.test.json": `{ "k": "a ${EM} b" }\n`,
 			"src/f.json": `{ "k": "a ${EN} b" }\n`,
+			"src/g.ts": `export const g = "a ${BS}u2014 b";\n`,
 		});
 		expect(code).toBe(1);
 		const flagged = [...out.matchAll(/^\s+(src\/[^:]+):\d+:/gm)].map(
 			(m) => m[1],
 		);
-		expect(flagged.sort()).toEqual(["src/a.ts", "src/f.json"]);
+		expect(flagged.sort()).toEqual(["src/a.ts", "src/f.json", "src/g.ts"]);
 	}, 60_000);
 
 	it("passes a clean tree", () => {
