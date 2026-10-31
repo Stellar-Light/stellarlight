@@ -62,3 +62,46 @@ arms, so any difference comes from word matching.
 Independent review on another model family before any PR, with a re-check
 of fixes. Live check after deploy: `q=--`, `q=the-`, `q=age` and the comma
 query above, read before and after.
+
+## Results (2026-10-31, after the replay)
+
+Evidence in `../audits/2026-10-31-build-terms/`: the query pool and its
+sha256 (committed before the replay), `compare.py` and its report
+`compare.txt`, `changed-counts.tsv` (keyword and hybrid row counts before
+and after for every changed query) and `concepts-changed.json` (the
+concepts each changed query was searched by, before and after).
+
+**Shipped: defects 1 and 2.** **Held: defect 3** (see below).
+
+- **(a) Byte identity: met.** 603 of 705 queries are byte-identical in
+  every replayed field. All 102 that changed hold a targeted shape; 0
+  changed without one.
+- **(b) Every change explained: met.** In each of the 102, the concept list
+  changed and every new concept is the core of a token it had before
+  (edge punctuation cut), while the dropped ones had no core ("--") or a
+  core that is a stopword, a generic word or a duplicate ("stellar,",
+  "app.", "this,"). The rest of the scorer is unchanged, so the rows follow
+  from the concepts. Keyword rows: 69 queries list more, 5 fewer, 28 the
+  same count in another order. The 5 fewer are all stopword or generic
+  cores that had counted as concepts: for example "Is USDC issued natively
+  on Stellar, and by whom?" goes from 11 rows to 2 once "stellar," stops
+  being a concept, and "Where is the `stellar contract deploy` subcommand
+  implemented in stellar-cli?" goes from 21 to 0: its backticked tokens
+  had padded the concept count, so rule L now withholds the 21 builds that
+  matched by the name word "contract" alone and its warning says so.
+- **(c) Tests: met.** Three tests in
+  `src/lib/__tests__/hackathon-builds.test.ts` fail on main and pass with
+  the change (q=--, a "--" in prose, "the-", the comma list); the suite
+  passes (203 files, 2,630 tests at the time of writing).
+- **(d) No false absence: met.** No changed query names a new word as
+  unused.
+
+**Defect 3 held.** Holding a three-letter word's plural to a whole word
+(the same rule the word already has) was replayed too: it changed 30 more
+queries and dropped 22 rows. Most were noise ("out" in payouts, "bot" in
+robots, "set" in assets, "let" in wallets), but some were relevant
+compound names the plural had found by accident: AidShield for "refugee
+aid vouchers" (which then lists nothing), RWAsset for "rwa tokenization",
+PayStream for "pay per article paywall", SpringNFTs for "NFT ticketing".
+Whether a short word should match the start of a compound is a design
+call that needs labeled queries; it is not made here.
