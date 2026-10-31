@@ -48,8 +48,13 @@ const opt = (name: string) =>
 const flag = (name: string) => args.includes(name);
 const ROOT = opt("--root") ?? process.cwd();
 
+/** A dash in literal form, as a JavaScript escape (only an odd run of
+ * backslashes before u escapes: a doubled one is the text backslash-u), or
+ * as an entity: the named ones are case-sensitive in HTML (an upper-case
+ * MDASH entity renders as written), and a browser reads a numeric one
+ * without its semicolon too (review, 2026-10-31). */
 const DASH =
-	/[\u{2013}\u{2014}]|\\u(?:2013|2014)|\\u\{0*(?:2013|2014)\}|&(?:mdash|ndash);|&#(?:0*8211|0*8212);|&#x0*(?:2013|2014);/giu;
+	/[\u{2013}\u{2014}]|(?<!\\)(?:\\\\)*\\u(?:2013|2014|\{0*(?:2013|2014)\})|&(?:mdash|ndash);|&#(?:0*8211|0*8212)(?![0-9]);?|&#[xX]0*(?:2013|2014)(?![0-9a-fA-F]);?/gu;
 const mask = (s: string) =>
 	s.replace(/\u{2014}/gu, "<EM>").replace(/\u{2013}/gu, "<EN>");
 
@@ -113,7 +118,8 @@ const AREAS: Area[] = [
 ];
 
 const isTest = (rel: string) =>
-	/(^|\/)__tests__\//.test(rel) || /\.(test|spec)\.(ts|tsx)$/.test(rel);
+	/(^|\/)(__tests__|fixtures?)\//.test(rel) ||
+	/\.(test|spec)\.(ts|tsx|mts|json)$/.test(rel);
 
 function walk(dir: string, exts: RegExp, out: string[]) {
 	if (!existsSync(dir)) return;
