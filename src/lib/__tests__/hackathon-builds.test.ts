@@ -1938,4 +1938,9 @@ describe("a query word is searched without its edge punctuation", () => {
 			names([build("Agent Pay", "AI agents payments")], "agents,"),
 		).toEqual(["Agent Pay"]);
 	});
+
+	it("keeps a word's combining marks, which are not punctuation", () => {
+		const hindi = [build("Suraksha", "भुगतान सुरक्षा")];
+		expect(names(hindi, "सुरक्षा,")).toEqual(["Suraksha"]);
+	});
 });

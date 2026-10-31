@@ -11,8 +11,8 @@ read; the criteria below are fixed here.
    1,356 of 1,356 builds with no warning, because `phraseForms` turns the
    token into the empty form and `termMatcher("")` matches at every word
    boundary. A `--` written as a dash inside a longer q lists every build
-   through the name rule. `q=the-` matched 420: a trailing hyphen keeps a
-   stopword as a concept.
+   through the name rule. `q=the-` matched 420: a trailing hyphen kept
+   "the-" as a concept apart from the stopword.
 2. **Edge punctuation stays on the token.** `q=escrow, milestones,
    freelancers` lists nothing against "Escrow with milestones for
    freelancers", and nothing warns, because the scorer searches `escrow,`
@@ -60,8 +60,9 @@ arms, so any difference comes from word matching.
   naming a word the corpus holds as a whole word.
 
 Independent review on another model family before any PR, with a re-check
-of fixes. Live check after deploy: `q=--`, `q=the-`, `q=age` and the comma
-query above, read before and after.
+of fixes. Live check after deploy: `q=--`, `lending -- small businesses`
+against `lending small businesses`, `lending the-` against `lending the`,
+and the comma query above, read before and after.
 
 ## Results (2026-10-31, after the replay)
 
@@ -105,3 +106,19 @@ aid vouchers" (which then lists nothing), RWAsset for "rwa tokenization",
 PayStream for "pay per article paywall", SpringNFTs for "NFT ticketing".
 Whether a short word should match the start of a compound is a design
 call that needs labeled queries; it is not made here.
+
+## Review (2026-10-31)
+
+Another model, in a clone with no remote: GATE push, three low notes.
+
+- `wordCore` cut combining marks as punctuation, so the new core cut would
+  have mangled Hindi or Thai words ("सुरक्षा" lost its last vowel sign).
+  Fixed: the edge class keeps `\p{M}`, as `wordsOf` in
+  `src/lib/event-in-query.ts` does. A test covers it, and the replay is
+  byte-identical to the reviewed change on all 705 queries.
+- A token whose core is one character ("C#", "C++") now drops silently.
+  Before, it counted as a concept no build could match. Left as it is: the
+  ranking is not worse, and naming such tokens is a separate change.
+- `q=the-` alone now searches "the", as `q=the` does (still about 420
+  rows); the reduction is for "the-" inside a longer q, where it no longer
+  counts as a concept. The live-check list above is corrected to test that.

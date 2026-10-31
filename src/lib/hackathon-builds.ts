@@ -739,9 +739,11 @@ function anyScriptWord(v: string): ((hay: string) => boolean) | null {
 	return (hay) => re.test(hay);
 }
 
-/** A token without its edge punctuation: "(rosca," is rosca. */
+/** A token without its edge punctuation: "(rosca," is rosca. A combining
+ * mark is part of the word, not punctuation: without \p{M}, "सुरक्षा" lost
+ * its last vowel sign and "ดี" its tone mark (review, 2026-10-31). */
 const wordCore = (v: string) =>
-	v.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+	v.replace(/^[^\p{L}\p{N}\p{M}]+|[^\p{L}\p{N}\p{M}]+$/gu, "");
 
 /** The plural or singular wordForms leaves out: charities is charity, family
  * is families, taxes is tax. Read only by wordsNoBuildUses: on 140 labeled
