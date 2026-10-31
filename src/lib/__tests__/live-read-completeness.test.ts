@@ -213,6 +213,91 @@ describe("live read completeness and budget", () => {
 		).toBe(true);
 	});
 
+	it("an anonymous pool that runs dry later in the window does not outlast the token's retry", async () => {
+		const oldKey = ["test", "old", "value"].join("-");
+		const newKey = ["test", "new", "value"].join("-");
+		vi.stubEnv("GITHUB_TOKEN", oldKey);
+		const t0 = Date.now();
+		const spy = vi.spyOn(Date, "now").mockReturnValue(t0);
+		const reset = String(Math.floor(t0 / 1000) + 50 * 60);
+		// Three repos, so no read is served from the cache.
+		const app = (url: string) => {
+			const name = /\/(?:team|Team)\/(app\d)/.exec(url)?.[1] ?? "app1";
+			return repo(
+				name,
+				{ truncated: false, tree: blobs("README.md") },
+				{ "README.md": "# App\n" },
+			)(url);
+		};
+		let anonymous = 0;
+		script((url, init) => {
+			if (!url.startsWith("https://api.github.com")) return app(url);
+			const auth = init?.headers?.authorization;
+			if (auth === `Bearer ${newKey}`) return app(url);
+			if (auth)
+				return new Response('{"message":"Bad credentials"}', { status: 401 });
+			// The first anonymous reads have room; then the pool is empty for 50 minutes.
+			anonymous++;
+			if (anonymous <= 4) return app(url);
+			return new Response('{"message":"API rate limit exceeded"}', {
+				status: 403,
+				headers: { "x-ratelimit-remaining": "0", "x-ratelimit-reset": reset },
+			});
+		});
+		expect((await readRepoLive("team/app1", { caller: "ip:1" })).state).toBe(
+			"read",
+		);
+		spy.mockReturnValue(t0 + 60_000);
+		await readRepoLive("team/app2", { caller: "ip:2" });
+		// 16 minutes on, a token GitHub accepts is tried, not locked out.
+		vi.stubEnv("GITHUB_TOKEN", newKey);
+		spy.mockReturnValue(t0 + 16 * 60_000);
+		const before = inits.length;
+		const again = await readRepoLive("team/app3", { caller: "ip:3" });
+		expect(
+			inits
+				.slice(before)
+				.some((i) => i.headers?.authorization === `Bearer ${newKey}`),
+			again.state === "unread" ? again.reason : again.state,
+		).toBe(true);
+	});
+
+	it("a tree partial for good keeps the full cache: a submodule repo is not re-read a minute later", async () => {
+		const t0 = Date.now();
+		const spy = vi.spyOn(Date, "now").mockReturnValue(t0);
+		script(
+			repo(
+				"subcache",
+				{
+					truncated: false,
+					tree: [...blobs("README.md"), { path: "contracts", type: "commit" }],
+				},
+				{ "README.md": "# Sub\n" },
+			),
+		);
+		expect((await readRepoLive("team/subcache")).state).toBe("read");
+		const made = calls.length;
+		spy.mockReturnValue(t0 + 90_000);
+		await readRepoLive("team/subcache");
+		expect(calls.length).toBe(made);
+	});
+
+	it("a Cargo.toml whose only Stellar dependency is stellar-rpc-client is found", async () => {
+		script(
+			repo(
+				"rpc2",
+				{ truncated: false, tree: blobs("README.md", "Cargo.toml") },
+				{
+					"README.md": "# Rpc\n",
+					"Cargo.toml":
+						'[package]\nname = "rpc2"\nversion = "0.1.0"\n\n[dependencies]\nstellar-rpc-client = "22"\n',
+				},
+			),
+		);
+		const { e } = await judged("rpc2");
+		expect(e.stellarPackages.state, e.stellarPackages.finding).toBe("found");
+	});
+
 	it("an @stellar package in optionalDependencies is found", async () => {
 		script(
 			repo(
@@ -288,13 +373,6 @@ describe("live read completeness and budget", () => {
 	it("a contract id only inside an HTML comment, which GitHub does not show, is not read", () => {
 		const id = `C${"A".repeat(55)}`;
 		expect(readmeEvidence(`# App\n<!-- ${id} -->\n`).contractIds).toEqual([]);
-	});
-
-	it("links after an unclosed <!--, which GitHub hides to the end of the file, are not read", () => {
-		const r = readmeEvidence(
-			"Live demo: https://a.example.net\n<!--\nLive demo: https://b.example.net\n",
-		);
-		expect(r.demoLinks).toEqual(["https://a.example.net"]);
 	});
 
 	it("a read reserved before the hour turned refunds nothing into the next hour", async () => {

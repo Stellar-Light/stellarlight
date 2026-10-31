@@ -67,8 +67,10 @@ const CARGO_EXACT = new Set([
 	"stellar-xdr",
 	"stellar-strkey",
 	"stellar-baselib",
-	// The Rust RPC client; code-signals already reads it as Stellar proof.
+	// The Rust RPC clients: the community soroban-client (code-signals
+	// already reads it as Stellar proof) and the stellar org's own.
 	"soroban-client",
+	"stellar-rpc-client",
 ]);
 const CARGO_PREFIXES = ["soroban-env-", "soroban-spec", "stellar-contract-"];
 

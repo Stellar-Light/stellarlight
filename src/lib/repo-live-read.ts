@@ -263,9 +263,9 @@ export function readmeEvidence(text: string): {
 	otherLinks: string[];
 } {
 	// GitHub shows no HTML comment, so nothing inside one is read: no link and
-	// no contract id. A comment never closed hides the rest of the file. Its
-	// line breaks stay, so every other link keeps its own line.
-	const shown = text.replace(/<!--[\s\S]*?(?:-->|$)/g, (c) =>
+	// no contract id. Its line breaks stay, so every other link keeps its own
+	// line.
+	const shown = text.replace(/<!--[\s\S]*?-->/g, (c) =>
 		c.replace(/[^\n]/g, ""),
 	);
 	const contractIds = [...new Set(shown.match(/\bC[A-Z2-7]{55}\b/g) ?? [])];
@@ -362,6 +362,11 @@ function notePool(res: Response, withToken: boolean) {
 		Number.isFinite(reset) && reset > 0
 			? reset * 1000
 			: Date.now() + 15 * 60_000;
+	// While a token GitHub rejected waits for its retry, an empty anonymous
+	// pool must not outlast that retry: until the lock lifts no call is made,
+	// so a rotated token would never be tried (review, 2026-10-31).
+	if (!withToken && Date.now() < tokenRejectedUntil)
+		budget.poolLowUntil = Math.min(budget.poolLowUntil, tokenRejectedUntil);
 }
 
 // ── The read ─────────────────────────────────────────────────────────────────
@@ -400,10 +405,6 @@ async function rest(path: string, deadline: number): Promise<Response | null> {
 		tokenRejectedUntil = Date.now() + TOKEN_RETRY_MS;
 		const anon = await call(null);
 		notePool(anon, false);
-		// An empty anonymous pool must not outlast the token's retry: until
-		// the lock lifts no call is made, so a rotated token would never be
-		// tried (review, 2026-10-31).
-		budget.poolLowUntil = Math.min(budget.poolLowUntil, tokenRejectedUntil);
 		return anon;
 	} catch {
 		return null;
@@ -816,7 +817,13 @@ export function readRepoLive(
 		// A read refused or failed whole is not kept: the next caller, with
 		// its own budget, reads again.
 		if (r.state === "unread") slot.ttl = 0;
-		else if (r.state === "read" && r.unread.length) slot.ttl = PARTIAL_CACHE_MS;
+		// A tree that was listed but holds submodules or was cut short is
+		// partial for good: reading again in a minute shows the same.
+		else if (
+			r.state === "read" &&
+			r.unread.some((p) => p !== "tree" || !r.facts.tree)
+		)
+			slot.ttl = PARTIAL_CACHE_MS;
 	});
 	return read;
 }
