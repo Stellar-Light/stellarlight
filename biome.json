@@ -12,7 +12,8 @@
 			"!improvements/quality/entities.json",
 			"!improvements/quality/progress.json",
 			"!improvements/engine/raven-routing-latest.json",
-			"!improvements/lanes/repair-attempts.json"
+			"!improvements/lanes/repair-attempts.json",
+			"!src/data/electric-capital-stellar.json"
 		]
 	},
 	"formatter": {

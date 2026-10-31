@@ -16,6 +16,7 @@ Requires:
   pip install duckdb
 """
 
+import re
 import json
 import sys
 from pathlib import Path
@@ -56,6 +57,21 @@ def fetch_latest_snapshot_path() -> str:
         if resource["path"].endswith("/eco_mads.parquet"):
             return "https://data.opendevdata.org" + resource["path"]
     raise RuntimeError("eco_mads.parquet not found in manifest")
+
+
+def no_dashes(v):
+    """Every string with its en dashes as hyphens and em dashes as commas.
+    The file is served text (the leaderboard, /api/analyze), the contract
+    gate fails on either dash under src/, and this script commits straight to
+    main, so an upstream country or label that carried one would redden every
+    PR until someone fixed it by hand."""
+    if isinstance(v, str):
+        return re.sub(r"\s*\u2014\s*", ", ", v).replace("\u2013", "-")
+    if isinstance(v, list):
+        return [no_dashes(x) for x in v]
+    if isinstance(v, dict):
+        return {k: no_dashes(x) for k, x in v.items()}
+    return v
 
 
 def main() -> None:
@@ -187,7 +203,7 @@ def main() -> None:
     ]
 
     snapshot = {
-        "source": "Electric Capital — Open Dev Data",
+        "source": "Electric Capital's Open Dev Data",
         "sourceUrl": "https://www.developerreport.com/ecosystems/stellar",
         "ecosystem": "Stellar",
         "asOf": str(raw["latest_day"]),
@@ -226,6 +242,7 @@ def main() -> None:
         "peers": peers,
     }
 
+    snapshot = no_dashes(snapshot)
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     OUT_FILE.write_text(json.dumps(snapshot, indent=2) + "\n")
     print(f"Wrote {OUT_FILE}", file=sys.stderr)

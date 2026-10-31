@@ -13,15 +13,16 @@
  *     `scout-mcp/src/index.ts` and the error text in `api-client/src/index.ts`
  *     (parsed with the TypeScript compiler, so a comment is never counted,
  *     even on the same line as code);
- *   - every line of the markdown under `public/skills/**` (served to agents).
+ *   - every line of the markdown under `public/skills/**` (served to agents);
+ *   - every line of a JSON file under `src/` (imported and served as data).
  * A dash counts in literal form or as an escape or entity (a JavaScript
  * unicode escape, `&mdash;`, `&ndash;`, a numeric entity).
  *
  * Not counted: comments, test files, stored database text (an owner
  * decision), and scripts. Known gaps, served or published text this check
  * does not read: other markdown (`scout-mcp/README.md`, `api-client/README.md`,
- * the repository docs), JSON (`package.json` descriptions, which are npm page
- * text) and MDX. Output never carries a literal dash: they print as <EM> and
+ * the repository docs), JSON outside `src/` (`package.json` descriptions, which
+ * are npm page text) and MDX. Output never carries a literal dash: they print as <EM> and
  * <EN>.
  *
  * Usage, from the repository root:
@@ -189,7 +190,7 @@ function classify(
 function scan(rel: string, text: string): Hit[] {
 	const idx = lineIndex(text);
 	const spans: [number, number][] = [];
-	if (rel.endsWith(".md")) {
+	if (rel.endsWith(".md") || rel.endsWith(".json")) {
 		spans.push([0, text.length]);
 	} else {
 		const sf = ts.createSourceFile(
@@ -226,6 +227,9 @@ function scan(rel: string, text: string): Hit[] {
 
 const files: string[] = [];
 walk(join(ROOT, "src"), /\.(ts|tsx|mts)$/, files);
+// JSON under src/ is served as imported data (the leaderboard and
+// /api/analyze read src/data/electric-capital-stellar.json), read whole.
+walk(join(ROOT, "src"), /\.json$/, files);
 walk(join(ROOT, "public/skills"), /\.md$/, files);
 for (const extra of ["scout-mcp/src/index.ts", "api-client/src/index.ts"]) {
 	const p = join(ROOT, extra);
@@ -322,7 +326,7 @@ const pad = (s: string | number, n: number) => String(s).padStart(n);
 const out: string[] = [];
 out.push(`dash audit: ${opt("--label") ?? "run"} (git ${sha})`);
 out.push(
-	"served text only (strings, templates, JSX text, skill markdown); comments and test files skipped",
+	"served text only (strings, templates, JSX text, skill markdown, JSON under src); comments and test files skipped",
 );
 out.push("");
 out.push(
