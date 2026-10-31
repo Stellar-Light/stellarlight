@@ -1889,3 +1889,58 @@ describe("a question's outcome words are not concepts", () => {
 		).toEqual({ absent: ["bridge", "cross-chain"], concepts: 2 });
 	});
 });
+
+describe("a query word is searched without its edge punctuation", () => {
+	// Review 2026-10-31, reproduced live on 1.9.111: q=-- matched all 1,356
+	// builds through the empty form, a "--" written as a dash listed every
+	// build through the name rule, q=the- searched the stopword, and
+	// "escrow, milestones, freelancers" listed nothing with no warning.
+	const names = (pool: IndexedBuild[], q: string) =>
+		searchHackathonBuilds(pool, q)
+			.map((s) => s.b.name)
+			.sort();
+	const pool = [
+		build("Lend", "Lending pools."),
+		build("Shop", "Tools for small businesses."),
+		build("Game", "A racing game."),
+		build("Ref", "The referral wallet."),
+	];
+
+	it("a token of hyphens or symbols alone is no concept", () => {
+		expect(names(pool, "--")).toEqual([]);
+		expect(names(pool, "---")).toEqual([]);
+		expect(names(pool, "lending -- small businesses")).toEqual(
+			names(pool, "lending small businesses"),
+		);
+		const escrow = [
+			build("Helper", "Escrow for teams"),
+			build("Escrow Hub", "A hub."),
+		];
+		expect(names(escrow, "escrow sandwich !!!")).toEqual(
+			names(escrow, "escrow sandwich"),
+		);
+	});
+
+	it("a trailing hyphen does not keep a stopword as a concept", () => {
+		expect(names(pool, "lending the-")).toEqual(names(pool, "lending the"));
+	});
+
+	it("a word followed by a comma matches the word", () => {
+		const gig = [
+			build("Gig Escrow", "Escrow with milestones for freelancers."),
+		];
+		const list = "escrow, milestones, freelancers";
+		expect(names(gig, list)).toEqual(["Gig Escrow"]);
+		expect(
+			unusedWordsWarning(gig, list, searchHackathonBuilds(gig, list)),
+		).toBeNull();
+		expect(
+			names([build("Agent Pay", "AI agents payments")], "agents,"),
+		).toEqual(["Agent Pay"]);
+	});
+
+	it("keeps a word's combining marks, which are not punctuation", () => {
+		const hindi = [build("Suraksha", "भुगतान सुरक्षा")];
+		expect(names(hindi, "सुरक्षा,")).toEqual(["Suraksha"]);
+	});
+});

@@ -1,0 +1,4234 @@
+{
+ "questions": [
+  {
+   "kind": "pool",
+   "id": "p0000",
+   "group": "2026-10-23-event-in-q",
+   "q": "!!!"
+  },
+  {
+   "kind": "pool",
+   "id": "p0001",
+   "group": "bench-v2",
+   "q": "(agent error) search builds with an undocumented sort parameter"
+  },
+  {
+   "kind": "pool",
+   "id": "p0002",
+   "group": "embarrass",
+   "q": "500-character query"
+  },
+  {
+   "kind": "pool",
+   "id": "p0003",
+   "group": "2026-10-23-event-in-q",
+   "q": ": , |"
+  },
+  {
+   "kind": "pool",
+   "id": "p0004",
+   "group": "embarrass",
+   "q": "<script>alert(1)</script>' OR 1=1 --"
+  },
+  {
+   "kind": "pool",
+   "id": "p0005",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "@creit.tech/stellar-wallets-kit"
+  },
+  {
+   "kind": "pool",
+   "id": "p0006",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "A hacker describes this idea. Which past hackathon builds are prior art they must see?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0007",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "AI agent that pays for API calls with USDC using x402"
+  },
+  {
+   "kind": "pool",
+   "id": "p0008",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "AI agent that rebalances my DeFi positions"
+  },
+  {
+   "kind": "pool",
+   "id": "p0009",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "AI agents, payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0010",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "AI shopping agent that pays merchants on behalf of the user"
+  },
+  {
+   "kind": "pool",
+   "id": "p0011",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "AI toaster opera"
+  },
+  {
+   "kind": "pool",
+   "id": "p0012",
+   "group": "embarrass",
+   "q": "Alias: XLM"
+  },
+  {
+   "kind": "pool",
+   "id": "p0013",
+   "group": "embarrass",
+   "q": "Alias: lumens"
+  },
+  {
+   "kind": "pool",
+   "id": "p0014",
+   "group": "embarrass",
+   "q": "Allbridge Core"
+  },
+  {
+   "kind": "pool",
+   "id": "p0015",
+   "group": "embarrass",
+   "q": "Aquarius"
+  },
+  {
+   "kind": "pool",
+   "id": "p0016",
+   "group": "2026-10-23-question-filler",
+   "q": "Are there winners where people give money to animal care?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0017",
+   "group": "2026-10-23-question-filler",
+   "q": "Are there winning projects that prove a person passed identity screening without putting any identity on-chain?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0018",
+   "group": "embarrass",
+   "q": "Beans app"
+  },
+  {
+   "kind": "pool",
+   "id": "p0019",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Before we go live as an anchor I want to check our stellar.toml and SEP-24 and SEP-31 endpoints against the spec. Is there a test suite or CLI I can point at our home domain?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0020",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Blend"
+  },
+  {
+   "kind": "pool",
+   "id": "p0021",
+   "group": "bench-v2",
+   "q": "Blend audit findings"
+  },
+  {
+   "kind": "pool",
+   "id": "p0022",
+   "group": "bench-v2",
+   "q": "CAP-46 Soroban smart contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0023",
+   "group": "embarrass",
+   "q": "Chainlink Stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0024",
+   "group": "embarrass",
+   "q": "Circle CCTP Stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0025",
+   "group": "embarrass",
+   "q": "Circle USDC"
+  },
+  {
+   "kind": "pool",
+   "id": "p0026",
+   "group": "bench-v2",
+   "q": "Compare HackMeridian 2025 with HackMeridian 2026."
+  },
+  {
+   "kind": "pool",
+   "id": "p0027",
+   "group": "bench-v2",
+   "q": "Compare Stellar Hacks: ZK Gaming with Stellar Hacks: ZK."
+  },
+  {
+   "kind": "pool",
+   "id": "p0028",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Creit-Tech/Stellar-Wallets-Kit"
+  },
+  {
+   "kind": "pool",
+   "id": "p0029",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Creit-Tech/xBull-Wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0030",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "DAO grant board"
+  },
+  {
+   "kind": "pool",
+   "id": "p0031",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "DAO tool that lets members delegate votes to experts by topic and revoke any time"
+  },
+  {
+   "kind": "pool",
+   "id": "p0032",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "DAO treasury voting on Soroban"
+  },
+  {
+   "kind": "pool",
+   "id": "p0033",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "DEX aggregator that routes swaps across Stellar AMMs"
+  },
+  {
+   "kind": "pool",
+   "id": "p0034",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "DeFi pancake flipping"
+  },
+  {
+   "kind": "pool",
+   "id": "p0035",
+   "group": "embarrass",
+   "q": "DeFindex"
+  },
+  {
+   "kind": "pool",
+   "id": "p0036",
+   "group": "2026-10-23-question-filler",
+   "q": "Did a betting game on a country's currency swings take a prize?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0037",
+   "group": "2026-10-23-question-filler",
+   "q": "Did any project that pays prizes out of pooled deposit yield, without anyone losing their stake, win at a Stellar hackathon?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0038",
+   "group": "2026-10-23-question-filler",
+   "q": "Did any winner let a token issuer show it holds enough backing without exposing customer data?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0039",
+   "group": "2026-10-23-question-filler",
+   "q": "Did anyone win with a pension or old-age saving tool for workers outside formal employment?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0040",
+   "group": "bench-v2",
+   "q": "Did more Payments builds come out of 2025 or 2026 Stellar hackathons?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0041",
+   "group": "embarrass",
+   "q": "Empty query"
+  },
+  {
+   "kind": "pool",
+   "id": "p0042",
+   "group": "embarrass",
+   "q": "Etherfuse"
+  },
+  {
+   "kind": "pool",
+   "id": "p0043",
+   "group": "bench-v2",
+   "q": "Exactly how many RWA builds are there across Stellar hackathons, and which are they?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0044",
+   "group": "embarrass",
+   "q": "Famous non-Stellar project: Uniswap"
+  },
+  {
+   "kind": "pool",
+   "id": "p0045",
+   "group": "2026-10-23-repos-ranking",
+   "q": "For our integration tests I want a throwaway local Stellar network in Docker with RPC, Horizon and a friendbot, so CI doesn't depend on testnet. What should I run?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0046",
+   "group": "embarrass",
+   "q": "Franklin Templeton"
+  },
+  {
+   "kind": "pool",
+   "id": "p0047",
+   "group": "embarrass",
+   "q": "Freighter"
+  },
+  {
+   "kind": "pool",
+   "id": "p0048",
+   "group": "2026-10-23-event-in-q",
+   "q": "HackMeridian 2024"
+  },
+  {
+   "kind": "pool",
+   "id": "p0049",
+   "group": "2026-10-23-event-in-q",
+   "q": "HackMeridian 2025"
+  },
+  {
+   "kind": "pool",
+   "id": "p0050",
+   "group": "2026-10-23-question-filler",
+   "q": "HackMeridian 2025 awards"
+  },
+  {
+   "kind": "pool",
+   "id": "p0051",
+   "group": "2026-10-23-event-in-q",
+   "q": "HackMeridian 2025 first place"
+  },
+  {
+   "kind": "pool",
+   "id": "p0052",
+   "group": "2026-10-23-event-in-q",
+   "q": "HackMeridian 2025 give me"
+  },
+  {
+   "kind": "pool",
+   "id": "p0053",
+   "group": "2026-10-23-event-in-q",
+   "q": "HackMeridian 2025 leaderboard"
+  },
+  {
+   "kind": "pool",
+   "id": "p0054",
+   "group": "2026-10-23-event-in-q",
+   "q": "HackMeridian 2025 participants"
+  },
+  {
+   "kind": "pool",
+   "id": "p0055",
+   "group": "2026-10-23-event-in-q",
+   "q": "HackMeridian 2025 payments app"
+  },
+  {
+   "kind": "pool",
+   "id": "p0056",
+   "group": "2026-10-23-event-in-q",
+   "q": "HackMeridian 2025 top three"
+  },
+  {
+   "kind": "pool",
+   "id": "p0057",
+   "group": "2026-10-23-event-in-q",
+   "q": "HackMeridian 2025 vs HackMeridian 2026"
+  },
+  {
+   "kind": "pool",
+   "id": "p0058",
+   "group": "2026-10-23-question-filler",
+   "q": "HackMeridian 2025 winners"
+  },
+  {
+   "kind": "pool",
+   "id": "p0059",
+   "group": "embarrass",
+   "q": "HackMeridian 2026"
+  },
+  {
+   "kind": "pool",
+   "id": "p0060",
+   "group": "embarrass",
+   "q": "HackMeridian prizes tracks Genesis Scale"
+  },
+  {
+   "kind": "pool",
+   "id": "p0061",
+   "group": "embarrass",
+   "q": "HackMeridian submission deadline finalists pitch"
+  },
+  {
+   "kind": "pool",
+   "id": "p0062",
+   "group": "2026-10-23-question-filler",
+   "q": "Has a card game where players' hands stay private ever won a prize at a Stellar hackathon?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0063",
+   "group": "bench-priorities",
+   "q": "Has a cross-chain or bridge project ever won a prize at a Stellar hackathon?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0064",
+   "group": "2026-10-23-question-filler",
+   "q": "Has a tool that locks your money until you reach a personal target, sending it to a cause if you fail, won a prize?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0065",
+   "group": "bench-v2",
+   "q": "Has anyone built a Soroban prediction market at a Stellar hackathon, and did any of them win?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0066",
+   "group": "embarrass",
+   "q": "Has anyone built a ZK poker game on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0067",
+   "group": "embarrass",
+   "q": "Has anyone built a no-loss lottery on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0068",
+   "group": "bench-v2",
+   "q": "Has anyone built a quantum llama sandwich exchange at a Stellar hackathon?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0069",
+   "group": "2026-10-23-question-filler",
+   "q": "Has anyone built a system where patients control their own medical records?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0070",
+   "group": "2026-10-23-question-filler",
+   "q": "Has anyone built an auction where bids stay secret and the winner is proven with zero knowledge?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0071",
+   "group": "bench-v2",
+   "q": "Has anyone built x402 paywalls or agent payments at a Stellar hackathon, and what became of them?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0072",
+   "group": "2026-10-23-question-filler",
+   "q": "Has anyone turned emissions offsets from farmers' crops into tokens?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0073",
+   "group": "2026-10-23-question-filler",
+   "q": "Have any winners rewarded people for returning used batteries for recycling?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0074",
+   "group": "bench-v2",
+   "q": "Help us prep our SCF pitch for a stablecoin payroll app for freelancers."
+  },
+  {
+   "kind": "pool",
+   "id": "p0075",
+   "group": "bench-v2",
+   "q": "Here is our DoraHacks submission, dorahacks.io/buidl/42765. How does it stack up?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0076",
+   "group": "2026-10-23-source-locator",
+   "q": "Horizon submitTransaction in js-stellar-sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0077",
+   "group": "bench-priorities",
+   "q": "How can my Soroban contract send a message to, or call, a contract on an EVM chain?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0078",
+   "group": "bench-priorities",
+   "q": "How do I add spending limits or M-of-N multisig thresholds to a Stellar smart account?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0079",
+   "group": "embarrass",
+   "q": "How do I deploy a smart contract with the Stellar CLI?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0080",
+   "group": "2026-10-23-locate-ranking",
+   "q": "How do I install the CLI plugin that signs auth entries with ed25519 keys for the multisig 1-of-n contract account example?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0081",
+   "group": "bench-priorities",
+   "q": "How do I move USDC natively between Stellar and EVM chains without a wrapped token?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0082",
+   "group": "bench-priorities",
+   "q": "How do I verify an Ethereum-signed message (secp256k1 signature over a keccak256 hash) inside a Soroban contract? Point me to the SDK functions and where the host implements them."
+  },
+  {
+   "kind": "pool",
+   "id": "p0083",
+   "group": "bench-v2",
+   "q": "How do Stellar hackathon submissions break down by category?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0084",
+   "group": "bench-v2",
+   "q": "How do winning builds differ from the rest by category?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0085",
+   "group": "embarrass",
+   "q": "How does MoneyGram work with Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0086",
+   "group": "2026-10-23-locate-ranking",
+   "q": "How does a Soroban contract read the current ledger sequence number with the Rust SDK?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0087",
+   "group": "2026-10-23-locate-ranking",
+   "q": "How does a Soroban contract refer to host objects through a Val, and can a guest forge or allocate object handles itself? Which doc section explains it?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0088",
+   "group": "bench-v2",
+   "q": "How fresh is Scout's data?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0089",
+   "group": "bench-v2",
+   "q": "How has Soroban Rust SDK use changed across Stellar hackathons?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0090",
+   "group": "bench-v2",
+   "q": "How many Payments submissions has each Stellar hackathon had?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0091",
+   "group": "bench-v2",
+   "q": "How many Stellar hackathons are on record, and how much prize money in total?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0092",
+   "group": "bench-v2",
+   "q": "How many hackathon builds became live products, and which ones?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0093",
+   "group": "embarrass",
+   "q": "How many projects were submitted to Stellar Hacks: Agents?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0094",
+   "group": "embarrass",
+   "q": "How many projects were submitted to Stellar Hacks: Real-World ZK?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0095",
+   "group": "bench-v2",
+   "q": "How many submissions and winners did each Stellar hackathon have?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0096",
+   "group": "embarrass",
+   "q": "How much can an SCF Build Award be and what are its tracks?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0097",
+   "group": "2026-10-23-repos-ranking",
+   "q": "I need XLM and BTC prices inside my Soroban lending contract. Which oracle should I use if I want free on-chain feeds that follow the SEP-40 interface?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0098",
+   "group": "bench-v2",
+   "q": "I need a fiat on and off ramp partner in Latin America for my wallet app. Who can I integrate?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0099",
+   "group": "2026-10-23-repos-ranking",
+   "q": "I want a contract account where different signers are allowed for different contracts and functions, with rules that expire, and signature checks delegated to verifier contracts like Ed25519. Is there a framework for that on Soroban?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0100",
+   "group": "bench-v2",
+   "q": "I want to build a remittance app sending USDC from the US to the Philippines on Stellar. Who already does this, and is there room?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0101",
+   "group": "bench-priorities",
+   "q": "I want to verify passkey (WebAuthn) signatures in my contract. Where is that signature check implemented in Soroban, and what do I call from the SDK?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0102",
+   "group": "2026-10-23-repos-ranking",
+   "q": "I'd like to offer an auto-compounding yield vault on Stellar where deposits get allocated to strategies like Blend. Is there an open-source vault and strategy contract suite I can build on?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0103",
+   "group": "2026-10-23-repos-ranking",
+   "q": "I'm adding a token swap feature to my Stellar wallet and want the best price across Soroswap, Phoenix and Aqua instead of hitting one AMM. What should I integrate?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0104",
+   "group": "2026-10-23-repos-ranking",
+   "q": "I'm building a Soroban dapp and I don't want to write separate connect logic for Freighter, xBull, Lobstr, Albedo and WalletConnect. Is there one library that handles all the Stellar wallets behind a single API?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0105",
+   "group": "2026-10-23-repos-ranking",
+   "q": "I'm building a TypeScript wallet and want to let users deposit and withdraw through anchors with SEP-10 login and the SEP-24 hosted flow. Which library takes care of the anchor side for me?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0106",
+   "group": "2026-10-23-repos-ranking",
+   "q": "I'm giving an AI agent access to a user's Stellar smart account. Which smart account contract lets me add a time-limited signer and install plugins with authorization hooks?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0107",
+   "group": "2026-10-23-repos-ranking",
+   "q": "I'm tired of rate limits on public endpoints and want to run my own Soroban RPC node for my dapp backend. Which repo has the server I should deploy?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0108",
+   "group": "2026-10-23-repos-ranking",
+   "q": "I'm writing a Django backend that needs to build and submit Stellar payments and also call a couple of Soroban contracts through RPC. Which Python library should I use for that?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0109",
+   "group": "2026-10-23-event-in-q",
+   "q": "Ideaton Fin de Ano Powered by Stellar Chile"
+  },
+  {
+   "kind": "pool",
+   "id": "p0110",
+   "group": "2026-10-23-locate-ranking",
+   "q": "If I run the stellar/quickstart image without any --enable flag, which services start? Is Stellar Lab among them?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0111",
+   "group": "2026-10-23-locate-ranking",
+   "q": "In js-stellar-sdk, how many seconds of validity does a contract.Client / AssembledTransaction put on a transaction by default when timeoutInSeconds is not passed, and where is that value set?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0112",
+   "group": "2026-10-23-locate-ranking",
+   "q": "In soroban-examples, where is the contract error code returned when the counter would go past its limit of 5 defined?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0113",
+   "group": "2026-10-23-locate-ranking",
+   "q": "In soroban-sdk unit tests, what ledger defaults (protocol version, min persistent and temporary TTL, max TTL) does a fresh Env::default() start with, and where are they set?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0114",
+   "group": "2026-10-23-locate-ranking",
+   "q": "In soroban-sdk, where do contracts publish events with topics and data?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0115",
+   "group": "2026-10-23-locate-ranking",
+   "q": "In stellar-rpc, which handler serves getLedgerEntries?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0116",
+   "group": "embarrass",
+   "q": "Injection strings"
+  },
+  {
+   "kind": "pool",
+   "id": "p0117",
+   "group": "embarrass",
+   "q": "Is Allbridge Core still a working bridge for Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0118",
+   "group": "bench-v2",
+   "q": "Is Blend live on mainnet, SCF-funded, and audited?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0119",
+   "group": "embarrass",
+   "q": "Is Chainlink live on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0120",
+   "group": "embarrass",
+   "q": "Is Circle CCTP live on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0121",
+   "group": "embarrass",
+   "q": "Is PayPal USD (PYUSD) live on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0122",
+   "group": "embarrass",
+   "q": "Is Spiko on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0123",
+   "group": "embarrass",
+   "q": "Is USDC issued natively on Stellar, and by whom?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0124",
+   "group": "embarrass",
+   "q": "Is USDT (USDT0) on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0125",
+   "group": "bench-priorities",
+   "q": "Is USDT available natively on Stellar, and how does it move cross-chain?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0126",
+   "group": "bench-v2",
+   "q": "Is an SCF round open right now, when do submissions close, and where do I apply?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0127",
+   "group": "bench-v2",
+   "q": "Is lending on Soroban a crowded lane, and who are the live incumbents?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0128",
+   "group": "bench-v2",
+   "q": "Is passkey-kit safe to build on: is it maintained, and where does it live now?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0129",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Is there a Stellar SDK for Flutter that I can use in my cross-platform mobile app? I need to sign transactions, query Horizon and invoke Soroban contracts from Dart."
+  },
+  {
+   "kind": "pool",
+   "id": "p0130",
+   "group": "2026-10-23-question-filler",
+   "q": "Is there a project offering insurance that pays automatically once conditions are met?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0131",
+   "group": "bench-priorities",
+   "q": "Is there an audited library of reusable Soroban contracts (fungible token, access control, pausable, upgradeable) I can import instead of writing them myself?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0132",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Is there an example account contract that checks a BLS signature in __check_auth?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0133",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Is there an upper cap on stellar-rpc's classic and soroban fee-stats retention windows, and where is the cap value defined and enforced?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0134",
+   "group": "2026-10-23-question-filler",
+   "q": "Is there anything that lets a business turn unpaid bills into immediate cash?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0135",
+   "group": "2026-10-23-event-in-q",
+   "q": "KALE Markets"
+  },
+  {
+   "kind": "pool",
+   "id": "p0136",
+   "group": "embarrass",
+   "q": "KALE x Reflector hackathon winners"
+  },
+  {
+   "kind": "pool",
+   "id": "p0137",
+   "group": "embarrass",
+   "q": "Kelp trading bot"
+  },
+  {
+   "kind": "pool",
+   "id": "p0138",
+   "group": "embarrass",
+   "q": "LOBSTR"
+  },
+  {
+   "kind": "pool",
+   "id": "p0139",
+   "group": "bench-v2",
+   "q": "Lumenswap"
+  },
+  {
+   "kind": "pool",
+   "id": "p0140",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "MCP server that lets AI agents use Stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0141",
+   "group": "2026-10-23-event-in-q",
+   "q": "Meridian"
+  },
+  {
+   "kind": "pool",
+   "id": "p0142",
+   "group": "embarrass",
+   "q": "Meridian 2026"
+  },
+  {
+   "kind": "pool",
+   "id": "p0143",
+   "group": "embarrass",
+   "q": "Misspelling: lobster wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0144",
+   "group": "embarrass",
+   "q": "Misspelling: soroswp"
+  },
+  {
+   "kind": "pool",
+   "id": "p0145",
+   "group": "embarrass",
+   "q": "MoneyGram Ramps"
+  },
+  {
+   "kind": "pool",
+   "id": "p0146",
+   "group": "bench-priorities",
+   "q": "My bridged token arrives on Stellar as a classic asset. How do I deploy its Stellar Asset Contract so Soroban contracts can use it, and where is the SAC implemented?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0147",
+   "group": "2026-10-23-repos-ranking",
+   "q": "My team already uses Chainlink feeds on EVM. If I want to read Chainlink Data Feeds from a Soroban contract, where's the proxy interface I'm supposed to code against?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0148",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "NFT event ticketing with resale royalties"
+  },
+  {
+   "kind": "pool",
+   "id": "p0149",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "NFT lawnmower marathon"
+  },
+  {
+   "kind": "pool",
+   "id": "p0150",
+   "group": "bench-v2",
+   "q": "NFT ticketing for live events"
+  },
+  {
+   "kind": "pool",
+   "id": "p0151",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "NGO tool to track disaster relief cash transfers to individual recipients with receipts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0152",
+   "group": "embarrass",
+   "q": "Name a project that went from a Stellar hackathon to SCF funding."
+  },
+  {
+   "kind": "pool",
+   "id": "p0153",
+   "group": "bench-v2",
+   "q": "Of Stellar Hacks: KALE x Reflector submissions, how many kept shipping code 90+ days after the event?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0154",
+   "group": "2026-10-23-repos-ranking",
+   "q": "OpenZeppelin/openzeppelin-relayer"
+  },
+  {
+   "kind": "pool",
+   "id": "p0155",
+   "group": "2026-10-23-repos-ranking",
+   "q": "OpenZeppelin/stellar-contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0156",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Our payments service is written in Go. What's the official Go SDK these days for building transactions and talking to Horizon? I remember it used to be the big stellar/go monorepo."
+  },
+  {
+   "kind": "pool",
+   "id": "p0157",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Our smart wallet users don't hold any XLM. Now that Launchtube is retired, what should I use on the backend to sponsor fees and submit their transactions?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0158",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Our token is already a LayerZero OFT on several EVM chains. Is there a reference OFT contract for Stellar so we can add Stellar as another chain in the mesh?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0159",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Our users mostly have the Freighter browser extension. How do I get their public key and ask Freighter to sign a transaction from my web app, and where does that client library live?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0160",
+   "group": "embarrass",
+   "q": "PayPal PYUSD"
+  },
+  {
+   "kind": "pool",
+   "id": "p0161",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Phoenix-Protocol-Group/phoenix-contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0162",
+   "group": "embarrass",
+   "q": "Protocol 30 Bell"
+  },
+  {
+   "kind": "pool",
+   "id": "p0163",
+   "group": "bench-v2",
+   "q": "Read DoraHacks submission 42765 in full: what did the team claim and what is verified?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0164",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Reflector"
+  },
+  {
+   "kind": "pool",
+   "id": "p0165",
+   "group": "embarrass",
+   "q": "Reflector oracle"
+  },
+  {
+   "kind": "pool",
+   "id": "p0166",
+   "group": "bench-v2",
+   "q": "Review my hackathon project github.com/CTX-com/Cards402 before we apply to SCF."
+  },
+  {
+   "kind": "pool",
+   "id": "p0167",
+   "group": "bench-v2",
+   "q": "Review my repo github.com/zz-nobody-xyz/no-such-repo-8841."
+  },
+  {
+   "kind": "pool",
+   "id": "p0168",
+   "group": "embarrass",
+   "q": "SCF Build Award maximum amount tracks"
+  },
+  {
+   "kind": "pool",
+   "id": "p0169",
+   "group": "bench-v2",
+   "q": "SCF Build award maximum amount"
+  },
+  {
+   "kind": "pool",
+   "id": "p0170",
+   "group": "embarrass",
+   "q": "SCF Instawards"
+  },
+  {
+   "kind": "pool",
+   "id": "p0171",
+   "group": "embarrass",
+   "q": "SEP-10"
+  },
+  {
+   "kind": "pool",
+   "id": "p0172",
+   "group": "embarrass",
+   "q": "SEP-24"
+  },
+  {
+   "kind": "pool",
+   "id": "p0173",
+   "group": "bench-v2",
+   "q": "SEP-24 interactive deposit flow"
+  },
+  {
+   "kind": "pool",
+   "id": "p0174",
+   "group": "embarrass",
+   "q": "SEP-31"
+  },
+  {
+   "kind": "pool",
+   "id": "p0175",
+   "group": "embarrass",
+   "q": "SEP-41"
+  },
+  {
+   "kind": "pool",
+   "id": "p0176",
+   "group": "embarrass",
+   "q": "Scaffold Stellar Hackathon winners"
+  },
+  {
+   "kind": "pool",
+   "id": "p0177",
+   "group": "bench-v2",
+   "q": "Show me winning Stellar hackathon projects that built passkey or smart-wallet onboarding."
+  },
+  {
+   "kind": "pool",
+   "id": "p0178",
+   "group": "embarrass",
+   "q": "Shut-down project: Kelp trading bot"
+  },
+  {
+   "kind": "pool",
+   "id": "p0179",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Some of my users won't install a browser extension. Is there a web-based Stellar signer I can call from my site with a small JS library so they can sign transactions or messages without handing me their secret key?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0180",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "Soroban contract template generator from plain English"
+  },
+  {
+   "kind": "pool",
+   "id": "p0181",
+   "group": "embarrass",
+   "q": "Soroban resource limits per transaction instructions"
+  },
+  {
+   "kind": "pool",
+   "id": "p0182",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "Sorobix IDE plugin"
+  },
+  {
+   "kind": "pool",
+   "id": "p0183",
+   "group": "embarrass",
+   "q": "Soroswap"
+  },
+  {
+   "kind": "pool",
+   "id": "p0184",
+   "group": "embarrass",
+   "q": "Spiko"
+  },
+  {
+   "kind": "pool",
+   "id": "p0185",
+   "group": "embarrass",
+   "q": "Stellar Build Better Hackathon winners"
+  },
+  {
+   "kind": "pool",
+   "id": "p0186",
+   "group": "embarrass",
+   "q": "Stellar Hack+ Buenos Aires"
+  },
+  {
+   "kind": "pool",
+   "id": "p0187",
+   "group": "2026-10-23-event-in-q",
+   "q": "Stellar Hacks"
+  },
+  {
+   "kind": "pool",
+   "id": "p0188",
+   "group": "embarrass",
+   "q": "Stellar Hacks: Agents"
+  },
+  {
+   "kind": "pool",
+   "id": "p0189",
+   "group": "embarrass",
+   "q": "Stellar Hacks: Agents submissions count"
+  },
+  {
+   "kind": "pool",
+   "id": "p0190",
+   "group": "2026-10-23-event-in-q",
+   "q": "Stellar Hacks: Blend"
+  },
+  {
+   "kind": "pool",
+   "id": "p0191",
+   "group": "embarrass",
+   "q": "Stellar Hacks: Real-World ZK"
+  },
+  {
+   "kind": "pool",
+   "id": "p0192",
+   "group": "embarrass",
+   "q": "Stellar Hacks: Real-World ZK submissions count"
+  },
+  {
+   "kind": "pool",
+   "id": "p0193",
+   "group": "embarrass",
+   "q": "Stellar Hacks: Real-World ZK winners"
+  },
+  {
+   "kind": "pool",
+   "id": "p0194",
+   "group": "embarrass",
+   "q": "Stellar Hacks: ZK Gaming winners"
+  },
+  {
+   "kind": "pool",
+   "id": "p0195",
+   "group": "embarrass",
+   "q": "Stellar ledger close time"
+  },
+  {
+   "kind": "pool",
+   "id": "p0196",
+   "group": "embarrass",
+   "q": "Stellar minimum base fee smart contract transaction operations"
+  },
+  {
+   "kind": "pool",
+   "id": "p0197",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Stellar-Wallets-Kit"
+  },
+  {
+   "kind": "pool",
+   "id": "p0198",
+   "group": "2026-10-23-repos-ranking",
+   "q": "StellarCN/py-stellar-base"
+  },
+  {
+   "kind": "pool",
+   "id": "p0199",
+   "group": "bench-v2",
+   "q": "Tell me about the stellar-hacks-quantum-2031 hackathon."
+  },
+  {
+   "kind": "pool",
+   "id": "p0200",
+   "group": "2026-10-23-repos-ranking",
+   "q": "Trustless-Work/trustlesswork-smart-contract-stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0201",
+   "group": "embarrass",
+   "q": "USDT0 Stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0202",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Under which Wasm import module and function name is the host function require_auth exposed to contracts, and where is that mapping defined?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0203",
+   "group": "embarrass",
+   "q": "Unicode query"
+  },
+  {
+   "kind": "pool",
+   "id": "p0204",
+   "group": "embarrass",
+   "q": "Uniswap"
+  },
+  {
+   "kind": "pool",
+   "id": "p0205",
+   "group": "bench-v2",
+   "q": "Vet my idea: NFT ticketing for live events on Stellar."
+  },
+  {
+   "kind": "pool",
+   "id": "p0206",
+   "group": "embarrass",
+   "q": "Vibrant wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0207",
+   "group": "2026-10-23-repos-ranking",
+   "q": "We issued a token on Stellar and want it to exist on Ethereum and Base too, with flow limits per token. How do I make my Stellar token interchain?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0208",
+   "group": "2026-10-23-repos-ranking",
+   "q": "We run a Polkadot parachain and want Stellar assets like USDC and EURC usable on it, with redemption back to Stellar. Is there an existing bridge between Substrate chains and Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0209",
+   "group": "2026-10-23-repos-ranking",
+   "q": "We want users of our app to supply and borrow against Blend lending pools. Is there a JS SDK for Blend, or do I have to call the pool contracts by hand?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0210",
+   "group": "2026-10-23-repos-ranking",
+   "q": "We're a fintech becoming a Stellar anchor and need SEP-10 auth, SEP-24 interactive deposits and withdrawals and SEP-31 receives. Is there a server we can deploy instead of implementing every SEP endpoint ourselves?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0211",
+   "group": "2026-10-23-repos-ranking",
+   "q": "We're building an RWA vault on Stellar and need push-model price feeds for tokenized assets plus EURC and USDC. Which oracle has a Soroban connector with Rust and TypeScript examples?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0212",
+   "group": "2026-10-23-repos-ranking",
+   "q": "We're doing analytics on Stellar history and need ledgers, transactions and trades exported into tables we can load into our warehouse. Is there an open-source pipeline for that instead of scraping Horizon?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0213",
+   "group": "bench-v2",
+   "q": "What MCP servers can I connect my agent to for Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0214",
+   "group": "bench-priorities",
+   "q": "What SDK should I use to add passkey (WebAuthn) smart wallets to my Stellar web app?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0215",
+   "group": "embarrass",
+   "q": "What are SCF Instawards?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0216",
+   "group": "embarrass",
+   "q": "What are the HackMeridian 2026 prizes and paths?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0217",
+   "group": "bench-v2",
+   "q": "What are the judging criteria and submission requirements for Stellar Hacks: ZK?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0218",
+   "group": "2026-10-23-locate-ranking",
+   "q": "What default CPU instruction and memory byte limits does a soroban-env-host Budget get when the embedder does not apply network config?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0219",
+   "group": "2026-10-23-locate-ranking",
+   "q": "What default inclusion fee does stellar-cli put on transactions it builds, and which environment variable overrides it?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0220",
+   "group": "bench-v2",
+   "q": "What did past SCF proposals for oracle projects say?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0221",
+   "group": "bench-v2",
+   "q": "What did security audits of Blend find?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0222",
+   "group": "bench-v2",
+   "q": "What did teams build at Stellar Hacks: KALE x Reflector, and which ones won?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0223",
+   "group": "embarrass",
+   "q": "What does Franklin Templeton do on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0224",
+   "group": "bench-v2",
+   "q": "What does SEP-24 say about the interactive deposit flow?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0225",
+   "group": "bench-v2",
+   "q": "What does the SCF Build award fund, and how much can a team get?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0226",
+   "group": "embarrass",
+   "q": "What happened to the Vibrant wallet?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0227",
+   "group": "bench-v2",
+   "q": "What has SDF written about agent payments and x402?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0228",
+   "group": "embarrass",
+   "q": "What is Aquarius on Stellar and is it live?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0229",
+   "group": "embarrass",
+   "q": "What is Beans?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0230",
+   "group": "embarrass",
+   "q": "What is Blend and is it live on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0231",
+   "group": "bench-v2",
+   "q": "What is CAP-46 and what did it introduce?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0232",
+   "group": "embarrass",
+   "q": "What is DeFindex and is it live?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0233",
+   "group": "embarrass",
+   "q": "What is Etherfuse?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0234",
+   "group": "embarrass",
+   "q": "What is Freighter?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0235",
+   "group": "embarrass",
+   "q": "What is LOBSTR?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0236",
+   "group": "embarrass",
+   "q": "What is Protocol 30 'Bell' and when is the vote?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0237",
+   "group": "embarrass",
+   "q": "What is Reflector?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0238",
+   "group": "embarrass",
+   "q": "What is SEP-10?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0239",
+   "group": "embarrass",
+   "q": "What is SEP-24?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0240",
+   "group": "embarrass",
+   "q": "What is SEP-31?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0241",
+   "group": "embarrass",
+   "q": "What is SEP-41?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0242",
+   "group": "embarrass",
+   "q": "What is Soroswap and is it live?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0243",
+   "group": "embarrass",
+   "q": "What is the Soroban per-transaction CPU instruction limit on mainnet?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0244",
+   "group": "embarrass",
+   "q": "What is the current SCF round and its submission deadline?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0245",
+   "group": "embarrass",
+   "q": "What is the current Stellar mainnet protocol version?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0246",
+   "group": "2026-10-23-locate-ranking",
+   "q": "What is the highest ledger protocol version this stellar-core build supports, and where is that number actually set?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0247",
+   "group": "embarrass",
+   "q": "What is the ledger close time on Stellar mainnet now?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0248",
+   "group": "embarrass",
+   "q": "What is the minimum base fee and how many operations can a smart contract transaction have?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0249",
+   "group": "bench-v2",
+   "q": "What share of winning Stellar hackathon builds are DeFi (DEX, Lending, Yield)?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0250",
+   "group": "embarrass",
+   "q": "What was Stellar Hack+ Buenos Aires 2025?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0251",
+   "group": "embarrass",
+   "q": "What was Stellar Hacks: Agents (prize pool, theme, deadline)?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0252",
+   "group": "2026-10-23-question-filler",
+   "q": "What winners automate salary payments to employees?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0253",
+   "group": "bench-priorities",
+   "q": "What's the fastest way to scaffold a full-stack Soroban dapp with contracts, a React frontend and typed TypeScript clients?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0254",
+   "group": "2026-10-23-repos-ranking",
+   "q": "What's the standard command-line tool for building, deploying and invoking Soroban contracts and managing keys and networks from my terminal?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0255",
+   "group": "bench-v2",
+   "q": "Whatever happened to Lumenswap?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0256",
+   "group": "2026-10-23-locate-ranking",
+   "q": "When I run the released stellar-rpc binary, what are the default and maximum page sizes for getLedgers, and where are they set?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0257",
+   "group": "embarrass",
+   "q": "When and where is HackMeridian 2026?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0258",
+   "group": "embarrass",
+   "q": "When and where is Meridian 2026?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0259",
+   "group": "embarrass",
+   "q": "When is the HackMeridian submission deadline and when do finalists pitch?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0260",
+   "group": "embarrass",
+   "q": "When was Stellar Hacks: Real-World ZK and what was the prize pool?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0261",
+   "group": "embarrass",
+   "q": "Where are the docs for smart wallets and passkeys on Stellar?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0262",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where do the js-stellar-sdk guides explain how to read the transaction-level and operation-level result codes when a Horizon submission fails?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0263",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where do the stellar-core docs list the HTTP admin commands that are only exposed on test instances, such as generateload, testacc and testtx?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0264",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does OpenZeppelin's Stellar library implement a keccak hasher?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0265",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does stellar contract deploy define the --wasm-hash option?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0266",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does stellar-core apply surge pricing when it builds a transaction set?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0267",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does stellar-core check whether a transaction is banned from its queue?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0268",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does stellar-core compute an account's minimum balance (getMinBalance)?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0269",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does stellar-core document the HTTP query server commands?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0270",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does stellar-rpc configure the default and maximum limit for getTransactions?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0271",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does the JavaScript SDK poll a submitted transaction until it completes?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0272",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does the Soroban SDK implement require_auth on Address?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0273",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does the Soroban host implement the Poseidon2 permutation?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0274",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does the Soroban host implement the extend_contract_data_ttl host function?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0275",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does the Soroban host verify an ed25519 signature?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0276",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does the quickstart start script initialize friendbot?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0277",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does the quickstart start script set the default for --enable-core-manual-close?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0278",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does the stellar CLI extend a contract's TTL?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0279",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where does the stellar CLI implement `stellar tx sign`?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0280",
+   "group": "bench-priorities",
+   "q": "Where in stellar-rpc is simulateTransaction implemented, the part that computes the footprint and resource fees for a contract call?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0281",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is `stellar contract alias add` implemented?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0282",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is extend_ttl defined for persistent storage in the Soroban Rust SDK?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0283",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is prepareTransaction implemented in the js-stellar-sdk RPC server?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0284",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is signAndSend defined on AssembledTransaction in the JS SDK contract client?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0285",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the Ownable trait defined in OpenZeppelin's Stellar contracts?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0286",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the SAC's clawback implemented in the Soroban host?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0287",
+   "group": "bench-priorities",
+   "q": "Where is the SEP-41 token interface defined in the Soroban Rust SDK, and is there an example token contract that implements it?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0288",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the TokenInterface trait defined in soroban-sdk?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0289",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the `stellar contract deploy` subcommand implemented in stellar-cli?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0290",
+   "group": "bench-priorities",
+   "q": "Where is the custom account interface with __check_auth defined in the Soroban SDK, and is there an example account contract I can start from?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0291",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the default PEER_PORT set in stellar-core's configuration?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0292",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the fee stats RPC method implemented in stellar-rpc?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0293",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the quickstart --limits flag parsed?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0294",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the simulateTransaction handler implemented in stellar-rpc?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0295",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the spending limit policy for OpenZeppelin smart accounts enforced?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0296",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the standard token interface trait (transfer, approve, allowance, burn, balance) that soroban token contracts implement and TokenClient is generated from defined?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0297",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the stellar contract invoke command implemented?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0298",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the stellar-core `calculate-asset-supply` command line subcommand implemented?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0299",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the swap function of the atomic swap example contract?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0300",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Where is the transfer function of the token example contract in soroban-examples?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0301",
+   "group": "bench-v2",
+   "q": "Where is the whitespace on Stellar right now: which verticals are under-built?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0302",
+   "group": "bench-v2",
+   "q": "Which DEXs are live on Stellar today?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0303",
+   "group": "bench-priorities",
+   "q": "Which DeFi protocols on Stellar can my contract compose with for lending, swaps and yield vaults, and where are their contracts?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0304",
+   "group": "bench-v2",
+   "q": "Which SCF-funded projects have gone inactive?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0305",
+   "group": "bench-v2",
+   "q": "Which Soroban SDK versions are Stellar repos on, and which are deprecated?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0306",
+   "group": "bench-v2",
+   "q": "Which Stellar hackathon winners went on to win SCF funding?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0307",
+   "group": "bench-v2",
+   "q": "Which Stellar hackathons are coming up that I can still join, and when are they?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0308",
+   "group": "bench-v2",
+   "q": "Which Stellar libraries are used together with Stellar Wallets Kit in hackathon builds?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0309",
+   "group": "bench-v2",
+   "q": "Which Stellar libraries do hackathon winners use most, and how does that compare with everyone else?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0310",
+   "group": "bench-priorities",
+   "q": "Which bridges and cross-chain protocols are live on Stellar mainnet today?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0311",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which file defines the --rpc-url flag of the stellar CLI?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0312",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which file implements `soroban contract build` in the CLI?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0313",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which function in the Rust SDK runs a BLS12-381 pairing check?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0314",
+   "group": "bench-v2",
+   "q": "Which hackathon builds use passkey-kit, and did any of them win?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0315",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which js-stellar-sdk file declares the error classes thrown by contract.AssembledTransaction and SentTransaction, such as NeedsMoreSignaturesError and TransactionStillPendingError?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0316",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which js-stellar-sdk file has assembleTransaction, which applies simulation results to a transaction?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0317",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which js-stellar-sdk function turns a native JavaScript value into an ScVal?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0318",
+   "group": "bench-v2",
+   "q": "Which mainnet contracts from Stellar projects show real on-chain usage?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0319",
+   "group": "bench-v2",
+   "q": "Which oracle can my Soroban app use for price feeds, and is it audited?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0320",
+   "group": "bench-priorities",
+   "q": "Which oracle providers can my Soroban contract read prices from on Stellar mainnet?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0321",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which part of the quickstart README explains ephemeral mode versus persistent mode?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0322",
+   "group": "bench-priorities",
+   "q": "Which passkey or smart-wallet projects have won prizes at Stellar hackathons?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0323",
+   "group": "bench-priorities",
+   "q": "Which past Stellar hackathon winners built on top of the Blend lending protocol?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0324",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which port in the quickstart container serves horizon, stellar-rpc, friendbot and lab, and which ports are the admin and stellar-core ports? Where is this documented?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0325",
+   "group": "2026-10-23-question-filler",
+   "q": "Which prize winners let AI agents pay per request with tiny USDC payments?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0326",
+   "group": "bench-v2",
+   "q": "Which skill should my agent install to write and test Soroban smart contracts?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0327",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which soroban-examples contract implements a simplified claimable balance, where a depositor locks tokens for a list of claimants with a before or after time bound?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0328",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which soroban-examples contract implements the custom account interface for a 1-of-n multisig?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0329",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which stellar-cli file implements the keys generate command?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0330",
+   "group": "2026-10-23-locate-ranking",
+   "q": "Which stellar-rpc option sets the history retention window?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0331",
+   "group": "bench-priorities",
+   "q": "Which wallets or wallet providers in the Stellar ecosystem offer passkey-based or smart-contract wallets?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0332",
+   "group": "2026-10-23-question-filler",
+   "q": "Which winners are built for people with weak or no internet access?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0333",
+   "group": "2026-10-23-question-filler",
+   "q": "Which winners hide payment amounts on-chain while still letting an auditor verify compliance?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0334",
+   "group": "2026-10-23-question-filler",
+   "q": "Which winners make approvals that need several signers easier?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0335",
+   "group": "bench-priorities",
+   "q": "Who can sponsor fees and submit transactions for my smart-wallet users on Stellar, since contract accounts can't pay their own fees?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0336",
+   "group": "bench-priorities",
+   "q": "Who has built cross-chain bridges or cross-chain transfer apps at past Stellar hackathons?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0337",
+   "group": "bench-priorities",
+   "q": "Who has built escrow smart contracts on Soroban at past Stellar hackathons, and at which hackathon?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0338",
+   "group": "bench-priorities",
+   "q": "Who has built passkey wallets or smart accounts (contract accounts) at past Stellar hackathons?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0339",
+   "group": "bench-v2",
+   "q": "Who has tried invoice factoring or trade finance on Stellar, either at a hackathon or as a live product?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0340",
+   "group": "embarrass",
+   "q": "Who won Stellar Hacks: KALE x Reflector?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0341",
+   "group": "embarrass",
+   "q": "Who won Stellar Hacks: Real-World ZK?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0342",
+   "group": "embarrass",
+   "q": "Who won Stellar Hacks: ZK Gaming?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0343",
+   "group": "embarrass",
+   "q": "Who won the Scaffold Stellar Hackathon?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0344",
+   "group": "embarrass",
+   "q": "Who won the Stellar Build Better Hackathon?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0345",
+   "group": "2026-10-23-question-filler",
+   "q": "Who won with a way to rein in resale prices for event admissions?"
+  },
+  {
+   "kind": "pool",
+   "id": "p0346",
+   "group": "embarrass",
+   "q": "XLM"
+  },
+  {
+   "kind": "pool",
+   "id": "p0347",
+   "group": "2026-10-23-event-in-q",
+   "q": "ZK Gaming"
+  },
+  {
+   "kind": "pool",
+   "id": "p0348",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "a depegged stablecoin for merchant payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0349",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "a minted stablecoin for payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0350",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "a non-custodial wallet for Stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0351",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "a stablecoin minter for merchant payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0352",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "a stablecoin pegging the dollar for payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0353",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "a stablecoin that anchors its peg to gold"
+  },
+  {
+   "kind": "pool",
+   "id": "p0354",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "a stablecoin with 1:1 backing for merchant payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0355",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "a stablecoin with daily redemptions for payroll"
+  },
+  {
+   "kind": "pool",
+   "id": "p0356",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "a stablecoin with dollar collateral for payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0357",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "accept donations in crypto"
+  },
+  {
+   "kind": "pool",
+   "id": "p0358",
+   "group": "2026-10-23-repos-ranking",
+   "q": "account abstraction"
+  },
+  {
+   "kind": "pool",
+   "id": "p0359",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "agent wallet spending limits"
+  },
+  {
+   "kind": "pool",
+   "id": "p0360",
+   "group": "2026-10-23-repos-ranking",
+   "q": "aggregator"
+  },
+  {
+   "kind": "pool",
+   "id": "p0361",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "airdrop and token distribution tool"
+  },
+  {
+   "kind": "pool",
+   "id": "p0362",
+   "group": "2026-10-23-repos-ranking",
+   "q": "allbridge-core-soroban-contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0363",
+   "group": "2026-10-23-repos-ranking",
+   "q": "allbridge-io/allbridge-core-soroban-contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0364",
+   "group": "2026-10-23-repos-ranking",
+   "q": "amm"
+  },
+  {
+   "kind": "pool",
+   "id": "p0365",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "an algorithmic stablecoin for merchant payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0366",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "an overcollateralized stablecoin for lending"
+  },
+  {
+   "kind": "pool",
+   "id": "p0367",
+   "group": "2026-10-23-repos-ranking",
+   "q": "anchor platform"
+  },
+  {
+   "kind": "pool",
+   "id": "p0368",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "anchor ship knot tutorial"
+  },
+  {
+   "kind": "pool",
+   "id": "p0369",
+   "group": "2026-10-23-repos-ranking",
+   "q": "anchor-platform"
+  },
+  {
+   "kind": "pool",
+   "id": "p0370",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "app where migrant workers split remittances automatically between family members in different countries"
+  },
+  {
+   "kind": "pool",
+   "id": "p0371",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "autonomous agents that negotiate prices with each other and settle payments on Stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0372",
+   "group": "2026-10-23-repos-ranking",
+   "q": "axelar-amplifier-stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0373",
+   "group": "2026-10-23-repos-ranking",
+   "q": "axelarnetwork/axelar-amplifier-stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0374",
+   "group": "2026-10-23-build-matching",
+   "q": "banana origami parliament"
+  },
+  {
+   "kind": "pool",
+   "id": "p0375",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "bashful pineapple tractor"
+  },
+  {
+   "kind": "pool",
+   "id": "p0376",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "bill and utility payments with stablecoins"
+  },
+  {
+   "kind": "pool",
+   "id": "p0377",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "bitcoin origami zeppelin"
+  },
+  {
+   "kind": "pool",
+   "id": "p0378",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "blend"
+  },
+  {
+   "kind": "pool",
+   "id": "p0379",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "blend lending pool"
+  },
+  {
+   "kind": "pool",
+   "id": "p0380",
+   "group": "2026-10-23-repos-ranking",
+   "q": "blend lending protocol"
+  },
+  {
+   "kind": "pool",
+   "id": "p0381",
+   "group": "2026-10-23-event-in-q",
+   "q": "blend lending vault"
+  },
+  {
+   "kind": "pool",
+   "id": "p0382",
+   "group": "2026-10-23-repos-ranking",
+   "q": "blend-capital/blend-contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0383",
+   "group": "2026-10-23-repos-ranking",
+   "q": "blend-capital/blend-contracts-v2"
+  },
+  {
+   "kind": "pool",
+   "id": "p0384",
+   "group": "2026-10-23-repos-ranking",
+   "q": "blend-contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0385",
+   "group": "2026-10-23-repos-ranking",
+   "q": "blend-contracts-v2"
+  },
+  {
+   "kind": "pool",
+   "id": "p0386",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "block explorer"
+  },
+  {
+   "kind": "pool",
+   "id": "p0387",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "blockchain sourdough starter"
+  },
+  {
+   "kind": "pool",
+   "id": "p0388",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "borrow stablecoins against crypto collateral"
+  },
+  {
+   "kind": "pool",
+   "id": "p0389",
+   "group": "2026-10-23-repos-ranking",
+   "q": "bridge"
+  },
+  {
+   "kind": "pool",
+   "id": "p0390",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "browser extension that warns users about scam tokens and malicious Stellar accounts before signing"
+  },
+  {
+   "kind": "pool",
+   "id": "p0391",
+   "group": "2026-10-23-event-in-q",
+   "q": "build on stellar lending app"
+  },
+  {
+   "kind": "pool",
+   "id": "p0392",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "caf\u00e9 payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0393",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "carbon credit marketplace"
+  },
+  {
+   "kind": "pool",
+   "id": "p0394",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "carbon credits"
+  },
+  {
+   "kind": "pool",
+   "id": "p0395",
+   "group": "embarrass",
+   "q": "carteira Stellar para remessas \ud83d\udcb8 \u30b9\u30c6\u30e9 \u30a6\u30a9\u30ec\u30c3\u30c8"
+  },
+  {
+   "kind": "pool",
+   "id": "p0396",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "center"
+  },
+  {
+   "kind": "pool",
+   "id": "p0397",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "charity auctions"
+  },
+  {
+   "kind": "pool",
+   "id": "p0398",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "cheapest route to swap USDC into naira"
+  },
+  {
+   "kind": "pool",
+   "id": "p0399",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "chess game"
+  },
+  {
+   "kind": "pool",
+   "id": "p0400",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "church tithe donations app"
+  },
+  {
+   "kind": "pool",
+   "id": "p0401",
+   "group": "2026-10-23-repos-ranking",
+   "q": "circlefin/stellar-cctp"
+  },
+  {
+   "kind": "pool",
+   "id": "p0402",
+   "group": "2026-10-23-repos-ranking",
+   "q": "colibri"
+  },
+  {
+   "kind": "pool",
+   "id": "p0403",
+   "group": "2026-10-23-source-locator",
+   "q": "contractimpl macro"
+  },
+  {
+   "kind": "pool",
+   "id": "p0404",
+   "group": "2026-10-23-repos-ranking",
+   "q": "core"
+  },
+  {
+   "kind": "pool",
+   "id": "p0405",
+   "group": "2026-10-23-build-matching",
+   "q": "cosmic broccoli wrestling league"
+  },
+  {
+   "kind": "pool",
+   "id": "p0406",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "crimson accordion volcano"
+  },
+  {
+   "kind": "pool",
+   "id": "p0407",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "crop insurance"
+  },
+  {
+   "kind": "pool",
+   "id": "p0408",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "cross border remittances"
+  },
+  {
+   "kind": "pool",
+   "id": "p0409",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "cross-border remittance"
+  },
+  {
+   "kind": "pool",
+   "id": "p0410",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "cross-border remittance app cashing out through local anchors"
+  },
+  {
+   "kind": "pool",
+   "id": "p0411",
+   "group": "2026-10-23-repos-ranking",
+   "q": "cross-chain bridge"
+  },
+  {
+   "kind": "pool",
+   "id": "p0412",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "crowdfunding"
+  },
+  {
+   "kind": "pool",
+   "id": "p0413",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "crowdfunding platform for indie game developers"
+  },
+  {
+   "kind": "pool",
+   "id": "p0414",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "crowdfunding with milestone-based payouts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0415",
+   "group": "embarrass",
+   "q": "current SCF round deadline"
+  },
+  {
+   "kind": "pool",
+   "id": "p0416",
+   "group": "embarrass",
+   "q": "current Stellar protocol version mainnet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0417",
+   "group": "2026-10-23-build-matching",
+   "q": "dancing penguin mortgage"
+  },
+  {
+   "kind": "pool",
+   "id": "p0418",
+   "group": "2026-10-23-repos-ranking",
+   "q": "dao governance"
+  },
+  {
+   "kind": "pool",
+   "id": "p0419",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "decentralised exchnage for stablecoins"
+  },
+  {
+   "kind": "pool",
+   "id": "p0420",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "decentralized identity"
+  },
+  {
+   "kind": "pool",
+   "id": "p0421",
+   "group": "embarrass",
+   "q": "deploy contract stellar cli"
+  },
+  {
+   "kind": "pool",
+   "id": "p0422",
+   "group": "2026-10-23-repos-ranking",
+   "q": "dex"
+  },
+  {
+   "kind": "pool",
+   "id": "p0423",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "discard"
+  },
+  {
+   "kind": "pool",
+   "id": "p0424",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "donation matching for nonprofits"
+  },
+  {
+   "kind": "pool",
+   "id": "p0425",
+   "group": "2026-10-23-repos-ranking",
+   "q": "escrow"
+  },
+  {
+   "kind": "pool",
+   "id": "p0426",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "escrow for freelance work with milestone releases"
+  },
+  {
+   "kind": "pool",
+   "id": "p0427",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "escrow sandwich"
+  },
+  {
+   "kind": "pool",
+   "id": "p0428",
+   "group": "2026-10-23-repos-ranking",
+   "q": "escrow vault"
+  },
+  {
+   "kind": "pool",
+   "id": "p0429",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "ethereum bagpipe tuner"
+  },
+  {
+   "kind": "pool",
+   "id": "p0430",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "event ticketing"
+  },
+  {
+   "kind": "pool",
+   "id": "p0431",
+   "group": "2026-10-23-repos-ranking",
+   "q": "explorer"
+  },
+  {
+   "kind": "pool",
+   "id": "p0432",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "fans fund artists"
+  },
+  {
+   "kind": "pool",
+   "id": "p0433",
+   "group": "2026-10-23-repos-ranking",
+   "q": "faucet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0434",
+   "group": "2026-10-23-repos-ranking",
+   "q": "fazzatti/colibri"
+  },
+  {
+   "kind": "pool",
+   "id": "p0435",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "fiat on-ramp and off-ramp for a local currency"
+  },
+  {
+   "kind": "pool",
+   "id": "p0436",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "fiat-backed stablecoin for payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0437",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "flash loan liquidation bot for Blend"
+  },
+  {
+   "kind": "pool",
+   "id": "p0438",
+   "group": "2026-10-23-repos-ranking",
+   "q": "flutter sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0439",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "forex hedging tool for exporters that locks exchange rates using onchain forward contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0440",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "freelancer marketplace with onchain reputation scores"
+  },
+  {
+   "kind": "pool",
+   "id": "p0441",
+   "group": "2026-10-23-repos-ranking",
+   "q": "freighter"
+  },
+  {
+   "kind": "pool",
+   "id": "p0442",
+   "group": "bench-v2",
+   "q": "fully served = every check True; partial = at least one True and at least one False or None; not served = no True and at least one False; could not check = every check None."
+  },
+  {
+   "kind": "pool",
+   "id": "p0443",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "game item marketplace"
+  },
+  {
+   "kind": "pool",
+   "id": "p0444",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "gamer"
+  },
+  {
+   "kind": "pool",
+   "id": "p0445",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "garantie"
+  },
+  {
+   "kind": "pool",
+   "id": "p0446",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "gargling penguin lighthouse"
+  },
+  {
+   "kind": "pool",
+   "id": "p0447",
+   "group": "2026-10-23-build-matching",
+   "q": "glitter dinosaur karaoke"
+  },
+  {
+   "kind": "pool",
+   "id": "p0448",
+   "group": "2026-10-23-repos-ranking",
+   "q": "go sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0449",
+   "group": "2026-10-23-repos-ranking",
+   "q": "go-stellar-sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0450",
+   "group": "embarrass",
+   "q": "hackathon winner later SCF funded"
+  },
+  {
+   "kind": "pool",
+   "id": "p0451",
+   "group": "2026-10-23-event-in-q",
+   "q": "hackmeridian"
+  },
+  {
+   "kind": "pool",
+   "id": "p0452",
+   "group": "2026-10-23-event-in-q",
+   "q": "hackmeridian-2025"
+  },
+  {
+   "kind": "pool",
+   "id": "p0453",
+   "group": "2026-10-23-build-matching",
+   "q": "haunted spoon orchestra"
+  },
+  {
+   "kind": "pool",
+   "id": "p0454",
+   "group": "2026-10-23-question-filler",
+   "q": "held out hm26-cc-02"
+  },
+  {
+   "kind": "pool",
+   "id": "p0455",
+   "group": "2026-10-23-question-filler",
+   "q": "held out hm26-sa-02"
+  },
+  {
+   "kind": "pool",
+   "id": "p0456",
+   "group": "2026-10-23-question-filler",
+   "q": "held out hm26-sc-02"
+  },
+  {
+   "kind": "pool",
+   "id": "p0457",
+   "group": "2026-10-23-smart-wallet-o2",
+   "q": "held out sa01-topic"
+  },
+  {
+   "kind": "pool",
+   "id": "p0458",
+   "group": "2026-10-23-question-filler",
+   "q": "held out sa01-verbatim"
+  },
+  {
+   "kind": "pool",
+   "id": "p0459",
+   "group": "2026-10-23-question-filler",
+   "q": "held out sa02-verbatim"
+  },
+  {
+   "kind": "pool",
+   "id": "p0460",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "hopes"
+  },
+  {
+   "kind": "pool",
+   "id": "p0461",
+   "group": "2026-10-23-repos-ranking",
+   "q": "horizon api server"
+  },
+  {
+   "kind": "pool",
+   "id": "p0462",
+   "group": "bench-v2",
+   "q": "how to apply to the Stellar Community Fund"
+  },
+  {
+   "kind": "pool",
+   "id": "p0463",
+   "group": "2026-10-23-source-locator",
+   "q": "increment example contract"
+  },
+  {
+   "kind": "pool",
+   "id": "p0464",
+   "group": "2026-10-23-repos-ranking",
+   "q": "indexer"
+  },
+  {
+   "kind": "pool",
+   "id": "p0465",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "insurance"
+  },
+  {
+   "kind": "pool",
+   "id": "p0466",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "inventor"
+  },
+  {
+   "kind": "pool",
+   "id": "p0467",
+   "group": "2026-10-23-build-matching",
+   "q": "invisible giraffe tax"
+  },
+  {
+   "kind": "pool",
+   "id": "p0468",
+   "group": "2026-10-23-repos-ranking",
+   "q": "invoice"
+  },
+  {
+   "kind": "pool",
+   "id": "p0469",
+   "group": "bench-v2",
+   "q": "invoice factoring trade finance"
+  },
+  {
+   "kind": "pool",
+   "id": "p0470",
+   "group": "bench-v2",
+   "q": "invoice financing"
+  },
+  {
+   "kind": "pool",
+   "id": "p0471",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "invoice financing for small businesses"
+  },
+  {
+   "kind": "pool",
+   "id": "p0472",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "invoicing"
+  },
+  {
+   "kind": "pool",
+   "id": "p0473",
+   "group": "2026-10-23-repos-ranking",
+   "q": "javascript sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0474",
+   "group": "2026-10-23-repos-ranking",
+   "q": "js-stellar-base"
+  },
+  {
+   "kind": "pool",
+   "id": "p0475",
+   "group": "2026-10-23-repos-ranking",
+   "q": "js-stellar-sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0476",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "knitted cactus parliament"
+  },
+  {
+   "kind": "pool",
+   "id": "p0477",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "kyc"
+  },
+  {
+   "kind": "pool",
+   "id": "p0478",
+   "group": "2026-10-23-repos-ranking",
+   "q": "launchpad"
+  },
+  {
+   "kind": "pool",
+   "id": "p0479",
+   "group": "2026-10-23-compact-views",
+   "q": "lending"
+  },
+  {
+   "kind": "pool",
+   "id": "p0480",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "lending artists insurance"
+  },
+  {
+   "kind": "pool",
+   "id": "p0481",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "lending protocol that accepts tokenized invoices as collateral and pays lenders in stablecoins"
+  },
+  {
+   "kind": "pool",
+   "id": "p0482",
+   "group": "2026-10-23-repos-ranking",
+   "q": "liquidity pool"
+  },
+  {
+   "kind": "pool",
+   "id": "p0483",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "llama"
+  },
+  {
+   "kind": "pool",
+   "id": "p0484",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "llama wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0485",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "loans for farmers"
+  },
+  {
+   "kind": "pool",
+   "id": "p0486",
+   "group": "embarrass",
+   "q": "lobster wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0487",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "lottery"
+  },
+  {
+   "kind": "pool",
+   "id": "p0488",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "loyalty points for coffee shops"
+  },
+  {
+   "kind": "pool",
+   "id": "p0489",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "loyalty points issued as tokens"
+  },
+  {
+   "kind": "pool",
+   "id": "p0490",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "lumen bowling alley scheduler"
+  },
+  {
+   "kind": "pool",
+   "id": "p0491",
+   "group": "embarrass",
+   "q": "lumens"
+  },
+  {
+   "kind": "pool",
+   "id": "p0492",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "marketplace for renting out tools and equipment with deposits held in escrow contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0493",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "marmalade thunderstorm trombone"
+  },
+  {
+   "kind": "pool",
+   "id": "p0494",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "merchant QR code payments for small shops"
+  },
+  {
+   "kind": "pool",
+   "id": "p0495",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "merchant payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0496",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "microfinance platform"
+  },
+  {
+   "kind": "pool",
+   "id": "p0497",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "microloan app"
+  },
+  {
+   "kind": "pool",
+   "id": "p0498",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "microloans"
+  },
+  {
+   "kind": "pool",
+   "id": "p0499",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "microloans for small businesses"
+  },
+  {
+   "kind": "pool",
+   "id": "p0500",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "microloans for small businesses in emerging markets"
+  },
+  {
+   "kind": "pool",
+   "id": "p0501",
+   "group": "2026-10-23-repos-ranking",
+   "q": "micropayments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0502",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "mill"
+  },
+  {
+   "kind": "pool",
+   "id": "p0503",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "miner"
+  },
+  {
+   "kind": "pool",
+   "id": "p0504",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "mobile wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0505",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "modes"
+  },
+  {
+   "kind": "pool",
+   "id": "p0506",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "monkey"
+  },
+  {
+   "kind": "pool",
+   "id": "p0507",
+   "group": "2026-10-23-build-matching",
+   "q": "moon cheese lottery"
+  },
+  {
+   "kind": "pool",
+   "id": "p0508",
+   "group": "2026-10-23-repos-ranking",
+   "q": "multisig"
+  },
+  {
+   "kind": "pool",
+   "id": "p0509",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "multisig wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0510",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "multisig wallet for team treasuries"
+  },
+  {
+   "kind": "pool",
+   "id": "p0511",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "music nfts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0512",
+   "group": "2026-10-23-repos-ranking",
+   "q": "nft marketplace"
+  },
+  {
+   "kind": "pool",
+   "id": "p0513",
+   "group": "embarrass",
+   "q": "no loss lottery"
+  },
+  {
+   "kind": "pool",
+   "id": "p0514",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "non custodial wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0515",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "notes"
+  },
+  {
+   "kind": "pool",
+   "id": "p0516",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "on-chain analytics dashboard for Stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0517",
+   "group": "2026-10-23-question-filler",
+   "q": "onchain fantasy sports game where winners are paid in stablecoins from the prize pool"
+  },
+  {
+   "kind": "pool",
+   "id": "p0518",
+   "group": "2026-10-23-repos-ranking",
+   "q": "openzeppelin-relayer"
+  },
+  {
+   "kind": "pool",
+   "id": "p0519",
+   "group": "2026-10-23-repos-ranking",
+   "q": "oracle"
+  },
+  {
+   "kind": "pool",
+   "id": "p0520",
+   "group": "2026-10-23-repos-ranking",
+   "q": "oracle price feed"
+  },
+  {
+   "kind": "pool",
+   "id": "p0521",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "p2p lending"
+  },
+  {
+   "kind": "pool",
+   "id": "p0522",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "pagos en l\u00ednea para comercios"
+  },
+  {
+   "kind": "pool",
+   "id": "p0523",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "paiement mobile s\u00e9curis\u00e9"
+  },
+  {
+   "kind": "pool",
+   "id": "p0524",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "parametric insurance paid out automatically by an oracle"
+  },
+  {
+   "kind": "pool",
+   "id": "p0525",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "pasky wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0526",
+   "group": "2026-10-23-repos-ranking",
+   "q": "passkey"
+  },
+  {
+   "kind": "pool",
+   "id": "p0527",
+   "group": "2026-10-23-smart-wallet-o2",
+   "q": "passkey or smart-wallet onboarding"
+  },
+  {
+   "kind": "pool",
+   "id": "p0528",
+   "group": "2026-10-23-repos-ranking",
+   "q": "passkey smart wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0529",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "passkey smart wallet so users never handle a seed phrase"
+  },
+  {
+   "kind": "pool",
+   "id": "p0530",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "passkey wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0531",
+   "group": "2026-10-23-smart-wallet-o2",
+   "q": "passkey wallet onboarding"
+  },
+  {
+   "kind": "pool",
+   "id": "p0532",
+   "group": "2026-10-23-repos-ranking",
+   "q": "passkey-kit"
+  },
+  {
+   "kind": "pool",
+   "id": "p0533",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "pay as you go health insurance for gig workers"
+  },
+  {
+   "kind": "pool",
+   "id": "p0534",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "pay by voice"
+  },
+  {
+   "kind": "pool",
+   "id": "p0535",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "pay per article paywall using micropayments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0536",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "pay per yodel"
+  },
+  {
+   "kind": "pool",
+   "id": "p0537",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "pay-per-call"
+  },
+  {
+   "kind": "pool",
+   "id": "p0538",
+   "group": "2026-10-23-repos-ranking",
+   "q": "payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0539",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "payroll"
+  },
+  {
+   "kind": "pool",
+   "id": "p0540",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "payroll for remote teams"
+  },
+  {
+   "kind": "pool",
+   "id": "p0541",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "peer-to-peer lending with on-chain credit scores"
+  },
+  {
+   "kind": "pool",
+   "id": "p0542",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "perpetual futures"
+  },
+  {
+   "kind": "pool",
+   "id": "p0543",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "perpetuals / derivatives trading protocol on Stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0544",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "peso stablecoin"
+  },
+  {
+   "kind": "pool",
+   "id": "p0545",
+   "group": "2026-10-23-repos-ranking",
+   "q": "phoenix-contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0546",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "planes"
+  },
+  {
+   "kind": "pool",
+   "id": "p0547",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "play to earn"
+  },
+  {
+   "kind": "pool",
+   "id": "p0548",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "play-to-earn game with on-chain rewards"
+  },
+  {
+   "kind": "pool",
+   "id": "p0549",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "pogo payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0550",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "polka dot submarine"
+  },
+  {
+   "kind": "pool",
+   "id": "p0551",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "port"
+  },
+  {
+   "kind": "pool",
+   "id": "p0552",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "prediction market"
+  },
+  {
+   "kind": "pool",
+   "id": "p0553",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "prediction market on Soroban"
+  },
+  {
+   "kind": "pool",
+   "id": "p0554",
+   "group": "2026-10-23-repos-ranking",
+   "q": "price feed"
+  },
+  {
+   "kind": "pool",
+   "id": "p0555",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "proof of reserves for stablecoin issuers"
+  },
+  {
+   "kind": "pool",
+   "id": "p0556",
+   "group": "2026-10-23-build-matching",
+   "q": "purple elephant trampoline"
+  },
+  {
+   "kind": "pool",
+   "id": "p0557",
+   "group": "2026-10-23-repos-ranking",
+   "q": "py-stellar-base"
+  },
+  {
+   "kind": "pool",
+   "id": "p0558",
+   "group": "2026-10-23-repos-ranking",
+   "q": "python sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0559",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "quadratic voting for community grants"
+  },
+  {
+   "kind": "pool",
+   "id": "p0560",
+   "group": "2026-10-23-build-matching",
+   "q": "quantum llama sandwich"
+  },
+  {
+   "kind": "pool",
+   "id": "p0561",
+   "group": "2026-10-23-repos-ranking",
+   "q": "quickstart"
+  },
+  {
+   "kind": "pool",
+   "id": "p0562",
+   "group": "2026-10-23-source-locator",
+   "q": "quickstart --enable-lab option"
+  },
+  {
+   "kind": "pool",
+   "id": "p0563",
+   "group": "2026-10-23-event-in-q",
+   "q": "real world assets tokenization"
+  },
+  {
+   "kind": "pool",
+   "id": "p0564",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "recurring subscription payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0565",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "redeemable stablecoin for merchant payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0566",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "reflector"
+  },
+  {
+   "kind": "pool",
+   "id": "p0567",
+   "group": "2026-10-23-repos-ranking",
+   "q": "reflector-contract"
+  },
+  {
+   "kind": "pool",
+   "id": "p0568",
+   "group": "2026-10-23-repos-ranking",
+   "q": "reflector-network/reflector-contract"
+  },
+  {
+   "kind": "pool",
+   "id": "p0569",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "refugee aid vouchers"
+  },
+  {
+   "kind": "pool",
+   "id": "p0570",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "remitance app"
+  },
+  {
+   "kind": "pool",
+   "id": "p0571",
+   "group": "2026-10-23-repos-ranking",
+   "q": "remittance"
+  },
+  {
+   "kind": "pool",
+   "id": "p0572",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "remittance app"
+  },
+  {
+   "kind": "pool",
+   "id": "p0573",
+   "group": "bench-v2",
+   "q": "remittance app sending USDC from the US to the Philippines"
+  },
+  {
+   "kind": "pool",
+   "id": "p0574",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "reusable KYC identity credentials across apps"
+  },
+  {
+   "kind": "pool",
+   "id": "p0575",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "round up savings app that sweeps spare change from purchases into a yield bearing stablecoin"
+  },
+  {
+   "kind": "pool",
+   "id": "p0576",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "routine"
+  },
+  {
+   "kind": "pool",
+   "id": "p0577",
+   "group": "2026-10-23-repos-ranking",
+   "q": "rs-soroban-sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0578",
+   "group": "2026-10-23-repos-ranking",
+   "q": "rwa tokenization"
+  },
+  {
+   "kind": "pool",
+   "id": "p0579",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "savings circle (ROSCA, tanda) with automatic payouts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0580",
+   "group": "2026-10-23-event-in-q",
+   "q": "scaffold stellar templates"
+  },
+  {
+   "kind": "pool",
+   "id": "p0581",
+   "group": "2026-10-23-repos-ranking",
+   "q": "script3/soroban-governor"
+  },
+  {
+   "kind": "pool",
+   "id": "p0582",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "send money home"
+  },
+  {
+   "kind": "pool",
+   "id": "p0583",
+   "group": "2026-10-23-repos-ranking",
+   "q": "sep-10"
+  },
+  {
+   "kind": "pool",
+   "id": "p0584",
+   "group": "2026-10-23-repos-ranking",
+   "q": "sep-24"
+  },
+  {
+   "kind": "pool",
+   "id": "p0585",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "sleepy giraffe bakery"
+  },
+  {
+   "kind": "pool",
+   "id": "p0586",
+   "group": "2026-10-23-build-matching",
+   "q": "sleepy walrus accountant"
+  },
+  {
+   "kind": "pool",
+   "id": "p0587",
+   "group": "2026-10-23-repos-ranking",
+   "q": "smart account"
+  },
+  {
+   "kind": "pool",
+   "id": "p0588",
+   "group": "2026-10-23-smart-wallet-o2",
+   "q": "smart account policy signers"
+  },
+  {
+   "kind": "pool",
+   "id": "p0589",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "smart contract hamster wheel"
+  },
+  {
+   "kind": "pool",
+   "id": "p0590",
+   "group": "2026-10-23-repos-ranking",
+   "q": "smart wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0591",
+   "group": "embarrass",
+   "q": "smart wallet passkeys docs"
+  },
+  {
+   "kind": "pool",
+   "id": "p0592",
+   "group": "2026-10-23-repos-ranking",
+   "q": "smart-account-kit"
+  },
+  {
+   "kind": "pool",
+   "id": "p0593",
+   "group": "2026-10-23-compact-views",
+   "q": "soroban"
+  },
+  {
+   "kind": "pool",
+   "id": "p0594",
+   "group": "2026-10-23-repos-ranking",
+   "q": "soroban cli"
+  },
+  {
+   "kind": "pool",
+   "id": "p0595",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "soroban garden gnome registry"
+  },
+  {
+   "kind": "pool",
+   "id": "p0596",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "soroban pickle juggling"
+  },
+  {
+   "kind": "pool",
+   "id": "p0597",
+   "group": "2026-10-23-repos-ranking",
+   "q": "soroban rust sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0598",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "soroban sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0599",
+   "group": "2026-10-23-source-locator",
+   "q": "soroban sdk ledger sequence number function"
+  },
+  {
+   "kind": "pool",
+   "id": "p0600",
+   "group": "2026-10-23-repos-ranking",
+   "q": "soroban-examples"
+  },
+  {
+   "kind": "pool",
+   "id": "p0601",
+   "group": "2026-10-23-repos-ranking",
+   "q": "soroban-governor"
+  },
+  {
+   "kind": "pool",
+   "id": "p0602",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "soroban-sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0603",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "sorobn wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0604",
+   "group": "2026-10-23-repos-ranking",
+   "q": "soroswap"
+  },
+  {
+   "kind": "pool",
+   "id": "p0605",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "soroswap aggregator"
+  },
+  {
+   "kind": "pool",
+   "id": "p0606",
+   "group": "2026-10-23-repos-ranking",
+   "q": "soroswap/aggregator"
+  },
+  {
+   "kind": "pool",
+   "id": "p0607",
+   "group": "2026-10-23-repos-ranking",
+   "q": "soroswap/core"
+  },
+  {
+   "kind": "pool",
+   "id": "p0608",
+   "group": "embarrass",
+   "q": "soroswp"
+  },
+  {
+   "kind": "pool",
+   "id": "p0609",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stablecoin"
+  },
+  {
+   "kind": "pool",
+   "id": "p0610",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "stablecoin issuance for payroll"
+  },
+  {
+   "kind": "pool",
+   "id": "p0611",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "stablecoin issuances for payroll"
+  },
+  {
+   "kind": "pool",
+   "id": "p0612",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "stablecoin issuer for merchant payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0613",
+   "group": "bench-v2",
+   "q": "stablecoin payroll app for freelancers"
+  },
+  {
+   "kind": "pool",
+   "id": "p0614",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "stablecoin payroll for freelancers"
+  },
+  {
+   "kind": "pool",
+   "id": "p0615",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "stablecoin payroll for freelancers and contractors"
+  },
+  {
+   "kind": "pool",
+   "id": "p0616",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "stablecoin reserves dashboard for payments teams"
+  },
+  {
+   "kind": "pool",
+   "id": "p0617",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "stablecoin savings"
+  },
+  {
+   "kind": "pool",
+   "id": "p0618",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "stablecoin savings app that earns yield"
+  },
+  {
+   "kind": "pool",
+   "id": "p0619",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "stablecoin wallet for remittances"
+  },
+  {
+   "kind": "pool",
+   "id": "p0620",
+   "group": "2026-10-23-repos-ranking",
+   "q": "staking"
+  },
+  {
+   "kind": "pool",
+   "id": "p0621",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "stalling"
+  },
+  {
+   "kind": "pool",
+   "id": "p0622",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0623",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar core consensus"
+  },
+  {
+   "kind": "pool",
+   "id": "p0624",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "stellar domain names"
+  },
+  {
+   "kind": "pool",
+   "id": "p0625",
+   "group": "2026-10-23-event-in-q",
+   "q": "stellar hacks blend"
+  },
+  {
+   "kind": "pool",
+   "id": "p0626",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "stellar kazoo orchestra tickets"
+  },
+  {
+   "kind": "pool",
+   "id": "p0627",
+   "group": "2026-10-23-event-in-q",
+   "q": "stellar latam remittances"
+  },
+  {
+   "kind": "pool",
+   "id": "p0628",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "stellar mattress comparison"
+  },
+  {
+   "kind": "pool",
+   "id": "p0629",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar wallets kit"
+  },
+  {
+   "kind": "pool",
+   "id": "p0630",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "stellar zorblax"
+  },
+  {
+   "kind": "pool",
+   "id": "p0631",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "stellar zorblax quibbet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0632",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar-cctp"
+  },
+  {
+   "kind": "pool",
+   "id": "p0633",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar-cli"
+  },
+  {
+   "kind": "pool",
+   "id": "p0634",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar-contracts"
+  },
+  {
+   "kind": "pool",
+   "id": "p0635",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar-core"
+  },
+  {
+   "kind": "pool",
+   "id": "p0636",
+   "group": "2026-10-23-source-locator",
+   "q": "stellar-core HTTP_PORT default"
+  },
+  {
+   "kind": "pool",
+   "id": "p0637",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "stellar-hd-wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0638",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar-rpc"
+  },
+  {
+   "kind": "pool",
+   "id": "p0639",
+   "group": "2026-10-23-source-locator",
+   "q": "stellar-rpc getEvents handler"
+  },
+  {
+   "kind": "pool",
+   "id": "p0640",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/anchor-platform"
+  },
+  {
+   "kind": "pool",
+   "id": "p0641",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/freighter"
+  },
+  {
+   "kind": "pool",
+   "id": "p0642",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/go-stellar-sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0643",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/js-stellar-base"
+  },
+  {
+   "kind": "pool",
+   "id": "p0644",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/js-stellar-sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0645",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/passkey-kit"
+  },
+  {
+   "kind": "pool",
+   "id": "p0646",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/quickstart"
+  },
+  {
+   "kind": "pool",
+   "id": "p0647",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/rs-soroban-sdk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0648",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/smart-account-kit"
+  },
+  {
+   "kind": "pool",
+   "id": "p0649",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/soroban-examples"
+  },
+  {
+   "kind": "pool",
+   "id": "p0650",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/stellar-cli"
+  },
+  {
+   "kind": "pool",
+   "id": "p0651",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/stellar-core"
+  },
+  {
+   "kind": "pool",
+   "id": "p0652",
+   "group": "2026-10-23-repos-ranking",
+   "q": "stellar/stellar-rpc"
+  },
+  {
+   "kind": "pool",
+   "id": "p0653",
+   "group": "2026-10-23-repos-ranking",
+   "q": "streaming payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0654",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "streaming salary payments by the second"
+  },
+  {
+   "kind": "pool",
+   "id": "p0655",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "strip"
+  },
+  {
+   "kind": "pool",
+   "id": "p0656",
+   "group": "2026-10-23-build-matching",
+   "q": "submarine pancake festival"
+  },
+  {
+   "kind": "pool",
+   "id": "p0657",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "subscription billing with recurring stablecoin payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0658",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "supply chain traceability for agricultural products"
+  },
+  {
+   "kind": "pool",
+   "id": "p0659",
+   "group": "2026-10-23-build-matching",
+   "q": "telepathic cactus insurance"
+  },
+  {
+   "kind": "pool",
+   "id": "p0660",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "testing framework"
+  },
+  {
+   "kind": "pool",
+   "id": "p0661",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "themes"
+  },
+  {
+   "kind": "pool",
+   "id": "p0662",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "thorough"
+  },
+  {
+   "kind": "pool",
+   "id": "p0663",
+   "group": "2026-10-23-build-matching",
+   "q": "time travel sock exchange"
+  },
+  {
+   "kind": "pool",
+   "id": "p0664",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "tipping and payments for content creators"
+  },
+  {
+   "kind": "pool",
+   "id": "p0665",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "toes"
+  },
+  {
+   "kind": "pool",
+   "id": "p0666",
+   "group": "2026-10-23-repos-ranking",
+   "q": "token contract"
+  },
+  {
+   "kind": "pool",
+   "id": "p0667",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "tokenized carbon credits for farmers"
+  },
+  {
+   "kind": "pool",
+   "id": "p0668",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "tokenized farmland"
+  },
+  {
+   "kind": "pool",
+   "id": "p0669",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "tokenized gold or commodities"
+  },
+  {
+   "kind": "pool",
+   "id": "p0670",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "tokenized music royalties paid out monthly"
+  },
+  {
+   "kind": "pool",
+   "id": "p0671",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "tokenized real estate with fractional ownership"
+  },
+  {
+   "kind": "pool",
+   "id": "p0672",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "tokenized treasury bills or bonds"
+  },
+  {
+   "kind": "pool",
+   "id": "p0673",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "transparent donation platform for charities"
+  },
+  {
+   "kind": "pool",
+   "id": "p0674",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "trombone lessons marketplace with escrow payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0675",
+   "group": "2026-10-23-repos-ranking",
+   "q": "trustlesswork-smart-contract-stellar"
+  },
+  {
+   "kind": "pool",
+   "id": "p0676",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "undercollateralized loans"
+  },
+  {
+   "kind": "pool",
+   "id": "p0677",
+   "group": "2026-10-23-build-matching",
+   "q": "underwater bicycle courier"
+  },
+  {
+   "kind": "pool",
+   "id": "p0678",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "usdc payroll"
+  },
+  {
+   "kind": "pool",
+   "id": "p0679",
+   "group": "2026-10-23-repos-ranking",
+   "q": "vault"
+  },
+  {
+   "kind": "pool",
+   "id": "p0680",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "verifiable credentials"
+  },
+  {
+   "kind": "pool",
+   "id": "p0681",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "verifiable diploma credentials for university graduates"
+  },
+  {
+   "kind": "pool",
+   "id": "p0682",
+   "group": "2026-10-23-build-matching",
+   "q": "volcano knitting subscription"
+  },
+  {
+   "kind": "pool",
+   "id": "p0683",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0684",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "wallet for pet iguanas"
+  },
+  {
+   "kind": "pool",
+   "id": "p0685",
+   "group": "2026-10-23-repos-ranking",
+   "q": "wallet kit"
+  },
+  {
+   "kind": "pool",
+   "id": "p0686",
+   "group": "2026-10-22-words-need-meaning",
+   "q": "wallet recovery guardians"
+  },
+  {
+   "kind": "pool",
+   "id": "p0687",
+   "group": "2026-10-23-source-locator",
+   "q": "where is the --network flag defined in stellar-cli"
+  },
+  {
+   "kind": "pool",
+   "id": "p0688",
+   "group": "2026-10-23-build-matching",
+   "q": "whispering teapot ledger"
+  },
+  {
+   "kind": "pool",
+   "id": "p0689",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "wither"
+  },
+  {
+   "kind": "pool",
+   "id": "p0690",
+   "group": "2026-10-23-repos-ranking",
+   "q": "x402"
+  },
+  {
+   "kind": "pool",
+   "id": "p0691",
+   "group": "bench-v2",
+   "q": "x402 agent payments"
+  },
+  {
+   "kind": "pool",
+   "id": "p0692",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "x402!!! paywall???"
+  },
+  {
+   "kind": "pool",
+   "id": "p0693",
+   "group": "2026-10-23-repos-ranking",
+   "q": "xBull-Wallet"
+  },
+  {
+   "kind": "pool",
+   "id": "p0694",
+   "group": "2026-10-23-repos-ranking",
+   "q": "yield"
+  },
+  {
+   "kind": "pool",
+   "id": "p0695",
+   "group": "2026-10-22-short-idea-prior-art",
+   "q": "yield aggregator"
+  },
+  {
+   "kind": "pool",
+   "id": "p0696",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "yield vault that auto-compounds DeFi rewards"
+  },
+  {
+   "kind": "pool",
+   "id": "p0697",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "yodeling teapot glacier"
+  },
+  {
+   "kind": "pool",
+   "id": "p0698",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "zero knowledge pogo stick"
+  },
+  {
+   "kind": "pool",
+   "id": "p0699",
+   "group": "2026-10-23-repos-ranking",
+   "q": "zero-knowledge"
+  },
+  {
+   "kind": "pool",
+   "id": "p0700",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "zero-knowledge multiplayer game with hidden information"
+  },
+  {
+   "kind": "pool",
+   "id": "p0701",
+   "group": "2026-10-23-nonsense-queries",
+   "q": "zero-knowledge pogo stick"
+  },
+  {
+   "kind": "pool",
+   "id": "p0702",
+   "group": "2026-10-22-prior-art-precision",
+   "q": "zero-knowledge proof of income without revealing salary"
+  },
+  {
+   "kind": "pool",
+   "id": "p0703",
+   "group": "2026-10-23-repos-ranking",
+   "q": "zk"
+  },
+  {
+   "kind": "pool",
+   "id": "p0704",
+   "group": "embarrass",
+   "q": "zk poker"
+  }
+ ]
+}

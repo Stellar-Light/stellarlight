@@ -1,0 +1,103 @@
+q	keyword_before	keyword_after	hybrid_before	hybrid_after
+(agent error) search builds with an undocumented sort parameter	0	70	0	70
+<script>alert(1)</script>' OR 1=1 --	0	0	0	0
+A hacker describes this idea. Which past hackathon builds are prior art they must see?	2	3	2	3
+AI agents, payments	148	267	148	267
+Alias: XLM	33	34	33	34
+Alias: lumens	10	11	10	11
+Before we go live as an anchor I want to check our stellar.toml and SEP-24 and SEP-31 endpoints against the spec. Is there a test suite or CLI I can point at our home domain?	15	17	15	17
+Compare HackMeridian 2025 with HackMeridian 2026.	0	1	0	1
+Compare Stellar Hacks: ZK Gaming with Stellar Hacks: ZK.	66	73	66	73
+Did any project that pays prizes out of pooled deposit yield, without anyone losing their stake, win at a Stellar hackathon?	9	19	9	19
+Famous non-Stellar project: Uniswap	0	0	0	0
+For our integration tests I want a throwaway local Stellar network in Docker with RPC, Horizon and a friendbot, so CI doesn't depend on testnet. What should I run?	13	13	13	13
+Has a card game where players' hands stay private ever won a prize at a Stellar hackathon?	26	33	26	33
+Has anyone built a Soroban prediction market at a Stellar hackathon, and did any of them win?	60	60	60	60
+Has anyone built x402 paywalls or agent payments at a Stellar hackathon, and what became of them?	141	141	141	141
+Has anyone turned emissions offsets from farmers' crops into tokens?	0	0	0	0
+Here is our DoraHacks submission, dorahacks.io/buidl/42765. How does it stack up?	0	2	0	2
+How can my Soroban contract send a message to, or call, a contract on an EVM chain?	69	164	69	164
+How do I verify an Ethereum-signed message (secp256k1 signature over a keccak256 hash) inside a Soroban contract? Point me to the SDK functions and where the host implements them.	26	27	26	27
+How many hackathon builds became live products, and which ones?	4	58	4	58
+How many projects were submitted to Stellar Hacks: Agents?	65	67	65	67
+How many projects were submitted to Stellar Hacks: Real-World ZK?	67	69	67	69
+I need XLM and BTC prices inside my Soroban lending contract. Which oracle should I use if I want free on-chain feeds that follow the SEP-40 interface?	60	60	60	60
+I need a fiat on and off ramp partner in Latin America for my wallet app. Who can I integrate?	15	14	15	14
+I want a contract account where different signers are allowed for different contracts and functions, with rules that expire, and signature checks delegated to verifier contracts like Ed25519. Is there a framework for that on Soroban?	23	23	23	23
+I want to build a remittance app sending USDC from the US to the Philippines on Stellar. Who already does this, and is there room?	4	3	4	3
+I want to verify passkey (WebAuthn) signatures in my contract. Where is that signature check implemented in Soroban, and what do I call from the SDK?	5	26	5	26
+I'd like to offer an auto-compounding yield vault on Stellar where deposits get allocated to strategies like Blend. Is there an open-source vault and strategy contract suite I can build on?	40	54	40	54
+I'm adding a token swap feature to my Stellar wallet and want the best price across Soroswap, Phoenix and Aqua instead of hitting one AMM. What should I integrate?	28	40	28	40
+I'm building a Soroban dapp and I don't want to write separate connect logic for Freighter, xBull, Lobstr, Albedo and WalletConnect. Is there one library that handles all the Stellar wallets behind a single API?	37	39	37	39
+I'm building a TypeScript wallet and want to let users deposit and withdraw through anchors with SEP-10 login and the SEP-24 hosted flow. Which library takes care of the anchor side for me?	24	34	24	34
+In soroban-sdk unit tests, what ledger defaults (protocol version, min persistent and temporary TTL, max TTL) does a fresh Env::default() start with, and where are they set?	7	11	7	11
+Is USDC issued natively on Stellar, and by whom?	11	2	11	2
+Is USDT available natively on Stellar, and how does it move cross-chain?	4	6	4	6
+Is an SCF round open right now, when do submissions close, and where do I apply?	8	9	8	9
+Is lending on Soroban a crowded lane, and who are the live incumbents?	0	0	0	0
+Is passkey-kit safe to build on: is it maintained, and where does it live now?	7	8	7	8
+Is there a Stellar SDK for Flutter that I can use in my cross-platform mobile app? I need to sign transactions, query Horizon and invoke Soroban contracts from Dart.	36	36	36	36
+Is there an audited library of reusable Soroban contracts (fungible token, access control, pausable, upgradeable) I can import instead of writing them myself?	31	31	31	31
+My bridged token arrives on Stellar as a classic asset. How do I deploy its Stellar Asset Contract so Soroban contracts can use it, and where is the SAC implemented?	22	22	22	22
+My team already uses Chainlink feeds on EVM. If I want to read Chainlink Data Feeds from a Soroban contract, where's the proxy interface I'm supposed to code against?	31	38	31	38
+Of Stellar Hacks: KALE x Reflector submissions, how many kept shipping code 90+ days after the event?	33	35	33	35
+Our payments service is written in Go. What's the official Go SDK these days for building transactions and talking to Horizon? I remember it used to be the big stellar/go monorepo.	27	27	27	27
+Our smart wallet users don't hold any XLM. Now that Launchtube is retired, what should I use on the backend to sponsor fees and submit their transactions?	5	8	5	8
+Our token is already a LayerZero OFT on several EVM chains. Is there a reference OFT contract for Stellar so we can add Stellar as another chain in the mesh?	70	70	70	70
+Our users mostly have the Freighter browser extension. How do I get their public key and ask Freighter to sign a transaction from my web app, and where does that client library live?	16	16	16	16
+Read DoraHacks submission 42765 in full: what did the team claim and what is verified?	3	4	3	4
+Show me winning Stellar hackathon projects that built passkey or smart-wallet onboarding.	4	5	4	5
+Shut-down project: Kelp trading bot	6	7	6	7
+Stellar Hack+ Buenos Aires	0	3	0	3
+Stellar Hacks: Agents	259	267	259	267
+Stellar Hacks: Agents submissions count	77	79	77	79
+Stellar Hacks: Blend	48	56	48	56
+Stellar Hacks: Real-World ZK	76	78	76	78
+Stellar Hacks: Real-World ZK submissions count	68	70	68	70
+Stellar Hacks: Real-World ZK winners	80	82	80	82
+Stellar Hacks: ZK Gaming winners	75	77	75	77
+Tell me about the stellar-hacks-quantum-2031 hackathon.	0	4	0	4
+Under which Wasm import module and function name is the host function require_auth exposed to contracts, and where is that mapping defined?	2	5	2	5
+Vet my idea: NFT ticketing for live events on Stellar.	13	13	13	13
+We issued a token on Stellar and want it to exist on Ethereum and Base too, with flow limits per token. How do I make my Stellar token interchain?	21	21	21	21
+We run a Polkadot parachain and want Stellar assets like USDC and EURC usable on it, with redemption back to Stellar. Is there an existing bridge between Substrate chains and Stellar?	53	52	53	52
+We want users of our app to supply and borrow against Blend lending pools. Is there a JS SDK for Blend, or do I have to call the pool contracts by hand?	53	53	53	53
+We're a fintech becoming a Stellar anchor and need SEP-10 auth, SEP-24 interactive deposits and withdrawals and SEP-31 receives. Is there a server we can deploy instead of implementing every SEP endpoint ourselves?	10	12	10	12
+We're building an RWA vault on Stellar and need push-model price feeds for tokenized assets plus EURC and USDC. Which oracle has a Soroban connector with Rust and TypeScript examples?	61	62	61	62
+We're doing analytics on Stellar history and need ledgers, transactions and trades exported into tables we can load into our warehouse. Is there an open-source pipeline for that instead of scraping Horizon?	11	15	11	15
+What SDK should I use to add passkey (WebAuthn) smart wallets to my Stellar web app?	8	8	8	8
+What are the judging criteria and submission requirements for Stellar Hacks: ZK?	65	67	65	67
+What default inclusion fee does stellar-cli put on transactions it builds, and which environment variable overrides it?	1	1	1	1
+What did teams build at Stellar Hacks: KALE x Reflector, and which ones won?	25	29	25	29
+What does the SCF Build award fund, and how much can a team get?	0	12	0	12
+What share of winning Stellar hackathon builds are DeFi (DEX, Lending, Yield)?	18	64	18	64
+What was Stellar Hack+ Buenos Aires 2025?	1	3	1	3
+What was Stellar Hacks: Agents (prize pool, theme, deadline)?	65	91	65	91
+What's the fastest way to scaffold a full-stack Soroban dapp with contracts, a React frontend and typed TypeScript clients?	22	22	22	22
+What's the standard command-line tool for building, deploying and invoking Soroban contracts and managing keys and networks from my terminal?	25	25	25	25
+When was Stellar Hacks: Real-World ZK and what was the prize pool?	107	109	107	109
+Where does the stellar CLI implement `stellar tx sign`?	0	12	0	12
+Where is `stellar contract alias add` implemented?	0	22	0	22
+Where is the SEP-41 token interface defined in the Soroban Rust SDK, and is there an example token contract that implements it?	44	48	44	48
+Where is the `stellar contract deploy` subcommand implemented in stellar-cli?	21	0	21	0
+Where is the custom account interface with __check_auth defined in the Soroban SDK, and is there an example account contract I can start from?	26	30	26	30
+Where is the quickstart --limits flag parsed?	0	0	0	0
+Where is the standard token interface trait (transfer, approve, allowance, burn, balance) that soroban token contracts implement and TokenClient is generated from defined?	22	26	22	26
+Which DeFi protocols on Stellar can my contract compose with for lending, swaps and yield vaults, and where are their contracts?	73	102	73	102
+Which Soroban SDK versions are Stellar repos on, and which are deprecated?	26	36	26	36
+Which file implements `soroban contract build` in the CLI?	21	23	21	23
+Which hackathon builds use passkey-kit, and did any of them win?	0	12	0	12
+Which oracle can my Soroban app use for price feeds, and is it audited?	32	33	32	33
+Which port in the quickstart container serves horizon, stellar-rpc, friendbot and lab, and which ports are the admin and stellar-core ports? Where is this documented?	0	0	0	0
+Which soroban-examples contract implements a simplified claimable balance, where a depositor locks tokens for a list of claimants with a before or after time bound?	44	47	44	47
+Who can sponsor fees and submit transactions for my smart-wallet users on Stellar, since contract accounts can't pay their own fees?	32	32	32	32
+Who has built escrow smart contracts on Soroban at past Stellar hackathons, and at which hackathon?	82	142	82	142
+Who has built passkey wallets or smart accounts (contract accounts) at past Stellar hackathons?	11	35	11	35
+Who has tried invoice factoring or trade finance on Stellar, either at a hackathon or as a live product?	18	18	18	18
+Who won Stellar Hacks: KALE x Reflector?	27	29	27	29
+Who won Stellar Hacks: Real-World ZK?	76	78	76	78
+Who won Stellar Hacks: ZK Gaming?	71	73	71	73
+fully served = every check True; partial = at least one True and at least one False or None; not served = no True and at least one False; could not check = every check None.	5	5	5	5
+savings circle (ROSCA, tanda) with automatic payouts	4	7	4	7
+where is the --network flag defined in stellar-cli	0	0	0	0
+x402!!! paywall???	7	137	7	137

@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-31",
+		surfaces: ["api"],
+		version: "spec@1.9.113",
+		type: "fixed",
+		summary:
+			'searchHackathonBuilds searches each word of q without its edge punctuation, as its unused-words line already read it: q=-- no longer lists every build, a -- written as a dash or a trailing hyphen no longer changes what matches, and "escrow, milestones, freelancers" lists the builds that say those words.',
+		detail:
+			"The same concepts reach vetIdea's and hackathonBrief's prior art and analyze's q. A token with no letter or digit is no concept, and a word whose core is a stopword or a generic word drops as the bare word does. Replayed over 705 frozen queries: 603 byte-identical, and every change follows from the concepts.",
+	},
+	{
+		date: "2026-10-31",
 		surfaces: ["skill"],
 		type: "changed",
 		summary:

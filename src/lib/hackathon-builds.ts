@@ -31,7 +31,7 @@ import {
 	prizeLabels,
 } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { contentTokens } from "@/lib/repo-search";
+import { contentTokens, isContentStopword } from "@/lib/repo-search";
 import { CORE_SYNONYMS, GENERIC_QUERY_TOKENS } from "@/lib/search-vocabulary";
 import type { HackathonBuild } from "@/payload-types";
 
@@ -739,9 +739,11 @@ function anyScriptWord(v: string): ((hay: string) => boolean) | null {
 	return (hay) => re.test(hay);
 }
 
-/** A token without its edge punctuation: "(rosca," is rosca. */
+/** A token without its edge punctuation: "(rosca," is rosca. A combining
+ * mark is part of the word, not punctuation: without \p{M}, "सुरक्षा" lost
+ * its last vowel sign and "ดี" its tone mark (review, 2026-10-31). */
 const wordCore = (v: string) =>
-	v.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+	v.replace(/^[^\p{L}\p{N}\p{M}]+|[^\p{L}\p{N}\p{M}]+$/gu, "");
 
 /** The plural or singular wordForms leaves out: charities is charity, family
  * is families, taxes is tax. Read only by wordsNoBuildUses: on 140 labeled
@@ -803,12 +805,23 @@ function queryTerms(query: string): Term[] {
 	// A question's question marks are punctuation: "hackathons?" was a
 	// concept no build holds, and "protocol?" escaped the stopword list.
 	const question = isQuestion(query);
-	const words = contentTokens(
+	// A word without its edge punctuation, as the unused-words line reads it:
+	// "escrow," matched no build that says escrow, "--" matched every build
+	// through its empty form, and "the-" kept a stopword as a concept
+	// (review, 2026-10-31). A core that is a stopword drops as the bare word
+	// does, unless every core is one.
+	const cores = contentTokens(
 		(question ? query.replace(/\?/g, " ") : query).replace(
 			SMART_PHRASE,
 			"smart-$1",
 		),
-	).filter((t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t));
+	)
+		.map(wordCore)
+		.filter((t) => t.length > 1);
+	const content = cores.filter((t) => !isContentStopword(t));
+	const words = (content.length ? content : cores).filter(
+		(t) => !GENERIC_QUERY_TOKENS.has(t) && !QUERY_FILLER.has(t),
+	);
 	// A question of filler alone ("who won?") still searches its words.
 	const topical = question
 		? words.filter((t) => !QUESTION_FILLER.has(t))
