@@ -25,7 +25,7 @@ export const AWARDS_WALLETS: Array<{
 }> = [
 	{
 		id: "freighter",
-		name: "Freighter",
+		name: "Varial (Freighter)",
 		hint: "Browser extension",
 		icon: "/wallets/freighter.png",
 	},

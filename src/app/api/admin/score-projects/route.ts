@@ -149,6 +149,7 @@ function scoreProject(
 	// --- Core wallet boost — primary user-facing Stellar wallets ---
 	const TOP_WALLETS = new Set([
 		"freighter",
+		"varial",
 		"lobstr",
 		"xbull",
 		"xbull wallet",

@@ -7,6 +7,7 @@ import { isAdminRequest } from "@/lib/admin-auth";
 const EXPLICIT_OVERRIDES: Record<string, string[]> = {
 	// Wallets
 	Freighter: ["Wallet"],
+	Varial: ["Wallet"], // Freighter, renamed 2026-10-29
 	Lobstr: ["Wallet"], // wallet only, not a DEX
 	Beans: ["Wallet", "Payments"], // payments wallet
 	"BOSS Wallet": ["Wallet"],
