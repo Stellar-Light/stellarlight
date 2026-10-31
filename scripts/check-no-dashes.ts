@@ -118,8 +118,9 @@ const AREAS: Area[] = [
 ];
 
 const isTest = (rel: string) =>
-	/(^|\/)(__tests__|fixtures?)\//.test(rel) ||
-	/\.(test|spec)\.(ts|tsx|mts|json)$/.test(rel);
+	/(^|\/)__tests__\//.test(rel) ||
+	/\.(test|spec)\.(ts|tsx|mts)$/.test(rel) ||
+	/\.test\.json$/.test(rel);
 
 function walk(dir: string, exts: RegExp, out: string[]) {
 	if (!existsSync(dir)) return;
