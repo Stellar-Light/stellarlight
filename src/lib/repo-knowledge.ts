@@ -7377,7 +7377,7 @@ export const REPO_KNOWLEDGE_NOTES: Record<string, KnowledgeNote[]> = {
 			asOf: "2026-09-14",
 		},
 	],
-	"icon-project/sodax-sdks": [
+	"gosodax/sodax-sdks": [
 		{
 			note: "The Sodax SDKs from the ICON project, released as @sdks@2.1.0 with a frontend demo; cross-chain SDK work whose Stellar relationship is not stated in the README, so establish it from the product rather than this repository (README read 2026-09-14; MIT; 1 star; last push 2026-09-14).",
 			triggers: ["sodax sdks icon"],

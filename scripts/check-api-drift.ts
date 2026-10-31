@@ -93,19 +93,20 @@ async function main() {
 	// next.config.mjs enumerates the public API; an endpoint that ships without
 	// being added there silently loses CORS + the version header (the
 	// repos/search + changelog + explain drift a consumer flagged 2026-06-27).
-	// Headers are path-based, so a bare probe carries them regardless of status.
+	// Headers are path-based, so a bare probe carries them regardless of status,
+	// and a path parameter can be any segment: skipping {param} paths hid
+	// /api/hackathons/builds/{id} shipping without either header (2026-10-31).
 	console.log("◆ Public GET endpoints emit X-API-Version + CORS");
-	const getPaths = specPaths.filter(
-		(p) => !p.includes("{") && spec.paths[p]?.get,
-	);
+	const getPaths = specPaths.filter((p) => spec.paths[p]?.get);
 	for (const p of getPaths) {
-		const ver = await headerOf(p, "x-api-version");
+		const probe = p.replace(/\{[^}]+\}/g, "drift-probe");
+		const ver = await headerOf(probe, "x-api-version");
 		check(
 			`${p} emits X-API-Version`,
 			ver === "1",
 			`got "${ver ?? "none"}" — add "${p}" to next.config.mjs publicApi[]`,
 		);
-		const origin = await headerOf(p, "access-control-allow-origin");
+		const origin = await headerOf(probe, "access-control-allow-origin");
 		check(
 			`${p} emits CORS (Access-Control-Allow-Origin)`,
 			origin === "*",

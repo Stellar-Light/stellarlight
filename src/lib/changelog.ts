@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-10-31",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.112",
+		type: "fixed",
+		summary:
+			"locateSource and getHackathonSubmission now send `Access-Control-Allow-Origin: *` and `X-API-Version: 1` like every other public endpoint, so a browser agent can call them, and the skill's API reference documents locateSource. HackMeridian 2026's `stats.winnersNote` now says its winners are not announced upstream (checked 2026-10-31), so its empty winners list no longer reads as none won.",
+		detail:
+			"The daily API drift guard had been red since 2026-10-23 on the locate headers and the missing reference section. It skipped every path with a path parameter, which hid getHackathonSubmission; it now probes those paths too, and a unit test fails any GET path in the spec that the header list does not cover. The knowledge notes for the Sodax SDKs repository now reach its row under its current name, gosodax/sodax-sdks (it moved from icon-project).",
+	},
+	{
 		date: "2026-10-24",
 		surfaces: ["mcp"],
 		version: "scout-mcp@1.8.2",
