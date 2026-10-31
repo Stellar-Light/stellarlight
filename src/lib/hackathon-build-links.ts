@@ -178,6 +178,20 @@ const SHARED_SITES = [
 	"crates.io",
 	"stellar.org",
 	"stellar.expert",
+	// Link-in-bio, event, booking and dashboard pages: the name is in the
+	// path, so one host holds many projects. noticias-trading's website is a
+	// beacons.ai page, and any beacons.ai link corroborated it (review,
+	// 2026-10-31). A per-site subdomain host (carrd.co) is not listed: its
+	// sites never share a key.
+	"beacons.ai",
+	"bio.link",
+	"bento.me",
+	"about.me",
+	"lu.ma",
+	"calendly.com",
+	"eventbrite.com",
+	"typeform.com",
+	"dune.com",
 ];
 
 /** A site's comparable host: lowercased, without www. or app., null for a
@@ -564,9 +578,9 @@ export interface PageEvidence {
  * The page rules' link for a named candidate (namedCandidate): the project's
  * SCF page's siteUrls link this submission (`scf-page-and-name`), else the
  * submission's page lists the project's website or X account
- * (`submission-links-and-name`). When neither holds and a page it needed
- * was not read (an empty links list counts as not read), the link stored
- * by one of these rules to the same project is kept; otherwise none.
+ * (`submission-links-and-name`). When neither holds and the page a stored
+ * link rests on was not read (an empty links list counts as not read), the
+ * link stored by that rule to the same project is kept; otherwise none.
  */
 export function pageRuleLink(
 	buildId: string,
@@ -585,9 +599,15 @@ export function pageRuleLink(
 		(!!p.site && siteKeyOf(l) === p.site) ||
 		(!!p.xHandle && xHandleOf(l) === p.xHandle);
 	if (ev.pageLinks?.some(listed)) return link("submission-links-and-name");
-	const unread =
-		(!!p.scfPage && ev.scfBuidls === undefined) || !ev.pageLinks?.length;
+	// A stored link stands only while the page that justified it is unread:
+	// read, and no longer listing the submission or the project, it ends,
+	// whatever the other page's state. Either page unread kept both
+	// (review, 2026-10-31).
 	const kept = stored?.projectLinkBasis;
+	const unread =
+		kept === "scf-page-and-name"
+			? !!p.scfPage && ev.scfBuidls === undefined
+			: !ev.pageLinks?.length;
 	return unread && stored?.projectSlug === p.slug && isPageBasis(kept)
 		? link(kept)
 		: null;

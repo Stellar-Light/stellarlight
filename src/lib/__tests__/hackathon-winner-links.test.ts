@@ -6,6 +6,7 @@ import {
 	indexProjectRepos,
 	indexProjectSites,
 	LINK_BASES,
+	linkBuild,
 	linkChangeLine,
 	linkDropReason,
 	namedCandidate,
@@ -15,6 +16,7 @@ import {
 	productKeyOf,
 	scfPageOf,
 	scfSiteUrlsBuidls,
+	siteKeyOf,
 	xHandleOf,
 } from "@/lib/hackathon-build-links";
 import { indexedFromStored } from "@/lib/hackathon-builds";
@@ -366,6 +368,29 @@ describe("links the page rules make", () => {
 		).toBeNull();
 	});
 
+	it("a stored link ends once its own page is read and no longer shows it, whatever the other page", () => {
+		// Review 2026-10-31: either page unread used to keep both bases.
+		expect(
+			pageRuleLink(
+				"dorahacks-buidl-25141",
+				named("payzoll"),
+				{ pageLinks: ["https://youtu.be/x"] },
+				{
+					projectSlug: "payzoll",
+					projectLinkBasis: "submission-links-and-name",
+				},
+			),
+		).toBeNull();
+		expect(
+			pageRuleLink(
+				"dorahacks-buidl-25141",
+				named("payzoll"),
+				{ scfBuidls: new Set<string>(), pageLinks: [] },
+				{ projectSlug: "payzoll", projectLinkBasis: "scf-page-and-name" },
+			),
+		).toBeNull();
+	});
+
 	it("never a submission off DoraHacks", () => {
 		expect(
 			pageRuleLink("curated-hackmeridian-2025-payzoll", named("payzoll"), {
@@ -580,6 +605,48 @@ describe("review fixes", () => {
 				{ projectSlug: "widget", projectLinkBasis: "repo" },
 				{ projectSlug: "widget", projectLinkBasis: "repo" },
 			),
+		).toBeNull();
+	});
+});
+
+describe("hosts that hold many projects", () => {
+	it("a link-in-bio, event or booking page is never a site identity", () => {
+		const pages = [
+			"https://linktr.ee/someone",
+			"https://beacons.ai/someone-else",
+			"https://bio.link/someone",
+			"https://bento.me/someone",
+			"https://about.me/someone",
+			"https://lu.ma/some-event",
+			"https://calendly.com/someone",
+			"https://dune.com/someone/dashboard",
+		];
+		expect(pages.filter((u) => siteKeyOf(u) !== null)).toEqual([]);
+		// A per-site subdomain host keeps one key per site.
+		expect(siteKeyOf("https://a.carrd.co")).not.toBe(
+			siteKeyOf("https://b.carrd.co"),
+		);
+	});
+
+	it("a demo on such a page links no project whose website is another page there", () => {
+		const rows: ProjectRepoRow[] = [
+			{
+				slug: "noticias-trading",
+				name: "Noticias Trading",
+				status: "Live",
+				links: { website: "https://beacons.ai/noticiastrading" },
+			},
+		];
+		const at = {
+			repos: indexProjectRepos(rows),
+			sites: indexProjectSites(rows),
+			owners: indexProjectOwners(rows),
+		};
+		expect(
+			linkBuild(
+				{ name: "Unrelated Build", demoUrl: "https://beacons.ai/someone-else" },
+				at,
+			).project,
 		).toBeNull();
 	});
 });
