@@ -16,6 +16,7 @@ Requires:
   pip install duckdb
 """
 
+import re
 import json
 import sys
 from pathlib import Path
@@ -65,7 +66,7 @@ def no_dashes(v):
     main, so an upstream country or label that carried one would redden every
     PR until someone fixed it by hand."""
     if isinstance(v, str):
-        return v.replace("\u2013", "-").replace("\u2014", ", ")
+        return re.sub(r"\s*\u2014\s*", ", ", v).replace("\u2013", "-")
     if isinstance(v, list):
         return [no_dashes(x) for x in v]
     if isinstance(v, dict):
@@ -241,8 +242,9 @@ def main() -> None:
         "peers": peers,
     }
 
+    snapshot = no_dashes(snapshot)
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    OUT_FILE.write_text(json.dumps(no_dashes(snapshot), indent=2) + "\n")
+    OUT_FILE.write_text(json.dumps(snapshot, indent=2) + "\n")
     print(f"Wrote {OUT_FILE}", file=sys.stderr)
     print(json.dumps(snapshot, indent=2))
 
