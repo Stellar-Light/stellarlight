@@ -283,7 +283,9 @@ async function main() {
 		check(
 			"sls-094: project search labels a typo-distance name recovery `corrected`",
 			frieghter?.meta?.matchMode === "corrected" &&
-				frieghter?.meta?.didYouMean?.to === "Freighter" &&
+				// The row is Varial once curate-projects runs REBRANDS freighter
+				// (SDF renamed the wallet 2026-10-29); either name is the recovery.
+				["Freighter", "Varial"].includes(frieghter?.meta?.didYouMean?.to) &&
 				freighter?.meta?.matchMode === "strict" &&
 				!freighter?.meta?.didYouMean,
 			`frieghter ${frieghter?.meta?.matchMode} (didYouMean ${frieghter?.meta?.didYouMean?.to ?? null}), freighter ${freighter?.meta?.matchMode}`,

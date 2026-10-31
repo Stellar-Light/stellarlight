@@ -81,6 +81,8 @@ const LIBRARY_EXACT: Record<string, string> = {
 	"@creit-tech/stellar-wallets-kit": "Stellar Wallets Kit",
 	"stellar-wallets-kit": "Stellar Wallets Kit",
 	"@stellar/freighter-api": "Freighter API",
+	// The same library, renamed with the wallet (Varial, 2026-10-28).
+	"@stellar/varial-sdk": "Freighter API",
 	"passkey-kit": "Passkey Kit",
 	"passkey-kit-sdk": "Passkey Kit",
 	"soroban-sdk": "Soroban Rust SDK",

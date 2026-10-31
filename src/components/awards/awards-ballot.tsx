@@ -472,7 +472,7 @@ function hiwSteps(picks: number) {
 	return [
 		{
 			t: "Connect a Pilot wallet",
-			d: "Freighter, xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot. Anyone else can browse read-only. Nothing to fund: the testnet account is taken care of for you.",
+			d: "Varial (formerly Freighter), xBull or Albedo. Only whitelisted SCF Pilot addresses can cast a ballot. Anyone else can browse read-only. Nothing to fund: the testnet account is taken care of for you.",
 		},
 		picks > 1
 			? {

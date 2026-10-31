@@ -259,7 +259,7 @@ const SDK_CAPABILITY_PATTERNS: Array<[tag: string, re: RegExp]> = [
 	["sep24-ramp", /sep-?24|\binteractive\s*deposit|\bTransferServerService\b/i],
 	[
 		"wallet-kit",
-		/stellar-wallets-kit|@stellar\/wallet-sdk|\bfreighter(-api)?\b|albedo/i,
+		/stellar-wallets-kit|@stellar\/wallet-sdk|\bfreighter(-api)?\b|varial-sdk|albedo/i,
 	],
 	// EXPORTS the standard wallet-API surface (freighter-api/xbull/rabet shape).
 	// Templates CONSUME these functions (import them); only an actual wallet

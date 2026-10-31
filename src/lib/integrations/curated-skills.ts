@@ -744,27 +744,28 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 	},
 	{
 		slug: "freighter-api",
-		name: "Freighter API",
-		tagline: "Browser SDK for connecting to the Freighter Stellar wallet.",
+		name: "Varial SDK (formerly Freighter API)",
+		tagline:
+			"Browser SDK for connecting to the Varial Stellar wallet, formerly Freighter.",
 		description:
-			"Official @stellar/freighter-api package. Detect and connect to the Freighter wallet extension from any web dapp. Request signatures, fetch the user's network + public key, and sign transactions for Stellar Classic and Soroban.",
+			"Official @stellar/varial-sdk package, the renamed @stellar/freighter-api (dapps on the old package keep working). Detect and connect to the Varial wallet extension from any web dapp. Request signatures, fetch the user's network + public key, and sign transactions for Stellar Classic and Soroban. SDF renamed Freighter to Varial on 2026-10-29.",
 		source: "external",
 		kind: "sdk",
-		install: "npm install @stellar/freighter-api",
+		install: "npm install @stellar/varial-sdk",
 		repository: "https://github.com/stellar/freighter",
-		homepage: "https://www.freighter.app/",
-		docs: "https://docs.freighter.app/",
-		compatibility: ["Browser", "TypeScript", "Freighter wallet"],
+		homepage: "https://varialwallet.com/",
+		docs: "https://docs.varialwallet.com/",
+		compatibility: ["Browser", "TypeScript", "Varial wallet"],
 		targetUser: ["dev"],
-		tags: ["wallet", "freighter", "browser", "stellar"],
+		tags: ["wallet", "varial", "freighter", "browser", "stellar"],
 	},
 	{
 		slug: "stellar-wallets-kit",
 		name: "Stellar Wallets Kit",
 		tagline:
-			"Multi-wallet connector for Stellar dapps (Freighter, xBull, Albedo, Lobstr, …).",
+			"Multi-wallet connector for Stellar dapps (Varial, formerly Freighter; xBull, Albedo, Lobstr, …).",
 		description:
-			"@creit.tech/stellar-wallets-kit: community-maintained one-shot integration for every major Stellar wallet (Freighter, xBull, Albedo, Lobstr, Hana, Rabet, Walletconnect, Hardware wallets). Drop-in modal UI + a clean unified API. The fastest way to ship a Stellar dapp with wallet support.",
+			"@creit.tech/stellar-wallets-kit: community-maintained one-shot integration for every major Stellar wallet (Varial, formerly Freighter; xBull, Albedo, Lobstr, Hana, Rabet, Walletconnect, Hardware wallets). Drop-in modal UI + a clean unified API. The fastest way to ship a Stellar dapp with wallet support.",
 		source: "external",
 		kind: "sdk",
 		install: "npm install @creit.tech/stellar-wallets-kit",
