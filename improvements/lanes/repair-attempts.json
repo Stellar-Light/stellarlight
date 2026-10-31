@@ -431,6 +431,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "engine-d-demand:specguard",
+   "date": "2026-10-31",
+   "run": "41211541459",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
