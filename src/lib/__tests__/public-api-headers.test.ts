@@ -24,9 +24,15 @@ const listed = [
 	),
 ].map((m) => m[1]);
 
-/** A next.config source pattern as a regex: each :param is one path segment. */
+/** A next.config source pattern as a regex: each :param is one path segment,
+ * every other character literal. */
 const covers = (source: string, p: string) =>
-	new RegExp(`^${source.replace(/:[A-Za-z]+/g, "[^/]+")}$`).test(p);
+	new RegExp(
+		`^${source
+			.split(/:[A-Za-z]+/)
+			.map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+			.join("[^/]+")}$`,
+	).test(p);
 
 describe("public API headers", () => {
 	it("reads the publicApi list", () => {

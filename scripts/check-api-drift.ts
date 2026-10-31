@@ -100,17 +100,19 @@ async function main() {
 	const getPaths = specPaths.filter((p) => spec.paths[p]?.get);
 	for (const p of getPaths) {
 		const probe = p.replace(/\{[^}]+\}/g, "drift-probe");
+		// The publicApi[] entry to add, in Next.js source syntax.
+		const source = p.replace(/\{([^}]+)\}/g, ":$1");
 		const ver = await headerOf(probe, "x-api-version");
 		check(
 			`${p} emits X-API-Version`,
 			ver === "1",
-			`got "${ver ?? "none"}" — add "${p}" to next.config.mjs publicApi[]`,
+			`got "${ver ?? "none"}" — add "${source}" to next.config.mjs publicApi[]`,
 		);
 		const origin = await headerOf(probe, "access-control-allow-origin");
 		check(
 			`${p} emits CORS (Access-Control-Allow-Origin)`,
 			origin === "*",
-			`got "${origin ?? "none"}" — add "${p}" to next.config.mjs publicApi[]`,
+			`got "${origin ?? "none"}" — add "${source}" to next.config.mjs publicApi[]`,
 		);
 	}
 
