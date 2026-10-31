@@ -77,6 +77,10 @@ export interface LiveRepoFacts {
 		tests: string[];
 		testCount: number;
 		ci: string[];
+		/** Git submodules the listing names but a tree read does not open:
+		 * their files (contracts and tests included) are not listed. Absent
+		 * on reads that predate it. */
+		submodules?: string[];
 	} | null;
 	/** null = the tree was not read, so no manifest was. */
 	manifests: {
@@ -258,12 +262,13 @@ export function readmeEvidence(text: string): {
 	demoLinks: string[];
 	otherLinks: string[];
 } {
-	const contractIds = [...new Set(text.match(/\bC[A-Z2-7]{55}\b/g) ?? [])];
-	// GitHub shows no HTML comment, so no link inside one is read. Its line
-	// breaks stay, so every other link keeps its own line.
-	const shown = text.replace(/<!--[\s\S]*?-->/g, (c) =>
+	// GitHub shows no HTML comment, so nothing inside one is read: no link and
+	// no contract id. A comment never closed hides the rest of the file. Its
+	// line breaks stay, so every other link keeps its own line.
+	const shown = text.replace(/<!--[\s\S]*?(?:-->|$)/g, (c) =>
 		c.replace(/[^\n]/g, ""),
 	);
+	const contractIds = [...new Set(shown.match(/\bC[A-Z2-7]{55}\b/g) ?? [])];
 	const demo: string[] = [];
 	const other: string[] = [];
 	for (const m of shown.matchAll(URL_RE)) {
@@ -334,9 +339,10 @@ function takeCalls(n: number, caller: string, now = Date.now()): Denial | null {
 	return null;
 }
 
-/** Give back calls reserved but not made. */
-function refund(n: number, caller: string) {
-	if (n <= 0) return;
+/** Give back calls reserved but not made, in the hour they were reserved
+ * in: a refund into the next hour would let it make more than its budget. */
+function refund(n: number, caller: string, hour: number) {
+	if (n <= 0 || hour !== budget.hourStart) return;
 	budget.calls = Math.max(0, budget.calls - n);
 	budget.byCaller.set(
 		caller,
@@ -394,6 +400,10 @@ async function rest(path: string, deadline: number): Promise<Response | null> {
 		tokenRejectedUntil = Date.now() + TOKEN_RETRY_MS;
 		const anon = await call(null);
 		notePool(anon, false);
+		// An empty anonymous pool must not outlast the token's retry: until
+		// the lock lifts no call is made, so a rotated token would never be
+		// tried (review, 2026-10-31).
+		budget.poolLowUntil = Math.min(budget.poolLowUntil, tokenRejectedUntil);
 		return anon;
 	} catch {
 		return null;
@@ -525,6 +535,7 @@ async function readFresh(
 	// halfway for budget; the calls it does not make are given back.
 	const denied = takeCalls(CALLS_PER_READ, caller);
 	if (denied) return { state: "unread", ...done(), reason: DENIED[denied] };
+	const hour = budget.hourStart;
 	let made = 0;
 	try {
 		// A 200 lands here only when its body was not read: cut at the
@@ -603,6 +614,7 @@ async function readFresh(
 		facts.commit = sha;
 
 		let paths: string[] | null = null;
+		let submodules: string[] = [];
 		let complete = false;
 		if (facts.empty) {
 			paths = [];
@@ -617,7 +629,16 @@ async function readFresh(
 			const tree = await json<TreeBody>(treeRes);
 			if (tree && Array.isArray(tree.tree)) {
 				paths = tree.tree.filter((t) => t.type === "blob").map((t) => t.path);
+				// A submodule is a commit entry: its files are not listed, so a
+				// contract or test kept in one would read as absent.
+				submodules = tree.tree
+					.filter((t) => t.type === "commit")
+					.map((t) => t.path);
 				complete = tree.truncated !== true;
+				if (!complete)
+					why.tree = `GitHub cut the tree listing at commit ${short} short, so files past the cut were not listed.`;
+				else if (submodules.length)
+					why.tree = `The tree at commit ${short} holds ${submodules.length} git submodule(s) (${submodules.slice(0, 3).join(", ")}${submodules.length > 3 ? " and others" : ""}), whose files a tree read does not open.`;
 			} else why.tree = answered(treeRes, `the tree at commit ${short}`);
 		} else
 			why.tree =
@@ -633,6 +654,9 @@ async function readFresh(
 				tests: tests.slice(0, KEEP_PATHS),
 				testCount: tests.length,
 				ci: ciPaths(paths),
+				...(submodules.length
+					? { submodules: submodules.slice(0, KEEP_PATHS) }
+					: {}),
 			};
 			const wanted = manifestPaths(paths);
 			const chosen = wanted.slice(0, MAX_MANIFESTS);
@@ -727,7 +751,9 @@ async function readFresh(
 			p === "metadata"
 				? false
 				: p === "tree"
-					? !facts.tree
+					? !facts.tree ||
+						!facts.tree.complete ||
+						!!facts.tree.submodules?.length
 					: p === "manifests"
 						? !facts.manifests || facts.manifests.unread > 0
 						: p === "readme"
@@ -741,7 +767,7 @@ async function readFresh(
 		) as Partial<Record<LiveReadPart, string>>;
 		return { state: "read", ...done(), unread, unreadWhy, facts };
 	} finally {
-		refund(CALLS_PER_READ - made, caller);
+		refund(CALLS_PER_READ - made, caller, hour);
 	}
 }
 

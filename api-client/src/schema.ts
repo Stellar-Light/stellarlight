@@ -4452,7 +4452,7 @@ export interface operations {
             query: {
                 /** @description The submission's GitHub repo (owner/name or its URL) or its DoraHacks link or id. A repo submitted more than once resolves to its placed entry, then the newest. With hackathon, a GitHub repo with no stored submission is read live instead of answering 404. */
                 link: string;
-                /** @description An event whose judging criteria Scout holds as data. Adds review.judging: each of the event's criteria, in its record's words, with the evidence a judge would find in the repo, or checkable false with the reason (decks, videos, submission answers and intake goals are not read). The repo is read live from GitHub at its default branch's newest commit: read-only, inside 4 seconds, cached 5 minutes per repo, at most 20 such requests a minute per caller, and never past a repo that is not public. One caller may spend at most a quarter of a server's hourly live-read budget; past it, its reads answer could-not-check. Any other value answers 400 with validHackathons. */
+                /** @description An event whose judging criteria Scout holds as data. Adds review.judging: each of the event's criteria, in its record's words, with the evidence a judge would find in the repo, or checkable false with the reason (decks, videos, submission answers and intake goals are not read). The repo is read live from GitHub at its default branch's newest commit: read-only, inside 4 seconds, cached 5 minutes per repo, at most 20 such requests a minute per IP address (a partner key has its own tier), and never past a repo that is not public. One caller may spend at most a quarter of a server's hourly live-read budget; past it, its reads answer could-not-check. Any other value answers 400 with validHackathons. */
                 hackathon?: "hackmeridian-2026";
             };
             header?: never;
@@ -4779,7 +4779,7 @@ export interface operations {
                                 readAt?: string;
                                 /** @description How long the read took, inside its 4-second budget. */
                                 readMs?: number;
-                                /** @description The parts not read; every evidence item resting on one says could-not-check, and its finding gives that part's own reason (GitHub's answer or silence for it, a listing cut short, a file that is not UTF-8 text, a manifest over 512 KB, more manifests than the 12 a read takes). [] when every part was read. */
+                                /** @description The parts not read, or not read whole; every evidence item resting on one says could-not-check, and its finding gives that part's own reason (GitHub's answer or silence for it, a listing cut short, a git submodule the tree read does not open, a file that is not UTF-8 text, a manifest over 512 KB, more manifests than the 12 a read takes). [] when every part was read. */
                                 unread?: ("metadata" | "tree" | "manifests" | "readme" | "commits" | "releases")[];
                             } | null;
                             /** @description Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason. Evidence, not a verdict: no score, no pass or fail. Categories and criteria keep the sentence's order; the order is not a rank. */
@@ -4818,7 +4818,7 @@ export interface operations {
                                             finding?: string;
                                             /** @description The cited values as written (package names, crate directories, contract ids, file paths, the latest release tag, URLs, the last commit's ISO date, open SCF rounds); a sample when count is larger. [] with not-found; null with could-not-check. */
                                             values?: string[] | null;
-                                            /** @description The total behind values (test files following a convention, a floor of the repo's tests; CI files; releases; commits on the default branch; contract ids; Stellar packages; contract crates). null when not counted, and whenever the part read was partial (a manifest unread, the tree listing or the README cut short), since a count over part of the repo is not its total; the finding then says what was not read. */
+                                            /** @description The total behind values (test files following a convention, a floor of the repo's tests; CI files; releases; commits on the default branch; contract ids; Stellar packages; contract crates). null when not counted, and whenever the part read was partial (a manifest unread, the tree listing or the README cut short, a git submodule the tree read does not open), since a count over part of the repo is not its total; the finding then says what was not read. The test-file count is a floor either way, so it stays over a partial tree and the finding says at least. */
                                             count?: number | null;
                                         }[] | null;
                                     }[];
@@ -4842,7 +4842,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description With hackathon, this caller's window (20 a minute per IP or partner key, per server instance) is spent; Retry-After says when to retry. */
+            /** @description With hackathon, this caller's window (20 a minute per IP address, per server instance; a partner key has its own tier) is spent; Retry-After says when to retry. */
             429: {
                 headers: {
                     [name: string]: unknown;

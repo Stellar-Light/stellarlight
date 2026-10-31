@@ -67,6 +67,8 @@ const CARGO_EXACT = new Set([
 	"stellar-xdr",
 	"stellar-strkey",
 	"stellar-baselib",
+	// The Rust RPC client; code-signals already reads it as Stellar proof.
+	"soroban-client",
 ]);
 const CARGO_PREFIXES = ["soroban-env-", "soroban-spec", "stellar-contract-"];
 
@@ -94,6 +96,8 @@ export function extractStellarDeps(blobs: DepBlob[]): string[] {
 					"dependencies",
 					"devDependencies",
 					"peerDependencies",
+					// Declared like the rest; detectStellarProof already reads it.
+					"optionalDependencies",
 				]) {
 					const deps = pkg[key];
 					if (deps && typeof deps === "object")

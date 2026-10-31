@@ -202,6 +202,10 @@ export function repoEvidence(
 	out.contractIds = contractIds(c);
 
 	const t = f.tree;
+	// A tree whose listing GitHub cut short, or whose submodules it does not
+	// open, did not list every file: none found there is not a no. CI is
+	// read off the listing alone (a submodule's workflows never run here).
+	const partial = !!t && (!t.complete || !!t.submodules?.length);
 	out.testFiles = !t
 		? unchecked("testFiles", why("tree"))
 		: f.empty
@@ -209,14 +213,14 @@ export function repoEvidence(
 			: t.testCount
 				? found(
 						"testFiles",
-						`${t.complete ? "" : "At least "}${t.testCount} file(s) follow a test-naming convention, e.g. ${list(t.tests, 3)}. Conventions counted: ${TEST_CONVENTIONS}; a test named otherwise is not counted, and whether tests run or pass is not read.${at}`,
+						`${partial ? "At least " : ""}${t.testCount} file(s) follow a test-naming convention, e.g. ${list(t.tests, 3)}. Conventions counted: ${TEST_CONVENTIONS}; a test named otherwise is not counted, and whether tests run or pass is not read.${at}`,
 						t.tests,
 						t.testCount,
 					)
-				: !t.complete
+				: partial
 					? unchecked(
 							"testFiles",
-							"GitHub cut the tree listing short and no test file was among the part listed.",
+							`No test file was among the files listed, and not every file was: ${why("tree")}`,
 						)
 					: none(
 							"testFiles",
@@ -305,18 +309,19 @@ function stellarPackages({
 		m.stellarJsDep,
 	].filter(Boolean);
 	const [lang, file] = (m.otherSdk ?? "").split(":");
+	const treePartial = !f.tree?.complete || !!f.tree?.submodules?.length;
 	if (values.length)
 		return found(
 			"stellarPackages",
-			`${m.unread ? `The ${m.read} of ${m.read + m.unread} manifests read declare` : "Declares"} ${values.length} Stellar package(s) Scout recognises: ${list(values, 8)}.${sdks.length ? ` SDK versions as declared: ${sdks.join(", ")}.` : ""}${m.otherSdk ? ` ${m.otherSdk}: a ${file} declares a Stellar SDK or library (${lang}).` : ""}${m.unread ? ` The ${m.unread} not read may declare more: ${why("manifests")}` : ""}${at}`,
+			`${m.unread ? `The ${m.read} of ${m.read + m.unread} manifests read declare` : "Declares"} ${values.length} Stellar package(s) Scout recognises: ${list(values, 8)}.${sdks.length ? ` SDK versions as declared: ${sdks.join(", ")}.` : ""}${m.otherSdk ? ` ${m.otherSdk}: a ${file} declares a Stellar SDK or library (${lang}).` : ""}${m.unread ? ` The ${m.unread} not read may declare more: ${why("manifests")}` : treePartial ? ` Not every file was listed, so there may be more: ${why("tree")}` : ""}${at}`,
 			values,
 			// Over a partial read the list is not the repo's total.
-			m.unread ? null : values.length,
+			m.unread || treePartial ? null : values.length,
 		);
-	if (m.unread || !f.tree?.complete)
+	if (m.unread || treePartial)
 		return unchecked(
 			"stellarPackages",
-			`None of the ${m.read} manifest(s) read declares a package on Scout's Stellar list, but ${m.unread ? `not all were read: ${why("manifests")}` : "GitHub cut the tree listing short."}`,
+			`None of the ${m.read} manifest(s) read declares a package on Scout's Stellar list, but ${m.unread ? `not all were read: ${why("manifests")}` : `not every file was listed: ${why("tree")}`}`,
 		);
 	return none(
 		"stellarPackages",
@@ -341,23 +346,24 @@ function contractCrates({
 			"contractCrates",
 			"The repository is empty: GitHub reports no commits.",
 		);
+	const treePartial = !f.tree?.complete || !!f.tree?.submodules?.length;
 	if (m.contractCrates.length)
 		return found(
 			"contractCrates",
-			`${m.cargoUnread ? `In the ${m.cargoRead} of ${m.cargoRead + m.cargoUnread} Cargo.toml files read, ` : ""}${m.contractCrates.length} deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): ${list(m.contractCrates)}${m.sorobanSdk ? `; soroban-sdk ${m.sorobanSdk} as declared` : ""}.${m.cargoUnread ? ` The ${m.cargoUnread} not read may hold more.` : ""} Whether they build or are deployed is not read here.${at}`,
+			`${m.cargoUnread ? `In the ${m.cargoRead} of ${m.cargoRead + m.cargoUnread} Cargo.toml files read, ` : ""}${m.contractCrates.length} deployable Soroban contract crate(s) (soroban-sdk with crate-type cdylib): ${list(m.contractCrates)}${m.sorobanSdk ? `; soroban-sdk ${m.sorobanSdk} as declared` : ""}.${m.cargoUnread ? ` The ${m.cargoUnread} not read may hold more.` : treePartial ? ` Not every file was listed, so there may be more: ${why("tree")}` : ""} Whether they build or are deployed is not read here.${at}`,
 			m.contractCrates,
 			// Over a partial read the list is not the repo's total.
-			m.cargoUnread ? null : m.contractCrates.length,
+			m.cargoUnread || treePartial ? null : m.contractCrates.length,
 		);
-	if (m.cargoUnread || !f.tree?.complete)
+	if (m.cargoUnread || treePartial)
 		return unchecked(
 			"contractCrates",
-			`No Cargo.toml read declares a deployable Soroban contract, but ${m.cargoUnread ? `${m.cargoUnread} Cargo.toml file(s) were not read: ${why("manifests")}` : "GitHub cut the tree listing short."}`,
+			`No Cargo.toml read declares a deployable Soroban contract, but ${m.cargoUnread ? `${m.cargoUnread} Cargo.toml file(s) were not read: ${why("manifests")}` : `not every file was listed: ${why("tree")}`}`,
 		);
 	return none(
 		"contractCrates",
 		m.cargoRead
-			? `None of its ${m.cargoRead} Cargo.toml file(s) declares a deployable Soroban contract (soroban-sdk with crate-type cdylib, outside examples and tests).${at}`
+			? `None of its ${m.cargoRead} Cargo.toml file(s) declares a deployable Soroban contract (soroban-sdk with crate-type cdylib, outside the folders a product does not ship from: examples, tests, testdata, testing, fixtures, benches, integration and templates).${at}`
 			: `No Cargo.toml in the tree, so no Soroban contract crate. A dapp that calls contracts deployed elsewhere has none.${at}`,
 	);
 }
