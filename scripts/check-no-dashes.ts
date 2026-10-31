@@ -326,7 +326,7 @@ const pad = (s: string | number, n: number) => String(s).padStart(n);
 const out: string[] = [];
 out.push(`dash audit: ${opt("--label") ?? "run"} (git ${sha})`);
 out.push(
-	"served text only (strings, templates, JSX text, skill markdown); comments and test files skipped",
+	"served text only (strings, templates, JSX text, skill markdown, JSON under src); comments and test files skipped",
 );
 out.push("");
 out.push(

@@ -58,6 +58,21 @@ def fetch_latest_snapshot_path() -> str:
     raise RuntimeError("eco_mads.parquet not found in manifest")
 
 
+def no_dashes(v):
+    """Every string with its en dashes as hyphens and em dashes as commas.
+    The file is served text (the leaderboard, /api/analyze), the contract
+    gate fails on either dash under src/, and this script commits straight to
+    main, so an upstream country or label that carried one would redden every
+    PR until someone fixed it by hand."""
+    if isinstance(v, str):
+        return v.replace("\u2013", "-").replace("\u2014", ", ")
+    if isinstance(v, list):
+        return [no_dashes(x) for x in v]
+    if isinstance(v, dict):
+        return {k: no_dashes(x) for k, x in v.items()}
+    return v
+
+
 def main() -> None:
     eco_mads_url = fetch_latest_snapshot_path()
     print(f"Fetching from {eco_mads_url}…", file=sys.stderr)
@@ -227,7 +242,7 @@ def main() -> None:
     }
 
     OUT_FILE.parent.mkdir(parents=True, exist_ok=True)
-    OUT_FILE.write_text(json.dumps(snapshot, indent=2) + "\n")
+    OUT_FILE.write_text(json.dumps(no_dashes(snapshot), indent=2) + "\n")
     print(f"Wrote {OUT_FILE}", file=sys.stderr)
     print(json.dumps(snapshot, indent=2))
 
