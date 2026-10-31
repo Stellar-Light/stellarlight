@@ -14,6 +14,7 @@ describe("curated winners notes", () => {
 		const events = new Set(CURATED_HACKATHONS.map((h) => h.uname));
 		expect(Object.keys(CURATED_WINNERS_NOTES).sort()).toEqual([
 			"apac-stellar-hackathon-2026",
+			"hackmeridian-2026",
 			"stellar-builders-camp-jaipur-2026",
 			"stellar-journey-to-mastery-2026",
 		]);
@@ -38,6 +39,7 @@ describe("curated winners notes", () => {
 			n.startsWith("Not announced upstream"),
 		);
 		expect(unannounced.map(([slug]) => slug).sort()).toEqual([
+			"hackmeridian-2026",
 			"stellar-builders-camp-jaipur-2026",
 			"stellar-journey-to-mastery-2026",
 		]);
