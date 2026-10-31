@@ -37,7 +37,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			"The Scout skill's integration list names Varial, formerly Freighter (SDF renamed the wallet on 2026-10-29), and its SDK @stellar/varial-sdk, formerly @stellar/freighter-api, which keeps working. It no longer recommends the Allbridge SDK for moving USDC to Stellar: Allbridge Core's Stellar support is unavailable pending an audit after the 2026-07-19 exploit.",
 		detail:
-			"Repo scans now read @stellar/varial-sdk as a Stellar JS dependency and count it with @stellar/freighter-api as one library.",
+			"Repo scans now read @stellar/varial-sdk as a Stellar JS dependency and count it with @stellar/freighter-api as one library. The SDK catalog entry freighter-api (slug kept) now names Varial SDK, installs @stellar/varial-sdk and links varialwallet.com and docs.varialwallet.com.",
 	},
 	{
 		date: "2026-10-31",

@@ -765,7 +765,7 @@ export const CURATED_SKILLS: CuratedSkill[] = [
 		tagline:
 			"Multi-wallet connector for Stellar dapps (Varial, formerly Freighter; xBull, Albedo, Lobstr, …).",
 		description:
-			"@creit.tech/stellar-wallets-kit: community-maintained one-shot integration for every major Stellar wallet (Freighter, xBull, Albedo, Lobstr, Hana, Rabet, Walletconnect, Hardware wallets). Drop-in modal UI + a clean unified API. The fastest way to ship a Stellar dapp with wallet support.",
+			"@creit.tech/stellar-wallets-kit: community-maintained one-shot integration for every major Stellar wallet (Varial, formerly Freighter; xBull, Albedo, Lobstr, Hana, Rabet, Walletconnect, Hardware wallets). Drop-in modal UI + a clean unified API. The fastest way to ship a Stellar dapp with wallet support.",
 		source: "external",
 		kind: "sdk",
 		install: "npm install @creit.tech/stellar-wallets-kit",
