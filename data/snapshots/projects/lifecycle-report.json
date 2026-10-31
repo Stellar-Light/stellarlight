@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-10-30T11:24:48.701Z",
+	"generatedAt": "2026-10-31T10:56:12.691Z",
 	"source": "data/snapshots/projects/*.json.gz",
-	"latestSnapshot": "2026-10-30",
+	"latestSnapshot": "2026-10-31",
 	"historyStart": "2026-10-02",
-	"snapshots": 29,
+	"snapshots": 30,
 	"definitions": {
 		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 		"markedLive": "Status Live, on any evidence.",
@@ -13,12 +13,12 @@
 	},
 	"groups": {
 		"all": {
-			"listed": 1005,
-			"launched": 942,
-			"markedLive": 848,
+			"listed": 1006,
+			"launched": 943,
+			"markedLive": 849,
 			"liveOnStrongEvidence": 404,
 			"observedActive": 307,
-			"noActivityData": 411
+			"noActivityData": 412
 		},
 		"scf": {
 			"listed": 613,
@@ -29,12 +29,12 @@
 			"noActivityData": 207
 		},
 		"nonScf": {
-			"listed": 392,
-			"launched": 362,
-			"markedLive": 295,
+			"listed": 393,
+			"launched": 363,
+			"markedLive": 296,
 			"liveOnStrongEvidence": 163,
 			"observedActive": 104,
-			"noActivityData": 204
+			"noActivityData": 205
 		}
 	},
 	"cohorts": {
@@ -88,18 +88,19 @@
 			},
 			{
 				"cohort": "2026",
-				"listed": 293,
-				"launched": 263,
-				"markedLive": 202,
+				"listed": 294,
+				"launched": 264,
+				"markedLive": 203,
 				"liveOnStrongEvidence": 119,
 				"observedActive": 68,
-				"noActivityData": 150
+				"noActivityData": 151
 			}
 		]
 	},
 	"changes": {
 		"since": "2026-10-02",
 		"newlyLaunched": [
+			"kast",
 			"stellar-atlas",
 			"zenex"
 		],
