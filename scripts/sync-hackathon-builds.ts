@@ -66,6 +66,7 @@ import {
 	embeddingTextHash,
 } from "../src/lib/hackathon-build-embedding";
 import {
+	basisPageUnread,
 	currentRepoFor,
 	indexProjectNames,
 	indexProjectOwners,
@@ -457,8 +458,10 @@ async function linkByPages(
 			}
 		}
 		const ev = { scfBuidls, pageLinks: listed };
+		// The same rule pageRuleLink keeps a stored link by.
 		const unread =
-			!scfBuidls?.has(n) && ((!!p.scfPage && !scfBuidls) || !listed?.length);
+			!scfBuidls?.has(n) &&
+			basisPageUnread(stored.get(entries[0].entryKey)?.projectLinkBasis, p, ev);
 		if (unread) tally.unread++;
 		for (const r of entries) {
 			const link = pageRuleLink(buildId, p, ev, stored.get(r.entryKey));

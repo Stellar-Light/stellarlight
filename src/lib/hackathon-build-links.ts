@@ -178,6 +178,21 @@ const SHARED_SITES = [
 	"crates.io",
 	"stellar.org",
 	"stellar.expert",
+	// Link-in-bio, event, booking, form and dashboard hosts: one host holds
+	// many projects' pages, and none of those pages is a product's own site.
+	// noticias-trading's website is a beacons.ai page, and any beacons.ai
+	// link corroborated it (review, 2026-10-31). carrd.co is not listed: a
+	// Carrd site is a product's own subdomain, and two never share a key.
+	"beacons.ai",
+	"bio.link",
+	"bento.me",
+	"about.me",
+	"lu.ma",
+	"luma.com",
+	"calendly.com",
+	"eventbrite.com",
+	"typeform.com",
+	"dune.com",
 ];
 
 /** A site's comparable host: lowercased, without www. or app., null for a
@@ -512,8 +527,9 @@ function nameMatch(
 }
 
 /** Why a stored link is gone after this run's linking, for the lane's log:
- * a page rule link (its name no longer names the project alone, or both
- * pages were read and neither says so), or any other rule's. */
+ * a page rule link (its name no longer names the project alone, or the
+ * page its basis rests on was read and no longer says so), or any other
+ * rule's. */
 export function linkDropReason(
 	b: BuildLinkFields & { isWinner?: boolean | null },
 	old: { projectSlug?: string | null; projectLinkBasis?: string | null },
@@ -529,7 +545,9 @@ export function linkDropReason(
 	if (typeof m === "string") return m;
 	if (m.slug !== old.projectSlug)
 		return `its name now names ${m.slug}, and no page says so`;
-	return "pages read: the SCF page's siteUrls do not link the submission and its page lists neither the project's website nor its X account (one two projects hold never counts)";
+	return basis === "scf-page-and-name"
+		? "its SCF page was read, and its siteUrls no longer link the submission"
+		: "its submission page was read, and lists neither the project's website nor its X account (one two projects hold never counts)";
 }
 
 /** One dry-run line for a row whose project or basis changes, old to new;
@@ -560,13 +578,31 @@ export interface PageEvidence {
 	pageLinks?: string[];
 }
 
+/** Whether the page a stored page-rule link rests on went unread this run:
+ * for `scf-page-and-name` the project's SCF page (none known counts as
+ * unread, so a project row whose SCF link flaps does not flap the link),
+ * otherwise the submission page's links (an empty list counts as unread).
+ * A stored link stands only while its own page is unread: read, and no
+ * longer listing the submission or the project, it ends, whatever the
+ * other page's state. Either page unread used to keep both (review,
+ * 2026-10-31). */
+export function basisPageUnread(
+	basis: string | null | undefined,
+	p: NamedProject,
+	ev: PageEvidence,
+): boolean {
+	return basis === "scf-page-and-name"
+		? !p.scfPage || ev.scfBuidls === undefined
+		: !ev.pageLinks?.length;
+}
+
 /**
  * The page rules' link for a named candidate (namedCandidate): the project's
  * SCF page's siteUrls link this submission (`scf-page-and-name`), else the
  * submission's page lists the project's website or X account
- * (`submission-links-and-name`). When neither holds and a page it needed
- * was not read (an empty links list counts as not read), the link stored
- * by one of these rules to the same project is kept; otherwise none.
+ * (`submission-links-and-name`). When neither holds and the page a stored
+ * link rests on was not read (an empty links list counts as not read), the
+ * link stored by that rule to the same project is kept; otherwise none.
  */
 export function pageRuleLink(
 	buildId: string,
@@ -585,9 +621,8 @@ export function pageRuleLink(
 		(!!p.site && siteKeyOf(l) === p.site) ||
 		(!!p.xHandle && xHandleOf(l) === p.xHandle);
 	if (ev.pageLinks?.some(listed)) return link("submission-links-and-name");
-	const unread =
-		(!!p.scfPage && ev.scfBuidls === undefined) || !ev.pageLinks?.length;
 	const kept = stored?.projectLinkBasis;
+	const unread = basisPageUnread(kept, p, ev);
 	return unread && stored?.projectSlug === p.slug && isPageBasis(kept)
 		? link(kept)
 		: null;
