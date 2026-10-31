@@ -187,7 +187,7 @@ def main() -> None:
     ]
 
     snapshot = {
-        "source": "Electric Capital — Open Dev Data",
+        "source": "Electric Capital's Open Dev Data",
         "sourceUrl": "https://www.developerreport.com/ecosystems/stellar",
         "ecosystem": "Stellar",
         "asOf": str(raw["latest_day"]),
