@@ -296,6 +296,21 @@ describe("live read completeness and budget", () => {
 		);
 		const { e } = await judged("rpc2");
 		expect(e.stellarPackages.state, e.stellarPackages.finding).toBe("found");
+		// The scan lane's parser reads it as Stellar too.
+		expect(
+			detectStellarProof({
+				fullName: "Team/rpc2",
+				blobs: [
+					{
+						path: "Cargo.toml",
+						text: '[package]\nname = "rpc2"\n\n[dependencies]\nstellar-rpc-client = "22"\n',
+						present: true,
+					},
+				],
+				tree: [],
+				treeComplete: true,
+			}).proof,
+		).toBe("lang-sdk");
 	});
 
 	it("an @stellar package in optionalDependencies is found", async () => {
