@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-31",
+		surfaces: ["api"],
+		version: "spec@1.9.115",
+		type: "fixed",
+		summary:
+			"searchProjects' statusChecks no longer read a partial reading as a verdict: on rows found by meaning, whose dates arrive as Date objects, the DefiLlama checks said not yet checked; a contract with only one of its two counters read counted as quiet; an unparseable window and a negative TVL fell through to a hit; and $0 over a listing with a mapped slug DefiLlama no longer lists could hit. Each now reads its dates or answers could-not-check.",
+		detail:
+			"A DefiLlama row with a per-chain breakdown that holds no Stellar figure is no Stellar TVL (its total is other chains'). enrich-tvl's map now names Soroswap's renamed slug (soroswap-amm) and the directory rows phoenix and normal, whose old keys matched no row; the figures move on its next run.",
+	},
+	{
+		date: "2026-10-31",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.114",
 		type: "fixed",
