@@ -1,6 +1,6 @@
 {
- "generatedAt": "2026-10-31T08:34:31.215Z",
- "asOf": "2026-10-31T08:34:31.215Z",
+ "generatedAt": "2026-11-01T09:27:06.115Z",
+ "asOf": "2026-11-01T09:27:06.115Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
  "checked": 2794,
@@ -485,6 +485,17 @@
    ],
    "citedByStatus": [
     "paykit: Live"
+   ]
+  },
+  {
+   "url": "https://youtube.com/@RobertoSanzCriptomonedas",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/roberto-sanz-criptomonedas.links.website"
+   ],
+   "citedByStatus": [
+    "roberto-sanz-criptomonedas: Live"
    ]
   }
  ],
