@@ -1,11 +1,11 @@
 {
-  "generatedAt": "2026-10-25T13:46:01Z",
+  "generatedAt": "2026-11-01T15:58:01Z",
   "base": "https://stellarlight.xyz",
   "board": [
     {
       "bucket": "P-KNOWN",
-      "ok": 1005,
-      "total": 1005,
+      "ok": 1006,
+      "total": 1006,
       "unchecked": 0,
       "rate": 100,
       "floor": 90,
@@ -31,8 +31,8 @@
     },
     {
       "bucket": "P-PHRASE",
-      "ok": 1005,
-      "total": 1005,
+      "ok": 1006,
+      "total": 1006,
       "unchecked": 0,
       "rate": 100,
       "floor": 60,
@@ -40,8 +40,8 @@
     },
     {
       "bucket": "P-ATTR",
-      "ok": 46,
-      "total": 46,
+      "ok": 44,
+      "total": 44,
       "unchecked": 0,
       "rate": 100,
       "floor": 70,

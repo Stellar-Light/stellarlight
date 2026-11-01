@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 17855,
-    "docs": 3194
+    "chunks": 18042,
+    "docs": 3203
   },
   "s5_junk_urls": {
     "count": 0,
@@ -13,66 +13,29 @@
     "sample": []
   },
   "s7_coverage": {
-    "dev-docs": {
-      "chunks": 5103,
-      "datedPct": 63,
-      "newestAgeDays": 5,
-      "undated": false,
-      "stalled": false
-    },
     "lumenloop-research": {
-      "chunks": 559,
+      "chunks": 570,
       "datedPct": 100,
       "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
-    "release": {
-      "chunks": 254,
-      "datedPct": 100,
-      "newestAgeDays": 3,
+    "dev-docs": {
+      "chunks": 5255,
+      "datedPct": 62,
+      "newestAgeDays": 12,
       "undated": false,
       "stalled": false
     },
     "sdf-blog": {
-      "chunks": 2460,
+      "chunks": 2471,
       "datedPct": 100,
-      "newestAgeDays": 6,
-      "undated": false,
-      "stalled": false
-    },
-    "cap": {
-      "chunks": 947,
-      "datedPct": 98,
-      "newestAgeDays": 10,
-      "undated": false,
-      "stalled": false
-    },
-    "sep": {
-      "chunks": 690,
-      "datedPct": 99,
-      "newestAgeDays": 26,
-      "undated": false,
-      "stalled": false
-    },
-    "scf-proposal": {
-      "chunks": 5796,
-      "datedPct": 0,
-      "newestAgeDays": null,
-      "undated": false,
-      "undateable": true,
-      "reason": "SCF submission pages state no date; each document names its award round instead",
-      "stalled": false
-    },
-    "audit": {
-      "chunks": 1157,
-      "datedPct": 100,
-      "newestAgeDays": 85,
+      "newestAgeDays": 4,
       "undated": false,
       "stalled": false
     },
     "repo-docs": {
-      "chunks": 358,
+      "chunks": 368,
       "datedPct": 0,
       "newestAgeDays": null,
       "undated": false,
@@ -80,10 +43,47 @@
       "reason": "GitHub READMEs state no publication date",
       "stalled": false
     },
+    "release": {
+      "chunks": 256,
+      "datedPct": 100,
+      "newestAgeDays": 7,
+      "undated": false,
+      "stalled": false
+    },
+    "scf-proposal": {
+      "chunks": 5797,
+      "datedPct": 0,
+      "newestAgeDays": null,
+      "undated": false,
+      "undateable": true,
+      "reason": "SCF submission pages state no date; each document names its award round instead",
+      "stalled": false
+    },
+    "cap": {
+      "chunks": 947,
+      "datedPct": 98,
+      "newestAgeDays": 17,
+      "undated": false,
+      "stalled": false
+    },
+    "sep": {
+      "chunks": 690,
+      "datedPct": 99,
+      "newestAgeDays": 33,
+      "undated": false,
+      "stalled": false
+    },
+    "audit": {
+      "chunks": 1157,
+      "datedPct": 100,
+      "newestAgeDays": 93,
+      "undated": false,
+      "stalled": false
+    },
     "ec-developer-report": {
       "chunks": 45,
       "datedPct": 100,
-      "newestAgeDays": 1394,
+      "newestAgeDays": 1401,
       "undated": false,
       "stalled": false
     },
@@ -99,35 +99,35 @@
     "sdf-org": {
       "chunks": 80,
       "datedPct": 29,
-      "newestAgeDays": 5,
+      "newestAgeDays": 12,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 172,
+      "newestAgeDays": 179,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 159,
+      "newestAgeDays": 166,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 134,
+      "newestAgeDays": 141,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3896,
+      "newestAgeDays": 3903,
       "undated": false,
       "stalled": false
     }
@@ -138,10 +138,10 @@
     "sample": [],
     "meaning": "actionable mirror components only (republication candidates + ambiguous identical pairs). Template siblings and boilerplate overlap are distinct documents sharing text, enumerated below, never counted as dirt.",
     "informational": {
-      "templateSiblings": 9,
-      "boilerplateOverlap": 155
+      "templateSiblings": 10,
+      "boilerplateOverlap": 159
     }
   },
-  "generatedAt": "2026-10-25T13:46:01Z",
+  "generatedAt": "2026-11-01T15:58:01Z",
   "evalKey": "corpus-health"
 }

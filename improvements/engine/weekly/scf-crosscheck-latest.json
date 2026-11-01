@@ -1,8 +1,8 @@
 {
-  "generatedAt": "2026-10-25T13:46:01Z",
+  "generatedAt": "2026-11-01T15:58:01Z",
   "frame": {
     "scf": 531,
-    "directory": 1005,
+    "directory": 1006,
     "matched": 340,
     "roundsChecked": 338
   },
@@ -85,6 +85,16 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
+      "slug": "minisend",
+      "name": "Minisend",
+      "ourRounds": [
+        "45"
+      ],
+      "url": "https://communityfund.stellar.org/project/minisend-7tt",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
+    },
+    {
       "slug": "swiftex",
       "name": "SwiftEx",
       "ourRounds": [
@@ -96,16 +106,6 @@
         "45"
       ],
       "reason": "no submission verdict found for round(s) #35"
-    },
-    {
-      "slug": "minisend",
-      "name": "Minisend",
-      "ourRounds": [
-        "45"
-      ],
-      "url": "https://communityfund.stellar.org/project/minisend-7tt",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
       "slug": "wellspring",

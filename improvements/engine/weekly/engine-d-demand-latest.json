@@ -1,18 +1,18 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 60069,
-    "realHits": 8554,
-    "distinctQueries": 3996,
+    "loggedHits": 53844,
+    "realHits": 8716,
+    "distinctQueries": 4389,
     "replayed": 250
   },
-  "okRate": 98,
+  "okRate": 99,
   "misses": [
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 77,
-      "lastSeen": "2026-10-25T10:12:18.260Z",
+      "hits": 68,
+      "lastSeen": "2026-11-01T13:13:12.259Z",
       "days": 14,
       "buckets": [
         "other"
@@ -23,33 +23,9 @@
     {
       "endpoint": "/api/repos/search",
       "query": "flurbomatic quantifold widgetron on stellar",
-      "hits": 15,
-      "lastSeen": "2026-10-25T12:43:07.517Z",
-      "days": 15,
-      "buckets": [
-        "other"
-      ],
-      "class": "EMPTY",
-      "evidence": "0 results"
-    },
-    {
-      "endpoint": "/api/projects/search",
-      "query": "paytag",
-      "hits": 5,
-      "lastSeen": "2026-10-20T16:14:20.187Z",
-      "days": 1,
-      "buckets": [
-        "other"
-      ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
-    },
-    {
-      "endpoint": "/api/repos/search",
-      "query": "calcy",
-      "hits": 5,
-      "lastSeen": "2026-10-19T12:47:35.769Z",
-      "days": 1,
+      "hits": 14,
+      "lastSeen": "2026-11-01T14:26:56.547Z",
+      "days": 14,
       "buckets": [
         "other"
       ],
@@ -69,6 +45,6 @@
       "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
     }
   ],
-  "generatedAt": "2026-10-25T13:46:01Z",
+  "generatedAt": "2026-11-01T15:58:01Z",
   "evalKey": "engine-d-demand"
 }

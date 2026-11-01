@@ -1,18 +1,18 @@
 {
   "base": "https://stellarlight.xyz",
-  "generatedAt": "2026-10-25T13:46:01Z",
-  "specVersion": "1.9.111",
+  "generatedAt": "2026-11-01T15:58:01Z",
+  "specVersion": "1.9.116",
   "frame": {
     "ops": 42,
     "paramsProbed": 40,
-    "fieldsChecked": 1047,
+    "fieldsChecked": 1004,
     "postChecked": 5,
     "skipped": [
       "GET /api/hackathons/builds/{id} (no sample for path params)",
       "GET /api/verify ?type (baseline 400)",
       "GET /api/hackathons/review ?hackathon (baseline 400)",
-      "GET /api/sources/locate ?repo (baseline 400)",
       "GET /api/sources/locate ?kind (baseline 400)",
+      "GET /api/sources/locate ?repo (baseline 400)",
       "GET /api/verify (field check: live call 400)",
       "GET /api/projects/resolve (field check: live call 400)",
       "GET /api/changes (field check: live call 400)",
@@ -121,21 +121,6 @@
       "op": "GET /api/projects/search",
       "field": "projects[].onchainContractsCount",
       "evidence": "documented optional item property absent from all 100 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
-    },
-    {
-      "op": "GET /api/projects/search",
-      "field": "codeReferences[].ciPresent",
-      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
-    },
-    {
-      "op": "GET /api/projects/search",
-      "field": "codeReferences[].testsPresent",
-      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
-    },
-    {
-      "op": "GET /api/projects/search",
-      "field": "codeReferences[].knowledgeNotesCount",
-      "evidence": "documented optional item property absent from all 5 sampled rows (https://stellarlight.xyz/api/projects/search?q=wallet&limit=200) \u2014 allowed by the schema, not drift"
     },
     {
       "op": "GET /api/repos/search",

@@ -63,7 +63,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.883841872215271,
+      "topScore": 0.883861780166626,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -153,7 +153,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8002804517745972,
+      "topScore": 0.801175594329834,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -243,7 +243,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8266215324401855,
+      "topScore": 0.8266825675964355,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -333,7 +333,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7709004878997803,
+      "topScore": 0.7707705497741699,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -351,7 +351,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8461064696311951,
+      "topScore": 0.8462882041931152,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -449,7 +449,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Live network value — served by adapters/RPC, not the static research corpus."
+      "sample": "Live network value \u2014 served by adapters/RPC, not the static research corpus."
     },
     {
       "id": "soroban-sdk-version",
@@ -467,7 +467,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Today's pinned version is a live fact (crates.io) — not the static corpus's job."
+      "sample": "Today's pinned version is a live fact (crates.io) \u2014 not the static corpus's job."
     },
     {
       "id": "repos-zk",
@@ -621,7 +621,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7094740867614746,
+      "topScore": 0.710228681564331,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -703,7 +703,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "yieldblox-incident-facts",
@@ -721,7 +721,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "YieldBlox (Blend V2 pool) — USTRY/Reflector oracle-misconfig"
+      "sample": "YieldBlox (Blend V2 pool) \u2014 USTRY/Reflector oracle-misconfig"
     },
     {
       "id": "cap-exact-id-0038",
@@ -767,7 +767,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6715497970581055,
+      "topScore": 0.6711050271987915,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": true,
@@ -803,7 +803,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8535137176513672,
+      "topScore": 0.853708028793335,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -821,7 +821,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.862249493598938,
+      "topScore": 0.8622249960899353,
       "urlOk": true,
       "scoreOk": null,
       "top1Ok": null,
@@ -958,5 +958,6 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-01T12:04:02Z"
+  "generatedAt": "2026-11-01T15:58:01Z",
+  "evalKey": "golden-eval"
 }
