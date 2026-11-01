@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { isContentStopword } from "../repo-search";
 import {
+	CLI_COMMANDS,
 	candidateTerms,
+	cliCommandPaths,
 	type IndexRow,
 	isCandidate,
 	parseQuery,
@@ -922,5 +924,58 @@ describe("verificationUrl", () => {
 		).toBe(
 			`https://github.com/stellar/quickstart/blob/${"b".repeat(40)}/README.md`,
 		);
+	});
+});
+
+describe("a stellar-cli command checked against the commands tree", () => {
+	// The module paths the index holds under the commands root, as served.
+	const commands = cliCommandPaths(
+		[
+			"keys/generate.rs",
+			"keys/mod.rs",
+			"contract/extend.rs",
+			"contract/invoke.rs",
+			"contract/read.rs",
+			"contract/deploy/asset.rs",
+			"contract/deploy/wasm.rs",
+			"contract/mod.rs",
+			"events.rs",
+		].map((p) => `${CLI_COMMANDS.root}${p}`),
+	);
+	const commandOf = (q: string, tree = commands) =>
+		parseQuery(q, isContentStopword, tree).command;
+
+	it("reads the module paths as commands, two words or more", () => {
+		expect(commands).toContainEqual(["keys", "generate"]);
+		expect(commands).toContainEqual(["contract", "deploy", "asset"]);
+		expect(commands).not.toContainEqual(["events"]);
+	});
+
+	it("finds the command past the first run of words, reversed or plural", () => {
+		// Review 2026-10-31: the first run, read in order, named no module.
+		expect(
+			commandOf("Which stellar-cli file implements the keys generate command?"),
+		).toEqual(["keys", "generate"]);
+		expect(
+			commandOf("Where does the stellar CLI extend a contract's TTL?"),
+		).toEqual(["contract", "extend"]);
+		expect(commandOf("stellar contracts invoke")).toEqual([
+			"contract",
+			"invoke",
+		]);
+		expect(commandOf("stellar contract deploy asset")).toEqual([
+			"contract",
+			"deploy",
+			"asset",
+		]);
+	});
+
+	it("keeps the old reading with no tree, and reads no command in prose", () => {
+		const q = "Where does the stellar CLI extend a contract's TTL?";
+		expect(parseQuery(q, isContentStopword).command).toEqual(commandOf(q, []));
+		// "Stellar" written as the network's name is not the binary.
+		expect(
+			commandOf("How do Stellar contracts read events from the ledger?"),
+		).toBeNull();
 	});
 });

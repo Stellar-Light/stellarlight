@@ -21,7 +21,9 @@ import { gunzipSync } from "node:zlib";
 import { isContentStopword } from "../src/lib/repo-search";
 import {
 	CANDIDATE_CAP,
+	CLI_COMMANDS,
 	candidateTerms,
+	cliCommandPaths,
 	type IndexRow,
 	isCandidate,
 	parseQuery,
@@ -75,8 +77,13 @@ if (rowsPath) {
 	}
 } else throw new Error("--rows <file> or --tarballs <dir> is required");
 
+// The commands tree the route reads off the index, read off these rows.
+const commands = cliCommandPaths(
+	rows.filter((r) => r.repo === CLI_COMMANDS.repo).map((r) => r.path),
+);
+
 const results = cases.map((c) => {
-	const pq = parseQuery(c.q, isContentStopword);
+	const pq = parseQuery(c.q, isContentStopword, commands);
 	const cand = candidateTerms(pq);
 	const pool = rows.filter((r) => isCandidate(r, cand));
 	const ranked = rankRows(pq, pool);

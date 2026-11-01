@@ -1,0 +1,697 @@
+{
+	"summary": {
+		"cases": 20,
+		"indexPointers": 25903,
+		"top1": 18,
+		"top3": 20,
+		"top10": 20,
+		"symbolTop1": 15,
+		"symbolTop3": 19,
+		"symbolTop10": 20,
+		"missedTop10": [],
+		"partialOnlyTop10": [],
+		"misleadingInTop10": []
+	},
+	"results": [
+		{
+			"id": "m1",
+			"q": "Where does the quickstart start script set the default for --enable-core-manual-close?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 756,
+			"overCap": false,
+			"matched": 756,
+			"top3": [
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "ENABLE_CORE_MANUAL_CLOSE",
+					"score": 43,
+					"matchReason": "path has start; symbol --enable-core-manual-close; repo named in q"
+				},
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "--enable-core-manual-close",
+					"score": 43,
+					"matchReason": "path has start; symbol --enable-core-manual-close; repo named in q"
+				},
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "start",
+					"score": 30,
+					"matchReason": "symbol start, path too; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "m2",
+			"q": "Where does stellar-rpc configure the default and maximum limit for getTransactions?",
+			"fileRank": 2,
+			"symbolRank": 9,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 4465,
+			"overCap": false,
+			"matched": 4465,
+			"top3": [
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv2/config/config.go",
+					"locator": "DefaultGetTransactionsMaxItemsPerResponse",
+					"score": 37,
+					"matchReason": "path has config; symbol has default; symbol has max; symbol holds getTransactions; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv1/config/options.go",
+					"locator": "max-get-transactions-execution-duration",
+					"score": 32,
+					"matchReason": "path has config; symbol has max; symbol holds getTransactions; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv2/config/config.go",
+					"locator": "DefaultGetTransactionsDefaultItemsPerResponse",
+					"score": 32,
+					"matchReason": "path has config; symbol has default; symbol holds getTransactions; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c03",
+			"q": "Where is extend_ttl defined for persistent storage in the Soroban Rust SDK?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1448,
+			"overCap": false,
+			"matched": 1448,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/storage.rs",
+					"locator": "extend_ttl",
+					"score": 25,
+					"matchReason": "symbol extend_ttl; path has storage; path has soroban; path has sdk"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/deploy.rs",
+					"locator": "extend_ttl",
+					"score": 24,
+					"matchReason": "symbol extend_ttl; path has soroban; path has sdk"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/storage.rs",
+					"locator": "extend_ttl",
+					"score": 24,
+					"matchReason": "symbol extend_ttl; path has storage; path has soroban"
+				}
+			]
+		},
+		{
+			"id": "c04",
+			"q": "Where does the Soroban SDK implement require_auth on Address?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 643,
+			"overCap": false,
+			"matched": 640,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/address.rs",
+					"locator": "require_auth",
+					"score": 74,
+					"matchReason": "symbol require_auth; path has address; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/env.rs",
+					"locator": "require_auth",
+					"score": 71,
+					"matchReason": "symbol require_auth; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/address.rs",
+					"locator": "require_auth_for_args",
+					"score": 56,
+					"matchReason": "symbol holds require_auth; path has address; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c05",
+			"q": "Where is the TokenInterface trait defined in soroban-sdk?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 364,
+			"overCap": false,
+			"matched": 364,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/token.rs",
+					"locator": "TokenInterface",
+					"score": 73,
+					"matchReason": "symbol TokenInterface, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-spec-rust/src/trait.rs",
+					"locator": "generate_trait",
+					"score": 36,
+					"matchReason": "symbol has trait, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk-macros/src/syn_ext.rs",
+					"locator": "trait_methods",
+					"score": 33,
+					"matchReason": "symbol has trait; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c06",
+			"q": "Where is prepareTransaction implemented in the js-stellar-sdk RPC server?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2491,
+			"overCap": false,
+			"matched": 2491,
+			"top3": [
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/rpc/server.ts",
+					"locator": "prepareTransaction",
+					"score": 52,
+					"matchReason": "symbol prepareTransaction; path has rpc; path has server; repo named in q"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/rpc/server.ts",
+					"locator": "RpcServer",
+					"score": 48,
+					"matchReason": "symbol has rpc, path too; symbol has server, path too; symbol RPC server; repo named in q"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "docs/reference/network-rpc.md",
+					"locator": "rpc.Server",
+					"score": 46,
+					"matchReason": "heading has rpc, path too; heading has server; heading RPC server; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c07",
+			"q": "Which js-stellar-sdk file has assembleTransaction, which applies simulation results to a transaction?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2734,
+			"overCap": false,
+			"matched": 2734,
+			"top3": [
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/rpc/transaction.ts",
+					"locator": "assembleTransaction",
+					"score": 42,
+					"matchReason": "symbol assembleTransaction, path too; symbol has transaction, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/base/transaction.ts",
+					"locator": "Transaction",
+					"score": 29,
+					"matchReason": "symbol has transaction, path too; symbol transaction, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/horizon/transaction_call_builder.ts",
+					"locator": "transaction",
+					"score": 29,
+					"matchReason": "symbol has transaction, path too; symbol transaction, path too; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c08",
+			"q": "Where is signAndSend defined on AssembledTransaction in the JS SDK contract client?",
+			"fileRank": 1,
+			"symbolRank": 2,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 3668,
+			"overCap": false,
+			"matched": 3668,
+			"top3": [
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/contract/assembled_transaction.ts",
+					"locator": "AssembledTransaction",
+					"score": 27,
+					"matchReason": "symbol AssembledTransaction, path too; path has js; path has sdk; path has contract"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/contract/assembled_transaction.ts",
+					"locator": "signAndSend",
+					"score": 27,
+					"matchReason": "symbol signAndSend; path has assembled transaction; path has js; path has sdk; path has contract"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "docs/reference/contracts-client.md",
+					"locator": "assembledTransaction.signAndSend(__namedParameters)",
+					"score": 21,
+					"matchReason": "heading has sign and send; heading has assembled transaction; path has js; path has sdk; path has c…"
+				}
+			]
+		},
+		{
+			"id": "c09",
+			"q": "Where does stellar-core document the HTTP query server commands?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 613,
+			"overCap": false,
+			"matched": 613,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "docs/software/commands.md",
+					"locator": "HTTP Query Server",
+					"score": 44,
+					"matchReason": "heading has http; heading has query; heading has server; path has command; heading HTTP query serve…"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/QueryServer.h",
+					"locator": "QueryServer",
+					"score": 36,
+					"matchReason": "symbol has query, path too; symbol has server, path too; symbol query server; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/Config.cpp",
+					"locator": "COMMANDS",
+					"score": 32,
+					"matchReason": "symbol commands; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c10",
+			"q": "Which stellar-rpc option sets the history retention window?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 417,
+			"overCap": false,
+			"matched": 371,
+			"top3": [
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv1/config/options.go",
+					"locator": "history-retention-window",
+					"score": 51,
+					"matchReason": "path has option; symbol has history; symbol has retention; symbol has window; symbol history retent…"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv2/geometry/retention.go",
+					"locator": "RetentionWindow",
+					"score": 37,
+					"matchReason": "symbol has retention, path too; symbol has window; symbol retention window; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv1/config/option.go",
+					"locator": "Option",
+					"score": 34,
+					"matchReason": "symbol option, path too; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c11",
+			"q": "Where is the simulateTransaction handler implemented in stellar-rpc?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2066,
+			"overCap": false,
+			"matched": 2066,
+			"top3": [
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/methods/simulate_transaction.go",
+					"locator": "NewSimulateTransactionHandler",
+					"score": 65,
+					"matchReason": "symbol holds simulateTransaction, path too; symbol has handler; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/integrationtest/infrastructure/client.go",
+					"locator": "SimulateTransactionFromTxParams",
+					"score": 53,
+					"matchReason": "symbol holds simulateTransaction; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv2/config/config.go",
+					"locator": "DefaultSimulateTransactionQueueLimit",
+					"score": 53,
+					"matchReason": "symbol holds simulateTransaction; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c12",
+			"q": "Which part of the quickstart README explains ephemeral mode versus persistent mode?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 185,
+			"overCap": false,
+			"matched": 185,
+			"top3": [
+				{
+					"repo": "stellar/quickstart",
+					"path": "README.md",
+					"locator": "Ephemeral mode",
+					"score": 39,
+					"matchReason": "path has readme; heading has ephemeral; heading has mode; heading ephemeral mode; repo named in q"
+				},
+				{
+					"repo": "stellar/quickstart",
+					"path": "README.md",
+					"locator": "Persistent mode",
+					"score": 39,
+					"matchReason": "path has readme; heading has mode; heading has persistent; heading persistent mode; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/cli/mode.go",
+					"locator": "Mode",
+					"score": 16,
+					"matchReason": "symbol mode, path too"
+				}
+			]
+		},
+		{
+			"id": "c13",
+			"q": "Which file defines the --rpc-url flag of the stellar CLI?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 603,
+			"overCap": false,
+			"matched": 603,
+			"top3": [
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/config/network.rs",
+					"locator": "--rpc-url",
+					"score": 71,
+					"matchReason": "symbol --rpc-url; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/crates/soroban-spec-typescript/ts-tests/src/util.ts",
+					"locator": "rpcUrl",
+					"score": 71,
+					"matchReason": "symbol --rpc-url; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/crates/soroban-test/src/lib.rs",
+					"locator": "with_rpc_url",
+					"score": 53,
+					"matchReason": "symbol holds --rpc-url; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c14",
+			"q": "Where does stellar contract deploy define the --wasm-hash option?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1923,
+			"overCap": false,
+			"matched": 1920,
+			"top3": [
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/deploy/wasm.rs",
+					"locator": "--wasm-hash",
+					"score": 51,
+					"matchReason": "implements contract deploy; path has contract; path has deploy; symbol --wasm-hash, path too"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/deploy/wasm.rs",
+					"locator": "build_create_contract_tx",
+					"score": 32,
+					"matchReason": "implements contract deploy; symbol has contract, path too; path has deploy; path has wasm"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/deploy/wasm.rs",
+					"locator": "--wasm",
+					"score": 30,
+					"matchReason": "implements contract deploy; path has contract; path has deploy; symbol has wasm, path too"
+				}
+			]
+		},
+		{
+			"id": "c15",
+			"q": "Where is the quickstart --limits flag parsed?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 348,
+			"overCap": false,
+			"matched": 348,
+			"top3": [
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "LIMITS",
+					"score": 71,
+					"matchReason": "symbol --limits; repo named in q"
+				},
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "--limits",
+					"score": 71,
+					"matchReason": "symbol --limits; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/container/start.rs",
+					"locator": "--limits",
+					"score": 49,
+					"matchReason": "symbol --limits"
+				}
+			]
+		},
+		{
+			"id": "c16",
+			"q": "Where is the transfer function of the token example contract in soroban-examples?",
+			"fileRank": 1,
+			"symbolRank": 2,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1735,
+			"overCap": false,
+			"matched": 1735,
+			"top3": [
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "token/src/contract.rs",
+					"locator": "Token",
+					"score": 38,
+					"matchReason": "symbol token, path too; path has example; path has contract; repo named in q"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "token/src/contract.rs",
+					"locator": "transfer",
+					"score": 38,
+					"matchReason": "symbol transfer; path has token; path has example; path has contract; repo named in q"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "deployer/contract/src/lib.rs",
+					"locator": "Contract",
+					"score": 36,
+					"matchReason": "path has example; symbol contract, path too; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c17",
+			"q": "Where is the swap function of the atomic swap example contract?",
+			"fileRank": 1,
+			"symbolRank": 2,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1279,
+			"overCap": false,
+			"matched": 1279,
+			"top3": [
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "atomic_swap/src/lib.rs",
+					"locator": "AtomicSwapContract",
+					"score": 29,
+					"matchReason": "symbol has swap, path too; symbol has atomic, path too; path has example; symbol has contract"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "atomic_swap/src/lib.rs",
+					"locator": "swap",
+					"score": 27,
+					"matchReason": "symbol swap, path too; path has atomic; path has example"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "atomic_multiswap/src/lib.rs",
+					"locator": "AtomicMultiSwapContract",
+					"score": 26,
+					"matchReason": "symbol has swap; symbol has atomic, path too; path has example; symbol has contract"
+				}
+			]
+		},
+		{
+			"id": "c18",
+			"q": "Where does stellar-core compute an account's minimum balance (getMinBalance)?",
+			"fileRank": 2,
+			"symbolRank": 2,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2767,
+			"overCap": false,
+			"matched": 2767,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/transactions/TransactionUtils.h",
+					"locator": "getMinBalance",
+					"score": 44,
+					"matchReason": "symbol has min; symbol has balance; symbol getMinBalance; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/transactions/TransactionUtils.cpp",
+					"locator": "getMinBalance",
+					"score": 44,
+					"matchReason": "symbol has min; symbol has balance; symbol getMinBalance; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/herder/Upgrades.cpp",
+					"locator": "getOfferAccountMinBalances",
+					"score": 41,
+					"matchReason": "symbol has account; symbol has min; symbol has balance; symbol has get min balance; symbol holds ac…"
+				}
+			]
+		},
+		{
+			"id": "c19",
+			"q": "Where is the default PEER_PORT set in stellar-core's configuration?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 1064,
+			"overCap": false,
+			"matched": 1064,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/Config.cpp",
+					"locator": "PEER_PORT",
+					"score": 59,
+					"matchReason": "symbol PEER_PORT; path has config; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "docs/stellar-core_example.cfg",
+					"locator": "PEER_PORT",
+					"score": 59,
+					"matchReason": "symbol PEER_PORT; path has config; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/Config.h",
+					"locator": "DEFAULT_PEER_PORT",
+					"score": 52,
+					"matchReason": "symbol has default; symbol holds PEER_PORT; path has config; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "c20",
+			"q": "Where does the Soroban host implement the extend_contract_data_ttl host function?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2713,
+			"overCap": false,
+			"matched": 2712,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/host.rs",
+					"locator": "extend_contract_data_ttl",
+					"score": 43,
+					"matchReason": "path has soroban; path has host; symbol extend_contract_data_ttl"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/host.rs",
+					"locator": "extend_contract_data_ttl_v2",
+					"score": 29,
+					"matchReason": "path has soroban; path has host; symbol holds extend_contract_data_ttl"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/host.rs",
+					"locator": "Host",
+					"score": 25,
+					"matchReason": "path has soroban; symbol host, path too"
+				}
+			]
+		}
+	]
+}

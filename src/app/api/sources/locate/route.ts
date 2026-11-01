@@ -22,6 +22,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { DEFAULT_READ_TIMEOUT_MS, degradedRead } from "@/lib/degraded-read";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { instanceMemo } from "@/lib/instance-memo";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { isContentStopword } from "@/lib/repo-search";
@@ -31,6 +32,7 @@ import {
 	CANDIDATE_CAP,
 	CLI_COMMANDS,
 	candidateTerms,
+	cliCommandPaths,
 	commandPathPattern,
 	LOCATE_MATCH_MODES,
 	LOCATE_MAX_PAGE,
@@ -62,6 +64,30 @@ const READ_PROJECTION = Object.fromEntries([
 const MAX_Q_CHARS = 300;
 const NOTE =
 	"Pointers, not content: fetch verificationUrl (the file at the pinned commit, at the line) to read the fact. ref is the commit the pointer was read at; an unchanged file keeps its first ref, which stays valid (same blob, same lines) and was re-confirmed at verifiedAt. Ranking is lexical: an exact symbol or file name scores highest, then an identifier held in a name, then words in a symbol or heading, then path words; adjacent words of q also match as one name, an identifier typed in q counts double, a few crypto and auth words match the code's names, and a repo or stellar-cli command named in q lifts its pointers; score is 0 to 100 against this q. pointers [] means the indexed repos hold no match; null means they could not be searched.";
+
+/** stellar-cli's commands tree, read off the index's own paths and kept per
+ * instance for 10 minutes: what a command typed in q is checked against.
+ * Null when it could not be read: q is then parsed as before. */
+let cliCommands: (() => Promise<string[][] | null>) | null = null;
+function cliCommandsOf(
+	// biome-ignore lint/suspicious/noExplicitAny: mongo db handle
+	db: any,
+): Promise<string[][] | null> {
+	cliCommands ??= instanceMemo(600_000, async () =>
+		cliCommandPaths(
+			(await db.collection("source-locators").distinct("path", {
+				repo: CLI_COMMANDS.repo,
+				path: { $regex: `^${CLI_COMMANDS.root}` },
+			})) as string[],
+		),
+	);
+	return degradedRead(
+		"source-locator-commands",
+		() => (cliCommands as () => Promise<string[][] | null>)(),
+		null,
+		DEFAULT_READ_TIMEOUT_MS,
+	).then((r) => r.value ?? null);
+}
 
 interface RepoState {
 	repo: string;
@@ -231,7 +257,11 @@ export async function GET(req: NextRequest) {
 		);
 	}
 
-	const cand = candidateTerms(pq);
+	// A command typed in q is checked against the tree stellar-cli has; with
+	// no tree read, q is parsed as it was above.
+	const commands = await cliCommandsOf(db);
+	const parsed = commands ? parseQuery(q, isContentStopword, commands) : pq;
+	const cand = candidateTerms(parsed);
 	const byTerm = {
 		terms: {
 			$in: [...cand.exact, ...cand.prefixes.map((p) => new RegExp(`^${p}`))],
@@ -276,7 +306,10 @@ export async function GET(req: NextRequest) {
 			`q matched more than ${CANDIDATE_CAP} candidate pointers; ranked the first ${CANDIDATE_CAP} read. Add a repo or a more specific word.`,
 		);
 
-	const ranked = rankRows(pq, found.slice(0, CANDIDATE_CAP), { repo, kind });
+	const ranked = rankRows(parsed, found.slice(0, CANDIDATE_CAP), {
+		repo,
+		kind,
+	});
 	const start = (page - 1) * PAGE_SIZE;
 	const pointers = ranked.slice(start, start + PAGE_SIZE).map((s, i) => {
 		const r = s.row;
