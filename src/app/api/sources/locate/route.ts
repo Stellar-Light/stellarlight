@@ -20,9 +20,9 @@ import { type NextRequest, NextResponse } from "next/server";
 import { rateLimited } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { DEFAULT_READ_TIMEOUT_MS, degradedRead } from "@/lib/degraded-read";
+import { instanceMemo } from "@/lib/instance-memo";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
-import { instanceMemo } from "@/lib/instance-memo";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { isContentStopword } from "@/lib/repo-search";
@@ -66,27 +66,36 @@ const NOTE =
 	"Pointers, not content: fetch verificationUrl (the file at the pinned commit, at the line) to read the fact. ref is the commit the pointer was read at; an unchanged file keeps its first ref, which stays valid (same blob, same lines) and was re-confirmed at verifiedAt. Ranking is lexical: an exact symbol or file name scores highest, then an identifier held in a name, then words in a symbol or heading, then path words; adjacent words of q also match as one name, an identifier typed in q counts double, a few crypto and auth words match the code's names, and a repo or stellar-cli command named in q lifts its pointers; score is 0 to 100 against this q. pointers [] means the indexed repos hold no match; null means they could not be searched.";
 
 /** stellar-cli's commands tree, read off the index's own paths and kept per
- * instance for 10 minutes: what a command typed in q is checked against.
- * Null when it could not be read: q is then parsed as before. */
-let cliCommands: (() => Promise<string[][] | null>) | null = null;
+ * instance for 10 minutes: what a command typed after a CLI alias is checked
+ * against. Null when it could not be read: q is then parsed as before. A
+ * read that failed or timed out is not kept, so the next request reads
+ * again rather than waiting on it (review, 2026-11-01). */
+let cliCommands: (() => Promise<string[][]>) | null = null;
+// biome-ignore lint/suspicious/noExplicitAny: mongo db handle
+let cliCommandsDb: any = null;
 function cliCommandsOf(
 	// biome-ignore lint/suspicious/noExplicitAny: mongo db handle
 	db: any,
 ): Promise<string[][] | null> {
+	cliCommandsDb = db;
 	cliCommands ??= instanceMemo(600_000, async () =>
 		cliCommandPaths(
-			(await db.collection("source-locators").distinct("path", {
+			(await cliCommandsDb.collection("source-locators").distinct("path", {
 				repo: CLI_COMMANDS.repo,
 				path: { $regex: `^${CLI_COMMANDS.root}` },
 			})) as string[],
 		),
 	);
+	const read = cliCommands;
 	return degradedRead(
 		"source-locator-commands",
-		() => (cliCommands as () => Promise<string[][] | null>)(),
+		() => read(),
 		null,
 		DEFAULT_READ_TIMEOUT_MS,
-	).then((r) => r.value ?? null);
+	).then((r) => {
+		if (r.warning && cliCommands === read) cliCommands = null;
+		return r.value;
+	});
 }
 
 interface RepoState {

@@ -12,10 +12,15 @@ names a module, so the command was dropped.
 
 `parseQuery` takes an optional commands tree (`cliCommandPaths`, read off
 the index's own paths under `cmd/soroban-cli/src/commands/`: two segments or
-more). With it, every run of words within 10 tokens of a CLI mention is
-tried, stemmed on both sides, and a two-word run also reversed; the first
-that names a module stellar-cli has is the command, in the module's own
-words. Without a tree, or when no run names a module, the old reading
+more). With it, after an alias that names the CLI ("the stellar CLI",
+"stellar-cli"), every run of words within 10 tokens is tried, stemmed on
+both sides, and a two-word run also reversed; the first that names a module
+stellar-cli has is the command, in the module's own words. A bare lowercase
+"stellar" keeps the old in-order reading: the review of the first version
+found that, read loosely after it, prose about the network ("the stellar
+asset contract", "stellar contracts read events") lifted the CLI router over
+the answer (clawback in the asset contract fell from 1 to 5, contract
+events from 6 to 15). A test now holds those five phrasings to main's parse. Without a tree, or when no run names a module, the old reading
 stands. The route reads the tree once per instance for 10 minutes (a
 `distinct` over the index, failure tolerant); the battery harness reads it
 off its rows. "Stellar" capitalized, as the network's name, is not the
@@ -49,4 +54,5 @@ first.
   asset-deploy module stays out of reach for that reason.
 
 Base runs use origin/main's harness and locator; change runs use this
-branch. Result files: `base-*.json`, `change-*.json`, `*-priority.txt`.
+branch (the narrowed rule; the first version scored the same on these sets,
+which is why the review's prose probes are pinned in a test). Result files: `base-*.json`, `change-*.json`, `*-priority.txt`.

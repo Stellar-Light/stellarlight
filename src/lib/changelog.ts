@@ -38,7 +38,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		summary:
 			'locateSource reads a stellar-cli command against the commands stellar-cli has: past the first run of words, reversed or plural. "Which stellar-cli file implements the keys generate command?" now ranks keys/generate.rs first, where it ranked 77th, and "Where does the stellar CLI extend a contract\'s TTL?" ranks contract/extend.rs first.',
 		detail:
-			"The commands tree is read off the index's own paths. Without it, or when no run names a module, q is read as before. Replayed over the six frozen locate sets: the dev set goes from 8, 10, 13 to 10, 12, 14 files found at ranks 1, 3 and 10, and no case in any set moves down. Stellar written as the network's name, capitalized, is not the binary.",
+			"The commands tree is read off the index's own paths. Without it, or when no run names a module, q is read as before. Replayed over the six frozen locate sets: the dev set goes from 8, 10, 13 to 10, 12, 14 files found at ranks 1, 3 and 10, and no case in any set moves down. A bare stellar keeps the old in-order reading, since in prose it is the network; only an alias that names the CLI (the stellar CLI, stellar-cli) gets the wider reading.",
 	},
 	{
 		date: "2026-10-31",

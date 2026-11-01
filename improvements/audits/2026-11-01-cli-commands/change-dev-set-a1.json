@@ -28,21 +28,21 @@
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/invoke.rs",
 					"locator": "invoke",
-					"score": 54,
+					"score": 47,
 					"matchReason": "implements contract invoke; path has contract; symbol invoke, path too; path has command"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/invoke.rs",
 					"locator": "build_invoke_contract_tx",
-					"score": 49,
+					"score": 43,
 					"matchReason": "implements contract invoke; symbol has contract, path too; symbol has invoke, path too; path has co…"
 				},
 				{
 					"repo": "stellar/stellar-cli",
 					"path": "cmd/soroban-cli/src/commands/contract/invoke.rs",
 					"locator": "STELLAR_CONTRACT_ID",
-					"score": 43,
+					"score": 37,
 					"matchReason": "implements contract invoke; symbol has contract, path too; path has invoke; path has command"
 				}
 			]

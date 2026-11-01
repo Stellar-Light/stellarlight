@@ -959,7 +959,7 @@ describe("a stellar-cli command checked against the commands tree", () => {
 		expect(
 			commandOf("Where does the stellar CLI extend a contract's TTL?"),
 		).toEqual(["contract", "extend"]);
-		expect(commandOf("stellar contracts invoke")).toEqual([
+		expect(commandOf("the stellar CLI contracts invoke command")).toEqual([
 			"contract",
 			"invoke",
 		]);
@@ -968,6 +968,20 @@ describe("a stellar-cli command checked against the commands tree", () => {
 			"deploy",
 			"asset",
 		]);
+	});
+
+	it("a bare lowercase stellar keeps the old reading: in prose it is the network", () => {
+		// Second review, 2026-11-01: read loosely, these lifted the CLI router
+		// over the answer (the asset contract's own code, the SDK's events).
+		for (const q of [
+			"how is clawback handled in the stellar asset contract?",
+			"deploy its stellar asset contract",
+			"how do stellar contracts read events from the ledger",
+			"where do stellar contracts fetch ledger entries",
+			"what stellar charges when contracts invoke other contracts",
+			"stellar contract deploy asset",
+		])
+			expect(commandOf(q), q).toEqual(parseQuery(q, isContentStopword).command);
 	});
 
 	it("keeps the old reading with no tree, and reads no command in prose", () => {

@@ -508,12 +508,16 @@ export function parseQuery(
 		}
 		if (words.length >= 2) command = words;
 	}
-	// With the commands tree known, every run of words near a CLI mention is
-	// tried, stemmed, and a two-word run reversed too, and the first that
-	// names a module stellar-cli has wins: the first run, read in English
-	// order, named none for "which stellar-cli file implements the keys
-	// generate command", "the stellar CLI extend a contract's TTL" or
-	// "stellar contracts invoke" (review, 2026-10-31).
+	// With the commands tree known, after an alias that names the CLI ("the
+	// stellar CLI", "stellar-cli") every run of words near it is tried,
+	// stemmed, and a two-word run reversed too, and the first that names a
+	// module stellar-cli has wins: the first run, read in English order,
+	// named none for "which stellar-cli file implements the keys generate
+	// command" or "the stellar CLI extend a contract's TTL" (review,
+	// 2026-10-31). A bare "stellar" keeps the reading above: in prose it is
+	// the network ("the stellar asset contract", "stellar contracts read
+	// events"), and the looser reading lifted the CLI router over the answer
+	// (second review, 2026-11-01).
 	if (commands?.length) {
 		// Stemmed on both sides ("contracts" is contract, "keys" stays the
 		// keys module), answered in the module's own words.
@@ -528,13 +532,13 @@ export function parseQuery(
 		};
 		let found: string[] | null = null;
 		for (let bin = 0; bin < tokens.length && !found; bin++) {
-			const binary =
-				!consumed.has(bin) &&
-				(CLI_COMMANDS.binaries as readonly string[]).includes(tokens[bin]);
-			if (!(binary || cliAliasEnds.has(bin)) || ENDS_RUN.test(parts[bin].raw))
-				continue;
+			if (!cliAliasEnds.has(bin) || ENDS_RUN.test(parts[bin].raw)) continue;
 			const runs: string[][] = [[]];
-			for (let i = bin + 1; i < tokens.length && i <= bin + COMMAND_WINDOW; i++) {
+			for (
+				let i = bin + 1;
+				i < tokens.length && i <= bin + COMMAND_WINDOW;
+				i++
+			) {
 				const t = tokens[i];
 				if (STARTS_RUN.test(parts[i].raw)) runs.push([]);
 				if (!consumed.has(i) && !FILLER.has(t)) {
@@ -549,8 +553,7 @@ export function parseQuery(
 			}
 			for (const run of runs) {
 				found =
-					named(run) ??
-					(run.length === 2 ? named([run[1], run[0]]) : null);
+					named(run) ?? (run.length === 2 ? named([run[1], run[0]]) : null);
 				if (found) break;
 			}
 		}
