@@ -149,7 +149,7 @@ const LANG_SDK_MARKERS: {
 	{
 		lang: "rust-infra",
 		file: (n) => n === "cargo.toml",
-		re: /\[dependencies\.(stellar|soroban)-[a-z0-9_-]+\]|^\s*(stellar-(xdr|strkey|baselib|quorum[a-z0-9_-]*)|soroban-(client|env|spec|rpc)[a-z0-9_-]*)\s*=|^\s*name\s*=\s*"(stellar|soroban)-[a-z0-9_-]+"/im,
+		re: /\[dependencies\.(stellar|soroban)-[a-z0-9_-]+\]|^\s*(stellar-(xdr|strkey|baselib|rpc-client|quorum[a-z0-9_-]*)|soroban-(client|env|spec|rpc)[a-z0-9_-]*)\s*=|^\s*name\s*=\s*"(stellar|soroban)-[a-z0-9_-]+"/im,
 	},
 	// AssemblyScript Soroban contracts. Verified against the real manifests in
 	// Soneso/as-soroban-examples: each contract's package.json depends on

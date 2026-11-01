@@ -43,6 +43,26 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-10-31",
 		surfaces: ["api"],
+		version: "spec@1.9.115",
+		type: "fixed",
+		summary:
+			"searchProjects' statusChecks no longer read a partial reading as a verdict: on rows found by meaning, whose dates arrive as Date objects, the DefiLlama checks said not yet checked; a contract with only one of its two counters read counted as quiet; an unparseable window and a negative TVL fell through to a hit; and $0 over a listing with a mapped slug DefiLlama no longer lists could hit. Each now reads its dates or answers could-not-check.",
+		detail:
+			"A DefiLlama row with a per-chain breakdown that holds no Stellar figure is no Stellar TVL (its total is other chains'). enrich-tvl's map now names Soroswap's renamed slug (soroswap-amm) and the directory rows phoenix and normal, whose old keys matched no row; the figures move on its next run.",
+	},
+	{
+		date: "2026-10-31",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.114",
+		type: "fixed",
+		summary:
+			"reviewSubmission's live read no longer calls a partial read a no: a repo whose tree holds git submodules, or whose listing GitHub cut short, lists tree in review.repo.unread with the reason, and its contract crates, Stellar packages and test files read could-not-check rather than not-found when none are listed.",
+		detail:
+			"A contract id written only inside an HTML comment, which GitHub does not show, is not read. optionalDependencies and the Rust soroban-client crate count as Stellar packages. A token GitHub rejects is retried after 15 minutes even when the unauthenticated pool runs dry meanwhile, and a read's unused calls are refunded only into the hour it reserved them in. A tree that is partial for good (submodules, a cut listing) keeps the full 5-minute cache. The Rust stellar-rpc-client crate counts as a Stellar package too. The spec now says the test-file count stays a floor over a partial tree, and that the review limit of 20 a minute is per IP address (a partner key has its own tier).",
+	},
+	{
+		date: "2026-10-31",
+		surfaces: ["api"],
 		version: "spec@1.9.113",
 		type: "fixed",
 		summary:

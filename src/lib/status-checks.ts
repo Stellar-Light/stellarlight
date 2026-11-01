@@ -134,12 +134,16 @@ export interface LlamaTvlInput {
 	deadFrom?: string | null;
 }
 
-const rowTvl = (r: LlamaTvlInput): number | null =>
-	typeof r.chainTvls?.Stellar === "number"
-		? r.chainTvls.Stellar
-		: typeof r.tvl === "number"
-			? r.tvl
-			: null;
+/** A row's Stellar TVL: its Stellar slice, or its total when DefiLlama
+ * publishes no per-chain breakdown at all. A breakdown without a Stellar
+ * figure is no Stellar reading: its total is other chains' (review,
+ * 2026-10-31). */
+const rowTvl = (r: LlamaTvlInput): number | null => {
+	const chains = r.chainTvls;
+	if (typeof chains?.Stellar === "number") return chains.Stellar;
+	if (chains && Object.keys(chains).length) return null;
+	return typeof r.tvl === "number" ? r.tvl : null;
+};
 
 /** TVL on Stellar summed over mapped rows: each row's Stellar slice where
  * DefiLlama publishes one, else its protocol total. Null when no row carries
@@ -190,7 +194,9 @@ interface ContractDelta {
 const str = (v: unknown) => (typeof v === "string" && v ? v : null);
 
 /** "moved" when any measured delta is non-zero, "quiet" when every contract
- * has a measured delta and all are zero, null when that cannot be said. */
+ * has both deltas measured (events and sub-calls) and all are zero, null
+ * when that cannot be said: a counter that was not read is not a zero
+ * (review, 2026-10-31). */
 function windowState(contracts: unknown): "moved" | "quiet" | null {
 	if (!Array.isArray(contracts) || !contracts.length) return null;
 	const deltas = (contracts as ContractDelta[]).map((c) =>
@@ -199,7 +205,7 @@ function windowState(contracts: unknown): "moved" | "quiet" | null {
 		),
 	);
 	if (deltas.some((d) => d.some((v) => v !== 0))) return "moved";
-	return deltas.every((d) => d.length > 0) ? "quiet" : null;
+	return deltas.every((d) => d.length === 2) ? "quiet" : null;
 }
 
 /** Start of the unbroken run of readings in which no tracked contract moved,
@@ -230,8 +236,20 @@ export function quietSinceFor(
 
 // ── serve side ──────────────────────────────────────────────────────────
 
-const day = (v: unknown) =>
-	typeof v === "string" && v ? v.slice(0, 10) : null;
+/** A stored date as an ISO string. Payload hands strings, but the semantic
+ * search rows come from a raw aggregate, where a date field is a Date: read
+ * as no date, every DefiLlama check on those rows said "not yet checked"
+ * (review, 2026-10-31). */
+const iso = (v: unknown): string | null =>
+	v instanceof Date
+		? Number.isNaN(v.getTime())
+			? null
+			: v.toISOString()
+		: typeof v === "string" && v
+			? v
+			: null;
+
+const day = (v: unknown) => iso(v)?.slice(0, 10) ?? null;
 
 const daysBetween = (from: string, to: string) =>
 	Math.floor((Date.parse(to) - Date.parse(from)) / 86_400_000);
@@ -311,10 +329,14 @@ function tvlQuietCheck(p: any, slugs: string[], now: Date): StatusCheck {
 	});
 	if (typeof p.tvlUSD !== "number")
 		return result("could-not-check", "No DefiLlama TVL figure on record.");
-	const tvlAge =
-		typeof p.tvlAsOf === "string"
-			? daysBetween(p.tvlAsOf, now.toISOString())
-			: NaN;
+	// A negative or non-finite figure is not a reading of $0.
+	if (!Number.isFinite(p.tvlUSD) || p.tvlUSD < 0)
+		return result(
+			"could-not-check",
+			"The DefiLlama TVL on record is not a usable figure.",
+		);
+	const tvlIso = iso(p.tvlAsOf);
+	const tvlAge = tvlIso ? daysBetween(tvlIso, now.toISOString()) : NaN;
 	if (!(tvlAge <= TVL_FRESH_DAYS))
 		return result(
 			"could-not-check",
@@ -325,7 +347,14 @@ function tvlQuietCheck(p: any, slugs: string[], now: Date): StatusCheck {
 			"clear",
 			`DefiLlama TVL ${usd(p.tvlUSD)}${tvlAsOf ? ` on ${tvlAsOf}` : ""}.`,
 		);
-	const asOf = typeof o?.asOf === "string" ? o.asOf : null;
+	// A listing with a mapped slug DefiLlama no longer lists does not sum the
+	// whole TVL: the missing slug may be where the value is.
+	if (["partial", "not-found"].includes(p.llamaListing?.state))
+		return result(
+			"could-not-check",
+			"TVL is $0, but DefiLlama's listing of the mapped protocols was not read whole, so the figure may leave value out.",
+		);
+	const asOf = iso(o?.asOf);
 	if (!asOf || !contracts.length)
 		return result(
 			"could-not-check",
@@ -339,7 +368,7 @@ function tvlQuietCheck(p: any, slugs: string[], now: Date): StatusCheck {
 			day(asOf),
 		);
 	const sinceAt: string | null =
-		state === "quiet" ? o.quietSince || o.prevAsOf || null : null;
+		state === "quiet" ? iso(o.quietSince) || iso(o.prevAsOf) : null;
 	const since = day(sinceAt);
 	if (!sinceAt || !since)
 		return result(
@@ -349,6 +378,13 @@ function tvlQuietCheck(p: any, slugs: string[], now: Date): StatusCheck {
 		);
 	const quiet = daysBetween(sinceAt, asOf);
 	const n = contracts.length;
+	// An unparseable date is no window: NaN < 60 is false and fell to a hit.
+	if (!Number.isFinite(quiet))
+		return result(
+			"could-not-check",
+			"TVL is $0, but the dates of its contract readings could not be read.",
+			day(asOf),
+		);
 	if (quiet < QUIET_DAYS)
 		return result(
 			"could-not-check",
