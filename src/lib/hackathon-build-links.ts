@@ -234,8 +234,14 @@ export function indexProjectSites(
 
 /** A name compared as letters and digits only, lowercased; null under four
  * characters, too short to identify anything. */
+/** A name with its accents folded: CaféPay is cafepay, never cafpay, in either
+ * Unicode form (review, 2026-10-31). Canonical decomposition only: NFKD also
+ * turned a trademark sign into tm, so PayZoll(TM) stopped naming PayZoll. */
+const folded = (name: string | null | undefined) =>
+	(name ?? "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+
 export function nameKeyOf(name: string | null | undefined): string | null {
-	const key = (name ?? "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+	const key = folded(name).replace(/[^a-z0-9]+/g, "");
 	return key.length >= 4 ? key : null;
 }
 
@@ -370,8 +376,7 @@ export function linkBuild(
  * "on" or "x" ("PayZoll_Stellar" and "Widget on Stellar" read as the product
  * alone), joined; null under four characters. */
 export function productKeyOf(name: string | null | undefined): string | null {
-	const words = (name ?? "")
-		.toLowerCase()
+	const words = folded(name)
 		.split(/[^a-z0-9]+/)
 		.filter(Boolean);
 	if (["stellar", "soroban"].includes(words[words.length - 1])) {
@@ -416,8 +421,14 @@ export function scfPageOf(url: string | null | undefined): string | null {
 /** The DoraHacks submission numbers a page links (dorahacks.io/buidl/<n>),
  * escaped slashes included. */
 export function buidlNumbersIn(text: string): Set<string> {
+	// The host whole, any subdomain of it: notdorahacks.io/buidl/31 is
+	// another site's path.
 	return new Set(
-		[...text.matchAll(/dorahacks\.io\\?\/buidl\\?\/(\d+)/gi)].map((m) => m[1]),
+		[
+			...text.matchAll(
+				/(?<![a-z0-9.-])(?:[a-z0-9-]+\.)*dorahacks\.io\\?\/buidl\\?\/(\d+)/gi,
+			),
+		].map((m) => m[1]),
 	);
 }
 
@@ -427,17 +438,36 @@ export function buidlNumbersIn(text: string): Set<string> {
  * bio, the traction text) never counts. undefined when the page carries no
  * `siteUrls` record, a format this reader does not know: could not check. */
 export function scfSiteUrlsBuidls(txt: string): Set<string> | undefined {
-	if (!txt.includes('"siteUrls":')) return undefined;
-	const at = txt.indexOf('"siteUrls":{');
-	if (at < 0) return new Set(); // "siteUrls":null, a page that lists none
-	const start = at + '"siteUrls":'.length;
+	// The record's object form first: a page can carry an earlier
+	// "siteUrls":null on another object before the real record (review,
+	// 2026-11-01). Null alone is a page that lists none; any other shape is
+	// one this reader does not know.
+	const obj = /"siteUrls":\s*\{/.exec(txt);
+	if (!obj) return /"siteUrls":\s*null/.test(txt) ? new Set() : undefined;
+	const rest = txt.slice(obj.index + obj[0].length - 1);
+	// The record's extent, braces inside its strings ignored, read as JSON:
+	// counted raw, a brace in a value ended it early or late (review,
+	// 2026-10-31). A record cut short or that does not parse: could not check.
 	let depth = 0;
-	for (let i = start; i < txt.length; i++) {
-		if (txt[i] === "{") depth++;
-		else if (txt[i] === "}" && --depth === 0)
-			return buidlNumbersIn(txt.slice(start, i + 1));
+	let quoted = false;
+	for (let i = 0; i < rest.length; i++) {
+		const c = rest[i];
+		if (quoted) {
+			if (c === "\\") i++;
+			else if (c === '"') quoted = false;
+		} else if (c === '"') quoted = true;
+		else if (c === "{") depth++;
+		else if (c === "}" && --depth === 0) {
+			const record = rest.slice(0, i + 1);
+			try {
+				JSON.parse(record);
+			} catch {
+				return undefined;
+			}
+			return buidlNumbersIn(record);
+		}
 	}
-	return new Set();
+	return undefined;
 }
 
 /** A project as the page rules read it: its SCF page, website and X account

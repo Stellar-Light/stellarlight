@@ -33,6 +33,13 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-01",
 		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"The build sync reads an SCF page's siteUrls record as JSON, its object form first: a record it cannot read is could-not-check, never links-none, so a stored winner link is not dropped on a read it could not make. A DoraHacks link is dorahacks.io or a subdomain of it, never another host's /buidl/ path, and names are compared with their accents folded.",
+	},
+	{
+		date: "2026-11-01",
+		surfaces: ["api"],
 		version: "spec@1.9.116",
 		type: "fixed",
 		summary:
