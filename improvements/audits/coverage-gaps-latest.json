@@ -1,12 +1,12 @@
 {
-  "asOf": "2026-10-01T14:54:03.019Z",
+  "asOf": "2026-11-01T14:35:34.673Z",
   "source": "scripts/report-coverage-gaps.ts",
   "scf": {
     "total": 531,
     "absent": 10,
     "served": 521,
-    "absentAwarded": 3,
-    "absentSubmittedOnly": 7,
+    "absentAwarded": 10,
+    "absentSubmittedOnly": 0,
     "sample": [
       {
         "scfSlug": "open-rwa-vault-infrastructure-nis",
@@ -19,53 +19,67 @@
       },
       {
         "scfSlug": "canary-protocol-y4l",
-        "rounds": [],
+        "rounds": [
+          "45"
+        ],
         "notAwardedRounds": [],
-        "awarded": false,
+        "awarded": true,
         "url": "https://communityfund.stellar.org/project/canary-protocol-y4l"
       },
       {
         "scfSlug": "pods-dxl",
-        "rounds": [],
+        "rounds": [
+          "45"
+        ],
         "notAwardedRounds": [],
-        "awarded": false,
+        "awarded": true,
         "url": "https://communityfund.stellar.org/project/pods-dxl"
       },
       {
         "scfSlug": "pollar-nqe",
-        "rounds": [],
+        "rounds": [
+          "45"
+        ],
         "notAwardedRounds": [
           "42"
         ],
-        "awarded": false,
+        "awarded": true,
         "url": "https://communityfund.stellar.org/project/pollar-nqe"
       },
       {
         "scfSlug": "cara7-yyx",
-        "rounds": [],
+        "rounds": [
+          "45"
+        ],
         "notAwardedRounds": [],
-        "awarded": false,
+        "awarded": true,
         "url": "https://communityfund.stellar.org/project/cara7-yyx"
       },
       {
         "scfSlug": "astrolabe-bzg",
-        "rounds": [],
+        "rounds": [
+          "45"
+        ],
         "notAwardedRounds": [],
-        "awarded": false,
+        "awarded": true,
         "url": "https://communityfund.stellar.org/project/astrolabe-bzg"
       },
       {
         "scfSlug": "nila-fwc",
-        "rounds": [],
+        "rounds": [
+          "45"
+        ],
         "notAwardedRounds": [],
-        "awarded": false,
+        "awarded": true,
         "url": "https://communityfund.stellar.org/project/nila-fwc"
       },
       {
         "scfSlug": "fermah-pay-w3c",
-        "rounds": [],
+        "rounds": [
+          "45"
+        ],
         "notAwardedRounds": [],
-        "awarded": false,
+        "awarded": true,
         "url": "https://communityfund.stellar.org/project/fermah-pay-w3c"
       },
       {
@@ -91,7 +105,7 @@
     ]
   },
   "defillama": {
-    "stellarListed": 42,
+    "stellarListed": 44,
     "matched": 32,
     "missing": 1,
     "belowFloor": 1
@@ -144,6 +158,11 @@
       "domain": "runtimeverification.com"
     },
     {
+      "scf": "paysomeai-7gh",
+      "slug": "smilepay",
+      "domain": "smilepay.app"
+    },
+    {
       "scf": "stellar-women-bootcamp-r5v",
       "slug": "womenbiz",
       "domain": "hiwomenbiz.com"
@@ -174,6 +193,11 @@
       "domain": "theaha.co"
     },
     {
+      "scf": "institutional-treasury-xlm-wyu",
+      "slug": "arrel",
+      "domain": "arreltech.com"
+    },
+    {
       "scf": "the-merchant-settlement-rail-for-africa-bzf",
       "slug": "slimepay",
       "domain": "slimepay.com"
@@ -189,11 +213,6 @@
       "domain": "soundness.xyz"
     },
     {
-      "scf": "institutional-treasury-xlm-wyu",
-      "slug": "arrel",
-      "domain": "arreltech.com"
-    },
-    {
       "scf": "meta-contracts-in-stellar-p4c",
       "slug": "stellar-router-sdk",
       "domain": "jsr.io/@creit-tech/stellar-router-sdk"
@@ -204,10 +223,10 @@
   "summary": {
     "missingDefillama": 1,
     "missingScf": 10,
-    "missingScfAwarded": 3,
+    "missingScfAwarded": 10,
     "partnerDocsWithoutOwnContent": 3,
-    "staleCollections": 0,
-    "staleOrEmptyResearchSources": 1,
-    "refreshUnmeasurableSources": 3
+    "staleCollections": 2,
+    "staleOrEmptyResearchSources": 0,
+    "refreshUnmeasurableSources": 2
   }
 }
