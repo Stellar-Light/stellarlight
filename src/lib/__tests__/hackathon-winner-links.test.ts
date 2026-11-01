@@ -690,17 +690,27 @@ describe("reading SCF siteUrls and names", () => {
 		expect([...(scfSiteUrlsBuidls('"siteUrls":null') ?? ["x"])]).toEqual([]);
 	});
 
-	it("another host's /buidl/ path is not a DoraHacks link", () => {
-		expect([
-			...buidlNumbersIn(
-				"https://notdorahacks.io/buidl/31 https://www.dorahacks.io/buidl/7",
-			),
-		]).toEqual(["7"]);
+	it("another host's /buidl/ path is not a DoraHacks link; a subdomain of it is", () => {
+		expect(
+			[
+				...buidlNumbersIn(
+					"https://notdorahacks.io/buidl/31 https://www.dorahacks.io/buidl/7 https://hackathon.dorahacks.io/buidl/6",
+				),
+			].sort(),
+		).toEqual(["6", "7"]);
+	});
+
+	it("reads the record past an earlier null on another object", () => {
+		const page =
+			'"m":{"siteUrls":null},"p":{"siteUrls":{"analytics":"https://dorahacks.io/buidl/27456"}}';
+		expect([...(scfSiteUrlsBuidls(page) ?? [])]).toEqual(["27456"]);
 	});
 
 	it("folds accents in name keys: different names never collide, one spelling in two forms does not split", () => {
 		expect(productKeyOf("CaféPay")).toBe("cafepay");
 		expect(productKeyOf("CafPay")).toBe("cafpay");
+		// A trademark sign is not part of the name.
+		expect(productKeyOf("PayZoll\u2122")).toBe("payzoll");
 		expect(productKeyOf("CaféPay")).toBe(productKeyOf("CaféPay"));
 	});
 });

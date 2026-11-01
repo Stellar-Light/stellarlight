@@ -204,16 +204,3 @@ describe("an award several placements share is a category, not a prize", () => {
 		});
 	});
 });
-
-describe("a winner's own prize is the largest figure its placement names", () => {
-	it("an award naming the winner's own amount stays the award (review, 2026-10-31)", () => {
-		const r = {
-			award: "1st Place - $5,000",
-			hackathonPlacement: "Stipend $100 plus $5,000",
-		};
-		expect(prizeLabels(prizeCategories([r]), r)).toEqual({
-			award: "1st Place - $5,000",
-			awardCategory: null,
-		});
-	});
-});

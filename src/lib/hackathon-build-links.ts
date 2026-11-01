@@ -235,9 +235,10 @@ export function indexProjectSites(
 /** A name compared as letters and digits only, lowercased; null under four
  * characters, too short to identify anything. */
 /** A name with its accents folded: CaféPay is cafepay, never cafpay, in either
- * Unicode form (review, 2026-10-31). */
+ * Unicode form (review, 2026-10-31). Canonical decomposition only: NFKD also
+ * turned a trademark sign into tm, so PayZoll(TM) stopped naming PayZoll. */
 const folded = (name: string | null | undefined) =>
-	(name ?? "").normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
+	(name ?? "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
 
 export function nameKeyOf(name: string | null | undefined): string | null {
 	const key = folded(name).replace(/[^a-z0-9]+/g, "");
@@ -420,11 +421,12 @@ export function scfPageOf(url: string | null | undefined): string | null {
 /** The DoraHacks submission numbers a page links (dorahacks.io/buidl/<n>),
  * escaped slashes included. */
 export function buidlNumbersIn(text: string): Set<string> {
-	// The host whole: notdorahacks.io/buidl/31 is another site's path.
+	// The host whole, any subdomain of it: notdorahacks.io/buidl/31 is
+	// another site's path.
 	return new Set(
 		[
 			...text.matchAll(
-				/(?<![a-z0-9.-])(?:www\.)?dorahacks\.io\\?\/buidl\\?\/(\d+)/gi,
+				/(?<![a-z0-9.-])(?:[a-z0-9-]+\.)*dorahacks\.io\\?\/buidl\\?\/(\d+)/gi,
 			),
 		].map((m) => m[1]),
 	);
@@ -436,12 +438,13 @@ export function buidlNumbersIn(text: string): Set<string> {
  * bio, the traction text) never counts. undefined when the page carries no
  * `siteUrls` record, a format this reader does not know: could not check. */
 export function scfSiteUrlsBuidls(txt: string): Set<string> | undefined {
-	const at = txt.indexOf('"siteUrls":');
-	if (at < 0) return undefined;
-	const rest = txt.slice(at + '"siteUrls":'.length).trimStart();
-	if (rest.startsWith("null")) return new Set(); // a page that lists none
-	// An array or anything else is a shape this reader does not know.
-	if (!rest.startsWith("{")) return undefined;
+	// The record's object form first: a page can carry an earlier
+	// "siteUrls":null on another object before the real record (review,
+	// 2026-11-01). Null alone is a page that lists none; any other shape is
+	// one this reader does not know.
+	const obj = /"siteUrls":\s*\{/.exec(txt);
+	if (!obj) return /"siteUrls":\s*null/.test(txt) ? new Set() : undefined;
+	const rest = txt.slice(obj.index + obj[0].length - 1);
 	// The record's extent, braces inside its strings ignored, read as JSON:
 	// counted raw, a brace in a value ended it early or late (review,
 	// 2026-10-31). A record cut short or that does not parse: could not check.

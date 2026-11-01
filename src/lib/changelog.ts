@@ -35,9 +35,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
-			"A winner's award text is a category (awardCategory) only when it states more than the largest prize its placement names, not the first: an award titled $5,000 over a placement of a $100 stipend plus $5,000 is the winner's own. No served winner changes today.",
-		detail:
-			"The build sync also reads an SCF page's siteUrls record as JSON (a record it cannot read is could-not-check, never links-none), reads only dorahacks.io itself as a DoraHacks link, and folds accents in the names it compares.",
+			"The build sync reads an SCF page's siteUrls record as JSON, its object form first: a record it cannot read is could-not-check, never links-none, so a stored winner link is not dropped on a read it could not make. A DoraHacks link is dorahacks.io or a subdomain of it, never another host's /buidl/ path, and names are compared with their accents folded.",
 	},
 	{
 		date: "2026-10-31",
