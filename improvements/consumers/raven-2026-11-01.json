@@ -1,0 +1,1920 @@
+{
+	"consumer": "raven",
+	"label": "Raven (agents.stellar.buzz)",
+	"buckets": [
+		"other"
+	],
+	"caveat": "Raven's adapter sends no User-Agent, so its traffic is the residual `other` bucket — other UA-less clients land here too. Figures are an upper bound on Raven's own traffic.",
+	"generatedAt": "2026-11-01T14:18:03.690Z",
+	"window": {
+		"since": "2026-10-02T14:18:03.690Z",
+		"days": 30
+	},
+	"totals": {
+		"calls": 43410,
+		"activeDays": 31,
+		"endpoints": 35
+	},
+	"byEndpoint": [
+		{
+			"endpoint": "/api/projects/search",
+			"calls": 10119,
+			"zeroResultCalls": 32,
+			"avgResultCount": 9.9
+		},
+		{
+			"endpoint": "/api/research",
+			"calls": 9141,
+			"zeroResultCalls": 6,
+			"avgResultCount": 22.8
+		},
+		{
+			"endpoint": "/api/hackathons/builds",
+			"calls": 6688,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"calls": 2731,
+			"zeroResultCalls": 228,
+			"avgResultCount": 8.8
+		},
+		{
+			"endpoint": "/api/skills/[name]",
+			"calls": 2692,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/[slug]",
+			"calls": 1746,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/builders",
+			"calls": 882,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners/[slug]",
+			"calls": 879,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/analyze",
+			"calls": 835,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/vet-idea",
+			"calls": 772,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners",
+			"calls": 753,
+			"zeroResultCalls": 139,
+			"avgResultCount": 4.5
+		},
+		{
+			"endpoint": "/api/rfps",
+			"calls": 692,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons",
+			"calls": 636,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/contracts",
+			"calls": 557,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/skills",
+			"calls": 423,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/repos/trust",
+			"calls": 384,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/projects/resolve",
+			"calls": 361,
+			"zeroResultCalls": 135,
+			"avgResultCount": 0.6
+		},
+		{
+			"endpoint": "/api/hackathon-brief",
+			"calls": 343,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/leaderboard",
+			"calls": 336,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/changes",
+			"calls": 241,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/analyze",
+			"calls": 238,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/stablecoins",
+			"calls": 237,
+			"zeroResultCalls": 1,
+			"avgResultCount": 18.7
+		},
+		{
+			"endpoint": "/api/repos/explain",
+			"calls": 233,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/clusters",
+			"calls": 217,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/scf-pitch",
+			"calls": 201,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/audits",
+			"calls": 193,
+			"zeroResultCalls": 104,
+			"avgResultCount": 4.7
+		},
+		{
+			"endpoint": "/api/rwa",
+			"calls": 171,
+			"zeroResultCalls": 0,
+			"avgResultCount": 38.7
+		},
+		{
+			"endpoint": "/api/hackathons/builds/[id]",
+			"calls": 160,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/sources/locate",
+			"calls": 159,
+			"zeroResultCalls": 29,
+			"avgResultCount": 8.2
+		},
+		{
+			"endpoint": "/api/hackathons/review",
+			"calls": 137,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/hackathons/compare",
+			"calls": 96,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/people",
+			"calls": 82,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/verify",
+			"calls": 39,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/partners/match",
+			"calls": 27,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		},
+		{
+			"endpoint": "/api/quality",
+			"calls": 9,
+			"zeroResultCalls": 0,
+			"avgResultCount": null
+		}
+	],
+	"queryTerms": {
+		"basis": "single terms asked in at least 5 calls per endpoint, top 20; stopwords and key, hash or address shaped tokens dropped; no query text is published",
+		"minTermCount": 5,
+		"byEndpoint": [
+			{
+				"endpoint": "/api/research",
+				"termBasis": 8869,
+				"terms": [
+					{
+						"term": "soroban",
+						"calls": 1094
+					},
+					{
+						"term": "contract",
+						"calls": 780
+					},
+					{
+						"term": "sep",
+						"calls": 581
+					},
+					{
+						"term": "cap",
+						"calls": 503
+					},
+					{
+						"term": "award",
+						"calls": 432
+					},
+					{
+						"term": "account",
+						"calls": 404
+					},
+					{
+						"term": "scf",
+						"calls": 391
+					},
+					{
+						"term": "asset",
+						"calls": 355
+					},
+					{
+						"term": "smart",
+						"calls": 329
+					},
+					{
+						"term": "sdf",
+						"calls": 305
+					},
+					{
+						"term": "wallet",
+						"calls": 292
+					},
+					{
+						"term": "transaction",
+						"calls": 265
+					},
+					{
+						"term": "anchor",
+						"calls": 243
+					},
+					{
+						"term": "authorization",
+						"calls": 242
+					},
+					{
+						"term": "app",
+						"calls": 233
+					},
+					{
+						"term": "contracts",
+						"calls": 233
+					},
+					{
+						"term": "oracle",
+						"calls": 233
+					},
+					{
+						"term": "development",
+						"calls": 228
+					},
+					{
+						"term": "fund",
+						"calls": 226
+					},
+					{
+						"term": "budget",
+						"calls": 213
+					}
+				]
+			},
+			{
+				"endpoint": "/api/projects/search",
+				"termBasis": 8608,
+				"terms": [
+					{
+						"term": "wallet",
+						"calls": 437
+					},
+					{
+						"term": "lending",
+						"calls": 302
+					},
+					{
+						"term": "soroban",
+						"calls": 193
+					},
+					{
+						"term": "blend",
+						"calls": 187
+					},
+					{
+						"term": "payments",
+						"calls": 165
+					},
+					{
+						"term": "agent",
+						"calls": 164
+					},
+					{
+						"term": "smart",
+						"calls": 145
+					},
+					{
+						"term": "test",
+						"calls": 138
+					},
+					{
+						"term": "x402",
+						"calls": 136
+					},
+					{
+						"term": "stablecoin",
+						"calls": 133
+					},
+					{
+						"term": "account",
+						"calls": 128
+					},
+					{
+						"term": "sdk",
+						"calls": 117
+					},
+					{
+						"term": "real",
+						"calls": 116
+					},
+					{
+						"term": "anchor",
+						"calls": 112
+					},
+					{
+						"term": "infrastructure",
+						"calls": 109
+					},
+					{
+						"term": "contract",
+						"calls": 108
+					},
+					{
+						"term": "api",
+						"calls": 100
+					},
+					{
+						"term": "finance",
+						"calls": 98
+					},
+					{
+						"term": "yield",
+						"calls": 92
+					},
+					{
+						"term": "asset",
+						"calls": 90
+					}
+				]
+			},
+			{
+				"endpoint": "/api/hackathons/builds",
+				"termBasis": 6116,
+				"terms": [
+					{
+						"term": "payments",
+						"calls": 552
+					},
+					{
+						"term": "stablecoin",
+						"calls": 460
+					},
+					{
+						"term": "wallet",
+						"calls": 379
+					},
+					{
+						"term": "ai",
+						"calls": 242
+					},
+					{
+						"term": "agent",
+						"calls": 236
+					},
+					{
+						"term": "merchant",
+						"calls": 194
+					},
+					{
+						"term": "app",
+						"calls": 178
+					},
+					{
+						"term": "smart",
+						"calls": 172
+					},
+					{
+						"term": "soroban",
+						"calls": 163
+					},
+					{
+						"term": "chain",
+						"calls": 160
+					},
+					{
+						"term": "passkey",
+						"calls": 158
+					},
+					{
+						"term": "lending",
+						"calls": 148
+					},
+					{
+						"term": "tokenized",
+						"calls": 146
+					},
+					{
+						"term": "escrow",
+						"calls": 142
+					},
+					{
+						"term": "pay",
+						"calls": 138
+					},
+					{
+						"term": "x402",
+						"calls": 138
+					},
+					{
+						"term": "savings",
+						"calls": 133
+					},
+					{
+						"term": "yield",
+						"calls": 131
+					},
+					{
+						"term": "game",
+						"calls": 130
+					},
+					{
+						"term": "payroll",
+						"calls": 125
+					}
+				]
+			},
+			{
+				"endpoint": "/api/skills/[name]",
+				"termBasis": 2692,
+				"terms": [
+					{
+						"term": "scf",
+						"calls": 1304
+					},
+					{
+						"term": "contracts",
+						"calls": 264
+					},
+					{
+						"term": "drafter",
+						"calls": 241
+					},
+					{
+						"term": "smart",
+						"calls": 219
+					},
+					{
+						"term": "reviewer",
+						"calls": 201
+					},
+					{
+						"term": "lumenloop",
+						"calls": 177
+					},
+					{
+						"term": "builder",
+						"calls": 156
+					},
+					{
+						"term": "scout",
+						"calls": 154
+					},
+					{
+						"term": "submission",
+						"calls": 147
+					},
+					{
+						"term": "claim",
+						"calls": 131
+					},
+					{
+						"term": "verifier",
+						"calls": 131
+					},
+					{
+						"term": "dapp",
+						"calls": 130
+					},
+					{
+						"term": "budget",
+						"calls": 117
+					},
+					{
+						"term": "analyst",
+						"calls": 112
+					},
+					{
+						"term": "competitor",
+						"calls": 112
+					},
+					{
+						"term": "reporter",
+						"calls": 112
+					},
+					{
+						"term": "tranche",
+						"calls": 112
+					},
+					{
+						"term": "round",
+						"calls": 110
+					},
+					{
+						"term": "context",
+						"calls": 100
+					},
+					{
+						"term": "live",
+						"calls": 100
+					}
+				]
+			},
+			{
+				"endpoint": "/api/repos/search",
+				"termBasis": 2633,
+				"terms": [
+					{
+						"term": "soroban",
+						"calls": 314
+					},
+					{
+						"term": "oracle",
+						"calls": 153
+					},
+					{
+						"term": "sdk",
+						"calls": 107
+					},
+					{
+						"term": "agent",
+						"calls": 84
+					},
+					{
+						"term": "zk",
+						"calls": 80
+					},
+					{
+						"term": "x402",
+						"calls": 79
+					},
+					{
+						"term": "account",
+						"calls": 77
+					},
+					{
+						"term": "contracts",
+						"calls": 62
+					},
+					{
+						"term": "escrow",
+						"calls": 59
+					},
+					{
+						"term": "contract",
+						"calls": 53
+					},
+					{
+						"term": "wallet",
+						"calls": 53
+					},
+					{
+						"term": "passkey",
+						"calls": 52
+					},
+					{
+						"term": "vault",
+						"calls": 51
+					},
+					{
+						"term": "smart",
+						"calls": 50
+					},
+					{
+						"term": "kit",
+						"calls": 49
+					},
+					{
+						"term": "payments",
+						"calls": 49
+					},
+					{
+						"term": "transaction",
+						"calls": 49
+					},
+					{
+						"term": "defindex",
+						"calls": 44
+					},
+					{
+						"term": "javascript",
+						"calls": 44
+					},
+					{
+						"term": "token",
+						"calls": 42
+					}
+				]
+			},
+			{
+				"endpoint": "/api/partners/[slug]",
+				"termBasis": 879,
+				"terms": [
+					{
+						"term": "anchor",
+						"calls": 400
+					},
+					{
+						"term": "moneygram",
+						"calls": 93
+					},
+					{
+						"term": "defindex",
+						"calls": 57
+					},
+					{
+						"term": "pay",
+						"calls": 57
+					},
+					{
+						"term": "alfred",
+						"calls": 52
+					},
+					{
+						"term": "bitso",
+						"calls": 49
+					},
+					{
+						"term": "wallet",
+						"calls": 49
+					},
+					{
+						"term": "hana",
+						"calls": 45
+					},
+					{
+						"term": "money",
+						"calls": 45
+					},
+					{
+						"term": "stellarexpert",
+						"calls": 45
+					},
+					{
+						"term": "albedo",
+						"calls": 42
+					},
+					{
+						"term": "reflector",
+						"calls": 41
+					},
+					{
+						"term": "zeam",
+						"calls": 41
+					},
+					{
+						"term": "mykobo",
+						"calls": 40
+					},
+					{
+						"term": "fonbnk",
+						"calls": 38
+					},
+					{
+						"term": "anclap",
+						"calls": 37
+					},
+					{
+						"term": "coins",
+						"calls": 37
+					},
+					{
+						"term": "ph",
+						"calls": 37
+					},
+					{
+						"term": "audd",
+						"calls": 27
+					},
+					{
+						"term": "freighter",
+						"calls": 27
+					}
+				]
+			},
+			{
+				"endpoint": "/api/vet-idea",
+				"termBasis": 772,
+				"terms": [
+					{
+						"term": "stablecoin",
+						"calls": 64
+					},
+					{
+						"term": "wallet",
+						"calls": 64
+					},
+					{
+						"term": "soroban",
+						"calls": 63
+					},
+					{
+						"term": "ai",
+						"calls": 51
+					},
+					{
+						"term": "payments",
+						"calls": 51
+					},
+					{
+						"term": "chain",
+						"calls": 45
+					},
+					{
+						"term": "app",
+						"calls": 44
+					},
+					{
+						"term": "lending",
+						"calls": 44
+					},
+					{
+						"term": "usdc",
+						"calls": 42
+					},
+					{
+						"term": "tokenized",
+						"calls": 41
+					},
+					{
+						"term": "agent",
+						"calls": 36
+					},
+					{
+						"term": "derivatives",
+						"calls": 36
+					},
+					{
+						"term": "payroll",
+						"calls": 34
+					},
+					{
+						"term": "perpetuals",
+						"calls": 34
+					},
+					{
+						"term": "savings",
+						"calls": 34
+					},
+					{
+						"term": "trading",
+						"calls": 33
+					},
+					{
+						"term": "custodial",
+						"calls": 32
+					},
+					{
+						"term": "non",
+						"calls": 32
+					},
+					{
+						"term": "rwas",
+						"calls": 31
+					},
+					{
+						"term": "smart",
+						"calls": 30
+					}
+				]
+			},
+			{
+				"endpoint": "/api/builders",
+				"termBasis": 556,
+				"terms": [
+					{
+						"term": "soroban",
+						"calls": 76
+					},
+					{
+						"term": "account",
+						"calls": 40
+					},
+					{
+						"term": "app",
+						"calls": 38
+					},
+					{
+						"term": "set",
+						"calls": 37
+					},
+					{
+						"term": "difference",
+						"calls": 36
+					},
+					{
+						"term": "verify",
+						"calls": 34
+					},
+					{
+						"term": "stream",
+						"calls": 33
+					},
+					{
+						"term": "horizon",
+						"calls": 32
+					},
+					{
+						"term": "ledger",
+						"calls": 26
+					},
+					{
+						"term": "10",
+						"calls": 24
+					},
+					{
+						"term": "sep",
+						"calls": 24
+					},
+					{
+						"term": "asset",
+						"calls": 23
+					},
+					{
+						"term": "contract",
+						"calls": 23
+					},
+					{
+						"term": "server",
+						"calls": 21
+					},
+					{
+						"term": "web",
+						"calls": 21
+					},
+					{
+						"term": "interface",
+						"calls": 19
+					},
+					{
+						"term": "javascript",
+						"calls": 19
+					},
+					{
+						"term": "new",
+						"calls": 19
+					},
+					{
+						"term": "trustline",
+						"calls": 19
+					},
+					{
+						"term": "up",
+						"calls": 19
+					}
+				]
+			},
+			{
+				"endpoint": "/api/partners",
+				"termBasis": 467,
+				"terms": [
+					{
+						"term": "contract",
+						"calls": 56
+					},
+					{
+						"term": "soroban",
+						"calls": 54
+					},
+					{
+						"term": "app",
+						"calls": 39
+					},
+					{
+						"term": "smart",
+						"calls": 36
+					},
+					{
+						"term": "audit",
+						"calls": 35
+					},
+					{
+						"term": "firms",
+						"calls": 35
+					},
+					{
+						"term": "account",
+						"calls": 34
+					},
+					{
+						"term": "9999",
+						"calls": 29
+					},
+					{
+						"term": "flurbomatic",
+						"calls": 29
+					},
+					{
+						"term": "nonexistent",
+						"calls": 29
+					},
+					{
+						"term": "quantifold",
+						"calls": 29
+					},
+					{
+						"term": "widgetron",
+						"calls": 29
+					},
+					{
+						"term": "zzqqxx",
+						"calls": 29
+					},
+					{
+						"term": "sep",
+						"calls": 24
+					},
+					{
+						"term": "asset",
+						"calls": 21
+					},
+					{
+						"term": "10",
+						"calls": 19
+					},
+					{
+						"term": "interface",
+						"calls": 19
+					},
+					{
+						"term": "ledger",
+						"calls": 19
+					},
+					{
+						"term": "server",
+						"calls": 19
+					},
+					{
+						"term": "web",
+						"calls": 19
+					}
+				]
+			},
+			{
+				"endpoint": "/api/contracts",
+				"termBasis": 416,
+				"terms": [
+					{
+						"term": "soroban",
+						"calls": 73
+					},
+					{
+						"term": "fee",
+						"calls": 36
+					},
+					{
+						"term": "set",
+						"calls": 36
+					},
+					{
+						"term": "stream",
+						"calls": 36
+					},
+					{
+						"term": "account",
+						"calls": 35
+					},
+					{
+						"term": "app",
+						"calls": 34
+					},
+					{
+						"term": "horizon",
+						"calls": 34
+					},
+					{
+						"term": "verify",
+						"calls": 34
+					},
+					{
+						"term": "difference",
+						"calls": 29
+					},
+					{
+						"term": "transaction",
+						"calls": 27
+					},
+					{
+						"term": "ledger",
+						"calls": 26
+					},
+					{
+						"term": "10",
+						"calls": 23
+					},
+					{
+						"term": "sep",
+						"calls": 23
+					},
+					{
+						"term": "asset",
+						"calls": 21
+					},
+					{
+						"term": "model",
+						"calls": 21
+					},
+					{
+						"term": "bump",
+						"calls": 20
+					},
+					{
+						"term": "server",
+						"calls": 20
+					},
+					{
+						"term": "web",
+						"calls": 20
+					},
+					{
+						"term": "auth",
+						"calls": 18
+					},
+					{
+						"term": "authorization",
+						"calls": 18
+					}
+				]
+			},
+			{
+				"endpoint": "/api/repos/trust",
+				"termBasis": 384,
+				"terms": [
+					{
+						"term": "network",
+						"calls": 40
+					},
+					{
+						"term": "contract",
+						"calls": 38
+					},
+					{
+						"term": "reflector",
+						"calls": 31
+					},
+					{
+						"term": "contracts",
+						"calls": 15
+					},
+					{
+						"term": "x402",
+						"calls": 15
+					},
+					{
+						"term": "agent",
+						"calls": 13
+					},
+					{
+						"term": "8004",
+						"calls": 11
+					},
+					{
+						"term": "local402",
+						"calls": 11
+					},
+					{
+						"term": "trionlabs",
+						"calls": 11
+					},
+					{
+						"term": "app",
+						"calls": 10
+					},
+					{
+						"term": "mca",
+						"calls": 8
+					},
+					{
+						"term": "medchain",
+						"calls": 8
+					},
+					{
+						"term": "kit",
+						"calls": 7
+					},
+					{
+						"term": "soroban",
+						"calls": 7
+					},
+					{
+						"term": "mcp",
+						"calls": 6
+					},
+					{
+						"term": "soroswap",
+						"calls": 6
+					},
+					{
+						"term": "benjaminnkem",
+						"calls": 5
+					},
+					{
+						"term": "bosun",
+						"calls": 5
+					},
+					{
+						"term": "calcy",
+						"calls": 5
+					},
+					{
+						"term": "clevercon",
+						"calls": 5
+					}
+				]
+			},
+			{
+				"endpoint": "/api/hackathon-brief",
+				"termBasis": 343,
+				"terms": [
+					{
+						"term": "soroban",
+						"calls": 40
+					},
+					{
+						"term": "ai",
+						"calls": 33
+					},
+					{
+						"term": "payments",
+						"calls": 33
+					},
+					{
+						"term": "agent",
+						"calls": 32
+					},
+					{
+						"term": "usdc",
+						"calls": 31
+					},
+					{
+						"term": "x402",
+						"calls": 31
+					},
+					{
+						"term": "chain",
+						"calls": 25
+					},
+					{
+						"term": "escrow",
+						"calls": 23
+					},
+					{
+						"term": "tokenized",
+						"calls": 20
+					},
+					{
+						"term": "wallet",
+						"calls": 19
+					},
+					{
+						"term": "payment",
+						"calls": 16
+					},
+					{
+						"term": "smart",
+						"calls": 15
+					},
+					{
+						"term": "spending",
+						"calls": 15
+					},
+					{
+						"term": "stablecoin",
+						"calls": 14
+					},
+					{
+						"term": "savings",
+						"calls": 13
+					},
+					{
+						"term": "agents",
+						"calls": 12
+					},
+					{
+						"term": "confidential",
+						"calls": 12
+					},
+					{
+						"term": "contract",
+						"calls": 12
+					},
+					{
+						"term": "local",
+						"calls": 12
+					},
+					{
+						"term": "platform",
+						"calls": 12
+					}
+				]
+			},
+			{
+				"endpoint": "/api/rfps",
+				"termBasis": 234,
+				"terms": [
+					{
+						"term": "development",
+						"calls": 33
+					},
+					{
+						"term": "soroban",
+						"calls": 33
+					},
+					{
+						"term": "account",
+						"calls": 28
+					},
+					{
+						"term": "stream",
+						"calls": 27
+					},
+					{
+						"term": "say",
+						"calls": 26
+					},
+					{
+						"term": "difference",
+						"calls": 24
+					},
+					{
+						"term": "contract",
+						"calls": 22
+					},
+					{
+						"term": "ledger",
+						"calls": 21
+					},
+					{
+						"term": "foundation",
+						"calls": 19
+					},
+					{
+						"term": "auth",
+						"calls": 15
+					},
+					{
+						"term": "check",
+						"calls": 15
+					},
+					{
+						"term": "custom",
+						"calls": 15
+					},
+					{
+						"term": "mandate",
+						"calls": 15
+					},
+					{
+						"term": "model",
+						"calls": 15
+					},
+					{
+						"term": "authorization",
+						"calls": 14
+					},
+					{
+						"term": "invocations",
+						"calls": 14
+					},
+					{
+						"term": "nested",
+						"calls": 14
+					},
+					{
+						"term": "data",
+						"calls": 13
+					},
+					{
+						"term": "database",
+						"calls": 13
+					},
+					{
+						"term": "galexie",
+						"calls": 13
+					}
+				]
+			},
+			{
+				"endpoint": "/api/repos/explain",
+				"termBasis": 233,
+				"terms": [
+					{
+						"term": "price",
+						"calls": 35
+					},
+					{
+						"term": "expose",
+						"calls": 32
+					},
+					{
+						"term": "oracle",
+						"calls": 31
+					},
+					{
+						"term": "feeds",
+						"calls": 30
+					},
+					{
+						"term": "contract",
+						"calls": 27
+					},
+					{
+						"term": "transaction",
+						"calls": 19
+					},
+					{
+						"term": "sep",
+						"calls": 17
+					},
+					{
+						"term": "horizon",
+						"calls": 15
+					},
+					{
+						"term": "soroban",
+						"calls": 15
+					},
+					{
+						"term": "token",
+						"calls": 15
+					},
+					{
+						"term": "server",
+						"calls": 13
+					},
+					{
+						"term": "account",
+						"calls": 12
+					},
+					{
+						"term": "sdk",
+						"calls": 12
+					},
+					{
+						"term": "events",
+						"calls": 11
+					},
+					{
+						"term": "getevents",
+						"calls": 11
+					},
+					{
+						"term": "return",
+						"calls": 11
+					},
+					{
+						"term": "confidential",
+						"calls": 10
+					},
+					{
+						"term": "reflector",
+						"calls": 10
+					},
+					{
+						"term": "wallet",
+						"calls": 10
+					},
+					{
+						"term": "address",
+						"calls": 9
+					}
+				]
+			},
+			{
+				"endpoint": "/api/scf-pitch",
+				"termBasis": 201,
+				"terms": [
+					{
+						"term": "lending",
+						"calls": 36
+					},
+					{
+						"term": "rwas",
+						"calls": 32
+					},
+					{
+						"term": "soroban",
+						"calls": 28
+					},
+					{
+						"term": "payments",
+						"calls": 26
+					},
+					{
+						"term": "usdc",
+						"calls": 24
+					},
+					{
+						"term": "infrastructure",
+						"calls": 19
+					},
+					{
+						"term": "app",
+						"calls": 16
+					},
+					{
+						"term": "scf",
+						"calls": 16
+					},
+					{
+						"term": "ai",
+						"calls": 15
+					},
+					{
+						"term": "project",
+						"calls": 15
+					},
+					{
+						"term": "fund",
+						"calls": 14
+					},
+					{
+						"term": "funding",
+						"calls": 14
+					},
+					{
+						"term": "stablecoin",
+						"calls": 13
+					},
+					{
+						"term": "currency",
+						"calls": 12
+					},
+					{
+						"term": "payroll",
+						"calls": 12
+					},
+					{
+						"term": "x402",
+						"calls": 12
+					},
+					{
+						"term": "applying",
+						"calls": 11
+					},
+					{
+						"term": "chain",
+						"calls": 11
+					},
+					{
+						"term": "freelancers",
+						"calls": 11
+					},
+					{
+						"term": "hackathon",
+						"calls": 11
+					}
+				]
+			},
+			{
+				"endpoint": "/api/sources/locate",
+				"termBasis": 159,
+				"terms": [
+					{
+						"term": "auth",
+						"calls": 54
+					},
+					{
+						"term": "require",
+						"calls": 51
+					},
+					{
+						"term": "contract",
+						"calls": 25
+					},
+					{
+						"term": "defined",
+						"calls": 22
+					},
+					{
+						"term": "qzxjvwk",
+						"calls": 21
+					},
+					{
+						"term": "soroban",
+						"calls": 18
+					},
+					{
+						"term": "sdk",
+						"calls": 12
+					},
+					{
+						"term": "cli",
+						"calls": 11
+					},
+					{
+						"term": "core",
+						"calls": 11
+					},
+					{
+						"term": "rpc",
+						"calls": 10
+					},
+					{
+						"term": "default",
+						"calls": 9
+					},
+					{
+						"term": "host",
+						"calls": 9
+					},
+					{
+						"term": "js",
+						"calls": 9
+					},
+					{
+						"term": "deploy",
+						"calls": 8
+					},
+					{
+						"term": "implemented",
+						"calls": 8
+					},
+					{
+						"term": "command",
+						"calls": 7
+					},
+					{
+						"term": "interface",
+						"calls": 7
+					},
+					{
+						"term": "token",
+						"calls": 7
+					},
+					{
+						"term": "tokeninterface",
+						"calls": 7
+					},
+					{
+						"term": "assembledtransaction",
+						"calls": 6
+					}
+				]
+			},
+			{
+				"endpoint": "/api/hackathons/review",
+				"termBasis": 137,
+				"terms": [
+					{
+						"term": "com",
+						"calls": 113
+					},
+					{
+						"term": "https",
+						"calls": 79
+					},
+					{
+						"term": "soroban",
+						"calls": 33
+					},
+					{
+						"term": "examples",
+						"calls": 32
+					},
+					{
+						"term": "buidl",
+						"calls": 23
+					},
+					{
+						"term": "dorahacks",
+						"calls": 23
+					},
+					{
+						"term": "io",
+						"calls": 23
+					},
+					{
+						"term": "cards402",
+						"calls": 13
+					},
+					{
+						"term": "ctx",
+						"calls": 13
+					},
+					{
+						"term": "42765",
+						"calls": 11
+					}
+				]
+			},
+			{
+				"endpoint": "/api/audits",
+				"termBasis": 135,
+				"terms": [
+					{
+						"term": "soroban",
+						"calls": 17
+					},
+					{
+						"term": "blend",
+						"calls": 14
+					},
+					{
+						"term": "openzeppelin",
+						"calls": 9
+					},
+					{
+						"term": "ledger",
+						"calls": 8
+					},
+					{
+						"term": "model",
+						"calls": 8
+					},
+					{
+						"term": "sdf",
+						"calls": 8
+					},
+					{
+						"term": "tokenization",
+						"calls": 8
+					},
+					{
+						"term": "authorization",
+						"calls": 7
+					},
+					{
+						"term": "freighter",
+						"calls": 7
+					},
+					{
+						"term": "invocations",
+						"calls": 7
+					},
+					{
+						"term": "nested",
+						"calls": 7
+					},
+					{
+						"term": "smart",
+						"calls": 7
+					},
+					{
+						"term": "axelar",
+						"calls": 6
+					},
+					{
+						"term": "passkey",
+						"calls": 6
+					}
+				]
+			},
+			{
+				"endpoint": "/api/hackathons/compare",
+				"termBasis": 96,
+				"terms": [
+					{
+						"term": "2026",
+						"calls": 66
+					},
+					{
+						"term": "builders",
+						"calls": 51
+					},
+					{
+						"term": "camp",
+						"calls": 51
+					},
+					{
+						"term": "jaipur",
+						"calls": 51
+					},
+					{
+						"term": "builder",
+						"calls": 44
+					},
+					{
+						"term": "summit",
+						"calls": 44
+					},
+					{
+						"term": "hacks",
+						"calls": 32
+					},
+					{
+						"term": "hackmeridian",
+						"calls": 21
+					},
+					{
+						"term": "zk",
+						"calls": 17
+					},
+					{
+						"term": "agents",
+						"calls": 15
+					},
+					{
+						"term": "mpp",
+						"calls": 15
+					},
+					{
+						"term": "stripe",
+						"calls": 15
+					},
+					{
+						"term": "x402",
+						"calls": 15
+					},
+					{
+						"term": "2025",
+						"calls": 14
+					},
+					{
+						"term": "kale",
+						"calls": 13
+					},
+					{
+						"term": "reflector",
+						"calls": 13
+					},
+					{
+						"term": "gaming",
+						"calls": 11
+					}
+				]
+			},
+			{
+				"endpoint": "/api/people",
+				"termBasis": 73,
+				"terms": [
+					{
+						"term": "development",
+						"calls": 30
+					},
+					{
+						"term": "say",
+						"calls": 19
+					},
+					{
+						"term": "foundation",
+						"calls": 17
+					},
+					{
+						"term": "mandate",
+						"calls": 13
+					},
+					{
+						"term": "freighter",
+						"calls": 8
+					},
+					{
+						"term": "kind",
+						"calls": 8
+					},
+					{
+						"term": "tokenization",
+						"calls": 8
+					},
+					{
+						"term": "ledger",
+						"calls": 5
+					},
+					{
+						"term": "operates",
+						"calls": 5
+					}
+				]
+			},
+			{
+				"endpoint": "/api/partners/match",
+				"termBasis": 27,
+				"terms": [
+					{
+						"term": "ramp",
+						"calls": 19
+					},
+					{
+						"term": "usdc",
+						"calls": 19
+					},
+					{
+						"term": "24",
+						"calls": 17
+					},
+					{
+						"term": "sep",
+						"calls": 17
+					},
+					{
+						"term": "off",
+						"calls": 16
+					},
+					{
+						"term": "mexico",
+						"calls": 8
+					},
+					{
+						"term": "bank",
+						"calls": 7
+					}
+				]
+			},
+			{
+				"endpoint": "/api/hackathons/analyze",
+				"termBasis": 14,
+				"terms": [
+					{
+						"term": "agent",
+						"calls": 5
+					},
+					{
+						"term": "ai",
+						"calls": 5
+					}
+				]
+			}
+		]
+	},
+	"replayByEndpoint": [
+		{
+			"endpoint": "/api/projects/search",
+			"graded": 13,
+			"ok": 13,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 0,
+			"failed": 0
+		},
+		{
+			"endpoint": "/api/research",
+			"graded": 10,
+			"ok": 9,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 1,
+			"failed": 0
+		},
+		{
+			"endpoint": "/api/repos/search",
+			"graded": 2,
+			"ok": 2,
+			"advisory": 0,
+			"empty": 0,
+			"weak": 0,
+			"failed": 0
+		}
+	],
+	"replaySummary": {
+		"graded": 25,
+		"ok": 24,
+		"okRate": 96,
+		"misses": 1
+	},
+	"contractChangesInWindow": 91
+}
