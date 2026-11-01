@@ -1033,7 +1033,7 @@ const JUDGING_EVIDENCE_SCHEMA = {
 			type: "integer",
 			nullable: true,
 			description:
-				"The total behind values (test files following a convention, a floor of the repo's tests; CI files; releases; commits on the default branch; contract ids; Stellar packages; contract crates). null when not counted, and whenever the part read was partial (a manifest unread, the tree listing or the README cut short), since a count over part of the repo is not its total; the finding then says what was not read.",
+				"The total behind values (test files following a convention, a floor of the repo's tests; CI files; releases; commits on the default branch; contract ids; Stellar packages; contract crates). null when not counted, and whenever the part read was partial (a manifest unread, the tree listing or the README cut short, a git submodule the tree read does not open), since a count over part of the repo is not its total; the finding then says what was not read. The test-file count is a floor either way, so it stays over a partial tree and the finding says at least.",
 		},
 	},
 };
@@ -1081,7 +1081,7 @@ const REVIEW_JUDGING_PROPERTIES = {
 			unread: {
 				type: "array",
 				description:
-					"The parts not read; every evidence item resting on one says could-not-check, and its finding gives that part's own reason (GitHub's answer or silence for it, a listing cut short, a file that is not UTF-8 text, a manifest over 512 KB, more manifests than the 12 a read takes). [] when every part was read.",
+					"The parts not read, or not read whole; every evidence item resting on one says could-not-check, and its finding gives that part's own reason (GitHub's answer or silence for it, a listing cut short, a git submodule the tree read does not open, a file that is not UTF-8 text, a manifest over 512 KB, more manifests than the 12 a read takes). [] when every part was read.",
 				items: { type: "string", enum: [...LIVE_READ_PARTS] },
 			},
 		},
@@ -4643,7 +4643,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: false,
 						description:
-							"An event whose judging criteria Scout holds as data. Adds review.judging: each of the event's criteria, in its record's words, with the evidence a judge would find in the repo, or checkable false with the reason (decks, videos, submission answers and intake goals are not read). The repo is read live from GitHub at its default branch's newest commit: read-only, inside 4 seconds, cached 5 minutes per repo, at most 20 such requests a minute per caller, and never past a repo that is not public. One caller may spend at most a quarter of a server's hourly live-read budget; past it, its reads answer could-not-check. Any other value answers 400 with validHackathons.",
+							"An event whose judging criteria Scout holds as data. Adds review.judging: each of the event's criteria, in its record's words, with the evidence a judge would find in the repo, or checkable false with the reason (decks, videos, submission answers and intake goals are not read). The repo is read live from GitHub at its default branch's newest commit: read-only, inside 4 seconds, cached 5 minutes per repo, at most 20 such requests a minute per IP address (a partner key has its own tier), and never past a repo that is not public. One caller may spend at most a quarter of a server's hourly live-read budget; past it, its reads answer could-not-check. Any other value answers 400 with validHackathons.",
 						schema: { type: "string", enum: [...JUDGED_EVENT_SLUGS] },
 					},
 				],
@@ -4765,7 +4765,7 @@ export const spec: OpenAPISpec = {
 					},
 					"429": {
 						description:
-							"With hackathon, this caller's window (20 a minute per IP or partner key, per server instance) is spent; Retry-After says when to retry.",
+							"With hackathon, this caller's window (20 a minute per IP address, per server instance; a partner key has its own tier) is spent; Retry-After says when to retry.",
 					},
 					"503": {
 						description:
