@@ -662,7 +662,15 @@ export function prizeCategories(rows: Iterable<PrizeRow>): Set<string> {
 		const seen = places.get(key) ?? new Set<string>();
 		seen.add((r.hackathonPlacement ?? "").trim().toLowerCase());
 		places.set(key, seen);
-		const own = parsePlacement(r.hackathonPlacement ?? null).prizeUsd;
+		// The winner's own prize is the largest figure its placement names:
+		// "Stipend $100 plus $5,000" won $5,000, so an award titled $5,000 is
+		// its own (review, 2026-10-31).
+		const own = Math.max(
+			0,
+			...[...(r.hackathonPlacement ?? "").matchAll(/\$\s*([\d,]+)/g)].map((m) =>
+				Number(m[1].replace(/,/g, "")),
+			),
+		);
 		if (own > 0 && parsePlacement(r.award).prizeUsd > own) pools.add(key);
 	}
 	for (const [key, p] of places) if (p.size > 1) pools.add(key);
