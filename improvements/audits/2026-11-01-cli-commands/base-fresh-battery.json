@@ -1,0 +1,705 @@
+{
+	"summary": {
+		"cases": 20,
+		"indexPointers": 25903,
+		"top1": 11,
+		"top3": 14,
+		"top10": 17,
+		"symbolTop1": 8,
+		"symbolTop3": 9,
+		"symbolTop10": 12,
+		"missedTop10": [
+			"f01",
+			"f07",
+			"f15"
+		],
+		"partialOnlyTop10": [
+			"f07"
+		],
+		"misleadingInTop10": [
+			"f16"
+		]
+	},
+	"results": [
+		{
+			"id": "f01",
+			"q": "What is the highest ledger protocol version this stellar-core build supports, and where is that number actually set?",
+			"fileRank": 15,
+			"symbolRank": 143,
+			"partialRank": 704,
+			"misleadingRank": null,
+			"candidates": 1840,
+			"overCap": false,
+			"matched": 1824,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "install-sh",
+					"locator": "--version",
+					"score": 20,
+					"matchReason": "symbol version; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/rust/src/log.rs",
+					"locator": "LEDGER",
+					"score": 20,
+					"matchReason": "symbol ledger; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/ledger/LedgerTxn.cpp",
+					"locator": "LedgerTxn::getNewestVersion",
+					"score": 18,
+					"matchReason": "symbol has ledger, path too; symbol has version; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f02",
+			"q": "Where is the stellar-core `calculate-asset-supply` command line subcommand implemented?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": 5,
+			"misleadingRank": null,
+			"candidates": 844,
+			"overCap": false,
+			"matched": 844,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/ApplicationUtils.cpp",
+					"locator": "calculateAssetSupply",
+					"score": 41,
+					"matchReason": "symbol calculate-asset-supply; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/CommandLine.cpp",
+					"locator": "CommandLine::Command::Command",
+					"score": 36,
+					"matchReason": "symbol command, path too; symbol has line, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/CommandLine.cpp",
+					"locator": "runCalculateAssetSupply",
+					"score": 34,
+					"matchReason": "symbol holds calculate-asset-supply; path has command; path has line; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f03",
+			"q": "Where do the stellar-core docs list the HTTP admin commands that are only exposed on test instances, such as generateload, testacc and testtx?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": 2,
+			"misleadingRank": null,
+			"candidates": 1224,
+			"overCap": false,
+			"matched": 1224,
+			"top3": [
+				{
+					"repo": "stellar/stellar-core",
+					"path": "docs/software/commands.md",
+					"locator": "The following HTTP commands are exposed on test instances",
+					"score": 19,
+					"matchReason": "path has doc; heading has http; heading has command, path too; heading has exposed; heading has tes…"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/CommandHandler.cpp",
+					"locator": "CommandHandler::testAcc",
+					"score": 15,
+					"matchReason": "symbol has command, path too; symbol has test; symbol testacc; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-core",
+					"path": "src/main/CommandHandler.cpp",
+					"locator": "CommandHandler::testTx",
+					"score": 15,
+					"matchReason": "symbol has command, path too; symbol has test; symbol testtx; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f04",
+			"q": "Where is the standard token interface trait (transfer, approve, allowance, burn, balance) that soroban token contracts implement and TokenClient is generated from defined?",
+			"fileRank": 4,
+			"symbolRank": 4,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 3071,
+			"overCap": false,
+			"matched": 3070,
+			"top3": [
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "examples/fungible-governor/token/src/token.rs",
+					"locator": "TokenContract",
+					"score": 10,
+					"matchReason": "symbol has token, path too; symbol has contract, path too; symbol has token, path too; symbol token…"
+				},
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "examples/fungible-governor-timelock/token/src/token.rs",
+					"locator": "TokenContract",
+					"score": 10,
+					"matchReason": "symbol has token, path too; symbol has contract, path too; symbol has token, path too; symbol token…"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "token/src/contract.rs",
+					"locator": "Token",
+					"score": 10,
+					"matchReason": "symbol token, path too; path has soroban; path has contract; symbol has token, path too"
+				}
+			]
+		},
+		{
+			"id": "f05",
+			"q": "In soroban-sdk unit tests, what ledger defaults (protocol version, min persistent and temporary TTL, max TTL) does a fresh Env::default() start with, and where are they set?",
+			"fileRank": 4,
+			"symbolRank": null,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 3158,
+			"overCap": false,
+			"matched": 3142,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/ledger.rs",
+					"locator": "set_min_persistent_entry_ttl",
+					"score": 13,
+					"matchReason": "path has ledger; symbol has min; symbol has persistent; symbol has ttl; symbol holds min persistent…"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/storage.rs",
+					"locator": "max_ttl",
+					"score": 13,
+					"matchReason": "symbol has ttl; symbol has max; symbol max TTL; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-sdk",
+					"path": "soroban-sdk/src/testutils.rs",
+					"locator": "set_min_persistent_entry_ttl",
+					"score": 12,
+					"matchReason": "symbol has min; symbol has persistent; symbol has ttl; symbol holds min persistent; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f06",
+			"q": "What default CPU instruction and memory byte limits does a soroban-env-host Budget get when the embedder does not apply network config?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": 4,
+			"misleadingRank": null,
+			"candidates": 3858,
+			"overCap": false,
+			"matched": 3855,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/budget/limits.rs",
+					"locator": "DEFAULT_CPU_INSN_LIMIT",
+					"score": 13,
+					"matchReason": "symbol has default; symbol has cpu; symbol has limit, path too; path has budget; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/budget/limits.rs",
+					"locator": "DEFAULT_MEM_BYTES_LIMIT",
+					"score": 13,
+					"matchReason": "symbol has default; symbol has byte; symbol has limit, path too; path has budget; repo named in q"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-simulation/src/network_config.rs",
+					"locator": "NetworkConfig",
+					"score": 12,
+					"matchReason": "symbol has network, path too; symbol has config, path too; symbol network config; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f07",
+			"q": "Under which Wasm import module and function name is the host function require_auth exposed to contracts, and where is that mapping defined?",
+			"fileRank": null,
+			"symbolRank": null,
+			"partialRank": 3,
+			"misleadingRank": null,
+			"candidates": 2434,
+			"overCap": false,
+			"matched": 2434,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/builtin_contracts/base_types.rs",
+					"locator": "require_auth",
+					"score": 19,
+					"matchReason": "path has host; symbol require_auth; path has contract"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/auth.rs",
+					"locator": "require_auth",
+					"score": 19,
+					"matchReason": "path has host; symbol require_auth, path too"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/host.rs",
+					"locator": "require_auth",
+					"score": 18,
+					"matchReason": "path has host; symbol require_auth"
+				}
+			]
+		},
+		{
+			"id": "f08",
+			"q": "How does a Soroban contract refer to host objects through a Val, and can a guest forge or allocate object handles itself? Which doc section explains it?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2894,
+			"overCap": false,
+			"matched": 2893,
+			"top3": [
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "docs/GUEST_INTERFACE.md",
+					"locator": "Host object handles",
+					"score": 13,
+					"matchReason": "path has soroban; heading has host; heading has object; path has guest; heading has object; heading…"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/host_object.rs",
+					"locator": "HostObject",
+					"score": 13,
+					"matchReason": "path has soroban; symbol has host, path too; symbol has object, path too; symbol has object, path t…"
+				},
+				{
+					"repo": "stellar/rs-soroban-env",
+					"path": "soroban-env-host/src/host_object.rs",
+					"locator": "HostObjectType",
+					"score": 11,
+					"matchReason": "path has soroban; symbol has host, path too; symbol has object, path too; symbol has object, path t…"
+				}
+			]
+		},
+		{
+			"id": "f09",
+			"q": "In js-stellar-sdk, how many seconds of validity does a contract.Client / AssembledTransaction put on a transaction by default when timeoutInSeconds is not passed, and where is that value set?",
+			"fileRank": 2,
+			"symbolRank": 179,
+			"partialRank": 1,
+			"misleadingRank": null,
+			"candidates": 3881,
+			"overCap": false,
+			"matched": 3881,
+			"top3": [
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/contract/assembled_transaction.ts",
+					"locator": "AssembledTransaction",
+					"score": 19,
+					"matchReason": "path has contract; symbol AssembledTransaction, path too; symbol has transaction, path too; repo na…"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/contract/types.ts",
+					"locator": "AssembledTransactionOptions",
+					"score": 14,
+					"matchReason": "path has contract; symbol holds AssembledTransaction; symbol has transaction; repo named in q"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "docs/reference/contracts-client.md",
+					"locator": "contract.AssembledTransaction",
+					"score": 13,
+					"matchReason": "heading has contract, path too; heading has assembled transaction; heading has transaction; repo na…"
+				}
+			]
+		},
+		{
+			"id": "f10",
+			"q": "Where do the js-stellar-sdk guides explain how to read the transaction-level and operation-level result codes when a Horizon submission fails?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": 2,
+			"misleadingRank": null,
+			"candidates": 3099,
+			"overCap": false,
+			"matched": 3099,
+			"top3": [
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "docs/guides/05-handle-errors.md",
+					"locator": "Read a transaction's result codes",
+					"score": 24,
+					"matchReason": "path has guide; heading has read; heading has transaction; heading has result; heading has code; he…"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "docs/reference/errors.md",
+					"locator": "transactionFailedError.getResultCodes()",
+					"score": 20,
+					"matchReason": "heading has transaction; heading has result; heading has code; heading holds result codes; repo nam…"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/errors/transaction_failed.ts",
+					"locator": "getResultCodes",
+					"score": 19,
+					"matchReason": "path has transaction; symbol has result; symbol has code; symbol holds result codes; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f11",
+			"q": "Which js-stellar-sdk file declares the error classes thrown by contract.AssembledTransaction and SentTransaction, such as NeedsMoreSignaturesError and TransactionStillPendingError?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": 3,
+			"misleadingRank": null,
+			"candidates": 3805,
+			"overCap": false,
+			"matched": 3805,
+			"top3": [
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/contract/errors.ts",
+					"locator": "TransactionStillPendingError",
+					"score": 25,
+					"matchReason": "symbol has error, path too; symbol has transaction, path too; symbol has transaction; symbol has er…"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/contract/errors.ts",
+					"locator": "NeedsMoreSignaturesError",
+					"score": 24,
+					"matchReason": "symbol has error, path too; path has contract; symbol NeedsMoreSignaturesError, path too; symbol ha…"
+				},
+				{
+					"repo": "stellar/js-stellar-sdk",
+					"path": "src/contract/sent_transaction.ts",
+					"locator": "SentTransaction",
+					"score": 22,
+					"matchReason": "symbol has transaction, path too; symbol SentTransaction, path too; symbol has transaction, path to…"
+				}
+			]
+		},
+		{
+			"id": "f12",
+			"q": "When I run the released stellar-rpc binary, what are the default and maximum page sizes for getLedgers, and where are they set?",
+			"fileRank": 5,
+			"symbolRank": 80,
+			"partialRank": 4,
+			"misleadingRank": null,
+			"candidates": 4200,
+			"overCap": false,
+			"matched": 4200,
+			"top3": [
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/methods/get_ledgers.go",
+					"locator": "getLedgers",
+					"score": 27,
+					"matchReason": "symbol getLedgers, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcdatastore/ledger_reader.go",
+					"locator": "GetLedgers",
+					"score": 26,
+					"matchReason": "symbol getLedgers, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/methods/mocks.go",
+					"locator": "GetLedgers",
+					"score": 26,
+					"matchReason": "symbol getLedgers; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f13",
+			"q": "Is there an upper cap on stellar-rpc's classic and soroban fee-stats retention windows, and where is the cap value defined and enforced?",
+			"fileRank": 3,
+			"symbolRank": 3,
+			"partialRank": 1,
+			"misleadingRank": null,
+			"candidates": 1510,
+			"overCap": false,
+			"matched": 1508,
+			"top3": [
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv1/config/options.go",
+					"locator": "classic-fee-stats-retention-window",
+					"score": 25,
+					"matchReason": "symbol has classic; symbol holds fee-stats; symbol has retention; symbol has window; symbol holds r…"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/rpcv1/config/options.go",
+					"locator": "soroban-fee-stats-retention-window",
+					"score": 25,
+					"matchReason": "symbol has soroban; symbol holds fee-stats; symbol has retention; symbol has window; symbol holds r…"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/limits/limits.go",
+					"locator": "MaxFeeStatsRetentionWindow",
+					"score": 22,
+					"matchReason": "symbol holds fee-stats; symbol has retention; symbol has window; symbol holds retention windows; re…"
+				}
+			]
+		},
+		{
+			"id": "f14",
+			"q": "If I run the stellar/quickstart image without any --enable flag, which services start? Is Stellar Lab among them?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": 32,
+			"candidates": 928,
+			"overCap": false,
+			"matched": 925,
+			"top3": [
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "ENABLE",
+					"score": 20,
+					"matchReason": "symbol --enable; path has start; repo named in q"
+				},
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "--enable",
+					"score": 20,
+					"matchReason": "symbol --enable; path has start; repo named in q"
+				},
+				{
+					"repo": "stellar/quickstart",
+					"path": "start",
+					"locator": "ENABLE_LAB",
+					"score": 15,
+					"matchReason": "symbol has enable; path has start; symbol has lab; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f15",
+			"q": "Which port in the quickstart container serves horizon, stellar-rpc, friendbot and lab, and which ports are the admin and stellar-core ports? Where is this documented?",
+			"fileRank": 25,
+			"symbolRank": 25,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 366,
+			"overCap": false,
+			"matched": 365,
+			"top3": [
+				{
+					"repo": "stellar/quickstart",
+					"path": "common/lab/bin/start",
+					"locator": "PORT",
+					"score": 24,
+					"matchReason": "symbol port; path has lab; symbol has port; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go",
+					"locator": "inContainerRPCAdminPort",
+					"score": 23,
+					"matchReason": "symbol has port; symbol has container; symbol has port; symbol has admin; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-rpc",
+					"path": "cmd/stellar-rpc/internal/integrationtest/infrastructure/test.go",
+					"locator": "fillContainerPorts",
+					"score": 20,
+					"matchReason": "symbol has port; symbol has container; symbol has port; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f16",
+			"q": "Where is the `stellar contract deploy` subcommand implemented in stellar-cli?",
+			"fileRank": 1,
+			"symbolRank": 6,
+			"partialRank": 87,
+			"misleadingRank": 2,
+			"candidates": 1230,
+			"overCap": false,
+			"matched": 1227,
+			"top3": [
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/deploy/wasm.rs",
+					"locator": "build_create_contract_tx",
+					"score": 49,
+					"matchReason": "implements contract deploy; symbol has contract, path too; path has deploy; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/deploy.rs",
+					"locator": "Cmd",
+					"score": 43,
+					"matchReason": "implements contract deploy; path has contract; path has deploy; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/commands/contract/deploy.rs",
+					"locator": "Error",
+					"score": 43,
+					"matchReason": "implements contract deploy; path has contract; path has deploy; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f17",
+			"q": "What default inclusion fee does stellar-cli put on transactions it builds, and which environment variable overrides it?",
+			"fileRank": 1,
+			"symbolRank": null,
+			"partialRank": 16,
+			"misleadingRank": null,
+			"candidates": 2846,
+			"overCap": false,
+			"matched": 2846,
+			"top3": [
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/fee.rs",
+					"locator": "--fee",
+					"score": 19,
+					"matchReason": "symbol fee, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/fee.rs",
+					"locator": "default",
+					"score": 19,
+					"matchReason": "symbol default; path has fee; repo named in q"
+				},
+				{
+					"repo": "stellar/stellar-cli",
+					"path": "cmd/soroban-cli/src/assembled.rs",
+					"locator": "DEFAULT_TRANSACTION_FEES",
+					"score": 19,
+					"matchReason": "symbol has default; symbol has fee; symbol has transaction; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f18",
+			"q": "How do I install the CLI plugin that signs auth entries with ed25519 keys for the multisig 1-of-n contract account example?",
+			"fileRank": 1,
+			"symbolRank": null,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 3836,
+			"overCap": false,
+			"matched": 3827,
+			"top3": [
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "multisig_1_of_n_account/README.md",
+					"locator": "Install the stellar sign-auth-ed25519 plugin",
+					"score": 16,
+					"matchReason": "heading has install; heading has plugin; heading has sign; heading has auth; heading has ed25519; p…"
+				},
+				{
+					"repo": "OpenZeppelin/stellar-contracts",
+					"path": "examples/multisig-smart-account/README.md",
+					"locator": "Ed25519 Keys",
+					"score": 14,
+					"matchReason": "heading has ed25519; heading has key; path has multisig; path has contract; path has account; path …"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "multisig_1_of_n_account/README.md",
+					"locator": "Multisig 1-of-n Contract Account",
+					"score": 12,
+					"matchReason": "heading has multisig, path too; heading has 1 of, path too; heading has contract; heading has accou…"
+				}
+			]
+		},
+		{
+			"id": "f19",
+			"q": "Which soroban-examples contract implements a simplified claimable balance, where a depositor locks tokens for a list of claimants with a before or after time bound?",
+			"fileRank": 2,
+			"symbolRank": 6,
+			"partialRank": 45,
+			"misleadingRank": null,
+			"candidates": 2254,
+			"overCap": false,
+			"matched": 2254,
+			"top3": [
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "token/src/contract.rs",
+					"locator": "balance",
+					"score": 13,
+					"matchReason": "path has contract; symbol balance; path has token; repo named in q"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "fuzzing/src/lib.rs",
+					"locator": "TimeBound",
+					"score": 12,
+					"matchReason": "symbol has time; symbol has bound; symbol time bound; repo named in q"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "fuzzing/src/lib.rs",
+					"locator": "ClaimableBalance",
+					"score": 12,
+					"matchReason": "symbol has claimable; symbol has balance; symbol claimable balance; repo named in q"
+				}
+			]
+		},
+		{
+			"id": "f20",
+			"q": "In soroban-examples, where is the contract error code returned when the counter would go past its limit of 5 defined?",
+			"fileRank": 1,
+			"symbolRank": 1,
+			"partialRank": null,
+			"misleadingRank": null,
+			"candidates": 2131,
+			"overCap": false,
+			"matched": 2131,
+			"top3": [
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "errors/src/lib.rs",
+					"locator": "Error",
+					"score": 20,
+					"matchReason": "symbol error, path too; repo named in q"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "errors/src/lib.rs",
+					"locator": "COUNTER",
+					"score": 20,
+					"matchReason": "path has error; symbol counter; repo named in q"
+				},
+				{
+					"repo": "stellar/soroban-examples",
+					"path": "deployer/contract/src/lib.rs",
+					"locator": "Contract",
+					"score": 20,
+					"matchReason": "symbol contract, path too; repo named in q"
+				}
+			]
+		}
+	]
+}
