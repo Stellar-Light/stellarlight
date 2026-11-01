@@ -1,0 +1,20 @@
+hm26-sc-05 strict=true required 2/2
+   must met      rank 1     stellar/rs-soroban-sdk soroban-sdk/src/token.rs TokenInterface
+   must met      rank 2     stellar/soroban-examples token/src/contract.rs impl TokenInterface for Token
+hm26-sc-06 strict=true required 1/1
+   must met      rank 1     stellar/stellar-rpc cmd/stellar-rpc/internal/methods/simulate_transaction.go NewSimulateTransactionHandler
+hm26-sa-05 strict=true required 2/2
+   must met      rank 1     stellar/rs-soroban-sdk soroban-sdk/src/auth.rs CustomAccountInterface
+   must met      rank 9     stellar/soroban-examples account/src/lib.rs impl CustomAccountInterface for AccountContract
+hm26-sa-06 strict=false required 1/2
+   must not_met  rank 17    stellar/rs-soroban-sdk soroban-sdk/src/crypto.rs secp256r1_verify
+   must not_met  rank 11    stellar/rs-soroban-env soroban-env-host/src/host.rs verify_sig_ecdsa_secp256r1
+   must met      rank 10    stellar/rs-soroban-env soroban-env-host/src/crypto/mod.rs secp256r1_verify_signature
+hm26-cc-05 strict=false required 1/3
+   must partial  rank 24    stellar/rs-soroban-sdk soroban-sdk/src/crypto.rs secp256k1_recover
+   must met      rank 1     stellar/rs-soroban-sdk soroban-sdk/src/crypto.rs keccak256
+   must not_met  rank 25    stellar/rs-soroban-env soroban-env-host/src/host.rs recover_key_ecdsa_secp256k1
+hm26-cc-06 strict=false required 1/2
+   must not_met  rank -     stellar/stellar-cli cmd/soroban-cli/src/commands/contract/deploy/asset.rs Cmd
+   must met      rank 1     stellar/rs-soroban-env soroban-env-host/src/builtin_contracts/stellar_asset_contract/contract.rs StellarAssetContract
+{"strict":3,"requiredMet":8,"requiredTotal":12}

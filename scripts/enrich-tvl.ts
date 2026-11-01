@@ -52,8 +52,13 @@ const LLAMA_MAP: Record<string, string[]> = {
 		"blend-backstop-v2",
 	],
 	aquarius: ["aquarius-stellar"],
-	soroswap: ["soroswap"],
-	"phoenix-protocol": ["phoenix-defi-hub"],
+	// 2026-10-31: DefiLlama renamed soroswap to soroswap-amm ($1.16M on
+	// Stellar); soroswap-aggregator lists no chain and no TVL. The old slug
+	// read not-found and left the 10-19 figure in place.
+	soroswap: ["soroswap-amm"],
+	// The directory row is phoenix: the old key matched no row, so the TVL
+	// was never written (the dry run's "no project" warning).
+	phoenix: ["phoenix-defi-hub"],
 	slender: ["slender"],
 	fxdao: ["fxdao"],
 	// 2026-10-23 (DQ1): allbridge-core is deprecated on DefiLlama (deadFrom
@@ -69,7 +74,8 @@ const LLAMA_MAP: Record<string, string[]> = {
 	sushi: ["sushi-stellar"],
 	excellar: ["excellar"],
 	scopuly: ["scopuly"],
-	"normal-stellar-amm": ["normal"],
+	// The directory row is normal (the old key matched no row).
+	normal: ["normal"],
 	whalehub: ["whalehub"],
 	upshift: ["upshift"],
 	// Coverage-gap pass 2026-07-16: the two verified llama misses (seeded the

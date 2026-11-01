@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { isContentStopword } from "../repo-search";
 import {
+	CLI_COMMANDS,
 	candidateTerms,
+	cliCommandPaths,
 	type IndexRow,
 	isCandidate,
 	parseQuery,
@@ -922,5 +924,72 @@ describe("verificationUrl", () => {
 		).toBe(
 			`https://github.com/stellar/quickstart/blob/${"b".repeat(40)}/README.md`,
 		);
+	});
+});
+
+describe("a stellar-cli command checked against the commands tree", () => {
+	// The module paths the index holds under the commands root, as served.
+	const commands = cliCommandPaths(
+		[
+			"keys/generate.rs",
+			"keys/mod.rs",
+			"contract/extend.rs",
+			"contract/invoke.rs",
+			"contract/read.rs",
+			"contract/deploy/asset.rs",
+			"contract/deploy/wasm.rs",
+			"contract/mod.rs",
+			"events.rs",
+		].map((p) => `${CLI_COMMANDS.root}${p}`),
+	);
+	const commandOf = (q: string, tree = commands) =>
+		parseQuery(q, isContentStopword, tree).command;
+
+	it("reads the module paths as commands, two words or more", () => {
+		expect(commands).toContainEqual(["keys", "generate"]);
+		expect(commands).toContainEqual(["contract", "deploy", "asset"]);
+		expect(commands).not.toContainEqual(["events"]);
+	});
+
+	it("finds the command past the first run of words, reversed or plural", () => {
+		// Review 2026-10-31: the first run, read in order, named no module.
+		expect(
+			commandOf("Which stellar-cli file implements the keys generate command?"),
+		).toEqual(["keys", "generate"]);
+		expect(
+			commandOf("Where does the stellar CLI extend a contract's TTL?"),
+		).toEqual(["contract", "extend"]);
+		expect(commandOf("the stellar CLI contracts invoke command")).toEqual([
+			"contract",
+			"invoke",
+		]);
+		expect(commandOf("stellar contract deploy asset")).toEqual([
+			"contract",
+			"deploy",
+			"asset",
+		]);
+	});
+
+	it("a bare lowercase stellar keeps the old reading: in prose it is the network", () => {
+		// Second review, 2026-11-01: read loosely, these lifted the CLI router
+		// over the answer (the asset contract's own code, the SDK's events).
+		for (const q of [
+			"how is clawback handled in the stellar asset contract?",
+			"deploy its stellar asset contract",
+			"how do stellar contracts read events from the ledger",
+			"where do stellar contracts fetch ledger entries",
+			"what stellar charges when contracts invoke other contracts",
+			"stellar contract deploy asset",
+		])
+			expect(commandOf(q), q).toEqual(parseQuery(q, isContentStopword).command);
+	});
+
+	it("keeps the old reading with no tree, and reads no command in prose", () => {
+		const q = "Where does the stellar CLI extend a contract's TTL?";
+		expect(parseQuery(q, isContentStopword).command).toEqual(commandOf(q, []));
+		// "Stellar" written as the network's name is not the binary.
+		expect(
+			commandOf("How do Stellar contracts read events from the ledger?"),
+		).toBeNull();
 	});
 });

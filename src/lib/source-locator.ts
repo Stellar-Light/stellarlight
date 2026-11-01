@@ -358,9 +358,32 @@ function synonymAlts(key: string, words: string[]): QueryUnit[] {
 	}));
 }
 
+/** The commands stellar-cli implements, as word lists, from the file paths of
+ * its commands tree (a mod.rs names its folder): two words or more, as a
+ * typed command needs, with hyphens where the module names have
+ * underscores. */
+export function cliCommandPaths(paths: Iterable<string>): string[][] {
+	const out = new Map<string, string[]>();
+	for (const p of paths) {
+		if (!p.startsWith(CLI_COMMANDS.root) || !p.endsWith(".rs")) continue;
+		const segs = p.slice(CLI_COMMANDS.root.length, -3).split("/");
+		if (segs.at(-1) === "mod") segs.pop();
+		if (segs.length >= 2)
+			out.set(
+				segs.join("/"),
+				segs.map((x) => x.replace(/_/g, "-")),
+			);
+	}
+	return [...out.values()];
+}
+
+/** Words that may name a command, stemmed: plain lowercase words. */
+const COMMAND_WORD = /^[a-z][a-z0-9-]*$/;
+
 export function parseQuery(
 	q: string,
 	isStopword: (w: string) => boolean,
+	commands?: readonly string[][],
 ): ParsedQuery {
 	const parts = q
 		.split(/\s+/)
@@ -485,8 +508,62 @@ export function parseQuery(
 		}
 		if (words.length >= 2) command = words;
 	}
+	// With the commands tree known, after an alias that names the CLI ("the
+	// stellar CLI", "stellar-cli") every run of words near it is tried,
+	// stemmed, and a two-word run reversed too, and the first that names a
+	// module stellar-cli has wins: the first run, read in English order,
+	// named none for "which stellar-cli file implements the keys generate
+	// command" or "the stellar CLI extend a contract's TTL" (review,
+	// 2026-10-31). A bare "stellar" keeps the reading above: in prose it is
+	// the network ("the stellar asset contract", "stellar contracts read
+	// events"), and the looser reading lifted the CLI router over the answer
+	// (second review, 2026-11-01).
+	if (commands?.length) {
+		// Stemmed on both sides ("contracts" is contract, "keys" stays the
+		// keys module), answered in the module's own words.
+		const key = (words: readonly string[]) => words.map(stem).join("/");
+		const known = new Map(commands.map((c) => [key(c), c]));
+		const named = (run: string[]) => {
+			for (let n = run.length; n >= 2; n--) {
+				const real = known.get(key(run.slice(0, n)));
+				if (real) return [...real];
+			}
+			return null;
+		};
+		let found: string[] | null = null;
+		for (let bin = 0; bin < tokens.length && !found; bin++) {
+			if (!cliAliasEnds.has(bin) || ENDS_RUN.test(parts[bin].raw)) continue;
+			const runs: string[][] = [[]];
+			for (
+				let i = bin + 1;
+				i < tokens.length && i <= bin + COMMAND_WINDOW;
+				i++
+			) {
+				const t = tokens[i];
+				if (STARTS_RUN.test(parts[i].raw)) runs.push([]);
+				if (!consumed.has(i) && !FILLER.has(t)) {
+					if (
+						COMMAND_WORD.test(t) &&
+						(!isStopword(t) || COMMAND_THOUGH_STOPWORD.has(t))
+					)
+						runs[runs.length - 1].push(t);
+					else runs.push([]);
+				}
+				if (ENDS_RUN.test(parts[i].raw)) runs.push([]);
+			}
+			for (const run of runs) {
+				found =
+					named(run) ?? (run.length === 2 ? named([run[1], run[0]]) : null);
+				if (found) break;
+			}
+		}
+		if (found) command = found;
+	}
 	return { units, joined, repos: [...repos], command };
 }
+
+/** How many tokens after a CLI mention may hold its command words. */
+const COMMAND_WINDOW = 10;
 
 /** Module path prefixes under stellar-cli's commands tree that a typed command names, two words or more. */
 export function commandPrefixes(command: string[] | null): string[] {

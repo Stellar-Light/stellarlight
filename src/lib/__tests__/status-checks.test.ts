@@ -521,3 +521,88 @@ describe("every serving point carries the guard, and the spec declares it", () =
 		expect(kinds).toContain("status-check");
 	});
 });
+
+// Review 2026-10-31 (another model family), each case reproduced first.
+describe("statusChecksFor: what a reading must hold before it decides", () => {
+	// A Live DEX, listed on DefiLlama, $0 TVL this week, quiet since August.
+	const dex = {
+		status: "Live",
+		statusBasis: "human-verified",
+		statusAsOf: "2026-09-05T00:00:00.000Z",
+		types: ["DEX"],
+		tvlUSD: 0,
+		tvlAsOf: "2026-10-25T00:00:00.000Z",
+		llamaSlugs: ["x"],
+		llamaListing: { state: "listed", checkedAt: "2026-10-26T00:00:00.000Z" },
+		onchain: {
+			asOf: "2026-10-26T00:00:00.000Z",
+			quietSince: "2026-08-01T00:00:00.000Z",
+			contracts: [{ eventsDelta: 0, subinvocationsDelta: 0 }],
+		},
+	};
+	const tvl = (row: object) =>
+		byCheck(statusChecksFor(row, NOW), "tvl-zero-onchain-quiet");
+
+	it("control: both counters silent for 60 days with $0 TVL is a hit", () => {
+		expect(tvl(dex)?.result).toBe("hit");
+	});
+
+	it("a contract with one counter read is not quiet: the other may have moved", () => {
+		const one = {
+			...dex,
+			onchain: { ...dex.onchain, contracts: [{ eventsDelta: 0 }] },
+		};
+		expect(tvl(one)?.result).toBe("could-not-check");
+		expect(
+			quietSinceFor([{ eventsDelta: 0 }], {
+				asOf: "2026-10-19T00:00:00.000Z",
+				quietSince: "2026-08-01T00:00:00.000Z",
+			}),
+		).toBeNull();
+	});
+
+	it("an unparseable reading date is no window, never a hit", () => {
+		const bad = { ...dex, onchain: { ...dex.onchain, asOf: "not-a-date" } };
+		expect(tvl(bad)?.result).toBe("could-not-check");
+		expect(tvl(bad)?.detail).not.toMatch(/NaN/);
+	});
+
+	it("a negative TVL is not a reading of $0", () => {
+		expect(tvl({ ...dex, tvlUSD: -5 })?.result).toBe("could-not-check");
+	});
+
+	it("$0 over a listing with a slug DefiLlama no longer lists decides nothing", () => {
+		const partial = {
+			...dex,
+			llamaListing: { ...dex.llamaListing, state: "partial" },
+		};
+		expect(tvl(partial)?.result).toBe("could-not-check");
+	});
+
+	it("reads dates handed as Date objects, as the semantic search rows hand them", () => {
+		const raw = {
+			...allbridge,
+			tvlAsOf: new Date(allbridge.tvlAsOf),
+			llamaListing: {
+				...allbridge.llamaListing,
+				checkedAt: new Date(allbridge.llamaListing.checkedAt),
+			},
+			onchain: {
+				...allbridge.onchain,
+				asOf: new Date(allbridge.onchain.asOf),
+				prevAsOf: new Date(allbridge.onchain.prevAsOf),
+			},
+		};
+		const out = statusChecksFor(raw, NOW);
+		expect(out).toEqual(statusChecksFor(allbridge, NOW));
+		expect(byCheck(out, "defillama-listing")?.result).toBe("hit");
+	});
+
+	it("a per-chain breakdown without Stellar is no Stellar TVL", () => {
+		expect(
+			stellarTvlOf([{ chainTvls: { Ethereum: 2_000_000 }, tvl: 2_000_000 }]),
+		).toBeNull();
+		// No breakdown at all: the total stands, as before.
+		expect(stellarTvlOf([{ tvl: 7 }])).toBe(7);
+	});
+});
