@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-11-01T12:20:04.438Z",
-	"specVersion": "1.9.113",
+	"generatedAt": "2026-11-02T14:13:55.262Z",
+	"specVersion": "1.9.116",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
@@ -86,17 +86,17 @@
 		{
 			"op": "getQualityReport",
 			"addedAt": "2026-10-24",
-			"ageDays": 8
+			"ageDays": 9
 		},
 		{
 			"op": "locateSource",
 			"addedAt": "2026-10-23",
-			"ageDays": 9
+			"ageDays": 10
 		},
 		{
 			"op": "verifyClaim",
 			"addedAt": "2026-10-23",
-			"ageDays": 9
+			"ageDays": 10
 		}
 	],
 	"extraInCatalog": [],
