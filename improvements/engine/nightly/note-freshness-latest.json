@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-01T12:14:46.828Z",
+	"generatedAt": "2026-11-02T14:04:56.268Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -238,8 +238,13 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:stellar-expert/contract-wasm-interface-parser:npm:@stellar-expert/contract-wasm-interface-parser",
+			"note": "note (asOf 2026-09-14) cites 6.0.1; registry latest is 6.1.1 (published 2026-11-01)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
-			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.23 (published 2026-10-22)",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.24 (published 2026-11-02)",
 			"surface": "code"
 		},
 		{
