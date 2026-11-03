@@ -5,8 +5,6 @@ type Scf = Pick<
 	"awardedRounds" | "lastAwardedRound"
 >;
 
-/** The SCF rounds a project was funded in: the stored list, else its last
- * round when only that is known. */
 export function scfRoundsOf(scf: Scf | null | undefined): number[] {
 	if (Array.isArray(scf?.awardedRounds)) return scf.awardedRounds;
 	return scf?.lastAwardedRound && scf.lastAwardedRound > 0
@@ -14,7 +12,6 @@ export function scfRoundsOf(scf: Scf | null | undefined): number[] {
 		: [];
 }
 
-/** "SCF funded #44 #29 #27 +2": newest rounds first, at most three. */
 export function scfBadgeLabel(rounds: number[]): string {
 	const newest = [...new Set(rounds)].sort((a, b) => b - a);
 	const shown = newest.slice(0, 3).map((r) => `#${r}`);

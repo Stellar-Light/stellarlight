@@ -72,12 +72,6 @@ const winner2025 = (
 ): CuratedBuild =>
 	winner("hackmeridian-2025", RECAP_2025, name, placement, track, null);
 
-// HackProof rebuilt HackMeridian 2026's submissions from Stellar testnet and
-// matched each project's repo to its on-chain activity inside the event
-// window, which is the proof the repo is the team's (src/data/
-// hackmeridian-2026-projects.json holds every verified project; only the
-// placed ones are builds here). A row's url is its HackProof record; a track
-// is only one the team declared itself.
 const hackmeridian2026Winners = hackmeridian2026.projects
 	.filter((p) => p.placement)
 	.map((p) =>

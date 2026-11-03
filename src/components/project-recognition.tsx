@@ -7,16 +7,9 @@ interface ProjectRecognitionProps {
 	scfAwarded: boolean;
 	scfRounds: number[];
 	hackathons: ProjectHackathon[];
-	/** The hackathon the directory entry itself names (project.hackathon). */
 	from?: { name: string; slug?: string; status?: string } | null;
 }
 
-const pill =
-	"text-sm px-4 py-1.5 font-semibold shadow-sm rounded-full transition-colors";
-const hackathonPill = `${pill} bg-gradient-to-r from-purple-500/20 to-purple-500/10 text-purple-400 border-purple-500/30 hover:border-purple-500/60`;
-const scfPill = `${pill} bg-[#FDDA24]/10 text-[#FDDA24] border-[#FDDA24]/30 hover:border-[#FDDA24]/60`;
-
-/** What recognised a project, in one row: SCF funding and its hackathons. */
 export function ProjectRecognition({
 	scfAwarded,
 	scfRounds,
@@ -31,7 +24,10 @@ export function ProjectRecognition({
 		<div className="flex flex-wrap items-center gap-3">
 			{scfAwarded && (
 				<a href="#scf">
-					<Badge variant="outline" className={scfPill}>
+					<Badge
+						variant="outline"
+						className="text-sm px-4 py-1.5 font-semibold shadow-sm rounded-full transition-colors bg-[#FDDA24]/10 text-[#FDDA24] border-[#FDDA24]/30 hover:border-[#FDDA24]/60"
+					>
 						{scfBadgeLabel(scfRounds)}
 					</Badge>
 				</a>
@@ -41,7 +37,10 @@ export function ProjectRecognition({
 					href={from.slug ? `/hackathons/${from.slug}` : "#"}
 					aria-disabled={!from.slug}
 				>
-					<Badge variant="outline" className={hackathonPill}>
+					<Badge
+						variant="outline"
+						className="text-sm px-4 py-1.5 font-semibold shadow-sm rounded-full transition-colors bg-gradient-to-r from-purple-500/20 to-purple-500/10 text-purple-400 border-purple-500/30 hover:border-purple-500/60"
+					>
 						From {from.name}
 						{from.status && (
 							<span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/10 text-purple-300">
@@ -53,7 +52,10 @@ export function ProjectRecognition({
 			)}
 			{hackathons.map((h) => (
 				<Link key={h.slug} href={`/hackathons/${h.slug}`}>
-					<Badge variant="outline" className={hackathonPill}>
+					<Badge
+						variant="outline"
+						className="text-sm px-4 py-1.5 font-semibold shadow-sm rounded-full transition-colors bg-gradient-to-r from-purple-500/20 to-purple-500/10 text-purple-400 border-purple-500/30 hover:border-purple-500/60"
+					>
 						{h.title}
 						{h.placement ? ` · ${h.placement}` : ""}
 					</Badge>

@@ -10,72 +10,79 @@ export interface ProjectHackathon {
 	endedAt: string;
 }
 
-const hackmeridian2026Repos = new Map(
-	hackmeridian2026.projects.map((p) => [p.repo.toLowerCase(), p]),
+const HM_EVENT = CURATED_HACKATHONS.find(
+	(h) => h.uname === hackmeridian2026.event,
+);
+const HM_ENDED_AT = HM_EVENT
+	? new Date(HM_EVENT.end_time * 1000).toISOString()
+	: "";
+const HM_REPOS = new Map(
+	hackmeridian2026.projects.map((p) => [p.repo.toLowerCase(), p.placement]),
 );
 
-/** HackMeridian 2026's verified projects whose repo is one of these. Held in
- * memory: only the placed ones are stored builds. */
-function verifiedHackathons(repoFullNames: string[]): ProjectHackathon[] {
-	const event = CURATED_HACKATHONS.find(
-		(h) => h.uname === hackmeridian2026.event,
-	);
-	if (!event) return [];
-	const project = repoFullNames
-		.map((r) => hackmeridian2026Repos.get(r.toLowerCase()))
-		.find(Boolean);
+function getVerifiedHackathon(
+	repoFullNames: readonly string[],
+): ProjectHackathon | null {
+	if (!HM_EVENT) return null;
 
-	return project
-		? [
-				{
-					slug: event.uname,
-					title: event.title,
-					placement: project.placement,
-					endedAt: new Date(event.end_time * 1000).toISOString(),
-				},
-			]
-		: [];
+	for (const repo of repoFullNames) {
+		const placement = HM_REPOS.get(repo.toLowerCase());
+		if (placement !== undefined) {
+			return {
+				slug: HM_EVENT.uname,
+				title: HM_EVENT.title,
+				placement,
+				endedAt: HM_ENDED_AT,
+			};
+		}
+	}
+
+	return null;
 }
 
-/** The hackathons a directory project took part in, one per event: its
- * linked submissions, and HackMeridian 2026 by its repo. Placed ones first,
- * then the newest. A build index that cannot be read leaves only the
- * in-memory ones. */
 export async function hackathonsOfProject(
 	projectSlug: string,
 	repoFullNames: string[],
 ): Promise<ProjectHackathon[]> {
-	const found: ProjectHackathon[] = [];
+	const byEvent = new Map<string, ProjectHackathon>();
+
 	try {
 		for (const b of await getHackathonBuildsIndex()) {
 			if (b.project?.slug !== projectSlug) continue;
-			found.push({
+			const placement = b.hackathonPlacement ?? (b.isWinner ? "Winner" : null);
+			if (byEvent.get(b.hackathon.slug)?.placement && !placement) continue;
+
+			byEvent.set(b.hackathon.slug, {
 				slug: b.hackathon.slug,
 				title: b.hackathon.title,
-				placement: b.hackathonPlacement ?? (b.isWinner ? "Winner" : null),
+				placement,
 				endedAt: b.hackathon.endedAt ?? "",
 			});
 		}
-	} catch {}
-	const byEvent = new Map<string, ProjectHackathon>();
-	for (const h of [...found, ...verifiedHackathons(repoFullNames)]) {
-		const known = byEvent.get(h.slug);
-		if (!known || (!known.placement && h.placement)) byEvent.set(h.slug, h);
+	} catch {
+		// The build index is optional here: the in-memory projects still show.
 	}
 
-	return [...byEvent.values()].sort(
-		(a, b) =>
-			Number(!!b.placement) - Number(!!a.placement) ||
-			b.endedAt.localeCompare(a.endedAt),
-	);
+	const verified = getVerifiedHackathon(repoFullNames);
+	if (verified) {
+		const existing = byEvent.get(verified.slug);
+		if (!existing || (!existing.placement && verified.placement)) {
+			byEvent.set(verified.slug, verified);
+		}
+	}
+
+	return Array.from(byEvent.values()).sort((a, b) => {
+		const placedDiff = (b.placement ? 1 : 0) - (a.placement ? 1 : 0);
+		return placedDiff !== 0 ? placedDiff : b.endedAt.localeCompare(a.endedAt);
+	});
 }
 
-/** The hackathon the directory entry itself names, when it names one. */
 export function declaredHackathon(
 	project: Pick<Project, "hackathon" | "hackathonStatus">,
 ): { name: string; slug?: string; status?: string } | null {
 	const { hackathon, hackathonStatus } = project;
 	if (!hackathon) return null;
+
 	const linked = typeof hackathon === "object" ? hackathon : null;
 
 	return {

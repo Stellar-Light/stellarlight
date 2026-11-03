@@ -36,8 +36,8 @@ import {
 	declaredHackathon,
 	hackathonsOfProject,
 } from "@/lib/project-hackathons";
-import { RESOLVABLE_PROJECT_STATUSES } from "@/lib/project-status";
 import { scfRoundsOf } from "@/lib/project-scf";
+import { RESOLVABLE_PROJECT_STATUSES } from "@/lib/project-status";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 type Params = Promise<{

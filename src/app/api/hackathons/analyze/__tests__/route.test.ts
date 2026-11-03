@@ -501,7 +501,6 @@ describe("events whose stored rows are their winners only", () => {
 		// The check: null or at least 100, never a fabricated small number.
 		expect(y2025.submissionCount).toBeNull();
 		expect(y2025.winnerCount).toBe(6);
-		// 2026's stored rows are its six winners too: the field is unknown.
 		expect(y2026.submissionCount).toBeNull();
 		expect(y2026.winnerCount).toBe(6);
 		expect(y2026.coverage).toBe("winners-only");

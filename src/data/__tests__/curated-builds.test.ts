@@ -43,7 +43,6 @@ describe("curated hackathon builds", () => {
 			"Runner-Up: bookerbob-hackmeridian-2026",
 			"Runner-Up: private-yield",
 		]);
-		// Only a track a team declared is carried.
 		expect(w.find((b) => b.name === "nest")?.track).toBeNull();
 		expect(w.find((b) => b.name === "alloy-stellar")?.track).toBe("Scale");
 		expect(w.every((b) => b.githubUrl?.startsWith("https://github.com/"))).toBe(
