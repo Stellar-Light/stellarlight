@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-02T14:13:55.262Z",
+	"generatedAt": "2026-11-03T13:17:15.638Z",
 	"specVersion": "1.9.116",
 	"graceDays": 10,
 	"expectedOps": [
@@ -80,22 +80,14 @@
 		"analyzeHackathonSubmissions",
 		"getHackathonSubmission",
 		"getRwaAssets",
-		"reviewSubmission"
+		"locateSource",
+		"reviewSubmission",
+		"verifyClaim"
 	],
 	"laggingInCatalog": [
 		{
 			"op": "getQualityReport",
 			"addedAt": "2026-10-24",
-			"ageDays": 9
-		},
-		{
-			"op": "locateSource",
-			"addedAt": "2026-10-23",
-			"ageDays": 10
-		},
-		{
-			"op": "verifyClaim",
-			"addedAt": "2026-10-23",
 			"ageDays": 10
 		}
 	],
