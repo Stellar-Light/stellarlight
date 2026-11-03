@@ -1,8 +1,8 @@
 {
-	"generatedAt": "2026-10-27T13:35:43.491Z",
+	"generatedAt": "2026-11-03T15:28:51.352Z",
 	"basis": "archived repos from the public repos API (isArchived=true), restricted to the curated pool (project-linked or repoScore >= 60), compared against REPO_SUPERSESSIONS keys",
-	"archivedTotal": 278,
-	"archivedInPool": 53,
+	"archivedTotal": 282,
+	"archivedInPool": 57,
 	"covered": 40,
 	"missing": [
 		{
@@ -36,10 +36,22 @@
 			"url": "https://github.com/tracefinance/frontend-challenge"
 		},
 		{
+			"fullName": "dfns/edwards-schnorr",
+			"projectSlug": "dfns",
+			"repoScore": 21,
+			"url": "https://github.com/dfns/edwards-schnorr"
+		},
+		{
 			"fullName": "idos-network/kwil-db-economy",
 			"projectSlug": "idos",
 			"repoScore": 21,
 			"url": "https://github.com/idos-network/kwil-db-economy"
+		},
+		{
+			"fullName": "drips-network/multiplayer",
+			"projectSlug": "drips",
+			"repoScore": 20,
+			"url": "https://github.com/drips-network/multiplayer"
 		},
 		{
 			"fullName": "idos-network/xrpl-credentials-demo",
@@ -66,6 +78,12 @@
 			"url": "https://github.com/bidalihq/commerce-sdk-ios"
 		},
 		{
+			"fullName": "drips-network/ecosystems",
+			"projectSlug": "drips",
+			"repoScore": 11,
+			"url": "https://github.com/drips-network/ecosystems"
+		},
+		{
 			"fullName": "bidalihq/commerce-sdk-android",
 			"projectSlug": "bidali",
 			"repoScore": 9,
@@ -82,6 +100,12 @@
 			"projectSlug": "tala",
 			"repoScore": 7,
 			"url": "https://github.com/inventure/Forex_Rate_Service"
+		},
+		{
+			"fullName": "dfns/dfns-connect",
+			"projectSlug": "dfns",
+			"repoScore": 7,
+			"url": "https://github.com/dfns/dfns-connect"
 		}
 	]
 }
