@@ -1,57 +1,57 @@
 {
-	"generatedAt": "2026-11-02T14:05:41.693Z",
-	"total": 901,
+	"generatedAt": "2026-11-03T13:15:51.013Z",
+	"total": 903,
 	"open": 74,
-	"refreshQueue": 108,
+	"refreshQueue": 109,
 	"blockedUpstream": 17,
 	"lagPastGrace": {
 		"count": 11,
 		"graceDays": 20,
-		"oldestDays": 102,
+		"oldestDays": 103,
 		"probes": [
 			{
 				"id": "raven-routing:reflector-oracle-on-stellar",
-				"days": 102
+				"days": 103
 			},
 			{
 				"id": "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
-				"days": 102
+				"days": 103
 			},
 			{
 				"id": "raven-routing:how-does-the-blend-lending-pool-calculate-intere",
-				"days": 66
+				"days": 67
 			},
 			{
 				"id": "raven-routing:who-gives-out-grants-for-building-on-stellar",
-				"days": 58
+				"days": 59
 			},
 			{
 				"id": "raven-routing:show-me-some-example-stellar-projects-i-can-copy",
-				"days": 58
+				"days": 59
 			},
 			{
 				"id": "raven-routing:which-stellar-wallets-support-soroban-contracts",
-				"days": 58
+				"days": 59
 			},
 			{
 				"id": "raven-routing:which-stellar-projects-had-a-smart-contract-audi",
-				"days": 58
+				"days": 59
 			},
 			{
 				"id": "raven-routing:how-does-blend-calculate-interest-accrual",
-				"days": 58
+				"days": 59
 			},
 			{
 				"id": "raven-routing:which-anchors-actually-implement-sep-24",
-				"days": 58
+				"days": 59
 			},
 			{
 				"id": "raven-routing:how-much-has-the-stellar-community-fund-awarded-",
-				"days": 58
+				"days": 59
 			},
 			{
 				"id": "raven-routing:which-verticals-on-stellar-have-the-least-compet",
-				"days": 58
+				"days": 59
 			}
 		]
 	},
@@ -59,11 +59,11 @@
 		"raven-scorer": 6,
 		"raven-catalog-lag": 11
 	},
-	"closed": 702,
+	"closed": 703,
 	"verified": 7,
-	"cleared": 695,
+	"cleared": 696,
 	"clearedByReprobe": 216,
-	"clearedOnSilence": 479,
+	"clearedOnSilence": 480,
 	"closingRate": 0.25,
 	"silenceShare": 0.53,
 	"recurrence": {
@@ -72,18 +72,18 @@
 		"regressedFromVerified": 0,
 		"recurredAfterSilence": {
 			"last30d": {
-				"newFindings": 156,
-				"recurred": 138,
-				"ratePct": 88.5
+				"newFindings": 141,
+				"recurred": 123,
+				"ratePct": 87.2
 			},
 			"lifetime": {
-				"newFindings": 901,
-				"recurred": 348,
-				"ratePct": 38.6
+				"newFindings": 903,
+				"recurred": 350,
+				"ratePct": 38.8
 			}
 		}
 	},
-	"oldestOpenDays": 36,
+	"oldestOpenDays": 37,
 	"inWave": 0,
 	"highOpen": 72,
 	"staleHighOpen": 8,
@@ -91,7 +91,7 @@
 		{
 			"surface": "code",
 			"open": 70,
-			"total": 186
+			"total": 188
 		},
 		{
 			"surface": "directory",
@@ -129,7 +129,7 @@
 		{
 			"source": "raven-routing",
 			"open": 17,
-			"days": 49
+			"days": 50
 		}
 	],
 	"topOpen": [
