@@ -458,6 +458,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-smart-account-kit-npm-smart-a",
+   "date": "2026-11-03",
+   "run": "41675478455",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
