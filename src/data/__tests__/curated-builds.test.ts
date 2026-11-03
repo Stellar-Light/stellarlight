@@ -31,6 +31,26 @@ describe("curated hackathon builds", () => {
 		expect(w.every((b) => b.githubUrl === null)).toBe(true);
 	});
 
+	it("carries HackMeridian 2026's six winners from HackProof's verified projects", () => {
+		const w = CURATED_BUILDS.filter(
+			(b) => b.hackathonSlug === "hackmeridian-2026",
+		);
+		expect(w.map((b) => `${b.placement}: ${b.name}`).sort()).toEqual([
+			"1st Place: alloy-stellar",
+			"1st Place: nest",
+			"Runner-Up: 4ward",
+			"Runner-Up: ZKross",
+			"Runner-Up: bookerbob-hackmeridian-2026",
+			"Runner-Up: private-yield",
+		]);
+		// Only a track a team declared is carried.
+		expect(w.find((b) => b.name === "nest")?.track).toBeNull();
+		expect(w.find((b) => b.name === "alloy-stellar")?.track).toBe("Scale");
+		expect(w.every((b) => b.githubUrl?.startsWith("https://github.com/"))).toBe(
+			true,
+		);
+	});
+
 	it("carries Build on Stellar Philippines' five winners as BitPinas heads them", () => {
 		const w = CURATED_BUILDS.filter(
 			(b) => b.hackathonSlug === "build-on-stellar-philippines-2026",

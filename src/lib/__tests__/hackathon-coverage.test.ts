@@ -86,6 +86,7 @@ describe("an event's coverage, from its stored rows", () => {
 		const index = [...curated(), synced("1", "zk"), synced("2", "zk", true)];
 		expect([...winnersOnlyEvents(index)]).toEqual([
 			["hackmeridian-2025", 6],
+			["hackmeridian-2026", 6],
 			["build-on-stellar-philippines-2026", 5],
 			["apac-stellar-hackathon-2026", 1],
 		]);
