@@ -18,6 +18,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import EntityCard from "@/components/entity-card";
 import { ProjectLogo } from "@/components/project-logo";
+import { ProjectRecognition } from "@/components/project-recognition";
 import { ProjectTVLChart } from "@/components/project-tvl-chart";
 import ShareButton from "@/components/share-button";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,10 @@ import {
 } from "@/components/ui/card";
 import { projectLogo } from "@/data/project-logos";
 import { getPayloadSafe } from "@/lib/payload-client";
+import {
+	declaredHackathon,
+	hackathonsOfProject,
+} from "@/lib/project-hackathons";
 import { RESOLVABLE_PROJECT_STATUSES } from "@/lib/project-status";
 import { getAppUrl } from "@/lib/utils/app-url";
 
@@ -290,6 +295,11 @@ export default async function ProjectDetailPage({
 		// Silently handle GitHub fetch errors
 	}
 
+	const hackathons = await hackathonsOfProject(
+		project.slug,
+		(gh?.repos ?? []).map((r) => `${r.owner}/${r.name}`),
+	);
+
 	// Find entities that have this project
 	let linkedEntities: any[] = [];
 	try {
@@ -447,35 +457,13 @@ export default async function ProjectDetailPage({
 												{project.verificationLevel}
 											</Badge>
 										)}
-										{(project as any).hackathon &&
-											(() => {
-												const h = (project as any).hackathon;
-												const hackathon = typeof h === "object" ? h : null;
-												const status = (project as any).hackathonStatus;
-												const inner = (
-													<>
-														From {hackathon?.name ?? "Hackathon"}
-														{status && (
-															<span className="ml-1.5 px-1.5 py-0.5 text-[10px] font-semibold rounded-md bg-white/10 text-purple-300">
-																{status}
-															</span>
-														)}
-													</>
-												);
-												const className =
-													"inline-flex items-center bg-gradient-to-r from-purple-500/20 to-purple-500/10 text-purple-400 border border-purple-500/30 hover:border-purple-500/60 text-sm px-4 py-1.5 font-semibold shadow-sm rounded-full transition-colors";
-												return hackathon?.slug ? (
-													<Link
-														href={`/hackathons/${hackathon.slug}`}
-														className={className}
-													>
-														{inner}
-													</Link>
-												) : (
-													<span className={className}>{inner}</span>
-												);
-											})()}
 									</div>
+
+									<ProjectRecognition
+										scfAwarded={!!project.scf?.awarded}
+										hackathons={hackathons}
+										from={declaredHackathon(project)}
+									/>
 
 									{/* Category Tags */}
 									<div className="flex flex-wrap items-center gap-3">
@@ -587,7 +575,10 @@ export default async function ProjectDetailPage({
 
 				{/* SCF Funding Info */}
 				{project.scf?.awarded && (
-					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
+					<Card
+						id="scf"
+						className="mb-8 border border-border/50 bg-card shadow-sm"
+					>
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">
 								Stellar Community Fund
