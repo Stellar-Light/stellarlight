@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import type { ProjectHackathon } from "@/lib/project-hackathons";
+import { scfBadgeLabel } from "@/lib/project-scf";
 
 interface ProjectRecognitionProps {
 	scfAwarded: boolean;
+	scfRounds: number[];
 	hackathons: ProjectHackathon[];
 	/** The hackathon the directory entry itself names (project.hackathon). */
 	from?: { name: string; slug?: string; status?: string } | null;
@@ -17,6 +19,7 @@ const scfPill = `${pill} bg-[#FDDA24]/10 text-[#FDDA24] border-[#FDDA24]/30 hove
 /** What recognised a project, in one row: SCF funding and its hackathons. */
 export function ProjectRecognition({
 	scfAwarded,
+	scfRounds,
 	hackathons,
 	from,
 }: ProjectRecognitionProps) {
@@ -29,7 +32,7 @@ export function ProjectRecognition({
 			{scfAwarded && (
 				<a href="#scf">
 					<Badge variant="outline" className={scfPill}>
-						SCF funded
+						{scfBadgeLabel(scfRounds)}
 					</Badge>
 				</a>
 			)}

@@ -37,6 +37,7 @@ import {
 	hackathonsOfProject,
 } from "@/lib/project-hackathons";
 import { RESOLVABLE_PROJECT_STATUSES } from "@/lib/project-status";
+import { scfRoundsOf } from "@/lib/project-scf";
 import { getAppUrl } from "@/lib/utils/app-url";
 
 type Params = Promise<{
@@ -461,6 +462,7 @@ export default async function ProjectDetailPage({
 
 									<ProjectRecognition
 										scfAwarded={!!project.scf?.awarded}
+										scfRounds={scfRoundsOf(project.scf)}
 										hackathons={hackathons}
 										from={declaredHackathon(project)}
 									/>
@@ -590,14 +592,7 @@ export default async function ProjectDetailPage({
 						<CardContent>
 							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 								{(() => {
-									const rounds: number[] = Array.isArray(
-										project.scf.awardedRounds,
-									)
-										? (project.scf.awardedRounds as number[])
-										: project.scf.lastAwardedRound &&
-												project.scf.lastAwardedRound > 0
-											? [project.scf.lastAwardedRound]
-											: [];
+									const rounds = scfRoundsOf(project.scf);
 									return rounds.length > 0 ? (
 										<div className="p-4 rounded-xl border border-border/50 bg-background/50">
 											<p className="text-sm font-medium text-muted-foreground mb-2">
