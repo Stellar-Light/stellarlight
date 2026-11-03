@@ -7,6 +7,8 @@ export interface ProjectHackathon {
 	slug: string;
 	title: string;
 	placement: string | null;
+	track: string | null;
+	url: string | null;
 	endedAt: string;
 }
 
@@ -17,7 +19,7 @@ const HM_ENDED_AT = HM_EVENT
 	? new Date(HM_EVENT.end_time * 1000).toISOString()
 	: "";
 const HM_REPOS = new Map(
-	hackmeridian2026.projects.map((p) => [p.repo.toLowerCase(), p.placement]),
+	hackmeridian2026.projects.map((p) => [p.repo.toLowerCase(), p]),
 );
 
 function getVerifiedHackathon(
@@ -26,12 +28,14 @@ function getVerifiedHackathon(
 	if (!HM_EVENT) return null;
 
 	for (const repo of repoFullNames) {
-		const placement = HM_REPOS.get(repo.toLowerCase());
-		if (placement !== undefined) {
+		const project = HM_REPOS.get(repo.toLowerCase());
+		if (project) {
 			return {
 				slug: HM_EVENT.uname,
 				title: HM_EVENT.title,
-				placement,
+				placement: project.placement,
+				track: project.track,
+				url: `${hackmeridian2026.source}/${project.file}.yml`,
 				endedAt: HM_ENDED_AT,
 			};
 		}
@@ -56,6 +60,8 @@ export async function hackathonsOfProject(
 				slug: b.hackathon.slug,
 				title: b.hackathon.title,
 				placement,
+				track: b.track ?? null,
+				url: b.url,
 				endedAt: b.hackathon.endedAt ?? "",
 			});
 		}

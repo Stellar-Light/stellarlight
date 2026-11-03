@@ -46,7 +46,12 @@ describe("hackathonsOfProject", () => {
 		const found = await hackathonsOfProject("p", ["Troqpay/Private-Yield"]);
 
 		expect(found).toMatchObject([
-			{ slug: "hackmeridian-2026", placement: "Runner-Up" },
+			{
+				slug: "hackmeridian-2026",
+				placement: "Runner-Up",
+				track: "Scale",
+				url: "https://hackproof-six.vercel.app/data/2026/private-yield.yml",
+			},
 		]);
 	});
 });

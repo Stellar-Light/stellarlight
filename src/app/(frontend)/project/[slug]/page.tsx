@@ -17,6 +17,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import EntityCard from "@/components/entity-card";
+import { ProjectHackathonsCard } from "@/components/project-hackathons-card";
 import { ProjectLogo } from "@/components/project-logo";
 import { ProjectRecognition } from "@/components/project-recognition";
 import { ProjectTVLChart } from "@/components/project-tvl-chart";
@@ -643,6 +644,8 @@ export default async function ProjectDetailPage({
 						</CardContent>
 					</Card>
 				)}
+
+				<ProjectHackathonsCard hackathons={hackathons} />
 
 				{/* TVL Stats & Chart (DeFi protocols only) */}
 				<ProjectTVLChart projectName={project.name} />
