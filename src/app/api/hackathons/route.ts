@@ -309,7 +309,7 @@ export async function GET(req: NextRequest) {
 					// read is no look at all.
 					summary: readWarnings.length
 						? `No ${statusFilter} hackathons${filtered ? ` matching ${filtered}` : ""} came back, but part of stellarlight's feed could not be read (meta.warnings), so this is not a check that none is listed. Check live channels for the next announcement.`
-						: `No ${statusFilter} hackathons ${filtered ? `match ${filtered} ` : ""}in stellarlight's feed right now. It holds curated events and Stellar organizers' DoraHacks listings, so this is not a claim that no Stellar hackathon is ${statusFilter} elsewhere. Check live channels for the next announcement.`,
+						: `No ${statusFilter} hackathons ${filtered ? `match ${filtered} ` : ""}in stellarlight's feed right now. The feed holds Stellar organizers' DoraHacks listings and, off DoraHacks, curated Stellar-presented hackathons and university challenges, so this is not a claim that no Stellar hackathon is ${statusFilter} elsewhere. Check live channels for the next announcement.`,
 					channels: [
 						{
 							name: "@BuildOnStellar on X/Twitter",

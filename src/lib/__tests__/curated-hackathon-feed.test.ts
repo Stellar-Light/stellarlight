@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CURATED_BUILDS } from "@/data/curated-builds";
@@ -231,6 +233,50 @@ describe("the Rise In Stellar Pro Hackathon in Istanbul", () => {
 	});
 });
 
+// L5-02 on live 1.9.116: "which Stellar hackathons are coming up that I can
+// still join?" found none, while the University of Waterloo's challenge,
+// powered by Stellar, ran 2 to 18 November 2026. Owner decision 2026-11-04:
+// Stellar-presented university challenges are in the curated feed.
+describe("the University of Waterloo Blockchain Innovation Challenge", () => {
+	const SLUG = "blockchain-innovation-challenge-waterloo-2026";
+	afterEach(() => vi.useRealTimers());
+
+	it("is in the feed as an active curated event while it runs", async () => {
+		vi.useFakeTimers({ toFake: ["Date"] });
+		vi.setSystemTime(new Date("2026-11-04T12:00:00Z"));
+		const body = await feed("?status=active");
+		expect(body.hackathons.map((h: { slug: string }) => h.slug)).toEqual([
+			SLUG,
+		]);
+		expect(body.hackathons[0]).toMatchObject({
+			name: "Blockchain Innovation Challenge powered by Stellar, Waterloo",
+			startDate: "2026-11-02",
+			endDate: "2026-11-18",
+			status: "active",
+			source: "curated",
+			prizePoolUSD: 15000,
+			externalUrl:
+				"https://www.velocityincubator.com/programs-events/the-blockchain-innovation-challenge-powered-by-stellar",
+			organizer: { name: "Velocity" },
+		});
+		expect(body.meta.fallbackChannels).toBeUndefined();
+		const found = await feed("?q=waterloo");
+		expect(found.hackathons.map((h: { slug: string }) => h.slug)).toEqual([
+			SLUG,
+		]);
+	});
+
+	it("is in scope as the curated file writes its scope", () => {
+		const file = readFileSync(
+			join(process.cwd(), "src/data/curated-hackathons.ts"),
+			"utf8",
+		);
+		expect(file.slice(0, 1500)).toMatch(
+			/Stellar-presented hackathons and university challenges/,
+		);
+	});
+});
+
 // Review: every curated event's page said "DoraHacks-sourced: live
 // submission feed unavailable", and served submissions [] for a roster no
 // one holds.
@@ -382,6 +428,10 @@ describe("the empty-feed summary", () => {
 			);
 			expect(summary).not.toMatch(/between events/i);
 			expect(summary).toMatch(/not a claim that no Stellar hackathon is/);
+			// The scope it covers, as the curated file writes it.
+			expect(summary).toMatch(
+				/curated Stellar-presented hackathons and university challenges/,
+			);
 		}
 		// Other filters narrow what was looked at, and it names them.
 		expect(await summaryFor("?status=active&q=istanbul")).toMatch(

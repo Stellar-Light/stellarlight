@@ -5,6 +5,11 @@
  * URL it was verified against. Shape mirrors DoraHacksHackathon so the
  * page, the API and the homepage section render them with the same code.
  *
+ * Scope (owner decision, 2026-11-04): the feed covers
+ * Stellar-presented hackathons and university challenges: events Stellar
+ * or SDF presents, powers or co-hosts, such as a university challenge
+ * powered by Stellar. Events on DoraHacks come from the DoraHacks feed.
+ *
  * Add a row when an event is announced; the status (upcoming / active /
  * ended) is derived from the dates at request time, never hand-set.
  * Verified 2026-08-17; HackMeridian rows 2026-10-20 (the 2026 rubric
@@ -396,6 +401,32 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		external_url: "https://www.risein.com/programs/stellar-pro-hackathon",
 		image_url:
 			"https://files.risein.com/programs/2kgsl-cohort-1787226687290jpeg",
+		source: "curated",
+		kind: "hackathon",
+	},
+	{
+		id: -1009,
+		title: "Blockchain Innovation Challenge powered by Stellar, Waterloo",
+		uname: "blockchain-innovation-challenge-waterloo-2026",
+		description:
+			"A two-week challenge for University of Waterloo students, hosted by Velocity and powered by Stellar, from 2 to 18 November 2026: build Stellar solutions that widen access to savings, credit, payments and identity verification for underserved people. $15,000 in prizes. The kick-off on 2 November (4 to 6 pm, Black and Gold Room, SLC) is mandatory for every participant; teams in the Top 16 present at a project showcase on 16 November, and the Top 8 at the final awards on 18 November (5 to 7:30 pm), both at the Innovation Arena, 280 Joseph St, Kitchener. Open to current undergraduate and graduate students.",
+		// Velocity's page and the University of Waterloo's event page, both
+		// read 2026-11-04: title, dates, prizes, host, audience and the
+		// mandatory dates. The days are kept at UTC midnight and 23:59, with no
+		// hour claimed, as for the other date-only rows.
+		start_time: ts("2026-11-02T00:00:00Z"),
+		end_time: ts("2026-11-18T23:59:00Z"),
+		bonus_price: 15000,
+		hackers_count: 0,
+		winner_announced: false,
+		status: 1,
+		field: "IRL,University,Canada",
+		ecosystem: "Stellar",
+		organization: { id: -21, name: "Velocity" },
+		external_url:
+			"https://www.velocityincubator.com/programs-events/the-blockchain-innovation-challenge-powered-by-stellar",
+		image_url:
+			"https://cdn.prod.website-files.com/66e096649930d345e692a0af/6aa0710787b46641ceb63f44_Stellar-challenge-header-image.avif",
 		source: "curated",
 		kind: "hackathon",
 	},
