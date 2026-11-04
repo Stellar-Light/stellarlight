@@ -189,3 +189,15 @@ export function derivedOnly(
 		SYNC_DERIVED_FIELDS.filter((f) => f in r).map((f) => [f, r[f]]),
 	);
 }
+
+/** A curated sync row as the link rules read it: named by its repo, not by
+ * the README heading it is shown under, so owner-and-name reads the input
+ * the 2026-11-04 measurement read (it links ACTA and Neko). A heading that
+ * names the project under the same owner, while the repo name does not,
+ * waits for a person (owner decision, TroqPay). */
+export function curatedLinkInput<
+	T extends { name?: string | null; repoFullName?: string | null },
+>(r: T): T {
+	const repo = r.repoFullName?.split("/")[1];
+	return repo ? { ...r, name: repo } : r;
+}

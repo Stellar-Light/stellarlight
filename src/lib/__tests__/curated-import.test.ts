@@ -4,11 +4,13 @@ import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
 import {
 	badCuratedRows,
 	curatedFacts,
+	curatedLinkInput,
 	curatedSyncRow,
 	derivedOnly,
 	planCuratedImport,
 	SYNC_DERIVED_FIELDS,
 } from "@/lib/curated-import";
+import { linkBuild } from "@/lib/hackathon-build-links";
 
 const events = new Map(CURATED_HACKATHONS.map((h) => [h.uname, h]));
 const ROWS = [...CURATED_BUILDS, ...HACKPROOF_BUILDS];
@@ -198,5 +200,41 @@ describe("the daily sync on a curated row: derived fields only", () => {
 			stack: ["soroban-sdk"],
 			stackReadAt: "2026-11-05T00:00:00.000Z",
 		});
+	});
+});
+
+// Owner decision 2026-11-04: no link by a shared owner alone, and a README
+// heading that names the project waits for a person.
+describe("the link rules on a curated row read its repo's own name", () => {
+	const idx = {
+		repos: new Map(),
+		sites: new Map(),
+		owners: new Map([
+			["acme-team", [{ slug: "acme", name: "Acme" }]],
+			["payco", [{ slug: "payco", name: "PayCo" }]],
+		]),
+	};
+	const row = (name: string, repoFullName: string) => ({
+		buildId: "curated-x-y",
+		entryKey: "curated-x-y@x",
+		name,
+		githubUrl: `https://github.com/${repoFullName}`,
+		repoFullName,
+	});
+
+	it("links a repo whose own name carries the project's, under its owner", () => {
+		const r = curatedLinkInput(row("Gate", "acme-team/acme-gate-x"));
+		expect(r.name).toBe("acme-gate-x");
+		expect(linkBuild(r, idx).project).toMatchObject({
+			slug: "acme",
+			basis: "owner-and-name",
+		});
+	});
+
+	it("does not link one whose heading names the project while its repo name does not", () => {
+		const heading = row("PayCo Private Yield", "payco/private-yield");
+		// Read on the heading, the rule would link it.
+		expect(linkBuild(heading, idx).project?.slug).toBe("payco");
+		expect(linkBuild(curatedLinkInput(heading), idx).project).toBeNull();
 	});
 });

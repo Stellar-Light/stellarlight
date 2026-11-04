@@ -42,7 +42,8 @@
  *
  * Stored curated rows with a repo (scripts/import-curated-builds.ts writes
  * their own fields) run steps 3 to 7 too, with no DoraHacks page or page
- * rule, and get only the fields those steps derive (src/lib/curated-import.ts
+ * rule and with the link rules reading the repo's own name, and get only
+ * the fields those steps derive (src/lib/curated-import.ts
  * SYNC_DERIVED_FIELDS): one field, one writer.
  *
  * The rules the stablecoin and RWA lanes earned:
@@ -55,7 +56,11 @@
 import "./load-env";
 import { createRequire } from "node:module";
 import { getPayload } from "payload";
-import { curatedSyncRow, derivedOnly } from "../src/lib/curated-import";
+import {
+	curatedLinkInput,
+	curatedSyncRow,
+	derivedOnly,
+} from "../src/lib/curated-import";
 import { embedBatch } from "../src/lib/embed";
 import {
 	assign as assignTypes,
@@ -725,8 +730,11 @@ async function main() {
 			[...rows.values()].filter((r) => r.isWinner).map((r) => r.buildId),
 		);
 		const named = new Map<string, { p: NamedProject; rows: Row[] }>();
+		// A curated row's rules read its repo's name (curatedLinkInput).
+		const linkInput = (r: Row) =>
+			curated.has(r.entryKey) ? curatedLinkInput(r) : r;
 		for (const r of rows.values()) {
-			const { project, ambiguous: listedTwice } = linkBuild(r, idx);
+			const { project, ambiguous: listedTwice } = linkBuild(linkInput(r), idx);
 			if (listedTwice) ambiguous++;
 			r.projectSlug = project?.slug ?? null;
 			r.projectName = project?.name ?? null;
@@ -749,7 +757,7 @@ async function main() {
 				dropWhy.set(
 					r.entryKey,
 					linkDropReason(
-						{ ...r, isWinner: won.has(r.buildId) },
+						{ ...linkInput(r), isWinner: won.has(r.buildId) },
 						old,
 						idx,
 						names,
