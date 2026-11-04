@@ -1,0 +1,527 @@
+[
+	{
+		"file": "src/app/(frontend)/awards/tally/page.tsx",
+		"collection": "award-ballots",
+		"limit": 1000,
+		"count": 1,
+		"reason": "admin-only tally of one round's ballots; a round's ballot count is not measured against the cap here"
+	},
+	{
+		"file": "src/app/(frontend)/awards/tally/page.tsx",
+		"collection": "award-rounds",
+		"limit": 20,
+		"count": 1,
+		"reason": "display: the 20 newest rounds offered in a picker, never counted"
+	},
+	{
+		"file": "src/app/(frontend)/awards/tally/page.tsx",
+		"collection": "award-voters",
+		"limit": 1000,
+		"count": 1,
+		"reason": "admin-only tally of one round's voters; a round's roster is not measured against the cap here"
+	},
+	{
+		"file": "src/app/(frontend)/blog/[slug]/page.tsx",
+		"collection": "blog",
+		"limit": 3,
+		"count": 1,
+		"reason": "display: three related posts"
+	},
+	{
+		"file": "src/app/(frontend)/blog/page.tsx",
+		"collection": "blog",
+		"limit": 1000,
+		"count": 1,
+		"reason": "latent: published posts read to collect their tags; the post count is not measured here"
+	},
+	{
+		"file": "src/app/(frontend)/builders/[username]/page.tsx",
+		"collection": "builders",
+		"limit": 5,
+		"count": 1,
+		"reason": "lookup: one profile by login, exact login preferred among substring hits"
+	},
+	{
+		"file": "src/app/(frontend)/builders/[username]/page.tsx",
+		"collection": "projects",
+		"limit": 100,
+		"count": 1,
+		"reason": "lookup: projects whose GitHub org is this one builder"
+	},
+	{
+		"file": "src/app/(frontend)/builders/[username]/page.tsx",
+		"collection": "projects",
+		"limit": 200,
+		"count": 1,
+		"reason": "lookup: bounded by the slugs the read above returned"
+	},
+	{
+		"file": "src/app/(frontend)/digest/[yearMonth]/page.tsx",
+		"collection": "blog",
+		"limit": 10,
+		"count": 1,
+		"reason": "display: up to 10 posts published in the month"
+	},
+	{
+		"file": "src/app/(frontend)/digest/[yearMonth]/page.tsx",
+		"collection": "projects",
+		"limit": 20,
+		"count": 1,
+		"reason": "display: the 20 newest projects of the month"
+	},
+	{
+		"file": "src/app/(frontend)/entities/page.tsx",
+		"collection": "entities",
+		"limit": 500,
+		"count": 1,
+		"reason": "latent: entity directory, not measured against the cap here"
+	},
+	{
+		"file": "src/app/(frontend)/entities/page.tsx",
+		"collection": "repos",
+		"limit": 5000,
+		"count": 1,
+		"reason": "latent: repos of the listed entities' projects, not measured against the cap here"
+	},
+	{
+		"file": "src/app/(frontend)/hackathons/page.tsx",
+		"collection": "hackathons",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: the stored hackathons collection, which the API route notes is empty"
+	},
+	{
+		"file": "src/app/(frontend)/partners/[slug]/page.tsx",
+		"collection": "partner-accounts",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: published partners (50 partner rows on 2026-11-04)"
+	},
+	{
+		"file": "src/app/(frontend)/partners/page.tsx",
+		"collection": "partner-accounts",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: published partners (50 partner rows on 2026-11-04)"
+	},
+	{
+		"file": "src/app/(frontend)/project/[slug]/page.tsx",
+		"collection": "repos",
+		"limit": 100,
+		"count": 1,
+		"reason": "latent: one project's repos, not measured against the cap here"
+	},
+	{
+		"file": "src/app/(frontend)/project/[slug]/page.tsx",
+		"collection": "transparency-logs",
+		"limit": 3,
+		"count": 1,
+		"reason": "display: the three newest log lines"
+	},
+	{
+		"file": "src/app/(frontend)/skills/[slug]/page.tsx",
+		"collection": "community-skills",
+		"limit": 500,
+		"count": 1,
+		"reason": "latent: approved community skills (43 on 2026-11-04)"
+	},
+	{
+		"file": "src/app/(frontend)/skills/page.tsx",
+		"collection": "community-skills",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: approved community skills (43 on 2026-11-04)"
+	},
+	{
+		"file": "src/app/(frontend)/stablecoins/[assetId]/page.tsx",
+		"collection": "stablecoin-snapshots",
+		"limit": 400,
+		"count": 1,
+		"reason": "latent and reported: one asset's daily series read oldest first, so past 400 days the newest would drop (about 260 days today)"
+	},
+	{
+		"file": "src/app/(frontend)/stablecoins/page.tsx",
+		"collection": "research-docs",
+		"limit": 400,
+		"count": 1,
+		"reason": "display: the newest 400 news items, sorted by date"
+	},
+	{
+		"file": "src/app/(frontend)/stablecoins/page.tsx",
+		"collection": "stablecoin-snapshots",
+		"limit": 20000,
+		"count": 1,
+		"reason": "ceiling sized in its comment: newest first, about 2.7 years at today's roster"
+	},
+	{
+		"file": "src/app/(frontend)/stablecoins/page.tsx",
+		"collection": "stablecoins",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: stablecoin registry (about 23 rows)"
+	},
+	{
+		"file": "src/app/api/admin/cleanup-projects/route.ts",
+		"collection": "projects",
+		"limit": 100,
+		"count": 1,
+		"reason": "admin-only maintenance route, outside the served API; not reviewed against the cap here"
+	},
+	{
+		"file": "src/app/api/admin/fix-descriptions/route.ts",
+		"collection": "projects",
+		"limit": 100,
+		"count": 1,
+		"reason": "admin-only maintenance route, outside the served API; not reviewed against the cap here"
+	},
+	{
+		"file": "src/app/api/admin/fix-entities/route.ts",
+		"collection": "entities",
+		"limit": 100,
+		"count": 1,
+		"reason": "admin-only maintenance route, outside the served API; not reviewed against the cap here"
+	},
+	{
+		"file": "src/app/api/admin/score-projects/route.ts",
+		"collection": "projects",
+		"limit": 100,
+		"count": 1,
+		"reason": "admin-only maintenance route, outside the served API; not reviewed against the cap here"
+	},
+	{
+		"file": "src/app/api/admin/score-projects/route.ts",
+		"collection": "signals",
+		"limit": 100,
+		"count": 1,
+		"reason": "admin-only maintenance route, outside the served API; not reviewed against the cap here"
+	},
+	{
+		"file": "src/app/api/admin/tag-projects/route.ts",
+		"collection": "projects",
+		"limit": 100,
+		"count": 1,
+		"reason": "admin-only maintenance route, outside the served API; not reviewed against the cap here"
+	},
+	{
+		"file": "src/app/api/analyze/route.ts",
+		"collection": "funding-snapshots",
+		"limit": 2,
+		"count": 1,
+		"reason": "lookup: the two newest snapshots"
+	},
+	{
+		"file": "src/app/api/analyze/route.ts",
+		"collection": "projects",
+		"limit": 5000,
+		"count": 1,
+		"reason": "latent: active projects (905 on 2026-11-04); the response carries population.truncated"
+	},
+	{
+		"file": "src/app/api/audits/route.ts",
+		"collection": "audits",
+		"limit": 500,
+		"count": 1,
+		"reason": "latent: audits registry (64 on 2026-11-04) but total is rows.length; owner lane"
+	},
+	{
+		"file": "src/app/api/clusters/route.ts",
+		"collection": "projects",
+		"limit": 5000,
+		"count": 1,
+		"reason": "latent: active projects (905 on 2026-11-04); the response carries population.truncated"
+	},
+	{
+		"file": "src/app/api/cron/github-refresh/route.ts",
+		"collection": "projects",
+		"limit": 500,
+		"count": 1,
+		"reason": "unsorted refresh batch: projects past the first 500 may never refresh (reported, owner lane)"
+	},
+	{
+		"file": "src/app/api/cron/partner-digest/route.ts",
+		"collection": "partner-accounts",
+		"limit": 1000,
+		"count": 1,
+		"reason": "latent: digest over partner rows (50 on 2026-11-04)"
+	},
+	{
+		"file": "src/app/api/cron/partner-digest/route.ts",
+		"collection": "partner-leads",
+		"limit": 5000,
+		"count": 1,
+		"reason": "latent: digest over partner leads, not measured against the cap here"
+	},
+	{
+		"file": "src/app/api/cron/partner-freshness/route.ts",
+		"collection": "partner-accounts",
+		"limit": 1000,
+		"count": 1,
+		"reason": "latent: freshness pass over partner rows (50 on 2026-11-04)"
+	},
+	{
+		"file": "src/app/api/hackathons/builds/[id]/route.ts",
+		"collection": "hackathon-builds",
+		"limit": 10,
+		"count": 1,
+		"reason": "lookup: one build by id"
+	},
+	{
+		"file": "src/app/api/hackathons/route.ts",
+		"collection": "hackathons",
+		"limit": 300,
+		"count": 1,
+		"reason": "latent: stored events (the collection is empty; DoraHacks feeds the list)"
+	},
+	{
+		"file": "src/app/api/partners/magic-link/route.ts",
+		"collection": "partner-accounts",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: partner rows (50 on 2026-11-04)"
+	},
+	{
+		"file": "src/app/api/partners/match/route.ts",
+		"collection": "partner-accounts",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: partner rows (50 on 2026-11-04)"
+	},
+	{
+		"file": "src/app/api/partners/route.ts",
+		"collection": "partner-accounts",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: partner rows (50 on 2026-11-04) but total is the mapped array; owner lane"
+	},
+	{
+		"file": "src/app/api/projects/resolve/route.ts",
+		"collection": "projects",
+		"limit": 5000,
+		"count": 1,
+		"reason": "latent: projects (1,139 on 2026-11-04) behind a found:false; owner lane"
+	},
+	{
+		"file": "src/app/api/projects/search/route.ts",
+		"collection": "audits",
+		"limit": 500,
+		"count": 1,
+		"reason": "decoration: audit rows joined onto results (64 on 2026-11-04)"
+	},
+	{
+		"file": "src/app/api/projects/search/route.ts",
+		"collection": "entities",
+		"limit": 300,
+		"count": 1,
+		"reason": "decoration: entity rows joined onto results, not measured against the cap here"
+	},
+	{
+		"file": "src/app/api/projects/search/route.ts",
+		"collection": "partner-accounts",
+		"limit": 100,
+		"count": 1,
+		"reason": "decoration: anchor rows joined onto results (50 partner rows on 2026-11-04)"
+	},
+	{
+		"file": "src/app/api/repos/explain/route.ts",
+		"collection": "repos",
+		"limit": 50,
+		"count": 1,
+		"reason": "lookup window: a like match, then an exact pick; can miss among more than 50 substring siblings (reported)"
+	},
+	{
+		"file": "src/app/api/research/route.ts",
+		"collection": "research-docs",
+		"limit": 10,
+		"count": 1,
+		"reason": "ranking pool: bounded candidates; the response states a null total with its basis"
+	},
+	{
+		"file": "src/app/api/research/route.ts",
+		"collection": "research-docs",
+		"limit": 24,
+		"count": 1,
+		"reason": "ranking pool: bounded candidates; the response states a null total with its basis"
+	},
+	{
+		"file": "src/app/api/research/route.ts",
+		"collection": "research-docs",
+		"limit": 25,
+		"count": 2,
+		"reason": "ranking pool: bounded candidates; the response states a null total with its basis"
+	},
+	{
+		"file": "src/app/api/research/route.ts",
+		"collection": "research-docs",
+		"limit": 30,
+		"count": 1,
+		"reason": "ranking pool: bounded candidates; the response states a null total with its basis"
+	},
+	{
+		"file": "src/app/api/research/route.ts",
+		"collection": "research-docs",
+		"limit": 40,
+		"count": 1,
+		"reason": "ranking pool: bounded candidates; the response states a null total with its basis"
+	},
+	{
+		"file": "src/app/api/research/route.ts",
+		"collection": "research-docs",
+		"limit": 200,
+		"count": 1,
+		"reason": "keyword fallback window: a recall cap that claims no total"
+	},
+	{
+		"file": "src/app/api/skills/route.ts",
+		"collection": "community-skills",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: approved community skills (43 on 2026-11-04) but total is the filtered array; owner lane"
+	},
+	{
+		"file": "src/app/api/stablecoins/route.ts",
+		"collection": "stablecoins",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: stablecoin registry (about 23 rows) but total is rows.length; owner lane"
+	},
+	{
+		"file": "src/app/api/verify/route.ts",
+		"collection": "audits",
+		"limit": 500,
+		"count": 1,
+		"reason": "latent: audits (64 on 2026-11-04)"
+	},
+	{
+		"file": "src/app/api/verify/route.ts",
+		"collection": "projects",
+		"limit": 5000,
+		"count": 1,
+		"reason": "latent: projects (1,139 on 2026-11-04) behind verdicts; owner lane"
+	},
+	{
+		"file": "src/app/api/verify/route.ts",
+		"collection": "repos",
+		"limit": 50,
+		"count": 1,
+		"reason": "lookup window for one repo"
+	},
+	{
+		"file": "src/app/api/verify/route.ts",
+		"collection": "stablecoins",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: stablecoin registry (about 23 rows) behind corpusTotal; owner lane"
+	},
+	{
+		"file": "src/app/sitemap.ts",
+		"collection": "community-skills",
+		"limit": 500,
+		"count": 1,
+		"reason": "latent: approved community skills (43 on 2026-11-04)"
+	},
+	{
+		"file": "src/lib/awards/record.ts",
+		"collection": "award-ballots",
+		"limit": 200,
+		"count": 1,
+		"reason": "page size of a loop that reads every ballot until hasNextPage is false"
+	},
+	{
+		"file": "src/lib/contracts-registry.ts",
+		"collection": "audits",
+		"limit": 500,
+		"count": 1,
+		"reason": "latent: audits (64 on 2026-11-04)"
+	},
+	{
+		"file": "src/lib/contracts-registry.ts",
+		"collection": "projects",
+		"limit": 500,
+		"count": 1,
+		"reason": "latent: contract registry join"
+	},
+	{
+		"file": "src/lib/contracts-registry.ts",
+		"collection": "repos",
+		"limit": 500,
+		"count": 1,
+		"reason": "latent: contract registry (about 100 rows) but total is rows.length; owner lane"
+	},
+	{
+		"file": "src/lib/hackathon-detail.ts",
+		"collection": "projects",
+		"limit": 300,
+		"count": 1,
+		"reason": "latent: the stored-event branch, empty today"
+	},
+	{
+		"file": "src/lib/hackathon-review.ts",
+		"collection": "hackathon-builds",
+		"limit": 10,
+		"count": 1,
+		"reason": "lookup: one build"
+	},
+	{
+		"file": "src/lib/partner-match.ts",
+		"collection": "partner-accounts",
+		"limit": 200,
+		"count": 1,
+		"reason": "latent: partner rows (50 on 2026-11-04)"
+	},
+	{
+		"file": "src/lib/research-ingest.ts",
+		"collection": "research-docs",
+		"limit": 10000,
+		"count": 1,
+		"reason": "ingest dedupe over one source's docs; 18,074 docs across all sources, the largest source not measured here"
+	},
+	{
+		"file": "src/lib/scf-pitch.ts",
+		"collection": "projects",
+		"limit": 5000,
+		"count": 1,
+		"reason": "latent: active projects (905 on 2026-11-04); owner lane"
+	},
+	{
+		"file": "src/lib/trust-report.ts",
+		"collection": "audits",
+		"limit": 100,
+		"count": 1,
+		"reason": "latent: audits (64 on 2026-11-04)"
+	},
+	{
+		"file": "src/lib/trust-report.ts",
+		"collection": "repos",
+		"limit": 20,
+		"count": 1,
+		"reason": "display: up to 20 repos in a report"
+	},
+	{
+		"file": "src/lib/vet-idea.ts",
+		"collection": "audits",
+		"limit": 500,
+		"count": 1,
+		"reason": "latent: audits (64 on 2026-11-04)"
+	},
+	{
+		"file": "src/lib/vet-idea.ts",
+		"collection": "projects",
+		"limit": 5000,
+		"count": 1,
+		"reason": "latent: active projects (905 on 2026-11-04); owner lane"
+	},
+	{
+		"file": "src/lib/vet-idea.ts",
+		"collection": "repos",
+		"limit": 20,
+		"count": 1,
+		"reason": "display: up to 20 repos in a verdict"
+	},
+	{
+		"file": "src/lib/vet-idea.ts",
+		"collection": "repos",
+		"limit": 1000,
+		"count": 1,
+		"reason": "latent: the judged set (about 365 repos) described as the whole set; owner lane"
+	}
+]
