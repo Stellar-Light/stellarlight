@@ -552,6 +552,47 @@ export function servedBy<
 	return exact ?? findTitlePrefixMatch(base.replace(/-/g, " "), rows);
 }
 
+/** Rows by canon name, for names exactly one row carries: a name two rows
+ * share identifies neither (scf-crosscheck took the first, sls-111). */
+export function uniqueNames<R extends { name: string }>(
+	rows: R[],
+): Map<string, R> {
+	const count = new Map<string, number>();
+	for (const r of rows)
+		count.set(canon(r.name), (count.get(canon(r.name)) ?? 0) + 1);
+	return new Map(
+		rows
+			.filter((r) => count.get(canon(r.name)) === 1)
+			.map((r) => [canon(r.name), r]),
+	);
+}
+
+/**
+ * What one matched pair (an SCF page, our row) says, for scf-crosscheck:
+ * understated when our row serves scfAwarded false and the page shows an
+ * award (its awarded rounds, maybe none when the award has no number);
+ * backfill when our row is awarded with no rounds and the page awards
+ * numbered rounds. Only the page's verdicts decide: a listing badge is a
+ * round ENTERED, never an award (and the listing carried none on
+ * 2026-11-04, so a badge-driven check never fired). A page that could not
+ * be read (v null) says nothing (sls-111).
+ */
+export function classifyScfMatch(m: {
+	ourAwarded: boolean;
+	ourRounds: string[];
+	v: ReturnType<typeof parseRoundVerdicts> | null;
+}): { understated?: string[]; backfill?: string[] } {
+	if (!m.v) return {};
+	const rounds = [...m.v.awarded].sort((a, b) => Number(a) - Number(b));
+	if (!m.ourAwarded)
+		return rounds.length > 0 || m.v.awardedAnyCount > 0
+			? { understated: rounds }
+			: {};
+	return m.ourRounds.length === 0 && rounds.length > 0
+		? { backfill: rounds }
+		: {};
+}
+
 /** The stored projects.scf fields scfHold reads. */
 export interface StoredScf {
 	awarded?: boolean | null;
