@@ -540,13 +540,11 @@ async function handle(req: NextRequest) {
 			// page — indexed repos owned by each builder's GitHub account that
 			// match the query. Kept separate from the profile-text match: the
 			// repo/language/last-commit are observable facts, the bio is a claim.
-			// Best-effort — rows ship with codeEvidence: [] on any error, which
-			// itself is signal ("no direct code evidence in the index").
+			// [] is a claim ("checked, none"), so a row gets it only once every
+			// repo its builder owns has been read; a failed read leaves the row
+			// null (could not check) and meta.failedReads names the read.
 			if (q && builders.length) {
 				const tokens = q.split(/\s+/).filter(Boolean);
-				// `??=`: a code-language row already carries the repos that admitted
-				// it — top that up here, don't wipe it.
-				for (const b of builders) b.codeEvidence ??= [];
 				try {
 					const byOwner = new Map(
 						builders.map((b) => [b.githubUsername.toLowerCase(), b]),
@@ -558,7 +556,10 @@ async function handle(req: NextRequest) {
 								...NOT_GONE,
 								owner: { in: builders.map((b) => b.githubUsername) },
 							},
-							limit: 300,
+							// limit 0 = every repo the page's builders own (at most a page
+							// of logins). A fixed 300 cut a page that owned more, and a
+							// builder past the cut read [] without being checked.
+							limit: 0,
 							depth: 0,
 							select: {
 								fullName: true,
@@ -574,6 +575,9 @@ async function handle(req: NextRequest) {
 						}),
 						DEFAULT_READ_TIMEOUT_MS,
 					);
+					// `??=`: a code-language row already carries the repos that admitted
+					// it; top that up here, don't wipe it.
+					for (const b of builders) b.codeEvidence ??= [];
 					for (const d of rres.docs as unknown as Array<
 						Record<string, unknown>
 					>) {
@@ -607,7 +611,7 @@ async function handle(req: NextRequest) {
 						});
 					}
 				} catch (e) {
-					// best-effort — codeEvidence stays [] on error, and says so
+					// rows this read could not check keep codeEvidence null, never []
 					warnings.push(degradedWarning("builders code evidence", e));
 				}
 			}

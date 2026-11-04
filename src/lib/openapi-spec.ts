@@ -12208,7 +12208,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						nullable: true,
 						description:
-							"Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter.",
+							"Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = every repo this account owns in the index was read and none matched (a weaker match, not a disqualification); null = not checked: no q/skill filter, or the code-evidence read failed (meta.failedReads names it), never 'none'.",
 						items: {
 							type: "object",
 							properties: {

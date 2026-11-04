@@ -2121,7 +2121,7 @@ export interface components {
                  */
                 basis?: "profile-text" | "repo-owner" | "code-language";
             } | null;
-            /** @description Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter. */
+            /** @description Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = every repo this account owns in the index was read and none matched (a weaker match, not a disqualification); null = not checked: no q/skill filter, or the code-evidence read failed (meta.failedReads names it), never 'none'. */
             codeEvidence?: {
                 fullName?: string;
                 url?: string | null;

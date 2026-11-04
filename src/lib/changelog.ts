@@ -33,6 +33,14 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-04",
 		surfaces: ["api"],
+		version: "spec@1.9.118",
+		type: "fixed",
+		summary:
+			"getBuilders' `codeEvidence` no longer says none for a builder it did not check. With q, the read of the repos the page's builders own stopped at 300, so a builder whose repos fell past the cut read [] beside a real match, and a failed read served [] on every row. Every owned repo is now read: [] means all were read and none matched, and a failed read leaves null, with the read named in `meta.failedReads`.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
 		type: "fixed",
 		summary:
 			"getBuilders reads every visible profile, not the newest 300: with no q, `counts.total` said 300 under a full set label while 401 profiles were visible, so the oldest were reachable only through a location filter. `counts.total` now counts the set the pages walk (page until offset + returned reaches it), and a q search runs over all of it.",
