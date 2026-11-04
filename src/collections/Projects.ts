@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { PROJECT_TYPES } from "@/lib/project-types";
+import { PROJECT_TYPES, VENUE_ROLES } from "@/lib/project-types";
 import { LLAMA_LISTING_STATES } from "@/lib/status-checks";
 import { generateSlug, normalizeUrlField } from "../lib/utils/normalize";
 import { adminOnly, isAdmin } from "./access";
@@ -550,13 +550,7 @@ export const Projects: CollectionConfig = {
 			// assignment grounded in the operator's own product description.
 			name: "venueRole",
 			type: "select",
-			options: [
-				"amm",
-				"native-orderbook",
-				"aggregator-router",
-				"trading-ui",
-				"wallet-integrated",
-			],
+			options: [...VENUE_ROLES],
 			admin: {
 				description:
 					"Role in the DEX/trading landscape (sls-035): amm / native-orderbook = independent liquidity venues; aggregator-router routes across venues and runs none; trading-ui = an interface over other venues (e.g. the native SDEX); wallet-integrated = trading embedded in a wallet. Null = not yet classified (unknown, not 'not a venue').",

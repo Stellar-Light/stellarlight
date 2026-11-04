@@ -132,7 +132,7 @@ The SDF team/people index: **leadership, board of directors, and advisors** (nam
 ## `GET /api/projects/search`
 Search existing Stellar projects (competitor / overlap lookup). The workhorse for Deep Dive step 2.
 
-**Params:** `q={keywords}`, `type={Wallet|DEX|Lending|Bridge|Payments|Anchor|Card Issuing|…}` (exact category; use it for \"what X services exist\" questions, e.g. `type=Card Issuing` for card-program infrastructure), `category={cat}`, `scfAwarded=1`, `limit=N`.
+**Params:** `q={keywords}`, `type={Wallet|DEX|Lending|Bridge|Payments|Anchor|Card Issuing|…}` (exact category; use it for \"what X services exist\" questions, e.g. `type=Card Issuing` for card-program infrastructure), `venueRole={amm|native-orderbook|aggregator-router|trading-ui|wallet-integrated}` (curated DEX sub-type, e.g. `type=DEX&venueRole=amm`; rows not yet classified never match), `category={cat}`, `scfAwarded=1`, `limit=N`.
 
 **Returns:** `.projects[*]` scored by keyword overlap, sorted by relevance. A row with a DefiLlama link also carries `statusChecks` (each hit, clear or could-not-check) and `statusCaveat`: when a Live row has a hit (DefiLlama dates its protocol dead, or retired it with nothing locked and no live successor; or an on-chain protocol shows a fresh TVL of 0 and 60+ days of contract silence), relay the caveat with the status and treat Live as unconfirmed; `statusConfidence` is halved there.
 

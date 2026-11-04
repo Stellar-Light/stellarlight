@@ -37,6 +37,7 @@ import {
 	STATUS_FIX,
 	STATUS_SOURCE_BACKFILL,
 	STATUS_SOURCE_RETRACT,
+	statusFixNote,
 	TYPE_ADD,
 	TYPES_ADD,
 	TYPES_SET,
@@ -672,6 +673,7 @@ const PRODUCT_KIND: Record<string, string> = {
 	// integration-kit — integrating existing wallets into dApps / host wallets
 	"simple-signer": "integration-kit", // "in-browser transaction signer that supports different stellar wallets"
 	"stellar-metamask": "integration-kit", // "Stellar Integration on MetaMask… MetaMask Snaps Platform" — a snap adding Stellar to an existing wallet
+	metamask: "end-user-wallet", // sls-112: support.metamask.io: "MetaMask supports Stellar as a default network, allowing you to manage XLM and other assets" (seeded 2026-11-04)
 	// smart-account-tooling — passkey / smart-account infrastructure
 	"stellar-passport": "smart-account-tooling", // "passkey-secured identity and participation layer"
 	"volta-circuit": "smart-account-tooling", // "smart contract-based security protocol… automated asset protection, recovery"
@@ -1130,6 +1132,30 @@ const PRODUCTS_FIX: Record<
 			note: "contract IDs published in the operator repo; per-network ID labels pending verification, so none is asserted here. Consumer caution: price state observed stale in upstream checks",
 		},
 	],
+	// sls-112 (#1904): one proxy per network serves every feed (seeded in
+	// SEEDS the same day). Both contracts read on stellar.expert 2026-11-04.
+	chainlink: [
+		{
+			name: "Chainlink Data Feeds proxy (Stellar Mainnet)",
+			kind: "oracle-feed",
+			network: "mainnet",
+			status: "live",
+			contractId: "CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ",
+			evidenceUrl: "https://docs.chain.link/data-feeds/stellar",
+			asOf: "2026-11-04",
+			note: "one proxy serves every feed; a contract selects a feed by its 32-byte data_id (feed IDs on docs.chain.link/data-feeds/price-feeds/addresses with Stellar selected). Created on mainnet 2026-09-14 per stellar.expert",
+		},
+		{
+			name: "Chainlink Data Feeds proxy (Stellar Testnet)",
+			kind: "oracle-feed",
+			network: "testnet",
+			status: "live",
+			contractId: "CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4",
+			evidenceUrl: "https://docs.chain.link/data-feeds/stellar",
+			asOf: "2026-11-04",
+			note: "same interface as the mainnet proxy; created on testnet 2026-09-08 per stellar.expert",
+		},
+	],
 };
 
 const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
@@ -1334,6 +1360,21 @@ const VENUE_ROLE: Record<string, string> = {
 	lobstr: "wallet-integrated", // lobstr.co: wallet with in-app swap/SDEX trading — venue access inside a wallet, not an independent venue
 	scopuly: "wallet-integrated", // scopuly.com: wallet + SDEX trading app (typed Wallet/DEX)
 	stellarbroker: "aggregator-router", // stellar.broker: "multi-source liquidity swap router … access to AMMs and Stellar DEX" — routes across venues, runs none
+	// sls-113 (#1905), each read 2026-11-04 from the operator's own material.
+	// Cross-chain routers are aggregator-router: on Stellar they fill a swap
+	// through other parties' liquidity and run no pool or book of their own,
+	// so they must stay out of the independent-venue count.
+	lumagg: "aggregator-router", // github.com/Lum-Agg/stellar-dex-agg README: "routes swaps across Soroswap, Aquarius (xy=k, stable, CLMM), Phoenix, Sushi V3, and Comet", splitting orders across venues
+	lifi: "aggregator-router", // docs.li.fi/introduction/stellar-ecosystem: "LI.FI integrates 1 DEX aggregator on Stellar" (Soroswap) plus 4 bridges; no liquidity of its own
+	sodax: "aggregator-router", // docs.sodax.com: "it routes and settles; independent solvers on the marketplace fill"; Stellar trustline and sponsoring guides in the same docs
+	stellarport: "wallet-integrated", // stellarport.io: Wallet and Exchange tabs, "The new SDEX portal has been released": SDEX trading inside a wallet
+	lumenswap: "trading-ui", // lumenswap.io ("Decentralized Exchange on Stellar"): its app bundle sends only classic offers, path payments and liquidity-pool deposits to Horizon, no Soroban calls: an interface over SDEX and protocol pools
+	tinyamm: "amm", // testnet.tinyamm.com: "The cutest little AMM on Stellar Soroban. Swap tokens, provide liquidity, and earn fees" (only the testnet site answers; status is a separate question)
+	// Left null on purpose (2026-11-04 pass): axis runs its own Soroban limit
+	// order book (axis.markets/docs), which is neither amm nor the native SDEX
+	// book native-orderbook names; perps, launchpads, CEX, remittance and
+	// vault rows are not spot venues; the rest could not be verified on
+	// Stellar from the operator's own pages.
 };
 
 /** Duplicate-record merges (lessons class 10; Engine B S3's 12 groups,
@@ -2456,13 +2497,15 @@ async function main() {
 		// the row is not a write. 141 from===to entries were re-written on every
 		// execute — "143 applied" meant nothing, and the noise hid that tucambio
 		// flipped between two curate maps each run. A stamp only fills an empty
-		// note, so a row with any note is in sync on the note.
+		// note (or replaces one with replaceNote), so statusFixNote says whether
+		// the note is in sync.
+		const note = statusFixNote(fix, d.lifecycle?.note);
 		if (
 			fix.from === fix.to &&
 			(!fix.asOf || String(d.statusAsOf ?? "").slice(0, 10) === fix.asOf) &&
 			(!fix.sourceUrl || d.statusSourceUrl === fix.sourceUrl) &&
 			(!fix.basis || d.statusBasis === fix.basis) &&
-			(!fix.note || !!d.lifecycle?.note)
+			note === null
 		) {
 			console.log(`  ${slug}: stamp already in sync, skip`);
 			continue;
@@ -2473,9 +2516,8 @@ async function main() {
 		// Inactive flips carry their evidence as ecosystem memory (fill-if-
 		// empty): "X WAS a live Y that shut down" beats silence for consumers.
 		// A status MOVE is a verdict: its note replaces whatever was there. A
-		// stamp (from === to) only fills an empty note, as before.
-		if (fix.note && (fix.from !== fix.to || !d.lifecycle?.note))
-			data.lifecycle = { ...(d.lifecycle ?? {}), note: fix.note };
+		// stamp (from === to) only fills an empty note, unless replaceNote.
+		if (note) data.lifecycle = { ...(d.lifecycle ?? {}), note };
 		// Retiring a row FROM Live is itself the proof it was once Live — the
 		// flag a consumer needs to hear "this used to be a real product" rather
 		// than silence. Rides the same write, never guessed.

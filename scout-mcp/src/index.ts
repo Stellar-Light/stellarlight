@@ -660,6 +660,19 @@ server.registerTool(
 				.describe(
 					"Filter by lifecycle status (Live, Inactive, Development, Pre-Release). status=Inactive lists retired/defunct projects, useful for 'is X still alive' and post-mortem queries.",
 				),
+			venueRole: z
+				.enum([
+					// Keep in sync with VENUE_ROLES in src/lib/project-types.ts.
+					"amm",
+					"native-orderbook",
+					"aggregator-router",
+					"trading-ui",
+					"wallet-integrated",
+				])
+				.optional()
+				.describe(
+					"Only projects whose curated venueRole is this DEX sub-type, e.g. type=DEX with venueRole=amm lists AMMs. Rows not yet classified (venueRole null) never match, so this is the classified subset, not every venue of that kind.",
+				),
 			scfAwarded: z
 				.boolean()
 				.optional()
@@ -674,12 +687,13 @@ server.registerTool(
 			view: viewInput,
 		},
 	},
-	async ({ q, category, type, status, scfAwarded, limit, view }) => {
+	async ({ q, category, type, status, venueRole, scfAwarded, limit, view }) => {
 		const params = new URLSearchParams();
 		if (q) params.set("q", q);
 		if (category) params.set("category", category);
 		if (type) params.set("type", type);
 		if (status) params.set("status", status);
+		if (venueRole) params.set("venueRole", venueRole);
 		if (scfAwarded) params.set("scfAwarded", "1");
 		if (limit !== undefined) params.set("limit", String(limit));
 		if (view) params.set("view", view);

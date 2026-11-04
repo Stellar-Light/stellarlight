@@ -66,8 +66,58 @@ export interface StatusCheck {
 	detail: string;
 	/** Date of the reading the result rests on (YYYY-MM-DD), null when none. */
 	asOf: string | null;
-	/** The first linked protocol's DefiLlama page. */
+	/** The DefiLlama page that shows the linked rows (llamaPageFor), else
+	 * the first linked protocol's page. */
 	sourceUrl: string;
+}
+
+// ── which DefiLlama page carries a row's TVL (sls-102) ─────────────────────
+
+/** DefiLlama parent pages that sum EXACTLY a project's mapped rows, keyed by
+ * the mapped slugs sorted and comma-joined. Read 2026-11-04: api.llama.fi
+ * lists these four rows, and no other, under parent#blend, and
+ * https://defillama.com/protocol/blend ("Blend (Combined)") lists them as
+ * its products with TVL excluding pool2 and active loans, the same base
+ * tvlUSD sums. enrich-tvl re-derives each family from DefiLlama's list on
+ * every run (llamaParentOf) and fails when this map disagrees. */
+export const LLAMA_PARENT_PAGES: Record<string, string> = {
+	"blend-backstop,blend-backstop-v2,blend-pools,blend-pools-v2": "blend",
+};
+
+const familyKey = (slugs: readonly string[]) => [...slugs].sort().join(",");
+
+/** The DefiLlama page that shows a row's whole tvlUSD: the protocol's own
+ * page for one mapped row, or for several the parent page whose children are
+ * exactly those rows. Null when the row is not mapped, or when no single page
+ * sums its rows; each llamaSlugs entry is then one contributing page. */
+export function llamaPageFor(
+	slugs: readonly string[] | null | undefined,
+): string | null {
+	if (!slugs?.length) return null;
+	const page =
+		slugs.length === 1 ? slugs[0] : LLAMA_PARENT_PAGES[familyKey(slugs)];
+	return page ? `https://defillama.com/protocol/${page}` : null;
+}
+
+/** Writer side: the DefiLlama parent (its page slug) whose children in the
+ * /protocols list are exactly the mapped slugs. Null for one slug, for slugs
+ * of different families or none, and for a parent with a child the mapping
+ * lacks: its page would then show more than tvlUSD adds. */
+export function llamaParentOf(
+	slugs: readonly string[],
+	protocols: readonly { slug: string; parentProtocol?: string | null }[],
+): string | null {
+	if (slugs.length < 2) return null;
+	const bySlug = new Map(protocols.map((p) => [p.slug, p]));
+	const parents = new Set(slugs.map((s) => bySlug.get(s)?.parentProtocol));
+	const [parent] = parents;
+	if (parents.size !== 1 || !parent?.startsWith("parent#")) return null;
+	const children = protocols
+		.filter((p) => p.parentProtocol === parent)
+		.map((p) => p.slug);
+	return familyKey(children) === familyKey(slugs)
+		? parent.slice("parent#".length)
+		: null;
 }
 
 // ── writer side: enrich-tvl ─────────────────────────────────────────────
@@ -256,6 +306,11 @@ const daysBetween = (from: string, to: string) =>
 
 const usd = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
 
+/** A check must cite somewhere: the page that shows the linked rows, else
+ * the first row's own page. */
+const checkPage = (slugs: string[]) =>
+	llamaPageFor(slugs) ?? `https://defillama.com/protocol/${slugs[0]}`;
+
 function linkedSlugs(v: unknown): string[] | null {
 	const slugs = Array.isArray(v)
 		? v.filter((s): s is string => typeof s === "string" && s.length > 0)
@@ -271,7 +326,7 @@ function listingCheck(p: any, slugs: string[]): StatusCheck {
 	const base = {
 		check: "defillama-listing" as const,
 		asOf: checkedAt,
-		sourceUrl: `https://defillama.com/protocol/${slugs[0]}`,
+		sourceUrl: checkPage(slugs),
 	};
 	if (!checkedAt || !l?.state)
 		return {
@@ -325,7 +380,7 @@ function tvlQuietCheck(p: any, slugs: string[], now: Date): StatusCheck {
 		detail,
 		asOf,
 		// where the TVL figure is read; the contract readings are on the row
-		sourceUrl: `https://defillama.com/protocol/${slugs[0]}`,
+		sourceUrl: checkPage(slugs),
 	});
 	if (typeof p.tvlUSD !== "number")
 		return result("could-not-check", "No DefiLlama TVL figure on record.");

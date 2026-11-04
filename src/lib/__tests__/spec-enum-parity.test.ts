@@ -19,7 +19,7 @@ import {
 	RESOLVABLE_PROJECT_STATUSES,
 	STATUS_BASES,
 } from "../project-status";
-import { PROJECT_TYPES } from "../project-types";
+import { PROJECT_TYPES, VENUE_ROLES } from "../project-types";
 import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
 import { REPO_MATCH_MODES } from "../repo-search";
@@ -252,6 +252,23 @@ describe("status and types params are the code's lists too (found 2026-09-09 by 
 		);
 		expect(PROJECT_TYPES).toContain("Oracle");
 		expect(PROJECT_TYPES).toContain("Yield");
+	});
+
+	it("venueRole (Project field, searchProjects ?venueRole, the collection) is VENUE_ROLES (sls-113)", () => {
+		expect(
+			sorted(S.components.schemas.Project.properties.venueRole.enum),
+		).toEqual(sorted(VENUE_ROLES));
+		expect(sorted(param(searchOp, "venueRole").schema.enum)).toEqual(
+			sorted(VENUE_ROLES),
+		);
+		expect(collection).toMatch(
+			/name:\s*"venueRole",[\s\S]*?options:\s*\[\.\.\.VENUE_ROLES\]/,
+		);
+		const search = readFileSync(
+			resolve(__dirname, "../../app/api/projects/search/route.ts"),
+			"utf8",
+		);
+		expect(search).toContain("VALID_VENUE_ROLES = VENUE_ROLES");
 	});
 
 	it("both route validators use the shared lists, not local literals", () => {

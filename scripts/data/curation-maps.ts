@@ -41,6 +41,10 @@ export const STATUS_FIX: Record<
 		 *  overwrite a strong one when the status is unchanged (the precedence
 		 *  rule otherwise keeps the stored strong provenance). */
 		withdraw?: boolean;
+		/** A stamp's note normally only fills an empty one. Set when the stored
+		 *  note states something that is no longer true (a redirect that has
+		 *  since reversed): this entry's note then replaces it. */
+		replaceNote?: boolean;
 	}
 > = {
 	// 2026-09-23: seeded as a new record from the i³ intake before noticing the
@@ -1720,13 +1724,23 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://laboratory.stellar.org/",
 		note: "SDF's Stellar Lab serving normally",
 	},
+	// sls-100 (#1911): the 2026-08-28 note said hanawallet.io 308s to
+	// hana.money. On 2026-11-02 the redirect ran the other way: hana.money
+	// answered 307 to wendmoney.com.au, a different remittance product, while
+	// hanawallet.io 308s to www.hanawallet.io, the Hana wallet. Read
+	// 2026-11-04: www.hanawallet.io ("Hana | Non-Custodial Multi-Chain Crypto
+	// Wallet", og:url www.hanawallet.io) lists Stellar among the chains live in
+	// its Chrome extension, and the Chrome Web Store listing it links (Hana
+	// Wallet, version 5.14.0, updated October 4, 2026) names a Stellar wallet.
+	// replaceNote: the stored note is the old redirect claim.
 	hana: {
 		from: "Live",
 		to: "Live",
 		basis: "human-verified",
-		asOf: "2026-08-28",
-		sourceUrl: "https://www.hana.money/",
-		note: "live wallet app; hanawallet.io 308s to hana.money (WEBSITE_FIXES moves the row)",
+		asOf: "2026-11-04",
+		sourceUrl: "https://www.hanawallet.io/",
+		note: "live wallet: www.hanawallet.io lists Stellar among the chains live in the Hana Chrome extension (Chrome Web Store v5.14.0, updated 2026-10-04); hanawallet.io 308s to www.hanawallet.io. The old hana.money domain no longer serves Hana (sls-100).",
+		replaceNote: true,
 	},
 	liquify: {
 		from: "Live",
@@ -2795,9 +2809,11 @@ export const WEBSITE_FIXES: Record<string, string> = {
 	// warmancer.com serves the game ("Warmancer" <title>) — the project moved
 	// domains and the row kept the dead one.
 	warmancer: "https://www.warmancer.com/",
-	// hanawallet.io 308s to hana.money (the operator's own redirect); the row
-	// should carry the destination, not the alias.
-	hana: "https://www.hana.money/",
+	// sls-100 (#1911): Hana's site is www.hanawallet.io again (hanawallet.io
+	// 308s there); hana.money answered 307 to wendmoney.com.au, a different
+	// product, on 2026-11-02. Payload strips www. on write, and the stored
+	// hanawallet.io reaches the wallet site through its own same-site 308.
+	hana: "https://www.hanawallet.io/",
 	// ARST Argentine-peso stablecoin has a live dedicated site (arst.finance/en, 'ARST — The Argentine Peso Stablecoin', deployed on Stellar among other chains); r…
 	arst: "https://www.arst.finance/en",
 	// boss-pay's recorded bossmoney.africa lapsed and was re-registered by
@@ -4968,6 +4984,57 @@ export const SEEDS: Array<{
 		statusSourceUrl:
 			"https://communityfund.stellar.org/project/study-stellar-sdk-soroban-b3d",
 	},
+	// ── sls-112 (#1904), 2026-11-04: two first-party Stellar launches the
+	// directory did not hold. Both checked absent by name (resolve and search
+	// for Chainlink and MetaMask found false) and by domain (no row on
+	// chain.link or metamask.com) on 2026-11-04. The only Chainlink row is a
+	// third-party VRF relayer (chainlink-oracles-relayer); the only MetaMask
+	// row is the community Snap (stellar-metamask).
+	//
+	// Chainlink: docs.chain.link/data-feeds/stellar says "Chainlink Data Feeds
+	// are available on the following Stellar networks: Stellar Testnet,
+	// Stellar Mainnet (Pubnet)" and gives one proxy contract per network; the
+	// changelog dates the release Sep 29, 2026. stellar.expert shows both
+	// proxies on-chain (mainnet created 2026-09-14, 11 invocations by
+	// 2026-11-04). Networks are the docs' own Data Feeds guide sections (EVM,
+	// Aptos, Solana, Stellar). Proxies ride PRODUCTS_FIX in curate-projects.ts
+	// and the mainnet deployment rides DEPLOYMENT_VERIFIED.
+	{
+		slug: "chainlink",
+		name: "Chainlink",
+		category: "Infrastructure",
+		status: "Live",
+		types: ["Oracle"],
+		supportedNetworks: ["stellar", "evm", "solana", "aptos"],
+		shortDescription:
+			"Chainlink Data Feeds bring Chainlink's price feeds to Stellar: available on Stellar Testnet and Stellar Mainnet (Pubnet) per Chainlink's docs (release of 2026-09-29). A Soroban contract reads every feed through one proxy contract per network and picks a feed by its 32-byte data_id: Testnet proxy CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4, Mainnet proxy CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ. Separate from the third-party Chainlink Oracles Relayer (VRF).",
+		links: { website: "https://chain.link/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-04",
+		statusSourceUrl: "https://docs.chain.link/data-feeds/stellar",
+		statusBasis: "operator-announcement",
+	},
+	// MetaMask: support.metamask.io/configure/networks/stellar says "MetaMask
+	// supports Stellar as a default network, allowing you to manage XLM and
+	// other assets", with trustlines, the reserve and same-chain swaps on
+	// Stellar. metamask.io 301s to metamask.com ("Buy, sell, swap, earn, and
+	// spend BTC, ETH, SOL and more", the networks below); the help center is
+	// Consensys's. PRODUCT_KIND in curate-projects.ts marks it end-user-wallet.
+	{
+		slug: "metamask",
+		name: "MetaMask",
+		category: "User-Facing App",
+		status: "Live",
+		types: ["Wallet"],
+		supportedNetworks: ["stellar", "evm", "solana", "bitcoin"],
+		shortDescription:
+			"MetaMask, the self-custodial wallet from Consensys, supports Stellar as a default network: users hold XLM and other Stellar assets, manage trustlines and the account reserve, and swap Stellar tokens in MetaMask itself, with no Snap to install. Separate from the community Stellar-MetaMask Snap.",
+		links: { website: "https://metamask.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-04",
+		statusSourceUrl: "https://support.metamask.io/configure/networks/stellar",
+		statusBasis: "operator-announcement",
+	},
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -5102,6 +5169,28 @@ export const DESCRIPTION_FIXES: Record<string, string> = {
 	// -oracles-stellar-public). No em dashes (copy rule).
 	"spectra-finance":
 		"Spectra (by Perspective, spectra.finance) is a permissionless interest-rate derivatives protocol: a yield-bearing asset is split into a Principal Token (fixed rate) and a Yield Token (variable yield). Live on Stellar/Soroban since August 2026 with Principal Token markets on Blend-wrapped USDC and EURC, earnUSDC, earnXLM and the Centrifuge tokenized treasury fund deJTRSY, next to its EVM deployments, plus an EVM to Stellar bridge for Spectra PTs. The Soroban core, bridge and oracle contracts were audited by Certora in May 2026.",
+	// sls-099 (#1910), read 2026-11-04: the stored text named "Soroswap,
+	// Phoenix, Aquarius" as the aggregator's venues. The operator's venue page
+	// (docs.soroswap.finance/aggregator/supported-amms) lists the API's
+	// protocols as soroswap, aqua, sushi (SushiSwap V3), comet and sdex, with
+	// SDEX "quoted alongside as a separate classic path". Phoenix is not an
+	// API venue; the Aggregator v3 contract reference (CARVQXFP...) defines a
+	// Phoenix hop, which the phoenix entry below states as contract-level.
+	soroswap:
+		"Soroswap is the first decentralized exchange (DEX) and DEX aggregator on Stellar Soroban, live on mainnet. It is an open-source AMM for swapping tokens and providing liquidity. Its Aggregator API prices the Soroban venues Soroswap AMM, Aquarius, SushiSwap V3 and Comet, can split one trade across them in a single transaction through its Aggregator v3 contract, and quotes the Stellar classic DEX (SDEX) as a separate classic path payment when asked to.",
+	// sls-099 (#1910): "One of the AMM liquidity sources aggregated by
+	// Soroswap" read as the current API venue set; it is contract-level only
+	// (see soroswap above). The rest is the stored text, which the operator's
+	// contracts repo supports (Phoenix-Protocol-Group/phoenix-contracts:
+	// factory, pool, pool_stable, multihop, stake; read 2026-11-04).
+	phoenix:
+		"Phoenix DeFi Hub is an SCF-funded AMM-based DEX on Stellar/Soroban (PHO token). It runs constant-product and stableswap liquidity pools where liquidity providers add liquidity to earn fees and staking rewards, with a Factory for creating pools and multi-hop routing for on-chain token swaps. Soroswap's Aggregator v3 contract defines a Phoenix hop type, but Phoenix is not in the venue list of Soroswap's Aggregator API (checked 2026-11-04).",
+	// sls-112 (#1904): MetaMask now ships Stellar as a default network (the
+	// metamask seed). The Snap is still listed in the MetaMask Snaps
+	// Directory (read 2026-11-04: "This Snap allows you to manage, send, and
+	// receive stellar tokens"); the text says how the two differ.
+	"stellar-metamask":
+		"A community MetaMask Snap that adds a Stellar wallet to MetaMask (manage, send and receive Stellar tokens), listed in the MetaMask Snaps Directory. Separate from MetaMask's own Stellar support: MetaMask now ships Stellar as a default network, with no Snap needed (see the MetaMask record).",
 };
 
 // Docs pointers (fill-if-empty links.docs). Policy answer to raven#18's
@@ -5117,6 +5206,9 @@ export const DOCS_LINKS: Record<string, string> = {
 	// asset + issuer, SAC and OFT contract IDs, LayerZero endpoint ID.
 	usdt0: "https://developers.stellar.org/launch/usdt0",
 	"spectra-finance": "https://docs.spectra.finance/", // 2026-09-26, the site's own Docs nav link
+	// sls-112 (#1904), read 2026-11-04: each operator's own Stellar page.
+	chainlink: "https://docs.chain.link/data-feeds/stellar",
+	metamask: "https://support.metamask.io/configure/networks/stellar",
 };
 
 // sls-025: ADDITIVE `github.repos` rows (owner/name) for records whose
@@ -5453,6 +5545,19 @@ export const TYPES_SET: Record<string, string[]> = {
  * name, shortDescription, category, types, status, verificationLevel,
  * provenance, links, github, onchain.
  */
+/** The lifecycle note a STATUS_FIX entry writes, or null to keep the stored
+ * one. A status move is a verdict, so its note replaces the stored note. A
+ * stamp (from === to) only fills an empty note, unless the entry says its
+ * note supersedes the stored one (replaceNote) and the two differ. */
+export function statusFixNote(
+	fix: { from: string; to: string; note?: string; replaceNote?: boolean },
+	stored: unknown,
+): string | null {
+	if (!fix.note) return null;
+	if (fix.from !== fix.to || !stored) return fix.note;
+	return fix.replaceNote && stored !== fix.note ? fix.note : null;
+}
+
 export function curatedFieldsFor(slug: string): Set<string> {
 	const owned = new Set<string>();
 	if (slug in DESCRIPTION_FIXES) owned.add("shortDescription");
@@ -5614,6 +5719,12 @@ export const DEPLOYMENT_VERIFIED: Record<
 		network: "mainnet",
 		sourceUrl: "https://docs.zenex.trade/deployments/contract-addresses",
 		note: "operator page written from the chain lists mainnet factory CDFEZPO7ZMXMZUMOIT2CZF5FUEIGD3CC5VOROUKF4KZEQQEDZBGSQYPQ and XLM-USD market CAOZCITWHWAXH5FRU4EULQ5EN2HMTCHICRNC4R5ZAOVD7XHCCQSJ42IB; market created on public 2026-09-29, 317 invocations (stellar.expert)",
+	},
+	// sls-112 (#1904), read 2026-11-04 (seeded the same day, see SEEDS).
+	chainlink: {
+		network: "mainnet",
+		sourceUrl: "https://docs.chain.link/data-feeds/stellar",
+		note: "operator docs list the Stellar Mainnet (Pubnet) Data Feeds proxy CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ (testnet proxy CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4); stellar.expert shows the mainnet proxy created 2026-09-14 with 11 invocations and 14 events by 2026-11-04",
 	},
 };
 

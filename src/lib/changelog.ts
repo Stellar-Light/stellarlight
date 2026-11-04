@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-04",
+		surfaces: ["api", "mcp", "skill"],
+		version: "spec@1.9.123",
+		type: "added",
+		summary:
+			"searchProjects takes venueRole (amm, native-orderbook, aggregator-router, trading-ui or wallet-integrated): type=DEX&venueRole=amm lists the AMMs, venueRole alone is a search, and an unknown value answers 400 with validVenueRoles. It used to be ignored with a warning. Rows whose venueRole is null, not yet classified, never match. The search_projects MCP tool passes it from its next release.",
+		detail:
+			"tvlMethodUrl now links the DefiLlama page that shows the whole tvlUSD. Blend's figure sums four DefiLlama rows and linked the V1 pools row, which held about $43k of $127M; it now links https://defillama.com/protocol/blend, the parent page of exactly those four rows. A row mapped to one DefiLlama protocol links that protocol's page as before. Several rows with no parent page that sums exactly them serve null, and llamaSlugs lists each contributing page. statusChecks sourceUrl links the same page. Curated corrections to the Soroswap, Phoenix and Hana rows, venue roles for six more DEX rows, and new Chainlink and MetaMask rows ship through the curation lane after this release.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",

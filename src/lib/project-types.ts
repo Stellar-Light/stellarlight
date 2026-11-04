@@ -55,6 +55,20 @@ export const PROJECT_TYPES = [
 export type ProjectType = (typeof PROJECT_TYPES)[number];
 
 /**
+ * The `venueRole` vocabulary (sls-035): a DEX row's role in the trading
+ * landscape. One list for the collection, the spec and the search filter,
+ * which validates `?venueRole=` against it (sls-113: the filter did not
+ * exist and the parameter was ignored with a warning).
+ */
+export const VENUE_ROLES = [
+	"amm",
+	"native-orderbook",
+	"aggregator-router",
+	"trading-ui",
+	"wallet-integrated",
+] as const;
+
+/**
  * What each type means, in one line a reader (or a typed-decision model) can
  * apply to a project description. Keyed by the vocabulary itself, so a new
  * PROJECT_TYPES member without a definition does not compile.
