@@ -8,6 +8,14 @@
  * Each row carries the URL it was verified against. A field the source does
  * not give stays null: no repo link without proof that it is the team's.
  */
+import type {
+	BuildContract,
+	EntryBasis,
+	EntryEvidence,
+	MentionIn,
+} from "@/lib/hackathon-build-links";
+import hackproof from "./hackmeridian-2026-hackproof.json";
+
 export interface CuratedBuild {
 	/** curated-<event>-<name>: never a DoraHacks id. */
 	id: string;
@@ -23,6 +31,15 @@ export interface CuratedBuild {
 	demoUrl: string | null;
 	/** Where this row was verified. */
 	url: string;
+	/** On a row from a list kept off the organizer's (HACKPROOF_BUILDS):
+	 * why it is stored, what that rests on, the contracts its repo cites
+	 * that passed Scout's checks and when they were checked, and the file
+	 * that names its placement. Absent on a winner from the page naming it. */
+	entryBasis?: EntryBasis;
+	entryEvidence?: EntryEvidence;
+	contracts?: BuildContract[];
+	contractsCheckedAt?: string;
+	winnerSource?: string;
 }
 
 const RECAP_2025 =
@@ -125,3 +142,45 @@ export const CURATED_BUILDS: CuratedBuild[] = [
 		"https://oliopay.xyz/",
 	),
 ];
+
+/** HackMeridian 2026's records from HackProof (MIT licensed; its notice is in
+ * the data file), built by scripts/build-hackmeridian-2026-hackproof.ts: the
+ * repos whose own text names the event, plus one HackProof lists as a
+ * placement. Not the organizer's list. Each row's url is its HackProof
+ * record at the pinned commit; a placed row's winnerSource is HackProof's
+ * event file, and its placement is HackProof's. */
+export const HACKPROOF_BUILDS: CuratedBuild[] = hackproof.rows.map((r) => ({
+	id: `curated-${hackproof.event}-${r.file}`,
+	name: r.name,
+	hackathonSlug: hackproof.event,
+	track: r.track,
+	placement: r.placement,
+	isWinner: r.placement !== null,
+	description: r.description,
+	githubUrl: `https://github.com/${r.repo}`,
+	demoUrl: r.homepage,
+	url: r.url,
+	entryBasis: r.basis as EntryBasis,
+	entryEvidence: {
+		mention: r.mention && {
+			in: r.mention.in as MentionIn,
+			path: r.mention.path,
+			readAt: hackproof.checkedAt.slice(0, 10),
+		},
+		listed: {
+			tier: r.tier as EntryEvidence["listed"]["tier"],
+			method: r.method,
+			commitsInWindow: r.commitsInWindow,
+		},
+		repoCreatedAt: r.repoCreatedAt,
+	},
+	contracts: r.contracts.map((c) => ({
+		id: c.id,
+		network: "testnet" as const,
+		createdAt: c.createdAt,
+		path: c.path,
+		checkedAt: hackproof.checkedAt,
+	})),
+	contractsCheckedAt: hackproof.checkedAt,
+	...(r.placement ? { winnerSource: hackproof.source.awards } : {}),
+}));

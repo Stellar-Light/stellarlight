@@ -662,6 +662,81 @@ export function pageRuleLink(
  * joined by single hyphens, none leading or trailing ("curated--" is not one). */
 export const CURATED_BUILD_ID = /^curated-[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+/** Why a row from a list kept off the organizer's is stored (an event whose
+ * coverage is partial; src/lib/hackproof.ts decides). repo-names-event: the
+ * repo's own text names the event; placement-listed: the list names a
+ * placement for it and its text does not name the event. Neither is an
+ * organizer's record of an entry. The spec spreads this list. */
+export const ENTRY_BASES = ["repo-names-event", "placement-listed"] as const;
+export type EntryBasis = (typeof ENTRY_BASES)[number];
+export const isEntryBasis = (v: unknown): v is EntryBasis =>
+	(ENTRY_BASES as readonly unknown[]).includes(v);
+
+/** What a page says of a row's entryBasis, never more than the basis: the
+ * team's own claim, or the list's placement; neither is an organizer's
+ * record of an entry. null on a row without a basis. */
+export function entryBasisLine(
+	row: { entryBasis?: string | null; contracts?: readonly unknown[] | null },
+	event: string,
+): string | null {
+	const n = row.contracts?.length ?? 0;
+	const chain = n
+		? ` ${n === 1 ? "A contract it cites was" : `${n} contracts it cites were`} created on testnet during the event.`
+		: "";
+	if (row.entryBasis === "repo-names-event")
+		return `The team's repo says it was built for ${event}.${chain}`;
+	// ponytail: HackProof is the one list partial rows come from; name each
+	// row's list here when a second list lands.
+	if (row.entryBasis === "placement-listed")
+		return `HackProof lists this repo as a placement; the repo's own text does not name the event.${chain}`;
+	return null;
+}
+
+/** The network a stored row's checked contracts are on. The spec spreads it. */
+export const CONTRACT_NETWORKS = ["testnet"] as const;
+
+/** Where in a repo's own text the event is named. The spec spreads it. */
+export const MENTION_PLACES = [
+	"readme",
+	"name",
+	"description",
+	"topics",
+	"doc",
+] as const;
+export type MentionIn = (typeof MENTION_PLACES)[number];
+/** A list's own tiers for a record (HackProof's). The spec spreads it. */
+export const LISTED_TIERS = ["verified", "likely"] as const;
+
+/** A testnet contract a stored row's repo cites, kept after Scout's checks:
+ * the cited file holds the id at HEAD, the instance exists on testnet (live
+ * or archived) and stellar.expert dates its creation inside the event. */
+export interface BuildContract {
+	id: string;
+	network: (typeof CONTRACT_NETWORKS)[number];
+	createdAt: string;
+	/** The repo file that cites it. */
+	path: string;
+	checkedAt: string;
+}
+
+/** What a row with an entryBasis rests on. Provenance, not a verdict. */
+export interface EntryEvidence {
+	/** Where Scout's read found the event named, and the day; null on
+	 * placement-listed. */
+	mention: { in: MentionIn; path: string | null; readAt: string } | null;
+	/** The list's own evidence for the record: its tier (verified: a
+	 * contract, wasm, asset or deployer in the repo matched testnet activity
+	 * during the event; likely: Stellar code committed then, no chain match),
+	 * the strongest match and the commits it counts in the event window. */
+	listed: {
+		tier: (typeof LISTED_TIERS)[number];
+		method: string | null;
+		commitsInWindow: number | null;
+	};
+	/** When GitHub says the repo was created. */
+	repoCreatedAt: string | null;
+}
+
 /** A submission's stored id from what an agent is likely to hold: the `id`
  * searchHackathonBuilds returns (dorahacks-buidl-<n>, or curated-<event>-<name>
  * for an event off DoraHacks), the bare number, or the dorahacks.io/buidl/<n>
