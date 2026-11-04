@@ -51,3 +51,24 @@ export function titlePrefixMatch(a: string, b: string): boolean {
 	const [short, long] = as.length <= bs.length ? [as, bs] : [bs, as];
 	return long === short || long.startsWith(`${short} `);
 }
+
+/**
+ * The partial matcher: the first row, in `rows` order, whose name passes
+ * titlePrefixMatch against an official title. Spaceless containment is only
+ * the pre-filter that picks candidates, so a candidate the rule rejects must
+ * not end the search: stopping at "velo" inside "de·velo·pment" kept Rumble
+ * Fish's three SCF awards off its row on every run (sls-111).
+ */
+export function findTitlePrefixMatch<T extends { name?: unknown }>(
+	title: string,
+	rows: Iterable<[string, T]>,
+	onReject?: (row: T) => void,
+): T | undefined {
+	const norm = normSpaceless(title);
+	for (const [key, row] of rows) {
+		if (!key || (!key.includes(norm) && !norm.includes(key))) continue;
+		if (titlePrefixMatch(title, String(row.name ?? ""))) return row;
+		onReject?.(row);
+	}
+	return undefined;
+}

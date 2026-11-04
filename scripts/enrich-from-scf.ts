@@ -15,13 +15,13 @@ import "./load-env";
 import { getPayload } from "payload";
 import {
 	cleanTitle as cleanScfTitle,
+	findTitlePrefixMatch,
 	normSpaceless,
 	stemSlugHash,
-	titlePrefixMatch,
 } from "../src/lib/identity";
 import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
-import { parseRoundVerdicts } from "./eval/scf-official";
+import { parseRoundVerdicts, showsAward } from "./eval/scf-official";
 
 const args = process.argv.slice(2);
 const dryRun = !args.includes("--execute");
@@ -446,6 +446,9 @@ async function main() {
 		"greep-pos-greep-pay-hfe": "greeppay",
 		"zkcrossdex-ipb": "zkcross",
 		"cashabroad-smart-treasury-wla": "cash-abroad",
+		// sls-111 (2026-11-04): a submission-named SCF #45 page whose own site,
+		// slimepay.com, is the row's site. r45 $35,000 (its #44 not awarded).
+		"the-merchant-settlement-rail-for-africa-bzf": "slimepay",
 		// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
 		// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
 		// `band`, which otherwise matches nothing and would keep stale data.
@@ -637,18 +640,11 @@ async function main() {
 		// tagline mentions ✗. Legit tail matches ("…by Gateway.fm") get explicit
 		// SCF_SLUG_OVERRIDES instead. Rejections are logged for that triage.
 		if (!ours && normTitle.length >= 4) {
-			for (const [key, proj] of byNormName) {
-				if (!key || (!key.includes(normTitle) && !normTitle.includes(key)))
-					continue;
-				if (titlePrefixMatch(cleanTitle, String(proj.name ?? ""))) {
-					ours = proj;
-				} else {
-					console.log(
-						`  partial REJECTED (not title-prefix): ours "${proj.name}" vs SCF "${scf.title}"`,
-					);
-				}
-				break;
-			}
+			ours = findTitlePrefixMatch(cleanTitle, byNormName, (proj) =>
+				console.log(
+					`  partial REJECTED (not title-prefix): ours "${proj.name}" vs SCF "${scf.title}"`,
+				),
+			);
 		}
 
 		// A lineage shadow (Draft + canonicalSlug, #1337) is not a record. The
@@ -719,11 +715,7 @@ async function main() {
 			);
 			continue;
 		}
-		const awardedOnPage =
-			(detail.roundAwards?.length ?? 0) > 0 ||
-			(detail.awardedRounds?.length ?? 0) > 0 ||
-			(detail.verdictAwardedAny ?? 0) > 0;
-		if (!awardedOnPage) {
+		if (!showsAward(detail)) {
 			if ((detail.verdictSubmissions ?? 0) > 0)
 				beyondCap.notAwarded.push(scfSlug);
 			else beyondCap.unparseable.push(`${scfSlug} (page verdicts nothing)`);
@@ -963,12 +955,14 @@ async function main() {
 		// submissions, don't let API round-codes flip it back to true (the
 		// coopstable class, corrected by scripts/data/fix-scf-rounds.ts).
 		// Narrow on purpose: records currently awarded=true are unaffected,
-		// and this script still never auto-flips true→false.
+		// and this script still never auto-flips true→false. "Zero awarded"
+		// means no award in ANY form (showsAward): the Awarded-card count
+		// alone held enable at false over its page-pinned #45 (2026-10-03).
 		const skipResurrect =
 			currentScf.awarded === false &&
 			isAwarded &&
 			(detail?.verdictSubmissions ?? 0) > 0 &&
-			(detail?.verdictAwardedAny ?? 0) === 0;
+			!showsAward(detail);
 
 		if (hasNewData && skipResurrect) {
 			console.log(

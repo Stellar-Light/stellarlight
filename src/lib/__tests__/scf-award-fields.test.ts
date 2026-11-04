@@ -16,7 +16,10 @@
  * so award ROUNDS must come from the verdicts, never from page text.
  */
 import { describe, expect, it } from "vitest";
-import { parseRoundVerdicts } from "../../../scripts/eval/scf-official";
+import {
+	parseRoundVerdicts,
+	showsAward,
+} from "../../../scripts/eval/scf-official";
 
 const card = (c: {
 	id: string;
@@ -115,5 +118,85 @@ describe("award fields in either order (2026-10-03)", () => {
 			].join("\n"),
 		);
 		expect(v.awards.find((a) => a.round === 40)?.budgetUSD).toBeNull();
+	});
+});
+
+// sls-111 (2026-11-04). Saved copies of the live page data: each card object
+// verbatim from liqvid-hrr and enable-duq, under the page's own project
+// record. Only the latest card's status is a parameter: on 2026-10-03 both
+// cards still sat in a pipeline status (the lane stored Liqvid with
+// lastAwardedRound 45, totalAwarded 235000 and rounds [37]; its log held
+// Enable at awarded=false). Both read "Awarded" by 2026-11-04.
+const liqvidPage = (status45: string, totalAwarded = 235000) =>
+	`{"project":{"id":"recGQNG0gXyv5aHrR","title":"Liqvid","slug":"liqvid-hrr","totalAwarded":${totalAwarded},"totalPaid":147250,"siteUrls":{"website":"https://liqvid.xyz/"},"awarded":true,"lastAwardedRound":45,"eligible":"Build","buildAwardRounds":["SCF #30","SCF #37","SCF #44","SCF #45"],"submissions":[` +
+	[
+		`{"id":"recLauVL3boo779AG","title":"Liqvid X Stellar RWA Lending Market","status":"${status45}","project":"recGQNG0gXyv5aHrR","projectName":"$24","roundName":"SCF #45","budget":97500,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$25"}`,
+		'{"id":"recIPO2uN2oa0uitf","title":"Stellar RWA Lending Market","status":"Not Awarded","project":"recGQNG0gXyv5aHrR","projectName":"$27","roundName":"SCF #44","budget":97500,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$28"}',
+		'{"id":"rec2aZKPZ8SmvFoGS","title":"Committed Yield RWAs on Stellar","status":"Awarded","project":"recGQNG0gXyv5aHrR","projectName":"$2a","roundName":"SCF #37","budget":137500,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$2b"}',
+		'{"id":"rec91jnTCLjHH1ssP","title":"Cross-Chain Interoperability (GMP) infrastructure and Liquidity for RWAs on Stellar","status":"Not Awarded","project":"recGQNG0gXyv5aHrR","projectName":"$2d","roundName":"SCF #30","budget":135000,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$2e"}',
+	].join(",") +
+	"]}}";
+
+const enablePage = (status45: string) =>
+	`{"project":{"id":"rec6DnJ4it4NQrDuQ","title":"Enable","slug":"enable-duq","totalAwarded":76000,"totalPaid":7600,"siteUrls":{"website":"https://www.humanity.link/"},"awarded":true,"lastAwardedRound":45,"buildAwardRounds":["SCF #43","SCF #45"],"submissions":[` +
+	[
+		`{"id":"recZeBSnr1JqjPt4C","title":"Humanitarian Aid Payments on Stellar","status":"${status45}","project":"rec6DnJ4it4NQrDuQ","projectName":"$25","roundName":"SCF #45","budget":76000,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$26"}`,
+		'{"id":"recbyuKM3UBIMEWYp","title":"Stellar Off-Ramps for Communities","status":"Panel Review Failed","project":"rec6DnJ4it4NQrDuQ","projectName":"$28","roundName":"SCF #43","budget":100000,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$29"}',
+	].join(",") +
+	"]}}";
+
+/** The per-page detail enrich-from-scf builds from the parse. */
+const detailOf = (html: string) => {
+	const v = parseRoundVerdicts(html);
+	return {
+		awardedRounds: [...v.awarded].map(Number).sort((a, b) => a - b),
+		roundAwards: v.awards,
+		verdictSubmissions: v.submissions,
+		verdictAwardedAny: v.awardedAnyCount,
+	};
+};
+
+describe("SCF #45 coverage (sls-111)", () => {
+	it("award rounds come from the verdicts, never from buildAwardRounds", () => {
+		// The page lists #30, #37, #44 and #45 in buildAwardRounds, but #30 and
+		// #44 read "Not Awarded", and its own total is #37 + #45 exactly.
+		const v = parseRoundVerdicts(liqvidPage("Awarded"));
+		expect([...v.awarded].sort()).toEqual(["37", "45"]);
+		expect([...v.notAwarded].sort()).toEqual(["30", "44"]);
+	});
+
+	it("a pinned latest round still disbursing is an award beside an earlier Awarded round", () => {
+		const v = parseRoundVerdicts(liqvidPage("Information Collection"));
+		expect([...v.awarded].sort()).toEqual(["37", "45"]);
+		expect(v.awards).toEqual([
+			{ round: 37, budgetUSD: 137500, awardType: "Build" },
+			{ round: 45, budgetUSD: 97500, awardType: "Build" },
+		]);
+		// The count stays the accusation counter: one card says "Awarded".
+		expect(v.awardedAnyCount).toBe(1);
+	});
+
+	it("the pinned round needs the page total to match exactly", () => {
+		const v = parseRoundVerdicts(liqvidPage("Information Collection", 240000));
+		expect([...v.awarded]).toEqual(["37"]);
+	});
+
+	it("a pinned disbursing award beside a failed round shows an award", () => {
+		// The no-resurrect guard read only the Awarded-card count, so on
+		// 2026-10-03 it held Enable at awarded=false over its #45 award.
+		const detail = detailOf(enablePage("Information Collection"));
+		expect(detail.awardedRounds).toEqual([45]);
+		expect(detail.verdictSubmissions).toBe(1);
+		expect(detail.verdictAwardedAny).toBe(0);
+		expect(showsAward(detail)).toBe(true);
+		expect(showsAward(detailOf(enablePage("Awarded")))).toBe(true);
+	});
+
+	it("a page whose every decided card lost shows no award", () => {
+		const detail = detailOf(
+			'{"id":"rec-coop","status":"Not Awarded","roundName":"SCF #30","budget":50000,"awardType":"Build"}',
+		);
+		expect(detail.verdictSubmissions).toBe(1);
+		expect(showsAward(detail)).toBe(false);
 	});
 });

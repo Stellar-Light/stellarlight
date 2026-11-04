@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"The SCF award sync no longer drops awards three ways: its name matcher stopped at the first name it rejected (Velo inside \"Rumble Fish Software Development\"), so the awards on Rumble Fish and six other rows were never read; a round whose card was still in a pipeline status was dropped beside an earlier award even when the page's own total pins it (Liqvid's SCF #45); and an award pinned that way was held at scfAwarded false (Enable, Docking Zone). The rows move on the next enrich-scf run.",
+		detail:
+			"Round membership still comes from each submission's own verdict, never from the page's buildAwardRounds list, which also names rounds a project entered and lost: Liqvid's rounds are 37 and 45, because its 30 and 44 entries read Not Awarded and its page total is the 37 and 45 budgets added. SlimePay's submission-named SCF #45 page now joins its row.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",

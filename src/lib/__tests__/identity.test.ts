@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	cleanTitle,
+	findTitlePrefixMatch,
 	normSpaced,
 	normSpaceless,
 	stemSlugHash,
@@ -48,6 +49,34 @@ describe("identity primitives — every past trap is a fixture", () => {
 		// SCF_SLUG_OVERRIDES carries these, page-verified
 		expect(titlePrefixMatch("Greep POS + Greep Pay", "Greeppay")).toBe(false);
 		expect(titlePrefixMatch("zkCrossDEX", "zkCross")).toBe(false);
+	});
+
+	it("a rejected containment candidate does not end the partial search", () => {
+		// de·velo·pment: our Velo row is a spaceless substring of SCF's
+		// "Rumble Fish Software Development - RFP" and loads first. Stopping
+		// at that rejected candidate kept Rumble Fish's #41, #42 and #45
+		// awards off its row on every run (enrich-scf log, 2026-10-03).
+		const rows = new Map([
+			["velo", { name: "Velo" }],
+			["rumblefish", { name: "Rumble Fish" }],
+		]);
+		const rejected: unknown[] = [];
+		expect(
+			findTitlePrefixMatch(
+				"Rumble Fish Software Development - RFP",
+				rows,
+				(row) => rejected.push(row.name),
+			),
+		).toEqual({ name: "Rumble Fish" });
+		expect(rejected).toEqual(["Velo"]);
+	});
+
+	it("the partial search still refuses when no candidate passes the rule", () => {
+		const rows = new Map([
+			["band", { name: "Band" }],
+			["sorobandisassemblerx", { name: "Soroban Disassemblerx" }],
+		]);
+		expect(findTitlePrefixMatch("Soroban Disassembler", rows)).toBeUndefined();
 	});
 
 	it("cleanTitle strips parenthetical noise", () => {

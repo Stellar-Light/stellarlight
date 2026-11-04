@@ -427,24 +427,37 @@ export function parseRoundVerdicts(html: string): {
 	// honest. `submissions`/`awardedAnyCount` are deliberately untouched —
 	// the reconcile adds award knowledge, never accusation evidence, so the
 	// never-accuse and no-resurrect guards keep their meaning.
-	if (awardedAnyCount === 0 && awardByRound.size === 0) {
-		const pageAward = /"awarded":true,"lastAwardedRound":(\d+)/.exec(txt);
-		const pageTotal = /"totalAwarded":(\d+)/.exec(txt);
-		if (pageAward && pageTotal) {
-			const r = Number(pageAward[1]);
-			const total = Number(pageTotal[1]);
-			const inRound = [...neutralByKey.values()].filter(
-				(c) => c.roundNum === r,
-			);
-			if (total > 0 && inRound.length === 1 && inRound[0].budgetUSD === total) {
-				awarded.add(String(r));
-				notAwarded.delete(String(r));
-				awardByRound.set(r, {
-					round: r,
-					budgetUSD: total,
-					awardType: inRound[0].awardType,
-				});
-			}
+	// The same pin holds beside earlier Awarded cards (sls-111: liqvid-hrr on
+	// 2026-10-03, #37 Awarded, #45 still in Information Collection, total =
+	// #37 + #45 to the dollar, and the lane stored rounds [37]). The neutral
+	// budget must then equal the total less every award the page itemizes,
+	// and each of those needs a known budget: a partial sum never passes.
+	const pageAward = /"awarded":true,"lastAwardedRound":(\d+)/.exec(txt);
+	const pageTotal = /"totalAwarded":(\d+)/.exec(txt);
+	const itemized = [
+		...[...awardByRound.values()].map((a) => a.budgetUSD),
+		...cards
+			.filter((c) => c.isAward && c.roundNum === null)
+			.map((c) => c.budgetUSD),
+	];
+	if (
+		pageAward &&
+		pageTotal &&
+		!awarded.has(pageAward[1]) &&
+		itemized.every((b) => b !== null)
+	) {
+		const r = Number(pageAward[1]);
+		const rest =
+			Number(pageTotal[1]) - itemized.reduce<number>((s, b) => s + (b ?? 0), 0);
+		const inRound = [...neutralByKey.values()].filter((c) => c.roundNum === r);
+		if (rest > 0 && inRound.length === 1 && inRound[0].budgetUSD === rest) {
+			awarded.add(String(r));
+			notAwarded.delete(String(r));
+			awardByRound.set(r, {
+				round: r,
+				budgetUSD: rest,
+				awardType: inRound[0].awardType,
+			});
 		}
 	}
 	// Awards SCF does not number. "Liquidity Award - '24 Q1" carries no SCF #N,
@@ -489,6 +502,31 @@ export function parseRoundVerdicts(html: string): {
 		),
 	];
 	return { awarded, notAwarded, submissions, awardedAnyCount, awards };
+}
+
+/**
+ * Whether a parsed page (enrich-from-scf's per-page detail) shows an award in
+ * any form: an Awarded card, a round the page's own summary pins (the
+ * reconciliation in parseRoundVerdicts), or an award record. The
+ * Awarded-card count alone stays 0 by design for a pinned award whose card
+ * still sits in a pipeline status, so a guard reading only the count held
+ * Enable at awarded=false over its SCF #45 award (sls-111, 2026-10-03).
+ */
+export function showsAward(
+	page:
+		| {
+				awardedRounds?: readonly unknown[];
+				roundAwards?: readonly unknown[];
+				verdictAwardedAny?: number;
+		  }
+		| null
+		| undefined,
+): boolean {
+	return (
+		(page?.awardedRounds?.length ?? 0) > 0 ||
+		(page?.roundAwards?.length ?? 0) > 0 ||
+		(page?.verdictAwardedAny ?? 0) > 0
+	);
 }
 
 export async function fetchDetailHtml(url: string): Promise<string | null> {
