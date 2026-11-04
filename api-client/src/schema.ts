@@ -4684,8 +4684,41 @@ export interface operations {
                                 type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
                                 submissions?: number;
                                 winners?: number;
+                                /** @description submissions / outOf. */
                                 shareOfSubmissions?: number | null;
+                                /** @description The share's denominator: the stored submissions in this scope (events whose full listing is stored) that have a category read, a confident type or none. */
+                                outOf?: number;
+                                /** @description The stored submissions in this scope not categorized yet, outside outOf. */
+                                uncategorized?: number;
                             } | null;
+                            /** @description The submission's category within each event it entered, counted by analyzeHackathonSubmissions' category facet over that event's stored submissions: one entry per event, served even when the submission has no confident category of its own (thisCategory null). categories are the event's five largest, most submissions first. An event whose stored rows are its winners only, or whose winners are published in part, keeps its counts with every share null and submissions, categorized and uncategorized null, and note says why. */
+                            eventCategories?: {
+                                /** @description The event's slug. */
+                                hackathon?: string;
+                                title?: string;
+                                /** @description The event's stored submissions; null when its rows are incomplete (note). */
+                                submissions?: number | null;
+                                /** @description Of those, the ones with a category read (a confident type or none): every share's denominator. */
+                                categorized?: number | null;
+                                /** @description Of those, the ones not categorized yet. */
+                                uncategorized?: number | null;
+                                categories?: {
+                                    type?: string;
+                                    submissions?: number;
+                                    winners?: number;
+                                    /** @description submissions / categorized; null over incomplete rows. */
+                                    share?: number | null;
+                                }[];
+                                /** @description This submission's top category in the event; null when it has no confident category (categoryNote says why). */
+                                thisCategory?: {
+                                    type?: string;
+                                    submissions?: number;
+                                    winners?: number;
+                                    share?: number | null;
+                                } | null;
+                                /** @description Present only when the event's rows are incomplete: why its size and shares are not served. */
+                                note?: string;
+                            }[];
                             /** @description Why categoryContext is null: the submission has no confident category (uncertain, not missing), or it is not categorized yet. null when categoryContext is served. */
                             categoryNote?: string | null;
                             pitch?: {

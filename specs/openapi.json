@@ -6396,7 +6396,93 @@
 														},
 														"shareOfSubmissions": {
 															"type": "number",
-															"nullable": true
+															"nullable": true,
+															"description": "submissions / outOf."
+														},
+														"outOf": {
+															"type": "integer",
+															"description": "The share's denominator: the stored submissions in this scope (events whose full listing is stored) that have a category read, a confident type or none."
+														},
+														"uncategorized": {
+															"type": "integer",
+															"description": "The stored submissions in this scope not categorized yet, outside outOf."
+														}
+													}
+												},
+												"eventCategories": {
+													"type": "array",
+													"description": "The submission's category within each event it entered, counted by analyzeHackathonSubmissions' category facet over that event's stored submissions: one entry per event, served even when the submission has no confident category of its own (thisCategory null). categories are the event's five largest, most submissions first. An event whose stored rows are its winners only, or whose winners are published in part, keeps its counts with every share null and submissions, categorized and uncategorized null, and note says why.",
+													"items": {
+														"type": "object",
+														"properties": {
+															"hackathon": {
+																"type": "string",
+																"description": "The event's slug."
+															},
+															"title": {
+																"type": "string"
+															},
+															"submissions": {
+																"type": "integer",
+																"nullable": true,
+																"description": "The event's stored submissions; null when its rows are incomplete (note)."
+															},
+															"categorized": {
+																"type": "integer",
+																"nullable": true,
+																"description": "Of those, the ones with a category read (a confident type or none): every share's denominator."
+															},
+															"uncategorized": {
+																"type": "integer",
+																"nullable": true,
+																"description": "Of those, the ones not categorized yet."
+															},
+															"categories": {
+																"type": "array",
+																"items": {
+																	"type": "object",
+																	"properties": {
+																		"type": {
+																			"type": "string"
+																		},
+																		"submissions": {
+																			"type": "integer"
+																		},
+																		"winners": {
+																			"type": "integer"
+																		},
+																		"share": {
+																			"type": "number",
+																			"nullable": true,
+																			"description": "submissions / categorized; null over incomplete rows."
+																		}
+																	}
+																}
+															},
+															"thisCategory": {
+																"type": "object",
+																"nullable": true,
+																"description": "This submission's top category in the event; null when it has no confident category (categoryNote says why).",
+																"properties": {
+																	"type": {
+																		"type": "string"
+																	},
+																	"submissions": {
+																		"type": "integer"
+																	},
+																	"winners": {
+																		"type": "integer"
+																	},
+																	"share": {
+																		"type": "number",
+																		"nullable": true
+																	}
+																}
+															},
+															"note": {
+																"type": "string",
+																"description": "Present only when the event's rows are incomplete: why its size and shares are not served."
+															}
 														}
 													}
 												},
