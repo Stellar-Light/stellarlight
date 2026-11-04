@@ -26,6 +26,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import { modelRateLimited, rateLimited } from "@/lib/api-error";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { classifyModelError } from "@/lib/model-failure";
 import {
 	fetchEligiblePartners,
 	PARTNER_TYPES,
@@ -127,9 +128,10 @@ function sanitizeMessages(raw: unknown): Turn[] {
 async function runSearch(
 	need: string,
 	type: string | undefined,
-): Promise<{ candidates: PublicPartner[]; blobs: string[] }> {
+): Promise<{ candidates: PublicPartner[]; blobs: string[]; failed?: true }> {
+	// A failed read is an outage, never "no partners match" (#1908).
 	const payload = await getPayloadSafe();
-	if (!payload) return { candidates: [], blobs: [] };
+	if (!payload) return { candidates: [], blobs: [], failed: true };
 	try {
 		const docs = await fetchEligiblePartners(payload, {});
 		const scoreQuery =
@@ -142,7 +144,7 @@ async function runSearch(
 			blobs: scored.map((s) => s.blob),
 		};
 	} catch {
-		return { candidates: [], blobs: [] };
+		return { candidates: [], blobs: [], failed: true };
 	}
 }
 
@@ -193,7 +195,7 @@ export async function POST(req: NextRequest) {
 			},
 			{
 				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+				headers: rateLimitHeaders(limit),
 			},
 		);
 	}
@@ -267,18 +269,23 @@ export async function POST(req: NextRequest) {
 					const input = block.input as { need?: string; type?: string };
 					const need = String(input?.need ?? "").trim();
 					lastNeed = need || lastNeed;
-					const { candidates, blobs } = await runSearch(need, input?.type);
-					matches = candidates;
+					const { candidates, blobs, failed } = await runSearch(
+						need,
+						input?.type,
+					);
+					if (!failed) matches = candidates;
 					toolResults.push({
 						type: "tool_result",
 						tool_use_id: block.id,
-						content: candidates.length
-							? `Found ${candidates.length} published partner(s):\n${candidates
-									.map((c, idx) => `${idx + 1}. [${c.slug}] ${blobs[idx]}`)
-									.join(
-										"\n",
-									)}\n\nRecommend only from these; cite each one's specific fit.`
-							: "No published partners match that need. Tell the builder honestly and suggest broadening or browsing /partners.",
+						content: failed
+							? "The partner directory could not be read just now. This is an outage, not an empty result: tell the builder to try again in a moment or browse /partners. Name no partner."
+							: candidates.length
+								? `Found ${candidates.length} published partner(s):\n${candidates
+										.map((c, idx) => `${idx + 1}. [${c.slug}] ${blobs[idx]}`)
+										.join(
+											"\n",
+										)}\n\nRecommend only from these; cite each one's specific fit.`
+								: "No published partners match that need. Tell the builder honestly and suggest broadening or browsing /partners.",
 					});
 				} else if (block.name === "ready_to_list") {
 					canList = true;
@@ -319,14 +326,11 @@ export async function POST(req: NextRequest) {
 			{ headers: rateLimitHeaders(limit) },
 		);
 	} catch (err) {
+		// Classified by error class and status, never wording (#1908).
 		if (err instanceof Anthropic.RateLimitError)
 			return modelRateLimited(err.headers?.get("retry-after"), limit);
-		if (
-			err instanceof Anthropic.AuthenticationError ||
-			err instanceof Anthropic.PermissionDeniedError ||
-			(err instanceof Anthropic.BadRequestError &&
-				/credit balance|billing|quota/i.test(err.message))
-		) {
+		const failure = classifyModelError(err);
+		if (failure === "unavailable") {
 			return NextResponse.json(
 				{
 					error:
@@ -335,11 +339,11 @@ export async function POST(req: NextRequest) {
 				},
 				{
 					status: 503,
-					headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+					headers: rateLimitHeaders(limit),
 				},
 			);
 		}
-		if (err instanceof Anthropic.APIError) {
+		if (failure === "failed") {
 			return NextResponse.json(
 				{ error: "The assistant hit a snag. Browse /partners instead." },
 				{ status: 502, headers: rateLimitHeaders(limit) },

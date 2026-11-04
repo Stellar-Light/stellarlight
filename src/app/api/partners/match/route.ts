@@ -24,9 +24,10 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
-import { modelRateLimited, rateLimited } from "@/lib/api-error";
+import { apiError, modelRateLimited, rateLimited } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { classifyModelError } from "@/lib/model-failure";
 import { scorePartners } from "@/lib/partner-match";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
@@ -117,8 +118,9 @@ function getAnthropic(): Anthropic | null {
 	return new Anthropic({ apiKey: key });
 }
 
-/** The documented 503: the AI path is off (no key, or an account the model
- * refuses), so the caller falls back to the directory filters. */
+/** The documented 503 unavailable: the AI path is off (no key, or the model
+ * refuses our request or account), so the caller falls back to the directory
+ * filters. No Retry-After: a resend cannot help until we fix it. */
 function aiUnavailable(limit: RateLimitResult) {
 	return NextResponse.json(
 		{
@@ -126,11 +128,23 @@ function aiUnavailable(limit: RateLimitResult) {
 				"AI matchmaking isn't available right now. Try the /partners directory filters.",
 			unavailable: true,
 		},
-		{
-			status: 503,
-			headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
-		},
+		{ status: 503, headers: rateLimitHeaders(limit) },
 	);
+}
+
+/** The documented 503 for a directory read that failed: an outage, never
+ * the empty answer "no partners are listed". */
+function directoryUnavailable(limit: RateLimitResult, startedAt: number) {
+	return apiError({
+		status: 503,
+		error: "partner directory read failed",
+		hint: "Wait 2 seconds, then resend the same request.",
+		advisory:
+			"The partner directory could not be read. This is an outage, NOT a claim that no partner matches.",
+		retryAfterSeconds: 2,
+		startedAt,
+		headers: rateLimitHeaders(limit),
+	});
 }
 
 /** Compact candidate the model reasons over. Public/partner-claimed + verified. */
@@ -181,6 +195,7 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
+	const startedAt = Date.now();
 	const limit = rateLimit(req, {
 		endpoint: "/api/partners/match",
 		limit: RATE_LIMIT_MAX,
@@ -224,26 +239,26 @@ export async function POST(req: NextRequest) {
 	if (!anthropic) return aiUnavailable(limit);
 
 	// ── Candidate set: same published source the directory serves ──
+	// A failed read is an outage, never "no partners are listed" (#1908).
 	const payload = await getPayloadSafe();
+	if (!payload) return directoryUnavailable(limit, startedAt);
 	// biome-ignore lint/suspicious/noExplicitAny: Payload docs
-	let docs: any[] = [];
-	if (payload) {
-		try {
-			// biome-ignore lint/suspicious/noExplicitAny: Payload Where shape
-			const where: any = { status: { equals: "published" } };
-			if (type) where.partnerType = { equals: type };
-			if (sector) where.sectors = { contains: sector };
-			if (region) where.regions = { contains: region };
-			const res = await payload.find({
-				collection: "partner-accounts",
-				where,
-				limit: 200,
-				depth: 0,
-			});
-			docs = res.docs;
-		} catch {
-			docs = [];
-		}
+	let docs: any[];
+	try {
+		// biome-ignore lint/suspicious/noExplicitAny: Payload Where shape
+		const where: any = { status: { equals: "published" } };
+		if (type) where.partnerType = { equals: type };
+		if (sector) where.sectors = { contains: sector };
+		if (region) where.regions = { contains: region };
+		const res = await payload.find({
+			collection: "partner-accounts",
+			where,
+			limit: 200,
+			depth: 0,
+		});
+		docs = res.docs;
+	} catch {
+		return directoryUnavailable(limit, startedAt);
 	}
 
 	// Archived = gone dark >1y → never matchable. (Public directory still lists
@@ -372,21 +387,14 @@ export async function POST(req: NextRequest) {
 			{ headers: rateLimitHeaders(limit) },
 		);
 	} catch (err) {
+		// Every arm is a documented response (#1908): the provider refusing
+		// our request or account is the 503 unavailable, one failed call the
+		// 502, and anything else this service's own 500.
 		if (err instanceof Anthropic.RateLimitError)
 			return modelRateLimited(err.headers?.get("retry-after"), limit);
-		// Our account cannot call the model (bad key, no permission, no
-		// credit): the AI path is off until that is fixed, so this is the
-		// documented 503 unavailable, the split the assistant and onboard
-		// routes make. It answered an undocumented 502 here (#1908).
-		if (
-			err instanceof Anthropic.AuthenticationError ||
-			err instanceof Anthropic.PermissionDeniedError ||
-			(err instanceof Anthropic.BadRequestError &&
-				/credit balance|billing|quota/i.test(err.message))
-		)
-			return aiUnavailable(limit);
-		// Any other provider failure is one failed call: the documented 502.
-		if (err instanceof Anthropic.APIError) {
+		const failure = classifyModelError(err);
+		if (failure === "unavailable") return aiUnavailable(limit);
+		if (failure === "failed") {
 			return NextResponse.json(
 				{
 					error: "Matchmaking hit a snag. Try the /partners directory filters.",

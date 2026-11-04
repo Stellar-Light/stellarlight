@@ -138,12 +138,40 @@ const errorBody = (description: string) => ({
 });
 
 /** The 502 the AI partner routes answer when one language model call fails
- * (#1908). An account the model refuses (bad key, no permission, no credit)
- * answers their 503 `unavailable` instead: a resend cannot clear that one. */
+ * (#1908, src/lib/model-failure.ts). The provider refusing our request or
+ * account answers their 503 `unavailable` instead: a resend cannot clear it. */
 const modelFailed502 = (fallback: string) =>
 	errorBody(
-		`One language model call failed: a provider error or outage, or output that could not be read. Not a claim about the request or the data: resend later, or ${fallback} now. The 503 with unavailable true is the answer when the AI path is off, where a resend does not help.`,
+		`One language model call failed: the provider erred (5xx), was overloaded, or could not be reached in time, or its output could not be read. Not a claim about the request or the data: resend later, or ${fallback} now. The provider refusing our request or account is the 503 with unavailable true instead, where a resend does not help.`,
 	);
+
+/** The body of the AI partner routes' 503 when the AI path is off. */
+const AI_UNAVAILABLE_SCHEMA = {
+	type: "object",
+	description:
+		"The AI path is off: no model is configured, or the provider refuses our request or account (any 4xx but 429). The caller falls back rather than erroring.",
+	required: ["error", "unavailable"],
+	properties: {
+		error: {
+			type: "string",
+			description: "Human-readable reason, safe to show.",
+		},
+		unavailable: {
+			type: "boolean",
+			description:
+				"Always true here: the feature is off, not the request wrong. Fall back; do not retry.",
+		},
+	},
+};
+const aiUnavailable503 = (fallback: string) => ({
+	description: `The AI path is off: no model is configured, or the provider refuses our request or account. A resend does not help, so no Retry-After is sent: ${fallback}.`,
+	content: { "application/json": { schema: AI_UNAVAILABLE_SCHEMA } },
+});
+
+/** This service's own fault: no AI partner route answers it on purpose. */
+const unexpected500 = errorBody(
+	"An unexpected error inside this service, not a claim about the request or the data: resend later.",
+);
 
 /** One-shot report meta — {source, generatedAt, note} (scf-pitch,
  * hackathon-brief, vet-idea, repos/trust routes serve exactly this). */
@@ -5458,34 +5486,53 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"400": errorBody(
-						"The body is not JSON, or `need` is missing or blank.",
-					),
+					"400": {
+						description:
+							"The body is not JSON, `need` is missing or blank, or `type` names no partner type; then validTypes lists every type it accepts.",
+						content: {
+							"application/json": {
+								schema: {
+									allOf: [
+										{ $ref: "#/components/schemas/ErrorResponse" },
+										{
+											type: "object",
+											properties: {
+												validTypes: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when type was unknown: every partner type the field accepts.",
+												},
+											},
+										},
+									],
+								},
+							},
+						},
+					},
 					"422": errorBody(
 						"The model declined to rank this need: rephrase it, or use GET /api/partners filters.",
 					),
 					"429": rateLimited429(true),
 					"502": modelFailed502("rank with GET /api/partners filters"),
+					"500": unexpected500,
 					"503": {
 						description:
-							"AI backend unavailable: fall back to GET /api/partners",
+							"Two cases, told apart by the body. unavailable true: the AI path is off (no model is configured, or the provider refuses our request or account); a resend does not help, so no Retry-After is sent: use GET /api/partners filters. retryAfterSeconds: the partner directory could not be read, an outage and NOT a claim that no partner matches; resend after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description:
+									"Only when the directory read failed: seconds to wait, the same number as retryAfterSeconds.",
+								schema: { type: "integer" },
+							},
+						},
 						content: {
 							"application/json": {
 								schema: {
-									type: "object",
-									description:
-										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
-									properties: {
-										error: {
-											type: "string",
-											description: "Human-readable reason, safe to show.",
-										},
-										unavailable: {
-											type: "boolean",
-											description:
-												"Always true here: the feature is off, not the request wrong.",
-										},
-									},
+									oneOf: [
+										AI_UNAVAILABLE_SCHEMA,
+										{ $ref: "#/components/schemas/RetryableError" },
+									],
 								},
 							},
 						},
@@ -5649,29 +5696,8 @@ export const spec: OpenAPISpec = {
 					),
 					"429": rateLimited429(true),
 					"502": modelFailed502("browse GET /api/partners"),
-					"503": {
-						description: "AI backend unavailable",
-						content: {
-							"application/json": {
-								schema: {
-									type: "object",
-									description:
-										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
-									properties: {
-										error: {
-											type: "string",
-											description: "Human-readable reason, safe to show.",
-										},
-										unavailable: {
-											type: "boolean",
-											description:
-												"Always true here: the feature is off, not the request wrong.",
-										},
-									},
-								},
-							},
-						},
-					},
+					"500": unexpected500,
+					"503": aiUnavailable503("browse /partners or use the listing form"),
 				},
 			},
 		},
@@ -5786,29 +5812,10 @@ export const spec: OpenAPISpec = {
 					"502": modelFailed502(
 						"use the listing form (POST /api/partners/submit-listing)",
 					),
-					"503": {
-						description: "AI backend unavailable",
-						content: {
-							"application/json": {
-								schema: {
-									type: "object",
-									description:
-										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
-									properties: {
-										error: {
-											type: "string",
-											description: "Human-readable reason, safe to show.",
-										},
-										unavailable: {
-											type: "boolean",
-											description:
-												"Always true here: the feature is off, not the request wrong.",
-										},
-									},
-								},
-							},
-						},
-					},
+					"500": unexpected500,
+					"503": aiUnavailable503(
+						"use the listing form (POST /api/partners/submit-listing)",
+					),
 				},
 			},
 		},

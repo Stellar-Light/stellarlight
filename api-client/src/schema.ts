@@ -5117,13 +5117,16 @@ export interface operations {
                     };
                 };
             };
-            /** @description The body is not JSON, or `need` is missing or blank. */
+            /** @description The body is not JSON, `need` is missing or blank, or `type` names no partner type; then validTypes lists every type it accepts. */
             400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
+                    "application/json": components["schemas"]["ErrorResponse"] & {
+                        /** @description Present only when type was unknown: every partner type the field accepts. */
+                        validTypes?: string[];
+                    };
                 };
             };
             /** @description The model declined to rank this need: rephrase it, or use GET /api/partners filters. */
@@ -5150,7 +5153,16 @@ export interface operations {
                     "application/json": components["schemas"]["RetryableError"];
                 };
             };
-            /** @description One language model call failed: a provider error or outage, or output that could not be read. Not a claim about the request or the data: resend later, or rank with GET /api/partners filters now. The 503 with unavailable true is the answer when the AI path is off, where a resend does not help. */
+            /** @description An unexpected error inside this service, not a claim about the request or the data: resend later. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description One language model call failed: the provider erred (5xx), was overloaded, or could not be reached in time, or its output could not be read. Not a claim about the request or the data: resend later, or rank with GET /api/partners filters now. The provider refusing our request or account is the 503 with unavailable true instead, where a resend does not help. */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -5159,18 +5171,20 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description AI backend unavailable: fall back to GET /api/partners */
+            /** @description Two cases, told apart by the body. unavailable true: the AI path is off (no model is configured, or the provider refuses our request or account); a resend does not help, so no Retry-After is sent: use GET /api/partners filters. retryAfterSeconds: the partner directory could not be read, an outage and NOT a claim that no partner matches; resend after Retry-After. */
             503: {
                 headers: {
+                    /** @description Only when the directory read failed: seconds to wait, the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
                         /** @description Human-readable reason, safe to show. */
-                        error?: string;
-                        /** @description Always true here: the feature is off, not the request wrong. */
-                        unavailable?: boolean;
-                    };
+                        error: string;
+                        /** @description Always true here: the feature is off, not the request wrong. Fall back; do not retry. */
+                        unavailable: boolean;
+                    } | components["schemas"]["RetryableError"];
                 };
             };
         };
@@ -5263,7 +5277,16 @@ export interface operations {
                     "application/json": components["schemas"]["RetryableError"];
                 };
             };
-            /** @description One language model call failed: a provider error or outage, or output that could not be read. Not a claim about the request or the data: resend later, or browse GET /api/partners now. The 503 with unavailable true is the answer when the AI path is off, where a resend does not help. */
+            /** @description An unexpected error inside this service, not a claim about the request or the data: resend later. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description One language model call failed: the provider erred (5xx), was overloaded, or could not be reached in time, or its output could not be read. Not a claim about the request or the data: resend later, or browse GET /api/partners now. The provider refusing our request or account is the 503 with unavailable true instead, where a resend does not help. */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -5272,7 +5295,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description AI backend unavailable */
+            /** @description The AI path is off: no model is configured, or the provider refuses our request or account. A resend does not help, so no Retry-After is sent: browse /partners or use the listing form. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -5280,9 +5303,9 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description Human-readable reason, safe to show. */
-                        error?: string;
-                        /** @description Always true here: the feature is off, not the request wrong. */
-                        unavailable?: boolean;
+                        error: string;
+                        /** @description Always true here: the feature is off, not the request wrong. Fall back; do not retry. */
+                        unavailable: boolean;
                     };
                 };
             };
@@ -5376,7 +5399,16 @@ export interface operations {
                     "application/json": components["schemas"]["RetryableError"];
                 };
             };
-            /** @description One language model call failed: a provider error or outage, or output that could not be read. Not a claim about the request or the data: resend later, or use the listing form (POST /api/partners/submit-listing) now. The 503 with unavailable true is the answer when the AI path is off, where a resend does not help. */
+            /** @description An unexpected error inside this service, not a claim about the request or the data: resend later. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description One language model call failed: the provider erred (5xx), was overloaded, or could not be reached in time, or its output could not be read. Not a claim about the request or the data: resend later, or use the listing form (POST /api/partners/submit-listing) now. The provider refusing our request or account is the 503 with unavailable true instead, where a resend does not help. */
             502: {
                 headers: {
                     [name: string]: unknown;
@@ -5385,7 +5417,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
-            /** @description AI backend unavailable */
+            /** @description The AI path is off: no model is configured, or the provider refuses our request or account. A resend does not help, so no Retry-After is sent: use the listing form (POST /api/partners/submit-listing). */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -5393,9 +5425,9 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description Human-readable reason, safe to show. */
-                        error?: string;
-                        /** @description Always true here: the feature is off, not the request wrong. */
-                        unavailable?: boolean;
+                        error: string;
+                        /** @description Always true here: the feature is off, not the request wrong. Fall back; do not retry. */
+                        unavailable: boolean;
                     };
                 };
             };
