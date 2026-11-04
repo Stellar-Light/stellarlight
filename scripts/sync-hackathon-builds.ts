@@ -40,6 +40,11 @@
  *      only when the method's leave-one-out precision on the directory's own
  *      hand-set types clears the floor
  *
+ * Stored curated rows with a repo (scripts/import-curated-builds.ts writes
+ * their own fields) run steps 3 to 7 too, with no DoraHacks page or page
+ * rule, and get only the fields those steps derive (src/lib/curated-import.ts
+ * SYNC_DERIVED_FIELDS): one field, one writer.
+ *
  * The rules the stablecoin and RWA lanes earned:
  *   - a row is never deleted;
  *   - a failed read never blanks a stored value;
@@ -50,6 +55,7 @@
 import "./load-env";
 import { createRequire } from "node:module";
 import { getPayload } from "payload";
+import { curatedSyncRow, derivedOnly } from "../src/lib/curated-import";
 import { embedBatch } from "../src/lib/embed";
 import {
 	assign as assignTypes,
@@ -570,11 +576,24 @@ async function main() {
 		process.exitCode = 2;
 		return;
 	}
+	// Curated rows with a repo, for the derived steps only.
+	const curated = new Set<string>();
+	for (const d of stored.values()) {
+		const r = curatedSyncRow(d);
+		if (!r || rows.has(r.entryKey)) continue;
+		rows.set(r.entryKey, r);
+		curated.add(r.entryKey);
+	}
+	console.log(
+		`  ${curated.size} stored curated rows with a repo: stack, activity, links, embeddings and categories only`,
+	);
 
 	// ── 2. submission pages ──────────────────────────────────────────────
 	// One page per submission, shared by every event row it holds.
 	const due = new Map<string, Row[]>();
 	for (const r of rows.values()) {
+		// A curated row has no DoraHacks page.
+		if (curated.has(r.entryKey)) continue;
 		const at = stored.get(r.entryKey)?.detailReadAt;
 		if (!at || Date.now() - Date.parse(at) > DETAIL_MAX_AGE_MS)
 			due.set(r.buildId, [...(due.get(r.buildId) ?? []), r]);
@@ -713,11 +732,10 @@ async function main() {
 			r.projectName = project?.name ?? null;
 			r.projectLinkBasis = project?.basis ?? null;
 			r.linkCheckedAt = now;
-			const p = namedCandidate(
-				{ ...r, isWinner: won.has(r.buildId) },
-				idx,
-				names,
-			);
+			// The page rules read DoraHacks pages, which a curated row has none of.
+			const p = curated.has(r.entryKey)
+				? null
+				: namedCandidate({ ...r, isWinner: won.has(r.buildId) }, idx, names);
 			if (p)
 				named.set(r.buildId, {
 					p,
@@ -980,7 +998,12 @@ async function main() {
 
 	// ── diff ─────────────────────────────────────────────────────────────
 	const creates: Row[] = [];
-	const updates: { id: string; data: Row; changed: string[] }[] = [];
+	const updates: {
+		id: string;
+		key: string;
+		data: Record<string, unknown>;
+		changed: string[];
+	}[] = [];
 	const fieldChanges = new Map<string, number>();
 	for (const r of rows.values()) {
 		const old = stored.get(r.entryKey);
@@ -991,11 +1014,17 @@ async function main() {
 		const changed = FIELDS.filter((f) => f in r && !same(r[f], old[f]));
 		for (const f of changed)
 			fieldChanges.set(f, (fieldChanges.get(f) ?? 0) + 1);
-		updates.push({ id: old.id, data: r, changed });
+		// A curated row's own fields are the import's: only derived ones go.
+		updates.push({
+			id: old.id,
+			key: r.entryKey,
+			data: curated.has(r.entryKey) ? derivedOnly(r) : r,
+			changed,
+		});
 	}
 	const notListed = [...stored.keys()].filter((k) => !rows.has(k)).length;
 	console.log(
-		`\n${rows.size} builds read: ${creates.length} new, ${updates.filter((u) => u.changed.length).length} changed, ${updates.filter((u) => !u.changed.length).length} unchanged; ${notListed} stored builds not listed this run (kept)`,
+		`\n${rows.size} builds read (${curated.size} curated rows, derived fields only): ${creates.length} new, ${updates.filter((u) => u.changed.length).length} changed, ${updates.filter((u) => !u.changed.length).length} unchanged; ${notListed} stored builds not listed this run (kept)`,
 	);
 	if (fieldChanges.size)
 		console.log(
@@ -1018,10 +1047,10 @@ async function main() {
 		)
 		.map((u) =>
 			linkChangeLine(
-				u.data.entryKey,
-				stored.get(u.data.entryKey) ?? {},
-				u.data,
-				dropWhy.get(u.data.entryKey),
+				u.key,
+				stored.get(u.key) ?? {},
+				u.data as Row,
+				dropWhy.get(u.key),
 			),
 		)
 		.filter((l): l is string => !!l);
@@ -1066,10 +1095,18 @@ async function main() {
 	let failed = 0;
 	const sent = new Map<string, Record<string, unknown>>();
 	const writes = [
-		...creates.map((data) => ({ id: null as string | null, data })),
-		...updates.map((u) => ({ id: u.id as string | null, data: u.data })),
+		...creates.map((data) => ({
+			id: null as string | null,
+			key: data.entryKey,
+			data: data as Record<string, unknown>,
+		})),
+		...updates.map((u) => ({
+			id: u.id as string | null,
+			key: u.key,
+			data: u.data,
+		})),
 	];
-	await pool(writes, 4, async ({ id, data }) => {
+	await pool(writes, 4, async ({ id, key, data }) => {
 		try {
 			if (id)
 				await payload.update({
@@ -1084,11 +1121,11 @@ async function main() {
 					data: data as Omit<HackathonBuild, "id" | "updatedAt" | "createdAt">,
 					context: { internal: true },
 				});
-			sent.set(data.entryKey, data);
+			sent.set(key, data);
 		} catch (e) {
 			failed++;
 			console.error(
-				`  ✗ ${data.entryKey}: write failed: ${String((e as Error).message).slice(0, 120)}`,
+				`  ✗ ${key}: write failed: ${String((e as Error).message).slice(0, 120)}`,
 			);
 		}
 	});
