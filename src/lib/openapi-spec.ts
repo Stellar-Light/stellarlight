@@ -11113,16 +11113,36 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'`; unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile.",
+							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24, and only against [], never null. NULL SEMANTICS: assets and seps come only from the anchor's stellar.toml and are null unless a read is recorded (the partner's tomlSourceUrl and tomlFetchedAt both set, `profileState: 'profiled'`); rampTypes and regions are as recorded (confirmed from the transfer server or entered by a curator) and null when none is. Null is UNKNOWN, never capability-free. `url` links the full partner profile.",
 						properties: {
 							slug: { type: "string" },
 							country: { type: "string", nullable: true },
-							regions: { type: "array", items: { type: "string" } },
-							assets: { type: "array", items: { type: "string" } },
-							seps: { type: "array", items: { type: "string" } },
+							regions: {
+								type: "array",
+								nullable: true,
+								items: { type: "string" },
+								description: "NULL = none recorded (UNKNOWN).",
+							},
+							assets: {
+								type: "array",
+								nullable: true,
+								items: { type: "string" },
+								description:
+									"From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none.",
+							},
+							seps: {
+								type: "array",
+								nullable: true,
+								items: { type: "string" },
+								description:
+									"From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none.",
+							},
 							rampTypes: {
 								type: "array",
+								nullable: true,
 								items: { type: "string", enum: ["on-ramp", "off-ramp"] },
+								description:
+									"Confirmed from the transfer server or entered by a curator. NULL = none recorded (UNKNOWN).",
 							},
 							asOf: { type: "string", nullable: true },
 							url: { type: "string" },
@@ -11130,7 +11150,7 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								enum: ["profiled", "not-profiled"],
 								description:
-									"'profiled' = at least one capability field is verified-filled; 'not-profiled' = capabilities not yet verified for this anchor (empty arrays mean UNKNOWN, not absent).",
+									"'profiled' = the anchor's stellar.toml read is recorded, so assets and seps state what it declares; 'not-profiled' = no read is recorded: assets and seps are null (UNKNOWN), and any rampTypes are as a curator entered them.",
 							},
 						},
 					},
@@ -11396,7 +11416,7 @@ export const spec: OpenAPISpec = {
 									anchorProfileBasis: {
 										type: "string",
 										description:
-											"Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join; empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+											"Present only when the page carries anchor rows: null semantics for the anchorProfile join. assets and seps are null without a recorded stellar.toml read (see each profile's profileState), rampTypes and regions null when none is recorded; a null is never a negative capability claim.",
 									},
 									scfCountBasis: {
 										type: "string",

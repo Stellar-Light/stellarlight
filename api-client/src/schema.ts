@@ -1390,18 +1390,22 @@ export interface components {
              * @enum {string|null}
              */
             venueRole?: "amm" | "native-orderbook" | "aggregator-router" | "trading-ui" | "wallet-integrated" | null;
-            /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'`; unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile. */
+            /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24, and only against [], never null. NULL SEMANTICS: assets and seps come only from the anchor's stellar.toml and are null unless a read is recorded (the partner's tomlSourceUrl and tomlFetchedAt both set, `profileState: 'profiled'`); rampTypes and regions are as recorded (confirmed from the transfer server or entered by a curator) and null when none is. Null is UNKNOWN, never capability-free. `url` links the full partner profile. */
             anchorProfile?: {
                 slug?: string;
                 country?: string | null;
-                regions?: string[];
-                assets?: string[];
-                seps?: string[];
-                rampTypes?: ("on-ramp" | "off-ramp")[];
+                /** @description NULL = none recorded (UNKNOWN). */
+                regions?: string[] | null;
+                /** @description From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none. */
+                assets?: string[] | null;
+                /** @description From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none. */
+                seps?: string[] | null;
+                /** @description Confirmed from the transfer server or entered by a curator. NULL = none recorded (UNKNOWN). */
+                rampTypes?: ("on-ramp" | "off-ramp")[] | null;
                 asOf?: string | null;
                 url?: string;
                 /**
-                 * @description 'profiled' = at least one capability field is verified-filled; 'not-profiled' = capabilities not yet verified for this anchor (empty arrays mean UNKNOWN, not absent).
+                 * @description 'profiled' = the anchor's stellar.toml read is recorded, so assets and seps state what it declares; 'not-profiled' = no read is recorded: assets and seps are null (UNKNOWN), and any rampTypes are as a curator entered them.
                  * @enum {string}
                  */
                 profileState?: "profiled" | "not-profiled";
@@ -1537,7 +1541,7 @@ export interface components {
                         why?: string;
                     }[];
                 };
-                /** @description Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join; empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
+                /** @description Present only when the page carries anchor rows: null semantics for the anchorProfile join. assets and seps are null without a recorded stellar.toml read (see each profile's profileState), rampTypes and regions null when none is recorded; a null is never a negative capability claim. */
                 anchorProfileBasis?: string;
                 /** @description Counting basis for the SCF fields on rows: scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups). */
                 scfCountBasis?: string;

@@ -186,3 +186,53 @@ export function partnerToPublic(
 		url: `https://stellarlight.xyz/partners/${p.slug}`,
 	};
 }
+
+/** The partner fields the searchProjects anchor join reads. */
+export const ANCHOR_PROFILE_SELECT = {
+	name: true,
+	slug: true,
+	country: true,
+	regions: true,
+	assets: true,
+	seps: true,
+	rampTypes: true,
+	lastPartnerUpdateAt: true,
+	tomlSourceUrl: true,
+	tomlFetchedAt: true,
+} as const;
+
+/** The anchorProfile searchProjects joins onto Anchor-typed project rows,
+ * under the partner rows' rules (#1909): assets and seps only from a
+ * recorded stellar.toml read, curated lists null when none is recorded, and
+ * "profiled" only when the read is recorded. It copied the raw fields and
+ * called any non-empty one "profiled", read or curated. */
+export function anchorProfileOf(d: Record<string, unknown>) {
+	const tags = (arr: unknown): string[] =>
+		Array.isArray(arr)
+			? arr
+					.map((x) =>
+						typeof x === "string"
+							? x
+							: String(
+									(x as { tag?: unknown; code?: unknown })?.tag ??
+										(x as { code?: unknown })?.code ??
+										"",
+								),
+					)
+					.filter(Boolean)
+			: [];
+	const read = hasTomlRead(d);
+	return {
+		slug: String(d.slug),
+		country: (d.country as string) ?? null,
+		regions: recordedOrNull(tags(d.regions)),
+		assets: read ? tags(d.assets) : null,
+		seps: read ? tags(d.seps) : null,
+		rampTypes: recordedOrNull(tags(d.rampTypes)),
+		asOf: (d.lastPartnerUpdateAt as string) ?? null,
+		url: `https://stellarlight.xyz/partners/${d.slug}`,
+		profileState: (read ? "profiled" : "not-profiled") as
+			| "profiled"
+			| "not-profiled",
+	};
+}
