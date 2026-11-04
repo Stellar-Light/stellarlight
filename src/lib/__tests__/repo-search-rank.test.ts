@@ -1515,9 +1515,20 @@ describe("served interface paths (issue #1906)", () => {
 		expect(cv?.contractInterfacePaths).toBeNull();
 	});
 
-	it("[] when there is no interface to place", async () => {
-		const cv = await served({ contractInterface: [] });
+	it("[] when the scan that recorded paths found no interface", async () => {
+		const cv = await served({
+			contractInterface: [],
+			contractInterfacePaths: [],
+		});
 		expect(cv?.contractInterfacePaths).toEqual([]);
+	});
+
+	// review finding 6: nothing recorded is unknown, never "checked, none"
+	it("null when no paths were recorded, even with no interface", async () => {
+		expect(
+			(await served({ contractInterface: [] }))?.contractInterfacePaths,
+		).toBeNull();
+		expect((await served({}))?.contractInterfacePaths).toBeNull();
 	});
 
 	it("null when the stored lists do not pair up", async () => {

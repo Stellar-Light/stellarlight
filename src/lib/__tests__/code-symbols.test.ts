@@ -240,6 +240,8 @@ describe("interfaces carry their source path; test folders stay out (issue #1906
 		"e2e/contracts/token/src/lib.rs",
 		"testdata/contract/src/lib.rs",
 		"contracts/tests/fixture/src/lib.rs",
+		// review finding 3: an integration-test folder by name
+		"integration-tests/src/lib.rs",
 	])(
 		"%s is a test folder: left out of the interface and the symbols",
 		(path) => {
@@ -259,6 +261,54 @@ describe("interfaces carry their source path; test folders stay out (issue #1906
 		expect(extractJsSymbols(blobs)).toEqual([]);
 		expect(detectSdkCapabilities(blobs)).toEqual([]);
 	});
+
+	// review finding 3: the test layouts of every language the scanner reads
+	it.each([
+		[
+			"__tests__/pay.ts",
+			"export function payFlow(a) { return new TransactionBuilder(a); }",
+		],
+		[
+			"src/pay.test.ts",
+			"export function payFlow(a) { return new TransactionBuilder(a); }",
+		],
+		[
+			"src/pay.spec.tsx",
+			"export function payFlow(a) { return new TransactionBuilder(a); }",
+		],
+		[
+			"internal/pay_test.go",
+			'import "github.com/stellar/go/txnbuild"\ntx := txnbuild.NewTransaction(p)',
+		],
+		[
+			"pkg/test_pay.py",
+			"from stellar_sdk import TransactionBuilder\nTransactionBuilder(a)",
+		],
+		[
+			"src/main/kotlin/PayTest.kt",
+			"import org.stellar.sdk.TransactionBuilder\nval b = TransactionBuilder(a)",
+		],
+	])(
+		"%s is test code in its language: no symbols, no capability tags",
+		(path, text) => {
+			const blobs = [{ path, text }];
+			expect(extractJsSymbols(blobs)).toEqual([]);
+			expect(detectSdkCapabilities(blobs)).toEqual([]);
+		},
+	);
+
+	// review finding 3: the integration clause covers a crate kept inside an
+	// integration/ folder, never a module or a crate merely named integration
+	it.each(["src/integration/mod.rs", "integration/src/lib.rs"])(
+		"%s is product code: its interface and symbols stay in",
+		(path) => {
+			const blobs = [{ path, text: impl("Bridge") }];
+			expect(extractCodeSymbols(blobs)).toEqual(["bump", "Bridge"]);
+			expect(contractInterfaceEntries(blobs)).toEqual([
+				{ signature: "Bridge.bump(n: u32) -> u32", path },
+			]);
+		},
+	);
 
 	it("a JS integration/ folder stays in: it can hold product code", () => {
 		const blobs = [

@@ -70,20 +70,29 @@ const FN_RE =
 const TYPE_RE =
 	/\bpub(?:\s*\([^)\n]{0,64}\))?\s+(?:struct|enum|trait)\s+([A-Za-z_][A-Za-z0-9_]*)/g;
 
-// One folder rule for every fact read from the fetched sources: interfaces,
-// symbols and capability tags (issue #1906). testdata/, e2e/ and test wasm
-// workspaces are test code by convention; stellar/rs-soroban-env keeps 48
-// fixture contracts under soroban-test-wasms/. A Rust crate under an
-// integration/ folder is an integration-test fixture (stellar/stellar-horizon
-// served its internal/integration/contracts as the repo's own interface);
-// JS integration/ folders can hold product code, so that clause reads .rs only.
+// One folder and file rule for every fact read from the fetched sources:
+// interfaces, symbols and capability tags (issue #1906), covering the test
+// layouts of each language the scanner reads. Rust: tests/, benches/,
+// foo_test.rs, tests.rs, test_foo.rs. JS and TS: __tests__/, __mocks__/,
+// foo.test.ts, foo.spec.tsx. Go: foo_test.go, testdata/. Python:
+// test_foo.py, foo_test.py. Kotlin and Java: FooTest.kt, FooTests.java. Any
+// language: e2e/, fixtures/, mocks/, test-utils/, integration-tests/ and
+// test wasm workspaces (stellar/rs-soroban-env keeps 48 fixture contracts
+// under soroban-test-wasms/). A Rust crate kept inside an integration/ folder
+// is an integration-test crate (stellar/stellar-horizon's
+// internal/integration/contracts/<crate>/src served as its own interface);
+// an integration module inside src/, or a crate merely named integration, is
+// product code and stays in.
 const isTestPath = (p: string) =>
-	/(^|\/)(tests?|testing|test[-_]?utils?|testdata|fixtures?|mocks?|benches|e2e|[\w.-]*test[-_]?wasms?)\//i.test(
+	/(^|\/)(tests?|__tests__|__mocks__|testing|test[-_]?utils?|testdata|fixtures?|mocks?|benches|e2e|integration[-_]tests?|[\w.-]*test[-_]?wasms?)\//i.test(
 		p,
 	) ||
-	/_tests?(\/|\.rs$)/i.test(p) ||
+	/_tests?(\/|\.(rs|go|py)$)/i.test(p) ||
 	/(^|\/)tests?\.rs$/i.test(p) ||
-	/(^|\/)integration\/.*\.rs$/i.test(p);
+	/(^|\/)test_[^/]*\.(rs|py)$/i.test(p) ||
+	/\.(test|spec)\.[cm]?[jt]sx?$/i.test(p) ||
+	/Tests?\.(kt|java)$/.test(p) ||
+	/(^|\/)integration\/(?:[^/]+\/)+src\/.*\.rs$/i.test(p);
 
 /** Extract the public code-symbol surface from a repo's fetched sources. */
 export function extractCodeSymbols(blobs: SymbolBlob[]): string[] {
@@ -208,17 +217,19 @@ export function contractInterfaceEntries(
 }
 
 /** A stored interface paired with its stored paths, as served (issue #1906):
- * paths[i] is where interface[i] was read. [] when there is no interface;
- * null when the scan predates paths or the two lists do not pair up, because
- * a path that cannot be matched to its entry is unknown, not absent. */
+ * paths[i] is where interface[i] was read. [] when the scan that recorded
+ * paths found no interface; null when no paths were recorded (a scan before
+ * 2026-11-04, or no interface at all) or the two lists do not pair up,
+ * because a path never recorded or matched to its entry is unknown, not
+ * absent. */
 export function interfacePathsOf(d: {
 	contractInterface?: unknown;
 	contractInterfacePaths?: unknown;
 }): string[] | null {
-	const iface = Array.isArray(d.contractInterface) ? d.contractInterface : [];
-	if (!iface.length) return [];
+	const iface = d.contractInterface;
 	const paths = d.contractInterfacePaths;
-	return Array.isArray(paths) &&
+	return Array.isArray(iface) &&
+		Array.isArray(paths) &&
 		paths.length === iface.length &&
 		[...iface, ...paths].every((s) => typeof s === "string")
 		? [...(paths as string[])]

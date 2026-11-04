@@ -80,3 +80,19 @@ Review finding 2 (the product float fires on the phrase itself, in any spelling;
  Test Files  1 failed (1)
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
 Pass after, with the fix: src/lib/__tests__/repo-search-rank.test.ts Tests 111 passed (111)
+
+Review findings 3 and 6 (test layouts per language, the integration clause limited to crates kept inside an integration folder, null paths when none were recorded): the new tests against 0938586e, before the fix
+      Tests  10 failed | 134 passed (144)
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > __tests__/pay.ts is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > integration-tests/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > integration/src/lib.rs is product code: its interface and symbols stay in
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > internal/pay_test.go is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > pkg/test_pay.py is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > src/integration/mod.rs is product code: its interface and symbols stay in
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > src/main/kotlin/PayTest.kt is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > src/pay.spec.tsx is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > src/pay.test.ts is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > null when no paths were recorded, even with no interface
+ Test Files  2 failed (2)
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: Test Files 4 passed (4); Tests 151 passed (151)
