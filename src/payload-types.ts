@@ -1279,19 +1279,23 @@ export interface Stablecoin {
 	 */
 	company?: string | null;
 	/**
-	 * ORG_NAME in the stellar.toml at the issuer account's home_domain, read only when that toml lists the issuer account. Empty = not established.
+	 * ORG_NAME in the stellar.toml at the issuer account's home_domain, when that toml lists the issuer account (issuerOfRecordCheck named). Empty otherwise.
 	 */
 	issuerOfRecord?: string | null;
 	/**
-	 * The toml URL issuerOfRecord was read from
+	 * What the stored check found: named, or not-named (read, and no issuer of record named; the note says why). Empty = never read.
+	 */
+	issuerOfRecordCheck?: ("named" | "not-named") | null;
+	/**
+	 * The toml URL the stored check read, after same-host redirects
 	 */
 	issuerOfRecordSourceUrl?: string | null;
 	/**
-	 * When that toml last named issuerOfRecord
+	 * When the stored check was made; a failed read does not move it
 	 */
 	issuerOfRecordAsOf?: string | null;
 	/**
-	 * The toml's own desc for this currency, quoted, when it names an issuing party other than issuerOfRecord (MGUSD: Bridge)
+	 * Named: the toml's desc for this currency, quoted, when it names another issuing party (MGUSD: Bridge). Not named: why.
 	 */
 	issuerOfRecordNote?: string | null;
 	domain?: string | null;
@@ -3742,6 +3746,7 @@ export interface StablecoinsSelect<T extends boolean = true> {
 	name?: T;
 	company?: T;
 	issuerOfRecord?: T;
+	issuerOfRecordCheck?: T;
 	issuerOfRecordSourceUrl?: T;
 	issuerOfRecordAsOf?: T;
 	issuerOfRecordNote?: T;

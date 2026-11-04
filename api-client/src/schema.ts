@@ -1295,7 +1295,7 @@ export interface components {
                 evidenceUrl?: string;
                 asOf?: string;
                 note?: string | null;
-                /** @description Issuing entity as the RWA registry attributes it; null on hand-curated rows. */
+                /** @description The issuer label the RWA registry carries for the product (getRwaAssets issuerEntity: the rwa.xyz listing's name, a brand, product line or fund as often as a legal entity), not read from the issuer's stellar.toml. Null on hand-curated rows. */
                 issuer?: string | null;
                 /** @description CODE-GISSUER for a classic asset, the contract id for a Soroban token; the product's identity. */
                 assetId?: string | null;
@@ -2393,16 +2393,21 @@ export interface components {
             issuerDomain?: string | null;
             /** @description The brand the asset is marketed under, as this registry curates it (Novatti Group for AUDD, Currency One for C1USD). A display name, NOT the legal issuer: for who issues the asset, read issuerOfRecord. */
             company?: string | null;
-            /** @description The legal issuer as the issuer publishes it: ORG_NAME in the stellar.toml at the issuer account's home_domain (from Horizon), counted only when that toml lists the issuer account, so both sides of the link agree (SEP-1). AUDD: AUDC PTY LTD. Read by the 6-hourly writer, never at request time. Null = not established: not read yet, the account sets no home_domain, its toml could not be read, or the toml does not list the account or name an ORG_NAME. Never derived from company. */
+            /** @description The legal issuer as the issuer publishes it: ORG_NAME in the stellar.toml at the issuer account's home_domain (from Horizon), counted only when that toml lists the account in ACCOUNTS or as a currency issuer, so both sides of the link agree (SEP-1). AUDD: AUDC PTY LTD. Set only when issuerOfRecordCheck is named; read by the 6-hourly writer, never at request time, and never derived from company. Cite it with issuerOfRecordAsOf. */
             issuerOfRecord?: string | null;
-            /** @description The stellar.toml URL issuerOfRecord was read from (https://<home_domain>/.well-known/stellar.toml); re-verify there. Null exactly when issuerOfRecord is null. */
+            /**
+             * @description What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account sets no home_domain, no toml is served there, the toml does not list the account, or it gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made (network, an HTTP error other than not found, a redirect off the home_domain or to http, a body over 100 KB or an HTML page) changes nothing: the stored check and its date stay as they were.
+             * @enum {string|null}
+             */
+            issuerOfRecordCheck?: "named" | "not-named" | null;
+            /** @description The stellar.toml URL the stored check read, after same-host https redirects (https://<home_domain>/.well-known/stellar.toml unless the host moved it); re-verify there. Null when the account sets no home_domain or nothing was read yet. */
             issuerOfRecordSourceUrl?: string | null;
             /**
              * Format: date-time
-             * @description When that toml last named issuerOfRecord. A later read that fails or finds no name keeps the last one, so a date well before updatedAt means the later runs did not confirm it. Null exactly when issuerOfRecord is null.
+             * @description When the stored check was made. A failed read does not move it, so a date well before updatedAt means the latest runs could not reach the toml. Date issuerOfRecord by this, not by updatedAt. Null = never read.
              */
             issuerOfRecordAsOf?: string | null;
-            /** @description Set when that toml's own desc for this currency names an issuing party other than issuerOfRecord: the desc, quoted. MGUSD: 'issued by Bridge on behalf of MoneyGram'. Null otherwise. */
+            /** @description On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named. */
             issuerOfRecordNote?: string | null;
             website?: string | null;
             /** @description Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit, so raw supply is NOT comparable across rows with different pegs; use marketCapUSD. */
@@ -2429,9 +2434,9 @@ export interface components {
             holders?: number | null;
             /** @description 24h transfer volume in USD. */
             volume24hUSD?: number | null;
-            /** @description Count, not a dollar amount, of payment operations in about the last 24h: mint, redemption and peer-to-peer payments undifferentiated, not adjusted for exchange, DeFi or infrastructure activity. Stellar Expert's lifetime payments counter diffed against our own snapshot from about a day back. Null until that history exists, never 0 for no data. */
+            /** @description Count, not a dollar amount, of payment operations over about a day: Stellar Expert's lifetime payments counter diffed against our own snapshot measured 12 to 36 hours earlier (the one nearest 24 hours; we keep one snapshot per UTC day). Mint, redemption and peer-to-peer payments undifferentiated, not adjusted for exchange, DeFi or infrastructure activity. Null when no snapshot falls in that window, never a longer span and never 0 for no data. */
             paymentsCount24h?: number | null;
-            /** @description Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist; never 0 for 'no data'. */
+            /** @description Percent change in supply vs our snapshot measured 6 to 8 days back, the one nearest 7 days (e.g. -5.8 means down 5.8%). Null when no snapshot falls in that window, never a longer span; never 0 for 'no data'. */
             supplyChange7d?: number | null;
             /**
              * @description How THIS row's numbers were obtained. live = measured this cycle. curated-static = hand-checked figures for an asset no public API reports reliably (an as-of estimate, NOT a live measurement; say so when citing). unmeasured = the fetch failed this cycle and the row is retained deliberately so its absence is never read as a delisting; its metrics are the last known values, dated by updatedAt.
@@ -7484,7 +7489,7 @@ export interface operations {
                             kind?: "classic" | "soroban";
                             name?: string;
                             symbol?: string;
-                            /** @description The issuer as the rwa.xyz listing a row came from names it (the tracked issuer, on a row a tracked issuer's toml declares): a label that can be a brand, a product line or a fund ('Ondo USDY', 'Circle International'), not read from the issuer's stellar.toml and not necessarily the legal entity. Null = the listing names no issuer. For the issuer's own statement, read the toml at evidenceUrl where the row cites one. */
+                            /** @description The issuer label rwa.xyz gives the row: a brand, product line or fund as often as a legal entity ('Ondo USDY', 'Circle International'), not read from the issuer's stellar.toml. A row rwa.xyz does not list (rwaxyzListed false) carries the label of that issuer's listed rows (FOCGX carries BENJI's 'Franklin Templeton Trust'), or null when it has none. For the issuer's own statement, read the toml at evidenceUrl where the row cites one. */
                             issuerEntity?: string | null;
                             /** @description Directory project this row joins onto (feeds its `products`); null = the issuer has no project row. */
                             projectSlug?: string | null;

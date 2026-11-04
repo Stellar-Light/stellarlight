@@ -1,9 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { STABLECOIN_REGISTRY } from "@/data/stablecoin-registry";
 import {
 	carryIssuerOfRecord,
 	issuerOfRecordFromToml,
+	issuerOfRecordPatch,
+	issuerOfRecordWriteOn,
+	nearestSnapshot,
 	orgLogoFromToml,
+	readIssuerOfRecord,
+	readIssuerToml,
 } from "../stablecoin-pipeline";
 
 describe("orgLogoFromToml", () => {
@@ -201,45 +206,385 @@ desc="Example's dollar, issued by Other Mint (Pty) Ltd, and operated by Example 
 			miss: "the toml declares no ORG_NAME",
 		});
 	});
+
+	it("an account listed only in ACCOUNTS is listed", () => {
+		const toml = `ACCOUNTS = [\n  "${MGUSD}",\n]\n[DOCUMENTATION]\nORG_NAME="MoneyGram Payment Systems, Inc."\n`;
+		expect(issuerOfRecordFromToml(toml, "MGUSD", MGUSD)).toEqual({
+			name: "MoneyGram Payment Systems, Inc.",
+			note: null,
+		});
+	});
+
+	it("an address that appears only in a comment is not listed", () => {
+		const toml = `# old issuer, retired: "${AUDD}"
+ACCOUNTS = [
+# "${AUDD}",
+"${MGUSD}"
+]
+[DOCUMENTATION]
+ORG_NAME="AUDC PTY LTD"
+[[CURRENCIES]]
+code="AUDD"
+# issuer="${AUDD}"
+`;
+		expect(issuerOfRecordFromToml(toml, "AUDD", AUDD)).toEqual({
+			miss: "the toml does not list the issuer account",
+		});
+	});
+
+	it("the note comes only from a block whose issuer is the account, never a code-only block", () => {
+		const toml = `[DOCUMENTATION]
+ORG_NAME="MoneyGram Payment Systems, Inc."
+[[CURRENCIES]]
+code="MGUSD"
+desc="MGUSD, issued by Decoy Mint Corp"
+[[CURRENCIES]]
+code="MGUSD"
+issuer="${MGUSD}"
+desc="USD-backed stablecoin issued by Bridge on behalf of MoneyGram"
+`;
+		expect(issuerOfRecordFromToml(toml, "MGUSD", MGUSD)).toEqual({
+			name: "MoneyGram Payment Systems, Inc.",
+			note: 'stellar.toml desc for MGUSD: "USD-backed stablecoin issued by Bridge on behalf of MoneyGram"',
+		});
+	});
 });
 
-describe("carryIssuerOfRecord: one read, kept whole, never from company", () => {
-	const NONE = {
-		issuerOfRecord: null,
-		issuerOfRecordSourceUrl: null,
-		issuerOfRecordAsOf: null,
-		issuerOfRecordNote: null,
-	};
+/**
+ * Review 2026-11-04: the first carry kept the stored name whenever a run read
+ * nothing, so "the toml no longer lists the account" and "the read failed"
+ * were one path and a name could stay forever. Three outcomes now, each with
+ * its own write.
+ */
+describe("carryIssuerOfRecord: named, not named, or could not read", () => {
 	const OLD = {
 		issuerOfRecord: "MoneyGram Payment Systems, Inc.",
+		issuerOfRecordCheck: "named",
 		issuerOfRecordSourceUrl:
 			"https://mgusd.moneygram.com/.well-known/stellar.toml",
 		issuerOfRecordAsOf: "2026-11-05T00:25:00.000Z",
 		issuerOfRecordNote:
 			'stellar.toml desc for MGUSD: "USD-backed stablecoin issued by Bridge on behalf of MoneyGram"',
 	};
-	const FRESH = {
-		...OLD,
-		issuerOfRecordAsOf: "2026-11-05T06:25:00.000Z",
-		issuerOfRecordNote: null,
-	};
+	const AT = "2026-11-05T06:25:00.000Z";
 
-	it("a fresh read replaces the stored one, all four fields from that read", () => {
+	it("named: the new read replaces the stored one, with its own date", () => {
 		expect(
-			carryIssuerOfRecord(FRESH, { company: "MoneyGram", ...OLD }),
-		).toEqual(FRESH);
+			carryIssuerOfRecord(
+				{
+					outcome: "named",
+					at: AT,
+					sourceUrl: OLD.issuerOfRecordSourceUrl,
+					name: "MoneyGram Payment Systems, Inc.",
+					note: null,
+				},
+				{ company: "MoneyGram", ...OLD },
+			),
+		).toEqual({
+			...OLD,
+			issuerOfRecordAsOf: AT,
+			issuerOfRecordNote: null,
+		});
 	});
 
-	it("a run that read nothing keeps the stored read whole, dated by its own asOf", () => {
-		expect(carryIssuerOfRecord(NONE, { company: "MoneyGram", ...OLD })).toEqual(
-			OLD,
-		);
+	it("not named: a checked absence clears the stored name and is dated, never keeps it", () => {
+		expect(
+			carryIssuerOfRecord(
+				{
+					outcome: "not-named",
+					at: AT,
+					sourceUrl: OLD.issuerOfRecordSourceUrl,
+					why: "the toml does not list the issuer account",
+				},
+				{ company: "MoneyGram", ...OLD },
+			),
+		).toEqual({
+			issuerOfRecord: null,
+			issuerOfRecordCheck: "not-named",
+			issuerOfRecordSourceUrl: OLD.issuerOfRecordSourceUrl,
+			issuerOfRecordAsOf: AT,
+			issuerOfRecordNote: "the toml does not list the issuer account",
+		});
 	});
 
-	it("nothing read and nothing stored stays null: never a guess from company", () => {
-		expect(carryIssuerOfRecord(NONE, { company: "Novatti Group" })).toEqual(
-			NONE,
-		);
-		expect(carryIssuerOfRecord(NONE, undefined)).toEqual(NONE);
+	it("could not read: the stored check stays whole, its date unchanged", () => {
+		expect(
+			carryIssuerOfRecord(
+				{ outcome: "could-not-read", why: "HTTP 503" },
+				{ company: "MoneyGram", ...OLD },
+			),
+		).toEqual(OLD);
+	});
+
+	it("could not read with nothing stored stays null: never a guess from company", () => {
+		const NONE = {
+			issuerOfRecord: null,
+			issuerOfRecordCheck: null,
+			issuerOfRecordSourceUrl: null,
+			issuerOfRecordAsOf: null,
+			issuerOfRecordNote: null,
+		};
+		expect(
+			carryIssuerOfRecord(
+				{ outcome: "could-not-read", why: "HTTP 503" },
+				{ company: "Novatti Group" },
+			),
+		).toEqual(NONE);
+		expect(
+			carryIssuerOfRecord({ outcome: "could-not-read", why: "x" }, undefined),
+		).toEqual(NONE);
+	});
+});
+
+describe("issuerOfRecordPatch: the write is off unless the owner turns it on", () => {
+	const read = {
+		outcome: "named" as const,
+		at: "2026-11-05T06:25:00.000Z",
+		sourceUrl: "https://audd.digital/.well-known/stellar.toml",
+		name: "AUDC PTY LTD",
+		note: null,
+	};
+	it("off: no issuer-of-record key at all, so the stored fields are left alone", () => {
+		expect(issuerOfRecordPatch(read, null, false)).toEqual({});
+	});
+	it("on: the carried fields", () => {
+		expect(issuerOfRecordPatch(read, null, true)).toMatchObject({
+			issuerOfRecord: "AUDC PTY LTD",
+			issuerOfRecordCheck: "named",
+		});
+	});
+	it("the switch reads exactly STABLECOIN_ISSUER_OF_RECORD_WRITE=on", () => {
+		expect(issuerOfRecordWriteOn({})).toBe(false);
+		expect(
+			issuerOfRecordWriteOn({ STABLECOIN_ISSUER_OF_RECORD_WRITE: "" }),
+		).toBe(false);
+		expect(
+			issuerOfRecordWriteOn({ STABLECOIN_ISSUER_OF_RECORD_WRITE: "true" }),
+		).toBe(false);
+		expect(
+			issuerOfRecordWriteOn({ STABLECOIN_ISSUER_OF_RECORD_WRITE: "on" }),
+		).toBe(true);
+	});
+});
+
+/** A stubbed network: each URL answers with its own Response; any other URL
+ *  is a test failure, so a refused redirect target is proven never fetched. */
+function stubFetch(routes: Record<string, () => Response>) {
+	const calls: string[] = [];
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async (input: string | URL) => {
+			const url = String(input);
+			calls.push(url);
+			const route = routes[url];
+			if (!route) throw new Error(`unexpected fetch ${url}`);
+			return route();
+		}),
+	);
+	return calls;
+}
+
+describe("readIssuerToml: strict, because it becomes a legal fact", () => {
+	afterEach(() => vi.unstubAllGlobals());
+	const TOML = 'ACCOUNTS=["GABC"]\n[DOCUMENTATION]\nORG_NAME="X Ltd"\n';
+
+	it("reads the home_domain's toml and records the URL it read", async () => {
+		stubFetch({
+			"https://r1.example/.well-known/stellar.toml": () => new Response(TOML),
+		});
+		expect(await readIssuerToml("r1.example")).toEqual({
+			kind: "read",
+			url: "https://r1.example/.well-known/stellar.toml",
+			text: TOML,
+		});
+	});
+
+	it("follows a same-host https redirect and records the final URL", async () => {
+		stubFetch({
+			"https://r2.example/.well-known/stellar.toml": () =>
+				new Response(null, {
+					status: 301,
+					headers: { location: "/stellar.toml" },
+				}),
+			"https://r2.example/stellar.toml": () => new Response(TOML),
+		});
+		expect(await readIssuerToml("r2.example")).toMatchObject({
+			kind: "read",
+			url: "https://r2.example/stellar.toml",
+		});
+	});
+
+	it("refuses a redirect to another host and never fetches it", async () => {
+		const calls = stubFetch({
+			"https://r3.example/.well-known/stellar.toml": () =>
+				new Response(null, {
+					status: 302,
+					headers: {
+						location: "https://elsewhere.example/.well-known/stellar.toml",
+					},
+				}),
+		});
+		const r = await readIssuerToml("r3.example");
+		expect(r.kind).toBe("failed");
+		expect(calls).toEqual(["https://r3.example/.well-known/stellar.toml"]);
+	});
+
+	it("refuses a redirect down to http on the same host", async () => {
+		const calls = stubFetch({
+			"https://r4.example/.well-known/stellar.toml": () =>
+				new Response(null, {
+					status: 301,
+					headers: { location: "http://r4.example/.well-known/stellar.toml" },
+				}),
+		});
+		expect((await readIssuerToml("r4.example")).kind).toBe("failed");
+		expect(calls).toHaveLength(1);
+	});
+
+	it("a 404 is a checked absence; a 403 is a failed read", async () => {
+		stubFetch({
+			"https://r5.example/.well-known/stellar.toml": () =>
+				new Response("nope", { status: 404 }),
+			"https://r6.example/.well-known/stellar.toml": () =>
+				new Response("denied", { status: 403 }),
+		});
+		expect(await readIssuerToml("r5.example")).toEqual({
+			kind: "absent",
+			url: "https://r5.example/.well-known/stellar.toml",
+		});
+		expect(await readIssuerToml("r6.example")).toMatchObject({
+			kind: "failed",
+		});
+	});
+
+	it("a body over 100 KB is not read", async () => {
+		stubFetch({
+			"https://r7.example/.well-known/stellar.toml": () =>
+				new Response("#".repeat(100 * 1024 + 1)),
+		});
+		const r = await readIssuerToml("r7.example");
+		expect(r.kind).toBe("failed");
+		expect(r.kind === "failed" && r.why).toContain("100 KB");
+	});
+
+	it("an HTML page at the toml path is a failed read, not a toml", async () => {
+		stubFetch({
+			"https://r8.example/.well-known/stellar.toml": () =>
+				new Response("<!doctype html><title>Just a moment</title>"),
+		});
+		expect((await readIssuerToml("r8.example")).kind).toBe("failed");
+	});
+});
+
+describe("readIssuerOfRecord: the three outcomes, end to end", () => {
+	afterEach(() => vi.unstubAllGlobals());
+	const ISSUER = "GDC7X2MXTYSAKUUGAIQ7J7RPEIM7GXSAIWFYWWH4GLNFECQVJJLB2EEU";
+	const account = (home?: string) => () =>
+		new Response(JSON.stringify(home ? { home_domain: home } : {}), {
+			headers: { "content-type": "application/json" },
+		});
+	const HORIZON = `https://horizon.stellar.org/accounts/${ISSUER}`;
+	const asset = { code: "AUDD", issuer: ISSUER };
+
+	it("named: the toml at the account's home_domain lists it", async () => {
+		stubFetch({
+			[HORIZON]: account("n1.example"),
+			"https://n1.example/.well-known/stellar.toml": () =>
+				new Response(
+					`ACCOUNTS=["${ISSUER}"]\n[DOCUMENTATION]\nORG_NAME="AUDC PTY LTD"\n`,
+				),
+		});
+		expect(await readIssuerOfRecord(asset)).toMatchObject({
+			outcome: "named",
+			name: "AUDC PTY LTD",
+			sourceUrl: "https://n1.example/.well-known/stellar.toml",
+			note: null,
+		});
+	});
+
+	it("not named: the account sets no home_domain", async () => {
+		stubFetch({ [HORIZON]: account() });
+		expect(await readIssuerOfRecord(asset)).toMatchObject({
+			outcome: "not-named",
+			sourceUrl: null,
+			why: "the issuer account sets no home_domain",
+		});
+	});
+
+	it("not named: the toml was read and does not list the account", async () => {
+		stubFetch({
+			[HORIZON]: account("n2.example"),
+			"https://n2.example/.well-known/stellar.toml": () =>
+				new Response('[DOCUMENTATION]\nORG_NAME="Someone Else Inc."\n'),
+		});
+		expect(await readIssuerOfRecord(asset)).toMatchObject({
+			outcome: "not-named",
+			sourceUrl: "https://n2.example/.well-known/stellar.toml",
+			why: "the toml does not list the issuer account",
+		});
+	});
+
+	it("could not read: the toml host answered 503", async () => {
+		stubFetch({
+			[HORIZON]: account("n3.example"),
+			"https://n3.example/.well-known/stellar.toml": () =>
+				new Response("busy", { status: 503 }),
+		});
+		const r = await readIssuerOfRecord(asset);
+		expect(r.outcome).toBe("could-not-read");
+	});
+});
+
+/**
+ * Review 2026-11-04: paymentsCount24h took the newest snapshot at or before a
+ * day back with no lower bound, so a gap in the series turned a lifetime of
+ * payments into a "24h" figure. supplyChange7d had the same unbounded
+ * lookback. A baseline now has to fall inside a stated window.
+ */
+describe("nearestSnapshot: a baseline only from inside its window", () => {
+	const H = 3600e3;
+	const now = Date.parse("2026-11-05T00:25:00.000Z");
+	const snap = (hoursAgo: number, v: number) => ({
+		measuredAt: new Date(now - hoursAgo * H).toISOString(),
+		paymentsCountLifetime: v,
+	});
+
+	it("24h: a 10-day-old snapshot is no baseline (it would count ten days)", () => {
+		expect(nearestSnapshot([snap(240, 1)], now - 24 * H, 12 * H)).toBeNull();
+	});
+
+	it("24h: a 6-hour-old snapshot is too recent; one from 30 hours back is used", () => {
+		expect(
+			nearestSnapshot([snap(6, 1), snap(30, 2)], now - 24 * H, 12 * H),
+		).toEqual(snap(30, 2));
+	});
+
+	it("24h: the snapshot nearest a day back wins", () => {
+		expect(
+			nearestSnapshot(
+				[snap(30, 2), snap(24, 3), snap(14, 4)],
+				now - 24 * H,
+				12 * H,
+			),
+		).toEqual(snap(24, 3));
+	});
+
+	it("7d: a 30-day-old snapshot is no baseline; one about a week back is", () => {
+		expect(
+			nearestSnapshot([snap(24 * 30, 1)], now - 7 * 24 * H, 24 * H),
+		).toBeNull();
+		expect(
+			nearestSnapshot([snap(24 * 7 + 6, 5)], now - 7 * 24 * H, 24 * H),
+		).toEqual(snap(24 * 7 + 6, 5));
+	});
+
+	it("a snapshot with no readable date is skipped, never treated as in range", () => {
+		expect(
+			nearestSnapshot(
+				[{ measuredAt: "not a date", paymentsCountLifetime: 9 }],
+				now - 24 * H,
+				12 * H,
+			),
+		).toBeNull();
 	});
 });

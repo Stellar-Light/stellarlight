@@ -37,14 +37,24 @@ import { getPayload } from "payload";
 import { STABLECOIN_REGISTRY } from "../src/data/stablecoin-registry";
 import {
 	carryIssuerOfRecord,
+	type IssuerOfRecordFields,
+	type IssuerOfRecordRead,
+	issuerOfRecordPatch,
+	issuerOfRecordWriteOn,
 	type MeasuredStablecoin,
 	measureRegistry,
+	nearestSnapshot,
 	RATE_LIMIT_MARK,
 } from "../src/lib/stablecoin-pipeline";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
+// The issuer of record reaches production only once the owner turns it on
+// (repository variable STABLECOIN_ISSUER_OF_RECORD_WRITE=on, passed by the
+// workflow) after reading a dry run's planned values. Off, every run still
+// reads and prints them, and writes none.
+const WRITE_ISSUER_OF_RECORD = issuerOfRecordWriteOn(process.env);
 const utcDay = (d: Date) => d.toISOString().slice(0, 10);
 
 // ponytail: flat heuristic, not derived from anything — revisit if the
@@ -52,15 +62,15 @@ const utcDay = (d: Date) => d.toISOString().slice(0, 10);
 // genuinely-transient 429s becomes the expected steady state.
 const RATE_LIMIT_EXIT_THRESHOLD = 3;
 
-/** Percent change vs the closest snapshot ~7 days back. Null unless both exist. */
+/** Percent change vs the snapshot 6 to 8 days back. Null unless both exist. */
 function pctChange(now: number | null, then: number | null): number | null {
 	if (now == null || then == null || then === 0) return null;
 	return Number((((now - then) / then) * 100).toFixed(2));
 }
 
-/** Raw count delta vs the closest snapshot ~1 day back. Null unless both
- *  exist, and null (never negative) if the counter went backwards — that's
- *  an upstream rebase/correction, not a real count of payments. */
+/** Raw count delta vs the snapshot 12 to 36 hours back. Null unless both
+ *  exist, and null (never negative) if the counter went backwards: that is
+ *  an upstream rebase or correction, not a real count of payments. */
 function countDelta(now: number | null, then: number | null): number | null {
 	if (now == null || then == null) return null;
 	const delta = now - then;
@@ -73,29 +83,53 @@ async function main() {
 	);
 	const payload = await getPayload({ config: await configPromise });
 
-	/** Closest stablecoin-snapshots row at or before `cutoff` for one asset, or
-	 *  undefined if the series doesn't reach back that far yet (fresh install
-	 *  or a gap). Shared by the 7-day supply-change and ~24h payments-count
-	 *  deltas below — same query shape, different lookback. */
-	async function snapshotOnOrBefore(assetId: string, cutoff: Date) {
+	/** The stablecoin-snapshots row for one asset measured nearest
+	 *  `targetMs`, within `slackMs` of it, or undefined. A period metric's
+	 *  baseline must come from that period: the newest row at or before a
+	 *  cutoff, with no lower bound, turned a gap in the series into a
+	 *  lifetime of payments labelled 24h (review, 2026-11-04). Shared by the
+	 *  7-day supply change and the 24h payments count below. */
+	async function snapshotNear(
+		assetId: string,
+		targetMs: number,
+		slackMs: number,
+	) {
 		try {
-			const prior = await payload.find({
+			const near = await payload.find({
 				collection: "stablecoin-snapshots",
 				where: {
 					and: [
 						{ assetId: { equals: assetId } },
-						{ day: { less_than_equal: utcDay(cutoff) } },
+						{
+							measuredAt: {
+								greater_than_equal: new Date(targetMs - slackMs).toISOString(),
+							},
+						},
+						{
+							measuredAt: {
+								less_than_equal: new Date(targetMs + slackMs).toISOString(),
+							},
+						},
 					],
 				},
-				sort: "-day",
-				limit: 1,
+				// One row per asset per UTC day, so a window of two days holds at
+				// most three: this limit cannot cut the set.
+				limit: 10,
 				depth: 0,
 			});
-			return prior.docs[0] as
-				| { supply?: number; paymentsCountLifetime?: number }
-				| undefined;
+			return (
+				nearestSnapshot(
+					near.docs as Array<{
+						measuredAt?: string;
+						supply?: number;
+						paymentsCountLifetime?: number;
+					}>,
+					targetMs,
+					slackMs,
+				) ?? undefined
+			);
 		} catch {
-			// No series yet on a fresh install — treated as "no prior snapshot".
+			// No series yet on a fresh install: treated as "no prior snapshot".
 			return undefined;
 		}
 	}
@@ -113,6 +147,8 @@ async function main() {
 	// so they share a map), snapshots on `${assetId}:${day}`. Only a write that
 	// resolved is recorded — a throw is counted in `failed`, red on its own.
 	const sentRows = new Map<string, Record<string, unknown>>();
+	// The issuer-of-record block of the summary, one line per row.
+	const issuerLines: string[] = [];
 	const sentSnaps = new Map<string, Record<string, unknown>>();
 	const attempt = async (label: string, fn: () => Promise<void>) => {
 		try {
@@ -124,20 +160,18 @@ async function main() {
 	};
 
 	for (const m of measured) {
-		// ── 7-day supply change, and ~24h payments-count change, from our own series ──
-		const weekAgoSnap = await snapshotOnOrBefore(
-			m.id,
-			new Date(Date.now() - 7 * 864e5),
-		);
+		// ── 7-day supply change, and 24h payments count, from our own series ──
+		const at = Date.parse(m.measuredAt);
+		// 6 to 8 days back, the one nearest 7.
+		const weekAgoSnap = await snapshotNear(m.id, at - 7 * 864e5, 864e5);
 		const change7d = pctChange(m.supply, weekAgoSnap?.supply ?? null);
 
-		const yesterdaySnap = await snapshotOnOrBefore(
-			m.id,
-			new Date(Date.now() - 1 * 864e5),
-		);
+		// 12 to 36 hours back, the one nearest 24 (four runs a day against one
+		// snapshot per UTC day: the span is about a day, never a lifetime).
+		const dayAgoSnap = await snapshotNear(m.id, at - 864e5, 864e5 / 2);
 		const paymentsCount24h = countDelta(
 			m.paymentsCountLifetime,
-			yesterdaySnap?.paymentsCountLifetime ?? null,
+			dayAgoSnap?.paymentsCountLifetime ?? null,
 		);
 
 		const existing = await payload.find({
@@ -167,9 +201,13 @@ async function main() {
 			issuer: m.issuer,
 			name: m.name,
 			company: m.company,
-			// The issuer of record (the ORG_NAME the issuer's own toml names),
-			// one read kept whole: a run that did not read one keeps the last.
-			...carryIssuerOfRecord(m, prev),
+			// The issuer of record: none of its keys while the write switch is
+			// off, so the stored fields stay exactly as they are.
+			...issuerOfRecordPatch(
+				m.issuerOfRecordRead,
+				prev,
+				WRITE_ISSUER_OF_RECORD,
+			),
 			domain: m.domain,
 			website: m.website,
 			peg: m.peg,
@@ -203,6 +241,9 @@ async function main() {
 			keptRows++;
 			kept7(m, problems);
 		}
+		issuerLines.push(
+			issuerLine(m, carryIssuerOfRecord(m.issuerOfRecordRead, prev)),
+		);
 
 		if (m.basis !== "live")
 			problems.push(`${m.id}: ${m.basis} — ${m.note ?? ""}`);
@@ -324,20 +365,25 @@ async function main() {
 			noLogo.length ? ` · none: ${noLogo.join(", ")}` : ""
 		}`,
 	);
-	// Issuer of record per row, beside the brand it can differ from. A row
-	// that did not read one says why; its stored read (if any) is kept.
-	const readRecord = measured.filter((m) => m.issuerOfRecord).length;
-	console.log(
-		`\nissuer of record: read ${readRecord}/${measured.length} from the stellar.toml at the issuer account's home_domain`,
-	);
+	// Issuer of record per row, beside the brand it can differ from: what
+	// this run read and what the row would store. The owner reads this block
+	// in a dry run before turning the write on.
+	const outcomes = new Map<IssuerOfRecordRead["outcome"], number>();
 	for (const m of measured)
-		console.log(
-			`  · ${m.id}: brand ${m.company}; ${
-				m.issuerOfRecord
-					? `issuer of record ${m.issuerOfRecord} (${m.issuerOfRecordSourceUrl})`
-					: `not read: ${m.issuerOfRecordMiss}`
-			}${m.issuerOfRecordNote ? `; note ${m.issuerOfRecordNote}` : ""}`,
+		outcomes.set(
+			m.issuerOfRecordRead.outcome,
+			(outcomes.get(m.issuerOfRecordRead.outcome) ?? 0) + 1,
 		);
+	console.log(
+		`\nissuer of record (${
+			WRITE_ISSUER_OF_RECORD
+				? EXECUTE
+					? "written"
+					: "write on; dry run, nothing written"
+				: "planned only: STABLECOIN_ISSUER_OF_RECORD_WRITE is not on, nothing written"
+		}): named ${outcomes.get("named") ?? 0} · not named ${outcomes.get("not-named") ?? 0} · could not read ${outcomes.get("could-not-read") ?? 0}`,
+	);
+	for (const line of issuerLines) console.log(line);
 	if (problems.length) {
 		console.log("\nrows needing attention:");
 		for (const p of problems) console.log(`  · ${p}`);
@@ -458,6 +504,23 @@ async function main() {
 		);
 		process.exitCode = 1;
 	}
+}
+
+/** One summary line: the brand, this run's read, and what the row would
+ *  store from it (a failed read stores the previous check, unchanged). */
+function issuerLine(m: MeasuredStablecoin, stored: IssuerOfRecordFields) {
+	const r = m.issuerOfRecordRead;
+	const read =
+		r.outcome === "named"
+			? `named ${r.name} (${r.sourceUrl})${r.note ? `; note ${r.note}` : ""}`
+			: r.outcome === "not-named"
+				? `not named: ${r.why}${r.sourceUrl ? ` (${r.sourceUrl})` : ""}`
+				: `could not read: ${r.why}; keeps ${
+						stored.issuerOfRecordCheck
+							? `the ${stored.issuerOfRecordCheck} check of ${stored.issuerOfRecordAsOf}${stored.issuerOfRecord ? ` (${stored.issuerOfRecord})` : ""}`
+							: "nothing (never read)"
+					}`;
+	return `  · ${m.id}: brand ${m.company}; ${read}`;
 }
 
 /** Note when a row kept a previous value because this run couldn't measure it. */

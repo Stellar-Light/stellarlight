@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { PRICE_BASES } from "@/lib/stablecoins";
+import { ISSUER_OF_RECORD_CHECKS, PRICE_BASES } from "@/lib/stablecoins";
 import { adminOnly } from "./access";
 
 /**
@@ -68,33 +68,49 @@ export const Stablecoins: CollectionConfig = {
 					"The brand the asset is marketed under (Novatti Group for AUDD). Not the legal issuer: see issuerOfRecord.",
 			},
 		},
-		// The issuer of record: one read of the stellar.toml at the issuer
-		// account's home_domain, written by refresh-stablecoins.ts and kept
-		// whole until a later read replaces it. Never filled from `company`.
+		// The issuer of record: the latest check of the stellar.toml at the
+		// issuer account's home_domain, written by refresh-stablecoins.ts only
+		// while STABLECOIN_ISSUER_OF_RECORD_WRITE is on. A read that could not
+		// be made leaves the stored check as it was. Never filled from `company`.
 		{
 			name: "issuerOfRecord",
 			type: "text",
 			admin: {
 				description:
-					"ORG_NAME in the stellar.toml at the issuer account's home_domain, read only when that toml lists the issuer account. Empty = not established.",
+					"ORG_NAME in the stellar.toml at the issuer account's home_domain, when that toml lists the issuer account (issuerOfRecordCheck named). Empty otherwise.",
+			},
+		},
+		{
+			name: "issuerOfRecordCheck",
+			type: "select",
+			options: [...ISSUER_OF_RECORD_CHECKS],
+			admin: {
+				description:
+					"What the stored check found: named, or not-named (read, and no issuer of record named; the note says why). Empty = never read.",
 			},
 		},
 		{
 			name: "issuerOfRecordSourceUrl",
 			type: "text",
-			admin: { description: "The toml URL issuerOfRecord was read from" },
+			admin: {
+				description:
+					"The toml URL the stored check read, after same-host redirects",
+			},
 		},
 		{
 			name: "issuerOfRecordAsOf",
 			type: "date",
-			admin: { description: "When that toml last named issuerOfRecord" },
+			admin: {
+				description:
+					"When the stored check was made; a failed read does not move it",
+			},
 		},
 		{
 			name: "issuerOfRecordNote",
 			type: "text",
 			admin: {
 				description:
-					"The toml's own desc for this currency, quoted, when it names an issuing party other than issuerOfRecord (MGUSD: Bridge)",
+					"Named: the toml's desc for this currency, quoted, when it names another issuing party (MGUSD: Bridge). Not named: why.",
 			},
 		},
 		{ name: "domain", type: "text" },

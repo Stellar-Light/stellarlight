@@ -19,7 +19,7 @@
  * Pure module — the route supplies rows; everything here is unit-testable.
  */
 import { factConfidence } from "./fact-confidence";
-import { namedIssuingParty, sameParty } from "./stablecoins";
+import { namedIssuingParty, partyWords, sameParty } from "./stablecoins";
 import { statusChecksFor } from "./status-checks";
 
 export type ClaimType = "audited" | "live" | "maintained" | "issued";
@@ -447,10 +447,22 @@ export interface StablecoinIssuerRow {
 	/** getStablecoins' issuer-of-record fields: the ORG_NAME the issuer's own
 	 *  stellar.toml names, that toml's URL, the read date and the desc note. */
 	issuerOfRecord?: string | null;
+	issuerOfRecordCheck?: string | null;
 	issuerOfRecordSourceUrl?: string | null;
 	issuerOfRecordAsOf?: string | null;
 	issuerOfRecordNote?: string | null;
 }
+
+/** Words too common in company names to tie two names together. */
+const GENERIC_NAME_WORDS = new Set([
+	"and",
+	"global",
+	"group",
+	"holding",
+	"holdings",
+	"international",
+	"of",
+]);
 
 /** "is <ticker> issued by <company>" — answered from the curated stablecoin
  * registry. The conflation this exists to stop: "Circle issues USDC and
@@ -462,9 +474,13 @@ export interface StablecoinIssuerRow {
  *
  * A claim matches a row on its brand (`company`), on the issuer of record its
  * own stellar.toml names, or on the party that toml's desc says issues it
- * (MGUSD: Bridge, on behalf of MoneyGram). Matching the brand alone
- * contradicted the issuer of record itself (sls-107: "is AUDD issued by AUDC
- * PTY LTD" came back contradicted). */
+ * (MGUSD: Bridge, on behalf of MoneyGram), and only on a whole name (a bare
+ * "Ltd" or a fragment never matches). Matching the brand alone contradicted
+ * the issuer of record itself (sls-107: "is AUDD issued by AUDC PTY LTD"
+ * came back contradicted). So a contradiction now needs every row of the
+ * ticker to have an issuer of record its toml named; a brand alone, or a
+ * claim that shares a word with a name on record without being it, is
+ * unsupported. */
 export function issuedVerdict(o: {
 	ticker: string;
 	company: string;
@@ -474,18 +490,28 @@ export function issuedVerdict(o: {
 	const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9]/g, "");
 	const t = norm(o.ticker);
 	const tickerRows = o.rows.filter((r) => norm(String(r.ticker ?? "")) === t);
-	// What the issuer's own toml says, with where and when it was read. The
+	const named = (r: StablecoinIssuerRow) =>
+		r.issuerOfRecordCheck === "named" && !!r.issuerOfRecord;
+	const day = (v: unknown) =>
+		v ? String(v).slice(0, 10) : "an unrecorded date";
+	// What the issuer's own toml said, with where and when it was read. The
 	// curated issuerDomain is not named: it is not always the account's
 	// home_domain, and the toml URL is the source.
 	const record = (r: StablecoinIssuerRow) =>
-		r.issuerOfRecord
-			? `issuer of record ${r.issuerOfRecord} (ORG_NAME in ${r.issuerOfRecordSourceUrl ?? "its stellar.toml"}${r.issuerOfRecordAsOf ? `, read ${String(r.issuerOfRecordAsOf).slice(0, 10)}` : ""})${r.issuerOfRecordNote ? `; ${r.issuerOfRecordNote}` : ""}`
-			: "issuer of record not established from its stellar.toml";
+		named(r)
+			? `issuer of record ${r.issuerOfRecord} (ORG_NAME in ${r.issuerOfRecordSourceUrl ?? "its stellar.toml"}, read ${day(r.issuerOfRecordAsOf)})${r.issuerOfRecordNote ? `; ${r.issuerOfRecordNote}` : ""}`
+			: r.issuerOfRecordCheck === "not-named"
+				? `no issuer of record named by its stellar.toml (checked ${day(r.issuerOfRecordAsOf)}: ${r.issuerOfRecordNote ?? "no reason recorded"})`
+				: "issuer of record not read from its stellar.toml yet";
+	// Dated by the toml check where there was one, not by the row's
+	// measurement time: the brand is curated, the issuer of record is read.
+	const dated = (r: StablecoinIssuerRow) =>
+		r.issuerOfRecordAsOf ?? r.updatedAt ?? null;
 	const ev = (r: StablecoinIssuerRow): EvidenceItem => ({
 		kind: "curated-note",
 		note: `${String(r.ticker ?? "").toUpperCase()} brand ${r.company ?? "unknown"}; ${record(r)}; issuer account ${r.issuer ?? "?"}`,
 		source: `https://stellarlight.xyz/api/stablecoins`,
-		asOf: r.updatedAt ?? null,
+		asOf: dated(r),
 	});
 	if (!tickerRows.length)
 		return {
@@ -497,8 +523,8 @@ export function issuedVerdict(o: {
 	const names = (r: StablecoinIssuerRow) =>
 		[
 			r.company,
-			r.issuerOfRecord,
-			namedIssuingParty(r.issuerOfRecordNote),
+			named(r) ? r.issuerOfRecord : null,
+			named(r) ? namedIssuingParty(r.issuerOfRecordNote) : null,
 		].filter((n): n is string => !!n);
 	const match = tickerRows.filter((r) =>
 		names(r).some((n) => sameParty(n, o.company)),
@@ -514,32 +540,47 @@ export function issuedVerdict(o: {
 			verdict: "supported",
 			statement:
 				`${o.company} issues ${o.ticker.toUpperCase()} on Stellar (issuer account on record).` +
-				(match[0].issuerOfRecord ? ` The ${record(match[0])}.` : "") +
+				(named(match[0]) ? ` The ${record(match[0])}.` : "") +
 				(multi
 					? ` NOTE: ${o.ticker.toUpperCase()} is also issued by ${others.filter((c) => !match.some((m) => m.company === c)).join(", ")}; attribute by issuer account, never by ticker alone.`
 					: ""),
 			evidence: tickerRows.map(ev),
-			confidence: factConfidence("human-verified", match[0].updatedAt ?? null),
+			confidence: factConfidence("human-verified", dated(match[0])),
 			...(multi ? { auditorsOnRecord: others } : {}),
 		};
 	}
+	const onRecord = [
+		...new Set(
+			tickerRows.map(
+				(r) =>
+					`${r.company ?? "an unnamed brand"}${named(r) ? ` (brand; issuer of record ${r.issuerOfRecord} per its stellar.toml)` : ""}`,
+			),
+		),
+	].join(", ");
+	// "Novatti" for the brand "Novatti Group": the same word, not the same
+	// name, so neither a match nor a contradiction.
+	const claimWords = new Set(
+		partyWords(o.company).filter(
+			(w) => w.length > 1 && !GENERIC_NAME_WORDS.has(w),
+		),
+	);
+	const sharesAWord = tickerRows.some((r) =>
+		names(r).some((n) => partyWords(n).some((w) => claimWords.has(w))),
+	);
+	if (sharesAWord || !tickerRows.every(named))
+		return {
+			verdict: "unsupported",
+			statement: sharesAWord
+				? `Our registry records ${o.ticker.toUpperCase()} as issued by ${onRecord}. ${o.company} shares a word with a name on record but is not that name, so this is neither supported nor contradicted; attribute by issuer account.`
+				: `Our registry records ${o.ticker.toUpperCase()} under the brand ${onRecord}, and no issuer of record named by the asset's own stellar.toml is on file for every issuer account, so a claim that ${o.company} issues it is neither supported nor contradicted. A brand alone does not settle who legally issues an asset.`,
+			evidence: tickerRows.map(ev),
+			confidence: null,
+		};
 	return {
 		verdict: "contradicted",
-		statement: `Our registry records ${o.ticker.toUpperCase()} issued by ${[
-			...new Set(
-				tickerRows.map(
-					(r) =>
-						`${r.company ?? "an unnamed brand"}${r.issuerOfRecord ? ` (brand; issuer of record ${r.issuerOfRecord} per its stellar.toml)` : ""}`,
-				),
-			),
-		].join(
-			", ",
-		)}, not by ${o.company}. This asserts our curated registry (${o.corpusTotal} tracked issuances), which is hand-verified but not the world.`,
+		statement: `Our registry records ${o.ticker.toUpperCase()} issued by ${onRecord}, not by ${o.company}. This asserts our curated registry (${o.corpusTotal} tracked issuances) and each issuer's own stellar.toml as last read, not the world.`,
 		evidence: tickerRows.map(ev),
-		confidence: factConfidence(
-			"human-verified",
-			tickerRows[0].updatedAt ?? null,
-		),
+		confidence: factConfidence("human-verified", dated(tickerRows[0])),
 		auditorsOnRecord: others,
 	};
 }

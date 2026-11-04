@@ -528,11 +528,56 @@ describe("company is the brand; issuerOfRecord is what the issuer's toml says", 
 		expect(namedIssuingParty(null)).toBeNull();
 	});
 
-	it("sameParty matches a short name inside a legal name, and never on an empty name", () => {
-		expect(sameParty("Brale", "Brale Inc.")).toBe(true);
-		expect(sameParty("VNX Global Ltd", "VNX Global Ltd.")).toBe(true);
+	it("sameParty compares whole names: a bare legal suffix or a fragment never matches (review 2026-11-04)", () => {
+		// The four inputs the review found matching under substring containment.
+		expect(sameParty("Ltd", "AUDC PTY LTD")).toBe(false);
+		expect(sameParty("Inc", "MoneyGram Payment Systems, Inc.")).toBe(false);
+		expect(sameParty("Cambridge", "Bridge")).toBe(false);
+		expect(sameParty("A", "AUDC PTY LTD")).toBe(false);
+		// A partial name is not the same name either.
+		expect(sameParty("Novatti", "Novatti Group")).toBe(false);
+		expect(sameParty("Circle", "Circle Internet Financial, LLC")).toBe(false);
+		expect(sameParty("Zeam Mint (Pty) Ltd", "ZEAM LIMITED")).toBe(false);
 		expect(sameParty("Bridge", "MoneyGram Payment Systems, Inc.")).toBe(false);
 		expect(sameParty("!!!", "Circle")).toBe(false);
+		expect(sameParty("Ltd", "Ltd")).toBe(false);
+	});
+
+	it("sameParty sets aside case, punctuation, spacing and legal-form suffixes", () => {
+		expect(sameParty("Brale", "Brale Inc.")).toBe(true);
+		expect(sameParty("VNX Global Ltd", "VNX Global Ltd.")).toBe(true);
+		expect(sameParty("AUDC Pty Ltd", "AUDC PTY LTD")).toBe(true);
+		expect(sameParty("AUDC", "AUDC PTY LTD")).toBe(true);
+		expect(
+			sameParty("Kinesis Money Panama S.A", "Kinesis Money Panama S.A."),
+		).toBe(true);
+		expect(sameParty("MyKobo", "MYKOBO")).toBe(true);
+		expect(sameParty("My Kobo", "MYKOBO")).toBe(true);
+		expect(sameParty("Zeam Mint", "Zeam Mint (Pty) Ltd")).toBe(true);
+		expect(sameParty("the Bank of X", "Bank of X Ltd")).toBe(true);
+	});
+
+	it("namedIssuingParty does not cut a name at a dot inside it", () => {
+		expect(
+			namedIssuingParty(
+				"ZUSD, issued by GMO-Z.com Trust Company, Inc. until its wind-down",
+			),
+		).toBe("GMO-Z.com Trust Company");
+		expect(
+			namedIssuingParty("issued by Kinesis Money Panama S.A. for holders"),
+		).toBe("Kinesis Money Panama S.A");
+	});
+
+	it("carries issuerOfRecordCheck; a value outside its vocabulary is null", () => {
+		expect(
+			storeRowToApi({ code: "USDT0", issuerOfRecordCheck: "not-named" })
+				.issuerOfRecordCheck,
+		).toBe("not-named");
+		expect(
+			storeRowToApi({ code: "X", issuerOfRecordCheck: "maybe" })
+				.issuerOfRecordCheck,
+		).toBeNull();
+		expect(storeRowToApi({ code: "X" }).issuerOfRecordCheck).toBeNull();
 	});
 });
 
@@ -613,6 +658,7 @@ describe("getStablecoins in the spec", () => {
 		const p = S.components.schemas.Stablecoin.properties;
 		for (const f of [
 			"issuerOfRecord",
+			"issuerOfRecordCheck",
 			"issuerOfRecordSourceUrl",
 			"issuerOfRecordAsOf",
 			"issuerOfRecordNote",

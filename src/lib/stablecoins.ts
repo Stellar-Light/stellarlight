@@ -26,6 +26,7 @@ export interface StoreRow {
 	name?: string | null;
 	company?: string | null;
 	issuerOfRecord?: string | null;
+	issuerOfRecordCheck?: string | null;
 	issuerOfRecordSourceUrl?: string | null;
 	issuerOfRecordAsOf?: string | null;
 	issuerOfRecordNote?: string | null;
@@ -65,16 +66,19 @@ export interface StablecoinRow {
 	/** The brand the asset is marketed under, as the registry curates it
 	 *  ("Novatti Group" for AUDD). NOT the legal issuer: see issuerOfRecord. */
 	company: string | null;
-	/** ORG_NAME in the stellar.toml at the issuer account's home_domain, read
-	 *  by the 6-hourly writer only when that toml lists the issuer account.
-	 *  Null = not established; never derived from `company`. */
+	/** ORG_NAME in the stellar.toml at the issuer account's home_domain, when
+	 *  the stored check named one (issuerOfRecordCheck "named"). Never derived
+	 *  from `company`. */
 	issuerOfRecord: string | null;
-	/** The toml URL issuerOfRecord was read from. */
+	/** What the stored check found: named, not-named (read, and no issuer of
+	 *  record named; issuerOfRecordNote says why), or null (never read). */
+	issuerOfRecordCheck: IssuerOfRecordCheck | null;
+	/** The toml URL the stored check read (after same-host redirects). */
 	issuerOfRecordSourceUrl: string | null;
-	/** When that toml last named issuerOfRecord (ISO). */
+	/** When the stored check was made (ISO). A failed read does not move it. */
 	issuerOfRecordAsOf: string | null;
-	/** The toml's own desc for this currency, quoted, when it names an issuing
-	 *  party other than issuerOfRecord (MGUSD: Bridge). */
+	/** Named: the toml's desc for this currency, quoted, when it names another
+	 *  issuing party (MGUSD: Bridge). Not named: why. */
 	issuerOfRecordNote: string | null;
 	website: string | null;
 	/** Fiat the asset tracks (USD, JPY, ARS, …). supply is in THIS unit; only
@@ -139,6 +143,11 @@ export interface StablecoinRow {
 	updatedAt: string | null;
 }
 
+/** What the stored issuer-of-record check found. A read that could not be
+ *  made is not a check: it leaves the stored one as it was. */
+export const ISSUER_OF_RECORD_CHECKS = ["named", "not-named"] as const;
+export type IssuerOfRecordCheck = (typeof ISSUER_OF_RECORD_CHECKS)[number];
+
 /** The query parameters GET /api/stablecoins reads; anything else is a 400. */
 export const STABLECOIN_QUERY_PARAMS = [
 	"peg",
@@ -188,15 +197,61 @@ export function filterByAssetType(
 	);
 }
 
-/** Letters and digits only, lowercased: how two spellings of one name compare. */
-const squash = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+/** Legal-form words a company name can end in ("AUDC PTY LTD", "Brale
+ *  Inc.", "Grupo Anchor S.A."), lowercased with the dots dropped. */
+const LEGAL_FORMS = new Set([
+	"ab",
+	"ag",
+	"as",
+	"bv",
+	"co",
+	"company",
+	"corp",
+	"corporation",
+	"gmbh",
+	"inc",
+	"incorporated",
+	"kk",
+	"limited",
+	"llc",
+	"llp",
+	"lp",
+	"ltd",
+	"nv",
+	"oy",
+	"plc",
+	"pte",
+	"pty",
+	"sa",
+	"sarl",
+	"sas",
+	"sl",
+	"spa",
+	"srl",
+]);
 
-/** True when one name contains the other once squashed ("Brale" in "Brale
- *  Inc."). An empty name matches nothing. */
+/** A company name as the words that name it: lowercased, dots dropped (S.A.
+ *  is SA), other punctuation a break, a leading "the" and any run of trailing
+ *  legal-form words removed. "Zeam Mint (Pty) Ltd" is [zeam, mint]. */
+export function partyWords(name: string): string[] {
+	const words = name
+		.toLowerCase()
+		.replace(/\./g, "")
+		.split(/[^a-z0-9]+/)
+		.filter(Boolean);
+	if (words[0] === "the") words.shift();
+	while (words.length && LEGAL_FORMS.has(words[words.length - 1])) words.pop();
+	return words;
+}
+
+/** True when two names are the same name once case, punctuation, spacing and
+ *  legal-form suffixes are set aside ("Brale" and "Brale Inc.", "MyKobo" and
+ *  "MYKOBO"). Whole names only: a bare suffix ("Ltd"), a fragment ("A",
+ *  "Bridge" inside "Cambridge") or a shorter name ("Novatti" for "Novatti
+ *  Group") never matches. */
 export function sameParty(a: string, b: string): boolean {
-	const x = squash(a);
-	const y = squash(b);
-	return !!x && !!y && (x.includes(y) || y.includes(x));
+	const x = partyWords(a).join("");
+	return x !== "" && x === partyWords(b).join("");
 }
 
 /**
@@ -212,7 +267,9 @@ export function namedIssuingParty(
 	text: string | null | undefined,
 ): string | null {
 	const m = text?.match(
-		/\bissued\s+by\s+(.+?)(?=\s+on\s+behalf\s+of\b|[,;.]|$)/i,
+		// A dot ends the clause only when a space or the end follows it, so
+		// "GMO-Z.com" and "S.A." stay whole.
+		/\bissued\s+by\s+(.+?)(?=\s+on\s+behalf\s+of\b|[,;]|\.(?:\s|$)|$)/i,
 	);
 	return m?.[1].trim() || null;
 }
@@ -241,6 +298,7 @@ export type PriceBasis = (typeof PRICE_BASES)[number];
 const BASES = new Set(["live", "curated-static", "unmeasured"]);
 const PRICE_BASIS_SET = new Set<string>(PRICE_BASES);
 const ASSET_TYPE_SET = new Set<string>(STABLECOIN_ASSET_TYPES);
+const CHECK_SET = new Set<string>(ISSUER_OF_RECORD_CHECKS);
 
 /** A finite number, or null. Guards against a stored NaN reaching the wire. */
 function num(v: unknown): number | null {
@@ -266,6 +324,10 @@ export function storeRowToApi(d: StoreRow): StablecoinRow {
 		issuerDomain: d.domain ?? null,
 		company: d.company ?? null,
 		issuerOfRecord: d.issuerOfRecord ?? null,
+		issuerOfRecordCheck:
+			d.issuerOfRecordCheck && CHECK_SET.has(d.issuerOfRecordCheck)
+				? (d.issuerOfRecordCheck as IssuerOfRecordCheck)
+				: null,
 		issuerOfRecordSourceUrl: d.issuerOfRecordSourceUrl ?? null,
 		issuerOfRecordAsOf: d.issuerOfRecordAsOf ?? null,
 		issuerOfRecordNote: d.issuerOfRecordNote ?? null,

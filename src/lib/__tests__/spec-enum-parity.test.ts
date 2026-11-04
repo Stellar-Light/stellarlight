@@ -35,6 +35,7 @@ import {
 	SOURCE_REPO_NAMES,
 } from "../source-locator";
 import {
+	ISSUER_OF_RECORD_CHECKS,
 	PRICE_BASES,
 	STABLECOIN_ASSET_TYPE_FILTERS,
 	STABLECOIN_ASSET_TYPES,
@@ -342,6 +343,22 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 		);
 		expect(spread("STABLECOIN_ASSET_TYPES")).toBe(1);
 		expect(spread("STABLECOIN_ASSET_TYPE_FILTERS")).toBe(1);
+	});
+
+	it("Stablecoin.issuerOfRecordCheck is ISSUER_OF_RECORD_CHECKS, in the spec and in the collection that stores it", () => {
+		expect(
+			sorted(
+				S.components.schemas.Stablecoin.properties.issuerOfRecordCheck.enum,
+			),
+		).toEqual(sorted(ISSUER_OF_RECORD_CHECKS as readonly string[]));
+		expect(spread("ISSUER_OF_RECORD_CHECKS")).toBe(1);
+		const collection = readFileSync(
+			resolve(__dirname, "../../collections/Stablecoins.ts"),
+			"utf8",
+		);
+		expect(collection).toMatch(
+			/name:\s*"issuerOfRecordCheck",[\s\S]*?options:\s*\[\.\.\.ISSUER_OF_RECORD_CHECKS\]/,
+		);
 	});
 
 	it("trust signals, contract code domains and the boolean param values are their constants", () => {

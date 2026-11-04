@@ -54,7 +54,13 @@ import {
 	type StablecoinAsset,
 	stablecoinId,
 } from "@/data/stablecoin-registry";
-import { namedIssuingParty, type PriceBasis, sameParty } from "./stablecoins";
+import {
+	type IssuerOfRecordCheck,
+	namedIssuingParty,
+	type PriceBasis,
+	sameParty,
+} from "./stablecoins";
+import { parseStellarToml } from "./stellar-toml";
 
 const HORIZON = "https://horizon.stellar.org";
 const EXPERT = "https://api.stellar.expert/explorer/public";
@@ -63,21 +69,41 @@ const COINGECKO = "https://api.coingecko.com/api/v3";
 /** Stellar Expert reports supply/volume in stroops (1e-7). */
 const STROOP = 10_000_000;
 
-/** What the writer stores about the issuer of record: one toml read. */
+/** What the writer stores about the issuer of record: one check. */
 export interface IssuerOfRecordFields {
 	/** ORG_NAME in the stellar.toml at the issuer account's home_domain, when
-	 *  that toml lists the issuer account. Null = not established. */
+	 *  that toml lists the issuer account. Null unless the check is named. */
 	issuerOfRecord: string | null;
+	issuerOfRecordCheck: IssuerOfRecordCheck | null;
 	issuerOfRecordSourceUrl: string | null;
 	issuerOfRecordAsOf: string | null;
-	/** The toml's desc for this currency, quoted, when it names an issuing
-	 *  party other than issuerOfRecord. */
+	/** Named: the toml's desc for this currency, quoted, when it names another
+	 *  issuing party. Not named: why. */
 	issuerOfRecordNote: string | null;
 }
 
-export interface MeasuredStablecoin extends IssuerOfRecordFields {
-	/** Why issuerOfRecord is null this run, for the run log; never stored. */
-	issuerOfRecordMiss: string | null;
+/**
+ * One attempt to read the issuer of record. Three outcomes, each written
+ * differently: named (the toml at the account's home_domain lists the account
+ * and gives an ORG_NAME), not-named (that read completed and named nobody: a
+ * checked absence), could-not-read (no answer to judge by: the stored check
+ * stays as it was).
+ */
+export type IssuerOfRecordRead =
+	| {
+			outcome: "named";
+			at: string;
+			sourceUrl: string;
+			name: string;
+			note: string | null;
+	  }
+	| { outcome: "not-named"; at: string; sourceUrl: string | null; why: string }
+	| { outcome: "could-not-read"; why: string };
+
+export interface MeasuredStablecoin {
+	/** This run's issuer-of-record read; the writer turns it into fields with
+	 *  carryIssuerOfRecord. */
+	issuerOfRecordRead: IssuerOfRecordRead;
 	id: string;
 	code: string;
 	issuer: string;
@@ -441,53 +467,34 @@ export function orgLogoFromToml(toml: string, domain: string): string | null {
 }
 
 /**
- * The desc of the [[CURRENCIES]] block that declares this code and issuer.
- * Same identity rule as logoFromToml (a block naming another issuer never
- * matches), but the value is read up to its own closing quote, so a desc
- * with an apostrophe is quoted whole rather than cut at it.
- */
-function currencyDesc(
-	toml: string,
-	code: string,
-	issuer: string,
-): string | null {
-	for (const b of toml.split(/\[\[\s*(?:CURRENCIES|ASSETS)\s*\]\]/i).slice(1)) {
-		const val = (k: string) =>
-			b.match(new RegExp(`^\\s*${k}\\s*=\\s*["']([^"']+)`, "im"))?.[1] ?? null;
-		const iss = val("issuer") ?? val("asset_issuer") ?? val("issuer_account");
-		if ((val("code") ?? val("asset_code")) !== code) continue;
-		if (iss && iss !== issuer) continue;
-		const m = b.match(/^\s*desc\s*=\s*(?:"([^"]+)"|'([^']+)')/im);
-		const desc = m?.[1] ?? m?.[2];
-		if (desc) return desc;
-	}
-	return null;
-}
-
-/**
- * The issuer of record a toml states for one asset: its ORG_NAME, counted
- * only when the toml lists the issuing account (in ACCOUNTS or as a currency
- * issuer). The account's home_domain points at the toml and the toml names
- * the account back (SEP-1, both directions): an account can set any
- * home_domain, but it cannot make another org's toml list it. The match is on
- * the account, not the code, so VNX's toml names the org behind VEUR even
- * though it declares only VCHF for that account.
+ * The issuer of record a toml states for one asset: its [DOCUMENTATION]
+ * ORG_NAME, counted only when the toml lists the issuing account, in ACCOUNTS
+ * or as a [[CURRENCIES]] issuer (an address in a comment is not a listing).
+ * The account's home_domain points at the toml and the toml names the account
+ * back (SEP-1, both directions): an account can set any home_domain, but it
+ * cannot make another org's toml list it. The match is on the account, not
+ * the code, so VNX's toml names the org behind VEUR though it declares only
+ * VCHF for that account.
  *
- * `note` keeps the currency's own desc, quoted, when it names an issuing
- * party other than the ORG_NAME (MGUSD: "issued by Bridge on behalf of
- * MoneyGram"). Pure: the caller fetches.
+ * `note` keeps the desc of the block that declares this code AND this issuer,
+ * quoted, when it names an issuing party other than the ORG_NAME (MGUSD:
+ * "issued by Bridge on behalf of MoneyGram"). Pure: the caller fetches.
  */
 export function issuerOfRecordFromToml(
 	toml: string,
 	code: string,
 	issuer: string,
 ): { name: string; note: string | null } | { miss: string } {
-	if (!toml.includes(issuer))
-		return { miss: "the toml does not list the issuer account" };
-	const m = toml.match(/^\s*ORG_NAME\s*=\s*(?:"([^"]+)"|'([^']+)')/im);
-	const name = (m?.[1] ?? m?.[2])?.trim();
+	const t = parseStellarToml(toml);
+	const listed =
+		t.accounts.includes(issuer) ||
+		t.currencies.some((c) => c.issuer === issuer);
+	if (!listed) return { miss: "the toml does not list the issuer account" };
+	const name = t.documentation.ORG_NAME?.trim();
 	if (!name) return { miss: "the toml declares no ORG_NAME" };
-	const desc = currencyDesc(toml, code, issuer);
+	const desc =
+		t.currencies.find((c) => c.code === code && c.issuer === issuer)?.desc ??
+		null;
 	const party = namedIssuingParty(desc);
 	return {
 		name,
@@ -498,77 +505,263 @@ export function issuerOfRecordFromToml(
 	};
 }
 
+/** The cap Stellar's own SDK puts on a stellar.toml. */
+const TOML_MAX_BYTES = 100 * 1024;
+
+/** The body, or null past `max` bytes (the rest is never downloaded). */
+async function cappedText(res: Response, max: number): Promise<string | null> {
+	const declared = Number(res.headers.get("content-length"));
+	if (Number.isFinite(declared) && declared > max) {
+		await res.body?.cancel();
+		return null;
+	}
+	const reader = res.body?.getReader();
+	if (!reader) return "";
+	const parts: Uint8Array[] = [];
+	let size = 0;
+	for (;;) {
+		const { done, value } = await reader.read();
+		if (done) break;
+		size += value.byteLength;
+		if (size > max) {
+			await reader.cancel();
+			return null;
+		}
+		parts.push(value);
+	}
+	return new TextDecoder().decode(Buffer.concat(parts));
+}
+
+export type IssuerTomlRead =
+	| { kind: "read"; url: string; text: string }
+	| { kind: "absent"; url: string }
+	| { kind: "failed"; why: string };
+
+/**
+ * Read https://<host>/.well-known/stellar.toml for the issuer of record.
+ * Stricter than the logo read (issuerToml), because this one becomes a legal
+ * fact: a redirect is followed only over https on the same host (to another
+ * host, or down to http, it is refused and never fetched), the body is capped
+ * at 100 KB, and an HTML page is not a toml. `url` is the one actually read.
+ * A 404 or 410 is a checked absence; any other answer that is not a toml body
+ * is a failed read, which changes nothing stored.
+ */
+export async function readIssuerToml(host: string): Promise<IssuerTomlRead> {
+	let url = `https://${host}/.well-known/stellar.toml`;
+	for (let hop = 0; hop < 4; hop++) {
+		let res: Response | null = null;
+		let lastError = "";
+		// A thrown fetch (DNS, TLS, timeout) is retried; an HTTP answer is not.
+		for (let attempt = 0; attempt < 3 && !res; attempt++) {
+			try {
+				res = await fetch(url, {
+					redirect: "manual",
+					signal: AbortSignal.timeout(8000),
+					headers: { "user-agent": "stellarlight-stablecoins" },
+				});
+			} catch (err) {
+				lastError = String((err as Error).message).slice(0, 80);
+				if (attempt < 2) await sleep(500 * 2 ** attempt);
+			}
+		}
+		if (!res) return { kind: "failed", why: `${url}: ${lastError}` };
+		if (res.status >= 300 && res.status < 400) {
+			let next: URL | null = null;
+			try {
+				next = new URL(res.headers.get("location") ?? "", url);
+			} catch {
+				next = null;
+			}
+			if (
+				!next ||
+				!res.headers.get("location") ||
+				next.protocol !== "https:" ||
+				next.hostname.toLowerCase() !== host.toLowerCase()
+			)
+				return {
+					kind: "failed",
+					why: `${url} redirects to ${next?.href ?? "nowhere"}, off the home_domain over https; not followed`,
+				};
+			url = next.href;
+			continue;
+		}
+		if (res.status === 404 || res.status === 410)
+			return { kind: "absent", url };
+		if (!res.ok) return { kind: "failed", why: `HTTP ${res.status} at ${url}` };
+		const text = await cappedText(res, TOML_MAX_BYTES);
+		if (text == null)
+			return { kind: "failed", why: `${url} is larger than 100 KB` };
+		if (text.trimStart().startsWith("<"))
+			return { kind: "failed", why: `${url} served HTML, not a toml` };
+		return { kind: "read", url, text };
+	}
+	return { kind: "failed", why: `${url}: too many redirects` };
+}
+
 /**
  * Read the issuer of record for one asset from the toml at the ISSUER
  * ACCOUNT's home_domain, as Horizon reports it. Never the registry's curated
  * `domain` (12 of 41 rows differ from the account's home_domain, 2026-11-04)
- * and never `company`. Never throws: a miss says why, for the run log, and
- * the writer keeps the previous read (carryIssuerOfRecord).
+ * and never `company`. Never throws.
  */
-async function readIssuerOfRecord(
-	asset: StablecoinAsset,
-): Promise<IssuerOfRecordFields & { issuerOfRecordMiss: string | null }> {
-	const miss = (why: string) => ({
-		issuerOfRecord: null,
-		issuerOfRecordSourceUrl: null,
-		issuerOfRecordAsOf: null,
-		issuerOfRecordNote: null,
-		issuerOfRecordMiss: why,
-	});
+export async function readIssuerOfRecord(
+	asset: Pick<StablecoinAsset, "code" | "issuer">,
+): Promise<IssuerOfRecordRead> {
+	const at = () => new Date().toISOString();
 	let home: unknown;
 	try {
 		const account = await fetchJson(`${HORIZON}/accounts/${asset.issuer}`, {
 			retries: 2,
 			timeoutMs: 6000,
 		});
-		if (!account) return miss("the issuer account is not on Horizon");
+		if (!account)
+			return {
+				outcome: "not-named",
+				at: at(),
+				sourceUrl: null,
+				why: "the issuer account is not on Horizon",
+			};
 		home = account.home_domain;
 	} catch (err) {
-		return miss(
-			`could not read the issuer account: ${String((err as Error).message).slice(0, 80)}`,
-		);
+		return {
+			outcome: "could-not-read",
+			why: `could not read the issuer account: ${String((err as Error).message).slice(0, 80)}`,
+		};
 	}
-	if (!home) return miss("the issuer account sets no home_domain");
+	if (!home)
+		return {
+			outcome: "not-named",
+			at: at(),
+			sourceUrl: null,
+			why: "the issuer account sets no home_domain",
+		};
 	// The account holder sets home_domain; fetch it only as a plain host.
 	if (typeof home !== "string" || !/^[a-z0-9.-]+$/i.test(home))
-		return miss("the issuer account's home_domain is not a plain host name");
-	const url = `https://${home}/.well-known/stellar.toml`;
-	const toml = await issuerToml(home);
-	if (!toml) return miss(`no stellar.toml read at ${url}`);
-	const r = issuerOfRecordFromToml(toml, asset.code, asset.issuer);
-	if ("miss" in r) return miss(`${r.miss} (${url})`);
+		return {
+			outcome: "not-named",
+			at: at(),
+			sourceUrl: null,
+			why: "the issuer account's home_domain is not a plain host name",
+		};
+	const read = await readIssuerToml(home);
+	if (read.kind === "failed")
+		return { outcome: "could-not-read", why: read.why };
+	if (read.kind === "absent")
+		return {
+			outcome: "not-named",
+			at: at(),
+			sourceUrl: read.url,
+			why: `the home_domain serves no stellar.toml (${read.url} answered not found)`,
+		};
+	const r = issuerOfRecordFromToml(read.text, asset.code, asset.issuer);
+	if ("miss" in r)
+		return {
+			outcome: "not-named",
+			at: at(),
+			sourceUrl: read.url,
+			why: r.miss,
+		};
 	return {
-		issuerOfRecord: r.name,
-		issuerOfRecordSourceUrl: url,
-		issuerOfRecordAsOf: new Date().toISOString(),
-		issuerOfRecordNote: r.note,
-		issuerOfRecordMiss: null,
+		outcome: "named",
+		at: at(),
+		sourceUrl: read.url,
+		name: r.name,
+		note: r.note,
+	};
+}
+
+/** A stored field as an ISO string or null (Payload may hand back a Date). */
+function storedText(v: unknown): string | null {
+	if (typeof v === "string") return v;
+	if (v instanceof Date && !Number.isNaN(v.getTime())) return v.toISOString();
+	return null;
+}
+
+/**
+ * The issuer-of-record fields the writer stores for one row, per outcome:
+ * named writes the new read with its date; not-named writes a dated checked
+ * absence (no name, the reason in the note), so a toml that stops listing the
+ * account clears the name; could-not-read writes the stored check back whole,
+ * its date unchanged, so a failed read never moves a date or clears a name.
+ * Null until a first check; never derived from `company`.
+ */
+export function carryIssuerOfRecord(
+	read: IssuerOfRecordRead,
+	prev?: Record<string, unknown> | null,
+): IssuerOfRecordFields {
+	if (read.outcome === "named")
+		return {
+			issuerOfRecord: read.name,
+			issuerOfRecordCheck: "named",
+			issuerOfRecordSourceUrl: read.sourceUrl,
+			issuerOfRecordAsOf: read.at,
+			issuerOfRecordNote: read.note,
+		};
+	if (read.outcome === "not-named")
+		return {
+			issuerOfRecord: null,
+			issuerOfRecordCheck: "not-named",
+			issuerOfRecordSourceUrl: read.sourceUrl,
+			issuerOfRecordAsOf: read.at,
+			issuerOfRecordNote: read.why,
+		};
+	const check = prev?.issuerOfRecordCheck;
+	return {
+		issuerOfRecord: storedText(prev?.issuerOfRecord),
+		issuerOfRecordCheck:
+			check === "named" || check === "not-named" ? check : null,
+		issuerOfRecordSourceUrl: storedText(prev?.issuerOfRecordSourceUrl),
+		issuerOfRecordAsOf: storedText(prev?.issuerOfRecordAsOf),
+		issuerOfRecordNote: storedText(prev?.issuerOfRecordNote),
 	};
 }
 
 /**
- * The issuer-of-record fields the writer stores for one row. They come from
- * ONE toml read and move together: when this run did not establish an
- * issuer of record (a failed read, or one that found no name), the stored
- * read is kept whole, dated by its own issuerOfRecordAsOf, so a miss never
- * blanks a name an earlier run read and two reads never mix. Null until a
- * first read succeeds; never derived from `company`.
+ * The write switch for the issuer of record: on only when the environment
+ * says STABLECOIN_ISSUER_OF_RECORD_WRITE=on (the refresh workflow passes the
+ * repository variable of that name). Off, the run computes and prints the
+ * planned values and writes none, so the first scheduled run after a merge
+ * cannot put an unreviewed legal name into production.
  */
-export function carryIssuerOfRecord(
-	fresh: IssuerOfRecordFields,
-	prev?: Record<string, unknown> | null,
-): IssuerOfRecordFields {
-	const from = fresh.issuerOfRecord
-		? fresh
-		: typeof prev?.issuerOfRecord === "string" && prev.issuerOfRecord
-			? (prev as Partial<IssuerOfRecordFields>)
-			: null;
-	return {
-		issuerOfRecord: from?.issuerOfRecord ?? null,
-		issuerOfRecordSourceUrl: from?.issuerOfRecordSourceUrl ?? null,
-		issuerOfRecordAsOf: from?.issuerOfRecordAsOf ?? null,
-		issuerOfRecordNote: from?.issuerOfRecordNote ?? null,
-	};
+export function issuerOfRecordWriteOn(
+	env: Record<string, string | undefined>,
+): boolean {
+	return env.STABLECOIN_ISSUER_OF_RECORD_WRITE === "on";
+}
+
+/** The issuer-of-record keys a run writes: none while the switch is off, so
+ *  the stored fields are left exactly as they are. */
+export function issuerOfRecordPatch(
+	read: IssuerOfRecordRead,
+	prev: Record<string, unknown> | null | undefined,
+	writeOn: boolean,
+): Partial<IssuerOfRecordFields> {
+	return writeOn ? carryIssuerOfRecord(read, prev) : {};
+}
+
+/**
+ * The snapshot measured nearest `targetMs`, among those within `slackMs` of
+ * it; null when none is. The baseline for a period metric has to come from
+ * that period: an older snapshot would stretch "24h" or "7d" across whatever
+ * gap the series has.
+ */
+export function nearestSnapshot<T extends { measuredAt?: unknown }>(
+	snaps: T[],
+	targetMs: number,
+	slackMs: number,
+): T | null {
+	let best: T | null = null;
+	let bestGap = Number.POSITIVE_INFINITY;
+	for (const s of snaps) {
+		const t = Date.parse(String(s.measuredAt ?? ""));
+		if (!Number.isFinite(t)) continue;
+		const gap = Math.abs(t - targetMs);
+		if (gap <= slackMs && gap < bestGap) {
+			best = s;
+			bestGap = gap;
+		}
+	}
+	return best;
 }
 
 /**
@@ -601,9 +794,9 @@ export async function measureStablecoin(
 	const now = new Date().toISOString();
 	// Read for every row, whatever happens to its metrics below: who issues
 	// an asset does not depend on whether its supply could be measured.
-	const record = await readIssuerOfRecord(asset);
+	const issuerOfRecordRead = await readIssuerOfRecord(asset);
 	const base = {
-		...record,
+		issuerOfRecordRead,
 		id: stablecoinId(asset),
 		code: asset.code,
 		issuer: asset.issuer,
