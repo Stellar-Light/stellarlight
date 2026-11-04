@@ -59,12 +59,15 @@
  *                                         schema scrubs
  *   scripts/emitted-text-guard.mjs, scripts/lib/skill-markdown.mjs
  *   eval/run-routing.mjs, eval/lib/grade.mjs  lanes, grading, gate rule
- * Data is read from the checkout at run time (exclusions from
- * src/policy/scout-exposure.ts and scripts/exposure.mjs, the retired-skill
- * pattern from src/skills/scrub.ts, scrubs, notes, retrieval profiles, cases,
- * thresholds), never copied here. Lumenloop and skills entries come from the
- * committed manifest as is: our spec cannot move them. stellarDocs keywords
- * are rebuilt because Raven's title filter reads Scout vocabulary.
+ * Policy is read from the checkout at run time with the TypeScript parser
+ * (scripts/eval/raven-policy.ts; a missing or non-literal declaration exits
+ * 2): the exclusions in src/policy/scout-exposure.ts and scripts/exposure.mjs,
+ * the scrubs in scripts/description-notes.mjs and the retired-skill pattern in
+ * src/skills/scrub.ts, files pinned like the ported ones. Notes, retrieval
+ * profiles, cases and thresholds are read whole from Raven's JSON. None of it
+ * is copied here. Lumenloop and skills entries come from the committed
+ * manifest as is: our spec cannot move them. stellarDocs keywords are rebuilt
+ * because Raven's title filter reads Scout vocabulary.
  *
  * Validated 2026-10-20 beyond the self-check: our 1.9.72 snapshot reproduces
  * Raven's own fresh-1.9.72 run (.agents/rounds/2026-10-08-routing-repair in its
@@ -78,12 +81,13 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { policyReader, scoutExposure } from "./raven-policy";
 
 /**
- * The Raven source files this script ports, hashed at commit fec1c79. Any
- * difference fails the self-check: Raven can change its scorer without
- * changing its accepted totals, and a port of old code would then grade a
- * spec by rules Raven no longer runs.
+ * The Raven source files this script ports or reads policy from, hashed at
+ * commit fec1c79. Any difference fails the self-check: Raven can change its
+ * scorer or how its exclusions combine without changing its accepted totals,
+ * and a port of old code would then grade a spec by rules Raven no longer runs.
  */
 export const PORTED_AT = "fec1c79";
 export const PORTED_FROM_RAVEN: Record<string, string> = {
@@ -115,6 +119,12 @@ export const PORTED_FROM_RAVEN: Record<string, string> = {
 		"9a938a710fe3b573e1e0306021e3816c77448ba41be6c375bb15b555de43916a",
 	"eval/lib/grade.mjs":
 		"86d42c16038821629ad517cf9db0a8a6238a197caea8917801463e9986c3a8cf",
+	"src/policy/scout-exposure.ts":
+		"b0ad8eb46dc853c7cb155da969fb867928a819e4830486bc757286f9a7c04b60",
+	"scripts/exposure.mjs":
+		"5618f5c76f1bd5a4f3603bddd6691fc3c9891e690bd949a744fe3dd640c43395",
+	"src/skills/scrub.ts":
+		"9e367b0b0111fb905b80a5cff18b4e92dc8f2de7ddf36fcfe726b3a445d47d76",
 };
 
 type Json = Record<string, unknown>;
@@ -1521,80 +1531,24 @@ interface Policy {
 	profiles: Map<string, Profile>; // entry id -> retrievalProfile (from manifest)
 }
 
-function sourceBlock(src: string, start: string, end: string, file: string) {
-	const i = src.indexOf(start);
-	const j = i < 0 ? -1 : src.indexOf(end, i + start.length);
-	if (i < 0 || j < 0)
-		throw new Error(
-			`${file}: "${start}" not found; Raven's source layout changed, update the replica's parser`,
-		);
-	return src.slice(i + start.length, j);
-}
-
 export function loadPolicy(
 	dir: string,
 	manifest: { entries: Entry[] },
 ): Policy {
-	const read = (p: string) => readFileSync(join(dir, p), "utf8");
-	const exposure = read("src/policy/scout-exposure.ts");
-	const pairs = (block: string) =>
-		new Map(
-			[...block.matchAll(/\[\s*"([A-Z]+ [^"]+)"\s*,\s*"([^"]+)"\s*\]/g)].map(
-				(m) => [m[1] as string, m[2] as string],
-			),
-		);
-	const strings = (block: string) =>
-		[...block.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map(
-			(m) => JSON.parse(`"${m[1]}"`) as string,
-		);
-	// `new Map([...])`, or an empty `new Map<string, string>()` as at fec1c79.
-	const mapPairs = (name: string) => {
-		const m = exposure.match(
-			new RegExp(`\\b${name} = new Map(?:<[^(]*>)?\\((\\[[\\s\\S]*?\\])?\\);`),
-		);
-		if (!m)
-			throw new Error(
-				`scout-exposure.ts: "${name} = new Map(...)" not found; Raven's source layout changed, update the replica's parser`,
-			);
-		return pairs(m[1] ?? "");
-	};
-	const excluded = mapPairs("EXCLUDED_SCOUT_OPERATIONS");
-	const optionalExcluded = mapPairs("OPTIONAL_EXCLUDED_SCOUT_OPERATIONS");
-	const absentPaths = new Set(
-		strings(
-			sourceBlock(
-				exposure,
-				"SCOUT_PATHS_ABSENT_FROM_SPEC = new Set(",
-				");",
-				"scout-exposure.ts",
-			),
-		),
+	const reader = (p: string) =>
+		policyReader(p, readFileSync(join(dir, p), "utf8"));
+	const { excluded, optionalExcluded, absentPaths } = scoutExposure(
+		readFileSync(join(dir, "src/policy/scout-exposure.ts"), "utf8"),
 	);
-	const notesSrc = read("scripts/description-notes.mjs")
-		.split("\n")
-		.filter((l) => !l.trim().startsWith("//"))
-		.join("\n");
-	const scrubs: Record<string, string[]> = {};
-	for (const m of sourceBlock(
-		notesSrc,
-		"SCOUT_DESCRIPTION_SCRUBS = {",
-		"\n};",
-		"description-notes.mjs",
-	).matchAll(/(\w+):\s*\[([\s\S]*?)\]/g))
-		scrubs[m[1] as string] = strings(m[2] as string);
-	const excludedLumenloop = strings(
-		sourceBlock(
-			read("scripts/exposure.mjs"),
-			"EXCLUDED_LUMENLOOP_OPS = new Set([",
-			"]);",
-			"exposure.mjs",
-		),
+	const scrubs = reader("scripts/description-notes.mjs").record(
+		"SCOUT_DESCRIPTION_SCRUBS",
 	);
-	const re = read("src/skills/scrub.ts").match(
-		/RETIRED_SKILL_REF_RE\s*=\s*\/(.+?)\/([a-z]*);/,
+	const excludedLumenloop = [
+		...reader("scripts/exposure.mjs").set("EXCLUDED_LUMENLOOP_OPS"),
+	];
+	const retiredSkillRe = reader("src/skills/scrub.ts").regex(
+		"RETIRED_SKILL_REF_RE",
 	);
-	if (!re)
-		throw new Error("src/skills/scrub.ts: RETIRED_SKILL_REF_RE not found");
 	const notes = new Map<string, string>();
 	const profiles = new Map<string, Profile>();
 	for (const e of manifest.entries) {
@@ -1614,7 +1568,7 @@ export function loadPolicy(
 		absentPaths,
 		scrubs,
 		excludedLumenloop,
-		retiredSkillRe: new RegExp(re[1] as string, re[2]),
+		retiredSkillRe,
 		notes,
 		profiles,
 	};

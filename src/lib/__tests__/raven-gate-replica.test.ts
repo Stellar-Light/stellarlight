@@ -178,6 +178,96 @@ describe("raven-gate-replica, ported from Raven fec1c79", () => {
 	});
 });
 
+// Review 2026-11-05: a pattern over the source text stopped at a "]);" inside
+// a comment and returned a shorter policy with no error.
+describe("raven-gate-replica reads Raven's policy whole, or not at all", () => {
+	const policyWith = (files: Record<string, string>) =>
+		loadPolicy(checkout({ ...POLICY, ...files }), { entries: [] });
+
+	it("reads every exclusion past a comment that holds ]); and typed Maps and Sets", () => {
+		const p = policyWith({
+			"src/policy/scout-exposure.ts": `export const EXCLUDED_SCOUT_OPERATIONS = new Map([
+  ["GET /api/feedback", "getFeedbackSchema"],
+  // Keep review excluded (see the audit]);
+  ["GET /api/hackathons/review", "reviewSubmission"]
+]);
+export const OPTIONAL_EXCLUDED_SCOUT_OPERATIONS = new Map<string, string>([
+  ["GET /api/sources/locate", "locateSource"]
+]);
+export const SCOUT_PATHS_ABSENT_FROM_SPEC = new Set<string>(["/api/repos"]);
+`,
+		});
+		expect([...p.excluded]).toEqual([
+			["GET /api/feedback", "getFeedbackSchema"],
+			["GET /api/hackathons/review", "reviewSubmission"],
+		]);
+		expect([...p.optionalExcluded.keys()]).toEqual(["GET /api/sources/locate"]);
+		expect([...p.absentPaths]).toEqual(["/api/repos"]);
+	});
+
+	it("reads scrub needles that hold a bracket, quoted keys, a wrapped Set and a regex", () => {
+		const p = policyWith({
+			"scripts/description-notes.mjs": `export const SCOUT_DESCRIPTION_SCRUBS = {
+  // Drop the chat pointer.
+  matchPartners: ["; see [the chat] page"],
+  "getStatus": [" or to discover endpoints"]
+};
+`,
+			"scripts/exposure.mjs":
+				'export const EXCLUDED_LUMENLOOP_OPS = new Set(\n  [\n    "request_research", // paid\n    "research_result"\n  ]\n);\n',
+			"src/skills/scrub.ts":
+				"export const RETIRED_SKILL_REF_RE =\n  /lumenloop-api-[a-z]+|lumenloop-mcp-connect/;\n",
+		});
+		expect(p.scrubs).toEqual({
+			matchPartners: ["; see [the chat] page"],
+			getStatus: [" or to discover endpoints"],
+		});
+		expect(p.excludedLumenloop).toEqual([
+			"request_research",
+			"research_result",
+		]);
+		expect(p.retiredSkillRe.source).toBe(
+			"lumenloop-api-[a-z]+|lumenloop-mcp-connect",
+		);
+	});
+
+	it.each([
+		[
+			"export const EXCLUDED_SCOUT_OPERATIONS = new Map(ENTRIES);",
+			"EXCLUDED_SCOUT_OPERATIONS holds a value that is not an array literal",
+		],
+		[
+			'export const EXCLUDED_SCOUT_OPERATIONS = new Map([...BASE, ["GET /x", "y"]]);',
+			"EXCLUDED_SCOUT_OPERATIONS holds a value that is not an array literal",
+		],
+		[
+			'export const EXCLUDED_SCOUT_OPERATIONS = new Map([["GET /x", NAME]]);',
+			"EXCLUDED_SCOUT_OPERATIONS holds a value that is not a string literal",
+		],
+		[
+			'export const EXCLUDED_SCOUT_OPERATIONS = new Map([["GET /x", "y"]]);',
+			"OPTIONAL_EXCLUDED_SCOUT_OPERATIONS is not declared with a value",
+		],
+	])("refuses %j", (source, why) => {
+		expect(() =>
+			policyWith({
+				"src/policy/scout-exposure.ts": `${source}\nexport const SCOUT_PATHS_ABSENT_FROM_SPEC = new Set();\n`,
+			}),
+		).toThrow(`src/policy/scout-exposure.ts: ${why};`);
+	});
+
+	it("pins every Raven file it reads policy from", () => {
+		expect(Object.keys(PORTED_FROM_RAVEN)).toEqual(
+			expect.arrayContaining([
+				"src/policy/scout-exposure.ts",
+				"scripts/exposure.mjs",
+				"scripts/description-notes.mjs",
+				"src/skills/scrub.ts",
+			]),
+		);
+	});
+});
+
 // Raven's own rules at fec1c79, including their gaps: the replica predicts
 // what Raven does, so a rule stricter than Raven's would hold a spec Raven
 // accepts. Review 2026-11-05 asked for each of these inputs.
@@ -306,14 +396,18 @@ describe("raven-gate-replica names drifted Raven sources", () => {
 		}
 		expect(status).toBe(2);
 		expect(stderr).toContain(
-			'raven-gate-replica failed: scout-exposure.ts: "EXCLUDED_SCOUT_OPERATIONS = new Map(...)" not found',
+			"raven-gate-replica failed: src/policy/scout-exposure.ts: EXCLUDED_SCOUT_OPERATIONS is not a new Map(...) over a literal",
 		);
 		expect(stderr).toContain(
 			"ported Raven sources changed since fec1c79: src/catalog/vendor/search-scoring.ts (missing),",
 		);
+		const edited = [
+			"scripts/build-catalog.mjs",
+			"src/policy/scout-exposure.ts",
+		];
 		for (const path of Object.keys(PORTED_FROM_RAVEN))
 			expect(stderr).toContain(
-				path === "scripts/build-catalog.mjs" ? `${path},` : `${path} (missing)`,
+				edited.includes(path) ? `${path},` : `${path} (missing)`,
 			);
 	}, 60_000);
 });
