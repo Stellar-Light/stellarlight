@@ -104,7 +104,13 @@ const queries: Array<{ set: string; id: string; q: string }> = [
 	...projectNames.map((n) => ({ set: "project-name", id: n, q: n })),
 	...sets.keyword.map((q: string) => ({ set: "keyword", id: q, q })),
 	...(
-		["acceptance", "controls", "unchanged", "naturalLanguage"] as const
+		[
+			"acceptance",
+			"controls",
+			"unchanged",
+			"naturalLanguage",
+			"exactName",
+		] as const
 	).flatMap((group) =>
 		frozen[group].map((x: Any) => ({ set: group, id: x.id, q: x.q })),
 	),

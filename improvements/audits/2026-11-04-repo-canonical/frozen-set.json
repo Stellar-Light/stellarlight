@@ -10,8 +10,16 @@
 		"unchanged": "every unchanged query serves the same first page (fullName and score, in order), matchMode and total on base and branch",
 		"naturalLanguage": "reported only, no bar: longer questions that name the same products",
 		"existingSets": "every rank move in the 2026-10-23 sets is listed; an expected repo that moves down needs a stated reason, or the change fails",
-		"generalRule": "a general authority rule (first-party ownership or repoScore above the keyword score) is measured as a variant on the same sets; it joins the branch only if it ranks first an acceptance query the curated entries leave unranked and moves no expected repo down in any set"
+		"generalRule": "a general authority rule (first-party ownership or repoScore above the keyword score) is measured as a variant on the same sets; it joins the branch only if it ranks first an acceptance query the curated entries leave unranked and moves no expected repo down in any set",
+		"exactName": "every exactName query ranks first the repo whose name (the part after the owner) is the query, on the branch; a canonical float never takes rank 1 from an exact name"
 	},
+	"amended": [
+		{
+			"at": "2026-11-04T23:00:00Z",
+			"why": "An independent review of the first three commits found inputs the set did not hold: a longer phrase that contains a product name fired the float, an underscore spelling did not, and an exact repo name lost rank 1 to the float. Added before any code change for those findings; no entry above was edited.",
+			"added": ["acc-15", "acc-16", "exn-01", "exn-02", "unc-14", "unc-15"]
+		}
+	],
 	"acceptance": [
 		{
 			"id": "acc-01",
@@ -96,6 +104,32 @@
 			"q": "contract examples",
 			"expect": "stellar/soroban-examples",
 			"basis": "the concept, shortest form"
+		},
+		{
+			"id": "acc-15",
+			"q": "scaffold_stellar",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the product name with an underscore; no indexed repo has this exact name"
+		},
+		{
+			"id": "acc-16",
+			"q": "soroban_examples",
+			"expect": "stellar/soroban-examples",
+			"basis": "the repo name with an underscore"
+		}
+	],
+	"exactName": [
+		{
+			"id": "exn-01",
+			"q": "stellar-lab",
+			"expectName": "stellar-lab",
+			"basis": "an indexed repo is named exactly stellar-lab; it ranked first on base"
+		},
+		{
+			"id": "exn-02",
+			"q": "stellar_lab",
+			"expectName": "stellar-lab",
+			"basis": "the same name with an underscore"
 		}
 	],
 	"controls": [
@@ -165,6 +199,16 @@
 			"id": "unc-13",
 			"q": "soroban crash lab",
 			"why": "a product named with the word lab"
+		},
+		{
+			"id": "unc-14",
+			"q": "stellar lab notes",
+			"why": "a longer phrase that contains the product name names something else"
+		},
+		{
+			"id": "unc-15",
+			"q": "stellar-lab-notes",
+			"why": "the same longer phrase as one hyphenated name"
 		}
 	],
 	"naturalLanguage": [

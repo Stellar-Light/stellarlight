@@ -105,6 +105,16 @@ const expected = (x: Any): { names?: string[]; terms?: string[] } | null => {
 				.filter((d) => d.projectName === x.id)
 				.map((d) => d.fullName as string),
 		};
+	if (x.set === "exactName") {
+		const want = lc(
+			frozen.exactName.find((y: Any) => y.id === x.id).expectName,
+		);
+		return {
+			names: corpus
+				.filter((d) => lc(String(d.fullName).split("/")[1] ?? "") === want)
+				.map((d) => d.fullName as string),
+		};
+	}
 	const f = ["acceptance", "controls", "naturalLanguage"].includes(x.set)
 		? frozen[x.set].find((y: Any) => y.id === x.id)
 		: null;
@@ -153,6 +163,12 @@ for (const l of live.live as Any[]) {
 		);
 	if (l.set === "unchanged")
 		bar("unchanged: same first page, matchMode and total", pageSame, label);
+	if (l.set === "exactName")
+		bar(
+			"exactName: the repo named by the query first on the branch",
+			rr === 1,
+			label,
+		);
 	if (pageSame && rankingSame) {
 		identical++;
 		continue;
