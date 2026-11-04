@@ -33,6 +33,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-04",
 		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"/api/status `usage.byEndpoint` counts every hit of the last 7 days. It grouped a read capped at 10,000 rows, so it summed to 10,000 beside a `last7d` of 25,806 and undercounted every endpoint; the counts now come from the database and sum to `last7d`.",
+		detail:
+			"The /analytics page's agent and human split had the same cap and is counted the same way.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
 		version: "spec@1.9.118",
 		type: "fixed",
 		summary:
