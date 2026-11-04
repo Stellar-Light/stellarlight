@@ -275,9 +275,30 @@ async function handle(req: NextRequest) {
 					payload.find({
 						collection: "builders",
 						where,
-						limit: 300,
+						// limit 0 = every eligible profile (#1915). A fixed 300 counted,
+						// paged and q-searched the newest 300 of 401 while the label
+						// said full set: the oldest were reachable only by a location
+						// filter. counts.total below is this set, under this `where`.
+						// ponytail: one read of the whole set per request (about 400
+						// rows, CDN-cached); page in the DB for the unfiltered listing
+						// if the collection grows past a few thousand.
+						limit: 0,
 						depth: 0,
 						sort: "-is_featured",
+						// Only what the rows and the page's onStellar join read.
+						select: {
+							github_username: true,
+							display_name: true,
+							bio: true,
+							role_title: true,
+							location: true,
+							website_url: true,
+							twitter_handle: true,
+							avatar_url: true,
+							is_featured: true,
+							projects: true,
+							contributions: true,
+						},
 					}),
 				{ docs: [] as unknown[] },
 				DEFAULT_READ_TIMEOUT_MS,

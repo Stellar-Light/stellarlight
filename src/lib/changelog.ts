@@ -31,6 +31,13 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"getBuilders reads every visible profile, not the newest 300: with no q, `counts.total` said 300 under a full set label while 401 profiles were visible, so the oldest were reachable only through a location filter. `counts.total` now counts the set the pages walk (page until offset + returned reaches it), and a q search runs over all of it.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",
