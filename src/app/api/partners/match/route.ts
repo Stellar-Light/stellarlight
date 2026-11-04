@@ -29,6 +29,7 @@ import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { classifyModelError } from "@/lib/model-failure";
 import { scorePartners } from "@/lib/partner-match";
+import { recordedOrNull } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
 	type RateLimitResult,
@@ -182,8 +183,9 @@ function toPublic(p: any) {
 		tagline: p.tagline ?? null,
 		websiteUrl: p.websiteUrl ?? null,
 		acceptingClients: p.acceptingClients ?? null,
-		sectors: p.sectors ?? [],
-		regions: p.regions ?? [],
+		// Curated tags: null when none is recorded, never "none" (#1909).
+		sectors: recordedOrNull(p.sectors),
+		regions: recordedOrNull(p.regions),
 		freshness: { status: p.freshnessStatus ?? "fresh" },
 		url: `https://stellarlight.xyz/partners/${p.slug}`,
 	};

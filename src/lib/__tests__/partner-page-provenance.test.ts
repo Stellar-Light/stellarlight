@@ -11,6 +11,8 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
 let current: Record<string, unknown> = {};
+/** What the directory's unpinned listing read returns. */
+let listing: Record<string, unknown>[] = [];
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({
 		// The profile's own read pins its slug; the related-partner and
@@ -21,13 +23,13 @@ vi.mock("@/lib/payload-client", () => ({
 		}: {
 			collection: string;
 			where: unknown;
-		}) => ({
-			docs:
-				collection === "partner-accounts" &&
-				JSON.stringify(where).includes(`{"equals":"${current.slug}"}`)
-					? [current]
-					: [],
-		}),
+		}) => {
+			if (collection !== "partner-accounts") return { docs: [] };
+			const w = JSON.stringify(where);
+			if (w.includes(`{"equals":"${current.slug}"}`))
+				return { docs: [current] };
+			return { docs: w.includes('"slug"') ? [] : listing };
+		},
 	})),
 }));
 
@@ -103,5 +105,39 @@ describe("partner page verification labels", () => {
 		expect(html).toContain("Compliance &amp; corridors");
 		expect(html).not.toMatch(/Verified from the partner/);
 		expect(html).toContain("Curated from the partner&#x27;s own disclosures");
+	});
+});
+
+describe("partner directory cards", () => {
+	it("show asset chips only for a recorded stellar.toml read", async () => {
+		listing = [
+			anchor({
+				slug: "anchor-curated",
+				contactEmail: "a@curated.example",
+				assets: [{ code: "CURATEDCOIN" }],
+			}),
+			anchor({
+				slug: "anchor-half",
+				contactEmail: "a@half.example",
+				assets: [{ code: "HALFCOIN" }],
+				tomlFetchedAt: "2026-09-29",
+			}),
+			anchor({
+				slug: "anchor-read",
+				contactEmail: "a@read.example",
+				assets: [{ code: "TOMLCOIN" }],
+				tomlSourceUrl: "https://read.example/.well-known/stellar.toml",
+				tomlFetchedAt: "2026-09-29",
+			}),
+		];
+		const { default: Directory } = await import(
+			"@/app/(frontend)/partners/page"
+		);
+		const html = renderToStaticMarkup(await Directory());
+		expect(html).toContain("anchor-read");
+		expect(html).toContain("TOMLCOIN");
+		expect(html).not.toContain("CURATEDCOIN");
+		expect(html).not.toContain("HALFCOIN");
+		listing = [];
 	});
 });

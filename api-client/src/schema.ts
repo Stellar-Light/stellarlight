@@ -1043,16 +1043,19 @@ export interface components {
             logoUrl?: string | null;
             websiteUrl?: string | null;
             foundedYear?: number | null;
-            services?: string[];
-            sectors?: string[];
-            regions?: string[];
-            /** @description Asset codes this partner issues/supports, read from their stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt), so this is UNKNOWN and never 'issues no assets'. [] = we did fetch it and it declares no CURRENCIES. */
+            /** @description Curated service tags. NULL = none recorded for this partner (UNKNOWN, never 'offers no services'). */
+            services?: string[] | null;
+            /** @description Curated sectors. NULL = none recorded for this partner (UNKNOWN, never 'serves no sector'). */
+            sectors?: string[] | null;
+            /** @description Curated coverage regions. NULL = none recorded for this partner (UNKNOWN, never 'covers nowhere'); the region filter does not select it. */
+            regions?: string[] | null;
+            /** @description Asset codes this partner issues/supports, read from their stellar.toml. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set), so this is UNKNOWN and never 'issues no assets'; a curated code is never served here. [] = a recorded read declares no CURRENCIES. */
             assets?: string[] | null;
-            /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null. */
+            /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set), so we do not know. [] = a recorded read implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null. */
             seps?: string[] | null;
             /** @description The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from; re-verify there. Null = never toml-enriched (curated/self-reported only). */
             tomlSourceUrl?: string | null;
-            /** @description Deterministic trust score for toml-derived anchor facts (basis stellar-toml × freshness of tomlFetchedAt). Null when no toml was ever fetched. */
+            /** @description Deterministic trust score for toml-derived anchor facts (basis stellar-toml × freshness of tomlFetchedAt). Null when no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set). */
             tomlConfidence?: {
                 score?: number;
                 /** @enum {string} */
@@ -1061,7 +1064,7 @@ export interface components {
             } | null;
             /** @description ISO date of the last successful stellar.toml fetch+parse. Admin/partner edits may postdate this snapshot. */
             tomlFetchedAt?: string | null;
-            /** @description Fiat ramp directions offered (deposit = on-ramp, withdraw = off-ramp). Either confirmed from the anchor's own transfer server /info during a stellar.toml read, or entered by a curator; with tomlFetchedAt null they are curator-entered, so never cite them as stellar.toml facts. NULL = none recorded (UNKNOWN, never 'offers no ramps'), and never inferred from SEP presence. */
+            /** @description Fiat ramp directions offered (deposit = on-ramp, withdraw = off-ramp). Either confirmed from the anchor's own transfer server /info during a stellar.toml read, or entered by a curator; without a recorded read (tomlSourceUrl and tomlFetchedAt both set) they are curator-entered, so never cite them as stellar.toml facts. NULL = none recorded (UNKNOWN, never 'offers no ramps'), and never inferred from SEP presence. */
             rampTypes?: ("on-ramp" | "off-ramp")[] | null;
             country?: string | null;
             acceptingClients?: boolean;
@@ -5100,8 +5103,10 @@ export interface operations {
                                 tagline?: string | null;
                                 websiteUrl?: string | null;
                                 acceptingClients?: boolean | null;
-                                sectors?: string[];
-                                regions?: string[];
+                                /** @description Curated sectors; NULL = none recorded (UNKNOWN). */
+                                sectors?: string[] | null;
+                                /** @description Curated coverage regions; NULL = none recorded (UNKNOWN). */
+                                regions?: string[] | null;
                                 freshness?: {
                                     status?: string;
                                 };
@@ -5228,16 +5233,18 @@ export interface operations {
                             description?: string | null;
                             websiteUrl?: string | null;
                             acceptingClients?: boolean | null;
+                            /** @description Curated sectors; [] = none recorded here, never 'serves no sector'. */
                             sectors?: string[];
+                            /** @description Curated coverage regions; [] = none recorded here, never 'covers nowhere'. */
                             regions?: string[];
-                            /** @description Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES. */
-                            assets?: string[];
-                            /** @description SEP standards implemented (sep-6, sep-24, sep-31). */
-                            seps?: string[];
+                            /** @description Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set): UNKNOWN, and a curated code is never served here. */
+                            assets?: string[] | null;
+                            /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from stellar.toml. NULL = no read is recorded; [] = a recorded read declares none. */
+                            seps?: string[] | null;
                             tomlSourceUrl?: string | null;
                             tomlFetchedAt?: string | null;
-                            /** @description Verified fiat-ramp capability (on-ramp / off-ramp) from the transfer server. */
-                            rampTypes?: string[];
+                            /** @description Fiat ramps (on-ramp / off-ramp): confirmed from the transfer server during a stellar.toml read, or entered by a curator. NULL = none recorded (UNKNOWN). */
+                            rampTypes?: string[] | null;
                             country?: string | null;
                             /** @description True when the partner has a direct contact path (email or channel). */
                             contactable?: boolean;

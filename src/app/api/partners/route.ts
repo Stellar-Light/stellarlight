@@ -18,7 +18,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { REGIONS } from "@/collections/Partners";
 import { logApiHit } from "@/lib/api-usage";
-import { isExperimentOn } from "@/lib/experiments";
 import {
 	BOOL_FALSE_VALUES,
 	BOOL_TRUE_VALUES,
@@ -32,7 +31,7 @@ import {
 import { laneHints } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { scorePartners } from "@/lib/partner-match";
-import { partnerToPublic } from "@/lib/partner-public";
+import { partnerRowOpts, partnerToPublic } from "@/lib/partner-public";
 import { passesQualityBar } from "@/lib/partner-quality";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { serverTiming } from "@/lib/server-timing";
@@ -308,11 +307,8 @@ export async function GET(req: NextRequest) {
 
 		// EXPERIMENTS (default off): include the gated blocks only when opted
 		// in via ?exp=<id> / X-Experiments header / env canary.
-		const withCompliance = isExperimentOn("partner-compliance-api", req);
-		const withOnchain = isExperimentOn("partner-onchain-live", req);
-		const mapped = ordered.map((p) =>
-			partnerToPublic(p, { compliance: withCompliance, onchain: withOnchain }),
-		);
+		const rowOpts = partnerRowOpts(req);
+		const mapped = ordered.map((p) => partnerToPublic(p, rowOpts));
 
 		totalMatching = mapped.length;
 		partners = mapped.slice(offset, offset + limit);

@@ -1,5 +1,30 @@
 import { partnerTrust } from "@/lib/confidence";
+import { isExperimentOn } from "@/lib/experiments";
 import { factConfidence } from "@/lib/fact-confidence";
+
+/**
+ * A stellar.toml read is recorded only with BOTH its source URL and its date
+ * (#1909). Without both, the toml-backed fields (assets, seps) are unknown,
+ * whatever the record holds. The one test every partner surface uses: the
+ * API rows, the profile page and the directory cards.
+ */
+export const hasTomlRead = (
+	p: { tomlSourceUrl?: unknown; tomlFetchedAt?: unknown } | null | undefined,
+): boolean => Boolean(p?.tomlSourceUrl && p?.tomlFetchedAt);
+
+/** A curated list nobody filled in is UNKNOWN: null, never "none" (#1909). */
+export const recordedOrNull = <T>(xs: T[] | null | undefined): T[] | null =>
+	xs?.length ? xs : null;
+
+/** The experiment flags that shape a partner row, read the same way for the
+ * list and the detail so the two rows cannot differ under a flag. */
+export const partnerRowOpts = (req: {
+	url?: string;
+	headers?: { get(name: string): string | null };
+}) => ({
+	compliance: isExperimentOn("partner-compliance-api", req),
+	onchain: isExperimentOn("partner-onchain-live", req),
+});
 
 /**
  * Map a Payload partner doc → the public shape. Drops auth/internal fields,
@@ -18,6 +43,7 @@ export function partnerToPublic(
 ) {
 	const verified = p.verified ?? {};
 	const freshnessStatus = p.freshnessStatus ?? "fresh";
+	const read = hasTomlRead(p);
 	// EXPERIMENT partner-compliance-api (default OFF): expose curator-verified
 	// compliance/corridor facts to agents. Gated so it's not in the stable
 	// contract until it graduates. Only present when the experiment is on AND
@@ -76,34 +102,35 @@ export function partnerToPublic(
 		logoUrl: p.logoUrl ?? null,
 		websiteUrl: p.websiteUrl ?? null,
 		foundedYear: p.foundedYear ?? null,
-		services: (p.services ?? [])
-			.map((s: { tag: string }) => s.tag)
-			.filter(Boolean),
-		sectors: p.sectors ?? [],
-		regions: p.regions ?? [],
+		// Curated tags: null when nobody recorded any, never "none".
+		services: recordedOrNull(
+			(p.services ?? []).map((s: { tag: string }) => s.tag).filter(Boolean),
+		),
+		sectors: recordedOrNull(p.sectors),
+		regions: recordedOrNull(p.regions),
 		// Anchor capabilities from stellar.toml (SEP-1), the same source as
 		// anchors.stellar.org.
 		//
-		// These are NULL when we never fetched the partner's toml, and only []
-		// when we did fetch it and it published none. The distinction is the
+		// These are NULL unless a read is recorded (hasTomlRead), and only []
+		// when we did read it and it published none. The distinction is the
 		// whole value of the field: [] is now the checkable claim "we read
 		// their SEP-1 file and it lists no SEPs", while null is "we have not
 		// looked". Collapsing both to [] told 31 of 44 partners' callers that
 		// the partner supports no SEPs and issues no assets, which for an
 		// anchor directory is the most damaging thing the row could say.
-		assets: p.tomlFetchedAt
+		assets: read
 			? (p.assets ?? []).map((a: { code: string }) => a.code).filter(Boolean)
 			: null,
-		seps: p.tomlFetchedAt ? (p.seps ?? []) : null,
+		seps: read ? (p.seps ?? []) : null,
 		tomlSourceUrl: p.tomlSourceUrl ?? null,
 		tomlFetchedAt: p.tomlFetchedAt ?? null,
 		tomlConfidence: factConfidence(
-			p.tomlFetchedAt ? "stellar-toml" : null,
+			read ? "stellar-toml" : null,
 			p.tomlFetchedAt,
 		),
 		// Curator-maintained, so empty means nobody has filled it in, not that
 		// the partner offers no ramp directions.
-		rampTypes: p.rampTypes?.length ? p.rampTypes : null,
+		rampTypes: recordedOrNull(p.rampTypes),
 		country: p.country ?? null,
 		acceptingClients: p.acceptingClients ?? null,
 		typicalEngagement: p.typicalEngagement ?? null,

@@ -31,6 +31,7 @@ import {
 	typeLabel,
 	typePlural,
 } from "@/lib/partner-labels";
+import { hasTomlRead } from "@/lib/partner-public";
 import { passesQualityBar } from "@/lib/partner-quality";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -336,8 +337,8 @@ export default async function PartnerProfilePage({
 		assets.length > 0 || seps.length > 0 || ramps.length > 0;
 	// Present capabilities prove nothing: they are stellar.toml facts only
 	// when a read is recorded, with its source URL and its date; otherwise a
-	// curator entered them (#1909).
-	const tomlRead = Boolean(p.tomlSourceUrl && p.tomlFetchedAt);
+	// curator entered them (#1909). The same test as the API rows.
+	const tomlRead = hasTomlRead(p);
 	const hasEngagement =
 		p.acceptingClients != null ||
 		p.pricingModel ||

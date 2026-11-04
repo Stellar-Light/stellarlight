@@ -19,6 +19,7 @@ import {
 	sepLabel,
 	typeLabel,
 } from "./partner-labels";
+import { hasTomlRead, recordedOrNull } from "./partner-public";
 
 export const PARTNER_TYPES = [
 	"anchor",
@@ -51,16 +52,23 @@ export interface PublicPartner {
 	description: string | null;
 	websiteUrl: string | null;
 	acceptingClients: boolean | null;
+	// ponytail: still [] when none is recorded, unlike the API rows (#1909):
+	// the chat card reads these two unguarded, in a file that fails biome on
+	// base, so they turn null once that file's lint debt is paid.
 	sectors: string[];
 	regions: string[];
-	/** Asset codes (USDC, EURC, NGNT…) from stellar.toml CURRENCIES. */
-	assets: string[];
-	/** SEP standards implemented (sep-6, sep-24, sep-31). */
-	seps: string[];
+	/** Asset codes (USDC, EURC, NGNT…) from stellar.toml CURRENCIES; null
+	 * unless a read is recorded (hasTomlRead), so a curated code never
+	 * passes as a stellar.toml fact. */
+	assets: string[] | null;
+	/** SEP standards implemented (sep-6, sep-24, sep-31); null without a
+	 * recorded read, [] when the read found none. */
+	seps: string[] | null;
 	tomlSourceUrl: string | null;
 	tomlFetchedAt: string | null;
-	/** Real fiat-ramp capability (on-ramp / off-ramp) from the transfer server. */
-	rampTypes: string[];
+	/** Fiat ramps (on-ramp / off-ramp): confirmed from the transfer server
+	 * during a read, or entered by a curator; null when none is recorded. */
+	rampTypes: string[] | null;
 	country: string | null;
 	/** True when the partner has a direct contact path (email or channel). */
 	contactable: boolean;
@@ -80,6 +88,7 @@ export interface ScoredPartner {
 
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 function toPublic(p: any): PublicPartner {
+	const read = hasTomlRead(p);
 	return {
 		slug: p.slug,
 		name: p.name,
@@ -90,13 +99,13 @@ function toPublic(p: any): PublicPartner {
 		acceptingClients: p.acceptingClients ?? null,
 		sectors: p.sectors ?? [],
 		regions: p.regions ?? [],
-		assets: (p.assets ?? [])
-			.map((a: { code: string }) => a.code)
-			.filter(Boolean),
-		seps: p.seps ?? [],
+		assets: read
+			? (p.assets ?? []).map((a: { code: string }) => a.code).filter(Boolean)
+			: null,
+		seps: read ? (p.seps ?? []) : null,
 		tomlSourceUrl: p.tomlSourceUrl ?? null,
 		tomlFetchedAt: p.tomlFetchedAt ?? null,
-		rampTypes: p.rampTypes ?? [],
+		rampTypes: recordedOrNull(p.rampTypes),
 		country: p.country ?? null,
 		contactable: Boolean(p.contactEmail || p.contactChannel),
 		logoUrl: p.logoUrl ?? null,

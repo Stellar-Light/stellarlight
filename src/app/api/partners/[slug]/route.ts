@@ -12,7 +12,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
-import { partnerToPublic } from "@/lib/partner-public";
+import { partnerRowOpts, partnerToPublic } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { serverTiming } from "@/lib/server-timing";
 
@@ -80,7 +80,7 @@ export async function GET(
 					source: `https://stellarlight.xyz/partners/${slug}`,
 					generatedAt: new Date().toISOString(),
 				},
-				partner: partnerToPublic(doc),
+				partner: partnerToPublic(doc, partnerRowOpts(req)),
 			},
 			{
 				headers: {
