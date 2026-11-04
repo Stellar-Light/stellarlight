@@ -84,9 +84,16 @@ export interface CoinView {
 	id: string;
 	ticker: string;
 	name: string;
+	/** The brand, as the registry curates it; never the issuer of record. */
 	company: string;
 	issuerCode: string;
+	/** The curated domain; not always the issuer account's home_domain. */
 	issuerDomain: string;
+	issuerOfRecord: string | null;
+	issuerOfRecordCheck: "named" | "not-named" | null;
+	issuerOfRecordAsOf: string | null;
+	issuerOfRecordNote: string | null;
+	/** The peg currency's country, not the issuer's. */
 	country: string | null;
 	peg: string | null;
 	assetType: string | null;
@@ -320,6 +327,65 @@ function CoinIcon({
 }
 
 /** Only shown when a row is NOT a live measurement — the one thing the old explorer couldn't tell you. */
+/** The issuer of record in words: what the asset's own stellar.toml named,
+ *  dated by that check, and never the brand in its place. */
+export function issuerOfRecordText(
+	c: Pick<
+		CoinView,
+		"issuerOfRecord" | "issuerOfRecordCheck" | "issuerOfRecordAsOf"
+	>,
+): string {
+	const when = c.issuerOfRecordAsOf
+		? new Date(c.issuerOfRecordAsOf).toLocaleDateString("en-US", {
+				dateStyle: "medium",
+				timeZone: "UTC",
+			})
+		: "an unrecorded date";
+	if (c.issuerOfRecordCheck === "named" && c.issuerOfRecord)
+		return `${c.issuerOfRecord} (stellar.toml, read ${when})`;
+	if (c.issuerOfRecordCheck === "not-named")
+		return `None named by its stellar.toml (checked ${when})`;
+	return "Not read from its stellar.toml yet";
+}
+
+/** The asset drawer's facts beside the issuer address, each labelled for
+ *  what it is: the brand, the issuer of record, the curated domain and the
+ *  peg's country (the drawer called the last two Home Domain and Country). */
+export function IssuerFacts({ coin }: { coin: CoinView }) {
+	const peg = countryInfo(coin.country, coin.peg);
+	return (
+		<>
+			<div>
+				<div className="text-sm text-muted-foreground mb-1">Brand</div>
+				<div className="text-sm">{coin.company || "-"}</div>
+			</div>
+			<div>
+				<div className="text-sm text-muted-foreground mb-1">
+					Issuer of record
+				</div>
+				<div className="text-sm">{issuerOfRecordText(coin)}</div>
+				{coin.issuerOfRecordNote && (
+					<div className="text-xs text-muted-foreground mt-1">
+						{coin.issuerOfRecordNote}
+					</div>
+				)}
+			</div>
+			<div>
+				<div className="text-sm text-muted-foreground mb-1">Domain</div>
+				<div className="text-sm">{coin.issuerDomain || "-"}</div>
+			</div>
+			<div>
+				<div className="text-sm text-muted-foreground mb-1">Peg country</div>
+				<div className="text-sm flex items-center gap-2">
+					{/* biome-ignore lint/performance/noImgElement: remote flag sprite */}
+					<img src={peg.flag} alt="" className="w-5 h-4" />
+					{peg.label}
+				</div>
+			</div>
+		</>
+	);
+}
+
 function BasisTag({ basis }: { basis: string | null }) {
 	if (!basis || basis === "live") return null;
 	return (
@@ -1029,7 +1095,7 @@ export function StablecoinExplorer({
 														<BasisTag basis={coin.basis} />
 													</div>
 													<div className="text-sm text-muted-foreground">
-														{coin.company}
+														{coin.company ? `Brand: ${coin.company}` : "-"}
 													</div>
 												</div>
 											</div>
@@ -1131,7 +1197,7 @@ export function StablecoinExplorer({
 													alt={info.label}
 													className="w-4 h-3"
 												/>
-												{coin.company}
+												{coin.company ? `Brand: ${coin.company}` : "-"}
 											</div>
 										</div>
 									</div>
@@ -1184,13 +1250,12 @@ export function StablecoinExplorer({
 			{/* Copy/share confirmation. Fixed above the drawer so it is visible
 			    whether the click came from a row or from inside the detail. */}
 			{toast && (
-				<div
-					role="status"
+				<output
 					aria-live="polite"
 					className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] px-4 py-2.5 rounded-lg bg-[#262626] border border-[#2F2F2F] text-sm text-[#E5E5E5] shadow-lg"
 				>
 					{toast}
-				</div>
+				</output>
 			)}
 
 			{/* ── Issuer detail ───────────────────────────────────────────── */}
@@ -1214,11 +1279,33 @@ export function StablecoinExplorer({
 												{selectedIssuer.company}
 											</DrawerTitle>
 											<DrawerDescription className="mt-1">
-												{selectedIssuer.tokens.length} asset
+												Brand · {selectedIssuer.tokens.length} asset
 												{selectedIssuer.tokens.length === 1 ? "" : "s"} ·{" "}
 												{displayUSD(selectedIssuer.totalMarketCapUSD)}
 												market cap
 											</DrawerDescription>
+											{(() => {
+												// The brand is not the issuer: name the issuers of
+												// record its assets' own tomls named, where any did.
+												const named = [
+													...new Set(
+														coins
+															.filter(
+																(c) =>
+																	c.company === selectedIssuer.company &&
+																	c.issuerOfRecordCheck === "named" &&
+																	c.issuerOfRecord,
+															)
+															.map((c) => c.issuerOfRecord as string),
+													),
+												];
+												return named.length ? (
+													<div className="mt-1 text-xs text-muted-foreground">
+														Issuer of record: {named.join(", ")} (per each
+														asset's stellar.toml)
+													</div>
+												) : null;
+											})()}
 											{(() => {
 												const first = coins.find(
 													(c) => c.company === selectedIssuer.company,
@@ -1458,7 +1545,9 @@ export function StablecoinExplorer({
 													alt=""
 													className="w-4 h-3"
 												/>
-												{selectedCoin.company}
+												{selectedCoin.company
+													? `Brand: ${selectedCoin.company}`
+													: "-"}
 												{selectedCoin.assetType
 													? ` · ${selectedCoin.assetType}`
 													: ""}
@@ -1579,34 +1668,7 @@ export function StablecoinExplorer({
 												)}
 											</button>
 										</div>
-										<div>
-											<div className="text-sm text-muted-foreground mb-1">
-												Home Domain
-											</div>
-											<div className="text-sm">
-												{selectedCoin.issuerDomain || "-"}
-											</div>
-										</div>
-										<div>
-											<div className="text-sm text-muted-foreground mb-1">
-												Country
-											</div>
-											<div className="text-sm flex items-center gap-2">
-												{/* biome-ignore lint/performance/noImgElement: remote flag sprite */}
-												<img
-													src={
-														countryInfo(selectedCoin.country, selectedCoin.peg)
-															.flag
-													}
-													alt=""
-													className="w-5 h-4"
-												/>
-												{
-													countryInfo(selectedCoin.country, selectedCoin.peg)
-														.label
-												}
-											</div>
-										</div>
+										<IssuerFacts coin={selectedCoin} />
 										<div>
 											<div className="text-sm text-muted-foreground mb-1">
 												Measured
