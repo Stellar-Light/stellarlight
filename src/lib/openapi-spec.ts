@@ -1039,6 +1039,55 @@ const JUDGING_EVIDENCE_SCHEMA = {
 };
 
 /** What reviewSubmission adds with `hackathon`. */
+/** A curated event's weighted rubric: getHackathon serves it as
+ * hackathon.rules.rubric, reviewSubmission as review.judging.rubric. */
+const HACKATHON_RUBRIC_SCHEMA = {
+	type: "object",
+	description:
+		"Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent in the page's order (not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none.",
+	properties: {
+		scoreMin: { type: "integer" },
+		scoreMax: { type: "integer" },
+		criteria: {
+			type: "array",
+			items: {
+				type: "object",
+				properties: {
+					criterion: {
+						type: "string",
+						description:
+							"The page's label for the criterion. A slot the page scores under a different name in each category carries a label that joins the names, as the page writes it; byCategory names each.",
+					},
+					weightPercent: {
+						type: "number",
+						description:
+							"The criterion's share of the score, in percent; a rubric's weights sum to 100.",
+					},
+					byCategory: {
+						type: "array",
+						description:
+							"Present only on a slot scored under a different name in each category: one entry per category the event judges in (getHackathon tracks with kind category), with the criterion's name there and what it scores. Absent: the criterion is the same in every category.",
+						items: {
+							type: "object",
+							properties: {
+								category: { type: "string" },
+								criterion: { type: "string" },
+								scores: {
+									type: "string",
+									description:
+										"What the criterion scores, in the page's words.",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		source: { type: "string", format: "uri" },
+		checkedOn: { type: "string", format: "date" },
+	},
+};
+
 const REVIEW_JUDGING_PROPERTIES = {
 	stored: {
 		type: "boolean",
@@ -1089,8 +1138,9 @@ const REVIEW_JUDGING_PROPERTIES = {
 	judging: {
 		type: "object",
 		description:
-			"Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason. Evidence, not a verdict: no score, no pass or fail. Categories and criteria keep the sentence's order; the order is not a rank.",
+			"Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason, and the organizer's weighted rubric (rubric) when it publishes one. Evidence, not a verdict: no score, no pass or fail; the rubric's weights are the organizer's, never a score of this repo. Categories and criteria keep the sentence's order; the order is not a rank.",
 		properties: {
+			rubric: HACKATHON_RUBRIC_SCHEMA,
 			hackathon: {
 				type: "object",
 				properties: { slug: { type: "string" }, title: { type: "string" } },
@@ -11485,7 +11535,7 @@ export const spec: OpenAPISpec = {
 											summary: {
 												type: "string",
 												description:
-													"What this feed shows for the selected status and filters: not a claim that no Stellar hackathon is upcoming or active elsewhere. When part of the feed could not be read (meta.warnings), it says so, and no empty result is a check.",
+													"What this feed shows for the selected status, naming any other filter (q, organizer, source): not a claim that no Stellar hackathon is upcoming or active elsewhere. When part of the feed could not be read (meta.warnings, partial true), it says so, counts.total is null, and the empty result is not a check.",
 											},
 											channels: {
 												type: "array",
@@ -11527,33 +11577,9 @@ export const spec: OpenAPISpec = {
 							rules: {
 								type: "object",
 								description:
-									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn, and rubric when the organizer publishes a weighted one; the other keys are absent, not known.",
+									"What the organizer published about submitting and judging. On a DoraHacks event, from its stored event page: absent = the page was not read; a null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated), from its record: present only when the record copies a judging sentence from the organizer's page, as judgingCriteria with source and checkedOn, and rubric when the organizer publishes a weighted one; the other keys are absent, not known. Absent on such an event: its record copies no judging sentence, which is not a claim that the organizer published none.",
 								properties: {
-									rubric: {
-										type: "object",
-										description:
-											"Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent, in the page's order and words (the order is not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none.",
-										properties: {
-											scoreMin: { type: "integer" },
-											scoreMax: { type: "integer" },
-											criteria: {
-												type: "array",
-												items: {
-													type: "object",
-													properties: {
-														criterion: { type: "string" },
-														weightPercent: {
-															type: "number",
-															description:
-																"The criterion's share of the score, in percent; a rubric's weights sum to 100.",
-														},
-													},
-												},
-											},
-											source: { type: "string", format: "uri" },
-											checkedOn: { type: "string", format: "date" },
-										},
-									},
+									rubric: HACKATHON_RUBRIC_SCHEMA,
 									source: {
 										type: "string",
 										description:
@@ -11797,8 +11823,9 @@ export const spec: OpenAPISpec = {
 					},
 					submissions: {
 						type: "array",
+						nullable: true,
 						description:
-							"Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`.",
+							"Every submission served for the event: [] = a roster read that found none. null = no roster is held (an event off DoraHacks with no curated roster) or none could be read just now (meta.note says which): not checked, never none. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`.",
 						items: {
 							type: "object",
 							additionalProperties: true,

@@ -75,14 +75,6 @@ const STELLAR_RE = /stellar|soroban/i;
  * legacy `DoraHacksHackathon` shape. `status` no longer exists upstream and is
  * derived from `timeline_end` (past end = 2/ended, else 1/active).
  */
-/**
- * A timed-out upstream read must not be mistaken for a complete one: it is
- * rethrown, so a caller leaves that event out (the sync, the index's live
- * fallback) instead of reading it as empty.
- */
-const isAbortError = (e: unknown): boolean =>
-	e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
-
 async function fetchOrgHackathons(
 	orgId: number,
 ): Promise<DoraHacksHackathon[]> {
@@ -352,10 +344,12 @@ async function fetchWinnerPrizeMap(
  * Fetches the live submission ("buidl") roster for one DoraHacks hackathon.
  * The v1 hub buidls endpoint is keyed by numeric hackathon id (uname is still
  * needed for the winner-assignments join), and each row nests the project
- * under `buidl`. Read-through: returns [] on a failed roster read (feed down /
- * WAF / unknown id) so callers degrade gracefully. A failed read of the
- * winner assignments throws instead, as a timeout does: a roster without
- * them would serve, and store, every winner as unplaced.
+ * under `buidl`. [] only when DoraHacks answers with no submission. Any
+ * failed read throws: a roster page that answers an error or cannot be
+ * parsed, a timeout, the winner assignments unreadable (a roster without
+ * them would serve, and store, every winner as unplaced). Callers tell a
+ * failed read from an empty one: [] on a failed read served "checked, none"
+ * for a roster no read reached.
  */
 export async function fetchHackathonSubmissions(
 	hackathon: Pick<DoraHacksHackathon, "id" | "uname">,
@@ -380,7 +374,10 @@ export async function fetchHackathonSubmissions(
 				next: { revalidate: 3600 },
 				signal: AbortSignal.timeout(5000),
 			});
-			if (!res.ok) break;
+			if (!res.ok)
+				throw new Error(
+					`DoraHacks submissions for ${hackathon.uname}: HTTP ${res.status}`,
+				);
 			// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 			const data: any = await res.json();
 			// DoraHacks reports the true total on every page — keep it so the
@@ -439,7 +436,7 @@ export async function fetchHackathonSubmissions(
 			`Error fetching DoraHacks submissions for ${hackathon.uname}:`,
 			err,
 		);
-		if (isAbortError(err)) throw err;
+		throw err;
 	}
 	return out;
 }

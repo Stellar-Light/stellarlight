@@ -1552,7 +1552,7 @@ export interface components {
                 matchModeLabel?: string;
                 /** @description Present when the query returns 0 events: a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array. */
                 fallbackChannels?: {
-                    /** @description What this feed shows for the selected status and filters: not a claim that no Stellar hackathon is upcoming or active elsewhere. When part of the feed could not be read (meta.warnings), it says so, and no empty result is a check. */
+                    /** @description What this feed shows for the selected status, naming any other filter (q, organizer, source): not a claim that no Stellar hackathon is upcoming or active elsewhere. When part of the feed could not be read (meta.warnings, partial true), it says so, counts.total is null, and the empty result is not a check. */
                     summary?: string;
                     channels?: {
                         name?: string;
@@ -1569,16 +1569,24 @@ export interface components {
             hackathon?: {
                 /** @description The event page as the organizer published it, in markdown: the description, then each custom tab under its name as a heading (some organizers publish judging criteria or submission requirements only in a tab). Stored daily for DoraHacks events. */
                 description?: string | null;
-                /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn, and rubric when the organizer publishes a weighted one; the other keys are absent, not known. */
+                /** @description What the organizer published about submitting and judging. On a DoraHacks event, from its stored event page: absent = the page was not read; a null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated), from its record: present only when the record copies a judging sentence from the organizer's page, as judgingCriteria with source and checkedOn, and rubric when the organizer publishes a weighted one; the other keys are absent, not known. Absent on such an event: its record copies no judging sentence, which is not a claim that the organizer published none. */
                 rules?: {
-                    /** @description Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent, in the page's order and words (the order is not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none. */
+                    /** @description Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent in the page's order (not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none. */
                     rubric?: {
                         scoreMin?: number;
                         scoreMax?: number;
                         criteria?: {
+                            /** @description The page's label for the criterion. A slot the page scores under a different name in each category carries a label that joins the names, as the page writes it; byCategory names each. */
                             criterion?: string;
                             /** @description The criterion's share of the score, in percent; a rubric's weights sum to 100. */
                             weightPercent?: number;
+                            /** @description Present only on a slot scored under a different name in each category: one entry per category the event judges in (getHackathon tracks with kind category), with the criterion's name there and what it scores. Absent: the criterion is the same in every category. */
+                            byCategory?: {
+                                category?: string;
+                                criterion?: string;
+                                /** @description What the criterion scores, in the page's words. */
+                                scores?: string;
+                            }[];
                         }[];
                         /** Format: uri */
                         source?: string;
@@ -1874,13 +1882,13 @@ export interface components {
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null; array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
-            /** @description Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`. */
+            /** @description Every submission served for the event: [] = a roster read that found none. null = no roster is held (an event off DoraHacks with no curated roster) or none could be read just now (meta.note says which): not checked, never none. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`. */
             submissions?: ({
                 award?: string | null;
                 awardCategory?: string | null;
             } & {
                 [key: string]: unknown;
-            })[];
+            })[] | null;
             /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which. */
             tracks?: ({
                 name?: string;
@@ -4810,8 +4818,30 @@ export interface operations {
                                 /** @description The parts not read, or not read whole; every evidence item resting on one says could-not-check, and its finding gives that part's own reason (GitHub's answer or silence for it, a listing cut short, a git submodule the tree read does not open, a file that is not UTF-8 text, a manifest over 512 KB, more manifests than the 12 a read takes). [] when every part was read. */
                                 unread?: ("metadata" | "tree" | "manifests" | "readme" | "commits" | "releases")[];
                             } | null;
-                            /** @description Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason. Evidence, not a verdict: no score, no pass or fail. Categories and criteria keep the sentence's order; the order is not a rank. */
+                            /** @description Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason, and the organizer's weighted rubric (rubric) when it publishes one. Evidence, not a verdict: no score, no pass or fail; the rubric's weights are the organizer's, never a score of this repo. Categories and criteria keep the sentence's order; the order is not a rank. */
                             judging?: {
+                                /** @description Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent in the page's order (not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none. */
+                                rubric?: {
+                                    scoreMin?: number;
+                                    scoreMax?: number;
+                                    criteria?: {
+                                        /** @description The page's label for the criterion. A slot the page scores under a different name in each category carries a label that joins the names, as the page writes it; byCategory names each. */
+                                        criterion?: string;
+                                        /** @description The criterion's share of the score, in percent; a rubric's weights sum to 100. */
+                                        weightPercent?: number;
+                                        /** @description Present only on a slot scored under a different name in each category: one entry per category the event judges in (getHackathon tracks with kind category), with the criterion's name there and what it scores. Absent: the criterion is the same in every category. */
+                                        byCategory?: {
+                                            category?: string;
+                                            criterion?: string;
+                                            /** @description What the criterion scores, in the page's words. */
+                                            scores?: string;
+                                        }[];
+                                    }[];
+                                    /** Format: uri */
+                                    source?: string;
+                                    /** Format: date */
+                                    checkedOn?: string;
+                                };
                                 hackathon?: {
                                     slug?: string;
                                     title?: string;

@@ -67,7 +67,19 @@ export interface CuratedHackathon extends DoraHacksHackathon {
 		rubric?: {
 			scoreMin: number;
 			scoreMax: number;
-			criteria: Array<{ criterion: string; weightPercent: number }>;
+			/** criterion is the page's label. A slot the page scores under a
+			 * different name in each category (its label joins them) names
+			 * each in byCategory: the category, its criterion, what it scores.
+			 * A test holds byCategory to the record's categories. */
+			criteria: Array<{
+				criterion: string;
+				weightPercent: number;
+				byCategory?: Array<{
+					category: string;
+					criterion: string;
+					scores: string;
+				}>;
+			}>;
 			source: string;
 			checkedOn: string;
 		};
@@ -148,9 +160,8 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 				},
 			],
 			// hackmeridian.com/build: one rubric scores every project, each
-			// criterion 1 to 5. Its 20% slot is Track Alignment for Genesis (fit
-			// with Stellar Unlocked and/or Stellar Composed) and Ecosystem
-			// Alignment for Scale (fit with and value to the Stellar ecosystem).
+			// criterion 1 to 5. Its 20% slot is Track Alignment for Genesis and
+			// Ecosystem Alignment for Scale.
 			rubric: {
 				scoreMin: 1,
 				scoreMax: 5,
@@ -159,6 +170,18 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 						criterion:
 							"Track Alignment (Genesis) / Ecosystem Alignment (Scale)",
 						weightPercent: 20,
+						byCategory: [
+							{
+								category: "Genesis",
+								criterion: "Track Alignment",
+								scores: "Fit with Stellar Unlocked and/or Stellar Composed.",
+							},
+							{
+								category: "Scale",
+								criterion: "Ecosystem Alignment",
+								scores: "Fit with and value to the Stellar ecosystem.",
+							},
+						],
 					},
 					{ criterion: "User Value & Problem", weightPercent: 20 },
 					{ criterion: "Technical Execution", weightPercent: 15 },
@@ -332,15 +355,16 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		title: "Stellar Pro Hackathon, Istanbul",
 		uname: "stellar-pro-hackathon-istanbul-2026",
 		description:
-			"Rise In's 36-hour in-person hackathon, presented by Stellar, at Grand Pera in Beyoğlu, Istanbul, on 19 to 20 September 2026. Two tracks: the Genesis Track (open to builders who want to start from scratch) and the Scale Track (invite-only, for teams already beyond the first prototype stage). $15,000 prize pool. Rise In's recap (30 September) counts 153 participants and 85 projects (Genesis 98 and 53, Scale 55 and 32), judged by the Stellar team. Winners: in Genesis, Pera Wallet, Plink, StellarCard and Payper, first to fourth; in Scale, Pacta, Koul and Mono, first to third. Rise In's page lists 18 to 20 September: its start, midnight on the 19th in Istanbul (GMT+3), is the 18th in UTC, and its program text gives 19 to 20 September.",
+			"Rise In's 36-hour in-person hackathon, presented by Stellar, at Grand Pera in Beyoğlu, Istanbul, on 19 to 20 September 2026. Two tracks: the Genesis Track (open to builders who want to start from scratch) and the Scale Track (invite-only, for teams already beyond the first prototype stage). $15,000 prize pool. The Stellar team reviewed every submission on the hackathon criteria and each project's quality and progress, shortlisted teams from each track, and only the shortlisted teams presented live to the jury. Rise In's recap (30 September) counts 153 participants and 85 projects (Genesis 98 and 53, Scale 55 and 32). Winners: in Genesis, Pera Wallet, Plink, StellarCard and Payper, first to fourth; in Scale, Pacta, Koul and Mono, first to third. Rise In's page lists 18 to 20 September: its start, midnight on the 19th in Istanbul (GMT+3), is the 18th in UTC, and its program text gives 19 to 20 September.",
 		// risein.com/programs/stellar-pro-hackathon (read 2026-11-04): dates,
-		// place, prize pool, "Presented by Stellar", tracks; the recap,
+		// place, prize pool, "Presented by Stellar", tracks, judging; the recap,
 		// risein.com/blog/stellar-pro-hackathon-153-builders-85-projects-and-a-path-to-enterprise
-		// (2026-09-30), the counts, the judging and the winners. No start hour
-		// is published, so a daytime start keeps the 19th: only the days are
-		// claimed. The end is the page's, 23:59 Istanbul time on the 20th.
-		start_time: ts("2026-09-19T09:00:00+03:00"),
-		end_time: ts("2026-09-20T23:59:00+03:00"),
+		// (2026-09-30), the counts and the winners (src/data/curated-builds.ts).
+		// The page's start, midnight on the 19th Istanbul time, is the 18th in
+		// UTC, so the day is kept at UTC midnight and no hour of it is claimed.
+		// The end is the page's own: 23:59:59 on the 20th, Istanbul time.
+		start_time: ts("2026-09-19T00:00:00Z"),
+		end_time: ts("2026-09-20T23:59:59+03:00"),
 		bonus_price: 15000,
 		hackers_count: 153,
 		winner_announced: true,
@@ -362,6 +386,13 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 					"Invite-only, for teams already beyond the first prototype stage.",
 			},
 		],
+		// How the page says the event is judged; it publishes no list of
+		// criteria ("shared with participants before the submission deadline").
+		judging: {
+			text: "The Stellar team reviewed every submission on the hackathon criteria and each project's quality and progress, shortlisted teams from each track, and only the shortlisted teams presented live to the jury.",
+			source: "https://www.risein.com/programs/stellar-pro-hackathon",
+			checkedOn: "2026-11-04",
+		},
 		external_url: "https://www.risein.com/programs/stellar-pro-hackathon",
 		image_url:
 			"https://files.risein.com/programs/2kgsl-cohort-1787226687290jpeg",
@@ -383,6 +414,4 @@ export const CURATED_WINNERS_NOTES: Record<string, string> = {
 		"Winners published for one track only: Rise In's builder spotlight (2026-09-01) names Olio 1st in Payment & Consumer Application. No page we could read names the other tracks' winners (checked 2026-10-22), so they are not served; this is not a claim that those tracks had none.",
 	"hackmeridian-2026":
 		"Not announced upstream: no page we could read names this hackathon's winners (hackmeridian.com, meridian.stellar.org/hackmeridian and its Winners Circle session page, checked 2026-10-31). This is not a claim that no one won.",
-	"stellar-pro-hackathon-istanbul-2026":
-		"Winners published, not held as rows: Rise In's recap (2026-09-30) names seven winners, four in the Genesis Track and three in the Scale Track, and this event's description lists them (checked 2026-11-04). Scout holds no winner rows for it, so winners is empty; this is not a claim that no one won.",
 };
