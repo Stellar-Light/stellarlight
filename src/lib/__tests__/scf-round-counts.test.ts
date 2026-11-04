@@ -9,18 +9,16 @@ import { compareRoundCounts } from "../scf-round-counts";
 const PAGE = "https://communityfund.stellar.org/project/";
 const listed = (slug: string, lastAwardedRound: unknown) => ({
 	slug,
-	title: slug,
 	lastAwardedRound,
 });
-const row = (slug: string, rounds: number[], page: string) => ({
-	slug,
+const row = (rounds: number[] | null, page: string) => ({
 	scfAwardedRounds: rounds,
 	scfSourceUrl: PAGE + page,
 });
 
 describe("compareRoundCounts", () => {
 	it("could-not-check when either side was not read in full", () => {
-		const ours = [row("a", [45], "a-1")];
+		const ours = [row([45], "a-1")];
 		for (const listing of [null, []]) {
 			expect(compareRoundCounts(listing, ours).status).toBe("could-not-check");
 		}
@@ -33,20 +31,59 @@ describe("compareRoundCounts", () => {
 		// exactly 500 rows is the page cap SCF used to serve: counts are floors
 		const capped = Array.from({ length: 500 }, (_, i) => listed(`p-${i}`, 45));
 		expect(compareRoundCounts(capped, ours).status).toBe("could-not-check");
-		// no numbered round at all (negative codes are non-numbered awards)
-		expect(compareRoundCounts([listed("pg-1", -326)], ours).status).toBe(
-			"could-not-check",
-		);
 	});
 
-	it("the latest round is exact and names the SCF pages no row cites", () => {
+	it("a value it cannot read is could-not-check, never a skipped row", () => {
+		// "45" as a string used to be skipped, so SCF's count shrank to ours
+		// and the round read as a match.
+		const report = compareRoundCounts(
+			[listed("paid-1", 45), listed("other-1", "45")],
+			[row([45], "paid-1")],
+		);
+		expect(report).toMatchObject({ status: "could-not-check" });
+		if (report.status === "could-not-check")
+			expect(report.reason).toContain("other-1");
+		expect(
+			compareRoundCounts([{ lastAwardedRound: 45 }], [row([45], "a-1")]).status,
+		).toBe("could-not-check");
+	});
+
+	it("a page listed twice counts once", () => {
+		// SCF has one #45 page; two rows of ours claim #45 from it. Counted
+		// twice, the listing matched our two rows.
+		const report = compareRoundCounts(
+			[listed("a-1", 45), listed("a-1", 45)],
+			[row([45], "a-1"), row([45], "a-1")],
+		);
+		expect(report.status).toBe("mismatch");
+		expect(
+			compareRoundCounts(
+				[listed("a-1", 45), listed("a-1", 44)],
+				[row([45], "a-1")],
+			).status,
+		).toBe("could-not-check");
+	});
+
+	it("a listing that lacks a page our rows cite for the latest round is could-not-check", () => {
+		// The listing gives no total, so a cut one is caught by a witness: a
+		// row claiming the latest round whose own SCF page is not listed.
+		const report = compareRoundCounts(
+			[listed("x-1", 45)],
+			[row([45], "x-1"), row([45], "y-1")],
+		);
+		expect(report).toMatchObject({ status: "could-not-check" });
+		if (report.status === "could-not-check")
+			expect(report.reason).toContain("y-1");
+	});
+
+	it("the latest round is exact: short and over are both findings", () => {
 		const report = compareRoundCounts(
 			[
 				listed("liqvid-hrr", 45),
 				listed("catlog-ygy", 45),
 				listed("pods-dxl", 45),
 			],
-			[row("liqvidxyz", [37], "liqvid-hrr"), row("catlog", [45], "catlog-ygy")],
+			[row([37], "liqvid-hrr"), row([45], "catlog-ygy")],
 		);
 		expect(report.status).toBe("mismatch");
 		if (report.status === "could-not-check") return;
@@ -57,13 +94,20 @@ describe("compareRoundCounts", () => {
 				exact: true,
 				scf: 3,
 				ours: 1,
-				disagrees: true,
+				verdict: "short",
 				uncited: ["liqvid-hrr", "pods-dxl"],
 			},
 		]);
+		const over = compareRoundCounts(
+			[listed("a-1", 45), listed("b-1", 44)],
+			[row([45], "a-1"), row([44, 45], "b-1")],
+		);
+		expect(over.status).toBe("mismatch");
+		if (over.status !== "could-not-check")
+			expect(over.rounds[0]).toMatchObject({ round: 45, verdict: "over" });
 	});
 
-	it("an earlier round is a floor: more rows than SCF is fine, fewer disagrees", () => {
+	it("an earlier round above its SCF floor is unconfirmed, not a match", () => {
 		const report = compareRoundCounts(
 			[
 				listed("x-1", 45),
@@ -72,41 +116,43 @@ describe("compareRoundCounts", () => {
 				listed("w-1", 43),
 			],
 			[
-				row("x", [43, 45], "x-1"),
-				row("y", [44], "y-1"),
-				row("v", [44], "v-1"),
-				row("z", [43], "z-1"),
+				row([43, 45], "x-1"),
+				row([44], "y-1"),
+				row([44], "v-1"),
+				row([43], "z-1"),
 			],
 		);
 		if (report.status === "could-not-check") throw new Error(report.reason);
 		const by = Object.fromEntries(report.rounds.map((r) => [r.round, r]));
-		expect(by[45]).toMatchObject({
-			exact: true,
-			scf: 1,
-			ours: 1,
-			disagrees: false,
-		});
+		expect(by[45]).toMatchObject({ exact: true, verdict: "agrees" });
+		// SCF lists one page last awarded in #44; two rows of ours claim it.
+		// The listing is a floor there, so it cannot confirm the second.
 		expect(by[44]).toMatchObject({
 			exact: false,
 			scf: 1,
 			ours: 2,
-			disagrees: false,
+			verdict: "unconfirmed",
 		});
-		// two SCF pages last awarded in #43, and z cites only one of them
 		expect(by[43]).toMatchObject({
 			exact: false,
 			scf: 2,
 			ours: 2,
-			disagrees: false,
+			verdict: "agrees",
 		});
 		expect(report.status).toBe("match");
+		const short = compareRoundCounts(
+			[listed("x-1", 45), listed("y-1", 44), listed("u-1", 44)],
+			[row([45], "x-1"), row([44], "y-1")],
+		);
+		expect(short.status).toBe("mismatch");
 	});
 
-	it("a latest round we overcount also disagrees", () => {
+	it("a row whose rounds were not read is counted apart, never as not in the round", () => {
 		const report = compareRoundCounts(
 			[listed("a-1", 45)],
-			[row("a", [45], "a-1"), row("b", [45], "b-1")],
+			[row([45], "a-1"), row(null, "b-1")],
 		);
-		expect(report.status).toBe("mismatch");
+		if (report.status === "could-not-check") throw new Error(report.reason);
+		expect(report.roundsUnread).toBe(1);
 	});
 });

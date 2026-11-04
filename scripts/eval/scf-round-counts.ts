@@ -78,18 +78,27 @@ async function main() {
 		process.exit(2);
 	}
 	console.log(
-		`SCF listing ${listing?.length} rows; our awarded rows ${ours?.length} (${BASE})`,
+		`SCF listing ${listing?.length} rows; our awarded rows ${ours?.length}, ${report.roundsUnread} with rounds unread (${BASE})`,
 	);
+	const label = {
+		agrees: "",
+		short: "  SHORT",
+		over: "  OVER",
+		unconfirmed: "  above the floor, unconfirmed",
+	};
 	for (const r of report.rounds) {
 		console.log(
-			`SCF #${r.round} ${r.exact ? `exact: SCF ${r.scf}` : `floor: SCF >= ${r.scf}`}, ours ${r.ours}${r.disagrees ? "  DISAGREES" : ""}`,
+			`SCF #${r.round} ${r.exact ? `exact: SCF ${r.scf}` : `floor: SCF >= ${r.scf}`}, ours ${r.ours}${label[r.verdict]}`,
 		);
 		for (const s of r.uncited)
 			console.log(
 				`    no row cites https://communityfund.stellar.org/project/${s}`,
 			);
 	}
-	console.log(`VERDICT: ${report.status}`);
+	const unconfirmed = report.rounds.filter((r) => r.verdict === "unconfirmed");
+	console.log(
+		`VERDICT: ${report.status} (${unconfirmed.length} earlier round(s) above their floor are unconfirmed here; scf-crosscheck roundsOverstated reads those pages)`,
+	);
 	process.exit(report.status === "match" ? 0 : 1);
 }
 
