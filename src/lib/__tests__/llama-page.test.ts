@@ -1,22 +1,26 @@
 /**
  * sls-102 (#1913): Blend's tvlUSD sums four DefiLlama rows while
- * tvlMethodUrl linked the first of them, the V1 pools child, which held
- * about $43k of the $127M. A citation for a sum must show the sum: one
- * mapped row cites its own page; several cite the parent page whose
- * children are exactly those rows; with no such parent there is no single
- * page, so the URL is null and llamaSlugs lists each contributing row.
- * The status checks cite the same page.
+ * tvlMethodUrl linked the first of them, the V1 pools child (on 2026-11-04
+ * DefiLlama put $43,591 of the four rows' $127.59M on it). A citation for a
+ * sum must show the sum: one mapped row cites its own page; several cite
+ * the parent page whose children are exactly those rows, as the TVL writer
+ * last read DefiLlama's list (llamaListing.parent); with no such parent, or
+ * none read yet, there is no single page, so the URL is null and llamaSlugs
+ * lists each contributing row. The status checks cite that page, else the
+ * first linked row's. A multi-row sum with no page is a nightly finding.
  *
  * Lives in src/lib so CI runs it; the route half drives the real route with
  * Payload mocked.
  */
+import { readdirSync, readFileSync } from "node:fs";
+import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
-	LLAMA_PARENT_PAGES,
 	llamaPageFor,
 	llamaParentOf,
 	statusChecksFor,
+	tvlCitationGaps,
 } from "../status-checks";
 
 const BLEND = [
@@ -28,27 +32,27 @@ const BLEND = [
 
 describe("llamaPageFor: the page that shows the whole tvlUSD", () => {
 	it("one mapped row cites its own page", () => {
-		expect(llamaPageFor(["aquarius-stellar"])).toBe(
+		expect(llamaPageFor(["aquarius-stellar"], null)).toBe(
 			"https://defillama.com/protocol/aquarius-stellar",
 		);
 	});
-	it("Blend's four rows cite the parent page, in any order", () => {
-		expect(llamaPageFor(BLEND)).toBe("https://defillama.com/protocol/blend");
-		expect(llamaPageFor([...BLEND].reverse())).toBe(
+	it("several rows cite the parent the writer verified", () => {
+		expect(llamaPageFor(BLEND, "blend")).toBe(
 			"https://defillama.com/protocol/blend",
 		);
 	});
-	it("several rows without a parent that sums exactly them: no single page", () => {
-		expect(llamaPageFor(["blend-pools", "aquarius-stellar"])).toBeNull();
-		expect(llamaPageFor(BLEND.slice(0, 2))).toBeNull();
+	it("several rows with no verified parent: no single page", () => {
+		expect(llamaPageFor(BLEND, null)).toBeNull();
+		expect(llamaPageFor(BLEND, undefined)).toBeNull();
+		expect(llamaPageFor(BLEND, "")).toBeNull();
 	});
 	it("not mapped is null", () => {
-		expect(llamaPageFor(null)).toBeNull();
-		expect(llamaPageFor([])).toBeNull();
+		expect(llamaPageFor(null, "blend")).toBeNull();
+		expect(llamaPageFor([], null)).toBeNull();
 	});
 });
 
-describe("llamaParentOf: the writer's check against DefiLlama's list", () => {
+describe("llamaParentOf: the writer's read of DefiLlama's list", () => {
 	// Shape of api.llama.fi/protocols on 2026-11-04 (parentProtocol only).
 	const list = [
 		...BLEND.map((slug) => ({ slug, parentProtocol: "parent#blend" })),
@@ -73,35 +77,83 @@ describe("llamaParentOf: the writer's check against DefiLlama's list", () => {
 	it("one row needs no parent", () => {
 		expect(llamaParentOf(["soroswap-amm"], list)).toBeNull();
 	});
-	it("every curated parent page agrees with the rule it stands for", () => {
-		for (const [key, parent] of Object.entries(LLAMA_PARENT_PAGES)) {
-			const slugs = key.split(",");
-			const fam = slugs.map((slug) => ({
-				slug,
-				parentProtocol: `parent#${parent}`,
-			}));
-			expect(llamaParentOf(slugs, fam)).toBe(parent);
-			expect(key).toBe([...slugs].sort().join(","));
-		}
-	});
 });
 
 describe("status checks cite the same page", () => {
-	it("Blend's listing and TVL checks link the parent page", () => {
-		const out = statusChecksFor(
-			{
-				status: "Live",
-				types: ["Lending"],
-				llamaSlugs: BLEND,
-				tvlUSD: 127_588_232,
-				tvlAsOf: "2026-11-02T13:19:15.688Z",
-				llamaListing: { state: "listed", checkedAt: "2026-11-02T13:19:15Z" },
-			},
-			new Date("2026-11-04T12:00:00Z"),
+	const blend = (parent?: string | null) => ({
+		status: "Live",
+		types: ["Lending"],
+		llamaSlugs: BLEND,
+		tvlUSD: 127_588_232,
+		tvlAsOf: "2026-11-02T13:19:15.688Z",
+		llamaListing: {
+			state: "listed",
+			checkedAt: "2026-11-02T13:19:15Z",
+			parent,
+		},
+	});
+	const urls = (p: unknown) =>
+		statusChecksFor(p, new Date("2026-11-04T12:00:00Z")).statusChecks?.map(
+			(c) => c.sourceUrl,
 		);
-		expect(out.statusChecks?.map((c) => c.sourceUrl)).toEqual([
+	it("Blend's checks link the verified parent page", () => {
+		expect(urls(blend("blend"))).toEqual([
 			"https://defillama.com/protocol/blend",
 			"https://defillama.com/protocol/blend",
+		]);
+	});
+	it("with no verified parent they fall back to the first row's page", () => {
+		expect(urls(blend(null))).toEqual([
+			"https://defillama.com/protocol/blend-pools",
+			"https://defillama.com/protocol/blend-pools",
+		]);
+	});
+});
+
+describe("tvlCitationGaps: a multi-row sum with no page is a finding", () => {
+	it("names the row and its family", () => {
+		expect(
+			tvlCitationGaps([
+				{
+					slug: "blend",
+					tvlUSD: 1,
+					llamaSlugs: BLEND,
+					tvlMethodUrl: null,
+				},
+				{
+					slug: "ok",
+					tvlUSD: 1,
+					llamaSlugs: BLEND,
+					tvlMethodUrl: "https://defillama.com/protocol/blend",
+				},
+				{ slug: "one", tvlUSD: 1, llamaSlugs: ["x"], tvlMethodUrl: null },
+				{ slug: "untracked", tvlUSD: null, llamaSlugs: BLEND },
+			]),
+		).toEqual([{ slug: "blend", family: BLEND }]);
+	});
+});
+
+describe("every TVL citation goes through the shared helpers", () => {
+	// The class: a writer or route building https://defillama.com/protocol/
+	// from llamaSlugs[0] cites one row of a sum. Only status-checks.ts builds
+	// the URL. The project page's TVL chart is exempt: it charts the one
+	// protocol its name lookup found and links that same protocol's page.
+	const ROOT = process.cwd();
+	const files = ["src", "scripts"].flatMap((dir) =>
+		(readdirSync(join(ROOT, dir), { recursive: true }) as string[])
+			.filter((f) => /\.(ts|tsx)$/.test(f) && !f.includes("node_modules"))
+			.map((f) => join(dir, f)),
+	);
+	it("no other file builds a protocol URL from a slug", () => {
+		const builders = files.filter((f) =>
+			/defillama\.com\/protocol\/\$\{/.test(
+				readFileSync(join(ROOT, f), "utf8"),
+			),
+		);
+		expect(files.length).toBeGreaterThan(100); // the scan must not pass vacuously
+		expect(builders.sort()).toEqual([
+			"src/components/project-tvl-chart.tsx",
+			"src/lib/status-checks.ts",
 		]);
 	});
 });
@@ -112,7 +164,7 @@ vi.mock("@/lib/repo-search", async (orig) => ({
 	...(await orig<typeof import("@/lib/repo-search")>()),
 	searchRepos: vi.fn(async () => ({ repos: [], warnings: [] })),
 }));
-const lending = (slug: string, llamaSlugs: string[]) => ({
+const lending = (slug: string, llamaSlugs: string[], parent?: string) => ({
 	id: slug,
 	name: slug,
 	slug,
@@ -123,6 +175,7 @@ const lending = (slug: string, llamaSlugs: string[]) => ({
 	tvlUSD: 1000,
 	tvlAsOf: "2026-11-02T13:19:15.688Z",
 	llamaSlugs,
+	llamaListing: { state: "listed", checkedAt: "2026-11-02", parent },
 });
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({
@@ -130,11 +183,12 @@ vi.mock("@/lib/payload-client", () => ({
 			a.collection === "projects" && a.limit === 0
 				? {
 						docs: [
-							lending("blend", BLEND),
+							lending("blend", BLEND, "blend"),
+							lending("unverified", BLEND),
 							lending("slender", ["slender"]),
 							lending("two-families", ["blend-pools", "slender"]),
 						],
-						totalDocs: 3,
+						totalDocs: 4,
 					}
 				: { docs: [], totalDocs: 0 },
 		),
@@ -167,6 +221,7 @@ describe("GET /api/projects/search tvlMethodUrl (sls-102)", () => {
 		);
 		expect(url).toEqual({
 			blend: "https://defillama.com/protocol/blend",
+			unverified: null,
 			slender: "https://defillama.com/protocol/slender",
 			"two-families": null,
 		});

@@ -15,6 +15,7 @@ const ASOF_SEED = "2026-08-31";
 // typecheck against a union that predated it. That is the sixth copy of this
 // list found on 2026-09-08 — the type as well as the value.
 import type { StatusBasis } from "../../src/lib/project-status";
+import type { VENUE_ROLES } from "../../src/lib/project-types";
 export type { StatusBasis };
 
 /** Launch-status corrections (boxy 2026-07-09: "some are in process of
@@ -4996,8 +4997,9 @@ export const SEEDS: Array<{
 	// Stellar Mainnet (Pubnet)" and gives one proxy contract per network; the
 	// changelog dates the release Sep 29, 2026. stellar.expert shows both
 	// proxies on-chain (mainnet created 2026-09-14, 11 invocations by
-	// 2026-11-04). Networks are the docs' own Data Feeds guide sections (EVM,
-	// Aptos, Solana, Stellar). Proxies ride PRODUCTS_FIX in curate-projects.ts
+	// 2026-11-04). supportedNetworks stays empty: a stored list is served as
+	// networksBasis "curated", which the spec reads as complete, and the docs
+	// give no full chain list. Proxies ride PRODUCTS_FIX in curate-projects.ts
 	// and the mainnet deployment rides DEPLOYMENT_VERIFIED.
 	{
 		slug: "chainlink",
@@ -5005,7 +5007,7 @@ export const SEEDS: Array<{
 		category: "Infrastructure",
 		status: "Live",
 		types: ["Oracle"],
-		supportedNetworks: ["stellar", "evm", "solana", "aptos"],
+		supportedNetworks: [],
 		shortDescription:
 			"Chainlink Data Feeds bring Chainlink's price feeds to Stellar: available on Stellar Testnet and Stellar Mainnet (Pubnet) per Chainlink's docs (release of 2026-09-29). A Soroban contract reads every feed through one proxy contract per network and picks a feed by its 32-byte data_id: Testnet proxy CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4, Mainnet proxy CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ. Separate from the third-party Chainlink Oracles Relayer (VRF).",
 		links: { website: "https://chain.link/" },
@@ -5018,15 +5020,17 @@ export const SEEDS: Array<{
 	// supports Stellar as a default network, allowing you to manage XLM and
 	// other assets", with trustlines, the reserve and same-chain swaps on
 	// Stellar. metamask.io 301s to metamask.com ("Buy, sell, swap, earn, and
-	// spend BTC, ETH, SOL and more", the networks below); the help center is
-	// Consensys's. PRODUCT_KIND in curate-projects.ts marks it end-user-wallet.
+	// spend BTC, ETH, SOL and more"): "and more" is no complete chain list, so
+	// supportedNetworks stays empty rather than read as curated and complete.
+	// The help center is Consensys's. PRODUCT_KIND in curate-projects.ts marks
+	// it end-user-wallet.
 	{
 		slug: "metamask",
 		name: "MetaMask",
 		category: "User-Facing App",
 		status: "Live",
 		types: ["Wallet"],
-		supportedNetworks: ["stellar", "evm", "solana", "bitcoin"],
+		supportedNetworks: [],
 		shortDescription:
 			"MetaMask, the self-custodial wallet from Consensys, supports Stellar as a default network: users hold XLM and other Stellar assets, manage trustlines and the account reserve, and swap Stellar tokens in MetaMask itself, with no Snap to install. Separate from the community Stellar-MetaMask Snap.",
 		links: { website: "https://metamask.com/" },
@@ -5036,6 +5040,43 @@ export const SEEDS: Array<{
 		statusBasis: "operator-announcement",
 	},
 ];
+
+/** sls-035 (#517): DEX-landscape role for the clearest records: makes the
+ * venue/aggregator/UI distinction data instead of prose, so a DEX cluster
+ * count stops reading as a competitor count. EXACT-SYNC for listed slugs
+ * (curate-projects.ts applies it). Moved here 2026-11-04 so a test can pin
+ * every assignment (src/lib/__tests__/directory-corrections.test.ts). Only
+ * assignments whose cited source supports the role's definition; hoops,
+ * normal and multi-role platforms stay null = unclassified. */
+export const VENUE_ROLE: Record<string, (typeof VENUE_ROLES)[number]> = {
+	soroswap: "amm", // soroswap.finance: AMM protocol on Soroban running its own pools; DefiLlama `soroswap` TVL row
+	aquarius: "amm", // aqua.network: AMM pools + liquidity-incentive voting on Stellar; DefiLlama `aquarius-stellar` TVL row
+	phoenix: "amm", // Phoenix DeFi Hub: constant-product + stableswap pools (PHO) on Soroban; runs its own liquidity
+	sushi: "amm", // Sushi's Stellar deployment runs its own AMM pools; DefiLlama `sushi-stellar` TVL row
+	comet: "amm", // WAS a Balancer-style weighted-pool AMM on Soroban (record Inactive: status carries liveness; role is the taxonomy fact)
+	stellarterm: "trading-ui", // stellarterm.com: open-source trading client for the native Stellar DEX; hosts no liquidity of its own
+	stellarx: "trading-ui", // stellarx.com: trading interface over Stellar's native orderbook; no own pools
+	lobstr: "wallet-integrated", // lobstr.co: wallet with in-app swap/SDEX trading: venue access inside a wallet, not an independent venue
+	scopuly: "wallet-integrated", // scopuly.com: wallet + SDEX trading app (typed Wallet/DEX)
+	stellarbroker: "aggregator-router", // stellar.broker: "multi-source liquidity swap router … access to AMMs and Stellar DEX": routes across venues, runs none
+	// sls-113 (#1905), read 2026-11-04 and 2026-11-05 from the operator's own
+	// material. aggregator-router means "routes across venues and runs none":
+	// each entry below cites where the operator says its trades execute on
+	// other parties' pools, protocols or solvers. Cross-chain routers qualify
+	// on the same test, and must stay out of the independent-venue count.
+	lumagg: "aggregator-router", // github.com/Lum-Agg/stellar-dex-agg README: "routes swaps across Soroswap, Aquarius (xy=k, stable, CLMM), Phoenix, Sushi V3, and Comet"; its DEX sources table lists only those venues' pools, and its vault is an "Operator-facing atomic round-trip stack (not a retail product)"
+	lifi: "aggregator-router", // docs.li.fi/llms.txt order flow: "The LI.FI API queries bridges, DEXs, and solvers for pricing" and "The facet executes via the underlying protocol"; docs.li.fi/introduction/stellar-ecosystem: "LI.FI integrates 1 DEX aggregator on Stellar" (Soroswap)
+	sodax: "aggregator-router", // docs.sodax.com/llms.txt: "Cross-network swaps filled by solvers" and "SODAX routes and settles; solvers on the marketplace fill"; Stellar trustline and sponsoring guides in the same docs
+	stellarport: "wallet-integrated", // stellarport.io: Wallet and Exchange tabs, "The new SDEX portal has been released": SDEX trading inside a wallet
+	lumenswap: "trading-ui", // lumenswap.io ("Decentralized Exchange on Stellar"): its app bundle sends only classic offers, path payments and liquidity-pool deposits to Horizon, no Soroban calls: an interface over SDEX and protocol pools
+	// Left null on purpose (2026-11-04 pass): tinyamm runs its own AMM, but
+	// only testnet.tinyamm.com answers, so it is no independent venue on the
+	// network a venue count means; axis runs its own Soroban limit order book
+	// (axis.markets/docs), which is neither amm nor the native SDEX book
+	// native-orderbook names; perps, launchpads, CEX, remittance and vault
+	// rows are not spot venues; the rest could not be verified on Stellar
+	// from the operator's own pages.
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Moved verbatim from curate-projects.ts (2026-07-26, lessons class 32). These
@@ -5724,7 +5765,7 @@ export const DEPLOYMENT_VERIFIED: Record<
 	chainlink: {
 		network: "mainnet",
 		sourceUrl: "https://docs.chain.link/data-feeds/stellar",
-		note: "operator docs list the Stellar Mainnet (Pubnet) Data Feeds proxy CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ (testnet proxy CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4); stellar.expert shows the mainnet proxy created 2026-09-14 with 11 invocations and 14 events by 2026-11-04",
+		note: "Curator attestation, 2026-11-04 (not a chain check this lane runs): Chainlink's Stellar docs list the Stellar Mainnet (Pubnet) Data Feeds proxy CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ (testnet proxy CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4); a stellar.expert read that day showed the mainnet proxy created 2026-09-14 with 11 invocations",
 	},
 };
 
@@ -6093,6 +6134,11 @@ export const WEBSITE_REMOVE: Record<string, string> = {
 
 	// thebluemarble.io now redirects to a casino spam page (s666com.casino).
 	"the-blue-marble": "https://thebluemarble.io/",
+	// Read 2026-11-04 (sls-100 review): stabble.org answers 200 on its own host
+	// with "Best Crypto Casinos Canada 2026: Tested & Ranked | Stabble", a
+	// gambling review site, not the stable-swap DEX the row describes. The
+	// row's Live status is a separate question for the owner.
+	stabble: "https://stabble.org/",
 	// Same hijacked domain on a second row (slug "blue-marble", Inactive): the
 	// 2026-09-01 owner call covers the domain, not the slug. Both rows point
 	// at diviandecor.com / casino spam now; neither should link out.

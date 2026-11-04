@@ -244,7 +244,10 @@ async function semanticProjectRows(
 			tvlMethod: p.tvlMethod ?? null,
 			// sls-039: mapped DefiLlama identifiers + citation URL
 			llamaSlugs: pickLlamaSlugs(p.llamaSlugs),
-			tvlMethodUrl: llamaPageFor(pickLlamaSlugs(p.llamaSlugs)),
+			tvlMethodUrl: llamaPageFor(
+				pickLlamaSlugs(p.llamaSlugs),
+				p.llamaListing?.parent,
+			),
 			// sls-032/035: route-level bridge evidence + DEX-landscape role
 			routes: pickRoutes(p.routes),
 			venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
@@ -1428,6 +1431,61 @@ async function handle(req: NextRequest) {
 				warnings.push(degradedWarning("projects audits rollup", e));
 			}
 
+			// A lineage shadow is served as its canonical (the fold below), so
+			// under ?status= or ?venueRole= it belongs to the set only when its
+			// canonical passes the filter. Decided here, before ranking and
+			// counting: dropped later on the page, the shadow was still counted
+			// and total promised a row no page could serve (sls-113 review). A
+			// failed read leaves the shadows in and nulls the total (not a
+			// decoration read), so an unchecked count is never served as exact.
+			const isShadow = (d: { slug?: string; canonicalSlug?: string | null }) =>
+				!!d.canonicalSlug && d.canonicalSlug !== d.slug;
+			const shadowTargets = [
+				...new Set(
+					(docs as Array<{ slug?: string; canonicalSlug?: string | null }>)
+						.filter(isShadow)
+						.map((d) => d.canonicalSlug as string),
+				),
+			];
+			if ((statusParam || venueRoleParam) && shadowTargets.length) {
+				const canon = await degradedRead(
+					"projects shadow canonicals",
+					() =>
+						payload.find({
+							collection: "projects",
+							where: { slug: { in: shadowTargets } },
+							limit: shadowTargets.length,
+							depth: 0,
+							select: { slug: true, status: true, venueRole: true },
+						}),
+					null,
+					DEFAULT_READ_TIMEOUT_MS,
+				);
+				if (canon.warning) warnings.push(canon.warning);
+				if (canon.value) {
+					const bySlug = new Map(
+						(
+							canon.value.docs as Array<{
+								slug: string;
+								status?: string;
+								venueRole?: string | null;
+							}>
+						).map((c) => [c.slug, c]),
+					);
+					docs = docs.filter((d) => {
+						const c = isShadow(d)
+							? bySlug.get(d.canonicalSlug as string)
+							: null;
+						// dangling pointer: the fold keeps the shadow, so it counts
+						return (
+							!c ||
+							((!statusParam || c.status === statusParam) &&
+								(!venueRoleParam || c.venueRole === venueRoleParam))
+						);
+					});
+				}
+			}
+
 			projects = (
 				docs as Array<{
 					id: string;
@@ -1454,6 +1512,7 @@ async function handle(req: NextRequest) {
 					tvlSource?: string | null;
 					tvlMethod?: string | null;
 					llamaSlugs?: string[] | null;
+					llamaListing?: { parent?: string | null } | null;
 					routes?: unknown;
 					venueRole?: string | null;
 					productKind?: string | null;
@@ -1573,7 +1632,10 @@ async function handle(req: NextRequest) {
 					tvlMethod: p.tvlMethod ?? null,
 					// sls-039: mapped DefiLlama identifiers + citation URL
 					llamaSlugs: pickLlamaSlugs(p.llamaSlugs),
-					tvlMethodUrl: llamaPageFor(pickLlamaSlugs(p.llamaSlugs)),
+					tvlMethodUrl: llamaPageFor(
+						pickLlamaSlugs(p.llamaSlugs),
+						p.llamaListing?.parent,
+					),
 					// sls-032/035: route-level bridge evidence + DEX-landscape role
 					routes: pickRoutes(p.routes),
 					venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
@@ -2071,10 +2133,14 @@ async function handle(req: NextRequest) {
 	// !typeParam: an exact-type enumeration's membership is the typed set —
 	// padding it with vector neighbours would re-introduce off-set rows the
 	// belt then strips page-side, recreating the returned<limit ghost pages
-	// this fix removes (sls-033).
+	// this fix removes (sls-033). !venueRoleParam for the same reason: the
+	// role set is a small curated list, and the vector index takes no role
+	// filter, so its nearest neighbours filtered afterwards are a cut sample
+	// of that list, not a search of it (sls-113 review).
 	if (
 		q &&
 		!typeParam &&
+		!venueRoleParam &&
 		offset === 0 &&
 		!didYouMean &&
 		scored.length < limit &&
@@ -2107,8 +2173,6 @@ async function handle(req: NextRequest) {
 						!typeParam ||
 						(Array.isArray(r.types) && r.types.includes(typeParam)),
 				)
-				// ?venueRole= too (sls-113): semantic rows carry venueRole.
-				.filter((r) => !venueRoleParam || r.venueRole === venueRoleParam)
 				.slice(0, limit - scored.length);
 		} catch (e) {
 			// index not ready / embed call down — degrade to keyword-only, said
@@ -2264,7 +2328,10 @@ async function handle(req: NextRequest) {
 					tvlSource: c.tvlSource ?? null,
 					tvlMethod: c.tvlMethod ?? null,
 					llamaSlugs: pickLlamaSlugs(c.llamaSlugs),
-					tvlMethodUrl: llamaPageFor(pickLlamaSlugs(c.llamaSlugs)),
+					tvlMethodUrl: llamaPageFor(
+						pickLlamaSlugs(c.llamaSlugs),
+						c.llamaListing?.parent,
+					),
 					routes: pickRoutes(c.routes),
 					venueRole: typeof c.venueRole === "string" ? c.venueRole : null,
 					// sls-033: product kind + availability must be the CANONICAL's too

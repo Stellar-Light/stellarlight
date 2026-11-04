@@ -30,7 +30,6 @@
 import "./load-env";
 import { getPayload } from "payload";
 import {
-	LLAMA_PARENT_PAGES,
 	llamaListingOf,
 	llamaPageFor,
 	llamaParentOf,
@@ -190,8 +189,29 @@ async function main() {
 			continue;
 		}
 		// DefiLlama's verdict, read from the FULL list (a dead protocol can
-		// drop Stellar from its chains).
-		const listing = { ...llamaListingOf(llamaSlugs, all), checkedAt: asOf };
+		// drop Stellar from its chains). parent (sls-102): the page that sums
+		// exactly these rows, which the route cites as tvlMethodUrl; null
+		// when one row is mapped or the family no longer matches the map.
+		const parent = llamaParentOf(llamaSlugs, all);
+		const listing = {
+			...llamaListingOf(llamaSlugs, all),
+			parent,
+			checkedAt: asOf,
+		};
+		if (llamaSlugs.length > 1) {
+			const was = d.llamaListing?.parent ?? null;
+			if (parent)
+				console.log(
+					`  ${ourSlug}: cites ${llamaPageFor(llamaSlugs, parent)}, parent of exactly [${llamaSlugs.join(",")}]`,
+				);
+			// A finding, not a failed run: the row's tvlMethodUrl serves null
+			// from this write on, and the nightly completeness sweep files it
+			// (tvlCitationGaps) so it reaches the improvement ledger.
+			else
+				console.warn(
+					`  ⚠ ${ourSlug}: no DefiLlama parent's children are exactly [${llamaSlugs.join(",")}]${was ? ` (was ${was})` : ""}: tvlMethodUrl serves null until LLAMA_MAP matches the family again`,
+				);
+		}
 		const rows = llamaSlugs
 			.map((ls) => bySlug.get(ls))
 			.filter((r): r is LlamaProtocol => Boolean(r));
@@ -240,29 +260,6 @@ async function main() {
 				console.error(`  FAILED: ${ourSlug} — ${String(err)}`);
 			}
 		}
-	}
-
-	// ── citation pages (sls-102): a summed tvlUSD cites the page that shows
-	// the sum. The route serves llamaPageFor from LLAMA_PARENT_PAGES; this
-	// re-derives every multi-row family from DefiLlama's list and fails the run
-	// when the two disagree: a parent that gained a child the map lacks shows
-	// more than tvlUSD adds, and the map must move with it.
-	console.log("\n── TVL citation pages (multi-row mappings, sls-102) ──");
-	for (const [ourSlug, llamaSlugs] of Object.entries(LLAMA_MAP)) {
-		if (llamaSlugs.length < 2) continue;
-		const live = llamaParentOf(llamaSlugs, all);
-		const key = [...llamaSlugs].sort().join(",");
-		const curated = LLAMA_PARENT_PAGES[key] ?? null;
-		if (live === curated) {
-			console.log(
-				`  ${ourSlug}: cites ${llamaPageFor(llamaSlugs) ?? "no single page (each llamaSlugs page contributes)"}`,
-			);
-			continue;
-		}
-		console.error(
-			`  ✗ ${ourSlug}: DefiLlama's list gives parent ${live ?? "none that sums exactly these rows"}, LLAMA_PARENT_PAGES says ${curated ?? "none"} for [${key}]. Fix the map (src/lib/status-checks.ts) or LLAMA_MAP before trusting tvlMethodUrl.`,
-		);
-		process.exitCode = 1;
 	}
 
 	// ── liveness report (never acts) ──

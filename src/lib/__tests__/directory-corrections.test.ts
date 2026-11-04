@@ -12,9 +12,15 @@ import {
 	SEEDS,
 	STATUS_FIX,
 	statusFixNote,
+	VENUE_ROLE,
 	WEBSITE_FIXES,
+	WEBSITE_REMOVE,
 } from "../../../scripts/data/curation-maps";
-import { registrableDomain } from "../partner-project-identity";
+import {
+	ALLOWED_DOMAIN_MISMATCHES,
+	registrableDomain,
+} from "../partner-project-identity";
+import { VENUE_ROLES } from "../project-types";
 
 describe("a STATUS_FIX stamp's note (statusFixNote)", () => {
 	const stamp = { from: "Live", to: "Live", note: "new" };
@@ -41,6 +47,15 @@ describe("Hana's curated links point at the wallet's own site (sls-100)", () => 
 	it("website and status source are hanawallet.io, not hana.money", () => {
 		expect(registrableDomain(WEBSITE_FIXES.hana)).toBe("hanawallet.io");
 		expect(registrableDomain(STATUS_FIX.hana.sourceUrl)).toBe("hanawallet.io");
+	});
+	it("the partner half is allowed to lag the project half, and only that way", () => {
+		// curate-projects moves the project row (its Tuesday cron executes);
+		// the partner row moves when curate-partners is dispatched. Between the
+		// two, the identity guard sees exactly this pair.
+		expect(ALLOWED_DOMAIN_MISMATCHES["hana-wallet"]).toMatchObject({
+			partner: "hana.money",
+			project: registrableDomain(WEBSITE_FIXES.hana),
+		});
 	});
 	it("the next run replaces the stale redirect note", () => {
 		expect(STATUS_FIX.hana.note).not.toMatch(/308s to hana\.money/);
@@ -90,8 +105,59 @@ describe("first-party Stellar launches are seeded with their sources (sls-112)",
 			/default network, with no Snap needed/,
 		);
 	});
+	it("a seed claims no network list its source does not give in full", () => {
+		// Stored networks are served with networksBasis "curated", which the
+		// spec reads as COMPLETE. Chainlink's page lists its Data Feeds guides
+		// and MetaMask's says "BTC, ETH, SOL and more": neither is a full list.
+		expect(seed("chainlink")?.supportedNetworks).toEqual([]);
+		expect(seed("metamask")?.supportedNetworks).toEqual([]);
+	});
+	it("the Chainlink deployment is labelled the attestation it is", () => {
+		// backfill-deployment stores DEPLOYMENT_VERIFIED as human-verified and
+		// never queries the chain, so the note must not read as a check it ran.
+		expect(DEPLOYMENT_VERIFIED.chainlink.note).toMatch(/^Curator attestation/);
+	});
 	it("seed slugs stay unique", () => {
 		const slugs = SEEDS.map((s) => s.slug);
 		expect(slugs.length).toBe(new Set(slugs).size);
+	});
+});
+
+describe("every curated venue role is pinned (sls-113)", () => {
+	// A role is a claim a venue count rests on: each one here was read from
+	// the operator's own material, and a change to any of them is a review.
+	it("the map is exactly the reviewed assignments", () => {
+		expect(VENUE_ROLE).toEqual({
+			soroswap: "amm",
+			aquarius: "amm",
+			phoenix: "amm",
+			sushi: "amm",
+			comet: "amm",
+			stellarterm: "trading-ui",
+			stellarx: "trading-ui",
+			lumenswap: "trading-ui",
+			lobstr: "wallet-integrated",
+			scopuly: "wallet-integrated",
+			stellarport: "wallet-integrated",
+			stellarbroker: "aggregator-router",
+			lumagg: "aggregator-router",
+			lifi: "aggregator-router",
+			sodax: "aggregator-router",
+		});
+	});
+	it("every value is in the vocabulary", () => {
+		for (const role of Object.values(VENUE_ROLE))
+			expect(VENUE_ROLES as readonly string[]).toContain(role);
+	});
+	it("a product whose only site is a testnet is no independent venue", () => {
+		expect(VENUE_ROLE.tinyamm).toBeUndefined();
+	});
+});
+
+describe("a site that became another business is unlinked (sls-100 review)", () => {
+	it("stabble's stored website, now a casino-ranking page, is removed", () => {
+		// Value-keyed: only this exact stored URL is cleared, so a later
+		// relink to the product's real site is never undone.
+		expect(WEBSITE_REMOVE.stabble).toBe("https://stabble.org/");
 	});
 });

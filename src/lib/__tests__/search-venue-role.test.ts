@@ -14,6 +14,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { VENUE_ROLES } from "../project-types";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
+// The semantic rung: a fixed query vector and a stubbed $vectorSearch.
+vi.mock("@/lib/embed", () => ({ embed: vi.fn(async () => [0.1, 0.2, 0.3]) }));
 vi.mock("@/lib/repo-search", async (orig) => ({
 	...(await orig<typeof import("@/lib/repo-search")>()),
 	searchRepos: vi.fn(async () => ({ repos: [], warnings: [] })),
@@ -51,17 +53,51 @@ const ROWS = [
 	row("lumagg", "aggregator-router", "Swap aggregator across Soroban AMMs."),
 	row("stellarterm", "trading-ui", "Trading client for the SDEX swap market."),
 	row("zenex", null, "Perpetuals swap exchange."),
+	// A lineage shadow that carries the role while its canonical does not:
+	// the fold serves the canonical, so the shadow is never an AMM row.
+	{
+		...row("legacyswap", "amm", "Legacy swap pools."),
+		status: "Draft",
+		canonicalSlug: "newproduct",
+	},
 ];
+const CANONICALS = [row("newproduct", null, "A product that is not a venue.")];
+/** What the stubbed vector search answers: a near neighbour with no role. */
+const NEIGHBOURS = [
+	{
+		_id: "n1",
+		...row("bondingcurve", null, "Bonding curve token launches."),
+		score: 0.9,
+	},
+];
+const aggregate = vi.fn(() => ({ toArray: async () => NEIGHBOURS }));
 // Like the database: a `venueRole: { equals }` clause in the read holds.
 const roleIn = (where: unknown): string | undefined =>
 	(where as { venueRole?: { equals?: string } } | undefined)?.venueRole?.equals;
+const slugIn = (where: unknown): string[] | undefined =>
+	(where as { slug?: { in?: string[] } } | undefined)?.slug?.in;
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () => ({
+		db: { connection: { db: { collection: () => ({ aggregate }) } } },
 		find: vi.fn(async (args: FindArgs) => {
+			const wanted = slugIn(args.where);
+			if (wanted) {
+				const docs = [...ROWS, ...CANONICALS].filter((r) =>
+					wanted.includes(r.slug),
+				);
+				return { docs, totalDocs: docs.length };
+			}
 			if (!isCandidate(args)) return { docs: [], totalDocs: 0 };
 			candidateWheres.push(args.where);
 			const role = honorWhere ? roleIn(args.where) : undefined;
-			const docs = role ? ROWS.filter((r) => r.venueRole === role) : ROWS;
+			// Browse mode leaves lineage shadows out in the read itself.
+			const browse =
+				(args.where as { canonicalSlug?: { equals?: null } } | undefined)
+					?.canonicalSlug?.equals === null;
+			const docs = ROWS.filter(
+				(r) =>
+					(!role || r.venueRole === role) && !(browse && "canonicalSlug" in r),
+			);
 			return { docs, totalDocs: docs.length };
 		}),
 	})),
@@ -86,10 +122,31 @@ describe("GET /api/projects/search?venueRole= (sls-113)", () => {
 		vi.stubEnv("VOYAGE_API_KEY", "");
 		candidateWheres.length = 0;
 		honorWhere = true;
+		aggregate.mockClear();
 	});
 	afterEach(() => {
 		vi.useRealTimers();
 		vi.unstubAllEnvs();
+	});
+
+	it("total counts only rows a page can serve: a shadow whose canonical lacks the role is out", async () => {
+		const { body } = await search("q=legacyswap&venueRole=amm");
+		expect(slugs(body)).not.toContain("newproduct");
+		expect(slugs(body)).not.toContain("legacyswap");
+		expect(body.meta.counts.total).toBe(body.projects.length);
+	});
+
+	it("a role filter does not pad the page with vector neighbours", async () => {
+		vi.stubEnv("VOYAGE_API_KEY", "test-key");
+		// Control: without the filter the semantic rung runs and serves one.
+		const open = await search("q=bondingcurve+launches");
+		expect(aggregate).toHaveBeenCalled();
+		expect(slugs(open.body)).toContain("bondingcurve");
+		aggregate.mockClear();
+		const { body } = await search("q=bondingcurve+launches&venueRole=amm");
+		expect(aggregate).not.toHaveBeenCalled();
+		expect(body.meta.counts.semantic).toBe(0);
+		expect(slugs(body)).not.toContain("bondingcurve");
 	});
 
 	it("type=DEX&venueRole=amm serves only the AMM rows, filtered in the read too", async () => {

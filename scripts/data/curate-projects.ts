@@ -41,6 +41,7 @@ import {
 	TYPE_ADD,
 	TYPES_ADD,
 	TYPES_SET,
+	VENUE_ROLE,
 	WEBSITE_FIXES,
 	WEBSITE_REMOVE,
 	WEBSITE_REMOVE_DEAD,
@@ -1342,39 +1343,6 @@ const ROUTES_SET: Record<string, CuratedRoute[]> = {
 			asOf: "2026-07-09",
 		},
 	),
-};
-
-/** sls-035 (#517): DEX-landscape role for the clearest records — makes the
- * venue/aggregator/UI distinction data instead of prose, so a DEX cluster
- * count stops reading as a competitor count. EXACT-SYNC for listed slugs.
- * Only unambiguous assignments (one-line evidence each); ambiguous records
- * (hoops, normal, lumenswap, multi-role platforms) stay null = unclassified. */
-const VENUE_ROLE: Record<string, string> = {
-	soroswap: "amm", // soroswap.finance: AMM protocol on Soroban running its own pools; DefiLlama `soroswap` TVL row
-	aquarius: "amm", // aqua.network: AMM pools + liquidity-incentive voting on Stellar; DefiLlama `aquarius-stellar` TVL row
-	phoenix: "amm", // Phoenix DeFi Hub: constant-product + stableswap pools (PHO) on Soroban — runs its own liquidity
-	sushi: "amm", // Sushi's Stellar deployment runs its own AMM pools; DefiLlama `sushi-stellar` TVL row
-	comet: "amm", // WAS a Balancer-style weighted-pool AMM on Soroban (record Inactive — status carries liveness; role is the taxonomy fact)
-	stellarterm: "trading-ui", // stellarterm.com: open-source trading client for the native Stellar DEX — hosts no liquidity of its own
-	stellarx: "trading-ui", // stellarx.com: trading interface over Stellar's native orderbook — no own pools
-	lobstr: "wallet-integrated", // lobstr.co: wallet with in-app swap/SDEX trading — venue access inside a wallet, not an independent venue
-	scopuly: "wallet-integrated", // scopuly.com: wallet + SDEX trading app (typed Wallet/DEX)
-	stellarbroker: "aggregator-router", // stellar.broker: "multi-source liquidity swap router … access to AMMs and Stellar DEX" — routes across venues, runs none
-	// sls-113 (#1905), each read 2026-11-04 from the operator's own material.
-	// Cross-chain routers are aggregator-router: on Stellar they fill a swap
-	// through other parties' liquidity and run no pool or book of their own,
-	// so they must stay out of the independent-venue count.
-	lumagg: "aggregator-router", // github.com/Lum-Agg/stellar-dex-agg README: "routes swaps across Soroswap, Aquarius (xy=k, stable, CLMM), Phoenix, Sushi V3, and Comet", splitting orders across venues
-	lifi: "aggregator-router", // docs.li.fi/introduction/stellar-ecosystem: "LI.FI integrates 1 DEX aggregator on Stellar" (Soroswap) plus 4 bridges; no liquidity of its own
-	sodax: "aggregator-router", // docs.sodax.com: "it routes and settles; independent solvers on the marketplace fill"; Stellar trustline and sponsoring guides in the same docs
-	stellarport: "wallet-integrated", // stellarport.io: Wallet and Exchange tabs, "The new SDEX portal has been released": SDEX trading inside a wallet
-	lumenswap: "trading-ui", // lumenswap.io ("Decentralized Exchange on Stellar"): its app bundle sends only classic offers, path payments and liquidity-pool deposits to Horizon, no Soroban calls: an interface over SDEX and protocol pools
-	tinyamm: "amm", // testnet.tinyamm.com: "The cutest little AMM on Stellar Soroban. Swap tokens, provide liquidity, and earn fees" (only the testnet site answers; status is a separate question)
-	// Left null on purpose (2026-11-04 pass): axis runs its own Soroban limit
-	// order book (axis.markets/docs), which is neither amm nor the native SDEX
-	// book native-orderbook names; perps, launchpads, CEX, remittance and
-	// vault rows are not spot venues; the rest could not be verified on
-	// Stellar from the operator's own pages.
 };
 
 /** Duplicate-record merges (lessons class 10; Engine B S3's 12 groups,

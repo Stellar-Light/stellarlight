@@ -290,6 +290,30 @@ describe("status and types params are the code's lists too (found 2026-09-09 by 
 	});
 });
 
+describe("the MCP search_projects tool copies the same lists (sls-113 review)", () => {
+	// scout-mcp ships as its own npm package and cannot import src/lib, so its
+	// enums are literals; this keeps each one equal to the code's list.
+	const mcp = readFileSync(
+		resolve(__dirname, "../../../scout-mcp/src/index.ts"),
+		"utf8",
+	);
+	const tool = mcp.slice(mcp.indexOf('"search_projects"'));
+	const literals = (name: string) =>
+		[
+			...(
+				tool.match(
+					new RegExp(`${name}:\\s*z\\s*\\.enum\\(\\[([\\s\\S]*?)\\]\\)`),
+				)?.[1] ?? ""
+			).matchAll(/"([^"]+)"/g),
+		].map((m) => m[1]);
+	it("venueRole is VENUE_ROLES", () => {
+		expect(sorted(literals("venueRole"))).toEqual(sorted(VENUE_ROLES));
+	});
+	it("type is PROJECT_TYPES", () => {
+		expect(sorted(literals("type"))).toEqual(sorted(PROJECT_TYPES));
+	});
+});
+
 describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 	// The residual copies found by the 2026-09-09 sweep. All were EQUAL to their
 	// constants that day, so spreading them changed no served byte — but a copy

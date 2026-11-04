@@ -546,7 +546,7 @@ export const Projects: CollectionConfig = {
 			// independent liquidity venues (AMMs, the native orderbook) with
 			// aggregators/routers, trading UIs, and wallet-integrated trading —
 			// so a cluster count is a taxonomy count, NOT a competitor count.
-			// Curated only (VENUE_ROLE in scripts/data/curate-projects.ts), each
+			// Curated only (VENUE_ROLE in scripts/data/curation-maps.ts), each
 			// assignment grounded in the operator's own product description.
 			name: "venueRole",
 			type: "select",
@@ -937,6 +937,15 @@ export const Projects: CollectionConfig = {
 					// Text, not a date: DefiLlama publishes it as a string and one
 					// upstream value (2022-02-31) is not a valid date.
 					name: "deadFrom",
+					type: "text",
+				},
+				{
+					// sls-102: the DefiLlama parent page (its slug) whose children
+					// in the /protocols list are exactly llamaSlugs (llamaParentOf),
+					// rewritten by enrich-tvl on every run; empty when one row is
+					// mapped or no parent sums exactly the rows. The route cites
+					// https://defillama.com/protocol/{parent} as tvlMethodUrl.
+					name: "parent",
 					type: "text",
 				},
 				{ name: "checkedAt", type: "date" },

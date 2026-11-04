@@ -1235,7 +1235,7 @@ export interface components {
                 asOf: string | null;
                 /**
                  * Format: uri
-                 * @description Where to check the fact: the DefiLlama page that shows the linked rows, the same page as the row's tvlMethodUrl (the protocol's own page, or for several rows the parent page that sums them), else the first linked protocol's page; the contract readings behind the TVL check are the row's onchain block.
+                 * @description Where to check the fact: the row's tvlMethodUrl when it has one (the protocol's own page, or for several rows the parent page that sums them), else the first linked protocol's DefiLlama page; the contract readings behind the TVL check are the row's onchain block.
                  */
                 sourceUrl: string;
             }[];
@@ -1427,7 +1427,7 @@ export interface components {
             llamaSlugs?: string[] | null;
             /**
              * Format: uri
-             * @description The DefiLlama page that shows the whole tvlUSD, to cite alongside it: the protocol's own page when llamaSlugs has one entry; when it has several, the parent page whose child rows are exactly those slugs (e.g. Blend: https://defillama.com/protocol/blend, the four pools and backstop rows combined). Null when not llama-mapped, or when no single DefiLlama page sums the mapped rows; llamaSlugs then lists each contributing page (https://defillama.com/protocol/{slug}).
+             * @description The DefiLlama page that shows the whole tvlUSD, to cite alongside it: the protocol's own page when llamaSlugs has one entry; when it has several, the parent page whose child rows were exactly those slugs at the last TVL refresh (e.g. Blend: https://defillama.com/protocol/blend, its pools and backstop rows combined). Null when not llama-mapped, or when no single DefiLlama page sums the mapped rows (the family changed upstream, or was not read yet); llamaSlugs then lists each contributing page (https://defillama.com/protocol/{slug}).
              */
             tvlMethodUrl?: string | null;
             /** @description When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding. */

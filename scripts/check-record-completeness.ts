@@ -16,6 +16,9 @@
  *      each entry carries its reason + date; never a silent skip).
  *   S2 statusBasis — every project row carries a lifecycle basis (the
  *      sls-024 invariant, corpus-wide: bare-null provenance never returns).
+ *   S3 tvlMethodUrl — a tvlUSD that sums several DefiLlama rows names the
+ *      page that sums them (sls-102); null means the family changed upstream
+ *      or enrich-tvl has not read it, and the residual names the family.
  *
  *   SCOUT_BASE=https://stellarlight.xyz npx tsx scripts/check-record-completeness.ts
  *
@@ -24,6 +27,7 @@
  * into nightly-health.yml.
  */
 
+import { tvlCitationGaps } from "../src/lib/status-checks";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
@@ -171,6 +175,7 @@ async function main() {
 	let scanned = 0;
 	let blank = 0;
 	const blanks: string[] = [];
+	const swept: Row[] = [];
 	for (const cat of [
 		"Anchor",
 		"Asset",
@@ -181,6 +186,7 @@ async function main() {
 	]) {
 		const rows = await sweep(`/api/projects/search?category=${cat}`);
 		scanned += rows.length;
+		swept.push(...rows);
 		for (const p of rows)
 			if (!p.statusBasis) {
 				blank++;
@@ -207,6 +213,30 @@ async function main() {
 				note: `${blank - blanks.length} more rows blank beyond the ${blanks.length} listed`,
 			});
 	}
+
+	// ── S3: a multi-row tvlUSD cites the page that sums it (sls-102) ──
+	// Reuses S2's sweep. enrich-tvl stores the parent it read from DefiLlama
+	// each run; when the family stops matching the map, tvlMethodUrl serves
+	// null and this is where that reaches the improvement ledger.
+	const gaps = tvlCitationGaps(
+		swept.map((p) => ({
+			slug: String(p.slug),
+			tvlUSD: p.tvlUSD,
+			llamaSlugs: p.llamaSlugs,
+			tvlMethodUrl: p.tvlMethodUrl,
+		})),
+	);
+	console.log(
+		`S3 tvlMethodUrl: ${swept.filter((p) => (p.llamaSlugs?.length ?? 0) > 1).length} multi-row TVL row(s) · ${gaps.length} with no page that sums them`,
+	);
+	for (const g of gaps) {
+		console.log(`  ✗ ${g.slug}: [${g.family.join(",")}]`);
+		failRows.push({
+			probe: `tvlMethodUrl null: ${g.slug}`,
+			note: `tvlUSD sums [${g.family.join(", ")}] but no DefiLlama parent's children are exactly these rows (family changed upstream, or enrich-tvl has not read it): reconcile LLAMA_MAP in scripts/enrich-tvl.ts`,
+		});
+	}
+	if (gaps.length) failures++;
 
 	writeNightlyFindings("record-completeness", failRows);
 	console.log(failures ? "\nFAILING" : "\nall sweeps clean");
