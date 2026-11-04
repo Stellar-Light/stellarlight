@@ -33,7 +33,8 @@
  * stellarDocs entries from Raven's own inventory, every field identical but
  * provenance (source URL, fetch time). Either miss
  * exits 2, as does a changed ported source file (PORTED_FROM_RAVEN), a missing
- * --raven, or a thrown error: re-port before trusting a verdict. Every exit-2
+ * --raven, or a thrown error: re-port before trusting a verdict. A missing
+ * --raven exits 2 with the usage line; once a checkout is given, every exit-2
  * message names the ported files that differ from fec1c79. Exit 0 =
  * Raven would accept, 1 = it would hold (gate breach, a lower accepted total,
  * a per-question hit-to-miss flip in any of the 544 rows across five lanes:

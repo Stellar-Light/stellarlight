@@ -178,8 +178,92 @@ describe("raven-gate-replica, ported from Raven fec1c79", () => {
 	});
 });
 
+// Raven's own rules at fec1c79, including their gaps: the replica predicts
+// what Raven does, so a rule stricter than Raven's would hold a spec Raven
+// accepts. Review 2026-11-05 asked for each of these inputs.
+describe("raven-gate-replica keeps Raven's exact leak and clause rules", () => {
+	const policy = loadPolicy(checkout(POLICY), { entries: [] });
+	const build = (ops: Record<string, Json>) => {
+		const problems: string[] = [];
+		const paths = Object.fromEntries(
+			Object.entries(ops).map(([id, op]) => [
+				`/api/probe/${id}`,
+				{ get: { operationId: id, ...op } },
+			]),
+		);
+		const entries = buildScoutEntries({ paths }, policy, problems);
+		return { problems, entries };
+	};
+
+	// emitted-text-guard.mjs TEMPLATED_SCOUT_PATH_RES: a templated segment
+	// matches [^\s/`)\]]+ and the path must then end (?![\w/-]), so a concrete
+	// id followed by "/" is not a leak to Raven's build either.
+	it.each([
+		["Fetch /api/hackathons/builds/abc123 for the write-up", true],
+		["Fetch /api/hackathons/builds/abc123?x=1", true],
+		["Fetch /api/hackathons/builds/abc123/ for the write-up", false],
+		["Fetch /api/hackathons/builds/abc123/files", false],
+		["Fetch /api/hackathons/builds/abc123/?x=1", false],
+	])("x-routing %j is a leak to Raven: %s", (text, leak) => {
+		const { problems } = build({ probe: { "x-routing": { useWhen: [text] } } });
+		expect(
+			problems.includes(
+				'ADR-0003 leak: scout.probe x-routing.useWhen emits excluded scout endpoint path "/api/hackathons/builds/{id}"',
+			),
+		).toBe(leak);
+	});
+
+	// description-notes.mjs dropNonExposedScoutClauses: clauses end at . ! ? or
+	// ; followed by whitespace, or at a newline; a clause naming a non-exposed
+	// operation or an excluded path goes whole, and a concrete id is no name.
+	it.each([
+		[
+			"Side-by-side. Profiles count like reviewSubmission;deltas name the shifts.",
+			"Side-by-side.",
+		],
+		[
+			"Side-by-side (see reviewSubmission). Deltas name the shifts.",
+			"Deltas name the shifts.",
+		],
+		[
+			"Use compareHackathons or reviewSubmission for this. Deltas name the shifts.",
+			"Deltas name the shifts.",
+		],
+		[
+			"Read one at /api/hackathons/builds/abc123. Deltas name the shifts.",
+			"Read one at /api/hackathons/builds/abc123. Deltas name the shifts.",
+		],
+	])("description %j scores as %j", (description, scored) => {
+		const { entries } = build({ probe: { description } });
+		expect(entries[0]?.description).toBe(scored);
+	});
+});
+
 describe("raven-gate-replica names drifted Raven sources", () => {
 	const sha = (text: string) => createHash("sha256").update(text).digest("hex");
+
+	it("exits 2 with the usage line alone when no checkout is given", () => {
+		const env = { ...process.env };
+		delete env.RAVEN_DIR;
+		let status = 0;
+		let stderr = "";
+		try {
+			execFileSync(
+				"pnpm",
+				["exec", "tsx", "scripts/eval/raven-gate-replica.ts"],
+				{
+					encoding: "utf8",
+					env,
+					stdio: ["ignore", "pipe", "pipe"],
+				},
+			);
+		} catch (e) {
+			({ status, stderr } = e as { status: number; stderr: string });
+		}
+		expect(status).toBe(2);
+		expect(stderr.trim()).toMatch(/^usage: raven-gate-replica --raven /);
+		expect(stderr).not.toContain("ported Raven sources");
+	}, 60_000);
 
 	it("lists changed and missing files, never identical ones", () => {
 		const dir = checkout({ "same.ts": "a", "edited.ts": "b" });
