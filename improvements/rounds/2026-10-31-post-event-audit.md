@@ -192,10 +192,17 @@ after each deploy.
   (owner review); decoded entity dashes in research titles.
 - G3, three lows, #1897: siteUrls read as JSON (an unreadable record is
   could-not-check), the DoraHacks host whole, accents folded in name keys.
-  A largest-figure award rule was reverted in review. It takes effect at the
-  daily build sync (04:43 UTC). Queued: a pool title with no dollar figure;
-  only the first award stored; a kept link not copied to other events; the
-  public log prints titles.
+  A largest-figure award rule was reverted in review. The first three syncs
+  after the merge (11-02 to 11-04) read 1,429 builds and changed no stored
+  link. Queued: a pool title with no dollar figure; only the first award
+  stored; a kept link not copied to other events; the public log prints
+  titles.
+
+Raven absorbed Scout 1.9.116 on 11-03 with the four newer operations
+excluded (stellar-raven #347). Its seven poor-fit captures, the reason it
+keeps them out, reproduce on our gate replica, which otherwise accepts
+1.9.116. Its HackMeridian findings (#1900 to #1905) are queued in
+`improvements/TODO.md`.
 
 ## Process notes
 
