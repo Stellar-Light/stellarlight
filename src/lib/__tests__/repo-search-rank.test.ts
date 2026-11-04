@@ -1435,3 +1435,63 @@ describe("served interface paths (issue #1906)", () => {
 		expect(cv?.contractInterfacePaths).toBeNull();
 	});
 });
+
+describe("a capped candidate window says so (the #1915 class)", () => {
+	// The no-q browse ranks the top 200 rows by repoScore and a q search the
+	// top 600. counts.total counted that window as if it were every match:
+	// live, the browse said total 200 and offset 200 served nothing against
+	// 13,810 indexed repos.
+	const many = (n: number, over: Record<string, unknown> = {}) =>
+		Array.from({ length: n }, (_, i) =>
+			doc({ fullName: `org/repo-${i}`, repoScore: n - i, ...over }),
+		);
+	// Answers like the database: honours limit and the repoScore floor, and
+	// counts every row the where admits.
+	const db = (rows: Array<Record<string, unknown>>) => ({
+		find: async (args: {
+			limit?: number;
+			where?: { repoScore?: { greater_than_equal?: number } };
+		}) => {
+			const floor = args.where?.repoScore?.greater_than_equal ?? -Infinity;
+			const hits = rows.filter((r) => Number(r.repoScore) >= floor);
+			return {
+				docs: hits.slice(0, args.limit ?? hits.length),
+				totalDocs: hits.length,
+			};
+		},
+	});
+
+	it("a browse past its window reports the true eligible count and the cut", async () => {
+		const res = await searchRepos(db(many(250)), "", { limit: 20 });
+		expect(res.total).toBe(200);
+		expect(res.truncated).toBe(true);
+		expect(res.eligible).toBe(250);
+	});
+
+	it("a window that holds every row is not cut, and eligible equals total", async () => {
+		const res = await searchRepos(db(many(30)), "", { limit: 20 });
+		expect(res.truncated).toBe(false);
+		expect(res.total).toBe(30);
+		expect(res.eligible).toBe(30);
+	});
+
+	it("minScore runs in the database, so a browse's eligible count stays exact", async () => {
+		const res = await searchRepos(db(many(250)), "", {
+			limit: 20,
+			minScore: 40,
+		});
+		// repoScore 40..250: 211 rows admitted, 200 of them ranked
+		expect(res.eligible).toBe(211);
+		expect(res.truncated).toBe(true);
+	});
+
+	it("a q search over a cut window cannot count every match: eligible is null, never a guess", async () => {
+		const res = await searchRepos(
+			db(many(700, { description: "vault contracts" })),
+			"vault",
+			{ limit: 5 },
+		);
+		expect(res.truncated).toBe(true);
+		expect(res.eligible).toBeNull();
+	});
+});

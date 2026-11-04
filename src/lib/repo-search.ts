@@ -38,7 +38,8 @@ import { parseSdkMajor, protocolForSdkMajor } from "./soroban-versions";
 
 // Minimal shape so we don't couple to the full Payload type.
 interface PayloadLike {
-	find(args: unknown): Promise<{ docs: unknown[] }>;
+	// totalDocs: Payload counts every row the where admits, past the limit.
+	find(args: unknown): Promise<{ docs: unknown[]; totalDocs?: number }>;
 }
 
 interface RepoDoc {
@@ -1221,6 +1222,15 @@ export async function searchRepos(
 	/** One line per backend read that failed or timed out (degraded-read.ts):
 	 * the page was served from whatever DID load. Empty when every read ran. */
 	warnings: string[];
+	/** The ranking was cut at its candidate window: rows the filters admit
+	 * past it were never ranked, so `total` counts the window, not every
+	 * match. null when the candidate read failed. */
+	truncated: boolean | null;
+	/** Rows the filters admit: `total` when nothing was cut; when cut, the
+	 * database's count for a no-q browse whose filters all run there; null
+	 * where only ranking every row could count them (a q search, or an
+	 * activity, capability, domain or dependsOn filter). */
+	eligible: number | null;
 }> {
 	const {
 		limit = 20,
@@ -1278,6 +1288,8 @@ export async function searchRepos(
 		matchMode: "none" as RepoMatchMode,
 		matchModeLabel: MATCH_MODE_LABEL.none,
 		warnings: why,
+		truncated: null,
+		eligible: null,
 	});
 	// No DB handle: an infrastructure failure, NOT an absence proof.
 	if (!payload)
@@ -1286,7 +1298,8 @@ export async function searchRepos(
 		const r = await degradedRead(
 			op,
 			() => payload.find(args),
-			{ docs: [] as unknown[] },
+			// a failed read counts nothing: its total is unknown, not zero
+			{ docs: [] as unknown[], totalDocs: undefined },
 			DEFAULT_READ_TIMEOUT_MS,
 		);
 		if (r.warning) warnings.push(r.warning);
@@ -1308,6 +1321,9 @@ export async function searchRepos(
 		// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
 		const where: any = { ...NOT_GONE };
 		if (language) where.primaryLanguage = { like: language };
+		// In the database too, so its count of the rows a browse admits is
+		// exact; the in-memory pass below stays (the other candidate sources).
+		if (minScore > 0) where.repoScore = { greater_than_equal: minScore };
 		if (tokens.length) {
 			where.or = tokens.flatMap((t) =>
 				termsForToken(t).flatMap((v) => [
@@ -1340,10 +1356,11 @@ export async function searchRepos(
 		if (dependsOn) where.stellarDeps = { like: dependsOn };
 		if (capability) where.sdkCapabilities = { like: capability };
 		const hasStructuredFilter = Boolean(domain || dependsOn || capability);
+		const windowLimit = tokens.length || hasStructuredFilter ? 600 : 200;
 		const res = await find("repos candidate fetch", {
 			collection: "repos",
 			where,
-			limit: tokens.length || hasStructuredFilter ? 600 : 200,
+			limit: windowLimit,
 			sort: "-repoScore",
 			depth: 0,
 			// Drop the README excerpt — it's the largest per-doc field and the
@@ -1354,6 +1371,20 @@ export async function searchRepos(
 		});
 		// The main fetch is the pool; without it there is nothing to rank.
 		if (warnings.length) return failed(warnings);
+		// A fixed window feeding a total and paging must say when it was cut
+		// (the #1915 class): the read's own count says how many rows the
+		// filters admit, at no extra query.
+		const truncated =
+			typeof res.totalDocs === "number"
+				? res.totalDocs > res.docs.length
+				: res.docs.length >= windowLimit;
+		const countable =
+			!tokens.length &&
+			!activity &&
+			!capability &&
+			!domain &&
+			!dependsOn &&
+			typeof res.totalDocs === "number";
 		// Curated concept → canonical repo injection. The authoritative SDF repo for
 		// an infra/protocol question often isn't a keyword candidate, so fetch the
 		// curated set and float it to the top in priority order (canonRank).
@@ -1973,6 +2004,12 @@ export async function searchRepos(
 			matchMode,
 			matchModeLabel: MATCH_MODE_LABEL[matchMode],
 			warnings,
+			truncated,
+			eligible: !truncated
+				? total
+				: countable
+					? (res.totalDocs as number)
+					: null,
 		};
 	} catch (e) {
 		// Every read is wrapped above, so this is the ranking pass throwing on

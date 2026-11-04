@@ -1171,7 +1171,7 @@ export const spec: OpenAPISpec = {
 			"Rate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.",
 			"",
 			"## Pagination",
-			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`.",
+			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`. `searchRepos` ranks a capped candidate window (the top 200 rows by repoScore for a browse with no q, the top 600 for a search): when `meta.counts.truncated` is true, `total` counts that window and paging ends there, and `meta.counts.eligible` gives the number of rows the filters admit (null where only ranking every row could count them).",
 			"",
 			"## Ordering & relevance",
 			'`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all; the rows are vector-similarity guesses (`via: "semantic"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it; matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0-1 cosine). Use these for cross-source ranking when merging with other aggregators.',
@@ -12127,6 +12127,23 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										description:
 											"Human-readable statement of the matchMode above, safe to surface verbatim to a user.",
+									},
+									counts: {
+										type: "object",
+										properties: {
+											truncated: {
+												type: "boolean",
+												description:
+													"True when the ranking was cut at its candidate window: the top 200 rows by repoScore for a browse with no q, the top 600 for a search or a capability, domain or dependsOn filter. Rows past the window were never ranked, so total counts the window and paging ends at it; read eligible for the number of matching rows. False when the ranking holds every row the filters admit.",
+											},
+											eligible: {
+												type: "integer",
+												minimum: 0,
+												nullable: true,
+												description:
+													"Rows the request's filters admit in the index. Equals total when truncated is false. When truncated is true: the database's count for a browse with no q whose filters all run there (language, minScore), and null for a search or an activity, capability, domain or dependsOn filter, where only ranking every row could count the matches. Never read null as zero.",
+											},
+										},
 									},
 								},
 							},

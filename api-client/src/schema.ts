@@ -2074,6 +2074,12 @@ export interface components {
                 matchMode?: "strict" | "partial" | "corrected" | "weak" | "all" | "none";
                 /** @description Human-readable statement of the matchMode above, safe to surface verbatim to a user. */
                 matchModeLabel?: string;
+                counts?: {
+                    /** @description True when the ranking was cut at its candidate window: the top 200 rows by repoScore for a browse with no q, the top 600 for a search or a capability, domain or dependsOn filter. Rows past the window were never ranked, so total counts the window and paging ends at it; read eligible for the number of matching rows. False when the ranking holds every row the filters admit. */
+                    truncated?: boolean;
+                    /** @description Rows the request's filters admit in the index. Equals total when truncated is false. When truncated is true: the database's count for a browse with no q whose filters all run there (language, minScore), and null for a search or an activity, capability, domain or dependsOn filter, where only ranking every row could count the matches. Never read null as zero. */
+                    eligible?: number | null;
+                };
             };
             repos: components["schemas"]["Repo"][];
         };

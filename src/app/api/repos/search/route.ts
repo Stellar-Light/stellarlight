@@ -159,6 +159,8 @@ async function handle(req: NextRequest) {
 	const {
 		repos,
 		total,
+		truncated,
+		eligible,
 		canonical,
 		searched,
 		matchMode,
@@ -264,7 +266,10 @@ async function handle(req: NextRequest) {
 							},
 						}
 					: {}),
-				counts: { returned: repos.length, total },
+				// truncated: the ranking was cut at its candidate window, so
+				// total counts that window and eligible the rows the filters admit
+				// (the #1915 class; null where only ranking every row could count).
+				counts: { returned: repos.length, total, eligible, truncated },
 			}),
 			repos: repos.map((r) => pickFields(r, fieldsWanted)),
 		}),

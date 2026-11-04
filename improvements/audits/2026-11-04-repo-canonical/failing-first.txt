@@ -40,3 +40,16 @@ Failing first: the changed and new test files run against the base tree (origin/
 ⎯⎯⎯⎯⎯⎯ Failed Tests 36 ⎯⎯⎯⎯⎯⎯⎯
 
 Pass after, on the branch: Test Files 7 passed (7); Tests 155 passed (155)
+
+Window cut (third commit, the #1915 class): the new tests run against the second commit (d1ea2d54), before the fix
+      Tests  5 failed | 97 passed (102)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > a capped candidate window says so (the #1915 class) > a browse past its window reports the true eligible count and the cut
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > a capped candidate window says so (the #1915 class) > a q search over a cut window cannot count every match: eligible is null, never a guess
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > a capped candidate window says so (the #1915 class) > a window that holds every row is not cut, and eligible equals total
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > a capped candidate window says so (the #1915 class) > minScore runs in the database, so a browse's eligible count stays exact
+ FAIL  src/lib/__tests__/repo-search-route-counts.test.ts > repo search counts > a browse past its window serves truncated and the true eligible count
+ Test Files  2 failed (2)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+Pass after, with the fix: Test Files 2 passed (2); Tests 102 passed (102)
+Replay of the third commit over the same corpus: 183 of 183 replay records identical to the second commit's (pages, rankings, totals, matchMode), so the ranking numbers above stay attributable to the second commit.
