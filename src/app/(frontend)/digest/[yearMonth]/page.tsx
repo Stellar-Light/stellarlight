@@ -18,6 +18,7 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { findWholeSet } from "@/lib/whole-set";
 
 export const dynamic = "force-dynamic";
 
@@ -100,14 +101,15 @@ export default async function DigestPage({ params }: { params: Params }) {
 					limit: 20,
 					depth: 1,
 				}),
-				// All active projects — joined to repo stars below for the
-				// top-by-stars list (the legacy `signals` source is dead).
-				payload.find({
+				// All active projects, joined to repo stars below for the
+				// top-by-stars list (the legacy `signals` source is dead). Every
+				// one: `limit: 300` ranked the newest 300 of 905 (2026-11-04).
+				findWholeSet(payload, {
 					collection: "projects",
 					where: {
 						status: { in: ["Development", "Pre-Release", "Live"] },
 					},
-					limit: 300,
+					limit: 0,
 					depth: 0,
 					select: { name: true, slug: true },
 				}),
@@ -160,10 +162,10 @@ export default async function DigestPage({ params }: { params: Params }) {
 		const slugs = (activeProjectsResult.docs as any[]).map((p) => p.slug);
 		const starsBySlug = new Map<string, number>();
 		if (slugs.length > 0) {
-			const reposResult = await payload.find({
+			const reposResult = await findWholeSet(payload, {
 				collection: "repos",
 				where: { projectSlug: { in: slugs } },
-				limit: 5000,
+				limit: 0,
 				depth: 0,
 				select: { projectSlug: true, stars: true },
 			});

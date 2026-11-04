@@ -35,6 +35,15 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
+			"A read that stops at a ceiling now says so instead of passing a cut set off as all of it. getBuilders' onStellar is null, with the read named in the warnings, when its repo or project read was cut, never a short block; getHackathonBuilds no longer answers that a hackathon value names no event when it could not check every listed event; getLeaderboard reads every eligible project and repo.",
+		detail:
+			"On the site, /leaderboard and /digest/<month> ranked the newest 300 of 905 active projects (32 of the top 50 by stars on /leaderboard differed from GET /api/leaderboard's) and now rank them all. /builders states the directory's true size and says when code activity could not be read rather than showing no repos, a profile says so rather than 'no public code', and /analytics counts SCF-funded projects in the database and leaves a cut sum unknown.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
 			"/api/status `usage.last24h`, `usage.last7d` and `usage.byEndpoint` count a hit whether its createdAt is stored as a date or as text. They were bounded by a date alone, which never matches a value stored as text; the three now come from one match, so byEndpoint sums to last7d.",
 	},
 	{

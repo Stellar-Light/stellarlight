@@ -96,6 +96,8 @@ export default async function BuilderProfilePage({
 	// what this person has shipped in the Stellar repos we index (owned,
 	// Passport-declared, contributor pass); the Passport profile alone is thin
 	let code: CodeActivity | undefined;
+	// true once the join ran: a failed or cut read is not "no code"
+	let codeRead = false;
 	// SCF grants on the projects this person is connected to, and hackathon
 	// projects (DoraHacks buidls) whose GitHub link is one of their repos
 	let scf: Array<{
@@ -111,6 +113,7 @@ export default async function BuilderProfilePage({
 			code = (await builderCodeActivity(payload, [builder as any])).get(
 				String(builder.github_username).toLowerCase(),
 			);
+			codeRead = true;
 			// Only projects the person OWNS: repos they own that belong to the
 			// project, or the project's GitHub org is them. Contributing to a
 			// project's repo (or naming it on Passport) is not receiving its grant.
@@ -482,11 +485,22 @@ export default async function BuilderProfilePage({
 					</Card>
 				)}
 
+			{!codeRead && (
+				<Card className="mb-8">
+					<CardContent className="py-6 text-sm text-muted-foreground">
+						Code activity for {builder.display_name || builder.github_username}{" "}
+						could not be read just now, so this page cannot say what they have
+						shipped on Stellar. Try again shortly.
+					</CardContent>
+				</Card>
+			)}
+
 			{/* Nothing indexed for this person: say so plainly rather than render a blank page */}
-			{(!code ||
-				(code.repos.length === 0 &&
-					code.projects.size === 0 &&
-					code.contributesTo.size === 0)) &&
+			{codeRead &&
+				(!code ||
+					(code.repos.length === 0 &&
+						code.projects.size === 0 &&
+						code.contributesTo.size === 0)) &&
 				hackBuilds.length === 0 && (
 					<Card className="mb-8">
 						<CardContent className="py-6 text-sm text-muted-foreground">

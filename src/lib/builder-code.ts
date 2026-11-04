@@ -12,6 +12,7 @@
 import type { Payload } from "payload";
 import { ACTIVE_PROJECT_STATUSES } from "./project-status";
 import { NOT_GONE } from "./repo-grade";
+import { findWholeSet, IncompleteRead } from "./whole-set";
 
 export type CodeRepo = {
 	fullName: string;
@@ -141,7 +142,10 @@ export async function builderCodeActivity(
 		}
 	}
 
-	const repos = await payload.find({
+	// A cut read is not a finished join: onStellar would read as a short
+	// block the spec calls complete, so it throws and the caller says the
+	// join could not run.
+	const repos = await findWholeSet(payload, {
 		collection: "repos",
 		where: {
 			and: [
@@ -178,6 +182,7 @@ export async function builderCodeActivity(
 			primaryLanguage: true,
 		},
 	} as any);
+	if (!repos.complete) throw new IncompleteRead("repos", repos);
 	const langCount = new Map<string, Map<string, number>>();
 
 	const projectSlugs = new Set<string>();
@@ -228,7 +233,7 @@ export async function builderCodeActivity(
 	}
 
 	// project names + projects whose GitHub org is the person
-	const projs = await payload.find({
+	const projs = await findWholeSet(payload, {
 		collection: "projects",
 		where: {
 			and: [
@@ -245,6 +250,7 @@ export async function builderCodeActivity(
 		depth: 0,
 		select: { name: true, slug: true, github: true },
 	} as any);
+	if (!projs.complete) throw new IncompleteRead("projects", projs);
 	const nameOf = new Map<string, string>();
 	for (const pj of projs.docs as any[]) {
 		nameOf.set(String(pj.slug), String(pj.name));
