@@ -640,10 +640,18 @@ async function main() {
 		// tagline mentions ✗. Legit tail matches ("…by Gateway.fm") get explicit
 		// SCF_SLUG_OVERRIDES instead. Rejections are logged for that triage.
 		if (!ours && normTitle.length >= 4) {
-			ours = findTitlePrefixMatch(cleanTitle, byNormName, (proj) =>
-				console.log(
-					`  partial REJECTED (not title-prefix): ours "${proj.name}" vs SCF "${scf.title}"`,
-				),
+			ours = findTitlePrefixMatch(
+				cleanTitle,
+				ourProjects,
+				(proj, why) =>
+					console.log(
+						`  partial REJECTED (${why}): ours "${proj.name}" vs SCF "${scf.title}"`,
+					),
+				// a lineage shadow and its canonical row are one project
+				(proj) =>
+					proj.canonicalSlug && bySlug.has(proj.canonicalSlug)
+						? proj.canonicalSlug
+						: proj.slug,
 			);
 		}
 

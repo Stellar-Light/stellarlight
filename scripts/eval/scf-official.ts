@@ -15,6 +15,8 @@
  *    accuses (callers must treat unparseable pages as unverifiable).
  */
 
+import { findTitlePrefixMatch, normSpaceless } from "../../src/lib/identity";
+
 export const SCF = "https://communityfund.stellar.org";
 
 export const canon = (s: string) =>
@@ -527,6 +529,27 @@ export function showsAward(
 		(page?.roundAwards?.length ?? 0) > 0 ||
 		(page?.verdictAwardedAny ?? 0) > 0
 	);
+}
+
+/**
+ * The directory row an SCF slug base names, for the absence diff, or
+ * undefined: an exact slug, name or alias, else the single best title prefix
+ * over names (findTitlePrefixMatch). In an absence report a false hit is not
+ * a mislabel, it deletes a real gap: the old first-hit rules (a shared
+ * prefix, a 5-letter substring, any shared word) filed Onboard under our
+ * Onboarding Club row and AgentSmith x402 under our x402 row (sls-111).
+ */
+export function servedBy<
+	R extends { slug: string; name: string; aliases?: string[] },
+>(base: string, rows: R[]): R | undefined {
+	const key = normSpaceless(base);
+	const exact = rows.find(
+		(r) =>
+			r.slug === base ||
+			normSpaceless(r.name) === key ||
+			(r.aliases ?? []).some((a) => normSpaceless(a) === key),
+	);
+	return exact ?? findTitlePrefixMatch(base.replace(/-/g, " "), rows);
 }
 
 export async function fetchDetailHtml(url: string): Promise<string | null> {

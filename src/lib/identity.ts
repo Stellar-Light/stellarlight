@@ -9,18 +9,23 @@
  * instead of a production incident.
  */
 
+/** Lowercase with accents folded, never deleted: José is jose, not jos
+ * (sls-111). Canonical decomposition, the rule hackathon-build-links'
+ * folded() uses. */
+const fold = (name: string) =>
+	name.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+
 /** Spaceless lowercase alnum — EQUALITY ONLY. Never use for containment:
  * word seams vanish, so "Soroban Disassembler" CONTAINS "band"
  * (soro·band·issassembler) — the 2026-08-12 18-row award poisoning. */
 export function normSpaceless(name: string): string {
-	return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+	return fold(name).replace(/[^a-z0-9]/g, "");
 }
 
 /** Lowercase with runs of non-alnum collapsed to single spaces — the form
  * token-boundary rules operate on. */
 export function normSpaced(name: string): string {
-	return name
-		.toLowerCase()
+	return fold(name)
 		.replace(/[^a-z0-9]+/g, " ")
 		.trim();
 }
@@ -52,23 +57,59 @@ export function titlePrefixMatch(a: string, b: string): boolean {
 	return long === short || long.startsWith(`${short} `);
 }
 
+/** A directory name under three letters is a word inside too many titles to
+ * identify one ("Op"); three still join (the BWB, CTX and DIA rows). */
+const MIN_PREFIX_NAME = 3;
+
 /**
- * The partial matcher: the first row, in `rows` order, whose name passes
- * titlePrefixMatch against an official title. Spaceless containment is only
- * the pre-filter that picks candidates, so a candidate the rule rejects must
- * not end the search: stopping at "velo" inside "de·velo·pment" kept Rumble
- * Fish's three SCF awards off its row on every run (sls-111).
+ * The partial matcher: the single best row for an official title, or
+ * undefined. Candidates are rows whose name passes titlePrefixMatch;
+ * spaceless containment only picks them, so a rejected candidate never ends
+ * the search ("velo" inside "de·velo·pment" hid Rumble Fish's awards,
+ * sls-111). The best candidate shares the longest prefix with the title, and
+ * a tie for it is no match: the first hit in row order is not an identity.
+ * `identityOf` says which rows are one project (a lineage shadow and its
+ * canonical row), so those never tie with each other.
  */
 export function findTitlePrefixMatch<T extends { name?: unknown }>(
 	title: string,
-	rows: Iterable<[string, T]>,
-	onReject?: (row: T) => void,
+	rows: Iterable<T>,
+	onSkip?: (row: T, why: string) => void,
+	identityOf: (row: T) => unknown = (row) => row,
 ): T | undefined {
 	const norm = normSpaceless(title);
-	for (const [key, row] of rows) {
+	const titleLen = normSpaced(title).length;
+	let best: T | undefined;
+	let bestLen = 0;
+	let tied = false;
+	for (const row of rows) {
+		const name = String(row.name ?? "");
+		const key = normSpaceless(name);
 		if (!key || (!key.includes(norm) && !norm.includes(key))) continue;
-		if (titlePrefixMatch(title, String(row.name ?? ""))) return row;
-		onReject?.(row);
+		if (key.length < MIN_PREFIX_NAME) {
+			onSkip?.(row, "name under three letters");
+			continue;
+		}
+		if (!titlePrefixMatch(title, name)) {
+			onSkip?.(row, "not title-prefix");
+			continue;
+		}
+		// the shared prefix: the shorter of the two names
+		const len = Math.min(titleLen, normSpaced(name).length);
+		if (len > bestLen) {
+			best = row;
+			bestLen = len;
+			tied = false;
+		} else if (
+			len === bestLen &&
+			best !== undefined &&
+			identityOf(row) !== identityOf(best)
+		)
+			tied = true;
 	}
-	return undefined;
+	if (tied && best !== undefined) {
+		onSkip?.(best, "tied with another row");
+		return undefined;
+	}
+	return best;
 }

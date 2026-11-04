@@ -56,27 +56,83 @@ describe("identity primitives — every past trap is a fixture", () => {
 		// "Rumble Fish Software Development - RFP" and loads first. Stopping
 		// at that rejected candidate kept Rumble Fish's #41, #42 and #45
 		// awards off its row on every run (enrich-scf log, 2026-10-03).
-		const rows = new Map([
-			["velo", { name: "Velo" }],
-			["rumblefish", { name: "Rumble Fish" }],
-		]);
-		const rejected: unknown[] = [];
+		const skipped: unknown[] = [];
 		expect(
 			findTitlePrefixMatch(
 				"Rumble Fish Software Development - RFP",
-				rows,
-				(row) => rejected.push(row.name),
+				[{ name: "Velo" }, { name: "Rumble Fish" }],
+				(row) => skipped.push(row.name),
 			),
 		).toEqual({ name: "Rumble Fish" });
-		expect(rejected).toEqual(["Velo"]);
+		expect(skipped).toEqual(["Velo"]);
 	});
 
-	it("the partial search still refuses when no candidate passes the rule", () => {
-		const rows = new Map([
-			["band", { name: "Band" }],
-			["sorobandisassemblerx", { name: "Soroban Disassemblerx" }],
-		]);
-		expect(findTitlePrefixMatch("Soroban Disassembler", rows)).toBeUndefined();
+	it("the partial match is the single best row, never the first hit", () => {
+		// Row order must not decide: Nest is a token prefix too, but Nest
+		// Protocol shares the longer prefix with the title.
+		const rows = [
+			{ name: "Velo" },
+			{ name: "Nest" },
+			{ name: "Nest Protocol" },
+		];
+		expect(findTitlePrefixMatch("Nest Protocol Development", rows)).toEqual({
+			name: "Nest Protocol",
+		});
+		// Two rows equally good (one name, two spellings) is no match at all.
+		expect(
+			findTitlePrefixMatch("Nest Protocol Development", [
+				{ name: "Nest Protocol" },
+				{ name: "Nest-Protocol" },
+			]),
+		).toBeUndefined();
+		// A title that is the start of two different names names neither.
+		expect(
+			findTitlePrefixMatch("Nest", [
+				{ name: "Nest Wallet" },
+				{ name: "Nest Protocol" },
+			]),
+		).toBeUndefined();
+	});
+
+	it("accents fold rather than vanish", () => {
+		// "José" used to read as "jos", so a row named Jos took it.
+		expect(
+			findTitlePrefixMatch("José Development", [{ name: "Jos" }]),
+		).toBeUndefined();
+		expect(
+			findTitlePrefixMatch("José Development", [{ name: "José" }]),
+		).toEqual({ name: "José" });
+		expect(normSpaced("José  Café")).toBe("jose cafe");
+		expect(normSpaceless("Cryptoconexión")).toBe("cryptoconexion");
+	});
+
+	it("a name under three letters never joins by prefix", () => {
+		// "Op" is a token prefix of "Op Stack Development" but identifies
+		// nothing; three letters (the BWB, CTX and DIA rows) still join.
+		expect(
+			findTitlePrefixMatch("Op Stack Development", [{ name: "Op" }]),
+		).toBeUndefined();
+		expect(findTitlePrefixMatch("DIA Oracles", [{ name: "DIA" }])).toEqual({
+			name: "DIA",
+		});
+	});
+
+	it("two rows that are one identity are not a tie", () => {
+		// A Draft lineage shadow and its canonical row carry one name; the
+		// enrich re-keys a shadow match to the canonical row anyway.
+		const rows = [
+			{ name: "Liqvid", slug: "liqvid", canonicalSlug: "liqvidxyz" },
+			{ name: "Liqvid", slug: "liqvidxyz", canonicalSlug: undefined },
+		];
+		const identity = (row: (typeof rows)[number]) =>
+			row.canonicalSlug ?? row.slug;
+		const hit = findTitlePrefixMatch(
+			"Liqvid X Stellar RWA Lending Market",
+			rows,
+			undefined,
+			identity,
+		);
+		expect(hit && identity(hit)).toBe("liqvidxyz");
 	});
 
 	it("cleanTitle strips parenthetical noise", () => {
