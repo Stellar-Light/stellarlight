@@ -72,7 +72,10 @@ const matches = (d: Doc, w: Where | undefined): boolean =>
 		const op = c as Record<string, unknown>;
 		if ("equals" in op) return v === String(op.equals);
 		if ("not_equals" in op) return v !== String(op.not_equals);
-		if ("in" in op) return (op.in as unknown[]).map(String).includes(v);
+		if ("in" in op)
+			return (op.in as unknown[]).some((x) =>
+				x instanceof RegExp ? x.test(v) : String(x) === v,
+			);
 		if ("like" in op)
 			return v.toLowerCase().includes(String(op.like).toLowerCase());
 		throw new Error(`unsupported where on ${k}: ${JSON.stringify(c)}`);

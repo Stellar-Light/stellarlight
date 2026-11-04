@@ -25,6 +25,7 @@ import {
 	agoSentence,
 	builderCodeActivity,
 	type CodeActivity,
+	loginIn,
 } from "@/lib/builder-code";
 import {
 	buildsForRepos,
@@ -121,7 +122,8 @@ export default async function BuilderProfilePage({
 				const org = await payload.find({
 					collection: "projects",
 					where: {
-						"github.orgLogin": { equals: String(builder.github_username) },
+						// a login matches as GitHub matches it: whole, any case
+						"github.orgLogin": loginIn([String(builder.github_username)]),
 					},
 					limit: 100,
 					depth: 0,

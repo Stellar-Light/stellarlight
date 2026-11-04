@@ -60,6 +60,20 @@ export type BuilderLike = {
 	}> | null;
 };
 
+/**
+ * A where clause matching any of `logins` as GitHub matches a login: whole
+ * and case-insensitive. Payload's `in` is exact and case-sensitive, so a
+ * profile stored as "Bob" never met repos owned by "bob", and a join read
+ * that as none. One anchored pattern, not one per login: Mongo tests every
+ * pattern in an `$in` list against each value.
+ */
+export function loginIn(logins: readonly string[]): { in: RegExp[] } {
+	const alts = [...new Set(logins.filter(Boolean).map((l) => l.toLowerCase()))]
+		.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+		.join("|");
+	return { in: alts ? [new RegExp(`^(?:${alts})$`, "i")] : [] };
+}
+
 const empty = (): CodeActivity => ({
 	repos: [],
 	stars: 0,
@@ -133,7 +147,7 @@ export async function builderCodeActivity(
 			and: [
 				{
 					or: [
-						{ owner: { in: logins } },
+						{ owner: loginIn(logins) },
 						...(declared.size
 							? [
 									{
@@ -221,7 +235,7 @@ export async function builderCodeActivity(
 				{ status: { in: [...ACTIVE_PROJECT_STATUSES] } },
 				{
 					or: [
-						{ "github.orgLogin": { in: logins } },
+						{ "github.orgLogin": loginIn(logins) },
 						...(projectSlugs.size ? [{ slug: { in: [...projectSlugs] } }] : []),
 					],
 				},

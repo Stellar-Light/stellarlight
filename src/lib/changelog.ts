@@ -52,7 +52,9 @@ export const CHANGELOG: ChangelogEntry[] = [
 		version: "spec@1.9.118",
 		type: "fixed",
 		summary:
-			"getBuilders' `codeEvidence` no longer says none for a builder it did not check. With q, the read of the repos the page's builders own stopped at 300, so a builder whose repos fell past the cut read [] beside a real match, and a failed read served [] on every row. Every owned repo is now read: [] means all were read and none matched, and a failed read leaves null, with the read named in `meta.failedReads`.",
+			"getBuilders' `codeEvidence` no longer says none for a builder it did not check. With q, the read of the repos the page's builders own stopped at 300, so a builder whose repos fell past the cut read [] beside a real match; owners matched only in their stored case, so a profile stored as Bob read [] beside repos owned by bob; and a failed read served [] on every row, or a code-language row's admitting repos as if the read had run. Every owned repo is now read, owners match as GitHub logins (whole, any case), [] means all were read and none matched, and a failed read leaves null on every row, with the read named in `meta.failedReads`.",
+		detail:
+			"A login with no Passport profile (match.basis repo-owner) is read in full too: its top five repos by repoScore came from the newest 200 of a substring match, so its best repo could be missing. The same login match now joins onStellar and the profile page's org projects, where a stored case that differed from GitHub's read as no code.",
 	},
 	{
 		date: "2026-11-04",
