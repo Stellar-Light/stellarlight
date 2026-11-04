@@ -16,6 +16,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import {
 	ACTIVE_QUARTER,
+	BRIEF_ROSTER,
 	CATEGORIES,
 	CATEGORY_LABELS,
 	type Category,
@@ -223,6 +224,9 @@ export async function GET(req: NextRequest) {
 					"total/open/closed = curated RFP briefs only. matched/returned = result rows, which ALSO include synthetic 'scf-round' rows (rowType: 'scf-round', synthetic: true) representing the live SCF round's open submission window. To count or render briefs, filter rowType === 'rfp'; round context is also in meta.scfRound.",
 				activeQuarter: ACTIVE_QUARTER,
 				activeQuarterLabel: QUARTER_LABELS[ACTIVE_QUARTER],
+				// sls-096: open/closed is set by hand from SCF's RFP Track page,
+				// so the page and the day it was read go with every count.
+				briefRoster: BRIEF_ROSTER,
 				// SCF round identity + submission window (sls-007, LIVE since sls-014).
 				// Populated from communityfund.stellar.org/awards' embedded
 				// award_rounds payload on a 6h revalidate — the sls-007 "no

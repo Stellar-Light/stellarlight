@@ -124,6 +124,12 @@ export function IdeasListing() {
 			<div className="relative z-10 mb-6 flex items-center gap-2 flex-wrap">
 				{[...QUARTERS].reverse().map((quarter) => {
 					const open = rfpStatus(quarter) === "open";
+					// The active quarter before SCF publishes its briefs is not open.
+					const label = !open
+						? "Closed"
+						: IDEAS.some((idea) => idea.quarter === quarter)
+							? "Open"
+							: "Coming soon";
 					return (
 						<button
 							key={quarter}
@@ -143,12 +149,12 @@ export function IdeasListing() {
 							{QUARTER_LABELS[quarter]}
 							<Badge
 								className={`px-1.5 py-0.5 text-xs font-semibold rounded-full border-0 ${
-									open
+									label === "Open"
 										? "bg-emerald-500/20 text-emerald-400"
 										: "bg-white/10 text-muted-foreground"
 								}`}
 							>
-								{open ? "Open" : "Closed"}
+								{label}
 							</Badge>
 						</button>
 					);

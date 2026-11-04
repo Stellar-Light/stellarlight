@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-04",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.122",
+		type: "fixed",
+		summary:
+			"getRfps follows SCF's RFP Track page, which names no open brief now (Q4 2026 RFPs are coming soon): activeQuarter is q4-2026, counts.open is 0 and the two Q3 briefs read closed, and meta.briefRoster gives that page and the day it was read. getHackathon serves HackMeridian 2026's weighted rubric as rules.rubric, and getHackathons lists the Rise In Stellar Pro Hackathon in Istanbul (19 to 20 September 2026).",
+		detail:
+			"RFP rows carry publishedBrief when SCF published one: its title, a commit-pinned copy of the RFP Track page and the day it was read (13 of 16 rows; none was found for concentrated-liquidity-amm, soroban-vrf or ai-webide). technicalRequirements is the idea's own summary. For contract-source-verification it differs from the brief, so publishedBrief restates the brief's functional requirements (the SEP-58 fields bldimg, bldopt, source_repo, source_rev, tarball_url and tarball_sha256, and an SDF-allowlisted trusted build image) and what it rules out (fully deterministic Rust compilation as a research effort). rules.rubric lists seven criteria scored 1 to 5 and weighted 20, 20, 15, 15, 10, 10 and 10 percent, from hackmeridian.com/build. The Istanbul dates are Istanbul's: Rise In's page header prints its local-midnight start in UTC, as 18 September. An empty upcoming or active feed now says no event of that status and filters is in this feed, not that the ecosystem is between events, and says when part of the feed could not be read. meta.quarters and meta.categories are declared as the {value, label} objects they always were.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",

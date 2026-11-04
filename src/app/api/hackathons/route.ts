@@ -283,11 +283,17 @@ export async function GET(req: NextRequest) {
 	// live channels rather than dead-end.
 	const isForwardLookingQuery =
 		statusFilter === "upcoming" || statusFilter === "active";
+	const filtered = Boolean(q || organizerFilter || sourceFilter);
 	const fallbackChannels =
 		isForwardLookingQuery && hackathons.length === 0
 			? {
-					summary:
-						"No upcoming or active hackathons in stellarlight's feed right now: between events. Check live channels for the next announcement.",
+					// Only what was looked at (sls-106): this feed, the selected
+					// status and any other filter. "Between events" claimed the
+					// ecosystem's schedule, which the feed cannot see; a failed
+					// read is no look at all.
+					summary: readWarnings.length
+						? `No ${statusFilter} hackathons came back, but part of stellarlight's feed could not be read (meta.warnings), so this is not a check that none is listed. Check live channels for the next announcement.`
+						: `No ${statusFilter} hackathons ${filtered ? "match these filters " : ""}in stellarlight's feed right now. It holds curated events and Stellar organizers' DoraHacks listings, so this is not a claim that no Stellar hackathon is ${statusFilter} elsewhere. Check live channels for the next announcement.`,
 					channels: [
 						{
 							name: "@BuildOnStellar on X/Twitter",

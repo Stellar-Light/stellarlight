@@ -1030,6 +1030,11 @@ describe("tracks and prize tiers that are not known are null, never []", () => {
 				"Judging is an async review of the demo video, pitch deck, GitHub repo and submission answers: Genesis on problem clarity, MVP quality, Stellar integration and continued development potential; Scale on milestones against goals set at pre-event intake, SCF eligibility, production readiness and ecosystem impact.",
 			source: "https://hackmeridian.com",
 			checkedOn: "2026-10-20",
+			// The weighted rubric keeps its own page and day.
+			rubric: expect.objectContaining({
+				source: "https://www.hackmeridian.com/build",
+				checkedOn: "2026-11-04",
+			}),
 		});
 		expect(
 			undeclaredInServed(

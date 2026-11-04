@@ -17,6 +17,7 @@ describe("curated winners notes", () => {
 			"hackmeridian-2026",
 			"stellar-builders-camp-jaipur-2026",
 			"stellar-journey-to-mastery-2026",
+			"stellar-pro-hackathon-istanbul-2026",
 		]);
 		for (const [slug, note] of Object.entries(CURATED_WINNERS_NOTES)) {
 			expect(events.has(slug), slug).toBe(true);
@@ -123,6 +124,7 @@ describe("tracks and judging a curated record declares", () => {
 		expect(declaring.map((h) => h.uname).sort()).toEqual([
 			"hackmeridian-2026",
 			"stellar-journey-to-mastery-2026",
+			"stellar-pro-hackathon-istanbul-2026",
 		]);
 		for (const h of declaring) {
 			for (const t of h.tracks ?? []) {

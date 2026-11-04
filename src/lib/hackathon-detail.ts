@@ -641,7 +641,8 @@ export async function getHackathonDetail(
 					// Absent = the event page was not read; a null section = the
 					// page has none (most Stellar event pages have no judging
 					// section: 14 of 20 on 2026-10-05). An event off DoraHacks:
-					// only the judging sentence its record copies verbatim.
+					// only the judging sentence its record copies verbatim, and
+					// the weighted rubric when its organizer publishes one.
 					...(storedEvent?.detailReadAt
 						? {
 								rules: {
@@ -659,6 +660,9 @@ export async function getHackathonDetail(
 										judgingCriteria: record.judging.text,
 										source: record.judging.source,
 										checkedOn: record.judging.checkedOn,
+										...(record.judging.rubric
+											? { rubric: record.judging.rubric }
+											: {}),
 									},
 								}
 							: {}),

@@ -6134,17 +6134,38 @@ export const spec: OpenAPISpec = {
 													description:
 														"Human label for activeQuarter (e.g. 'Q3 2026').",
 												},
+												briefRoster: {
+													type: "object",
+													description:
+														"The official page the open briefs were last checked against, and the day: SCF's RFP Track page, which lists the briefs open now. Each brief's status and counts.open are set by hand from it, so they hold as of checkedOn; a brief SCF opened or dropped since may not be reflected. counts.open 0 means that page named no open brief that day.",
+													properties: {
+														source: { type: "string", format: "uri" },
+														checkedOn: { type: "string", format: "date" },
+													},
+												},
 												quarters: {
 													type: "array",
-													items: { type: "string" },
+													items: {
+														type: "object",
+														properties: {
+															value: { type: "string" },
+															label: { type: "string" },
+														},
+													},
 													description:
-														"Every quarter key the quarter filter accepts, newest first.",
+														"Every quarter the quarter filter accepts (value) with its label, oldest first. A quarter can hold no brief yet.",
 												},
 												categories: {
 													type: "array",
-													items: { type: "string" },
+													items: {
+														type: "object",
+														properties: {
+															value: { type: "string" },
+															label: { type: "string" },
+														},
+													},
 													description:
-														"Every category value present in the current brief set; the category filter's live vocabulary.",
+														"Every category the category filter accepts (value) with its display label; a category can hold no brief.",
 												},
 												submitNewBriefAt: {
 													type: "string",
@@ -11461,7 +11482,11 @@ export const spec: OpenAPISpec = {
 										description:
 											"Present when the query returns 0 events: a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array.",
 										properties: {
-											summary: { type: "string" },
+											summary: {
+												type: "string",
+												description:
+													"What this feed shows for the selected status and filters: not a claim that no Stellar hackathon is upcoming or active elsewhere. When part of the feed could not be read (meta.warnings), it says so, and no empty result is a check.",
+											},
 											channels: {
 												type: "array",
 												items: {
@@ -11502,8 +11527,33 @@ export const spec: OpenAPISpec = {
 							rules: {
 								type: "object",
 								description:
-									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn; the other keys are absent, not known.",
+									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn, and rubric when the organizer publishes a weighted one; the other keys are absent, not known.",
 								properties: {
+									rubric: {
+										type: "object",
+										description:
+											"Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent, in the page's order and words (the order is not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none.",
+										properties: {
+											scoreMin: { type: "integer" },
+											scoreMax: { type: "integer" },
+											criteria: {
+												type: "array",
+												items: {
+													type: "object",
+													properties: {
+														criterion: { type: "string" },
+														weightPercent: {
+															type: "number",
+															description:
+																"The criterion's share of the score, in percent; a rubric's weights sum to 100.",
+														},
+													},
+												},
+											},
+											source: { type: "string", format: "uri" },
+											checkedOn: { type: "string", format: "date" },
+										},
+									},
 									source: {
 										type: "string",
 										description:
@@ -12357,7 +12407,32 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"The sponsor's technical requirements text. Null when the brief carries none, and always null on synthetic scf-round rows.",
+							"The idea's own summary of what to build, as stellarlight.xyz/ideas shows it: not the brief SCF published, and it can differ from it (some were written before the brief). The published brief is publishedBrief. Null when the idea carries none, and always null on synthetic scf-round rows.",
+					},
+					publishedBrief: {
+						type: "object",
+						description:
+							"The brief SCF published for this idea on its RFP Track page: a commit-pinned copy of that page (the live page drops a quarter's briefs when the next arrive) and the day it was read. Absent: no published brief is linked, which is not a claim that SCF published none; always absent on synthetic scf-round rows.",
+						properties: {
+							title: {
+								type: "string",
+								description: "The brief's title on the page.",
+							},
+							url: { type: "string", format: "uri" },
+							checkedOn: { type: "string", format: "date" },
+							functionalRequirements: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"The brief's functional requirements, restated short, in its order. Absent: not restated here; the brief at url has them, with its non-functional requirements, evaluation criteria and deliverables, which are not restated.",
+							},
+							outOfScope: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"What the brief rules out of scope, restated short. Absent: not restated here.",
+							},
+						},
 					},
 					category: {
 						type: "string",

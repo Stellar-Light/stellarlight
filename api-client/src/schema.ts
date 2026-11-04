@@ -1552,6 +1552,7 @@ export interface components {
                 matchModeLabel?: string;
                 /** @description Present when the query returns 0 events: a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array. */
                 fallbackChannels?: {
+                    /** @description What this feed shows for the selected status and filters: not a claim that no Stellar hackathon is upcoming or active elsewhere. When part of the feed could not be read (meta.warnings), it says so, and no empty result is a check. */
                     summary?: string;
                     channels?: {
                         name?: string;
@@ -1568,8 +1569,22 @@ export interface components {
             hackathon?: {
                 /** @description The event page as the organizer published it, in markdown: the description, then each custom tab under its name as a heading (some organizers publish judging criteria or submission requirements only in a tab). Stored daily for DoraHacks events. */
                 description?: string | null;
-                /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn; the other keys are absent, not known. */
+                /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn, and rubric when the organizer publishes a weighted one; the other keys are absent, not known. */
                 rules?: {
+                    /** @description Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent, in the page's order and words (the order is not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none. */
+                    rubric?: {
+                        scoreMin?: number;
+                        scoreMax?: number;
+                        criteria?: {
+                            criterion?: string;
+                            /** @description The criterion's share of the score, in percent; a rubric's weights sum to 100. */
+                            weightPercent?: number;
+                        }[];
+                        /** Format: uri */
+                        source?: string;
+                        /** Format: date */
+                        checkedOn?: string;
+                    };
                     /** @description Curated events only: the page the judging sentence was checked against. */
                     source?: string;
                     /**
@@ -2187,8 +2202,21 @@ export interface components {
             id?: string;
             title?: string;
             description?: string;
-            /** @description The sponsor's technical requirements text. Null when the brief carries none, and always null on synthetic scf-round rows. */
+            /** @description The idea's own summary of what to build, as stellarlight.xyz/ideas shows it: not the brief SCF published, and it can differ from it (some were written before the brief). The published brief is publishedBrief. Null when the idea carries none, and always null on synthetic scf-round rows. */
             technicalRequirements?: string | null;
+            /** @description The brief SCF published for this idea on its RFP Track page: a commit-pinned copy of that page (the live page drops a quarter's briefs when the next arrive) and the day it was read. Absent: no published brief is linked, which is not a claim that SCF published none; always absent on synthetic scf-round rows. */
+            publishedBrief?: {
+                /** @description The brief's title on the page. */
+                title?: string;
+                /** Format: uri */
+                url?: string;
+                /** Format: date */
+                checkedOn?: string;
+                /** @description The brief's functional requirements, restated short, in its order. Absent: not restated here; the brief at url has them, with its non-functional requirements, evaluation criteria and deliverables, which are not restated. */
+                functionalRequirements?: string[];
+                /** @description What the brief rules out of scope, restated short. Absent: not restated here. */
+                outOfScope?: string[];
+            };
             /** @description Category slug: the ?category= filter vocabulary (an unrecognized filter value returns 400 with validCategories). 'scf' is carried by the synthetic live-round row. */
             category?: string;
             /** @description Display label for category (e.g. 'DeFi'). */
@@ -5500,10 +5528,23 @@ export interface operations {
                             activeQuarter?: string;
                             /** @description Human label for activeQuarter (e.g. 'Q3 2026'). */
                             activeQuarterLabel?: string;
-                            /** @description Every quarter key the quarter filter accepts, newest first. */
-                            quarters?: string[];
-                            /** @description Every category value present in the current brief set; the category filter's live vocabulary. */
-                            categories?: string[];
+                            /** @description The official page the open briefs were last checked against, and the day: SCF's RFP Track page, which lists the briefs open now. Each brief's status and counts.open are set by hand from it, so they hold as of checkedOn; a brief SCF opened or dropped since may not be reflected. counts.open 0 means that page named no open brief that day. */
+                            briefRoster?: {
+                                /** Format: uri */
+                                source?: string;
+                                /** Format: date */
+                                checkedOn?: string;
+                            };
+                            /** @description Every quarter the quarter filter accepts (value) with its label, oldest first. A quarter can hold no brief yet. */
+                            quarters?: {
+                                value?: string;
+                                label?: string;
+                            }[];
+                            /** @description Every category the category filter accepts (value) with its display label; a category can hold no brief. */
+                            categories?: {
+                                value?: string;
+                                label?: string;
+                            }[];
                             /**
                              * Format: uri
                              * @description Where a team submits a NEW brief/idea (the SCF ideas board); hand off here when asked how to propose one.
