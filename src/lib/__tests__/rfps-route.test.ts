@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { describe, expect, it, vi } from "vitest";
 import { BRIEF_ROSTER, IDEAS, rfpStatus } from "@/data/ideas";
@@ -141,24 +143,33 @@ describe("a brief SCF published is linked, apart from the idea summary", () => {
 	});
 });
 
-/** The RFP Track page's markdown in the shapes it has taken: each brief a
- * <details> block under "Current Open RFPs", up to the next heading. */
-const page = (...blocks: string[]) =>
+/** The RFP Track page's markdown in the shapes it has taken: a notice line
+ * when there is one, then each brief a <details> block under "Current Open
+ * RFPs", up to the next heading. */
+const page = (notice: string | null, ...blocks: string[]) =>
 	[
 		"#### Requirements",
 		"",
 		"#### Current Open RFPs",
 		"",
+		...(notice ? [notice, ""] : []),
 		...blocks.flatMap((b) => ["<details>", "", b, "", "</details>", ""]),
 		"#### Process & Timeline",
 		"",
 		"<details><summary>Not a brief</summary></details>",
 	].join("\n");
 const COMING_SOON = "<summary><strong>Coming Soon</strong></summary>\n\n###";
+const Q4_NOTICE = "_**October 2026: New Q4 RFPs are coming soon.**_";
+const section = (...lines: string[]) =>
+	["#### Current Open RFPs", "", ...lines, "", "#### Process & Timeline"].join(
+		"\n",
+	);
 
 describe("the open briefs the RFP Track page lists", () => {
-	it("reads none from the October 2026 page, as /api/rfps now serves", () => {
-		const official = officialOpenBriefs(page(COMING_SOON, COMING_SOON));
+	it("reads none from the October 2026 page, which says so plainly", () => {
+		const official = officialOpenBriefs(
+			page(Q4_NOTICE, COMING_SOON, COMING_SOON),
+		);
 		expect(official).toEqual([]);
 		const ours = IDEAS.filter((i) => rfpStatus(i.quarter) === "open").map(
 			(i) => i.publishedBrief?.title ?? i.title,
@@ -172,6 +183,7 @@ describe("the open briefs the RFP Track page lists", () => {
 	it("reads each brief's title, and flags both directions of drift", () => {
 		const official = officialOpenBriefs(
 			page(
+				"_**July 23, 2026: New Q3 RFPs are open for submissions!**_",
 				// Q3 2026: a plain summary, its sections inside the block.
 				"<summary>Stellar-compatible LayerZero DVN</summary>\n\n### Stellar-compatible LayerZero DVN\n\n#### 1. Scope of Work",
 				// A bold summary, with an entity and a trailing colon (2026-03-24).
@@ -194,18 +206,84 @@ describe("the open briefs the RFP Track page lists", () => {
 		});
 	});
 
+	// Review: a summary on the block's own line, or with an attribute, read
+	// as no brief, and an empty list passed as "none open".
+	it("reads a summary however its tags are written", () => {
+		const one = ["Q4 Prices API"];
+		expect(
+			officialOpenBriefs(
+				section("<details><summary>Q4 Prices API</summary>", "", "</details>"),
+			),
+		).toEqual(one);
+		expect(
+			officialOpenBriefs(
+				page(null, '<summary class="x">Q4 Prices API</summary>'),
+			),
+		).toEqual(one);
+		expect(
+			officialOpenBriefs(
+				page(null, "<summary>\n<strong>Q4 Prices API</strong>\n</summary>"),
+			),
+		).toEqual(one);
+		expect(
+			officialOpenBriefs(
+				section("<DETAILS open><Summary>Q4 Prices API</Summary></DETAILS>"),
+			),
+		).toEqual(one);
+	});
+
 	it("does not count a brief the page marks closed", () => {
 		// How the page listed Q1 2026's briefs after they closed.
 		expect(
 			officialOpenBriefs(
 				page(
+					"_**April 4, 2025: All Q1 RFPs are closed. Keep an eye out for Q2 RFPs coming soon.**_",
 					"<summary><strong>Prices API :</strong> No longer accepting submissions</summary>",
 				),
 			),
 		).toEqual([]);
 	});
 
-	it("knows nothing when the page has no Current Open RFPs heading", () => {
+	it("knows nothing unless the section reads one way: briefs, or a plain none", () => {
 		expect(officialOpenBriefs("# RFP Track\n\nMoved.")).toBeNull();
+		// No brief, and nothing on the page saying none is open.
+		expect(officialOpenBriefs(page(null, COMING_SOON, COMING_SOON))).toBeNull();
+		expect(officialOpenBriefs(section("New briefs below."))).toBeNull();
+		// A block whose title is not in a summary, a block left open, and a
+		// summary outside any block: shapes this does not read.
+		expect(
+			officialOpenBriefs(page(Q4_NOTICE, "<p>Q4 Prices API</p>")),
+		).toBeNull();
+		expect(
+			officialOpenBriefs(
+				section(Q4_NOTICE, "<details>", "<summary>Q4 Prices API</summary>"),
+			),
+		).toBeNull();
+		expect(
+			officialOpenBriefs(
+				section(Q4_NOTICE, "<summary>Q4 Prices API</summary>"),
+			),
+		).toBeNull();
+	});
+
+	// Review: the check existed and nothing ran it.
+	it("runs every night, and a red run is reported", () => {
+		const yml = readFileSync(
+			join(process.cwd(), ".github/workflows/nightly-health.yml"),
+			"utf8",
+		);
+		const step =
+			/- name: [^\n]*\n\s+id: (\w+)\n(?:\s+[^\n]*\n){0,6}?\s+run: pnpm exec tsx scripts\/check-rfp-roster\.ts/.exec(
+				yml,
+			);
+		expect(step?.[1]).toBeTruthy();
+		const id = step?.[1] ?? "";
+		const env = new RegExp(
+			`(\\w+): \\$\\{\\{ steps\\.${id}\\.outcome \\}\\}`,
+		).exec(yml)?.[1];
+		expect(env).toBeTruthy();
+		expect(yml).toContain(
+			`[ "$${env}" = "failure" ] && REDS="$REDS rfp-roster"`,
+		);
 	});
 });
