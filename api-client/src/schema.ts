@@ -1992,7 +1992,7 @@ export interface components {
             score?: number;
             /** @description DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions (e.g. where error codes / consensus / XDR are defined) beyond which-repo discovery. */
             deepWikiUrl?: string;
-            /** @description True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them. */
+            /** @description True when surfaced as a curated canonical answer for an infra, protocol or developer-product query (e.g. error codes → stellar-core and the SDKs; Horizon → stellar/stellar-horizon; Scaffold Stellar → stellar-scaffold/cli; Stellar Lab → stellar/laboratory; smart contract examples → stellar/soroban-examples). Floated to the top; meta.canonical lists them. */
             canonical?: boolean;
             /**
              * @description WHY this repo ranks as Stellar-relevant: ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none: a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.
@@ -2035,6 +2035,8 @@ export interface components {
                 symbols?: string[];
                 /** @description Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08. */
                 contractInterface?: string[];
+                /** @description The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test and fixture folders (tests/, fixtures/, testdata/, e2e/, test wasm workspaces, a Rust crate under integration/) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when contractInterface is []. null when the repo was scanned before paths were recorded (2026-11-04): such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan. */
+                contractInterfacePaths?: string[] | null;
                 /** @description Stellar protocol the pinned soroban-sdk MAJOR targets, derived from the maintained sdk→protocol table (dated; the mapping has documented irregularities: 23.x spans P24→P25). ADVISORY, not an attestation: null = unknown major, never guessed. */
                 targetProtocol?: number | null;
                 /** @description CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol: the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null. */
@@ -2056,8 +2058,12 @@ export interface components {
         };
         RepoSearchResponse: {
             meta: components["schemas"]["Meta"] & {
-                /** @description The curated canonical SDF repo floated to the top for an infra/protocol query (e.g. error codes → stellar/stellar-core), or null when the query isn’t a canonical-routed concept. */
-                canonical?: string | null;
+                /** @description The curated canonical repos floated to the top for an infra, protocol or developer-product query (e.g. error codes → stellar/stellar-core; Scaffold Stellar → stellar-scaffold/cli), or null when the query isn’t a canonical-routed concept. */
+                canonical?: {
+                    /** @description fullNames, in canonical priority order. */
+                    repos?: string[];
+                    note?: string;
+                } | null;
                 /** @description How to read the results (e.g. code references graded by repoScore 0-100). */
                 note?: string;
                 view?: components["schemas"]["CompactView"];
@@ -3511,6 +3517,8 @@ export interface operations {
                             scannedRef?: string | null;
                             symbols?: string[];
                             contractInterface?: string[];
+                            /** @description The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test and fixture folders (tests/, fixtures/, testdata/, e2e/, test wasm workspaces, a Rust crate under integration/) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when contractInterface is []. null when the repo was scanned before paths were recorded (2026-11-04): such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan. */
+                            contractInterfacePaths?: string[] | null;
                             targetProtocol?: number | null;
                             protocolCaps?: {
                                 cap?: number;
@@ -5894,7 +5902,7 @@ export interface operations {
                                     slug?: string;
                                     name?: string | null;
                                 } | null;
-                                /** @description TrustReport codeTruth minus the full contractInterface (interfaceSize is kept). */
+                                /** @description TrustReport codeTruth minus the full contractInterface and its contractInterfacePaths (interfaceSize is kept). */
                                 codeTruth?: {
                                     /**
                                      * @description Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself, so the code facts here describe something no longer reachable; such rows are excluded from searchRepos and builder code evidence. null = never stamped.
@@ -6221,6 +6229,8 @@ export interface operations {
                                 interfaceSize?: number;
                                 /** @description Scanned public fn signatures (up to 60); verify generated calls against these. */
                                 contractInterface?: string[];
+                                /** @description The repo-relative source file of each contractInterface entry (up to 60), same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test and fixture folders (tests/, fixtures/, testdata/, e2e/, test wasm workspaces, a Rust crate under integration/) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when contractInterface is []. null when the repo was scanned before paths were recorded (2026-11-04): such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan. */
+                                contractInterfacePaths?: string[] | null;
                                 mainnetContractId?: string | null;
                             };
                             usage?: {

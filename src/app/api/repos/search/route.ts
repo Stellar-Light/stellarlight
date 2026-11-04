@@ -243,7 +243,7 @@ async function handle(req: NextRequest) {
 					canonical.length > 0
 						? {
 								repos: canonical,
-								note: "Curated canonical Stellar repos for this infra/protocol query, floated to the top (e.g. error codes → stellar-core/Horizon/SDKs; Horizon lives in stellar/go). Recommend these as the authoritative sources, and chain to their deepWikiUrl for internals.",
+								note: "Curated canonical Stellar repos for this infra, protocol or developer-product query, floated to the top (e.g. error codes → stellar-core and the SDKs; Horizon → stellar/stellar-horizon; Scaffold Stellar → stellar-scaffold/cli). Recommend these as the authoritative sources, and chain to their deepWikiUrl for internals.",
 							}
 						: null,
 				// sls-025: a zero-result page says exactly what WAS searched, so an

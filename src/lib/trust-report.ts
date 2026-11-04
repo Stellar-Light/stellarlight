@@ -18,7 +18,9 @@
  */
 
 import type { Payload } from "payload";
+import { interfacePathsOf } from "./code-symbols";
 import { activityStateOf } from "./repo-grade";
+import { renamedTo } from "./repo-relations";
 import { securityOf } from "./repo-security";
 
 export const TRUST_SIGNALS = [
@@ -56,6 +58,9 @@ export interface TrustReport {
 		sdkCapabilities: string[];
 		interfaceSize: number;
 		contractInterface: string[];
+		/** contractInterfacePaths[i] is the source file of contractInterface[i]
+		 * (issue #1906); null when the scan predates paths. */
+		contractInterfacePaths: string[] | null;
 		mainnetContractId: string | null;
 		mainnetContractBasis?: string | null;
 	};
@@ -95,20 +100,31 @@ export interface TrustReport {
 
 export async function buildTrustReport(
 	payload: Payload,
-	fullName: string,
+	asked: string,
 ): Promise<TrustReport | null> {
-	const res = await payload.find({
-		collection: "repos",
-		where: { fullName: { equals: fullName } },
-		limit: 1,
-		depth: 0,
-		select: { readmeExcerpt: false },
-		// A held repo is hidden from every other read; asked for by name, it is
-		// served with its warning (repo-security.ts).
-		context: { includeSecurityHeld: true },
-	});
+	const read = async (name: string) =>
+		(
+			await payload.find({
+				collection: "repos",
+				where: { fullName: { equals: name } },
+				limit: 1,
+				depth: 0,
+				select: { readmeExcerpt: false },
+				// A held repo is hidden from every other read; asked for by name, it
+				// is served with its warning (repo-security.ts).
+				context: { includeSecurityHeld: true },
+			})
+		).docs[0];
+	// A renamed repo's old path, when the index holds no row for it, is the
+	// repo it now lives at (GitHub 301s it), so an old link still finds the
+	// report (issue #1901).
+	let fullName = asked;
 	// biome-ignore lint/suspicious/noExplicitAny: stored doc shape
-	const d = res.docs[0] as any;
+	let d = (await read(fullName)) as any;
+	if (!d && renamedTo(asked) !== asked) {
+		fullName = renamedTo(asked);
+		d = await read(fullName);
+	}
 	if (!d) return null;
 
 	const iface: string[] = Array.isArray(d.contractInterface)
@@ -234,6 +250,7 @@ export async function buildTrustReport(
 				: [],
 			interfaceSize: iface.length,
 			contractInterface: iface.slice(0, 60),
+			contractInterfacePaths: interfacePathsOf(d)?.slice(0, 60) ?? null,
 			mainnetContractId: d.mainnetContractId
 				? String(d.mainnetContractId)
 				: null,

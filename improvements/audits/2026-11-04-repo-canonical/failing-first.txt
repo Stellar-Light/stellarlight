@@ -1,0 +1,42 @@
+Failing first: the changed and new test files run against the base tree (origin/main f3b19008, a scratch archive)
+      Tests  36 failed | 119 passed (155)
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > JS under a test folder stays out of the symbols and the capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > contracts/tests/fixture/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > e2e/contracts/token/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > each signature comes with the file it was read from, in the same order
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > internal/integration/contracts/increment/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > soroban-test-wasms/wasm-workspace/auth/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > testdata/contract/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/explain-route-interface.test.ts > explainRepo codeVerified interface paths > a renamed repo's old path routes to the repo where it lives now
+ FAIL  src/lib/__tests__/explain-route-interface.test.ts > explainRepo codeVerified interface paths > serves each interface entry's source path, through the route's select
+ FAIL  src/lib/__tests__/hackathon-brief.test.ts > summarizeTrust > drops the full contractInterface (the budget-buster) but keeps its size and a link to the full report
+ FAIL  src/lib/__tests__/repo-relations.test.ts > renamedTo: an old path resolves to where the repo lives now > an archived or superseded repo is a different repo and keeps its own name
+ FAIL  src/lib/__tests__/repo-relations.test.ts > renamedTo: an old path resolves to where the repo lives now > follows a rename, case-insensitively
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > How do I start a new dapp with Scaffold Stellar? routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > Scaffold Stellar routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > Stellar Laboratory routes to stellar/laboratory
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > contract examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > example soroban contracts routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > lab.stellar.org routes to stellar/laboratory
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold stellar routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold-stellar routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > smart contract examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > soroban examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > soroban smart contract examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar lab routes to stellar/laboratory
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar scaffold cli routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar scaffold routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > the old owner/name of a renamed repo finds the repo where it lives now
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > the product outranks a hackathon copy that carries its name
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > [] when there is no interface to place
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > null when the scan predates paths: an entry's path is unknown, not absent
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > null when the stored lists do not pair up
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > pairs each entry with its stored source path
+ FAIL  src/lib/__tests__/scan-write-shape.test.ts > write-shape: the signals-only write gate > ok outcome persists the full signal set + state=scanned
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > an old renamed path answers with the repo where it lives now
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > null paths when the scan predates them
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > serves each interface entry's source path beside it
+ Test Files  7 failed (7)
+⎯⎯⎯⎯⎯⎯ Failed Tests 36 ⎯⎯⎯⎯⎯⎯⎯
+
+Pass after, on the branch: Test Files 7 passed (7); Tests 155 passed (155)

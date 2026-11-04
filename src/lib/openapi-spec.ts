@@ -3414,6 +3414,13 @@ export const spec: OpenAPISpec = {
 													type: "array",
 													items: { type: "string" },
 												},
+												contractInterfacePaths: {
+													type: "array",
+													items: { type: "string" },
+													nullable: true,
+													description:
+														"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test and fixture folders (tests/, fixtures/, testdata/, e2e/, test wasm workspaces, a Rust crate under integration/) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when contractInterface is []. null when the repo was scanned before paths were recorded (2026-11-04): such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
+												},
 												targetProtocol: {
 													type: "integer",
 													nullable: true,
@@ -6472,7 +6479,7 @@ export const spec: OpenAPISpec = {
 															codeTruth: {
 																type: "object",
 																description:
-																	"TrustReport codeTruth minus the full contractInterface (interfaceSize is kept).",
+																	"TrustReport codeTruth minus the full contractInterface and its contractInterfacePaths (interfaceSize is kept).",
 																properties: {
 																	scanState: {
 																		type: "string",
@@ -6915,6 +6922,13 @@ export const spec: OpenAPISpec = {
 															items: { type: "string" },
 															description:
 																"Scanned public fn signatures (up to 60); verify generated calls against these.",
+														},
+														contractInterfacePaths: {
+															type: "array",
+															items: { type: "string" },
+															nullable: true,
+															description:
+																"The repo-relative source file of each contractInterface entry (up to 60), same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test and fixture folders (tests/, fixtures/, testdata/, e2e/, test wasm workspaces, a Rust crate under integration/) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when contractInterface is []. null when the repo was scanned before paths were recorded (2026-11-04): such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
 														},
 														mainnetContractId: {
 															type: "string",
@@ -11932,7 +11946,7 @@ export const spec: OpenAPISpec = {
 					canonical: {
 						type: "boolean",
 						description:
-							"True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them.",
+							"True when surfaced as a curated canonical answer for an infra, protocol or developer-product query (e.g. error codes → stellar-core and the SDKs; Horizon → stellar/stellar-horizon; Scaffold Stellar → stellar-scaffold/cli; Stellar Lab → stellar/laboratory; smart contract examples → stellar/soroban-examples). Floated to the top; meta.canonical lists them.",
 					},
 					stellarEvidence: {
 						type: "string",
@@ -12018,6 +12032,13 @@ export const spec: OpenAPISpec = {
 								description:
 									"Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08.",
 							},
+							contractInterfacePaths: {
+								type: "array",
+								items: { type: "string" },
+								nullable: true,
+								description:
+									"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test and fixture folders (tests/, fixtures/, testdata/, e2e/, test wasm workspaces, a Rust crate under integration/) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when contractInterface is []. null when the repo was scanned before paths were recorded (2026-11-04): such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
+							},
 							targetProtocol: {
 								type: "integer",
 								nullable: true,
@@ -12077,10 +12098,18 @@ export const spec: OpenAPISpec = {
 								type: "object",
 								properties: {
 									canonical: {
-										type: "string",
+										type: "object",
 										nullable: true,
 										description:
-											"The curated canonical SDF repo floated to the top for an infra/protocol query (e.g. error codes \u2192 stellar/stellar-core), or null when the query isn\u2019t a canonical-routed concept.",
+											"The curated canonical repos floated to the top for an infra, protocol or developer-product query (e.g. error codes \u2192 stellar/stellar-core; Scaffold Stellar \u2192 stellar-scaffold/cli), or null when the query isn\u2019t a canonical-routed concept.",
+										properties: {
+											repos: {
+												type: "array",
+												items: { type: "string" },
+												description: "fullNames, in canonical priority order.",
+											},
+											note: { type: "string" },
+										},
 									},
 									note: {
 										type: "string",

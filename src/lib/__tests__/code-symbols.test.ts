@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+	contractInterfaceEntries,
 	detectSdkCapabilities,
 	extractCodeSymbols,
+	extractContractInterface,
 	extractJsSymbols,
 	symbolsHaystack,
 } from "../code-symbols";
@@ -200,5 +202,72 @@ describe("language-frontier capabilities (py/go/jvm)", () => {
 			},
 		]);
 		expect(tags).toEqual([]);
+	});
+});
+
+describe("interfaces carry their source path; test folders stay out (issue #1906)", () => {
+	const impl = (name: string) =>
+		`#[contract]\npub struct ${name};\n#[contractimpl]\nimpl ${name} {\n\tpub fn bump(env: Env, n: u32) -> u32 { n }\n}\n`;
+
+	it("each signature comes with the file it was read from, in the same order", () => {
+		const blobs = [
+			{ path: "contracts/vault/src/lib.rs", text: impl("Vault") },
+			{ path: "examples/demo/src/contract.rs", text: impl("Demo") },
+		];
+		expect(contractInterfaceEntries(blobs)).toEqual([
+			{
+				signature: "Vault.bump(n: u32) -> u32",
+				path: "contracts/vault/src/lib.rs",
+			},
+			// an example folder stays in; its path is what marks it
+			{
+				signature: "Demo.bump(n: u32) -> u32",
+				path: "examples/demo/src/contract.rs",
+			},
+		]);
+		// the string list existing consumers read is unchanged
+		expect(extractContractInterface(blobs)).toEqual([
+			"Vault.bump(n: u32) -> u32",
+			"Demo.bump(n: u32) -> u32",
+		]);
+	});
+
+	it.each([
+		// stellar/stellar-horizon: the six interfaces it served live
+		"internal/integration/contracts/increment/src/lib.rs",
+		// stellar/rs-soroban-env: its test wasms
+		"soroban-test-wasms/wasm-workspace/auth/src/lib.rs",
+		"e2e/contracts/token/src/lib.rs",
+		"testdata/contract/src/lib.rs",
+		"contracts/tests/fixture/src/lib.rs",
+	])(
+		"%s is a test folder: left out of the interface and the symbols",
+		(path) => {
+			const blobs = [{ path, text: impl("Fixture") }];
+			expect(extractCodeSymbols(blobs)).toEqual([]);
+			expect(contractInterfaceEntries(blobs)).toEqual([]);
+		},
+	);
+
+	it("JS under a test folder stays out of the symbols and the capability tags", () => {
+		const blobs = [
+			{
+				path: "e2e/flows/pay.ts",
+				text: "export function payFlow(a) { return new TransactionBuilder(a); }",
+			},
+		];
+		expect(extractJsSymbols(blobs)).toEqual([]);
+		expect(detectSdkCapabilities(blobs)).toEqual([]);
+	});
+
+	it("a JS integration/ folder stays in: it can hold product code", () => {
+		const blobs = [
+			{
+				path: "src/integration/wallet.ts",
+				text: "export function connectWallet() { return new TransactionBuilder(a); }",
+			},
+		];
+		expect(extractJsSymbols(blobs)).toEqual(["connectWallet"]);
+		expect(detectSdkCapabilities(blobs)).toEqual(["tx-building"]);
 	});
 });

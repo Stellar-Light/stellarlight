@@ -15,9 +15,9 @@ import {
 	degradedWarning,
 } from "@/lib/degraded-read";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
-import { currentRepo, repoSupersession } from "@/lib/repo-relations";
+import { currentRepo, renamedTo, repoSupersession } from "@/lib/repo-relations";
 import { CAP_REGISTRY } from "../data/cap-registry";
-import { symbolsHaystack } from "./code-symbols";
+import { interfacePathsOf, symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
 import {
 	activityStateOf,
@@ -79,6 +79,7 @@ interface RepoDoc {
 	scannedRef?: unknown;
 	codeSymbols?: unknown;
 	contractInterface?: unknown;
+	contractInterfacePaths?: unknown;
 	stellarDeps?: unknown;
 	mainnetContractId?: string | null;
 	sdkCapabilities?: unknown;
@@ -257,6 +258,10 @@ export interface CodeVerified {
 	scannedRef: string | null;
 	/** Soroban contract ABI: `Contract.fn(arg: Type, …) -> Ret` per #[contractimpl] pub fn (env stripped, matching contractspec). Empty for non-contract repos or pre-2026-08-08 scans. */
 	contractInterface: string[];
+	/** contractInterfacePaths[i] is the repo-relative file contractInterface[i]
+	 * was read from (issue #1906): [] when there is no interface, null when the
+	 * scan predates paths. */
+	contractInterfacePaths: string[] | null;
 	/** Protocol the pinned soroban-sdk major targets per the maintained table — ADVISORY (derived, dated; the sdk→protocol mapping has documented irregularities), null when unknown/never guessed. */
 	targetProtocol: number | null;
 	/** CAPs whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line. [] when targetProtocol is null. */
@@ -327,6 +332,7 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 		contractInterface: Array.isArray(d.contractInterface)
 			? d.contractInterface.filter((s): s is string => typeof s === "string")
 			: [],
+		contractInterfacePaths: interfacePathsOf(d),
 		stellarDeps: Array.isArray(d.stellarDeps)
 			? d.stellarDeps.filter((s): s is string => typeof s === "string")
 			: [],
@@ -866,6 +872,29 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	// split to their own repos. The living repo leads; the archived monorepo
 	// stays second for historical questions about pre-split code.
 	{ test: /\bgo\s*sdk\b/, repos: ["stellar/go-stellar-sdk", "stellar/go"] },
+	// Developer products (issue #1901). A product whose repo name does not
+	// carry the product's words lost its own name to repos that do: hackathon
+	// copies named *scaffold-stellar* led q="scaffold stellar" while
+	// stellar-scaffold/cli ranked 16th, and *-lab repos led q="stellar lab"
+	// over stellar/laboratory. A product NAME fires anywhere in the query; the
+	// generic phrase "contract examples" fires only as the whole query, since
+	// a topic before it ("escrow contract examples") names a more specific
+	// answer. The lookarounds keep a name that merely contains the words
+	// (hackthon-scaffold-stellar, stellar-agent-merchant-lab) from firing.
+	// Listed last, so a query that also names an infra concept keeps that
+	// concept's repo first.
+	{
+		test: /(?<![\w-])(?:scaffold[\s-]*stellar|stellar[\s-]*scaffold)(?![\w-])/,
+		repos: ["stellar-scaffold/cli"],
+	},
+	{
+		test: /(?<![\w-])stellar[\s-]*lab(?:oratory)?(?![\w-])|\blab\.stellar\.org\b/,
+		repos: ["stellar/laboratory"],
+	},
+	{
+		test: /(?<![\w-])soroban[\s-]*examples?(?![\w-])|^(?:(?:soroban|stellar)\s+)?(?:smart\s+)?contracts?\s+examples?$|^examples?\s+(?:of\s+)?(?:(?:soroban|stellar)\s+)?(?:smart\s+)?contracts?$/,
+		repos: ["stellar/soroban-examples"],
+	},
 ];
 
 // Canonical repos for a query, priority order, deduped. Empty when the query
@@ -1336,7 +1365,21 @@ export async function searchRepos(
 		// noisy scored list, so a wallet/aggregator can't bury the real flagship.
 		const flagList = flagshipsFor(q);
 		const flagRank = new Map(flagList.map((fn, i) => [fn.toLowerCase(), i]));
-		const injectList = [...new Set([...canonList, ...flagList])];
+		// A renamed repo's old owner/name is an alias of the repo it now lives
+		// at (GitHub 301s it): fetch that repo so the old link still finds it,
+		// even when the index never held the old path (theahaco/scaffold-
+		// stellar, issue #1901). An indexed old row keeps matching its own name.
+		const named = explicitRepoName(q);
+		const renamed = named ? renamedTo(named) : "";
+		const renamedTarget =
+			renamed && renamed.toLowerCase() !== named?.toLowerCase() ? renamed : "";
+		const injectList = [
+			...new Set([
+				...canonList,
+				...flagList,
+				...(renamedTarget ? [renamedTarget] : []),
+			]),
+		];
 		let rawDocs = res.docs as unknown as RepoDoc[];
 		if (injectList.length) {
 			const cres = await find("repos canonical inject", {
@@ -1592,13 +1635,15 @@ export async function searchRepos(
 			// regardless of token score and outranks keyword/semantic neighbors.
 			// ≥3 chars so degenerate short queries can't ride it.
 			const alias =
-				qNorm.length >= 3 &&
-				(qIsIdentifier || qIsSpacedName
-					? normAlias(repoPart) === qNorm ||
-						normAlias(ownerRaw) === qNorm ||
-						normAlias(r.fullName) === qNorm
-					: // Plain-word queries: owner identity ONLY (see qIsPlainName).
-						normAlias(ownerRaw) === qNorm)
+				(qNorm.length >= 3 &&
+					(qIsIdentifier || qIsSpacedName
+						? normAlias(repoPart) === qNorm ||
+							normAlias(ownerRaw) === qNorm ||
+							normAlias(r.fullName) === qNorm
+						: // Plain-word queries: owner identity ONLY (see qIsPlainName).
+							normAlias(ownerRaw) === qNorm)) ||
+				(renamedTarget &&
+					r.fullName.toLowerCase() === renamedTarget.toLowerCase())
 					? 1
 					: 0;
 			// mention check spans name/topics/desc AND readme (F4: a repo whose

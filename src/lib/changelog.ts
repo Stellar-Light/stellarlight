@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-04",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.120",
+		type: "fixed",
+		summary:
+			"searchRepos ranks a developer product first for its own name: q=scaffold stellar leads with stellar-scaffold/cli, which ranked 16th under hackathon copies named for the template; q=stellar lab with stellar/laboratory (17th) and q=smart contract examples with stellar/soroban-examples (5th). The old path theahaco/scaffold-stellar, which the Stellar docs still link, now finds stellar-scaffold/cli on searchRepos, explainRepo and /api/repos/trust. Each contract interface entry now has its source file in `codeVerified.contractInterfacePaths` (and `codeTruth.contractInterfacePaths` on the trust report).",
+		detail:
+			"`canonical` and `meta.canonical` now cover developer products, and `meta.canonical` is declared as the object it is served as (repos and note), not a string. A scan now leaves contract interfaces, symbols and capability tags read from testdata, e2e and test wasm folders, or from a Rust crate under an integration folder, out of a repo's code facts, as it already did for tests and fixtures. The six interfaces explainRepo lists for stellar/stellar-horizon are integration-test fixtures and drop out at its next scan; until a repo is rescanned its paths are null. Replayed over 13,810 indexed repos: the 14 product-name queries of the new frozen set rank their product first, the eight infrastructure controls stay first, and all 145 queries of the 2026-10-23 sets answer identically. Ranking first-party ownership or repoScore above the keyword score instead moved 14 and 17 expected repos down, so neither ships.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",

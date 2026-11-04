@@ -533,6 +533,16 @@ export const REPO_SUPERSESSIONS: Record<string, RepoSupersession> = {
 		source: "path redirects to github.com/Micopay/micopay-protocol (HTTP 301)",
 		asOf: "2026-09-02",
 	},
+	// -- 2026-11-04 (issue #1901): the Stellar docs' Scaffold page still links
+	// the old path, which the index never held.
+	"theahaco/scaffold-stellar": {
+		kind: "renamed",
+		supersededBy: "stellar-scaffold/cli",
+		deprecatedAt: null,
+		source:
+			"github.com/theahaco/scaffold-stellar → HTTP 301 → github.com/stellar-scaffold/cli; GitHub API full_name stellar-scaffold/cli",
+		asOf: "2026-11-04",
+	},
 	// -- 2026-09-13 supersession-freshness sweep: the six archived curated-pool repos the
 	// check had been reporting since 09-08 while its lane was misdeclared (#1533). Two batch
 	// archives: stellar-expert on 08-29, idos-network on 08-25. deprecatedAt is GraphQL
@@ -603,6 +613,17 @@ export const REPO_SUCCESSIONS: Record<string, string> = Object.fromEntries(
  * follow a move instead of going stale. */
 export function currentRepo(fullName: string): string {
 	return repoSupersession(fullName)?.supersededBy ?? fullName;
+}
+
+/** Where a renamed repo's old path leads. GitHub answers the old path with a
+ * 301 to the new one, so the two names are one repo. Only `renamed` entries
+ * resolve: an archived or superseded repo is a different repo and keeps its
+ * own name. Lookups by name fall back to this when the name as given finds
+ * no row, so an old link still reaches the repo (issue #1901) and a lookup
+ * that works today never changes. */
+export function renamedTo(fullName: string): string {
+	const s = REPO_SUPERSESSIONS[fullName.toLowerCase()];
+	return s?.kind === "renamed" && s.supersededBy ? s.supersededBy : fullName;
 }
 
 /** The supersession fields a repo row serves, or null when the repo has none. */

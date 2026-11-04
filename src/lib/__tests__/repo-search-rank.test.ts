@@ -1289,3 +1289,149 @@ describe("language filter survives every candidate source (2026-09-05)", () => {
 		expect(repos.map((r) => r.fullName)).toEqual(["acme/sep10-py"]);
 	});
 });
+
+describe("developer products are canonical answers (issue #1901)", () => {
+	// A product whose repo name does not carry the product's words lost its
+	// own name to repos that do: hackathon copies of the scaffold template
+	// led q="scaffold stellar" while stellar-scaffold/cli ranked 16th.
+	const PRODUCTS: Array<[string, string]> = [
+		["scaffold stellar", "stellar-scaffold/cli"],
+		["Scaffold Stellar", "stellar-scaffold/cli"],
+		["stellar scaffold", "stellar-scaffold/cli"],
+		["scaffold-stellar", "stellar-scaffold/cli"],
+		["stellar scaffold cli", "stellar-scaffold/cli"],
+		[
+			"How do I start a new dapp with Scaffold Stellar?",
+			"stellar-scaffold/cli",
+		],
+		["stellar lab", "stellar/laboratory"],
+		["Stellar Laboratory", "stellar/laboratory"],
+		["lab.stellar.org", "stellar/laboratory"],
+		["soroban examples", "stellar/soroban-examples"],
+		["smart contract examples", "stellar/soroban-examples"],
+		["soroban smart contract examples", "stellar/soroban-examples"],
+		["example soroban contracts", "stellar/soroban-examples"],
+		["contract examples", "stellar/soroban-examples"],
+	];
+	it.each(PRODUCTS)("%s routes to %s", (q, repo) => {
+		expect(canonicalFor(q)[0]).toBe(repo);
+	});
+
+	// The same words inside another name, a bare word, or a topic that names a
+	// more specific answer must not fire the float.
+	it.each([
+		"scaffold",
+		"scaffold template",
+		"lab",
+		"laboratory",
+		"stellar labs",
+		"examples",
+		"escrow contract examples",
+		"token contract example",
+		"hackthon-scaffold-stellar",
+		"stellar-scaffold-front-hackaton",
+		"stellar-agent-merchant-lab",
+		"soroban crash lab",
+		"stellar-scaffold/ui",
+	])("%s maps to nothing", (q) => {
+		expect(canonicalFor(q)).toEqual([]);
+	});
+
+	const copy = doc({
+		fullName: "someone/hackthon-scaffold-stellar",
+		description: "Hackathon dapp",
+		codeScanState: "scanned",
+		stellarProof: "cargo-sdk",
+		repoScore: 16,
+		stars: 0,
+	});
+	const cli = doc({
+		fullName: "stellar-scaffold/cli",
+		description:
+			"The easiest way to build Stellar apps. One command scaffolds your contracts",
+		codeScanState: "scanned",
+		stellarProof: "cargo-sdk",
+		repoScore: 77,
+		stars: 53,
+	});
+
+	it("the product outranks a hackathon copy that carries its name", async () => {
+		const { repos, canonical } = await searchRepos(
+			mockPayload([copy, cli]),
+			"scaffold stellar",
+			{ limit: 5 },
+		);
+		expect(repos.map((r) => r.fullName)).toEqual([
+			"stellar-scaffold/cli",
+			"someone/hackthon-scaffold-stellar",
+		]);
+		expect(repos[0].canonical).toBe(true);
+		expect(canonical).toEqual(["stellar-scaffold/cli"]);
+	});
+
+	it("the copy's own exact name still finds the copy first", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([copy, cli]),
+			"hackthon-scaffold-stellar",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("someone/hackthon-scaffold-stellar");
+	});
+
+	it("the old owner/name of a renamed repo finds the repo where it lives now", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([copy, cli]),
+			"theahaco/scaffold-stellar",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("stellar-scaffold/cli");
+	});
+});
+
+describe("served interface paths (issue #1906)", () => {
+	const served = async (over: Record<string, unknown>) =>
+		(
+			await searchRepos(
+				mockPayload([
+					doc({
+						fullName: "acme/vault",
+						description: "vault contracts",
+						codeScanState: "scanned",
+						stellarProof: "cargo-sdk",
+						...over,
+					}),
+				]),
+				"vault",
+				{ limit: 1 },
+			)
+		).repos[0].codeVerified;
+
+	it("pairs each entry with its stored source path", async () => {
+		const cv = await served({
+			contractInterface: ["Vault.bump(n: u32) -> u32"],
+			contractInterfacePaths: ["contracts/vault/src/lib.rs"],
+		});
+		expect(cv?.contractInterface).toEqual(["Vault.bump(n: u32) -> u32"]);
+		expect(cv?.contractInterfacePaths).toEqual(["contracts/vault/src/lib.rs"]);
+	});
+
+	it("null when the scan predates paths: an entry's path is unknown, not absent", async () => {
+		const cv = await served({
+			contractInterface: ["Vault.bump(n: u32) -> u32"],
+		});
+		expect(cv?.contractInterfacePaths).toBeNull();
+	});
+
+	it("[] when there is no interface to place", async () => {
+		const cv = await served({ contractInterface: [] });
+		expect(cv?.contractInterfacePaths).toEqual([]);
+	});
+
+	it("null when the stored lists do not pair up", async () => {
+		const cv = await served({
+			contractInterface: ["Vault.bump(n: u32) -> u32", "Vault.drain()"],
+			contractInterfacePaths: ["contracts/vault/src/lib.rs"],
+		});
+		expect(cv?.contractInterfacePaths).toBeNull();
+	});
+});

@@ -15,6 +15,7 @@
  */
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
+import { interfacePathsOf } from "@/lib/code-symbols";
 import { askDeepWiki } from "@/lib/deepwiki";
 import { isKnownInfraNotDeployable } from "@/lib/known-infra";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -29,6 +30,7 @@ import {
 	findRepoByTrigger,
 	REPO_KNOWLEDGE_NOTES,
 } from "@/lib/repo-knowledge";
+import { renamedTo } from "@/lib/repo-relations";
 import {
 	canonicalFor,
 	contentTokens,
@@ -175,6 +177,9 @@ export async function GET(req: NextRequest) {
 		sdkCapabilities: string[];
 		codeDomains: string[];
 		contractInterface: string[];
+		/** contractInterfacePaths[i] is the source file of contractInterface[i]
+		 * (issue #1906); null when the scan predates paths. */
+		contractInterfacePaths: string[] | null;
 		stellarDeps: string[];
 		codeInUse: Record<string, unknown> | null;
 	} | null = null;
@@ -188,9 +193,20 @@ export async function GET(req: NextRequest) {
 			// knowledge-trigger or explicit route to "creit-tech/…" found no row
 			// and served repoMeta/codeVerified as null. `like` is case-insensitive;
 			// the exact-name filter keeps a sibling from matching.
+			// A renamed repo's old path is read beside the path it now lives at
+			// (GitHub 301s it), so an old link still finds the repo (issue #1901).
+			const renamed = renamedTo(repo);
 			const found = await payload.find({
 				collection: "repos",
-				where: { fullName: { like: repo } },
+				where:
+					renamed === repo
+						? { fullName: { like: repo } }
+						: {
+								or: [
+									{ fullName: { like: repo } },
+									{ fullName: { like: renamed } },
+								],
+							},
 				// substring match — a short name (stellar/go) also matches its
 				// forks and siblings; leave room so the exact row is on the page
 				limit: 50,
@@ -218,6 +234,7 @@ export async function GET(req: NextRequest) {
 					sdkCapabilities: true,
 					codeDomains: true,
 					contractInterface: true,
+					contractInterfacePaths: true,
 					stellarDeps: true,
 					codeInUse: true,
 					scannedRef: true,
@@ -229,11 +246,20 @@ export async function GET(req: NextRequest) {
 				// repo, so it is served with its warning.
 				context: { includeSecurityHeld: true },
 			});
-			const d = found.docs.find(
-				(x) =>
-					String((x as { fullName?: string }).fullName ?? "").toLowerCase() ===
-					repo.toLowerCase(),
-			) as unknown as Record<string, unknown> | undefined;
+			const exact = (name: string) =>
+				found.docs.find(
+					(x) =>
+						String(
+							(x as { fullName?: string }).fullName ?? "",
+						).toLowerCase() === name.toLowerCase(),
+				) as unknown as Record<string, unknown> | undefined;
+			// The name as given wins; the renamed path only when the index holds
+			// no row for the old one.
+			let d = exact(repo);
+			if (!d && renamed !== repo) {
+				d = exact(renamed);
+				if (d) repo = renamed;
+			}
 			if (d) {
 				security = securityOf(d);
 				if (d.codeScanState === "scanned" && d.stellarProof) {
@@ -276,6 +302,7 @@ export async function GET(req: NextRequest) {
 									.filter((s): s is string => typeof s === "string")
 									.slice(0, 60)
 							: [],
+						contractInterfacePaths: interfacePathsOf(d)?.slice(0, 60) ?? null,
 						stellarDeps: Array.isArray(d.stellarDeps)
 							? (d.stellarDeps as unknown[]).filter(
 									(s): s is string => typeof s === "string",

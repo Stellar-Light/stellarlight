@@ -1,0 +1,59 @@
+General authority rules measured as variants of the base sort (frozen-set.json bar generalRule).
+v1: first-party ownership (sdf) moved from below liveness to directly above the keyword score.
+v2: repoScore moved from the last tiebreaks to directly above the keyword score.
+Same corpus, same 183 queries, measured with measure.mts against the base replay.
+
+== v1
+Bars (frozen-set.json)
+  FAILS  acceptance: expected repo first on the branch: 5/14; failing: [acceptance] acc-01 (q="scaffold stellar") | [acceptance] acc-02 (q="stellar lab") | [acceptance] acc-03 (q="smart contract examples") | [acceptance] acc-04 (q="Scaffold Stellar") | [acceptance] acc-05 (q="stellar scaffold") | [acceptance] acc-06 (q="scaffold-stellar") | [acceptance] acc-07 (q="theahaco/scaffold-stellar") | [acceptance] acc-10 (q="lab.stellar.org") | [acceptance] acc-12 (q="soroban smart contract examples")
+  HOLDS  controls: expected repo first on base and branch: 8/8
+  FAILS  unchanged: same first page, matchMode and total: 5/13; failing: [unchanged] unc-02 (q="scaffold template") | [unchanged] unc-04 (q="laboratory") | [unchanged] unc-06 (q="examples") | [unchanged] unc-07 (q="escrow contract examples") | [unchanged] unc-08 (q="token contract example") | [unchanged] unc-10 (q="stellar-scaffold-front-hackaton") | [unchanged] unc-11 (q="stellar-agent-merchant-lab") | [unchanged] unc-13 (q="soroban crash lab")
+  REVIEW  no expected repo moves down: [dev] dev-01 (q="I'm writing a Django backend that needs to build and submit Stellar payments and also call a couple of Soroban contracts through RPC. Which Python library should I use for that?"): 35 -> 64 | [dev] dev-03 (q="Is there a Stellar SDK for Flutter that I can use in my cross-platform mobile app? I need to sign transactions, query Horizon and invoke Soroban contracts from Dart."): 49 -> 70 | [dev] dev-06 (q="Some of my users won't install a browser extension. Is there a web-based Stellar signer I can call from my site with a small JS library so
+  FAILS  every change has a mechanism of the change: 10/145
+
+Queries: 183; identical (first page and whole ranking): 38; changed: 145
+expected repos up: 8; down: 14
+  down [dev] dev-01: 35 -> 64
+  down [dev] dev-03: 49 -> 70
+  down [dev] dev-06: 31 -> 64
+  down [dev] dev-10: 353 -> 359
+  down [dev] dev-17: 28 -> 46
+  down [dev] dev-20: 1 -> 37
+  down [dev] dev-22: 140 -> 157
+  down [battery] hm26-sc-03: 70 -> 106
+  down [battery] hm26-sc-04: 111 -> 139
+  down [battery] hm26-sa-04: 71 -> 78
+  down [battery] hm26-cc-03: 256 -> 257
+  down [battery] hm26-cc-04: 38 -> 42
+  down [exact-name] soroswap/core: 5 -> 9
+  down [exact-name] soroswap/aggregator: 5 -> 6
+
+== v2
+Bars (frozen-set.json)
+  FAILS  acceptance: expected repo first on the branch: 2/14; failing: [acceptance] acc-01 (q="scaffold stellar") | [acceptance] acc-02 (q="stellar lab") | [acceptance] acc-03 (q="smart contract examples") | [acceptance] acc-04 (q="Scaffold Stellar") | [acceptance] acc-05 (q="stellar scaffold") | [acceptance] acc-06 (q="scaffold-stellar") | [acceptance] acc-07 (q="theahaco/scaffold-stellar") | [acceptance] acc-10 (q="lab.stellar.org") | [acceptance] acc-11 (q="soroban examples") | [acceptance] acc-12 (q="soroban smart contract examples") | [acceptance] acc-13 (q="example soroban contracts") | 
+  FAILS  controls: expected repo first on base and branch: 7/8; failing: [controls] ctl-01 (q="soroban-sdk")
+  FAILS  unchanged: same first page, matchMode and total: 2/13; failing: [unchanged] unc-01 (q="scaffold") | [unchanged] unc-02 (q="scaffold template") | [unchanged] unc-03 (q="lab") | [unchanged] unc-05 (q="stellar labs") | [unchanged] unc-06 (q="examples") | [unchanged] unc-07 (q="escrow contract examples") | [unchanged] unc-08 (q="token contract example") | [unchanged] unc-09 (q="hackthon-scaffold-stellar") | [unchanged] unc-10 (q="stellar-scaffold-front-hackaton") | [unchanged] unc-11 (q="stellar-agent-merchant-lab") | [unchanged] unc-13 (q="soroban crash lab")
+  REVIEW  no expected repo moves down: [dev] dev-05 (q="Our users mostly have the Freighter browser extension. How do I get their public key and ask Freighter to sign a transaction from my web app, and where does that client library live?"): 1 -> 12 | [dev] dev-06 (q="Some of my users won't install a browser extension. Is there a web-based Stellar signer I can call from my site with a small JS library so they can sign transactions or messages without handing me their secret key?"): 31 -> 34 | [dev] dev-10 (q="I'm adding a token swap feature to my Stellar wallet and want the best price across S
+  FAILS  every change has a mechanism of the change: 14/172
+
+Queries: 183; identical (first page and whole ranking): 11; changed: 172
+expected repos up: 10; down: 17
+  down [dev] dev-05: 1 -> 12
+  down [dev] dev-06: 31 -> 34
+  down [dev] dev-10: 353 -> 411
+  down [dev] dev-14: 18 -> 26
+  down [dev] dev-19: 415 -> 416
+  down [dev] dev-20: 1 -> 28
+  down [dev] dev-24: 19 -> 21
+  down [battery] hm26-sc-03: 70 -> 113
+  down [battery] hm26-sc-04: 111 -> 129
+  down [battery] hm26-cc-03: 256 -> 279
+  down [acceptance] acc-03: 5 -> 19
+  down [acceptance] acc-11: 1 -> 3
+  down [acceptance] acc-12: 4 -> 19
+  down [acceptance] acc-13: 2 -> 3
+  down [acceptance] acc-14: 1 -> 3
+  down [controls] ctl-01: 1 -> 8
+  down [naturalLanguage] nl-01: 166 -> 185
+
+Verdict: neither variant ranks first an acceptance query the curated entries leave unranked (the curated entries rank all 14 first), and both move expected repos down, so neither joins the branch (AGENTS.md rule 6: authority signals break ties, never beat relevance).

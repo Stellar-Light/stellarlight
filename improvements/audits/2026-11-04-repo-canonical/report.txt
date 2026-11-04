@@ -1,0 +1,194 @@
+apiVersion during capture: [{"at":"2026-11-04T21:54:46.591Z","apiVersion":"1.9.116"},{"at":"2026-11-04T21:59:24.967Z","apiVersion":"1.9.116"},{"at":"2026-11-04T22:05:37.046Z","apiVersion":"1.9.116"}]
+corpus rows: 13810; live pages: 183
+fidelity: 183/183 base first pages identical to live (rows, order, scores, matchMode, total)
+
+Bars (frozen-set.json)
+  HOLDS  acceptance: expected repo first on the branch: 14/14
+  HOLDS  controls: expected repo first on base and branch: 8/8
+  HOLDS  unchanged: same first page, matchMode and total: 13/13
+  HOLDS  no expected repo moves down: none moved down
+  HOLDS  every change has a mechanism of the change: 12/12
+
+Queries: 183; identical (first page and whole ranking): 171; changed: 12
+
+Expected-repo ranks, base -> branch (every query that names a repo)
+    [dev] dev-01: 35 -> 35
+    [dev] dev-02: 2 -> 2
+    [dev] dev-03: 49 -> 49
+    [dev] dev-04: 4 -> 4
+    [dev] dev-05: 1 -> 1
+    [dev] dev-06: 31 -> 31
+    [dev] dev-07: 4 -> 4
+    [dev] dev-08: absent -> absent
+    [dev] dev-09: absent -> absent
+    [dev] dev-10: 353 -> 353
+    [dev] dev-11: 2 -> 2
+    [dev] dev-12: absent -> absent
+    [dev] dev-13: 35 -> 35
+    [dev] dev-14: 18 -> 18
+    [dev] dev-15: 53 -> 53
+    [dev] dev-16: 1 -> 1
+    [dev] dev-17: 28 -> 28
+    [dev] dev-18: absent -> absent
+    [dev] dev-19: 415 -> 415
+    [dev] dev-20: 1 -> 1
+    [dev] dev-21: absent -> absent
+    [dev] dev-22: 140 -> 140
+    [dev] dev-23: 4 -> 4
+    [dev] dev-24: 19 -> 19
+    [dev] dev-25: 2 -> 2
+    [battery] hm26-sc-03: 70 -> 70
+    [battery] hm26-sc-04: 111 -> 111
+    [battery] hm26-sa-03: 1 -> 1
+    [battery] hm26-sa-04: 71 -> 71
+    [battery] hm26-cc-03: 256 -> 256
+    [battery] hm26-cc-04: 38 -> 38
+    [exact-full] stellar/js-stellar-sdk: 1 -> 1
+    [exact-name] stellar/js-stellar-sdk: 1 -> 1
+    [exact-full] stellar/rs-soroban-sdk: 1 -> 1
+    [exact-name] stellar/rs-soroban-sdk: 1 -> 1
+    [exact-full] stellar/stellar-cli: 1 -> 1
+    [exact-name] stellar/stellar-cli: 1 -> 1
+    [exact-full] stellar/stellar-core: 1 -> 1
+    [exact-name] stellar/stellar-core: 1 -> 1
+    [exact-full] stellar/freighter: 1 -> 1
+    [exact-name] stellar/freighter: 1 -> 1
+    [exact-full] stellar/passkey-kit: 1 -> 1
+    [exact-name] stellar/passkey-kit: 1 -> 1
+    [exact-full] stellar/smart-account-kit: 1 -> 1
+    [exact-name] stellar/smart-account-kit: 1 -> 1
+    [exact-full] stellar/anchor-platform: 1 -> 1
+    [exact-name] stellar/anchor-platform: 1 -> 1
+    [exact-full] stellar/stellar-rpc: 1 -> 1
+    [exact-name] stellar/stellar-rpc: 1 -> 1
+    [exact-full] stellar/quickstart: 1 -> 1
+    [exact-name] stellar/quickstart: 1 -> 1
+    [exact-full] stellar/soroban-examples: 1 -> 1
+    [exact-name] stellar/soroban-examples: 1 -> 1
+    [exact-full] stellar/js-stellar-base: 1 -> 1
+    [exact-name] stellar/js-stellar-base: 1 -> 1
+    [exact-full] stellar/go-stellar-sdk: 1 -> 1
+    [exact-name] stellar/go-stellar-sdk: 1 -> 1
+    [exact-full] StellarCN/py-stellar-base: 1 -> 1
+    [exact-name] StellarCN/py-stellar-base: 1 -> 1
+    [exact-full] OpenZeppelin/stellar-contracts: 1 -> 1
+    [exact-name] OpenZeppelin/stellar-contracts: 1 -> 1
+    [exact-full] OpenZeppelin/openzeppelin-relayer: 1 -> 1
+    [exact-name] OpenZeppelin/openzeppelin-relayer: 1 -> 1
+    [exact-full] axelarnetwork/axelar-amplifier-stellar: 1 -> 1
+    [exact-name] axelarnetwork/axelar-amplifier-stellar: 1 -> 1
+    [exact-full] blend-capital/blend-contracts-v2: 1 -> 1
+    [exact-name] blend-capital/blend-contracts-v2: 1 -> 1
+    [exact-full] blend-capital/blend-contracts: 1 -> 1
+    [exact-name] blend-capital/blend-contracts: 1 -> 1
+    [exact-full] soroswap/core: 1 -> 1
+    [exact-name] soroswap/core: 5 -> 5
+    [exact-full] soroswap/aggregator: 1 -> 1
+    [exact-name] soroswap/aggregator: 5 -> 5
+    [exact-full] reflector-network/reflector-contract: 1 -> 1
+    [exact-name] reflector-network/reflector-contract: 1 -> 1
+    [exact-full] Creit-Tech/Stellar-Wallets-Kit: 1 -> 1
+    [exact-name] Creit-Tech/Stellar-Wallets-Kit: 1 -> 1
+    [exact-full] Creit-Tech/xBull-Wallet: 1 -> 1
+    [exact-name] Creit-Tech/xBull-Wallet: 1 -> 1
+    [exact-full] script3/soroban-governor: 1 -> 1
+    [exact-name] script3/soroban-governor: 1 -> 1
+    [exact-full] Phoenix-Protocol-Group/phoenix-contracts: 1 -> 1
+    [exact-name] Phoenix-Protocol-Group/phoenix-contracts: 1 -> 1
+    [exact-full] allbridge-io/allbridge-core-soroban-contracts: 1 -> 1
+    [exact-name] allbridge-io/allbridge-core-soroban-contracts: 1 -> 1
+    [exact-full] Trustless-Work/trustlesswork-smart-contract-stellar: 1 -> 1
+    [exact-name] Trustless-Work/trustlesswork-smart-contract-stellar: 1 -> 1
+    [exact-full] fazzatti/colibri: 1 -> 1
+    [exact-name] fazzatti/colibri: 1 -> 1
+    [exact-full] circlefin/stellar-cctp: 1 -> 1
+    [exact-name] circlefin/stellar-cctp: 1 -> 1
+    [project-name] Blend: 1 -> 1
+    [project-name] Reflector: 1 -> 1
+  + [acceptance] acc-01: 16 -> 1
+  + [acceptance] acc-02: 17 -> 1
+  + [acceptance] acc-03: 5 -> 1
+  + [acceptance] acc-04: 16 -> 1
+  + [acceptance] acc-05: 2 -> 1
+  + [acceptance] acc-06: 16 -> 1
+  + [acceptance] acc-07: absent -> 1
+    [acceptance] acc-08: 1 -> 1
+    [acceptance] acc-09: 1 -> 1
+  + [acceptance] acc-10: absent -> 1
+    [acceptance] acc-11: 1 -> 1
+  + [acceptance] acc-12: 4 -> 1
+  + [acceptance] acc-13: 2 -> 1
+    [acceptance] acc-14: 1 -> 1
+    [controls] ctl-01: 1 -> 1
+    [controls] ctl-02: 1 -> 1
+    [controls] ctl-03: 1 -> 1
+    [controls] ctl-04: 1 -> 1
+    [controls] ctl-05: 1 -> 1
+    [controls] ctl-06: 1 -> 1
+    [controls] ctl-07: 1 -> 1
+    [controls] ctl-08: 1 -> 1
+    [naturalLanguage] nl-01: 166 -> 166
+  + [naturalLanguage] nl-02: 394 -> 1
+  + [naturalLanguage] nl-03: absent -> 1
+
+Every changed query
+  [acceptance] acc-01 (q="scaffold stellar")
+    mechanism: canonical entry (stellar-scaffold/cli)
+    expected repo rank: 16 -> 1
+    first page: stellar-scaffold/cli 16->1, Gbangbolaoluwagbemiga/SecureFlow-scaffold 1->2, danielgorgonha/hackthon-scaffold-stellar 2->3, masch/stellar-scaffold-front-hackaton 3->4, dropsland-app/dropsland-scaffold 4->5, stevmolina/token-scaffold 5->6, anataliocs/validate-scaffold 6->7, ScaffoldRust/Main-Scaffold-Rust 7->8, stellar-registry/cli 8->9, JulioMCruz/Stellar-mcp 9->10, rohitjadhav07/Nexar 10->11, stellar-scaffold/ui 11->12, Jistriane/ZKID 12->13, yripper/luckyledgers 13->14, Kalchaqui/Loanet-Stellar 14->15, ScaffoldRust/SRust-Basic-Stellar-nextjs-pnpm 15->16
+    whole ranking: 25 -> 25 rows, changed
+  [acceptance] acc-02 (q="stellar lab")
+    mechanism: canonical entry (stellar/laboratory)
+    expected repo rank: 17 -> 1
+    first page: stellar/laboratory 17->1, StellarDevHub/Web3-Student-Lab 1->2, CaBsCrypto/stellar-agent-merchant-lab 2->3, Nectar-Network/nectar 3->4, ThaisFReis/karn-protocol 4->5, Alouzious/StellarIDE 5->6, Neko-Protocol/neko-web 6->7, Karn-lat/karn-protocol 7->8, hatdong359-star/lab_kit_lending 8->9, Savitura/Savitools 9->10, RevoraOrg/Revora-Frontend 10->11, chinhnghia812/lab_kit_lending 11->12, aldyneronqs/MediTrust 12->13, adletgamer/Axiomer-dashboardx 13->14, VietNg25/dairy_provenance 14->15, phohuyhieu6/lab_kit_lending 15->16, SorobanCrashLab/soroban-crashlab 16->17
+    whole ranking: 44 -> 44 rows, changed
+  [acceptance] acc-03 (q="smart contract examples")
+    mechanism: canonical entry (stellar/soroban-examples)
+    expected repo rank: 5 -> 1
+    first page: stellar/soroban-examples 5->1, kunaldrall29/policywright 1->2, TrustLine-id/stellar-sdk 2->3, stellar/passkey-kit 3->4, stellar/smart-account-kit 4->5
+    whole ranking: 593 -> 593 rows, changed
+  [acceptance] acc-04 (q="Scaffold Stellar")
+    mechanism: canonical entry (stellar-scaffold/cli)
+    expected repo rank: 16 -> 1
+    first page: stellar-scaffold/cli 16->1, Gbangbolaoluwagbemiga/SecureFlow-scaffold 1->2, danielgorgonha/hackthon-scaffold-stellar 2->3, masch/stellar-scaffold-front-hackaton 3->4, dropsland-app/dropsland-scaffold 4->5, stevmolina/token-scaffold 5->6, anataliocs/validate-scaffold 6->7, ScaffoldRust/Main-Scaffold-Rust 7->8, stellar-registry/cli 8->9, JulioMCruz/Stellar-mcp 9->10, rohitjadhav07/Nexar 10->11, stellar-scaffold/ui 11->12, Jistriane/ZKID 12->13, yripper/luckyledgers 13->14, Kalchaqui/Loanet-Stellar 14->15, ScaffoldRust/SRust-Basic-Stellar-nextjs-pnpm 15->16
+    whole ranking: 25 -> 25 rows, changed
+  [acceptance] acc-05 (q="stellar scaffold")
+    mechanism: canonical entry (stellar-scaffold/cli)
+    expected repo rank: 2 -> 1
+    first page: stellar-scaffold/cli 2->1, stellar-scaffold/ui 1->2
+    whole ranking: 25 -> 25 rows, changed
+  [acceptance] acc-06 (q="scaffold-stellar")
+    mechanism: canonical entry (stellar-scaffold/cli)
+    expected repo rank: 16 -> 1
+    first page: stellar-scaffold/cli 16->1, danielgorgonha/hackthon-scaffold-stellar 1->2, Gbangbolaoluwagbemiga/SecureFlow-scaffold 2->3, masch/stellar-scaffold-front-hackaton 3->4, dropsland-app/dropsland-scaffold 4->5, stevmolina/token-scaffold 5->6, anataliocs/validate-scaffold 6->7, ScaffoldRust/Main-Scaffold-Rust 7->8, stellar-registry/cli 8->9, JulioMCruz/Stellar-mcp 9->10, rohitjadhav07/Nexar 10->11, stellar-scaffold/ui 11->12, Jistriane/ZKID 12->13, yripper/luckyledgers 13->14, Kalchaqui/Loanet-Stellar 14->15, ScaffoldRust/SRust-Basic-Stellar-nextjs-pnpm 15->16
+    whole ranking: 25 -> 25 rows, changed
+  [acceptance] acc-07 (q="theahaco/scaffold-stellar")
+    mechanism: rename alias (theahaco/scaffold-stellar -> stellar-scaffold/cli)
+    expected repo rank: absent -> 1
+    first page: stellar-scaffold/cli new->1
+    whole ranking: 0 -> 1 rows, changed
+  [acceptance] acc-10 (q="lab.stellar.org")
+    mechanism: canonical entry (stellar/laboratory)
+    expected repo rank: absent -> 1
+    first page: stellar/laboratory new->1
+    whole ranking: 0 -> 1 rows, changed
+  [acceptance] acc-12 (q="soroban smart contract examples")
+    mechanism: canonical entry (stellar/soroban-examples)
+    expected repo rank: 4 -> 1
+    first page: stellar/soroban-examples 4->1, kunaldrall29/policywright 1->2, stellar/passkey-kit 2->3, stellar/smart-account-kit 3->4
+    whole ranking: 593 -> 593 rows, changed
+  [acceptance] acc-13 (q="example soroban contracts")
+    mechanism: canonical entry (stellar/soroban-examples)
+    expected repo rank: 2 -> 1
+    first page: stellar/soroban-examples 2->1, fxjrin/stellar-contracts-kit 1->2
+    whole ranking: 594 -> 594 rows, changed
+  [naturalLanguage] nl-02 (q="How do I start a new dapp with Scaffold Stellar?")
+    mechanism: canonical entry (stellar-scaffold/cli)
+    expected repo rank: 394 -> 1
+    first page: stellar-scaffold/cli new->1, josealfredo79/stellar-crud-dapp-new 1->2, Stellar-split/split-app 2->3, Sentinel-Labss/sentinel-app 3->4, Sarthakdhere0211/Stellar-PayDapp 4->5, sroc9820-svg/ev_charge 5->6, stellar/rs-stellar-rpc-client 6->7, stellar-experimental/henyey 7->8, OpenZeppelin/openzeppelin-monitor 8->9, stellar-registry/cli 9->10, jamesbachini/zk-Rock-Paper-Scissors 10->11, AstronLabs/remitMortage 11->12, gmanjuns027/Poison-Game 12->13, SphinxBSD/aether-grid 13->14, AshFrancis/stellarsprint 14->15, sphinxar/aether-grid 15->16, theyuvan/zk-THRONE 16->17, kalepail/phantom-code 17->18, denissejane/KapitKita 18->19, dogstarapps/dogstar-mylab-contracts 19->20, kalepail/ohloss 20->off page
+    whole ranking: 446 -> 446 rows, changed
+  [naturalLanguage] nl-03 (q="Which repo is the source of Stellar Lab, the browser tool for building transactions?")
+    mechanism: canonical entry (stellar/laboratory)
+    expected repo rank: absent -> 1
+    first page: stellar/laboratory new->1, LumenWipe/lumenwipe 1->2, Scopuly/scopuly-browser-extension 2->3, TS-mfon/stellar-agent-api-bazaar 3->4, stellar-experimental/stellar-contract-verify-plugin 4->5, Ebioro-UAB/ebioro-wallet-migration 5->6, CoinFabrik/scout-audit 6->7, OpenZeppelin/ui-builder 7->8, Pulsefy/Soter 8->9, mericcintosun/riskon 9->10, SourceXXL/alian_structure-UI 10->11, CoinFabrik/scout-soroban 11->12, findolor/sorodrop 12->13, Tellus-Cooperative/stellar-paylink 13->14, LabsCrypt/remitlend 14->15, LabsCrypt/flowfi 15->16, Echo-Mirror-Butler/Echo-Mirror-Butler- 16->17, ognla-payeasy/payeasy 17->18, ANTAPEX/Soroban-Registry 18->19, theblockfreight/stellarfreight 19->20, mergepay/mergepay-api 20->off page
+    whole ranking: 416 -> 417 rows, changed

@@ -70,12 +70,20 @@ const FN_RE =
 const TYPE_RE =
 	/\bpub(?:\s*\([^)\n]{0,64}\))?\s+(?:struct|enum|trait)\s+([A-Za-z_][A-Za-z0-9_]*)/g;
 
+// One folder rule for every fact read from the fetched sources: interfaces,
+// symbols and capability tags (issue #1906). testdata/, e2e/ and test wasm
+// workspaces are test code by convention; stellar/rs-soroban-env keeps 48
+// fixture contracts under soroban-test-wasms/. A Rust crate under an
+// integration/ folder is an integration-test fixture (stellar/stellar-horizon
+// served its internal/integration/contracts as the repo's own interface);
+// JS integration/ folders can hold product code, so that clause reads .rs only.
 const isTestPath = (p: string) =>
-	/(^|\/)(tests?|testing|test[-_]?utils?|fixtures?|mocks?|benches)\//i.test(
+	/(^|\/)(tests?|testing|test[-_]?utils?|testdata|fixtures?|mocks?|benches|e2e|[\w.-]*test[-_]?wasms?)\//i.test(
 		p,
 	) ||
 	/_tests?(\/|\.rs$)/i.test(p) ||
-	/(^|\/)tests?\.rs$/i.test(p);
+	/(^|\/)tests?\.rs$/i.test(p) ||
+	/(^|\/)integration\/.*\.rs$/i.test(p);
 
 /** Extract the public code-symbol surface from a repo's fetched sources. */
 export function extractCodeSymbols(blobs: SymbolBlob[]): string[] {
@@ -143,7 +151,15 @@ const SIG_RE =
  * Fns whose args the bounded regex can't capture (nested-paren tuple args) are
  * SKIPPED, never truncated mid-type — missing beats lying. */
 export function extractContractInterface(blobs: SymbolBlob[]): string[] {
-	const out: string[] = [];
+	return contractInterfaceEntries(blobs).map((e) => e.signature);
+}
+
+/** The same signatures, each with the repo-relative file it was read from,
+ * so a reader can tell a shipped contract from an example (issue #1906). */
+export function contractInterfaceEntries(
+	blobs: SymbolBlob[],
+): Array<{ signature: string; path: string }> {
+	const out: Array<{ signature: string; path: string }> = [];
 	const seen = new Set<string>();
 	for (const b of blobs) {
 		if (out.length >= MAX_IFACE_FNS) break;
@@ -182,13 +198,31 @@ export function extractContractInterface(blobs: SymbolBlob[]): string[] {
 				const ret = m[4] ? ` ${m[4].replace(/\s+/g, " ").trim()}` : "";
 				let sig = `${contract}.${name}${args}${ret === " -> ()" ? "" : ret}`;
 				if (sig.length > MAX_SIG_LEN) sig = `${sig.slice(0, MAX_SIG_LEN)}…`;
-				out.push(sig);
+				out.push({ signature: sig, path: b.path });
 				if (out.length >= MAX_IFACE_FNS) break;
 			}
 			if (out.length >= MAX_IFACE_FNS) break;
 		}
 	}
 	return out;
+}
+
+/** A stored interface paired with its stored paths, as served (issue #1906):
+ * paths[i] is where interface[i] was read. [] when there is no interface;
+ * null when the scan predates paths or the two lists do not pair up, because
+ * a path that cannot be matched to its entry is unknown, not absent. */
+export function interfacePathsOf(d: {
+	contractInterface?: unknown;
+	contractInterfacePaths?: unknown;
+}): string[] | null {
+	const iface = Array.isArray(d.contractInterface) ? d.contractInterface : [];
+	if (!iface.length) return [];
+	const paths = d.contractInterfacePaths;
+	return Array.isArray(paths) &&
+		paths.length === iface.length &&
+		[...iface, ...paths].every((s) => typeof s === "string")
+		? [...(paths as string[])]
+		: null;
 }
 
 // ── JS/TS (gist gap 1, phase 1: facts, not scores) ─────────────────────────
@@ -352,7 +386,7 @@ const LANG_FAMILIES: Array<
 export function detectSdkCapabilities(blobs: SymbolBlob[]): string[] {
 	const tags = new Set<string>();
 	for (const b of blobs) {
-		if (!b.text) continue;
+		if (!b.text || isTestPath(b.path)) continue;
 		if (JS_EXT.test(b.path)) {
 			for (const [tag, re] of SDK_CAPABILITY_PATTERNS) {
 				if (!tags.has(tag) && re.test(b.text)) tags.add(tag);
