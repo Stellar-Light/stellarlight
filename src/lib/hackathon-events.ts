@@ -39,8 +39,38 @@ export function eventPageMarkdown(
 	return page || null;
 }
 
+/** Accents off, so "Critérios de Avaliação" reads as "Criterios de
+ * Avaliacao". */
+const fold = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+/** A label line's own words: bold markers and a closing colon off. */
+const labelText = (line: string) =>
+	line
+		.trim()
+		.replace(/^\*\*(.+)\*\*:?$/, "$1")
+		.replace(/:$/, "")
+		.trim();
+
+/** A line a page uses as a section title without a heading: after a blank
+ * line (or first), under 60 characters, not a list item, table row, quote
+ * or sentence ("Critérios de Avaliação", "**Judging Criteria**"). */
+function isLabelLine(lines: string[], i: number): boolean {
+	const line = lines[i].trim();
+	const text = labelText(line);
+	return (
+		!!text &&
+		text.length <= 60 &&
+		!/^([-*+]\s|\d+[.)]\s|#|>|\|)/.test(line) &&
+		!/[.!?,;]$/.test(text) &&
+		(i === 0 || !lines[i - 1].trim())
+	);
+}
+
 /** The text under the first heading matching `heading`, up to the next
- * heading of the same or a higher level; null when there is none. */
+ * heading of the same or a higher level. With no such heading, the
+ * paragraph under the first label line that matches (a page that writes
+ * "Critérios de Avaliação" on a line of its own). null when there is
+ * neither. Accents do not count when matching. */
 export function markdownSection(
 	markdown: string | null | undefined,
 	heading: RegExp,
@@ -48,9 +78,9 @@ export function markdownSection(
 	if (!markdown) return null;
 	const lines = markdown.split(/\r?\n/);
 	const at = lines.findIndex(
-		(l) => /^#{1,6}\s/.test(l) && heading.test(l.replace(/^#+\s*/, "")),
+		(l) => /^#{1,6}\s/.test(l) && heading.test(fold(l.replace(/^#+\s*/, ""))),
 	);
-	if (at < 0) return null;
+	if (at < 0) return labelSection(lines, heading);
 	const level = (lines[at].match(/^#+/) ?? ["#"])[0].length;
 	const body: string[] = [];
 	for (const l of lines.slice(at + 1)) {
@@ -60,6 +90,23 @@ export function markdownSection(
 	}
 	const text = body.join("\n").trim();
 	return text ? text.slice(0, 4_000) : null;
+}
+
+/** The paragraph under the first label line matching `heading`.
+ * ponytail: one paragraph; criteria a page spreads over several paragraphs
+ * under one label read as the first only. */
+function labelSection(lines: string[], heading: RegExp): string | null {
+	const at = lines.findIndex(
+		(l, i) => isLabelLine(lines, i) && heading.test(fold(labelText(l))),
+	);
+	if (at < 0) return null;
+	let i = at + 1;
+	while (i < lines.length && !lines[i].trim()) i++;
+	const body: string[] = [];
+	for (; i < lines.length && lines[i].trim(); i++) body.push(lines[i]);
+	// A heading under the label is not its paragraph.
+	if (!body.length || /^#{1,6}\s/.test(body[0])) return null;
+	return body.join("\n").trim().slice(0, 4_000);
 }
 
 /** sls-092: what a reader should know when the submissions served here
@@ -112,5 +159,8 @@ export function hiddenWinnersNote(
 		: `${hidden.length} winning submissions are not served here: their teams hid or deleted them on DoraHacks (${places}).`;
 }
 
-export const JUDGING_HEADING = /judg|criteri|evaluat|scoring/i;
-export const REQUIREMENTS_HEADING = /requirement|rules|eligib|how to submit/i;
+// Spanish and Portuguese too, read with accents off: "Criterios de
+// evaluación", "Critérios de Avaliação", "Requisitos", "Entregáveis".
+export const JUDGING_HEADING = /judg|criteri|evaluat|evaluac|avaliac|scoring/i;
+export const REQUIREMENTS_HEADING =
+	/requirement|rules|eligib|how to submit|requisit|deliverable|entregab|entregav/i;

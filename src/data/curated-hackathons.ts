@@ -70,8 +70,9 @@ export interface CuratedHackathon extends DoraHacksHackathon {
 		 * (it can sit on another page than the sentence). A test holds the
 		 * weights to 100. getHackathon serves it as rules.rubric. */
 		rubric?: {
-			scoreMin: number;
-			scoreMax: number;
+			/** Absent: the page publishes no score scale. */
+			scoreMin?: number;
+			scoreMax?: number;
 			/** criterion is the page's label. A slot the page scores under a
 			 * different name in each category (its label joins them) names
 			 * each in byCategory: the category, its criterion, what it scores.
@@ -89,6 +90,10 @@ export interface CuratedHackathon extends DoraHacksHackathon {
 			checkedOn: string;
 		};
 	};
+	/** The organizer's page was read and publishes no judging criteria: the
+	 * page and the day. getHackathon then serves rules.judgingCriteria null
+	 * with a dated judgingNote. Absent with no judging: not checked. */
+	judgingChecked?: { source: string; checkedOn: string };
 }
 
 export const CURATED_HACKATHONS: CuratedHackathon[] = [
@@ -234,6 +239,12 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 					"Payments, stablecoins, RWAs, cross-border, wallets, AI + blockchain, anchors.",
 			},
 		],
+		// Its page, read 2026-11-04, publishes no judging criteria.
+		judgingChecked: {
+			source:
+				"https://www.risein.com/programs/stellar-journey-to-mastery-monthly-builder-challenges",
+			checkedOn: "2026-11-04",
+		},
 		external_url:
 			"https://www.risein.com/programs/stellar-journey-to-mastery-monthly-builder-challenges",
 		image_url:
@@ -256,6 +267,13 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		field: "Payments,DeFi,APAC",
 		ecosystem: "Stellar",
 		organization: { id: -20, name: "Rise In" },
+		// Its page, read 2026-11-04, ties prizes to "minimum quality
+		// requirements and technical benchmarks set by the judging committee"
+		// and lists no criteria.
+		judgingChecked: {
+			source: "https://www.risein.com/programs/apac-stellar-hackathon",
+			checkedOn: "2026-11-04",
+		},
 		external_url: "https://www.risein.com/programs/apac-stellar-hackathon",
 		image_url:
 			"https://files.risein.com/programs/co8um-cohort-1778746738617png",
@@ -278,6 +296,11 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		field: "IRL,Residency,India",
 		ecosystem: "Stellar",
 		organization: { id: -20, name: "Rise In" },
+		// The Luma page, read 2026-11-04, publishes no judging criteria.
+		judgingChecked: {
+			source: "https://luma.com/ajcns4mc",
+			checkedOn: "2026-11-04",
+		},
 		external_url: "https://luma.com/ajcns4mc",
 		image_url:
 			"https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=1,anim=false,background=white,quality=75,width=800,height=420/event-social/uf/71ddf351-c388-4ea1-82ca-fb4fc120dded.png",
@@ -289,7 +312,7 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		title: "Build on Stellar Philippines Hackathon",
 		uname: "build-on-stellar-philippines-2026",
 		description:
-			"Stellar PH and Rise In's national hackathon: 165 registrations, 32 submissions, 28 mainnet deployments; ₱60,000 in prizes. Winners: AbotPera, PinkRaft, Axial, Sobre, TyFi.",
+			"Stellar PH and Rise In's national hackathon: 165 registrations, 32 submissions, 28 mainnet deployments; ₱60,000 in prizes. Judging weighed real-world impact at 30%, technical execution on Stellar at 25%, UX and usability at 20%, innovation at 15% and feasibility at 10%. Winners: AbotPera, PinkRaft, Axial, Sobre, TyFi.",
 		// Launch day 18 May (the page body; no time of day published), so a
 		// daytime start: local midnight served 17 May.
 		start_time: ts("2026-05-18T09:00:00+08:00"),
@@ -301,6 +324,26 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		field: "Payments,Philippines",
 		ecosystem: "Stellar",
 		organization: { id: -20, name: "Rise In" },
+		// The page's judging table, read 2026-11-04: five criteria and their
+		// weights, with no score scale.
+		judging: {
+			text: "Judging weighed real-world impact at 30%, technical execution on Stellar at 25%, UX and usability at 20%, innovation at 15% and feasibility at 10%.",
+			source:
+				"https://www.risein.com/programs/build-on-stellar-philippines-hackathon",
+			checkedOn: "2026-11-04",
+			rubric: {
+				criteria: [
+					{ criterion: "Real-World Impact", weightPercent: 30 },
+					{ criterion: "Technical Execution (Stellar)", weightPercent: 25 },
+					{ criterion: "UX / Usability", weightPercent: 20 },
+					{ criterion: "Innovation", weightPercent: 15 },
+					{ criterion: "Feasibility", weightPercent: 10 },
+				],
+				source:
+					"https://www.risein.com/programs/build-on-stellar-philippines-hackathon",
+				checkedOn: "2026-11-04",
+			},
+		},
 		external_url:
 			"https://www.risein.com/programs/build-on-stellar-philippines-hackathon",
 		image_url:
@@ -350,6 +393,12 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		field: "IRL,Meridian",
 		ecosystem: "Stellar",
 		organization: { id: 3096, name: "Stellar Development Foundation" },
+		// SDF's recap, read 2026-11-04, names no HackMeridian judging criteria.
+		judgingChecked: {
+			source:
+				"https://stellar.org/blog/foundation-news/the-blueprint-at-meridian-2025",
+			checkedOn: "2026-11-04",
+		},
 		external_url:
 			"https://stellar.org/blog/foundation-news/the-blueprint-at-meridian-2025",
 		source: "curated",
@@ -423,6 +472,13 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		field: "IRL,University,Canada",
 		ecosystem: "Stellar",
 		organization: { id: -21, name: "Velocity" },
+		// Neither page, read 2026-11-04, publishes judging criteria; teams
+		// advance to a Top 16 and a Top 8.
+		judgingChecked: {
+			source:
+				"https://www.velocityincubator.com/programs-events/the-blockchain-innovation-challenge-powered-by-stellar",
+			checkedOn: "2026-11-04",
+		},
 		external_url:
 			"https://www.velocityincubator.com/programs-events/the-blockchain-innovation-challenge-powered-by-stellar",
 		image_url:

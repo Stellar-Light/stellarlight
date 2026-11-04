@@ -1045,13 +1045,20 @@ describe("tracks and prize tiers that are not known are null, never []", () => {
 		).toEqual([]);
 	});
 
-	it("a record that declares no tracks serves null tracks, and no rules", async () => {
+	it("a record that declares no tracks serves null tracks, and rules that say its page publishes no criteria", async () => {
 		const body = await serveCurated("stellar-builders-camp-jaipur-2026");
 		expect(body.hackathon.tracks).toBeNull();
 		expect(body.tracks).toBeNull();
 		expect(body.hackathon.prizeTiers).toBeNull();
 		expect(body.hackathon.notes).toEqual([NO_ROSTER_NOTE, TIERS_NOTE]);
-		expect("rules" in body.hackathon).toBe(false);
+		// Checked 2026-11-04: the Luma page publishes no judging criteria.
+		expect(body.hackathon.rules).toEqual({
+			judgingCriteria: null,
+			source: "https://luma.com/ajcns4mc",
+			checkedOn: "2026-11-04",
+			judgingNote:
+				"The organizer's page publishes no judging criteria (https://luma.com/ajcns4mc, checked 2026-11-04).",
+		});
 		expect(
 			undeclaredInServed(
 				spec,

@@ -45,6 +45,55 @@ describe("what an organizer published", () => {
 	});
 });
 
+// L5-03 sweep, 2026-11-04: Stellar IdeaThon Mulheres Que Codam publishes
+// "Critérios de Avaliação" on a line of its own, no heading, and the reader
+// served judgingCriteria null for criteria the page lists.
+describe("a section a page writes as a label line", () => {
+	const MQC = [
+		"Prêmios",
+		"",
+		"1ª 1.000,00",
+		"",
+		"Critérios de Avaliação",
+		"",
+		"Inovação e Originalidade, Melhor apresentação, Go to market, Qualidade Técnica",
+		"",
+		"Entregáveis",
+		"",
+		"- Repositório Git: [LINK]",
+		"- Apresentação: [PDF]",
+	].join("\n");
+
+	it("reads the paragraph under the label, in Portuguese or Spanish too", () => {
+		expect(markdownSection(MQC, JUDGING_HEADING)).toBe(
+			"Inovação e Originalidade, Melhor apresentação, Go to market, Qualidade Técnica",
+		);
+		expect(markdownSection(MQC, REQUIREMENTS_HEADING)).toBe(
+			"- Repositório Git: [LINK]\n- Apresentação: [PDF]",
+		);
+		expect(
+			markdownSection(
+				"**Criterios de evaluación**\n\nImpacto y uso de Stellar.",
+				JUDGING_HEADING,
+			),
+		).toBe("Impacto y uso de Stellar.");
+	});
+
+	it("does not read a sentence, a list item or a long line as a label", () => {
+		expect(
+			markdownSection(
+				"Judges evaluate every project on the same criteria regardless of category.\n\nNext.",
+				JUDGING_HEADING,
+			),
+		).toBeNull();
+		expect(markdownSection("- Judging\n\nNext.", JUDGING_HEADING)).toBeNull();
+		// A heading still wins over a label line.
+		expect(
+			markdownSection(`Judging\n\nNot this.\n\n${PAGE}`, JUDGING_HEADING),
+		).toBe("Impact, Stellar integration, completeness.");
+	});
+});
+
 describe("eventPageMarkdown", () => {
 	it("joins the description and each tab under its name, its headings one level down", () => {
 		expect(

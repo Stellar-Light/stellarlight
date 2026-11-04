@@ -26,6 +26,9 @@ import {
 } from "@/lib/hackathon-builds";
 import {
 	hiddenWinnersNote,
+	JUDGING_HEADING,
+	markdownSection,
+	REQUIREMENTS_HEADING,
 	submissionCoverageNote,
 } from "@/lib/hackathon-events";
 import { heldSecurity } from "@/lib/held-repos";
@@ -298,6 +301,30 @@ async function curatedWinnersFor(
 		...r,
 		scfAwarded: r.slug ? (scf.get(r.slug) ?? null) : null,
 	}));
+}
+
+/** A DoraHacks event's rules from its stored page: the sections the sync
+ * stored, else the same reading of the stored page (a section the reader
+ * learned to find after the page was stored, until the next sync stores
+ * it), and a dated note when the page has no judging section. */
+function storedRules(event: HackathonEvent, readAt: string) {
+	const judgingCriteria =
+		event.judgingSection ?? markdownSection(event.description, JUDGING_HEADING);
+	return {
+		repoRequired: !!event.repoRequired,
+		videoRequired: !!event.videoRequired,
+		submissionQuestions: event.submissionQuestions ?? [],
+		requirements:
+			event.requirementsSection ??
+			markdownSection(event.description, REQUIREMENTS_HEADING),
+		judgingCriteria,
+		...(judgingCriteria
+			? {}
+			: {
+					judgingNote: `The event page publishes no judging criteria: no section of it reads as judging criteria (page read ${readAt.slice(0, 10)}).`,
+				}),
+		readAt,
+	};
 }
 
 /** Up to three listed slugs sharing the most distinguishing words with an
@@ -689,16 +716,7 @@ export async function getHackathonDetail(
 					// only the judging sentence its record copies verbatim, and
 					// the weighted rubric when its organizer publishes one.
 					...(storedEvent?.detailReadAt
-						? {
-								rules: {
-									repoRequired: !!storedEvent.repoRequired,
-									videoRequired: !!storedEvent.videoRequired,
-									submissionQuestions: storedEvent.submissionQuestions ?? [],
-									requirements: storedEvent.requirementsSection ?? null,
-									judgingCriteria: storedEvent.judgingSection ?? null,
-									readAt: storedEvent.detailReadAt,
-								},
-							}
+						? { rules: storedRules(storedEvent, storedEvent.detailReadAt) }
 						: record?.judging
 							? {
 									rules: {
@@ -710,7 +728,18 @@ export async function getHackathonDetail(
 											: {}),
 									},
 								}
-							: {}),
+							: // Checked, and the organizer's page publishes none:
+								// said with the page and the day, never a bare null.
+								record?.judgingChecked
+								? {
+										rules: {
+											judgingCriteria: null,
+											source: record.judgingChecked.source,
+											checkedOn: record.judgingChecked.checkedOn,
+											judgingNote: `The organizer's page publishes no judging criteria (${record.judgingChecked.source}, checked ${record.judgingChecked.checkedOn}).`,
+										},
+									}
+								: {}),
 					// The engine's profile of the stored submissions: categories,
 					// libraries, activity after the event, and what they became.
 					...(fromStore ? { profile: eventProfile(stored) } : {}),

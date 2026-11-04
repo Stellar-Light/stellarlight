@@ -109,7 +109,10 @@ describe("a curated event's weighted rubric", () => {
 		const rubrics = CURATED_HACKATHONS.flatMap((h) =>
 			h.judging?.rubric ? [[h.uname, h.judging.rubric] as const] : [],
 		);
-		expect(rubrics.map(([slug]) => slug)).toEqual(["hackmeridian-2026"]);
+		expect(rubrics.map(([slug]) => slug)).toEqual([
+			"hackmeridian-2026",
+			"build-on-stellar-philippines-2026",
+		]);
 		for (const [slug, r] of rubrics) {
 			const weights = r.criteria.map((c) => c.weightPercent);
 			expect(
@@ -120,7 +123,10 @@ describe("a curated event's weighted rubric", () => {
 				expect(Number.isInteger(w) && w > 0, slug).toBe(true);
 			const names = r.criteria.map((c) => c.criterion);
 			expect(new Set(names).size, slug).toBe(names.length);
-			expect(r.scoreMin < r.scoreMax, slug).toBe(true);
+			// A score scale is optional (the Philippines page publishes none),
+			// and ordered when it is there.
+			if (r.scoreMin !== undefined || r.scoreMax !== undefined)
+				expect((r.scoreMin ?? 0) < (r.scoreMax ?? 0), slug).toBe(true);
 			expect(r.source, slug).toMatch(/^https:\/\//);
 			expect(r.checkedOn, slug).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 			expect(JSON.stringify(r), slug).not.toMatch(/[\u2013\u2014]/);
@@ -297,7 +303,10 @@ describe("a curated event's page", () => {
 					/no submission roster is held for it/,
 				);
 			}
-			expect("rules" in body.hackathon, h.uname).toBe(!!h.judging);
+			// Rules when the record copies judging, or checked a page with none.
+			expect("rules" in body.hackathon, h.uname).toBe(
+				!!(h.judging || h.judgingChecked),
+			);
 			expect(
 				undeclaredInServed(
 					spec,
@@ -464,5 +473,150 @@ describe("the empty-feed summary", () => {
 		expect(body.meta.partial).toBe(true);
 		expect(body.meta.counts.total).toBeNull();
 		expect(body.meta.fallbackChannels.summary).toMatch(/could not be read/);
+	});
+});
+
+// L5-03 on live 1.9.116: "the judging criteria for Stellar Hacks: ZK" read
+// rules.judgingCriteria null, and 17 of 27 listed events carried none, with
+// nothing to tell "published none" from "not read".
+describe("judging criteria, or a dated note that the page publishes none", () => {
+	const RECORDED = {
+		judged: [
+			"hackmeridian-2026",
+			"build-on-stellar-philippines-2026",
+			"stellar-pro-hackathon-istanbul-2026",
+		],
+		none: [
+			"stellar-journey-to-mastery-2026",
+			"apac-stellar-hackathon-2026",
+			"stellar-builders-camp-jaipur-2026",
+			"hackmeridian-2025",
+			"blockchain-innovation-challenge-waterloo-2026",
+		],
+		// Press coverage only: no organizer page to check.
+		unchecked: ["stellar-builder-summit-2026"],
+	};
+
+	it("records every curated event as judged, checked with none, or not checked", () => {
+		const of = (pick: (h: (typeof CURATED_HACKATHONS)[number]) => boolean) =>
+			CURATED_HACKATHONS.filter(pick)
+				.map((h) => h.uname)
+				.sort();
+		expect(of((h) => !!h.judging)).toEqual([...RECORDED.judged].sort());
+		expect(of((h) => !!h.judgingChecked)).toEqual([...RECORDED.none].sort());
+		expect(of((h) => !h.judging && !h.judgingChecked)).toEqual(
+			RECORDED.unchecked,
+		);
+		for (const h of CURATED_HACKATHONS)
+			if (h.judgingChecked) {
+				expect(h.judgingChecked.source, h.uname).toMatch(/^https:\/\//);
+				expect(h.judgingChecked.checkedOn, h.uname).toMatch(
+					/^\d{4}-\d{2}-\d{2}$/,
+				);
+			}
+	});
+
+	it("serves a curated page that publishes none as a dated note, not a bare null", async () => {
+		for (const slug of RECORDED.none) {
+			const h = CURATED_HACKATHONS.find((x) => x.uname === slug);
+			const rules = (await detail(slug)).hackathon.rules;
+			expect(rules, slug).toEqual({
+				judgingCriteria: null,
+				source: h?.judgingChecked?.source,
+				checkedOn: h?.judgingChecked?.checkedOn,
+				judgingNote: `The organizer's page publishes no judging criteria (${h?.judgingChecked?.source}, checked ${h?.judgingChecked?.checkedOn}).`,
+			});
+		}
+		expect(
+			"rules" in (await detail("stellar-builder-summit-2026")).hackathon,
+		).toBe(false);
+	});
+
+	it("serves the Philippines hackathon's weighted criteria as published", async () => {
+		const rules = (await detail("build-on-stellar-philippines-2026")).hackathon
+			.rules;
+		expect(rules.source).toBe(
+			"https://www.risein.com/programs/build-on-stellar-philippines-hackathon",
+		);
+		expect(rules.rubric.criteria).toEqual([
+			{ criterion: "Real-World Impact", weightPercent: 30 },
+			{ criterion: "Technical Execution (Stellar)", weightPercent: 25 },
+			{ criterion: "UX / Usability", weightPercent: 20 },
+			{ criterion: "Innovation", weightPercent: 15 },
+			{ criterion: "Feasibility", weightPercent: 10 },
+		]);
+		// No score scale is published, so none is served.
+		expect("scoreMin" in rules.rubric).toBe(false);
+	});
+
+	const DORA = {
+		id: 2198,
+		uname: "stellar-hacks-zk",
+		title: "Stellar Hacks: Real-World ZK",
+		start_time: 1_750_000_000,
+		end_time: 1_760_000_000,
+		bonus_price: 10_000,
+		hackers_count: 300,
+		status: 2,
+		winner_announced: true,
+	} as DoraHacksHackathon;
+	const pageOf = (description: string) => ({
+		find: async (args: { collection: string }) => ({
+			docs:
+				args.collection === "hackathon-events"
+					? [
+							{
+								id: "e1",
+								slug: DORA.uname,
+								title: DORA.title,
+								description,
+								repoRequired: true,
+								videoRequired: true,
+								submissionQuestions: [],
+								requirementsSection: null,
+								judgingSection: null,
+								detailReadAt: "2026-11-04T12:35:11.060Z",
+							},
+						]
+					: [],
+		}),
+	});
+	const served = async (description: string) => {
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([DORA]);
+		const { getHackathonDetail } = await import("@/lib/hackathon-detail");
+		const r = await getHackathonDetail(
+			pageOf(description) as never,
+			DORA.uname,
+		);
+		if (!r.found) throw new Error("not found");
+		return JSON.parse(JSON.stringify(r.body));
+	};
+
+	it("says a read DoraHacks page publishes none, with the day it was read", async () => {
+		const body = await served(
+			"# Brief\n\nBuild with ZK.\n\n# Submission Requirements\n\n- A repo",
+		);
+		expect(body.hackathon.rules.judgingCriteria).toBeNull();
+		expect(body.hackathon.rules.judgingNote).toBe(
+			"The event page publishes no judging criteria: no section of it reads as judging criteria (page read 2026-11-04).",
+		);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("reads criteria a stored page writes as a label line, before the next sync stores them", async () => {
+		const body = await served(
+			"Critérios de Avaliação\n\nInovação e Originalidade, Qualidade Técnica\n\nEntregáveis\n\n- Repositório Git",
+		);
+		expect(body.hackathon.rules.judgingCriteria).toBe(
+			"Inovação e Originalidade, Qualidade Técnica",
+		);
+		expect(body.hackathon.rules.requirements).toBe("- Repositório Git");
+		expect("judgingNote" in body.hackathon.rules).toBe(false);
 	});
 });

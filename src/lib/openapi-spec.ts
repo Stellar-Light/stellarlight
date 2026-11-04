@@ -1046,8 +1046,16 @@ const HACKATHON_RUBRIC_SCHEMA = {
 	description:
 		"Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent in the page's order (not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none.",
 	properties: {
-		scoreMin: { type: "integer" },
-		scoreMax: { type: "integer" },
+		scoreMin: {
+			type: "integer",
+			description:
+				"The lowest score a criterion takes. Absent with scoreMax: the page publishes no score scale.",
+		},
+		scoreMax: {
+			type: "integer",
+			description:
+				"The highest score a criterion takes. Absent with scoreMin: the page publishes no score scale.",
+		},
 		criteria: {
 			type: "array",
 			items: {
@@ -11577,13 +11585,18 @@ export const spec: OpenAPISpec = {
 							rules: {
 								type: "object",
 								description:
-									"What the organizer published about submitting and judging. On a DoraHacks event, from its stored event page: absent = the page was not read; a null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated), from its record: present only when the record copies a judging sentence from the organizer's page, as judgingCriteria with source and checkedOn, and rubric when the organizer publishes a weighted one; the other keys are absent, not known. Absent on such an event: its record copies no judging sentence, which is not a claim that the organizer published none.",
+									"What the organizer published about submitting and judging. On a DoraHacks event, from its stored event page: absent = the page was not read; a null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated), from its record: the judging sentence it copies from the organizer's page, as judgingCriteria with source and checkedOn, and rubric when the organizer publishes a weighted one; or, when that page was checked and publishes no judging criteria, judgingCriteria null with source, checkedOn and judgingNote. The other keys are absent, not known. Absent on such an event: its organizer's page was not checked (no page on record), which is not a claim that it publishes none.",
 								properties: {
 									rubric: HACKATHON_RUBRIC_SCHEMA,
 									source: {
 										type: "string",
 										description:
-											"Curated events only: the page the judging sentence was checked against.",
+											"Curated events only: the page the judging sentence, or its absence, was checked against.",
+									},
+									judgingNote: {
+										type: "string",
+										description:
+											"Present only when judgingCriteria is null: that the page publishes no judging criteria, with the page and the day it was read or checked. A DoraHacks page's note rests on its sections as read (a heading or a label line whose words name judging, scoring or criteria, in English, Spanish or Portuguese).",
 									},
 									checkedOn: {
 										type: "string",
@@ -11607,7 +11620,7 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										nullable: true,
 										description:
-											"The page's judging section, in markdown. null = the page was read (readAt) and has no judging section: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all.",
+											"The page's judging section, in markdown: under a heading, or a line of its own, that names judging, scoring or criteria (Spanish and Portuguese too). null = the page was read (readAt) or checked (checkedOn) and has no judging section, as judgingNote says: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all.",
 									},
 									readAt: { type: "string", format: "date-time" },
 								},
