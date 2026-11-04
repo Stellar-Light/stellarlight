@@ -256,6 +256,20 @@ const daysBetween = (from: string, to: string) =>
 
 const usd = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
 
+/** Whether a served TVL reading is older than TVL_FRESH_DAYS, or undated.
+ * enrich-tvl keeps the stored figure when no DefiLlama row resolves
+ * (tvlFieldsFor), so a reading can sit for weeks under "refreshed weekly":
+ * Sentora's since 2026-08-10 (#1912). null when there is no reading. */
+export function tvlStaleOf(
+	tvlUSD: unknown,
+	tvlAsOf: unknown,
+	now: Date = new Date(),
+): boolean | null {
+	if (typeof tvlUSD !== "number") return null;
+	const at = iso(tvlAsOf);
+	return !(at && daysBetween(at, now.toISOString()) <= TVL_FRESH_DAYS);
+}
+
 function linkedSlugs(v: unknown): string[] | null {
 	const slugs = Array.isArray(v)
 		? v.filter((s): s is string => typeof s === "string" && s.length > 0)

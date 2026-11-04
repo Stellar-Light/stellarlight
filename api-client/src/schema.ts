@@ -1173,7 +1173,7 @@ export interface components {
             /** Format: uri */
             skill?: string;
         };
-        /** @description Present in meta only when the request had view=compact; absent means full rows. Compact project rows (projects/search `projects`) carry exactly: id, name, slug, canonicalSlug, url, category, types, shortDescription, status, statusAsOf, deployment, tvlUSD, tvlAsOf, scfAwarded, scfTotalAwardedUSD, audits, score, via, confidence, reposCount, onchainContractsCount; deployment keeps only network, confidence only score and label. Compact repo rows (repos/search `repos`, projects/search `codeReferences`) carry exactly: fullName, url, description, primaryLanguage, stars, lastCommitAt, isArchived, activityState, project, hackathonWinner, scfAwarded, repoScore, repoScoreLabel, tier, kind, stellarEvidence, score, knowledgeNotesCount. Every key is on every row, null where there is no value. */
+        /** @description Present in meta only when the request had view=compact; absent means full rows. Compact project rows (projects/search `projects`) carry exactly: id, name, slug, canonicalSlug, url, category, types, shortDescription, status, statusAsOf, deployment, tvlUSD, tvlAsOf, tvlStale, scfAwarded, scfTotalAwardedUSD, audits, score, via, confidence, reposCount, onchainContractsCount; deployment keeps only network, confidence only score and label. Compact repo rows (repos/search `repos`, projects/search `codeReferences`) carry exactly: fullName, url, description, primaryLanguage, stars, lastCommitAt, isArchived, activityState, project, hackathonWinner, scfAwarded, repoScore, repoScoreLabel, tier, kind, stellarEvidence, score, knowledgeNotesCount. Every key is on every row, null where there is no value. */
         CompactView: {
             /** @description Always `compact`: this page carries compact rows. */
             mode: string;
@@ -1415,10 +1415,12 @@ export interface components {
                 driftDays?: number | null;
                 codeChangedSinceAudit?: boolean | null;
             } | null;
-            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf. */
+            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading the refresh kept from an earlier run. */
             tvlUSD?: number | null;
             /** @description When tvlUSD was fetched from DefiLlama (ISO 8601). */
             tvlAsOf?: string | null;
+            /** @description true = tvlUSD is older than 14 days (or undated): the weekly refresh found no current DefiLlama figure and kept this one, so cite it with tvlAsOf as a past reading, not today's TVL. false = read within 14 days. null = no tvlUSD. */
+            tvlStale?: boolean | null;
             /** @description Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope; cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth. */
             tvlSource?: string | null;
             /** @description How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time): the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions. */
@@ -2350,6 +2352,8 @@ export interface components {
              * @description When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.
              */
             tvlAsOf?: string | null;
+            /** @description true = tvlUSD is older than 14 days (or undated): a reading the weekly refresh kept, so sort=tvl ranks it as a past figure. false = read within 14 days. null = no tvlUSD. */
+            tvlStale?: boolean | null;
             /** @description Code of the project's issued on-chain asset (USDC, CETES, …), from stellar.expert. Null = no verified issued asset in our on-chain seed set. */
             assetCode?: string | null;
             /** @description Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED; never 'zero supply'; untracked issuers sort below every tracked one. */
@@ -7089,22 +7093,45 @@ export interface operations {
                             totalPrizePoolUSD?: number;
                             totalRegisteredHackers?: number;
                         };
-                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. */
+                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning. */
                         tvl?: {
+                            /** @description Sum of every tracked project's last reading, stale ones included (see staleTvlUSD). */
                             totalTvlUSD?: number;
+                            /** @description The part of totalTvlUSD from readings older than 14 days (or undated); 0 when every reading is fresh. totalTvlUSD minus this is the part read within 14 days. */
+                            staleTvlUSD?: number;
                             trackedProjects?: number;
                             /**
                              * Format: date-time
-                             * @description Most recent per-project tvlAsOf refresh; null when nothing is tracked.
+                             * @description The NEWEST per-project tvlAsOf: it dates the freshest reading, not the whole total (see oldestAsOf). Null when nothing is tracked.
                              */
                             asOf?: string | null;
+                            /**
+                             * Format: date-time
+                             * @description The OLDEST tvlAsOf among the readings summed. Null when nothing is tracked.
+                             */
+                            oldestAsOf?: string | null;
+                            /** @description Non-null when any summed reading is older than 14 days: how many, the oldest date, and their share of totalTvlUSD. Null = every reading is within 14 days. */
+                            staleWarning?: string | null;
                             provider?: string;
+                            /** @description The ten largest readings, largest first. */
                             top10?: {
                                 slug?: string | null;
                                 name?: string | null;
                                 tvlUSD?: number;
                                 /** Format: date-time */
                                 tvlAsOf?: string | null;
+                                /** @description true = this reading is older than 14 days (or undated): the weekly refresh kept the last figure. See staleWarning. */
+                                tvlStale?: boolean;
+                            }[];
+                            /** @description Every summed reading older than 14 days (or undated), largest first; [] = none. */
+                            staleProjects?: {
+                                slug?: string | null;
+                                name?: string | null;
+                                tvlUSD?: number;
+                                /** Format: date-time */
+                                tvlAsOf?: string | null;
+                                /** @description true = this reading is older than 14 days (or undated): the weekly refresh kept the last figure. See staleWarning. */
+                                tvlStale?: boolean;
                             }[];
                             basis?: string;
                         };
@@ -7140,10 +7167,10 @@ export interface operations {
                             projectSetHash?: string;
                             /**
                              * Format: date-time
-                             * @description When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state.
+                             * @description When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state. Null when this read is neither stored nor compared (deltaUnavailable says why).
                              */
                             snapshotAsOf?: string | null;
-                            /** @description The most recent persisted snapshot with a DIFFERENT project set. Null when none exists yet (see deltaUnavailable). */
+                            /** @description The most recent persisted snapshot with a DIFFERENT project set whose stored slug list is non-empty and reproduces its projectSetHash: an empty or incomplete stored snapshot is never a baseline. Null when none is found (see deltaUnavailable). */
                             previousSnapshot?: {
                                 projectSetHash?: string;
                                 /** Format: date-time */
@@ -7170,11 +7197,22 @@ export interface operations {
                                     reason?: "dedupe" | "eligibility-reclassification" | "source-correction" | "unknown";
                                 }[];
                             } | null;
-                            /** @description Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable); an explicit reason, never a silent omission. */
+                            /** @description Non-null when snapshotDelta cannot be served, stating WHY: no valid differing prior snapshot is stored (empty or incomplete ones are skipped), the most recent stored snapshots read hold no other set, this read found no awarded project or was truncated (it is then neither stored nor compared), or the snapshot store is unavailable; an explicit reason, never a silent omission. */
                             deltaUnavailable?: string | null;
                             deltaBasis?: string;
                         };
                     };
+                };
+            };
+            /** @description The projects read behind categories, funding, tvl or gaps failed (dimension=all included): an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };

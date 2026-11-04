@@ -4,6 +4,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { PROJECT_COMPACT } from "../compact-view";
 import { factConfidence } from "../fact-confidence";
 import { spec } from "../openapi-spec";
 import {
@@ -14,7 +15,9 @@ import {
 	STATUS_CHECKS,
 	statusChecksFor,
 	stellarTvlOf,
+	TVL_FRESH_DAYS,
 	tvlFieldsFor,
+	tvlStaleOf,
 } from "../status-checks";
 
 const NOW = new Date("2026-10-26T12:00:00.000Z");
@@ -166,6 +169,24 @@ describe("stellarTvlOf and tvlFieldsFor: a missing TVL is null, never 0", () => 
 			tvlUSD: null,
 			llamaSlugs: ["allbridge-next"],
 		});
+	});
+});
+
+// #1912: the stored figure stays when no row resolves (above), so a served
+// reading can sit for weeks under "refreshed weekly": Sentora since 08-10.
+describe("tvlStaleOf: a reading past the weekly refresh says so", () => {
+	const ago = (days: number) =>
+		new Date(NOW.getTime() - days * 86_400_000).toISOString();
+	it("fresh up to TVL_FRESH_DAYS, stale past it or undated, null with no reading", () => {
+		expect(tvlStaleOf(5, ago(TVL_FRESH_DAYS), NOW)).toBe(false);
+		expect(tvlStaleOf(5, ago(TVL_FRESH_DAYS + 1), NOW)).toBe(true);
+		// A reading of 0 is a reading; its age still decides.
+		expect(tvlStaleOf(0, ago(1), NOW)).toBe(false);
+		expect(tvlStaleOf(5, null, NOW)).toBe(true);
+		expect(tvlStaleOf(5, "not a date", NOW)).toBe(true);
+		expect(tvlStaleOf(null, ago(1), NOW)).toBeNull();
+		// Semantic rows come from a raw aggregate, where the date is a Date.
+		expect(tvlStaleOf(5, new Date(ago(1)), NOW)).toBe(false);
 	});
 });
 
@@ -519,6 +540,24 @@ describe("every serving point carries the guard, and the spec declares it", () =
 			s.paths["/api/verify"].get.responses["200"].content["application/json"]
 				.schema.properties.evidence.items.properties.kind.enum;
 		expect(kinds).toContain("status-check");
+	});
+	it("every TVL row serves tvlStale from the one helper, and the spec declares it", () => {
+		const builders = (route.match(/\.\.\.statusChecksFor\(\w+\)/g) ?? [])
+			.length;
+		const stale = /tvlStale: tvlStaleOf\((\w+)\.tvlUSD, \1\.tvlAsOf\)/g;
+		expect((route.match(stale) ?? []).length).toBe(builders);
+		const board = readFileSync(
+			join(process.cwd(), "src/app/api/leaderboard/route.ts"),
+			"utf8",
+		);
+		expect((board.match(stale) ?? []).length).toBe(1);
+		expect(PROJECT_COMPACT.keep).toHaveProperty("tvlStale", true);
+		// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+		const s: any = spec;
+		for (const name of ["Project", "LeaderboardProject"]) {
+			const f = s.components.schemas[name].properties.tvlStale;
+			expect(f).toMatchObject({ type: "boolean", nullable: true });
+		}
 	});
 });
 

@@ -19,6 +19,7 @@ import { jsonSafe } from "@/lib/json-safe";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { PROJECT_TYPES } from "@/lib/project-types";
+import { tvlStaleOf } from "@/lib/status-checks";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min — Payload data is cheap, but no point hammering it
@@ -42,6 +43,8 @@ interface ProjectRow {
 	// (class 8).
 	tvlUSD: number | null;
 	tvlAsOf: string | null;
+	// #1912: the reading is past the weekly refresh (tvlStaleOf)
+	tvlStale: boolean | null;
 	// On-chain issued-asset stats (2026-07-21 institutional battery: "biggest
 	// stablecoin by supply" had no sort). From stellar.expert via
 	// enrich-onchain-projects.ts; null = NOT TRACKED (no verified issued asset
@@ -404,6 +407,7 @@ export async function GET(req: NextRequest) {
 					scfAwarded: !!project.scf?.awarded,
 					tvlUSD: project.tvlUSD ?? null,
 					tvlAsOf: project.tvlAsOf ?? null,
+					tvlStale: tvlStaleOf(project.tvlUSD, project.tvlAsOf),
 					assetCode:
 						typeof project.onchain?.assetCode === "string"
 							? project.onchain.assetCode

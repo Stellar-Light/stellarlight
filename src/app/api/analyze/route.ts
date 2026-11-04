@@ -23,6 +23,7 @@
 import { createHash } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { computeEcosystemGaps, GAP_VERTICALS } from "@/lib/ecosystem-gaps";
 import { fetchAllDoraHacksHackathons } from "@/lib/integrations/dorahacks";
@@ -33,6 +34,7 @@ import {
 	type PopulationScope,
 	populationScope,
 } from "@/lib/population";
+import { TVL_FRESH_DAYS, tvlStaleOf } from "@/lib/status-checks";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -75,6 +77,35 @@ type RemovalReason =
 	| "source-correction"
 	| "unknown";
 
+/** sls-044: projectSetHash, the sha256 prefix of a sorted slug list, hashed
+ * in the order given: a stored list is checked exactly as it was written. */
+function setHashOf(sortedSlugs: readonly string[]): string {
+	return createHash("sha256")
+		.update(sortedSlugs.join("\n"))
+		.digest("hex")
+		.slice(0, 16);
+}
+
+/** A stored snapshot's slugs when it can be a baseline, else null: a list
+ * that is non-empty, matches its count and total, and reproduces its own
+ * hash. #1914: requests whose project read failed stored the EMPTY set
+ * (e3b0c44298fc1c14, sha256 of nothing) 13 times, and the delta against one
+ * listed every awarded project as added. */
+function baselineSlugsOf(s: FundingSnapshotDoc): string[] | null {
+	const slugs = Array.isArray(s.awardedSlugs)
+		? s.awardedSlugs.filter((x): x is string => typeof x === "string")
+		: [];
+	return slugs.length > 0 &&
+		slugs.length === s.scfAwardedProjects &&
+		typeof s.scfTotalDistributedUSD === "number" &&
+		setHashOf(slugs) === s.projectSetHash
+		? slugs
+		: null;
+}
+
+/** How many stored snapshots, newest first, the baseline search reads. */
+const SNAPSHOT_WINDOW = 10;
+
 interface CategoryStats {
 	category: string;
 	projectCount: number;
@@ -101,6 +132,7 @@ interface ProjectDoc {
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	const dimensionParam = sp.get("dimension") ?? "all";
 	if (!VALID_DIMENSIONS.includes(dimensionParam as never)) {
@@ -165,12 +197,11 @@ export async function GET(req: NextRequest) {
 	}
 
 	// ── Categories + funding + tvl share a projects fetch
+	const needsProjects =
+		includeCategories || includeFunding || includeTvl || includeGaps;
 	let projects: ProjectDoc[] = [];
 	let population: PopulationScope | null = null;
-	if (
-		payload &&
-		(includeCategories || includeFunding || includeTvl || includeGaps)
-	) {
+	if (payload && needsProjects) {
 		try {
 			const r = await payload.find({
 				collection: "projects",
@@ -216,8 +247,28 @@ export async function GET(req: NextRequest) {
 				included: projects.length,
 			});
 		} catch {
-			// fall through with empty
+			// population stays null: answered below
 		}
+	}
+	// #1914: a failed read fell through with [] and served zero totals, a gaps
+	// list calling every vertical absent, and a stored empty funding snapshot
+	// (13 since July). It is an outage: say so, cache nothing, store nothing.
+	if (needsProjects && !population) {
+		logApiHit({
+			req,
+			endpoint: "/api/analyze",
+			filters: { dimension: dimensionParam },
+			status: 503,
+			startedAt,
+		});
+		return apiError({
+			status: 503,
+			error: "project store read failed",
+			advisory:
+				"The projects read behind this rollup failed. This is an outage, NOT a claim that any count, funding total or TVL is zero, and nothing was stored. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+		});
 	}
 
 	if (includeCategories) {
@@ -311,10 +362,7 @@ export async function GET(req: NextRequest) {
 		const awardedSlugs = scfProjects
 			.map((p) => p.slug ?? p.id)
 			.sort((a, b) => a.localeCompare(b));
-		const projectSetHash = createHash("sha256")
-			.update(awardedSlugs.join("\n"))
-			.digest("hex")
-			.slice(0, 16);
+		const projectSetHash = setHashOf(awardedSlugs);
 
 		// sls-044 (#520): answer-visible set-delta provenance. The hash alone
 		// says WHETHER the awarded set changed; consumers also need WHAT changed
@@ -339,19 +387,38 @@ export async function GET(req: NextRequest) {
 			removedReasons: Array<{ slug: string; reason: RemovalReason }>;
 		} | null = null;
 		let deltaUnavailable: string | null = null;
-		if (payload) {
+		// #1914: only a whole, non-empty awarded set is stored or compared.
+		if (!awardedSlugs.length || population?.truncated) {
+			deltaUnavailable = population?.truncated
+				? `This read returned ${population.included} of ${population.totalAvailable} matching projects (meta.population.truncated), so its awarded set is partial: it is not stored as a snapshot and not compared against one.`
+				: "This read found no awarded project, so it is not stored as a snapshot and not compared against one.";
+		} else if (payload) {
 			try {
 				const snapRes = await payload.find({
 					collection: "funding-snapshots",
+					// An empty set is never a baseline (baselineSlugsOf).
+					where: { scfAwardedProjects: { greater_than: 0 } },
 					sort: "-computedAt",
-					limit: 2,
+					limit: SNAPSHOT_WINDOW,
 					depth: 0,
 					overrideAccess: true,
 				});
-				const snaps = snapRes.docs as FundingSnapshotDoc[];
-				const latest = snaps[0] ?? null;
-				let prev: FundingSnapshotDoc | null = null;
-				if (!latest || latest.projectSetHash !== projectSetHash) {
+				// Rows that can be a baseline, newest first, with their slugs.
+				const snaps = (snapRes.docs as FundingSnapshotDoc[]).flatMap((s) => {
+					const slugs = baselineSlugsOf(s);
+					return slugs ? [{ ...s, slugs }] : [];
+				});
+				// The unbroken run of rows holding the current set: its oldest row
+				// is when the set was first observed (rows written after an empty
+				// one re-record a set already held).
+				let run = 0;
+				while (snaps[run]?.projectSetHash === projectSetHash) run++;
+				const prev = snaps[run] ?? null;
+				if (run) {
+					// This response IS that stored set (amounts may still drift
+					// within a set: amount revisions).
+					snapshotAsOf = snaps[run - 1].computedAt ?? null;
+				} else {
 					// New set state (or first run): record it. Best-effort — a full
 					// storage tier must degrade the delta, never the funding numbers.
 					snapshotAsOf = new Date().toISOString();
@@ -372,12 +439,6 @@ export async function GET(req: NextRequest) {
 						// persistence failed (e.g. storage full) — delta still computes
 						// against the last stored state; only durability is affected.
 					}
-					prev = latest;
-				} else {
-					// Same set as the stored latest — this response IS that snapshot
-					// (amounts may still drift within a set: amount revisions).
-					snapshotAsOf = latest.computedAt ?? null;
-					prev = snaps[1] ?? null;
 				}
 				if (prev?.projectSetHash) {
 					previousSnapshot = {
@@ -392,11 +453,7 @@ export async function GET(req: NextRequest) {
 								? prev.scfTotalDistributedUSD
 								: null,
 					};
-					const prevSlugs = Array.isArray(prev.awardedSlugs)
-						? (prev.awardedSlugs as unknown[]).filter(
-								(s): s is string => typeof s === "string",
-							)
-						: [];
+					const prevSlugs = prev.slugs;
 					const prevSet = new Set(prevSlugs);
 					const curSet = new Set(awardedSlugs);
 					const added = awardedSlugs.filter((s) => !prevSet.has(s));
@@ -461,8 +518,11 @@ export async function GET(req: NextRequest) {
 						removedReasons,
 					};
 				} else {
+					// A full window may hide an older baseline: say the read was cut.
 					deltaUnavailable =
-						"No prior funding snapshot with a different project set is recorded yet; snapshot history starts at snapshotAsOf. Re-read after the awarded set changes to receive addedProjects/removedProjects; a shifted headline before then is an amount revision within the SAME set (projectSetHash unchanged).";
+						snapRes.docs.length >= SNAPSHOT_WINDOW
+							? `None of the ${SNAPSHOT_WINDOW} most recent non-empty stored snapshots is a valid baseline with a different project set, and older history was not read; snapshotAsOf is the oldest row read that holds this set.`
+							: "No valid prior funding snapshot with a different project set is stored (an empty or incomplete stored snapshot is never a baseline); snapshot history starts at snapshotAsOf. Re-read after the awarded set changes to receive addedProjects/removedProjects; a shifted headline before then is an amount revision within the SAME set (projectSetHash unchanged).";
 				}
 			} catch {
 				deltaUnavailable =
@@ -499,7 +559,7 @@ export async function GET(req: NextRequest) {
 			snapshotDelta,
 			deltaUnavailable,
 			deltaBasis:
-				"snapshotAsOf = when the CURRENT projectSetHash was first observed (persisted snapshot time). previousSnapshot = the most recent stored snapshot with a DIFFERENT project set; snapshotDelta lists the slugs added/removed between it and this response, with mechanical reason codes for removals (dedupe = record now points at a canonical slug; eligibility-reclassification = record left the active status pool; source-correction = scf.awarded corrected to false; unknown = no mechanical signal). totalUSDDelta = this response's total minus the previous snapshot's. When snapshotDelta is null, deltaUnavailable says why (no differing prior snapshot yet, or store unavailable); never infer a cause from headline drift alone.",
+				"snapshotAsOf = when the CURRENT projectSetHash was first observed (persisted snapshot time). previousSnapshot = the most recent stored snapshot with a DIFFERENT project set whose stored slug list is non-empty and reproduces its hash (an empty or incomplete snapshot, such as one a failed read wrote, is never a baseline, and an empty or truncated read is never stored); snapshotDelta lists the slugs added/removed between it and this response, with mechanical reason codes for removals (dedupe = record now points at a canonical slug; eligibility-reclassification = record left the active status pool; source-correction = scf.awarded corrected to false; unknown = no mechanical signal). totalUSDDelta = this response's total minus the previous snapshot's. When snapshotDelta is null, deltaUnavailable says why (no valid differing prior snapshot, an empty or truncated read, or store unavailable); never infer a cause from headline drift alone.",
 			countBasis:
 				"Counts distinct PROJECTS with scf.awarded=true (not awarded submissions; SDF's own counters count submissions, so totals differ by design). Dollar totals are in-house reconstructions: SCF does not publish per-award amounts for all rounds (some are XLM-denominated or undisclosed; see scfAmountStatus on project rows), so cross-source totals can legitimately disagree. Round membership comes from official award pages. byRound apportions each project's total equally across its awarded rounds because per-round amounts are unpublished. NOTE: byRound[].count is per-round MEMBERSHIP (a project is counted in each round it won), so the sum of byRound counts is intentionally GREATER than scfAwardedProjects; never add round counts to get a project total.",
 			postHackathonStatusFunnel: {
@@ -525,28 +585,43 @@ export async function GET(req: NextRequest) {
 		const totalTvlUSD = Math.round(
 			tracked.reduce((s, p) => s + (p.tvlUSD ?? 0), 0),
 		);
-		const top10 = [...tracked]
-			.sort((a, b) => (b.tvlUSD ?? 0) - (a.tvlUSD ?? 0))
-			.slice(0, 10)
-			.map((p) => ({
-				slug: p.slug ?? null,
-				name: p.name ?? null,
-				tvlUSD: Math.round(p.tvlUSD ?? 0),
-				tvlAsOf: p.tvlAsOf ?? null,
-			}));
-		// Most recent per-project refresh date = the rollup's as-of.
-		const asOf = tracked.reduce<string | null>(
-			(m, p) => (p.tvlAsOf && (!m || p.tvlAsOf > m) ? p.tvlAsOf : m),
-			null,
+		// #1912: each row's age under the rule search rows serve (tvlStale).
+		const now = new Date();
+		const isStale = (p: ProjectDoc) =>
+			tvlStaleOf(p.tvlUSD, p.tvlAsOf, now) === true;
+		const row = (p: ProjectDoc) => ({
+			slug: p.slug ?? null,
+			name: p.name ?? null,
+			tvlUSD: Math.round(p.tvlUSD ?? 0),
+			tvlAsOf: p.tvlAsOf ?? null,
+			tvlStale: isStale(p),
+		});
+		const byValue = [...tracked].sort(
+			(a, b) => (b.tvlUSD ?? 0) - (a.tvlUSD ?? 0),
 		);
+		const stale = byValue.filter(isStale);
+		const staleTvlUSD = Math.round(
+			stale.reduce((s, p) => s + (p.tvlUSD ?? 0), 0),
+		);
+		// asOf alone (the newest reading) dated a total that was 84% readings
+		// 7 and 12 weeks old on 2026-11-02; oldestAsOf dates the other end.
+		const datesOf = (ps: ProjectDoc[]) =>
+			ps.flatMap((p) => (p.tvlAsOf ? [p.tvlAsOf] : [])).sort();
+		const dates = datesOf(tracked);
+		const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 		result.tvl = {
 			totalTvlUSD,
+			staleTvlUSD,
 			trackedProjects: tracked.length,
-			asOf,
+			asOf: dates.at(-1) ?? null,
+			oldestAsOf: dates[0] ?? null,
+			staleWarning: stale.length
+				? `${stale.length} of ${tracked.length} tracked projects carry a TVL reading older than ${TVL_FRESH_DAYS} days (oldest ${datesOf(stale)[0]?.slice(0, 10) ?? "undated"}): ${usd(staleTvlUSD)}, ${totalTvlUSD ? Math.round((staleTvlUSD / totalTvlUSD) * 100) : 0}% of totalTvlUSD, is the last reading the weekly refresh kept, not a current one; the other ${usd(totalTvlUSD - staleTvlUSD)} was read within ${TVL_FRESH_DAYS} days. Cite the total with this caveat; staleProjects lists the rows.`
+				: null,
 			provider: "DefiLlama",
-			top10,
-			basis:
-				"Sum of per-project tvlUSD across ACTIVE directory projects tracked on DefiLlama (tvlUSD != null; null = not tracked there, never zero: untracked protocols are simply absent, so this UNDERCOUNTS chain-wide TVL). Values are per-protocol DefiLlama totals refreshed on a curated cadence (asOf = most recent per-project tvlAsOf), CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated: never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf also ride each /api/projects/search row.",
+			top10: byValue.slice(0, 10).map(row),
+			staleProjects: stale.map(row),
+			basis: `Sum of per-project tvlUSD across ACTIVE directory projects tracked on DefiLlama (tvlUSD != null; null = not tracked there, never zero: untracked protocols are simply absent, so this UNDERCOUNTS chain-wide TVL). Values are per-protocol DefiLlama totals refreshed weekly: asOf = the newest per-project tvlAsOf, oldestAsOf = the oldest. A reading older than ${TVL_FRESH_DAYS} days (a missed weekly run, or DefiLlama no longer returns a Stellar figure for the mapped protocol, so the last one is kept) is stale: it stays in totalTvlUSD, never dropped or zeroed, and is summed in staleTvlUSD, listed in staleProjects and named in staleWarning; totalTvlUSD minus staleTvlUSD is the part read within ${TVL_FRESH_DAYS} days. CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated: never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf/tvlStale also ride each /api/projects/search row.`,
 		};
 	}
 

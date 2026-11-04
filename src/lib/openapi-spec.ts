@@ -230,6 +230,22 @@ const TYPE_COVERAGE_PROPS = {
 	hackathonWinners: { type: "integer" },
 };
 
+/** One project's TVL reading in the analyze tvl rollup (top10, staleProjects). */
+const TVL_ROLLUP_ROW_SCHEMA = {
+	type: "object",
+	properties: {
+		slug: { type: "string", nullable: true },
+		name: { type: "string", nullable: true },
+		tvlUSD: { type: "number" },
+		tvlAsOf: { type: "string", format: "date-time", nullable: true },
+		tvlStale: {
+			type: "boolean",
+			description:
+				"true = this reading is older than 14 days (or undated): the weekly refresh kept the last figure. See staleWarning.",
+		},
+	},
+};
+
 /** What a hackathon build became: shared by searchHackathonBuilds and
  * hackathonBrief. Optional on purpose: absent means the link was not checked
  * (the build was read live from DoraHacks), which is not "no project". */
@@ -8606,6 +8622,21 @@ export const spec: OpenAPISpec = {
 					},
 				],
 				responses: {
+					"503": {
+						description:
+							"The projects read behind categories, funding, tvl or gaps failed (dimension=all included): an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Analytics rollup",
 						content: {
@@ -8849,33 +8880,51 @@ export const spec: OpenAPISpec = {
 										tvl: {
 											type: "object",
 											description:
-												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'.",
+												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning.",
 											properties: {
-												totalTvlUSD: { type: "number" },
+												totalTvlUSD: {
+													type: "number",
+													description:
+														"Sum of every tracked project's last reading, stale ones included (see staleTvlUSD).",
+												},
+												staleTvlUSD: {
+													type: "number",
+													description:
+														"The part of totalTvlUSD from readings older than 14 days (or undated); 0 when every reading is fresh. totalTvlUSD minus this is the part read within 14 days.",
+												},
 												trackedProjects: { type: "integer" },
 												asOf: {
 													type: "string",
 													format: "date-time",
 													nullable: true,
 													description:
-														"Most recent per-project tvlAsOf refresh; null when nothing is tracked.",
+														"The NEWEST per-project tvlAsOf: it dates the freshest reading, not the whole total (see oldestAsOf). Null when nothing is tracked.",
+												},
+												oldestAsOf: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"The OLDEST tvlAsOf among the readings summed. Null when nothing is tracked.",
+												},
+												staleWarning: {
+													type: "string",
+													nullable: true,
+													description:
+														"Non-null when any summed reading is older than 14 days: how many, the oldest date, and their share of totalTvlUSD. Null = every reading is within 14 days.",
 												},
 												provider: { type: "string" },
 												top10: {
 													type: "array",
-													items: {
-														type: "object",
-														properties: {
-															slug: { type: "string", nullable: true },
-															name: { type: "string", nullable: true },
-															tvlUSD: { type: "number" },
-															tvlAsOf: {
-																type: "string",
-																format: "date-time",
-																nullable: true,
-															},
-														},
-													},
+													description:
+														"The ten largest readings, largest first.",
+													items: TVL_ROLLUP_ROW_SCHEMA,
+												},
+												staleProjects: {
+													type: "array",
+													description:
+														"Every summed reading older than 14 days (or undated), largest first; [] = none.",
+													items: TVL_ROLLUP_ROW_SCHEMA,
 												},
 												basis: { type: "string" },
 											},
@@ -8944,13 +8993,13 @@ export const spec: OpenAPISpec = {
 													format: "date-time",
 													nullable: true,
 													description:
-														"When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state.",
+														"When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state. Null when this read is neither stored nor compared (deltaUnavailable says why).",
 												},
 												previousSnapshot: {
 													type: "object",
 													nullable: true,
 													description:
-														"The most recent persisted snapshot with a DIFFERENT project set. Null when none exists yet (see deltaUnavailable).",
+														"The most recent persisted snapshot with a DIFFERENT project set whose stored slug list is non-empty and reproduces its projectSetHash: an empty or incomplete stored snapshot is never a baseline. Null when none is found (see deltaUnavailable).",
 													properties: {
 														projectSetHash: { type: "string" },
 														computedAt: {
@@ -9019,7 +9068,7 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													nullable: true,
 													description:
-														"Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable); an explicit reason, never a silent omission.",
+														"Non-null when snapshotDelta cannot be served, stating WHY: no valid differing prior snapshot is stored (empty or incomplete ones are skipped), the most recent stored snapshots read hold no other set, this read found no awarded project or was truncated (it is then neither stored nor compared), or the snapshot store is unavailable; an explicit reason, never a silent omission.",
 												},
 												deltaBasis: { type: "string" },
 											},
@@ -11180,12 +11229,18 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf.",
+							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading the refresh kept from an earlier run.",
 					},
 					tvlAsOf: {
 						type: "string",
 						nullable: true,
 						description: "When tvlUSD was fetched from DefiLlama (ISO 8601).",
+					},
+					tvlStale: {
+						type: "boolean",
+						nullable: true,
+						description:
+							"true = tvlUSD is older than 14 days (or undated): the weekly refresh found no current DefiLlama figure and kept this one, so cite it with tvlAsOf as a past reading, not today's TVL. false = read within 14 days. null = no tvlUSD.",
 					},
 					tvlSource: {
 						type: "string",
@@ -12665,6 +12720,12 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						description:
 							"When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.",
+					},
+					tvlStale: {
+						type: "boolean",
+						nullable: true,
+						description:
+							"true = tvlUSD is older than 14 days (or undated): a reading the weekly refresh kept, so sort=tvl ranks it as a past figure. false = read within 14 days. null = no tvlUSD.",
 					},
 					assetCode: {
 						type: "string",

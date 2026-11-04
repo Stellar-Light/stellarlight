@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-04",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.117",
+		type: "fixed",
+		summary:
+			"analyzeEcosystem no longer dates a TVL total by its newest reading alone, or compares funding against an empty snapshot: `tvl` gains `staleTvlUSD`, `oldestAsOf`, `staleProjects` and `staleWarning` for readings older than 14 days (3 of 17 on 2026-11-04, 84% of `totalTvlUSD`), TVL rows gain `tvlStale`, and `previousSnapshot` skips empty or incomplete stored snapshots.",
+		detail:
+			"Stale readings stay in `totalTvlUSD`: dropping them would zero the total whenever the weekly refresh stops, and hide figures that are real but dated. `totalTvlUSD` minus `staleTvlUSD` is the part read within 14 days. `tvlStale` (true past 14 days, null with no `tvlUSD`) rides searchProjects rows and their compact view, getLeaderboard rows and the rollup's `top10`. Funding: a stored snapshot is a baseline only when its slug list is non-empty and reproduces its `projectSetHash`; 13 stored snapshots hold the empty set (hash e3b0c44298fc1c14), the shape a request whose project read failed wrote, and the live delta against one listed all 582 projects as added. `snapshotAsOf` is now when the current set was first stored (2026-10-03 for b44bd87c48cd5ef9), and a read that finds no awarded project or is truncated is neither stored nor compared (`deltaUnavailable` says which). A failed projects read now answers 503 (RetryableError, `retryAfterSeconds` 2) for categories, funding, tvl, gaps and all, where it served zero totals and stored the empty snapshot.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",

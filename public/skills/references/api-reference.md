@@ -78,12 +78,15 @@ Use this when the user wants to choose between two upcoming events ("which Stell
 ## `GET /api/analyze`
 Cross-event analytics: the macro picture across all Stellar hackathons + funding + projects.
 
-**Params:** `dimension=all|hackathons|categories|funding` (default `all`).
+**Params:** `dimension=all|hackathons|categories|funding|tvl|gaps|developers|toolchain` (default `all`).
 
 **Returns:**
 - `.hackathons.totalEvents`, `.hackathons.byStatus`, `.hackathons.totalPrizePoolUSD`, `.hackathons.totalRegisteredHackers`
 - `.categories.distribution[*]`: per-category project counts + SCF totals + hackathon-winner counts (sorted desc by project count)
 - `.funding.scfAwardedProjects`, `.funding.scfTotalDistributedUSD`, `.funding.meanAwardUSD`, `.funding.postHackathonStatusFunnel`, `.funding.byRound[*]`
+- `.funding.previousSnapshot` + `.funding.snapshotDelta`: the awarded-set change since the last valid stored snapshot (an empty or incomplete stored snapshot is never the baseline); when there is none, `.funding.deltaUnavailable` says why.
+- `.tvl.totalTvlUSD`: the sum of each tracked project's last DefiLlama reading, dated by `.tvl.asOf` (the newest reading) and `.tvl.oldestAsOf` (the oldest). A reading older than 14 days stays in the total and is named: `.tvl.staleTvlUSD` (its part of the total), `.tvl.staleProjects[*]`, `.tvl.top10[*].tvlStale`, and `.tvl.staleWarning` (null when every reading is within 14 days). When the warning is non-null, quote it with the total.
+- A failed projects read answers **503** with `retryAfterSeconds` for categories, funding, tvl, gaps and all: an outage, never a zero total. Retry; do not report zero.
 
 Use this when the user asks "*what's the state of Stellar's hackathon scene*" or "*how much SCF money has been distributed to date*"; these can't be answered from single-event detail.
 
@@ -152,7 +155,7 @@ When `matchMode === "majority"` still returns 0, the response includes `.meta.ad
 
 ---
 
-**TVL (`.projects[*].tvlUSD` + `tvlAsOf`):** DefiLlama-tracked total value locked with its snapshot date. `null` = **not tracked by DefiLlama**, never "zero TVL"; don't collapse untracked to 0.
+**TVL (`.projects[*].tvlUSD` + `tvlAsOf` + `tvlStale`):** DefiLlama-tracked total value locked with its snapshot date. `null` = **not tracked by DefiLlama**, never "zero TVL"; don't collapse untracked to 0. `tvlStale: true` = the reading is older than 14 days (the weekly refresh found no current figure and kept this one): cite it with its `tvlAsOf` as a past reading, never as today's TVL.
 
 **On-chain metrics (`.projects[*].onchain`):** projects with hand-verified contract/asset join keys carry per-contract lifetime `events`/`subinvocations`/`storageEntries` (+ `eventsDelta`/`subinvocationsDelta` once two snapshots exist) and per-asset `assetHolders`/`assetSupply`, from stellar.expert with `source` + `asOf`. Semantics: `onchain` null = not tracked in our registry, NEVER 'no on-chain activity'; null deltas = no prior snapshot yet. subinvocations undercounts contracts users call directly; read `events` alongside.
 
