@@ -6948,6 +6948,17 @@ export interface operations {
                     };
                 };
             };
+            /** @description The projects read behind the clusters failed: an outage, NOT an empty directory or a zero count. Retry after Retry-After. A value filter that matches nothing after a read that ran is a 200 with clusters [] and meta.advisory. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     analyzeEcosystem: {
@@ -7204,7 +7215,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description The projects read behind categories, funding, tvl or gaps failed (dimension=all included): an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After. */
+            /** @description The projects read behind categories, funding, tvl or gaps, or the repos scan read behind toolchain, failed (dimension=all included): an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After. */
             503: {
                 headers: {
                     /** @description Seconds to wait before resending (2). */
@@ -7299,6 +7310,17 @@ export interface operations {
                         };
                         projects?: components["schemas"]["LeaderboardProject"][];
                     };
+                };
+            };
+            /** @description The project or repo read behind the ranking failed (format=csv included): an outage, NOT an empty ranking or a zero count. Retry after Retry-After. A filter that matches nothing after a read that ran is a 200 with projects []. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };

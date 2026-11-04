@@ -250,10 +250,9 @@ export async function GET(req: NextRequest) {
 			// population stays null: answered below
 		}
 	}
-	// #1914: a failed read fell through with [] and served zero totals, a gaps
-	// list calling every vertical absent, and a stored empty funding snapshot
-	// (13 since July). It is an outage: say so, cache nothing, store nothing.
-	if (needsProjects && !population) {
+	// #1914: a failed read is an outage, never a 200 with zero totals or a
+	// missing block: say so, cache nothing, store nothing.
+	const outage = (read: string) => {
 		logApiHit({
 			req,
 			endpoint: "/api/analyze",
@@ -263,13 +262,16 @@ export async function GET(req: NextRequest) {
 		});
 		return apiError({
 			status: 503,
-			error: "project store read failed",
-			advisory:
-				"The projects read behind this rollup failed. This is an outage, NOT a claim that any count, funding total or TVL is zero, and nothing was stored. Retry after Retry-After.",
+			error: `${read} failed`,
+			advisory: `The ${read} behind this rollup failed. This is an outage, NOT a claim that any count, total or TVL is zero, and nothing was stored. Retry after Retry-After.`,
 			retryAfterSeconds: 2,
 			startedAt,
 		});
-	}
+	};
+	// A failed projects read fell through with [] and served zero totals, a
+	// gaps list calling every vertical absent, and a stored empty funding
+	// snapshot (13 since July).
+	if (needsProjects && !population) return outage("projects read");
 
 	if (includeCategories) {
 		const map = new Map<string, CategoryStats>();
@@ -767,9 +769,12 @@ export async function GET(req: NextRequest) {
 					"Soroban-SDK toolchain status per scanned repo (soroban-versions.ts dated table; 'unknown' = version unparsed, never a demotion). deprecatedRepos capped at 50, deprecatedTotal is the full count. engineeringPractice counts repos whose latest scan recorded tree-level CI/test presence: presence facts only, not CI results; reposWithPracticeFacts < scannedRepos until re-scans reach the corpus.",
 			};
 		} catch {
-			// best-effort — rollup absent on error, never fabricated
+			// answered below: result.toolchain stays unset
 		}
 	}
+	// The block went missing from a 200 when its read failed or the store
+	// was down; a caller read the bare meta as "no toolchain data".
+	if (includeToolchain && !result.toolchain) return outage("repos scan read");
 
 	logApiHit({
 		req,

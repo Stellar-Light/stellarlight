@@ -8470,6 +8470,21 @@ export const spec: OpenAPISpec = {
 					},
 				],
 				responses: {
+					"503": {
+						description:
+							"The projects read behind the clusters failed: an outage, NOT an empty directory or a zero count. Retry after Retry-After. A value filter that matches nothing after a read that ran is a 200 with clusters [] and meta.advisory.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Cluster list",
 						content: {
@@ -8624,7 +8639,7 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"503": {
 						description:
-							"The projects read behind categories, funding, tvl or gaps failed (dimension=all included): an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After.",
+							"The projects read behind categories, funding, tvl or gaps, or the repos scan read behind toolchain, failed (dimension=all included): an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After.",
 						headers: {
 							"Retry-After": {
 								description: "Seconds to wait before resending (2).",
@@ -9225,6 +9240,21 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/limit" },
 				],
 				responses: {
+					"503": {
+						description:
+							"The project or repo read behind the ranking failed (format=csv included): an outage, NOT an empty ranking or a zero count. Retry after Retry-After. A filter that matches nothing after a read that ran is a 200 with projects [].",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Leaderboard + ecosystem stats",
 						content: {

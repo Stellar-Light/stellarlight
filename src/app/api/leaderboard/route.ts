@@ -13,6 +13,7 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import { jsonSafe } from "@/lib/json-safe";
@@ -120,6 +121,7 @@ function toCsv(rows: ProjectRow[]): string {
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
@@ -215,8 +217,7 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	let rows: ProjectRow[] = [];
 	// Rows matching the filters BEFORE `limit` is applied — the honest `total`
-	// for meta.counts. Stays 0 if the try block below throws, which matches the
-	// empty `rows` it falls through with.
+	// for meta.counts. A read that throws answers 503 below, never these zeros.
 	let matchedBeforeLimit = 0;
 	// sls-036 residual: the repository-index rollup timestamp — when the repo
 	// rows this response aggregates were last refreshed (max updatedAt across
@@ -224,6 +225,7 @@ export async function GET(req: NextRequest) {
 	// time): the served stars/issues/lastActivityAt are as-of THIS timestamp,
 	// not a live GitHub read. Null when no repos matched.
 	let dataAsOf: string | null = null;
+	let readFailed = !payload;
 
 	if (payload) {
 		try {
@@ -519,8 +521,34 @@ export async function GET(req: NextRequest) {
 			matchedBeforeLimit = rows.length;
 			rows = rows.slice(0, limit).map((r, i) => ({ ...r, rank: i + 1 }));
 		} catch {
-			// fall through with empty rows
+			readFailed = true;
 		}
+	}
+	// A failed read served a 200 with an empty ranking and counts 0, which the
+	// CDN kept for 5 minutes as "no projects": it is an outage (#1914 class).
+	if (readFailed) {
+		logApiHit({
+			req,
+			endpoint: "/api/leaderboard",
+			filters: {
+				sort,
+				range,
+				category,
+				limit,
+				format,
+				type: typeList.join(","),
+			},
+			status: 503,
+			startedAt,
+		});
+		return apiError({
+			status: 503,
+			error: "leaderboard read failed",
+			advisory:
+				"The project or repo read behind this ranking failed. This is an outage, NOT a claim that no project ranks or that any count is zero. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+		});
 	}
 
 	logApiHit({
