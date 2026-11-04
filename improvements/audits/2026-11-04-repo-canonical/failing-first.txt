@@ -65,3 +65,18 @@ Review finding 1 (one rename rule on search, explain and trust; the substitution
  Test Files  3 failed (3)
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
 Pass after, with the fix: Test Files 4 passed (4); Tests 122 passed (122)
+
+Review finding 2 (the product float fires on the phrase itself, in any spelling; an exact name keeps rank 1): the new tests against cbc7da39, before the fix
+      Tests  9 failed | 102 passed (111)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > How do I start a new dapp with Scaffold Stellar? maps to nothing
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > a hackathon copy named for the template stays below the product for scaffold_stellar
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > an exact repo name keeps rank 1 over the product float (q=stellar-lab, q=stellar_lab)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > an underscore spelling reaches the repo with that exact name, past a flooded window
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold_stellar routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > soroban_examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar lab notes maps to nothing
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar scaffold cli maps to nothing
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar_lab routes to stellar/laboratory
+ Test Files  1 failed (1)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: src/lib/__tests__/repo-search-rank.test.ts Tests 111 passed (111)

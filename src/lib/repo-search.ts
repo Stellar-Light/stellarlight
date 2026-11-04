@@ -877,30 +877,38 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	// split to their own repos. The living repo leads; the archived monorepo
 	// stays second for historical questions about pre-split code.
 	{ test: /\bgo\s*sdk\b/, repos: ["stellar/go-stellar-sdk", "stellar/go"] },
-	// Developer products (issue #1901). A product whose repo name does not
-	// carry the product's words lost its own name to repos that do: hackathon
-	// copies named *scaffold-stellar* led q="scaffold stellar" while
-	// stellar-scaffold/cli ranked 16th, and *-lab repos led q="stellar lab"
-	// over stellar/laboratory. A product NAME fires anywhere in the query; the
-	// generic phrase "contract examples" fires only as the whole query, since
-	// a topic before it ("escrow contract examples") names a more specific
-	// answer. The lookarounds keep a name that merely contains the words
-	// (hackthon-scaffold-stellar, stellar-agent-merchant-lab) from firing.
-	// Listed last, so a query that also names an infra concept keeps that
-	// concept's repo first.
+];
+
+// Developer products (issue #1901): a product whose repo name does not carry
+// the product's words lost its own name to repos that do. Hackathon copies
+// named *scaffold-stellar* led q="scaffold stellar" while
+// stellar-scaffold/cli ranked 16th, and *-lab repos led q="stellar lab" over
+// stellar/laboratory. Each test reads the WHOLE query, folded by productKey
+// (case, trailing punctuation, and spaces, hyphens or underscores as one
+// separator), so the name alone fires in any spelling, scaffold_stellar
+// included, and a longer phrase that contains it (stellar lab notes, a
+// question) names something else and does not.
+const PRODUCTS: Array<{ test: RegExp; repo: string }> = [
 	{
-		test: /(?<![\w-])(?:scaffold[\s-]*stellar|stellar[\s-]*scaffold)(?![\w-])/,
-		repos: ["stellar-scaffold/cli"],
+		test: /^(?:scaffold stellar|stellar scaffold)$/,
+		repo: "stellar-scaffold/cli",
 	},
 	{
-		test: /(?<![\w-])stellar[\s-]*lab(?:oratory)?(?![\w-])|\blab\.stellar\.org\b/,
-		repos: ["stellar/laboratory"],
+		test: /^(?:stellar lab(?:oratory)?|lab\.stellar\.org)$/,
+		repo: "stellar/laboratory",
 	},
 	{
-		test: /(?<![\w-])soroban[\s-]*examples?(?![\w-])|^(?:(?:soroban|stellar)\s+)?(?:smart\s+)?contracts?\s+examples?$|^examples?\s+(?:of\s+)?(?:(?:soroban|stellar)\s+)?(?:smart\s+)?contracts?$/,
-		repos: ["stellar/soroban-examples"],
+		test: /^(?:soroban examples?|(?:(?:soroban|stellar) )?(?:smart )?contracts? examples?|examples? (?:of )?(?:(?:soroban|stellar) )?(?:smart )?contracts?)$/,
+		repo: "stellar/soroban-examples",
 	},
 ];
+const productKey = (q: string) =>
+	q
+		.trim()
+		.toLowerCase()
+		.replace(/[?!.,;:]+$/, "")
+		.replace(/[\s_-]+/g, " ")
+		.trim();
 
 // Canonical repos for a query, priority order, deduped. Empty when the query
 // doesn't hit a curated concept (so normal queries behave exactly as before).
@@ -918,6 +926,10 @@ export function explicitRepoName(q: string): string | null {
 }
 
 export function canonicalFor(q: string): string[] {
+	// A developer product's name, as the whole query, before the identifier
+	// rule below: scaffold_stellar is that name, not a code symbol.
+	const product = PRODUCTS.find((p) => p.test.test(productKey(q)));
+	if (product) return [currentRepo(product.repo)];
 	// An IDENTIFIER is not a concept phrase: a single-word camelCase/snake_case
 	// query (`contractErrorCodeFromNumber`) wordy-splits into concept
 	// vocabulary ("error code") and floated stellar-core above the repo that
@@ -1139,6 +1151,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 export const CURATED_CANONICAL_REPOS: string[] = [
 	...new Set([
 		...CANONICAL.flatMap((c) => c.repos),
+		...PRODUCTS.map((p) => p.repo),
 		...VERTICAL_FLAGSHIPS.flatMap((c) => c.repos),
 	]),
 ];
@@ -1482,7 +1495,15 @@ export async function searchRepos(
 			/[a-z][A-Z]/.test(qRaw) ||
 			(qRaw.split(/\s+/).length >= 3 && normAlias(qRaw).length >= 8);
 		if (qLooksLikeName && qRaw.length >= 5) {
-			const forms = [...new Set([qRaw, qRaw.replace(/\s+/g, "-")])];
+			const forms = [
+				...new Set([
+					qRaw,
+					qRaw.replace(/\s+/g, "-"),
+					// an underscore spelling (stellar_lab) reaches the hyphenated
+					// name (stellar-lab) that normAlias already equates with it
+					qRaw.replace(/_/g, "-"),
+				]),
+			];
 			const nres = await find("repos exact-name supplement", {
 				collection: "repos",
 				where: {
@@ -1688,6 +1709,17 @@ export async function searchRepos(
 				(standIn && r.fullName.toLowerCase() === standIn)
 					? 1
 					: 0;
+			// The query IS this repo's full path or its name (not its owner):
+			// that identity keeps rank 1 even over a canonical float, so a repo
+			// named stellar-lab leads q=stellar-lab ahead of stellar/laboratory
+			// (review of issue #1901). The rename stand-in counts as its name.
+			const nameAlias =
+				(qNorm.length >= 3 &&
+					(qIsIdentifier || qIsSpacedName) &&
+					(normAlias(repoPart) === qNorm || normAlias(r.fullName) === qNorm)) ||
+				(standIn && r.fullName.toLowerCase() === standIn)
+					? 1
+					: 0;
 			// mention check spans name/topics/desc AND readme (F4: a repo whose
 			// only Stellar evidence is its README is still Stellar-evidenced).
 			const hay = `${wordy(r.fullName)} ${tops} ${desc} ${readme}`;
@@ -1748,6 +1780,7 @@ export async function searchRepos(
 				matched,
 				viaCorrection,
 				alias,
+				nameAlias,
 				sdf,
 				alive,
 				stale2y,
@@ -1804,12 +1837,17 @@ export async function searchRepos(
 		// Stellar match at the same relevance.
 		filtered.sort(
 			(a, b) =>
+				// An exact name or full path outranks even a canonical float: the
+				// float answers a concept, and a repo named by the query is the
+				// answer to that query. Owner-only identity stays below the float,
+				// so q=horizon still leads with the curated Horizon repo.
+				b.nameAlias - a.nameAlias ||
 				a.crank - b.crank ||
 				// Exact alias identity (sls-025) ABOVE the flagship family float:
 				// when the query IS a repo's owner/name/path, that repo must outrank
 				// even curated family flagships (q="stellar-wallets-kit" was losing
 				// to the wallet float's other three seeds). Canonical corrections
-				// (crank) still rank higher — they fix wrong-repo identities.
+				// (crank) still rank higher than an owner match.
 				b.alias - a.alias ||
 				a.frank - b.frank ||
 				// Stellar evidence BEFORE raw keyword score (F4): coarse 3-tier so

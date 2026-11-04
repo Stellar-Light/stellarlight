@@ -1299,12 +1299,12 @@ describe("developer products are canonical answers (issue #1901)", () => {
 		["Scaffold Stellar", "stellar-scaffold/cli"],
 		["stellar scaffold", "stellar-scaffold/cli"],
 		["scaffold-stellar", "stellar-scaffold/cli"],
-		["stellar scaffold cli", "stellar-scaffold/cli"],
-		[
-			"How do I start a new dapp with Scaffold Stellar?",
-			"stellar-scaffold/cli",
-		],
+		// review finding 2: underscore spellings are the same name
+		["scaffold_stellar", "stellar-scaffold/cli"],
+		["Scaffold Stellar?", "stellar-scaffold/cli"],
 		["stellar lab", "stellar/laboratory"],
+		["stellar_lab", "stellar/laboratory"],
+		["soroban_examples", "stellar/soroban-examples"],
 		["Stellar Laboratory", "stellar/laboratory"],
 		["lab.stellar.org", "stellar/laboratory"],
 		["soroban examples", "stellar/soroban-examples"],
@@ -1333,6 +1333,12 @@ describe("developer products are canonical answers (issue #1901)", () => {
 		"stellar-agent-merchant-lab",
 		"soroban crash lab",
 		"stellar-scaffold/ui",
+		// review finding 2: a longer phrase that contains a product name names
+		// something else (a repo named stellar-lab-notes, a question)
+		"stellar lab notes",
+		"stellar-lab-notes",
+		"stellar scaffold cli",
+		"How do I start a new dapp with Scaffold Stellar?",
 	])("%s maps to nothing", (q) => {
 		expect(canonicalFor(q)).toEqual([]);
 	});
@@ -1367,6 +1373,73 @@ describe("developer products are canonical answers (issue #1901)", () => {
 		]);
 		expect(repos[0].canonical).toBe(true);
 		expect(canonical).toEqual(["stellar-scaffold/cli"]);
+	});
+
+	it("an exact repo name keeps rank 1 over the product float (q=stellar-lab, q=stellar_lab)", async () => {
+		const named = doc({
+			fullName: "someone/stellar-lab",
+			description: "notes from a workshop",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 14,
+			stars: 0,
+		});
+		const lab = doc({
+			fullName: "stellar/laboratory",
+			description: "A set of tools to try out the Stellar network",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 88,
+			stars: 112,
+		});
+		for (const q of ["stellar-lab", "stellar_lab"]) {
+			const { repos } = await searchRepos(mockPayload([lab, named]), q, {
+				limit: 5,
+			});
+			expect(repos.map((r) => r.fullName).slice(0, 2), q).toEqual([
+				"someone/stellar-lab",
+				"stellar/laboratory",
+			]);
+		}
+	});
+
+	it("an underscore spelling reaches the repo with that exact name, past a flooded window", async () => {
+		const named = doc({ fullName: "someone/stellar-lab", repoScore: 14 });
+		const flood = Array.from({ length: 5 }, (_, i) =>
+			doc({ fullName: `org/lab-${i}`, description: "lab", repoScore: 90 }),
+		);
+		const payload = {
+			// Only the exact-name read (limit 20) can bring the named repo in,
+			// and only when one of its forms is a substring of that repo's name.
+			find: async (args: {
+				limit?: number;
+				where?: {
+					or?: Array<{
+						fullName?: { like?: string };
+						name?: { like?: string };
+					}>;
+				};
+			}) => {
+				if (args.limit !== 20) return { docs: flood, totalDocs: flood.length };
+				const forms = (args.where?.or ?? []).map((w) =>
+					String(w.fullName?.like ?? w.name?.like ?? "").toLowerCase(),
+				);
+				return {
+					docs: forms.some((f) => named.fullName.includes(f)) ? [named] : [],
+				};
+			},
+		};
+		const { repos } = await searchRepos(payload, "stellar_lab", { limit: 5 });
+		expect(repos[0].fullName).toBe("someone/stellar-lab");
+	});
+
+	it("a hackathon copy named for the template stays below the product for scaffold_stellar", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([copy, cli]),
+			"scaffold_stellar",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("stellar-scaffold/cli");
 	});
 
 	it("the copy's own exact name still finds the copy first", async () => {

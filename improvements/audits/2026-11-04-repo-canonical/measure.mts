@@ -53,10 +53,20 @@ const NEW_CANONICAL = [
 	"stellar/laboratory",
 	"stellar/soroban-examples",
 ];
-const mechanism = (q: string) => {
+const norm = (s: string) => s.toLowerCase().replace(/[-_/.\s]/g, "");
+const mechanism = (q: string, ranking: string[]) => {
 	const m: string[] = [];
 	const fired = canonicalFor(q).filter((r) => NEW_CANONICAL.includes(r));
 	if (fired.length) m.push(`canonical entry (${fired.join(", ")})`);
+	// review finding 2: a repo the query names exactly (its name or full
+	// path) keeps rank 1 over a canonical float
+	const top = ranking[0] ?? "";
+	if (
+		canonicalFor(q).length &&
+		/[-_/.0-9]/.test(q) &&
+		[top, top.split("/")[1] ?? ""].some((n) => norm(n) === norm(q))
+	)
+		m.push(`exact name above the canonical float (${top})`);
 	const named = explicitRepoName(q);
 	if (named && renamedTo(named) !== named)
 		m.push(`rename alias (${named} -> ${renamedTo(named)})`);
@@ -174,7 +184,7 @@ for (const l of live.live as Any[]) {
 		continue;
 	}
 	changed++;
-	const mech = mechanism(l.q);
+	const mech = mechanism(l.q, r.ranking);
 	if (!mech.length) unexplained++;
 	if (
 		rb !== undefined &&
