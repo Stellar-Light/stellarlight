@@ -18,7 +18,15 @@
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { NextRequest } from "next/server";
-import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+	afterAll,
+	beforeAll,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	vi,
+} from "vitest";
 import { spec } from "@/lib/openapi-spec";
 
 const { create } = vi.hoisted(() => ({ create: vi.fn() }));
@@ -161,6 +169,14 @@ const ROUTES = {
 	"/api/partners/onboard": { mode: "chat", messages: user("We are a ramp") },
 } as const;
 type Path = keyof typeof ROUTES;
+
+// Heavy modules: import them once, with room for a loaded machine, so no
+// single test pays the cold import inside its 5 s limit.
+beforeAll(async () => {
+	await import("@/app/api/partners/match/route");
+	await import("@/app/api/partners/assistant/route");
+	await import("@/app/api/partners/onboard/route");
+}, 60_000);
 
 const post = async (path: Path, body: unknown) => {
 	const mod = await import(`@/app${path}/route`);

@@ -84,6 +84,24 @@ export function parseStellarToml(text: string): StellarToml {
 	return { topLevel, documentation, currencyCodes, currencies };
 }
 
+/** The toml-backed partner fields a successful parse writes: what the file
+ * declares, [] when it declares none (#1909). Writing only non-empty values
+ * let an earlier curated value survive under a fresh read stamp, served as
+ * read from the file. */
+export function tomlCapabilities(toml: StellarToml): {
+	seps: string[];
+	assets: { code: string }[];
+} {
+	const seps: string[] = [];
+	if (toml.topLevel.TRANSFER_SERVER) seps.push("sep-6");
+	if (toml.topLevel.TRANSFER_SERVER_SEP0024) seps.push("sep-24");
+	if (toml.topLevel.DIRECT_PAYMENT_SERVER) seps.push("sep-31");
+	return {
+		seps,
+		assets: toml.currencyCodes.slice(0, 25).map((code) => ({ code })),
+	};
+}
+
 export async function fetchText(url: string): Promise<string | null> {
 	try {
 		const res = await fetch(url, {

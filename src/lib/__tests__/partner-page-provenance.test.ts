@@ -8,7 +8,7 @@
  * date, and the page keyed both labels on the capabilities being present.
  */
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 let current: Record<string, unknown> = {};
 /** What the directory's unpinned listing read returns. */
@@ -59,6 +59,13 @@ const render = async (doc: Record<string, unknown>) => {
 	);
 };
 const BADGE = "stellar.toml verified";
+
+// Heavy modules: import them once, with room for a loaded machine, so no
+// single test pays the cold import inside its 5 s limit.
+beforeAll(async () => {
+	await import("@/app/(frontend)/partners/[slug]/page");
+	await import("@/app/(frontend)/partners/page");
+}, 60_000);
 const TOML_HEADING = "stellar.toml (SEP-1)";
 
 describe("partner page verification labels", () => {

@@ -13,7 +13,7 @@
  * regions) serve null when none is recorded, never "none".
  */
 import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { spec } from "@/lib/openapi-spec";
 import { scorePartners } from "@/lib/partner-match";
 
@@ -129,6 +129,13 @@ vi.mock("@/lib/payload-client", () => ({
 }));
 
 const FLAGS = "exp=partner-compliance-api,partner-onchain-live";
+
+// Heavy modules: import them once, with room for a loaded machine, so no
+// single test pays the cold import inside its 5 s limit.
+beforeAll(async () => {
+	await import("@/app/api/partners/route");
+	await import("@/app/api/partners/[slug]/route");
+}, 60_000);
 const listRows = async (qs = "") => {
 	const { GET } = await import("@/app/api/partners/route");
 	const res = await GET(
