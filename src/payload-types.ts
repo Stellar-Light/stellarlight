@@ -1274,7 +1274,26 @@ export interface Stablecoin {
 	 */
 	issuer: string;
 	name?: string | null;
+	/**
+	 * The brand the asset is marketed under (Novatti Group for AUDD). Not the legal issuer: see issuerOfRecord.
+	 */
 	company?: string | null;
+	/**
+	 * ORG_NAME in the stellar.toml at the issuer account's home_domain, read only when that toml lists the issuer account. Empty = not established.
+	 */
+	issuerOfRecord?: string | null;
+	/**
+	 * The toml URL issuerOfRecord was read from
+	 */
+	issuerOfRecordSourceUrl?: string | null;
+	/**
+	 * When that toml last named issuerOfRecord
+	 */
+	issuerOfRecordAsOf?: string | null;
+	/**
+	 * The toml's own desc for this currency, quoted, when it names an issuing party other than issuerOfRecord (MGUSD: Bridge)
+	 */
+	issuerOfRecordNote?: string | null;
 	domain?: string | null;
 	website?: string | null;
 	/**
@@ -3722,6 +3741,10 @@ export interface StablecoinsSelect<T extends boolean = true> {
 	issuer?: T;
 	name?: T;
 	company?: T;
+	issuerOfRecord?: T;
+	issuerOfRecordSourceUrl?: T;
+	issuerOfRecordAsOf?: T;
+	issuerOfRecordNote?: T;
 	domain?: T;
 	website?: T;
 	peg?: T;

@@ -36,6 +36,7 @@ import "./load-env";
 import { getPayload } from "payload";
 import { STABLECOIN_REGISTRY } from "../src/data/stablecoin-registry";
 import {
+	carryIssuerOfRecord,
 	type MeasuredStablecoin,
 	measureRegistry,
 	RATE_LIMIT_MARK,
@@ -166,6 +167,9 @@ async function main() {
 			issuer: m.issuer,
 			name: m.name,
 			company: m.company,
+			// The issuer of record (the ORG_NAME the issuer's own toml names),
+			// one read kept whole: a run that did not read one keeps the last.
+			...carryIssuerOfRecord(m, prev),
 			domain: m.domain,
 			website: m.website,
 			peg: m.peg,
@@ -320,6 +324,20 @@ async function main() {
 			noLogo.length ? ` · none: ${noLogo.join(", ")}` : ""
 		}`,
 	);
+	// Issuer of record per row, beside the brand it can differ from. A row
+	// that did not read one says why; its stored read (if any) is kept.
+	const readRecord = measured.filter((m) => m.issuerOfRecord).length;
+	console.log(
+		`\nissuer of record: read ${readRecord}/${measured.length} from the stellar.toml at the issuer account's home_domain`,
+	);
+	for (const m of measured)
+		console.log(
+			`  · ${m.id}: brand ${m.company}; ${
+				m.issuerOfRecord
+					? `issuer of record ${m.issuerOfRecord} (${m.issuerOfRecordSourceUrl})`
+					: `not read: ${m.issuerOfRecordMiss}`
+			}${m.issuerOfRecordNote ? `; note ${m.issuerOfRecordNote}` : ""}`,
+		);
 	if (problems.length) {
 		console.log("\nrows needing attention:");
 		for (const p of problems) console.log(`  · ${p}`);

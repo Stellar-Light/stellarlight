@@ -19,6 +19,8 @@
  *                    payment-op count
  *   CoinGecko      — live FX for every peg, via the XLM cross
  *   <domain>/.well-known/stellar.toml — the issuer's own logo
+ *   <issuer account's home_domain>/.well-known/stellar.toml: the issuer of
+ *                    record (ORG_NAME), read off the account Horizon reports
  *
  * NOT a source here: real dollar-denominated PAYMENT (transfer) volume, as
  * opposed to the SDEX trade volume this file already reports. Researched
@@ -52,7 +54,7 @@ import {
 	type StablecoinAsset,
 	stablecoinId,
 } from "@/data/stablecoin-registry";
-import type { PriceBasis } from "./stablecoins";
+import { namedIssuingParty, type PriceBasis, sameParty } from "./stablecoins";
 
 const HORIZON = "https://horizon.stellar.org";
 const EXPERT = "https://api.stellar.expert/explorer/public";
@@ -61,7 +63,21 @@ const COINGECKO = "https://api.coingecko.com/api/v3";
 /** Stellar Expert reports supply/volume in stroops (1e-7). */
 const STROOP = 10_000_000;
 
-export interface MeasuredStablecoin {
+/** What the writer stores about the issuer of record: one toml read. */
+export interface IssuerOfRecordFields {
+	/** ORG_NAME in the stellar.toml at the issuer account's home_domain, when
+	 *  that toml lists the issuer account. Null = not established. */
+	issuerOfRecord: string | null;
+	issuerOfRecordSourceUrl: string | null;
+	issuerOfRecordAsOf: string | null;
+	/** The toml's desc for this currency, quoted, when it names an issuing
+	 *  party other than issuerOfRecord. */
+	issuerOfRecordNote: string | null;
+}
+
+export interface MeasuredStablecoin extends IssuerOfRecordFields {
+	/** Why issuerOfRecord is null this run, for the run log; never stored. */
+	issuerOfRecordMiss: string | null;
 	id: string;
 	code: string;
 	issuer: string;
@@ -425,6 +441,137 @@ export function orgLogoFromToml(toml: string, domain: string): string | null {
 }
 
 /**
+ * The desc of the [[CURRENCIES]] block that declares this code and issuer.
+ * Same identity rule as logoFromToml (a block naming another issuer never
+ * matches), but the value is read up to its own closing quote, so a desc
+ * with an apostrophe is quoted whole rather than cut at it.
+ */
+function currencyDesc(
+	toml: string,
+	code: string,
+	issuer: string,
+): string | null {
+	for (const b of toml.split(/\[\[\s*(?:CURRENCIES|ASSETS)\s*\]\]/i).slice(1)) {
+		const val = (k: string) =>
+			b.match(new RegExp(`^\\s*${k}\\s*=\\s*["']([^"']+)`, "im"))?.[1] ?? null;
+		const iss = val("issuer") ?? val("asset_issuer") ?? val("issuer_account");
+		if ((val("code") ?? val("asset_code")) !== code) continue;
+		if (iss && iss !== issuer) continue;
+		const m = b.match(/^\s*desc\s*=\s*(?:"([^"]+)"|'([^']+)')/im);
+		const desc = m?.[1] ?? m?.[2];
+		if (desc) return desc;
+	}
+	return null;
+}
+
+/**
+ * The issuer of record a toml states for one asset: its ORG_NAME, counted
+ * only when the toml lists the issuing account (in ACCOUNTS or as a currency
+ * issuer). The account's home_domain points at the toml and the toml names
+ * the account back (SEP-1, both directions): an account can set any
+ * home_domain, but it cannot make another org's toml list it. The match is on
+ * the account, not the code, so VNX's toml names the org behind VEUR even
+ * though it declares only VCHF for that account.
+ *
+ * `note` keeps the currency's own desc, quoted, when it names an issuing
+ * party other than the ORG_NAME (MGUSD: "issued by Bridge on behalf of
+ * MoneyGram"). Pure: the caller fetches.
+ */
+export function issuerOfRecordFromToml(
+	toml: string,
+	code: string,
+	issuer: string,
+): { name: string; note: string | null } | { miss: string } {
+	if (!toml.includes(issuer))
+		return { miss: "the toml does not list the issuer account" };
+	const m = toml.match(/^\s*ORG_NAME\s*=\s*(?:"([^"]+)"|'([^']+)')/im);
+	const name = (m?.[1] ?? m?.[2])?.trim();
+	if (!name) return { miss: "the toml declares no ORG_NAME" };
+	const desc = currencyDesc(toml, code, issuer);
+	const party = namedIssuingParty(desc);
+	return {
+		name,
+		note:
+			desc && party && !sameParty(party, name)
+				? `stellar.toml desc for ${code}: "${desc}"`
+				: null,
+	};
+}
+
+/**
+ * Read the issuer of record for one asset from the toml at the ISSUER
+ * ACCOUNT's home_domain, as Horizon reports it. Never the registry's curated
+ * `domain` (12 of 41 rows differ from the account's home_domain, 2026-11-04)
+ * and never `company`. Never throws: a miss says why, for the run log, and
+ * the writer keeps the previous read (carryIssuerOfRecord).
+ */
+async function readIssuerOfRecord(
+	asset: StablecoinAsset,
+): Promise<IssuerOfRecordFields & { issuerOfRecordMiss: string | null }> {
+	const miss = (why: string) => ({
+		issuerOfRecord: null,
+		issuerOfRecordSourceUrl: null,
+		issuerOfRecordAsOf: null,
+		issuerOfRecordNote: null,
+		issuerOfRecordMiss: why,
+	});
+	let home: unknown;
+	try {
+		const account = await fetchJson(`${HORIZON}/accounts/${asset.issuer}`, {
+			retries: 2,
+			timeoutMs: 6000,
+		});
+		if (!account) return miss("the issuer account is not on Horizon");
+		home = account.home_domain;
+	} catch (err) {
+		return miss(
+			`could not read the issuer account: ${String((err as Error).message).slice(0, 80)}`,
+		);
+	}
+	if (!home) return miss("the issuer account sets no home_domain");
+	// The account holder sets home_domain; fetch it only as a plain host.
+	if (typeof home !== "string" || !/^[a-z0-9.-]+$/i.test(home))
+		return miss("the issuer account's home_domain is not a plain host name");
+	const url = `https://${home}/.well-known/stellar.toml`;
+	const toml = await issuerToml(home);
+	if (!toml) return miss(`no stellar.toml read at ${url}`);
+	const r = issuerOfRecordFromToml(toml, asset.code, asset.issuer);
+	if ("miss" in r) return miss(`${r.miss} (${url})`);
+	return {
+		issuerOfRecord: r.name,
+		issuerOfRecordSourceUrl: url,
+		issuerOfRecordAsOf: new Date().toISOString(),
+		issuerOfRecordNote: r.note,
+		issuerOfRecordMiss: null,
+	};
+}
+
+/**
+ * The issuer-of-record fields the writer stores for one row. They come from
+ * ONE toml read and move together: when this run did not establish an
+ * issuer of record (a failed read, or one that found no name), the stored
+ * read is kept whole, dated by its own issuerOfRecordAsOf, so a miss never
+ * blanks a name an earlier run read and two reads never mix. Null until a
+ * first read succeeds; never derived from `company`.
+ */
+export function carryIssuerOfRecord(
+	fresh: IssuerOfRecordFields,
+	prev?: Record<string, unknown> | null,
+): IssuerOfRecordFields {
+	const from = fresh.issuerOfRecord
+		? fresh
+		: typeof prev?.issuerOfRecord === "string" && prev.issuerOfRecord
+			? (prev as Partial<IssuerOfRecordFields>)
+			: null;
+	return {
+		issuerOfRecord: from?.issuerOfRecord ?? null,
+		issuerOfRecordSourceUrl: from?.issuerOfRecordSourceUrl ?? null,
+		issuerOfRecordAsOf: from?.issuerOfRecordAsOf ?? null,
+		issuerOfRecordNote: from?.issuerOfRecordNote ?? null,
+	};
+}
+
+/**
  * Confirm a candidate logo URL actually serves an image before we store it.
  * sls: APS Money's own declared ORG_LOGO 404s — a broken image is worse than
  * the flag fallback it would replace, so nothing here gets stored unverified.
@@ -452,7 +599,11 @@ export async function measureStablecoin(
 	asset: StablecoinAsset,
 ): Promise<MeasuredStablecoin> {
 	const now = new Date().toISOString();
+	// Read for every row, whatever happens to its metrics below: who issues
+	// an asset does not depend on whether its supply could be measured.
+	const record = await readIssuerOfRecord(asset);
 	const base = {
+		...record,
 		id: stablecoinId(asset),
 		code: asset.code,
 		issuer: asset.issuer,

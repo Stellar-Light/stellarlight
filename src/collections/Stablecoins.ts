@@ -59,7 +59,44 @@ export const Stablecoins: CollectionConfig = {
 			},
 		},
 		{ name: "name", type: "text" },
-		{ name: "company", type: "text", index: true },
+		{
+			name: "company",
+			type: "text",
+			index: true,
+			admin: {
+				description:
+					"The brand the asset is marketed under (Novatti Group for AUDD). Not the legal issuer: see issuerOfRecord.",
+			},
+		},
+		// The issuer of record: one read of the stellar.toml at the issuer
+		// account's home_domain, written by refresh-stablecoins.ts and kept
+		// whole until a later read replaces it. Never filled from `company`.
+		{
+			name: "issuerOfRecord",
+			type: "text",
+			admin: {
+				description:
+					"ORG_NAME in the stellar.toml at the issuer account's home_domain, read only when that toml lists the issuer account. Empty = not established.",
+			},
+		},
+		{
+			name: "issuerOfRecordSourceUrl",
+			type: "text",
+			admin: { description: "The toml URL issuerOfRecord was read from" },
+		},
+		{
+			name: "issuerOfRecordAsOf",
+			type: "date",
+			admin: { description: "When that toml last named issuerOfRecord" },
+		},
+		{
+			name: "issuerOfRecordNote",
+			type: "text",
+			admin: {
+				description:
+					"The toml's own desc for this currency, quoted, when it names an issuing party other than issuerOfRecord (MGUSD: Bridge)",
+			},
+		},
 		{ name: "domain", type: "text" },
 		{ name: "website", type: "text" },
 		{

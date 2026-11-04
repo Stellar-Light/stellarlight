@@ -61,7 +61,8 @@ export async function generateMetadata({
 	return {
 		title: `${row.ticker}: ${row.company ?? "Stellar stablecoin"}`,
 		alternates: { canonical: `/stablecoins/${row.assetId}` },
-		description: `${row.ticker}, issued by ${row.company ?? "an unnamed issuer"} and pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
+		// `company` is the brand; only the issuer's own toml names the issuer.
+		description: `${row.ticker}, a ${row.company ?? "Stellar"} stablecoin${row.issuerOfRecord ? ` issued by ${row.issuerOfRecord}` : ""}, pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
 	};
 }
 
@@ -161,7 +162,10 @@ export default async function StablecoinDetailPage({
 						)}
 					</div>
 					<p className="text-sm text-muted-foreground">
-						Issued by {row.company ?? "an unnamed issuer"}
+						{row.issuerOfRecord
+							? `Issued by ${row.issuerOfRecord}, per its stellar.toml`
+							: "Issuer of record not established from its stellar.toml"}
+						{row.company ? ` · Brand: ${row.company}` : ""}
 					</p>
 				</div>
 
@@ -223,8 +227,16 @@ export default async function StablecoinDetailPage({
 						<h2 className="text-base font-semibold text-foreground mb-3">
 							Issuer
 						</h2>
-						<Row label="Company">{row.company ?? "-"}</Row>
-						<Row label="Home domain">
+						<Row label="Brand">{row.company ?? "-"}</Row>
+						<Row label="Issuer of record">
+							{row.issuerOfRecord ?? "-"}
+							{row.issuerOfRecordNote && (
+								<span className="block text-xs text-muted-foreground mt-1">
+									{row.issuerOfRecordNote}
+								</span>
+							)}
+						</Row>
+						<Row label="Domain">
 							{row.issuerDomain ? (
 								<a
 									href={`https://${row.issuerDomain}`}
@@ -299,9 +311,12 @@ export default async function StablecoinDetailPage({
 								>
 									Horizon account <ExternalLink className="w-3 h-3" />
 								</a>
-								{row.issuerDomain && (
+								{(row.issuerOfRecordSourceUrl || row.issuerDomain) && (
 									<a
-										href={`https://${row.issuerDomain}/.well-known/stellar.toml`}
+										href={
+											row.issuerOfRecordSourceUrl ??
+											`https://${row.issuerDomain}/.well-known/stellar.toml`
+										}
 										target="_blank"
 										rel="noopener noreferrer"
 										className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg bg-white/[0.04] border border-border/50 hover:bg-white/[0.07] transition-colors"

@@ -334,3 +334,72 @@ describe("issuedVerdict — ticker attribution over the registry (sls-066 class)
 		});
 	});
 });
+
+/**
+ * sls-107 sibling: issuedVerdict matched the claimed company against the
+ * brand only, so "is AUDD issued by AUDC PTY LTD" (the ORG_NAME in AUDD's own
+ * stellar.toml) came back contradicted, and so did "is MGUSD issued by
+ * Bridge", which MGUSD's own toml desc states.
+ */
+describe("issuedVerdict reads the issuer of record, not only the brand (sls-107)", () => {
+	const AUDD = {
+		ticker: "AUDD",
+		company: "Novatti Group",
+		issuer: "GDC7X2MXTYSAKUUGAIQ7J7RPEIM7GXSAIWFYWWH4GLNFECQVJJLB2EEU",
+		issuerDomain: "audd.digital",
+		issuerOfRecord: "AUDC PTY LTD",
+		issuerOfRecordSourceUrl: "https://audd.digital/.well-known/stellar.toml",
+		issuerOfRecordAsOf: "2026-11-05T00:25:00.000Z",
+		issuerOfRecordNote: null,
+		updatedAt: "2026-11-05",
+	};
+	const MGUSD = {
+		ticker: "MGUSD",
+		company: "MoneyGram",
+		issuer: "GAIUGZZZSL47BKH27SUDZESZELFJDPE2UM52RACOSFJ7BIVBGKUEJSUZ",
+		issuerDomain: "mgusd.moneygram.com",
+		issuerOfRecord: "MoneyGram Payment Systems, Inc.",
+		issuerOfRecordSourceUrl:
+			"https://mgusd.moneygram.com/.well-known/stellar.toml",
+		issuerOfRecordAsOf: "2026-11-05T00:25:00.000Z",
+		issuerOfRecordNote:
+			'stellar.toml desc for MGUSD: "USD-backed stablecoin issued by Bridge on behalf of MoneyGram"',
+		updatedAt: "2026-11-05",
+	};
+	const verdict = (ticker: string, company: string) =>
+		issuedVerdict({ ticker, company, rows: [AUDD, MGUSD], corpusTotal: 2 });
+
+	it("the ORG_NAME in the issuer's own toml is a match, never a contradiction", () => {
+		const r = verdict("AUDD", "AUDC PTY LTD");
+		expect(r.verdict).toBe("supported");
+		expect(r.statement).toContain("issuer of record");
+	});
+
+	it("the party the toml's desc names as issuing is a match, quoted", () => {
+		const r = verdict("MGUSD", "Bridge");
+		expect(r.verdict).toBe("supported");
+		expect(r.statement).toContain("issued by Bridge on behalf of MoneyGram");
+	});
+
+	it("a brand match still holds, and the answer names the issuer of record", () => {
+		const r = verdict("AUDD", "Novatti");
+		expect(r.verdict).toBe("supported");
+		expect(r.statement).toContain("AUDC PTY LTD");
+	});
+
+	it("a contradiction names the issuer of record beside the brand", () => {
+		const r = verdict("AUDD", "Tether");
+		expect(r.verdict).toBe("contradicted");
+		expect(r.statement).toContain("Novatti Group");
+		expect(r.statement).toContain("AUDC PTY LTD");
+	});
+
+	it("evidence cites the toml the issuer of record came from, and calls the curated domain no home domain", () => {
+		const r = verdict("AUDD", "AUDC PTY LTD");
+		const ev = r.evidence[0];
+		const note = "note" in ev ? ev.note : "";
+		expect(note).toContain("AUDC PTY LTD");
+		expect(note).toContain("https://audd.digital/.well-known/stellar.toml");
+		expect(note).not.toContain("home domain");
+	});
+});

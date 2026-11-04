@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-04",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.121",
+		type: "fixed",
+		summary:
+			"getStablecoins rows name the issuer of record beside the brand. `issuerOfRecord` is the ORG_NAME in the stellar.toml at the issuer account's home_domain, with `issuerOfRecordSourceUrl`, `issuerOfRecordAsOf` and `issuerOfRecordNote` (that toml's own desc, quoted, where it names another issuing party: MGUSD is issued by Bridge on behalf of MoneyGram). `company` is documented as the brand: AUDD is the Novatti Group brand issued by AUDC PTY LTD, the eight C1 rows the Currency One brand issued by Kinesis Money Panama S.A. A new assetType filter takes Yield Stablecoin, Treasury-Backed or none.",
+		detail:
+			"The six-hourly refresh fills the issuer of record, never a request; it is null until that first read and never taken from `company`. The ORG_NAME counts only when the toml lists the issuer account, so a home_domain pointed at another org's toml names nobody, and a later read that fails or finds no name keeps the last one. A read on 2026-11-04 named 38 of 41 rows: USDT0's issuer sets no home_domain, PYUSD's toml answered 403 and BRLT's toml host did not resolve. assetType=none returns the rows with no `assetType` recorded; one is recorded only where the unit is not 1:1 with its peg, so null is unclassified, not a verified plain peg as the spec used to say. An unknown assetType is a 400 naming the valid values. verifyClaim's issued type matches the issuer of record and the party the toml names as well as the brand: is AUDD issued by AUDC PTY LTD was contradicted, and is supported once the row is read. The spec now says what `issuerDomain` is (the curated domain; 12 of 41 differ from the issuer account's home_domain), that `country` is the peg's country, not the issuer's jurisdiction, and that getRwaAssets' `issuerEntity` is the rwa.xyz listing's label; it also declares `paymentsCount24h`.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",
