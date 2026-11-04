@@ -32,6 +32,7 @@ import {
 	type IndexedBuild,
 } from "@/lib/hackathon-builds";
 import { prizeCategories, prizeLabels } from "@/lib/integrations/dorahacks";
+import { PUBLIC_BUILDERS } from "@/lib/integrations/stellar-passport";
 import { getPayloadSafe } from "@/lib/payload-client";
 
 type Params = Promise<{ username: string }>;
@@ -43,7 +44,8 @@ async function getBuilder(username: string) {
 	// GitHub logins are case-insensitive; URLs get typed in lowercase
 	const result = await payload.find({
 		collection: "builders",
-		where: { github_username: { like: username } },
+		// a private profile is never shown, even at its own URL
+		where: { ...PUBLIC_BUILDERS, github_username: { like: username } },
 		limit: 5,
 	});
 	const docs = result.docs;
@@ -593,8 +595,8 @@ export default async function BuilderProfilePage({
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-4">
-							{builder.projects.map((project, index) => (
-								<div key={index} className="border rounded-lg p-4">
+							{builder.projects.map((project) => (
+								<div key={project.slug} className="border rounded-lg p-4">
 									<div className="flex items-start justify-between mb-2">
 										<div>
 											<h3 className="text-lg font-semibold">{project.name}</h3>
@@ -653,9 +655,9 @@ export default async function BuilderProfilePage({
 									{project.repos && project.repos.length > 0 && (
 										<div className="mt-4 space-y-2">
 											<h4 className="text-sm font-medium">Repositories:</h4>
-											{project.repos.map((repo, repoIndex) => (
+											{project.repos.map((repo) => (
 												<div
-													key={repoIndex}
+													key={repo.full_name}
 													className="flex items-center justify-between text-sm"
 												>
 													<a

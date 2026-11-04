@@ -11,7 +11,9 @@ import { AMBASSADORS } from "@/data/stellar-ambassadors";
 import { builderCodeActivity, type CodeActivity } from "@/lib/builder-code";
 import {
 	fetchAllBuilders,
+	isPublicBuilder,
 	type PassportBuilder,
+	PUBLIC_BUILDERS,
 } from "@/lib/integrations/stellar-passport";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -39,7 +41,7 @@ export default async function BuildersPage() {
 		try {
 			const mirror = await payload.find({
 				collection: "builders",
-				where: { visibility: { not_equals: "hidden" } },
+				where: PUBLIC_BUILDERS,
 				limit: 1000,
 				depth: 0,
 			});
@@ -53,7 +55,7 @@ export default async function BuildersPage() {
 	}
 	if (builders.length === 0) {
 		try {
-			builders = await fetchAllBuilders();
+			builders = (await fetchAllBuilders()).filter(isPublicBuilder);
 		} catch (error) {
 			console.error("Failed to fetch builders:", error);
 		}

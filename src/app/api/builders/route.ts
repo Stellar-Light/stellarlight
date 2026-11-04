@@ -46,6 +46,7 @@ import {
 	withReadTimeout,
 } from "@/lib/degraded-read";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import { PUBLIC_BUILDERS } from "@/lib/integrations/stellar-passport";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -238,9 +239,9 @@ async function handle(req: NextRequest) {
 	if (payload) {
 		try {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
-			const where: any = {
-				visibility: { not_equals: "hidden" },
-			};
+			// Public profiles only: a private one is never listed, counted or
+			// searched (the field holds public or private, never "hidden").
+			const where: any = { ...PUBLIC_BUILDERS };
 			if (location) {
 				// Region umbrellas → country vocabulary (sls-010): profile locations
 				// are free-text country/city strings, so "Latin America" matched
@@ -793,7 +794,7 @@ async function handle(req: NextRequest) {
 			const c = await withReadTimeout(
 				payload.count({
 					collection: "builders",
-					where: { visibility: { not_equals: "hidden" } },
+					where: PUBLIC_BUILDERS,
 				}),
 				DEFAULT_READ_TIMEOUT_MS,
 			);

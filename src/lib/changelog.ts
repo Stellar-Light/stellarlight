@@ -35,6 +35,13 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
+			"getBuilders, /builders and /builders/<login> serve public profiles only. The filter dropped a visibility value the field never holds, so a profile set to private would have been listed, counted, searched and shown at its own URL. Payload's REST and GraphQL now read public profiles only too, unless an admin asks. All 401 profiles are public today, so no count moves.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
 			"/api/status `usage.byEndpoint` counts every hit of the last 7 days. It grouped a read capped at 10,000 rows, so it summed to 10,000 beside a `last7d` of 25,806 and undercounted every endpoint; the counts now come from the database and sum to `last7d`.",
 		detail:
 			"The /analytics page's agent and human split had the same cap and is counted the same way.",

@@ -11,18 +11,20 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 
 const ELIGIBLE = 1050;
-const HIDDEN = 30;
+// Private profiles: the field allows public and private, and a private one
+// must never be listed, counted or searched.
+const PRIVATE = 30;
 type Doc = Record<string, unknown>;
-const builders: Doc[] = Array.from({ length: ELIGIBLE + HIDDEN }, (_, i) => ({
+const builders: Doc[] = Array.from({ length: ELIGIBLE + PRIVATE }, (_, i) => ({
 	id: `b${i}`,
-	github_username: i < ELIGIBLE ? `dev${i}` : `hidden${i}`,
+	github_username: i < ELIGIBLE ? `dev${i}` : `private${i}`,
 	display_name: `Dev ${i}`,
 	bio: "Soroban developer",
 	role_title: "Engineer",
 	// the 25 oldest profiles are the ones a newest-first cap drops
 	location: i < 25 ? "Sao Paulo, Brazil" : "Lagos, Nigeria",
 	is_featured: false,
-	visibility: i < ELIGIBLE ? "public" : "hidden",
+	visibility: i < ELIGIBLE ? "public" : "private",
 	createdAt: new Date(Date.UTC(2025, 0, 1) + i * 3_600_000).toISOString(),
 	projects: [],
 	contributions: [],
@@ -127,6 +129,7 @@ vi.mock("@/lib/payload-client", () => ({
 type Body = {
 	meta: {
 		matchModeLabel: string;
+		advisory?: { summary: string };
 		counts: { returned: number; total: number | null };
 		partial: boolean;
 	};
@@ -163,7 +166,7 @@ describe("GET /api/builders lists the full eligible set (#1915)", () => {
 	it("pages through every visible profile, and counts.total is that set", async () => {
 		const seen = await unfilteredLogins();
 		expect(seen.size).toBe(ELIGIBLE);
-		expect([...seen].some((l) => l.startsWith("hidden"))).toBe(false);
+		expect([...seen].some((l) => l.startsWith("private"))).toBe(false);
 		const first = await get("limit=1");
 		expect(first.meta.matchModeLabel).toContain("full set");
 	});
@@ -192,5 +195,16 @@ describe("GET /api/builders lists the full eligible set (#1915)", () => {
 			myCommits12m: 7,
 		});
 		expect(via["Org-X/Vault-UI"]).toMatchObject({ via: "declared" });
+	});
+
+	it("never lists, counts or searches a private profile", async () => {
+		const lagos = await get("location=Nigeria&limit=1");
+		expect(lagos.meta.counts.total).toBe(ELIGIBLE - 25);
+		const miss = await get(`q=private${ELIGIBLE}`);
+		expect(miss.builders).toEqual([]);
+		// the empty-result advisory states the public directory's size
+		expect(miss.meta.advisory?.summary).toContain(
+			`The directory has ${ELIGIBLE} builder profiles`,
+		);
 	});
 });
