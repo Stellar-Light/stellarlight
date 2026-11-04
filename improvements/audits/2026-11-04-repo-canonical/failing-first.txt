@@ -96,3 +96,11 @@ Review findings 3 and 6 (test layouts per language, the integration clause limit
  Test Files  2 failed (2)
 ⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
 Pass after, with the fix: Test Files 4 passed (4); Tests 151 passed (151)
+
+Review finding 4 (meta.canonical for the query, not the page): the new tests against fc4ebf62, before the fix
+      Tests  2 failed | 112 passed (114)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > canonical comes from the query, not the page
+ FAIL  src/lib/__tests__/repo-search-route-canonical.test.ts > repo search meta.canonical > names the query's canonical repo on a page that does not hold it
+ Test Files  2 failed (2)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: Test Files 3 passed (3); Tests 115 passed (115)

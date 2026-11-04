@@ -2060,7 +2060,7 @@ export interface components {
         };
         RepoSearchResponse: {
             meta: components["schemas"]["Meta"] & {
-                /** @description The curated canonical repos floated to the top for an infra, protocol or developer-product query (e.g. error codes → stellar/stellar-core; Scaffold Stellar → stellar-scaffold/cli), or null when the query isn’t a canonical-routed concept. */
+                /** @description The curated canonical repos floated to the top for an infra, protocol or developer-product query (e.g. error codes → stellar/stellar-core; Scaffold Stellar → stellar-scaffold/cli), the same on every page: the query's canonical repos the index holds, whether or not this page or a filter serves them. null when the query isn’t a canonical-routed concept. */
                 canonical?: {
                     /** @description fullNames, in canonical priority order. */
                     repos?: string[];

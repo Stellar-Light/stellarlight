@@ -1574,6 +1574,12 @@ export async function searchRepos(
 			!rawDocs.some((d) => d.fullName.toLowerCase() === named?.toLowerCase())
 				? renamedTarget.toLowerCase()
 				: "";
+		// meta.canonical answers for the query: its curated repos the index
+		// holds, whatever page, offset or filter is served (a page past the
+		// canonical row used to say null, read as "not a canonical query").
+		const canonHeld = canonList.filter((fn) =>
+			rawDocs.some((d) => d.fullName.toLowerCase() === fn.toLowerCase()),
+		);
 		// The language filter rides the first candidate query, but three more
 		// candidate sources (canonical/flagship injection, the anchor-token net,
 		// the name net) did not carry it, so ?q=SEP-10+authentication&language=
@@ -2050,7 +2056,7 @@ export async function searchRepos(
 		return {
 			repos,
 			total,
-			canonical: repos.filter((r) => r.canonical).map((r) => r.fullName),
+			canonical: canonHeld,
 			searched,
 			matchMode,
 			matchModeLabel: MATCH_MODE_LABEL[matchMode],

@@ -1442,6 +1442,20 @@ describe("developer products are canonical answers (issue #1901)", () => {
 		expect(repos[0].fullName).toBe("stellar-scaffold/cli");
 	});
 
+	// review finding 4: meta.canonical answers for the query, so a page past
+	// the canonical row still names it (null means the query is not routed)
+	it("canonical comes from the query, not the page", async () => {
+		const { repos, canonical } = await searchRepos(
+			mockPayload([copy, cli]),
+			"scaffold stellar",
+			{ limit: 1, offset: 1 },
+		);
+		expect(repos.map((r) => r.fullName)).toEqual([
+			"someone/hackthon-scaffold-stellar",
+		]);
+		expect(canonical).toEqual(["stellar-scaffold/cli"]);
+	});
+
 	it("the copy's own exact name still finds the copy first", async () => {
 		const { repos } = await searchRepos(
 			mockPayload([copy, cli]),

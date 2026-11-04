@@ -12125,7 +12125,7 @@ export const spec: OpenAPISpec = {
 										type: "object",
 										nullable: true,
 										description:
-											"The curated canonical repos floated to the top for an infra, protocol or developer-product query (e.g. error codes \u2192 stellar/stellar-core; Scaffold Stellar \u2192 stellar-scaffold/cli), or null when the query isn\u2019t a canonical-routed concept.",
+											"The curated canonical repos floated to the top for an infra, protocol or developer-product query (e.g. error codes \u2192 stellar/stellar-core; Scaffold Stellar \u2192 stellar-scaffold/cli), the same on every page: the query's canonical repos the index holds, whether or not this page or a filter serves them. null when the query isn\u2019t a canonical-routed concept.",
 										properties: {
 											repos: {
 												type: "array",
