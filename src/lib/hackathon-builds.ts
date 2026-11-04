@@ -1214,8 +1214,9 @@ export function searchHackathonBuilds(
 		/** buildId -> similarity from semanticBuildScores; required for
 		 * meaning and hybrid, ignored for keyword. */
 		semantic?: Map<string, number>;
-		/** One result per submission across events, its best entry
-		 * (sls-092). Off for counting: analyze counts every event entry. */
+		/** One result per submission, its best entry among the rows the
+		 * filters kept (sls-092). Off where every entry is needed: analyze
+		 * groups each event's own entries, and its counts take submissions. */
 		perSubmission?: boolean;
 		/** Also match the packages a build's read repo declares (common
 		 * libraries left out), so "passkey" finds the winner Tukar, built on
@@ -1249,9 +1250,10 @@ export function searchHackathonBuilds(
 			b.categories?.some((x) => x.type.toLowerCase() === c),
 		);
 	}
-	// Inside an event filter every row is that event's own entry.
-	if (opts.perSubmission && !opts.hackathons?.length)
-		pool = onePerSubmission(pool);
+	// Inside one event every row is that event's own entry; across several
+	// named events a submission entered in more than one is one result, as
+	// analyze counts it.
+	if (opts.perSubmission) pool = onePerSubmission(pool);
 	const query = q.trim().toLowerCase();
 	if (!query) {
 		return pool

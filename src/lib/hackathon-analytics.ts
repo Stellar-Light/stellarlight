@@ -337,7 +337,7 @@ export const FACETS = {
 
 export type FacetId = keyof typeof FACETS;
 export const FACET_IDS = Object.keys(FACETS) as FacetId[];
-/** Facets a set can be split by: exactly one value per build. */
+/** Facets a set can be split by: exactly one value per event entry. */
 export const GROUP_FACETS = [
 	"event",
 	"year",
@@ -378,6 +378,13 @@ export interface CountOpts {
 const round = (n: number, places: number) =>
 	Math.round(n * 10 ** places) / 10 ** places;
 
+/** Submissions among these rows: the unit every build count reports, as
+ * searchHackathonBuilds lists them. The index holds a row per submission and
+ * event, so one entered in several events counts once (sls-092). */
+export function countSubmissions(builds: IndexedBuild[]): number {
+	return new Set(builds.map((b) => b.id)).size;
+}
+
 export function distribution(
 	builds: IndexedBuild[],
 	facet: FacetId,
@@ -385,23 +392,34 @@ export function distribution(
 ): Distribution {
 	const now = opts.now ?? Date.now();
 	const read: Facet["values"] = FACETS[facet].values;
-	const tally = new Map<string, { builds: number; winners: number }>();
-	let known = 0;
+	// Submission ids, not rows: one entered in several events counts once,
+	// under every value any of its entries carries (L2-04: AgroChain LATAM
+	// entered two ideathons and made 64 RWA builds read 65).
+	const tally = new Map<
+		string,
+		{ builds: Set<string>; winners: Set<string> }
+	>();
+	const known = new Set<string>();
 	for (const b of builds) {
 		const vs = read(b, now);
 		if (vs === null) continue;
-		known++;
-		for (const v of new Set(vs)) {
-			const t = tally.get(v) ?? { builds: 0, winners: 0 };
-			t.builds++;
-			if (b.isWinner) t.winners++;
+		known.add(b.id);
+		for (const v of vs) {
+			const t = tally.get(v) ?? { builds: new Set(), winners: new Set() };
+			t.builds.add(b.id);
+			if (b.isWinner) t.winners.add(b.id);
 			tally.set(v, t);
 		}
 	}
-	const row = (value: string, t = { builds: 0, winners: 0 }): ValueCount => ({
+	const all = countSubmissions(builds);
+	const row = (
+		value: string,
+		t = { builds: new Set<string>(), winners: new Set<string>() },
+	): ValueCount => ({
 		value,
-		...t,
-		share: known ? round(t.builds / known, 3) : null,
+		builds: t.builds.size,
+		winners: t.winners.size,
+		share: known.size ? round(t.builds.size / known.size, 3) : null,
 	});
 	let values: ValueCount[];
 	if (opts.value) {
@@ -422,12 +440,7 @@ export function distribution(
 			)
 			.slice(0, opts.top ?? 10);
 	}
-	return {
-		builds: builds.length,
-		known,
-		unknown: builds.length - known,
-		values,
-	};
+	return { builds: all, known: known.size, unknown: all - known.size, values };
 }
 
 export interface Group extends Distribution {
@@ -454,17 +467,19 @@ export function distributionBy(
 	const read: Facet["values"] = FACETS[by].values;
 	const groups = new Map<
 		string,
-		{ first: IndexedBuild; field: number; members: IndexedBuild[] }
+		{ first: IndexedBuild; field: Set<string>; members: IndexedBuild[] }
 	>();
 	const at = (b: IndexedBuild, v: string) => {
 		let g = groups.get(v);
 		if (!g) {
-			g = { first: b, field: 0, members: [] };
+			g = { first: b, field: new Set(), members: [] };
 			groups.set(v, g);
 		}
 		return g;
 	};
-	for (const b of field) for (const v of read(b, now) ?? []) at(b, v).field++;
+	// A submission counts once in each group any of its entries falls in.
+	for (const b of field)
+		for (const v of read(b, now) ?? []) at(b, v).field.add(b.id);
 	for (const b of matched)
 		for (const v of read(b, now) ?? []) at(b, v).members.push(b);
 	const out: Group[] = [...groups].map(([value, g]) => ({
@@ -472,7 +487,7 @@ export function distributionBy(
 		...(by === "event"
 			? { title: g.first.hackathon.title, endedAt: g.first.hackathon.endedAt }
 			: {}),
-		field: g.field,
+		field: g.field.size,
 		...distribution(g.members, facet, { ...opts, now }),
 	}));
 	if (by === "event")
@@ -502,7 +517,10 @@ export function winnersVsOthers(
 ): { winnersKnown: number; othersKnown: number; values: Lift[] } | null {
 	if (facet === "placement") return null;
 	const w = builds.filter((b) => b.isWinner);
-	const o = builds.filter((b) => !b.isWinner);
+	// Everyone else: a submission that placed in any of its entries here is a
+	// winner, never also one of the others.
+	const won = new Set(w.map((b) => b.id));
+	const o = builds.filter((b) => !won.has(b.id));
 	if (!w.length || !o.length) return null;
 	const all = { ...opts, top: Number.POSITIVE_INFINITY };
 	const dw = distribution(w, facet, all);

@@ -299,7 +299,7 @@ export interface paths {
         };
         /**
          * Trends and counts across Stellar hackathon submissions, with lift
-         * @description Counts over every stored Stellar hackathon submission, during and after its event. `facet`: category (project types), library or package (Stellar SDKs declared), activity (commits 90+ days after), project (became a directory project), projectStatus (its status today) and its grant funding, placement, event or year. `by=event` or `by=year` makes a trend; every answer compares winners with the rest (lift). Shares are over known values. Unit: event entries (a submission in two events counts twice). Same filters as searchHackathonBuilds; for the builds themselves → use searchHackathonBuilds.
+         * @description Counts over every stored Stellar hackathon submission, during and after its event. `facet`: category (project types), library or package (Stellar SDKs declared), activity (commits 90+ days after), project (became a directory project), projectStatus (its status today) and its grant funding, placement, event or year. `by=event` or `by=year` makes a trend; every answer compares winners with the rest (lift). Shares are over known values. Unit: submissions (one in two events counts once). Same filters as searchHackathonBuilds; for the builds themselves → use searchHackathonBuilds.
          */
         get: operations["analyzeHackathonSubmissions"];
         put?: never;
@@ -3887,7 +3887,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only: the winners DoraHacks assigned and those a page off DoraHacks names (getHackathon shows these with winnerSource), by words and by meaning alike. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
+                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events: under this filter each row is a named event's own entry, with its own placement, and one entered in several named events is one row, its best entry among them (a placed one first, then the latest), and one count. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -3963,7 +3963,7 @@ export interface operations {
                                 indexedBuilds?: number;
                                 /** @description Unique submissions that match: the rows this search pages through. */
                                 matched?: number;
-                                /** @description Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows analyze leaves out beside full listings (its meta.warnings names them). */
+                                /** @description Event entries that match: a submission entered in several events counts once per event, as each event's own count does. analyzeHackathonSubmissions counts submissions, so for the same filters and mode its total.builds equals matched, not this, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows analyze leaves out beside full listings (its meta.warnings names them). */
                                 entries?: number;
                                 /** @description Builds whose name matched q but that are not listed, because most of the words searched in q occur as a whole word in no submission; meta.warnings names the words they matched. Not counted in matched or entries. 0 = none held back; always 0 in meaning mode, which never lists a build by its name. */
                                 withheldByName?: number;
@@ -4264,7 +4264,7 @@ export interface operations {
             query?: {
                 /** @description What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project (a floor). projectStatus: that project's directory status today. scf: whether SCF funded it. placement: winner or not. track, event, year. */
                 facet?: "category" | "package" | "library" | "activity" | "project" | "projectStatus" | "scf" | "placement" | "track" | "event" | "year";
-                /** @description Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. */
+                /** @description Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. A submission counts once in each group its entries fall in, so groups can sum past the total. */
                 by?: "event" | "year" | "placement" | "track";
                 /** @description Report only this value (Payments, soroban-sdk), as a row even at zero. With by=event: the trend of one value. With facet=library a package name counts as the library it belongs to (soroban-sdk = Soroban Rust SDK). A value no stored submission carries adds a meta.warnings line naming the values seen: its 0 is a miss, not a measured count. */
                 value?: string;
@@ -4276,7 +4276,7 @@ export interface operations {
                 mode?: "keyword" | "meaning" | "hybrid";
                 /** @description Set to 1 for prize winners only: the winners DoraHacks assigned and those a page off DoraHacks names (getHackathon shows these with winnerSource), by words and by meaning alike. Accepts 1/true/yes/on (and 0/false/no/off for explicit off); any other value returns 400 with the accepted forms, never silently ignored. */
                 winnersOnly?: "1" | "true" | "yes" | "on" | "0" | "false" | "no" | "off";
-                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement. */
+                /** @description Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events: under this filter each row is a named event's own entry, with its own placement, and one entered in several named events is one row, its best entry among them (a placed one first, then the latest), and one count. */
                 hackathon?: string;
                 /** @description Filter by hackathon track (substring match). */
                 track?: string;
@@ -4349,7 +4349,7 @@ export interface operations {
                             by?: "event" | "year" | "placement" | "track" | null;
                             value?: string | null;
                             counts?: {
-                                /** @description Event entries in the index. A submission entered in several events counts once per event. */
+                                /** @description Submissions in the index, as searchHackathonBuilds counts them: a submission entered in several events counts once. */
                                 indexedBuilds?: number;
                             };
                             note?: string;

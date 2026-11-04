@@ -17,6 +17,7 @@ import { logApiHit } from "@/lib/api-usage";
 import {
 	COVERAGE_VALUES,
 	categoryMeasures,
+	countSubmissions,
 	type Distribution,
 	distribution,
 	distributionBy,
@@ -149,7 +150,7 @@ export async function GET(req: NextRequest) {
 		noShares ? withoutShares(d) : d;
 	const opts = { top, value };
 	const total = {
-		field: counted.length,
+		field: countSubmissions(counted),
 		...shares(distribution(matched, facet, opts)),
 	};
 	// A winners-only event's group says so; it is grouped only when such
@@ -279,8 +280,8 @@ export async function GET(req: NextRequest) {
 				},
 				by: by ?? null,
 				value: value ?? null,
-				counts: { indexedBuilds: indexed.length },
-				note: "Shares are over `known` (builds whose value is known); `unknown` builds are counted apart, never as none. A build can count under several categories or packages, so shares can sum past 1. `field` = builds passing every filter except q; builds / field is the share of the field that matched q. Groups by event run oldest first. winnersVsOthers compares winners with everyone else in the same set: lift above 1 = more common among winners. Small counts are noise: read `winners` and `others` before the lift.",
+				counts: { indexedBuilds: countSubmissions(indexed) },
+				note: "Shares are over `known` (builds whose value is known); `unknown` builds are counted apart, never as none. A build is a submission, counted once as searchHackathonBuilds counts it, even when it entered several events; it counts under every category or package it carries and in each event, year, track or placement its entries have, so shares can sum past 1 and groups past the total. `field` = builds passing every filter except q; builds / field is the share of the field that matched q. Groups by event run oldest first. winnersVsOthers compares winners (a submission that placed in any of its entries) with everyone else in the same set: lift above 1 = more common among winners. Small counts are noise: read `winners` and `others` before the lift.",
 			},
 			total,
 			...(groups ? { groups } : {}),

@@ -384,7 +384,7 @@ const buildFilterParams = (
 		in: "query",
 		required: false,
 		description:
-			"Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement.",
+			"Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events: under this filter each row is a named event's own entry, with its own placement, and one entered in several named events is one row, its best entry among them (a placed one first, then the latest), and one count.",
 		schema: { type: "string" },
 	},
 	{
@@ -4096,7 +4096,7 @@ export const spec: OpenAPISpec = {
 														entries: {
 															type: "integer",
 															description:
-																"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows analyze leaves out beside full listings (its meta.warnings names them).",
+																"Event entries that match: a submission entered in several events counts once per event, as each event's own count does. analyzeHackathonSubmissions counts submissions, so for the same filters and mode its total.builds equals matched, not this, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows analyze leaves out beside full listings (its meta.warnings names them).",
 														},
 														withheldByName: {
 															type: "integer",
@@ -4330,7 +4330,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Trends and counts across Stellar hackathon submissions, with lift",
 				description:
-					"Counts over every stored Stellar hackathon submission, during and after its event. `facet`: category (project types), library or package (Stellar SDKs declared), activity (commits 90+ days after), project (became a directory project), projectStatus (its status today) and its grant funding, placement, event or year. `by=event` or `by=year` makes a trend; every answer compares winners with the rest (lift). Shares are over known values. Unit: event entries (a submission in two events counts twice). Same filters as searchHackathonBuilds; for the builds themselves → use searchHackathonBuilds.",
+					"Counts over every stored Stellar hackathon submission, during and after its event. `facet`: category (project types), library or package (Stellar SDKs declared), activity (commits 90+ days after), project (became a directory project), projectStatus (its status today) and its grant funding, placement, event or year. `by=event` or `by=year` makes a trend; every answer compares winners with the rest (lift). Shares are over known values. Unit: submissions (one in two events counts once). Same filters as searchHackathonBuilds; for the builds themselves → use searchHackathonBuilds.",
 				"x-routing": {
 					purpose:
 						"Spot trends across Stellar hackathons: what share of submissions do X, which SDKs winners use, how a category moved event by event, what the winners did differently, and who kept building.",
@@ -4394,7 +4394,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: false,
 						description:
-							"Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q.",
+							"Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. A submission counts once in each group its entries fall in, so groups can sum past the total.",
 						schema: { type: "string", enum: [...GROUP_FACETS] },
 					},
 					{
@@ -4500,7 +4500,7 @@ export const spec: OpenAPISpec = {
 														indexedBuilds: {
 															type: "integer",
 															description:
-																"Event entries in the index. A submission entered in several events counts once per event.",
+																"Submissions in the index, as searchHackathonBuilds counts them: a submission entered in several events counts once.",
 														},
 													},
 												},

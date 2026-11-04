@@ -275,9 +275,9 @@ export interface BuildQuery {
 	field: IndexedBuild[];
 	served: BuildSearchMode;
 	warnings: string[];
-	/** With countEntries: the event entries that match, the unit analyze
-	 * counts (a submission entered in several events is one entry per
-	 * event), however perSubmission folded the rows. */
+	/** With countEntries: the event entries that match (a submission entered
+	 * in several events is one entry per event), however perSubmission folded
+	 * the rows. analyze counts submissions, as `scored` holds them. */
 	entries?: number;
 	/** With rerank, in hybrid mode: the reranker's score per build of the
 	 * first RERANK_TOP, which `scored` is then ordered by; null = it did not
@@ -297,7 +297,8 @@ export async function queryBuilds(
 	indexed: IndexedBuild[],
 	f: BuildFilters,
 	/** searchHackathonBuilds: one result per submission. analyze leaves it
-	 * off and counts every event entry (sls-092). `packages`: q also matches
+	 * off: its groups read every event entry, and its counts take
+	 * submissions (sls-092). `packages`: q also matches
 	 * declared packages; only the searchHackathonBuilds route passes it.
 	 * `countEntries`: also count matching event entries (meta.counts.entries).
 	 * `rerank`: in hybrid mode, reorder the first RERANK_TOP by the reranker
