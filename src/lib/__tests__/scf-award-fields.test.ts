@@ -18,7 +18,7 @@
 import { describe, expect, it } from "vitest";
 import {
 	parseRoundVerdicts,
-	showsAward,
+	scfHold,
 } from "../../../scripts/eval/scf-official";
 
 const card = (c: {
@@ -181,22 +181,65 @@ describe("SCF #45 coverage (sls-111)", () => {
 		expect([...v.awarded]).toEqual(["37"]);
 	});
 
-	it("a pinned disbursing award beside a failed round shows an award", () => {
+	it("an unread false yields to a page that pins an award", () => {
 		// The no-resurrect guard read only the Awarded-card count, so on
-		// 2026-10-03 it held Enable at awarded=false over its #45 award.
-		const detail = detailOf(enablePage("Information Collection"));
-		expect(detail.awardedRounds).toEqual([45]);
-		expect(detail.verdictSubmissions).toBe(1);
-		expect(detail.verdictAwardedAny).toBe(0);
-		expect(showsAward(detail)).toBe(true);
-		expect(showsAward(detailOf(enablePage("Awarded")))).toBe(true);
+		// 2026-10-03 it held Enable (a row nobody had read: Payload's default
+		// awarded=false) over the #45 award its page pins.
+		const page = detailOf(enablePage("Information Collection"));
+		expect(page.awardedRounds).toEqual([45]);
+		expect(page.verdictAwardedAny).toBe(0);
+		expect(scfHold({ awarded: false }, page, true)).toBeNull();
 	});
 
-	it("a page whose every decided card lost shows no award", () => {
-		const detail = detailOf(
+	it("an unread false holds when the page shows no award at all", () => {
+		// The coopstable class: the listing's round code says awarded, every
+		// card on the page lost.
+		const page = detailOf(
 			'{"id":"rec-coop","status":"Not Awarded","roundName":"SCF #30","budget":50000,"awardType":"Build"}',
 		);
-		expect(detail.verdictSubmissions).toBe(1);
-		expect(showsAward(detail)).toBe(false);
+		expect(scfHold({ awarded: false }, page, true)).not.toBeNull();
+	});
+
+	it("a stamped false is deliberate and the reader never undoes it", () => {
+		// fix-scf-rounds' poison clear keeps the page slug; its boolean fix
+		// keeps the citation. Either way an SCF writer set this false.
+		const page = detailOf(enablePage("Awarded"));
+		expect(
+			scfHold({ awarded: false, slug: "choppaddi-vmf" }, page, true),
+		).not.toBeNull();
+		expect(
+			scfHold(
+				{
+					awarded: false,
+					basis: "official-record",
+					sourceUrl:
+						"https://communityfund.stellar.org/project/coopstable-v2-yield-sharing-stablecoin-nrc",
+				},
+				page,
+				true,
+			),
+		).not.toBeNull();
+	});
+
+	it("a human-verified record is curate's: the reader writes nothing to it", () => {
+		// pen and hermes: SCF_FIX unlinks them (awarded false, rounds [], slug
+		// null). Writing the page slug back with a page round would serve
+		// awarded false beside round 45, and curate would undo it next run.
+		const page = detailOf(enablePage("Awarded"));
+		expect(
+			scfHold(
+				{ awarded: false, basis: "human-verified", slug: null },
+				page,
+				true,
+			),
+		).not.toBeNull();
+		// an awarded human-verified row gains no page round either
+		expect(
+			scfHold(
+				{ awarded: true, basis: "human-verified", slug: "aquarius-l4a" },
+				page,
+				true,
+			),
+		).not.toBeNull();
 	});
 });

@@ -21,7 +21,7 @@ import {
 } from "../src/lib/identity";
 import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
-import { parseRoundVerdicts, showsAward } from "./eval/scf-official";
+import { parseRoundVerdicts, scfHold, showsAward } from "./eval/scf-official";
 
 const args = process.argv.slice(2);
 const dryRun = !args.includes("--execute");
@@ -36,6 +36,7 @@ const stats = {
 	descriptionsAdded: 0,
 	linksAdded: 0,
 	skipped: 0,
+	held: 0,
 	errors: 0,
 };
 
@@ -929,14 +930,13 @@ async function main() {
 						]),
 					));
 
-		// One field, one writer (2026-09-06): a human-verified block (curate
-		// SCF_FIX) is the writer of record for its values — the page's total can
-		// include an ineligible round (aquarius: page $391k, paid $291k) and its
-		// award types are not what the human recorded. This lane only ADDS to
-		// such a row: rounds and round awards the page shows that the block
-		// lacks (union; stored tuples win), plus the citation when missing.
-		// Before this the two lanes flipped aquarius, stride, palremit and
-		// autoaction on every execute.
+		// One field, one writer: a human-verified block (curate SCF_FIX) is the
+		// writer of record for its values. The page's total can include an
+		// ineligible round (aquarius: page $391k, paid $291k), and curate syncs
+		// the rounds exactly, so this lane writes nothing to such a row
+		// (scfHold below). What the page shows that the block lacks is logged
+		// for a human to carry into SCF_FIX (sls-111; until then the lane
+		// added it, and curate took it away again).
 		const humanOwned = currentScf.basis === "human-verified";
 		const storedRounds: number[] = (currentScf.awardedRounds ?? []).map(Number);
 		// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
@@ -958,51 +958,19 @@ async function main() {
 				currentScf.sourceUrl !== pageUrl
 			: pageDiffers;
 
-		// No-resurrect guard (2026-07-11): if this record is already
-		// awarded=false and the official page affirmatively shows ZERO awarded
-		// submissions, don't let API round-codes flip it back to true (the
-		// coopstable class, corrected by scripts/data/fix-scf-rounds.ts).
-		// Narrow on purpose: records currently awarded=true are unaffected,
-		// and this script still never auto-flips true→false. "Zero awarded"
-		// means no award in ANY form (showsAward): the Awarded-card count
-		// alone held enable at false over its page-pinned #45 (2026-10-03).
-		const skipResurrect =
-			currentScf.awarded === false &&
-			isAwarded &&
-			(detail?.verdictSubmissions ?? 0) > 0 &&
-			!showsAward(detail);
+		// scfHold (scf-official.ts): curate's rows, a deliberate false (one an
+		// SCF writer stamped: fix-scf-rounds' poison clears and boolean fix),
+		// and an unread false on a page that awards nothing (the coopstable
+		// no-resurrect class) all stand. An unread false yields to a page that
+		// shows an award in any form: the Awarded-card count alone held enable
+		// at false over its page-pinned #45 (2026-10-03).
+		const hold = scfHold(currentScf, detail, isAwarded);
 
-		if (hasNewData && skipResurrect) {
+		if (hasNewData && hold) {
 			console.log(
-				`    SCF: NO-RESURRECT — awarded=false stands (official page shows ${detail?.verdictSubmissions} submission(s), zero awarded)`,
+				`    SCF: HOLD (${hold}); page shows +rounds [${addRounds.join(", ")}] +awards ${addRA.map((r) => `#${r.round ?? r.awardName}:$${r.amountUSD ?? "?"}`).join(" ") || "none"}, slug=${scf.slug}`,
 			);
-		} else if (hasNewData && humanOwned) {
-			const pageLast = Number(scf.lastAwardedRound) || 0;
-			const storedLast = Number(currentScf.lastAwardedRound) || 0;
-			updateData.scf = {
-				...currentScf,
-				slug: scf.slug,
-				sourceUrl: pageUrl,
-				asOf: new Date().toISOString().slice(0, 10),
-				lastAwardedRound: storedRound(
-					pageLast > storedLast ? pageLast : currentScf.lastAwardedRound,
-				),
-				awardedRounds: [...storedRounds, ...addRounds].sort((a, b) => a - b),
-				roundAwards: [
-					// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
-					...storedRA.map((r: any) => ({
-						round: r.round ?? null,
-						awardName: r.awardName ?? null,
-						amountUSD: r.amountUSD ?? null,
-						awardType: r.awardType ?? null,
-					})),
-					...addRA,
-				],
-			};
-			console.log(
-				`    SCF (human-verified, additive): +rounds [${addRounds.join(", ")}] +awards ${addRA.map((r) => `#${r.round ?? r.awardName}:$${r.amountUSD ?? "?"}`).join(" ") || "none"}, slug=${scf.slug}`,
-			);
-			stats.scfDataUpdated++;
+			stats.held++;
 		} else if (hasNewData) {
 			updateData.scf = {
 				awarded: isAwarded,
@@ -1149,6 +1117,7 @@ async function main() {
 	console.log(`  Descriptions:     ${stats.descriptionsAdded}`);
 	console.log(`  Links:            ${stats.linksAdded}`);
 	console.log(`Skipped (no new):   ${stats.skipped}`);
+	console.log(`SCF held (scfHold): ${stats.held}`);
 	console.log(`Errors:             ${stats.errors}`);
 	console.log(
 		`Beyond-cap pages:   ${beyondCap.queued.length} awarded · ${beyondCap.notAwarded.length} not awarded on page · ${beyondCap.unparseable.length} could not parse`,

@@ -552,6 +552,47 @@ export function servedBy<
 	return exact ?? findTitlePrefixMatch(base.replace(/-/g, " "), rows);
 }
 
+/** The stored projects.scf fields scfHold reads. */
+export interface StoredScf {
+	awarded?: boolean | null;
+	basis?: string | null;
+	asOf?: string | null;
+	sourceUrl?: string | null;
+	slug?: string | null;
+}
+
+/**
+ * Why enrich-from-scf must leave a row's SCF record as it is, or null when
+ * the page decides it. One field, one writer (sls-111):
+ * - a human-verified record is curate's (SCF_FIX). The reader adds nothing:
+ *   curate syncs its rounds exactly, so a page round the reader added would
+ *   be removed on curate's next run and added back on the enrich's, and on
+ *   an unlinked row (pen, hermes) it would serve awarded false beside it;
+ * - an awarded=false record an SCF writer stamped (any basis, date, source
+ *   or page slug: a poison clear, a boolean fix) is a deliberate false, and
+ *   the reader never undoes it;
+ * - an unstamped false (the default of a row nobody has read) yields to a
+ *   page that shows an award in any form (showsAward), and holds when the
+ *   page decides its cards and awards nothing (the coopstable class).
+ */
+export function scfHold(
+	current: StoredScf | null | undefined,
+	page:
+		| (Parameters<typeof showsAward>[0] & { verdictSubmissions?: number })
+		| null
+		| undefined,
+	pageSaysAwarded: boolean,
+): string | null {
+	if (current?.basis === "human-verified")
+		return "human-verified record: curate SCF_FIX owns it";
+	if (current?.awarded !== false || !pageSaysAwarded) return null;
+	if (current.basis || current.asOf || current.sourceUrl || current.slug)
+		return "awarded=false was set by an SCF writer: a deliberate false";
+	if ((page?.verdictSubmissions ?? 0) > 0 && !showsAward(page))
+		return "the page decides its cards and shows no award";
+	return null;
+}
+
 export async function fetchDetailHtml(url: string): Promise<string | null> {
 	try {
 		const res = await fetch(url, {
