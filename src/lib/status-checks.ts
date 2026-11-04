@@ -256,18 +256,38 @@ const daysBetween = (from: string, to: string) =>
 
 const usd = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
 
-/** Whether a served TVL reading is older than TVL_FRESH_DAYS, or undated.
- * enrich-tvl keeps the stored figure when no DefiLlama row resolves
- * (tvlFieldsFor), so a reading can sit for weeks under "refreshed weekly":
- * Sentora's since 2026-08-10 (#1912). null when there is no reading. */
+/** A stored date as ISO 8601, or null when it is missing or unparseable. */
+export function parseDate(v: unknown): string | null {
+	const s = iso(v);
+	const t = s ? Date.parse(s) : Number.NaN;
+	return Number.isFinite(t) ? new Date(t).toISOString() : null;
+}
+
+/** One parse for a served TVL reading. `at` is its date when that date can
+ * date a reading now: parseable and not after `now`. `stale` is true when
+ * `at` is missing or more than TVL_FRESH_DAYS old, null with no reading.
+ * Only the date is checked, not why it is old: enrich-tvl keeps the stored
+ * figure when no DefiLlama row resolves (tvlFieldsFor), and a missed weekly
+ * run leaves every figure as it was (#1912: Sentora's sat from 2026-08-10). */
+export function tvlReadingOf(
+	tvlUSD: unknown,
+	tvlAsOf: unknown,
+	now: Date = new Date(),
+): { at: string | null; stale: boolean | null } {
+	const parsed = parseDate(tvlAsOf);
+	const at = parsed && Date.parse(parsed) <= now.getTime() ? parsed : null;
+	if (typeof tvlUSD !== "number") return { at, stale: null };
+	const fresh = at && daysBetween(at, now.toISOString()) <= TVL_FRESH_DAYS;
+	return { at, stale: !fresh };
+}
+
+/** tvlReadingOf's stale flag, for the row builders. */
 export function tvlStaleOf(
 	tvlUSD: unknown,
 	tvlAsOf: unknown,
 	now: Date = new Date(),
 ): boolean | null {
-	if (typeof tvlUSD !== "number") return null;
-	const at = iso(tvlAsOf);
-	return !(at && daysBetween(at, now.toISOString()) <= TVL_FRESH_DAYS);
+	return tvlReadingOf(tvlUSD, tvlAsOf, now).stale;
 }
 
 function linkedSlugs(v: unknown): string[] | null {

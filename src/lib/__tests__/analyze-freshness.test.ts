@@ -20,6 +20,8 @@ const h = vi.hoisted(() => ({
 	totalDocs: null as number | null,
 	failProjects: false,
 	storeDown: false,
+	repos: [] as Record<string, unknown>[],
+	failRepos: false,
 }));
 const find = vi.fn(
 	async (args: { collection: string; where?: Doc; limit?: number }) => {
@@ -44,6 +46,10 @@ const find = vi.fn(
 				.slice(0, args.limit ?? 10);
 			return { docs, totalDocs: h.snapshots.length };
 		}
+		if (args.collection === "repos") {
+			if (h.failRepos) throw new Error("connection reset by peer");
+			return { docs: h.repos, totalDocs: h.repos.length };
+		}
 		throw new Error(`unexpected collection ${args.collection}`);
 	},
 );
@@ -60,6 +66,7 @@ vi.mock("@/lib/integrations/dorahacks", () => ({
 }));
 
 const { GET } = await import("@/app/api/analyze/route");
+const dora = await import("@/lib/integrations/dorahacks");
 
 /** The served projectSetHash: sha256 of the sorted slug set, 16 hex chars. */
 const hashOf = (slugs: string[]) =>
@@ -113,6 +120,8 @@ beforeEach(() => {
 	h.totalDocs = null;
 	h.failProjects = false;
 	h.storeDown = false;
+	h.repos = [];
+	h.failRepos = false;
 	find.mockClear();
 	create.mockClear();
 });
@@ -157,7 +166,7 @@ describe("tvl: a reading older than the weekly refresh is named beside the total
 			"etherfuse",
 		]);
 		expect(tvl.staleWarning).toMatch(/3 of 5/);
-		expect(tvl.staleWarning).toMatch(/older than 14 days/);
+		expect(tvl.staleWarning).toMatch(/not from the last 14 days/);
 		expect(tvl.staleWarning).toMatch(/2026-08-10/);
 		const top = Object.fromEntries(
 			(tvl.top10 as Doc[]).map((p) => [p.slug, p.tvlStale]),
@@ -336,5 +345,171 @@ describe("a failed project read is an outage, never a zero total or a snapshot",
 		const { status, body } = await analyze("developers");
 		expect(status).toBe(200);
 		expect(body.developers).toBeDefined();
+	});
+});
+
+// Review 2026-11-04 (another model family), each case reproduced first.
+describe("review: one parse dates and flags each reading, and the parts add up", () => {
+	const at = (slug: string, tvlUSD: number, tvlAsOf: unknown) => ({
+		id: slug,
+		slug,
+		name: slug,
+		status: "Live",
+		tvlUSD,
+		tvlAsOf,
+	});
+	const tvlOf = async () => (await analyze("tvl")).body.tvl as Doc;
+
+	it("a future, unparseable or missing date is stale and never dates the total", async () => {
+		h.projects = [
+			at("blend", 100, "2026-11-02T13:19:15.688Z"),
+			at("future", 7, "2099-01-01T00:00:00.000Z"),
+			at("garbled", 5, "not a date"),
+			at("undated", 3, null),
+		];
+		const tvl = await tvlOf();
+		expect(tvl.asOf).toBe("2026-11-02T13:19:15.688Z");
+		expect(tvl.oldestAsOf).toBe("2026-11-02T13:19:15.688Z");
+		const stale = tvl.staleProjects as Doc[];
+		expect(stale.map((p) => [p.slug, p.tvlAsOf])).toEqual([
+			["future", "2099-01-01T00:00:00.000Z"],
+			["garbled", null],
+			["undated", null],
+		]);
+		expect(tvl.staleTvlUSD).toBe(15);
+		expect(tvl.staleWarning).toMatch(/3 of 4/);
+		expect(tvl.staleWarning).toMatch(/none with a usable date/);
+	});
+
+	it("one undated reading: asOf is null with one project tracked, as the spec says", async () => {
+		h.projects = [at("undated", 3, null)];
+		const tvl = await tvlOf();
+		expect(tvl.trackedProjects).toBe(1);
+		expect(tvl.asOf).toBeNull();
+		expect(tvl.oldestAsOf).toBeNull();
+		// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+		const s: any = responseSchema(spec, "/api/analyze");
+		const props = s.properties.tvl.properties;
+		for (const k of ["asOf", "oldestAsOf"])
+			expect(props[k].description).toMatch(
+				/no summed reading has a usable date/,
+			);
+	});
+
+	it("rounds each reading once, so the stale part, the rows and the total add up", async () => {
+		h.projects = [
+			at("a", 0.6, "2026-09-01T00:00:00.000Z"),
+			at("b", 0.6, "2026-09-01T00:00:00.000Z"),
+			at("c", 0.6, "2026-09-01T00:00:00.000Z"),
+			at("d", 1.4, "2026-11-02T00:00:00.000Z"),
+		];
+		const tvl = await tvlOf();
+		const sum = (rows: unknown) =>
+			(rows as Doc[]).reduce((s, p) => s + Number(p.tvlUSD), 0);
+		expect(tvl.staleTvlUSD).toBe(sum(tvl.staleProjects));
+		expect(tvl.totalTvlUSD).toBe(sum(tvl.top10));
+	});
+
+	it("dates handed as Date objects (the raw-aggregate shape) are read, never a 500", async () => {
+		h.projects = [
+			at("spiko", 10, new Date("2026-09-14T10:30:21.591Z")),
+			at("blend", 5, new Date("2026-11-02T13:19:15.688Z")),
+		];
+		const tvl = await tvlOf();
+		expect(tvl.asOf).toBe("2026-11-02T13:19:15.688Z");
+		expect(tvl.oldestAsOf).toBe("2026-09-14T10:30:21.591Z");
+		expect(tvl.staleWarning).toMatch(/oldest 2026-09-14/);
+	});
+
+	it("the warning and the basis say what is checked, not a cause", async () => {
+		h.projects = [at("spiko", 10, "2026-09-14T10:30:21.591Z")];
+		const tvl = await tvlOf();
+		for (const t of [tvl.staleWarning, tvl.basis])
+			expect(String(t)).not.toMatch(
+				/refresh kept|last one is kept|found no current/,
+			);
+		expect(String(tvl.staleWarning)).toMatch(/only the date is checked/i);
+	});
+});
+
+describe("review: a snapshot is stored only after every read succeeded", () => {
+	it("dimension=all stores nothing when the repos read fails, as its 503 says", async () => {
+		h.projects = ["a", "b", "c"].map(awarded);
+		h.failRepos = true;
+		const { status, body } = await analyze("all");
+		expect(status).toBe(503);
+		expect(String(body.advisory)).toMatch(/nothing was stored/);
+		expect(create).not.toHaveBeenCalled();
+	});
+
+	it("with every read whole, dimension=all stores the new set once", async () => {
+		h.projects = ["a", "b", "c"].map(awarded);
+		const { status } = await analyze("all");
+		expect(status).toBe(200);
+		expect(create).toHaveBeenCalledTimes(1);
+	});
+
+	it("ten stored rows that all fail the check: says so, never names a row holding the set", async () => {
+		h.projects = ["a", "b", "c"].map(awarded);
+		h.snapshots = Array.from({ length: 10 }, (_, i) => ({
+			...snap(["a", "b", "c"], `2026-10-${10 + i}T00:00:00.000Z`),
+			awardedSlugs: [],
+		}));
+		const f = (await analyze("funding")).body.funding as Doc;
+		expect(f.previousSnapshot).toBeNull();
+		expect(f.snapshotAsOf).toBe("2026-11-04T21:00:00.000Z");
+		expect(f.deltaUnavailable).toMatch(
+			/None of the 10 most recent non-empty stored snapshots read is a valid baseline/,
+		);
+		expect(f.deltaUnavailable).toMatch(/older history was not read/);
+		expect(f.deltaUnavailable).toMatch(/this response's time/);
+		expect(f.deltaUnavailable).not.toMatch(
+			/oldest row read that holds this set/,
+		);
+		expect(create).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe("review: a failed DoraHacks read is never zero events", () => {
+	const fail = () =>
+		vi
+			.mocked(dora.fetchAllDoraHacksHackathons)
+			.mockRejectedValueOnce(new Error("DoraHacks timed out"));
+
+	it("dimension=hackathons answers 503", async () => {
+		fail();
+		const { status, body } = await analyze("hackathons");
+		expect(status).toBe(503);
+		expect(body.retryAfterSeconds).toBe(2);
+		expect(String(body.advisory)).toMatch(/NOT a claim/);
+	});
+
+	it("dimension=all serves hackathons null with a warning, and caches nothing", async () => {
+		h.projects = ["a"].map(awarded);
+		fail();
+		const res = await GET(
+			new NextRequest("https://stellarlight.xyz/api/analyze?dimension=all"),
+		);
+		const body = (await res.json()) as Doc;
+		expect(res.status).toBe(200);
+		expect(body.hackathons).toBeNull();
+		expect((body.meta as Doc).warnings).toEqual([
+			expect.stringMatching(/hackathons is null/),
+		]);
+		expect(res.headers.get("Cache-Control")).toBe("no-store");
+		expect(
+			undeclaredInServed(spec, responseSchema(spec, "/api/analyze"), body),
+		).toEqual([]);
+	});
+
+	it("a read that works keeps its totals, the public cache and no warnings", async () => {
+		h.projects = ["a"].map(awarded);
+		const res = await GET(
+			new NextRequest("https://stellarlight.xyz/api/analyze?dimension=all"),
+		);
+		const body = (await res.json()) as Doc;
+		expect((body.hackathons as Doc).totalEvents).toBe(0);
+		expect((body.meta as Doc).warnings).toBeUndefined();
+		expect(res.headers.get("Cache-Control")).toMatch(/^public, s-maxage=600/);
 	});
 });

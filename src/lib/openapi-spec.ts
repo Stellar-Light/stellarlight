@@ -241,7 +241,7 @@ const TVL_ROLLUP_ROW_SCHEMA = {
 		tvlStale: {
 			type: "boolean",
 			description:
-				"true = this reading is older than 14 days (or undated): the weekly refresh kept the last figure. See staleWarning.",
+				"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the reading is old. See staleWarning.",
 		},
 	},
 };
@@ -8639,7 +8639,7 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"503": {
 						description:
-							"The projects read behind categories, funding, tvl or gaps, or the repos scan read behind toolchain, failed (dimension=all included): an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After.",
+							"The projects read behind categories, funding, tvl or gaps, the repos scan read behind toolchain (dimension=all included for both), or the DoraHacks read behind dimension=hackathons failed: an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After.",
 						headers: {
 							"Retry-After": {
 								description: "Seconds to wait before resending (2).",
@@ -8678,6 +8678,12 @@ export const spec: OpenAPISpec = {
 												},
 												source: { type: "string", format: "uri" },
 												generatedAt: { type: "string", format: "date-time" },
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when a block of a dimension=all response is null because its read failed this request (today: hackathons): what is missing, and that it is unknown, not zero.",
+												},
 											},
 										},
 										toolchain: {
@@ -8724,6 +8730,17 @@ export const spec: OpenAPISpec = {
 														},
 													},
 												},
+												engineeringPractice: {
+													type: "object",
+													description:
+														"Repos whose latest scan recorded tree-level CI and test presence: presence facts only, not CI results.",
+													properties: {
+														reposWithPracticeFacts: { type: "integer" },
+														ciPresent: { type: "integer" },
+														testsPresent: { type: "integer" },
+													},
+												},
+												basis: { type: "string" },
 											},
 										},
 										categories: {
@@ -8876,8 +8893,9 @@ export const spec: OpenAPISpec = {
 										},
 										hackathons: {
 											type: "object",
+											nullable: true,
 											description:
-												"Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed.",
+												"Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed. null (dimension=all only) = the DoraHacks read failed this request: unknown, never zero; meta.warnings says so and the response is not cached. dimension=hackathons answers 503 instead.",
 											properties: {
 												totalEvents: { type: "integer" },
 												byStatus: {
@@ -8905,7 +8923,7 @@ export const spec: OpenAPISpec = {
 												staleTvlUSD: {
 													type: "number",
 													description:
-														"The part of totalTvlUSD from readings older than 14 days (or undated); 0 when every reading is fresh. totalTvlUSD minus this is the part read within 14 days.",
+														"The part of totalTvlUSD from stale readings (tvlAsOf more than 14 days old, or missing, unparseable or in the future); 0 when every reading is fresh. Each figure is rounded once, so totalTvlUSD minus this is the part read within 14 days and equals the fresh rows.",
 												},
 												trackedProjects: { type: "integer" },
 												asOf: {
@@ -8913,14 +8931,14 @@ export const spec: OpenAPISpec = {
 													format: "date-time",
 													nullable: true,
 													description:
-														"The NEWEST per-project tvlAsOf: it dates the freshest reading, not the whole total (see oldestAsOf). Null when nothing is tracked.",
+														"The NEWEST usable per-project tvlAsOf (a missing, unparseable or future date dates nothing): it dates the freshest reading, not the whole total (see oldestAsOf). Null when no summed reading has a usable date.",
 												},
 												oldestAsOf: {
 													type: "string",
 													format: "date-time",
 													nullable: true,
 													description:
-														"The OLDEST tvlAsOf among the readings summed. Null when nothing is tracked.",
+														"The OLDEST usable tvlAsOf among the readings summed. Null when no summed reading has a usable date.",
 												},
 												staleWarning: {
 													type: "string",
@@ -8938,7 +8956,7 @@ export const spec: OpenAPISpec = {
 												staleProjects: {
 													type: "array",
 													description:
-														"Every summed reading older than 14 days (or undated), largest first; [] = none.",
+														"Every stale summed reading (tvlAsOf more than 14 days old, or missing, unparseable or in the future), largest first; [] = none.",
 													items: TVL_ROLLUP_ROW_SCHEMA,
 												},
 												basis: { type: "string" },
@@ -11259,7 +11277,7 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading the refresh kept from an earlier run.",
+							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading more than 14 days old.",
 					},
 					tvlAsOf: {
 						type: "string",
@@ -11270,7 +11288,7 @@ export const spec: OpenAPISpec = {
 						type: "boolean",
 						nullable: true,
 						description:
-							"true = tvlUSD is older than 14 days (or undated): the weekly refresh found no current DefiLlama figure and kept this one, so cite it with tvlAsOf as a past reading, not today's TVL. false = read within 14 days. null = no tvlUSD.",
+							"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future: cite tvlUSD with its tvlAsOf as a past reading, not today's TVL. Only the date is checked, not why the figure is old. false = read within 14 days. null = no tvlUSD.",
 					},
 					tvlSource: {
 						type: "string",
@@ -12755,7 +12773,7 @@ export const spec: OpenAPISpec = {
 						type: "boolean",
 						nullable: true,
 						description:
-							"true = tvlUSD is older than 14 days (or undated): a reading the weekly refresh kept, so sort=tvl ranks it as a past figure. false = read within 14 days. null = no tvlUSD.",
+							"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the figure is old, and sort=tvl still orders by tvlUSD alone, stale or not. false = read within 14 days. null = no tvlUSD.",
 					},
 					assetCode: {
 						type: "string",

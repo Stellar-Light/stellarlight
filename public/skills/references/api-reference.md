@@ -87,8 +87,8 @@ Cross-event analytics: the macro picture across all Stellar hackathons + funding
 - `.categories.distribution[*]`: per-category project counts + SCF totals + hackathon-winner counts (sorted desc by project count)
 - `.funding.scfAwardedProjects`, `.funding.scfTotalDistributedUSD`, `.funding.meanAwardUSD`, `.funding.postHackathonStatusFunnel`, `.funding.byRound[*]`
 - `.funding.previousSnapshot` + `.funding.snapshotDelta`: the awarded-set change since the last valid stored snapshot (an empty or incomplete stored snapshot is never the baseline); when there is none, `.funding.deltaUnavailable` says why.
-- `.tvl.totalTvlUSD`: the sum of each tracked project's last DefiLlama reading, dated by `.tvl.asOf` (the newest reading) and `.tvl.oldestAsOf` (the oldest). A reading older than 14 days stays in the total and is named: `.tvl.staleTvlUSD` (its part of the total), `.tvl.staleProjects[*]`, `.tvl.top10[*].tvlStale`, and `.tvl.staleWarning` (null when every reading is within 14 days). When the warning is non-null, quote it with the total.
-- A failed projects read answers **503** with `retryAfterSeconds` for categories, funding, tvl, gaps and all, and a failed repos scan read does for toolchain and all: an outage, never a zero total or a missing block. Retry; do not report zero.
+- `.tvl.totalTvlUSD`: the sum of each tracked project's last DefiLlama reading, dated by `.tvl.asOf` (the newest reading) and `.tvl.oldestAsOf` (the oldest). A stale reading (`tvlAsOf` more than 14 days old, or missing, unparseable or in the future) stays in the total and is named: `.tvl.staleTvlUSD` (its part of the total), `.tvl.staleProjects[*]`, `.tvl.top10[*].tvlStale`, and `.tvl.staleWarning` (null when every reading is within 14 days). When the warning is non-null, quote it with the total.
+- A failed projects read answers **503** with `retryAfterSeconds` for categories, funding, tvl, gaps and all, a failed repos scan read does for toolchain and all, and a failed DoraHacks read does for hackathons: an outage, never a zero total or a missing block. Under `dimension=all` a failed DoraHacks read leaves `.hackathons` `null` with `.meta.warnings` instead. Retry; do not report zero.
 
 Use this when the user asks "*what's the state of Stellar's hackathon scene*" or "*how much SCF money has been distributed to date*"; these can't be answered from single-event detail.
 
@@ -159,7 +159,7 @@ When `matchMode === "majority"` still returns 0, the response includes `.meta.ad
 
 ---
 
-**TVL (`.projects[*].tvlUSD` + `tvlAsOf` + `tvlStale`):** DefiLlama-tracked total value locked with its snapshot date. `null` = **not tracked by DefiLlama**, never "zero TVL"; don't collapse untracked to 0. `tvlStale: true` = the reading is older than 14 days (the weekly refresh found no current figure and kept this one): cite it with its `tvlAsOf` as a past reading, never as today's TVL.
+**TVL (`.projects[*].tvlUSD` + `tvlAsOf` + `tvlStale`):** DefiLlama-tracked total value locked with its snapshot date. `null` = **not tracked by DefiLlama**, never "zero TVL"; don't collapse untracked to 0. `tvlStale: true` = its `tvlAsOf` is more than 14 days old, or missing, unparseable or in the future (only the date is checked, not why): cite it with its `tvlAsOf` as a past reading, never as today's TVL. On `/api/leaderboard`, `sort=tvl` still orders by `tvlUSD` alone, and the CSV carries `tvl_as_of` and `tvl_stale`.
 
 **On-chain metrics (`.projects[*].onchain`):** projects with hand-verified contract/asset join keys carry per-contract lifetime `events`/`subinvocations`/`storageEntries` (+ `eventsDelta`/`subinvocationsDelta` once two snapshots exist) and per-asset `assetHolders`/`assetSupply`, from stellar.expert with `source` + `asOf`. Semantics: `onchain` null = not tracked in our registry, NEVER 'no on-chain activity'; null deltas = no prior snapshot yet. subinvocations undercounts contracts users call directly; read `events` alongside.
 

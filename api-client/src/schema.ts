@@ -1415,11 +1415,11 @@ export interface components {
                 driftDays?: number | null;
                 codeChangedSinceAudit?: boolean | null;
             } | null;
-            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading the refresh kept from an earlier run. */
+            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading more than 14 days old. */
             tvlUSD?: number | null;
             /** @description When tvlUSD was fetched from DefiLlama (ISO 8601). */
             tvlAsOf?: string | null;
-            /** @description true = tvlUSD is older than 14 days (or undated): the weekly refresh found no current DefiLlama figure and kept this one, so cite it with tvlAsOf as a past reading, not today's TVL. false = read within 14 days. null = no tvlUSD. */
+            /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future: cite tvlUSD with its tvlAsOf as a past reading, not today's TVL. Only the date is checked, not why the figure is old. false = read within 14 days. null = no tvlUSD. */
             tvlStale?: boolean | null;
             /** @description Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope; cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth. */
             tvlSource?: string | null;
@@ -2352,7 +2352,7 @@ export interface components {
              * @description When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.
              */
             tvlAsOf?: string | null;
-            /** @description true = tvlUSD is older than 14 days (or undated): a reading the weekly refresh kept, so sort=tvl ranks it as a past figure. false = read within 14 days. null = no tvlUSD. */
+            /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the figure is old, and sort=tvl still orders by tvlUSD alone, stale or not. false = read within 14 days. null = no tvlUSD. */
             tvlStale?: boolean | null;
             /** @description Code of the project's issued on-chain asset (USDC, CETES, …), from stellar.expert. Null = no verified issued asset in our on-chain seed set. */
             assetCode?: string | null;
@@ -6990,6 +6990,8 @@ export interface operations {
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
+                            /** @description Present only when a block of a dimension=all response is null because its read failed this request (today: hackathons): what is missing, and that it is unknown, not zero. */
+                            warnings?: string[];
                         };
                         /** @description Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain. */
                         toolchain?: {
@@ -7010,6 +7012,13 @@ export interface operations {
                                 projectSlug?: string | null;
                                 sorobanSdkVersion?: string | null;
                             }[];
+                            /** @description Repos whose latest scan recorded tree-level CI and test presence: presence facts only, not CI results. */
+                            engineeringPractice?: {
+                                reposWithPracticeFacts?: number;
+                                ciPresent?: number;
+                                testsPresent?: number;
+                            };
+                            basis?: string;
                         };
                         /** @description Present for dimension=all|categories: project counts by category over the active population (see meta.population). */
                         categories?: {
@@ -7093,7 +7102,7 @@ export interface operations {
                                 underbuiltMax?: number;
                             };
                         };
-                        /** @description Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed. */
+                        /** @description Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed. null (dimension=all only) = the DoraHacks read failed this request: unknown, never zero; meta.warnings says so and the response is not cached. dimension=hackathons answers 503 instead. */
                         hackathons?: {
                             totalEvents?: number;
                             byStatus?: {
@@ -7103,22 +7112,22 @@ export interface operations {
                             };
                             totalPrizePoolUSD?: number;
                             totalRegisteredHackers?: number;
-                        };
+                        } | null;
                         /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning. */
                         tvl?: {
                             /** @description Sum of every tracked project's last reading, stale ones included (see staleTvlUSD). */
                             totalTvlUSD?: number;
-                            /** @description The part of totalTvlUSD from readings older than 14 days (or undated); 0 when every reading is fresh. totalTvlUSD minus this is the part read within 14 days. */
+                            /** @description The part of totalTvlUSD from stale readings (tvlAsOf more than 14 days old, or missing, unparseable or in the future); 0 when every reading is fresh. Each figure is rounded once, so totalTvlUSD minus this is the part read within 14 days and equals the fresh rows. */
                             staleTvlUSD?: number;
                             trackedProjects?: number;
                             /**
                              * Format: date-time
-                             * @description The NEWEST per-project tvlAsOf: it dates the freshest reading, not the whole total (see oldestAsOf). Null when nothing is tracked.
+                             * @description The NEWEST usable per-project tvlAsOf (a missing, unparseable or future date dates nothing): it dates the freshest reading, not the whole total (see oldestAsOf). Null when no summed reading has a usable date.
                              */
                             asOf?: string | null;
                             /**
                              * Format: date-time
-                             * @description The OLDEST tvlAsOf among the readings summed. Null when nothing is tracked.
+                             * @description The OLDEST usable tvlAsOf among the readings summed. Null when no summed reading has a usable date.
                              */
                             oldestAsOf?: string | null;
                             /** @description Non-null when any summed reading is older than 14 days: how many, the oldest date, and their share of totalTvlUSD. Null = every reading is within 14 days. */
@@ -7131,17 +7140,17 @@ export interface operations {
                                 tvlUSD?: number;
                                 /** Format: date-time */
                                 tvlAsOf?: string | null;
-                                /** @description true = this reading is older than 14 days (or undated): the weekly refresh kept the last figure. See staleWarning. */
+                                /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the reading is old. See staleWarning. */
                                 tvlStale?: boolean;
                             }[];
-                            /** @description Every summed reading older than 14 days (or undated), largest first; [] = none. */
+                            /** @description Every stale summed reading (tvlAsOf more than 14 days old, or missing, unparseable or in the future), largest first; [] = none. */
                             staleProjects?: {
                                 slug?: string | null;
                                 name?: string | null;
                                 tvlUSD?: number;
                                 /** Format: date-time */
                                 tvlAsOf?: string | null;
-                                /** @description true = this reading is older than 14 days (or undated): the weekly refresh kept the last figure. See staleWarning. */
+                                /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the reading is old. See staleWarning. */
                                 tvlStale?: boolean;
                             }[];
                             basis?: string;
@@ -7215,7 +7224,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description The projects read behind categories, funding, tvl or gaps, or the repos scan read behind toolchain, failed (dimension=all included): an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After. */
+            /** @description The projects read behind categories, funding, tvl or gaps, the repos scan read behind toolchain (dimension=all included for both), or the DoraHacks read behind dimension=hackathons failed: an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After. */
             503: {
                 headers: {
                     /** @description Seconds to wait before resending (2). */

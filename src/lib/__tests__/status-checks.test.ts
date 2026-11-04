@@ -188,6 +188,12 @@ describe("tvlStaleOf: a reading past the weekly refresh says so", () => {
 		// Semantic rows come from a raw aggregate, where the date is a Date.
 		expect(tvlStaleOf(5, new Date(ago(1)), NOW)).toBe(false);
 	});
+	it("a future or unparseable date is never fresh (review 2026-11-04)", () => {
+		expect(tvlStaleOf(5, "2099-01-01T00:00:00.000Z", NOW)).toBe(true);
+		expect(tvlStaleOf(5, new Date(NOW.getTime() + 86_400_000), NOW)).toBe(true);
+		expect(tvlStaleOf(5, new Date("nope"), NOW)).toBe(true);
+		expect(tvlStaleOf(5, "", NOW)).toBe(true);
+	});
 });
 
 describe("quietSinceFor: silence is only what two readings showed", () => {

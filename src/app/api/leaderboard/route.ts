@@ -94,6 +94,10 @@ function toCsv(rows: ProjectRow[]): string {
 		"asset_supply",
 		"asset_holders",
 		"short_description",
+		// Review 2026-11-04: tvl_usd was served with no date. Appended, so every
+		// older column keeps its position.
+		"tvl_as_of",
+		"tvl_stale",
 	].join(",");
 	const lines = rows.map((r) =>
 		[
@@ -113,6 +117,8 @@ function toCsv(rows: ProjectRow[]): string {
 			r.assetSupply ?? "",
 			r.assetHolders ?? "",
 			r.shortDescription ?? "",
+			r.tvlAsOf ?? "",
+			r.tvlStale ?? "",
 		]
 			.map(csvEscape)
 			.join(","),
@@ -622,7 +628,7 @@ export async function GET(req: NextRequest) {
 						"range=7d/30d/90d/1y keeps only projects whose lastActivityAt falls inside the window. stars/issues totals remain all-time rollups; they are NOT recomputed within the window.",
 					dataAsOf:
 						"meta.dataAsOf = the most recent index-refresh timestamp across the repo rows this response aggregated; every github.* number is as-of this moment, NOT a live GitHub read. Distinct from meta.generatedAt (when the response was serialized). Null when no indexed repos matched the filter.",
-					tvl: "sort=tvl orders by tvlUSD: DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = NOT TRACKED on DefiLlama (never 'zero TVL'); untracked projects sort below every tracked one. TVL covers DeFi-style protocols only; most projects are legitimately untracked.",
+					tvl: "sort=tvl orders by tvlUSD: DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = NOT TRACKED on DefiLlama (never 'zero TVL'); untracked projects sort below every tracked one. tvlStale true = the row's tvlAsOf is more than 14 days old, or missing, unparseable or in the future (only the date is checked); the order is tvlUSD alone, stale or not. TVL covers DeFi-style protocols only; most projects are legitimately untracked. The CSV carries tvl_as_of and tvl_stale.",
 					supply:
 						"sort=supply orders by assetSupply: circulating supply of the project's issued asset in WHOLE ASSET UNITS of its own denomination (assetCode names it: USDC, CETES, …), from stellar.expert. This is NOT USD-comparable across assets; a JPY or ARS coin's unit count dwarfs a USD coin's without being larger in value. For a USD-comparable stablecoin ranking (market cap, complete set incl. USDY/Ondo), use getStablecoins (/api/stablecoins) instead. assetSupply null = NOT TRACKED (no verified issued asset in our on-chain seed set), never 'zero supply'; untracked projects sort below every tracked one. assetHolders = trustline holder count.",
 				},

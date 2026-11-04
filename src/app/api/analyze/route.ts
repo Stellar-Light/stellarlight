@@ -34,7 +34,7 @@ import {
 	type PopulationScope,
 	populationScope,
 } from "@/lib/population";
-import { TVL_FRESH_DAYS, tvlStaleOf } from "@/lib/status-checks";
+import { parseDate, TVL_FRESH_DAYS, tvlReadingOf } from "@/lib/status-checks";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -158,6 +158,38 @@ export async function GET(req: NextRequest) {
 	const includeToolchain =
 		dimensionParam === "all" || dimensionParam === "toolchain";
 
+	// #1914: a failed read is an outage, never a 200 with zero totals or a
+	// missing block: say so, cache nothing, store nothing.
+	const outage = (read: string) => {
+		logApiHit({
+			req,
+			endpoint: "/api/analyze",
+			filters: { dimension: dimensionParam },
+			status: 503,
+			startedAt,
+		});
+		return apiError({
+			status: 503,
+			error: `${read} failed`,
+			advisory: `The ${read} behind this rollup failed. This is an outage, NOT a claim that any count, total or TVL is zero, and nothing was stored. Retry after Retry-After.`,
+			retryAfterSeconds: 2,
+			startedAt,
+		});
+	};
+	// Blocks a dimension=all response serves as null, each with its reason:
+	// that response is partial, so it is never cached as a full answer.
+	const warnings: string[] = [];
+	// #1914 review: a new funding snapshot is stored only after every read
+	// this response needs has succeeded, so a 503 never follows a write.
+	let pendingSnapshot: {
+		projectSetHash: string;
+		scfAwardedProjects: number;
+		scfTotalDistributedUSD: number;
+		methodologyVersion: string;
+		awardedSlugs: string[];
+		computedAt: string;
+	} | null = null;
+
 	const payload = await getPayloadSafe();
 
 	const result: Record<string, unknown> = {};
@@ -170,6 +202,7 @@ export async function GET(req: NextRequest) {
 		let upcomingCount = 0;
 		let activeCount = 0;
 		let completedCount = 0;
+		let doraFailed = false;
 		try {
 			const dora = await fetchAllDoraHacksHackathons();
 			const now = Math.floor(Date.now() / 1000);
@@ -182,18 +215,26 @@ export async function GET(req: NextRequest) {
 				else activeCount += 1;
 			}
 		} catch {
-			// fall through with zeros
+			// Review 2026-11-04: this served zero events and a zero prize pool,
+			// cached for 10 minutes. dimension=all keeps its other blocks.
+			if (dimensionParam === "hackathons") return outage("DoraHacks read");
+			doraFailed = true;
+			warnings.push(
+				"hackathons is null: the DoraHacks read failed this request, so its totals are unknown, not zero. Retry for the full rollup.",
+			);
 		}
-		result.hackathons = {
-			totalEvents: hackCount,
-			byStatus: {
-				upcoming: upcomingCount,
-				active: activeCount,
-				completed: completedCount,
-			},
-			totalPrizePoolUSD: totalPrizeUSD,
-			totalRegisteredHackers: totalHackersCount,
-		};
+		result.hackathons = doraFailed
+			? null
+			: {
+					totalEvents: hackCount,
+					byStatus: {
+						upcoming: upcomingCount,
+						active: activeCount,
+						completed: completedCount,
+					},
+					totalPrizePoolUSD: totalPrizeUSD,
+					totalRegisteredHackers: totalHackersCount,
+				};
 	}
 
 	// ── Categories + funding + tvl share a projects fetch
@@ -250,24 +291,6 @@ export async function GET(req: NextRequest) {
 			// population stays null: answered below
 		}
 	}
-	// #1914: a failed read is an outage, never a 200 with zero totals or a
-	// missing block: say so, cache nothing, store nothing.
-	const outage = (read: string) => {
-		logApiHit({
-			req,
-			endpoint: "/api/analyze",
-			filters: { dimension: dimensionParam },
-			status: 503,
-			startedAt,
-		});
-		return apiError({
-			status: 503,
-			error: `${read} failed`,
-			advisory: `The ${read} behind this rollup failed. This is an outage, NOT a claim that any count, total or TVL is zero, and nothing was stored. Retry after Retry-After.`,
-			retryAfterSeconds: 2,
-			startedAt,
-		});
-	};
 	// A failed projects read fell through with [] and served zero totals, a
 	// gaps list calling every vertical absent, and a stored empty funding
 	// snapshot (13 since July).
@@ -421,26 +444,17 @@ export async function GET(req: NextRequest) {
 					// within a set: amount revisions).
 					snapshotAsOf = snaps[run - 1].computedAt ?? null;
 				} else {
-					// New set state (or first run): record it. Best-effort — a full
-					// storage tier must degrade the delta, never the funding numbers.
+					// New set state (or first run): record it, once every read this
+					// response needs has succeeded (stored at the end of the handler).
 					snapshotAsOf = new Date().toISOString();
-					try {
-						await payload.create({
-							collection: "funding-snapshots",
-							data: {
-								projectSetHash,
-								scfAwardedProjects: scfProjects.length,
-								scfTotalDistributedUSD: totalUSD,
-								methodologyVersion: FUNDING_METHODOLOGY_VERSION,
-								awardedSlugs,
-								computedAt: snapshotAsOf,
-							},
-							overrideAccess: true,
-						});
-					} catch {
-						// persistence failed (e.g. storage full) — delta still computes
-						// against the last stored state; only durability is affected.
-					}
+					pendingSnapshot = {
+						projectSetHash,
+						scfAwardedProjects: scfProjects.length,
+						scfTotalDistributedUSD: totalUSD,
+						methodologyVersion: FUNDING_METHODOLOGY_VERSION,
+						awardedSlugs,
+						computedAt: snapshotAsOf,
+					};
 				}
 				if (prev?.projectSetHash) {
 					previousSnapshot = {
@@ -520,11 +534,19 @@ export async function GET(req: NextRequest) {
 						removedReasons,
 					};
 				} else {
-					// A full window may hide an older baseline: say the read was cut.
-					deltaUnavailable =
-						snapRes.docs.length >= SNAPSHOT_WINDOW
-							? `None of the ${SNAPSHOT_WINDOW} most recent non-empty stored snapshots is a valid baseline with a different project set, and older history was not read; snapshotAsOf is the oldest row read that holds this set.`
-							: "No valid prior funding snapshot with a different project set is stored (an empty or incomplete stored snapshot is never a baseline); snapshot history starts at snapshotAsOf. Re-read after the awarded set changes to receive addedProjects/removedProjects; a shifted headline before then is an amount revision within the SAME set (projectSetHash unchanged).";
+					// Exactly what was read: how many rows, how many hold this set,
+					// how many failed the check, and whether the window was cut.
+					const read = snapRes.docs.length;
+					const skipped = read - snaps.length;
+					const cut =
+						read >= SNAPSHOT_WINDOW ? "; older history was not read" : "";
+					const reread =
+						" Re-read after the awarded set changes to receive addedProjects/removedProjects; a shifted headline before then is an amount revision within the SAME set (projectSetHash unchanged).";
+					deltaUnavailable = run
+						? `No valid prior funding snapshot with a different project set among the ${read} most recent non-empty stored snapshots read (holding this set: ${run}${skipped ? `; skipped as empty or incomplete: ${skipped}` : ""})${cut}; snapshotAsOf is the oldest row read that holds this set.${reread}`
+						: read
+							? `None of the ${read} most recent non-empty stored snapshots read is a valid baseline (each is empty or incomplete)${cut}, so snapshotAsOf is this response's time.${reread}`
+							: `No non-empty funding snapshot is stored yet, so snapshotAsOf is this response's time.${reread}`;
 				}
 			} catch {
 				deltaUnavailable =
@@ -583,47 +605,49 @@ export async function GET(req: NextRequest) {
 	// tell unavailable from soft-empty. Serve it, dated and provenance-labeled,
 	// from the per-project DefiLlama facts (scripts/enrich-tvl.ts).
 	if (includeTvl) {
-		const tracked = projects.filter((p) => typeof p.tvlUSD === "number");
-		const totalTvlUSD = Math.round(
-			tracked.reduce((s, p) => s + (p.tvlUSD ?? 0), 0),
-		);
-		// #1912: each row's age under the rule search rows serve (tvlStale).
+		// #1912, review 2026-11-04: one parse dates and flags each reading (a
+		// future or unparseable date dates nothing), and each figure is rounded
+		// once, so the stale part, the rows and the total add up.
 		const now = new Date();
-		const isStale = (p: ProjectDoc) =>
-			tvlStaleOf(p.tvlUSD, p.tvlAsOf, now) === true;
-		const row = (p: ProjectDoc) => ({
-			slug: p.slug ?? null,
-			name: p.name ?? null,
-			tvlUSD: Math.round(p.tvlUSD ?? 0),
-			tvlAsOf: p.tvlAsOf ?? null,
-			tvlStale: isStale(p),
-		});
-		const byValue = [...tracked].sort(
-			(a, b) => (b.tvlUSD ?? 0) - (a.tvlUSD ?? 0),
-		);
-		const stale = byValue.filter(isStale);
-		const staleTvlUSD = Math.round(
-			stale.reduce((s, p) => s + (p.tvlUSD ?? 0), 0),
-		);
+		const readings = projects
+			.filter((p) => typeof p.tvlUSD === "number")
+			.map((p) => {
+				const { at, stale } = tvlReadingOf(p.tvlUSD, p.tvlAsOf, now);
+				const row = {
+					slug: p.slug ?? null,
+					name: p.name ?? null,
+					tvlUSD: Math.round(p.tvlUSD ?? 0),
+					tvlAsOf: parseDate(p.tvlAsOf),
+					tvlStale: stale === true,
+				};
+				return { row, at };
+			})
+			.sort((a, b) => b.row.tvlUSD - a.row.tvlUSD);
+		const stale = readings.filter((r) => r.row.tvlStale);
+		const sum = (rs: typeof readings) =>
+			rs.reduce((s, r) => s + r.row.tvlUSD, 0);
+		const totalTvlUSD = sum(readings);
+		const staleTvlUSD = sum(stale);
 		// asOf alone (the newest reading) dated a total that was 84% readings
 		// 7 and 12 weeks old on 2026-11-02; oldestAsOf dates the other end.
-		const datesOf = (ps: ProjectDoc[]) =>
-			ps.flatMap((p) => (p.tvlAsOf ? [p.tvlAsOf] : [])).sort();
-		const dates = datesOf(tracked);
+		const datesOf = (rs: typeof readings) =>
+			rs.flatMap((r) => (r.at ? [r.at] : [])).sort();
+		const dates = datesOf(readings);
+		const oldestStale = datesOf(stale)[0]?.slice(0, 10);
 		const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
 		result.tvl = {
 			totalTvlUSD,
 			staleTvlUSD,
-			trackedProjects: tracked.length,
+			trackedProjects: readings.length,
 			asOf: dates.at(-1) ?? null,
 			oldestAsOf: dates[0] ?? null,
 			staleWarning: stale.length
-				? `${stale.length} of ${tracked.length} tracked projects carry a TVL reading older than ${TVL_FRESH_DAYS} days (oldest ${datesOf(stale)[0]?.slice(0, 10) ?? "undated"}): ${usd(staleTvlUSD)}, ${totalTvlUSD ? Math.round((staleTvlUSD / totalTvlUSD) * 100) : 0}% of totalTvlUSD, is the last reading the weekly refresh kept, not a current one; the other ${usd(totalTvlUSD - staleTvlUSD)} was read within ${TVL_FRESH_DAYS} days. Cite the total with this caveat; staleProjects lists the rows.`
+				? `${stale.length} of ${readings.length} tracked projects carry a TVL reading that is not from the last ${TVL_FRESH_DAYS} days (${oldestStale ? `oldest ${oldestStale}` : "none with a usable date"}): ${usd(staleTvlUSD)}, ${totalTvlUSD ? Math.round((staleTvlUSD / totalTvlUSD) * 100) : 0}% of totalTvlUSD; the other ${usd(totalTvlUSD - staleTvlUSD)} was read within ${TVL_FRESH_DAYS} days. Only the date is checked, not why a reading is old. Cite the total with this caveat; staleProjects lists the rows.`
 				: null,
 			provider: "DefiLlama",
-			top10: byValue.slice(0, 10).map(row),
-			staleProjects: stale.map(row),
-			basis: `Sum of per-project tvlUSD across ACTIVE directory projects tracked on DefiLlama (tvlUSD != null; null = not tracked there, never zero: untracked protocols are simply absent, so this UNDERCOUNTS chain-wide TVL). Values are per-protocol DefiLlama totals refreshed weekly: asOf = the newest per-project tvlAsOf, oldestAsOf = the oldest. A reading older than ${TVL_FRESH_DAYS} days (a missed weekly run, or DefiLlama no longer returns a Stellar figure for the mapped protocol, so the last one is kept) is stale: it stays in totalTvlUSD, never dropped or zeroed, and is summed in staleTvlUSD, listed in staleProjects and named in staleWarning; totalTvlUSD minus staleTvlUSD is the part read within ${TVL_FRESH_DAYS} days. CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated: never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf/tvlStale also ride each /api/projects/search row.`,
+			top10: readings.slice(0, 10).map((r) => r.row),
+			staleProjects: stale.map((r) => r.row),
+			basis: `Sum of per-project tvlUSD across ACTIVE directory projects tracked on DefiLlama (tvlUSD != null; null = not tracked there, never zero: untracked protocols are simply absent, so this UNDERCOUNTS chain-wide TVL), each figure rounded to the dollar once, so totalTvlUSD, staleTvlUSD and the rows add up. Values are per-protocol DefiLlama totals refreshed weekly: asOf = the newest usable per-project tvlAsOf, oldestAsOf = the oldest. A reading whose tvlAsOf is more than ${TVL_FRESH_DAYS} days old, or missing, unparseable or in the future, is stale; only the date is checked, not why the reading is old. A stale reading stays in totalTvlUSD, never dropped or zeroed, and is summed in staleTvlUSD, listed in staleProjects and named in staleWarning; totalTvlUSD minus staleTvlUSD is the part read within ${TVL_FRESH_DAYS} days. CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated: never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf/tvlStale also ride each /api/projects/search row.`,
 		};
 	}
 
@@ -776,6 +800,20 @@ export async function GET(req: NextRequest) {
 	// was down; a caller read the bare meta as "no toolchain data".
 	if (includeToolchain && !result.toolchain) return outage("repos scan read");
 
+	// Every read succeeded: now the new set state may be stored. Best-effort:
+	// a full storage tier degrades durability, never the funding numbers.
+	if (pendingSnapshot && payload) {
+		try {
+			await payload.create({
+				collection: "funding-snapshots",
+				data: pendingSnapshot,
+				overrideAccess: true,
+			});
+		} catch {
+			// persistence failed (e.g. storage full); the delta above stands
+		}
+	}
+
 	logApiHit({
 		req,
 		endpoint: "/api/analyze",
@@ -793,12 +831,15 @@ export async function GET(req: NextRequest) {
 				// over (null when neither dimension was requested). Same shape as
 				// /api/clusters — identical `population.id` ⇒ comparable numbers.
 				...(population ? { population } : {}),
+				...(warnings.length ? { warnings } : {}),
 			},
 			...result,
 		},
 		{
 			headers: {
-				"Cache-Control": "public, s-maxage=600, stale-while-revalidate=3600",
+				"Cache-Control": warnings.length
+					? "no-store"
+					: "public, s-maxage=600, stale-while-revalidate=3600",
 			},
 		},
 	);
