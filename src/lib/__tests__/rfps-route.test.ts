@@ -120,6 +120,18 @@ describe("a brief SCF published is linked, apart from the idea summary", () => {
 		);
 	});
 
+	// Review: q read the idea text only, so the brief's own terms found
+	// nothing.
+	it("finds a brief by the words its published brief uses", async () => {
+		for (const q of ["bldimg", "tarball_sha256", "allowlisted"]) {
+			const body = await rfps(`?q=${q}`);
+			expect(
+				body.rfps.map((r: { id: string }) => r.id),
+				q,
+			).toEqual(["contract-source-verification"]);
+		}
+	});
+
 	it("links each brief to a commit-pinned copy of the RFP Track page, one per quarter", () => {
 		const linked = IDEAS.filter((i) => i.publishedBrief);
 		expect(IDEAS.filter((i) => !i.publishedBrief).map((i) => i.id)).toEqual([
@@ -134,7 +146,7 @@ describe("a brief SCF published is linked, apart from the idea summary", () => {
 			expect(b.url, i.id).toMatch(PINNED);
 			expect(b.checkedOn, i.id).toMatch(/^\d{4}-\d{2}-\d{2}$/);
 			expect(b.title.trim(), i.id).not.toBe("");
-			expect(JSON.stringify(b), i.id).not.toMatch(/[–—]/);
+			expect(JSON.stringify(b), i.id).not.toMatch(/[\u2013\u2014]/);
 			copies.set(i.quarter, (copies.get(i.quarter) ?? new Set()).add(b.url));
 		}
 		// A quarter's briefs were published together, on one page version.
@@ -285,5 +297,27 @@ describe("the open briefs the RFP Track page lists", () => {
 		expect(yml).toContain(
 			`[ "$${env}" = "failure" ] && REDS="$REDS rfp-roster"`,
 		);
+	});
+});
+
+// Review: the skill told agents open briefs are "continuously fundable" and
+// that no open match means "no current SCF round covers this lane", while
+// counts.open is 0 and SCF #46 takes submissions until 2026-11-09.
+describe("what the skill tells an agent about open briefs", () => {
+	const read = (p: string) => readFileSync(join(process.cwd(), p), "utf8");
+	const skill = read("public/skills/stellar-scout.md");
+	const reference = read("public/skills/references/api-reference.md");
+
+	it("never ties the SCF round to the brief list", () => {
+		for (const [name, text] of [
+			["stellar-scout.md", skill],
+			["api-reference.md", reference],
+		])
+			expect(text, name).not.toMatch(
+				/no current SCF round covers this lane|continuously fundable|ready to be funded and built/i,
+			);
+		// No open match sends the agent to the round's own state.
+		expect(skill).toMatch(/0 matches[^\n]*meta\.scfRound/);
+		expect(reference).toMatch(/counts\.open[^\n]*0[^\n]*meta\.scfRound/);
 	});
 });

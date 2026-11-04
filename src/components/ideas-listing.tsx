@@ -9,6 +9,7 @@ import { PointerHighlight } from "@/components/pointer-highlight";
 import { Badge } from "@/components/ui/badge";
 import {
 	ACTIVE_QUARTER,
+	BRIEF_ROSTER,
 	CATEGORIES,
 	CATEGORY_LABELS,
 	IDEAS,
@@ -291,7 +292,9 @@ export function IdeasListing() {
 					<p className="text-sm text-muted-foreground">
 						{searchQuery || selectedCategory !== "all"
 							? "Try adjusting your search or filters"
-							: "No RFPs available for this quarter."}
+							: selectedQuarter === ACTIVE_QUARTER
+								? `SCF has not published its ${QUARTER_LABELS[selectedQuarter]} RFPs yet: its RFP Track page named none open (checked ${BRIEF_ROSTER.checkedOn}).`
+								: "No RFPs available for this quarter."}
 					</p>
 				</div>
 			)}

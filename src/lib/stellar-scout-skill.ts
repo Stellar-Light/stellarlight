@@ -105,7 +105,7 @@ Triggered by *"vet"*, *"deep dive"*, *"should I build"*, *"is X a good idea"*. R
 7. **Funding signal.** What's been funded in this area? Filter \`/api/projects/search?q={keywords}&scfAwarded=1\` and surface total SCF dollars + recipients. Cross-reference active SCF rounds if visible.
 8. **Suggested next steps.** Concrete:
    - (a) Which upcoming hackathon to enter (\`/api/hackathons?status=upcoming\`).
-   - (b) Whether an **open RFP** (brief still soliciting; check \`meta.scfRound\` for whether the SCF submission window is open today) matches the idea (\`/api/rfps?status=open&q={keywords}\`). Open RFPs are ready to be built; winners get SCF grant funding. **If 0 matches: tell the user no current SCF round covers this lane yet, and invite them to propose it at \`https://stellarlight.xyz/ideas\` via "Suggest a Need"; community submissions graduate to confirmed RFPs.** Don't treat a zero-match RFP search as a dead end.
+   - (b) Whether an **open RFP** (brief still soliciting; check \`meta.scfRound\` for whether the SCF submission window is open today) matches the idea (\`/api/rfps?status=open&q={keywords}\`). Open RFPs are ready to be built; winners get SCF grant funding. **If 0 matches: tell the user no open SCF brief matches the idea (as of \`meta.briefRoster.checkedOn\`; \`counts.open\` can be 0 between quarters). That is not the SCF round: read \`meta.scfRound\` (\`submissionWindow\`, \`currentPhase\`) for whether SCF takes submissions now, where the idea can still apply outside the RFP track. Then invite them to propose a brief at \`https://stellarlight.xyz/ideas\` via "Suggest a Need"; community submissions graduate to confirmed RFPs.** Don't treat a zero-match RFP search as a dead end.
    - (c) Which SDK skill to install next from \`skills.stellar.org\`.
 
 ## Specialized workflows
@@ -208,7 +208,7 @@ Use the 8-step workflow above. Final answer follows this skeleton: every section
 1. **User type recap**: *"You're entering a hackathon / applying for an SCF grant / shipping independently."* One line.
 2. **Gap classification + crowdedness score**: Full gap / Partial gap / False gap, then 1-10 with one-line justification including the count math.
 3. **Existing projects (5-8 bullets)**: name + slug + score + one-line on what they do + SCF status. Inline citations.
-4. **Relevant RFPs (if any open match)**: RFP title + link + one-line on fit. If none, say *"no current SCF round covers this lane"*.
+4. **Relevant RFPs (if any open match)**: RFP title + link + one-line on fit. If none, say no open SCF brief matches it (as of \`meta.briefRoster.checkedOn\`), and give the round's own state from \`meta.scfRound\`: an open submission window still takes the idea outside the RFP track.
 5. **SDK / track recommendation**: point to one or two \`skills.stellar.org\` skills, name them.
 6. **Teammate candidates (or honest no-data)**: if \`/api/builders\` returns 0, surface the \`meta.advisory\` channels verbatim. Don't invent.
 7. **Past SCF outcomes / hackathon winners in adjacent space**: name + amount + 1-line outcome. *"X received $50k in Round Y for similar territory."*

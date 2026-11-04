@@ -33,7 +33,7 @@ Each row has a `source` field (`"curated"` or `"dorahacks"`). When `.meta.counts
 - **`https://stellarlight.xyz/hackathons`**: live page; curators add events here before they fully populate the API
 - **DoraHacks: Stellar Development Foundation** (`https://dorahacks.io/org/3096`); registration goes live here
 
-**Do not say *"no Stellar hackathons exist"*** when this happens; say *"there are no upcoming/active hackathons in stellarlight's feed right now; an event outside this feed may still be on. New ones are announced at @BuildOnStellar and stellarlight.xyz/hackathons."* `.meta.fallbackChannels.summary` names the status and filters it covers; when it says part of the feed could not be read, the empty list is not a check. Then pivot the user to RFPs (`/api/rfps?status=open`) since those are continuously fundable.
+**Do not say *"no Stellar hackathons exist"*** when this happens; say *"there are no upcoming/active hackathons in stellarlight's feed right now; an event outside this feed may still be on. New ones are announced at @BuildOnStellar and stellarlight.xyz/hackathons."* `.meta.fallbackChannels.summary` names the status and filters it covers; when it says part of the feed could not be read, the empty list is not a check. Then pivot the user to RFPs (`/api/rfps?status=open`): `counts.open` can be 0 between quarters, and whether SCF takes submissions now is `meta.scfRound`, not the brief list.
 
 ---
 
@@ -178,7 +178,7 @@ Curated **RFPs / sponsor briefs** for the Stellar ecosystem; confirmed problem s
 - **stellarlight.xyz/ideas**: the live RFP listing + the "Suggest a Need" form. Always link here when surfacing RFPs so the user can browse the full set, see quarter tabs, or submit their own.
 
 **Active RFPs vs closed RFPs:**
-- `status: "open"` RFPs are in the current SCF round (`activeQuarter`) and are **ready to be funded and built**; winners get an SCF grant. These are the actionable opportunities. Surface these first.
+- `status: "open"` RFPs are the briefs SCF's RFP Track page listed for `activeQuarter` when it was last checked (`meta.briefRoster.checkedOn`); a proposal answering one can win an SCF grant, when `meta.scfRound` shows a submission window. These are the actionable opportunities: surface them first. `counts.open` can be 0 (a quarter whose briefs SCF has not published yet); then say so, with the date, and give `meta.scfRound`: an open round still takes Open and Integration track submissions.
 - `status: "closed"` RFPs are from past quarters. **Surface them with a clear warning: *"This RFP was from {quarterLabel}; someone is likely already building it."*** It's not a dead lane. Always pair the warning with a concrete next step:
   - **Surface the `.authorName` field** and recommend the user reach out to coordinate (*"The original author was {authorName}; DM them on Stellar Discord or check the Stellar GitHub org to see who picked it up"*).
   - **Suggest competing/better takes** if the user has a clear differentiator (*"If your angle adds {X} the original brief didn't cover, that's still a viable build."*).
@@ -186,7 +186,7 @@ Curated **RFPs / sponsor briefs** for the Stellar ecosystem; confirmed problem s
 - Default behavior: when the user asks generally *"what should I build?"* or *"what RFPs are out there?"*, call `GET /api/rfps?status=open` first and lead with the active set. Mention the count from `.counts.open`. When you include closed RFPs as additional context, label them as past-quarter every time.
 
 **Important framing when there are 0 open matches:**
-- 0 open RFPs in a category doesn't mean *"no opportunity"*. It means *"no sponsor brief in the current SCF round (`.activeQuarter`) covers this lane yet."*
+- 0 open RFPs in a category doesn't mean *"no opportunity"*. It means no open sponsor brief (`.activeQuarter`, as of `.meta.briefRoster.checkedOn`) covers this lane. It says nothing about the SCF round: when `counts.open` is 0, give `meta.scfRound` for whether SCF takes submissions now.
 - **Anyone can propose an RFP** at `https://stellarlight.xyz/ideas` (`.meta.submitNewBriefAt`) via the "Suggest a Need" button. Community submissions go through curators and graduate to confirmed briefs in upcoming rounds.
 - When you find no matching open RFP, tell the user this explicitly and surface the submission CTA. Don't frame it as a dead end; frame it as an invitation to define the brief themselves.
 

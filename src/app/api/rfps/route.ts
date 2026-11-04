@@ -167,8 +167,20 @@ export async function GET(req: NextRequest) {
 	if (q) {
 		const tokens = q.split(/\s+/).filter(Boolean);
 		rfps = rfps.filter((r) => {
-			const hay =
-				`${r.title} ${r.description} ${r.technicalRequirements ?? ""} ${r.categoryLabel}`.toLowerCase();
+			// The published brief's own words too: its title, requirements and
+			// what it rules out, not only the idea summary.
+			const brief = r.publishedBrief;
+			const hay = [
+				r.title,
+				r.description,
+				r.technicalRequirements ?? "",
+				r.categoryLabel,
+				brief?.title ?? "",
+				...(brief?.functionalRequirements ?? []),
+				...(brief?.outOfScope ?? []),
+			]
+				.join(" ")
+				.toLowerCase();
 			return tokens.every((t) => hay.includes(t));
 		});
 	}
