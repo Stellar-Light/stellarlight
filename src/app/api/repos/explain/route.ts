@@ -62,8 +62,15 @@ export async function GET(req: NextRequest) {
 
 	// Route to the authoritative repo: curated canonical map first (concept →
 	// SDF repo), then the graded index as a fallback for non-canonical topics.
-	let routedVia: "explicit" | "canonical" | "knowledge-trigger" | "search" =
-		"explicit";
+	let routedVia:
+		| "explicit"
+		| "renamed"
+		| "canonical"
+		| "knowledge-trigger"
+		| "search" = "explicit";
+	// The renamed path asked for, when the index holds no row for it and the
+	// repo it moved to is explained instead (issue #1901).
+	let renamedFrom: string | null = null;
 	let nearMisses: string[] = [];
 	const canon = canonicalFor(q);
 	if (!repo) {
@@ -129,6 +136,7 @@ export async function GET(req: NextRequest) {
 			q,
 			repo: null,
 			routedVia: null,
+			renamedFrom: null,
 			repoMeta: null,
 			// Near-miss candidates from search — surfaced so an agent can pick
 			// one and pin ?repo= instead of dead-ending (F4 honesty guard).
@@ -258,7 +266,11 @@ export async function GET(req: NextRequest) {
 			let d = exact(repo);
 			if (!d && renamed !== repo) {
 				d = exact(renamed);
-				if (d) repo = renamed;
+				if (d) {
+					renamedFrom = repo;
+					repo = renamed;
+					routedVia = "renamed";
+				}
 			}
 			if (d) {
 				security = securityOf(d);
@@ -429,6 +441,7 @@ export async function GET(req: NextRequest) {
 			q,
 			repo,
 			routedVia,
+			renamedFrom,
 			repoMeta,
 			// Before anything else about the code: a malware hold, if one is on
 			// record (null otherwise, which is no claim the repo is safe).

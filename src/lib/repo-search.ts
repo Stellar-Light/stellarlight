@@ -175,6 +175,10 @@ export interface RepoResult {
 	 * snapshot (null until one exists). null = no verified contract joined —
 	 * NOT a claim the code is unused. */
 	successorRepo: string | null;
+	/** The renamed path the query named, when the index holds no row for it
+	 * and this repo, where GitHub redirects it, stands in (issue #1901). null
+	 * when the row was found under its own name. */
+	renamedFrom: string | null;
 	/** P5 (2026-09-05): supersession as FIELDS, from the curated dated map —
 	 * where to go instead, the repo's own date for it, and the kind. null =
 	 * no curated supersession statement, never 'not superseded'. */
@@ -1541,6 +1545,14 @@ export async function searchRepos(
 			normAlias(q).length >= 8;
 		const qNorm =
 			qIsIdentifier || qIsPlainName || qIsSpacedName ? normAlias(q) : "";
+		// The rule explain and trust follow: the old path keeps its own row
+		// when the index holds one; the repo it moved to stands in only when
+		// it does not, and then names the path that was asked for.
+		const standIn =
+			renamedTarget &&
+			!rawDocs.some((d) => d.fullName.toLowerCase() === named?.toLowerCase())
+				? renamedTarget.toLowerCase()
+				: "";
 		// The language filter rides the first candidate query, but three more
 		// candidate sources (canonical/flagship injection, the anchor-token net,
 		// the name net) did not carry it, so ?q=SEP-10+authentication&language=
@@ -1673,8 +1685,7 @@ export async function searchRepos(
 							normAlias(r.fullName) === qNorm
 						: // Plain-word queries: owner identity ONLY (see qIsPlainName).
 							normAlias(ownerRaw) === qNorm)) ||
-				(renamedTarget &&
-					r.fullName.toLowerCase() === renamedTarget.toLowerCase())
+				(standIn && r.fullName.toLowerCase() === standIn)
 					? 1
 					: 0;
 			// mention check spans name/topics/desc AND readme (F4: a repo whose
@@ -1888,6 +1899,8 @@ export async function searchRepos(
 						: null,
 				successorRepo:
 					(r as { successorRepo?: string | null }).successorRepo ?? null,
+				renamedFrom:
+					standIn && r.fullName.toLowerCase() === standIn ? named : null,
 				// Read-time from the curated dated map; the stored successorRepo is the
 				// weekly-stamped view of the same map. A stored value is never overridden.
 				supersededBy:

@@ -3346,7 +3346,13 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
+												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | renamed (that name is a renamed repo's old path the index holds no row for, so `repo` is where GitHub redirects it and `renamedFrom` is the path asked for) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
+										},
+										renamedFrom: {
+											type: "string",
+											nullable: true,
+											description:
+												"The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is explained instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for.",
 										},
 										repoMeta: {
 											type: "object",
@@ -6457,6 +6463,12 @@ export const spec: OpenAPISpec = {
 																type: "object",
 																properties: {
 																	fullName: { type: "string" },
+																	renamedFrom: {
+																		type: "string",
+																		nullable: true,
+																		description:
+																			"As on /api/repos/trust: the renamed path asked for, or null. Always null here, since competitors come from search rows.",
+																	},
 																	url: { type: "string", nullable: true },
 																	stars: { type: "integer", nullable: true },
 																	lastCommitAt: {
@@ -6879,6 +6891,12 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													properties: {
 														fullName: { type: "string" },
+														renamedFrom: {
+															type: "string",
+															nullable: true,
+															description:
+																"The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is served instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for.",
+														},
 														url: { type: "string", nullable: true },
 														stars: { type: "integer", nullable: true },
 														lastCommitAt: { type: "string", nullable: true },
@@ -11781,6 +11799,12 @@ export const spec: OpenAPISpec = {
 					"An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source.",
 				required: ["fullName", "repoScore"],
 				properties: {
+					renamedFrom: {
+						type: "string",
+						nullable: true,
+						description:
+							"The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, stands in for it on searchRepos (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for.",
+					},
 					successorRepo: {
 						type: "string",
 						nullable: true,

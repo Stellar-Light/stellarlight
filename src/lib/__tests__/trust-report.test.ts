@@ -50,11 +50,22 @@ describe("trust report interface paths and renamed paths", () => {
 		expect(r?.codeTruth.contractInterfacePaths).toBeNull();
 	});
 
-	it("an old renamed path answers with the repo where it lives now", async () => {
+	it("an old renamed path answers with the repo where it lives now, and says so", async () => {
 		const r = await buildTrustReport(
 			payloadOf([CLI]),
 			"theahaco/scaffold-stellar",
 		);
 		expect(r?.repo.fullName).toBe("stellar-scaffold/cli");
+		expect(r?.repo.renamedFrom).toBe("theahaco/scaffold-stellar");
+	});
+
+	it("an old path the index holds a row for is served as itself", async () => {
+		const OLD = { ...CLI, fullName: "theahaco/scaffold-stellar" };
+		const r = await buildTrustReport(
+			payloadOf([OLD, CLI]),
+			"theahaco/scaffold-stellar",
+		);
+		expect(r?.repo.fullName).toBe("theahaco/scaffold-stellar");
+		expect(r?.repo.renamedFrom).toBeNull();
 	});
 });

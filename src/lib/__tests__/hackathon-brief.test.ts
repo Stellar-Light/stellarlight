@@ -91,6 +91,7 @@ describe("contractDomainFor", () => {
 const trust = (over: Partial<TrustReport> = {}): TrustReport => ({
 	repo: {
 		fullName: "blend-capital/blend-contracts-v2",
+		renamedFrom: null,
 		url: "https://github.com/blend-capital/blend-contracts-v2",
 		stars: 100,
 		lastCommitAt: "2026-08-01T00:00:00.000Z",

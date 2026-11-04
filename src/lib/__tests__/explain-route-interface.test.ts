@@ -7,9 +7,10 @@
  * it lives now (issue #1901).
  */
 import { NextRequest } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const ROWS: Array<Record<string, unknown>> = [
+let ROWS: Array<Record<string, unknown>> = [];
+const BASE_ROWS: Array<Record<string, unknown>> = [
 	{
 		fullName: "stellar/stellar-horizon",
 		codeScanState: "scanned",
@@ -51,6 +52,9 @@ vi.mock("@/lib/deepwiki", () => ({ askDeepWiki: vi.fn(async () => null) }));
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 
 const { GET } = await import("../../app/api/repos/explain/route");
+beforeEach(() => {
+	ROWS = [...BASE_ROWS];
+});
 const call = async (qs: string) =>
 	(await GET(new NextRequest(`https://x.test/api/repos/explain?${qs}`))).json();
 
@@ -67,12 +71,29 @@ describe("explainRepo codeVerified interface paths", () => {
 		]);
 	});
 
-	it("a renamed repo's old path routes to the repo where it lives now", async () => {
+	it("a renamed repo's old path routes to the repo where it lives now, and says so", async () => {
 		const pinned = await call(
 			"q=how+do+clients+generate&repo=theahaco/scaffold-stellar",
 		);
 		expect(pinned.repo).toBe("stellar-scaffold/cli");
+		// the route names what it did: not the explicit name, a rename of it
+		expect(pinned.routedVia).toBe("renamed");
+		expect(pinned.renamedFrom).toBe("theahaco/scaffold-stellar");
 		const named = await call("q=theahaco/scaffold-stellar");
 		expect(named.repo).toBe("stellar-scaffold/cli");
+		expect(named.routedVia).toBe("renamed");
+	});
+
+	it("an old path the index holds a row for is explained as itself", async () => {
+		ROWS.push({
+			fullName: "theahaco/scaffold-stellar",
+			codeScanState: "unscanned",
+		});
+		const body = await call(
+			"q=how+do+clients+generate&repo=theahaco/scaffold-stellar",
+		);
+		expect(body.repo).toBe("theahaco/scaffold-stellar");
+		expect(body.routedVia).toBe("explicit");
+		expect(body.renamedFrom).toBeNull();
 	});
 });

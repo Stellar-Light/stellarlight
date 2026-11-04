@@ -41,6 +41,10 @@ export type TrustSignal = (typeof TRUST_SIGNALS)[number];
 export interface TrustReport {
 	repo: {
 		fullName: string;
+		/** The renamed path asked for, when the index holds no row for it and
+		 * this repo, where GitHub redirects it, is served instead (issue
+		 * #1901); null when the repo was found under the name asked for. */
+		renamedFrom: string | null;
 		url: string | null;
 		stars: number | null;
 		lastCommitAt: string | null;
@@ -220,6 +224,7 @@ export async function buildTrustReport(
 	return {
 		repo: {
 			fullName: String(d.fullName),
+			renamedFrom: fullName === asked ? null : asked,
 			url: d.url ? String(d.url) : null,
 			stars: typeof d.stars === "number" ? d.stars : null,
 			lastCommitAt,

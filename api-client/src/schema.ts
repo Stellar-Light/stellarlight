@@ -1888,6 +1888,8 @@ export interface components {
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
+            /** @description The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, stands in for it on searchRepos (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for. */
+            renamedFrom?: string | null;
             /** @description Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements, never inferred from names). Null = not superseded or not yet classified. In searchRepos, when the successor (this field, else supersededBy) is also in the results, the successor takes this repo's place and this repo moves below it, unless q is an exact alias of this repo's owner, name or path. */
             successorRepo?: string | null;
             /** @description Where to go instead, as GitHub spells it; from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'. */
@@ -3469,8 +3471,10 @@ export interface operations {
                         };
                         q?: string;
                         repo?: string | null;
-                        /** @description How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed. */
+                        /** @description How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | renamed (that name is a renamed repo's old path the index holds no row for, so `repo` is where GitHub redirects it and `renamedFrom` is the path asked for) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed. */
                         routedVia?: string | null;
+                        /** @description The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is explained instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for. */
+                        renamedFrom?: string | null;
                         /** @description Freshness/status of the routed repo from the StellarLight INDEX: these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed. */
                         repoMeta?: {
                             /** Format: date-time */
@@ -5897,6 +5901,8 @@ export interface operations {
                             startFrom?: {
                                 repo?: {
                                     fullName?: string;
+                                    /** @description As on /api/repos/trust: the renamed path asked for, or null. Always null here, since competitors come from search rows. */
+                                    renamedFrom?: string | null;
                                     url?: string | null;
                                     stars?: number | null;
                                     lastCommitAt?: string | null;
@@ -6210,6 +6216,8 @@ export interface operations {
                         report?: {
                             repo?: {
                                 fullName?: string;
+                                /** @description The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is served instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for. */
+                                renamedFrom?: string | null;
                                 url?: string | null;
                                 stars?: number | null;
                                 lastCommitAt?: string | null;

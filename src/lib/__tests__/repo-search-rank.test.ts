@@ -1378,13 +1378,33 @@ describe("developer products are canonical answers (issue #1901)", () => {
 		expect(repos[0].fullName).toBe("someone/hackthon-scaffold-stellar");
 	});
 
-	it("the old owner/name of a renamed repo finds the repo where it lives now", async () => {
+	it("the old owner/name of a renamed repo finds the repo where it lives now, and says so", async () => {
 		const { repos } = await searchRepos(
 			mockPayload([copy, cli]),
 			"theahaco/scaffold-stellar",
 			{ limit: 5 },
 		);
 		expect(repos[0].fullName).toBe("stellar-scaffold/cli");
+		// the stand-in names the path that was asked for
+		expect(repos[0].renamedFrom).toBe("theahaco/scaffold-stellar");
+	});
+
+	it("an old path the index holds a row for keeps its own row (the rule explain and trust follow)", async () => {
+		const old = doc({
+			fullName: "theahaco/scaffold-stellar",
+			description: "Scaffold Stellar (old path)",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 16,
+			stars: 0,
+		});
+		const { repos } = await searchRepos(
+			mockPayload([old, cli]),
+			"theahaco/scaffold-stellar",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("theahaco/scaffold-stellar");
+		expect(repos.every((r) => r.renamedFrom === null)).toBe(true);
 	});
 });
 

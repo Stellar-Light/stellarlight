@@ -53,3 +53,15 @@ Window cut (third commit, the #1915 class): the new tests run against the second
 
 Pass after, with the fix: Test Files 2 passed (2); Tests 102 passed (102)
 Replay of the third commit over the same corpus: 183 of 183 replay records identical to the second commit's (pages, rankings, totals, matchMode), so the ranking numbers above stay attributable to the second commit.
+
+Review finding 1 (one rename rule on search, explain and trust; the substitution named): the new tests against 3aa39d8f, before the fix
+      Tests  6 failed | 103 passed (109)
+ FAIL  src/lib/__tests__/explain-route-interface.test.ts > explainRepo codeVerified interface paths > a renamed repo's old path routes to the repo where it lives now, and says so
+ FAIL  src/lib/__tests__/explain-route-interface.test.ts > explainRepo codeVerified interface paths > an old path the index holds a row for is explained as itself
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > an old path the index holds a row for keeps its own row (the rule explain and trust follow)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > the old owner/name of a renamed repo finds the repo where it lives now, and says so
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > an old path the index holds a row for is served as itself
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > an old renamed path answers with the repo where it lives now, and says so
+ Test Files  3 failed (3)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: Test Files 4 passed (4); Tests 122 passed (122)
