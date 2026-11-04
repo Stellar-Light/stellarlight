@@ -31,6 +31,13 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"The Raven interlock guard in /api/quality no longer counts operations that Raven's own exposure policy excludes as missing from Raven's catalog. The daily drift check reads that policy from Raven's repository and lists those operations apart, so the guard expects the 30 operations Raven means to serve, not 37, and stops reporting reviewSubmission, analyzeHackathonSubmissions, getHackathonSubmission, locateSource, getRwaAssets, getQualityReport and verifyClaim as unindexed.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",

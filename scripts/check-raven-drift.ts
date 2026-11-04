@@ -31,9 +31,9 @@ const MCP_URL = process.env.RAVEN_MCP_URL || "https://agents.stellar.buzz/mcp";
 /**
  * The token is durable at ~/.config/stellarlight/raven.token. Reading only the
  * env meant every local run skipped the catalog half — and then printed "ok".
- * Resolved lazily with a dynamic import: this file deliberately has no
- * top-level import, so that it stays in global scope (see the collision guard
- * at the bottom).
+ * Resolved lazily with a dynamic import, as is every module this file reads;
+ * its exports make it a module, so its names never collide in tsc's global
+ * scope.
  */
 // RAVEN_TOKEN is the name the repo's secret actually carries (see
 // raven-category-battery.yml, raven-eval-parity.yml). Reading only
@@ -62,20 +62,85 @@ const GRACE_DAYS = Number(process.env.RAVEN_DRIFT_GRACE_DAYS || 10);
 // UA passes. Keep our name in the string for their logs.
 const UA = "curl/8 stellarlight-raven-drift-guard";
 
-// Write/interactive surfaces Raven's catalog intentionally omits (observed
-// policy 2026-07-21: all data GETs + the two partner POST flows are served).
-const CATALOG_EXCLUDED = new Set([
-	"getFeedbackSchema",
-	"submitFeedback",
-	"partnerAssistant",
-	"submitPartnerListing",
-]);
+// Raven's catalog omits what its own exposure policy excludes (12 operations
+// at fec1c79, 2026-11-03). A list typed here on 2026-07-21 knew four of them,
+// so every later exclusion read as an op Raven failed to index. The policy is
+// read with the gate replica's reader, from a clone (RAVEN_DIR) or from the
+// public repository's main branch, the code Raven deploys.
+const RAVEN_POLICY_URL =
+	"https://raw.githubusercontent.com/stellar-experimental/stellar-raven/main/src/policy/scout-exposure.ts";
+export async function loadRavenExposure(): Promise<{
+	source: string;
+	excluded: Set<string>;
+}> {
+	const { scoutExposure } = await import("./eval/raven-policy");
+	let source = RAVEN_POLICY_URL;
+	let text: string;
+	if (process.env.RAVEN_DIR) {
+		const { readFileSync } = await import("node:fs");
+		const { join } = await import("node:path");
+		source = join(process.env.RAVEN_DIR, "src/policy/scout-exposure.ts");
+		text = readFileSync(source, "utf8");
+	} else {
+		const res = await fetch(RAVEN_POLICY_URL, {
+			headers: { "User-Agent": UA },
+		});
+		if (!res.ok) throw new Error(`${RAVEN_POLICY_URL}: HTTP ${res.status}`);
+		text = await res.text();
+	}
+	const { excluded, optionalExcluded } = scoutExposure(text);
+	return {
+		source,
+		excluded: new Set([...excluded.keys(), ...optionalExcluded.keys()]),
+	};
+}
+
+/** The spec ops a discovery sweep should find, and the ones Raven excludes. */
+export function classifySpecOps(
+	spec: { paths?: Record<string, unknown> },
+	excluded: Set<string>,
+) {
+	const ops: string[] = [];
+	const excludedByPolicy: string[] = [];
+	const pathByOp = new Map<string, string>();
+	for (const [path, methods] of Object.entries(spec.paths ?? {})) {
+		for (const [method, op] of Object.entries(
+			methods as Record<string, unknown>,
+		)) {
+			const o =
+				op && typeof op === "object"
+					? (op as { operationId?: string; "x-side-effecting"?: boolean })
+					: undefined;
+			if (!o?.operationId) continue;
+			if (excluded.has(`${method.toUpperCase()} ${path}`))
+				excludedByPolicy.push(o.operationId);
+			// Side-effecting ops (the get-listed flow: partnerOnboard,
+			// submit-listing) are deliberately NOT part of the agent research
+			// surface, so a discovery sweep must not expect to find them.
+			// partnerOnboard was reported as a routing gap on 2026-09-06 purely
+			// because this list included it.
+			else if (o["x-side-effecting"] !== true) {
+				ops.push(o.operationId);
+				pathByOp.set(o.operationId, path);
+			}
+		}
+	}
+	return {
+		ops: ops.sort(),
+		excludedByPolicy: excludedByPolicy.sort(),
+		pathByOp,
+	};
+}
 
 interface DriftReport {
 	generatedAt: string;
 	specVersion: string;
 	graceDays: number;
 	expectedOps: string[];
+	/** Spec ops Raven's own exposure policy excludes: its decision, not drift. */
+	excludedByRavenPolicy: string[];
+	/** Where that policy was read: a clone path or the repository URL. */
+	ravenPolicySource: string;
 	catalogOps: string[] | null;
 	/** Absent beyond the grace window (or undatable → old) — real drift. */
 	missingFromCatalog: string[];
@@ -182,44 +247,15 @@ async function rpc(method: string, params?: unknown): Promise<any> {
 	return payload ? JSON.parse(payload) : {};
 }
 
-async function expectedFromSpec(): Promise<{
-	version: string;
-	ops: string[];
-	pathByOp: Map<string, string>;
-}> {
+async function expectedFromSpec(excluded: Set<string>) {
 	const res = await fetch(`${SCOUT_BASE}/api/openapi.json`, {
 		headers: { "User-Agent": UA },
 	});
 	if (!res.ok) throw new Error(`openapi.json → HTTP ${res.status}`);
 	const spec = await res.json();
-	const ops: string[] = [];
-	const pathByOp = new Map<string, string>();
-	for (const [path, methods] of Object.entries(spec.paths ?? {})) {
-		for (const op of Object.values(methods as Record<string, unknown>)) {
-			const id =
-				op && typeof op === "object"
-					? (op as { operationId?: string }).operationId
-					: undefined;
-			// Side-effecting ops (the get-listed flow: partnerOnboard,
-			// submit-listing) are deliberately NOT part of the agent research
-			// surface, so a discovery sweep must not expect to find them.
-			// partnerOnboard was reported as a routing gap on 2026-09-06 purely
-			// because this list included it.
-			const sideEffecting =
-				op && typeof op === "object"
-					? (op as { "x-side-effecting"?: boolean })["x-side-effecting"] ===
-						true
-					: false;
-			if (id && !CATALOG_EXCLUDED.has(id) && !sideEffecting) {
-				ops.push(id);
-				pathByOp.set(id, path);
-			}
-		}
-	}
 	return {
 		version: String(spec.info?.version ?? "?"),
-		ops: ops.sort(),
-		pathByOp,
+		...classifySpecOps(spec, excluded),
 	};
 }
 
@@ -337,14 +373,29 @@ async function main() {
 	const jsonIdx = process.argv.indexOf("--json");
 	const jsonOut = jsonIdx > -1 ? process.argv[jsonIdx + 1] : null;
 
-	const spec = await expectedFromSpec();
-	console.log(`spec ${spec.version} — ${spec.ops.length} catalog-relevant ops`);
+	let exposure: Awaited<ReturnType<typeof loadRavenExposure>>;
+	try {
+		exposure = await loadRavenExposure();
+	} catch (err) {
+		// Without the policy, an excluded op and a missing one look the same.
+		console.error(
+			`\nINCONCLUSIVE: could not read Raven's exposure policy: ${err instanceof Error ? err.message : err}`,
+		);
+		process.exit(2);
+	}
+	const spec = await expectedFromSpec(exposure.excluded);
+	console.log(`spec ${spec.version}: ${spec.ops.length} catalog-relevant ops`);
+	console.log(
+		`  excluded by Raven's own exposure policy, not drift (${exposure.source}): ${spec.excludedByPolicy.join(", ") || "none"}`,
+	);
 
 	const report: DriftReport = {
 		generatedAt: new Date().toISOString(),
 		specVersion: spec.version,
 		graceDays: GRACE_DAYS,
 		expectedOps: spec.ops,
+		excludedByRavenPolicy: spec.excludedByPolicy,
+		ravenPolicySource: exposure.source,
 		catalogOps: null,
 		missingFromCatalog: [],
 		undiscoverable: [],
@@ -375,7 +426,9 @@ async function main() {
 		report.claimedOpCount = cat.claimed;
 		report.auditArchetypeRoutesToRegistry = cat.auditRouted;
 		const absent = spec.ops.filter((o) => !cat.ops.includes(o));
-		report.extraInCatalog = cat.ops.filter((o) => !spec.ops.includes(o));
+		report.extraInCatalog = cat.ops.filter(
+			(o) => !spec.ops.includes(o) && !spec.excludedByPolicy.includes(o),
+		);
 
 		// Split absent ops into expected re-baseline lag vs real drift.
 		const dates = await addedDates(absent, spec.pathByOp);
@@ -448,14 +501,8 @@ async function main() {
 	console.log("\nok");
 }
 
-main().catch((err) => {
-	console.error("raven-drift-guard failed:", err.message ?? err);
-	process.exit(2);
-});
-
-// Global-scope collision guard: with no import/export, tsc puts this file
-// in the shared global scope where every script's main/BASE/PROBES collide —
-// and WHICH file draws the error depends on enumeration order, which differs
-// macOS vs linux (the baseline divergence of 2026-09-01). export{} makes it a
-// module; tsx runtime behavior is unchanged.
-export {};
+if (process.argv[1]?.includes("check-raven-drift"))
+	main().catch((err) => {
+		console.error("raven-drift-guard failed:", err.message ?? err);
+		process.exit(2);
+	});
