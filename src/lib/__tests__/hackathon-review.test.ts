@@ -117,6 +117,7 @@ const detail = (over: Partial<BuildDetail> = {}): BuildDetail => ({
 		factsReadAt: "2026-10-05T00:00:00Z",
 	},
 	stack: ["@stellar/stellar-sdk", "@x402/stellar"],
+	contractsCheckedAt: null,
 	stackReadAt: "2026-10-05T00:00:00Z",
 	repoMissingAt: null,
 	categoriesAt: null,

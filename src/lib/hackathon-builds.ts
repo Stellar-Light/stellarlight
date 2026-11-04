@@ -13,7 +13,11 @@ import { DEFAULT_READ_TIMEOUT_MS, withReadTimeout } from "@/lib/degraded-read";
 import { libraryOf } from "@/lib/hackathon-analytics";
 import {
 	BUILD_SEARCH_MODES,
+	type BuildContract,
 	type BuildSearchMode,
+	type EntryBasis,
+	type EntryEvidence,
+	isEntryBasis,
 	LINK_BASES,
 	type LinkBasis,
 	type LinkedProject,
@@ -53,8 +57,15 @@ export interface IndexedBuild extends DoraHacksSubmission {
 	/** The repo answered not found the last time it was read. */
 	repoMissing?: boolean;
 	/** Present only on a winner that a page off DoraHacks names
-	 * (src/data/winner-overlay.ts): that page, the evidence of the win. */
+	 * (src/data/winner-overlay.ts), or a curated row whose placement another
+	 * list names: that page or file, the evidence of the win. */
 	winnerSource?: string;
+	/** Present only on a row from a list kept off the organizer's (an event
+	 * whose coverage is partial): why it is stored. */
+	entryBasis?: EntryBasis;
+	/** Present only when the repo's cited contracts were checked: the
+	 * testnet contracts that passed every check ([] = none did). */
+	contracts?: BuildContract[];
 }
 
 /** The off-DoraHacks win of a stored entry DoraHacks did not place, or null.
@@ -82,6 +93,27 @@ export interface BuildCategory {
 
 const isLinkBasis = (v: unknown): v is LinkBasis =>
 	(LINK_BASES as readonly unknown[]).includes(v);
+
+const isContractList = (v: unknown): v is BuildContract[] =>
+	Array.isArray(v) && v.every((c) => typeof c?.id === "string");
+
+/** A stored row's win evidence off DoraHacks: the overlay's page, else the
+ * list the importer stored with the row. */
+const winnerSourceOf = (
+	d: HackathonBuild,
+	won: { winnerSource: string } | null,
+) => {
+	const src = won?.winnerSource ?? d.winnerSource;
+	return src ? { winnerSource: src } : {};
+};
+
+/** The fields a row from a list kept off the organizer's carries. */
+const entryFieldsOf = (d: HackathonBuild) => ({
+	...(isEntryBasis(d.entryBasis) ? { entryBasis: d.entryBasis } : {}),
+	...(d.contractsCheckedAt && isContractList(d.contracts)
+		? { contracts: d.contracts }
+		: {}),
+});
 
 const isCategoryList = (v: unknown): v is BuildCategory[] =>
 	Array.isArray(v) &&
@@ -296,7 +328,8 @@ export function indexedFromStored(
 		hackathonPlacement: won?.placement ?? d.placement ?? null,
 		award: d.award ?? null,
 		isWinner: !!d.isWinner || !!won,
-		...(won ? { winnerSource: won.winnerSource } : {}),
+		...winnerSourceOf(d, won),
+		...entryFieldsOf(d),
 		voteCount: null,
 		url: d.url,
 		source: "dorahacks",
@@ -348,6 +381,13 @@ export interface BuildDetail {
 	isWinner: boolean;
 	/** Present only when the best entry's win is named off DoraHacks. */
 	winnerSource?: string;
+	/** Present only on a row from a list kept off the organizer's: why it is
+	 * stored, and what that rests on. */
+	entryBasis?: EntryBasis;
+	entryEvidence?: EntryEvidence | null;
+	/** Absent = contracts not checked; [] = checked, none cited passed. */
+	contracts?: BuildContract[];
+	contractsCheckedAt: string | null;
 	links: {
 		dorahacks: string;
 		github: string | null;
@@ -438,7 +478,7 @@ function entryOf(
 		}),
 		prizeUsd: parsePlacement(placement).prizeUsd || null,
 		isWinner: !!d.isWinner || !!won,
-		...(won ? { winnerSource: won.winnerSource } : {}),
+		...winnerSourceOf(d, won),
 	};
 }
 
@@ -477,6 +517,16 @@ export function buildDetailFromStored(
 			video: d.videoUrl ?? null,
 		},
 		repo: d.repoFullName ?? null,
+		...(isEntryBasis(d.entryBasis)
+			? {
+					entryBasis: d.entryBasis,
+					entryEvidence: (d.entryEvidence as EntryEvidence | null) ?? null,
+				}
+			: {}),
+		...(d.contractsCheckedAt && isContractList(d.contracts)
+			? { contracts: d.contracts }
+			: {}),
+		contractsCheckedAt: d.contractsCheckedAt ?? null,
 		...heldSecurity(rows.find((r) => heldSecurity(r).security) ?? d),
 		...(d.linkCheckedAt ? { project: linkedProject(d, facts) } : {}),
 		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
@@ -522,6 +572,7 @@ async function readStoredBuilds(): Promise<IndexedBuild[] | null> {
 					selfTags: false,
 					embedding: false,
 					embeddingTextHash: false,
+					entryEvidence: false,
 				},
 			}),
 			8_000,
@@ -584,8 +635,9 @@ export const getHackathonBuildsIndex = unstable_cache(
 	// an old-shape index serves every new field as unknown for up to an hour.
 	// v4: an empty index is no longer cached, so one cached before this
 	// deploy must not outlive it. v5: winners named off DoraHacks
-	// (winnerSource), which a v4 index serves as unplaced.
-	["hackathon-builds-index:v5"],
+	// (winnerSource), which a v4 index serves as unplaced. v6: a stored
+	// winnerSource, entryBasis and contracts.
+	["hackathon-builds-index:v6"],
 	{
 		revalidate: 3600,
 		tags: ["hackathons"],

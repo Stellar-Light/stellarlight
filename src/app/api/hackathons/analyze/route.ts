@@ -15,8 +15,8 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import {
-	COVERAGE_VALUES,
 	categoryMeasures,
+	coverageEvents,
 	type Distribution,
 	distribution,
 	distributionBy,
@@ -27,6 +27,8 @@ import {
 	type GroupFacetId,
 	incompleteEvents,
 	leftOutWarning,
+	partialLeftOutWarning,
+	partialWarning,
 	winnersOnlyEvents,
 	winnersOnlyWarning,
 	winnersVsOthers,
@@ -136,6 +138,7 @@ export async function GET(req: NextRequest) {
 	// 12 curated winners made the winners 80 of 1,383 (5.8%), where the full
 	// listings give 68 of 1,371. Alone, they keep their counts, shares null.
 	const winnersOnly = winnersOnlyEvents(indexed);
+	const partial = coverageEvents(indexed, "partial");
 	const incompleteSet = incompleteEvents(indexed);
 	const incomplete = (b: IndexedBuild) => incompleteSet.has(b.hackathon.slug);
 	const mixed = field.some((b) => !incomplete(b));
@@ -152,32 +155,50 @@ export async function GET(req: NextRequest) {
 		field: counted.length,
 		...shares(distribution(matched, facet, opts)),
 	};
-	// A winners-only event's group says so; it is grouped only when such
-	// rows are all the set holds.
+	// A winners-only or partial event's group says so; it is grouped only
+	// when such rows are all the set holds.
+	const coverageOf = (slug: string) =>
+		winnersOnly.has(slug)
+			? ("winners-only" as const)
+			: partial.has(slug)
+				? ("partial" as const)
+				: undefined;
 	const groups = by
-		? distributionBy(matched, counted, facet, by, opts).map((g) =>
-				shares(
-					by === "event" && winnersOnly.has(g.value)
-						? { ...g, coverage: COVERAGE_VALUES[0] }
-						: g,
-				),
-			)
+		? distributionBy(matched, counted, facet, by, opts).map((g) => {
+				const coverage = by === "event" ? coverageOf(g.value) : undefined;
+				return shares(coverage ? { ...g, coverage } : g);
+			})
 		: undefined;
 	if (left.length) {
-		const byEvent = new Map([...winnersOnly.keys()].map((s) => [s, 0]));
-		for (const b of left)
-			byEvent.set(b.hackathon.slug, (byEvent.get(b.hackathon.slug) ?? 0) + 1);
-		warnings.push(leftOutWarning([...byEvent].filter(([, n]) => n > 0)));
+		// One line for winners-only events and one for partial lists.
+		for (const [events, line] of [
+			[winnersOnly, leftOutWarning],
+			[partial, partialLeftOutWarning],
+		] as const) {
+			const byEvent = new Map([...events.keys()].map((s) => [s, 0]));
+			for (const b of left)
+				if (byEvent.has(b.hackathon.slug))
+					byEvent.set(
+						b.hackathon.slug,
+						(byEvent.get(b.hackathon.slug) ?? 0) + 1,
+					);
+			const named = [...byEvent].filter(([, n]) => n > 0);
+			if (named.length) warnings.push(line(named));
+		}
 	}
 	// Alone and not named by a hackathon value (which already warned).
-	const unwarned = noShares
-		? [...winnersOnly].filter(
-				([slug]) =>
-					counted.some((b) => b.hackathon.slug === slug) &&
-					!f.hackathons.includes(slug),
-			)
-		: [];
-	if (unwarned.length) warnings.push(winnersOnlyWarning(unwarned));
+	const unwarned = (events: Map<string, number>) =>
+		noShares
+			? [...events].filter(
+					([slug]) =>
+						counted.some((b) => b.hackathon.slug === slug) &&
+						!f.hackathons.includes(slug),
+				)
+			: [];
+	const quietWinners = unwarned(winnersOnly);
+	if (quietWinners.length) warnings.push(winnersOnlyWarning(quietWinners));
+	const quietPartial = unwarned(partial);
+	if (quietPartial.length) warnings.push(partialWarning(quietPartial));
 	const lift = noShares ? null : winnersVsOthers(matched, facet, opts);
 	// A value only left-out rows carry: its 0 counts the full listings, not
 	// the value, so it serves no share, nor does a group holding those rows,
@@ -212,8 +233,12 @@ export async function GET(req: NextRequest) {
 				othersShare: null,
 				lift: null,
 			};
+		const kinds = new Set(
+			carriers.map((b) => coverageOf(b.hackathon.slug) ?? "left-out"),
+		);
+		const kind = kinds.size === 1 ? [...kinds][0] : "left-out";
 		warnings.push(
-			`value '${value}': only rows left out above carry it (${carriers.length} winners-only ${carriers.length === 1 ? "row" : "rows"}), so its 0 is not a count of it and its share is null`,
+			`value '${value}': only rows left out above carry it (${carriers.length} ${kind} ${carriers.length === 1 ? "row" : "rows"}), so its 0 is not a count of it and its share is null`,
 		);
 	}
 	// How far each reported type's count can be trusted, from the lane's own

@@ -23,6 +23,7 @@ import {
 	GAP_VERTICALS,
 	type TypeCoverage,
 } from "./ecosystem-gaps";
+import type { EntryBasis } from "./hackathon-build-links";
 import { queryBuilds } from "./hackathon-build-query";
 import {
 	type BuildSearchMode,
@@ -172,6 +173,10 @@ export interface VetIdeaReport {
 			hackathon: string;
 			placement: string | null;
 			isWinner: boolean;
+			/** Present only when the win is named off DoraHacks. */
+			winnerSource?: string;
+			/** Present only on a row of a partial list: why it is stored. */
+			entryBasis?: EntryBasis;
 			githubUrl: string | null;
 			matchedTerms: string[];
 			/** Meaning similarity to the idea, when search by meaning ran. */
@@ -566,6 +571,8 @@ export async function buildVetIdea(
 				hackathon: b.hackathon.title,
 				placement: b.hackathonPlacement ?? null,
 				isWinner: !!b.isWinner,
+				...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
+				...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
 				githubUrl: b.githubUrl ?? null,
 				matchedTerms: matched,
 				...(similarity !== undefined

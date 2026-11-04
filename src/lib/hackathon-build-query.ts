@@ -8,6 +8,8 @@ import {
 	rerankBuilds,
 } from "@/lib/build-rerank";
 import {
+	coverageEvents,
+	partialWarning,
 	winnersOnlyEvents,
 	winnersOnlyWarning,
 } from "@/lib/hackathon-analytics";
@@ -245,13 +247,17 @@ export async function parseBuildFilters(
 				`could not check hackathon '${v}': the event listing could not be read; 0 matched from it is not evidence that nothing was built`,
 		),
 	];
-	// A winners-only event's stored rows are its winners, never its field.
-	const onlyWinners = winnersOnlyEvents(indexed);
-	const named = [...slugs].flatMap((s): Array<[string, number]> => {
-		const n = onlyWinners.get(s);
-		return n ? [[s, n]] : [];
-	});
-	if (named.length) warnings.push(winnersOnlyWarning(named));
+	// A winners-only event's stored rows are its winners, and a partial
+	// event's a list from another source: never its field.
+	const named = (events: Map<string, number>) =>
+		[...slugs].flatMap((s): Array<[string, number]> => {
+			const n = events.get(s);
+			return n ? [[s, n]] : [];
+		});
+	const onlyWinners = named(winnersOnlyEvents(indexed));
+	if (onlyWinners.length) warnings.push(winnersOnlyWarning(onlyWinners));
+	const partial = named(coverageEvents(indexed, "partial"));
+	if (partial.length) warnings.push(partialWarning(partial));
 	const opt = (k: string) => sp.get(k)?.trim().toLowerCase() || undefined;
 	return {
 		filters: {

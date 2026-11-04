@@ -304,6 +304,15 @@ export const CURATED_WINNERS_NOTES: Record<string, string> = {
 		"Not announced upstream: no page we could read names this residency's winners (checked 2026-10-22). This is not a claim that no one won.",
 	"apac-stellar-hackathon-2026":
 		"Winners published for one track only: Rise In's builder spotlight (2026-09-01) names Olio 1st in Payment & Consumer Application. No page we could read names the other tracks' winners (checked 2026-10-22), so they are not served; this is not a claim that those tracks had none.",
+	// Owner decision 2026-11-04: HackProof's placements, served secondhand.
 	"hackmeridian-2026":
-		"Not announced upstream: no page we could read names this hackathon's winners (hackmeridian.com, meridian.stellar.org/hackmeridian and its Winners Circle session page, checked 2026-10-31). This is not a claim that no one won.",
+		"Secondhand: no organizer or SDF page we read names this hackathon's winners (hackmeridian.com, meridian.stellar.org/hackmeridian and its Winners Circle session page, and the stellar.org blog, checked 2026-11-04). HackProof, an MIT-licensed dataset, lists six placements in its event file at commit ea7e1982 (https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/hackmeridian-2026.yaml), two first places and four runners-up, with no source of its own; each placed row carries that file as winnerSource. This is not a claim that these are the organizer's results.",
+};
+
+/** getHackathon's stats.coverageNote after the generic one (partialNote) on
+ * a curated event whose stored rows are a partial list (coverage partial):
+ * where the list comes from and what Scout checked, dated. */
+export const CURATED_COVERAGE_NOTES: Record<string, string> = {
+	"hackmeridian-2026":
+		"The organizer's own list sits behind its builder portal's sign-in and was not read. These rows are records from HackProof (https://github.com/devodii/hackproof, MIT licensed, commit ea7e1982), which found repos on GitHub with activity on Stellar testnet during the event. Scout kept a record only when the repo's own text names HackMeridian (entryBasis repo-names-event) or HackProof lists it as a placement (placement-listed), re-read each repo's text, and kept a cited contract only when the cited file holds its id, it exists on testnet and stellar.expert dates its creation inside the event (checked 2026-11-04).",
 };

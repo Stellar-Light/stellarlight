@@ -1587,14 +1587,14 @@ export interface components {
                     /** Format: date-time */
                     readAt?: string;
                 };
-                /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, not the event's field, and every share in it is null. */
+                /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, and when it is partial the rows of that list, not the event's field, and every share in it is null. */
                 profile?: {
                     /**
-                     * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
+                     * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record. partial: every stored row comes from a list other than the organizer's and at least one is not a winner (HackMeridian 2026's, from HackProof), each row with an entryBasis that says why it is stored; the list is not the event's field and need not hold every entry. In both the size and mix of the field are unknown: its submission counts are null, never the winner or row count, and no share is computed over the rows. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
                      * @enum {string}
                      */
-                    coverage?: "winners-only";
-                    /** @description Stored submissions profiled. null when coverage is winners-only: only the winners are on record, so the size of the field is unknown. */
+                    coverage?: "winners-only" | "partial";
+                    /** @description Stored submissions profiled. null when coverage is winners-only or partial: the stored rows are not the event's field, so its size is unknown. */
                     submissions?: number | null;
                     winners?: number;
                     category?: {
@@ -1609,7 +1609,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1625,7 +1625,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1641,7 +1641,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1657,7 +1657,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1674,7 +1674,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1690,7 +1690,7 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
@@ -1706,17 +1706,17 @@ export interface components {
                             builds?: number;
                             /** @description Of `builds`, how many placed. */
                             winners?: number;
-                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                            /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                             share?: number | null;
                         }[];
                     };
                 };
                 /**
-                 * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
+                 * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record. partial: every stored row comes from a list other than the organizer's and at least one is not a winner (HackMeridian 2026's, from HackProof), each row with an entryBasis that says why it is stored; the list is not the event's field and need not hold every entry. In both the size and mix of the field are unknown: its submission counts are null, never the winner or row count, and no share is computed over the rows. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
                  * @enum {string}
                  */
-                coverage?: "winners-only";
-                /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which. */
+                coverage?: "winners-only" | "partial";
+                /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, or over a partial list (coverage partial), the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or stored rows that name no track; notes says which. */
                 tracks?: ({
                     name?: string;
                     /**
@@ -1726,7 +1726,7 @@ export interface components {
                     kind?: "category" | "track";
                     /** @description Present only on a declared track: one line, in the words of the event's record. */
                     description?: string;
-                    /** @description Submissions in the track. null when the event's coverage is winners-only (only its winners are on record, so the track's field is unknown, never its winner count) and on a declared track (no roster held: not known). */
+                    /** @description Submissions in the track. null when the event's coverage is winners-only or partial (its stored rows are not its field, so the track's field is unknown, never its winner or row count) and on a declared track (no roster held: not known). */
                     submissionCount?: number | null;
                     /** @description Winners in the track. null on a declared track: no roster held, not known. */
                     winnerCount?: number | null;
@@ -1744,9 +1744,9 @@ export interface components {
                 }[] | null;
                 /** @description Present only when tracks or prizeTiers is null: why each one is not known. */
                 notes?: string[];
-                /** @description Counts for the event. totalSubmissions counts the submissions served here (null = no submission list, or only the winners are on record). */
+                /** @description Counts for the event. totalSubmissions counts the submissions served here (null = no submission list, or only the winners or a partial list are on record). */
                 stats?: {
-                    /** @description The submissions served here. null when no submission list is held, and when coverage is winners-only: only the winners are on record, so the size of the field is unknown, never the winner count. */
+                    /** @description The submissions served here. null when no submission list is held, and when coverage is winners-only or partial: the stored rows are its winners alone or a partial list from another source, so the size of the field is unknown, never the winner or row count. */
                     totalSubmissions?: number | null;
                     /** @description Prize money in USD: the event's prize pool, else the sum of its winners' recorded prizes. null = no USD figure is known (a prize not yet announced, or prizes that are not cash); never 0 for unknown. */
                     totalPrizeUSD?: number | null;
@@ -1759,13 +1759,13 @@ export interface components {
                         awardCategory?: string | null;
                         placementRank?: number | null;
                     }[] | null;
-                    /** @description Why the winners are what they are, so a missing winner or a 0 is explained rather than silent. When hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award. On an event off DoraHacks: a dated note that its winners are published only in part, or not announced upstream. When winners carry winnerSource: the page that names them and which named winners are not served. On an ended DoraHacks event with no winner served: DoraHacks' winner_announced flag, from its event listing (refreshed hourly), says not announced upstream, or announced but not recorded here. Not announced is never a claim that no one won. null = nothing to add, or the flag could not be read. */
+                    /** @description Why the winners are what they are, so a missing winner or a 0 is explained rather than silent. When hiddenWinners is non-empty: how many winning submissions are not served and why, with each one's placement and award. On an event off DoraHacks: a dated note that its winners are published only in part, not announced upstream, or secondhand (named only by the list its rows come from, which winnerSource gives). When winners carry winnerSource: the page that names them and which named winners are not served. On an ended DoraHacks event with no winner served: DoraHacks' winner_announced flag, from its event listing (refreshed hourly), says not announced upstream, or announced but not recorded here. Not announced is never a claim that no one won. null = nothing to add, or the flag could not be read. */
                     winnersNote?: string | null;
-                    /** @description Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. When coverage is winners-only: that only the winners are on record, so the size and mix of the field are unknown and the counts of it are null. */
+                    /** @description Present when upstreamSubmissions and totalSubmissions differ: which submissions are not served here (hidden or deleted by their teams, or a same-name resubmission counted once), or that a stored submission DoraHacks no longer lists is kept. When coverage is winners-only: that only the winners are on record, so the size and mix of the field are unknown and the counts of it are null. When coverage is partial: that the rows are a partial list from a source other than the organizer, how many, the same nulls, then the event's dated note on where the list comes from and what Scout checked. */
                     coverageNote?: string | null;
                     /** @description The number of rows in `winners`. */
                     winners?: number;
-                    /** @description Submissions by status after the event, summing to totalSubmissions; null when no submission list is held, or only the winners are (coverage winners-only). Only submissions that are directory projects carry a status; DoraHacks submissions are not classified, so on a DoraHacks event built, inProgress and abandoned are 0 and unknown counts every submission. `profile` says what they became. */
+                    /** @description Submissions by status after the event, summing to totalSubmissions; null when no submission list is held, or only the winners or a partial list are (coverage winners-only or partial). Only submissions that are directory projects carry a status; DoraHacks submissions are not classified, so on a DoraHacks event built, inProgress and abandoned are 0 and unknown counts every submission. `profile` says what they became. */
                     outcomes?: {
                         built?: number;
                         inProgress?: number;
@@ -1794,8 +1794,29 @@ export interface components {
                 /** @description What THIS project won, in USD, parsed from its own placement string ('3rd Place - $1,250 in XLM' -> 1250); on curated roster rows, the roster's own figure. null when the placement carries no amount (tier-labelled winners like 'Track Winner'), never 0, which would assert a prize of nothing. */
                 prizeUsd?: number | null;
                 isWinner?: boolean;
-                /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
                 winnerSource?: string;
+                /**
+                 * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                 * @enum {string}
+                 */
+                entryBasis?: "repo-names-event" | "placement-listed";
+                /** @description Present only when the contracts the repo cites were checked (rows of a partial list): the ones that passed every check, each kept only when the cited file holds its id at HEAD, getLedgerEntries finds its contract instance on testnet (live or archived) and stellar.expert dates its creation inside the event window. [] = checked, none passed. A floor, not every contract the team deployed: an id that failed a check or could not be checked is left out, never served as absent. Absent = not checked. */
+                contracts?: {
+                    /** @description The contract id (C...). */
+                    id?: string;
+                    /** @enum {string} */
+                    network?: "testnet";
+                    /**
+                     * Format: date-time
+                     * @description When stellar.expert dates the contract's creation.
+                     */
+                    createdAt?: string;
+                    /** @description The repo file that cites it. */
+                    path?: string;
+                    /** Format: date-time */
+                    checkedAt?: string;
+                }[];
                 githubUrl?: string | null;
                 demoUrl?: string | null;
                 videoUrl?: string | null;
@@ -1859,14 +1880,35 @@ export interface components {
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null; array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
-            /** @description Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`. */
+            /** @description Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`. On a partial event (hackathon.coverage partial) the rows of that list, not the organizer's list of entries: each says why it is stored (entryBasis). */
             submissions?: ({
                 award?: string | null;
                 awardCategory?: string | null;
+                /**
+                 * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                 * @enum {string}
+                 */
+                entryBasis?: "repo-names-event" | "placement-listed";
+                /** @description Present only when the contracts the repo cites were checked (rows of a partial list): the ones that passed every check, each kept only when the cited file holds its id at HEAD, getLedgerEntries finds its contract instance on testnet (live or archived) and stellar.expert dates its creation inside the event window. [] = checked, none passed. A floor, not every contract the team deployed: an id that failed a check or could not be checked is left out, never served as absent. Absent = not checked. */
+                contracts?: {
+                    /** @description The contract id (C...). */
+                    id?: string;
+                    /** @enum {string} */
+                    network?: "testnet";
+                    /**
+                     * Format: date-time
+                     * @description When stellar.expert dates the contract's creation.
+                     */
+                    createdAt?: string;
+                    /** @description The repo file that cites it. */
+                    path?: string;
+                    /** Format: date-time */
+                    checkedAt?: string;
+                }[];
             } & {
                 [key: string]: unknown;
             })[];
-            /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which. */
+            /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, or over a partial list (coverage partial), the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or stored rows that name no track; notes says which. */
             tracks?: ({
                 name?: string;
                 /**
@@ -1876,7 +1918,7 @@ export interface components {
                 kind?: "category" | "track";
                 /** @description Present only on a declared track: one line, in the words of the event's record. */
                 description?: string;
-                /** @description Submissions in the track. null when the event's coverage is winners-only (only its winners are on record, so the track's field is unknown, never its winner count) and on a declared track (no roster held: not known). */
+                /** @description Submissions in the track. null when the event's coverage is winners-only or partial (its stored rows are not its field, so the track's field is unknown, never its winner or row count) and on a declared track (no roster held: not known). */
                 submissionCount?: number | null;
                 /** @description Winners in the track. null on a declared track: no roster held, not known. */
                 winnerCount?: number | null;
@@ -3677,30 +3719,30 @@ export interface operations {
                             source?: string;
                             /** @description Registered hackers, from the event listing. null when the listing publishes none (a 0 counts as none) or the row comes from a curated event record, which carries none: unknown, never zero. */
                             hackersCount?: number | null;
-                            /** @description Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event. Also null on a winners-only event (coverage): only its winners are stored, so the size of its field is unknown, never the winner count. */
+                            /** @description Curated events: directory projects tied to the event. DoraHacks events: stored submissions. null when neither is held: could not check, never zero; deltas.notes then names the event. Also null on a winners-only or partial event (coverage): its stored rows are its winners alone or a partial list from another source, so the size of its field is unknown, never the winner or row count. */
                             submissionCount?: number | null;
                             /** @description Winners, on the same basis as submissionCount; on a winners-only event, its stored winners. null when neither is held: could not check, never zero. */
                             winnerCount?: number | null;
                             /**
-                             * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
+                             * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record. partial: every stored row comes from a list other than the organizer's and at least one is not a winner (HackMeridian 2026's, from HackProof), each row with an entryBasis that says why it is stored; the list is not the event's field and need not hold every entry. In both the size and mix of the field are unknown: its submission counts are null, never the winner or row count, and no share is computed over the rows. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
                              * @enum {string}
                              */
-                            coverage?: "winners-only";
-                            /** @description prizePoolUSD / winnerCount, rounded. Absent when either is missing or zero. null when the winners on record are incomplete rows: only the winners are stored (coverage winners-only) or they are published only in part (getHackathon stats.winnersNote); notes says which. Never computed over incomplete rows. */
+                            coverage?: "winners-only" | "partial";
+                            /** @description prizePoolUSD / winnerCount, rounded. Absent when either is missing or zero. null when the winners on record are incomplete rows: only the winners are stored (coverage winners-only), the rows are a partial list (coverage partial), or the winners are published only in part or secondhand (getHackathon stats.winnersNote); notes says which. Never computed over incomplete rows. */
                             prizePerWinnerUSD?: number | null;
                             /** @description Curated events only: the event's directory projects still active today. */
                             stillActiveCount?: number | null;
                             liveCount?: number | null;
                             /** @description Curated events only: stillActiveCount / submissionCount as a percent. null over incomplete rows, as prizePerWinnerUSD; notes says why. */
                             activeRatePct?: number | null;
-                            /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, not the event's field, and every share in it is null. */
+                            /** @description What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, and when it is partial the rows of that list, not the event's field, and every share in it is null. */
                             profile?: {
                                 /**
-                                 * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record and the size and mix of its field are unknown; its submission counts are then null, never the winner count. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
+                                 * @description Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record. partial: every stored row comes from a list other than the organizer's and at least one is not a winner (HackMeridian 2026's, from HackProof), each row with an entryBasis that says why it is stored; the list is not the event's field and need not hold every entry. In both the size and mix of the field are unknown: its submission counts are null, never the winner or row count, and no share is computed over the rows. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.
                                  * @enum {string}
                                  */
-                                coverage?: "winners-only";
-                                /** @description Stored submissions profiled. null when coverage is winners-only: only the winners are on record, so the size of the field is unknown. */
+                                coverage?: "winners-only" | "partial";
+                                /** @description Stored submissions profiled. null when coverage is winners-only or partial: the stored rows are not the event's field, so its size is unknown. */
                                 submissions?: number | null;
                                 winners?: number;
                                 category?: {
@@ -3715,7 +3757,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3731,7 +3773,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3747,7 +3789,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3763,7 +3805,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3780,7 +3822,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3796,7 +3838,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3812,7 +3854,7 @@ export interface operations {
                                         builds?: number;
                                         /** @description Of `builds`, how many placed. */
                                         winners?: number;
-                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                                        /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                                         share?: number | null;
                                     }[];
                                 };
@@ -3859,9 +3901,9 @@ export interface operations {
                                 /** @description Slug. */
                                 lowest?: string;
                             };
-                            /** @description Plain-language differences, plus every gap: an event whose counts are unavailable, a winners-only event whose submission count is unknown, and any read that failed (a failed read is never served as an absent event or a zero). */
+                            /** @description Plain-language differences, plus every gap: an event whose counts are unavailable, a winners-only or partial event whose submission count is unknown, and any read that failed (a failed read is never served as an absent event or a zero). */
                             notes?: string[];
-                            /** @description Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set. A winners-only event (coverage) is left out: its winners' mix is not its field's. */
+                            /** @description Category and package shares that moved most between the events, largest spread first. Each value is counted against every event's full set. A winners-only or partial event (coverage) is left out: the mix of its winners or of a partial list is not its field's. */
                             facetShifts?: {
                                 /** @enum {string} */
                                 facet?: "category" | "package";
@@ -3963,7 +4005,7 @@ export interface operations {
                                 indexedBuilds?: number;
                                 /** @description Unique submissions that match: the rows this search pages through. */
                                 matched?: number;
-                                /** @description Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows analyze leaves out beside full listings (its meta.warnings names them). */
+                                /** @description Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows or a partial event's rows, which analyze leaves out beside full listings (its meta.warnings names them). */
                                 entries?: number;
                                 /** @description Builds whose name matched q but that are not listed, because most of the words searched in q occur as a whole word in no submission; meta.warnings names the words they matched. Not counted in matched or entries. 0 = none held back; always 0 in meaning mode, which never lists a build by its name. */
                                 withheldByName?: number;
@@ -4009,6 +4051,29 @@ export interface operations {
                             awardCategory?: string | null;
                             /** @description Placed in the event; absence of a win is not a quality judgement. */
                             isWinner?: boolean;
+                            /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
+                            winnerSource?: string;
+                            /**
+                             * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                             * @enum {string}
+                             */
+                            entryBasis?: "repo-names-event" | "placement-listed";
+                            /** @description Present only when the contracts the repo cites were checked (rows of a partial list): the ones that passed every check, each kept only when the cited file holds its id at HEAD, getLedgerEntries finds its contract instance on testnet (live or archived) and stellar.expert dates its creation inside the event window. [] = checked, none passed. A floor, not every contract the team deployed: an id that failed a check or could not be checked is left out, never served as absent. Absent = not checked. */
+                            contracts?: {
+                                /** @description The contract id (C...). */
+                                id?: string;
+                                /** @enum {string} */
+                                network?: "testnet";
+                                /**
+                                 * Format: date-time
+                                 * @description When stellar.expert dates the contract's creation.
+                                 */
+                                createdAt?: string;
+                                /** @description The repo file that cites it. */
+                                path?: string;
+                                /** Format: date-time */
+                                checkedAt?: string;
+                            }[];
                             /** @description What this build itself won in USD, parsed from its own placement string; null = not stated there, never 0. An `award` of its own can name the amount ('1st Place - $5,000'); an `awardCategory` names a category or pool, never this build's amount. */
                             prizeUsd?: number | null;
                             votes?: number | null;
@@ -4141,7 +4206,7 @@ export interface operations {
                             awardCategory?: string | null;
                             prizeUsd?: number | null;
                             isWinner?: boolean;
-                            /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                            /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
                             winnerSource?: string;
                             /** @description Every event this submission entered, best first, each with its own track, placement, award and awardCategory. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
                             entries?: {
@@ -4156,7 +4221,7 @@ export interface operations {
                                 awardCategory?: string | null;
                                 prizeUsd?: number | null;
                                 isWinner?: boolean;
-                                /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                                /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
                                 winnerSource?: string;
                             }[];
                             links?: {
@@ -4167,6 +4232,53 @@ export interface operations {
                             };
                             /** @description owner/name from the GitHub link; null for an account or org link, or when the repo is held (see `security`). */
                             repo?: string | null;
+                            /**
+                             * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                             * @enum {string}
+                             */
+                            entryBasis?: "repo-names-event" | "placement-listed";
+                            /** @description Present with entryBasis: what it rests on. Provenance, not a verdict. */
+                            entryEvidence?: {
+                                /** @description Where Scout's read found the event named and the day it read it; null on placement-listed. */
+                                mention?: {
+                                    /**
+                                     * @description readme; name, description or topics (the repo's GitHub metadata); doc (another markdown file).
+                                     * @enum {string}
+                                     */
+                                    in?: "readme" | "name" | "description" | "topics" | "doc";
+                                    /** @description The file, for readme and doc; null otherwise. */
+                                    path?: string | null;
+                                    /** Format: date */
+                                    readAt?: string;
+                                } | null;
+                                /** @description The list's own evidence for the record, as it published it: tier verified (a contract, wasm, asset or deployer in the repo matched testnet activity during the event) or likely (Stellar code committed then, no chain match), its strongest match (method) and the commits it counts in the event window. Not re-checked, except the contracts Scout checks itself (`contracts`). */
+                                listed?: {
+                                    /** @enum {string} */
+                                    tier?: "verified" | "likely";
+                                    method?: string | null;
+                                    commitsInWindow?: number | null;
+                                };
+                                /** @description When GitHub says the repo was created. */
+                                repoCreatedAt?: string | null;
+                            } | null;
+                            /** @description Present only when the contracts the repo cites were checked (rows of a partial list): the ones that passed every check, each kept only when the cited file holds its id at HEAD, getLedgerEntries finds its contract instance on testnet (live or archived) and stellar.expert dates its creation inside the event window. [] = checked, none passed. A floor, not every contract the team deployed: an id that failed a check or could not be checked is left out, never served as absent. Absent = not checked. */
+                            contracts?: {
+                                /** @description The contract id (C...). */
+                                id?: string;
+                                /** @enum {string} */
+                                network?: "testnet";
+                                /**
+                                 * Format: date-time
+                                 * @description When stellar.expert dates the contract's creation.
+                                 */
+                                createdAt?: string;
+                                /** @description The repo file that cites it. */
+                                path?: string;
+                                /** Format: date-time */
+                                checkedAt?: string;
+                            }[];
+                            /** @description When the contracts the repo cites were checked; null = not checked. */
+                            contractsCheckedAt?: string | null;
                             /** @description Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe. */
                             security?: {
                                 held?: boolean;
@@ -4311,7 +4423,7 @@ export interface operations {
                                 /** @enum {string} */
                                 served?: "keyword" | "meaning" | "hybrid";
                             };
-                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. No rate is computed over incomplete rows (an event whose stored rows are its winners only). When the set also holds full listings, those rows are left out of every count and share, and one line names the events and the rows left out ('left out of every count and share: 12 rows of <slug> (6), ...'), so facet=event and by=event do not list those events. A value only left-out rows carry serves its 0 with every share null (in total, in a group holding those rows and in winnersVsOthers), and a line names it (value '<v>': only rows left out above carry it ...). When they are all the set holds (a hackathon value naming only such events, or filters that leave only them), their counts stay, every share is null, and a line names them ('only the winners of <slug> are stored ...'). */
+                            /** @description Present only when something limited this answer, e.g. counting by meaning, or a hackathon value that names an event whose submissions are not stored ('no submissions are stored for <slug>') or could not be checked ('could not check hackathon ...'). Either hackathon line means 0 counted from that event is not evidence that nothing was built. No rate is computed over incomplete rows (an event whose stored rows are its winners only, or a partial list from a source other than the organizer). When the set also holds full listings, those rows are left out of every count and share, and one line names the winners-only events and the rows left out ('left out of every count and share: 12 rows of <slug> (6), ...') and one the partial events ('left out of every count and share: the 97 rows of <slug>, a partial list ...'), so facet=event and by=event do not list those events. A value only left-out rows carry serves its 0 with every share null (in total, in a group holding those rows and in winnersVsOthers), and a line names it (value '<v>': only rows left out above carry it ...). When they are all the set holds (a hackathon value naming only such events, or filters that leave only them), their counts stay, every share is null, and a line names them ('only the winners of <slug> are stored ...', 'the stored rows of <slug> are a partial list ...'). */
                             warnings?: string[];
                             source?: string;
                             upstream?: string;
@@ -4356,7 +4468,7 @@ export interface operations {
                         };
                         /** @description The facet over every matched submission, less the incomplete rows meta.warnings says were left out. */
                         total?: {
-                            /** @description Builds passing every filter except q, less incomplete rows left out (meta.warnings); builds / field is the share that matched q. When only a winners-only event's rows are counted, they are its winners, not its field. */
+                            /** @description Builds passing every filter except q, less incomplete rows left out (meta.warnings); builds / field is the share that matched q. When only a winners-only or partial event's rows are counted, they are its winners or its partial list, not its field. */
                             field?: number;
                             /** @description Builds in the set. */
                             builds?: number;
@@ -4369,7 +4481,7 @@ export interface operations {
                                 builds?: number;
                                 /** @description Of `builds`, how many placed. */
                                 winners?: number;
-                                /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                                /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                                 share?: number | null;
                             }[];
                         };
@@ -4379,13 +4491,13 @@ export interface operations {
                             /** @description by=event: the event's title. */
                             title?: string;
                             endedAt?: string | null;
-                            /** @description Builds in this group before q: the group's whole field. On a group with coverage winners-only, the event's winners on record, not its field, and every share in the group is null. */
+                            /** @description Builds in this group before q: the group's whole field. On a group with coverage winners-only or partial, the event's winners or partial list on record, not its field, and every share in the group is null. */
                             field?: number;
                             /**
-                             * @description by=event only, present only when the event's stored rows are its winners alone (winners-only), which happens only when such rows are all the set holds: its counts describe its winners, the size and mix of its field are unknown, and every share in the group is null.
+                             * @description by=event only, present only when the event's stored rows are its winners alone (winners-only) or a partial list from a source other than the organizer (partial), which happens only when such rows are all the set holds: its counts describe those rows, the size and mix of its field are unknown, and every share in the group is null.
                              * @enum {string}
                              */
-                            coverage?: "winners-only";
+                            coverage?: "winners-only" | "partial";
                             /** @description Builds in the set. */
                             builds?: number;
                             /** @description Builds whose value is known: every share's denominator. */
@@ -4397,11 +4509,11 @@ export interface operations {
                                 builds?: number;
                                 /** @description Of `builds`, how many placed. */
                                 winners?: number;
-                                /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners): no share is computed over them. */
+                                /** @description builds / known (0 to 1); null when no build's value is known, or when the counted rows are incomplete (only a winners-only event's winners, or a partial event's list): no share is computed over them. */
                                 share?: number | null;
                             }[];
                         }[];
-                        /** @description Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement, or when the set is only a winners-only event's rows. Incomplete rows left out of the set (meta.warnings) are not among the winners. */
+                        /** @description Winners against everyone else in the matched set, value by value, most common among winners first. Absent when the set has no winners or no others, or facet=placement, or when the set is only a winners-only or partial event's rows. Incomplete rows left out of the set (meta.warnings) are not among the winners. */
                         winnersVsOthers?: {
                             winnersKnown?: number;
                             othersKnown?: number;
@@ -4503,7 +4615,7 @@ export interface operations {
                                 awardCategory?: string | null;
                                 prizeUsd?: number | null;
                                 isWinner?: boolean;
-                                /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                                /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
                                 winnerSource?: string;
                                 /** @description Every event this submission entered, best first, each with its own track, placement, award and awardCategory. DoraHacks lets one submission enter several events, and a placement belongs to one of them. */
                                 entries?: {
@@ -4518,7 +4630,7 @@ export interface operations {
                                     awardCategory?: string | null;
                                     prizeUsd?: number | null;
                                     isWinner?: boolean;
-                                    /** @description Present only when a page off DoraHacks, not DoraHacks' own winner assignments, names this win: that page, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that page states it, 'Winner' when it names none. Absent on a win DoraHacks assigned, on a submission from an event off DoraHacks (curated-{event}-{name}, whose own link is its source) and on a submission that did not win. */
+                                    /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
                                     winnerSource?: string;
                                 }[];
                                 links?: {
@@ -4529,6 +4641,53 @@ export interface operations {
                                 };
                                 /** @description owner/name from the GitHub link; null for an account or org link, or when the repo is held (see `security`). */
                                 repo?: string | null;
+                                /**
+                                 * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                                 * @enum {string}
+                                 */
+                                entryBasis?: "repo-names-event" | "placement-listed";
+                                /** @description Present with entryBasis: what it rests on. Provenance, not a verdict. */
+                                entryEvidence?: {
+                                    /** @description Where Scout's read found the event named and the day it read it; null on placement-listed. */
+                                    mention?: {
+                                        /**
+                                         * @description readme; name, description or topics (the repo's GitHub metadata); doc (another markdown file).
+                                         * @enum {string}
+                                         */
+                                        in?: "readme" | "name" | "description" | "topics" | "doc";
+                                        /** @description The file, for readme and doc; null otherwise. */
+                                        path?: string | null;
+                                        /** Format: date */
+                                        readAt?: string;
+                                    } | null;
+                                    /** @description The list's own evidence for the record, as it published it: tier verified (a contract, wasm, asset or deployer in the repo matched testnet activity during the event) or likely (Stellar code committed then, no chain match), its strongest match (method) and the commits it counts in the event window. Not re-checked, except the contracts Scout checks itself (`contracts`). */
+                                    listed?: {
+                                        /** @enum {string} */
+                                        tier?: "verified" | "likely";
+                                        method?: string | null;
+                                        commitsInWindow?: number | null;
+                                    };
+                                    /** @description When GitHub says the repo was created. */
+                                    repoCreatedAt?: string | null;
+                                } | null;
+                                /** @description Present only when the contracts the repo cites were checked (rows of a partial list): the ones that passed every check, each kept only when the cited file holds its id at HEAD, getLedgerEntries finds its contract instance on testnet (live or archived) and stellar.expert dates its creation inside the event window. [] = checked, none passed. A floor, not every contract the team deployed: an id that failed a check or could not be checked is left out, never served as absent. Absent = not checked. */
+                                contracts?: {
+                                    /** @description The contract id (C...). */
+                                    id?: string;
+                                    /** @enum {string} */
+                                    network?: "testnet";
+                                    /**
+                                     * Format: date-time
+                                     * @description When stellar.expert dates the contract's creation.
+                                     */
+                                    createdAt?: string;
+                                    /** @description The repo file that cites it. */
+                                    path?: string;
+                                    /** Format: date-time */
+                                    checkedAt?: string;
+                                }[];
+                                /** @description When the contracts the repo cites were checked; null = not checked. */
+                                contractsCheckedAt?: string | null;
                                 /** @description Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe. */
                                 security?: {
                                     held?: boolean;
@@ -4638,7 +4797,7 @@ export interface operations {
                                     } | null;
                                 }[];
                             };
-                            /** @description How crowded the submission's top category is across every stored submission of events whose full listing is stored: a winners-only event's winners are left out, so no share mixes them in. null when it has no confident category or is not categorized yet; categoryNote says which. */
+                            /** @description How crowded the submission's top category is across every stored submission of events whose full listing is stored: a winners-only event's winners and a partial event's list are left out, so no share mixes them in. null when it has no confident category or is not categorized yet; categoryNote says which. */
                             categoryContext?: {
                                 /** @enum {string} */
                                 type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
@@ -4720,6 +4879,13 @@ export interface operations {
                                             hackathon?: string;
                                             placement?: string | null;
                                             isWinner?: boolean;
+                                            /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
+                                            winnerSource?: string;
+                                            /**
+                                             * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                                             * @enum {string}
+                                             */
+                                            entryBasis?: "repo-names-event" | "placement-listed";
                                             githubUrl?: string | null;
                                             matchedTerms?: string[];
                                             /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
@@ -5671,6 +5837,13 @@ export interface operations {
                                         hackathon?: string;
                                         placement?: string | null;
                                         isWinner?: boolean;
+                                        /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
+                                        winnerSource?: string;
+                                        /**
+                                         * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                                         * @enum {string}
+                                         */
+                                        entryBasis?: "repo-names-event" | "placement-listed";
                                         githubUrl?: string | null;
                                         matchedTerms?: string[];
                                         /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
@@ -5805,6 +5978,13 @@ export interface operations {
                                         hackathon?: string;
                                         placement?: string | null;
                                         isWinner?: boolean;
+                                        /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
+                                        winnerSource?: string;
+                                        /**
+                                         * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                                         * @enum {string}
+                                         */
+                                        entryBasis?: "repo-names-event" | "placement-listed";
                                         githubUrl?: string | null;
                                         matchedTerms?: string[];
                                         /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */
@@ -5849,6 +6029,13 @@ export interface operations {
                                 endedAt?: string | null;
                                 isWinner?: boolean;
                                 placement?: string | null;
+                                /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
+                                winnerSource?: string;
+                                /**
+                                 * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                                 * @enum {string}
+                                 */
+                                entryBasis?: "repo-names-event" | "placement-listed";
                                 githubUrl?: string | null;
                                 /** @description Present only when this build's repo is held for malware (the repo's own hold is getRepoTrust `security`): the build is still served, but its GitHub link and repo name are withheld (null) and `note` says what not to do, in Scout's words. Absent means no hold on record, which is not a claim that the repo is safe. */
                                 security?: {
@@ -6102,6 +6289,13 @@ export interface operations {
                                     hackathon?: string;
                                     placement?: string | null;
                                     isWinner?: boolean;
+                                    /** @description Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win. */
+                                    winnerSource?: string;
+                                    /**
+                                     * @description Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named, at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.
+                                     * @enum {string}
+                                     */
+                                    entryBasis?: "repo-names-event" | "placement-listed";
                                     githubUrl?: string | null;
                                     matchedTerms?: string[];
                                     /** @description Meaning similarity to the idea, 0 to 1; absent when search by meaning did not run. */

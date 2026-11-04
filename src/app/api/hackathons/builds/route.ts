@@ -165,6 +165,12 @@ export async function GET(req: NextRequest) {
 			// What this project actually won, parsed from its own placement string.
 			prizeUsd: parsePlacement(b.hackathonPlacement).prizeUsd || null,
 			isWinner: b.isWinner,
+			// A win named off DoraHacks: the page or file that names it.
+			...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
+			// A row of a partial list: why it is stored, and the testnet
+			// contracts its repo cites that passed Scout's checks.
+			...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
+			...(b.contracts ? { contracts: b.contracts } : {}),
 			votes: b.voteCount,
 			url: b.url,
 			githubUrl: b.githubUrl,
