@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-04",
+		surfaces: ["api", "mcp", "skill"],
+		version: "spec@1.9.119",
+		type: "fixed",
+		summary:
+			"getPartner serves the same row as getPartners: seps and assets are null when no stellar.toml read is recorded (they were [] and curated asset codes), caseStudies is null when none is recorded (was []), and the row gains pilot, tomlConfidence and trust. matchPartners answers a model account that is refused (bad key, no permission, no credit) with the documented 503 unavailable, where it answered an undocumented 502; matchPartners, partnerAssistant and partnerOnboard now document their 400, 422 and 502 responses.",
+		detail:
+			"Found by live checks on 2026-11-02. getPartner kept its own copy of the partner row: for Bitso, Honey Coin, Coins PH and Yellow Card it served seps [], the checkable claim that we read their SEP-1 file and it lists none, where getPartners served null, and it served curated asset codes as if read from stellar.toml. Both routes now use one serializer and the spec declares the row once, as Partner; [] still means a recorded read found none. Partner.rampTypes now says ramps are either confirmed from the transfer server during a stellar.toml read or entered by a curator, and are curator-entered when tomlFetchedAt is null. The partner pages show 'stellar.toml verified' and 'Verified from this partner's stellar.toml' only when a read is recorded with its source URL and its date; otherwise the capabilities read 'Curated by Stellar Light', ramp directions are labelled as recorded, and the compliance card reads 'Curated from' where it read 'Verified from'. matchPartners was the one AI partner route without the account branch, so a refused account answered 502; it now answers 503 with unavailable true, which tells a consumer to fall back to GET /api/partners filters and not to retry. Any other model failure (a provider error or outage, or output that could not be read) stays a 502, now documented with the ErrorResponse body: one failed call that a later resend can clear.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",

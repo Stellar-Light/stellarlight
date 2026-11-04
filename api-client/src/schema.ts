@@ -1061,7 +1061,7 @@ export interface components {
             } | null;
             /** @description ISO date of the last successful stellar.toml fetch+parse. Admin/partner edits may postdate this snapshot. */
             tomlFetchedAt?: string | null;
-            /** @description Fiat ramp directions offered. Curator-maintained: NULL = not recorded for this partner (UNKNOWN, never 'offers no ramps'). */
+            /** @description Fiat ramp directions offered (deposit = on-ramp, withdraw = off-ramp). Either confirmed from the anchor's own transfer server /info during a stellar.toml read, or entered by a curator; with tomlFetchedAt null they are curator-entered, so never cite them as stellar.toml facts. NULL = none recorded (UNKNOWN, never 'offers no ramps'), and never inferred from SEP presence. */
             rampTypes?: ("on-ramp" | "off-ramp")[] | null;
             country?: string | null;
             acceptingClients?: boolean;
@@ -1076,7 +1076,10 @@ export interface components {
             responseSla?: string | null;
             /** @description Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies'); currently null for every partner, as none have been curated yet. */
             caseStudies?: {
-                [key: string]: unknown;
+                title?: string;
+                url?: string | null;
+                /** @description Slug in the projects directory, when the case study's project is listed there. */
+                projectSlug?: string | null;
             }[] | null;
             /** @description SYSTEM-computed activity signals (never self-reported). All-null = not yet auto-verified, NOT a negative signal. */
             verified?: {
@@ -5040,62 +5043,7 @@ export interface operations {
                             /** Format: date-time */
                             generatedAt?: string;
                         };
-                        /** @description The full partner profile: every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing. */
-                        partner?: {
-                            slug?: string;
-                            name?: string;
-                            partnerType?: string;
-                            tagline?: string | null;
-                            description?: string | null;
-                            logoUrl?: string | null;
-                            websiteUrl?: string | null;
-                            foundedYear?: number | null;
-                            services?: string[];
-                            sectors?: string[];
-                            regions?: string[];
-                            assets?: string[];
-                            /** @description SEP standards the partner implements. */
-                            seps?: string[];
-                            /** @description Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed; the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner. */
-                            rampTypes?: ("on-ramp" | "off-ramp")[] | null;
-                            country?: string | null;
-                            acceptingClients?: boolean;
-                            typicalEngagement?: string | null;
-                            leadTime?: string | null;
-                            pricingModel?: string | null;
-                            pricingNotes?: string | null;
-                            docsUrl?: string | null;
-                            githubOrg?: string | null;
-                            contactEmail?: string | null;
-                            contactChannel?: string | null;
-                            responseSla?: string | null;
-                            tomlSourceUrl?: string | null;
-                            tomlFetchedAt?: string | null;
-                            caseStudies?: {
-                                title?: string;
-                                url?: string | null;
-                                /** @description Slug in the projects directory, when the case study's project is listed there. */
-                                projectSlug?: string | null;
-                            }[];
-                            /** @description Automated verification signals. Null members mean not yet probed: absence of evidence, not a failing grade. */
-                            verified?: {
-                                githubLastCommitAt?: string | null;
-                                githubCommits90d?: number | null;
-                                onchainActive?: boolean | null;
-                                onchainNote?: string | null;
-                                scfInvolvement?: string | null;
-                                lastAutoVerifyAt?: string | null;
-                            };
-                            /** @description Row-currency signals used by matching. */
-                            freshness?: {
-                                status?: string;
-                                lastPartnerUpdateAt?: string | null;
-                                isCurrent?: boolean;
-                                excludeFromMatching?: boolean;
-                            };
-                            /** @description Canonical stellarlight.xyz profile URL. */
-                            url?: string;
-                        };
+                        partner?: components["schemas"]["Partner"];
                     };
                 };
             };
@@ -5169,6 +5117,24 @@ export interface operations {
                     };
                 };
             };
+            /** @description The body is not JSON, or `need` is missing or blank. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The model declined to rank this need: rephrase it, or use GET /api/partners filters. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
@@ -5182,6 +5148,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+            /** @description One language model call failed: a provider error or outage, or output that could not be read. Not a claim about the request or the data: resend later, or rank with GET /api/partners filters now. The 503 with unavailable true is the answer when the AI path is off, where a resend does not help. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description AI backend unavailable: fall back to GET /api/partners */
@@ -5264,6 +5239,15 @@ export interface operations {
                     };
                 };
             };
+            /** @description The body is not JSON, or `messages` holds no usable chat turn. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
@@ -5277,6 +5261,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+            /** @description One language model call failed: a provider error or outage, or output that could not be read. Not a claim about the request or the data: resend later, or browse GET /api/partners now. The 503 with unavailable true is the answer when the AI path is off, where a resend does not help. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description AI backend unavailable */
@@ -5350,6 +5343,24 @@ export interface operations {
                     };
                 };
             };
+            /** @description The body is not JSON, `mode` is neither chat nor extract, or extract was sent with no transcript. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The model declined to read this transcript. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
@@ -5363,6 +5374,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+            /** @description One language model call failed: a provider error or outage, or output that could not be read. Not a claim about the request or the data: resend later, or use the listing form (POST /api/partners/submit-listing) now. The 503 with unavailable true is the answer when the AI path is off, where a resend does not help. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description AI backend unavailable */

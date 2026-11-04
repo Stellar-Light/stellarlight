@@ -334,6 +334,10 @@ export default async function PartnerProfilePage({
 
 	const hasCapabilities =
 		assets.length > 0 || seps.length > 0 || ramps.length > 0;
+	// Present capabilities prove nothing: they are stellar.toml facts only
+	// when a read is recorded, with its source URL and its date; otherwise a
+	// curator entered them (#1909).
+	const tomlRead = Boolean(p.tomlSourceUrl && p.tomlFetchedAt);
 	const hasEngagement =
 		p.acceptingClients != null ||
 		p.pricingModel ||
@@ -507,7 +511,7 @@ export default async function PartnerProfilePage({
 												SCF-funded
 											</Badge>
 										)}
-										{hasCapabilities && (
+										{hasCapabilities && tomlRead && (
 											<Badge
 												variant="outline"
 												className="text-sm px-4 py-1.5 font-medium border-border/50 text-muted-foreground flex items-center gap-1.5"
@@ -740,13 +744,17 @@ export default async function PartnerProfilePage({
 					</Card>
 				)}
 
-				{/* Capabilities (anchors — from stellar.toml) */}
+				{/* Capabilities: stellar.toml facts when a read is recorded, else
+				    curated. Ramps are never stellar.toml facts alone: a curator
+				    may have entered them even when the file was read. */}
 				{hasCapabilities && (
 					<Card className="mb-8 border border-border/50 bg-card shadow-sm">
 						<CardHeader className="pb-4">
 							<CardTitle className="text-xl font-bold">Capabilities</CardTitle>
 							<CardDescription>
-								Verified from this partner&apos;s stellar.toml (SEP-1)
+								{tomlRead
+									? `Assets and standards verified from this partner's stellar.toml (SEP-1), read ${p.tomlFetchedAt}.${ramps.length > 0 ? " Ramp directions as recorded by Stellar Light." : ""}`
+									: "Curated by Stellar Light, not read from this partner's stellar.toml."}
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-6">
@@ -830,6 +838,7 @@ export default async function PartnerProfilePage({
 										? `https://stellar.expert/explorer/public/asset/${o.code}-${o.issuer}`
 										: null;
 									const inner = (
+										// biome-ignore lint/correctness/useJsxKeyInIterable: inner is only the child of the keyed wrapper returned below
 										<div className="flex flex-wrap items-center gap-x-6 gap-y-3 p-4 rounded-xl border border-border/50 bg-background/50 group-hover:border-green-500/40 transition-colors duration-150">
 											<span className="font-mono text-base font-bold text-foreground min-w-[5rem]">
 												{o.code}
@@ -880,7 +889,7 @@ export default async function PartnerProfilePage({
 								Compliance &amp; corridors
 							</CardTitle>
 							<CardDescription>
-								Verified from the partner&apos;s own disclosures / regulator
+								Curated from the partner&apos;s own disclosures and regulator
 								registries
 							</CardDescription>
 						</CardHeader>

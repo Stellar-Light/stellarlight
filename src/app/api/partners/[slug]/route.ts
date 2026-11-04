@@ -3,8 +3,8 @@
  *
  *   GET /api/partners/{slug}
  *
- * Published partners only. Same public shape as the list endpoint's items
- * (partner-claimed + verified signals + freshness). 404 for unknown or
+ * Published partners only. The list endpoint's row, from the same
+ * serializer (partnerToPublic). 404 for unknown or
  * unpublished slugs — drafts and archived-but-unpublished partners stay
  * invisible to the public + to agents.
  */
@@ -12,6 +12,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { partnerToPublic } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { serverTiming } from "@/lib/server-timing";
 
@@ -20,73 +21,6 @@ export const dynamic = "force-dynamic";
 // stall, and finishing it helps nobody.
 export const maxDuration = 20;
 export const revalidate = 300;
-
-// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape varies
-function toPublic(p: any) {
-	const verified = p.verified ?? {};
-	const freshnessStatus = p.freshnessStatus ?? "fresh";
-	return {
-		slug: p.slug,
-		name: p.name,
-		partnerType: p.partnerType,
-		tagline: p.tagline ?? null,
-		description: p.description ?? null,
-		logoUrl: p.logoUrl ?? null,
-		websiteUrl: p.websiteUrl ?? null,
-		foundedYear: p.foundedYear ?? null,
-		services: (p.services ?? [])
-			.map((s: { tag: string }) => s.tag)
-			.filter(Boolean),
-		sectors: p.sectors ?? [],
-		regions: p.regions ?? [],
-		// Anchor capabilities from stellar.toml (SEP-1) — same source as
-		// anchors.stellar.org. Empty for non-anchors.
-		assets: (p.assets ?? [])
-			.map((a: { code: string }) => a.code)
-			.filter(Boolean),
-		seps: p.seps ?? [],
-		tomlSourceUrl: p.tomlSourceUrl ?? null,
-		tomlFetchedAt: p.tomlFetchedAt ?? null,
-		// null, never []: the list route already serves an unconfirmed ramp set
-		// as null, and the detail served [] for the same row (MYKOBO, 2026-09-05
-		// through-Raven battery) — an empty array asserts "no ramps" where the
-		// transfer server's /info was simply not readable.
-		rampTypes: p.rampTypes?.length ? p.rampTypes : null,
-		country: p.country ?? null,
-		acceptingClients: p.acceptingClients ?? null,
-		typicalEngagement: p.typicalEngagement ?? null,
-		leadTime: p.leadTime ?? null,
-		pricingModel: p.pricingModel ?? null,
-		pricingNotes: p.pricingNotes ?? null,
-		docsUrl: p.docsUrl ?? null,
-		githubOrg: p.githubOrg ?? null,
-		contactEmail: p.contactEmail ?? null,
-		contactChannel: p.contactChannel ?? null,
-		responseSla: p.responseSla ?? null,
-		caseStudies: (p.caseStudies ?? []).map(
-			(c: { title: string; url?: string; projectSlug?: string }) => ({
-				title: c.title,
-				url: c.url ?? null,
-				projectSlug: c.projectSlug ?? null,
-			}),
-		),
-		verified: {
-			githubLastCommitAt: verified.githubLastCommitAt ?? null,
-			githubCommits90d: verified.githubCommits90d ?? null,
-			onchainActive: verified.onchainActive ?? null,
-			onchainNote: verified.onchainNote ?? null,
-			scfInvolvement: verified.scfInvolvement ?? null,
-			lastAutoVerifyAt: verified.lastAutoVerifyAt ?? null,
-		},
-		freshness: {
-			status: freshnessStatus,
-			lastPartnerUpdateAt: p.lastPartnerUpdateAt ?? null,
-			isCurrent: freshnessStatus === "fresh",
-			excludeFromMatching: freshnessStatus === "archived",
-		},
-		url: `https://stellarlight.xyz/partners/${p.slug}`,
-	};
-}
 
 export async function GET(
 	req: NextRequest,
@@ -146,7 +80,7 @@ export async function GET(
 					source: `https://stellarlight.xyz/partners/${slug}`,
 					generatedAt: new Date().toISOString(),
 				},
-				partner: toPublic(doc),
+				partner: partnerToPublic(doc),
 			},
 			{
 				headers: {

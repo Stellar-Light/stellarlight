@@ -127,6 +127,24 @@ const rateLimited429 = (callsModel = false) => ({
 	},
 });
 
+/** A documented failure whose body is the shared ErrorResponse. */
+const errorBody = (description: string) => ({
+	description,
+	content: {
+		"application/json": {
+			schema: { $ref: "#/components/schemas/ErrorResponse" },
+		},
+	},
+});
+
+/** The 502 the AI partner routes answer when one language model call fails
+ * (#1908). An account the model refuses (bad key, no permission, no credit)
+ * answers their 503 `unavailable` instead: a resend cannot clear that one. */
+const modelFailed502 = (fallback: string) =>
+	errorBody(
+		`One language model call failed: a provider error or outage, or output that could not be read. Not a claim about the request or the data: resend later, or ${fallback} now. The 503 with unavailable true is the answer when the AI path is off, where a resend does not help.`,
+	);
+
 /** One-shot report meta — {source, generatedAt, note} (scf-pitch,
  * hackathon-brief, vet-idea, repos/trust routes serve exactly this). */
 const REPORT_META_SCHEMA = {
@@ -5289,109 +5307,7 @@ export const spec: OpenAPISpec = {
 												generatedAt: { type: "string", format: "date-time" },
 											},
 										},
-										partner: {
-											type: "object",
-											description:
-												"The full partner profile: every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing.",
-											properties: {
-												slug: { type: "string" },
-												name: { type: "string" },
-												partnerType: { type: "string" },
-												tagline: { type: "string", nullable: true },
-												description: { type: "string", nullable: true },
-												logoUrl: { type: "string", nullable: true },
-												websiteUrl: { type: "string", nullable: true },
-												foundedYear: { type: "integer", nullable: true },
-												services: { type: "array", items: { type: "string" } },
-												sectors: { type: "array", items: { type: "string" } },
-												regions: { type: "array", items: { type: "string" } },
-												assets: { type: "array", items: { type: "string" } },
-												seps: {
-													type: "array",
-													items: { type: "string" },
-													description: "SEP standards the partner implements.",
-												},
-												rampTypes: {
-													type: "array",
-													nullable: true,
-													items: {
-														type: "string",
-														enum: ["on-ramp", "off-ramp"],
-													},
-													description:
-														"Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed; the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner.",
-												},
-												country: { type: "string", nullable: true },
-												acceptingClients: { type: "boolean" },
-												typicalEngagement: { type: "string", nullable: true },
-												leadTime: { type: "string", nullable: true },
-												pricingModel: { type: "string", nullable: true },
-												pricingNotes: { type: "string", nullable: true },
-												docsUrl: { type: "string", nullable: true },
-												githubOrg: { type: "string", nullable: true },
-												contactEmail: { type: "string", nullable: true },
-												contactChannel: { type: "string", nullable: true },
-												responseSla: { type: "string", nullable: true },
-												tomlSourceUrl: { type: "string", nullable: true },
-												tomlFetchedAt: { type: "string", nullable: true },
-												caseStudies: {
-													type: "array",
-													items: {
-														type: "object",
-														properties: {
-															title: { type: "string" },
-															url: { type: "string", nullable: true },
-															projectSlug: {
-																type: "string",
-																nullable: true,
-																description:
-																	"Slug in the projects directory, when the case study's project is listed there.",
-															},
-														},
-													},
-												},
-												verified: {
-													type: "object",
-													description:
-														"Automated verification signals. Null members mean not yet probed: absence of evidence, not a failing grade.",
-													properties: {
-														githubLastCommitAt: {
-															type: "string",
-															nullable: true,
-														},
-														githubCommits90d: {
-															type: "integer",
-															nullable: true,
-														},
-														onchainActive: { type: "boolean", nullable: true },
-														onchainNote: { type: "string", nullable: true },
-														scfInvolvement: { type: "string", nullable: true },
-														lastAutoVerifyAt: {
-															type: "string",
-															nullable: true,
-														},
-													},
-												},
-												freshness: {
-													type: "object",
-													description: "Row-currency signals used by matching.",
-													properties: {
-														status: { type: "string" },
-														lastPartnerUpdateAt: {
-															type: "string",
-															nullable: true,
-														},
-														isCurrent: { type: "boolean" },
-														excludeFromMatching: { type: "boolean" },
-													},
-												},
-												url: {
-													type: "string",
-													description:
-														"Canonical stellarlight.xyz profile URL.",
-												},
-											},
-										},
+										partner: { $ref: "#/components/schemas/Partner" },
 									},
 								},
 							},
@@ -5542,7 +5458,14 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"400": errorBody(
+						"The body is not JSON, or `need` is missing or blank.",
+					),
+					"422": errorBody(
+						"The model declined to rank this need: rephrase it, or use GET /api/partners filters.",
+					),
 					"429": rateLimited429(true),
+					"502": modelFailed502("rank with GET /api/partners filters"),
 					"503": {
 						description:
 							"AI backend unavailable: fall back to GET /api/partners",
@@ -5721,7 +5644,11 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"400": errorBody(
+						"The body is not JSON, or `messages` holds no usable chat turn.",
+					),
 					"429": rateLimited429(true),
+					"502": modelFailed502("browse GET /api/partners"),
 					"503": {
 						description: "AI backend unavailable",
 						content: {
@@ -5851,7 +5778,14 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"400": errorBody(
+						"The body is not JSON, `mode` is neither chat nor extract, or extract was sent with no transcript.",
+					),
+					"422": errorBody("The model declined to read this transcript."),
 					"429": rateLimited429(true),
+					"502": modelFailed502(
+						"use the listing form (POST /api/partners/submit-listing)",
+					),
 					"503": {
 						description: "AI backend unavailable",
 						content: {
@@ -10469,7 +10403,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "string", enum: ["on-ramp", "off-ramp"] },
 						description:
-							"Fiat ramp directions offered. Curator-maintained: NULL = not recorded for this partner (UNKNOWN, never 'offers no ramps').",
+							"Fiat ramp directions offered (deposit = on-ramp, withdraw = off-ramp). Either confirmed from the anchor's own transfer server /info during a stellar.toml read, or entered by a curator; with tomlFetchedAt null they are curator-entered, so never cite them as stellar.toml facts. NULL = none recorded (UNKNOWN, never 'offers no ramps'), and never inferred from SEP presence.",
 					},
 					country: { type: "string", nullable: true },
 					acceptingClients: { type: "boolean" },
@@ -10485,7 +10419,19 @@ export const spec: OpenAPISpec = {
 					caseStudies: {
 						type: "array",
 						nullable: true,
-						items: { type: "object", additionalProperties: true },
+						items: {
+							type: "object",
+							properties: {
+								title: { type: "string" },
+								url: { type: "string", nullable: true },
+								projectSlug: {
+									type: "string",
+									nullable: true,
+									description:
+										"Slug in the projects directory, when the case study's project is listed there.",
+								},
+							},
+						},
 						description:
 							"Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies'); currently null for every partner, as none have been curated yet.",
 					},

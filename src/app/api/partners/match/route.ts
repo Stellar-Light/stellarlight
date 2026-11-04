@@ -29,7 +29,11 @@ import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { scorePartners } from "@/lib/partner-match";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import {
+	type RateLimitResult,
+	rateLimit,
+	rateLimitHeaders,
+} from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -111,6 +115,22 @@ function getAnthropic(): Anthropic | null {
 	const key = process.env.ANTHROPIC_API_KEY;
 	if (!key) return null;
 	return new Anthropic({ apiKey: key });
+}
+
+/** The documented 503: the AI path is off (no key, or an account the model
+ * refuses), so the caller falls back to the directory filters. */
+function aiUnavailable(limit: RateLimitResult) {
+	return NextResponse.json(
+		{
+			error:
+				"AI matchmaking isn't available right now. Try the /partners directory filters.",
+			unavailable: true,
+		},
+		{
+			status: 503,
+			headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
+		},
+	);
 }
 
 /** Compact candidate the model reasons over. Public/partner-claimed + verified. */
@@ -201,19 +221,7 @@ export async function POST(req: NextRequest) {
 	}
 
 	const anthropic = getAnthropic();
-	if (!anthropic) {
-		return NextResponse.json(
-			{
-				error:
-					"AI matchmaking isn't available right now. Try the /partners directory filters.",
-				unavailable: true,
-			},
-			{
-				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
-			},
-		);
-	}
+	if (!anthropic) return aiUnavailable(limit);
 
 	// ── Candidate set: same published source the directory serves ──
 	const payload = await getPayloadSafe();
@@ -366,6 +374,18 @@ export async function POST(req: NextRequest) {
 	} catch (err) {
 		if (err instanceof Anthropic.RateLimitError)
 			return modelRateLimited(err.headers?.get("retry-after"), limit);
+		// Our account cannot call the model (bad key, no permission, no
+		// credit): the AI path is off until that is fixed, so this is the
+		// documented 503 unavailable, the split the assistant and onboard
+		// routes make. It answered an undocumented 502 here (#1908).
+		if (
+			err instanceof Anthropic.AuthenticationError ||
+			err instanceof Anthropic.PermissionDeniedError ||
+			(err instanceof Anthropic.BadRequestError &&
+				/credit balance|billing|quota/i.test(err.message))
+		)
+			return aiUnavailable(limit);
+		// Any other provider failure is one failed call: the documented 502.
 		if (err instanceof Anthropic.APIError) {
 			return NextResponse.json(
 				{
