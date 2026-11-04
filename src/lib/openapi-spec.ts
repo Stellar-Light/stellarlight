@@ -4808,6 +4808,8 @@ export const spec: OpenAPISpec = {
 																	hackathon: { type: "string" },
 																	isWinner: { type: "boolean" },
 																	placement: { type: "string", nullable: true },
+																	winnerSource: BUILD_WINNER_SOURCE_SCHEMA,
+																	entryBasis: BUILD_ENTRY_BASIS_SCHEMA,
 																	similarity: { type: "number" },
 																	project: BUILD_PROJECT_SCHEMA,
 																},
