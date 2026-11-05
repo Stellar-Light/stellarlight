@@ -110,6 +110,9 @@ const queries: Array<{ set: string; id: string; q: string }> = [
 			"unchanged",
 			"naturalLanguage",
 			"exactName",
+			"canonicalOverName",
+			"fullPath",
+			"explain",
 		] as const
 	).flatMap((group) =>
 		frozen[group].map((x: Any) => ({ set: group, id: x.id, q: x.q })),

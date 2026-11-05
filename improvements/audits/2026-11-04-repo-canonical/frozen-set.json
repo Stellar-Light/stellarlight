@@ -11,13 +11,40 @@
 		"naturalLanguage": "reported only, no bar: longer questions that name the same products",
 		"existingSets": "every rank move in the 2026-10-23 sets is listed; an expected repo that moves down needs a stated reason, or the change fails",
 		"generalRule": "a general authority rule (first-party ownership or repoScore above the keyword score) is measured as a variant on the same sets; it joins the branch only if it ranks first an acceptance query the curated entries leave unranked and moves no expected repo down in any set",
-		"exactName": "every exactName query ranks first the repo whose name (the part after the owner) is the query, on the branch; a canonical float never takes rank 1 from an exact name"
+		"exactName": "every exactName query ranks first the repo whose name (the part after the owner) is the query, on the branch; a canonical float never takes rank 1 from an exact name",
+		"canonicalOverName": "every canonicalOverName query ranks its canonical repo first on the branch (a bare name that fires a canonical entry defers to it)",
+		"fullPath": "every fullPath query ranks the repo it names first, on base and on the branch",
+		"explain": "decision rule fixed before measuring: explain routes a developer product named inside a question only if that routes at least two of exp-01, exp-02, exp-03, exp-04 and exp-06 to their product, does not route exp-05 to stellar/laboratory, and changes the route of no other frozen question (dev, battery, naturalLanguage, keyword, acceptance) except to a product that question names; otherwise the spec says explain routes products only on a bare name"
 	},
 	"amended": [
 		{
 			"at": "2026-11-04T23:00:00Z",
 			"why": "An independent review of the first three commits found inputs the set did not hold: a longer phrase that contains a product name fired the float, an underscore spelling did not, and an exact repo name lost rank 1 to the float. Added before any code change for those findings; no entry above was edited.",
 			"added": ["acc-15", "acc-16", "exn-01", "exn-02", "unc-14", "unc-15"]
+		},
+		{
+			"at": "2026-11-05T13:18:00Z",
+			"why": "The coordinator's decision after an independent re-check of the branch: a query that names a full owner/name path ranks that repo first; a bare name that also fires a canonical entry defers to the canonical repo; a bare name that fires none keeps its exact-name match first. exn-01 and exn-02 expected the exact name over the float and are superseded by can-04 and can-05: their bar is retired and they are still reported. Also added: product names followed by a surface word (repo, github, source code), one more longer-phrase control, and questions for the explain routing decision. Added before any code change for those items; no entry above was edited.",
+			"added": [
+				"can-01",
+				"can-02",
+				"can-03",
+				"can-04",
+				"can-05",
+				"fp-01",
+				"acc-17",
+				"acc-18",
+				"acc-19",
+				"acc-20",
+				"unc-16",
+				"exp-01",
+				"exp-02",
+				"exp-03",
+				"exp-04",
+				"exp-05",
+				"exp-06"
+			],
+			"superseded": ["exn-01", "exn-02"]
 		}
 	],
 	"acceptance": [
@@ -116,6 +143,102 @@
 			"q": "soroban_examples",
 			"expect": "stellar/soroban-examples",
 			"basis": "the repo name with an underscore"
+		},
+		{
+			"id": "acc-17",
+			"q": "scaffold stellar repo",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the product name and a surface word that search drops"
+		},
+		{
+			"id": "acc-18",
+			"q": "scaffold stellar github",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the product name and a surface word that search drops"
+		},
+		{
+			"id": "acc-19",
+			"q": "stellar lab repo",
+			"expect": "stellar/laboratory",
+			"basis": "the product name and a surface word that search drops"
+		},
+		{
+			"id": "acc-20",
+			"q": "stellar lab source code",
+			"expect": "stellar/laboratory",
+			"basis": "the product name and two surface words"
+		}
+	],
+	"canonicalOverName": [
+		{
+			"id": "can-01",
+			"q": "soroban-rpc",
+			"expect": "stellar/stellar-rpc",
+			"basis": "a bare name that fires the rpc entry; a copy in the index is named soroban-rpc"
+		},
+		{
+			"id": "can-02",
+			"q": "sep-10",
+			"expect": "stellar/stellar-protocol",
+			"basis": "a bare name that fires the SEP entry; a repo in the index is named sep10"
+		},
+		{
+			"id": "can-03",
+			"q": "sep10",
+			"expect": "stellar/stellar-protocol",
+			"basis": "the same name without the hyphen"
+		},
+		{
+			"id": "can-04",
+			"q": "stellar-lab",
+			"expect": "stellar/laboratory",
+			"basis": "folds to the product name stellar lab; supersedes exn-01"
+		},
+		{
+			"id": "can-05",
+			"q": "stellar_lab",
+			"expect": "stellar/laboratory",
+			"basis": "the same with an underscore; supersedes exn-02"
+		}
+	],
+	"fullPath": [
+		{
+			"id": "fp-01",
+			"q": "apay-io/sep10",
+			"expect": "apay-io/sep10",
+			"basis": "the caller named the full owner/name path"
+		}
+	],
+	"explain": [
+		{
+			"id": "exp-01",
+			"q": "How do I start a new dapp with Scaffold Stellar?",
+			"expect": "stellar-scaffold/cli"
+		},
+		{
+			"id": "exp-02",
+			"q": "Which repo is the source of Stellar Lab, the browser tool for building transactions?",
+			"expect": "stellar/laboratory"
+		},
+		{
+			"id": "exp-03",
+			"q": "What is Stellar Lab?",
+			"expect": "stellar/laboratory"
+		},
+		{
+			"id": "exp-04",
+			"q": "Where are the Soroban examples?",
+			"expect": "stellar/soroban-examples"
+		},
+		{
+			"id": "exp-05",
+			"q": "How do I use stellar lab notes?",
+			"notExpect": "stellar/laboratory"
+		},
+		{
+			"id": "exp-06",
+			"q": "How does Stellar Lab sign transactions?",
+			"expect": "stellar/laboratory"
 		}
 	],
 	"exactName": [
@@ -209,6 +332,11 @@
 			"id": "unc-15",
 			"q": "stellar-lab-notes",
 			"why": "the same longer phrase as one hyphenated name"
+		},
+		{
+			"id": "unc-16",
+			"q": "stellar lab notes repo",
+			"why": "the longer phrase and a surface word: removing the surface word must not make it fire"
 		}
 	],
 	"naturalLanguage": [

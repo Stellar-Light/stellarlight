@@ -125,10 +125,17 @@ const expected = (x: Any): { names?: string[]; terms?: string[] } | null => {
 				.map((d) => d.fullName as string),
 		};
 	}
-	const f = ["acceptance", "controls", "naturalLanguage"].includes(x.set)
+	const f = [
+		"acceptance",
+		"controls",
+		"naturalLanguage",
+		"canonicalOverName",
+		"fullPath",
+		"explain",
+	].includes(x.set)
 		? frozen[x.set].find((y: Any) => y.id === x.id)
 		: null;
-	return f ? { names: [f.expect] } : null;
+	return f?.expect ? { names: [f.expect] } : null;
 };
 const rankIn = (x: Any, ranking: string[]) => {
 	const e = expected(x);
@@ -173,10 +180,26 @@ for (const l of live.live as Any[]) {
 		);
 	if (l.set === "unchanged")
 		bar("unchanged: same first page, matchMode and total", pageSame, label);
-	if (l.set === "exactName")
+	// superseded entries stay reported, out of every bar
+	const superseded = frozen.amended.some((a: Any) =>
+		(a.superseded ?? []).includes(l.id),
+	);
+	if (l.set === "exactName" && !superseded)
 		bar(
 			"exactName: the repo named by the query first on the branch",
 			rr === 1,
+			label,
+		);
+	if (l.set === "canonicalOverName")
+		bar(
+			"canonicalOverName: the canonical repo first on the branch",
+			rr === 1,
+			label,
+		);
+	if (l.set === "fullPath")
+		bar(
+			"fullPath: the named repo first on base and branch",
+			rb === 1 && rr === 1,
 			label,
 		);
 	if (pageSame && rankingSame) {
