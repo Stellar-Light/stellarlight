@@ -1,16 +1,65 @@
 /**
  * Raven's exposure policy, read from its source files with the TypeScript
  * parser instead of a pattern over the text: comments are not text to it, and
- * each declaration must exist once and be a plain literal (a string, a regex,
- * an array, an object of arrays, a new Map or Set over an array). Anything
- * else throws with the file and the name, so a policy that was not fully read
- * never passes as the whole policy. Shared by the gate replica
- * (scripts/eval/raven-gate-replica.ts) and the catalog drift guard
- * (scripts/check-raven-drift.ts).
+ * each declaration must exist once, be const, never be changed later in the
+ * file, and be a plain literal (a string, a regex, an array, an object of
+ * arrays, a new Map or Set over an array). A file that does not parse, or a
+ * declaration that breaks any of these, throws with the file and the name, so
+ * a policy that was not fully read never passes as the whole policy. Shared by
+ * the gate replica (scripts/eval/raven-gate-replica.ts) and the catalog drift
+ * guard (scripts/check-raven-drift.ts).
  */
+import { createHash } from "node:crypto";
+import { realpathSync } from "node:fs";
+import { pathToFileURL } from "node:url";
 import ts from "typescript";
 
+export const sha256 = (text: string) =>
+	createHash("sha256").update(text).digest("hex");
+
+/** True only when moduleUrl is the script node was started with. */
+export function isEntry(moduleUrl: string): boolean {
+	try {
+		return (
+			moduleUrl === pathToFileURL(realpathSync(process.argv[1] ?? "")).href
+		);
+	} catch {
+		return false;
+	}
+}
+
+/** Methods that change a Map, Set or array in place. */
+const MUTATORS = new Set([
+	"set",
+	"add",
+	"delete",
+	"clear",
+	"push",
+	"pop",
+	"shift",
+	"unshift",
+	"splice",
+	"sort",
+	"reverse",
+	"fill",
+	"copyWithin",
+]);
+
 export function policyReader(file: string, text: string) {
+	function fail(name: string, why: string): never {
+		throw new Error(
+			`${file}: ${name} ${why}; Raven's source layout changed, update scripts/eval/raven-policy.ts`,
+		);
+	}
+	// A truncated file still parses to a tree, one literal shorter.
+	const { diagnostics = [] } = ts.transpileModule(text, {
+		fileName: file,
+		reportDiagnostics: true,
+	});
+	if (diagnostics.length)
+		throw new Error(
+			`${file}: does not parse (${ts.flattenDiagnosticMessageText(diagnostics[0]?.messageText ?? "", " ")}); Raven's source layout changed, update scripts/eval/raven-policy.ts`,
+		);
 	const source = ts.createSourceFile(
 		file,
 		text,
@@ -18,19 +67,87 @@ export function policyReader(file: string, text: string) {
 		true,
 		file.endsWith(".ts") ? ts.ScriptKind.TS : ts.ScriptKind.JS,
 	);
-	function fail(name: string, why: string): never {
-		throw new Error(
-			`${file}: ${name} ${why}; Raven's source layout changed, update scripts/eval/raven-policy.ts`,
-		);
-	}
+	const member = (e: ts.Node) =>
+		ts.isPropertyAccessExpression(e)
+			? e.name.text
+			: ts.isElementAccessExpression(e) &&
+					ts.isStringLiteralLike(e.argumentExpression)
+				? e.argumentExpression.text
+				: "";
+	/** How the file changes `name` after declaring it, if it does. */
+	const change = (name: string): string | null => {
+		let found: string | null = null;
+		const visit = (node: ts.Node): void => {
+			if (found) return;
+			if (ts.isIdentifier(node) && node.text === name) {
+				let top: ts.Node = node;
+				while (
+					(ts.isPropertyAccessExpression(top.parent) ||
+						ts.isElementAccessExpression(top.parent)) &&
+					top.parent.expression === top
+				)
+					top = top.parent;
+				const p = top.parent;
+				if (
+					ts.isBinaryExpression(p) &&
+					p.left === top &&
+					p.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+					p.operatorToken.kind <= ts.SyntaxKind.LastAssignment
+				)
+					found = "is assigned to";
+				else if (ts.isDeleteExpression(p)) found = "has a member deleted";
+				else if (
+					(ts.isPrefixUnaryExpression(p) || ts.isPostfixUnaryExpression(p)) &&
+					(p.operator === ts.SyntaxKind.PlusPlusToken ||
+						p.operator === ts.SyntaxKind.MinusMinusToken)
+				)
+					found = "is incremented";
+				else if (
+					ts.isCallExpression(p) &&
+					p.expression === top &&
+					top !== node &&
+					MUTATORS.has(member(top))
+				)
+					found = `is changed by .${member(top)}()`;
+				else if (
+					ts.isCallExpression(p) &&
+					p.arguments[0] === top &&
+					ts.isPropertyAccessExpression(p.expression) &&
+					ts.isIdentifier(p.expression.expression) &&
+					["Object", "Reflect"].includes(p.expression.expression.text) &&
+					[
+						"assign",
+						"defineProperty",
+						"defineProperties",
+						"deleteProperty",
+						"set",
+						"setPrototypeOf",
+					].includes(p.expression.name.text)
+				)
+					found = `is changed by ${p.expression.expression.text}.${p.expression.name.text}()`;
+			}
+			ts.forEachChild(node, visit);
+		};
+		visit(source);
+		return found;
+	};
 	const init = (name: string): ts.Expression => {
 		const found = source.statements
 			.filter(ts.isVariableStatement)
-			.flatMap((s) => [...s.declarationList.declarations])
-			.filter((d) => ts.isIdentifier(d.name) && d.name.text === name);
+			.flatMap((s) =>
+				s.declarationList.declarations
+					.filter((d) => ts.isIdentifier(d.name) && d.name.text === name)
+					.map((d) => ({
+						d,
+						isConst: !!(s.declarationList.flags & ts.NodeFlags.Const),
+					})),
+			);
 		if (found.length > 1) fail(name, "is declared more than once");
-		let e = found[0]?.initializer;
+		let e = found[0]?.d.initializer;
 		if (!e) return fail(name, "is not declared with a value");
+		if (!found[0]?.isConst) fail(name, "is not declared const");
+		const changed = change(name);
+		if (changed) fail(name, changed);
 		while (
 			ts.isParenthesizedExpression(e) ||
 			ts.isAsExpression(e) ||

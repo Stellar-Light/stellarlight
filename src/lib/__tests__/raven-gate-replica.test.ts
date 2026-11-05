@@ -10,7 +10,7 @@ import { createHash } from "node:crypto";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, describe, expect, it, vi } from "vitest";
 import {
 	buildDocsEntries,
 	buildScoutEntries,
@@ -256,14 +256,68 @@ export const SCOUT_PATHS_ABSENT_FROM_SPEC = new Set<string>(["/api/repos"]);
 		).toThrow(`src/policy/scout-exposure.ts: ${why};`);
 	});
 
-	it("pins every Raven file it reads policy from", () => {
-		expect(Object.keys(PORTED_FROM_RAVEN)).toEqual(
-			expect.arrayContaining([
-				"src/policy/scout-exposure.ts",
-				"scripts/exposure.mjs",
-				"scripts/description-notes.mjs",
-				"src/skills/scrub.ts",
-			]),
+	// Review 2026-11-05 (second round): a truncated file parsed to a shorter
+	// literal, and a later change to a declaration was invisible.
+	const EXPOSURE = POLICY["src/policy/scout-exposure.ts"];
+	it.each([
+		[
+			"src/policy/scout-exposure.ts",
+			EXPOSURE.slice(0, EXPOSURE.indexOf("]);")),
+			"src/policy/scout-exposure.ts: does not parse (']' expected.)",
+		],
+		[
+			"src/policy/scout-exposure.ts",
+			EXPOSURE.replace("export const EXCLUDED", "export let EXCLUDED"),
+			"EXCLUDED_SCOUT_OPERATIONS is not declared const",
+		],
+		[
+			"src/policy/scout-exposure.ts",
+			`${EXPOSURE}EXCLUDED_SCOUT_OPERATIONS.set("GET /api/x", "x");\n`,
+			"EXCLUDED_SCOUT_OPERATIONS is changed by .set()",
+		],
+		[
+			"src/policy/scout-exposure.ts",
+			`${EXPOSURE}if (process.env.X) SCOUT_PATHS_ABSENT_FROM_SPEC.delete("/api/repos");\n`,
+			"SCOUT_PATHS_ABSENT_FROM_SPEC is changed by .delete()",
+		],
+		[
+			"scripts/description-notes.mjs",
+			'export const SCOUT_DESCRIPTION_SCRUBS = {\n  getStatus: ["x"]\n};\ndelete SCOUT_DESCRIPTION_SCRUBS.getStatus;\n',
+			"SCOUT_DESCRIPTION_SCRUBS has a member deleted",
+		],
+		[
+			"scripts/description-notes.mjs",
+			'export const SCOUT_DESCRIPTION_SCRUBS = {};\nSCOUT_DESCRIPTION_SCRUBS["getStatus"] = ["x"];\n',
+			"SCOUT_DESCRIPTION_SCRUBS is assigned to",
+		],
+		[
+			"scripts/description-notes.mjs",
+			'export const SCOUT_DESCRIPTION_SCRUBS = {};\nObject.assign(SCOUT_DESCRIPTION_SCRUBS, { getStatus: ["x"] });\n',
+			"SCOUT_DESCRIPTION_SCRUBS is changed by Object.assign()",
+		],
+		[
+			"scripts/exposure.mjs",
+			'export var EXCLUDED_LUMENLOOP_OPS = new Set(["request_research"]);\n',
+			"EXCLUDED_LUMENLOOP_OPS is not declared const",
+		],
+	])("refuses %s holding %j", (file, source, why) => {
+		expect(() => policyWith({ [file]: source })).toThrow(why);
+	});
+
+	// Policy is data: read at run time, shape checked, hashed into the report,
+	// never pinned like ported code (review 2026-11-05, second round).
+	it("pins ported code only, and records each policy file's sha256 as read", () => {
+		for (const path of [
+			"src/policy/scout-exposure.ts",
+			"scripts/exposure.mjs",
+			"src/skills/scrub.ts",
+		])
+			expect(PORTED_FROM_RAVEN).not.toHaveProperty([path]);
+		const sha = (t: string) => createHash("sha256").update(t).digest("hex");
+		expect(policyWith({}).files).toEqual(
+			Object.fromEntries(
+				Object.entries(POLICY).map(([path, text]) => [path, sha(text)]),
+			),
 		);
 	});
 });
@@ -331,6 +385,24 @@ describe("raven-gate-replica keeps Raven's exact leak and clause rules", () => {
 
 describe("raven-gate-replica names drifted Raven sources", () => {
 	const sha = (text: string) => createHash("sha256").update(text).digest("hex");
+
+	it("does not start a run when its path only contains the script's name", async () => {
+		const argv1 = process.argv[1];
+		const exit = vi.spyOn(process, "exit").mockImplementation((() => {
+			throw new Error("process.exit");
+		}) as never);
+		process.argv[1] =
+			"/tmp/raven-gate-replica-row/node_modules/vitest/vitest.mjs";
+		try {
+			vi.resetModules();
+			await import("../../../scripts/eval/raven-gate-replica");
+			await new Promise((r) => setTimeout(r, 50));
+			expect(exit).not.toHaveBeenCalled();
+		} finally {
+			process.argv[1] = argv1;
+			exit.mockRestore();
+		}
+	});
 
 	it("exits 2 with the usage line alone when no checkout is given", () => {
 		const env = { ...process.env };
@@ -401,10 +473,7 @@ describe("raven-gate-replica names drifted Raven sources", () => {
 		expect(stderr).toContain(
 			"ported Raven sources changed since fec1c79: src/catalog/vendor/search-scoring.ts (missing),",
 		);
-		const edited = [
-			"scripts/build-catalog.mjs",
-			"src/policy/scout-exposure.ts",
-		];
+		const edited = ["scripts/build-catalog.mjs"];
 		for (const path of Object.keys(PORTED_FROM_RAVEN))
 			expect(stderr).toContain(
 				edited.includes(path) ? `${path},` : `${path} (missing)`,
