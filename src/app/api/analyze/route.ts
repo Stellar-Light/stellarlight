@@ -179,8 +179,11 @@ export async function GET(req: NextRequest) {
 	// Blocks a dimension=all response serves as null, each with its reason:
 	// that response is partial, so it is never cached as a full answer.
 	const warnings: string[] = [];
-	// #1914 review: a new funding snapshot is stored only after every read
-	// this response needs has succeeded, so a 503 never follows a write.
+	// #1914 review: a new funding snapshot is stored last, once no read whose
+	// failure answers 503 (projects, repos scan) is left, so a 503 never
+	// follows a write. A failed DoraHacks read under dimension=all answers 200
+	// with hackathons null and does not stop it: the snapshot depends only on
+	// the projects read.
 	let pendingSnapshot: {
 		projectSetHash: string;
 		scfAwardedProjects: number;
@@ -800,7 +803,8 @@ export async function GET(req: NextRequest) {
 	// was down; a caller read the bare meta as "no toolchain data".
 	if (includeToolchain && !result.toolchain) return outage("repos scan read");
 
-	// Every read succeeded: now the new set state may be stored. Best-effort:
+	// No 503 can follow now: the projects and repos scan reads succeeded (a
+	// failed DoraHacks read under dimension=all does not stop this). Best-effort:
 	// a full storage tier degrades durability, never the funding numbers.
 	if (pendingSnapshot && payload) {
 		try {

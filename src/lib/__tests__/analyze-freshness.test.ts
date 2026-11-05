@@ -513,3 +513,31 @@ describe("review: a failed DoraHacks read is never zero events", () => {
 		expect(res.headers.get("Cache-Control")).toMatch(/^public, s-maxage=600/);
 	});
 });
+
+// Re-check 2026-11-05: the stored-snapshot sentence must say what the code
+// does: a failed DoraHacks read under dimension=all serves hackathons null
+// with a 200, and the snapshot, which depends only on the projects read, is
+// still stored.
+describe("re-check: the snapshot is stored once no 503 can follow", () => {
+	it("under dimension=all a failed DoraHacks read still stores the new set", async () => {
+		h.projects = ["a", "b", "c"].map(awarded);
+		vi.mocked(dora.fetchAllDoraHacksHackathons).mockRejectedValueOnce(
+			new Error("DoraHacks timed out"),
+		);
+		const { status, body } = await analyze("all");
+		expect(status).toBe(200);
+		expect(body.hackathons).toBeNull();
+		expect(create).toHaveBeenCalledTimes(1);
+	});
+
+	it("the changelog says exactly that", async () => {
+		const { CHANGELOG } = await import("@/lib/changelog");
+		const entry = CHANGELOG.find((c) => c.version === "spec@1.9.117");
+		expect(entry?.detail).not.toMatch(
+			/only after every read the response needs has succeeded/,
+		);
+		expect(entry?.detail).toMatch(
+			/a failed DoraHacks read under dimension=all[^.]*does not stop it/,
+		);
+	});
+});
