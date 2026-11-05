@@ -3015,7 +3015,7 @@ export const spec: OpenAPISpec = {
 						name: "venueRole",
 						in: "query",
 						description:
-							"Filter to projects whose curated `venueRole` equals this value, e.g. `type=DEX&venueRole=amm` lists AMMs and `venueRole=aggregator-router` lists routers. Rows not yet classified (venueRole null) never match, so the result is the classified subset, not every venue of that kind. Unknown values return 400 with validVenueRoles.",
+							"Filter to projects whose curated `venueRole` equals this value, e.g. `type=DEX&venueRole=amm` lists AMMs and `venueRole=aggregator-router` lists routers. Rows not yet classified (venueRole null) never match, so the result is the classified subset, not every venue of that kind. A venueRole search adds no rows found by meaning, so an empty page means no classified row matched q. Unknown values return 400 with validVenueRoles.",
 						schema: {
 							type: "string",
 							enum: [...VENUE_ROLES],

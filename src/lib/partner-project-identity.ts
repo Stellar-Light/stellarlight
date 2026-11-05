@@ -86,6 +86,9 @@ export const ALLOWED_DOMAIN_MISMATCHES: Record<
 		reason:
 			"Company vs product: Benji is Franklin Templeton's tokenized-fund product; both are Franklin Templeton properties (verified 2026-07-20)",
 	},
+	// Whoever dispatches curate-partners for hana-wallet deletes this entry,
+	// and its test in src/lib/__tests__/directory-corrections.test.ts ("the
+	// partner half is allowed to lag"), in the same change.
 	"hana-wallet": {
 		partner: "hana.money",
 		project: "hanawallet.io",

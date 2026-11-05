@@ -47,6 +47,13 @@ const row = (
 	types: ["DEX"],
 	venueRole,
 });
+// A DEX-typed shadow whose canonical is a Wallet: under ?type=DEX the fold
+// would drop it, so it must not be counted either.
+const TYPE_SHADOW = {
+	...row("olddex", null, "Old exchange."),
+	status: "Draft",
+	canonicalSlug: "walletapp",
+};
 const ROWS = [
 	row("soroswap", "amm", "AMM swap pools on Soroban."),
 	row("aquarius", "amm", "AMM swap pools and liquidity rewards."),
@@ -60,8 +67,12 @@ const ROWS = [
 		status: "Draft",
 		canonicalSlug: "newproduct",
 	},
+	TYPE_SHADOW,
 ];
-const CANONICALS = [row("newproduct", null, "A product that is not a venue.")];
+const CANONICALS = [
+	row("newproduct", null, "A product that is not a venue."),
+	{ ...row("walletapp", null, "A wallet."), types: ["Wallet"] },
+];
 /** What the stubbed vector search answers: a near neighbour with no role. */
 const NEIGHBOURS = [
 	{
@@ -134,6 +145,19 @@ describe("GET /api/projects/search?venueRole= (sls-113)", () => {
 		expect(slugs(body)).not.toContain("newproduct");
 		expect(slugs(body)).not.toContain("legacyswap");
 		expect(body.meta.counts.total).toBe(body.projects.length);
+	});
+
+	it("under ?type= too, a shadow whose canonical lacks the type is not counted", async () => {
+		for (const qs of ["q=olddex&type=DEX", "q=x&type=DEX"]) {
+			const { body } = await search(qs);
+			expect(slugs(body), qs).not.toContain("walletapp");
+			expect(body.meta.counts.total, qs).toBe(body.projects.length);
+		}
+	});
+
+	it("says a venueRole search adds no rows found by meaning", async () => {
+		const { body } = await search("q=bondingcurve+launches&venueRole=amm");
+		expect(body.meta.matchModeLabel).toMatch(/no rows found by meaning/);
 	});
 
 	it("a role filter does not pad the page with vector neighbours", async () => {

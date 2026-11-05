@@ -11,6 +11,7 @@ import {
 	DESCRIPTION_FIXES,
 	SEEDS,
 	STATUS_FIX,
+	STATUS_SOURCE_RETRACT,
 	statusFixNote,
 	VENUE_ROLE,
 	WEBSITE_FIXES,
@@ -159,5 +160,9 @@ describe("a site that became another business is unlinked (sls-100 review)", () 
 		// Value-keyed: only this exact stored URL is cleared, so a later
 		// relink to the product's real site is never undone.
 		expect(WEBSITE_REMOVE.stabble).toBe("https://stabble.org/");
+	});
+	it("and the casino page is never cited as its status evidence", () => {
+		// Its statusSourceUrl is the same page (site-liveness, 2026-08-17).
+		expect(STATUS_SOURCE_RETRACT.stabble).toBe("https://stabble.org/");
 	});
 });

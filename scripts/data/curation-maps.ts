@@ -5866,6 +5866,12 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
 	"scam-flagging-system":
 		"https://docs.google.com/spreadsheets/d/1jckwz3x1h6kjkm6zczthdshk_whhnitygtv8r24anho/edit?usp=sharing",
 	"the-blue-marble": "https://thebluemarble.io/",
+	// 2026-11-05 (sls-100 review): stabble's statusSourceUrl is its own site,
+	// which now ranks crypto casinos ("Best Crypto Casinos Canada 2026: Tested
+	// & Ranked | Stabble"), stamped site-liveness on 2026-08-17. The page is no
+	// evidence the DEX lives; WEBSITE_REMOVE unlinks the same URL. Status is
+	// the owner's call (the-blue-marble went Inactive on the same evidence).
+	stabble: "https://stabble.org/",
 	venalabs: "https://venalabs.com/",
 	whalestack: "https://coinqvest.com/",
 };

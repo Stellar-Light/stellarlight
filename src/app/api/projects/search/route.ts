@@ -1432,8 +1432,8 @@ async function handle(req: NextRequest) {
 			}
 
 			// A lineage shadow is served as its canonical (the fold below), so
-			// under ?status= or ?venueRole= it belongs to the set only when its
-			// canonical passes the filter. Decided here, before ranking and
+			// under ?status=, ?type= or ?venueRole= it belongs to the set only
+			// when its canonical passes the filter. Decided here, before ranking and
 			// counting: dropped later on the page, the shadow was still counted
 			// and total promised a row no page could serve (sls-113 review). A
 			// failed read leaves the shadows in and nulls the total (not a
@@ -1447,7 +1447,10 @@ async function handle(req: NextRequest) {
 						.map((d) => d.canonicalSlug as string),
 				),
 			];
-			if ((statusParam || venueRoleParam) && shadowTargets.length) {
+			if (
+				(statusParam || typeParam || venueRoleParam) &&
+				shadowTargets.length
+			) {
 				const canon = await degradedRead(
 					"projects shadow canonicals",
 					() =>
@@ -1456,7 +1459,12 @@ async function handle(req: NextRequest) {
 							where: { slug: { in: shadowTargets } },
 							limit: shadowTargets.length,
 							depth: 0,
-							select: { slug: true, status: true, venueRole: true },
+							select: {
+								slug: true,
+								status: true,
+								types: true,
+								venueRole: true,
+							},
 						}),
 					null,
 					DEFAULT_READ_TIMEOUT_MS,
@@ -1468,6 +1476,7 @@ async function handle(req: NextRequest) {
 							canon.value.docs as Array<{
 								slug: string;
 								status?: string;
+								types?: string[] | null;
 								venueRole?: string | null;
 							}>
 						).map((c) => [c.slug, c]),
@@ -1480,6 +1489,8 @@ async function handle(req: NextRequest) {
 						return (
 							!c ||
 							((!statusParam || c.status === statusParam) &&
+								(!typeParam ||
+									(Array.isArray(c.types) && c.types.includes(typeParam))) &&
 								(!venueRoleParam || c.venueRole === venueRoleParam))
 						);
 					});
@@ -2765,6 +2776,29 @@ async function handle(req: NextRequest) {
 		partial: failedReadsOf(warnings).length > 0,
 	});
 
+	// The matchMode label (see the hint comment at matchModeLabel below).
+	const tierLabel = {
+		strict: "all keywords matched",
+		"loose-1": "all but one keyword matched",
+		majority: "majority of keywords matched (broader scope)",
+		corrected: didYouMean
+			? `matched via a typo-distance name recovery: no project is spelled '${didYouMean.from}', so these rows are for '${didYouMean.to}'; verify the identity before relying on it`
+			: "matched via a known spelling correction: the query token does not occur in these rows; verify the identity before relying on it",
+		semantic:
+			"no keyword match: semantically similar results (verify relevance before relying on them)",
+		all: "no keyword filter",
+	}[matchMode];
+	const setLabel =
+		typeParam && q
+			? "type filter defines the result set (every typed row included); q ranks within it"
+			: tierLabel;
+	// The semantic rung does not run under venueRole (sls-113 review): say so,
+	// or semantic false would read like "nothing was found by meaning".
+	const modeLabel =
+		venueRoleParam && q
+			? `${setLabel}; venueRole set: no rows found by meaning are added, so this page holds keyword matches among the classified rows only`
+			: setLabel;
+
 	return NextResponse.json(
 		view({
 			meta: withProjectsPartial({
@@ -2820,23 +2854,7 @@ async function handle(req: NextRequest) {
 				//   majority → "most of your keywords matched — broader interpretation"
 				//   semantic → NO keyword matched; vector-similarity guesses only
 				//   all      → no keyword query was supplied
-				matchModeLabel: {
-					strict: "all keywords matched",
-					"loose-1": "all but one keyword matched",
-					majority: "majority of keywords matched (broader scope)",
-					corrected: didYouMean
-						? `matched via a typo-distance name recovery: no project is spelled '${didYouMean.from}', so these rows are for '${didYouMean.to}'; verify the identity before relying on it`
-						: "matched via a known spelling correction: the query token does not occur in these rows; verify the identity before relying on it",
-					semantic:
-						"no keyword match: semantically similar results (verify relevance before relying on them)",
-					all: "no keyword filter",
-				}[matchMode],
-				...(typeParam && q
-					? {
-							matchModeLabel:
-								"type filter defines the result set (every typed row included); q ranks within it",
-						}
-					: {}),
+				matchModeLabel: modeLabel,
 				// total = matches before offset/limit slicing — lets paging
 				// consumers know when they've seen everything. `semantic` counts
 				// the rows on THIS page served by the vector fallback (also part
