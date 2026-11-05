@@ -35,6 +35,13 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
+			"/builders/<login> shows that login's profile or answers not found. The lookup matched part of a login and fell back to its first hit, so /builders/bob showed and titled bobby's profile; a login now matches whole, in any case.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
 			"A read that stops at a ceiling now says so instead of passing a cut set off as all of it. getBuilders' onStellar is null, with the read named in the warnings, when its repo or project read was cut, never a short block; getHackathonBuilds no longer answers that a hackathon value names no event when it could not check every listed event; getLeaderboard reads every eligible project and repo.",
 		detail:
 			"On the site, /leaderboard and /digest/<month> ranked the newest 300 of 905 active projects (32 of the top 50 by stars on /leaderboard differed from GET /api/leaderboard's) and now rank them all. /builders states the directory's true size and says when code activity could not be read rather than showing no repos, a profile says so rather than 'no public code', and /analytics counts SCF-funded projects in the database and leaves a cut sum unknown.",

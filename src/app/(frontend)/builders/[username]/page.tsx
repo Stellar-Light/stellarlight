@@ -42,21 +42,16 @@ async function getBuilder(username: string) {
 	const payload = await getPayloadSafe();
 	if (!payload) return null;
 
-	// GitHub logins are case-insensitive; URLs get typed in lowercase
+	// The whole login in any case, as GitHub matches one: a URL names one
+	// person or nobody. A substring match fell back to its first hit, so
+	// /builders/bob served bobby's profile.
 	const result = await payload.find({
 		collection: "builders",
 		// a private profile is never shown, even at its own URL
-		where: { ...PUBLIC_BUILDERS, github_username: { like: username } },
-		limit: 5,
+		where: { ...PUBLIC_BUILDERS, github_username: loginIn([username]) },
+		limit: 1,
 	});
-	const docs = result.docs;
-	return (
-		docs.find(
-			(d) => String(d.github_username).toLowerCase() === username.toLowerCase(),
-		) ??
-		docs[0] ??
-		null
-	);
+	return result.docs[0] ?? null;
 }
 
 export async function generateMetadata({

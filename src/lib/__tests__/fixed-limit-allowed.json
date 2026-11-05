@@ -36,13 +36,6 @@
 	},
 	{
 		"file": "src/app/(frontend)/builders/[username]/page.tsx",
-		"collection": "builders",
-		"limit": 5,
-		"count": 1,
-		"reason": "lookup: one profile by login, exact login preferred among substring hits"
-	},
-	{
-		"file": "src/app/(frontend)/builders/[username]/page.tsx",
 		"collection": "projects",
 		"limit": 100,
 		"count": 1,

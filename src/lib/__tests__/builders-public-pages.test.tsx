@@ -37,7 +37,10 @@ const matches = (d: Doc, w: Where | undefined): boolean =>
 		if ("not_equals" in op) return v !== String(op.not_equals);
 		if ("like" in op)
 			return v.toLowerCase().includes(String(op.like).toLowerCase());
-		if ("in" in op) return false;
+		if ("in" in op)
+			return (op.in as unknown[]).some((x) =>
+				x instanceof RegExp ? x.test(v) : String(x) === v,
+			);
 		throw new Error(`unsupported where on ${k}: ${JSON.stringify(c)}`);
 	});
 vi.mock("@/lib/payload-client", () => ({
