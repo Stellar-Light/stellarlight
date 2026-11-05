@@ -5126,7 +5126,7 @@ export interface operations {
                     };
                 };
             };
-            /** @description The body is not JSON, `need` is missing or blank, or `type` names no partner type; then validTypes lists every type it accepts. */
+            /** @description The body is not JSON, `need` is missing, blank or longer than 2,000 characters, or `type` names no partner type; then validTypes lists every type it accepts. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -5261,6 +5261,8 @@ export interface operations {
                         intent?: string | null;
                         /** @description Whether the caller is eligible to submit a listing from here. */
                         canList?: boolean;
+                        /** @description Present and true only when a partner search this turn could not read the directory: matches is absent and the reply did not ground on directory rows. An outage, NOT an empty result: resend later, or browse GET /api/partners. */
+                        directoryUnavailable?: boolean;
                     };
                 };
             };

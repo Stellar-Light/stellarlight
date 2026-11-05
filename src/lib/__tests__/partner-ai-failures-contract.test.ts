@@ -53,7 +53,13 @@ vi.mock("@/lib/rate-limit", async (orig) => ({
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 
 /** The partner directory as the routes see it on this request. */
-let directory: "ok" | "empty" | "no-handle" | "throws" = "ok";
+let directory:
+	| "ok"
+	| "empty"
+	| "no-handle"
+	| "throws"
+	| "untagged"
+	| "bad-row" = "ok";
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () =>
 		directory === "no-handle"
@@ -64,16 +70,38 @@ vi.mock("@/lib/payload-client", () => ({
 						const docs =
 							directory === "empty"
 								? []
-								: [
-										{
-											slug: "ramp-mx",
-											name: "Ramp MX",
-											partnerType: "anchor",
-											status: "published",
-											tagline: "USDC off-ramp in Mexico",
-											regions: ["latam"],
-										},
-									];
+								: directory === "untagged"
+									? [
+											{
+												slug: "tools-x",
+												name: "Tools X",
+												partnerType: "tooling",
+												status: "published",
+												tagline: "Developer tooling",
+											},
+										]
+									: directory === "bad-row"
+										? [
+												{
+													slug: "bad-row",
+													name: "Bad Row",
+													partnerType: "anchor",
+													status: "published",
+													// Stored data the scorer cannot read: a
+													// fault of ours, not a directory outage.
+													services: 5,
+												},
+											]
+										: [
+												{
+													slug: "ramp-mx",
+													name: "Ramp MX",
+													partnerType: "anchor",
+													status: "published",
+													tagline: "USDC off-ramp in Mexico",
+													regions: ["latam"],
+												},
+											];
 						return { docs, totalDocs: docs.length };
 					},
 					create: async () => ({}),
@@ -136,6 +164,12 @@ const MODEL_FAILURES: Array<[string, () => unknown, number]> = [
 		() => providerError(404, "not_found_error", "model: claude-x"),
 		503,
 	],
+	[
+		"request timeout",
+		() => providerError(408, "timeout_error", "Request timed out"),
+		502,
+	],
+	["conflict", () => providerError(409, "conflict_error", "Conflict"), 502],
 	[
 		"provider 500",
 		() => providerError(500, "api_error", "Internal error"),
@@ -277,6 +311,7 @@ describe("partner AI routes: bad input and unusable model output are documented"
 	it.each([
 		["/api/partners/match", "{not json"],
 		["/api/partners/match", { need: "  " }],
+		["/api/partners/match", { need: "x".repeat(2001) }],
 		["/api/partners/assistant", "{not json"],
 		["/api/partners/assistant", { messages: [] }],
 		["/api/partners/onboard", "{not json"],
@@ -372,8 +407,82 @@ describe("a failed directory read is an outage, never an empty answer", () => {
 		);
 		expect(res.status).toBe(200);
 		expect(res.body.matches).toBeUndefined();
+		expect(res.body.directoryUnavailable).toBe(true);
+		const declared = (
+			spec.paths["/api/partners/assistant"] as {
+				post: { responses: Record<string, Record<string, unknown>> };
+			}
+		).post.responses["200"].content as Record<
+			string,
+			{ schema: { properties: Record<string, unknown> } }
+		>;
+		expect(declared["application/json"].schema.properties).toHaveProperty(
+			"directoryUnavailable",
+		);
 		const toolTurn = JSON.stringify(create.mock.calls[1][0].messages.at(-1));
 		expect(toolTurn).toContain("could not be read");
 		expect(toolTurn).not.toContain("No published partners match");
+	});
+});
+
+describe("round 3: need cap, scorer faults and match rows", () => {
+	const ok = (slug: string) => ({
+		stop_reason: "end_turn",
+		content: [
+			{
+				type: "text",
+				text: JSON.stringify({
+					matches: [{ slug, score: 80, reason: "Fits the need." }],
+					summary: "One fit.",
+				}),
+			},
+		],
+	});
+
+	it("a need at the cap still reaches the model", async () => {
+		create.mockResolvedValue(ok("ramp-mx"));
+		const res = await post("/api/partners/match", { need: "x".repeat(2000) });
+		expect(res.status).toBe(200);
+		expect(create).toHaveBeenCalled();
+	});
+
+	it("match rows serve null for sectors and regions nobody recorded", async () => {
+		directory = "untagged";
+		create.mockResolvedValue(ok("tools-x"));
+		const res = await post("/api/partners/match", {
+			need: "developer tooling",
+		});
+		expect(res.status).toBe(200);
+		const partner = res.body.matches[0]?.partner;
+		expect(partner?.slug).toBe("tools-x");
+		expect(partner?.sectors).toBeNull();
+		expect(partner?.regions).toBeNull();
+	});
+
+	it("assistant: a scorer fault is its documented 500, never a directory outage", async () => {
+		directory = "bad-row";
+		create.mockResolvedValueOnce({
+			stop_reason: "tool_use",
+			content: [
+				{
+					type: "tool_use",
+					id: "t1",
+					name: "search_partners",
+					input: { need: "MXN off-ramp" },
+				},
+			],
+		});
+		// A reply follows the tool turn, so only the scorer can fail this call.
+		create.mockResolvedValueOnce({
+			stop_reason: "end_turn",
+			content: [{ type: "text", text: "Here is what I found." }],
+		});
+		const res = await post(
+			"/api/partners/assistant",
+			ROUTES["/api/partners/assistant"],
+		);
+		expect(res.status).toBe(500);
+		expect(res.body.directoryUnavailable).toBeUndefined();
+		expectDocumented("/api/partners/assistant", res);
 	});
 });

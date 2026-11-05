@@ -5494,7 +5494,7 @@ export const spec: OpenAPISpec = {
 					},
 					"400": {
 						description:
-							"The body is not JSON, `need` is missing or blank, or `type` names no partner type; then validTypes lists every type it accepts.",
+							"The body is not JSON, `need` is missing, blank or longer than 2,000 characters, or `type` names no partner type; then validTypes lists every type it accepts.",
 						content: {
 							"application/json": {
 								schema: {
@@ -5698,6 +5698,11 @@ export const spec: OpenAPISpec = {
 											type: "boolean",
 											description:
 												"Whether the caller is eligible to submit a listing from here.",
+										},
+										directoryUnavailable: {
+											type: "boolean",
+											description:
+												"Present and true only when a partner search this turn could not read the directory: matches is absent and the reply did not ground on directory rows. An outage, NOT an empty result: resend later, or browse GET /api/partners.",
 										},
 									},
 								},

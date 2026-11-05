@@ -132,20 +132,24 @@ async function runSearch(
 	// A failed read is an outage, never "no partners match" (#1908).
 	const payload = await getPayloadSafe();
 	if (!payload) return { candidates: [], blobs: [], failed: true };
+	// biome-ignore lint/suspicious/noExplicitAny: Payload docs
+	let docs: any[];
 	try {
-		const docs = await fetchEligiblePartners(payload, {});
-		const scoreQuery =
-			type && (PARTNER_TYPES as readonly string[]).includes(type)
-				? `${need} ${type}`
-				: need;
-		const scored = scorePartners(scoreQuery, docs, 6);
-		return {
-			candidates: scored.map((s) => s.partner),
-			blobs: scored.map((s) => s.blob),
-		};
+		docs = await fetchEligiblePartners(payload, {});
 	} catch {
 		return { candidates: [], blobs: [], failed: true };
 	}
+	// Scoring stays outside the read's try: a scorer fault is this service's
+	// own error (the documented 500), never reported as a directory outage.
+	const scoreQuery =
+		type && (PARTNER_TYPES as readonly string[]).includes(type)
+			? `${need} ${type}`
+			: need;
+	const scored = scorePartners(scoreQuery, docs, 6);
+	return {
+		candidates: scored.map((s) => s.partner),
+		blobs: scored.map((s) => s.blob),
+	};
 }
 
 /** Fire-and-forget: record that these partners were surfaced for a need. */
@@ -233,6 +237,9 @@ export async function POST(req: NextRequest) {
 	let matches: PublicPartner[] | undefined;
 	let lastNeed = "";
 	let canList = false;
+	// A search this turn could not read the directory: say so in a field a
+	// caller can read, not only in the model's prose (#1908).
+	let directoryUnavailable = false;
 
 	try {
 		// Agentic loop: let the model call tools, feed real results back, and
@@ -255,7 +262,13 @@ export async function POST(req: NextRequest) {
 				if (matches && lastNeed) await logLeads(lastNeed, matches);
 				const intent = matches ? "find" : canList ? "list" : "chat";
 				return NextResponse.json(
-					{ reply, matches, intent, canList },
+					{
+						reply,
+						matches,
+						intent,
+						canList,
+						...(directoryUnavailable ? { directoryUnavailable: true } : {}),
+					},
 					{ headers: rateLimitHeaders(limit) },
 				);
 			}
@@ -273,7 +286,8 @@ export async function POST(req: NextRequest) {
 						need,
 						input?.type,
 					);
-					if (!failed) matches = candidates;
+					if (failed) directoryUnavailable = true;
+					else matches = candidates;
 					toolResults.push({
 						type: "tool_result",
 						tool_use_id: block.id,
@@ -322,7 +336,13 @@ export async function POST(req: NextRequest) {
 		if (matches && lastNeed) await logLeads(lastNeed, matches);
 		const intent = matches ? "find" : canList ? "list" : "chat";
 		return NextResponse.json(
-			{ reply, matches, intent, canList },
+			{
+				reply,
+				matches,
+				intent,
+				canList,
+				...(directoryUnavailable ? { directoryUnavailable: true } : {}),
+			},
 			{ headers: rateLimitHeaders(limit) },
 		);
 	} catch (err) {

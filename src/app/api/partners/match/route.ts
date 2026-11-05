@@ -49,6 +49,10 @@ const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
 // Bound the prompt: never feed the model more than this many candidates.
 const MAX_CANDIDATES = 40;
+// A need is a sentence or two. Past this the provider can refuse the prompt
+// as too long, which reads as "the AI path is off" (503) for what is the
+// caller's oversized input: answer that as the caller's 400 instead.
+const MAX_NEED_CHARS = 2000;
 
 const PARTNER_TYPES = [
 	"anchor",
@@ -219,6 +223,14 @@ export async function POST(req: NextRequest) {
 	if (!need) {
 		return NextResponse.json(
 			{ error: "Provide a `need`: what are you trying to integrate or buy?" },
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
+	if (need.length > MAX_NEED_CHARS) {
+		return NextResponse.json(
+			{
+				error: `\`need\` is ${need.length} characters; keep it to ${MAX_NEED_CHARS}: the integration need itself, not a document.`,
+			},
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}

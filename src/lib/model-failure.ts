@@ -10,7 +10,8 @@ import Anthropic from "@anthropic-ai/sdk";
  *   longer accepts). Every resend fails the same way until we fix it, so
  *   the caller falls back and does not retry.
  * - "failed": the provider failed this one call (5xx, overloaded, no
- *   connection, timeout). A later resend can succeed.
+ *   connection, a timeout, including its 408, or a 409 conflict). A later
+ *   resend can succeed.
  * - "unexpected": not a provider error at all, so a fault in this service.
  */
 export type ModelFailure =
@@ -23,6 +24,8 @@ export function classifyModelError(err: unknown): ModelFailure {
 	if (!(err instanceof Anthropic.APIError)) return "unexpected";
 	if (err instanceof Anthropic.RateLimitError) return "rate-limited";
 	const status = err.status;
+	// 408 and 409 are transient 4xx: the same call can succeed on a resend.
+	if (status === 408 || status === 409) return "failed";
 	return typeof status === "number" && status >= 400 && status < 500
 		? "unavailable"
 		: "failed";
