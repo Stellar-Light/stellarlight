@@ -127,6 +127,52 @@ const rateLimited429 = (callsModel = false) => ({
 	},
 });
 
+/** A documented failure whose body is the shared ErrorResponse. */
+const errorBody = (description: string) => ({
+	description,
+	content: {
+		"application/json": {
+			schema: { $ref: "#/components/schemas/ErrorResponse" },
+		},
+	},
+});
+
+/** The 502 the AI partner routes answer when one language model call fails
+ * (#1908, src/lib/model-failure.ts). The provider refusing our request or
+ * account answers their 503 `unavailable` instead: a resend cannot clear it. */
+const modelFailed502 = (fallback: string) =>
+	errorBody(
+		`One language model call failed: the provider erred (5xx), was overloaded, or could not be reached in time, or its output could not be read. Not a claim about the request or the data: resend later, or ${fallback} now. The provider refusing our request or account is the 503 with unavailable true instead, where a resend does not help.`,
+	);
+
+/** The body of the AI partner routes' 503 when the AI path is off. */
+const AI_UNAVAILABLE_SCHEMA = {
+	type: "object",
+	description:
+		"The AI path is off: no model is configured, or the provider refuses our request or account (any 4xx but 429). The caller falls back rather than erroring.",
+	required: ["error", "unavailable"],
+	properties: {
+		error: {
+			type: "string",
+			description: "Human-readable reason, safe to show.",
+		},
+		unavailable: {
+			type: "boolean",
+			description:
+				"Always true here: the feature is off, not the request wrong. Fall back; do not retry.",
+		},
+	},
+};
+const aiUnavailable503 = (fallback: string) => ({
+	description: `The AI path is off: no model is configured, or the provider refuses our request or account. A resend does not help, so no Retry-After is sent: ${fallback}.`,
+	content: { "application/json": { schema: AI_UNAVAILABLE_SCHEMA } },
+});
+
+/** This service's own fault: no AI partner route answers it on purpose. */
+const unexpected500 = errorBody(
+	"An unexpected error inside this service, not a claim about the request or the data: resend later.",
+);
+
 /** One-shot report meta — {source, generatedAt, note} (scf-pitch,
  * hackathon-brief, vet-idea, repos/trust routes serve exactly this). */
 const REPORT_META_SCHEMA = {
@@ -5305,109 +5351,7 @@ export const spec: OpenAPISpec = {
 												generatedAt: { type: "string", format: "date-time" },
 											},
 										},
-										partner: {
-											type: "object",
-											description:
-												"The full partner profile: every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing.",
-											properties: {
-												slug: { type: "string" },
-												name: { type: "string" },
-												partnerType: { type: "string" },
-												tagline: { type: "string", nullable: true },
-												description: { type: "string", nullable: true },
-												logoUrl: { type: "string", nullable: true },
-												websiteUrl: { type: "string", nullable: true },
-												foundedYear: { type: "integer", nullable: true },
-												services: { type: "array", items: { type: "string" } },
-												sectors: { type: "array", items: { type: "string" } },
-												regions: { type: "array", items: { type: "string" } },
-												assets: { type: "array", items: { type: "string" } },
-												seps: {
-													type: "array",
-													items: { type: "string" },
-													description: "SEP standards the partner implements.",
-												},
-												rampTypes: {
-													type: "array",
-													nullable: true,
-													items: {
-														type: "string",
-														enum: ["on-ramp", "off-ramp"],
-													},
-													description:
-														"Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed; the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner.",
-												},
-												country: { type: "string", nullable: true },
-												acceptingClients: { type: "boolean" },
-												typicalEngagement: { type: "string", nullable: true },
-												leadTime: { type: "string", nullable: true },
-												pricingModel: { type: "string", nullable: true },
-												pricingNotes: { type: "string", nullable: true },
-												docsUrl: { type: "string", nullable: true },
-												githubOrg: { type: "string", nullable: true },
-												contactEmail: { type: "string", nullable: true },
-												contactChannel: { type: "string", nullable: true },
-												responseSla: { type: "string", nullable: true },
-												tomlSourceUrl: { type: "string", nullable: true },
-												tomlFetchedAt: { type: "string", nullable: true },
-												caseStudies: {
-													type: "array",
-													items: {
-														type: "object",
-														properties: {
-															title: { type: "string" },
-															url: { type: "string", nullable: true },
-															projectSlug: {
-																type: "string",
-																nullable: true,
-																description:
-																	"Slug in the projects directory, when the case study's project is listed there.",
-															},
-														},
-													},
-												},
-												verified: {
-													type: "object",
-													description:
-														"Automated verification signals. Null members mean not yet probed: absence of evidence, not a failing grade.",
-													properties: {
-														githubLastCommitAt: {
-															type: "string",
-															nullable: true,
-														},
-														githubCommits90d: {
-															type: "integer",
-															nullable: true,
-														},
-														onchainActive: { type: "boolean", nullable: true },
-														onchainNote: { type: "string", nullable: true },
-														scfInvolvement: { type: "string", nullable: true },
-														lastAutoVerifyAt: {
-															type: "string",
-															nullable: true,
-														},
-													},
-												},
-												freshness: {
-													type: "object",
-													description: "Row-currency signals used by matching.",
-													properties: {
-														status: { type: "string" },
-														lastPartnerUpdateAt: {
-															type: "string",
-															nullable: true,
-														},
-														isCurrent: { type: "boolean" },
-														excludeFromMatching: { type: "boolean" },
-													},
-												},
-												url: {
-													type: "string",
-													description:
-														"Canonical stellarlight.xyz profile URL.",
-												},
-											},
-										},
+										partner: { $ref: "#/components/schemas/Partner" },
 									},
 								},
 							},
@@ -5471,7 +5415,33 @@ export const spec: OpenAPISpec = {
 								properties: {
 									need: {
 										type: "string",
-										description: "The builder's need, in plain language",
+										maxLength: 2000,
+										description:
+											"The builder's need, in plain language, up to 2,000 characters.",
+									},
+									type: {
+										type: "string",
+										enum: [...PARTNER_TYPES],
+										description:
+											"Rank only partners of this type; any other value answers 400 with validTypes.",
+									},
+									sector: {
+										type: "string",
+										description:
+											"Rank only partners whose recorded sectors contain this text.",
+									},
+									region: {
+										type: "string",
+										description:
+											"Rank only partners whose recorded regions contain this text.",
+									},
+									limit: {
+										type: "integer",
+										minimum: 1,
+										maximum: 10,
+										default: 5,
+										description:
+											"Most matches to return, 1 to 10 (default 5); out-of-range values are clamped.",
 									},
 								},
 							},
@@ -5522,11 +5492,17 @@ export const spec: OpenAPISpec = {
 															},
 															sectors: {
 																type: "array",
+																nullable: true,
 																items: { type: "string" },
+																description:
+																	"Curated sectors; NULL = none recorded (UNKNOWN).",
 															},
 															regions: {
 																type: "array",
+																nullable: true,
 																items: { type: "string" },
+																description:
+																	"Curated coverage regions; NULL = none recorded (UNKNOWN).",
 															},
 															freshness: {
 																type: "object",
@@ -5558,27 +5534,53 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": rateLimited429(true),
-					"503": {
+					"400": {
 						description:
-							"AI backend unavailable: fall back to GET /api/partners",
+							"The body is not JSON, `need` is missing, blank or longer than 2,000 characters, or `type` names no partner type; then validTypes lists every type it accepts.",
 						content: {
 							"application/json": {
 								schema: {
-									type: "object",
-									description:
-										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
-									properties: {
-										error: {
-											type: "string",
-											description: "Human-readable reason, safe to show.",
+									allOf: [
+										{ $ref: "#/components/schemas/ErrorResponse" },
+										{
+											type: "object",
+											properties: {
+												validTypes: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when type was unknown: every partner type the field accepts.",
+												},
+											},
 										},
-										unavailable: {
-											type: "boolean",
-											description:
-												"Always true here: the feature is off, not the request wrong.",
-										},
-									},
+									],
+								},
+							},
+						},
+					},
+					"422": errorBody(
+						"The model declined to rank this need: rephrase it, or use GET /api/partners filters.",
+					),
+					"429": rateLimited429(true),
+					"502": modelFailed502("rank with GET /api/partners filters"),
+					"500": unexpected500,
+					"503": {
+						description:
+							"Two cases, told apart by the body. unavailable true: the AI path is off (no model is configured, or the provider refuses our request or account); a resend does not help, so no Retry-After is sent: use GET /api/partners filters. retryAfterSeconds: the partner directory could not be read, an outage and NOT a claim that no partner matches; resend after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description:
+									"Only when the directory read failed: seconds to wait, the same number as retryAfterSeconds.",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: {
+									oneOf: [
+										AI_UNAVAILABLE_SCHEMA,
+										{ $ref: "#/components/schemas/RetryableError" },
+									],
 								},
 							},
 						},
@@ -5680,31 +5682,40 @@ export const spec: OpenAPISpec = {
 													},
 													sectors: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
+														description:
+															"Curated sectors; NULL = none recorded (UNKNOWN, never 'serves no sector').",
 													},
 													regions: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
+														description:
+															"Curated coverage regions; NULL = none recorded (UNKNOWN, never 'covers nowhere').",
 													},
 													assets: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
 														description:
-															"Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES.",
+															"Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set): UNKNOWN, and a curated code is never served here.",
 													},
 													seps: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
 														description:
-															"SEP standards implemented (sep-6, sep-24, sep-31).",
+															"SEP standards implemented (sep-6, sep-24, sep-31), read from stellar.toml. NULL = no read is recorded; [] = a recorded read declares none.",
 													},
 													tomlSourceUrl: { type: "string", nullable: true },
 													tomlFetchedAt: { type: "string", nullable: true },
 													rampTypes: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
 														description:
-															"Verified fiat-ramp capability (on-ramp / off-ramp) from the transfer server.",
+															"Fiat ramps (on-ramp / off-ramp): confirmed from the transfer server during a stellar.toml read, or entered by a curator. NULL = none recorded (UNKNOWN).",
 													},
 													country: { type: "string", nullable: true },
 													contactable: {
@@ -5732,35 +5743,23 @@ export const spec: OpenAPISpec = {
 											description:
 												"Whether the caller is eligible to submit a listing from here.",
 										},
-									},
-								},
-							},
-						},
-					},
-					"429": rateLimited429(true),
-					"503": {
-						description: "AI backend unavailable",
-						content: {
-							"application/json": {
-								schema: {
-									type: "object",
-									description:
-										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
-									properties: {
-										error: {
-											type: "string",
-											description: "Human-readable reason, safe to show.",
-										},
-										unavailable: {
+										directoryUnavailable: {
 											type: "boolean",
 											description:
-												"Always true here: the feature is off, not the request wrong.",
+												"Present and true only when no partner search this turn could read the directory: matches is absent and the reply did not ground on directory rows. An outage, NOT an empty result: resend later, or browse GET /api/partners.",
 										},
 									},
 								},
 							},
 						},
 					},
+					"400": errorBody(
+						"The body is not JSON, or `messages` holds no usable chat turn.",
+					),
+					"429": rateLimited429(true),
+					"502": modelFailed502("browse GET /api/partners"),
+					"500": unexpected500,
+					"503": aiUnavailable503("browse /partners or use the listing form"),
 				},
 			},
 		},
@@ -5867,30 +5866,18 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"400": errorBody(
+						"The body is not JSON, `mode` is neither chat nor extract, or extract was sent with no transcript.",
+					),
+					"422": errorBody("The model declined to read this transcript."),
 					"429": rateLimited429(true),
-					"503": {
-						description: "AI backend unavailable",
-						content: {
-							"application/json": {
-								schema: {
-									type: "object",
-									description:
-										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
-									properties: {
-										error: {
-											type: "string",
-											description: "Human-readable reason, safe to show.",
-										},
-										unavailable: {
-											type: "boolean",
-											description:
-												"Always true here: the feature is off, not the request wrong.",
-										},
-									},
-								},
-							},
-						},
-					},
+					"502": modelFailed502(
+						"use the listing form (POST /api/partners/submit-listing)",
+					),
+					"500": unexpected500,
+					"503": aiUnavailable503(
+						"use the listing form (POST /api/partners/submit-listing)",
+					),
 				},
 			},
 		},
@@ -6026,6 +6013,21 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"429": rateLimited429(),
+					"503": {
+						description:
+							"The partner store could not be opened: an outage, NOT a judgment of the listing, and nothing was saved. Resend after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 				},
 			},
 		},
@@ -10521,22 +10523,40 @@ export const spec: OpenAPISpec = {
 					logoUrl: { type: "string", nullable: true },
 					websiteUrl: { type: "string", nullable: true },
 					foundedYear: { type: "integer", nullable: true },
-					services: { type: "array", items: { type: "string" } },
-					sectors: { type: "array", items: { type: "string" } },
-					regions: { type: "array", items: { type: "string" } },
+					services: {
+						type: "array",
+						nullable: true,
+						items: { type: "string" },
+						description:
+							"Curated service tags. NULL = none recorded for this partner (UNKNOWN, never 'offers no services').",
+					},
+					sectors: {
+						type: "array",
+						nullable: true,
+						items: { type: "string" },
+						description:
+							"Curated sectors. NULL = none recorded for this partner (UNKNOWN, never 'serves no sector').",
+					},
+					regions: {
+						type: "array",
+						nullable: true,
+						items: { type: "string" },
+						description:
+							"Curated coverage regions. NULL = none recorded for this partner (UNKNOWN, never 'covers nowhere'); the region filter does not select it.",
+					},
 					assets: {
 						type: "array",
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"Asset codes this partner issues/supports, read from their stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt), so this is UNKNOWN and never 'issues no assets'. [] = we did fetch it and it declares no CURRENCIES.",
+							"Asset codes this partner issues/supports, read from their stellar.toml. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set), so this is UNKNOWN and never 'issues no assets'; a curated code is never served here. [] = a recorded read declares no CURRENCIES.",
 					},
 					seps: {
 						type: "array",
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null.",
+							"SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set), so we do not know. [] = a recorded read implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null.",
 					},
 					tomlSourceUrl: {
 						type: "string",
@@ -10548,7 +10568,7 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Deterministic trust score for toml-derived anchor facts (basis stellar-toml \u00d7 freshness of tomlFetchedAt). Null when no toml was ever fetched.",
+							"Deterministic trust score for toml-derived anchor facts (basis stellar-toml \u00d7 freshness of tomlFetchedAt). Null when no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set).",
 						properties: {
 							score: { type: "number" },
 							label: { type: "string", enum: ["high", "medium", "low"] },
@@ -10566,7 +10586,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "string", enum: ["on-ramp", "off-ramp"] },
 						description:
-							"Fiat ramp directions offered. Curator-maintained: NULL = not recorded for this partner (UNKNOWN, never 'offers no ramps').",
+							"Fiat ramp directions offered (deposit = on-ramp, withdraw = off-ramp). Either confirmed from the anchor's own transfer server /info during a stellar.toml read, or entered by a curator; without a recorded read (tomlSourceUrl and tomlFetchedAt both set) they are curator-entered, so never cite them as stellar.toml facts. NULL = none recorded (UNKNOWN, never 'offers no ramps'), and never inferred from SEP presence.",
 					},
 					country: { type: "string", nullable: true },
 					acceptingClients: { type: "boolean" },
@@ -10582,7 +10602,19 @@ export const spec: OpenAPISpec = {
 					caseStudies: {
 						type: "array",
 						nullable: true,
-						items: { type: "object", additionalProperties: true },
+						items: {
+							type: "object",
+							properties: {
+								title: { type: "string" },
+								url: { type: "string", nullable: true },
+								projectSlug: {
+									type: "string",
+									nullable: true,
+									description:
+										"Slug in the projects directory, when the case study's project is listed there.",
+								},
+							},
+						},
 						description:
 							"Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies'); currently null for every partner, as none have been curated yet.",
 					},
@@ -10618,8 +10650,16 @@ export const spec: OpenAPISpec = {
 						description:
 							"System-computed composite trust (0-1 score + label), decomposed into freshness and verification sub-signals.",
 						properties: {
-							score: { type: "number" },
-							label: { type: "string" },
+							score: {
+								type: "number",
+								description:
+									"Computed when the row is served from its freshness and verification signals, so not dated itself: the ages of its inputs are freshness.lastPartnerUpdateAt and verified.lastAutoVerifyAt.",
+							},
+							label: {
+								type: "string",
+								description:
+									"The score's band, computed with it, so not dated either: see score.",
+							},
 							freshness: { type: "number" },
 							verification: { type: "number" },
 						},
@@ -11226,16 +11266,36 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'`; unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile.",
+							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24, and only against [], never null. NULL SEMANTICS: assets and seps come only from the anchor's stellar.toml and are null unless a read is recorded (the partner's tomlSourceUrl and tomlFetchedAt both set, `profileState: 'profiled'`); rampTypes and regions are as recorded (confirmed from the transfer server or entered by a curator) and null when none is. Null is UNKNOWN, never capability-free. `url` links the full partner profile.",
 						properties: {
 							slug: { type: "string" },
 							country: { type: "string", nullable: true },
-							regions: { type: "array", items: { type: "string" } },
-							assets: { type: "array", items: { type: "string" } },
-							seps: { type: "array", items: { type: "string" } },
+							regions: {
+								type: "array",
+								nullable: true,
+								items: { type: "string" },
+								description: "NULL = none recorded (UNKNOWN).",
+							},
+							assets: {
+								type: "array",
+								nullable: true,
+								items: { type: "string" },
+								description:
+									"From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none.",
+							},
+							seps: {
+								type: "array",
+								nullable: true,
+								items: { type: "string" },
+								description:
+									"From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none.",
+							},
 							rampTypes: {
 								type: "array",
+								nullable: true,
 								items: { type: "string", enum: ["on-ramp", "off-ramp"] },
+								description:
+									"Confirmed from the transfer server or entered by a curator. NULL = none recorded (UNKNOWN).",
 							},
 							asOf: { type: "string", nullable: true },
 							url: { type: "string" },
@@ -11243,7 +11303,7 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								enum: ["profiled", "not-profiled"],
 								description:
-									"'profiled' = at least one capability field is verified-filled; 'not-profiled' = capabilities not yet verified for this anchor (empty arrays mean UNKNOWN, not absent).",
+									"'profiled' = the anchor's stellar.toml read is recorded, so assets and seps state what it declares; 'not-profiled' = no read is recorded: assets and seps are null (UNKNOWN), and any rampTypes are as a curator entered them.",
 							},
 						},
 					},
@@ -11515,7 +11575,7 @@ export const spec: OpenAPISpec = {
 									anchorProfileBasis: {
 										type: "string",
 										description:
-											"Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join; empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+											"Present only when the page carries anchor rows: null semantics for the anchorProfile join. assets and seps are null without a recorded stellar.toml read (see each profile's profileState), rampTypes and regions null when none is recorded; a null is never a negative capability claim.",
 									},
 									scfCountBasis: {
 										type: "string",

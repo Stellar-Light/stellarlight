@@ -1043,16 +1043,19 @@ export interface components {
             logoUrl?: string | null;
             websiteUrl?: string | null;
             foundedYear?: number | null;
-            services?: string[];
-            sectors?: string[];
-            regions?: string[];
-            /** @description Asset codes this partner issues/supports, read from their stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt), so this is UNKNOWN and never 'issues no assets'. [] = we did fetch it and it declares no CURRENCIES. */
+            /** @description Curated service tags. NULL = none recorded for this partner (UNKNOWN, never 'offers no services'). */
+            services?: string[] | null;
+            /** @description Curated sectors. NULL = none recorded for this partner (UNKNOWN, never 'serves no sector'). */
+            sectors?: string[] | null;
+            /** @description Curated coverage regions. NULL = none recorded for this partner (UNKNOWN, never 'covers nowhere'); the region filter does not select it. */
+            regions?: string[] | null;
+            /** @description Asset codes this partner issues/supports, read from their stellar.toml. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set), so this is UNKNOWN and never 'issues no assets'; a curated code is never served here. [] = a recorded read declares no CURRENCIES. */
             assets?: string[] | null;
-            /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null. */
+            /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set), so we do not know. [] = a recorded read implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null. */
             seps?: string[] | null;
             /** @description The stellar.toml URL the anchor-capability fields (assets/seps/rampTypes/jurisdiction) were last system-enriched from; re-verify there. Null = never toml-enriched (curated/self-reported only). */
             tomlSourceUrl?: string | null;
-            /** @description Deterministic trust score for toml-derived anchor facts (basis stellar-toml × freshness of tomlFetchedAt). Null when no toml was ever fetched. */
+            /** @description Deterministic trust score for toml-derived anchor facts (basis stellar-toml × freshness of tomlFetchedAt). Null when no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set). */
             tomlConfidence?: {
                 score?: number;
                 /** @enum {string} */
@@ -1061,7 +1064,7 @@ export interface components {
             } | null;
             /** @description ISO date of the last successful stellar.toml fetch+parse. Admin/partner edits may postdate this snapshot. */
             tomlFetchedAt?: string | null;
-            /** @description Fiat ramp directions offered. Curator-maintained: NULL = not recorded for this partner (UNKNOWN, never 'offers no ramps'). */
+            /** @description Fiat ramp directions offered (deposit = on-ramp, withdraw = off-ramp). Either confirmed from the anchor's own transfer server /info during a stellar.toml read, or entered by a curator; without a recorded read (tomlSourceUrl and tomlFetchedAt both set) they are curator-entered, so never cite them as stellar.toml facts. NULL = none recorded (UNKNOWN, never 'offers no ramps'), and never inferred from SEP presence. */
             rampTypes?: ("on-ramp" | "off-ramp")[] | null;
             country?: string | null;
             acceptingClients?: boolean;
@@ -1076,7 +1079,10 @@ export interface components {
             responseSla?: string | null;
             /** @description Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies'); currently null for every partner, as none have been curated yet. */
             caseStudies?: {
-                [key: string]: unknown;
+                title?: string;
+                url?: string | null;
+                /** @description Slug in the projects directory, when the case study's project is listed there. */
+                projectSlug?: string | null;
             }[] | null;
             /** @description SYSTEM-computed activity signals (never self-reported). All-null = not yet auto-verified, NOT a negative signal. */
             verified?: {
@@ -1097,7 +1103,9 @@ export interface components {
             };
             /** @description System-computed composite trust (0-1 score + label), decomposed into freshness and verification sub-signals. */
             trust?: {
+                /** @description Computed when the row is served from its freshness and verification signals, so not dated itself: the ages of its inputs are freshness.lastPartnerUpdateAt and verified.lastAutoVerifyAt. */
                 score?: number;
+                /** @description The score's band, computed with it, so not dated either: see score. */
                 label?: string;
                 freshness?: number;
                 verification?: number;
@@ -1384,18 +1392,22 @@ export interface components {
              * @enum {string|null}
              */
             venueRole?: "amm" | "native-orderbook" | "aggregator-router" | "trading-ui" | "wallet-integrated" | null;
-            /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'`; unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile. */
+            /** @description Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24, and only against [], never null. NULL SEMANTICS: assets and seps come only from the anchor's stellar.toml and are null unless a read is recorded (the partner's tomlSourceUrl and tomlFetchedAt both set, `profileState: 'profiled'`); rampTypes and regions are as recorded (confirmed from the transfer server or entered by a curator) and null when none is. Null is UNKNOWN, never capability-free. `url` links the full partner profile. */
             anchorProfile?: {
                 slug?: string;
                 country?: string | null;
-                regions?: string[];
-                assets?: string[];
-                seps?: string[];
-                rampTypes?: ("on-ramp" | "off-ramp")[];
+                /** @description NULL = none recorded (UNKNOWN). */
+                regions?: string[] | null;
+                /** @description From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none. */
+                assets?: string[] | null;
+                /** @description From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none. */
+                seps?: string[] | null;
+                /** @description Confirmed from the transfer server or entered by a curator. NULL = none recorded (UNKNOWN). */
+                rampTypes?: ("on-ramp" | "off-ramp")[] | null;
                 asOf?: string | null;
                 url?: string;
                 /**
-                 * @description 'profiled' = at least one capability field is verified-filled; 'not-profiled' = capabilities not yet verified for this anchor (empty arrays mean UNKNOWN, not absent).
+                 * @description 'profiled' = the anchor's stellar.toml read is recorded, so assets and seps state what it declares; 'not-profiled' = no read is recorded: assets and seps are null (UNKNOWN), and any rampTypes are as a curator entered them.
                  * @enum {string}
                  */
                 profileState?: "profiled" | "not-profiled";
@@ -1533,7 +1545,7 @@ export interface components {
                         why?: string;
                     }[];
                 };
-                /** @description Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join; empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim. */
+                /** @description Present only when the page carries anchor rows: null semantics for the anchorProfile join. assets and seps are null without a recorded stellar.toml read (see each profile's profileState), rampTypes and regions null when none is recorded; a null is never a negative capability claim. */
                 anchorProfileBasis?: string;
                 /** @description Counting basis for the SCF fields on rows: scfTotalAwardedUSD is the project's own SCF-page total (SDF's figure); scfRoundAwards carries each awarded round's official submission record, and the total can exceed the sum of round budgets (un-itemized top-ups). */
                 scfCountBasis?: string;
@@ -5044,62 +5056,7 @@ export interface operations {
                             /** Format: date-time */
                             generatedAt?: string;
                         };
-                        /** @description The full partner profile: every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing. */
-                        partner?: {
-                            slug?: string;
-                            name?: string;
-                            partnerType?: string;
-                            tagline?: string | null;
-                            description?: string | null;
-                            logoUrl?: string | null;
-                            websiteUrl?: string | null;
-                            foundedYear?: number | null;
-                            services?: string[];
-                            sectors?: string[];
-                            regions?: string[];
-                            assets?: string[];
-                            /** @description SEP standards the partner implements. */
-                            seps?: string[];
-                            /** @description Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed; the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner. */
-                            rampTypes?: ("on-ramp" | "off-ramp")[] | null;
-                            country?: string | null;
-                            acceptingClients?: boolean;
-                            typicalEngagement?: string | null;
-                            leadTime?: string | null;
-                            pricingModel?: string | null;
-                            pricingNotes?: string | null;
-                            docsUrl?: string | null;
-                            githubOrg?: string | null;
-                            contactEmail?: string | null;
-                            contactChannel?: string | null;
-                            responseSla?: string | null;
-                            tomlSourceUrl?: string | null;
-                            tomlFetchedAt?: string | null;
-                            caseStudies?: {
-                                title?: string;
-                                url?: string | null;
-                                /** @description Slug in the projects directory, when the case study's project is listed there. */
-                                projectSlug?: string | null;
-                            }[];
-                            /** @description Automated verification signals. Null members mean not yet probed: absence of evidence, not a failing grade. */
-                            verified?: {
-                                githubLastCommitAt?: string | null;
-                                githubCommits90d?: number | null;
-                                onchainActive?: boolean | null;
-                                onchainNote?: string | null;
-                                scfInvolvement?: string | null;
-                                lastAutoVerifyAt?: string | null;
-                            };
-                            /** @description Row-currency signals used by matching. */
-                            freshness?: {
-                                status?: string;
-                                lastPartnerUpdateAt?: string | null;
-                                isCurrent?: boolean;
-                                excludeFromMatching?: boolean;
-                            };
-                            /** @description Canonical stellarlight.xyz profile URL. */
-                            url?: string;
-                        };
+                        partner?: components["schemas"]["Partner"];
                     };
                 };
             };
@@ -5124,8 +5081,22 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description The builder's need, in plain language */
+                    /** @description The builder's need, in plain language, up to 2,000 characters. */
                     need: string;
+                    /**
+                     * @description Rank only partners of this type; any other value answers 400 with validTypes.
+                     * @enum {string}
+                     */
+                    type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "asset-issuer" | "other";
+                    /** @description Rank only partners whose recorded sectors contain this text. */
+                    sector?: string;
+                    /** @description Rank only partners whose recorded regions contain this text. */
+                    region?: string;
+                    /**
+                     * @description Most matches to return, 1 to 10 (default 5); out-of-range values are clamped.
+                     * @default 5
+                     */
+                    limit?: number;
                 };
             };
         };
@@ -5156,8 +5127,10 @@ export interface operations {
                                 tagline?: string | null;
                                 websiteUrl?: string | null;
                                 acceptingClients?: boolean | null;
-                                sectors?: string[];
-                                regions?: string[];
+                                /** @description Curated sectors; NULL = none recorded (UNKNOWN). */
+                                sectors?: string[] | null;
+                                /** @description Curated coverage regions; NULL = none recorded (UNKNOWN). */
+                                regions?: string[] | null;
                                 freshness?: {
                                     status?: string;
                                 };
@@ -5171,6 +5144,27 @@ export interface operations {
                         }[];
                         summary?: string | null;
                     };
+                };
+            };
+            /** @description The body is not JSON, `need` is missing, blank or longer than 2,000 characters, or `type` names no partner type; then validTypes lists every type it accepts. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"] & {
+                        /** @description Present only when type was unknown: every partner type the field accepts. */
+                        validTypes?: string[];
+                    };
+                };
+            };
+            /** @description The model declined to rank this need: rephrase it, or use GET /api/partners filters. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
@@ -5188,18 +5182,38 @@ export interface operations {
                     "application/json": components["schemas"]["RetryableError"];
                 };
             };
-            /** @description AI backend unavailable: fall back to GET /api/partners */
+            /** @description An unexpected error inside this service, not a claim about the request or the data: resend later. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description One language model call failed: the provider erred (5xx), was overloaded, or could not be reached in time, or its output could not be read. Not a claim about the request or the data: resend later, or rank with GET /api/partners filters now. The provider refusing our request or account is the 503 with unavailable true instead, where a resend does not help. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Two cases, told apart by the body. unavailable true: the AI path is off (no model is configured, or the provider refuses our request or account); a resend does not help, so no Retry-After is sent: use GET /api/partners filters. retryAfterSeconds: the partner directory could not be read, an outage and NOT a claim that no partner matches; resend after Retry-After. */
             503: {
                 headers: {
+                    /** @description Only when the directory read failed: seconds to wait, the same number as retryAfterSeconds. */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": {
                         /** @description Human-readable reason, safe to show. */
-                        error?: string;
-                        /** @description Always true here: the feature is off, not the request wrong. */
-                        unavailable?: boolean;
-                    };
+                        error: string;
+                        /** @description Always true here: the feature is off, not the request wrong. Fall back; do not retry. */
+                        unavailable: boolean;
+                    } | components["schemas"]["RetryableError"];
                 };
             };
         };
@@ -5243,16 +5257,18 @@ export interface operations {
                             description?: string | null;
                             websiteUrl?: string | null;
                             acceptingClients?: boolean | null;
-                            sectors?: string[];
-                            regions?: string[];
-                            /** @description Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES. */
-                            assets?: string[];
-                            /** @description SEP standards implemented (sep-6, sep-24, sep-31). */
-                            seps?: string[];
+                            /** @description Curated sectors; NULL = none recorded (UNKNOWN, never 'serves no sector'). */
+                            sectors?: string[] | null;
+                            /** @description Curated coverage regions; NULL = none recorded (UNKNOWN, never 'covers nowhere'). */
+                            regions?: string[] | null;
+                            /** @description Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set): UNKNOWN, and a curated code is never served here. */
+                            assets?: string[] | null;
+                            /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from stellar.toml. NULL = no read is recorded; [] = a recorded read declares none. */
+                            seps?: string[] | null;
                             tomlSourceUrl?: string | null;
                             tomlFetchedAt?: string | null;
-                            /** @description Verified fiat-ramp capability (on-ramp / off-ramp) from the transfer server. */
-                            rampTypes?: string[];
+                            /** @description Fiat ramps (on-ramp / off-ramp): confirmed from the transfer server during a stellar.toml read, or entered by a curator. NULL = none recorded (UNKNOWN). */
+                            rampTypes?: string[] | null;
                             country?: string | null;
                             /** @description True when the partner has a direct contact path (email or channel). */
                             contactable?: boolean;
@@ -5265,7 +5281,18 @@ export interface operations {
                         intent?: string | null;
                         /** @description Whether the caller is eligible to submit a listing from here. */
                         canList?: boolean;
+                        /** @description Present and true only when no partner search this turn could read the directory: matches is absent and the reply did not ground on directory rows. An outage, NOT an empty result: resend later, or browse GET /api/partners. */
+                        directoryUnavailable?: boolean;
                     };
+                };
+            };
+            /** @description The body is not JSON, or `messages` holds no usable chat turn. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
             /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
@@ -5283,7 +5310,25 @@ export interface operations {
                     "application/json": components["schemas"]["RetryableError"];
                 };
             };
-            /** @description AI backend unavailable */
+            /** @description An unexpected error inside this service, not a claim about the request or the data: resend later. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description One language model call failed: the provider erred (5xx), was overloaded, or could not be reached in time, or its output could not be read. Not a claim about the request or the data: resend later, or browse GET /api/partners now. The provider refusing our request or account is the 503 with unavailable true instead, where a resend does not help. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The AI path is off: no model is configured, or the provider refuses our request or account. A resend does not help, so no Retry-After is sent: browse /partners or use the listing form. */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -5291,9 +5336,9 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description Human-readable reason, safe to show. */
-                        error?: string;
-                        /** @description Always true here: the feature is off, not the request wrong. */
-                        unavailable?: boolean;
+                        error: string;
+                        /** @description Always true here: the feature is off, not the request wrong. Fall back; do not retry. */
+                        unavailable: boolean;
                     };
                 };
             };
@@ -5354,6 +5399,24 @@ export interface operations {
                     };
                 };
             };
+            /** @description The body is not JSON, `mode` is neither chat nor extract, or extract was sent with no transcript. */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The model declined to read this transcript. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
             /** @description This endpoint's rate window is spent, or the language model it calls is at its own rate limit (the wait is then the model's own, at most 3600 seconds, or 60 seconds when it sent no usable number). hint states the wait in seconds and the next step; retryAfterSeconds and Retry-After carry the same number. Counters are per serverless instance (X-RateLimit-Scope: instance), so a host-wide window read from the headers is approximate. It says nothing about the data: wait, then resend the same request. */
             429: {
                 headers: {
@@ -5369,7 +5432,25 @@ export interface operations {
                     "application/json": components["schemas"]["RetryableError"];
                 };
             };
-            /** @description AI backend unavailable */
+            /** @description An unexpected error inside this service, not a claim about the request or the data: resend later. */
+            500: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description One language model call failed: the provider erred (5xx), was overloaded, or could not be reached in time, or its output could not be read. Not a claim about the request or the data: resend later, or use the listing form (POST /api/partners/submit-listing) now. The provider refusing our request or account is the 503 with unavailable true instead, where a resend does not help. */
+            502: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description The AI path is off: no model is configured, or the provider refuses our request or account. A resend does not help, so no Retry-After is sent: use the listing form (POST /api/partners/submit-listing). */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -5377,9 +5458,9 @@ export interface operations {
                 content: {
                     "application/json": {
                         /** @description Human-readable reason, safe to show. */
-                        error?: string;
-                        /** @description Always true here: the feature is off, not the request wrong. */
-                        unavailable?: boolean;
+                        error: string;
+                        /** @description Always true here: the feature is off, not the request wrong. Fall back; do not retry. */
+                        unavailable: boolean;
                     };
                 };
             };
@@ -5461,6 +5542,17 @@ export interface operations {
                     "X-RateLimit-Scope"?: "instance";
                     /** @description Our own wall time, as on a 200. */
                     "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+            /** @description The partner store could not be opened: an outage, NOT a judgment of the listing, and nothing was saved. Resend after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {

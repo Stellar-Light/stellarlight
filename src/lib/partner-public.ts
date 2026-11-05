@@ -1,0 +1,238 @@
+import { partnerTrust } from "@/lib/confidence";
+import { isExperimentOn } from "@/lib/experiments";
+import { factConfidence } from "@/lib/fact-confidence";
+
+/**
+ * A stellar.toml read is recorded only with BOTH its source URL and its date
+ * (#1909). Without both, the toml-backed fields (assets, seps) are unknown,
+ * whatever the record holds. The one test every partner surface uses: the
+ * API rows, the profile page and the directory cards.
+ */
+export const hasTomlRead = (
+	p: { tomlSourceUrl?: unknown; tomlFetchedAt?: unknown } | null | undefined,
+): boolean => Boolean(p?.tomlSourceUrl && p?.tomlFetchedAt);
+
+/** A curated list nobody filled in is UNKNOWN: null, never "none" (#1909). */
+export const recordedOrNull = <T>(xs: T[] | null | undefined): T[] | null =>
+	xs?.length ? xs : null;
+
+/** The experiment flags that shape a partner row, read the same way for the
+ * list and the detail so the two rows cannot differ under a flag. */
+export const partnerRowOpts = (req: {
+	url?: string;
+	headers?: { get(name: string): string | null };
+}) => ({
+	compliance: isExperimentOn("partner-compliance-api", req),
+	onchain: isExperimentOn("partner-onchain-live", req),
+});
+
+/**
+ * Map a Payload partner doc → the public shape. Drops auth/internal fields,
+ * flattens the verified group, and derives a freshness object consumers
+ * can act on without knowing our day thresholds.
+ *
+ * The ONE row for GET /api/partners and GET /api/partners/{slug}, declared
+ * once as the Partner schema. The detail route kept its own copy, and the
+ * copy drifted twice: rampTypes [] in 2026-09, then seps, assets and
+ * caseStudies [] for partners whose stellar.toml was never fetched (#1909).
+ */
+export function partnerToPublic(
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape varies; we read a known subset
+	p: any,
+	opts: { compliance?: boolean; onchain?: boolean } = {},
+) {
+	const verified = p.verified ?? {};
+	const freshnessStatus = p.freshnessStatus ?? "fresh";
+	const read = hasTomlRead(p);
+	// EXPERIMENT partner-compliance-api (default OFF): expose curator-verified
+	// compliance/corridor facts to agents. Gated so it's not in the stable
+	// contract until it graduates. Only present when the experiment is on AND
+	// the partner actually has compliance data.
+	// biome-ignore lint/suspicious/noExplicitAny: gated experimental fields
+	const gated: any = {};
+	if (opts.compliance && p.compliance) {
+		const c = p.compliance;
+		gated.compliance = {
+			licenses: (c.licenses ?? []).map(
+				(l: { authority?: string; jurisdiction?: string; type?: string }) => ({
+					authority: l.authority ?? null,
+					jurisdiction: l.jurisdiction ?? null,
+					type: l.type ?? null,
+				}),
+			),
+			kycRequired: c.kycRequired ?? null,
+			travelRule: c.travelRule ?? null,
+			currencies: c.currencies ?? null,
+			settlementTime: c.settlementTime ?? null,
+			notableCustomers: c.notableCustomers ?? null,
+		};
+	}
+	// EXPERIMENT partner-onchain-live (default OFF): expose the domain-matched
+	// on-chain reality of each anchor's OWN issued assets (git-free trust
+	// signal). Same gating discipline as compliance: not in the stable contract
+	// until it graduates. Only present when opted in AND the partner has data.
+	if (opts.onchain && Array.isArray(p.onchain) && p.onchain.length > 0) {
+		gated.onchain = p.onchain.map(
+			(a: {
+				code?: string;
+				issuer?: string;
+				holders?: number;
+				payments?: number;
+				rating?: number;
+				asOf?: string;
+			}) => ({
+				code: a.code ?? null,
+				issuer: a.issuer ?? null,
+				holders: a.holders ?? null,
+				payments: a.payments ?? null,
+				rating: a.rating ?? null,
+				asOf: a.asOf ?? null,
+			}),
+		);
+	}
+	return {
+		...gated,
+		slug: p.slug,
+		name: p.name,
+		partnerType: p.partnerType,
+		// Pilot cohort: the select partners featured first in the directory.
+		pilot: Boolean(p.pilot),
+		tagline: p.tagline ?? null,
+		description: p.description ?? null,
+		logoUrl: p.logoUrl ?? null,
+		websiteUrl: p.websiteUrl ?? null,
+		foundedYear: p.foundedYear ?? null,
+		// Curated tags: null when nobody recorded any, never "none".
+		services: recordedOrNull(
+			(p.services ?? []).map((s: { tag: string }) => s.tag).filter(Boolean),
+		),
+		sectors: recordedOrNull(p.sectors),
+		regions: recordedOrNull(p.regions),
+		// Anchor capabilities from stellar.toml (SEP-1), the same source as
+		// anchors.stellar.org.
+		//
+		// These are NULL unless a read is recorded (hasTomlRead), and only []
+		// when we did read it and it published none. The distinction is the
+		// whole value of the field: [] is now the checkable claim "we read
+		// their SEP-1 file and it lists no SEPs", while null is "we have not
+		// looked". Collapsing both to [] told 31 of 44 partners' callers that
+		// the partner supports no SEPs and issues no assets, which for an
+		// anchor directory is the most damaging thing the row could say.
+		assets: read
+			? (p.assets ?? []).map((a: { code: string }) => a.code).filter(Boolean)
+			: null,
+		seps: read ? (p.seps ?? []) : null,
+		tomlSourceUrl: p.tomlSourceUrl ?? null,
+		tomlFetchedAt: p.tomlFetchedAt ?? null,
+		tomlConfidence: factConfidence(
+			read ? "stellar-toml" : null,
+			p.tomlFetchedAt,
+		),
+		// Curator-maintained, so empty means nobody has filled it in, not that
+		// the partner offers no ramp directions.
+		rampTypes: recordedOrNull(p.rampTypes),
+		country: p.country ?? null,
+		acceptingClients: p.acceptingClients ?? null,
+		typicalEngagement: p.typicalEngagement ?? null,
+		leadTime: p.leadTime ?? null,
+		pricingModel: p.pricingModel ?? null,
+		pricingNotes: p.pricingNotes ?? null,
+		docsUrl: p.docsUrl ?? null,
+		githubOrg: p.githubOrg ?? null,
+		contactEmail: p.contactEmail ?? null,
+		contactChannel: p.contactChannel ?? null,
+		responseSla: p.responseSla ?? null,
+		// Empty on all 44 partners, i.e. never curated for anyone, so []
+		// asserted "this partner has no case studies" across the whole
+		// directory. Null until someone actually records one.
+		caseStudies: p.caseStudies?.length
+			? p.caseStudies.map(
+					(c: { title: string; url?: string; projectSlug?: string }) => ({
+						title: c.title,
+						url: c.url ?? null,
+						projectSlug: c.projectSlug ?? null,
+					}),
+				)
+			: null,
+		// System-verified signals: what an agent trusts over self-claims.
+		verified: {
+			githubLastCommitAt: verified.githubLastCommitAt ?? null,
+			githubCommits90d: verified.githubCommits90d ?? null,
+			onchainActive: verified.onchainActive ?? null,
+			onchainNote: verified.onchainNote ?? null,
+			scfInvolvement: verified.scfInvolvement ?? null,
+			lastAutoVerifyAt: verified.lastAutoVerifyAt ?? null,
+		},
+		// Freshness: consumers should down-rank or skip non-current partners.
+		freshness: {
+			status: freshnessStatus,
+			lastPartnerUpdateAt: p.lastPartnerUpdateAt ?? null,
+			isCurrent: freshnessStatus === "fresh",
+			// archived = partner went dark >1y; usable for display, never for AI matches
+			excludeFromMatching: freshnessStatus === "archived",
+		},
+		// Single profile-trust score (0 to 1, plus a label) blending freshness with how
+		// much of the profile is system-verified (on-chain, recent commits,
+		// SCF), so a consumer gets one number instead of interpreting five
+		// fields. Same trust vocabulary as /api/research confidence.
+		trust: partnerTrust({
+			freshnessStatus,
+			verified: {
+				onchainActive: verified.onchainActive ?? null,
+				githubCommits90d: verified.githubCommits90d ?? null,
+				scfInvolvement: verified.scfInvolvement ?? null,
+			},
+		}),
+		url: `https://stellarlight.xyz/partners/${p.slug}`,
+	};
+}
+
+/** The partner fields the searchProjects anchor join reads. */
+export const ANCHOR_PROFILE_SELECT = {
+	name: true,
+	slug: true,
+	country: true,
+	regions: true,
+	assets: true,
+	seps: true,
+	rampTypes: true,
+	lastPartnerUpdateAt: true,
+	tomlSourceUrl: true,
+	tomlFetchedAt: true,
+} as const;
+
+/** The anchorProfile searchProjects joins onto Anchor-typed project rows,
+ * under the partner rows' rules (#1909): assets and seps only from a
+ * recorded stellar.toml read, curated lists null when none is recorded, and
+ * "profiled" only when the read is recorded. It copied the raw fields and
+ * called any non-empty one "profiled", read or curated. */
+export function anchorProfileOf(d: Record<string, unknown>) {
+	const tags = (arr: unknown): string[] =>
+		Array.isArray(arr)
+			? arr
+					.map((x) =>
+						typeof x === "string"
+							? x
+							: String(
+									(x as { tag?: unknown; code?: unknown })?.tag ??
+										(x as { code?: unknown })?.code ??
+										"",
+								),
+					)
+					.filter(Boolean)
+			: [];
+	const read = hasTomlRead(d);
+	return {
+		slug: String(d.slug),
+		country: (d.country as string) ?? null,
+		regions: recordedOrNull(tags(d.regions)),
+		assets: read ? tags(d.assets) : null,
+		seps: read ? tags(d.seps) : null,
+		rampTypes: recordedOrNull(tags(d.rampTypes)),
+		asOf: (d.lastPartnerUpdateAt as string) ?? null,
+		url: `https://stellarlight.xyz/partners/${d.slug}`,
+		profileState: (read ? "profiled" : "not-profiled") as
+			| "profiled"
+			| "not-profiled",
+	};
+}
