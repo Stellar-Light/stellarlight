@@ -266,6 +266,13 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
 unless noted.
 
+- Hackathon builds: a submission's project link, repoMissing and activity
+  are still read per row (src/lib/hackathon-builds.ts,
+  sameFactsPerSubmission merges only types and packages), so a winner whose
+  link was checked only on an unplaced row reads unknown in the winner
+  groups of analyzeHackathonSubmissions (project, projectStatus and scf
+  facets). Merge them in sameFactsPerSubmission. Found by the 2026-11-05
+  review of lane R10; no instance in the rows saved 2026-11-04.
 - Research authority weighting: a 75/15/10 weighting held out best in
   simulation and changes about 10% of confidence labels (the 2026-10-20
   research lane), but the question that motivated it no longer reproduces:
