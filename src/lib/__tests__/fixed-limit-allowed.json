@@ -197,13 +197,6 @@
 	},
 	{
 		"file": "src/app/api/analyze/route.ts",
-		"collection": "funding-snapshots",
-		"limit": 2,
-		"count": 1,
-		"reason": "lookup: the two newest snapshots"
-	},
-	{
-		"file": "src/app/api/analyze/route.ts",
 		"collection": "projects",
 		"limit": 5000,
 		"count": 1,
