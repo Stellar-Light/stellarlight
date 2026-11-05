@@ -35,7 +35,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
-			"The Raven interlock guard in /api/quality no longer counts operations that Raven's own exposure policy excludes as missing from Raven's catalog. The daily drift check reads that policy from Raven's repository and lists those operations apart, so the guard expects the 30 operations Raven means to serve, not 37, and stops reporting reviewSubmission, analyzeHackathonSubmissions, getHackathonSubmission, locateSource, getRwaAssets, getQualityReport and verifyClaim as unindexed.",
+			"The quality report's Raven interlock guard no longer counts operations that Raven's own exposure policy excludes as missing from Raven's catalog: the daily drift check reads that policy from Raven's repository and lists those operations apart, so the guard expects the 30 operations Raven means to serve, not 37. When the check cannot run, the guard says so with the reason instead of keeping the previous run's verdict and date.",
 	},
 	{
 		date: "2026-11-01",

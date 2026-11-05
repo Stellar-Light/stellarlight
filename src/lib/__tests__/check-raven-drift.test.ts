@@ -5,7 +5,13 @@
  * read a list typed on 2026-07-21 instead of Raven's policy (review
  * 2026-11-05). It reads the policy with the gate replica's reader.
  */
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+	mkdirSync,
+	mkdtempSync,
+	readFileSync,
+	rmSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -22,6 +28,7 @@ const fetchMock = vi.hoisted(() => {
 import {
 	classifySpecOps,
 	loadRavenExposure,
+	main,
 } from "../../../scripts/check-raven-drift";
 
 // Raven's src/policy/scout-exposure.ts layout at fec1c79, fixture data.
@@ -140,5 +147,75 @@ describe("check-raven-drift", () => {
 		await expect(loadRavenExposure()).rejects.toThrow(
 			"src/policy/scout-exposure.ts: EXCLUDED_SCOUT_OPERATIONS is not a new Map(...) over a literal",
 		);
+	});
+});
+
+// Review 2026-11-05 (second round): both could-not-check exits left the last
+// run's artifact in place, so /api/quality kept its verdict and date.
+describe("check-raven-drift when it cannot look", () => {
+	const run = async () => {
+		const dir = mkdtempSync(join(tmpdir(), "raven-drift-run-"));
+		roots.push(dir);
+		const out = join(dir, "artifact.json");
+		vi.stubEnv("HOME", dir);
+		vi.stubEnv("RAVEN_MCP_TOKEN", "");
+		vi.stubEnv("RAVEN_TOKEN", "");
+		const exit = vi.spyOn(process, "exit").mockImplementation(((
+			code: number,
+		) => {
+			throw new Error(`exit ${code}`);
+		}) as never);
+		try {
+			await expect(main(["node", "x", "--json", out])).rejects.toThrow(
+				"exit 2",
+			);
+		} finally {
+			exit.mockRestore();
+		}
+		return JSON.parse(readFileSync(out, "utf8"));
+	};
+	const interlock = async (artifact: unknown) => {
+		vi.resetModules();
+		vi.doMock("../../../improvements/audits/raven-drift-latest.json", () => ({
+			default: artifact,
+		}));
+		const { getGuardRows } = await import("../quality-artifacts");
+		vi.doUnmock("../../../improvements/audits/raven-drift-latest.json");
+		return getGuardRows(new Date()).find((r) => r.key === "raven-interlock");
+	};
+
+	it("writes checked: false with the reason when Raven's policy cannot be read", async () => {
+		vi.stubEnv("RAVEN_DIR", "");
+		fetchMock.mockResolvedValue(new Response("", { status: 503 }));
+		const artifact = await run();
+		expect(artifact.checked).toBe(false);
+		expect(artifact.notes[0]).toContain(
+			"could not read Raven's exposure policy",
+		);
+		const row = await interlock(artifact);
+		expect(row?.value).toBe("not checked");
+		expect(row?.ok).toBe(false);
+		expect(row?.details[0]).toContain("HTTP 503");
+	});
+
+	it("writes checked: false with the reason when there is no Raven credential", async () => {
+		const dir = mkdtempSync(join(tmpdir(), "raven-drift-"));
+		roots.push(dir);
+		mkdirSync(join(dir, "src/policy"), { recursive: true });
+		writeFileSync(join(dir, "src/policy/scout-exposure.ts"), POLICY);
+		vi.stubEnv("RAVEN_DIR", dir);
+		fetchMock.mockResolvedValue(new Response(JSON.stringify(SPEC)));
+		const artifact = await run();
+		expect(artifact.checked).toBe(false);
+		expect(artifact.catalogOps).toBeNull();
+		expect(artifact.notes[0]).toContain("no Raven credential");
+		const row = await interlock(artifact);
+		expect(row?.value).toBe("not checked");
+		expect(row?.measure).toEqual({
+			value: 0,
+			of: null,
+			unit: "operations checked",
+		});
+		expect(row?.details[0]).toContain("no Raven credential");
 	});
 });

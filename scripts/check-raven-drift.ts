@@ -369,19 +369,54 @@ async function catalogOps(specOps: string[]): Promise<{
 	};
 }
 
-async function main() {
-	const jsonIdx = process.argv.indexOf("--json");
-	const jsonOut = jsonIdx > -1 ? process.argv[jsonIdx + 1] : null;
+export async function main(argv = process.argv) {
+	const jsonIdx = argv.indexOf("--json");
+	const jsonOut = jsonIdx > -1 ? argv[jsonIdx + 1] : null;
+	const write = async (report: DriftReport) => {
+		if (!jsonOut) return;
+		const { writeFileSync } = await import("node:fs");
+		writeFileSync(jsonOut, `${JSON.stringify(report, null, "\t")}\n`);
+		console.log(`\nartifact → ${jsonOut}`);
+	};
+	// A run that could not look still writes its artifact, checked: false with
+	// the reason, so /api/quality stops showing the last run's verdict and date.
+	const inconclusive = async (
+		report: DriftReport,
+		reason: string,
+	): Promise<never> => {
+		report.checked = false;
+		report.notes.push(reason);
+		console.error(`\nINCONCLUSIVE: ${reason}`);
+		await write(report);
+		process.exit(2);
+	};
 
 	let exposure: Awaited<ReturnType<typeof loadRavenExposure>>;
 	try {
 		exposure = await loadRavenExposure();
 	} catch (err) {
 		// Without the policy, an excluded op and a missing one look the same.
-		console.error(
-			`\nINCONCLUSIVE: could not read Raven's exposure policy: ${err instanceof Error ? err.message : err}`,
+		return inconclusive(
+			{
+				generatedAt: new Date().toISOString(),
+				specVersion: "?",
+				graceDays: GRACE_DAYS,
+				expectedOps: [],
+				excludedByRavenPolicy: [],
+				ravenPolicySource: process.env.RAVEN_DIR || RAVEN_POLICY_URL,
+				catalogOps: null,
+				missingFromCatalog: [],
+				undiscoverable: [],
+				uncataloged: [],
+				laggingInCatalog: [],
+				extraInCatalog: [],
+				claimedOpCount: null,
+				auditArchetypeRoutesToRegistry: null,
+				checked: false,
+				notes: [],
+			},
+			`could not read Raven's exposure policy: ${err instanceof Error ? err.message : err}`,
 		);
-		process.exit(2);
 	}
 	const spec = await expectedFromSpec(exposure.excluded);
 	console.log(`spec ${spec.version}: ${spec.ops.length} catalog-relevant ops`);
@@ -411,14 +446,13 @@ async function main() {
 	await resolveToken();
 	if (!MCP_URL || !MCP_TOKEN) {
 		// A run that skipped its only upstream probe is not "ok". This used to
-		// print the warning and fall through to the success line — the same
+		// print the warning and fall through to the success line, the same
 		// shape as the truth battery reporting "0 fail" with four slices dead
 		// (both 2026-09-06).
-		report.notes.push(
-			"no Raven credential (RAVEN_MCP_TOKEN, or ~/.config/stellarlight/raven.token) — the catalog half could not run.",
+		return inconclusive(
+			report,
+			"no Raven credential (RAVEN_MCP_TOKEN, or ~/.config/stellarlight/raven.token); the catalog half could not run.",
 		);
-		console.error(`\nINCONCLUSIVE: ${report.notes[0]}`);
-		process.exit(2);
 	} else {
 		const cat = await catalogOps(spec.ops);
 		report.checked = true;
@@ -486,11 +520,7 @@ async function main() {
 			console.log("  ✓ catalog op list matches the contract");
 	}
 
-	if (jsonOut) {
-		const { writeFileSync } = await import("node:fs");
-		writeFileSync(jsonOut, `${JSON.stringify(report, null, "\t")}\n`);
-		console.log(`\nartifact → ${jsonOut}`);
-	}
+	await write(report);
 
 	if (report.checked && report.missingFromCatalog.length > 0) {
 		console.log(
