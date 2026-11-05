@@ -32,6 +32,51 @@ function mockPayload(docs: any[]): any {
 	return { find: async () => ({ docs, totalDocs: docs.length }) };
 }
 
+/** A mock that answers each read by its where clause, as the MongoDB adapter
+ * does (re-check item 4): like = every space-separated word a
+ * case-insensitive substring of the field (any element of an array); in;
+ * equals; not_equals; greater_than_equal; or; and; sort -repoScore; limit.
+ * A test that depends on a row being fetched fails when the read misses it. */
+// biome-ignore lint/suspicious/noExplicitAny: mock payload
+function whereDb(docs: any[]): any {
+	const text = (v: unknown) =>
+		(Array.isArray(v) ? v.join("\n") : String(v ?? "")).toLowerCase();
+	const vals = (v: unknown) => (Array.isArray(v) ? v : [v]);
+	// biome-ignore lint/suspicious/noExplicitAny: Payload where shape
+	const ok = (d: any, w: any): boolean =>
+		Object.entries(w ?? {}).every(([k, c]) => {
+			// biome-ignore lint/suspicious/noExplicitAny: Payload where shape
+			if (k === "or") return (c as any[]).some((x) => ok(d, x));
+			// biome-ignore lint/suspicious/noExplicitAny: Payload where shape
+			if (k === "and") return (c as any[]).every((x) => ok(d, x));
+			return Object.entries(c as Record<string, unknown>).every(([op, a]) => {
+				if (op === "like")
+					return String(a)
+						.toLowerCase()
+						.split(" ")
+						.every((word) => text(d[k]).includes(word));
+				if (op === "in")
+					return vals(d[k]).some((v) => (a as unknown[]).includes(v));
+				if (op === "equals") return vals(d[k]).includes(a);
+				if (op === "not_equals") return !vals(d[k]).includes(a);
+				if (op === "greater_than_equal") return Number(d[k] ?? 0) >= Number(a);
+				throw new Error(`unsupported operator ${op}`);
+			});
+		});
+	return {
+		// biome-ignore lint/suspicious/noExplicitAny: Payload find args
+		find: async (args: any) => {
+			const hits = docs
+				.filter((d) => ok(d, args.where))
+				.sort((x, y) => (y.repoScore ?? 0) - (x.repoScore ?? 0));
+			return {
+				docs: hits.slice(0, args.limit ?? hits.length),
+				totalDocs: hits.length,
+			};
+		},
+	};
+}
+
 describe("searchRepos F4 ranking", () => {
 	it("a code-verified Stellar repo outranks a no-evidence repo with a stronger name hit", async () => {
 		const alien = doc({
@@ -1538,8 +1583,10 @@ describe("developer products are canonical answers (issue #1901)", () => {
 			repoScore: 16,
 			stars: 0,
 		});
+		// the old row must come from the reads themselves, not a mock that
+		// hands every row to every read (re-check item 4)
 		const { repos } = await searchRepos(
-			mockPayload([old, cli]),
+			whereDb([old, cli]),
 			"theahaco/scaffold-stellar",
 			{ limit: 5 },
 		);

@@ -141,3 +141,8 @@ Re-check item 3 (one shared test-path rule): the new table run against the old r
  FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > test-suites/src/lib.rs is test code
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
 Pass after, with the new rule: code-symbols and repo-search-rank, Tests 173 passed (173)
+
+Re-check item 4 (the stand-in test's mock honors the where clause): mutation check on a scratch copy of 0ee73237 where every read that reaches the old row by name (the main fetch, the identity read and the exact-name read) is broken:
+  with the where-honoring mock the test fails: expected 'stellar-scaffold/cli' to be 'theahaco/scaffold-stellar' (Tests 1 failed);
+  with the old mock that hands every row to every read it passes (Tests 1 passed), the defect the review named.
+On the real code the where-honoring test passes.
