@@ -99,6 +99,8 @@ interface DirRow {
 	name: string;
 	scfAwarded: boolean;
 	scfAwardedRounds: string[];
+	/** human-verified rows are curate's (classifyScfMatch skips them) */
+	scfBasis: string | null;
 }
 
 async function fetchDir(): Promise<DirRow[]> {
@@ -125,6 +127,7 @@ async function fetchDir(): Promise<DirRow[]> {
 					name: p.name,
 					scfAwarded: !!p.scfAwarded,
 					scfAwardedRounds: (p.scfAwardedRounds ?? []).map(String),
+					scfBasis: p.scfBasis ?? null,
 				});
 			if (page.length < 100) break;
 		}
@@ -182,6 +185,7 @@ async function main() {
 			const c = classifyScfMatch({
 				ourAwarded: m.dir.scfAwarded,
 				ourRounds: m.dir.scfAwardedRounds,
+				ourBasis: m.dir.scfBasis,
 				v: parseRoundVerdicts(html),
 			});
 			if (c.understated)

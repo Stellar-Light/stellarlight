@@ -584,14 +584,17 @@ export function uniqueNames<R extends { name: string }>(
  * numbered rounds. Only the page's verdicts decide: a listing badge is a
  * round ENTERED, never an award (and the listing carried none on
  * 2026-11-04, so a badge-driven check never fired). A page that could not
- * be read (v null) says nothing (sls-111).
+ * be read (v null) says nothing, and neither does a human-verified row:
+ * curate's SCF_FIX owns it, and an unlinked one (pen, hermes) is false on
+ * purpose beside another project's page (sls-111).
  */
 export function classifyScfMatch(m: {
 	ourAwarded: boolean;
 	ourRounds: string[];
+	ourBasis?: string | null;
 	v: ReturnType<typeof parseRoundVerdicts> | null;
 }): { understated?: string[]; backfill?: string[] } {
-	if (!m.v) return {};
+	if (!m.v || m.ourBasis === "human-verified") return {};
 	const rounds = [...m.v.awarded].sort((a, b) => Number(a) - Number(b));
 	if (!m.ourAwarded)
 		return rounds.length > 0 || m.v.awardedAnyCount > 0
@@ -618,8 +621,13 @@ export interface StoredScf {
  *   curate syncs its rounds exactly, so a page round the reader added would
  *   be removed on curate's next run and added back on the enrich's, and on
  *   an unlinked row (pen, hermes) it would serve awarded false beside it;
- * - an awarded=false record an SCF writer stamped (any basis, date, source
- *   or page slug: a poison clear, a boolean fix) is a deliberate false, and
+ * - an awarded=false from an official read (basis official-record, such as
+ *   fix-scf-rounds' boolean fix, set when every decided card lost) yields
+ *   only to a page that awards a numbered round after every round the page
+ *   marks lost: a later round's award. The page carries no dates, so round
+ *   order stands in for "after its asOf";
+ * - any other awarded=false an SCF writer stamped (a date, source or page
+ *   slug without that basis: a poison clear, an unlink) is a removal, and
  *   the reader never undoes it;
  * - an unstamped false (the default of a row nobody has read) yields to a
  *   page that shows an award in any form (showsAward), and holds when the
@@ -628,7 +636,10 @@ export interface StoredScf {
 export function scfHold(
 	current: StoredScf | null | undefined,
 	page:
-		| (Parameters<typeof showsAward>[0] & { verdictSubmissions?: number })
+		| (Parameters<typeof showsAward>[0] & {
+				verdictSubmissions?: number;
+				notAwardedRounds?: readonly number[];
+		  })
 		| null
 		| undefined,
 	pageSaysAwarded: boolean,
@@ -636,8 +647,15 @@ export function scfHold(
 	if (current?.basis === "human-verified")
 		return "human-verified record: curate SCF_FIX owns it";
 	if (current?.awarded !== false || !pageSaysAwarded) return null;
+	if (current.basis === "official-record") {
+		const won = Math.max(0, ...(page?.awardedRounds ?? []).map(Number));
+		const lost = Math.max(0, ...(page?.notAwardedRounds ?? []));
+		return won > lost
+			? null
+			: "awarded=false from an official read, and no award after its losses";
+	}
 	if (current.basis || current.asOf || current.sourceUrl || current.slug)
-		return "awarded=false was set by an SCF writer: a deliberate false";
+		return "awarded=false was set by an SCF correction: a removal";
 	if ((page?.verdictSubmissions ?? 0) > 0 && !showsAward(page))
 		return "the page decides its cards and shows no award";
 	return null;

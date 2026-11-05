@@ -266,6 +266,15 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
 unless noted.
 
+- Unread SCF facts are served as answers: 392 of 1006 rows served by
+  GET /api/projects/search (paged across every category, 2026-11-05) carry
+  scfAwarded false and scfAwardedRounds [] with no SCF read behind them (no
+  scfBasis, scfAsOf or scfSourceUrl), among them the nine rows the pending
+  enrich-scf execute marks awarded (Enable, Rumble Fish, Docking Zone,
+  SlimePay and five more). Serving null for a row no SCF read covers needs
+  both fields nullable, a contract change; until then the scfAwarded
+  description says false with scfBasis null means no SCF read is recorded.
+  Found by the review of the sls-111 lane (#1903).
 - Research authority weighting: a 75/15/10 weighting held out best in
   simulation and changes about 10% of confidence labels (the 2026-10-20
   research lane), but the question that motivated it no longer reproduces:

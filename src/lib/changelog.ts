@@ -33,11 +33,12 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-04",
 		surfaces: ["api"],
+		version: "spec@1.9.124",
 		type: "fixed",
 		summary:
 			"SCF awards no longer go missing from scfAwarded and scfAwardedRounds in three ways. The sync's name matcher took the first row it tried, and a rejected one (Velo inside \"Rumble Fish Software Development\") stopped it, so Rumble Fish and six other rows never got their awards; it now takes the one row sharing the longest name prefix with the SCF title, and none on a tie. A round whose card was still in a pipeline status was dropped whenever the page listed another award (Liqvid's SCF #45). A row nobody had read was held at scfAwarded false over an award its page pins (Enable, Docking Zone). The rows move on the next enrich-scf run.",
 		detail:
-			"A round whose submission card still shows a pipeline status (such as Information Collection) counts as awarded only when it is the page's own last awarded round, the page says awarded, the round has exactly one such card, and the page's total less every other award the page lists equals that card's budget to the dollar. Round membership still comes from each submission's verdict, never from the page's buildAwardRounds list, which also names rounds a project entered and lost: Liqvid's rounds are 37 and 45, because its 30 and 44 entries read Not Awarded. The sync no longer changes a curated (human-verified) SCF record, or an scfAwarded false that an SCF correction set. SlimePay's submission-named SCF #45 page now joins its row.",
+			"A round whose submission card still shows a pipeline status (such as Information Collection) counts as awarded only when it is the page's own last awarded round, the page says awarded, the round has exactly one such card, and the page's total less every other award the page lists equals that card's budget to the dollar. Round membership still comes from each submission's verdict, never from the page's buildAwardRounds list, which also names rounds a project entered and lost: Liqvid's rounds are 37 and 45, because its 30 and 44 entries read Not Awarded. The sync no longer changes a curated (human-verified) SCF record or a removal an SCF correction made, and an official-record false yields only to an award in a round after the rounds its page marks lost. SlimePay's submission-named SCF #45 page now joins its row. searchProjects' `scfAwarded` now says what false with `scfBasis` null means: no SCF read is recorded for the row (392 of 1006 rows served on 2026-11-05), so it is not evidence that SCF did not fund the project.",
 	},
 	{
 		date: "2026-11-01",

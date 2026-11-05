@@ -58,6 +58,30 @@ describe("crosscheck matching", () => {
 	});
 });
 
+describe("curated rows (crosscheck)", () => {
+	it("a human-verified row is curate's: an award page does not make it understated", () => {
+		// pen and hermes are unlinked in SCF_FIX (awarded false). A page whose
+		// slug base or name equals theirs is another project's; flagging them
+		// UNDERSTATED would raise a high-severity ledger item every run.
+		expect(
+			classifyScfMatch({
+				ourAwarded: false,
+				ourRounds: [],
+				ourBasis: "human-verified",
+				v: liqvid,
+			}),
+		).toEqual({});
+		expect(
+			classifyScfMatch({
+				ourAwarded: false,
+				ourRounds: [],
+				ourBasis: null,
+				v: liqvid,
+			}),
+		).toEqual({ understated: ["37", "45"] });
+	});
+});
+
 describe("one name, one identity (enrich and crosscheck)", () => {
 	it("a name carried by two projects names neither; a lineage shadow is not a second project", () => {
 		const rows = [

@@ -153,6 +153,7 @@ const detailOf = (html: string) => {
 		roundAwards: v.awards,
 		verdictSubmissions: v.submissions,
 		verdictAwardedAny: v.awardedAnyCount,
+		notAwardedRounds: [...v.notAwarded].map(Number).sort((a, b) => a - b),
 	};
 };
 
@@ -200,25 +201,51 @@ describe("SCF #45 coverage (sls-111)", () => {
 		expect(scfHold({ awarded: false }, page, true)).not.toBeNull();
 	});
 
-	it("a stamped false is deliberate and the reader never undoes it", () => {
-		// fix-scf-rounds' poison clear keeps the page slug; its boolean fix
-		// keeps the citation. Either way an SCF writer set this false.
+	it("a removal an SCF correction made is held against any page", () => {
+		// fix-scf-rounds' poison clear nulls the basis and source and keeps
+		// another project's page slug: the page that matched is not this row's.
 		const page = detailOf(enablePage("Awarded"));
 		expect(
-			scfHold({ awarded: false, slug: "choppaddi-vmf" }, page, true),
-		).not.toBeNull();
-		expect(
 			scfHold(
-				{
-					awarded: false,
-					basis: "official-record",
-					sourceUrl:
-						"https://communityfund.stellar.org/project/coopstable-v2-yield-sharing-stablecoin-nrc",
-				},
+				{ awarded: false, slug: "choppaddi-vmf", asOf: "2026-08-12" },
 				page,
 				true,
 			),
 		).not.toBeNull();
+	});
+
+	it("a dated official-record false yields only to an award after its losses", () => {
+		// fix-scf-rounds' boolean fix (coopstable) set false because every
+		// decided card lost (#38, #40) and kept the official-record citation.
+		const coop = {
+			awarded: false,
+			basis: "official-record",
+			asOf: "2026-07-11",
+			sourceUrl:
+				"https://communityfund.stellar.org/project/coopstable-v2-yield-sharing-stablecoin-nrc",
+		};
+		const lost = [
+			'{"id":"rec-c38","status":"Not Awarded","roundName":"SCF #38","budget":90000,"awardType":"Build"}',
+			'{"id":"rec-c40","status":"Not Awarded","roundName":"SCF #40","budget":90000,"awardType":"Build"}',
+		];
+		// a later round's award: the reason for the false no longer holds
+		const later = detailOf(
+			[
+				...lost,
+				'{"id":"rec-c46","status":"Awarded","roundName":"SCF #46","budget":80000,"awardType":"Build"}',
+			].join("\n"),
+		);
+		expect(scfHold(coop, later, true)).toBeNull();
+		// the same losses and nothing after them: the false stands
+		expect(scfHold(coop, detailOf(lost.join("\n")), true)).not.toBeNull();
+		// an award only in an earlier round than a loss is not after it
+		const earlier = detailOf(
+			[
+				'{"id":"rec-c37","status":"Awarded","roundName":"SCF #37","budget":50000,"awardType":"Build"}',
+				...lost,
+			].join("\n"),
+		);
+		expect(scfHold(coop, earlier, true)).not.toBeNull();
 	});
 
 	it("a human-verified record is curate's: the reader writes nothing to it", () => {

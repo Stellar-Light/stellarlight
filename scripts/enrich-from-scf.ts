@@ -143,6 +143,8 @@ async function scrapeDetailPage(slug: string): Promise<{
 	}>;
 	verdictSubmissions?: number;
 	verdictAwardedAny?: number;
+	/** Numbered rounds the page marks lost (every decided card negative). */
+	notAwardedRounds?: number[];
 	/** Page-level project record (title / slug / lastAwardedRound), read for
 	 * pages the listing never served — see SCF_PAGES_BEYOND_CAP. */
 	pageSlug?: string;
@@ -279,6 +281,9 @@ async function scrapeDetailPage(slug: string): Promise<{
 		// non-award.
 		result.verdictSubmissions = verdicts.submissions;
 		result.verdictAwardedAny = verdicts.awardedAnyCount;
+		result.notAwardedRounds = [...verdicts.notAwarded]
+			.map(Number)
+			.sort((a, b) => a - b);
 
 		return Object.keys(result).length > 0 ? result : null;
 	} catch {
@@ -860,6 +865,9 @@ async function main() {
 				(n, d) => n + (d.verdictAwardedAny ?? 0),
 				0,
 			),
+			notAwardedRounds: [
+				...new Set(details.flatMap((d) => d.notAwardedRounds ?? [])),
+			].sort((a, b) => a - b),
 		};
 		const lastAwardedRound =
 			Math.max(...pages.map((p) => Number(p.lastAwardedRound) || 0)) ||
@@ -982,12 +990,13 @@ async function main() {
 				currentScf.sourceUrl !== pageUrl
 			: pageDiffers;
 
-		// scfHold (scf-official.ts): curate's rows, a deliberate false (one an
-		// SCF writer stamped: fix-scf-rounds' poison clears and boolean fix),
-		// and an unread false on a page that awards nothing (the coopstable
-		// no-resurrect class) all stand. An unread false yields to a page that
-		// shows an award in any form: the Awarded-card count alone held enable
-		// at false over its page-pinned #45 (2026-10-03).
+		// scfHold (scf-official.ts): curate's rows, a removal an SCF correction
+		// made (fix-scf-rounds' poison clears), and an unread false on a page
+		// that awards nothing (the coopstable no-resurrect class) all stand. An
+		// official-record false (the boolean fix) yields to an award in a round
+		// after the rounds the page marks lost. An unread false yields to a
+		// page that shows an award in any form: the Awarded-card count alone
+		// held enable at false over its page-pinned #45 (2026-10-03).
 		const hold = scfHold(currentScf, detail, isAwarded);
 
 		if (hasNewData && hold) {

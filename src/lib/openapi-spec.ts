@@ -10886,7 +10886,11 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					logoUrl: { type: "string", nullable: true },
-					scfAwarded: { type: "boolean" },
+					scfAwarded: {
+						type: "boolean",
+						description:
+							"Whether an SCF award is on record for the project. false with scfBasis null means no SCF read is recorded for this row, so it is not evidence that SCF did not fund the project. Cite a false only with scfBasis and scfSourceUrl.",
+					},
 					scfTotalAwardedUSD: { type: "number", nullable: true },
 					scfAmountStatus: {
 						type: "string",
