@@ -95,13 +95,13 @@ describe("identity primitives — every past trap is a fixture", () => {
 	});
 
 	it("accents fold rather than vanish", () => {
-		// "José" used to read as "jos", so a row named Jos took it.
+		// "José" used to read as "jos", so a row named JOS took it.
 		expect(
-			findTitlePrefixMatch("José Development", [{ name: "Jos" }]),
+			findTitlePrefixMatch("José Development", [{ name: "JOS" }]),
 		).toBeUndefined();
-		expect(
-			findTitlePrefixMatch("José Development", [{ name: "José" }]),
-		).toEqual({ name: "José" });
+		expect(findTitlePrefixMatch("Cafés Network", [{ name: "Cafés" }])).toEqual({
+			name: "Cafés",
+		});
 		expect(normSpaced("José  Café")).toBe("jose cafe");
 		expect(normSpaceless("Cryptoconexión")).toBe("cryptoconexion");
 	});
@@ -115,6 +115,57 @@ describe("identity primitives — every past trap is a fixture", () => {
 		expect(findTitlePrefixMatch("DIA Oracles", [{ name: "DIA" }])).toEqual({
 			name: "DIA",
 		});
+	});
+
+	it("an exact name wins outright over a longer name the title starts", () => {
+		// Both share the whole title as prefix; the row named exactly that is
+		// the match, not a tie.
+		expect(
+			findTitlePrefixMatch("Nest Protocol", [
+				{ name: "Nest Protocol Labs" },
+				{ name: "Nest Protocol" },
+			]),
+		).toEqual({ name: "Nest Protocol" });
+		// two different rows with that exact name are still no match
+		expect(
+			findTitlePrefixMatch("Nest Protocol", [
+				{ name: "Nest Protocol Labs" },
+				{ name: "Nest Protocol" },
+				{ name: "NEST PROTOCOL" },
+			]),
+		).toBeUndefined();
+	});
+
+	it("a name of three or four letters joins by prefix only as an acronym", () => {
+		// Lend and Pay are words that start many titles; BWB, CTX, DIA and LINK
+		// are written as acronyms and join (live #45 row BWB).
+		expect(
+			findTitlePrefixMatch("Lend Wallet for Remittances", [{ name: "Lend" }]),
+		).toBeUndefined();
+		expect(
+			findTitlePrefixMatch("Pay Anywhere Stablecoin Card", [{ name: "Pay" }]),
+		).toBeUndefined();
+		expect(
+			findTitlePrefixMatch("BWB: Brazilian Real Estate Yields on Stellar", [
+				{ name: "BWB" },
+			]),
+		).toEqual({ name: "BWB" });
+		expect(findTitlePrefixMatch("LINK IO", [{ name: "LINK" }])).toEqual({
+			name: "LINK",
+		});
+		// Five letters and up are not filtered: live #45 rows are named Haven,
+		// Bridge and Balance. Vault would join "Vault Kit for RWA" on its own;
+		// what guards it is the single best rule (a longer name the title
+		// starts with wins) and the dry run a person reads.
+		expect(
+			findTitlePrefixMatch("Vault Kit for RWA", [
+				{ name: "Vault" },
+				{ name: "Vault Kit" },
+			]),
+		).toEqual({ name: "Vault Kit" });
+		expect(
+			findTitlePrefixMatch("Vault Kit for RWA", [{ name: "Vault" }]),
+		).toEqual({ name: "Vault" });
 	});
 
 	it("two rows that are one identity are not a tie", () => {

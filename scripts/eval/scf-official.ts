@@ -19,8 +19,9 @@ import { findTitlePrefixMatch, normSpaceless } from "../../src/lib/identity";
 
 export const SCF = "https://communityfund.stellar.org";
 
-export const canon = (s: string) =>
-	(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+/** Spaceless lowercase with accents folded: the matcher's own normSpaceless,
+ * so the crosscheck and the enrich read "Cryptoconexión" alike (sls-111). */
+export const canon = (s: string) => normSpaceless(s || "");
 
 export interface ScfEntry {
 	base: string;
@@ -552,19 +553,27 @@ export function servedBy<
 	return exact ?? findTitlePrefixMatch(base.replace(/-/g, " "), rows);
 }
 
-/** Rows by canon name, for names exactly one row carries: a name two rows
- * share identifies neither (scf-crosscheck took the first, sls-111). */
+/** Rows by canon name, for names exactly one project carries: a name two
+ * projects share identifies neither (scf-crosscheck took the first row,
+ * enrich-from-scf the last, sls-111). `identityOf` says which rows are one
+ * project (a lineage shadow and its canonical row); `onShared` hears every
+ * name it drops, for a person to decide. */
 export function uniqueNames<R extends { name: string }>(
 	rows: R[],
+	identityOf: (row: R) => unknown = (row) => row,
+	onShared?: (name: string, rows: R[]) => void,
 ): Map<string, R> {
-	const count = new Map<string, number>();
-	for (const r of rows)
-		count.set(canon(r.name), (count.get(canon(r.name)) ?? 0) + 1);
-	return new Map(
-		rows
-			.filter((r) => count.get(canon(r.name)) === 1)
-			.map((r) => [canon(r.name), r]),
-	);
+	const byName = new Map<string, R[]>();
+	for (const r of rows) {
+		const key = canon(r.name);
+		if (key) byName.set(key, [...(byName.get(key) ?? []), r]);
+	}
+	const out = new Map<string, R>();
+	for (const [key, named] of byName) {
+		if (new Set(named.map(identityOf)).size === 1) out.set(key, named[0]);
+		else onShared?.(key, named);
+	}
+	return out;
 }
 
 /**

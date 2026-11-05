@@ -57,19 +57,25 @@ export function titlePrefixMatch(a: string, b: string): boolean {
 	return long === short || long.startsWith(`${short} `);
 }
 
-/** A directory name under three letters is a word inside too many titles to
- * identify one ("Op"); three still join (the BWB, CTX and DIA rows). */
+/** A directory name under three letters never joins by prefix ("Op"); one
+ * of three or four joins only when written as an acronym (BWB, CTX, DIA,
+ * LINK), because Lend or Pay starts too many titles to identify one. */
 const MIN_PREFIX_NAME = 3;
+const isAcronym = (name: string) => {
+	const s = name.replace(/[^\p{L}\p{N}]/gu, "");
+	return /\p{Lu}/u.test(s) && s === s.toUpperCase();
+};
 
 /**
  * The partial matcher: the single best row for an official title, or
  * undefined. Candidates are rows whose name passes titlePrefixMatch;
  * spaceless containment only picks them, so a rejected candidate never ends
  * the search ("velo" inside "de·velo·pment" hid Rumble Fish's awards,
- * sls-111). The best candidate shares the longest prefix with the title, and
- * a tie for it is no match: the first hit in row order is not an identity.
- * `identityOf` says which rows are one project (a lineage shadow and its
- * canonical row), so those never tie with each other.
+ * sls-111). A row named exactly as the title wins outright; otherwise the
+ * best candidate shares the longest prefix with the title. A tie for either
+ * is no match: the first hit in row order is not an identity. `identityOf`
+ * says which rows are one project (a lineage shadow and its canonical row),
+ * so those never tie with each other.
  */
 export function findTitlePrefixMatch<T extends { name?: unknown }>(
 	title: string,
@@ -78,7 +84,10 @@ export function findTitlePrefixMatch<T extends { name?: unknown }>(
 	identityOf: (row: T) => unknown = (row) => row,
 ): T | undefined {
 	const norm = normSpaceless(title);
-	const titleLen = normSpaced(title).length;
+	const spaced = normSpaced(title);
+	const titleLen = spaced.length;
+	let exact: T | undefined;
+	let exactTied = false;
 	let best: T | undefined;
 	let bestLen = 0;
 	let tied = false;
@@ -86,8 +95,17 @@ export function findTitlePrefixMatch<T extends { name?: unknown }>(
 		const name = String(row.name ?? "");
 		const key = normSpaceless(name);
 		if (!key || (!key.includes(norm) && !norm.includes(key))) continue;
+		if (normSpaced(name) === spaced) {
+			if (exact === undefined) exact = row;
+			else if (identityOf(row) !== identityOf(exact)) exactTied = true;
+			continue;
+		}
 		if (key.length < MIN_PREFIX_NAME) {
 			onSkip?.(row, "name under three letters");
+			continue;
+		}
+		if (key.length <= 4 && !isAcronym(name)) {
+			onSkip?.(row, "short name not written as an acronym");
 			continue;
 		}
 		if (!titlePrefixMatch(title, name)) {
@@ -106,6 +124,11 @@ export function findTitlePrefixMatch<T extends { name?: unknown }>(
 			identityOf(row) !== identityOf(best)
 		)
 			tied = true;
+	}
+	if (exact !== undefined) {
+		if (!exactTied) return exact;
+		onSkip?.(exact, "two rows carry this exact name");
+		return undefined;
 	}
 	if (tied && best !== undefined) {
 		onSkip?.(best, "tied with another row");

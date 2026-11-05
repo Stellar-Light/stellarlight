@@ -8,6 +8,7 @@
  */
 import { describe, expect, it } from "vitest";
 import {
+	canon,
 	classifyScfMatch,
 	parseRoundVerdicts,
 	uniqueNames,
@@ -54,5 +55,33 @@ describe("crosscheck matching", () => {
 		expect(
 			classifyScfMatch({ ourAwarded: false, ourRounds: [], v: null }),
 		).toEqual({});
+	});
+});
+
+describe("one name, one identity (enrich and crosscheck)", () => {
+	it("a name carried by two projects names neither; a lineage shadow is not a second project", () => {
+		const rows = [
+			{ slug: "nest", name: "Nest" },
+			{ slug: "nest-2", name: "NEST" },
+			{ slug: "liqvid", name: "Liqvid", canonicalSlug: "liqvidxyz" },
+			{ slug: "liqvidxyz", name: "Liqvid", canonicalSlug: undefined },
+		];
+		const shared: string[] = [];
+		const index = uniqueNames(
+			rows,
+			(r) => r.canonicalSlug ?? r.slug,
+			(name) => shared.push(name),
+		);
+		expect(index.has("nest")).toBe(false);
+		expect(shared).toEqual(["nest"]);
+		const hit = index.get("liqvid");
+		expect(hit && (hit.canonicalSlug ?? hit.slug)).toBe("liqvidxyz");
+	});
+
+	it("canon folds accents the way the matcher does", () => {
+		// The crosscheck read Cryptoconexión as cryptoconexin, the enrich as
+		// cryptoconexion, so the two disagreed on whether the page was ours.
+		expect(canon("Cryptoconexión")).toBe("cryptoconexion");
+		expect(canon("CaféPay")).toBe("cafepay");
 	});
 });

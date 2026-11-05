@@ -21,7 +21,12 @@ import {
 } from "../src/lib/identity";
 import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
-import { parseRoundVerdicts, scfHold, showsAward } from "./eval/scf-official";
+import {
+	parseRoundVerdicts,
+	scfHold,
+	showsAward,
+	uniqueNames,
+} from "./eval/scf-official";
 
 const args = process.argv.slice(2);
 const dryRun = !args.includes("--execute");
@@ -339,12 +344,19 @@ async function main() {
 	}
 	console.log(`Loaded ${ourProjects.length} projects from DB\n`);
 
-	const byNormName = new Map<string, any>();
 	const bySlug = new Map<string, any>();
-	for (const p of ourProjects) {
-		byNormName.set(normalize(p.name), p);
-		bySlug.set(p.slug, p);
-	}
+	for (const p of ourProjects) bySlug.set(p.slug, p);
+	// a lineage shadow and its canonical row are one project
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+	const identityOf = (p: any) =>
+		p.canonicalSlug && bySlug.has(p.canonicalSlug) ? p.canonicalSlug : p.slug;
+	// One exact name, one project (sls-111): a name two projects carry joins
+	// neither. The map used to keep whichever row loaded last.
+	const byNormName = uniqueNames(ourProjects, identityOf, (name, rows) =>
+		console.log(
+			`  shared name "${name}": ${rows.map((r) => r.slug).join(", ")}; no page joins either by name, a person decides`,
+		),
+	);
 
 	// 4. Match and enrich
 	// sls-061 (#767): SCF titles that no normalization reaches — the API title
@@ -450,6 +462,22 @@ async function main() {
 		// sls-111 (2026-11-04): a submission-named SCF #45 page whose own site,
 		// slimepay.com, is the row's site. r45 $35,000 (its #44 not awarded).
 		"the-merchant-settlement-rail-for-africa-bzf": "slimepay",
+		// sls-111: rows with a 3 or 4 letter name that is not an acronym no
+		// longer join by title prefix (a row named Lend would take any title
+		// starting "Lend"). These live joins are kept here instead, each with
+		// the page's own site equal to the row's site (2026-11-05).
+		"bexo-wallet-usdc-payments-cross-border-transfers-qr-merchant-payments-for-latin-america-uyu":
+			"bexo", // bexo.app
+		"lendxyz-7xc": "lend", // app.lend.xyz
+		"zarf-protocol-zarfto-b5n": "zarf", // zarf.to
+		"loop-cashback-everywhere-with-stellar-zom": "loop", // loopfinance.io
+		"sfx-super-money-app-uav": "sfx", // sfxchange.co
+		"lul-serving-the-unbanked-ckz": "lulpay", // lulpay.com (the lul row is its lineage shadow)
+		"eara-european-regulated-rwa-ecosystem-dmu": "eara", // earaglobal.com
+		"rozo-one-tap-to-pay-vqy": "rozo", // rozo.ai
+		"cobo-custody-integration-for-institution-p8i": "cobo", // cobo.com
+		"cocaxyz-5fk": "coca", // coca.xyz
+		"paid-payrolling-0sk": "paid", // p-aid.world
 		// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
 		// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
 		// `band`, which otherwise matches nothing and would keep stale data.
@@ -648,11 +676,7 @@ async function main() {
 					console.log(
 						`  partial REJECTED (${why}): ours "${proj.name}" vs SCF "${scf.title}"`,
 					),
-				// a lineage shadow and its canonical row are one project
-				(proj) =>
-					proj.canonicalSlug && bySlug.has(proj.canonicalSlug)
-						? proj.canonicalSlug
-						: proj.slug,
+				identityOf,
 			);
 		}
 
