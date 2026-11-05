@@ -244,6 +244,32 @@ describe("search and analyze count one set the same way", () => {
 		expect(s.indexedBuilds).toBe(new Set(all.map((b) => b.id)).size);
 	});
 
+	it("counts placement once per submission, as winnersVsOthers and search do", async () => {
+		use(saved);
+		// Blend Pool Creator, Verbex and Hive placed in one event each and
+		// entered another unplaced.
+		const p = await analyze({ facet: "placement" });
+		expect(p.total).toMatchObject({ builds: 24, known: 24 });
+		const values = p.total.values as Array<{
+			value: string;
+			builds: number;
+			winners: number;
+		}>;
+		expect(values.map((v) => [v.value, v.builds, v.winners])).toEqual([
+			["not placed", 21, 0],
+			["winner", 3, 3],
+		]);
+		expect(values[1].builds).toBe((await search({ winnersOnly: "1" })).matched);
+		const groups = (await analyze({ facet: "category", by: "placement" }))
+			.groups as Array<{ value: string; field: number }>;
+		expect(groups.map((g) => [g.value, g.field])).toEqual([
+			["not placed", 21],
+			["winner", 3],
+		]);
+		const lift = (await analyze({ facet: "category" })).winnersVsOthers;
+		expect(lift.winnersKnown + lift.othersKnown).toBe(24);
+	});
+
 	it("differs only by the winners-only rows analyze leaves out and counts in its warning", async () => {
 		use(saved, rows(WINNERS_ONLY));
 		const leftOut = (warnings: string[] = []) =>

@@ -283,7 +283,7 @@ export const FACETS = {
 		values: (b) => (b.stack ? [...new Set(b.stack.map(libraryOf))] : null),
 	},
 	activity: {
-		label: `whether the submitted repo saw commits on its default branch ${KEPT_BUILDING_DAYS}+ days after the event ended (work that moved to another repo counts as none here)`,
+		label: `whether the submitted repo saw commits on its default branch ${KEPT_BUILDING_DAYS}+ days after the event ended (work that moved to another repo counts as none here); for a submission entered in several events, the event of its placed entry, else its latest`,
 		unknown: `no repo link, activity not read yet, or the event ended under ${KEPT_BUILDING_DAYS} days ago`,
 		values: activityAfter,
 	},
@@ -313,7 +313,8 @@ export const FACETS = {
 				: null,
 	},
 	placement: {
-		label: "placed in its event or not",
+		label:
+			"placed in its event or not; a submission entered in several events is a winner when any of its entries placed",
 		unknown: "",
 		values: (b) => [b.isWinner ? "winner" : "not placed"],
 	},
@@ -378,6 +379,34 @@ export interface CountOpts {
 const round = (n: number, places: number) =>
 	Math.round(n * 10 ** places) / 10 ** places;
 
+/** A submission's event entries, best first: a placed one, then the latest
+ * event. The detail's top level, search across events and review all show
+ * this entry, so they never disagree about which event a submission is in. */
+export function entryOrder(
+	a: { isWinner?: boolean | null; endedAt?: string | null },
+	b: { isWinner?: boolean | null; endedAt?: string | null },
+): number {
+	return (
+		Number(!!b.isWinner) - Number(!!a.isWinner) ||
+		(b.endedAt ?? "").localeCompare(a.endedAt ?? "")
+	);
+}
+
+/** One row per submission, its best entry, in index order (sls-092: the
+ * index holds a row per submission and event). */
+export function onePerSubmission(builds: IndexedBuild[]): IndexedBuild[] {
+	const key = (b: IndexedBuild) => ({
+		isWinner: b.isWinner,
+		endedAt: b.hackathon.endedAt,
+	});
+	const best = new Map<string, IndexedBuild>();
+	for (const b of builds) {
+		const cur = best.get(b.id);
+		if (!cur || entryOrder(key(b), key(cur)) < 0) best.set(b.id, b);
+	}
+	return builds.filter((b) => best.get(b.id) === b);
+}
+
 /** Submissions among these rows: the unit every build count reports, as
  * searchHackathonBuilds lists them. The index holds a row per submission and
  * event, so one entered in several events counts once (sls-092). */
@@ -400,7 +429,15 @@ export function distribution(
 		{ builds: Set<string>; winners: Set<string> }
 	>();
 	const known = new Set<string>();
-	for (const b of builds) {
+	// Placement and activity read one entry per submission, the one search
+	// shows for it: a submission that placed in any entry here is a winner,
+	// never also not placed, and its activity is measured from that entry's
+	// event, so one with events ending months apart has one verdict.
+	const rows =
+		facet === "placement" || facet === "activity"
+			? onePerSubmission(builds)
+			: builds;
+	for (const b of rows) {
 		const vs = read(b, now);
 		if (vs === null) continue;
 		known.add(b.id);
@@ -477,10 +514,16 @@ export function distributionBy(
 		}
 		return g;
 	};
-	// A submission counts once in each group any of its entries falls in.
-	for (const b of field)
+	// A submission counts once in each group any of its entries falls in;
+	// by=placement puts it in one, as winnersVsOthers does.
+	const rows = (set: IndexedBuild[]) => {
+		if (by !== "placement") return set;
+		const { winners, others } = placementSplit(set);
+		return [...winners, ...others];
+	};
+	for (const b of rows(field))
 		for (const v of read(b, now) ?? []) at(b, v).field.add(b.id);
-	for (const b of matched)
+	for (const b of rows(matched))
 		for (const v of read(b, now) ?? []) at(b, v).members.push(b);
 	const out: Group[] = [...groups].map(([value, g]) => ({
 		value,
@@ -495,6 +538,17 @@ export function distributionBy(
 	else if (by === "year") out.sort((a, b) => a.value.localeCompare(b.value));
 	else out.sort((a, b) => b.field - a.field || a.value.localeCompare(b.value));
 	return out;
+}
+
+/** Winners and everyone else, by submission: one that placed in any of its
+ * entries here is a winner, by its placed entries, and never also one of the
+ * rest (winnersVsOthers, by=placement). */
+function placementSplit(rows: IndexedBuild[]) {
+	const won = new Set(rows.filter((b) => b.isWinner).map((b) => b.id));
+	return {
+		winners: rows.filter((b) => b.isWinner),
+		others: rows.filter((b) => !won.has(b.id)),
+	};
 }
 
 export interface Lift {
@@ -516,11 +570,7 @@ export function winnersVsOthers(
 	opts: CountOpts = {},
 ): { winnersKnown: number; othersKnown: number; values: Lift[] } | null {
 	if (facet === "placement") return null;
-	const w = builds.filter((b) => b.isWinner);
-	// Everyone else: a submission that placed in any of its entries here is a
-	// winner, never also one of the others.
-	const won = new Set(w.map((b) => b.id));
-	const o = builds.filter((b) => !won.has(b.id));
+	const { winners: w, others: o } = placementSplit(builds);
 	if (!w.length || !o.length) return null;
 	const all = { ...opts, top: Number.POSITIVE_INFINITY };
 	const dw = distribution(w, facet, all);

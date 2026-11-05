@@ -205,6 +205,48 @@ describe("a submission entered in several events", () => {
 		]);
 	});
 
+	it("counts placement once: a winner when any of its entries placed", () => {
+		const d = distribution(rows, "placement", { now: NOW });
+		expect(d).toMatchObject({ builds: 2, known: 2 });
+		expect(d.values.map((v) => [v.value, v.builds, v.winners])).toEqual([
+			["winner", 1, 1],
+			["not placed", 1, 0],
+		]);
+		const g = distributionBy(rows, rows, "category", "placement", {
+			now: NOW,
+		});
+		expect(g.map((x) => [x.value, x.field, x.builds])).toEqual([
+			["not placed", 1, 1],
+			["winner", 1, 1],
+		]);
+	});
+
+	// DarkWater ZK, saved 2026-11-04: its two events ended 11 days apart, so
+	// its repo kept building 90 days after one and not after the other.
+	it("measures activity from one entry, the event search shows it in", () => {
+		const activity = {
+			lastCommitAt: "2026-05-25T06:45:35Z",
+			archived: false,
+		};
+		const darkWater = [
+			build("dorahacks-buidl-39905", {
+				activity,
+				event: "buildonstellarchile",
+				endedAt: "2026-03-06",
+			}),
+			build("dorahacks-buidl-39905", {
+				activity,
+				event: "stellar-hacks-zk-gaming",
+				endedAt: "2026-02-23",
+			}),
+		];
+		const d = distribution(darkWater, "activity", { now: NOW });
+		expect(d).toMatchObject({ builds: 1, known: 1 });
+		expect(d.values.map((v) => [v.value, v.builds])).toEqual([
+			["no commits 90+ days after", 1],
+		]);
+	});
+
 	it("is a winner, not one of the others, when any of its entries placed", () => {
 		expect(winnersVsOthers(rows, "category", { now: NOW })).toMatchObject({
 			winnersKnown: 1,

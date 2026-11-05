@@ -4382,7 +4382,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: false,
 						description:
-							"What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project (a floor). projectStatus: that project's directory status today. scf: whether SCF funded it. placement: winner or not. track, event, year.",
+							"What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project (a floor). projectStatus: that project's directory status today. scf: whether SCF funded it. placement: winner or not. track, event, year. A submission entered in several events counts once: a winner when any entry placed, its activity from the event of its placed entry, else its latest.",
 						schema: {
 							type: "string",
 							enum: [...FACET_IDS],
@@ -4394,7 +4394,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: false,
 						description:
-							"Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. A submission counts once in each group its entries fall in, so groups can sum past the total.",
+							"Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. A submission counts once in each event, year or track group its entries fall in, so groups can sum past the total; by=placement puts it in one, winner when any of its entries placed.",
 						schema: { type: "string", enum: [...GROUP_FACETS] },
 					},
 					{

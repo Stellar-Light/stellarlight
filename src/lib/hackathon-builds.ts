@@ -10,7 +10,11 @@
 import { unstable_cache } from "next/cache";
 import { overlayWinnerOf } from "@/data/winner-overlay";
 import { DEFAULT_READ_TIMEOUT_MS, withReadTimeout } from "@/lib/degraded-read";
-import { libraryOf } from "@/lib/hackathon-analytics";
+import {
+	entryOrder,
+	libraryOf,
+	onePerSubmission,
+} from "@/lib/hackathon-analytics";
 import {
 	BUILD_SEARCH_MODES,
 	type BuildSearchMode,
@@ -390,33 +394,8 @@ export interface BuildEntry {
 	winnerSource?: string;
 }
 
-/** A submission's event entries, best first: a placed one, then the latest
- * event. The detail's top level, search across events and review all show
- * this entry, so they never disagree about which event a submission is in. */
-function entryOrder(
-	a: { isWinner?: boolean | null; endedAt?: string | null },
-	b: { isWinner?: boolean | null; endedAt?: string | null },
-): number {
-	return (
-		Number(!!b.isWinner) - Number(!!a.isWinner) ||
-		(b.endedAt ?? "").localeCompare(a.endedAt ?? "")
-	);
-}
-
-/** One row per submission, its best entry, in index order (sls-092: the
- * index holds a row per submission and event). */
-export function onePerSubmission(builds: IndexedBuild[]): IndexedBuild[] {
-	const key = (b: IndexedBuild) => ({
-		isWinner: b.isWinner,
-		endedAt: b.hackathon.endedAt,
-	});
-	const best = new Map<string, IndexedBuild>();
-	for (const b of builds) {
-		const cur = best.get(b.id);
-		if (!cur || entryOrder(key(b), key(cur)) < 0) best.set(b.id, b);
-	}
-	return builds.filter((b) => best.get(b.id) === b);
-}
+/** The fold lives with the facet engine, which counts by it. */
+export { onePerSubmission };
 
 function entryOf(
 	d: HackathonBuild,
