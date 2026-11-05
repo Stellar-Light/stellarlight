@@ -1,13 +1,11 @@
 {
 	"$comment": "Served values with no date in their own scope, as of the guard's first run. A ratchet: entries may be REMOVED (in the PR that dates them) and never added — --update refuses growth unless the guard's own rules changed (--widen). Regenerate: pnpm exec tsx scripts/check-answer-dating.ts --update",
-	"updatedAt": "2026-10-05T17:15:13.503Z",
-	"count": 30,
+	"updatedAt": "2026-11-05T14:09:56.050Z",
+	"count": 28,
 	"undated": [
 		"explainRepo :: codeVerified.protocolCaps.status",
 		"getBuilders :: builders.projects.status",
 		"getHackathons :: meta.fallbackChannels.summary",
-		"getPartners :: partners.trust.label",
-		"getPartners :: partners.trust.score",
 		"getQualityReport :: (root).verdict",
 		"getQualityReport :: consumerFindings.records.status",
 		"getQualityReport :: flow.nodes.label",

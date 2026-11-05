@@ -66,7 +66,12 @@ import {
 	LOCATOR_KINDS,
 	SOURCE_REPO_NAMES,
 } from "./source-locator";
-import { PRICE_BASES } from "./stablecoins";
+import {
+	ISSUER_OF_RECORD_CHECKS,
+	PRICE_BASES,
+	STABLECOIN_ASSET_TYPE_FILTERS,
+	STABLECOIN_ASSET_TYPES,
+} from "./stablecoins";
 import { CHECK_RESULTS, STATUS_CHECKS } from "./status-checks";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
@@ -126,6 +131,52 @@ const rateLimited429 = (callsModel = false) => ({
 		},
 	},
 });
+
+/** A documented failure whose body is the shared ErrorResponse. */
+const errorBody = (description: string) => ({
+	description,
+	content: {
+		"application/json": {
+			schema: { $ref: "#/components/schemas/ErrorResponse" },
+		},
+	},
+});
+
+/** The 502 the AI partner routes answer when one language model call fails
+ * (#1908, src/lib/model-failure.ts). The provider refusing our request or
+ * account answers their 503 `unavailable` instead: a resend cannot clear it. */
+const modelFailed502 = (fallback: string) =>
+	errorBody(
+		`One language model call failed: the provider erred (5xx), was overloaded, or could not be reached in time, or its output could not be read. Not a claim about the request or the data: resend later, or ${fallback} now. The provider refusing our request or account is the 503 with unavailable true instead, where a resend does not help.`,
+	);
+
+/** The body of the AI partner routes' 503 when the AI path is off. */
+const AI_UNAVAILABLE_SCHEMA = {
+	type: "object",
+	description:
+		"The AI path is off: no model is configured, or the provider refuses our request or account (any 4xx but 429). The caller falls back rather than erroring.",
+	required: ["error", "unavailable"],
+	properties: {
+		error: {
+			type: "string",
+			description: "Human-readable reason, safe to show.",
+		},
+		unavailable: {
+			type: "boolean",
+			description:
+				"Always true here: the feature is off, not the request wrong. Fall back; do not retry.",
+		},
+	},
+};
+const aiUnavailable503 = (fallback: string) => ({
+	description: `The AI path is off: no model is configured, or the provider refuses our request or account. A resend does not help, so no Retry-After is sent: ${fallback}.`,
+	content: { "application/json": { schema: AI_UNAVAILABLE_SCHEMA } },
+});
+
+/** This service's own fault: no AI partner route answers it on purpose. */
+const unexpected500 = errorBody(
+	"An unexpected error inside this service, not a claim about the request or the data: resend later.",
+);
 
 /** One-shot report meta — {source, generatedAt, note} (scf-pitch,
  * hackathon-brief, vet-idea, repos/trust routes serve exactly this). */
@@ -228,6 +279,22 @@ const TYPE_COVERAGE_PROPS = {
 	},
 	scfFunded: { type: "integer" },
 	hackathonWinners: { type: "integer" },
+};
+
+/** One project's TVL reading in the analyze tvl rollup (top10, staleProjects). */
+const TVL_ROLLUP_ROW_SCHEMA = {
+	type: "object",
+	properties: {
+		slug: { type: "string", nullable: true },
+		name: { type: "string", nullable: true },
+		tvlUSD: { type: "number" },
+		tvlAsOf: { type: "string", format: "date-time", nullable: true },
+		tvlStale: {
+			type: "boolean",
+			description:
+				"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the reading is old. See staleWarning.",
+		},
+	},
 };
 
 /** What a hackathon build became: shared by searchHackathonBuilds and
@@ -1229,7 +1296,7 @@ export const spec: OpenAPISpec = {
 			"Rate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.",
 			"",
 			"## Pagination",
-			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`.",
+			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`. `searchRepos` ranks a capped candidate window (the top 200 rows by repoScore for a browse with no q, the top 600 for a search): when `meta.counts.truncated` is true, `total` counts that window and paging ends there, and `meta.counts.eligible` gives the number of rows the filters admit (null where only ranking every row could count them).",
 			"",
 			"## Ordering & relevance",
 			'`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all; the rows are vector-similarity guesses (`via: "semantic"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it; matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0-1 cosine). Use these for cross-source ranking when merging with other aggregators.',
@@ -3404,7 +3471,13 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
+												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | renamed (that name is a renamed repo's old path the index holds no row for, so `repo` is where GitHub redirects it and `renamedFrom` is the path asked for) | canonical (the curated concept map; a developer product routes here only when the whole q is its name, in any spelling, with surface words such as repo or github ignored, so a product named inside a longer question routes by trigger or the index) | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
+										},
+										renamedFrom: {
+											type: "string",
+											nullable: true,
+											description:
+												"The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is explained instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for.",
 										},
 										repoMeta: {
 											type: "object",
@@ -3471,6 +3544,13 @@ export const spec: OpenAPISpec = {
 												contractInterface: {
 													type: "array",
 													items: { type: "string" },
+												},
+												contractInterfacePaths: {
+													type: "array",
+													items: { type: "string" },
+													nullable: true,
+													description:
+														"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
 												},
 												targetProtocol: {
 													type: "integer",
@@ -5440,109 +5520,7 @@ export const spec: OpenAPISpec = {
 												generatedAt: { type: "string", format: "date-time" },
 											},
 										},
-										partner: {
-											type: "object",
-											description:
-												"The full partner profile: every field the live response serves. An earlier declaration covered 9 of these; Raven's drift check prompted a field-complete pass so an agent can see contact, coverage and verification exist without probing.",
-											properties: {
-												slug: { type: "string" },
-												name: { type: "string" },
-												partnerType: { type: "string" },
-												tagline: { type: "string", nullable: true },
-												description: { type: "string", nullable: true },
-												logoUrl: { type: "string", nullable: true },
-												websiteUrl: { type: "string", nullable: true },
-												foundedYear: { type: "integer", nullable: true },
-												services: { type: "array", items: { type: "string" } },
-												sectors: { type: "array", items: { type: "string" } },
-												regions: { type: "array", items: { type: "string" } },
-												assets: { type: "array", items: { type: "string" } },
-												seps: {
-													type: "array",
-													items: { type: "string" },
-													description: "SEP standards the partner implements.",
-												},
-												rampTypes: {
-													type: "array",
-													nullable: true,
-													items: {
-														type: "string",
-														enum: ["on-ramp", "off-ramp"],
-													},
-													description:
-														"Fiat ramps CONFIRMED from the anchor's own transfer server /info (deposit = on-ramp, withdraw = off-ramp). null = no ramp confirmed; the /info was not readable from our enrichment or reported none enabled; never inferred from SEP presence (MYKOBO serves SEP-24 but its /info is unreachable from outside, so it is null, not 'no ramps'). Same encoding on getPartner.",
-												},
-												country: { type: "string", nullable: true },
-												acceptingClients: { type: "boolean" },
-												typicalEngagement: { type: "string", nullable: true },
-												leadTime: { type: "string", nullable: true },
-												pricingModel: { type: "string", nullable: true },
-												pricingNotes: { type: "string", nullable: true },
-												docsUrl: { type: "string", nullable: true },
-												githubOrg: { type: "string", nullable: true },
-												contactEmail: { type: "string", nullable: true },
-												contactChannel: { type: "string", nullable: true },
-												responseSla: { type: "string", nullable: true },
-												tomlSourceUrl: { type: "string", nullable: true },
-												tomlFetchedAt: { type: "string", nullable: true },
-												caseStudies: {
-													type: "array",
-													items: {
-														type: "object",
-														properties: {
-															title: { type: "string" },
-															url: { type: "string", nullable: true },
-															projectSlug: {
-																type: "string",
-																nullable: true,
-																description:
-																	"Slug in the projects directory, when the case study's project is listed there.",
-															},
-														},
-													},
-												},
-												verified: {
-													type: "object",
-													description:
-														"Automated verification signals. Null members mean not yet probed: absence of evidence, not a failing grade.",
-													properties: {
-														githubLastCommitAt: {
-															type: "string",
-															nullable: true,
-														},
-														githubCommits90d: {
-															type: "integer",
-															nullable: true,
-														},
-														onchainActive: { type: "boolean", nullable: true },
-														onchainNote: { type: "string", nullable: true },
-														scfInvolvement: { type: "string", nullable: true },
-														lastAutoVerifyAt: {
-															type: "string",
-															nullable: true,
-														},
-													},
-												},
-												freshness: {
-													type: "object",
-													description: "Row-currency signals used by matching.",
-													properties: {
-														status: { type: "string" },
-														lastPartnerUpdateAt: {
-															type: "string",
-															nullable: true,
-														},
-														isCurrent: { type: "boolean" },
-														excludeFromMatching: { type: "boolean" },
-													},
-												},
-												url: {
-													type: "string",
-													description:
-														"Canonical stellarlight.xyz profile URL.",
-												},
-											},
-										},
+										partner: { $ref: "#/components/schemas/Partner" },
 									},
 								},
 							},
@@ -5606,7 +5584,33 @@ export const spec: OpenAPISpec = {
 								properties: {
 									need: {
 										type: "string",
-										description: "The builder's need, in plain language",
+										maxLength: 2000,
+										description:
+											"The builder's need, in plain language, up to 2,000 characters.",
+									},
+									type: {
+										type: "string",
+										enum: [...PARTNER_TYPES],
+										description:
+											"Rank only partners of this type; any other value answers 400 with validTypes.",
+									},
+									sector: {
+										type: "string",
+										description:
+											"Rank only partners whose recorded sectors contain this text.",
+									},
+									region: {
+										type: "string",
+										description:
+											"Rank only partners whose recorded regions contain this text.",
+									},
+									limit: {
+										type: "integer",
+										minimum: 1,
+										maximum: 10,
+										default: 5,
+										description:
+											"Most matches to return, 1 to 10 (default 5); out-of-range values are clamped.",
 									},
 								},
 							},
@@ -5657,11 +5661,17 @@ export const spec: OpenAPISpec = {
 															},
 															sectors: {
 																type: "array",
+																nullable: true,
 																items: { type: "string" },
+																description:
+																	"Curated sectors; NULL = none recorded (UNKNOWN).",
 															},
 															regions: {
 																type: "array",
+																nullable: true,
 																items: { type: "string" },
+																description:
+																	"Curated coverage regions; NULL = none recorded (UNKNOWN).",
 															},
 															freshness: {
 																type: "object",
@@ -5693,27 +5703,53 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
-					"429": rateLimited429(true),
-					"503": {
+					"400": {
 						description:
-							"AI backend unavailable: fall back to GET /api/partners",
+							"The body is not JSON, `need` is missing, blank or longer than 2,000 characters, or `type` names no partner type; then validTypes lists every type it accepts.",
 						content: {
 							"application/json": {
 								schema: {
-									type: "object",
-									description:
-										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
-									properties: {
-										error: {
-											type: "string",
-											description: "Human-readable reason, safe to show.",
+									allOf: [
+										{ $ref: "#/components/schemas/ErrorResponse" },
+										{
+											type: "object",
+											properties: {
+												validTypes: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when type was unknown: every partner type the field accepts.",
+												},
+											},
 										},
-										unavailable: {
-											type: "boolean",
-											description:
-												"Always true here: the feature is off, not the request wrong.",
-										},
-									},
+									],
+								},
+							},
+						},
+					},
+					"422": errorBody(
+						"The model declined to rank this need: rephrase it, or use GET /api/partners filters.",
+					),
+					"429": rateLimited429(true),
+					"502": modelFailed502("rank with GET /api/partners filters"),
+					"500": unexpected500,
+					"503": {
+						description:
+							"Two cases, told apart by the body. unavailable true: the AI path is off (no model is configured, or the provider refuses our request or account); a resend does not help, so no Retry-After is sent: use GET /api/partners filters. retryAfterSeconds: the partner directory could not be read, an outage and NOT a claim that no partner matches; resend after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description:
+									"Only when the directory read failed: seconds to wait, the same number as retryAfterSeconds.",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: {
+									oneOf: [
+										AI_UNAVAILABLE_SCHEMA,
+										{ $ref: "#/components/schemas/RetryableError" },
+									],
 								},
 							},
 						},
@@ -5815,31 +5851,40 @@ export const spec: OpenAPISpec = {
 													},
 													sectors: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
+														description:
+															"Curated sectors; NULL = none recorded (UNKNOWN, never 'serves no sector').",
 													},
 													regions: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
+														description:
+															"Curated coverage regions; NULL = none recorded (UNKNOWN, never 'covers nowhere').",
 													},
 													assets: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
 														description:
-															"Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES.",
+															"Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set): UNKNOWN, and a curated code is never served here.",
 													},
 													seps: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
 														description:
-															"SEP standards implemented (sep-6, sep-24, sep-31).",
+															"SEP standards implemented (sep-6, sep-24, sep-31), read from stellar.toml. NULL = no read is recorded; [] = a recorded read declares none.",
 													},
 													tomlSourceUrl: { type: "string", nullable: true },
 													tomlFetchedAt: { type: "string", nullable: true },
 													rampTypes: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
 														description:
-															"Verified fiat-ramp capability (on-ramp / off-ramp) from the transfer server.",
+															"Fiat ramps (on-ramp / off-ramp): confirmed from the transfer server during a stellar.toml read, or entered by a curator. NULL = none recorded (UNKNOWN).",
 													},
 													country: { type: "string", nullable: true },
 													contactable: {
@@ -5867,35 +5912,23 @@ export const spec: OpenAPISpec = {
 											description:
 												"Whether the caller is eligible to submit a listing from here.",
 										},
-									},
-								},
-							},
-						},
-					},
-					"429": rateLimited429(true),
-					"503": {
-						description: "AI backend unavailable",
-						content: {
-							"application/json": {
-								schema: {
-									type: "object",
-									description:
-										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
-									properties: {
-										error: {
-											type: "string",
-											description: "Human-readable reason, safe to show.",
-										},
-										unavailable: {
+										directoryUnavailable: {
 											type: "boolean",
 											description:
-												"Always true here: the feature is off, not the request wrong.",
+												"Present and true only when no partner search this turn could read the directory: matches is absent and the reply did not ground on directory rows. An outage, NOT an empty result: resend later, or browse GET /api/partners.",
 										},
 									},
 								},
 							},
 						},
 					},
+					"400": errorBody(
+						"The body is not JSON, or `messages` holds no usable chat turn.",
+					),
+					"429": rateLimited429(true),
+					"502": modelFailed502("browse GET /api/partners"),
+					"500": unexpected500,
+					"503": aiUnavailable503("browse /partners or use the listing form"),
 				},
 			},
 		},
@@ -6002,30 +6035,18 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"400": errorBody(
+						"The body is not JSON, `mode` is neither chat nor extract, or extract was sent with no transcript.",
+					),
+					"422": errorBody("The model declined to read this transcript."),
 					"429": rateLimited429(true),
-					"503": {
-						description: "AI backend unavailable",
-						content: {
-							"application/json": {
-								schema: {
-									type: "object",
-									description:
-										"The AI path is not configured or is unavailable; the caller falls back to the manual form rather than erroring.",
-									properties: {
-										error: {
-											type: "string",
-											description: "Human-readable reason, safe to show.",
-										},
-										unavailable: {
-											type: "boolean",
-											description:
-												"Always true here: the feature is off, not the request wrong.",
-										},
-									},
-								},
-							},
-						},
-					},
+					"502": modelFailed502(
+						"use the listing form (POST /api/partners/submit-listing)",
+					),
+					"500": unexpected500,
+					"503": aiUnavailable503(
+						"use the listing form (POST /api/partners/submit-listing)",
+					),
 				},
 			},
 		},
@@ -6161,6 +6182,21 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"429": rateLimited429(),
+					"503": {
+						description:
+							"The partner store could not be opened: an outage, NOT a judgment of the listing, and nothing was saved. Resend after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 				},
 			},
 		},
@@ -6630,6 +6666,12 @@ export const spec: OpenAPISpec = {
 																type: "object",
 																properties: {
 																	fullName: { type: "string" },
+																	renamedFrom: {
+																		type: "string",
+																		nullable: true,
+																		description:
+																			"As on /api/repos/trust: the renamed path asked for, or null. Always null here, since competitors come from search rows.",
+																	},
 																	url: { type: "string", nullable: true },
 																	stars: { type: "integer", nullable: true },
 																	lastCommitAt: {
@@ -6652,7 +6694,7 @@ export const spec: OpenAPISpec = {
 															codeTruth: {
 																type: "object",
 																description:
-																	"TrustReport codeTruth minus the full contractInterface (interfaceSize is kept).",
+																	"TrustReport codeTruth minus the full contractInterface and its contractInterfacePaths (interfaceSize is kept).",
 																properties: {
 																	scanState: {
 																		type: "string",
@@ -7052,6 +7094,12 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													properties: {
 														fullName: { type: "string" },
+														renamedFrom: {
+															type: "string",
+															nullable: true,
+															description:
+																"The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is served instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for.",
+														},
 														url: { type: "string", nullable: true },
 														stars: { type: "integer", nullable: true },
 														lastCommitAt: { type: "string", nullable: true },
@@ -7095,6 +7143,13 @@ export const spec: OpenAPISpec = {
 															items: { type: "string" },
 															description:
 																"Scanned public fn signatures (up to 60); verify generated calls against these.",
+														},
+														contractInterfacePaths: {
+															type: "array",
+															items: { type: "string" },
+															nullable: true,
+															description:
+																"The repo-relative source file of each contractInterface entry (up to 60), same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
 														},
 														mainnetContractId: {
 															type: "string",
@@ -8634,6 +8689,21 @@ export const spec: OpenAPISpec = {
 					},
 				],
 				responses: {
+					"503": {
+						description:
+							"The projects read behind the clusters failed: an outage, NOT an empty directory or a zero count. Retry after Retry-After. A value filter that matches nothing after a read that ran is a 200 with clusters [] and meta.advisory.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Cluster list",
 						content: {
@@ -8786,6 +8856,21 @@ export const spec: OpenAPISpec = {
 					},
 				],
 				responses: {
+					"503": {
+						description:
+							"The projects read behind categories, funding, tvl or gaps, the repos scan read behind toolchain (dimension=all included for both), or the DoraHacks read behind dimension=hackathons failed: an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Analytics rollup",
 						content: {
@@ -8812,6 +8897,12 @@ export const spec: OpenAPISpec = {
 												},
 												source: { type: "string", format: "uri" },
 												generatedAt: { type: "string", format: "date-time" },
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when a block of a dimension=all response is null because its read failed this request (today: hackathons): what is missing, and that it is unknown, not zero.",
+												},
 											},
 										},
 										toolchain: {
@@ -8858,6 +8949,17 @@ export const spec: OpenAPISpec = {
 														},
 													},
 												},
+												engineeringPractice: {
+													type: "object",
+													description:
+														"Repos whose latest scan recorded tree-level CI and test presence: presence facts only, not CI results.",
+													properties: {
+														reposWithPracticeFacts: { type: "integer" },
+														ciPresent: { type: "integer" },
+														testsPresent: { type: "integer" },
+													},
+												},
+												basis: { type: "string" },
 											},
 										},
 										categories: {
@@ -9010,8 +9112,9 @@ export const spec: OpenAPISpec = {
 										},
 										hackathons: {
 											type: "object",
+											nullable: true,
 											description:
-												"Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed.",
+												"Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed. null (dimension=all only) = the DoraHacks read failed this request: unknown, never zero; meta.warnings says so and the response is not cached. dimension=hackathons answers 503 instead.",
 											properties: {
 												totalEvents: { type: "integer" },
 												byStatus: {
@@ -9029,33 +9132,51 @@ export const spec: OpenAPISpec = {
 										tvl: {
 											type: "object",
 											description:
-												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'.",
+												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning.",
 											properties: {
-												totalTvlUSD: { type: "number" },
+												totalTvlUSD: {
+													type: "number",
+													description:
+														"Sum of every tracked project's last reading, stale ones included (see staleTvlUSD).",
+												},
+												staleTvlUSD: {
+													type: "number",
+													description:
+														"The part of totalTvlUSD from stale readings (tvlAsOf more than 14 days old, or missing, unparseable or in the future); 0 when every reading is fresh. Each figure is rounded once, so totalTvlUSD minus this is the part read within 14 days and equals the fresh rows.",
+												},
 												trackedProjects: { type: "integer" },
 												asOf: {
 													type: "string",
 													format: "date-time",
 													nullable: true,
 													description:
-														"Most recent per-project tvlAsOf refresh; null when nothing is tracked.",
+														"The NEWEST usable per-project tvlAsOf (a missing, unparseable or future date dates nothing): it dates the freshest reading, not the whole total (see oldestAsOf). Null when no summed reading has a usable date.",
+												},
+												oldestAsOf: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"The OLDEST usable tvlAsOf among the readings summed. Null when no summed reading has a usable date.",
+												},
+												staleWarning: {
+													type: "string",
+													nullable: true,
+													description:
+														"Non-null when any summed reading is older than 14 days: how many, the oldest date, and their share of totalTvlUSD. Null = every reading is within 14 days.",
 												},
 												provider: { type: "string" },
 												top10: {
 													type: "array",
-													items: {
-														type: "object",
-														properties: {
-															slug: { type: "string", nullable: true },
-															name: { type: "string", nullable: true },
-															tvlUSD: { type: "number" },
-															tvlAsOf: {
-																type: "string",
-																format: "date-time",
-																nullable: true,
-															},
-														},
-													},
+													description:
+														"The ten largest readings, largest first.",
+													items: TVL_ROLLUP_ROW_SCHEMA,
+												},
+												staleProjects: {
+													type: "array",
+													description:
+														"Every stale summed reading (tvlAsOf more than 14 days old, or missing, unparseable or in the future), largest first; [] = none.",
+													items: TVL_ROLLUP_ROW_SCHEMA,
 												},
 												basis: { type: "string" },
 											},
@@ -9124,13 +9245,13 @@ export const spec: OpenAPISpec = {
 													format: "date-time",
 													nullable: true,
 													description:
-														"When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state.",
+														"When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state. Null when this read is neither stored nor compared (deltaUnavailable says why).",
 												},
 												previousSnapshot: {
 													type: "object",
 													nullable: true,
 													description:
-														"The most recent persisted snapshot with a DIFFERENT project set. Null when none exists yet (see deltaUnavailable).",
+														"The most recent persisted snapshot with a DIFFERENT project set whose stored slug list is non-empty and reproduces its projectSetHash: an empty or incomplete stored snapshot is never a baseline. Null when none is found (see deltaUnavailable).",
 													properties: {
 														projectSetHash: { type: "string" },
 														computedAt: {
@@ -9199,7 +9320,7 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													nullable: true,
 													description:
-														"Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable); an explicit reason, never a silent omission.",
+														"Non-null when snapshotDelta cannot be served, stating WHY: no valid differing prior snapshot is stored (empty or incomplete ones are skipped), the most recent stored snapshots read hold no other set, this read found no awarded project or was truncated (it is then neither stored nor compared), or the snapshot store is unavailable; an explicit reason, never a silent omission.",
 												},
 												deltaBasis: { type: "string" },
 											},
@@ -9356,6 +9477,21 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/limit" },
 				],
 				responses: {
+					"503": {
+						description:
+							"The project or repo read behind the ranking failed (format=csv included): an outage, NOT an empty ranking or a zero count. Retry after Retry-After. A filter that matches nothing after a read that ran is a 200 with projects [].",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Leaderboard + ecosystem stats",
 						content: {
@@ -9824,7 +9960,12 @@ export const spec: OpenAPISpec = {
 													},
 													name: { type: "string" },
 													symbol: { type: "string" },
-													issuerEntity: { type: "string", nullable: true },
+													issuerEntity: {
+														type: "string",
+														nullable: true,
+														description:
+															"The issuer label rwa.xyz gives the row: a brand, product line or fund as often as a legal entity ('Ondo USDY', 'Circle International'), not read from the issuer's stellar.toml. A row rwa.xyz does not list (rwaxyzListed false) carries the label of that issuer's listed rows (FOCGX carries BENJI's 'Franklin Templeton Trust'), or null when it has none. For the issuer's own statement, read the toml at evidenceUrl where the row cites one.",
+													},
 													projectSlug: {
 														type: "string",
 														nullable: true,
@@ -10025,6 +10166,16 @@ export const spec: OpenAPISpec = {
 						description:
 							"Filter to one fiat peg (e.g. USD, EUR, JPY, ARS). Case-insensitive. Omit for all pegs.",
 						schema: { type: "string" },
+					},
+					{
+						name: "assetType",
+						in: "query",
+						description:
+							"Filter on the row's assetType, case-insensitive: Yield Stablecoin (e.g. USDY), Treasury-Backed (e.g. USDM1), or none for the rows with no assetType recorded. A qualifier is recorded only where the unit is not 1:1 with its peg and a row without one was not classified, so assetType=none leaves out the known yield and Treasury products but does not certify every row left as par. Unrecognized values return 400 with the valid set.",
+						schema: {
+							type: "string",
+							enum: [...STABLECOIN_ASSET_TYPE_FILTERS],
+						},
 					},
 					{
 						name: "limit",
@@ -10604,22 +10755,40 @@ export const spec: OpenAPISpec = {
 					logoUrl: { type: "string", nullable: true },
 					websiteUrl: { type: "string", nullable: true },
 					foundedYear: { type: "integer", nullable: true },
-					services: { type: "array", items: { type: "string" } },
-					sectors: { type: "array", items: { type: "string" } },
-					regions: { type: "array", items: { type: "string" } },
+					services: {
+						type: "array",
+						nullable: true,
+						items: { type: "string" },
+						description:
+							"Curated service tags. NULL = none recorded for this partner (UNKNOWN, never 'offers no services').",
+					},
+					sectors: {
+						type: "array",
+						nullable: true,
+						items: { type: "string" },
+						description:
+							"Curated sectors. NULL = none recorded for this partner (UNKNOWN, never 'serves no sector').",
+					},
+					regions: {
+						type: "array",
+						nullable: true,
+						items: { type: "string" },
+						description:
+							"Curated coverage regions. NULL = none recorded for this partner (UNKNOWN, never 'covers nowhere'); the region filter does not select it.",
+					},
 					assets: {
 						type: "array",
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"Asset codes this partner issues/supports, read from their stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt), so this is UNKNOWN and never 'issues no assets'. [] = we did fetch it and it declares no CURRENCIES.",
+							"Asset codes this partner issues/supports, read from their stellar.toml. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set), so this is UNKNOWN and never 'issues no assets'; a curated code is never served here. [] = a recorded read declares no CURRENCIES.",
 					},
 					seps: {
 						type: "array",
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = we have not fetched their SEP-1 file (check tomlFetchedAt) and therefore do not know. [] = we DID fetch it and it implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null.",
+							"SEP standards implemented (sep-6, sep-24, sep-31), read from the partner's stellar.toml. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set), so we do not know. [] = a recorded read implements none, so [] with non-empty rampTypes is the checkable claim that the ramp is a proprietary API rather than SEP-based. That inference is only valid against [], never against null.",
 					},
 					tomlSourceUrl: {
 						type: "string",
@@ -10631,7 +10800,7 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Deterministic trust score for toml-derived anchor facts (basis stellar-toml \u00d7 freshness of tomlFetchedAt). Null when no toml was ever fetched.",
+							"Deterministic trust score for toml-derived anchor facts (basis stellar-toml \u00d7 freshness of tomlFetchedAt). Null when no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set).",
 						properties: {
 							score: { type: "number" },
 							label: { type: "string", enum: ["high", "medium", "low"] },
@@ -10649,7 +10818,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "string", enum: ["on-ramp", "off-ramp"] },
 						description:
-							"Fiat ramp directions offered. Curator-maintained: NULL = not recorded for this partner (UNKNOWN, never 'offers no ramps').",
+							"Fiat ramp directions offered (deposit = on-ramp, withdraw = off-ramp). Either confirmed from the anchor's own transfer server /info during a stellar.toml read, or entered by a curator; without a recorded read (tomlSourceUrl and tomlFetchedAt both set) they are curator-entered, so never cite them as stellar.toml facts. NULL = none recorded (UNKNOWN, never 'offers no ramps'), and never inferred from SEP presence.",
 					},
 					country: { type: "string", nullable: true },
 					acceptingClients: { type: "boolean" },
@@ -10665,7 +10834,19 @@ export const spec: OpenAPISpec = {
 					caseStudies: {
 						type: "array",
 						nullable: true,
-						items: { type: "object", additionalProperties: true },
+						items: {
+							type: "object",
+							properties: {
+								title: { type: "string" },
+								url: { type: "string", nullable: true },
+								projectSlug: {
+									type: "string",
+									nullable: true,
+									description:
+										"Slug in the projects directory, when the case study's project is listed there.",
+								},
+							},
+						},
 						description:
 							"Curated case studies. NULL = none recorded for this partner (UNKNOWN, never 'has no case studies'); currently null for every partner, as none have been curated yet.",
 					},
@@ -10701,8 +10882,16 @@ export const spec: OpenAPISpec = {
 						description:
 							"System-computed composite trust (0-1 score + label), decomposed into freshness and verification sub-signals.",
 						properties: {
-							score: { type: "number" },
-							label: { type: "string" },
+							score: {
+								type: "number",
+								description:
+									"Computed when the row is served from its freshness and verification signals, so not dated itself: the ages of its inputs are freshness.lastPartnerUpdateAt and verified.lastAutoVerifyAt.",
+							},
+							label: {
+								type: "string",
+								description:
+									"The score's band, computed with it, so not dated either: see score.",
+							},
 							freshness: { type: "number" },
 							verification: { type: "number" },
 						},
@@ -11104,7 +11293,7 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									nullable: true,
 									description:
-										"Issuing entity as the RWA registry attributes it; null on hand-curated rows.",
+										"The issuer label the RWA registry carries for the product (getRwaAssets issuerEntity: the rwa.xyz listing's name, a brand, product line or fund as often as a legal entity), not read from the issuer's stellar.toml. Null on hand-curated rows.",
 								},
 								assetId: {
 									type: "string",
@@ -11309,16 +11498,36 @@ export const spec: OpenAPISpec = {
 						type: "object",
 						nullable: true,
 						description:
-							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24. EMPTY-FIELD SEMANTICS: capability arrays fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs); when ALL of assets/seps/rampTypes are empty the anchor is `profileState: 'not-profiled'`; unknown, NOT capability-free. Never turn an empty array into a negative claim when the description asserts live corridors. `url` links the full partner profile.",
+							"Integration-oriented ramp/anchor profile joined from the partner directory (Anchor-typed rows only; null otherwise). Complements `coverage`: rampTypes says WHAT ramps exist, seps says over WHICH interop surface; `seps: []` with non-empty rampTypes means a proprietary ramp API rather than SEP-6/24, and only against [], never null. NULL SEMANTICS: assets and seps come only from the anchor's stellar.toml and are null unless a read is recorded (the partner's tomlSourceUrl and tomlFetchedAt both set, `profileState: 'profiled'`); rampTypes and regions are as recorded (confirmed from the transfer server or entered by a curator) and null when none is. Null is UNKNOWN, never capability-free. `url` links the full partner profile.",
 						properties: {
 							slug: { type: "string" },
 							country: { type: "string", nullable: true },
-							regions: { type: "array", items: { type: "string" } },
-							assets: { type: "array", items: { type: "string" } },
-							seps: { type: "array", items: { type: "string" } },
+							regions: {
+								type: "array",
+								nullable: true,
+								items: { type: "string" },
+								description: "NULL = none recorded (UNKNOWN).",
+							},
+							assets: {
+								type: "array",
+								nullable: true,
+								items: { type: "string" },
+								description:
+									"From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none.",
+							},
+							seps: {
+								type: "array",
+								nullable: true,
+								items: { type: "string" },
+								description:
+									"From the anchor's stellar.toml. NULL = no read recorded (UNKNOWN); [] = the read found none.",
+							},
 							rampTypes: {
 								type: "array",
+								nullable: true,
 								items: { type: "string", enum: ["on-ramp", "off-ramp"] },
+								description:
+									"Confirmed from the transfer server or entered by a curator. NULL = none recorded (UNKNOWN).",
 							},
 							asOf: { type: "string", nullable: true },
 							url: { type: "string" },
@@ -11326,7 +11535,7 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								enum: ["profiled", "not-profiled"],
 								description:
-									"'profiled' = at least one capability field is verified-filled; 'not-profiled' = capabilities not yet verified for this anchor (empty arrays mean UNKNOWN, not absent).",
+									"'profiled' = the anchor's stellar.toml read is recorded, so assets and seps state what it declares; 'not-profiled' = no read is recorded: assets and seps are null (UNKNOWN), and any rampTypes are as a curator entered them.",
 							},
 						},
 					},
@@ -11360,12 +11569,18 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf.",
+							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading more than 14 days old.",
 					},
 					tvlAsOf: {
 						type: "string",
 						nullable: true,
 						description: "When tvlUSD was fetched from DefiLlama (ISO 8601).",
+					},
+					tvlStale: {
+						type: "boolean",
+						nullable: true,
+						description:
+							"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future: cite tvlUSD with its tvlAsOf as a past reading, not today's TVL. Only the date is checked, not why the figure is old. false = read within 14 days. null = no tvlUSD.",
 					},
 					tvlSource: {
 						type: "string",
@@ -11592,7 +11807,7 @@ export const spec: OpenAPISpec = {
 									anchorProfileBasis: {
 										type: "string",
 										description:
-											"Present only when the page carries anchor rows: empty-field semantics for the anchorProfile join; empty capability arrays mean not-yet-profiled (see each profile's profileState), never a negative capability claim.",
+											"Present only when the page carries anchor rows: null semantics for the anchorProfile join. assets and seps are null without a recorded stellar.toml read (see each profile's profileState), rampTypes and regions null when none is recorded; a null is never a negative capability claim.",
 									},
 									scfCountBasis: {
 										type: "string",
@@ -11958,6 +12173,12 @@ export const spec: OpenAPISpec = {
 					"An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source.",
 				required: ["fullName", "repoScore"],
 				properties: {
+					renamedFrom: {
+						type: "string",
+						nullable: true,
+						description:
+							"The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, stands in for it on searchRepos (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for.",
+					},
 					successorRepo: {
 						type: "string",
 						nullable: true,
@@ -12123,7 +12344,7 @@ export const spec: OpenAPISpec = {
 					canonical: {
 						type: "boolean",
 						description:
-							"True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them.",
+							"True when surfaced as a curated canonical answer for an infra, protocol or developer-product query (e.g. error codes → stellar-core and the SDKs; Horizon → stellar/stellar-horizon; Scaffold Stellar → stellar-scaffold/cli; Stellar Lab → stellar/laboratory; smart contract examples → stellar/soroban-examples). Floated to the top; meta.canonical lists them. A query that is a full owner/name path fires no canonical entry and ranks the repo it names first; a bare name that fires one ranks the canonical repo first and repos with that exact name next (q=sep-10: stellar/stellar-protocol, then a repo named sep10); a bare name that fires none ranks the repo with that exact name first.",
 					},
 					stellarEvidence: {
 						type: "string",
@@ -12209,6 +12430,13 @@ export const spec: OpenAPISpec = {
 								description:
 									"Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08.",
 							},
+							contractInterfacePaths: {
+								type: "array",
+								items: { type: "string" },
+								nullable: true,
+								description:
+									"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
+							},
 							targetProtocol: {
 								type: "integer",
 								nullable: true,
@@ -12268,10 +12496,18 @@ export const spec: OpenAPISpec = {
 								type: "object",
 								properties: {
 									canonical: {
-										type: "string",
+										type: "object",
 										nullable: true,
 										description:
-											"The curated canonical SDF repo floated to the top for an infra/protocol query (e.g. error codes \u2192 stellar/stellar-core), or null when the query isn\u2019t a canonical-routed concept.",
+											"The curated canonical repos floated to the top for an infra, protocol or developer-product query (e.g. error codes \u2192 stellar/stellar-core; Scaffold Stellar \u2192 stellar-scaffold/cli), the same on every page: the query's canonical repos the index holds, whether or not this page or a filter serves them. null when the query isn\u2019t a canonical-routed concept.",
+										properties: {
+											repos: {
+												type: "array",
+												items: { type: "string" },
+												description: "fullNames, in canonical priority order.",
+											},
+											note: { type: "string" },
+										},
 									},
 									note: {
 										type: "string",
@@ -12289,6 +12525,23 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										description:
 											"Human-readable statement of the matchMode above, safe to surface verbatim to a user.",
+									},
+									counts: {
+										type: "object",
+										properties: {
+											truncated: {
+												type: "boolean",
+												description:
+													"True when the ranking was cut at its candidate window: the top 200 rows by repoScore for a browse with no q, the top 600 for a search or a capability, domain or dependsOn filter. Rows past the window were never ranked, so total counts the window and paging ends at it; read eligible for the number of matching rows. False when the ranking holds every row the filters admit.",
+											},
+											eligible: {
+												type: "integer",
+												minimum: 0,
+												nullable: true,
+												description:
+													"Rows the request's filters admit in the index. Equals total when truncated is false. When truncated is true: the database's count for a browse with no q whose filters all run there (language, minScore), and null for a search or an activity, capability, domain or dependsOn filter, where only ranking every row could count the matches. Never read null as zero.",
+											},
+										},
 									},
 								},
 							},
@@ -12391,7 +12644,7 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								enum: ["profile-text", "repo-owner", "code-language"],
 								description:
-									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence); every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.",
+									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence, null like every row when the code-evidence read failed); every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.",
 							},
 						},
 					},
@@ -12399,7 +12652,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						nullable: true,
 						description:
-							"Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter.",
+							"Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = every repo in the index that this GitHub account owns was read and none matched (a weaker match, not a disqualification). Owners match as GitHub logins do, whole and in any case; repos GitHub reports gone are left out. null = not checked: no q/skill filter, or the code-evidence read failed (meta.failedReads names it), on every row including code-language ones; never 'none'.",
 						items: {
 							type: "object",
 							properties: {
@@ -12882,6 +13135,12 @@ export const spec: OpenAPISpec = {
 						description:
 							"When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.",
 					},
+					tvlStale: {
+						type: "boolean",
+						nullable: true,
+						description:
+							"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the figure is old, and sort=tvl still orders by tvlUSD alone, stale or not. false = read within 14 days. null = no tvlUSD.",
+					},
 					assetCode: {
 						type: "string",
 						nullable: true,
@@ -12972,8 +13231,50 @@ export const spec: OpenAPISpec = {
 						description:
 							"Full mainnet issuer account (G…): the universal join key. With `ticker` this IS the asset's identity.",
 					},
-					issuerDomain: { type: "string", nullable: true },
-					company: { type: "string", nullable: true },
+					issuerDomain: {
+						type: "string",
+						nullable: true,
+						description:
+							"The asset's web domain as this registry curates it (the logo is read from its stellar.toml). Not always the issuer account's on-chain home_domain; the issuer's own toml, the source of issuerOfRecord, is at issuerOfRecordSourceUrl.",
+					},
+					company: {
+						type: "string",
+						nullable: true,
+						description:
+							"The brand the asset is marketed under, as this registry curates it (Novatti Group for AUDD, Currency One for C1USD). A display name, NOT the legal issuer: for who issues the asset, read issuerOfRecord.",
+					},
+					issuerOfRecord: {
+						type: "string",
+						nullable: true,
+						description:
+							"The legal issuer as the issuer publishes it: ORG_NAME in the stellar.toml at the issuer account's home_domain (from Horizon), counted only when that toml lists the account in ACCOUNTS or as a currency issuer, so both sides of the link agree (SEP-1). AUDD: AUDC PTY LTD. Set only when issuerOfRecordCheck is named; read by the 6-hourly writer, never at request time, and never derived from company. Cite it with issuerOfRecordAsOf.",
+					},
+					issuerOfRecordCheck: {
+						type: "string",
+						nullable: true,
+						enum: [...ISSUER_OF_RECORD_CHECKS],
+						description:
+							"What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account sets no home_domain, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read).",
+					},
+					issuerOfRecordSourceUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"The stellar.toml URL the stored check read, after same-host https redirects (https://<home_domain>/.well-known/stellar.toml unless the host moved it); re-verify there. Null when the account sets no home_domain or nothing was read yet.",
+					},
+					issuerOfRecordAsOf: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+						description:
+							"When the stored check was made. A failed read does not move it, so a date well before updatedAt means the latest runs could not reach the toml. Date issuerOfRecord by this, not by updatedAt. Null = never read.",
+					},
+					issuerOfRecordNote: {
+						type: "string",
+						nullable: true,
+						description:
+							"On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named.",
+					},
 					website: { type: "string", nullable: true },
 					peg: {
 						type: "string",
@@ -12981,12 +13282,18 @@ export const spec: OpenAPISpec = {
 						description:
 							"Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit, so raw supply is NOT comparable across rows with different pegs; use marketCapUSD.",
 					},
-					country: { type: "string", nullable: true },
-					assetType: {
+					country: {
 						type: "string",
 						nullable: true,
 						description:
-							"Qualifier where the asset is not a pure peg, e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg.",
+							"Home country code of the PEG currency (US for USD, EU for EUR), or Global, for flag display. It describes the peg, NOT the issuer's jurisdiction or place of incorporation.",
+					},
+					assetType: {
+						type: "string",
+						nullable: true,
+						enum: [...STABLECOIN_ASSET_TYPES],
+						description:
+							"Recorded only where the registry found the unit is not 1:1 with its peg; such rows are priced from their own market where it can be read (priceBasis). Yield Stablecoin = yield accrues to or is paid on the unit (Ondo's USDY); Treasury-Backed = a Treasury-backed bond (USDM1). Null = no qualifier recorded: the row was not classified, so null is unknown, NOT a verified plain peg and NOT 'not yield-bearing'. Filter with ?assetType=.",
 					},
 					supply: {
 						type: "number",
@@ -13023,11 +13330,17 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						description: "24h transfer volume in USD.",
 					},
+					paymentsCount24h: {
+						type: "number",
+						nullable: true,
+						description:
+							"Count, not a dollar amount, of payment operations over the last 24 hours: Stellar Expert's lifetime payments counter diffed against our own reading of it from 20 to 28 hours earlier, the one nearest 24 hours (each row keeps two days of its six-hourly readings). Mint, redemption and peer-to-peer payments undifferentiated, not adjusted for exchange, DeFi or infrastructure activity. Null when no reading falls in that window, so also for about a day after the readings start; never a longer or shorter span, never 0 for no data.",
+					},
 					supplyChange7d: {
 						type: "number",
 						nullable: true,
 						description:
-							"Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist; never 0 for 'no data'.",
+							"Percent change in supply vs our snapshot measured 6 to 8 days back, the one nearest 7 days (e.g. -5.8 means down 5.8%). Null when no snapshot falls in that window, never a longer span; never 0 for 'no data'.",
 					},
 					basis: {
 						type: "string",

@@ -39,6 +39,7 @@ import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { instanceMemo } from "@/lib/instance-memo";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { ANCHOR_PROFILE_SELECT, anchorProfileOf } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { pickDeployment } from "@/lib/project-deployment";
 import {
@@ -75,7 +76,11 @@ import {
 	productsCoverage,
 } from "@/lib/rwa-products";
 import { serverTiming } from "@/lib/server-timing";
-import { type StatusCheck, statusChecksFor } from "@/lib/status-checks";
+import {
+	type StatusCheck,
+	statusChecksFor,
+	tvlStaleOf,
+} from "@/lib/status-checks";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -235,6 +240,7 @@ async function semanticProjectRows(
 			publicGoods: pickPublicGoods(p.publicGoods),
 			tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 			tvlAsOf: p.tvlAsOf ?? null,
+			tvlStale: tvlStaleOf(p.tvlUSD, p.tvlAsOf),
 			// sls-031: TVL methodology provenance (which source, computed how)
 			tvlSource: p.tvlSource ?? null,
 			tvlMethod: p.tvlMethod ?? null,
@@ -302,16 +308,7 @@ const anchorRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
 		limit: 100,
 		depth: 0,
 		pagination: false,
-		select: {
-			name: true,
-			slug: true,
-			country: true,
-			regions: true,
-			assets: true,
-			seps: true,
-			rampTypes: true,
-			lastPartnerUpdateAt: true,
-		},
+		select: ANCHOR_PROFILE_SELECT,
 	});
 });
 
@@ -430,6 +427,8 @@ interface ProjectRow {
 	// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 	onchain?: any;
 	tvlAsOf?: string | null;
+	// #1912: the reading is past the weekly refresh (tvlStaleOf)
+	tvlStale?: boolean | null;
 	// sls-031: TVL provenance — which source produced tvlUSD and how.
 	tvlSource?: string | null;
 	tvlMethod?: string | null;
@@ -1537,6 +1536,7 @@ async function handle(req: NextRequest) {
 					publicGoods: pickPublicGoods(p.publicGoods),
 					tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 					tvlAsOf: p.tvlAsOf ?? null,
+					tvlStale: tvlStaleOf(p.tvlUSD, p.tvlAsOf),
 					// sls-031: TVL methodology provenance
 					tvlSource: p.tvlSource ?? null,
 					tvlMethod: p.tvlMethod ?? null,
@@ -2226,6 +2226,7 @@ async function handle(req: NextRequest) {
 					deployment: pickDeployment(c.deployment, c.slug),
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
+					tvlStale: tvlStaleOf(c.tvlUSD, c.tvlAsOf),
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not
 					// inherited from the shadow via the spread.
 					tvlSource: c.tvlSource ?? null,
@@ -2469,27 +2470,13 @@ async function handle(req: NextRequest) {
 		}
 	}
 	// Anchor corridor data (sls-012): Anchor-typed project records described
-	// their coverage only in prose ("20 African countries incl. Nigeria") —
-	// unfilterable, undateable. The partner directory already carries the
-	// STRUCTURED fields (stellar.toml-enriched countries/assets/SEPs/ramps),
-	// so join them on by normalized name instead of duplicating the data.
+	// their coverage only in prose ("20 African countries incl. Nigeria"),
+	// unfilterable and undateable. The partner directory carries the
+	// STRUCTURED fields (assets and SEPs from a recorded stellar.toml read,
+	// ramps and regions as recorded), so join them on by normalized name
+	// instead of duplicating the data (anchorProfileOf, #1909).
 	// Best-effort, one small query only when the page contains Anchor rows.
-	interface AnchorProfile {
-		slug: string;
-		country: string | null;
-		regions: string[];
-		assets: string[];
-		seps: string[];
-		rampTypes: string[];
-		asOf: string | null;
-		url: string;
-		/** sls-049: empty capability arrays are NOT negative claims. "profiled"
-		 * = at least one capability field is verified-filled; "not-profiled" =
-		 * we haven't verified this anchor's capabilities yet (unknown, not
-		 * absent). Capability fields fill only from verifiable sources
-		 * (stellar.toml / the provider's own docs). */
-		profileState: "profiled" | "not-profiled";
-	}
+	type AnchorProfile = ReturnType<typeof anchorProfileOf>;
 	let anchorProfiles = new Map<string, AnchorProfile>();
 	const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 	// projectsOut is a union of keyword rows (carry `types`) and semantic-search
@@ -2508,42 +2495,8 @@ async function handle(req: NextRequest) {
 				DEFAULT_READ_TIMEOUT_MS,
 			);
 			const m = new Map<string, AnchorProfile>();
-			for (const d of pRes.docs as unknown as Array<Record<string, unknown>>) {
-				const tags = (arr: unknown): string[] =>
-					Array.isArray(arr)
-						? arr
-								.map((x) =>
-									typeof x === "string"
-										? x
-										: String(
-												(x as { tag?: unknown; code?: unknown })?.tag ??
-													(x as { code?: unknown })?.code ??
-													"",
-											),
-								)
-								.filter(Boolean)
-						: [];
-				const assets = tags(d.assets);
-				const seps = tags(d.seps);
-				const rampTypes = tags(d.rampTypes);
-				m.set(norm(String(d.name)), {
-					slug: String(d.slug),
-					country: (d.country as string) ?? null,
-					regions: tags(d.regions),
-					assets,
-					seps,
-					rampTypes,
-					asOf: (d.lastPartnerUpdateAt as string) ?? null,
-					url: `https://stellarlight.xyz/partners/${d.slug}`,
-					// sls-049: make empty-vs-unknown answer-visible — an anchor whose
-					// narrative asserts live corridors but whose capability arrays
-					// are all empty is UNPROFILED, not capability-free.
-					profileState:
-						assets.length || seps.length || rampTypes.length
-							? "profiled"
-							: "not-profiled",
-				});
-			}
+			for (const d of pRes.docs as unknown as Array<Record<string, unknown>>)
+				m.set(norm(String(d.name)), anchorProfileOf(d));
 			anchorProfiles = m;
 		} catch (e) {
 			// best-effort — rows ship without anchorProfile on any error
@@ -2755,7 +2708,7 @@ async function handle(req: NextRequest) {
 				...(projectsWithOrg.some((p) => p.anchorProfile)
 					? {
 							anchorProfileBasis:
-								"anchorProfile capability arrays (assets/seps/rampTypes) fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs). Empty arrays mean not-yet-profiled (see profileState); NOT that the anchor lacks the capability; never turn an empty array into a negative claim when the description asserts live corridors.",
+								"anchorProfile.assets and seps come only from the anchor's stellar.toml and are null unless a read is recorded (profileState profiled); [] then means the read found none. rampTypes and regions are as recorded, confirmed from the transfer server or entered by a curator, and null when none is. Never turn a null into a negative claim when the description asserts live corridors.",
 						}
 					: {}),
 				// Semantic-only page: NOT a match, and it must not read like one.

@@ -1,5 +1,6 @@
 import type { CollectionConfig } from "payload";
-import { adminOnly } from "./access";
+import { PUBLIC_BUILDERS } from "@/lib/integrations/stellar-passport";
+import { adminOnly, isAdmin } from "./access";
 
 const Builders: CollectionConfig = {
 	slug: "builders",
@@ -15,7 +16,11 @@ const Builders: CollectionConfig = {
 		description: "Builder profiles from Stellar Passport",
 	},
 	access: {
-		read: () => true,
+		// Payload's REST (/api/builders/<id>, /api/builders/count) and GraphQL
+		// answer anyone: only an admin reads a private profile there. Site
+		// pages and /api/builders read through the local API and apply the
+		// same rule themselves.
+		read: ({ req }) => (isAdmin(req.user) ? true : PUBLIC_BUILDERS),
 		create: adminOnly,
 		update: adminOnly,
 		delete: adminOnly,

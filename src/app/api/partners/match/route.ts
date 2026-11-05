@@ -24,12 +24,18 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
-import { modelRateLimited, rateLimited } from "@/lib/api-error";
+import { apiError, modelRateLimited, rateLimited } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
-import { scorePartners } from "@/lib/partner-match";
+import { classifyModelError } from "@/lib/model-failure";
+import { PARTNER_TYPES, scorePartners } from "@/lib/partner-match";
+import { recordedOrNull } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
-import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
+import {
+	type RateLimitResult,
+	rateLimit,
+	rateLimitHeaders,
+} from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -43,20 +49,10 @@ const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 
 // Bound the prompt: never feed the model more than this many candidates.
 const MAX_CANDIDATES = 40;
-
-const PARTNER_TYPES = [
-	"anchor",
-	"on-off-ramp",
-	"infrastructure",
-	"tooling",
-	"protocol",
-	"wallet",
-	"audit-firm",
-	"legal",
-	"agency",
-	"asset-issuer",
-	"other",
-];
+// A need is a sentence or two. Past this the provider can refuse the prompt
+// as too long, which reads as "the AI path is off" (503) for what is the
+// caller's oversized input: answer that as the caller's 400 instead.
+const MAX_NEED_CHARS = 2000;
 
 const MATCH_SCHEMA = {
 	type: "object",
@@ -113,6 +109,35 @@ function getAnthropic(): Anthropic | null {
 	return new Anthropic({ apiKey: key });
 }
 
+/** The documented 503 unavailable: the AI path is off (no key, or the model
+ * refuses our request or account), so the caller falls back to the directory
+ * filters. No Retry-After: a resend cannot help until we fix it. */
+function aiUnavailable(limit: RateLimitResult) {
+	return NextResponse.json(
+		{
+			error:
+				"AI matchmaking isn't available right now. Try the /partners directory filters.",
+			unavailable: true,
+		},
+		{ status: 503, headers: rateLimitHeaders(limit) },
+	);
+}
+
+/** The documented 503 for a directory read that failed: an outage, never
+ * the empty answer "no partners are listed". */
+function directoryUnavailable(limit: RateLimitResult, startedAt: number) {
+	return apiError({
+		status: 503,
+		error: "partner directory read failed",
+		hint: "Wait 2 seconds, then resend the same request.",
+		advisory:
+			"The partner directory could not be read. This is an outage, NOT a claim that no partner matches.",
+		retryAfterSeconds: 2,
+		startedAt,
+		headers: rateLimitHeaders(limit),
+	});
+}
+
 /** Compact candidate the model reasons over. Public/partner-claimed + verified. */
 // biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 function toCandidate(p: any) {
@@ -148,8 +173,9 @@ function toPublic(p: any) {
 		tagline: p.tagline ?? null,
 		websiteUrl: p.websiteUrl ?? null,
 		acceptingClients: p.acceptingClients ?? null,
-		sectors: p.sectors ?? [],
-		regions: p.regions ?? [],
+		// Curated tags: null when none is recorded, never "none" (#1909).
+		sectors: recordedOrNull(p.sectors),
+		regions: recordedOrNull(p.regions),
 		freshness: { status: p.freshnessStatus ?? "fresh" },
 		url: `https://stellarlight.xyz/partners/${p.slug}`,
 	};
@@ -161,6 +187,7 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
+	const startedAt = Date.now();
 	const limit = rateLimit(req, {
 		endpoint: "/api/partners/match",
 		limit: RATE_LIMIT_MAX,
@@ -185,6 +212,14 @@ export async function POST(req: NextRequest) {
 			{ status: 400, headers: rateLimitHeaders(limit) },
 		);
 	}
+	if (need.length > MAX_NEED_CHARS) {
+		return NextResponse.json(
+			{
+				error: `\`need\` is ${need.length} characters; keep it to ${MAX_NEED_CHARS}: the integration need itself, not a document.`,
+			},
+			{ status: 400, headers: rateLimitHeaders(limit) },
+		);
+	}
 	const type = (body as { type?: unknown }).type;
 	const sector = (body as { sector?: unknown }).sector;
 	const region = (body as { region?: unknown }).region;
@@ -193,7 +228,11 @@ export async function POST(req: NextRequest) {
 		10,
 	);
 
-	if (type && (typeof type !== "string" || !PARTNER_TYPES.includes(type))) {
+	if (
+		type &&
+		(typeof type !== "string" ||
+			!(PARTNER_TYPES as readonly string[]).includes(type))
+	) {
 		return NextResponse.json(
 			{ error: `Unknown type '${String(type)}'`, validTypes: PARTNER_TYPES },
 			{ status: 400, headers: rateLimitHeaders(limit) },
@@ -201,41 +240,29 @@ export async function POST(req: NextRequest) {
 	}
 
 	const anthropic = getAnthropic();
-	if (!anthropic) {
-		return NextResponse.json(
-			{
-				error:
-					"AI matchmaking isn't available right now. Try the /partners directory filters.",
-				unavailable: true,
-			},
-			{
-				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
-			},
-		);
-	}
+	if (!anthropic) return aiUnavailable(limit);
 
 	// ── Candidate set: same published source the directory serves ──
+	// A failed read is an outage, never "no partners are listed" (#1908).
 	const payload = await getPayloadSafe();
+	if (!payload) return directoryUnavailable(limit, startedAt);
 	// biome-ignore lint/suspicious/noExplicitAny: Payload docs
-	let docs: any[] = [];
-	if (payload) {
-		try {
-			// biome-ignore lint/suspicious/noExplicitAny: Payload Where shape
-			const where: any = { status: { equals: "published" } };
-			if (type) where.partnerType = { equals: type };
-			if (sector) where.sectors = { contains: sector };
-			if (region) where.regions = { contains: region };
-			const res = await payload.find({
-				collection: "partner-accounts",
-				where,
-				limit: 200,
-				depth: 0,
-			});
-			docs = res.docs;
-		} catch {
-			docs = [];
-		}
+	let docs: any[];
+	try {
+		// biome-ignore lint/suspicious/noExplicitAny: Payload Where shape
+		const where: any = { status: { equals: "published" } };
+		if (type) where.partnerType = { equals: type };
+		if (sector) where.sectors = { contains: sector };
+		if (region) where.regions = { contains: region };
+		const res = await payload.find({
+			collection: "partner-accounts",
+			where,
+			limit: 200,
+			depth: 0,
+		});
+		docs = res.docs;
+	} catch {
+		return directoryUnavailable(limit, startedAt);
 	}
 
 	// Archived = gone dark >1y → never matchable. (Public directory still lists
@@ -364,9 +391,14 @@ export async function POST(req: NextRequest) {
 			{ headers: rateLimitHeaders(limit) },
 		);
 	} catch (err) {
+		// Every arm is a documented response (#1908): the provider refusing
+		// our request or account is the 503 unavailable, one failed call the
+		// 502, and anything else this service's own 500.
 		if (err instanceof Anthropic.RateLimitError)
 			return modelRateLimited(err.headers?.get("retry-after"), limit);
-		if (err instanceof Anthropic.APIError) {
+		const failure = classifyModelError(err);
+		if (failure === "unavailable") return aiUnavailable(limit);
+		if (failure === "failed") {
 			return NextResponse.json(
 				{
 					error: "Matchmaking hit a snag. Try the /partners directory filters.",

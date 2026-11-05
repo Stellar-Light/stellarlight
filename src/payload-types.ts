@@ -1069,6 +1069,18 @@ export interface Repo {
 		| boolean
 		| null;
 	/**
+	 * Source file of each contractInterface entry (array of strings, same order and length); absent on scans before 2026-11-04
+	 */
+	contractInterfacePaths?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
 	 * Stellar-ecosystem dependencies (array of package names) from Cargo.toml/package.json — allowlist-matched, the dependency-graph signal
 	 */
 	stellarDeps?:
@@ -1274,7 +1286,30 @@ export interface Stablecoin {
 	 */
 	issuer: string;
 	name?: string | null;
+	/**
+	 * The brand the asset is marketed under (Novatti Group for AUDD). Not the legal issuer: see issuerOfRecord.
+	 */
 	company?: string | null;
+	/**
+	 * ORG_NAME in the stellar.toml at the issuer account's home_domain, when that toml lists the issuer account (issuerOfRecordCheck named). Empty otherwise.
+	 */
+	issuerOfRecord?: string | null;
+	/**
+	 * What the stored check found: named, or not-named (read, and no issuer of record named; the note says why). Empty = never read.
+	 */
+	issuerOfRecordCheck?: ("named" | "not-named") | null;
+	/**
+	 * The toml URL the stored check read, after same-host redirects
+	 */
+	issuerOfRecordSourceUrl?: string | null;
+	/**
+	 * When the stored check was made; a failed read does not move it
+	 */
+	issuerOfRecordAsOf?: string | null;
+	/**
+	 * Named: the toml's desc for this currency, quoted, when it names another issuing party (MGUSD: Bridge). Not named: why.
+	 */
+	issuerOfRecordNote?: string | null;
 	domain?: string | null;
 	website?: string | null;
 	/**
@@ -1318,6 +1353,18 @@ export interface Stablecoin {
 	 * Count of payment operations in the last ~24h (delta of paymentsCountLifetime vs the closest snapshot ~1 day back). A COUNT, not a dollar amount — includes mint, redemption and peer-to-peer payments undifferentiated; not adjusted for CEX/DeFi/infrastructure activity the way a figure like Allium's 'adjusted transfers' is. Null until two snapshots roughly a day apart exist.
 	 */
 	paymentsCount24h?: number | null;
+	/**
+	 * Internal, not served: the lifetime payments counter at each run of the last two days, as [{at, count}], so paymentsCount24h can take its baseline from a reading 20 to 28 hours back.
+	 */
+	paymentsCountHistory?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
 	/**
 	 * Percent change vs the snapshot ~7 days ago. Null until two snapshots exist — never 0 for 'no data'.
 	 */
@@ -3652,6 +3699,7 @@ export interface ReposSelect<T extends boolean = true> {
 	farmFlags?: T;
 	codeSymbols?: T;
 	contractInterface?: T;
+	contractInterfacePaths?: T;
 	stellarDeps?: T;
 	sdkCapabilities?: T;
 	codeDomains?: T;
@@ -3722,6 +3770,11 @@ export interface StablecoinsSelect<T extends boolean = true> {
 	issuer?: T;
 	name?: T;
 	company?: T;
+	issuerOfRecord?: T;
+	issuerOfRecordCheck?: T;
+	issuerOfRecordSourceUrl?: T;
+	issuerOfRecordAsOf?: T;
+	issuerOfRecordNote?: T;
 	domain?: T;
 	website?: T;
 	peg?: T;
@@ -3735,6 +3788,7 @@ export interface StablecoinsSelect<T extends boolean = true> {
 	volume24hUSD?: T;
 	paymentsCountLifetime?: T;
 	paymentsCount24h?: T;
+	paymentsCountHistory?: T;
 	supplyChange7d?: T;
 	logoUrl?: T;
 	logoSource?: T;

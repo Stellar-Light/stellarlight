@@ -34,10 +34,12 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import type { Where } from "payload";
 import { apiError, rateLimited } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { clampLimit } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { hasTomlRead } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { rateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 
@@ -163,6 +165,9 @@ export async function GET(req: NextRequest) {
 	const facetTotal = async (
 		collection: "projects" | "repos" | "partner-accounts",
 		field: string,
+		// A further condition the facet's dated fact needs (the partner toml
+		// facet needs its source URL too: hasTomlRead).
+		extra?: Where,
 	): Promise<number> => {
 		const r = await payload.find({
 			collection,
@@ -170,6 +175,7 @@ export async function GET(req: NextRequest) {
 				and: [
 					{ updatedAt: { greater_than: sinceIso } },
 					{ [field]: { greater_than: sinceIso } },
+					...(extra ? [extra] : []),
 				],
 			},
 			limit: 0,
@@ -255,12 +261,20 @@ export async function GET(req: NextRequest) {
 			limit: perSurface,
 			depth: 0,
 			overrideAccess: true,
-			select: { slug: true, updatedAt: true, tomlFetchedAt: true },
+			select: {
+				slug: true,
+				updatedAt: true,
+				tomlFetchedAt: true,
+				tomlSourceUrl: true,
+			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
 		for (const d of r.docs as any[]) {
 			const facets: string[] = [];
-			if (afterSince(d.tomlFetchedAt, sinceMs)) facets.push("toml");
+			// A toml read counts only when it is recorded (#1909): its date
+			// without its source URL is no read.
+			if (hasTomlRead(d) && afterSince(d.tomlFetchedAt, sinceMs))
+				facets.push("toml");
 			changes.push({
 				surface: "partners",
 				slug: String(d.slug),
@@ -271,7 +285,10 @@ export async function GET(req: NextRequest) {
 		counts.partners = r.totalDocs;
 		truncated.partners = r.totalDocs > perSurface;
 		byFacet.partners = {
-			toml: await facetTotal("partner-accounts", "tomlFetchedAt"),
+			// The count's form of hasTomlRead: the enrichment stamps a URL.
+			toml: await facetTotal("partner-accounts", "tomlFetchedAt", {
+				tomlSourceUrl: { contains: "://" },
+			}),
 		};
 	}
 

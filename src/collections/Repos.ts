@@ -490,6 +490,15 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
+			name: "contractInterfacePaths",
+			type: "json",
+			admin: {
+				position: "sidebar",
+				description:
+					"Source file of each contractInterface entry (array of strings, same order and length); absent on scans before 2026-11-04",
+			},
+		},
+		{
 			name: "stellarDeps",
 			type: "json",
 			admin: {

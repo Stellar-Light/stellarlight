@@ -19,8 +19,13 @@ import {
 } from "@/data/builder-name-overrides";
 import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
-import { type BuilderLike, builderCodeActivity } from "@/lib/builder-code";
 import {
+	type BuilderLike,
+	builderCodeActivity,
+	loginIn,
+} from "@/lib/builder-code";
+import {
+	type BuilderCodeEvidence,
 	type BuilderProject,
 	type BuilderRow,
 	codeDerivedBuilderRow,
@@ -46,6 +51,7 @@ import {
 	withReadTimeout,
 } from "@/lib/degraded-read";
 import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
+import { PUBLIC_BUILDERS } from "@/lib/integrations/stellar-passport";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -238,9 +244,9 @@ async function handle(req: NextRequest) {
 	if (payload) {
 		try {
 			// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
-			const where: any = {
-				visibility: { not_equals: "hidden" },
-			};
+			// Public profiles only: a private one is never listed, counted or
+			// searched (the field holds public or private, never "hidden").
+			const where: any = { ...PUBLIC_BUILDERS };
 			if (location) {
 				// Region umbrellas → country vocabulary (sls-010): profile locations
 				// are free-text country/city strings, so "Latin America" matched
@@ -275,9 +281,30 @@ async function handle(req: NextRequest) {
 					payload.find({
 						collection: "builders",
 						where,
-						limit: 300,
+						// limit 0 = every eligible profile (#1915). A fixed 300 counted,
+						// paged and q-searched the newest 300 of 401 while the label
+						// said full set: the oldest were reachable only by a location
+						// filter. counts.total below is this set, under this `where`.
+						// ponytail: one read of the whole set per request (about 400
+						// rows, CDN-cached); page in the DB for the unfiltered listing
+						// if the collection grows past a few thousand.
+						limit: 0,
 						depth: 0,
 						sort: "-is_featured",
+						// Only what the rows and the page's onStellar join read.
+						select: {
+							github_username: true,
+							display_name: true,
+							bio: true,
+							role_title: true,
+							location: true,
+							website_url: true,
+							twitter_handle: true,
+							avatar_url: true,
+							is_featured: true,
+							projects: true,
+							contributions: true,
+						},
 					}),
 				{ docs: [] as unknown[] },
 				DEFAULT_READ_TIMEOUT_MS,
@@ -340,6 +367,10 @@ async function handle(req: NextRequest) {
 			// record WHERE each token hit (field + literal term + project) so a
 			// row carries its own match provenance instead of presenting a bio
 			// mention as if it were verified experience.
+			// The repos that admitted a code-language row become its codeEvidence
+			// only once the code-evidence read below succeeds, so a failed read
+			// leaves every row null alike.
+			const admittedBy = new Map<string, BuilderCodeEvidence[]>();
 			if (q) {
 				const tokens = q.split(/\s+/).filter(Boolean);
 				// A query token that IS a primary language in the repo index admits
@@ -367,7 +398,7 @@ async function handle(req: NextRequest) {
 						// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
 						const langWhere: any = {
 							and: [
-								{ owner: { in: builders.map((b) => b.githubUsername) } },
+								{ owner: loginIn(builders.map((b) => b.githubUsername)) },
 								// A 404 repo must not admit a builder to a language
 								// roster — nor be counted in the capped-roster warning.
 								NOT_GONE,
@@ -489,7 +520,7 @@ async function handle(req: NextRequest) {
 						matchedFields.add("codeEvidence");
 						for (const [t, lang] of Object.entries(code.terms))
 							matchedTerms[t] ??= lang;
-						b.codeEvidence = code.repos;
+						admittedBy.set(b.githubUsername.toLowerCase(), code.repos);
 					}
 					b.match = {
 						matchedFields: [...matchedFields],
@@ -519,13 +550,11 @@ async function handle(req: NextRequest) {
 			// page — indexed repos owned by each builder's GitHub account that
 			// match the query. Kept separate from the profile-text match: the
 			// repo/language/last-commit are observable facts, the bio is a claim.
-			// Best-effort — rows ship with codeEvidence: [] on any error, which
-			// itself is signal ("no direct code evidence in the index").
+			// [] is a claim ("checked, none"), so a row gets it only once every
+			// repo its builder owns has been read; a failed read leaves the row
+			// null (could not check) and meta.failedReads names the read.
 			if (q && builders.length) {
 				const tokens = q.split(/\s+/).filter(Boolean);
-				// `??=`: a code-language row already carries the repos that admitted
-				// it — top that up here, don't wipe it.
-				for (const b of builders) b.codeEvidence ??= [];
 				try {
 					const byOwner = new Map(
 						builders.map((b) => [b.githubUsername.toLowerCase(), b]),
@@ -535,9 +564,12 @@ async function handle(req: NextRequest) {
 							collection: "repos",
 							where: {
 								...NOT_GONE,
-								owner: { in: builders.map((b) => b.githubUsername) },
+								owner: loginIn(builders.map((b) => b.githubUsername)),
 							},
-							limit: 300,
+							// limit 0 = every repo the page's builders own (at most a page
+							// of logins). A fixed 300 cut a page that owned more, and a
+							// builder past the cut read [] without being checked.
+							limit: 0,
 							depth: 0,
 							select: {
 								fullName: true,
@@ -553,6 +585,12 @@ async function handle(req: NextRequest) {
 						}),
 						DEFAULT_READ_TIMEOUT_MS,
 					);
+					// Every repo each builder owns was read: from here [] is a checked
+					// "none". A code-language row starts from the repos that admitted it.
+					for (const b of builders)
+						b.codeEvidence = [
+							...(admittedBy.get(b.githubUsername.toLowerCase()) ?? []),
+						];
 					for (const d of rres.docs as unknown as Array<
 						Record<string, unknown>
 					>) {
@@ -586,7 +624,7 @@ async function handle(req: NextRequest) {
 						});
 					}
 				} catch (e) {
-					// best-effort — codeEvidence stays [] on error, and says so
+					// rows this read could not check keep codeEvidence null, never []
 					warnings.push(degradedWarning("builders code evidence", e));
 				}
 			}
@@ -611,15 +649,16 @@ async function handle(req: NextRequest) {
 					: handleForName(q)
 				: null;
 			if (q && !location && totalMatching === 0 && derivedHandle) {
-				// `like` is a substring/case-insensitive net; the exact-login filter
-				// below is the precise cut (q="kale" must NOT become owner kalepail).
+				// Exact and case-insensitive (loginIn): q="kale" never becomes owner
+				// kalepail. Every repo the login owns, not a newest-first window: the
+				// top 5 by repoScore below needs all of them.
 				const owned = await degradedRead(
 					"builders code-derived owner lookup",
 					() =>
 						payload.find({
 							collection: "repos",
-							where: { ...NOT_GONE, owner: { like: derivedHandle } },
-							limit: 200,
+							where: { ...NOT_GONE, owner: loginIn([derivedHandle]) },
+							limit: 0,
 							depth: 0,
 							select: {
 								fullName: true,
@@ -768,7 +807,7 @@ async function handle(req: NextRequest) {
 			const c = await withReadTimeout(
 				payload.count({
 					collection: "builders",
-					where: { visibility: { not_equals: "hidden" } },
+					where: PUBLIC_BUILDERS,
 				}),
 				DEFAULT_READ_TIMEOUT_MS,
 			);
@@ -910,7 +949,7 @@ async function handle(req: NextRequest) {
 				// sls-041: what a skill match IS (and is not). Rows are candidate
 				// discovery, not verified experience/seniority/availability.
 				matchBasis:
-					"Skill/q matches are FREE-TEXT hits over profile + project prose; each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means no direct code evidence in our index: a weaker match, not a disqualification. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name). A row with match.basis 'code-language' was admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder OWNS in our index while their profile never says the word; matchedFields INCLUDES 'codeEvidence', matchedTerms names the language as indexed, and codeEvidence holds the proving repos. Every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) lists the prose fields in matchedFields too and still keeps the 'code-language' basis; the weaker evidence sets the basis, and these rows sort BELOW all prose hits because owning a Rust repo is a candidate signal, not verified experience.",
+					"Skill/q matches are FREE-TEXT hits over profile + project prose; each row's `match` names the fields, projects and literal terms that hit (a token can match via a synonym). This is candidate discovery, NOT verified experience: treat bio/role text as claims. `codeEvidence` lists indexed repos owned by the builder's GitHub account that match the query (language + last activity are observable facts); an empty list means every repo the account owns in our index was read and none matched (owners matched as GitHub logins, case-insensitively; repos GitHub reports gone are left out): a weaker match, not a disqualification. null means the evidence could not be checked (the code-evidence read failed: see meta.failedReads), never none. A row with match.basis 'repo-owner' is CODE-DERIVED: the query is a GitHub login that owns indexed Stellar repos but has no Stellar Passport profile, so bio/roleTitle are null and the evidence lives entirely in codeEvidence (P2 builders-by-name). A row with match.basis 'code-language' was admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder OWNS in our index while their profile never says the word; matchedFields INCLUDES 'codeEvidence', matchedTerms names the language as indexed, and codeEvidence holds the proving repos, or null like every row when the code-evidence read failed. Every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) lists the prose fields in matchedFields too and still keeps the 'code-language' basis; the weaker evidence sets the basis, and these rows sort BELOW all prose hits because owning a Rust repo is a candidate signal, not verified experience.",
 				...(builderAdvisory ? { advisory: builderAdvisory } : {}),
 				// sls-025 shape, ported from /api/repos/search: a zero-result page
 				// says exactly what WAS searched. `strupey` was the 4th-most-asked
