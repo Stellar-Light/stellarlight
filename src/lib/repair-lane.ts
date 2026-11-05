@@ -8,6 +8,7 @@
  * checks the diff against PROTECTED_PATHS, pushes a `repair/*` branch and
  * opens a PR. It never merges. A human merges at Stage 1.
  */
+import { RAVEN_DRIFT_ARTIFACT } from "./improvement-ledger";
 
 export interface LedgerRow {
 	id: string;
@@ -137,8 +138,7 @@ export function pickRow(
 export function artifactFor(source: string): string {
 	if (source.startsWith("nightly-"))
 		return `improvements/engine/nightly/${source.replace(/^nightly-/, "")}-latest.json`;
-	if (source === "raven-drift")
-		return "improvements/engine/raven-drift-latest.json";
+	if (source === "raven-drift") return RAVEN_DRIFT_ARTIFACT;
 	return `improvements/engine/weekly/${source}-latest.json`;
 }
 
