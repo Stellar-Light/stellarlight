@@ -692,6 +692,20 @@ export function entryBasisLine(
 	return null;
 }
 
+/** What a page says of a placement named off DoraHacks: whose word it is.
+ * null when DoraHacks assigned it, or there is none. */
+export function placementSourceLine(row: {
+	isWinner?: boolean | null;
+	winnerSource?: string | null;
+	entryBasis?: string | null;
+}): string | null {
+	if (!row.isWinner || !row.winnerSource) return null;
+	// ponytail: HackProof is the one list partial rows come from.
+	return row.entryBasis
+		? "The placement is HackProof's, secondhand: no organizer page we read names the winners."
+		: "The placement is named off DoraHacks, by the page linked here.";
+}
+
 /** The network a stored row's checked contracts are on. The spec spreads it. */
 export const CONTRACT_NETWORKS = ["testnet"] as const;
 

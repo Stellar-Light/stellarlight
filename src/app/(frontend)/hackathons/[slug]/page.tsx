@@ -12,9 +12,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache, type ReactNode } from "react";
+import { BuildSourceNote } from "@/components/build-source-note";
 import { Badge } from "@/components/ui/badge";
 import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
-import { entryBasisLine } from "@/lib/hackathon-build-links";
 import { getHackathonDetail } from "@/lib/hackathon-detail";
 import {
 	type DoraHacksHackathon,
@@ -49,6 +49,8 @@ type Row = {
 	/** A row of a partial list: why it is stored. */
 	entryBasis?: string;
 	contracts?: readonly unknown[];
+	isWinner?: boolean;
+	winnerSource?: string;
 };
 
 /** The event as the API serves it; a null count is not known, never 0. */
@@ -370,14 +372,6 @@ function placementMeta(p: Row) {
 	};
 }
 
-/** Why a row of a partial list is on the page, in its basis' own words. */
-function BasisLine({ p, event }: { p: Row; event: string }) {
-	const line = entryBasisLine(p, event);
-	return line ? (
-		<p className="text-xs text-muted-foreground/80 mb-3">{line}</p>
-	) : null;
-}
-
 function WinnerCard({ p, event }: { p: Row; event: string }) {
 	const meta = placementMeta(p);
 	const prize = p.prizeUsd ?? p.hackathonPrize;
@@ -416,7 +410,7 @@ function WinnerCard({ p, event }: { p: Row; event: string }) {
 					{blurb}
 				</p>
 			)}
-			<BasisLine p={p} event={event} />
+			<BuildSourceNote row={p} event={event} />
 
 			<div className="flex items-center justify-between text-xs pt-3 border-t border-border/50">
 				{prize ? (
@@ -464,7 +458,7 @@ function ProjectCard({ p, event }: { p: Row; event: string }) {
 					{blurb}
 				</p>
 			)}
-			<BasisLine p={p} event={event} />
+			<BuildSourceNote row={p} event={event} />
 		</RowLink>
 	);
 }

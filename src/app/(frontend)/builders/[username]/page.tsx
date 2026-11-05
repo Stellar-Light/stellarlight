@@ -17,6 +17,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type React from "react";
+import { BuildSourceNote } from "@/components/build-source-note";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -541,7 +542,8 @@ export default async function BuilderProfilePage({
 							<CardHeader>
 								<CardTitle className="text-base">Hackathon projects</CardTitle>
 								<p className="text-xs text-muted-foreground">
-									DoraHacks submissions whose repository is one of theirs.
+									Hackathon builds whose repository is one of theirs, each with
+									where it comes from.
 								</p>
 							</CardHeader>
 							<CardContent className="space-y-2">
@@ -569,6 +571,11 @@ export default async function BuilderProfilePage({
 													? ` · in ${b.awardCategory}`
 													: ""}
 										</span>
+										<BuildSourceNote
+											row={b}
+											event={b.hackathon.title}
+											showSource
+										/>
 									</div>
 								))}
 								{hackBuilds.length > 8 && (
