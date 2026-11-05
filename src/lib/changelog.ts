@@ -35,6 +35,13 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
+			"/builders/<login> says which of its reads failed. Code activity, SCF grants and hackathon submissions each read on their own and say unknown when their read fails, where a failed grants or hackathon read showed no grants or said no submissions matched.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
 			"The home page's trending projects and the sitemap read every row. Trending ranked the newest 300 of 905 active projects, and the sitemap stopped each collection at 5,000 rows, which would drop pages from search engines without a word.",
 	},
 	{

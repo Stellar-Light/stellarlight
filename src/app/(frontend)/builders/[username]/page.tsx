@@ -91,8 +91,12 @@ export default async function BuilderProfilePage({
 	// what this person has shipped in the Stellar repos we index (owned,
 	// Passport-declared, contributor pass); the Passport profile alone is thin
 	let code: CodeActivity | undefined;
-	// true once the join ran: a failed or cut read is not "no code"
+	// One flag per read: a read that failed renders as unknown with a notice,
+	// never as none. Grants and hackathon matches rest on the repos the code
+	// read found, so they are known only once it ran.
 	let codeRead = false;
+	let grantsRead = false;
+	let buildsRead = false;
 	// SCF grants on the projects this person is connected to, and hackathon
 	// projects (DoraHacks buidls) whose GitHub link is one of their repos
 	let scf: Array<{
@@ -102,76 +106,92 @@ export default async function BuilderProfilePage({
 		rounds: number[];
 	}> = [];
 	let hackBuilds: Array<IndexedBuild & { awardCategory: string | null }> = [];
-	try {
-		const payload = await getPayloadSafe();
-		if (payload) {
+	const payload = await getPayloadSafe();
+	if (payload) {
+		try {
 			code = (await builderCodeActivity(payload, [builder as any])).get(
 				String(builder.github_username).toLowerCase(),
 			);
 			codeRead = true;
-			// Only projects the person OWNS: repos they own that belong to the
-			// project, or the project's GitHub org is them. Contributing to a
-			// project's repo (or naming it on Passport) is not receiving its grant.
-			const login = String(builder.github_username).toLowerCase();
-			const owned = new Set<string>();
-			for (const r of code?.repos ?? [])
-				if (r.via === "owner" && r.projectSlug) owned.add(r.projectSlug);
-			if (code) {
-				const org = await payload.find({
-					collection: "projects",
-					where: {
-						// a login matches as GitHub matches it: whole, any case
-						"github.orgLogin": loginIn([String(builder.github_username)]),
-					},
-					limit: 100,
-					depth: 0,
-					select: { slug: true },
-				} as any);
-				for (const d of org.docs as any[])
-					if (d.slug) owned.add(String(d.slug));
-			}
-			void login;
-			const slugs = [...owned];
-			if (slugs.length) {
-				const pr = await payload.find({
-					collection: "projects",
-					where: {
-						and: [{ slug: { in: slugs } }, { "scf.awarded": { equals: true } }],
-					},
-					limit: 200,
-					depth: 0,
-					select: { name: true, slug: true, scf: true },
-				} as any);
-				scf = (pr.docs as any[])
-					.map((d) => ({
-						slug: String(d.slug),
-						name: String(d.name),
-						totalAwarded: Number(d.scf?.totalAwarded ?? 0),
-						rounds: ((d.scf?.awardedRounds ?? []) as unknown[])
-							.map(Number)
-							.filter((n) => Number.isFinite(n)),
-					}))
-					.sort((a, b) => b.totalAwarded - a.totalAwarded);
-			}
+		} catch {}
+		if (codeRead)
 			try {
-				const idx = await getHackathonBuildsIndex();
-				// An award several placements share is their category, not
-				// one build's prize.
-				const categories = prizeCategories(idx);
-				hackBuilds = buildsForRepos(
-					idx,
-					code?.repos.map((r) => r.fullName) ?? [],
-					[String(builder.github_username)],
-				)
-					.map((b) => ({ ...b, ...prizeLabels(categories, b) }))
-					.sort((a, b) =>
-						(b.hackathon.endedAt ?? "").localeCompare(
-							a.hackathon.endedAt ?? "",
-						),
-					);
+				// Only projects the person OWNS: repos they own that belong to the
+				// project, or the project's GitHub org is them. Contributing to a
+				// project's repo (or naming it on Passport) is not receiving its grant.
+				const owned = new Set<string>();
+				for (const r of code?.repos ?? [])
+					if (r.via === "owner" && r.projectSlug) owned.add(r.projectSlug);
+				if (code) {
+					const org = await payload.find({
+						collection: "projects",
+						where: {
+							// a login matches as GitHub matches it: whole, any case
+							"github.orgLogin": loginIn([String(builder.github_username)]),
+						},
+						limit: 100,
+						depth: 0,
+						select: { slug: true },
+					} as any);
+					for (const d of org.docs as any[])
+						if (d.slug) owned.add(String(d.slug));
+				}
+				const slugs = [...owned];
+				if (slugs.length) {
+					const pr = await payload.find({
+						collection: "projects",
+						where: {
+							and: [
+								{ slug: { in: slugs } },
+								{ "scf.awarded": { equals: true } },
+							],
+						},
+						limit: 200,
+						depth: 0,
+						select: { name: true, slug: true, scf: true },
+					} as any);
+					scf = (pr.docs as any[])
+						.map((d) => ({
+							slug: String(d.slug),
+							name: String(d.name),
+							totalAwarded: Number(d.scf?.totalAwarded ?? 0),
+							rounds: ((d.scf?.awardedRounds ?? []) as unknown[])
+								.map(Number)
+								.filter((n) => Number.isFinite(n)),
+						}))
+						.sort((a, b) => b.totalAwarded - a.totalAwarded);
+				}
+				grantsRead = true;
 			} catch {}
-		}
-	} catch {}
+		try {
+			const idx = await getHackathonBuildsIndex();
+			// An award several placements share is their category, not
+			// one build's prize.
+			const categories = prizeCategories(idx);
+			hackBuilds = buildsForRepos(
+				idx,
+				code?.repos.map((r) => r.fullName) ?? [],
+				[String(builder.github_username)],
+			)
+				.map((b) => ({ ...b, ...prizeLabels(categories, b) }))
+				.sort((a, b) =>
+					(b.hackathon.endedAt ?? "").localeCompare(a.hackathon.endedAt ?? ""),
+				);
+			buildsRead = codeRead;
+		} catch {}
+	}
+	// "Code activity, SCF grants and hackathon submissions": what could not
+	// be read, for the one notice below
+	const unreadParts = [
+		!codeRead && "code activity",
+		!grantsRead && "SCF grants",
+		!buildsRead && "hackathon submissions",
+	].filter((x): x is string => Boolean(x));
+	const unreadList =
+		unreadParts.length > 1
+			? `${unreadParts.slice(0, -1).join(", ")} and ${unreadParts[unreadParts.length - 1]}`
+			: (unreadParts[0] ?? "");
+	const unread = unreadList.charAt(0).toUpperCase() + unreadList.slice(1);
 
 	return (
 		<div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -480,18 +500,19 @@ export default async function BuilderProfilePage({
 					</Card>
 				)}
 
-			{!codeRead && (
+			{unread && (
 				<Card className="mb-8">
 					<CardContent className="py-6 text-sm text-muted-foreground">
-						Code activity for {builder.display_name || builder.github_username}{" "}
-						could not be read just now, so this page cannot say what they have
-						shipped on Stellar. Try again shortly.
+						{unread} for {builder.display_name || builder.github_username} could
+						not be read just now, so this page cannot say what it holds there.
+						Try again shortly.
 					</CardContent>
 				</Card>
 			)}
 
 			{/* Nothing indexed for this person: say so plainly rather than render a blank page */}
 			{codeRead &&
+				buildsRead &&
 				(!code ||
 					(code.repos.length === 0 &&
 						code.projects.size === 0 &&
