@@ -197,61 +197,98 @@ export function filterByAssetType(
 	);
 }
 
-/** Legal-form words a company name can end in ("AUDC PTY LTD", "Brale
- *  Inc.", "Grupo Anchor S.A."), lowercased with the dots dropped. */
-const LEGAL_FORMS = new Set([
-	"ab",
-	"ag",
-	"as",
-	"bv",
-	"co",
-	"company",
-	"corp",
-	"corporation",
-	"gmbh",
-	"inc",
-	"incorporated",
-	"kk",
-	"limited",
-	"llc",
-	"llp",
-	"lp",
-	"ltd",
-	"nv",
-	"oy",
-	"plc",
-	"pte",
-	"pty",
-	"sa",
-	"sarl",
-	"sas",
-	"sl",
-	"spa",
-	"srl",
-]);
+/** Legal forms by every spelling (lowercased, dots dropped) to one form, so
+ *  "Ltd" and "Limited" are one form and "LLC" and "Inc" are two. "as"
+ *  (Norwegian AS) is left out: it is also an English word ("Pay As"). */
+const LEGAL_FORMS: Record<string, string> = {
+	ab: "ab",
+	ag: "ag",
+	bv: "bv",
+	co: "co",
+	company: "co",
+	corp: "corp",
+	corporation: "corp",
+	gmbh: "gmbh",
+	inc: "inc",
+	incorporated: "inc",
+	kk: "kk",
+	limited: "ltd",
+	llc: "llc",
+	llp: "llp",
+	lp: "lp",
+	ltd: "ltd",
+	nv: "nv",
+	oy: "oy",
+	plc: "plc",
+	pte: "pte",
+	pty: "pty",
+	sa: "sa",
+	sarl: "sarl",
+	sas: "sas",
+	sl: "sl",
+	spa: "spa",
+	srl: "srl",
+};
 
-/** A company name as the words that name it: lowercased, dots dropped (S.A.
- *  is SA), other punctuation a break, a leading "the" and any run of trailing
- *  legal-form words removed. "Zeam Mint (Pty) Ltd" is [zeam, mint]. */
-export function partyWords(name: string): string[] {
+/**
+ * A company name as the words that name it and the legal forms it ends in.
+ * Accents are folded and letters and digits in any script are kept (anything
+ * else breaks a word); dots are dropped, so S.A. is SA; a leading "the" goes.
+ * Forms come off the end only, a spaced one ("S A") included: "Zeam Mint
+ * (Pty) Ltd" is [zeam, mint] with forms [pty, ltd].
+ */
+export function partyName(name: string): { words: string[]; forms: string[] } {
 	const words = name
+		.normalize("NFD")
+		.replace(/\p{M}+/gu, "")
 		.toLowerCase()
 		.replace(/\./g, "")
-		.split(/[^a-z0-9]+/)
+		.split(/[^\p{L}\p{N}]+/u)
 		.filter(Boolean);
 	if (words[0] === "the") words.shift();
-	while (words.length && LEGAL_FORMS.has(words[words.length - 1])) words.pop();
-	return words;
+	const forms: string[] = [];
+	for (;;) {
+		const last = words[words.length - 1];
+		if (last && LEGAL_FORMS[last]) {
+			forms.unshift(LEGAL_FORMS[last]);
+			words.pop();
+			continue;
+		}
+		// A spaced form: a trailing run of single letters that spells one.
+		let i = words.length;
+		while (i > 0 && words[i - 1].length === 1) i--;
+		const run = words.slice(i).join("");
+		if (words.length - i >= 2 && LEGAL_FORMS[run]) {
+			forms.unshift(LEGAL_FORMS[run]);
+			words.splice(i);
+			continue;
+		}
+		return { words, forms };
+	}
 }
 
-/** True when two names are the same name once case, punctuation, spacing and
- *  legal-form suffixes are set aside ("Brale" and "Brale Inc.", "MyKobo" and
- *  "MYKOBO"). Whole names only: a bare suffix ("Ltd"), a fragment ("A",
- *  "Bridge" inside "Cambridge") or a shorter name ("Novatti" for "Novatti
- *  Group") never matches. */
+/** The words that name a company, legal forms set aside. */
+export function partyWords(name: string): string[] {
+	return partyName(name).words;
+}
+
+/**
+ * True when two names are the same name: the same words once case, accents,
+ * punctuation and spacing are set aside ("Brale" and "Brale Inc.", "Société
+ * Générale" and "Societe Generale"), and, when both carry a legal form, the
+ * same forms, or one list starting the other (a name cut before its last
+ * form). Whole names only: a bare suffix ("Ltd"), a fragment ("Bridge" in
+ * "Cambridge"), a shorter name ("Novatti" for "Novatti Group") or another
+ * legal form ("..., LLC" for "... Inc") never matches.
+ */
 export function sameParty(a: string, b: string): boolean {
-	const x = partyWords(a).join("");
-	return x !== "" && x === partyWords(b).join("");
+	const x = partyName(a);
+	const y = partyName(b);
+	const key = x.words.join("");
+	if (key === "" || key !== y.words.join("")) return false;
+	const [short, long] =
+		x.forms.length <= y.forms.length ? [x.forms, y.forms] : [y.forms, x.forms];
+	return short.every((f, k) => long[k] === f);
 }
 
 /**

@@ -1342,6 +1342,18 @@ export interface Stablecoin {
 	 */
 	paymentsCount24h?: number | null;
 	/**
+	 * Internal, not served: the lifetime payments counter at each run of the last two days, as [{at, count}], so paymentsCount24h can take its baseline from a reading 20 to 28 hours back.
+	 */
+	paymentsCountHistory?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
 	 * Percent change vs the snapshot ~7 days ago. Null until two snapshots exist — never 0 for 'no data'.
 	 */
 	supplyChange7d?: number | null;
@@ -3763,6 +3775,7 @@ export interface StablecoinsSelect<T extends boolean = true> {
 	volume24hUSD?: T;
 	paymentsCountLifetime?: T;
 	paymentsCount24h?: T;
+	paymentsCountHistory?: T;
 	supplyChange7d?: T;
 	logoUrl?: T;
 	logoSource?: T;

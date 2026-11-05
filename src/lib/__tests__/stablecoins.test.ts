@@ -557,6 +557,43 @@ describe("company is the brand; issuerOfRecord is what the issuer's toml says", 
 		expect(sameParty("the Bank of X", "Bank of X Ltd")).toBe(true);
 	});
 
+	it("sameParty reads letters in any script and folds accents (re-check item 3)", () => {
+		expect(sameParty("Société Générale", "Societe Generale")).toBe(true);
+		expect(sameParty("Société Générale", "SOCIETE GENERALE S.A.")).toBe(true);
+		expect(sameParty("Banque Société Générale", "Societe Generale")).toBe(
+			false,
+		);
+		expect(sameParty("Банк Х", "Банк Х")).toBe(true);
+		expect(sameParty("Банк Х", "Банк У")).toBe(false);
+		expect(sameParty("三菱UFJ信託銀行", "三菱UFJ信託銀行")).toBe(true);
+		expect(sameParty("三菱", "三菱UFJ信託銀行")).toBe(false);
+	});
+
+	it("sameParty handles spaced forms, keeps English words, and never equates two different legal forms (re-check item 4)", () => {
+		expect(
+			sameParty("Kinesis Money Panama S A", "Kinesis Money Panama S.A."),
+		).toBe(true);
+		expect(
+			sameParty("Kinesis Money Panama S. A.", "Kinesis Money Panama SA"),
+		).toBe(true);
+		expect(sameParty("Pay As", "Pay")).toBe(false);
+		expect(
+			sameParty(
+				"Circle Internet Financial, LLC",
+				"Circle Internet Financial Inc",
+			),
+		).toBe(false);
+		expect(
+			sameParty(
+				"Circle Internet Financial Limited",
+				"Circle Internet Financial Ltd",
+			),
+		).toBe(true);
+		expect(sameParty("AUDC Ltd", "AUDC PTY LTD")).toBe(false);
+		expect(sameParty("Co Op Bank", "Op Bank")).toBe(false);
+		expect(sameParty("Plan B", "Plan")).toBe(false);
+	});
+
 	it("namedIssuingParty does not cut a name at a dot inside it", () => {
 		expect(
 			namedIssuingParty(

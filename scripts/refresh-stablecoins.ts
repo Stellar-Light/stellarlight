@@ -43,8 +43,11 @@ import {
 	issuerOfRecordWriteOn,
 	type MeasuredStablecoin,
 	measureRegistry,
-	nearestSnapshot,
+	nextPaymentsHistory,
+	paymentsCount24hFrom,
 	RATE_LIMIT_MARK,
+	supplyBaseline,
+	supplyBaselineWindow,
 } from "../src/lib/stablecoin-pipeline";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
@@ -68,69 +71,37 @@ function pctChange(now: number | null, then: number | null): number | null {
 	return Number((((now - then) / then) * 100).toFixed(2));
 }
 
-/** Raw count delta vs the snapshot 12 to 36 hours back. Null unless both
- *  exist, and null (never negative) if the counter went backwards: that is
- *  an upstream rebase or correction, not a real count of payments. */
-function countDelta(now: number | null, then: number | null): number | null {
-	if (now == null || then == null) return null;
-	const delta = now - then;
-	return delta >= 0 ? delta : null;
-}
-
 async function main() {
 	console.log(
 		`Stablecoin refresh — ${EXECUTE ? "EXECUTE" : "DRY RUN (no writes)"}\n`,
 	);
 	const payload = await getPayload({ config: await configPromise });
 
-	/** The stablecoin-snapshots row for one asset measured nearest
-	 *  `targetMs`, within `slackMs` of it, or undefined. A period metric's
-	 *  baseline must come from that period: the newest row at or before a
-	 *  cutoff, with no lower bound, turned a gap in the series into a
-	 *  lifetime of payments labelled 24h (review, 2026-11-04). Shared by the
-	 *  7-day supply change and the 24h payments count below. */
-	async function snapshotNear(
-		assetId: string,
-		targetMs: number,
-		slackMs: number,
-	) {
+	/** The stablecoin-snapshots rows for one asset measured inside a window
+	 *  (supplyBaselineWindow), for supplyBaseline to choose from. A period
+	 *  metric's baseline must come from that period: the newest row at or
+	 *  before a cutoff, with no lower bound, stretched a gap in the series
+	 *  into the figure (review, 2026-11-04). */
+	async function snapshotsBetween(assetId: string, from: string, to: string) {
 		try {
 			const near = await payload.find({
 				collection: "stablecoin-snapshots",
 				where: {
 					and: [
 						{ assetId: { equals: assetId } },
-						{
-							measuredAt: {
-								greater_than_equal: new Date(targetMs - slackMs).toISOString(),
-							},
-						},
-						{
-							measuredAt: {
-								less_than_equal: new Date(targetMs + slackMs).toISOString(),
-							},
-						},
+						{ measuredAt: { greater_than_equal: from } },
+						{ measuredAt: { less_than_equal: to } },
 					],
 				},
-				// One row per asset per UTC day, so a window of two days holds at
+				// One row per asset per UTC day, so a two-day window holds at
 				// most three: this limit cannot cut the set.
 				limit: 10,
 				depth: 0,
 			});
-			return (
-				nearestSnapshot(
-					near.docs as Array<{
-						measuredAt?: string;
-						supply?: number;
-						paymentsCountLifetime?: number;
-					}>,
-					targetMs,
-					slackMs,
-				) ?? undefined
-			);
+			return near.docs as Array<{ measuredAt?: string; supply?: number }>;
 		} catch {
 			// No series yet on a fresh install: treated as "no prior snapshot".
-			return undefined;
+			return [];
 		}
 	}
 
@@ -160,19 +131,14 @@ async function main() {
 	};
 
 	for (const m of measured) {
-		// ── 7-day supply change, and 24h payments count, from our own series ──
+		// ── 7-day supply change, from our own daily series ──
 		const at = Date.parse(m.measuredAt);
-		// 6 to 8 days back, the one nearest 7.
-		const weekAgoSnap = await snapshotNear(m.id, at - 7 * 864e5, 864e5);
-		const change7d = pctChange(m.supply, weekAgoSnap?.supply ?? null);
-
-		// 12 to 36 hours back, the one nearest 24 (four runs a day against one
-		// snapshot per UTC day: the span is about a day, never a lifetime).
-		const dayAgoSnap = await snapshotNear(m.id, at - 864e5, 864e5 / 2);
-		const paymentsCount24h = countDelta(
-			m.paymentsCountLifetime,
-			dayAgoSnap?.paymentsCountLifetime ?? null,
+		const week = supplyBaselineWindow(at);
+		const weekAgoSnap = supplyBaseline(
+			await snapshotsBetween(m.id, week.from, week.to),
+			at,
 		);
+		const change7d = pctChange(m.supply, weekAgoSnap?.supply ?? null);
 
 		const existing = await payload.find({
 			collection: "stablecoins",
@@ -183,6 +149,18 @@ async function main() {
 		const prev = existing.docs[0] as
 			| (Record<string, unknown> & { id: string })
 			| undefined;
+
+		// ── 24h payments count, from the row's own per-run readings ──
+		const paymentsCountHistory = nextPaymentsHistory(
+			prev?.paymentsCountHistory,
+			m.measuredAt,
+			m.paymentsCountLifetime,
+		);
+		const paymentsCount24h = paymentsCount24hFrom(
+			paymentsCountHistory,
+			m.measuredAt,
+			m.paymentsCountLifetime,
+		);
 
 		// Never let a failed fetch blank a good number in CURRENT state.
 		const keep = <T>(fresh: T | null, old: unknown): T | null => {
@@ -227,9 +205,11 @@ async function main() {
 				m.paymentsCountLifetime,
 				prev?.paymentsCountLifetime,
 			),
-			// Derived fresh from history each run, like supplyChange7d — never
-			// kept forward from a previous run when it can't be computed now.
+			// Derived fresh each run, like supplyChange7d: never kept forward
+			// from a previous run when it cannot be computed now.
 			paymentsCount24h,
+			// Internal: the readings the next runs take their 24h baseline from.
+			paymentsCountHistory,
 			supplyChange7d: change7d,
 			logoUrl: m.logoUrl,
 			logoSource: m.logoSource,

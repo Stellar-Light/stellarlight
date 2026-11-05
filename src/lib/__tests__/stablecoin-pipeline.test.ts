@@ -5,10 +5,15 @@ import {
 	issuerOfRecordFromToml,
 	issuerOfRecordPatch,
 	issuerOfRecordWriteOn,
+	measureStablecoin,
 	nearestSnapshot,
+	nextPaymentsHistory,
 	orgLogoFromToml,
+	paymentsCount24hFrom,
 	readIssuerOfRecord,
 	readIssuerToml,
+	supplyBaseline,
+	supplyBaselineWindow,
 } from "../stablecoin-pipeline";
 
 describe("orgLogoFromToml", () => {
@@ -586,5 +591,209 @@ describe("nearestSnapshot: a baseline only from inside its window", () => {
 				12 * H,
 			),
 		).toBeNull();
+	});
+});
+
+/** A body that sends its headers and a first chunk, then fails: what a
+ *  host that stalls past the timeout or resets mid-body looks like. */
+const brokenBody = () =>
+	new Response(
+		new ReadableStream({
+			start(c) {
+				c.enqueue(new TextEncoder().encode('ACCOUNTS=["'));
+				c.error(new Error("socket reset mid-body"));
+			},
+		}),
+	);
+
+/** Route the given URLs; every other URL answers 404 (fast, never thrown). */
+function stubFetch404(routes: Record<string, () => Response>) {
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async (input: string | URL) => {
+			const route = routes[String(input)];
+			return route ? route() : new Response("not found", { status: 404 });
+		}),
+	);
+}
+
+describe("a failed body read is one row's could-not-read, never a run-wide failure (re-check item 1)", () => {
+	afterEach(() => vi.unstubAllGlobals());
+	const ISSUER = "GBROKENBODYISSUERXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+	const account = () =>
+		new Response(JSON.stringify({ home_domain: "broken.example" }));
+
+	it("readIssuerToml answers failed when the body read rejects", async () => {
+		stubFetch404({
+			"https://broken.example/.well-known/stellar.toml": brokenBody,
+		});
+		const r = await readIssuerToml("broken.example");
+		expect(r.kind).toBe("failed");
+	});
+
+	it("readIssuerOfRecord answers could-not-read", async () => {
+		stubFetch404({
+			[`https://horizon.stellar.org/accounts/${ISSUER}`]: account,
+			"https://broken.example/.well-known/stellar.toml": brokenBody,
+		});
+		expect(
+			(await readIssuerOfRecord({ code: "TST", issuer: ISSUER })).outcome,
+		).toBe("could-not-read");
+	});
+
+	it("measureStablecoin still resolves with that row, as its contract says", async () => {
+		stubFetch404({
+			[`https://horizon.stellar.org/accounts/${ISSUER}`]: account,
+			"https://broken.example/.well-known/stellar.toml": brokenBody,
+		});
+		const m = await measureStablecoin({
+			code: "TST",
+			issuer: ISSUER,
+			domain: "logo-broken.example",
+			company: "Test Brand",
+			peg: "USD",
+		});
+		expect(m.issuerOfRecordRead.outcome).toBe("could-not-read");
+		expect(m.code).toBe("TST");
+	});
+});
+
+describe("a 200 that is not a stellar.toml is a failed read, never a checked absence (re-check item 2)", () => {
+	afterEach(() => vi.unstubAllGlobals());
+	const ISSUER = "GNOTATOMLISSUERXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+	const bodies: Array<[string, () => Response]> = [
+		[
+			"text/plain Not Found",
+			() =>
+				new Response("Not Found", {
+					headers: { "content-type": "text/plain" },
+				}),
+		],
+		[
+			"JSON error",
+			() =>
+				new Response('{"error":"not found"}', {
+					headers: { "content-type": "application/json" },
+				}),
+		],
+		["empty body", () => new Response("")],
+	];
+	for (const [label, body] of bodies)
+		it(`${label}: could-not-read, so a stored name is kept`, async () => {
+			stubFetch404({
+				[`https://horizon.stellar.org/accounts/${ISSUER}`]: () =>
+					new Response(JSON.stringify({ home_domain: "notoml.example" })),
+				"https://notoml.example/.well-known/stellar.toml": body,
+			});
+			expect((await readIssuerToml("notoml.example")).kind).toBe("failed");
+			expect(
+				(await readIssuerOfRecord({ code: "TST", issuer: ISSUER })).outcome,
+			).toBe("could-not-read");
+		});
+});
+
+describe("a 404 at the home_domain keeps the stored check (re-check item 10)", () => {
+	afterEach(() => vi.unstubAllGlobals());
+	it("could-not-read: a lapsed or parked domain does not prove the issuer stopped issuing", async () => {
+		const ISSUER = "GPARKEDDOMAINISSUERXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+		stubFetch404({
+			[`https://horizon.stellar.org/accounts/${ISSUER}`]: () =>
+				new Response(JSON.stringify({ home_domain: "parked.example" })),
+		});
+		expect(
+			(await readIssuerOfRecord({ code: "TST", issuer: ISSUER })).outcome,
+		).toBe("could-not-read");
+	});
+});
+
+/**
+ * Re-check items 5 and 6: one snapshot per UTC day, upserted by every run,
+ * left the 24h baseline at the day's last run, so the span ran 30, 12, 18
+ * and 24 hours by the hour of the run. The row now keeps its own recent
+ * readings and the figure needs one 20 to 28 hours back; the windows live in
+ * these functions, so the writer passes no numbers of its own.
+ */
+describe("paymentsCount24h measures about 24 hours", () => {
+	const H = 3600e3;
+	const at = "2026-11-05T00:25:00.000Z";
+	const atMs = Date.parse(at);
+	const reading = (hoursAgo: number, count: number) => ({
+		at: new Date(atMs - hoursAgo * H).toISOString(),
+		count,
+	});
+
+	it("uses the reading nearest 24 hours back", () => {
+		const h = [
+			reading(30, 100),
+			reading(24, 110),
+			reading(18, 120),
+			reading(6, 140),
+		];
+		expect(paymentsCount24hFrom(h, at, 150)).toBe(40);
+	});
+
+	it("null when the nearest readings are 18 and 30 hours back: never a span stretched or cut to fit", () => {
+		expect(
+			paymentsCount24hFrom([reading(30, 100), reading(18, 120)], at, 150),
+		).toBeNull();
+	});
+
+	it("the band is 20 to 28 hours, both ends inside", () => {
+		expect(paymentsCount24hFrom([reading(20, 100)], at, 150)).toBe(50);
+		expect(paymentsCount24hFrom([reading(28, 100)], at, 150)).toBe(50);
+		expect(paymentsCount24hFrom([reading(19.9, 100)], at, 150)).toBeNull();
+		expect(paymentsCount24hFrom([reading(28.1, 100)], at, 150)).toBeNull();
+	});
+
+	it("no count now, or a counter that went backwards, is null", () => {
+		expect(paymentsCount24hFrom([reading(24, 100)], at, null)).toBeNull();
+		expect(paymentsCount24hFrom([reading(24, 200)], at, 150)).toBeNull();
+	});
+
+	it("the history appends this run, keeps two days, drops junk and repeats", () => {
+		const prev = [
+			reading(49, 1),
+			reading(24, 2),
+			{ at: "not a date", count: 3 },
+			{ at: reading(12, 0).at, count: Number.NaN },
+			reading(6, 4),
+		];
+		expect(nextPaymentsHistory(prev, at, 5)).toEqual([
+			reading(24, 2),
+			reading(6, 4),
+			{ at, count: 5 },
+		]);
+		// No count this run: nothing appended; a repeated run is not doubled.
+		expect(nextPaymentsHistory([reading(6, 4)], at, null)).toEqual([
+			reading(6, 4),
+		]);
+		expect(nextPaymentsHistory([{ at, count: 5 }], at, 5)).toEqual([
+			{ at, count: 5 },
+		]);
+		expect(nextPaymentsHistory(undefined, at, 5)).toEqual([{ at, count: 5 }]);
+	});
+});
+
+describe("supplyChange7d's baseline window", () => {
+	const D = 864e5;
+	const atMs = Date.parse("2026-11-05T00:25:00.000Z");
+	const snap = (daysAgo: number, supply: number) => ({
+		measuredAt: new Date(atMs - daysAgo * D).toISOString(),
+		supply,
+	});
+
+	it("queries 6 to 8 days back", () => {
+		expect(supplyBaselineWindow(atMs)).toEqual({
+			from: new Date(atMs - 8 * D).toISOString(),
+			to: new Date(atMs - 6 * D).toISOString(),
+		});
+	});
+
+	it("takes the snapshot nearest 7 days back inside the window, else none", () => {
+		expect(supplyBaseline([snap(6.25, 1), snap(7.25, 2)], atMs)).toEqual(
+			snap(7.25, 2),
+		);
+		expect(supplyBaseline([snap(30, 1)], atMs)).toBeNull();
+		expect(supplyBaseline([snap(5.9, 1), snap(8.1, 2)], atMs)).toBeNull();
 	});
 });

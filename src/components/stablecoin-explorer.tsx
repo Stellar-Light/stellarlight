@@ -386,6 +386,25 @@ export function IssuerFacts({ coin }: { coin: CoinView }) {
 	);
 }
 
+/** The peg's flag labelled as the peg, then the brand as the brand: a bare
+ *  flag beside the brand read as the brand's country. */
+export function PegAndBrand({
+	coin,
+}: {
+	coin: Pick<CoinView, "company" | "country" | "peg">;
+}) {
+	const peg = countryInfo(coin.country, coin.peg);
+	return (
+		<>
+			{/* biome-ignore lint/performance/noImgElement: remote flag sprite */}
+			<img src={peg.flag} alt="" className="w-4 h-3" />
+			<span>{`${coin.peg ?? peg.label} peg`}</span>
+			<span aria-hidden="true">·</span>
+			<span>{`Brand: ${coin.company || "-"}`}</span>
+		</>
+	);
+}
+
 function BasisTag({ basis }: { basis: string | null }) {
 	if (!basis || basis === "live") return null;
 	return (
@@ -1168,7 +1187,6 @@ export function StablecoinExplorer({
 			) : (
 				<div className="stagger-in grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 					{paged.map((coin) => {
-						const info = countryInfo(coin.country, coin.peg);
 						return (
 							<Card
 								key={coin.id}
@@ -1191,13 +1209,7 @@ export function StablecoinExplorer({
 												<BasisTag basis={coin.basis} />
 											</div>
 											<div className="text-sm text-muted-foreground flex items-center gap-1">
-												{/* biome-ignore lint/performance/noImgElement: remote flag sprite */}
-												<img
-													src={info.flag}
-													alt={info.label}
-													className="w-4 h-3"
-												/>
-												{coin.company ? `Brand: ${coin.company}` : "-"}
+												<PegAndBrand coin={coin} />
 											</div>
 										</div>
 									</div>
@@ -1536,18 +1548,7 @@ export function StablecoinExplorer({
 												<BasisTag basis={selectedCoin.basis} />
 											</DrawerTitle>
 											<DrawerDescription className="flex items-center gap-2 mt-1">
-												{/* biome-ignore lint/performance/noImgElement: remote flag sprite */}
-												<img
-													src={
-														countryInfo(selectedCoin.country, selectedCoin.peg)
-															.flag
-													}
-													alt=""
-													className="w-4 h-3"
-												/>
-												{selectedCoin.company
-													? `Brand: ${selectedCoin.company}`
-													: "-"}
+												<PegAndBrand coin={selectedCoin} />
 												{selectedCoin.assetType
 													? ` · ${selectedCoin.assetType}`
 													: ""}

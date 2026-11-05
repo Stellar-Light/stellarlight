@@ -60,7 +60,7 @@ import {
 	type PriceBasis,
 	sameParty,
 } from "./stablecoins";
-import { parseStellarToml } from "./stellar-toml";
+import { looksLikeStellarToml, parseStellarToml } from "./stellar-toml";
 
 const HORIZON = "https://horizon.stellar.org";
 const EXPERT = "https://api.stellar.expert/explorer/public";
@@ -512,7 +512,7 @@ const TOML_MAX_BYTES = 100 * 1024;
 async function cappedText(res: Response, max: number): Promise<string | null> {
 	const declared = Number(res.headers.get("content-length"));
 	if (Number.isFinite(declared) && declared > max) {
-		await res.body?.cancel();
+		await res.body?.cancel().catch(() => {});
 		return null;
 	}
 	const reader = res.body?.getReader();
@@ -524,7 +524,7 @@ async function cappedText(res: Response, max: number): Promise<string | null> {
 		if (done) break;
 		size += value.byteLength;
 		if (size > max) {
-			await reader.cancel();
+			await reader.cancel().catch(() => {});
 			return null;
 		}
 		parts.push(value);
@@ -542,9 +542,10 @@ export type IssuerTomlRead =
  * Stricter than the logo read (issuerToml), because this one becomes a legal
  * fact: a redirect is followed only over https on the same host (to another
  * host, or down to http, it is refused and never fetched), the body is capped
- * at 100 KB, and an HTML page is not a toml. `url` is the one actually read.
- * A 404 or 410 is a checked absence; any other answer that is not a toml body
- * is a failed read, which changes nothing stored.
+ * at 100 KB, and a body must read as a stellar.toml (an HTML page, a "Not
+ * Found" text, a JSON error or an empty body does not). `url` is the one
+ * actually read. A 404 or 410 is reported as absent; anything else that is
+ * not a toml body, a body that fails mid-read included, is failed.
  */
 export async function readIssuerToml(host: string): Promise<IssuerTomlRead> {
 	let url = `https://${host}/.well-known/stellar.toml`;
@@ -588,11 +589,25 @@ export async function readIssuerToml(host: string): Promise<IssuerTomlRead> {
 		if (res.status === 404 || res.status === 410)
 			return { kind: "absent", url };
 		if (!res.ok) return { kind: "failed", why: `HTTP ${res.status} at ${url}` };
-		const text = await cappedText(res, TOML_MAX_BYTES);
+		// The headers came; the body can still stall past the timeout or reset
+		// mid-stream. That is this row's failed read, never a thrown error: one
+		// host must not stop the whole refresh.
+		let text: string | null;
+		try {
+			text = await cappedText(res, TOML_MAX_BYTES);
+		} catch (err) {
+			return {
+				kind: "failed",
+				why: `${url}: body read failed: ${String((err as Error).message).slice(0, 80)}`,
+			};
+		}
 		if (text == null)
 			return { kind: "failed", why: `${url} is larger than 100 KB` };
-		if (text.trimStart().startsWith("<"))
-			return { kind: "failed", why: `${url} served HTML, not a toml` };
+		if (!looksLikeStellarToml(text))
+			return {
+				kind: "failed",
+				why: `${url} answered 200 with ${text.trimStart().startsWith("<") ? "HTML" : "a body that is not a stellar.toml"}`,
+			};
 		return { kind: "read", url, text };
 	}
 	return { kind: "failed", why: `${url}: too many redirects` };
@@ -605,6 +620,20 @@ export async function readIssuerToml(host: string): Promise<IssuerTomlRead> {
  * and never `company`. Never throws.
  */
 export async function readIssuerOfRecord(
+	asset: Pick<StablecoinAsset, "code" | "issuer">,
+): Promise<IssuerOfRecordRead> {
+	// measureStablecoin promises never to throw, and it awaits this first.
+	try {
+		return await readIssuerOfRecordOnce(asset);
+	} catch (err) {
+		return {
+			outcome: "could-not-read",
+			why: `issuer-of-record read failed: ${String((err as Error).message).slice(0, 80)}`,
+		};
+	}
+}
+
+async function readIssuerOfRecordOnce(
 	asset: Pick<StablecoinAsset, "code" | "issuer">,
 ): Promise<IssuerOfRecordRead> {
 	const at = () => new Date().toISOString();
@@ -646,12 +675,12 @@ export async function readIssuerOfRecord(
 	const read = await readIssuerToml(home);
 	if (read.kind === "failed")
 		return { outcome: "could-not-read", why: read.why };
+	// A 404 does not prove the issuer stopped issuing: a lapsed home_domain
+	// parked on a host that 404s looks the same. Keep the stored check.
 	if (read.kind === "absent")
 		return {
-			outcome: "not-named",
-			at: at(),
-			sourceUrl: read.url,
-			why: `the home_domain serves no stellar.toml (${read.url} answered not found)`,
+			outcome: "could-not-read",
+			why: `${read.url} answered not found; kept as a failed read, since a lapsed or parked domain answers the same`,
 		};
 	const r = issuerOfRecordFromToml(read.text, asset.code, asset.issuer);
 	if ("miss" in r)
@@ -762,6 +791,82 @@ export function nearestSnapshot<T extends { measuredAt?: unknown }>(
 		}
 	}
 	return best;
+}
+
+const DAY_MS = 864e5;
+
+/** One reading of Stellar Expert's lifetime payments counter, as the row
+ *  keeps it for the 24h figure. */
+export interface PaymentsReading {
+	at: string;
+	count: number;
+}
+
+/**
+ * The row's recent counter readings after this run: the stored ones from the
+ * last two days that parse, then this run's (when it has a count). Snapshots
+ * keep one point per UTC day, the day's last run, which left the 24h figure's
+ * baseline 30, 12, 18 or 24 hours back by the hour of the run; these
+ * per-run readings put one about 24 hours back on every run.
+ */
+export function nextPaymentsHistory(
+	prev: unknown,
+	at: string,
+	count: number | null,
+): PaymentsReading[] {
+	const atMs = Date.parse(at);
+	const kept: PaymentsReading[] = [];
+	for (const r of Array.isArray(prev) ? prev : []) {
+		const t = Date.parse(String(r?.at ?? ""));
+		if (!Number.isFinite(t) || !Number.isFinite(r?.count)) continue;
+		// Older readings, and this run's own if it repeats, are not kept.
+		if (t >= atMs || atMs - t > 2 * DAY_MS) continue;
+		kept.push({ at: r.at, count: r.count });
+	}
+	if (count != null && Number.isFinite(count)) kept.push({ at, count });
+	return kept.sort((a, b) => Date.parse(a.at) - Date.parse(b.at));
+}
+
+/**
+ * Payment operations over the last 24 hours: this run's lifetime count less
+ * the reading nearest 24 hours back, taken only from 20 to 28 hours back.
+ * Null without one there, without a count now, or when the counter went
+ * backwards (an upstream correction, not a count of payments).
+ */
+export function paymentsCount24hFrom(
+	history: PaymentsReading[],
+	at: string,
+	count: number | null,
+): number | null {
+	if (count == null) return null;
+	const base = nearestSnapshot(
+		history.map((r) => ({ measuredAt: r.at, count: r.count })),
+		Date.parse(at) - DAY_MS,
+		4 * 3600e3,
+	);
+	if (!base) return null;
+	const delta = count - base.count;
+	return delta >= 0 ? delta : null;
+}
+
+/** The measuredAt range the 7-day supply baseline is read from: 6 to 8 days
+ *  back. The writer queries exactly this, then picks with supplyBaseline. */
+export function supplyBaselineWindow(atMs: number): {
+	from: string;
+	to: string;
+} {
+	return {
+		from: new Date(atMs - 8 * DAY_MS).toISOString(),
+		to: new Date(atMs - 6 * DAY_MS).toISOString(),
+	};
+}
+
+/** The snapshot nearest 7 days back, from 6 to 8 days back, or null. */
+export function supplyBaseline<T extends { measuredAt?: unknown }>(
+	snaps: T[],
+	atMs: number,
+): T | null {
+	return nearestSnapshot(snaps, atMs - 7 * DAY_MS, DAY_MS);
 }
 
 /**

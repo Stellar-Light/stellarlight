@@ -12799,7 +12799,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						enum: [...ISSUER_OF_RECORD_CHECKS],
 						description:
-							"What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account sets no home_domain, no toml is served there, the toml does not list the account, or it gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made (network, an HTTP error other than not found, a redirect off the home_domain or to http, a body over 100 KB or an HTML page) changes nothing: the stored check and its date stay as they were.",
+							"What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account sets no home_domain, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body).",
 					},
 					issuerOfRecordSourceUrl: {
 						type: "string",
@@ -12879,7 +12879,7 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Count, not a dollar amount, of payment operations over about a day: Stellar Expert's lifetime payments counter diffed against our own snapshot measured 12 to 36 hours earlier (the one nearest 24 hours; we keep one snapshot per UTC day). Mint, redemption and peer-to-peer payments undifferentiated, not adjusted for exchange, DeFi or infrastructure activity. Null when no snapshot falls in that window, never a longer span and never 0 for no data.",
+							"Count, not a dollar amount, of payment operations over the last 24 hours: Stellar Expert's lifetime payments counter diffed against our own reading of it from 20 to 28 hours earlier, the one nearest 24 hours (each row keeps two days of its six-hourly readings). Mint, redemption and peer-to-peer payments undifferentiated, not adjusted for exchange, DeFi or infrastructure activity. Null when no reading falls in that window, so also for about a day after the readings start; never a longer or shorter span, never 0 for no data.",
 					},
 					supplyChange7d: {
 						type: "number",

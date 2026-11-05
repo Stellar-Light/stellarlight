@@ -34,6 +34,18 @@ export interface StellarToml {
 
 const STRKEY = /^G[A-Z2-7]{55}$/;
 
+/** Whether a body reads as a stellar.toml at all: its first meaningful line
+ *  (not blank, not a comment) opens a table or assigns a key. An HTML page,
+ *  a "Not Found" text, a JSON error or an empty body does not. */
+export function looksLikeStellarToml(text: string): boolean {
+	const first =
+		text
+			.split(/\r?\n/)
+			.map((l) => l.trim())
+			.find((l) => l && !l.startsWith("#")) ?? "";
+	return /^(\[|[A-Za-z0-9_]+\s*=)/.test(first);
+}
+
 /** `KEY = "value"` or `KEY = 'value'`, the value up to its own closing quote. */
 const ASSIGN = /^([A-Za-z0-9_]+)\s*=\s*(?:"((?:[^"\\]|\\.)*)"|'([^']*)')/;
 
@@ -94,9 +106,15 @@ export function parseStellarToml(text: string): StellarToml {
 		const line = raw.trim();
 		if (!line || line.startsWith("#")) continue;
 		if (inAccounts) {
-			collectAccounts(line);
-			if (line.replace(/#.*$/, "").includes("]")) inAccounts = false;
-			continue;
+			// A header or a key assignment means the array was left open: end
+			// it there and read the line as what it is, so an unclosed
+			// ACCOUNTS cannot swallow the [DOCUMENTATION] table after it.
+			if (line.startsWith("[") || ASSIGN.test(line)) inAccounts = false;
+			else {
+				collectAccounts(line);
+				if (line.replace(/#.*$/, "").includes("]")) inAccounts = false;
+				continue;
+			}
 		}
 		if (line.startsWith("[")) {
 			if (section === "currency") flushCurrency();

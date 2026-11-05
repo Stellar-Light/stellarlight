@@ -12,7 +12,10 @@ const FETCH_TIMEOUT_MS = 10_000;
 
 /* ── stellar.toml parsing lives in src/lib/stellar-toml.ts (shared with the
  * stablecoin pipeline); re-exported so the scripts' imports stay as they are. */
+import { looksLikeStellarToml } from "../../src/lib/stellar-toml";
+
 export {
+	looksLikeStellarToml,
 	parseStellarToml,
 	type StellarToml,
 } from "../../src/lib/stellar-toml";
@@ -40,14 +43,7 @@ export async function fetchText(url: string): Promise<string | null> {
 		// Content sniff: an HTML parking page is not a toml, and the callers'
 		// "soft-404 is a skip" claim was only true if someone checked. First
 		// meaningful line must look like a toml table or KEY assignment.
-		const first =
-			text
-				.split(/\r?\n/)
-				.find((l) => l.trim() && !l.trim().startsWith("#"))
-				?.trim() ?? "";
-		if (first.startsWith("<") || !/^(\[|[A-Za-z0-9_]+\s*=)/.test(first))
-			return null;
-		return text;
+		return looksLikeStellarToml(text) ? text : null;
 	} catch {
 		return null;
 	}

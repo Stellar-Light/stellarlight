@@ -8,7 +8,7 @@
  */
 import { cleanup, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
-import { type CoinView, IssuerFacts } from "./stablecoin-explorer";
+import { type CoinView, IssuerFacts, PegAndBrand } from "./stablecoin-explorer";
 
 afterEach(cleanup);
 
@@ -86,5 +86,17 @@ describe("IssuerFacts: each value labelled for what it is", () => {
 			/>,
 		);
 		expect(screen.getByText("Not read from its stellar.toml yet")).toBeTruthy();
+	});
+});
+
+/** Re-check item 11: the card and the drawer header put the peg's flag
+ *  beside the brand with no label, which read as the brand's country. */
+describe("PegAndBrand: the flag is labelled as the peg", () => {
+	it("says the peg next to its flag, then the brand as the brand", () => {
+		const { container } = render(<PegAndBrand coin={coin} />);
+		expect(screen.getByText("AUD peg")).toBeTruthy();
+		expect(screen.getByText("Brand: Novatti Group")).toBeTruthy();
+		// The flag is decorative now that the text names the peg.
+		expect(container.querySelector("img")?.getAttribute("alt")).toBe("");
 	});
 });

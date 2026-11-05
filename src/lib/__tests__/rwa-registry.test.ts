@@ -7,6 +7,7 @@ import {
 	RWA_STATES,
 	RWA_VERIFICATION_LEVELS,
 } from "@/data/rwa-registry";
+import { spec } from "../openapi-spec";
 import {
 	mergeProducts,
 	productsCoverage,
@@ -632,6 +633,17 @@ describe("issuerEntity on a row rwa.xyz does not list is a listed sibling's labe
 			.map((r) => `${r.symbol}: ${r.issuerEntity}`);
 		expect(strays).toEqual([]);
 	});
+	it("the spec states the same rule (re-check item 9: the sentence is pinned, not only the data)", () => {
+		const d: string =
+			// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+			(spec as any).paths["/api/rwa"].get.responses["200"].content[
+				"application/json"
+			].schema.properties.assets.items.properties.issuerEntity.description;
+		expect(d).toContain("rwaxyzListed false");
+		expect(d).toContain("label of that issuer's listed rows");
+		expect(d).toContain("not read from the issuer's stellar.toml");
+	});
+
 	it("FOCGX carries BENJI's label, its own issuer account's", () => {
 		const focgx = RWA_REGISTRY.find((r) => r.symbol === "FOCGX");
 		const benji = listed.find(

@@ -193,6 +193,14 @@ export const Stablecoins: CollectionConfig = {
 			},
 		},
 		{
+			name: "paymentsCountHistory",
+			type: "json",
+			admin: {
+				description:
+					"Internal, not served: the lifetime payments counter at each run of the last two days, as [{at, count}], so paymentsCount24h can take its baseline from a reading 20 to 28 hours back.",
+			},
+		},
+		{
 			name: "supplyChange7d",
 			type: "number",
 			admin: {

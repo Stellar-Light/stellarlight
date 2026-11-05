@@ -526,9 +526,25 @@ export function issuedVerdict(o: {
 			named(r) ? r.issuerOfRecord : null,
 			named(r) ? namedIssuingParty(r.issuerOfRecordNote) : null,
 		].filter((n): n is string => !!n);
-	const match = tickerRows.filter((r) =>
-		names(r).some((n) => sameParty(n, o.company)),
-	);
+	// The name on record a claim matched, spelled as the record spells it,
+	// and what that name is: an answer quotes the record, not the claim.
+	const hitOf = (r: StablecoinIssuerRow) => {
+		if (r.company && sameParty(r.company, o.company))
+			return { name: r.company, kind: "the brand on record" };
+		if (named(r) && r.issuerOfRecord && sameParty(r.issuerOfRecord, o.company))
+			return {
+				name: r.issuerOfRecord,
+				kind: "the issuer of record its stellar.toml names",
+			};
+		const party = named(r) ? namedIssuingParty(r.issuerOfRecordNote) : null;
+		if (party && sameParty(party, o.company))
+			return {
+				name: party,
+				kind: "the party its stellar.toml's desc names as issuing it",
+			};
+		return null;
+	};
+	const match = tickerRows.filter((r) => hitOf(r) !== null);
 	const others = [
 		...new Set(
 			tickerRows.map((r) => r.company).filter((c): c is string => !!c),
@@ -539,7 +555,7 @@ export function issuedVerdict(o: {
 		return {
 			verdict: "supported",
 			statement:
-				`${o.company} issues ${o.ticker.toUpperCase()} on Stellar (issuer account on record).` +
+				`${hitOf(match[0])?.name}, ${hitOf(match[0])?.kind}, issues ${o.ticker.toUpperCase()} on Stellar (issuer account on record).` +
 				(named(match[0]) ? ` The ${record(match[0])}.` : "") +
 				(multi
 					? ` NOTE: ${o.ticker.toUpperCase()} is also issued by ${others.filter((c) => !match.some((m) => m.company === c)).join(", ")}; attribute by issuer account, never by ticker alone.`

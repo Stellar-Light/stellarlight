@@ -509,3 +509,34 @@ describe("issuedVerdict compares whole names and dates the toml read (review)", 
 		expect(note).toContain("sets no home_domain");
 	});
 });
+
+/** Re-check item 4 (2026-11-04): two different explicit legal forms are two
+ *  claims about two entities, and an answer quotes the record's spelling. */
+describe("issuedVerdict: legal forms and the record's own spelling", () => {
+	const USDC = {
+		ticker: "USDC",
+		company: "Circle",
+		issuer: "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN",
+		issuerOfRecord: "Circle Internet Financial, LLC",
+		issuerOfRecordCheck: "named",
+		issuerOfRecordSourceUrl: "https://circle.com/.well-known/stellar.toml",
+		issuerOfRecordAsOf: "2026-11-05T06:25:00.000Z",
+		issuerOfRecordNote: null,
+		updatedAt: "2026-11-05T06:30:00.000Z",
+	};
+	const verdict = (company: string) =>
+		issuedVerdict({ ticker: "USDC", company, rows: [USDC], corpusTotal: 1 });
+
+	it("a different legal form is unsupported, quoting the issuer of record as its toml spells it", () => {
+		const r = verdict("Circle Internet Financial Inc");
+		expect(r.verdict).toBe("unsupported");
+		expect(r.statement).toContain("Circle Internet Financial, LLC");
+	});
+
+	it("a supported answer names the match as the record spells it, not as the claim did", () => {
+		const r = verdict("circle internet financial llc");
+		expect(r.verdict).toBe("supported");
+		expect(r.statement.startsWith("Circle Internet Financial, LLC")).toBe(true);
+		expect(r.statement).not.toContain("circle internet financial llc issues");
+	});
+});
