@@ -22,20 +22,36 @@ export interface StellarToml {
 	 *  are collected; a currency block without an issuer contributes to
 	 *  currencyCodes but never here. */
 	currencies: Array<{ code: string; issuer: string; status?: string }>;
+	/** Top-level keys the file sets in a form this parser does not read (a
+	 *  multi-line string, an array, a table): could-not-check, never "not
+	 *  declared" (#1909). */
+	unreadKeys: string[];
+	/** [[CURRENCIES]] blocks with no code this parser could read (a linked
+	 *  currency `toml`, a `code_template`, an unreadable code): their codes
+	 *  are UNKNOWN, so the file's asset list is could-not-check. */
+	unreadCurrencies: string[];
 }
 
-/** Parse just the shapes we need: top-level `KEY = "v"`, the [DOCUMENTATION]
- *  table, and `code`/`issuer` inside [[CURRENCIES]] blocks. */
+/** Parse just the shapes we need: top-level `KEY = "v"` or `KEY = 'v'`, the
+ *  [DOCUMENTATION] table, and `code`/`issuer` inside [[CURRENCIES]] blocks.
+ *  What it cannot read it records as unread, never as absent. */
 export function parseStellarToml(text: string): StellarToml {
 	const topLevel: Record<string, string> = {};
 	const documentation: Record<string, string> = {};
 	const currencyCodes: string[] = [];
 	const currencies: Array<{ code: string; issuer: string; status?: string }> =
 		[];
+	const unreadKeys: string[] = [];
+	const unreadCurrencies: string[] = [];
 	let section: "top" | "doc" | "currency" | "other" = "top";
 	// The current [[CURRENCIES]] block accumulates until its next block starts
 	// — key order inside a block is not guaranteed by SEP-1.
-	let cur: { code?: string; issuer?: string; status?: string } = {};
+	let cur: {
+		code?: string;
+		issuer?: string;
+		status?: string;
+		unread?: string;
+	} = {};
 	const flushCurrency = () => {
 		// Asset codes are case-sensitive on Stellar (nBTC and NBTC are two
 		// assets), so the code keeps the case the operator wrote; only the
@@ -48,6 +64,9 @@ export function parseStellarToml(text: string): StellarToml {
 		// decline an asset the operator itself has retired.
 		const status = cur.status?.trim().toLowerCase() || undefined;
 		if (code && !currencyCodes.includes(code)) currencyCodes.push(code);
+		// A declared currency whose code we could not read: unknown, so the
+		// whole asset list is could-not-check (#1909).
+		if (!code) unreadCurrencies.push(cur.unread ?? "a block with no code");
 		if (
 			code &&
 			issuer &&
@@ -58,8 +77,14 @@ export function parseStellarToml(text: string): StellarToml {
 		cur = {};
 	};
 
+	// Inside a multi-line string, the delimiter that closes it.
+	let multiline: string | null = null;
 	for (const raw of text.split(/\r?\n/)) {
 		const line = raw.trim();
+		if (multiline) {
+			if (line.includes(multiline)) multiline = null;
+			continue;
+		}
 		if (!line || line.startsWith("#")) continue;
 		if (line.startsWith("[")) {
 			if (section === "currency") flushCurrency();
@@ -68,9 +93,37 @@ export function parseStellarToml(text: string): StellarToml {
 			else section = "other";
 			continue;
 		}
-		const m = line.match(/^([A-Za-z0-9_]+)\s*=\s*"([^"]*)"/);
-		if (!m) continue;
-		const [, key, value] = m;
+		// A """multi-line""" or '''multi-line''' value: read when it closes on
+		// its own line, otherwise unread (could-not-check) to its delimiter.
+		const triple = line.match(/^([A-Za-z0-9_]+)\s*=\s*("""|''')(.*)$/);
+		if (triple) {
+			const [, tKey, delim, rest] = triple;
+			const end = rest.indexOf(delim);
+			if (end === -1) {
+				multiline = delim;
+				if (section === "top") unreadKeys.push(tKey.toUpperCase());
+				else if (section === "currency" && tKey.toLowerCase() === "code")
+					cur.unread ??= "an unreadable code";
+				continue;
+			}
+			const tValue = rest.slice(0, end);
+			if (section === "top") topLevel[tKey.toUpperCase()] = tValue;
+			else if (section === "doc") documentation[tKey.toUpperCase()] = tValue;
+			else if (section === "currency" && tKey.toLowerCase() === "code")
+				cur.code = tValue;
+			continue;
+		}
+		// A basic "string" or a literal 'string', the two one-line forms.
+		const m = line.match(/^([A-Za-z0-9_]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/);
+		if (!m) {
+			const key = line.match(/^([A-Za-z0-9_]+)\s*=/)?.[1];
+			if (key && section === "top") unreadKeys.push(key.toUpperCase());
+			else if (key && section === "currency" && key.toLowerCase() === "code")
+				cur.unread ??= "an unreadable code";
+			continue;
+		}
+		const key = m[1];
+		const value = m[2] ?? m[3] ?? "";
 		if (section === "top") topLevel[key.toUpperCase()] = value;
 		else if (section === "doc") documentation[key.toUpperCase()] = value;
 		else if (section === "currency") {
@@ -78,28 +131,85 @@ export function parseStellarToml(text: string): StellarToml {
 			if (k === "code") cur.code = value;
 			else if (k === "issuer") cur.issuer = value;
 			else if (k === "status") cur.status = value;
+			else if (k === "toml") cur.unread ??= `toml=${value}`;
+			else if (k === "code_template") cur.unread ??= `code_template=${value}`;
 		}
 	}
 	if (section === "currency") flushCurrency();
-	return { topLevel, documentation, currencyCodes, currencies };
+	return {
+		topLevel,
+		documentation,
+		currencyCodes,
+		currencies,
+		unreadKeys,
+		unreadCurrencies,
+	};
 }
 
-/** The toml-backed partner fields a successful parse writes: what the file
- * declares, [] when it declares none (#1909). Writing only non-empty values
- * let an earlier curated value survive under a fresh read stamp, served as
- * read from the file. */
+const SEP_SERVERS: Record<string, string> = {
+	TRANSFER_SERVER: "sep-6",
+	TRANSFER_SERVER_SEP0024: "sep-24",
+	DIRECT_PAYMENT_SERVER: "sep-31",
+};
+
+/** The toml-backed partner fields a successful parse supports (#1909): what
+ * the file declares, [] when it declares none, and null (could-not-check)
+ * when the parser could not read a server key or a currency's code. Writing
+ * only non-empty values let an earlier curated value survive under a fresh
+ * read stamp; writing [] for what we could not read erased a real one. */
 export function tomlCapabilities(toml: StellarToml): {
-	seps: string[];
-	assets: { code: string }[];
+	seps: string[] | null;
+	assets: { code: string }[] | null;
 } {
-	const seps: string[] = [];
-	if (toml.topLevel.TRANSFER_SERVER) seps.push("sep-6");
-	if (toml.topLevel.TRANSFER_SERVER_SEP0024) seps.push("sep-24");
-	if (toml.topLevel.DIRECT_PAYMENT_SERVER) seps.push("sep-31");
+	const serverUnread = Object.keys(SEP_SERVERS).some((k) =>
+		toml.unreadKeys.includes(k),
+	);
 	return {
-		seps,
-		assets: toml.currencyCodes.slice(0, 25).map((code) => ({ code })),
+		seps: serverUnread
+			? null
+			: Object.entries(SEP_SERVERS)
+					.filter(([k]) => toml.topLevel[k])
+					.map(([, sep]) => sep),
+		assets: toml.unreadCurrencies.length
+			? null
+			: toml.currencyCodes.slice(0, 25).map((code) => ({ code })),
 	};
+}
+
+/** The update a successful parse writes: a could-not-check field is left
+ * out, so the stored value stands; it is never written as [] or null. */
+export function capabilityWrite(caps: ReturnType<typeof tomlCapabilities>): {
+	seps?: string[];
+	assets?: { code: string }[];
+} {
+	return {
+		...(caps.seps ? { seps: caps.seps } : {}),
+		...(caps.assets ? { assets: caps.assets } : {}),
+	};
+}
+
+const listed = (xs: unknown): string =>
+	!Array.isArray(xs)
+		? "unset"
+		: xs.length
+			? xs
+					.map((x) =>
+						typeof x === "string" ? x : (x as { code?: string })?.code,
+					)
+					.join(",")
+			: "none";
+
+/** The dry run's lines: the stored value beside the planned one, so a wipe
+ * or an unread field is visible before an execute. */
+export function capabilityReport(
+	stored: { seps?: unknown; assets?: unknown },
+	toml: StellarToml,
+): string[] {
+	const caps = tomlCapabilities(toml);
+	return [
+		`seps ${listed(stored.seps)} → ${caps.seps ? listed(caps.seps) : `unread (${toml.unreadKeys.join(", ")}), kept`}`,
+		`assets ${listed(stored.assets)} → ${caps.assets ? listed(caps.assets) : `unread (${toml.unreadCurrencies.join("; ")}), kept`}`,
+	];
 }
 
 export async function fetchText(url: string): Promise<string | null> {

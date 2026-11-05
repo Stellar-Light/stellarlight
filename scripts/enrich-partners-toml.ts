@@ -24,8 +24,10 @@
  *   - DRY RUN by default; per-anchor report of exactly what would change.
  *   - System-owned fields are overwritten from source: assets and seps on
  *     every successful parse with what the file declares, [] when it declares
- *     none (so no curated value survives under a fresh read stamp); rampTypes
- *     only when the transfer server's /info confirms a ramp;
+ *     none (so no curated value survives under a fresh read stamp), and left
+ *     as stored when the parser could not read them (a linked currency
+ *     toml, a code_template, a value it cannot parse); rampTypes only when
+ *     the transfer server's /info confirms a ramp;
  *     partner-owned fields (tagline/contact/logo) are filled ONLY when empty.
  *   - No deletes. A missing/unreachable toml = "skipped", never a wipe.
  */
@@ -34,6 +36,8 @@ import "./load-env";
 import config from "@payload-config";
 import { getPayload } from "payload";
 import {
+	capabilityReport,
+	capabilityWrite,
 	domainOf,
 	fetchText,
 	parseStellarToml,
@@ -564,14 +568,13 @@ async function main() {
 				// data stopped changing). Admin edits may postdate the snapshot.
 				update.tomlSourceUrl = `https://${domain}/.well-known/stellar.toml`;
 				update.tomlFetchedAt = new Date().toISOString().slice(0, 10);
-				// SEPs from declared endpoints, assets from CURRENCIES.
+				// SEPs from declared endpoints, assets from CURRENCIES. What the
+				// parser could not read stays as stored (#1909), and the report
+				// shows the stored value beside the planned one.
 				const caps = tomlCapabilities(toml);
-				Object.assign(update, caps);
-				const seps = caps.seps;
-				report.push(`seps=${seps.join(",") || "none"}`);
-				report.push(
-					`assets=${toml.currencyCodes.slice(0, 8).join(",") || "none"}${toml.currencyCodes.length > 8 ? "…" : ""}`,
-				);
+				Object.assign(update, capabilityWrite(caps));
+				const seps = caps.seps ?? [];
+				report.push(...capabilityReport(doc, toml));
 
 				// Real ramp capability from /info (prefer SEP-24 server, else SEP-6)
 				const transferServer =
