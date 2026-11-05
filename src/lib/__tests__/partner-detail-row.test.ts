@@ -268,6 +268,14 @@ describe("the assistant's partner rows follow the same rules", () => {
 		expect(rowOf("anchor-read-none")?.seps).toEqual([]);
 	});
 
+	it("serves null for curated tag lists nobody recorded", () => {
+		const row = rowOf("partner-untagged", "dev tools");
+		expect(row?.slug).toBe("partner-untagged");
+		expect(row?.sectors).toBeNull();
+		expect(row?.regions).toBeNull();
+		expect(rowOf("anchor-read")?.regions).toEqual(["latam"]);
+	});
+
 	it("scores a missing tag list exactly as an empty one", () => {
 		const doc = docs.find((d) => d.slug === "partner-untagged");
 		const as = (tags: unknown) =>
@@ -321,7 +329,11 @@ describe("every served partner row declares the null it can serve", () => {
 			],
 		],
 		["matchPartners row", matchRow, ["sectors", "regions"]],
-		["partnerAssistant row", assistantRow, ["assets", "seps", "rampTypes"]],
+		[
+			"partnerAssistant row",
+			assistantRow,
+			["assets", "seps", "rampTypes", "sectors", "regions"],
+		],
 	] as Array<[string, unknown, string[]]>)("%s", (_, schema, fields) => {
 		for (const f of fields)
 			expect(props(schema)[f]?.nullable, `${f} must be nullable`).toBe(true);

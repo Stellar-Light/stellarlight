@@ -5640,15 +5640,17 @@ export const spec: OpenAPISpec = {
 													},
 													sectors: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
 														description:
-															"Curated sectors; [] = none recorded here, never 'serves no sector'.",
+															"Curated sectors; NULL = none recorded (UNKNOWN, never 'serves no sector').",
 													},
 													regions: {
 														type: "array",
+														nullable: true,
 														items: { type: "string" },
 														description:
-															"Curated coverage regions; [] = none recorded here, never 'covers nowhere'.",
+															"Curated coverage regions; NULL = none recorded (UNKNOWN, never 'covers nowhere').",
 													},
 													assets: {
 														type: "array",

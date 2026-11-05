@@ -5237,10 +5237,10 @@ export interface operations {
                             description?: string | null;
                             websiteUrl?: string | null;
                             acceptingClients?: boolean | null;
-                            /** @description Curated sectors; [] = none recorded here, never 'serves no sector'. */
-                            sectors?: string[];
-                            /** @description Curated coverage regions; [] = none recorded here, never 'covers nowhere'. */
-                            regions?: string[];
+                            /** @description Curated sectors; NULL = none recorded (UNKNOWN, never 'serves no sector'). */
+                            sectors?: string[] | null;
+                            /** @description Curated coverage regions; NULL = none recorded (UNKNOWN, never 'covers nowhere'). */
+                            regions?: string[] | null;
                             /** @description Asset codes (USDC, EURC, …) from stellar.toml CURRENCIES. NULL = no read is recorded (tomlSourceUrl and tomlFetchedAt are not both set): UNKNOWN, and a curated code is never served here. */
                             assets?: string[] | null;
                             /** @description SEP standards implemented (sep-6, sep-24, sep-31), read from stellar.toml. NULL = no read is recorded; [] = a recorded read declares none. */

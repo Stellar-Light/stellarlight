@@ -52,11 +52,9 @@ export interface PublicPartner {
 	description: string | null;
 	websiteUrl: string | null;
 	acceptingClients: boolean | null;
-	// ponytail: still [] when none is recorded, unlike the API rows (#1909):
-	// the chat card reads these two unguarded, in a file that fails biome on
-	// base, so they turn null once that file's lint debt is paid.
-	sectors: string[];
-	regions: string[];
+	/** Curated tags; null when none is recorded, never "none" (#1909). */
+	sectors: string[] | null;
+	regions: string[] | null;
 	/** Asset codes (USDC, EURC, NGNT…) from stellar.toml CURRENCIES; null
 	 * unless a read is recorded (hasTomlRead), so a curated code never
 	 * passes as a stellar.toml fact. */
@@ -97,8 +95,8 @@ function toPublic(p: any): PublicPartner {
 		description: p.description ? String(p.description).slice(0, 180) : null,
 		websiteUrl: p.websiteUrl ?? null,
 		acceptingClients: p.acceptingClients ?? null,
-		sectors: p.sectors ?? [],
-		regions: p.regions ?? [],
+		sectors: recordedOrNull(p.sectors),
+		regions: recordedOrNull(p.regions),
 		assets: read
 			? (p.assets ?? []).map((a: { code: string }) => a.code).filter(Boolean)
 			: null,
