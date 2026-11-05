@@ -7,12 +7,14 @@ const FILE = "https://example.test/hackmeridian-2026.yaml";
 const html = (
 	row: Parameters<typeof BuildSourceNote>[0]["row"],
 	showSource = true,
+	linkSource = true,
 ) =>
 	renderToStaticMarkup(
 		<BuildSourceNote
 			row={row}
 			event="HackMeridian 2026"
 			showSource={showSource}
+			linkSource={linkSource}
 		/>,
 	);
 
@@ -54,5 +56,22 @@ describe("a build's source, basis and placement, said as the event page says the
 			"The placement is named off DoraHacks, by the page linked here",
 		);
 		expect(out).toContain(`href="${FILE}"`);
+	});
+
+	// Final re-check 2026-11-05: the event page's cards are links, and the
+	// note's "Source" link inside them nested an <a> in an <a>.
+	it("inside a card it names the source as text, never as a link", () => {
+		const out = html(
+			{
+				id: "curated-hackmeridian-2026-nest",
+				entryBasis: "placement-listed",
+				isWinner: true,
+				winnerSource: FILE,
+			},
+			false,
+			false,
+		);
+		expect(out).not.toContain("<a");
+		expect(out).toContain("Source: example.test/hackmeridian-2026.yaml");
 	});
 });

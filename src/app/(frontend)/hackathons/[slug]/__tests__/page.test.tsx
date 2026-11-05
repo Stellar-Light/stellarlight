@@ -72,6 +72,15 @@ const render = async (slug = "hackmeridian-2026") =>
 		await HackathonDetailPage({ params: Promise.resolve({ slug }) }),
 	);
 const count = (html: string, s: string) => html.split(s).length - 1;
+/** Whether any <a> opens inside another: a card link broken mid-card. */
+const nestedAnchors = (html: string) => {
+	let depth = 0;
+	for (const m of html.matchAll(/<a[\s>]|<\/a>/g)) {
+		depth += m[0] === "</a>" ? -1 : 1;
+		if (depth > 1) return true;
+	}
+	return false;
+};
 /** A stat block's value. */
 const zeroStat = /tracking-tight">0</;
 
@@ -138,7 +147,10 @@ describe("/hackathons/<slug>", () => {
 		expect(count(html, "The placement is HackProof&#x27;s, secondhand")).toBe(
 			2,
 		);
-		expect(html).toContain(`href="${FILE}"`);
+		// Cards are links: the source is named as text inside them.
+		expect(html).toContain("Source: example.test/hackmeridian-2026.yaml");
+		expect(nestedAnchors(html)).toBe(false);
+		expect(nestedAnchors("<a href=x><p><a href=y>y</a></p></a>")).toBe(true);
 	});
 
 	it("renders an upcoming curated event from the API's body, with no count it does not hold", async () => {

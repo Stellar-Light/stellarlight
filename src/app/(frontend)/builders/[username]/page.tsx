@@ -575,6 +575,7 @@ export default async function BuilderProfilePage({
 											row={b}
 											event={b.hackathon.title}
 											showSource
+											linkSource
 										/>
 									</div>
 								))}
