@@ -1151,13 +1151,14 @@ export interface components {
             generatedAt: string;
             sources?: {
                 name?: string;
-                count?: number;
+                /** @description null = the source could not be read with this response (could not check), never zero. */
+                count?: number | null;
                 /** Format: date-time */
                 lastUpdatedAt?: string | null;
                 /** @description Scope digest of what `count` counts: same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes. */
                 populationId?: string;
                 notes?: string;
-                /** @description hackathonBuilds only: the serialised size in bytes of the hackathon submissions index, as measured with this response. Next caches it as one item of at most 2 MB; past that every request rebuilds it from the store, so a live check reds above 1,800,000. null = the index could not be read in time (could not check). Absent on every other source. */
+                /** @description hackathonBuilds only: the serialised size in bytes of the hackathon submissions index, as its last build on the server instance answering measured it (lastUpdatedAt dates it). Next caches the index as one item of at most 2 MB; past that every request rebuilds it from the store, so a live check reds above 1,800,000. null = that instance has not built the index yet (could not check). Absent on every other source. */
                 indexBytes?: number | null;
             }[];
             usage?: {

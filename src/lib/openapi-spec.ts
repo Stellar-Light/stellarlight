@@ -10737,7 +10737,12 @@ export const spec: OpenAPISpec = {
 							type: "object",
 							properties: {
 								name: { type: "string" },
-								count: { type: "integer" },
+								count: {
+									type: "integer",
+									nullable: true,
+									description:
+										"null = the source could not be read with this response (could not check), never zero.",
+								},
 								lastUpdatedAt: {
 									type: "string",
 									format: "date-time",
@@ -10753,7 +10758,7 @@ export const spec: OpenAPISpec = {
 									type: "integer",
 									nullable: true,
 									description:
-										"hackathonBuilds only: the serialised size in bytes of the hackathon submissions index, as measured with this response. Next caches it as one item of at most 2 MB; past that every request rebuilds it from the store, so a live check reds above 1,800,000. null = the index could not be read in time (could not check). Absent on every other source.",
+										"hackathonBuilds only: the serialised size in bytes of the hackathon submissions index, as its last build on the server instance answering measured it (lastUpdatedAt dates it). Next caches the index as one item of at most 2 MB; past that every request rebuilds it from the store, so a live check reds above 1,800,000. null = that instance has not built the index yet (could not check). Absent on every other source.",
 								},
 							},
 						},

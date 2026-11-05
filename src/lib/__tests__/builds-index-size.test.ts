@@ -53,6 +53,12 @@ describe("the builds index stays small enough to cache", () => {
 		expect(idx.some((b) => "contracts" in b)).toBe(false);
 		expect(reads[0]?.select).toMatchObject({ contracts: false });
 		const { indexBytes } = await import("@/lib/builds-index-size");
+		// Recorded beside the index, for /api/status to read without loading it.
+		const { lastBuildsIndexSize } = await import("@/lib/hackathon-builds");
+		expect(lastBuildsIndexSize()).toMatchObject({
+			rows: idx.length,
+			bytes: indexBytes(idx),
+		});
 		expect(log).toHaveBeenCalledWith(
 			`hackathon builds index: ${idx.length} rows, ${indexBytes(idx)} bytes serialised (red above 1800000)`,
 		);

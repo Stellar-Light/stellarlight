@@ -655,6 +655,13 @@ export function dedupeBuilds(rows: IndexedBuild[]): IndexedBuild[] {
 	return flat;
 }
 
+/** The size the last build of the index on this server instance measured,
+ * kept beside it so /api/status reads it without loading the index; null
+ * until a build here has measured one. */
+let lastIndexSize: { rows: number; bytes: number; measuredAt: string } | null =
+	null;
+export const lastBuildsIndexSize = () => lastIndexSize;
+
 export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
 	const stored = await readStoredBuilds();
 	const index = dedupeBuilds(stored?.length ? stored : await buildLiveIndex());
@@ -666,6 +673,11 @@ export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
 	if (!index.length) throw new Error("hackathon builds index came back empty");
 	// Next caches the result only up to 2 MB, with no error past it.
 	const bytes = indexBytes(index);
+	lastIndexSize = {
+		rows: index.length,
+		bytes,
+		measuredAt: new Date().toISOString(),
+	};
 	console.log(
 		`hackathon builds index: ${index.length} rows, ${bytes} bytes serialised (red above ${INDEX_BYTES_RED})`,
 	);
