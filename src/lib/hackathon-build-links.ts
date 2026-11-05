@@ -684,7 +684,7 @@ export function entryBasisLine(
 		? ` ${n === 1 ? "A contract it cites was" : `${n} contracts it cites were`} created on testnet during the event.`
 		: "";
 	if (row.entryBasis === "repo-names-event")
-		return `The team's repo says it was built for ${event}.${chain}`;
+		return `The team's repo names ${event}.${chain}`;
 	// ponytail: HackProof is the one list partial rows come from; name each
 	// row's list here when a second list lands.
 	if (row.entryBasis === "placement-listed")

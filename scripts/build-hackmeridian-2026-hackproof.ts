@@ -34,6 +34,7 @@ import {
 	firstHeading,
 	type Mention,
 	namedUpFront,
+	placementOf,
 	type RepoRead,
 	type RepoText,
 	rpcProbes,
@@ -77,7 +78,7 @@ interface HpRecord {
 	repo_url: string;
 	track: string;
 	track_declared: boolean;
-	award?: "first" | "runner-up" | null;
+	award?: string | null;
 	evidence_tier: "verified" | "likely";
 	commits_in_window?: number | null;
 	chain: { evidence: Evidence[] };
@@ -359,6 +360,15 @@ async function main() {
 		throw new Error(
 			`placements disagree between the event file and the records: ${mismatch.map((m) => m.file).join(", ")}`,
 		);
+	// A place value not seen before stops the run here, before any read: a
+	// new place is worded by a person, never written as no placement.
+	for (const { file, rec } of records) {
+		try {
+			placementOf(rec.award);
+		} catch (e) {
+			throw new Error(`${file}: ${(e as Error).message}`);
+		}
+	}
 	console.log(`${records.length} records, ${awards.size} placements`);
 
 	const checkedAt = new Date().toISOString().replace(/\.\d{3}Z$/, "Z");
@@ -520,12 +530,7 @@ async function main() {
 			track: rec.track_declared
 				? rec.track.charAt(0).toUpperCase() + rec.track.slice(1)
 				: null,
-			placement:
-				rec.award === "first"
-					? "First place"
-					: rec.award === "runner-up"
-						? "Runner-up"
-						: null,
+			placement: placementOf(rec.award),
 			basis,
 			mention,
 			tier: rec.evidence_tier,

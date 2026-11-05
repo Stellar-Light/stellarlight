@@ -15,9 +15,29 @@ import type { EntryBasis, MentionIn } from "@/lib/hackathon-build-links";
 
 /** HackMeridian named, in any spacing or case ("Hack Meridian", "hack-meridian"). */
 export const EVENT_NAMED = /hack[\s_\-.]*meridian/i;
-/** The variant phrases a team uses for it ("Meridian hackathon"). */
+/** The variant phrases a team uses for it ("Meridian hackathon"), to the
+ * end of the word so a year after it is read. */
 export const EVENT_VARIANT =
-	/hack\w*on[\s_\-.]*meridian|meridian[\s_\-.]*(?:2026[\s_\-.]*)?hack/i;
+	/hack\w*on[\s_\-.]*meridian|meridian[\s_\-.]*(?:2026[\s_\-.]*)?hack\w*/i;
+/** The edition a mention must name, or leave unnamed. */
+const EDITION = "2026";
+const YEAR_AFTER = /^[\s_\-.]*(\d{4})(?!\d)/;
+const YEAR_BEFORE = /(?<!\d)(\d{4})[\s_\-.]*$/;
+
+/** Whether the text names this edition: a match of the name with 2026, or
+ * no year, right beside it. "HackMeridian 2025" names another one. */
+export function namesEdition(text: string, re: RegExp): boolean {
+	for (const m of text.matchAll(new RegExp(re.source, `${re.flags}g`))) {
+		const end = m.index + m[0].length;
+		const after = YEAR_AFTER.exec(text.slice(end, end + 12))?.[1];
+		const before = YEAR_BEFORE.exec(
+			text.slice(Math.max(0, m.index - 12), m.index),
+		)?.[1];
+		if ((after ?? EDITION) === EDITION && (before ?? EDITION) === EDITION)
+			return true;
+	}
+	return false;
+}
 
 /** A repo's own text as read: its name, GitHub description and topics, the
  * README GitHub shows, and its other markdown files (shallowest first). */
@@ -36,13 +56,13 @@ export interface Mention {
 }
 
 function hit(t: RepoText, re: RegExp, docs: boolean): Mention | null {
-	if (t.readme && re.test(t.readme.text))
+	const names = (s: string | null) => !!s && namesEdition(s, re);
+	if (t.readme && names(t.readme.text))
 		return { in: "readme", path: t.readme.path };
-	if (re.test(t.name)) return { in: "name", path: null };
-	if (t.description && re.test(t.description))
-		return { in: "description", path: null };
-	if (t.topics.some((x) => re.test(x))) return { in: "topics", path: null };
-	const doc = docs ? t.docs.find((d) => re.test(d.text)) : undefined;
+	if (names(t.name)) return { in: "name", path: null };
+	if (names(t.description)) return { in: "description", path: null };
+	if (t.topics.some(names)) return { in: "topics", path: null };
+	const doc = docs ? t.docs.find((d) => names(d.text)) : undefined;
 	return doc ? { in: "doc", path: doc.path } : null;
 }
 
@@ -56,6 +76,22 @@ export const namedUpFront = (t: RepoText): boolean =>
  * for a variant phrase. null = no text read names it. */
 export function findMention(t: RepoText): Mention | null {
 	return hit(t, EVENT_NAMED, true) ?? hit(t, EVENT_VARIANT, true);
+}
+
+/** HackProof's place values as Scout serves them. */
+const PLACES: Record<string, string> = {
+	first: "First place",
+	"runner-up": "Runner-up",
+};
+
+/** A record's placement, or null when it has none. A place value not seen
+ * before throws: a new place is read and worded by a person, never stored
+ * as no placement beside a placement-listed basis. */
+export function placementOf(place: string | null | undefined): string | null {
+	if (place == null) return null;
+	const p = PLACES[place];
+	if (!p) throw new Error(`unknown HackProof place value '${place}'`);
+	return p;
 }
 
 /** What the repo read found. docsRead below docsTotal is a partial read. */

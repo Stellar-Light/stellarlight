@@ -15,6 +15,7 @@ import {
 	findMention,
 	firstHeading,
 	namedUpFront,
+	placementOf,
 	type RepoText,
 	rpcProbes,
 } from "@/lib/hackproof";
@@ -93,6 +94,54 @@ describe("which records are stored, and on what basis", () => {
 				}),
 			),
 		).toBeNull();
+	});
+
+	// Audit 2026-11-04: "Built at HackMeridian 2025 in Rio." named the event
+	// with no edition check, and the page then said the repo was built for 2026.
+	it("a mention of another edition does not count: 2026 or no year beside the name", () => {
+		const readme = (t: string) =>
+			text({ readme: { path: "README.md", text: t } });
+		expect(
+			findMention(readme("Built at HackMeridian 2025 in Rio.")),
+		).toBeNull();
+		expect(findMention(readme("2025 HackMeridian finalist"))).toBeNull();
+		expect(
+			findMention(readme("Winner of the Meridian hackathon 2024")),
+		).toBeNull();
+		// 2026, or no year at all, names this one.
+		for (const t of [
+			"Built at HackMeridian 2026.",
+			"HackMeridian-2026 entry",
+			"For HackMeridian, live on Stellar.",
+			"built for the Stellar Meridian hackathon",
+			"Hackmeridian2026",
+		])
+			expect(findMention(readme(t)), t).toEqual({
+				in: "readme",
+				path: "README.md",
+			});
+		// Another edition first, this one later in the same text: it counts.
+		expect(
+			findMention(
+				readme("After HackMeridian 2025 we came back for HackMeridian 2026."),
+			),
+		).toEqual({ in: "readme", path: "README.md" });
+		// The repo name and topics are read the same way.
+		expect(findMention(text({ name: "hackmeridian-2025" }))).toBeNull();
+		expect(findMention(text({ topics: ["hackmeridian-2025"] }))).toBeNull();
+		expect(namedUpFront(text({ description: "HackMeridian 2025 MVP" }))).toBe(
+			false,
+		);
+	});
+
+	it("a place value HackProof has not used before stops the generator, never a silent null", () => {
+		expect(placementOf("first")).toBe("First place");
+		expect(placementOf("runner-up")).toBe("Runner-up");
+		expect(placementOf(null)).toBeNull();
+		expect(placementOf(undefined)).toBeNull();
+		expect(() => placementOf("honorable-mention")).toThrow(
+			/unknown HackProof place value 'honorable-mention'/,
+		);
 	});
 
 	it("reads other markdown files only when the README, name, description and topics are silent", () => {
@@ -409,8 +458,9 @@ describe("HackMeridian 2026 from HackProof", () => {
 		const named = HACKPROOF_BUILDS.find(
 			(b) => b.entryBasis === "repo-names-event" && b.contracts?.length === 0,
 		);
+		// What the basis proves: the repo names the event, nothing about why.
 		expect(entryBasisLine(named ?? {}, "HackMeridian 2026")).toBe(
-			"The team's repo says it was built for HackMeridian 2026.",
+			"The team's repo names HackMeridian 2026.",
 		);
 		expect(
 			entryBasisLine(
@@ -418,7 +468,7 @@ describe("HackMeridian 2026 from HackProof", () => {
 				"HackMeridian 2026",
 			),
 		).toBe(
-			"The team's repo says it was built for HackMeridian 2026. 3 contracts it cites were created on testnet during the event.",
+			"The team's repo names HackMeridian 2026. 3 contracts it cites were created on testnet during the event.",
 		);
 		expect(
 			entryBasisLine({ entryBasis: "placement-listed", contracts: [] }, "X"),
