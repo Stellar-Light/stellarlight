@@ -127,8 +127,12 @@ export function parseStellarToml(text: string): StellarToml {
 		}
 	};
 	const assign = (key: string, value: string) => {
-		if (section === "top") topLevel[key.toUpperCase()] = value;
-		else if (section === "doc") documentation[key.toUpperCase()] = value;
+		if (section === "top") {
+			topLevel[key.toUpperCase()] = value;
+			// ACCOUNTS written as one string, not an array: still a listing.
+			if (key.toUpperCase() === "ACCOUNTS")
+				collectAccounts(`"${value.trim()}"`);
+		} else if (section === "doc") documentation[key.toUpperCase()] = value;
 		else if (section === "currency") {
 			const k = key.toLowerCase();
 			if (k === "code") cur.code = value;

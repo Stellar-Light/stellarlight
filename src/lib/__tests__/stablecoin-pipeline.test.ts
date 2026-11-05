@@ -227,6 +227,14 @@ desc="Example's dollar, issued by Other Mint (Pty) Ltd, and operated by Example 
 		});
 	});
 
+	it("an ACCOUNTS written as one string, not an array, still lists the account", () => {
+		const toml = `ACCOUNTS = "${AUDD}"\n[DOCUMENTATION]\nORG_NAME="AUDC PTY LTD"\n`;
+		expect(issuerOfRecordFromToml(toml, "AUDD", AUDD)).toEqual({
+			name: "AUDC PTY LTD",
+			note: null,
+		});
+	});
+
 	it("an account listed only in ACCOUNTS is listed", () => {
 		const toml = `ACCOUNTS = [\n  "${MGUSD}",\n]\n[DOCUMENTATION]\nORG_NAME="MoneyGram Payment Systems, Inc."\n`;
 		expect(issuerOfRecordFromToml(toml, "MGUSD", MGUSD)).toEqual({
