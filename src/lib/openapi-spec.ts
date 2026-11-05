@@ -952,7 +952,12 @@ const BUILD_DETAIL_SCHEMA = {
 					description:
 						"The list's own evidence for the record, as it published it: tier verified (a contract, wasm, asset or deployer in the repo matched testnet activity during the event) or likely (Stellar code committed then, no chain match), its strongest match (method) and the commits it counts in the event window. Not re-checked, except the contracts Scout checks itself (`contracts`).",
 					properties: {
-						tier: { type: "string", enum: [...LISTED_TIERS] },
+						tier: {
+							type: "string",
+							enum: [...LISTED_TIERS],
+							description:
+								"The list's own tier as its record at the pinned commit (the row's url) states it: not dated here, since that commit fixes it, and not re-checked by Scout.",
+						},
 						method: { type: "string", nullable: true },
 						commitsInWindow: { type: "integer", nullable: true },
 					},
