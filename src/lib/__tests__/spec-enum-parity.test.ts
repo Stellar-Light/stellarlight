@@ -298,11 +298,18 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 		expect(spread("DEPLOYMENT_NETWORKS")).toBe(1);
 	});
 
-	it("partnerType (getPartners param, submit-listing body, Partner schema) is PARTNER_TYPES", () => {
+	it("partnerType (getPartners param, submit-listing body, matchPartners body, Partner schema) is PARTNER_TYPES", () => {
 		expect(
 			sorted(S.components.schemas.Partner.properties.partnerType.enum),
 		).toEqual(sorted(PARTNER_TYPES as readonly string[]));
-		expect(spread("PARTNER_TYPES")).toBe(3);
+		expect(
+			sorted(
+				S.paths["/api/partners/match"].post.requestBody.content[
+					"application/json"
+				].schema.properties.type.enum,
+			),
+		).toEqual(sorted(PARTNER_TYPES as readonly string[]));
+		expect(spread("PARTNER_TYPES")).toBe(4);
 	});
 
 	it("REPO_KINDS: one spread, one shared schema object, two sites that equal it (Repo.kind, explainRepo repoMeta.kind)", () => {

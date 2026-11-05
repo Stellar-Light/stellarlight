@@ -153,10 +153,12 @@ async function loadDetailUrls(now: Date): Promise<MetadataRoute.Sitemap> {
 		key: "slug" | "assetId" = "slug",
 	) => {
 		try {
+			// The whole set (limit 0): a sitemap cut at a ceiling drops pages
+			// from search engines without a word. The select keeps it light.
 			const res = await payload.find({
 				collection,
 				where,
-				limit: 5000,
+				limit: 0,
 				depth: 0,
 				select: { [key]: true, updatedAt: true },
 			} as any);

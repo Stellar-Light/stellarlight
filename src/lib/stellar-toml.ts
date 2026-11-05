@@ -8,7 +8,8 @@
  * that a strict TOML parser rejects the whole file, and only a few shapes are
  * needed. Comment lines are skipped, a value is read up to its own closing
  * quote (double or single, with \" and \\ escapes in a double-quoted one),
- * and nothing outside the shapes below is read.
+ * and nothing outside the shapes below is read: a key set in another form
+ * is recorded as unread (could-not-check), never as absent.
  */
 
 export interface StellarToml {
@@ -30,6 +31,14 @@ export interface StellarToml {
 	/** The top-level ACCOUNTS array (SEP-1: the accounts this domain
 	 *  controls), well-formed StrKeys only, uppercased. */
 	accounts: string[];
+	/** Top-level keys the file sets in a form this parser does not read (a
+	 *  multi-line string, an array other than ACCOUNTS, a table):
+	 *  could-not-check, never "not declared" (#1909). */
+	unreadKeys: string[];
+	/** [[CURRENCIES]] blocks with no code this parser could read (a linked
+	 *  currency `toml`, a `code_template`, an unreadable code): their codes
+	 *  are UNKNOWN, so the file's asset list is could-not-check. */
+	unreadCurrencies: string[];
 }
 
 const STRKEY = /^G[A-Z2-7]{55}$/;
@@ -51,20 +60,29 @@ const ASSIGN = /^([A-Za-z0-9_]+)\s*=\s*(?:"((?:[^"\\]|\\.)*)"|'([^']*)')/;
 
 /** Parse just the shapes we need: top-level `KEY = "v"`, the ACCOUNTS array,
  *  the [DOCUMENTATION] table, and `code`/`issuer`/`status`/`desc` inside
- *  [[CURRENCIES]] blocks. */
+ *  [[CURRENCIES]] blocks, each as a one-line string or a triple-quoted one
+ *  that closes on its own line. What it cannot read it records as unread,
+ *  never as absent (#1909). */
 export function parseStellarToml(text: string): StellarToml {
 	const topLevel: Record<string, string> = {};
 	const documentation: Record<string, string> = {};
 	const currencyCodes: string[] = [];
 	const currencies: StellarToml["currencies"] = [];
 	const accounts: string[] = [];
+	const unreadKeys: string[] = [];
+	const unreadCurrencies: string[] = [];
 	let section: "top" | "doc" | "currency" | "other" = "top";
 	// Inside a multi-line ACCOUNTS = [ ... ] array.
 	let inAccounts = false;
 	// The current [[CURRENCIES]] block accumulates until its next block starts:
 	// key order inside a block is not guaranteed by SEP-1.
-	let cur: { code?: string; issuer?: string; status?: string; desc?: string } =
-		{};
+	let cur: {
+		code?: string;
+		issuer?: string;
+		status?: string;
+		desc?: string;
+		unread?: string;
+	} = {};
 	const flushCurrency = () => {
 		// Asset codes are case-sensitive on Stellar (nBTC and NBTC are two
 		// assets), so the code keeps the case the operator wrote; only the
@@ -78,6 +96,9 @@ export function parseStellarToml(text: string): StellarToml {
 		const status = cur.status?.trim().toLowerCase() || undefined;
 		const desc = cur.desc?.trim() || undefined;
 		if (code && !currencyCodes.includes(code)) currencyCodes.push(code);
+		// A declared currency whose code we could not read: unknown, so the
+		// whole asset list is could-not-check (#1909).
+		if (!code) unreadCurrencies.push(cur.unread ?? "a block with no code");
 		if (
 			code &&
 			issuer &&
@@ -101,9 +122,34 @@ export function parseStellarToml(text: string): StellarToml {
 			if (STRKEY.test(key) && !accounts.includes(key)) accounts.push(key);
 		}
 	};
+	const assign = (key: string, value: string) => {
+		if (section === "top") topLevel[key.toUpperCase()] = value;
+		else if (section === "doc") documentation[key.toUpperCase()] = value;
+		else if (section === "currency") {
+			const k = key.toLowerCase();
+			if (k === "code") cur.code = value;
+			else if (k === "issuer") cur.issuer = value;
+			else if (k === "status") cur.status = value;
+			else if (k === "desc") cur.desc = value;
+			else if (k === "toml") cur.unread ??= `toml=${value}`;
+			else if (k === "code_template") cur.unread ??= `code_template=${value}`;
+		}
+	};
+	// A key set in a form this parser does not read: could-not-check.
+	const unread = (key: string) => {
+		if (section === "top") unreadKeys.push(key.toUpperCase());
+		else if (section === "currency" && key.toLowerCase() === "code")
+			cur.unread ??= "an unreadable code";
+	};
 
+	// Inside a multi-line string, the delimiter that closes it.
+	let multiline: string | null = null;
 	for (const raw of text.split(/\r?\n/)) {
 		const line = raw.trim();
+		if (multiline) {
+			if (line.includes(multiline)) multiline = null;
+			continue;
+		}
 		if (!line || line.startsWith("#")) continue;
 		if (inAccounts) {
 			// A header or a key assignment means the array was left open: end
@@ -129,21 +175,39 @@ export function parseStellarToml(text: string): StellarToml {
 			if (!arr[1].replace(/#.*$/, "").includes("]")) inAccounts = true;
 			continue;
 		}
-		const m = line.match(ASSIGN);
-		if (!m) continue;
-		const key = m[1];
-		const value =
-			m[2] !== undefined ? m[2].replace(/\\(["\\])/g, "$1") : (m[3] ?? "");
-		if (section === "top") topLevel[key.toUpperCase()] = value;
-		else if (section === "doc") documentation[key.toUpperCase()] = value;
-		else if (section === "currency") {
-			const k = key.toLowerCase();
-			if (k === "code") cur.code = value;
-			else if (k === "issuer") cur.issuer = value;
-			else if (k === "status") cur.status = value;
-			else if (k === "desc") cur.desc = value;
+		// A """multi-line""" or '''multi-line''' value: read when it closes on
+		// its own line, otherwise unread up to its delimiter. Checked before
+		// ASSIGN, which would read `KEY = """x` as an empty string and then
+		// parse the string's lines as keys.
+		const triple = line.match(/^([A-Za-z0-9_]+)\s*=\s*("""|''')(.*)$/);
+		if (triple) {
+			const [, key, delim, rest] = triple;
+			const end = rest.indexOf(delim);
+			if (end === -1) {
+				multiline = delim;
+				unread(key);
+			} else assign(key, rest.slice(0, end));
+			continue;
 		}
+		const m = line.match(ASSIGN);
+		if (!m) {
+			const key = line.match(/^([A-Za-z0-9_]+)\s*=/)?.[1];
+			if (key) unread(key);
+			continue;
+		}
+		assign(
+			m[1],
+			m[2] !== undefined ? m[2].replace(/\\(["\\])/g, "$1") : (m[3] ?? ""),
+		);
 	}
 	if (section === "currency") flushCurrency();
-	return { topLevel, documentation, currencyCodes, currencies, accounts };
+	return {
+		topLevel,
+		documentation,
+		currencyCodes,
+		currencies,
+		accounts,
+		unreadKeys,
+		unreadCurrencies,
+	};
 }

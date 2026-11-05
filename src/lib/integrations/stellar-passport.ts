@@ -154,6 +154,20 @@ export async function fetchBuilder(
 }
 
 /**
+ * The one rule for serving a builder profile: public only. The field allows
+ * public and private (collections/Builders.ts), so a filter that only drops
+ * some other value lists, counts and searches private profiles. A stored row
+ * with no value is not served; the sync below never writes one.
+ */
+export const PUBLIC_BUILDERS = { visibility: { equals: "public" } } as const;
+
+/** The same rule for a profile read straight from Passport, whose missing
+ * value the sync below stores as public. */
+export function isPublicBuilder(b: { visibility?: string | null }): boolean {
+	return (b.visibility || "public") === "public";
+}
+
+/**
  * Transforms Passport builder data to Payload CMS format
  */
 export function transformBuilderForPayload(builder: PassportBuilder) {

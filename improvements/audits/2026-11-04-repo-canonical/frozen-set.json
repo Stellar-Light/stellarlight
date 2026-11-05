@@ -1,0 +1,359 @@
+{
+	"fixedAt": "2026-11-04T21:55:00Z",
+	"issue": "Stellar-Light/stellarlight#1901",
+	"base": "origin/main f3b19008 (API 1.9.116, the version production serves)",
+	"rule": "Written and committed before any code change on lane/r1104-repo-canonical and before any replay. Queries are product names and phrasings a builder types; each expected repo comes from the issue's evidence and the repo's own GitHub page (github.com/theahaco/scaffold-stellar answers HTTP 301 to github.com/stellar-scaffold/cli and the GitHub API names it stellar-scaffold/cli, read 2026-11-04), never from replay output. The 2026-10-23 sets (../2026-10-23-repos-ranking: dev set, battery, exact names, project names, keyword) are replayed beside these, unchanged.",
+	"replay": "One corpus capture from the public /api/repos read; base and branch searchRepos replayed over it with ../2026-10-23-repos-ranking/replay.mts. Fidelity first: the base replay's first page must match live on at least 90% of captured queries, or the harness is fixed before any result is read.",
+	"bars": {
+		"acceptance": "every acceptance query ranks its expected repo first on the branch",
+		"controls": "every control ranks its expected repo first on base and on the branch",
+		"unchanged": "every unchanged query serves the same first page (fullName and score, in order), matchMode and total on base and branch",
+		"naturalLanguage": "reported only, no bar: longer questions that name the same products",
+		"existingSets": "every rank move in the 2026-10-23 sets is listed; an expected repo that moves down needs a stated reason, or the change fails",
+		"generalRule": "a general authority rule (first-party ownership or repoScore above the keyword score) is measured as a variant on the same sets; it joins the branch only if it ranks first an acceptance query the curated entries leave unranked and moves no expected repo down in any set",
+		"exactName": "every exactName query ranks first the repo whose name (the part after the owner) is the query, on the branch; a canonical float never takes rank 1 from an exact name",
+		"canonicalOverName": "every canonicalOverName query ranks its canonical repo first on the branch (a bare name that fires a canonical entry defers to it)",
+		"fullPath": "every fullPath query ranks the repo it names first, on base and on the branch",
+		"explain": "decision rule fixed before measuring: explain routes a developer product named inside a question only if that routes at least two of exp-01, exp-02, exp-03, exp-04 and exp-06 to their product, does not route exp-05 to stellar/laboratory, and changes the route of no other frozen question (dev, battery, naturalLanguage, keyword, acceptance) except to a product that question names; otherwise the spec says explain routes products only on a bare name"
+	},
+	"amended": [
+		{
+			"at": "2026-11-04T23:00:00Z",
+			"why": "An independent review of the first three commits found inputs the set did not hold: a longer phrase that contains a product name fired the float, an underscore spelling did not, and an exact repo name lost rank 1 to the float. Added before any code change for those findings; no entry above was edited.",
+			"added": ["acc-15", "acc-16", "exn-01", "exn-02", "unc-14", "unc-15"]
+		},
+		{
+			"at": "2026-11-05T13:18:00Z",
+			"why": "The coordinator's decision after an independent re-check of the branch: a query that names a full owner/name path ranks that repo first; a bare name that also fires a canonical entry defers to the canonical repo; a bare name that fires none keeps its exact-name match first. exn-01 and exn-02 expected the exact name over the float and are superseded by can-04 and can-05: their bar is retired and they are still reported. Also added: product names followed by a surface word (repo, github, source code), one more longer-phrase control, and questions for the explain routing decision. Added before any code change for those items; no entry above was edited.",
+			"added": [
+				"can-01",
+				"can-02",
+				"can-03",
+				"can-04",
+				"can-05",
+				"fp-01",
+				"acc-17",
+				"acc-18",
+				"acc-19",
+				"acc-20",
+				"unc-16",
+				"exp-01",
+				"exp-02",
+				"exp-03",
+				"exp-04",
+				"exp-05",
+				"exp-06"
+			],
+			"superseded": ["exn-01", "exn-02"]
+		}
+	],
+	"acceptance": [
+		{
+			"id": "acc-01",
+			"q": "scaffold stellar",
+			"expect": "stellar-scaffold/cli",
+			"basis": "issue #1901: rank 16 of 25 live 2026-11-02"
+		},
+		{
+			"id": "acc-02",
+			"q": "stellar lab",
+			"expect": "stellar/laboratory",
+			"basis": "issue #1901: not in the top 5; homepage lab.stellar.org"
+		},
+		{
+			"id": "acc-03",
+			"q": "smart contract examples",
+			"expect": "stellar/soroban-examples",
+			"basis": "issue #1901: fifth; description 'Example Soroban Contracts'"
+		},
+		{
+			"id": "acc-04",
+			"q": "Scaffold Stellar",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the product name as written"
+		},
+		{
+			"id": "acc-05",
+			"q": "stellar scaffold",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the org name; the CLI plugin runs as `stellar scaffold`"
+		},
+		{
+			"id": "acc-06",
+			"q": "scaffold-stellar",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the old repo name"
+		},
+		{
+			"id": "acc-07",
+			"q": "theahaco/scaffold-stellar",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the old owner/name, which GitHub redirects and the Stellar docs still link"
+		},
+		{
+			"id": "acc-08",
+			"q": "stellar scaffold cli",
+			"expect": "stellar-scaffold/cli",
+			"basis": "issue #1901: ranks first live; must stay first"
+		},
+		{
+			"id": "acc-09",
+			"q": "Stellar Laboratory",
+			"expect": "stellar/laboratory",
+			"basis": "the product's long name"
+		},
+		{
+			"id": "acc-10",
+			"q": "lab.stellar.org",
+			"expect": "stellar/laboratory",
+			"basis": "the product's address"
+		},
+		{
+			"id": "acc-11",
+			"q": "soroban examples",
+			"expect": "stellar/soroban-examples",
+			"basis": "the repo name spoken with a space"
+		},
+		{
+			"id": "acc-12",
+			"q": "soroban smart contract examples",
+			"expect": "stellar/soroban-examples",
+			"basis": "the concept with the platform named"
+		},
+		{
+			"id": "acc-13",
+			"q": "example soroban contracts",
+			"expect": "stellar/soroban-examples",
+			"basis": "the repo description's own words"
+		},
+		{
+			"id": "acc-14",
+			"q": "contract examples",
+			"expect": "stellar/soroban-examples",
+			"basis": "the concept, shortest form"
+		},
+		{
+			"id": "acc-15",
+			"q": "scaffold_stellar",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the product name with an underscore; no indexed repo has this exact name"
+		},
+		{
+			"id": "acc-16",
+			"q": "soroban_examples",
+			"expect": "stellar/soroban-examples",
+			"basis": "the repo name with an underscore"
+		},
+		{
+			"id": "acc-17",
+			"q": "scaffold stellar repo",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the product name and a surface word that search drops"
+		},
+		{
+			"id": "acc-18",
+			"q": "scaffold stellar github",
+			"expect": "stellar-scaffold/cli",
+			"basis": "the product name and a surface word that search drops"
+		},
+		{
+			"id": "acc-19",
+			"q": "stellar lab repo",
+			"expect": "stellar/laboratory",
+			"basis": "the product name and a surface word that search drops"
+		},
+		{
+			"id": "acc-20",
+			"q": "stellar lab source code",
+			"expect": "stellar/laboratory",
+			"basis": "the product name and two surface words"
+		}
+	],
+	"canonicalOverName": [
+		{
+			"id": "can-01",
+			"q": "soroban-rpc",
+			"expect": "stellar/stellar-rpc",
+			"basis": "a bare name that fires the rpc entry; a copy in the index is named soroban-rpc"
+		},
+		{
+			"id": "can-02",
+			"q": "sep-10",
+			"expect": "stellar/stellar-protocol",
+			"basis": "a bare name that fires the SEP entry; a repo in the index is named sep10"
+		},
+		{
+			"id": "can-03",
+			"q": "sep10",
+			"expect": "stellar/stellar-protocol",
+			"basis": "the same name without the hyphen"
+		},
+		{
+			"id": "can-04",
+			"q": "stellar-lab",
+			"expect": "stellar/laboratory",
+			"basis": "folds to the product name stellar lab; supersedes exn-01"
+		},
+		{
+			"id": "can-05",
+			"q": "stellar_lab",
+			"expect": "stellar/laboratory",
+			"basis": "the same with an underscore; supersedes exn-02"
+		}
+	],
+	"fullPath": [
+		{
+			"id": "fp-01",
+			"q": "apay-io/sep10",
+			"expect": "apay-io/sep10",
+			"basis": "the caller named the full owner/name path"
+		}
+	],
+	"explain": [
+		{
+			"id": "exp-01",
+			"q": "How do I start a new dapp with Scaffold Stellar?",
+			"expect": "stellar-scaffold/cli"
+		},
+		{
+			"id": "exp-02",
+			"q": "Which repo is the source of Stellar Lab, the browser tool for building transactions?",
+			"expect": "stellar/laboratory"
+		},
+		{
+			"id": "exp-03",
+			"q": "What is Stellar Lab?",
+			"expect": "stellar/laboratory"
+		},
+		{
+			"id": "exp-04",
+			"q": "Where are the Soroban examples?",
+			"expect": "stellar/soroban-examples"
+		},
+		{
+			"id": "exp-05",
+			"q": "How do I use stellar lab notes?",
+			"notExpect": "stellar/laboratory"
+		},
+		{
+			"id": "exp-06",
+			"q": "How does Stellar Lab sign transactions?",
+			"expect": "stellar/laboratory"
+		}
+	],
+	"exactName": [
+		{
+			"id": "exn-01",
+			"q": "stellar-lab",
+			"expectName": "stellar-lab",
+			"basis": "an indexed repo is named exactly stellar-lab; it ranked first on base"
+		},
+		{
+			"id": "exn-02",
+			"q": "stellar_lab",
+			"expectName": "stellar-lab",
+			"basis": "the same name with an underscore"
+		}
+	],
+	"controls": [
+		{
+			"id": "ctl-01",
+			"q": "soroban-sdk",
+			"expect": "stellar/rs-soroban-sdk"
+		},
+		{ "id": "ctl-02", "q": "stellar-cli", "expect": "stellar/stellar-cli" },
+		{ "id": "ctl-03", "q": "stellar-core", "expect": "stellar/stellar-core" },
+		{
+			"id": "ctl-04",
+			"q": "js-stellar-sdk",
+			"expect": "stellar/js-stellar-sdk"
+		},
+		{ "id": "ctl-05", "q": "freighter", "expect": "stellar/freighter" },
+		{
+			"id": "ctl-06",
+			"q": "anchor platform",
+			"expect": "stellar/anchor-platform"
+		},
+		{ "id": "ctl-07", "q": "stellar rpc", "expect": "stellar/stellar-rpc" },
+		{ "id": "ctl-08", "q": "horizon", "expect": "stellar/stellar-horizon" }
+	],
+	"unchanged": [
+		{ "id": "unc-01", "q": "scaffold", "why": "the bare template word" },
+		{ "id": "unc-02", "q": "scaffold template", "why": "asks for templates" },
+		{ "id": "unc-03", "q": "lab", "why": "the bare word" },
+		{
+			"id": "unc-04",
+			"q": "laboratory",
+			"why": "ranks stellar/laboratory first today by name"
+		},
+		{ "id": "unc-05", "q": "stellar labs", "why": "a different name (plural)" },
+		{ "id": "unc-06", "q": "examples", "why": "the bare word" },
+		{
+			"id": "unc-07",
+			"q": "escrow contract examples",
+			"why": "a topic before 'contract examples' names a more specific answer"
+		},
+		{
+			"id": "unc-08",
+			"q": "token contract example",
+			"why": "a topic plus the singular"
+		},
+		{
+			"id": "unc-09",
+			"q": "hackthon-scaffold-stellar",
+			"why": "exact repo name of a hackathon copy that leads q=scaffold stellar live"
+		},
+		{
+			"id": "unc-10",
+			"q": "stellar-scaffold-front-hackaton",
+			"why": "exact repo name of a hackathon copy that leads q=scaffold stellar live"
+		},
+		{
+			"id": "unc-11",
+			"q": "stellar-agent-merchant-lab",
+			"why": "exact repo name of a repo that leads q=stellar lab live"
+		},
+		{
+			"id": "unc-12",
+			"q": "stellar-scaffold/ui",
+			"why": "exact owner/name of a sibling repo in the same org"
+		},
+		{
+			"id": "unc-13",
+			"q": "soroban crash lab",
+			"why": "a product named with the word lab"
+		},
+		{
+			"id": "unc-14",
+			"q": "stellar lab notes",
+			"why": "a longer phrase that contains the product name names something else"
+		},
+		{
+			"id": "unc-15",
+			"q": "stellar-lab-notes",
+			"why": "the same longer phrase as one hyphenated name"
+		},
+		{
+			"id": "unc-16",
+			"q": "stellar lab notes repo",
+			"why": "the longer phrase and a surface word: removing the surface word must not make it fire"
+		}
+	],
+	"naturalLanguage": [
+		{
+			"id": "nl-01",
+			"q": "Where can I find official Soroban smart contract examples?",
+			"expect": "stellar/soroban-examples"
+		},
+		{
+			"id": "nl-02",
+			"q": "How do I start a new dapp with Scaffold Stellar?",
+			"expect": "stellar-scaffold/cli"
+		},
+		{
+			"id": "nl-03",
+			"q": "Which repo is the source of Stellar Lab, the browser tool for building transactions?",
+			"expect": "stellar/laboratory"
+		}
+	]
+}
