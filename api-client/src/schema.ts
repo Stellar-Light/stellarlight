@@ -1103,7 +1103,9 @@ export interface components {
             };
             /** @description System-computed composite trust (0-1 score + label), decomposed into freshness and verification sub-signals. */
             trust?: {
+                /** @description Computed when the row is served from its freshness and verification signals, so not dated itself: the ages of its inputs are freshness.lastPartnerUpdateAt and verified.lastAutoVerifyAt. */
                 score?: number;
+                /** @description The score's band, computed with it, so not dated either: see score. */
                 label?: string;
                 freshness?: number;
                 verification?: number;
@@ -5075,8 +5077,22 @@ export interface operations {
         requestBody: {
             content: {
                 "application/json": {
-                    /** @description The builder's need, in plain language */
+                    /** @description The builder's need, in plain language, up to 2,000 characters. */
                     need: string;
+                    /**
+                     * @description Rank only partners of this type; any other value answers 400 with validTypes.
+                     * @enum {string}
+                     */
+                    type?: "anchor" | "on-off-ramp" | "infrastructure" | "tooling" | "protocol" | "wallet" | "audit-firm" | "legal" | "agency" | "asset-issuer" | "other";
+                    /** @description Rank only partners whose recorded sectors contain this text. */
+                    sector?: string;
+                    /** @description Rank only partners whose recorded regions contain this text. */
+                    region?: string;
+                    /**
+                     * @description Most matches to return, 1 to 10 (default 5); out-of-range values are clamped.
+                     * @default 5
+                     */
+                    limit?: number;
                 };
             };
         };
@@ -5522,6 +5538,17 @@ export interface operations {
                     "X-RateLimit-Scope"?: "instance";
                     /** @description Our own wall time, as on a 200. */
                     "Server-Timing"?: string;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
+            /** @description The partner store could not be opened: an outage, NOT a judgment of the listing, and nothing was saved. Resend after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
                     [name: string]: unknown;
                 };
                 content: {

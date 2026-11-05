@@ -5399,7 +5399,33 @@ export const spec: OpenAPISpec = {
 								properties: {
 									need: {
 										type: "string",
-										description: "The builder's need, in plain language",
+										maxLength: 2000,
+										description:
+											"The builder's need, in plain language, up to 2,000 characters.",
+									},
+									type: {
+										type: "string",
+										enum: [...PARTNER_TYPES],
+										description:
+											"Rank only partners of this type; any other value answers 400 with validTypes.",
+									},
+									sector: {
+										type: "string",
+										description:
+											"Rank only partners whose recorded sectors contain this text.",
+									},
+									region: {
+										type: "string",
+										description:
+											"Rank only partners whose recorded regions contain this text.",
+									},
+									limit: {
+										type: "integer",
+										minimum: 1,
+										maximum: 10,
+										default: 5,
+										description:
+											"Most matches to return, 1 to 10 (default 5); out-of-range values are clamped.",
 									},
 								},
 							},
@@ -5971,6 +5997,21 @@ export const spec: OpenAPISpec = {
 						},
 					},
 					"429": rateLimited429(),
+					"503": {
+						description:
+							"The partner store could not be opened: an outage, NOT a judgment of the listing, and nothing was saved. Resend after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 				},
 			},
 		},
@@ -10512,8 +10553,16 @@ export const spec: OpenAPISpec = {
 						description:
 							"System-computed composite trust (0-1 score + label), decomposed into freshness and verification sub-signals.",
 						properties: {
-							score: { type: "number" },
-							label: { type: "string" },
+							score: {
+								type: "number",
+								description:
+									"Computed when the row is served from its freshness and verification signals, so not dated itself: the ages of its inputs are freshness.lastPartnerUpdateAt and verified.lastAutoVerifyAt.",
+							},
+							label: {
+								type: "string",
+								description:
+									"The score's band, computed with it, so not dated either: see score.",
+							},
 							freshness: { type: "number" },
 							verification: { type: "number" },
 						},

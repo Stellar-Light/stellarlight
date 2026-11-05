@@ -28,7 +28,7 @@ import { apiError, modelRateLimited, rateLimited } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { classifyModelError } from "@/lib/model-failure";
-import { scorePartners } from "@/lib/partner-match";
+import { PARTNER_TYPES, scorePartners } from "@/lib/partner-match";
 import { recordedOrNull } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
 import {
@@ -53,20 +53,6 @@ const MAX_CANDIDATES = 40;
 // as too long, which reads as "the AI path is off" (503) for what is the
 // caller's oversized input: answer that as the caller's 400 instead.
 const MAX_NEED_CHARS = 2000;
-
-const PARTNER_TYPES = [
-	"anchor",
-	"on-off-ramp",
-	"infrastructure",
-	"tooling",
-	"protocol",
-	"wallet",
-	"audit-firm",
-	"legal",
-	"agency",
-	"asset-issuer",
-	"other",
-];
 
 const MATCH_SCHEMA = {
 	type: "object",
@@ -242,7 +228,11 @@ export async function POST(req: NextRequest) {
 		10,
 	);
 
-	if (type && (typeof type !== "string" || !PARTNER_TYPES.includes(type))) {
+	if (
+		type &&
+		(typeof type !== "string" ||
+			!(PARTNER_TYPES as readonly string[]).includes(type))
+	) {
 		return NextResponse.json(
 			{ error: `Unknown type '${String(type)}'`, validTypes: PARTNER_TYPES },
 			{ status: 400, headers: rateLimitHeaders(limit) },
