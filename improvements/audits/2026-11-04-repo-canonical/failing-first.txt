@@ -104,3 +104,12 @@ Review finding 4 (meta.canonical for the query, not the page): the new tests aga
  Test Files  2 failed (2)
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 Pass after, with the fix: Test Files 3 passed (3); Tests 115 passed (115)
+
+Re-check item 1 (a bare name that fires a canonical entry defers to the canonical repo): the new tests against e209caf2, before the fix
+      Tests  2 failed | 113 passed (115)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > a bare name that fires a canonical entry ranks the canonical repo first (q=stellar-lab, q=stellar_lab)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > a copy named for a canonical concept does not outrank the canonical repo (soroban-rpc, sep-10, sep10)
+ Test Files  1 failed (1)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: src/lib/__tests__/repo-search-rank.test.ts Tests 115 passed (115)
+Replay over 206 frozen queries, base against branch: canonicalOverName 5/5, fullPath 1/1, controls 8/8, unchanged 16/16; against b3117b2d, 8 queries change: can-01 to can-05 2->1, sep-10 back to the canonical repo, exn-01 and exn-02 (superseded) 1->2.

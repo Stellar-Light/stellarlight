@@ -1716,9 +1716,8 @@ export async function searchRepos(
 					? 1
 					: 0;
 			// The query IS this repo's full path or its name (not its owner):
-			// that identity keeps rank 1 even over a canonical float, so a repo
-			// named stellar-lab leads q=stellar-lab ahead of stellar/laboratory
-			// (review of issue #1901). The rename stand-in counts as its name.
+			// that identity ranks right after a canonical float and above an
+			// owner-only match. The rename stand-in counts as its name.
 			const nameAlias =
 				(qNorm.length >= 3 &&
 					(qIsIdentifier || qIsSpacedName) &&
@@ -1843,12 +1842,13 @@ export async function searchRepos(
 		// Stellar match at the same relevance.
 		filtered.sort(
 			(a, b) =>
-				// An exact name or full path outranks even a canonical float: the
-				// float answers a concept, and a repo named by the query is the
-				// answer to that query. Owner-only identity stays below the float,
-				// so q=horizon still leads with the curated Horizon repo.
-				b.nameAlias - a.nameAlias ||
+				// The canonical float first: a bare name that fires a canonical
+				// entry (soroban-rpc, sep-10, stellar-lab) answers the concept, so
+				// a copy named after it ranks next, not first. A full owner/name
+				// path never fires one, so the repo it names leads; a bare name
+				// that fires none keeps its exact name first (nameAlias).
 				a.crank - b.crank ||
+				b.nameAlias - a.nameAlias ||
 				// Exact alias identity (sls-025) ABOVE the flagship family float:
 				// when the query IS a repo's owner/name/path, that repo must outrank
 				// even curated family flagships (q="stellar-wallets-kit" was losing

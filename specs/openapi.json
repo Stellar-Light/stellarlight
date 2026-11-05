@@ -18004,7 +18004,7 @@
 					},
 					"canonical": {
 						"type": "boolean",
-						"description": "True when surfaced as a curated canonical answer for an infra, protocol or developer-product query (e.g. error codes → stellar-core and the SDKs; Horizon → stellar/stellar-horizon; Scaffold Stellar → stellar-scaffold/cli; Stellar Lab → stellar/laboratory; smart contract examples → stellar/soroban-examples). Floated to the top; meta.canonical lists them."
+						"description": "True when surfaced as a curated canonical answer for an infra, protocol or developer-product query (e.g. error codes → stellar-core and the SDKs; Horizon → stellar/stellar-horizon; Scaffold Stellar → stellar-scaffold/cli; Stellar Lab → stellar/laboratory; smart contract examples → stellar/soroban-examples). Floated to the top; meta.canonical lists them. A query that is a full owner/name path fires no canonical entry and ranks the repo it names first; a bare name that fires one ranks the canonical repo first and repos with that exact name next (q=sep-10: stellar/stellar-protocol, then a repo named sep10); a bare name that fires none ranks the repo with that exact name first."
 					},
 					"stellarEvidence": {
 						"type": "string",

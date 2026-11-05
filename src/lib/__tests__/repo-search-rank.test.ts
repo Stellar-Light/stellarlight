@@ -1375,7 +1375,9 @@ describe("developer products are canonical answers (issue #1901)", () => {
 		expect(canonical).toEqual(["stellar-scaffold/cli"]);
 	});
 
-	it("an exact repo name keeps rank 1 over the product float (q=stellar-lab, q=stellar_lab)", async () => {
+	// The coordinator's rule after the re-check: a bare name that fires a
+	// canonical entry defers to the canonical repo, then the exact name.
+	it("a bare name that fires a canonical entry ranks the canonical repo first (q=stellar-lab, q=stellar_lab)", async () => {
 		const named = doc({
 			fullName: "someone/stellar-lab",
 			description: "notes from a workshop",
@@ -1397,10 +1399,54 @@ describe("developer products are canonical answers (issue #1901)", () => {
 				limit: 5,
 			});
 			expect(repos.map((r) => r.fullName).slice(0, 2), q).toEqual([
-				"someone/stellar-lab",
 				"stellar/laboratory",
+				"someone/stellar-lab",
 			]);
 		}
+	});
+
+	it("a copy named for a canonical concept does not outrank the canonical repo (soroban-rpc, sep-10, sep10)", async () => {
+		const rpc = doc({
+			fullName: "stellar/stellar-rpc",
+			description: "RPC server for Soroban",
+			codeScanState: "scanned",
+			stellarProof: "lang-sdk",
+			repoScore: 90,
+		});
+		const rpcCopy = doc({ fullName: "someone/soroban-rpc", repoScore: 20 });
+		const spec = doc({
+			fullName: "stellar/stellar-protocol",
+			description: "Stellar protocol and SEP documents",
+			repoScore: 80,
+		});
+		const sepRepo = doc({ fullName: "someone/sep10", repoScore: 30 });
+		for (const [q, want] of [
+			["soroban-rpc", "stellar/stellar-rpc"],
+			["sep-10", "stellar/stellar-protocol"],
+			["sep10", "stellar/stellar-protocol"],
+		]) {
+			const { repos } = await searchRepos(
+				mockPayload([rpcCopy, sepRepo, rpc, spec]),
+				q,
+				{ limit: 5 },
+			);
+			expect(repos[0].fullName, q).toBe(want);
+		}
+	});
+
+	it("a full owner/name path ranks the repo it names first", async () => {
+		const spec = doc({
+			fullName: "stellar/stellar-protocol",
+			description: "Stellar protocol and SEP documents",
+			repoScore: 80,
+		});
+		const sepRepo = doc({ fullName: "someone/sep10", repoScore: 30 });
+		const { repos } = await searchRepos(
+			mockPayload([spec, sepRepo]),
+			"someone/sep10",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("someone/sep10");
 	});
 
 	it("an underscore spelling reaches the repo with that exact name, past a flooded window", async () => {
@@ -1430,7 +1476,8 @@ describe("developer products are canonical answers (issue #1901)", () => {
 			},
 		};
 		const { repos } = await searchRepos(payload, "stellar_lab", { limit: 5 });
-		expect(repos[0].fullName).toBe("someone/stellar-lab");
+		// reached: in the ranking (the canonical repo, absent here, would lead)
+		expect(repos.map((r) => r.fullName)).toContain("someone/stellar-lab");
 	});
 
 	it("a hackathon copy named for the template stays below the product for scaffold_stellar", async () => {
