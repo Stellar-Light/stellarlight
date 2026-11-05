@@ -590,7 +590,7 @@
       "scoreOk": null,
       "top1Ok": null,
       "uniqueOk": null,
-      "thin": false,
+      "thin": true,
       "junk": 0,
       "badTitle": 0,
       "sample": "Cross-Chain USDC Transfers with CCTP"
@@ -677,7 +677,7 @@
         "protocol\\s*2[6-9]|zipper"
       ],
       "forbiddenHits": [],
-      "topScore": 0.7115404009819031,
+      "topScore": 0.7108401656150818,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -685,7 +685,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Introducing Bell, Protocol 30 on Stellar"
+      "sample": "Bell, Protocol 30 Upgrade Guide"
     },
     {
       "id": "blend-incident-facts",
@@ -958,5 +958,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-03T13:03:31Z"
+  "generatedAt": "2026-11-05T13:31:52Z"
 }

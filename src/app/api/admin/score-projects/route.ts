@@ -50,18 +50,14 @@ function scoreProject(
 	// --- DeFi Llama TVL (0-35) — most important signal ---
 	const projectNameLower = (project.name || "").toLowerCase();
 
-	// Manual TVL overrides for projects not tracked by DeFi Llama
-	const MANUAL_TVL: Record<string, number> = {
-		benji: 625_861_896, // Franklin Templeton FOBXX on Stellar (rwa.xyz)
-		wisdomtree: 20_000_000, // WisdomTree tokenized funds
-	};
-
-	let tvlMatch = MANUAL_TVL[projectNameLower]
-		? { tvl: MANUAL_TVL[projectNameLower], slug: projectNameLower }
-		: ctx.stellarProtocols.get(projectNameLower) ||
-			ctx.stellarProtocols.get(
-				projectNameLower.replace(/\s+/g, "-").toLowerCase(),
-			);
+	// Re-check 2026-11-05: a MANUAL_TVL map gave benji (625,861,896) and
+	// wisdomtree (20,000,000) TVL points from figures hard-coded in March
+	// 2026. TVL points come only from a DefiLlama reading.
+	let tvlMatch =
+		ctx.stellarProtocols.get(projectNameLower) ||
+		ctx.stellarProtocols.get(
+			projectNameLower.replace(/\s+/g, "-").toLowerCase(),
+		);
 
 	if (!tvlMatch) {
 		let bestTvl = 0;
