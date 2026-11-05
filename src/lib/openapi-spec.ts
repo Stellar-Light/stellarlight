@@ -66,7 +66,12 @@ import {
 	LOCATOR_KINDS,
 	SOURCE_REPO_NAMES,
 } from "./source-locator";
-import { PRICE_BASES } from "./stablecoins";
+import {
+	ISSUER_OF_RECORD_CHECKS,
+	PRICE_BASES,
+	STABLECOIN_ASSET_TYPE_FILTERS,
+	STABLECOIN_ASSET_TYPES,
+} from "./stablecoins";
 import { CHECK_RESULTS, STATUS_CHECKS } from "./status-checks";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
@@ -9775,7 +9780,12 @@ export const spec: OpenAPISpec = {
 													},
 													name: { type: "string" },
 													symbol: { type: "string" },
-													issuerEntity: { type: "string", nullable: true },
+													issuerEntity: {
+														type: "string",
+														nullable: true,
+														description:
+															"The issuer label rwa.xyz gives the row: a brand, product line or fund as often as a legal entity ('Ondo USDY', 'Circle International'), not read from the issuer's stellar.toml. A row rwa.xyz does not list (rwaxyzListed false) carries the label of that issuer's listed rows (FOCGX carries BENJI's 'Franklin Templeton Trust'), or null when it has none. For the issuer's own statement, read the toml at evidenceUrl where the row cites one.",
+													},
 													projectSlug: {
 														type: "string",
 														nullable: true,
@@ -9976,6 +9986,16 @@ export const spec: OpenAPISpec = {
 						description:
 							"Filter to one fiat peg (e.g. USD, EUR, JPY, ARS). Case-insensitive. Omit for all pegs.",
 						schema: { type: "string" },
+					},
+					{
+						name: "assetType",
+						in: "query",
+						description:
+							"Filter on the row's assetType, case-insensitive: Yield Stablecoin (e.g. USDY), Treasury-Backed (e.g. USDM1), or none for the rows with no assetType recorded. A qualifier is recorded only where the unit is not 1:1 with its peg and a row without one was not classified, so assetType=none leaves out the known yield and Treasury products but does not certify every row left as par. Unrecognized values return 400 with the valid set.",
+						schema: {
+							type: "string",
+							enum: [...STABLECOIN_ASSET_TYPE_FILTERS],
+						},
 					},
 					{
 						name: "limit",
@@ -11093,7 +11113,7 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									nullable: true,
 									description:
-										"Issuing entity as the RWA registry attributes it; null on hand-curated rows.",
+										"The issuer label the RWA registry carries for the product (getRwaAssets issuerEntity: the rwa.xyz listing's name, a brand, product line or fund as often as a legal entity), not read from the issuer's stellar.toml. Null on hand-curated rows.",
 								},
 								assetId: {
 									type: "string",
@@ -12995,8 +13015,50 @@ export const spec: OpenAPISpec = {
 						description:
 							"Full mainnet issuer account (G…): the universal join key. With `ticker` this IS the asset's identity.",
 					},
-					issuerDomain: { type: "string", nullable: true },
-					company: { type: "string", nullable: true },
+					issuerDomain: {
+						type: "string",
+						nullable: true,
+						description:
+							"The asset's web domain as this registry curates it (the logo is read from its stellar.toml). Not always the issuer account's on-chain home_domain; the issuer's own toml, the source of issuerOfRecord, is at issuerOfRecordSourceUrl.",
+					},
+					company: {
+						type: "string",
+						nullable: true,
+						description:
+							"The brand the asset is marketed under, as this registry curates it (Novatti Group for AUDD, Currency One for C1USD). A display name, NOT the legal issuer: for who issues the asset, read issuerOfRecord.",
+					},
+					issuerOfRecord: {
+						type: "string",
+						nullable: true,
+						description:
+							"The legal issuer as the issuer publishes it: ORG_NAME in the stellar.toml at the issuer account's home_domain (from Horizon), counted only when that toml lists the account in ACCOUNTS or as a currency issuer, so both sides of the link agree (SEP-1). AUDD: AUDC PTY LTD. Set only when issuerOfRecordCheck is named; read by the 6-hourly writer, never at request time, and never derived from company. Cite it with issuerOfRecordAsOf.",
+					},
+					issuerOfRecordCheck: {
+						type: "string",
+						nullable: true,
+						enum: [...ISSUER_OF_RECORD_CHECKS],
+						description:
+							"What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account sets no home_domain, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read).",
+					},
+					issuerOfRecordSourceUrl: {
+						type: "string",
+						nullable: true,
+						description:
+							"The stellar.toml URL the stored check read, after same-host https redirects (https://<home_domain>/.well-known/stellar.toml unless the host moved it); re-verify there. Null when the account sets no home_domain or nothing was read yet.",
+					},
+					issuerOfRecordAsOf: {
+						type: "string",
+						format: "date-time",
+						nullable: true,
+						description:
+							"When the stored check was made. A failed read does not move it, so a date well before updatedAt means the latest runs could not reach the toml. Date issuerOfRecord by this, not by updatedAt. Null = never read.",
+					},
+					issuerOfRecordNote: {
+						type: "string",
+						nullable: true,
+						description:
+							"On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named.",
+					},
 					website: { type: "string", nullable: true },
 					peg: {
 						type: "string",
@@ -13004,12 +13066,18 @@ export const spec: OpenAPISpec = {
 						description:
 							"Fiat the asset tracks (USD, JPY, ARS, …). `supply` is in THIS unit, so raw supply is NOT comparable across rows with different pegs; use marketCapUSD.",
 					},
-					country: { type: "string", nullable: true },
-					assetType: {
+					country: {
 						type: "string",
 						nullable: true,
 						description:
-							"Qualifier where the asset is not a pure peg, e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg.",
+							"Home country code of the PEG currency (US for USD, EU for EUR), or Global, for flag display. It describes the peg, NOT the issuer's jurisdiction or place of incorporation.",
+					},
+					assetType: {
+						type: "string",
+						nullable: true,
+						enum: [...STABLECOIN_ASSET_TYPES],
+						description:
+							"Recorded only where the registry found the unit is not 1:1 with its peg; such rows are priced from their own market where it can be read (priceBasis). Yield Stablecoin = yield accrues to or is paid on the unit (Ondo's USDY); Treasury-Backed = a Treasury-backed bond (USDM1). Null = no qualifier recorded: the row was not classified, so null is unknown, NOT a verified plain peg and NOT 'not yield-bearing'. Filter with ?assetType=.",
 					},
 					supply: {
 						type: "number",
@@ -13046,11 +13114,17 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						description: "24h transfer volume in USD.",
 					},
+					paymentsCount24h: {
+						type: "number",
+						nullable: true,
+						description:
+							"Count, not a dollar amount, of payment operations over the last 24 hours: Stellar Expert's lifetime payments counter diffed against our own reading of it from 20 to 28 hours earlier, the one nearest 24 hours (each row keeps two days of its six-hourly readings). Mint, redemption and peer-to-peer payments undifferentiated, not adjusted for exchange, DeFi or infrastructure activity. Null when no reading falls in that window, so also for about a day after the readings start; never a longer or shorter span, never 0 for no data.",
+					},
 					supplyChange7d: {
 						type: "number",
 						nullable: true,
 						description:
-							"Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist; never 0 for 'no data'.",
+							"Percent change in supply vs our snapshot measured 6 to 8 days back, the one nearest 7 days (e.g. -5.8 means down 5.8%). Null when no snapshot falls in that window, never a longer span; never 0 for 'no data'.",
 					},
 					basis: {
 						type: "string",

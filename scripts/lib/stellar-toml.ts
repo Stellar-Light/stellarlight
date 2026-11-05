@@ -10,141 +10,18 @@
 
 const FETCH_TIMEOUT_MS = 10_000;
 
-/* ── minimal stellar.toml parsing (no TOML dep) ─────────────────────────── */
+/* ── stellar.toml parsing lives in src/lib/stellar-toml.ts (shared with the
+ * stablecoin pipeline); re-exported so the scripts' imports stay as they are. */
+import {
+	looksLikeStellarToml,
+	type StellarToml,
+} from "../../src/lib/stellar-toml";
 
-export interface StellarToml {
-	topLevel: Record<string, string>;
-	documentation: Record<string, string>;
-	currencyCodes: string[];
-	/** (code, issuer) pairs from [[CURRENCIES]] blocks — the issuer is the
-	 *  on-chain evidence key the project-side enrichment joins on. Only pairs
-	 *  whose issuer is a well-formed Stellar account (G + 55 base32 chars)
-	 *  are collected; a currency block without an issuer contributes to
-	 *  currencyCodes but never here. */
-	currencies: Array<{ code: string; issuer: string; status?: string }>;
-	/** Top-level keys the file sets in a form this parser does not read (a
-	 *  multi-line string, an array, a table): could-not-check, never "not
-	 *  declared" (#1909). */
-	unreadKeys: string[];
-	/** [[CURRENCIES]] blocks with no code this parser could read (a linked
-	 *  currency `toml`, a `code_template`, an unreadable code): their codes
-	 *  are UNKNOWN, so the file's asset list is could-not-check. */
-	unreadCurrencies: string[];
-}
-
-/** Parse just the shapes we need: top-level `KEY = "v"` or `KEY = 'v'`, the
- *  [DOCUMENTATION] table, and `code`/`issuer` inside [[CURRENCIES]] blocks.
- *  What it cannot read it records as unread, never as absent. */
-export function parseStellarToml(text: string): StellarToml {
-	const topLevel: Record<string, string> = {};
-	const documentation: Record<string, string> = {};
-	const currencyCodes: string[] = [];
-	const currencies: Array<{ code: string; issuer: string; status?: string }> =
-		[];
-	const unreadKeys: string[] = [];
-	const unreadCurrencies: string[] = [];
-	let section: "top" | "doc" | "currency" | "other" = "top";
-	// The current [[CURRENCIES]] block accumulates until its next block starts
-	// — key order inside a block is not guaranteed by SEP-1.
-	let cur: {
-		code?: string;
-		issuer?: string;
-		status?: string;
-		unread?: string;
-	} = {};
-	const flushCurrency = () => {
-		// Asset codes are case-sensitive on Stellar (nBTC and NBTC are two
-		// assets), so the code keeps the case the operator wrote; only the
-		// issuer is a StrKey, which is uppercase by definition. Uppercasing the
-		// code sent the on-chain join to a 404 for normalfinance.io's nBTC
-		// (2026-09-28) while the real asset had 65 trustlines.
-		const code = cur.code?.trim();
-		const issuer = cur.issuer?.trim().toUpperCase();
-		// SEP-1 `status`: live | dead | test | private. Kept so a join can
-		// decline an asset the operator itself has retired.
-		const status = cur.status?.trim().toLowerCase() || undefined;
-		if (code && !currencyCodes.includes(code)) currencyCodes.push(code);
-		// A declared currency whose code we could not read: unknown, so the
-		// whole asset list is could-not-check (#1909).
-		if (!code) unreadCurrencies.push(cur.unread ?? "a block with no code");
-		if (
-			code &&
-			issuer &&
-			/^G[A-Z2-7]{55}$/.test(issuer) &&
-			!currencies.some((c) => c.code === code && c.issuer === issuer)
-		)
-			currencies.push(status ? { code, issuer, status } : { code, issuer });
-		cur = {};
-	};
-
-	// Inside a multi-line string, the delimiter that closes it.
-	let multiline: string | null = null;
-	for (const raw of text.split(/\r?\n/)) {
-		const line = raw.trim();
-		if (multiline) {
-			if (line.includes(multiline)) multiline = null;
-			continue;
-		}
-		if (!line || line.startsWith("#")) continue;
-		if (line.startsWith("[")) {
-			if (section === "currency") flushCurrency();
-			if (/^\[\[\s*CURRENCIES\s*\]\]/i.test(line)) section = "currency";
-			else if (/^\[\s*DOCUMENTATION\s*\]/i.test(line)) section = "doc";
-			else section = "other";
-			continue;
-		}
-		// A """multi-line""" or '''multi-line''' value: read when it closes on
-		// its own line, otherwise unread (could-not-check) to its delimiter.
-		const triple = line.match(/^([A-Za-z0-9_]+)\s*=\s*("""|''')(.*)$/);
-		if (triple) {
-			const [, tKey, delim, rest] = triple;
-			const end = rest.indexOf(delim);
-			if (end === -1) {
-				multiline = delim;
-				if (section === "top") unreadKeys.push(tKey.toUpperCase());
-				else if (section === "currency" && tKey.toLowerCase() === "code")
-					cur.unread ??= "an unreadable code";
-				continue;
-			}
-			const tValue = rest.slice(0, end);
-			if (section === "top") topLevel[tKey.toUpperCase()] = tValue;
-			else if (section === "doc") documentation[tKey.toUpperCase()] = tValue;
-			else if (section === "currency" && tKey.toLowerCase() === "code")
-				cur.code = tValue;
-			continue;
-		}
-		// A basic "string" or a literal 'string', the two one-line forms.
-		const m = line.match(/^([A-Za-z0-9_]+)\s*=\s*(?:"([^"]*)"|'([^']*)')/);
-		if (!m) {
-			const key = line.match(/^([A-Za-z0-9_]+)\s*=/)?.[1];
-			if (key && section === "top") unreadKeys.push(key.toUpperCase());
-			else if (key && section === "currency" && key.toLowerCase() === "code")
-				cur.unread ??= "an unreadable code";
-			continue;
-		}
-		const key = m[1];
-		const value = m[2] ?? m[3] ?? "";
-		if (section === "top") topLevel[key.toUpperCase()] = value;
-		else if (section === "doc") documentation[key.toUpperCase()] = value;
-		else if (section === "currency") {
-			const k = key.toLowerCase();
-			if (k === "code") cur.code = value;
-			else if (k === "issuer") cur.issuer = value;
-			else if (k === "status") cur.status = value;
-			else if (k === "toml") cur.unread ??= `toml=${value}`;
-			else if (k === "code_template") cur.unread ??= `code_template=${value}`;
-		}
-	}
-	if (section === "currency") flushCurrency();
-	return {
-		topLevel,
-		documentation,
-		currencyCodes,
-		currencies,
-		unreadKeys,
-		unreadCurrencies,
-	};
-}
+export {
+	looksLikeStellarToml,
+	parseStellarToml,
+	type StellarToml,
+} from "../../src/lib/stellar-toml";
 
 const SEP_SERVERS: Record<string, string> = {
 	TRANSFER_SERVER: "sep-6",
@@ -254,14 +131,7 @@ export async function fetchText(url: string): Promise<string | null> {
 		// Content sniff: an HTML parking page is not a toml, and the callers'
 		// "soft-404 is a skip" claim was only true if someone checked. First
 		// meaningful line must look like a toml table or KEY assignment.
-		const first =
-			text
-				.split(/\r?\n/)
-				.find((l) => l.trim() && !l.trim().startsWith("#"))
-				?.trim() ?? "";
-		if (first.startsWith("<") || !/^(\[|[A-Za-z0-9_]+\s*=)/.test(first))
-			return null;
-		return text;
+		return looksLikeStellarToml(text) ? text : null;
 	} catch {
 		return null;
 	}

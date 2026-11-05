@@ -260,7 +260,7 @@ Full docs in \`references/api-reference.md\`. Quick lookup table:
 | \`/api/scf-pitch\` | GET | **Composite:** live round state + funded peers with award totals + vet-idea view + deterministic pitch angles (\`?q=\`). Round never asserted closed on fetch failure |
 | \`/api/hackathon-brief\` | GET | **Composite:** the Hackathon Build Brief in one call: vet + prototype prior art + starter repos with trust summaries + live contracts + funding + \`whatNotToClaim\` (\`?q=\`). Rails and RFPs not bundled |
 | \`/api/hackathons/builds\` | GET | Prior art over prototypes: every DoraHacks submission, \`?q=\` topic, \`winnersOnly=1\`, \`track=\` |
-| \`/api/stablecoins\` | GET | Tracked stablecoins ranked by USD market cap; \`?peg=\` filter. Never compare raw \`supply\` across pegs |
+| \`/api/stablecoins\` | GET | Tracked stablecoins ranked by USD market cap; \`?peg=\` and \`?assetType=\` filters. \`company\` is the brand; \`issuerOfRecord\` is the ORG_NAME in the issuer's own stellar.toml. Never compare raw \`supply\` across pegs |
 | \`/api/changes\` | GET | Reconciliation feed: rows that changed since \`?since=\` (projects/repos/partners) with \`facets\`. For refreshing remembered claims, not discovery |
 | - | - | Project rows carry \`onchain\` metrics (contract events/subinvocations + asset holders/supply, weekly deltas) for verified join keys; null = not tracked, never 'inactive' |
 | \`/api/feedback\` | POST | In-skill feedback channel (bug/missing-data/wrong-answer/suggestion) |

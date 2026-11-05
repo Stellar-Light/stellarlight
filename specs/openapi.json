@@ -2,7 +2,7 @@
 	"openapi": "3.1.0",
 	"info": {
 		"title": "Stellar Scout API",
-		"version": "1.9.120",
+		"version": "1.9.121",
 		"summary": "Agent-native data layer for the Stellar ecosystem: projects, builders, hackathons, SCF, audits, research.",
 		"description": "Read-only public API powering Stellar Scout. Aggregators, autonomous agents, and AI tools can call these endpoints directly without auth.\n\nAll endpoints are edge-cached. The same data is available via the @stellar-light/scout-mcp Model Context Protocol server (for human-driven clients) and via the @stellar-light/api-client TypeScript SDK (for autonomous aggregators).\n\nData sources merged behind these endpoints: the Stellarlight directory of curated Stellar projects + an indexed-and-scored GitHub repo index, Stellar Passport builder profiles, Electric Capital developer activity, Soroban audit corpus, SDF skills.stellar.org skill catalog, lumenloop ecosystem data, and primary research (SEPs, papers, dev docs, SCF Handbook). Live collection sizes are in GET /api/status (sources[]); counts are intentionally not hardcoded here to avoid drift.\n\n## Routing metadata (description vs x-routing)\nOperation `description` fields are deliberately terse purpose statements: the operation's distinctive job plus its single sharpest disambiguation, nothing else. The machine-routing vocabulary that previously lived in description prose (category/product enumerations, synonym chains, example question phrasings) lives in each operation's `x-routing` extension: `{purpose, keywords[], useWhen[], notFor[], exampleQuestions[]}`. Lexical and embedding routers should score `x-routing` as separately-weighted fields rather than concatenating it into the description (broad prose descriptions were lexically capturing question families other operations answer); `notFor` entries name the operation to prefer, as '<question shape> -> <operationId>'.\n\n## Versioning\nEvery response carries an `X-API-Version` header (currently `1`). The number bumps only on a breaking response-shape change; additive fields don't bump it. Pin to a version by asserting the header. Breaking changes are announced before they ship.\n\n## Rate limits\nRate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.\n\n## Pagination\nList endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`. `searchRepos` ranks a capped candidate window (the top 200 rows by repoScore for a browse with no q, the top 600 for a search): when `meta.counts.truncated` is true, `total` counts that window and paging ends there, and `meta.counts.eligible` gives the number of rows the filters admit (null where only ranking every row could count them).\n\n## Ordering & relevance\n`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all; the rows are vector-similarity guesses (`via: \"semantic\"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it; matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0-1 cosine). Use these for cross-source ranking when merging with other aggregators.",
 		"contact": {
@@ -14560,7 +14560,8 @@
 													},
 													"issuerEntity": {
 														"type": "string",
-														"nullable": true
+														"nullable": true,
+														"description": "The issuer label rwa.xyz gives the row: a brand, product line or fund as often as a legal entity ('Ondo USDY', 'Circle International'), not read from the issuer's stellar.toml. A row rwa.xyz does not list (rwaxyzListed false) carries the label of that issuer's listed rows (FOCGX carries BENJI's 'Franklin Templeton Trust'), or null when it has none. For the issuer's own statement, read the toml at evidenceUrl where the row cites one."
 													},
 													"projectSlug": {
 														"type": "string",
@@ -14812,6 +14813,19 @@
 						"description": "Filter to one fiat peg (e.g. USD, EUR, JPY, ARS). Case-insensitive. Omit for all pegs.",
 						"schema": {
 							"type": "string"
+						}
+					},
+					{
+						"name": "assetType",
+						"in": "query",
+						"description": "Filter on the row's assetType, case-insensitive: Yield Stablecoin (e.g. USDY), Treasury-Backed (e.g. USDM1), or none for the rows with no assetType recorded. A qualifier is recorded only where the unit is not 1:1 with its peg and a row without one was not classified, so assetType=none leaves out the known yield and Treasury products but does not certify every row left as par. Unrecognized values return 400 with the valid set.",
+						"schema": {
+							"type": "string",
+							"enum": [
+								"Yield Stablecoin",
+								"Treasury-Backed",
+								"none"
+							]
 						}
 					},
 					{
@@ -16323,7 +16337,7 @@
 								"issuer": {
 									"type": "string",
 									"nullable": true,
-									"description": "Issuing entity as the RWA registry attributes it; null on hand-curated rows."
+									"description": "The issuer label the RWA registry carries for the product (getRwaAssets issuerEntity: the rwa.xyz listing's name, a brand, product line or fund as often as a legal entity), not read from the issuer's stellar.toml. Null on hand-curated rows."
 								},
 								"assetId": {
 									"type": "string",
@@ -19183,11 +19197,43 @@
 					},
 					"issuerDomain": {
 						"type": "string",
-						"nullable": true
+						"nullable": true,
+						"description": "The asset's web domain as this registry curates it (the logo is read from its stellar.toml). Not always the issuer account's on-chain home_domain; the issuer's own toml, the source of issuerOfRecord, is at issuerOfRecordSourceUrl."
 					},
 					"company": {
 						"type": "string",
-						"nullable": true
+						"nullable": true,
+						"description": "The brand the asset is marketed under, as this registry curates it (Novatti Group for AUDD, Currency One for C1USD). A display name, NOT the legal issuer: for who issues the asset, read issuerOfRecord."
+					},
+					"issuerOfRecord": {
+						"type": "string",
+						"nullable": true,
+						"description": "The legal issuer as the issuer publishes it: ORG_NAME in the stellar.toml at the issuer account's home_domain (from Horizon), counted only when that toml lists the account in ACCOUNTS or as a currency issuer, so both sides of the link agree (SEP-1). AUDD: AUDC PTY LTD. Set only when issuerOfRecordCheck is named; read by the 6-hourly writer, never at request time, and never derived from company. Cite it with issuerOfRecordAsOf."
+					},
+					"issuerOfRecordCheck": {
+						"type": "string",
+						"nullable": true,
+						"enum": [
+							"named",
+							"not-named"
+						],
+						"description": "What the stored check of that toml found. named = it lists the account and gives an ORG_NAME (issuerOfRecord). not-named = the read completed and named no issuer: the account sets no home_domain, or a stellar.toml was read there that does not list the account or gives no ORG_NAME (issuerOfRecordNote says which); a checked absence, dated by issuerOfRecordAsOf. null = never read. A read that could not be made changes nothing, so the stored check and its date stay as they were: a network failure or a body that fails mid-read, any HTTP error, a not found too (a lapsed or parked home_domain answers the same, so it does not prove the issuer stopped issuing), a redirect off the home_domain or to http, and a body over 100 KB or one that does not read as a stellar.toml (HTML, a Not Found text, a JSON error, an empty body). A toml read that cannot answer changes nothing either: an ORG_NAME in a form the parser cannot read, or an account the toml does not list where it holds a listing the parser cannot read (a currency linked to its own toml, a code it cannot read)."
+					},
+					"issuerOfRecordSourceUrl": {
+						"type": "string",
+						"nullable": true,
+						"description": "The stellar.toml URL the stored check read, after same-host https redirects (https://<home_domain>/.well-known/stellar.toml unless the host moved it); re-verify there. Null when the account sets no home_domain or nothing was read yet."
+					},
+					"issuerOfRecordAsOf": {
+						"type": "string",
+						"format": "date-time",
+						"nullable": true,
+						"description": "When the stored check was made. A failed read does not move it, so a date well before updatedAt means the latest runs could not reach the toml. Date issuerOfRecord by this, not by updatedAt. Null = never read."
+					},
+					"issuerOfRecordNote": {
+						"type": "string",
+						"nullable": true,
+						"description": "On a named check: that toml's own desc for this currency, quoted, where it names an issuing party other than issuerOfRecord (MGUSD: 'issued by Bridge on behalf of MoneyGram'), else null. On a not-named check: why no issuer of record was named."
 					},
 					"website": {
 						"type": "string",
@@ -19200,12 +19246,17 @@
 					},
 					"country": {
 						"type": "string",
-						"nullable": true
+						"nullable": true,
+						"description": "Home country code of the PEG currency (US for USD, EU for EUR), or Global, for flag display. It describes the peg, NOT the issuer's jurisdiction or place of incorporation."
 					},
 					"assetType": {
 						"type": "string",
 						"nullable": true,
-						"description": "Qualifier where the asset is not a pure peg, e.g. 'Yield Stablecoin' for Ondo's USDY. Null = a plain peg."
+						"enum": [
+							"Yield Stablecoin",
+							"Treasury-Backed"
+						],
+						"description": "Recorded only where the registry found the unit is not 1:1 with its peg; such rows are priced from their own market where it can be read (priceBasis). Yield Stablecoin = yield accrues to or is paid on the unit (Ondo's USDY); Treasury-Backed = a Treasury-backed bond (USDM1). Null = no qualifier recorded: the row was not classified, so null is unknown, NOT a verified plain peg and NOT 'not yield-bearing'. Filter with ?assetType=."
 					},
 					"supply": {
 						"type": "number",
@@ -19241,10 +19292,15 @@
 						"nullable": true,
 						"description": "24h transfer volume in USD."
 					},
+					"paymentsCount24h": {
+						"type": "number",
+						"nullable": true,
+						"description": "Count, not a dollar amount, of payment operations over the last 24 hours: Stellar Expert's lifetime payments counter diffed against our own reading of it from 20 to 28 hours earlier, the one nearest 24 hours (each row keeps two days of its six-hourly readings). Mint, redemption and peer-to-peer payments undifferentiated, not adjusted for exchange, DeFi or infrastructure activity. Null when no reading falls in that window, so also for about a day after the readings start; never a longer or shorter span, never 0 for no data."
+					},
 					"supplyChange7d": {
 						"type": "number",
 						"nullable": true,
-						"description": "Percent change in supply vs our snapshot ~7 days back (e.g. -5.8 means down 5.8%). Null until two snapshots exist; never 0 for 'no data'."
+						"description": "Percent change in supply vs our snapshot measured 6 to 8 days back, the one nearest 7 days (e.g. -5.8 means down 5.8%). Null when no snapshot falls in that window, never a longer span; never 0 for 'no data'."
 					},
 					"basis": {
 						"type": "string",
