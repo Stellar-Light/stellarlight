@@ -17,8 +17,10 @@
  *   S2 statusBasis — every project row carries a lifecycle basis (the
  *      sls-024 invariant, corpus-wide: bare-null provenance never returns).
  *   S3 tvlMethodUrl — a tvlUSD that sums several DefiLlama rows names the
- *      page that sums them (sls-102); null means the family changed upstream
- *      or enrich-tvl has not read it, and the residual names the family.
+ *      page that sums them (sls-102). A null is read against DefiLlama's own
+ *      list: a parent that still sums exactly the rows means enrich-tvl has
+ *      not stored it yet (run the TVL lane); none means the family changed
+ *      (reconcile the map); an unread list is could-not-check.
  *
  *   SCOUT_BASE=https://stellarlight.xyz npx tsx scripts/check-record-completeness.ts
  *
@@ -216,24 +218,44 @@ async function main() {
 
 	// ── S3: a multi-row tvlUSD cites the page that sums it (sls-102) ──
 	// Reuses S2's sweep. enrich-tvl stores the parent it read from DefiLlama
-	// each run; when the family stops matching the map, tvlMethodUrl serves
-	// null and this is where that reaches the improvement ledger.
-	const gaps = tvlCitationGaps(
-		swept.map((p) => ({
-			slug: String(p.slug),
-			tvlUSD: p.tvlUSD,
-			llamaSlugs: p.llamaSlugs,
-			tvlMethodUrl: p.tvlMethodUrl,
-		})),
+	// each run; a null here is either a parent not stored yet (right after a
+	// deploy, before the TVL lane runs) or a family that changed upstream.
+	// DefiLlama's list tells them apart, so it is read only when a gap exists.
+	const tvlRows = swept.map((p) => ({
+		slug: String(p.slug),
+		tvlUSD: p.tvlUSD,
+		llamaSlugs: p.llamaSlugs,
+		tvlMethodUrl: p.tvlMethodUrl,
+	}));
+	const anyGap = tvlRows.some(
+		(r) =>
+			typeof r.tvlUSD === "number" &&
+			(r.llamaSlugs?.length ?? 0) > 1 &&
+			!r.tvlMethodUrl,
 	);
+	let protocols: { slug: string; parentProtocol?: string | null }[] | null =
+		null;
+	if (anyGap) {
+		try {
+			const res = await fetch("https://api.llama.fi/protocols", {
+				headers: UA,
+			});
+			const body = res.ok ? await res.json() : null;
+			// Below 1,000 rows the body is not the real list (enrich-tvl's guard).
+			protocols = Array.isArray(body) && body.length >= 1000 ? body : null;
+		} catch {
+			protocols = null;
+		}
+	}
+	const gaps = tvlCitationGaps(tvlRows, protocols);
 	console.log(
 		`S3 tvlMethodUrl: ${swept.filter((p) => (p.llamaSlugs?.length ?? 0) > 1).length} multi-row TVL row(s) · ${gaps.length} with no page that sums them`,
 	);
 	for (const g of gaps) {
-		console.log(`  ✗ ${g.slug}: [${g.family.join(",")}]`);
+		console.log(`  ✗ ${g.slug}: [${g.family.join(",")}] ${g.cause}`);
 		failRows.push({
 			probe: `tvlMethodUrl null: ${g.slug}`,
-			note: `tvlUSD sums [${g.family.join(", ")}] but no DefiLlama parent's children are exactly these rows (family changed upstream, or enrich-tvl has not read it): reconcile LLAMA_MAP in scripts/enrich-tvl.ts`,
+			note: `${g.cause}: tvlUSD sums [${g.family.join(", ")}] with no page cited. ${g.action}`,
 		});
 	}
 	if (gaps.length) failures++;

@@ -94,9 +94,28 @@ export function llamaPageFor(
 	return page ? `https://defillama.com/protocol/${page}` : null;
 }
 
+/** Why a multi-row tvlUSD has no page to cite, and the repair for each:
+ *   parent-not-read  DefiLlama's list still names a parent whose children are
+ *                    exactly these rows, so the row has not stored it yet
+ *                    (enrich-tvl has not run since): run the TVL lane.
+ *   family-drift     no parent's children are exactly these rows any more:
+ *                    the map must follow DefiLlama's family.
+ *   could-not-check  DefiLlama's list was not read, so neither can be told.
+ */
+export const TVL_CITATION_GAP_ACTIONS = {
+	"parent-not-read":
+		"dispatch enrich-tvl.yml with execute=true: DefiLlama's parent page sums exactly these rows and the row has not stored it yet",
+	"family-drift":
+		"reconcile LLAMA_MAP in scripts/enrich-tvl.ts with DefiLlama's family for these rows: no parent's children are exactly them now",
+	"could-not-check":
+		"DefiLlama's protocol list could not be read, so a missing read and a changed family cannot be told apart: rerun",
+} as const;
+export type TvlCitationGapCause = keyof typeof TVL_CITATION_GAP_ACTIONS;
+
 /** Rows whose tvlUSD sums several DefiLlama rows with no single page to cite
- * (tvlMethodUrl null): the family changed upstream, or the writer has not
- * read it yet. The nightly completeness sweep files each as a finding. */
+ * (tvlMethodUrl null), each with its cause, read against DefiLlama's own list
+ * by the same rule the writer uses (llamaParentOf). protocols null = the list
+ * could not be read. The nightly completeness sweep files each one. */
 export function tvlCitationGaps(
 	rows: readonly {
 		slug: string;
@@ -104,7 +123,13 @@ export function tvlCitationGaps(
 		llamaSlugs?: string[] | null;
 		tvlMethodUrl?: string | null;
 	}[],
-): { slug: string; family: string[] }[] {
+	protocols: readonly { slug: string; parentProtocol?: string | null }[] | null,
+): {
+	slug: string;
+	family: string[];
+	cause: TvlCitationGapCause;
+	action: string;
+}[] {
 	return rows
 		.filter(
 			(r) =>
@@ -112,7 +137,20 @@ export function tvlCitationGaps(
 				(r.llamaSlugs?.length ?? 0) > 1 &&
 				!r.tvlMethodUrl,
 		)
-		.map((r) => ({ slug: r.slug, family: r.llamaSlugs as string[] }));
+		.map((r) => {
+			const family = r.llamaSlugs as string[];
+			const cause: TvlCitationGapCause = !protocols
+				? "could-not-check"
+				: llamaParentOf(family, protocols)
+					? "parent-not-read"
+					: "family-drift";
+			return {
+				slug: r.slug,
+				family,
+				cause,
+				action: TVL_CITATION_GAP_ACTIONS[cause],
+			};
+		});
 }
 
 /** Writer side: the DefiLlama parent (its page slug) whose children in the

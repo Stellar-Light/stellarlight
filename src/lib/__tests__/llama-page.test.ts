@@ -111,25 +111,46 @@ describe("status checks cite the same page", () => {
 });
 
 describe("tvlCitationGaps: a multi-row sum with no page is a finding", () => {
-	it("names the row and its family", () => {
-		expect(
-			tvlCitationGaps([
-				{
-					slug: "blend",
-					tvlUSD: 1,
-					llamaSlugs: BLEND,
-					tvlMethodUrl: null,
-				},
-				{
-					slug: "ok",
-					tvlUSD: 1,
-					llamaSlugs: BLEND,
-					tvlMethodUrl: "https://defillama.com/protocol/blend",
-				},
-				{ slug: "one", tvlUSD: 1, llamaSlugs: ["x"], tvlMethodUrl: null },
-				{ slug: "untracked", tvlUSD: null, llamaSlugs: BLEND },
-			]),
-		).toEqual([{ slug: "blend", family: BLEND }]);
+	const rows = [
+		{ slug: "blend", tvlUSD: 1, llamaSlugs: BLEND, tvlMethodUrl: null },
+		{
+			slug: "ok",
+			tvlUSD: 1,
+			llamaSlugs: BLEND,
+			tvlMethodUrl: "https://defillama.com/protocol/blend",
+		},
+		{ slug: "one", tvlUSD: 1, llamaSlugs: ["x"], tvlMethodUrl: null },
+		{ slug: "untracked", tvlUSD: null, llamaSlugs: BLEND },
+	];
+	const list = BLEND.map((slug) => ({ slug, parentProtocol: "parent#blend" }));
+	it("DefiLlama still confirms a parent: not read yet, so the fix is to run the TVL lane", () => {
+		expect(tvlCitationGaps(rows, list)).toEqual([
+			{
+				slug: "blend",
+				family: BLEND,
+				cause: "parent-not-read",
+				action: expect.stringMatching(/enrich-tvl\.yml with execute=true/),
+			},
+		]);
+	});
+	it("DefiLlama no longer sums exactly these rows: the fix is the map", () => {
+		const grown = [
+			...list,
+			{ slug: "blend-pools-v3", parentProtocol: "parent#blend" },
+		];
+		expect(tvlCitationGaps(rows, grown)).toEqual([
+			{
+				slug: "blend",
+				family: BLEND,
+				cause: "family-drift",
+				action: expect.stringMatching(/LLAMA_MAP/),
+			},
+		]);
+	});
+	it("an unread DefiLlama list tells neither apart", () => {
+		expect(tvlCitationGaps(rows, null)).toEqual([
+			expect.objectContaining({ slug: "blend", cause: "could-not-check" }),
+		]);
 	});
 });
 
