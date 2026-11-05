@@ -972,9 +972,8 @@ describe("an event whose stored rows are a partial list", () => {
 	const AWARDS =
 		"https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/hackmeridian-2026.yaml";
 	const serve = async () => {
-		const { getHackathonBuildsIndex, indexedFromStored } = await import(
-			"@/lib/hackathon-builds"
-		);
+		const { dedupeBuilds, getHackathonBuildsIndex, indexedFromStored } =
+			await import("@/lib/hackathon-builds");
 		const { fetchAllDoraHacksHackathons } = await import(
 			"@/lib/integrations/dorahacks"
 		);
@@ -983,16 +982,19 @@ describe("an event whose stored rows are a partial list", () => {
 		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
 			{ ...ev, source: "curated" } as DoraHacksHackathon,
 		]);
+		// Through the real dedupe, as buildHackathonBuildsIndex serves them.
 		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(
-			HACKPROOF_BUILDS.map((b) =>
-				indexedFromStored({
-					...(curatedFacts(b, ev) as unknown as HackathonBuild),
-					id: b.id,
-					firstSeenAt: "2026-11-04T00:00:00.000Z",
-					lastSeenAt: "2026-11-04T00:00:00.000Z",
-					updatedAt: "2026-11-04T00:00:00.000Z",
-					createdAt: "2026-11-04T00:00:00.000Z",
-				}),
+			dedupeBuilds(
+				HACKPROOF_BUILDS.map((b) =>
+					indexedFromStored({
+						...(curatedFacts(b, ev) as unknown as HackathonBuild),
+						id: b.id,
+						firstSeenAt: "2026-11-04T00:00:00.000Z",
+						lastSeenAt: "2026-11-04T00:00:00.000Z",
+						updatedAt: "2026-11-04T00:00:00.000Z",
+						createdAt: "2026-11-04T00:00:00.000Z",
+					}),
+				),
 			),
 		);
 		return getEvent("hackmeridian-2026");
@@ -1040,7 +1042,9 @@ describe("an event whose stored rows are a partial list", () => {
 			["Stellar Composed", null],
 		]);
 		const subs = body.submissions as Array<Record<string, unknown>>;
-		expect(subs).toHaveLength(97);
+		// Every stored row, the two named "Nomad Vault" included.
+		expect(subs).toHaveLength(HACKPROOF_BUILDS.length);
+		expect(subs.filter((r) => r.name === "Nomad Vault")).toHaveLength(2);
 		expect(subs.every((r) => r.source === "curated" && r.entryBasis)).toBe(
 			true,
 		);

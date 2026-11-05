@@ -15,6 +15,7 @@ import {
 	BUILD_SEARCH_MODES,
 	type BuildContract,
 	type BuildSearchMode,
+	CURATED_BUILD_ID,
 	type EntryBasis,
 	type EntryEvidence,
 	isEntryBasis,
@@ -608,10 +609,15 @@ export function dedupeBuilds(rows: IndexedBuild[]): IndexedBuild[] {
 	const flat: IndexedBuild[] = [];
 	for (const b of rows) {
 		const id = `${b.hackathon.slug}::${b.id}`;
-		const key = `${b.hackathon.slug}::${b.name.trim().toLowerCase()}`;
-		if (seenId.has(id) || seenKey.has(key)) continue;
+		// The name rule is DoraHacks' resubmissions; a curated row is its own
+		// record, kept by its id (two HackMeridian 2026 repos are both
+		// "Nomad Vault").
+		const key = CURATED_BUILD_ID.test(b.id)
+			? null
+			: `${b.hackathon.slug}::${b.name.trim().toLowerCase()}`;
+		if (seenId.has(id) || (key !== null && seenKey.has(key))) continue;
 		seenId.add(id);
-		seenKey.add(key);
+		if (key !== null) seenKey.add(key);
 		flat.push(b);
 	}
 	return flat;
