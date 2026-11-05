@@ -133,6 +133,17 @@ jobs:
         shell: bash
         run: pnpm exec tsx scripts/data/reconcile-rwa-issuers.ts 2>&1 | tee /tmp/rwa-reconcile.log
 
+      # The briefs /api/rfps serves as open vs the ones SCF's RFP Track page
+      # lists (sls-096: the page dropped the Q3 briefs on 2026-10-16 and the
+      # API kept them open for 17 days). Exit 1: the lists differ. Exit 2: the
+      # page could not be read one way; red as well, since then nothing is
+      # checking the roster.
+      - name: RFP roster (open briefs vs SCF's RFP Track page)
+        id: rfproster
+        continue-on-error: true
+        shell: bash
+        run: pnpm exec tsx scripts/check-rfp-roster.ts 2>&1 | tee /tmp/rfp-roster.log
+
       - name: Feed the improvement ledger + commit the evidence
         # continue-on-error: the red-issue step below must file even if the
         # feed/commit hiccups (its own step shows red in the run UI).
@@ -164,6 +175,7 @@ jobs:
           BATTERY: ${{ steps.battery.outcome }}
           SCANCOV: ${{ steps.scancov.outcome }}
           RWARECON: ${{ steps.rwarecon.outcome }}
+          RFPROSTER: ${{ steps.rfproster.outcome }}
         run: |
           set -e
           REDS=""
@@ -175,16 +187,17 @@ jobs:
           [ "$BATTERY" = "failure" ] && REDS="$REDS battery-coverage"
           [ "$SCANCOV" = "failure" ] && REDS="$REDS scan-coverage"
           [ "$RWARECON" = "failure" ] && REDS="$REDS rwa-reconcile"
+          [ "$RFPROSTER" = "failure" ] && REDS="$REDS rfp-roster"
           if [ -z "$REDS" ]; then echo "all detectors green — no issue"; exit 0; fi
           TITLE="Nightly health: red findings"
           BODY_FILE=/tmp/body.md
           {
             echo "Automated nightly detector run went red on:**$REDS** ($(date -u +%Y-%m-%d))."
             echo
-            for d in drift fields golden claims completeness battery scan-coverage rwa-reconcile; do
+            for d in drift fields golden claims completeness battery scan-coverage rwa-reconcile rfp-roster; do
               LOG=/tmp/$d.log
               case $d in
-                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;; completeness) OUT=$COMPLETENESS;; battery) OUT=$BATTERY;; scan-coverage) OUT=$SCANCOV;; rwa-reconcile) OUT=$RWARECON;;
+                drift) OUT=$DRIFT;; fields) OUT=$FIELDS;; golden) OUT=$GOLDEN;; claims) OUT=$CLAIMS;; completeness) OUT=$COMPLETENESS;; battery) OUT=$BATTERY;; scan-coverage) OUT=$SCANCOV;; rwa-reconcile) OUT=$RWARECON;; rfp-roster) OUT=$RFPROSTER;;
               esac
               [ "$OUT" = "failure" ] || continue
               echo "<details><summary>$d — failing output (tail)</summary>"

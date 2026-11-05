@@ -88,6 +88,7 @@ describe("an event's coverage, from its stored rows", () => {
 			["hackmeridian-2025", 6],
 			["build-on-stellar-philippines-2026", 5],
 			["apac-stellar-hackathon-2026", 1],
+			["stellar-pro-hackathon-istanbul-2026", 7],
 		]);
 	});
 });

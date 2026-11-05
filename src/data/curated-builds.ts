@@ -36,6 +36,11 @@ const PH_2026 =
 // site. The only APAC winner found published (read 2026-10-22).
 const APAC_OLIO =
 	"https://www.risein.com/blog/builder-spotlight-from-hackathon-curiosity-to-building-olio-on-stellar";
+// Rise In's recap, 2026-09-30: the Stellar Pro Hackathon's seven winners,
+// each one's track and place and what it built; it links no project. Read
+// 2026-11-04.
+const PRO_2026 =
+	"https://www.risein.com/blog/stellar-pro-hackathon-153-builders-85-projects-and-a-path-to-enterprise";
 
 /** A winner as its source names it: curated-<event>-<name> id. */
 const winner = (
@@ -76,6 +81,21 @@ const ph2026 = (name: string, placement: string, description: string) =>
 		name,
 		placement,
 		null,
+		description,
+	);
+
+const pro2026 = (
+	name: string,
+	track: "Genesis Track" | "Scale Track",
+	placement: string,
+	description: string,
+) =>
+	winner(
+		"stellar-pro-hackathon-istanbul-2026",
+		PRO_2026,
+		name,
+		placement,
+		track,
 		description,
 	);
 
@@ -123,5 +143,48 @@ export const CURATED_BUILDS: CuratedBuild[] = [
 		"Payment & Consumer Application",
 		"Confidential USDC payments app on Stellar.",
 		"https://oliopay.xyz/",
+	),
+	// Places as the recap heads them, by track.
+	pro2026(
+		"Pera Wallet",
+		"Genesis Track",
+		"First Place",
+		"Smart wallet that brings Turkish lira onto Stellar through a local anchor and converts it to USDC, puts idle funds in DeFindex vaults, and caps AI-agent spending with daily and weekly rules enforced on Soroban.",
+	),
+	pro2026(
+		"Plink",
+		"Genesis Track",
+		"Second Place",
+		"Crowdfunding payment links that deposit into a Soroban escrow contract, releasing funds only when conditions set before payment are met.",
+	),
+	pro2026(
+		"StellarCard",
+		"Genesis Track",
+		"Third Place",
+		"Payment infrastructure for AI agents linked to Stripe virtual cards, with Stellar smart contracts applying spending limits per transaction.",
+	),
+	pro2026(
+		"Payper",
+		"Genesis Track",
+		"Fourth Place",
+		"Invoice financing that hashes each invoice's ETTN on-chain so the same receivable cannot be financed twice, with real-time pricing for receivables.",
+	),
+	pro2026(
+		"Pacta",
+		"Scale Track",
+		"First Place",
+		"Escrow for medical-tourism payments: deposits held on Stellar, cancellation terms recorded before payment and refunds calculated openly, with clinics paid in Turkish lira through a SEP-6 anchor.",
+	),
+	pro2026(
+		"Koul",
+		"Scale Track",
+		"Second Place",
+		"Conditional execution engine: rules set in a Soroban contract run when a keeper finds their condition met, while funds stay in the user's smart account.",
+	),
+	pro2026(
+		"Mono",
+		"Scale Track",
+		"Third Place",
+		"Reliability scores for Stellar anchors from live tests: it finds active SEP-6 and SEP-24 anchors, checks their APIs and tests SEP-10 and SEP-24 deposit flows.",
 	),
 ];
