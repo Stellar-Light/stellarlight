@@ -1,4 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { spec } from "@/lib/openapi-spec";
+import {
+	responseSchema,
+	undeclaredInServed,
+} from "../../../scripts/contract/served-shape";
 import {
 	buildJudging,
 	CRITERION_EVIDENCE,
@@ -516,6 +521,46 @@ describe("SCF eligibility evidence", () => {
 			values: null,
 		});
 		expect(scfEvidence(null).finding).toMatch(/scf-prescreen-checker/);
+	});
+});
+
+// Review: the review carried the qualitative criteria and never the
+// organizer's weights, which getHackathon serves as rules.rubric.
+describe("the weighted rubric on a review", () => {
+	const judging = () =>
+		buildJudging(event, repoEvidence(read(facts())), scfEvidence(null));
+
+	it("carries the organizer's weights beside the criteria", () => {
+		const j = judging();
+		expect(j.rubric).toEqual(event.judging?.rubric);
+		expect(j.rubric?.criteria.reduce((s, c) => s + c.weightPercent, 0)).toBe(
+			100,
+		);
+	});
+
+	it("is left out when the event publishes no weights", () => {
+		const judgingOf = event.judging;
+		if (!judgingOf) throw new Error("hackmeridian-2026 has no judging");
+		const bare = { ...event, judging: { ...judgingOf, rubric: undefined } };
+		expect(
+			"rubric" in
+				buildJudging(bare, repoEvidence(read(facts())), scfEvidence(null)),
+		).toBe(false);
+	});
+
+	it("is declared where the review serves it", () => {
+		// biome-ignore lint/suspicious/noExplicitAny: walking the spec
+		const review = responseSchema(spec, "/api/hackathons/review") as any;
+		expect(
+			undeclaredInServed(
+				spec,
+				review.properties.review.properties.judging,
+				JSON.parse(JSON.stringify(judging())),
+			),
+		).toEqual([]);
+		expect(
+			Object.keys(review.properties.review.properties.judging.properties),
+		).toContain("rubric");
 	});
 });
 

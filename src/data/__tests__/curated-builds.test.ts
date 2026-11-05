@@ -81,6 +81,29 @@ describe("curated hackathon builds", () => {
 		]);
 	});
 
+	it("carries the Stellar Pro Hackathon's seven winners as Rise In's recap places them", () => {
+		const w = CURATED_BUILDS.filter(
+			(b) => b.hackathonSlug === "stellar-pro-hackathon-istanbul-2026",
+		);
+		expect(w.map((b) => `${b.track}: ${b.placement} ${b.name}`)).toEqual([
+			"Genesis Track: First Place Pera Wallet",
+			"Genesis Track: Second Place Plink",
+			"Genesis Track: Third Place StellarCard",
+			"Genesis Track: Fourth Place Payper",
+			"Scale Track: First Place Pacta",
+			"Scale Track: Second Place Koul",
+			"Scale Track: Third Place Mono",
+		]);
+		for (const b of w) {
+			expect(b.url).toBe(
+				"https://www.risein.com/blog/stellar-pro-hackathon-153-builders-85-projects-and-a-path-to-enterprise",
+			);
+			// The recap says what each built and links no project.
+			expect(b.description).toBeTruthy();
+			expect([b.githubUrl, b.demoUrl]).toEqual([null, null]);
+		}
+	});
+
 	it("writes no em or en dash", () => {
 		expect(JSON.stringify(CURATED_BUILDS)).not.toMatch(/[\u2013\u2014]/);
 	});

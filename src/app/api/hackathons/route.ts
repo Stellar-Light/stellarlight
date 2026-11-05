@@ -25,7 +25,7 @@ import { degradedWarning, withPartial } from "@/lib/degraded-read";
 import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import {
 	type DoraHacksHackathon,
-	fetchAllDoraHacksHackathons,
+	fetchAllDoraHacksHackathonsChecked,
 	getHackathonUrl,
 } from "@/lib/integrations/dorahacks";
 import { matchModeMeta } from "@/lib/match-mode";
@@ -209,8 +209,18 @@ export async function GET(req: NextRequest) {
 		}
 	}
 	try {
-		const doraHackathons = await fetchAllDoraHacksHackathons();
+		const { hackathons: doraHackathons, complete } =
+			await fetchAllDoraHacksHackathonsChecked();
 		dora = doraHackathons.map(doraToRow);
+		// A DoraHacks read that failed leaves its events out, so a listing
+		// read in part is a failed read: its counts are not totals.
+		if (!complete)
+			readWarnings.push(
+				degradedWarning(
+					"DoraHacks listing",
+					"one or more DoraHacks reads failed or timed out",
+				),
+			);
 	} catch (err) {
 		readWarnings.push(degradedWarning("DoraHacks listing", err));
 	}
@@ -283,11 +293,23 @@ export async function GET(req: NextRequest) {
 	// live channels rather than dead-end.
 	const isForwardLookingQuery =
 		statusFilter === "upcoming" || statusFilter === "active";
+	const filtered = [
+		q && `q=${q}`,
+		organizerFilter && `organizer=${organizerFilter}`,
+		sourceFilter && `source=${sourceFilter}`,
+	]
+		.filter(Boolean)
+		.join(", ");
 	const fallbackChannels =
 		isForwardLookingQuery && hackathons.length === 0
 			? {
-					summary:
-						"No upcoming or active hackathons in stellarlight's feed right now: between events. Check live channels for the next announcement.",
+					// Only what was looked at (sls-106): this feed, the selected
+					// status and any other filter. "Between events" claimed the
+					// ecosystem's schedule, which the feed cannot see; a failed
+					// read is no look at all.
+					summary: readWarnings.length
+						? `No ${statusFilter} hackathons${filtered ? ` matching ${filtered}` : ""} came back, but part of stellarlight's feed could not be read (meta.warnings), so this is not a check that none is listed. Check live channels for the next announcement.`
+						: `No ${statusFilter} hackathons ${filtered ? `match ${filtered} ` : ""}in stellarlight's feed right now. The feed holds Stellar organizers' DoraHacks listings and, off DoraHacks, curated Stellar-presented hackathons and university challenges, so this is not a claim that no Stellar hackathon is ${statusFilter} elsewhere. Check live channels for the next announcement.`,
 					channels: [
 						{
 							name: "@BuildOnStellar on X/Twitter",

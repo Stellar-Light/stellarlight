@@ -335,7 +335,6 @@ unless noted.
   `profile.project` says 12 became directory projects.
 - Winners-only search is not in placement order; its rows carry no
   `placementRank`.
-- Curated event pages say "live submission feed unavailable".
 - `meta.counts.indexedBuilds` is 1,344 in search and 1,371 in analyze under
   one name; the analyze `q` description says it matches like search while its
   default mode differs.

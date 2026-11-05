@@ -629,7 +629,7 @@ describe("events whose stored rows are their winners only", () => {
 	// 12 of them curated winners whose fields are not stored; 68 of 1,371
 	// (5.0%) without them.
 	const LEFT_OUT =
-		"left out of every count and share: 12 rows of hackmeridian-2025 (6), build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1), whose stored rows are their winners only; the rest covers events whose full listing is stored";
+		"left out of every count and share: 19 rows of hackmeridian-2025 (6), build-on-stellar-philippines-2026 (5), apac-stellar-hackathon-2026 (1) and stellar-pro-hackathon-istanbul-2026 (7), whose stored rows are their winners only; the rest covers events whose full listing is stored";
 
 	it("analyze across every event leaves winners-only rows out of every count and share, in one line", async () => {
 		const all = await get("analyze", "facet=placement");

@@ -1566,6 +1566,7 @@ export interface components {
                 matchModeLabel?: string;
                 /** @description Present when the query returns 0 events: a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array. */
                 fallbackChannels?: {
+                    /** @description What this feed shows for the selected status, naming any other filter (q, organizer, source): not a claim that no Stellar hackathon is upcoming or active elsewhere. When part of the feed could not be read (meta.warnings, partial true), it says so, counts.total is null, and the empty result is not a check. */
                     summary?: string;
                     channels?: {
                         name?: string;
@@ -1582,10 +1583,36 @@ export interface components {
             hackathon?: {
                 /** @description The event page as the organizer published it, in markdown: the description, then each custom tab under its name as a heading (some organizers publish judging criteria or submission requirements only in a tab). Stored daily for DoraHacks events. */
                 description?: string | null;
-                /** @description What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn; the other keys are absent, not known. */
+                /** @description What the organizer published about submitting and judging. On a DoraHacks event, from its stored event page: absent = the page was not read; a null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated), from its record: the judging sentence it copies from the organizer's page, as judgingCriteria with source and checkedOn, and rubric when the organizer publishes a weighted one; or, when that page was checked and publishes no judging criteria, judgingCriteria null with source, checkedOn and judgingNote. The other keys are absent, not known. Absent on such an event: its organizer's page was not checked (no page on record), which is not a claim that it publishes none. */
                 rules?: {
-                    /** @description Curated events only: the page the judging sentence was checked against. */
+                    /** @description Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent in the page's order (not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none. */
+                    rubric?: {
+                        /** @description The lowest score a criterion takes. Absent with scoreMax: the page publishes no score scale. */
+                        scoreMin?: number;
+                        /** @description The highest score a criterion takes. Absent with scoreMin: the page publishes no score scale. */
+                        scoreMax?: number;
+                        criteria?: {
+                            /** @description The page's label for the criterion. A slot the page scores under a different name in each category carries a label that joins the names, as the page writes it; byCategory names each. */
+                            criterion?: string;
+                            /** @description The criterion's share of the score, in percent; a rubric's weights sum to 100. */
+                            weightPercent?: number;
+                            /** @description Present only on a slot scored under a different name in each category: one entry per category the event judges in (getHackathon tracks with kind category), with the criterion's name there and what it scores. Absent: the criterion is the same in every category. */
+                            byCategory?: {
+                                category?: string;
+                                criterion?: string;
+                                /** @description What the criterion scores, in the page's words. */
+                                scores?: string;
+                            }[];
+                        }[];
+                        /** Format: uri */
+                        source?: string;
+                        /** Format: date */
+                        checkedOn?: string;
+                    };
+                    /** @description Curated events only: the page the judging sentence, or its absence, was checked against. */
                     source?: string;
+                    /** @description Present only when judgingCriteria is null: that the page publishes no judging criteria, with the page and the day it was read or checked. A DoraHacks page's note rests on its sections as read now (a heading, a line of its own or a bold label naming judging, scoring or criteria, in English, Spanish or Portuguese; a list of judges is not criteria). */
+                    judgingNote?: string;
                     /**
                      * Format: date
                      * @description Curated events only: the day that page was checked.
@@ -1596,7 +1623,7 @@ export interface components {
                     submissionQuestions?: string[];
                     /** @description The page's submission-requirements section, in markdown. null = the page was read (readAt) and has no requirements section: the organizer published none there. */
                     requirements?: string | null;
-                    /** @description The page's judging section, in markdown. null = the page was read (readAt) and has no judging section: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all. */
+                    /** @description The page's judging section, in markdown, read from the stored page by the current reader: under the event's own heading that names judging, scoring or criteria (Spanish and Portuguese too), a line of its own or a bold label; sections that sit under different tracks come each under its track's name, and a heading that names both sections serves its criteria part. null = the page was read (readAt) or checked (checkedOn) and has no judging section, as judgingNote says: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all. */
                     judgingCriteria?: string | null;
                     /** Format: date-time */
                     readAt?: string;
@@ -1873,13 +1900,13 @@ export interface components {
             }[];
             /** @description Whether the winners array order is a ranking. true = ordinal placements (sorted by placementRank, winners[0] is 1st place); false = tier-labeled winners (all placementRank null; array order is meaningless, treat as an unordered set); null = no winners recorded. */
             winnersRanked?: boolean | null;
-            /** @description Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`. */
+            /** @description Every submission served for the event: [] = a roster read that found none. null = no roster is held (an event off DoraHacks with no curated roster) or none could be read just now (meta.note says which): not checked, never none. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`. */
             submissions?: ({
                 award?: string | null;
                 awardCategory?: string | null;
             } & {
                 [key: string]: unknown;
-            })[];
+            })[] | null;
             /** @description The event's tracks: from its submission roster when one is held (on a winners-only event, the tracks of its winners on record); with no roster, the tracks and categories its record declares (kind, description, counts null). [] = the roster names no track. null = not known: no roster and no declared track, or winners that name no track; notes says which. */
             tracks?: ({
                 name?: string;
@@ -2215,8 +2242,21 @@ export interface components {
             id?: string;
             title?: string;
             description?: string;
-            /** @description The sponsor's technical requirements text. Null when the brief carries none, and always null on synthetic scf-round rows. */
+            /** @description The idea's own summary of what to build, as stellarlight.xyz/ideas shows it: not the brief SCF published, and it can differ from it (some were written before the brief). The published brief is publishedBrief. Null when the idea carries none, and always null on synthetic scf-round rows. */
             technicalRequirements?: string | null;
+            /** @description The brief SCF published for this idea on its RFP Track page: a commit-pinned copy of that page (the live page drops a quarter's briefs when the next arrive) and the day it was read. Absent: no published brief is linked, which is not a claim that SCF published none; always absent on synthetic scf-round rows. */
+            publishedBrief?: {
+                /** @description The brief's title on the page. */
+                title?: string;
+                /** Format: uri */
+                url?: string;
+                /** Format: date */
+                checkedOn?: string;
+                /** @description The brief's functional requirements, restated short, in its order. Absent: not restated here; the brief at url has them, with its non-functional requirements, evaluation criteria and deliverables, which are not restated. */
+                functionalRequirements?: string[];
+                /** @description What the brief rules out of scope, restated short. Absent: not restated here. */
+                outOfScope?: string[];
+            };
             /** @description Category slug: the ?category= filter vocabulary (an unrecognized filter value returns 400 with validCategories). 'scf' is carried by the synthetic live-round row. */
             category?: string;
             /** @description Display label for category (e.g. 'DeFi'). */
@@ -3690,6 +3730,17 @@ export interface operations {
                     };
                 };
             };
+            /** @description Could not check: the store did not answer, or a DoraHacks listing read failed so the slug was not looked for in every listing. An outage, NOT a not-found. Retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending. */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     compareHackathons: {
@@ -4702,8 +4753,41 @@ export interface operations {
                                 type?: "Wallet" | "DEX" | "Lending" | "Bridge" | "Infrastructure" | "Payments" | "Anchor" | "SDK" | "Indexer" | "Explorer" | "Analytics" | "AI" | "Gaming" | "Education" | "Security" | "NFT" | "RWA" | "Stablecoin" | "Social Impact" | "RPC" | "Faucet" | "Card Issuing" | "Exchange" | "Oracle" | "Yield";
                                 submissions?: number;
                                 winners?: number;
+                                /** @description submissions / outOf. */
                                 shareOfSubmissions?: number | null;
+                                /** @description The share's denominator: the stored submissions in this scope (events whose full listing is stored) that have a category read, a confident type or none. */
+                                outOf?: number;
+                                /** @description The stored submissions in this scope not categorized yet, outside outOf. */
+                                uncategorized?: number;
                             } | null;
+                            /** @description The submission's category within each event it entered, counted by analyzeHackathonSubmissions' category facet over that event's stored submissions: one entry per event, served even when the submission has no confident category of its own (thisCategory null). categories are the event's five largest, most submissions first. An event whose stored rows are its winners only, or whose winners are published in part, keeps its counts with every share null and submissions, categorized and uncategorized null, and note says why. */
+                            eventCategories?: {
+                                /** @description The event's slug. */
+                                hackathon?: string;
+                                title?: string;
+                                /** @description The event's stored submissions; null when its rows are incomplete (note). */
+                                submissions?: number | null;
+                                /** @description Of those, the ones with a category read (a confident type or none): every share's denominator. */
+                                categorized?: number | null;
+                                /** @description Of those, the ones not categorized yet. */
+                                uncategorized?: number | null;
+                                categories?: {
+                                    type?: string;
+                                    submissions?: number;
+                                    winners?: number;
+                                    /** @description submissions / categorized; null over incomplete rows. */
+                                    share?: number | null;
+                                }[];
+                                /** @description This submission's top category in the event; null when it has no confident category (categoryNote says why). */
+                                thisCategory?: {
+                                    type?: string;
+                                    submissions?: number;
+                                    winners?: number;
+                                    share?: number | null;
+                                } | null;
+                                /** @description Present only when the event's rows are incomplete: why its size and shares are not served. */
+                                note?: string;
+                            }[];
                             /** @description Why categoryContext is null: the submission has no confident category (uncertain, not missing), or it is not categorized yet. null when categoryContext is served. */
                             categoryNote?: string | null;
                             pitch?: {
@@ -4840,8 +4924,32 @@ export interface operations {
                                 /** @description The parts not read, or not read whole; every evidence item resting on one says could-not-check, and its finding gives that part's own reason (GitHub's answer or silence for it, a listing cut short, a git submodule the tree read does not open, a file that is not UTF-8 text, a manifest over 512 KB, more manifests than the 12 a read takes). [] when every part was read. */
                                 unread?: ("metadata" | "tree" | "manifests" | "readme" | "commits" | "releases")[];
                             } | null;
-                            /** @description Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason. Evidence, not a verdict: no score, no pass or fail. Categories and criteria keep the sentence's order; the order is not a rank. */
+                            /** @description Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason, and the organizer's weighted rubric (rubric) when it publishes one. Evidence, not a verdict: no score, no pass or fail; the rubric's weights are the organizer's, never a score of this repo. Categories and criteria keep the sentence's order; the order is not a rank. */
                             judging?: {
+                                /** @description Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent in the page's order (not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none. */
+                                rubric?: {
+                                    /** @description The lowest score a criterion takes. Absent with scoreMax: the page publishes no score scale. */
+                                    scoreMin?: number;
+                                    /** @description The highest score a criterion takes. Absent with scoreMin: the page publishes no score scale. */
+                                    scoreMax?: number;
+                                    criteria?: {
+                                        /** @description The page's label for the criterion. A slot the page scores under a different name in each category carries a label that joins the names, as the page writes it; byCategory names each. */
+                                        criterion?: string;
+                                        /** @description The criterion's share of the score, in percent; a rubric's weights sum to 100. */
+                                        weightPercent?: number;
+                                        /** @description Present only on a slot scored under a different name in each category: one entry per category the event judges in (getHackathon tracks with kind category), with the criterion's name there and what it scores. Absent: the criterion is the same in every category. */
+                                        byCategory?: {
+                                            category?: string;
+                                            criterion?: string;
+                                            /** @description What the criterion scores, in the page's words. */
+                                            scores?: string;
+                                        }[];
+                                    }[];
+                                    /** Format: uri */
+                                    source?: string;
+                                    /** Format: date */
+                                    checkedOn?: string;
+                                };
                                 hackathon?: {
                                     slug?: string;
                                     title?: string;
@@ -5638,10 +5746,25 @@ export interface operations {
                             activeQuarter?: string;
                             /** @description Human label for activeQuarter (e.g. 'Q3 2026'). */
                             activeQuarterLabel?: string;
-                            /** @description Every quarter key the quarter filter accepts, newest first. */
-                            quarters?: string[];
-                            /** @description Every category value present in the current brief set; the category filter's live vocabulary. */
-                            categories?: string[];
+                            /** @description The official page the open briefs were last checked against, and the day: SCF's RFP Track page, which lists the briefs open now. Each brief's status and counts.open are set by hand from it, so they hold as of checkedOn; a brief SCF opened or dropped since may not be reflected. counts.open 0 means that page named no open brief that day. */
+                            briefRoster?: {
+                                /** Format: uri */
+                                source?: string;
+                                /** Format: date */
+                                checkedOn?: string;
+                            };
+                            /** @description Every quarter the quarter filter accepts (value) with its label, oldest first. A quarter can hold no brief yet. */
+                            quarters?: {
+                                value?: string;
+                                /** @description A fixed display name, not dated: it does not change with time. */
+                                label?: string;
+                            }[];
+                            /** @description Every category the category filter accepts (value) with its display label; a category can hold no brief. */
+                            categories?: {
+                                value?: string;
+                                /** @description A fixed display name, not dated: it does not change with time. */
+                                label?: string;
+                            }[];
                             /**
                              * Format: uri
                              * @description Where a team submits a NEW brief/idea (the SCF ideas board); hand off here when asked how to propose one.

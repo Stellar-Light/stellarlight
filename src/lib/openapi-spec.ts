@@ -1106,6 +1106,63 @@ const JUDGING_EVIDENCE_SCHEMA = {
 };
 
 /** What reviewSubmission adds with `hackathon`. */
+/** A curated event's weighted rubric: getHackathon serves it as
+ * hackathon.rules.rubric, reviewSubmission as review.judging.rubric. */
+const HACKATHON_RUBRIC_SCHEMA = {
+	type: "object",
+	description:
+		"Curated events only: the weighted rubric the organizer publishes, each criterion with its weight in percent in the page's order (not a rank), each scored scoreMin to scoreMax, with the page and day it was checked. Absent: no weighted rubric is on record for this event, which is not a claim that the organizer published none.",
+	properties: {
+		scoreMin: {
+			type: "integer",
+			description:
+				"The lowest score a criterion takes. Absent with scoreMax: the page publishes no score scale.",
+		},
+		scoreMax: {
+			type: "integer",
+			description:
+				"The highest score a criterion takes. Absent with scoreMin: the page publishes no score scale.",
+		},
+		criteria: {
+			type: "array",
+			items: {
+				type: "object",
+				properties: {
+					criterion: {
+						type: "string",
+						description:
+							"The page's label for the criterion. A slot the page scores under a different name in each category carries a label that joins the names, as the page writes it; byCategory names each.",
+					},
+					weightPercent: {
+						type: "number",
+						description:
+							"The criterion's share of the score, in percent; a rubric's weights sum to 100.",
+					},
+					byCategory: {
+						type: "array",
+						description:
+							"Present only on a slot scored under a different name in each category: one entry per category the event judges in (getHackathon tracks with kind category), with the criterion's name there and what it scores. Absent: the criterion is the same in every category.",
+						items: {
+							type: "object",
+							properties: {
+								category: { type: "string" },
+								criterion: { type: "string" },
+								scores: {
+									type: "string",
+									description:
+										"What the criterion scores, in the page's words.",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		source: { type: "string", format: "uri" },
+		checkedOn: { type: "string", format: "date" },
+	},
+};
+
 const REVIEW_JUDGING_PROPERTIES = {
 	stored: {
 		type: "boolean",
@@ -1156,8 +1213,9 @@ const REVIEW_JUDGING_PROPERTIES = {
 	judging: {
 		type: "object",
 		description:
-			"Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason. Evidence, not a verdict: no score, no pass or fail. Categories and criteria keep the sentence's order; the order is not a rank.",
+			"Present only with hackathon: each of the event's judging criteria by category, in its record's words (getHackathon serves the sentence as rules.judgingCriteria), with the evidence a judge would find in the repo, or checkable false with the reason, and the organizer's weighted rubric (rubric) when it publishes one. Evidence, not a verdict: no score, no pass or fail; the rubric's weights are the organizer's, never a score of this repo. Categories and criteria keep the sentence's order; the order is not a rank.",
 		properties: {
+			rubric: HACKATHON_RUBRIC_SCHEMA,
 			hackathon: {
 				type: "object",
 				properties: { slug: { type: "string" }, title: { type: "string" } },
@@ -3788,6 +3846,21 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"503": {
+						description:
+							"Could not check: the store did not answer, or a DoraHacks listing read failed so the slug was not looked for in every listing. An outage, NOT a not-found. Retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending.",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 				},
 			},
 		},
@@ -4817,6 +4890,84 @@ export const spec: OpenAPISpec = {
 														shareOfSubmissions: {
 															type: "number",
 															nullable: true,
+															description: "submissions / outOf.",
+														},
+														outOf: {
+															type: "integer",
+															description:
+																"The share's denominator: the stored submissions in this scope (events whose full listing is stored) that have a category read, a confident type or none.",
+														},
+														uncategorized: {
+															type: "integer",
+															description:
+																"The stored submissions in this scope not categorized yet, outside outOf.",
+														},
+													},
+												},
+												eventCategories: {
+													type: "array",
+													description:
+														"The submission's category within each event it entered, counted by analyzeHackathonSubmissions' category facet over that event's stored submissions: one entry per event, served even when the submission has no confident category of its own (thisCategory null). categories are the event's five largest, most submissions first. An event whose stored rows are its winners only, or whose winners are published in part, keeps its counts with every share null and submissions, categorized and uncategorized null, and note says why.",
+													items: {
+														type: "object",
+														properties: {
+															hackathon: {
+																type: "string",
+																description: "The event's slug.",
+															},
+															title: { type: "string" },
+															submissions: {
+																type: "integer",
+																nullable: true,
+																description:
+																	"The event's stored submissions; null when its rows are incomplete (note).",
+															},
+															categorized: {
+																type: "integer",
+																nullable: true,
+																description:
+																	"Of those, the ones with a category read (a confident type or none): every share's denominator.",
+															},
+															uncategorized: {
+																type: "integer",
+																nullable: true,
+																description:
+																	"Of those, the ones not categorized yet.",
+															},
+															categories: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		type: { type: "string" },
+																		submissions: { type: "integer" },
+																		winners: { type: "integer" },
+																		share: {
+																			type: "number",
+																			nullable: true,
+																			description:
+																				"submissions / categorized; null over incomplete rows.",
+																		},
+																	},
+																},
+															},
+															thisCategory: {
+																type: "object",
+																nullable: true,
+																description:
+																	"This submission's top category in the event; null when it has no confident category (categoryNote says why).",
+																properties: {
+																	type: { type: "string" },
+																	submissions: { type: "integer" },
+																	winners: { type: "integer" },
+																	share: { type: "number", nullable: true },
+																},
+															},
+															note: {
+																type: "string",
+																description:
+																	"Present only when the event's rows are incomplete: why its size and shares are not served.",
+															},
 														},
 													},
 												},
@@ -6170,17 +6321,46 @@ export const spec: OpenAPISpec = {
 													description:
 														"Human label for activeQuarter (e.g. 'Q3 2026').",
 												},
+												briefRoster: {
+													type: "object",
+													description:
+														"The official page the open briefs were last checked against, and the day: SCF's RFP Track page, which lists the briefs open now. Each brief's status and counts.open are set by hand from it, so they hold as of checkedOn; a brief SCF opened or dropped since may not be reflected. counts.open 0 means that page named no open brief that day.",
+													properties: {
+														source: { type: "string", format: "uri" },
+														checkedOn: { type: "string", format: "date" },
+													},
+												},
 												quarters: {
 													type: "array",
-													items: { type: "string" },
+													items: {
+														type: "object",
+														properties: {
+															value: { type: "string" },
+															label: {
+																type: "string",
+																description:
+																	"A fixed display name, not dated: it does not change with time.",
+															},
+														},
+													},
 													description:
-														"Every quarter key the quarter filter accepts, newest first.",
+														"Every quarter the quarter filter accepts (value) with its label, oldest first. A quarter can hold no brief yet.",
 												},
 												categories: {
 													type: "array",
-													items: { type: "string" },
+													items: {
+														type: "object",
+														properties: {
+															value: { type: "string" },
+															label: {
+																type: "string",
+																description:
+																	"A fixed display name, not dated: it does not change with time.",
+															},
+														},
+													},
 													description:
-														"Every category value present in the current brief set; the category filter's live vocabulary.",
+														"Every category the category filter accepts (value) with its display label; a category can hold no brief.",
 												},
 												submitNewBriefAt: {
 													type: "string",
@@ -11676,7 +11856,11 @@ export const spec: OpenAPISpec = {
 										description:
 											"Present when the query returns 0 events: a summary plus live announcement channels to point the user at. NOTE: an OBJECT, not an array.",
 										properties: {
-											summary: { type: "string" },
+											summary: {
+												type: "string",
+												description:
+													"What this feed shows for the selected status, naming any other filter (q, organizer, source): not a claim that no Stellar hackathon is upcoming or active elsewhere. When part of the feed could not be read (meta.warnings, partial true), it says so, counts.total is null, and the empty result is not a check.",
+											},
 											channels: {
 												type: "array",
 												items: {
@@ -11717,12 +11901,18 @@ export const spec: OpenAPISpec = {
 							rules: {
 								type: "object",
 								description:
-									"What the organizer published about submitting and judging, from the stored event page. Absent = the page was not read. A null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated) whose record copies its judging sentence: only judgingCriteria, source and checkedOn; the other keys are absent, not known.",
+									"What the organizer published about submitting and judging. On a DoraHacks event, from its stored event page: absent = the page was not read; a null section = the page has none (on 2026-10-05, 5 of 20 Stellar event pages had a requirements section and 6 a judging section). On an event off DoraHacks (source curated), from its record: the judging sentence it copies from the organizer's page, as judgingCriteria with source and checkedOn, and rubric when the organizer publishes a weighted one; or, when that page was checked and publishes no judging criteria, judgingCriteria null with source, checkedOn and judgingNote. The other keys are absent, not known. Absent on such an event: its organizer's page was not checked (no page on record), which is not a claim that it publishes none.",
 								properties: {
+									rubric: HACKATHON_RUBRIC_SCHEMA,
 									source: {
 										type: "string",
 										description:
-											"Curated events only: the page the judging sentence was checked against.",
+											"Curated events only: the page the judging sentence, or its absence, was checked against.",
+									},
+									judgingNote: {
+										type: "string",
+										description:
+											"Present only when judgingCriteria is null: that the page publishes no judging criteria, with the page and the day it was read or checked. A DoraHacks page's note rests on its sections as read now (a heading, a line of its own or a bold label naming judging, scoring or criteria, in English, Spanish or Portuguese; a list of judges is not criteria).",
 									},
 									checkedOn: {
 										type: "string",
@@ -11746,7 +11936,7 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										nullable: true,
 										description:
-											"The page's judging section, in markdown. null = the page was read (readAt) and has no judging section: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all.",
+											"The page's judging section, in markdown, read from the stored page by the current reader: under the event's own heading that names judging, scoring or criteria (Spanish and Portuguese too), a line of its own or a bold label; sections that sit under different tracks come each under its track's name, and a heading that names both sections serves its criteria part. null = the page was read (readAt) or checked (checkedOn) and has no judging section, as judgingNote says: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all.",
 									},
 									readAt: { type: "string", format: "date-time" },
 								},
@@ -11962,8 +12152,9 @@ export const spec: OpenAPISpec = {
 					},
 					submissions: {
 						type: "array",
+						nullable: true,
 						description:
-							"Every submission served for the event. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`.",
+							"Every submission served for the event: [] = a roster read that found none. null = no roster is held (an event off DoraHacks with no curated roster) or none could be read just now (meta.note says which): not checked, never none. On a DoraHacks row `award` and `awardCategory` read as on `winners`: an award its winners of different placements share is `awardCategory`, never a row's `award`.",
 						items: {
 							type: "object",
 							additionalProperties: true,
@@ -12610,7 +12801,32 @@ export const spec: OpenAPISpec = {
 						type: "string",
 						nullable: true,
 						description:
-							"The sponsor's technical requirements text. Null when the brief carries none, and always null on synthetic scf-round rows.",
+							"The idea's own summary of what to build, as stellarlight.xyz/ideas shows it: not the brief SCF published, and it can differ from it (some were written before the brief). The published brief is publishedBrief. Null when the idea carries none, and always null on synthetic scf-round rows.",
+					},
+					publishedBrief: {
+						type: "object",
+						description:
+							"The brief SCF published for this idea on its RFP Track page: a commit-pinned copy of that page (the live page drops a quarter's briefs when the next arrive) and the day it was read. Absent: no published brief is linked, which is not a claim that SCF published none; always absent on synthetic scf-round rows.",
+						properties: {
+							title: {
+								type: "string",
+								description: "The brief's title on the page.",
+							},
+							url: { type: "string", format: "uri" },
+							checkedOn: { type: "string", format: "date" },
+							functionalRequirements: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"The brief's functional requirements, restated short, in its order. Absent: not restated here; the brief at url has them, with its non-functional requirements, evaluation criteria and deliverables, which are not restated.",
+							},
+							outOfScope: {
+								type: "array",
+								items: { type: "string" },
+								description:
+									"What the brief rules out of scope, restated short. Absent: not restated here.",
+							},
+						},
 					},
 					category: {
 						type: "string",
