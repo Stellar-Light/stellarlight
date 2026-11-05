@@ -39,6 +39,9 @@ const matches = (d: Doc, w: Where | undefined): boolean =>
 		if (k === "or") return (c as Where[]).some((x) => matches(d, x));
 		const v = String(d[k] ?? "");
 		const op = c as Record<string, unknown>;
+		// Payload: exists means present, not null and not empty
+		if ("exists" in op)
+			return (d[k] != null && d[k] !== "") === Boolean(op.exists);
 		if ("equals" in op) return v === String(op.equals);
 		if ("in" in op) return (op.in as unknown[]).map(String).includes(v);
 		if ("greater_than" in op) return v > String(op.greater_than);

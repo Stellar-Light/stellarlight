@@ -29,11 +29,21 @@ export class IncompleteRead extends Error {
 	}
 }
 
+/** Matches every row. With an empty filter Payload's mongo adapter counts
+ * with estimatedDocumentCount, the collection's metadata rather than its
+ * rows, and `complete` must compare against an exact count: this clause
+ * keeps the query non-empty so the database counts the rows. */
+const EVERY_ROW = { id: { exists: true } } as const;
+
 export async function findWholeSet<T = Record<string, unknown>>(
 	payload: Pick<Payload, "find">,
 	args: Parameters<Payload["find"]>[0],
 ): Promise<WholeSet<T>> {
-	const res = await payload.find({ ...args, pagination: true });
+	const res = await payload.find({
+		...args,
+		where: args.where ? { and: [args.where, EVERY_ROW] } : EVERY_ROW,
+		pagination: true,
+	});
 	return {
 		docs: res.docs as unknown as T[],
 		totalDocs: res.totalDocs,

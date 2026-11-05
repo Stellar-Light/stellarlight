@@ -30,6 +30,9 @@ const matches = (d: Doc, w: Where | undefined): boolean =>
 		if (k === "or") return (c as Where[]).some((x) => matches(d, x));
 		const v = String(d[k] ?? "");
 		const op = c as Record<string, unknown>;
+		// Payload: exists means present, not null and not empty
+		if ("exists" in op)
+			return (d[k] != null && d[k] !== "") === Boolean(op.exists);
 		if ("equals" in op) return v === String(op.equals);
 		if ("not_equals" in op) return v !== String(op.not_equals);
 		if ("like" in op)
@@ -53,10 +56,14 @@ vi.mock("@/lib/integrations/stellar-passport", async (orig) => ({
 
 describe("only public builder profiles are served", () => {
 	it("/builders lists and counts public profiles only", async () => {
+		// the mirror alone: an empty fallback, so a failed mirror read cannot pass
+		const passport = state.passport;
+		state.passport = [];
 		const { default: BuildersPage } = await import(
 			"@/app/(frontend)/builders/page"
 		);
 		const html = renderToStaticMarkup(await BuildersPage());
+		state.passport = passport;
 		expect(html).toContain("/builders/pubdev");
 		expect(html).not.toContain("privdev");
 		expect(html).toContain("1 developers building on Stellar");
