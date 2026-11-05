@@ -266,6 +266,24 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
 unless noted.
 
+- Code facts other than interfaces, symbols and capability tags still read
+  test code. After a rescan, a repo whose only Soroban crate is a test
+  fixture serves an empty contractInterface and no symbols, while
+  isDeployableContract, the auth, storage and event signals,
+  contractMacroCount and the cargo-sdk proof still come from that crate:
+  src/lib/code-signals.ts counts them over every fetched .rs file (the
+  fetch adds up to three test files), and its NON_PRODUCT_MANIFEST_DIR is
+  segment-anchored and lacks e2e. Found by the independent re-check of the
+  2026-11-04 repo-canonical lane (deferred there because it moves stored
+  grades). Plan, measured before any execute: run
+  scripts/scan/scan-repo-code.ts in dry mode over every scanned repo twice,
+  with the current rules and with isTestPath (src/lib/code-symbols.ts)
+  applied to the .rs signal loop, the manifest check and the fetch
+  selection (scripts/scan/fetch-repo-code.ts); recompute repoScore for both
+  with the grade (codeDepth and the farm flags read these signals); list
+  every repo whose score, proof or deployability moves, and ship only with
+  that list reviewed.
+
 - Research authority weighting: a 75/15/10 weighting held out best in
   simulation and changes about 10% of confidence labels (the 2026-10-20
   research lane), but the question that motivated it no longer reproduces:

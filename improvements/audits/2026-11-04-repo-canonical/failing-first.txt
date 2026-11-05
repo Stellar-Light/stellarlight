@@ -146,3 +146,5 @@ Re-check item 4 (the stand-in test's mock honors the where clause): mutation che
   with the where-honoring mock the test fails: expected 'stellar-scaffold/cli' to be 'theahaco/scaffold-stellar' (Tests 1 failed);
   with the old mock that hands every row to every read it passes (Tests 1 passed), the defect the review named.
 On the real code the where-honoring test passes.
+
+Re-check item 5 (the spec says which code facts leave test code out; the follow-up queued in improvements/TODO.md): src/lib/__tests__/code-facts-test-rule-spec.test.ts against the spec at dd211947: Tests 1 failed (1); with the change: Tests 1 passed (1).
