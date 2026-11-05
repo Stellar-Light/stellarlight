@@ -52,7 +52,9 @@ const RWA_CACHE_TTL = 60 * 60 * 1000;
 
 /**
  * Fetch asset data from rwa.xyz API (requires RWA_XYZ_API_KEY env var).
- * Returns historical TVL timeseries and current value.
+ * Returns historical TVL timeseries and current value; null only when this
+ * deployment holds no key (not configured). A failed read throws: it is an
+ * outage the route answers 503, never a figure of null (re-check 2026-11-05).
  */
 async function fetchRwaXyzAsset(assetId: string): Promise<{
 	currentTVL: number | null;
@@ -67,50 +69,42 @@ async function fetchRwaXyzAsset(assetId: string): Promise<{
 		return cached.data;
 	}
 
-	try {
-		// Fetch asset timeseries from rwa.xyz
-		const res = await fetch(
-			`https://api.rwa.xyz/v4/assets/${assetId}/timeseries?metric=market_cap&interval=day&chain=stellar`,
-			{
-				headers: {
-					Authorization: `Bearer ${apiKey}`,
-					Accept: "application/json",
-				},
+	// Fetch asset timeseries from rwa.xyz
+	const res = await fetch(
+		`https://api.rwa.xyz/v4/assets/${assetId}/timeseries?metric=market_cap&interval=day&chain=stellar`,
+		{
+			headers: {
+				Authorization: `Bearer ${apiKey}`,
+				Accept: "application/json",
 			},
-		);
+		},
+	);
 
-		if (!res.ok) {
-			console.warn(`rwa.xyz API error for ${assetId}: ${res.status}`);
-			return null;
-		}
+	if (!res.ok) throw new Error(`rwa.xyz answered ${res.status}`);
 
-		const json = await res.json();
-		const timeseries = json.data || json.timeseries || json;
+	const json = await res.json();
+	const timeseries = json.data || json.timeseries || json;
 
-		// Parse timeseries into our format
-		const historicalTVL: { date: number; tvl: number }[] = [];
-		let currentTVL: number | null = null;
+	// Parse timeseries into our format
+	const historicalTVL: { date: number; tvl: number }[] = [];
+	let currentTVL: number | null = null;
 
-		if (Array.isArray(timeseries)) {
-			for (const point of timeseries) {
-				const date = new Date(point.date || point.timestamp).getTime();
-				const tvl = point.value || point.market_cap || point.tvl || 0;
-				if (date && tvl) {
-					historicalTVL.push({ date, tvl });
-				}
-			}
-			if (historicalTVL.length > 0) {
-				currentTVL = historicalTVL[historicalTVL.length - 1].tvl;
+	if (Array.isArray(timeseries)) {
+		for (const point of timeseries) {
+			const date = new Date(point.date || point.timestamp).getTime();
+			const tvl = point.value || point.market_cap || point.tvl || 0;
+			if (date && tvl) {
+				historicalTVL.push({ date, tvl });
 			}
 		}
-
-		const result = { currentTVL, historicalTVL };
-		rwaCache[cacheKey] = { data: result, timestamp: Date.now() };
-		return result;
-	} catch (e) {
-		console.warn(`rwa.xyz fetch failed for ${assetId}:`, e);
-		return null;
+		if (historicalTVL.length > 0) {
+			currentTVL = historicalTVL[historicalTVL.length - 1].tvl;
+		}
 	}
+
+	const result = { currentTVL, historicalTVL };
+	rwaCache[cacheKey] = { data: result, timestamp: Date.now() };
+	return result;
 }
 
 // Cache protocol list for 1 hour in-memory
@@ -220,16 +214,8 @@ export async function GET(
 			`https://api.llama.fi/protocol/${match.slug}`,
 		);
 		// A failed read is not "not found": the protocol matched above.
-		if (!detailRes.ok) {
-			return apiError({
-				status: 503,
-				error: "DefiLlama protocol read failed",
-				advisory:
-					"The protocol is listed on DefiLlama, but its detail read failed. This is an outage, NOT a claim the protocol is gone or holds nothing. Retry after Retry-After.",
-				retryAfterSeconds: 60,
-				startedAt,
-			});
-		}
+		if (!detailRes.ok)
+			throw new Error(`DefiLlama answered ${detailRes.status}`);
 
 		const detail = await detailRes.json();
 
@@ -256,10 +242,17 @@ export async function GET(
 			historicalTVL,
 			asOf: lastPointAsOf(historicalTVL),
 		});
-	} catch (error) {
-		return NextResponse.json(
-			{ error: "Failed to fetch protocol data" },
-			{ status: 500 },
-		);
+	} catch {
+		// Every failure here is an upstream read: rwa.xyz with a key set, or
+		// DefiLlama's protocol list or detail. Each is an outage: 503 with
+		// Retry-After, never a 500 or a 200 of nulls (re-check 2026-11-05).
+		return apiError({
+			status: 503,
+			error: "TVL source read failed",
+			advisory:
+				"rwa.xyz or DefiLlama did not answer this read. This is an outage, NOT a claim the protocol is gone or holds nothing. Retry after Retry-After.",
+			retryAfterSeconds: 60,
+			startedAt,
+		});
 	}
 }

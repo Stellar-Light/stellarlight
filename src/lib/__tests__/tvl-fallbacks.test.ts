@@ -40,7 +40,11 @@ beforeEach(() => {
 		vi.fn(async (url: string) => handler(String(url))),
 	);
 });
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+	vi.unstubAllGlobals();
+	// Each test says whether this deployment holds an rwa.xyz key.
+	delete process.env.RWA_XYZ_API_KEY;
+});
 
 async function rwaTvl() {
 	const { GET } = await import("@/app/api/rwa-tvl/route");
@@ -52,7 +56,11 @@ async function protocol(slug: string) {
 		new NextRequest(`https://stellarlight.xyz/api/defillama/protocol/${slug}`),
 		{ params: Promise.resolve({ slug }) },
 	);
-	return { status: res.status, body: await res.json() };
+	return {
+		status: res.status,
+		retryAfter: res.headers.get("Retry-After"),
+		body: await res.json(),
+	};
 }
 
 describe("/api/rwa-tvl never serves a figure it did not read", () => {
@@ -118,6 +126,7 @@ describe("/api/defillama/protocol/{slug} never serves a figure it did not read",
 	];
 
 	it("Benji with no rwa.xyz key: no figure, no change, no history claimed", async () => {
+		delete process.env.RWA_XYZ_API_KEY;
 		handler = () => json({}, 500);
 		const { status, body } = await protocol("benji");
 		expect(status).toBe(200);
@@ -157,6 +166,41 @@ describe("/api/defillama/protocol/{slug} never serves a figure it did not read",
 		const { status, body } = await protocol("blend");
 		expect(status).toBe(503);
 		expect(body.found).toBeUndefined();
+	});
+
+	// Re-check 2026-11-05: not configured (no key) and failed (key set, read
+	// failed) both served 200 with nulls; a failed list read was a bare 500.
+	it("Benji with a key and a failed rwa.xyz read answers 503 with Retry-After", async () => {
+		process.env.RWA_XYZ_API_KEY = "test-key-not-real";
+		handler = () => json({ error: "upstream" }, 500);
+		const { status, retryAfter } = await protocol("benji");
+		expect(status).toBe(503);
+		expect(Number(retryAfter)).toBeGreaterThan(0);
+	});
+
+	it("Benji with a key and a thrown rwa.xyz read answers 503 too", async () => {
+		process.env.RWA_XYZ_API_KEY = "test-key-not-real";
+		handler = () => {
+			throw new Error("socket hang up");
+		};
+		expect((await protocol("benji")).status).toBe(503);
+	});
+
+	it("a failed DefiLlama protocols list read answers 503 with Retry-After, not a 500", async () => {
+		handler = (url) =>
+			url.endsWith("/protocols") ? json({ error: "down" }, 500) : json({});
+		const { status, retryAfter, body } = await protocol("blend");
+		expect(status).toBe(503);
+		expect(Number(retryAfter)).toBeGreaterThan(0);
+		expect(body.retryAfterSeconds).toBeGreaterThan(0);
+	});
+
+	it("a thrown DefiLlama detail read answers 503", async () => {
+		handler = (url) => {
+			if (url.endsWith("/protocols")) return json(protocols);
+			throw new Error("connection reset");
+		};
+		expect((await protocol("blend")).status).toBe(503);
 	});
 
 	it("a full reading is served with its figures and the date of its last point", async () => {
