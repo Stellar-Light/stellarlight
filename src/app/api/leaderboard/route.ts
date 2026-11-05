@@ -13,12 +13,14 @@
 
 import { type NextRequest, NextResponse } from "next/server";
 import ecData from "@/data/electric-capital-stellar.json";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import { jsonSafe } from "@/lib/json-safe";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { PROJECT_TYPES } from "@/lib/project-types";
+import { tvlStaleOf } from "@/lib/status-checks";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min — Payload data is cheap, but no point hammering it
@@ -42,6 +44,8 @@ interface ProjectRow {
 	// (class 8).
 	tvlUSD: number | null;
 	tvlAsOf: string | null;
+	// #1912: the reading is past the weekly refresh (tvlStaleOf)
+	tvlStale: boolean | null;
 	// On-chain issued-asset stats (2026-07-21 institutional battery: "biggest
 	// stablecoin by supply" had no sort). From stellar.expert via
 	// enrich-onchain-projects.ts; null = NOT TRACKED (no verified issued asset
@@ -90,6 +94,10 @@ function toCsv(rows: ProjectRow[]): string {
 		"asset_supply",
 		"asset_holders",
 		"short_description",
+		// Review 2026-11-04: tvl_usd was served with no date. Appended, so every
+		// older column keeps its position.
+		"tvl_as_of",
+		"tvl_stale",
 	].join(",");
 	const lines = rows.map((r) =>
 		[
@@ -109,6 +117,8 @@ function toCsv(rows: ProjectRow[]): string {
 			r.assetSupply ?? "",
 			r.assetHolders ?? "",
 			r.shortDescription ?? "",
+			r.tvlAsOf ?? "",
+			r.tvlStale ?? "",
 		]
 			.map(csvEscape)
 			.join(","),
@@ -117,6 +127,7 @@ function toCsv(rows: ProjectRow[]): string {
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
@@ -212,8 +223,7 @@ export async function GET(req: NextRequest) {
 	const payload = await getPayloadSafe();
 	let rows: ProjectRow[] = [];
 	// Rows matching the filters BEFORE `limit` is applied — the honest `total`
-	// for meta.counts. Stays 0 if the try block below throws, which matches the
-	// empty `rows` it falls through with.
+	// for meta.counts. A read that throws answers 503 below, never these zeros.
 	let matchedBeforeLimit = 0;
 	// sls-036 residual: the repository-index rollup timestamp — when the repo
 	// rows this response aggregates were last refreshed (max updatedAt across
@@ -221,6 +231,7 @@ export async function GET(req: NextRequest) {
 	// time): the served stars/issues/lastActivityAt are as-of THIS timestamp,
 	// not a live GitHub read. Null when no repos matched.
 	let dataAsOf: string | null = null;
+	let readFailed = !payload;
 
 	if (payload) {
 		try {
@@ -404,6 +415,7 @@ export async function GET(req: NextRequest) {
 					scfAwarded: !!project.scf?.awarded,
 					tvlUSD: project.tvlUSD ?? null,
 					tvlAsOf: project.tvlAsOf ?? null,
+					tvlStale: tvlStaleOf(project.tvlUSD, project.tvlAsOf),
 					assetCode:
 						typeof project.onchain?.assetCode === "string"
 							? project.onchain.assetCode
@@ -515,8 +527,34 @@ export async function GET(req: NextRequest) {
 			matchedBeforeLimit = rows.length;
 			rows = rows.slice(0, limit).map((r, i) => ({ ...r, rank: i + 1 }));
 		} catch {
-			// fall through with empty rows
+			readFailed = true;
 		}
+	}
+	// A failed read served a 200 with an empty ranking and counts 0, which the
+	// CDN kept for 5 minutes as "no projects": it is an outage (#1914 class).
+	if (readFailed) {
+		logApiHit({
+			req,
+			endpoint: "/api/leaderboard",
+			filters: {
+				sort,
+				range,
+				category,
+				limit,
+				format,
+				type: typeList.join(","),
+			},
+			status: 503,
+			startedAt,
+		});
+		return apiError({
+			status: 503,
+			error: "leaderboard read failed",
+			advisory:
+				"The project or repo read behind this ranking failed. This is an outage, NOT a claim that no project ranks or that any count is zero. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+		});
 	}
 
 	logApiHit({
@@ -590,7 +628,7 @@ export async function GET(req: NextRequest) {
 						"range=7d/30d/90d/1y keeps only projects whose lastActivityAt falls inside the window. stars/issues totals remain all-time rollups; they are NOT recomputed within the window.",
 					dataAsOf:
 						"meta.dataAsOf = the most recent index-refresh timestamp across the repo rows this response aggregated; every github.* number is as-of this moment, NOT a live GitHub read. Distinct from meta.generatedAt (when the response was serialized). Null when no indexed repos matched the filter.",
-					tvl: "sort=tvl orders by tvlUSD: DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = NOT TRACKED on DefiLlama (never 'zero TVL'); untracked projects sort below every tracked one. TVL covers DeFi-style protocols only; most projects are legitimately untracked.",
+					tvl: "sort=tvl orders by tvlUSD: DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = NOT TRACKED on DefiLlama (never 'zero TVL'); untracked projects sort below every tracked one. tvlStale true = the row's tvlAsOf is more than 14 days old, or missing, unparseable or in the future (only the date is checked); the order is tvlUSD alone, stale or not. TVL covers DeFi-style protocols only; most projects are legitimately untracked. The CSV carries tvl_as_of and tvl_stale.",
 					supply:
 						"sort=supply orders by assetSupply: circulating supply of the project's issued asset in WHOLE ASSET UNITS of its own denomination (assetCode names it: USDC, CETES, …), from stellar.expert. This is NOT USD-comparable across assets; a JPY or ARS coin's unit count dwarfs a USD coin's without being larger in value. For a USD-comparable stablecoin ranking (market cap, complete set incl. USDY/Ondo), use getStablecoins (/api/stablecoins) instead. assetSupply null = NOT TRACKED (no verified issued asset in our on-chain seed set), never 'zero supply'; untracked projects sort below every tracked one. assetHolders = trustline holder count.",
 				},

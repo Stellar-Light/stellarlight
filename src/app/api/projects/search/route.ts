@@ -75,7 +75,11 @@ import {
 	productsCoverage,
 } from "@/lib/rwa-products";
 import { serverTiming } from "@/lib/server-timing";
-import { type StatusCheck, statusChecksFor } from "@/lib/status-checks";
+import {
+	type StatusCheck,
+	statusChecksFor,
+	tvlStaleOf,
+} from "@/lib/status-checks";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -235,6 +239,7 @@ async function semanticProjectRows(
 			publicGoods: pickPublicGoods(p.publicGoods),
 			tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 			tvlAsOf: p.tvlAsOf ?? null,
+			tvlStale: tvlStaleOf(p.tvlUSD, p.tvlAsOf),
 			// sls-031: TVL methodology provenance (which source, computed how)
 			tvlSource: p.tvlSource ?? null,
 			tvlMethod: p.tvlMethod ?? null,
@@ -430,6 +435,8 @@ interface ProjectRow {
 	// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 	onchain?: any;
 	tvlAsOf?: string | null;
+	// #1912: the reading is past the weekly refresh (tvlStaleOf)
+	tvlStale?: boolean | null;
 	// sls-031: TVL provenance — which source produced tvlUSD and how.
 	tvlSource?: string | null;
 	tvlMethod?: string | null;
@@ -1537,6 +1544,7 @@ async function handle(req: NextRequest) {
 					publicGoods: pickPublicGoods(p.publicGoods),
 					tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 					tvlAsOf: p.tvlAsOf ?? null,
+					tvlStale: tvlStaleOf(p.tvlUSD, p.tvlAsOf),
 					// sls-031: TVL methodology provenance
 					tvlSource: p.tvlSource ?? null,
 					tvlMethod: p.tvlMethod ?? null,
@@ -2226,6 +2234,7 @@ async function handle(req: NextRequest) {
 					deployment: pickDeployment(c.deployment, c.slug),
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
+					tvlStale: tvlStaleOf(c.tvlUSD, c.tvlAsOf),
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not
 					// inherited from the shadow via the spread.
 					tvlSource: c.tvlSource ?? null,
