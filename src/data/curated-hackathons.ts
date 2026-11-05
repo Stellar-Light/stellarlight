@@ -309,6 +309,14 @@ export const CURATED_WINNERS_NOTES: Record<string, string> = {
 		"Secondhand: no organizer or SDF page we read names this hackathon's winners (hackmeridian.com, meridian.stellar.org/hackmeridian and its Winners Circle session page, and the stellar.org blog, checked 2026-11-04). HackProof, an MIT-licensed dataset, lists six placements in its event file at commit ea7e1982 (https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/hackmeridian-2026.yaml), two first places and four runners-up, with no source of its own; each placed row carries that file as winnerSource. This is not a claim that these are the organizer's results.",
 };
 
+/** The winners note while a "Secondhand" event's placed rows are not stored
+ * yet (between a deploy and its import): no winner carries the list's
+ * file, so the note cannot say any does. */
+export const CURATED_WINNERS_NOTES_UNSTORED: Record<string, string> = {
+	"hackmeridian-2026":
+		"Secondhand: no organizer or SDF page we read names this hackathon's winners (hackmeridian.com, meridian.stellar.org/hackmeridian and its Winners Circle session page, and the stellar.org blog, checked 2026-11-04). HackProof, an MIT-licensed dataset, lists six placements in its event file at commit ea7e1982 (https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/hackmeridian-2026.yaml), with no source of its own, and none of them is stored here yet, so winners is empty. This is not a claim that no one won.",
+};
+
 /** getHackathon's stats.coverageNote after the generic one (partialNote) on
  * a curated event whose stored rows are a partial list (coverage partial):
  * where the list comes from and what Scout checked, dated. */

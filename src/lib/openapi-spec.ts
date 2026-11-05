@@ -11856,6 +11856,7 @@ export const spec: OpenAPISpec = {
 							properties: {
 								award: { type: "string", nullable: true },
 								awardCategory: { type: "string", nullable: true },
+								winnerSource: BUILD_WINNER_SOURCE_SCHEMA,
 								entryBasis: BUILD_ENTRY_BASIS_SCHEMA,
 								contracts: BUILD_CONTRACTS_SCHEMA,
 							},

@@ -5,6 +5,7 @@ import {
 	CURATED_COVERAGE_NOTES,
 	CURATED_HACKATHONS,
 	CURATED_WINNERS_NOTES,
+	CURATED_WINNERS_NOTES_UNSTORED,
 } from "@/data/curated-hackathons";
 import { curatedFacts } from "@/lib/curated-import";
 import { partialNote } from "@/lib/hackathon-analytics";
@@ -631,8 +632,10 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 			/^Winners named by BAF's newsletter \(2026-05-04\), not by DoraHacks, which assigned none when checked on 2026-10-22: .*Seyf is not served/,
 		);
 		expect(body.hackathon.profile.winners).toBe(2);
-		// The submissions list keeps its shape; the source is on winner rows.
-		for (const s of body.submissions) expect("winnerSource" in s).toBe(false);
+		// A placed submission row says whose placement it is, as winners do
+		// (audit 2026-11-04); no other row carries a source.
+		for (const s of body.submissions)
+			expect("winnerSource" in s).toBe(!!s.isWinner);
 		expect(
 			body.submissions
 				.filter((s: { isWinner: boolean }) => s.isWinner)
@@ -1051,6 +1054,13 @@ describe("an event whose stored rows are a partial list", () => {
 		expect(
 			subs.filter((r) => r.entryBasis === "placement-listed"),
 		).toHaveLength(1);
+		// A placed row says whose placement it is here too, as on winners.
+		expect(subs.filter((r) => r.isWinner).map((r) => r.winnerSource)).toEqual(
+			Array(6).fill(AWARDS),
+		);
+		expect(
+			subs.filter((r) => !r.isWinner).some((r) => "winnerSource" in r),
+		).toBe(false);
 		// Placements secondhand, each with the file that names it, ranked.
 		expect(
 			(body.winners as Array<Record<string, unknown>>).map((w) => [
@@ -1077,6 +1087,34 @@ describe("an event whose stored rows are a partial list", () => {
 				body,
 			),
 		).toEqual([]);
+	});
+});
+
+// Audit 2026-11-04: between the deploy and the import, winners was [] beside
+// a note saying each placed row carries its source.
+describe("a partial event with nothing stored yet", () => {
+	it("says none of the list's placements is stored yet", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		const ev = CURATED_HACKATHONS.find((h) => h.uname === "hackmeridian-2026");
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			{ ...ev, source: "curated" } as DoraHacksHackathon,
+		]);
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
+		eventPage = undefined;
+		try {
+			const body = await getEvent("hackmeridian-2026");
+			expect(body.winners).toEqual([]);
+			const note = CURATED_WINNERS_NOTES_UNSTORED["hackmeridian-2026"];
+			expect(body.hackathon.stats.winnersNote).toBe(note);
+			expect(note).toMatch(/none of them is stored here yet/);
+			expect(note).toMatch(/checked 2026-11-04/);
+			expect(note).not.toMatch(/each placed row carries/);
+		} finally {
+			eventPage = storedEvent;
+		}
 	});
 });
 

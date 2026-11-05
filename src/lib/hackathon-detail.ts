@@ -10,6 +10,7 @@ import {
 	CURATED_COVERAGE_NOTES,
 	CURATED_HACKATHONS,
 	CURATED_WINNERS_NOTES,
+	CURATED_WINNERS_NOTES_UNSTORED,
 } from "@/data/curated-hackathons";
 import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
 import { WINNER_OVERLAY } from "@/data/winner-overlay";
@@ -475,6 +476,8 @@ export async function getHackathonDetail(
 					// its repo cites that passed Scout's checks.
 					...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
 					...(b.contracts ? { contracts: b.contracts } : {}),
+					// A placement named off DoraHacks: the page or file naming it.
+					...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
 				}))
 			: // A failed live read (its winners unreadable, a timeout)
 				// serves no roster; the winners note then says they could
@@ -537,8 +540,12 @@ export async function getHackathonDetail(
 		// winner hidden upstream, a curated event's dated note, winners
 		// named off DoraHacks, or an ended DoraHacks event with none.
 		let winnersNote = hiddenWinnersNote(hidden);
+		// A list's placements not stored yet: the note says so.
 		if (dora.source === "curated")
-			winnersNote ??= CURATED_WINNERS_NOTES[slug] ?? null;
+			winnersNote ??=
+				(!winners.some((w) => "winnerSource" in w) &&
+					CURATED_WINNERS_NOTES_UNSTORED[slug]) ||
+				(CURATED_WINNERS_NOTES[slug] ?? null);
 		else if (winners.some((w) => "winnerSource" in w))
 			winnersNote ??=
 				WINNER_OVERLAY.find((e) => e.hackathonSlug === slug)?.note ?? null;

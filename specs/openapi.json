@@ -17993,6 +17993,10 @@
 									"type": "string",
 									"nullable": true
 								},
+								"winnerSource": {
+									"type": "string",
+									"description": "Present only when a page or file off DoraHacks, not DoraHacks' own winner assignments, names this win: that page or file, the evidence to cite; the submission's own links stay its DoraHacks ones. The placement is then the place as that source states it, 'Winner' when it names none. On a row of a partial list (entryBasis set), the list's own placement file, a secondhand source: HackMeridian 2026's placements come from HackProof's event file, and no organizer page names them (getHackathon stats.winnersNote). Absent on a win DoraHacks assigned, on a winner from an event off DoraHacks imported from the page that names it (curated-{event}-{name} with no entryBasis, whose own link is its source) and on a submission that did not win."
+								},
 								"entryBasis": {
 									"type": "string",
 									"enum": [
