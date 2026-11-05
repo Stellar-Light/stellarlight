@@ -27,11 +27,14 @@ vi.mock("@/lib/integrations/dorahacks", async (orig) => {
 	const { CURATED_HACKATHONS: rows } = await import(
 		"@/data/curated-hackathons"
 	);
+	const all = vi.fn(async () => rows.map((h) => ({ ...h })));
 	return {
 		...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
-		fetchAllDoraHacksHackathons: vi.fn(async () => rows.map((h) => ({ ...h }))),
+		fetchAllDoraHacksHackathons: all,
+		// The checked listing reads the same rows, so a test that sets the
+		// plain one sets this too.
 		fetchAllDoraHacksHackathonsChecked: vi.fn(async () => ({
-			hackathons: rows.map((h) => ({ ...h })),
+			hackathons: await all(),
 			complete: true,
 		})),
 		fetchHackathonSubmissions: vi.fn(async () => []),
@@ -391,12 +394,34 @@ describe("a DoraHacks event whose roster could not be read", () => {
 		).toEqual([]);
 	});
 
-	it("keeps an empty list for a roster DoraHacks read as empty", async () => {
+	it("keeps an empty list for a roster DoraHacks read as empty, and says so", async () => {
 		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([DORA]);
 		vi.mocked(fetchHackathonSubmissions).mockResolvedValueOnce([]);
 		const body = await detail(DORA.uname);
 		expect(body.submissions).toEqual([]);
 		expect(body.meta.note).toMatch(/DoraHacks lists no submission/);
+		// Review round 3: the winners note said the roster could not be read.
+		expect(body.hackathon.stats.winnersNote).toBe(
+			"DoraHacks lists this event's winners as announced (winner_announced true), but it lists no submission for the event, so no winner is recorded here. This is not a claim that no one won.",
+		);
+	});
+
+	// Review round 3: a failed organizer read turned a real slug into 404.
+	it("answers could-not-check, not not-found, when the listing read failed", async () => {
+		vi.mocked(fetchAllDoraHacksHackathonsChecked).mockResolvedValueOnce({
+			hackathons: [],
+			complete: false,
+		});
+		const { getHackathonDetail } = await import("@/lib/hackathon-detail");
+		const r = await getHackathonDetail(payload, "stellar-hacks-zk");
+		expect(r.found).toBe(false);
+		expect("unchecked" in r && r.unchecked).toBe(true);
+		vi.mocked(fetchAllDoraHacksHackathonsChecked).mockResolvedValueOnce({
+			hackathons: [],
+			complete: true,
+		});
+		const miss = await getHackathonDetail(payload, "stellar-hacks-zk");
+		expect("unchecked" in miss).toBe(false);
 	});
 });
 
@@ -422,6 +447,40 @@ describe("the DoraHacks roster read", () => {
 		);
 		await expect((await roster())({ id: 1, uname: "x" })).rejects.toThrow(
 			/HTTP 503/,
+		);
+	});
+
+	// Review round 3: a roster cut at the page cap was served as whole.
+	it("throws on a roster cut short: past the page cap, or under its own count", async () => {
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (url: string) =>
+				String(url).includes("/buidls")
+					? json(200, {
+							count: 999,
+							results: [{ buidl: { id: 1, name: "One" } }],
+							next: "more",
+						})
+					: json(200, { award_list: [] }),
+			),
+		);
+		await expect((await roster())({ id: 1, uname: "x" })).rejects.toThrow(
+			/cut short/,
+		);
+		vi.stubGlobal(
+			"fetch",
+			vi.fn(async (url: string) =>
+				String(url).includes("/buidls")
+					? json(200, {
+							count: 3,
+							results: [{ buidl: { id: 1, name: "One" } }],
+							next: null,
+						})
+					: json(200, { award_list: [] }),
+			),
+		);
+		await expect((await roster())({ id: 1, uname: "x" })).rejects.toThrow(
+			/cut short/,
 		);
 	});
 

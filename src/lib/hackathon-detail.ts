@@ -35,7 +35,7 @@ import { heldSecurity } from "@/lib/held-repos";
 import {
 	type DoraHacksSubmission,
 	doraEventRef,
-	fetchAllDoraHacksHackathons,
+	fetchAllDoraHacksHackathonsChecked,
 	fetchHackathonSubmissions,
 	getHackathonUrl,
 	parsePlacement,
@@ -247,12 +247,18 @@ function staticWinnersForSlug(slug: string): SubmissionRow[] {
  * read (not checked). */
 function noWinnersNote(
 	announced: boolean | null,
-	rosterRead: boolean,
+	read: boolean,
+	rows: number,
 ): string | null {
 	if (announced === false)
-		return `Not announced upstream: DoraHacks lists this event's winners as not announced (winner_announced false in its event listing, which Scout refreshes hourly)${rosterRead ? ", and no submission served here carries a prize" : ""}. This is not a claim that no one won: an organizer can name winners off DoraHacks.`;
-	if (!rosterRead)
-		return "Winners could not be checked: no submission of this event could be read (Scout's stored copy holds none, and DoraHacks' live roster failed or returned none), so this 0 is not a count.";
+		return `Not announced upstream: DoraHacks lists this event's winners as not announced (winner_announced false in its event listing, which Scout refreshes hourly)${rows ? ", and no submission served here carries a prize" : ""}. This is not a claim that no one won: an organizer can name winners off DoraHacks.`;
+	if (!read)
+		return "Winners could not be checked: no submission of this event could be read (Scout's stored copy holds none, and DoraHacks' live roster failed), so this 0 is not a count.";
+	// A roster read that found none: its own case, never "could not read".
+	if (!rows)
+		return announced === true
+			? "DoraHacks lists this event's winners as announced (winner_announced true), but it lists no submission for the event, so no winner is recorded here. This is not a claim that no one won."
+			: "DoraHacks lists no submission for this event, so no winner is recorded here.";
 	if (announced === true)
 		return "DoraHacks lists this event's winners as announced (winner_announced true), but no submission served here carries a prize, so its winners are not recorded here. This is not a claim that no one won.";
 	return null;
@@ -387,8 +393,19 @@ export async function getHackathonDetail(
 	// rows in by `uname` slug; without this, the detail endpoint 404s
 	// on every uncurated event.
 	if (!hackathon) {
-		const listed = await fetchAllDoraHacksHackathons();
+		const { hackathons: listed, complete } =
+			await fetchAllDoraHacksHackathonsChecked();
 		const dora = listed.find((h) => h.uname === slug);
+		// A listing read that failed in part did not look for every event:
+		// could-not-check, never "not found".
+		if (!dora && !complete)
+			return {
+				found: false as const,
+				unchecked: true as const,
+				body: {
+					error: `hackathon ${slug} could not be checked: a DoraHacks listing read failed. Retry shortly.`,
+				},
+			};
 		if (!dora) {
 			// The way forward goes in the error text itself: some agent
 			// clients keep only `error` from a 404.
@@ -589,7 +606,8 @@ export async function getHackathonDetail(
 		else if (!winners.length && status === "completed")
 			winnersNote ??= noWinnersNote(
 				dora.winner_announced,
-				liveSubmissions.length > 0,
+				roster === "held",
+				liveSubmissions.length,
 			);
 		const trackMap = new Map<
 			string,

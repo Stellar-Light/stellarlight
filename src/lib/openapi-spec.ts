@@ -3766,6 +3766,21 @@ export const spec: OpenAPISpec = {
 							},
 						},
 					},
+					"503": {
+						description:
+							"Could not check: the store did not answer, or a DoraHacks listing read failed so the slug was not looked for in every listing. An outage, NOT a not-found. Retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending.",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 				},
 			},
 		},
@@ -6285,7 +6300,11 @@ export const spec: OpenAPISpec = {
 														type: "object",
 														properties: {
 															value: { type: "string" },
-															label: { type: "string" },
+															label: {
+																type: "string",
+																description:
+																	"A fixed display name, not dated: it does not change with time.",
+															},
 														},
 													},
 													description:
@@ -6297,7 +6316,11 @@ export const spec: OpenAPISpec = {
 														type: "object",
 														properties: {
 															value: { type: "string" },
-															label: { type: "string" },
+															label: {
+																type: "string",
+																description:
+																	"A fixed display name, not dated: it does not change with time.",
+															},
 														},
 													},
 													description:

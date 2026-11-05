@@ -87,11 +87,19 @@ const doraEvent = {
 	hackers_count: 300,
 	status: 2,
 };
-vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
-	...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
-	fetchAllDoraHacksHackathons: vi.fn(async () => [doraEvent]),
-	fetchHackathonSubmissions: live,
-}));
+vi.mock("@/lib/integrations/dorahacks", async (orig) => {
+	const all = vi.fn(async () => [doraEvent]);
+	return {
+		...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
+		fetchAllDoraHacksHackathons: all,
+		// The detail reads the checked listing: the same rows, read whole.
+		fetchAllDoraHacksHackathonsChecked: vi.fn(async () => ({
+			hackathons: await all(),
+			complete: true,
+		})),
+		fetchHackathonSubmissions: live,
+	};
+});
 const build = (id: string, over: Partial<IndexedBuild> = {}): IndexedBuild => ({
 	id,
 	name: id,
@@ -269,10 +277,10 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
 		const body = await getEvent();
 		expect(body.hackathon.stats.hiddenWinners).toBeNull();
-		// No roster at all (the live read returned none): its 0 winners is
-		// not a count either.
+		// The live read returned none: a roster read that found none, said
+		// as that, not as one that could not be read.
 		expect(body.hackathon.stats.winnersNote).toMatch(
-			/^Winners could not be checked/,
+			/^DoraHacks lists no submission for this event/,
 		);
 	});
 

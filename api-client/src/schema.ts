@@ -3672,6 +3672,17 @@ export interface operations {
                     };
                 };
             };
+            /** @description Could not check: the store did not answer, or a DoraHacks listing read failed so the slug was not looked for in every listing. An outage, NOT a not-found. Retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending. */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     compareHackathons: {
@@ -5607,11 +5618,13 @@ export interface operations {
                             /** @description Every quarter the quarter filter accepts (value) with its label, oldest first. A quarter can hold no brief yet. */
                             quarters?: {
                                 value?: string;
+                                /** @description A fixed display name, not dated: it does not change with time. */
                                 label?: string;
                             }[];
                             /** @description Every category the category filter accepts (value) with its display label; a category can hold no brief. */
                             categories?: {
                                 value?: string;
+                                /** @description A fixed display name, not dated: it does not change with time. */
                                 label?: string;
                             }[];
                             /**
