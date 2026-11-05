@@ -32,7 +32,7 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-04",
-		surfaces: ["api", "skill"],
+		surfaces: ["api", "mcp", "skill"],
 		version: "spec@1.9.125",
 		type: "added",
 		summary:

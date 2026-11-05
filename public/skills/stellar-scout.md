@@ -246,7 +246,7 @@ Full docs in `references/api-reference.md`. Quick lookup table:
 | `/api/contracts` | GET | Evidence-gated registry of verified mainnet contracts, joined to code truth + usage + audits (`?domain=` closed set). Absence ≠ nonexistence |
 | `/api/scf-pitch` | GET | **Composite:** live round state + funded peers with award totals + vet-idea view + deterministic pitch angles (`?q=`). Round never asserted closed on fetch failure |
 | `/api/hackathon-brief` | GET | **Composite:** the Hackathon Build Brief in one call: vet + prototype prior art + starter repos with trust summaries + live contracts + funding + `whatNotToClaim` (`?q=`). Rails and RFPs not bundled |
-| `/api/hackathons/builds` | GET | Prior art over prototypes: every DoraHacks submission, `?q=` topic, `winnersOnly=1`, `track=` |
+| `/api/hackathons/builds` | GET | Prior art over prototypes: every DoraHacks submission plus curated ones from events off it (winners named by their own pages; HackMeridian 2026's partial list from HackProof, each with its `entryBasis`), `?q=` topic, `winnersOnly=1`, `track=` |
 | `/api/stablecoins` | GET | Tracked stablecoins ranked by USD market cap; `?peg=` filter. Never compare raw `supply` across pegs |
 | `/api/changes` | GET | Reconciliation feed: rows that changed since `?since=` (projects/repos/partners) with `facets`. For refreshing remembered claims, not discovery |
 | - | - | Project rows carry `onchain` metrics (contract events/subinvocations + asset holders/supply, weekly deltas) for verified join keys; null = not tracked, never 'inactive' |
