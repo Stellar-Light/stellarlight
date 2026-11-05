@@ -25,6 +25,7 @@ import { CURATED_BUILD_ID } from "@/lib/hackathon-build-links";
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
+	readBuildContracts,
 } from "@/lib/hackathon-builds";
 import {
 	hiddenWinnersNote,
@@ -439,6 +440,13 @@ export async function getHackathonDetail(
 		]);
 		const stored = index.filter((b) => b.hackathon.slug === slug);
 		const fromStore = stored.length > 0;
+		// A partial list's contracts are read from the store, not the cached
+		// index; a failed read leaves them absent (unknown, not none).
+		const entryOf = (b: IndexedBuild) => `${b.id}@${b.hackathon.slug}`;
+		const contracts = await readBuildContracts(
+			payload,
+			stored.filter((b) => b.entryBasis).map(entryOf),
+		);
 		// Only the winners on record (a curated import), or a partial list
 		// from another source: the field is unknown, so no count of it is
 		// served, never the winner or row count.
@@ -475,7 +483,9 @@ export async function getHackathonDetail(
 					// Why a row of a partial list is stored, and the contracts
 					// its repo cites that passed Scout's checks.
 					...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
-					...(b.contracts ? { contracts: b.contracts } : {}),
+					...(contracts?.has(entryOf(b))
+						? { contracts: contracts.get(entryOf(b)) }
+						: {}),
 					// A placement named off DoraHacks: the page or file naming it.
 					...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
 				}))

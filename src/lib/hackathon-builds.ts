@@ -9,6 +9,7 @@
  */
 import { unstable_cache } from "next/cache";
 import { overlayWinnerOf } from "@/data/winner-overlay";
+import { INDEX_BYTES_RED, indexBytes } from "@/lib/builds-index-size";
 import { DEFAULT_READ_TIMEOUT_MS, withReadTimeout } from "@/lib/degraded-read";
 import { libraryOf } from "@/lib/hackathon-analytics";
 import {
@@ -62,11 +63,9 @@ export interface IndexedBuild extends DoraHacksSubmission {
 	 * list names: that page or file, the evidence of the win. */
 	winnerSource?: string;
 	/** Present only on a row from a list kept off the organizer's (an event
-	 * whose coverage is partial): why it is stored. */
+	 * whose coverage is partial): why it is stored. Its contracts are not in
+	 * the index (readBuildContracts reads them where they are served). */
 	entryBasis?: EntryBasis;
-	/** Present only when the repo's cited contracts were checked: the
-	 * testnet contracts that passed every check ([] = none did). */
-	contracts?: BuildContract[];
 }
 
 /** The off-DoraHacks win of a stored entry DoraHacks did not place, or null.
@@ -109,12 +108,43 @@ const winnerSourceOf = (
 };
 
 /** The fields a row from a list kept off the organizer's carries. */
-const entryFieldsOf = (d: HackathonBuild) => ({
-	...(isEntryBasis(d.entryBasis) ? { entryBasis: d.entryBasis } : {}),
-	...(d.contractsCheckedAt && isContractList(d.contracts)
-		? { contracts: d.contracts }
-		: {}),
-});
+const entryFieldsOf = (d: HackathonBuild) =>
+	isEntryBasis(d.entryBasis) ? { entryBasis: d.entryBasis } : {};
+
+/** The checked contracts of these stored entries (entryKey), read from the
+ * store: they are kept out of the cached index, which Next caches only up
+ * to 2 MB. An entry not checked is absent; null when the read failed
+ * (unknown, never none). */
+export async function readBuildContracts(
+	payload: NonNullable<Awaited<ReturnType<typeof getPayloadSafe>>>,
+	entryKeys: string[],
+): Promise<Map<string, BuildContract[]> | null> {
+	if (!entryKeys.length) return new Map();
+	try {
+		const res = await withReadTimeout(
+			payload.find({
+				collection: "hackathon-builds",
+				where: {
+					and: [
+						{ entryKey: { in: entryKeys } },
+						{ contractsCheckedAt: { exists: true } },
+					],
+				},
+				pagination: false,
+				depth: 0,
+				select: { entryKey: true, contracts: true, contractsCheckedAt: true },
+			}),
+			DEFAULT_READ_TIMEOUT_MS,
+		);
+		const out = new Map<string, BuildContract[]>();
+		for (const d of res.docs as HackathonBuild[])
+			if (d.entryKey && d.contractsCheckedAt && isContractList(d.contracts))
+				out.set(d.entryKey, d.contracts);
+		return out;
+	} catch {
+		return null;
+	}
+}
 
 const isCategoryList = (v: unknown): v is BuildCategory[] =>
 	Array.isArray(v) &&
@@ -574,6 +604,8 @@ async function readStoredBuilds(): Promise<IndexedBuild[] | null> {
 					embedding: false,
 					embeddingTextHash: false,
 					entryEvidence: false,
+					// Read where served (readBuildContracts), not cached.
+					contracts: false,
 				},
 			}),
 			8_000,
@@ -632,6 +664,15 @@ export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
 	// compare with a note. The event detail and builder pages still show an
 	// unreadable index as no submissions, as they did an empty one.
 	if (!index.length) throw new Error("hackathon builds index came back empty");
+	// Next caches the result only up to 2 MB, with no error past it.
+	const bytes = indexBytes(index);
+	console.log(
+		`hackathon builds index: ${index.length} rows, ${bytes} bytes serialised (red above ${INDEX_BYTES_RED})`,
+	);
+	if (bytes > INDEX_BYTES_RED)
+		console.error(
+			`✗ hackathon builds index is ${bytes} bytes: past Next's 2 MB cache item limit every reader rebuilds it from the store`,
+		);
 	return index;
 }
 

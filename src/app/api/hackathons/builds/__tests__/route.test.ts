@@ -878,6 +878,21 @@ describe("GET /api/hackathons/builds rows of a partial list", () => {
 				}),
 			),
 		);
+		// Contracts are not in the cached index: the route reads the page's
+		// from the store.
+		const { getPayloadSafe } = await import("@/lib/payload-client");
+		const stored = HACKPROOF_BUILDS.map((b) => ({
+			entryKey: `${b.id}@hackmeridian-2026`,
+			contracts: b.contracts,
+			contractsCheckedAt: b.contractsCheckedAt,
+		}));
+		const contractReads: unknown[] = [];
+		vi.mocked(getPayloadSafe).mockResolvedValueOnce({
+			find: async (a: { select?: Record<string, unknown> }) => {
+				contractReads.push(a.select);
+				return { docs: a.select?.contracts ? stored : [] };
+			},
+		} as never);
 		const { GET } = await import("../route");
 		const res = await GET(
 			new NextRequest(
@@ -894,7 +909,11 @@ describe("GET /api/hackathons/builds rows of a partial list", () => {
 			true,
 		);
 		expect(rows.filter((r) => r.winnerSource)).toHaveLength(6);
-		// Every row was checked: its kept contracts, [] when none passed.
+		// Every row was checked: its kept contracts, [] when none passed,
+		// read from the store in one read.
+		expect(contractReads).toEqual([
+			{ entryKey: true, contracts: true, contractsCheckedAt: true },
+		]);
 		expect(rows.every((r) => Array.isArray(r.contracts))).toBe(true);
 		expect(
 			rows.reduce((n, r) => n + (r.contracts as unknown[]).length, 0),

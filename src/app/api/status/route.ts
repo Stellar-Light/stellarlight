@@ -16,6 +16,9 @@ import { NextResponse } from "next/server";
 import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
 import ecData from "@/data/electric-capital-stellar.json";
 import { getUsageStats } from "@/lib/api-usage";
+import { indexBytes } from "@/lib/builds-index-size";
+import { withReadTimeout } from "@/lib/degraded-read";
+import { getHackathonBuildsIndex } from "@/lib/hackathon-builds";
 import { fetchSdfSkillCatalog } from "@/lib/integrations/sdf-skills";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
@@ -37,6 +40,35 @@ interface SourceStatus {
 	 * different populations — never merge/sum them without labeling scope. */
 	populationId?: string;
 	notes?: string;
+	/** hackathonBuilds only: the cached index's serialised size. */
+	indexBytes?: number | null;
+}
+
+/** The submissions index search, analyze and event pages read: its rows and
+ * serialised size, which Next caches as one item of at most 2 MB (the live
+ * canary reds above 1.8 MB). null when it could not be read in time. */
+async function buildsIndexStatus(): Promise<SourceStatus> {
+	const notes =
+		"The hackathon submissions index (powers /api/hackathons/builds, analyze and event pages): count = its rows; indexBytes = its serialised size, cached by Next as one item of at most 2 MB, past which every request rebuilds it from the store.";
+	try {
+		const idx = await withReadTimeout(getHackathonBuildsIndex(), 8_000);
+		return {
+			name: "hackathonBuilds",
+			count: idx.length,
+			lastUpdatedAt: null,
+			populationId: "hackathon-builds|index",
+			notes,
+			indexBytes: indexBytes(idx),
+		};
+	} catch {
+		return {
+			name: "hackathonBuilds",
+			count: null,
+			lastUpdatedAt: null,
+			notes,
+			indexBytes: null,
+		};
+	}
 }
 
 async function collectionStatus(
@@ -188,6 +220,7 @@ export async function GET() {
 				partners,
 				ecosystemStats,
 				sdfSkills,
+				await buildsIndexStatus(),
 			],
 			usage: usage ?? {
 				total: null,

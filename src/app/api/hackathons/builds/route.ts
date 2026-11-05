@@ -30,6 +30,7 @@ import {
 import {
 	getHackathonBuildsIndex,
 	type IndexedBuild,
+	readBuildContracts,
 	unusedWordsWarning,
 } from "@/lib/hackathon-builds";
 import { heldSecurity } from "@/lib/held-repos";
@@ -41,6 +42,7 @@ import {
 } from "@/lib/integrations/dorahacks";
 import { matchModeMeta } from "@/lib/match-mode";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { getPayloadSafe } from "@/lib/payload-client";
 import { serverTiming } from "@/lib/server-timing";
 
 export const dynamic = "force-dynamic";
@@ -149,48 +151,65 @@ export async function GET(req: NextRequest) {
 	// Award text several placements of one event share names their category,
 	// never one build's prize: read over every event's winners, not the page.
 	const categories = prizeCategories(indexed);
-	const builds = scored
-		.slice(offset, offset + limit)
-		.map(({ b, matched, similarity }) => ({
-			// Opens the full submission in getHackathonBuild.
-			id: b.id,
-			name: b.name,
-			description: b.description,
-			hackathon: b.hackathon.title,
-			hackathonSlug: b.hackathon.slug,
-			endedAt: b.hackathon.endedAt,
-			track: b.track,
-			placement: b.hackathonPlacement,
-			...prizeLabels(categories, b),
-			// What this project actually won, parsed from its own placement string.
-			prizeUsd: parsePlacement(b.hackathonPlacement).prizeUsd || null,
-			isWinner: b.isWinner,
-			// A win named off DoraHacks: the page or file that names it.
-			...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
-			// A row of a partial list: why it is stored, and the testnet
-			// contracts its repo cites that passed Scout's checks.
-			...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
-			...(b.contracts ? { contracts: b.contracts } : {}),
-			votes: b.voteCount,
-			url: b.url,
-			githubUrl: b.githubUrl,
-			...heldSecurity(b),
-			demoUrl: b.demoUrl,
-			// Present only when the link was checked: the directory project that
-			// lists this build's exact repo, or null when none does.
-			...(b.project !== undefined ? { project: b.project } : {}),
-			// What the repo did after the event, in analyze's activity
-			// vocabulary, and its last commit: absent is unknown.
-			...afterEventFields(b),
-			// Present only when the repo was read: absent is unknown.
-			...(b.stack ? { stack: b.stack } : {}),
-			// Present only when categorized: best first.
-			...(b.categories ? { categories: b.categories.map((c) => c.type) } : {}),
-			...(matched.length ? { matchedTerms: matched } : {}),
-			...(similarity !== undefined
-				? { similarity: Math.round(similarity * 1000) / 1000 }
-				: {}),
-		}));
+	const page = scored.slice(offset, offset + limit);
+	// A partial list's contracts are not in the cached index: this page's are
+	// read from the store. A failed read leaves them absent and says so.
+	const entryOf = (b: IndexedBuild) => `${b.id}@${b.hackathon.slug}`;
+	const listed = page
+		.filter(({ b }) => b.entryBasis)
+		.map(({ b }) => entryOf(b));
+	const payload = listed.length ? await getPayloadSafe() : null;
+	const contracts = listed.length
+		? payload
+			? await readBuildContracts(payload, listed)
+			: null
+		: new Map();
+	if (!contracts)
+		warnings.push(
+			`contracts could not be read for the ${listed.length} rows of a partial list on this page, so they carry none here: unknown, not none`,
+		);
+	const builds = page.map(({ b, matched, similarity }) => ({
+		// Opens the full submission in getHackathonBuild.
+		id: b.id,
+		name: b.name,
+		description: b.description,
+		hackathon: b.hackathon.title,
+		hackathonSlug: b.hackathon.slug,
+		endedAt: b.hackathon.endedAt,
+		track: b.track,
+		placement: b.hackathonPlacement,
+		...prizeLabels(categories, b),
+		// What this project actually won, parsed from its own placement string.
+		prizeUsd: parsePlacement(b.hackathonPlacement).prizeUsd || null,
+		isWinner: b.isWinner,
+		// A win named off DoraHacks: the page or file that names it.
+		...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
+		// A row of a partial list: why it is stored, and the testnet
+		// contracts its repo cites that passed Scout's checks.
+		...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
+		...(contracts?.has(entryOf(b))
+			? { contracts: contracts.get(entryOf(b)) }
+			: {}),
+		votes: b.voteCount,
+		url: b.url,
+		githubUrl: b.githubUrl,
+		...heldSecurity(b),
+		demoUrl: b.demoUrl,
+		// Present only when the link was checked: the directory project that
+		// lists this build's exact repo, or null when none does.
+		...(b.project !== undefined ? { project: b.project } : {}),
+		// What the repo did after the event, in analyze's activity
+		// vocabulary, and its last commit: absent is unknown.
+		...afterEventFields(b),
+		// Present only when the repo was read: absent is unknown.
+		...(b.stack ? { stack: b.stack } : {}),
+		// Present only when categorized: best first.
+		...(b.categories ? { categories: b.categories.map((c) => c.type) } : {}),
+		...(matched.length ? { matchedTerms: matched } : {}),
+		...(similarity !== undefined
+			? { similarity: Math.round(similarity * 1000) / 1000 }
+			: {}),
+	}));
 
 	try {
 		logApiHit({

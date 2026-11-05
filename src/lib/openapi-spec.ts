@@ -360,7 +360,7 @@ const BUILD_ENTRY_BASIS_SCHEMA = {
 const BUILD_CONTRACTS_SCHEMA = {
 	type: "array",
 	description:
-		"Present only when the contracts the repo cites were checked (rows of a partial list): the ones that passed every check, each kept only when the cited file holds its id at HEAD, getLedgerEntries finds its contract instance on testnet (live or archived) and stellar.expert dates its creation inside the event window. [] = checked, none passed. A floor, not every contract the team deployed: an id that failed a check or could not be checked is left out, never served as absent. Absent = not checked.",
+		"Present only when the contracts the repo cites were checked (rows of a partial list): the ones that passed every check, each kept only when the cited file holds its id at HEAD, getLedgerEntries finds its contract instance on testnet (live or archived) and stellar.expert dates its creation inside the event window. [] = checked, none passed. A floor, not every contract the team deployed: an id that failed a check or could not be checked is left out, never served as absent. Absent = not checked, or the stored contracts could not be read with this response (searchHackathonBuilds' meta.warnings then says so); either way unknown, never none.",
 	items: {
 		type: "object",
 		properties: {
@@ -10749,6 +10749,12 @@ export const spec: OpenAPISpec = {
 										"Scope digest of what `count` counts: same format as meta.population.id on /api/analyze and /api/clusters. DB-backed sources here are `<collection>|status:all` (the FULL collection incl. Inactive), which is why projects.count is larger than analyze/clusters' active-only populations. Different ids = different populations: never merge or compare the numbers without labeling the scopes.",
 								},
 								notes: { type: "string" },
+								indexBytes: {
+									type: "integer",
+									nullable: true,
+									description:
+										"hackathonBuilds only: the serialised size in bytes of the hackathon submissions index, as measured with this response. Next caches it as one item of at most 2 MB; past that every request rebuilds it from the store, so a live check reds above 1,800,000. null = the index could not be read in time (could not check). Absent on every other source.",
+								},
 							},
 						},
 					},
