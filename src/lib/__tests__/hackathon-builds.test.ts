@@ -1578,7 +1578,7 @@ describe("a submission entered in two events", () => {
 		}
 	});
 
-	it("counting keeps every event entry (analyze counts once per event)", () => {
+	it("without the fold keeps every event entry (analyze groups each event's own)", () => {
 		expect(searchHackathonBuilds(rows, "")).toHaveLength(2);
 	});
 
@@ -1942,5 +1942,39 @@ describe("a query word is searched without its edge punctuation", () => {
 	it("keeps a word's combining marks, which are not punctuation", () => {
 		const hindi = [build("Suraksha", "भुगतान सुरक्षा")];
 		expect(names(hindi, "सुरक्षा,")).toEqual(["Suraksha"]);
+	});
+});
+
+// Blitz's rows, saved 2026-11-04: SDK on two, no confident type on the
+// third. Its detail serves the types search serves for it.
+describe("a submission's own facts across its rows", () => {
+	const AT = "2026-11-04T00:00:00.000Z";
+	const row = (slug: string, types: string[], at: string) =>
+		({
+			id: slug,
+			buildId: "dorahacks-buidl-31669",
+			name: "Blitz - QR Code Auction Platform",
+			hackathonSlug: slug,
+			hackathonTitle: slug,
+			endedAt: "2026-03-06",
+			url: "https://dorahacks.io/buidl/31669",
+			categories: types.map((type) => ({ type, score: 0.8 })),
+			categoriesAt: at,
+			firstSeenAt: AT,
+			lastSeenAt: AT,
+			updatedAt: AT,
+			createdAt: AT,
+		}) as HackathonBuild;
+
+	it("serves the types merged over its rows, dated by the latest", () => {
+		const d = buildDetailFromStored(
+			[
+				row("buildonstellarchile", [], "2026-10-01T00:00:00.000Z"),
+				row("ideaton2026", ["SDK"], "2026-10-02T00:00:00.000Z"),
+			],
+			new Set(),
+		);
+		expect(d.categories?.map((c) => c.type)).toEqual(["SDK"]);
+		expect(d.categoriesAt).toBe("2026-10-02T00:00:00.000Z");
 	});
 });

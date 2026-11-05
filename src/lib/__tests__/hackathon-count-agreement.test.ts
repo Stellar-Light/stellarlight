@@ -21,10 +21,14 @@ vi.mock("@/lib/hackathon-build-semantic", async (orig) => ({
 	semanticBuildScores: vi.fn(async () => null),
 }));
 const index: IndexedBuild[] = [];
-vi.mock("@/lib/hackathon-builds", async (orig) => ({
-	...(await orig<typeof import("@/lib/hackathon-builds")>()),
-	getHackathonBuildsIndex: vi.fn(async () => index),
-}));
+// As the index is built: each row of a submission carries its types.
+vi.mock("@/lib/hackathon-builds", async (orig) => {
+	const m = await orig<typeof import("@/lib/hackathon-builds")>();
+	return {
+		...m,
+		getHackathonBuildsIndex: vi.fn(async () => m.sameFactsPerSubmission(index)),
+	};
+});
 
 // Saved from the live API (1.9.116, 2026-11-04): every entry of the 24
 // submissions entered in more than one event. Columns: id | name | event |
@@ -121,7 +125,8 @@ const entry = (line: string): IndexedBuild => {
 		url: `https://dorahacks.io/buidl/${id}`,
 		source: "dorahacks",
 		hackathon: { title: slug, slug, endedAt: endedAt || null },
-		haystack: name.toLowerCase(),
+		// As the index builds it: name, description, track and award.
+		haystack: `${name} ${track}`.toLowerCase(),
 		...(categories
 			? { categories: categories.map((type) => ({ type, score: 0.8 })) }
 			: {}),
@@ -268,6 +273,41 @@ describe("search and analyze count one set the same way", () => {
 		]);
 		const lift = (await analyze({ facet: "category" })).winnersVsOthers;
 		expect(lift.winnersKnown + lift.othersKnown).toBe(24);
+	});
+
+	it("reads a winner's types off its submission: winners of a type are that type among winners", async () => {
+		// No live case: the sync types each row from its own embedding, so a
+		// winner's type can sit only on its unplaced row.
+		use([
+			entry("w | Winner | ev-a | 2025-07-07 | | W | - | -"),
+			entry("w | Winner | ev-b | 2025-08-07 | | | RWA | -"),
+			entry("o | Other | ev-b | 2025-08-07 | | | RWA | -"),
+		]);
+		expect((await search({ category: "RWA", winnersOnly: "1" })).matched).toBe(
+			1,
+		);
+		const asValue = await analyze({ facet: "category", value: "RWA" });
+		expect(asValue.total.values[0]).toMatchObject({ builds: 2, winners: 1 });
+		const amongWinners = await analyze({
+			winnersOnly: "1",
+			facet: "category",
+			value: "RWA",
+		});
+		expect(amongWinners.total.values[0].builds).toBe(1);
+	});
+
+	it("matches q on every entry, then counts each submission once", async () => {
+		use(saved);
+		// AgroChain LATAM and Verbex hold Track Abierto on an entry search did
+		// not show across events, and search missed them.
+		const tracks = saved.flatMap((b) => (b.track ? [b.track] : []));
+		for (const q of new Set(["abierto", ...tracks])) {
+			const s = await search({ q, mode: "keyword" });
+			expect(s.matched, q).toBeGreaterThan(0);
+			const a = await analyze({ q, mode: "keyword" });
+			expect(a.total.builds, q).toBe(s.matched);
+		}
+		expect((await search({ q: "abierto", mode: "keyword" })).matched).toBe(6);
 	});
 
 	it("differs only by the winners-only rows analyze leaves out and counts in its warning", async () => {

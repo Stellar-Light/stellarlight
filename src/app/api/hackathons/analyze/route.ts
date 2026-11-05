@@ -134,8 +134,9 @@ export async function GET(req: NextRequest) {
 	}
 	// No rate over incomplete rows (incompleteRows). Beside full listings they
 	// are left out of every count and share, in one line: across every event
-	// 12 curated winners made the winners 80 of 1,383 (5.8%), where the full
-	// listings give 68 of 1,371. Alone, they keep their counts, shares null.
+	// 12 curated winners made the winners 80 of 1,356 submissions (5.9%),
+	// where the full listings give 68 of 1,344 (5.1%) (live 1.9.116). Alone,
+	// they keep their counts, shares null.
 	const winnersOnly = winnersOnlyEvents(indexed);
 	const incompleteSet = incompleteEvents(indexed);
 	const incomplete = (b: IndexedBuild) => incompleteSet.has(b.hackathon.slug);

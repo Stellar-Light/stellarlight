@@ -421,6 +421,49 @@ function entryOf(
 	};
 }
 
+/** One list of types from several rows of one submission: each type at its
+ * highest score, best first. */
+function mergeCategories(lists: BuildCategory[][]): BuildCategory[] {
+	if (lists.length === 1) return lists[0];
+	const best = new Map<string, BuildCategory>();
+	for (const c of lists.flat())
+		if ((best.get(c.type)?.score ?? -1) < c.score) best.set(c.type, c);
+	return [...best.values()].sort((a, b) => b.score - a.score);
+}
+const mergeStack = (lists: string[][]) =>
+	lists.length === 1 ? lists[0] : [...new Set(lists.flat())];
+const latest = <T>(rows: T[], at: (r: T) => string | null | undefined) =>
+	rows.reduce<T | undefined>(
+		(a, r) => (a === undefined || (at(r) ?? "") > (at(a) ?? "") ? r : a),
+		undefined,
+	);
+
+/** A submission's own facts, the same on each of its event rows: the types it
+ * was sorted into and the packages its repo declares, each merged over its
+ * rows. The sync types each row from that row's own embedding, so one
+ * submission's rows can disagree (Blitz: SDK on two, none on the third), and
+ * a filter, a facet and a winner count must read one answer. An event's own
+ * facts (track, placement, award) stay each row's. */
+export function sameFactsPerSubmission(rows: IndexedBuild[]): IndexedBuild[] {
+	const byId = new Map<string, IndexedBuild[]>();
+	for (const b of rows) {
+		const all = byId.get(b.id);
+		if (all) all.push(b);
+		else byId.set(b.id, [b]);
+	}
+	return rows.map((b) => {
+		const all = byId.get(b.id) ?? [b];
+		if (all.length === 1) return b;
+		const typed = all.flatMap((r) => (r.categories ? [r.categories] : []));
+		const read = all.flatMap((r) => (r.stack ? [r.stack] : []));
+		return {
+			...b,
+			...(typed.length ? { categories: mergeCategories(typed) } : {}),
+			...(read.length ? { stack: mergeStack(read) } : {}),
+		};
+	});
+}
+
 /** One submission from its stored rows, one per event it entered (sls-092:
  * a submission entered in two events is two rows). The top-level event
  * fields are its best entry: a placed one first, then the latest event.
@@ -436,6 +479,14 @@ export function buildDetailFromStored(
 		endedAt: r.endedAt,
 	});
 	const sorted = [...rows].sort((a, b) => entryOrder(key(a), key(b)));
+	// Its types and packages are the submission's, merged over its rows, as
+	// the index serves them (sameFactsPerSubmission).
+	const typed = sorted.filter(
+		(r): r is HackathonBuild & { categories: BuildCategory[] } =>
+			!!r.categoriesAt && isCategoryList(r.categories),
+	);
+	const read = sorted.filter((r) => r.stackReadAt);
+	const typedAt = latest(typed, (r) => r.categoriesAt);
 	const d = sorted[0];
 	// Submission-level dates span every row: an entry restored later must not
 	// make the submission look new.
@@ -458,14 +509,16 @@ export function buildDetailFromStored(
 		repo: d.repoFullName ?? null,
 		...heldSecurity(rows.find((r) => heldSecurity(r).security) ?? d),
 		...(d.linkCheckedAt ? { project: linkedProject(d, facts) } : {}),
-		...(d.stackReadAt ? { stack: d.stack ?? [] } : {}),
-		stackReadAt: d.stackReadAt ?? null,
-		repoMissingAt: d.repoMissingAt ?? null,
-		...(d.categoriesAt && isCategoryList(d.categories)
-			? { categories: d.categories }
+		...(read.length
+			? { stack: mergeStack(read.map((r) => r.stack ?? [])) }
 			: {}),
-		categoriesAt: d.categoriesAt ?? null,
-		categoriesMethod: d.categoriesMethod ?? null,
+		stackReadAt: latest(read, (r) => r.stackReadAt)?.stackReadAt ?? null,
+		repoMissingAt: d.repoMissingAt ?? null,
+		...(typed.length
+			? { categories: mergeCategories(typed.map((r) => r.categories)) }
+			: {}),
+		categoriesAt: typedAt?.categoriesAt ?? null,
+		categoriesMethod: typedAt?.categoriesMethod ?? null,
 		...(d.activityCheckedAt
 			? {
 					activity: {
@@ -547,7 +600,9 @@ export function dedupeBuilds(rows: IndexedBuild[]): IndexedBuild[] {
 
 export async function buildHackathonBuildsIndex(): Promise<IndexedBuild[]> {
 	const stored = await readStoredBuilds();
-	const index = dedupeBuilds(stored?.length ? stored : await buildLiveIndex());
+	const index = sameFactsPerSubmission(
+		dedupeBuilds(stored?.length ? stored : await buildLiveIndex()),
+	);
 	// Never return an empty index: unstable_cache would store it for an hour
 	// in place of the last good one; a throw stores nothing. Search, analyze
 	// and review answer the throw with a 503, vetIdea and the brief with null,
@@ -1229,13 +1284,19 @@ export function searchHackathonBuilds(
 			b.categories?.some((x) => x.type.toLowerCase() === c),
 		);
 	}
-	// Inside one event every row is that event's own entry; across several
-	// named events a submission entered in more than one is one result, as
-	// analyze counts it.
-	if (opts.perSubmission) pool = onePerSubmission(pool);
+	// One result per submission: inside one event every row is that event's
+	// own entry; across several, a submission entered in more than one is one
+	// result, as analyze counts it. With q it is folded after matching, so a
+	// submission matches when any of its entries does (an entry's track and
+	// award text are its own), and shows its best entry among those.
+	const one = (rows: ScoredBuild[]) => {
+		if (!opts.perSubmission) return rows;
+		const keep = new Set(onePerSubmission(rows.map((s) => s.b)));
+		return rows.filter((s) => keep.has(s.b));
+	};
 	const query = q.trim().toLowerCase();
 	if (!query) {
-		return pool
+		return (opts.perSubmission ? onePerSubmission(pool) : pool)
 			.map((b) => ({
 				b,
 				score: (b.isWinner ? 1000 : 0) + Math.min(b.voteCount ?? 0, 100),
@@ -1259,12 +1320,15 @@ export function searchHackathonBuilds(
 	// "x402" is not, so a build is weighed by WHICH words it covers, not how
 	// many: counting words let descriptions padded with common ones ("per",
 	// "api", "agents") outrank the winners that built the idea.
+	// Weighed over the entries search shows, one per submission, so matching
+	// every entry adds matches and never reweighs the words.
+	const weighed = opts.perSubmission ? onePerSubmission(pool) : pool;
 	const weight = new Map<string, number>();
 	terms.forEach(({ t }, i) => {
-		const df = pool.filter((b) =>
+		const df = weighed.filter((b) =>
 			(held.get(b) ?? terms)[i].variants.some((hit) => hit(haystack(b))),
 		).length;
-		weight.set(t, Math.log((pool.length + 1) / (df + 1)));
+		weight.set(t, Math.log((weighed.length + 1) / (df + 1)));
 	});
 	const scored: ScoredBuild[] = [];
 	for (const b of pool) {
@@ -1310,13 +1374,20 @@ export function searchHackathonBuilds(
 		} else if (score > 0 && nameMatched)
 			opts.withheld?.push({ b, matched: [...matched] });
 	}
+	// A submission held back by name is one, its best entry.
+	if (opts.perSubmission && opts.withheld?.length) {
+		const keep = new Set(onePerSubmission(opts.withheld.map((w) => w.b)));
+		const kept = opts.withheld.filter((w) => keep.has(w.b));
+		opts.withheld.splice(0, opts.withheld.length, ...kept);
+	}
 	const mode = opts.mode ?? "keyword";
 	const sem = opts.semantic;
 	if (mode === "keyword" || !sem) {
 		const rank = (s: ScoredBuild) =>
 			s.coverage * (s.b.isWinner ? WINNER_EDGE : 1);
-		scored.sort((a, b) => rank(b) - rank(a) || b.score - a.score);
-		return scored;
+		const out = one(scored);
+		out.sort((a, b) => rank(b) - rank(a) || b.score - a.score);
+		return out;
 	}
 	// Meaning and hybrid: builds close in meaning join the keyword matches,
 	// within the same winners/track filters. Similarity is scaled 0 to 1
@@ -1343,8 +1414,9 @@ export function searchHackathonBuilds(
 			? rel(s.b.id)
 			: 0.5 * (s.coverage / totalWeight) + 0.5 * rel(s.b.id)) *
 		(s.b.isWinner ? WINNER_EDGE : 1);
-	const out =
-		mode === "meaning" ? scored.filter((s) => sem.has(s.b.id)) : scored;
+	const out = one(
+		mode === "meaning" ? scored.filter((s) => sem.has(s.b.id)) : scored,
+	);
 	out.sort((a, b) => blend(b) - blend(a) || b.score - a.score);
 	return out;
 }
