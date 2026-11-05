@@ -1069,6 +1069,18 @@ export interface Repo {
 		| boolean
 		| null;
 	/**
+	 * Source file of each contractInterface entry (array of strings, same order and length); absent on scans before 2026-11-04
+	 */
+	contractInterfacePaths?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
 	 * Stellar-ecosystem dependencies (array of package names) from Cargo.toml/package.json — allowlist-matched, the dependency-graph signal
 	 */
 	stellarDeps?:
@@ -3652,6 +3664,7 @@ export interface ReposSelect<T extends boolean = true> {
 	farmFlags?: T;
 	codeSymbols?: T;
 	contractInterface?: T;
+	contractInterfacePaths?: T;
 	stellarDeps?: T;
 	sdkCapabilities?: T;
 	codeDomains?: T;

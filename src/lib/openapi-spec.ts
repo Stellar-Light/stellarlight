@@ -1233,7 +1233,7 @@ export const spec: OpenAPISpec = {
 			"Rate-limit counters are kept per serverless instance (every limited response carries X-RateLimit-Scope: instance), so X-RateLimit-Remaining and -Reset describe the instance that answered, not a global window. Per-IP, per-endpoint, per-minute floors on the cost-bearing routes (typically 60 requests a minute; `/api/research` 60 a minute), advertised on every response via `X-RateLimit-Limit`, `X-RateLimit-Remaining` and `X-RateLimit-Reset`, and on a 429 via `Retry-After`. Cache where `Cache-Control` allows and prefer `offset` pagination over hammering. A platform whose users share one egress IP (an agent runtime, an MCP host) can ask support@stellarlight.xyz for a partner key: sent as `Authorization: Bearer <key>` or `x-api-key`, it is metered per key instead of per IP, at 1,200 requests a minute and 200,000 a day. A 503 (store or index unavailable) carries `Retry-After` in seconds. `/api/research` also answers `X-Scout-Match-Mode` (`vector` or `keyword`, the same value as `meta.matchMode`) and `Server-Timing` (our wall time in ms), and when it falls back to keyword its `meta.warnings` says why.",
 			"",
 			"## Pagination",
-			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`.",
+			"List endpoints (`/api/projects/search`, `/api/builders`, `/api/rfps`) accept `limit` + `offset`. EVERY list response carries `meta.counts` with `returned` (this page) and `total`/`matched` (all rows matching the filter, pre-slice); compare the two to tell a complete read from a truncated one, and page until `offset + returned >= total`. Two documented exceptions, both explicit rather than silent: `searchResearch` serves `total: null` with a `totalBasis` because similarity ranking has no crisp matching set, and `/api/changelog` additionally serves `returned`/`total` flat on `meta` for backward compatibility; those flat fields are DEPRECATED, read `meta.counts`. `searchRepos` ranks a capped candidate window (the top 200 rows by repoScore for a browse with no q, the top 600 for a search): when `meta.counts.truncated` is true, `total` counts that window and paging ends there, and `meta.counts.eligible` gives the number of rows the filters admit (null where only ranking every row could count them).",
 			"",
 			"## Ordering & relevance",
 			'`/api/projects/search` sorts by descending keyword `score` (token-overlap count) and exposes `meta.matchMode` (`strict` → `loose-1` → `majority` → `semantic`) so you know how much the query was relaxed. `semantic` means no keyword tier matched at all; the rows are vector-similarity guesses (`via: "semantic"`, confidence capped at medium), not keyword-confirmed answers. When `?type=` is present, TYPE DEFINES MEMBERSHIP (the full typed set, limit-independent) and q only ranks within it; matchMode reports `all` with an explicit label, because a tier would falsely claim q gated the set (sls-033). `corrected` means the rows matched ONLY through a known spelling correction (e.g. strupey → stroopy): the query token does not occur in the rows, so verify the identity before treating them as evidence about the queried name. `/api/research` sorts by descending vector-similarity `score` (0-1 cosine). Use these for cross-source ranking when merging with other aggregators.',
@@ -3408,7 +3408,13 @@ export const spec: OpenAPISpec = {
 											type: "string",
 											nullable: true,
 											description:
-												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
+												"How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | renamed (that name is a renamed repo's old path the index holds no row for, so `repo` is where GitHub redirects it and `renamedFrom` is the path asked for) | canonical (the curated concept map; a developer product routes here only when the whole q is its name, in any spelling, with surface words such as repo or github ignored, so a product named inside a longer question routes by trigger or the index) | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed.",
+										},
+										renamedFrom: {
+											type: "string",
+											nullable: true,
+											description:
+												"The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is explained instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for.",
 										},
 										repoMeta: {
 											type: "object",
@@ -3475,6 +3481,13 @@ export const spec: OpenAPISpec = {
 												contractInterface: {
 													type: "array",
 													items: { type: "string" },
+												},
+												contractInterfacePaths: {
+													type: "array",
+													items: { type: "string" },
+													nullable: true,
+													description:
+														"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
 												},
 												targetProtocol: {
 													type: "integer",
@@ -6468,6 +6481,12 @@ export const spec: OpenAPISpec = {
 																type: "object",
 																properties: {
 																	fullName: { type: "string" },
+																	renamedFrom: {
+																		type: "string",
+																		nullable: true,
+																		description:
+																			"As on /api/repos/trust: the renamed path asked for, or null. Always null here, since competitors come from search rows.",
+																	},
 																	url: { type: "string", nullable: true },
 																	stars: { type: "integer", nullable: true },
 																	lastCommitAt: {
@@ -6490,7 +6509,7 @@ export const spec: OpenAPISpec = {
 															codeTruth: {
 																type: "object",
 																description:
-																	"TrustReport codeTruth minus the full contractInterface (interfaceSize is kept).",
+																	"TrustReport codeTruth minus the full contractInterface and its contractInterfacePaths (interfaceSize is kept).",
 																properties: {
 																	scanState: {
 																		type: "string",
@@ -6890,6 +6909,12 @@ export const spec: OpenAPISpec = {
 													type: "object",
 													properties: {
 														fullName: { type: "string" },
+														renamedFrom: {
+															type: "string",
+															nullable: true,
+															description:
+																"The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is served instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for.",
+														},
 														url: { type: "string", nullable: true },
 														stars: { type: "integer", nullable: true },
 														lastCommitAt: { type: "string", nullable: true },
@@ -6933,6 +6958,13 @@ export const spec: OpenAPISpec = {
 															items: { type: "string" },
 															description:
 																"Scanned public fn signatures (up to 60); verify generated calls against these.",
+														},
+														contractInterfacePaths: {
+															type: "array",
+															items: { type: "string" },
+															nullable: true,
+															description:
+																"The repo-relative source file of each contractInterface entry (up to 60), same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
 														},
 														mainnetContractId: {
 															type: "string",
@@ -11930,6 +11962,12 @@ export const spec: OpenAPISpec = {
 					"An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source.",
 				required: ["fullName", "repoScore"],
 				properties: {
+					renamedFrom: {
+						type: "string",
+						nullable: true,
+						description:
+							"The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, stands in for it on searchRepos (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for.",
+					},
 					successorRepo: {
 						type: "string",
 						nullable: true,
@@ -12095,7 +12133,7 @@ export const spec: OpenAPISpec = {
 					canonical: {
 						type: "boolean",
 						description:
-							"True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them.",
+							"True when surfaced as a curated canonical answer for an infra, protocol or developer-product query (e.g. error codes → stellar-core and the SDKs; Horizon → stellar/stellar-horizon; Scaffold Stellar → stellar-scaffold/cli; Stellar Lab → stellar/laboratory; smart contract examples → stellar/soroban-examples). Floated to the top; meta.canonical lists them. A query that is a full owner/name path fires no canonical entry and ranks the repo it names first; a bare name that fires one ranks the canonical repo first and repos with that exact name next (q=sep-10: stellar/stellar-protocol, then a repo named sep10); a bare name that fires none ranks the repo with that exact name first.",
 					},
 					stellarEvidence: {
 						type: "string",
@@ -12181,6 +12219,13 @@ export const spec: OpenAPISpec = {
 								description:
 									"Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08.",
 							},
+							contractInterfacePaths: {
+								type: "array",
+								items: { type: "string" },
+								nullable: true,
+								description:
+									"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
+							},
 							targetProtocol: {
 								type: "integer",
 								nullable: true,
@@ -12240,10 +12285,18 @@ export const spec: OpenAPISpec = {
 								type: "object",
 								properties: {
 									canonical: {
-										type: "string",
+										type: "object",
 										nullable: true,
 										description:
-											"The curated canonical SDF repo floated to the top for an infra/protocol query (e.g. error codes \u2192 stellar/stellar-core), or null when the query isn\u2019t a canonical-routed concept.",
+											"The curated canonical repos floated to the top for an infra, protocol or developer-product query (e.g. error codes \u2192 stellar/stellar-core; Scaffold Stellar \u2192 stellar-scaffold/cli), the same on every page: the query's canonical repos the index holds, whether or not this page or a filter serves them. null when the query isn\u2019t a canonical-routed concept.",
+										properties: {
+											repos: {
+												type: "array",
+												items: { type: "string" },
+												description: "fullNames, in canonical priority order.",
+											},
+											note: { type: "string" },
+										},
 									},
 									note: {
 										type: "string",
@@ -12261,6 +12314,23 @@ export const spec: OpenAPISpec = {
 										type: "string",
 										description:
 											"Human-readable statement of the matchMode above, safe to surface verbatim to a user.",
+									},
+									counts: {
+										type: "object",
+										properties: {
+											truncated: {
+												type: "boolean",
+												description:
+													"True when the ranking was cut at its candidate window: the top 200 rows by repoScore for a browse with no q, the top 600 for a search or a capability, domain or dependsOn filter. Rows past the window were never ranked, so total counts the window and paging ends at it; read eligible for the number of matching rows. False when the ranking holds every row the filters admit.",
+											},
+											eligible: {
+												type: "integer",
+												minimum: 0,
+												nullable: true,
+												description:
+													"Rows the request's filters admit in the index. Equals total when truncated is false. When truncated is true: the database's count for a browse with no q whose filters all run there (language, minScore), and null for a search or an activity, capability, domain or dependsOn filter, where only ranking every row could count the matches. Never read null as zero.",
+											},
+										},
 									},
 								},
 							},

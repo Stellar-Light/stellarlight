@@ -1902,6 +1902,8 @@ export interface components {
         };
         /** @description An indexed Stellar ecosystem GitHub repository graded by repoScore. Cite the repo's url / homepageUrl as the primary source. */
         Repo: {
+            /** @description The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, stands in for it on searchRepos (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for. */
+            renamedFrom?: string | null;
             /** @description Analog: this repo is a SUPERSEDED generation and the named fullName is its successor (curated, verified against the repos' own statements, never inferred from names). Null = not superseded or not yet classified. In searchRepos, when the successor (this field, else supersededBy) is also in the results, the successor takes this repo's place and this repo moves below it, unless q is an exact alias of this repo's owner, name or path. */
             successorRepo?: string | null;
             /** @description Where to go instead, as GitHub spells it; from the curated dated supersession map (P5), falling back to the stored successorRepo. null = no curated supersession statement for this repo, never 'not superseded'. */
@@ -2006,7 +2008,7 @@ export interface components {
             score?: number;
             /** @description DeepWiki AI-generated wiki of this repo's internals (deepwiki.com/{owner}/{name}). Hand off here for deep 'where/how' code questions (e.g. where error codes / consensus / XDR are defined) beyond which-repo discovery. */
             deepWikiUrl?: string;
-            /** @description True when surfaced as a curated canonical SDF answer for an infra/protocol query (e.g. error codes → stellar-core/Horizon/SDKs; Horizon → stellar/go). Floated to the top; meta.canonical lists them. */
+            /** @description True when surfaced as a curated canonical answer for an infra, protocol or developer-product query (e.g. error codes → stellar-core and the SDKs; Horizon → stellar/stellar-horizon; Scaffold Stellar → stellar-scaffold/cli; Stellar Lab → stellar/laboratory; smart contract examples → stellar/soroban-examples). Floated to the top; meta.canonical lists them. A query that is a full owner/name path fires no canonical entry and ranks the repo it names first; a bare name that fires one ranks the canonical repo first and repos with that exact name next (q=sep-10: stellar/stellar-protocol, then a repo named sep10); a bare name that fires none ranks the repo with that exact name first. */
             canonical?: boolean;
             /**
              * @description WHY this repo ranks as Stellar-relevant: ranking puts Stellar evidence ABOVE raw keyword score, and this names the tier: code-verified (scan found real Stellar/Soroban code) / sdf-org / curated (canonical or flagship map) / mentioned (stellar|soroban in its own name/topics/description/README) / none: a general-purpose toolchain or dependency with NO direct Stellar evidence. 'none' rows can still topic-match a query (e.g. a ZK language for q=zero-knowledge): treat them as toolchains, never cite them as Stellar reference implementations.
@@ -2049,6 +2051,8 @@ export interface components {
                 symbols?: string[];
                 /** @description Soroban contract ABI: full pub fn signatures per #[contractimpl] block, formatted `Contract.fn(arg: Type, …) -> Ret` (host-injected env param stripped, matching the SDK contractspec). Symbols say WHAT a repo implements; this says HOW TO CALL IT. Empty for non-contract repos or repos scanned before 2026-08-08. */
                 contractInterface?: string[];
+                /** @description The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan. */
+                contractInterfacePaths?: string[] | null;
                 /** @description Stellar protocol the pinned soroban-sdk MAJOR targets, derived from the maintained sdk→protocol table (dated; the mapping has documented irregularities: 23.x spans P24→P25). ADVISORY, not an attestation: null = unknown major, never guessed. */
                 targetProtocol?: number | null;
                 /** @description CAPs (Core Advancement Proposals) whose declared protocolVersion matches targetProtocol: the protocol-change grounding for this repo's SDK line, joined from the committed cap-registry. Answers 'which consensus/protocol changes are relevant to this contract's SDK pin'. Empty when targetProtocol is null. */
@@ -2070,8 +2074,12 @@ export interface components {
         };
         RepoSearchResponse: {
             meta: components["schemas"]["Meta"] & {
-                /** @description The curated canonical SDF repo floated to the top for an infra/protocol query (e.g. error codes → stellar/stellar-core), or null when the query isn’t a canonical-routed concept. */
-                canonical?: string | null;
+                /** @description The curated canonical repos floated to the top for an infra, protocol or developer-product query (e.g. error codes → stellar/stellar-core; Scaffold Stellar → stellar-scaffold/cli), the same on every page: the query's canonical repos the index holds, whether or not this page or a filter serves them. null when the query isn’t a canonical-routed concept. */
+                canonical?: {
+                    /** @description fullNames, in canonical priority order. */
+                    repos?: string[];
+                    note?: string;
+                } | null;
                 /** @description How to read the results (e.g. code references graded by repoScore 0-100). */
                 note?: string;
                 view?: components["schemas"]["CompactView"];
@@ -2082,6 +2090,12 @@ export interface components {
                 matchMode?: "strict" | "partial" | "corrected" | "weak" | "all" | "none";
                 /** @description Human-readable statement of the matchMode above, safe to surface verbatim to a user. */
                 matchModeLabel?: string;
+                counts?: {
+                    /** @description True when the ranking was cut at its candidate window: the top 200 rows by repoScore for a browse with no q, the top 600 for a search or a capability, domain or dependsOn filter. Rows past the window were never ranked, so total counts the window and paging ends at it; read eligible for the number of matching rows. False when the ranking holds every row the filters admit. */
+                    truncated?: boolean;
+                    /** @description Rows the request's filters admit in the index. Equals total when truncated is false. When truncated is true: the database's count for a browse with no q whose filters all run there (language, minScore), and null for a search or an activity, capability, domain or dependsOn filter, where only ranking every row could count the matches. Never read null as zero. */
+                    eligible?: number | null;
+                };
             };
             repos: components["schemas"]["Repo"][];
         };
@@ -3473,8 +3487,10 @@ export interface operations {
                         };
                         q?: string;
                         repo?: string | null;
-                        /** @description How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | canonical | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed. */
+                        /** @description How the repo was chosen: explicit (the `repo` param, or `q` itself is a bare owner/name; that names the repo and outranks the concept map) | renamed (that name is a renamed repo's old path the index holds no row for, so `repo` is where GitHub redirects it and `renamedFrom` is the path asked for) | canonical (the curated concept map; a developer product routes here only when the whole q is its name, in any spelling, with surface words such as repo or github ignored, so a product named inside a longer question routes by trigger or the index) | knowledge-trigger (a curated trigger phrase on a knowledge note named exactly one repo, before the lexical index voted) | search. null when nothing routed. */
                         routedVia?: string | null;
+                        /** @description The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is explained instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for. */
+                        renamedFrom?: string | null;
                         /** @description Freshness/status of the routed repo from the StellarLight INDEX: these dates cover our index's view of the repo, explicitly NOT the answer. Never attach lastCommitAt as the answer's as-of date: the answer is dated by answerAsOf alone, and a DeepWiki answer can predate lastCommitAt and contradict the code at it. Null when the repo isn't indexed or nothing routed. */
                         repoMeta?: {
                             /** Format: date-time */
@@ -3527,6 +3543,8 @@ export interface operations {
                             scannedRef?: string | null;
                             symbols?: string[];
                             contractInterface?: string[];
+                            /** @description The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan. */
+                            contractInterfacePaths?: string[] | null;
                             targetProtocol?: number | null;
                             protocolCaps?: {
                                 cap?: number;
@@ -5979,6 +5997,8 @@ export interface operations {
                             startFrom?: {
                                 repo?: {
                                     fullName?: string;
+                                    /** @description As on /api/repos/trust: the renamed path asked for, or null. Always null here, since competitors come from search rows. */
+                                    renamedFrom?: string | null;
                                     url?: string | null;
                                     stars?: number | null;
                                     lastCommitAt?: string | null;
@@ -5990,7 +6010,7 @@ export interface operations {
                                     slug?: string;
                                     name?: string | null;
                                 } | null;
-                                /** @description TrustReport codeTruth minus the full contractInterface (interfaceSize is kept). */
+                                /** @description TrustReport codeTruth minus the full contractInterface and its contractInterfacePaths (interfaceSize is kept). */
                                 codeTruth?: {
                                     /**
                                      * @description Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself, so the code facts here describe something no longer reachable; such rows are excluded from searchRepos and builder code evidence. null = never stamped.
@@ -6292,6 +6312,8 @@ export interface operations {
                         report?: {
                             repo?: {
                                 fullName?: string;
+                                /** @description The renamed path the request named, when the index holds no row for it and this repo, where GitHub redirects it, is served instead (issue #1901: the Stellar docs link github.com/theahaco/scaffold-stellar, now stellar-scaffold/cli). null when the repo was found under the name asked for. */
+                                renamedFrom?: string | null;
                                 url?: string | null;
                                 stars?: number | null;
                                 lastCommitAt?: string | null;
@@ -6317,6 +6339,8 @@ export interface operations {
                                 interfaceSize?: number;
                                 /** @description Scanned public fn signatures (up to 60); verify generated calls against these. */
                                 contractInterface?: string[];
+                                /** @description The repo-relative source file of each contractInterface entry (up to 60), same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. Only contractInterface, symbols and sdkCapabilities leave test code out; stellarProof, codeDepth, isDeployableContract and stellarDeps still read every fetched file until a measured follow-up, so a repo whose only Soroban crate is a test fixture can serve an empty contractInterface beside a cargo-sdk proof. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan. */
+                                contractInterfacePaths?: string[] | null;
                                 mainnetContractId?: string | null;
                             };
                             usage?: {

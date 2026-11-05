@@ -170,6 +170,8 @@ const C4_ALLOW: Record<string, string> = {
 	mainnetContractId: "verified-on-chain only, sparse by design (2026-08-12)",
 	mainnetContractBasis:
 		"set only where mainnetContractId survives, so exactly as sparse as it is; served on /api/contracts as contractBasis and read by the trust signal (2026-09-03)",
+	contractInterfacePaths:
+		"served beside contractInterface on search, explain and trust, and null until a repo is rescanned after 2026-11-04, so a population probe would read the backfill, not a defect; add one once scan waves have refreshed the corpus (2026-11-05)",
 };
 const writeShape = read("scripts/scan/write-shape.ts");
 const okStart = writeShape.indexOf(
