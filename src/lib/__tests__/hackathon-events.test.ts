@@ -151,6 +151,10 @@ describe("which section a page's headings name", () => {
 		expect(
 			markdownSection("## Requisitos\n\n- Repo público", REQUIREMENTS_HEADING),
 		).toBe("- Repo público");
+		// Portuguese prerequisites, hyphenated, are not requirements either.
+		expect(
+			markdownSection("## Pré-requisitos\n\n- Node 20", REQUIREMENTS_HEADING),
+		).toBeNull();
 	});
 
 	it("reads a heading that names both sections once for each, by its labelled parts", () => {

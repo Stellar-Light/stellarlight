@@ -248,8 +248,8 @@ export function hiddenWinnersNote(
 // Spanish and Portuguese too, read with accents off: "Criterios de
 // evaluación", "Critérios de Avaliação", "Requisitos", "Entregáveis".
 // A list of judges is not criteria: judging, judged and judgment are, and
-// Prerequisites are not requirements.
+// Prerequisites are not requirements ("Pré-requisitos" either).
 export const JUDGING_HEADING =
 	/judging|judged|judgment|judgement|criteri|evaluat|evaluac|avaliac|scoring/i;
 export const REQUIREMENTS_HEADING =
-	/requirement|rules|eligib|how to submit|\brequisitos?\b|deliverable|entregab|entregav/i;
+	/requirement|rules|eligib|how to submit|(?<![\w-])requisitos?\b|deliverable|entregab|entregav/i;
