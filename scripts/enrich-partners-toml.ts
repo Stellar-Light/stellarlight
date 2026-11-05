@@ -22,20 +22,29 @@
  *
  * Rules of engagement (house rules):
  *   - DRY RUN by default; per-anchor report of exactly what would change.
- *   - System-owned fields (assets/seps/rampTypes) are overwritten from source;
+ *   - System-owned fields are overwritten from source: assets and seps on
+ *     every successful parse with what the file declares, [] when it declares
+ *     none (so no curated value survives under a fresh read stamp), and left
+ *     as stored when the parser could not read them (a linked currency
+ *     toml, a code_template, a value it cannot parse); rampTypes only when
+ *     the transfer server's /info confirms a ramp;
  *     partner-owned fields (tagline/contact/logo) are filled ONLY when empty.
  *   - No deletes. A missing/unreachable toml = "skipped", never a wipe.
  */
 
 import "./load-env";
+import config from "@payload-config";
+import { getPayload } from "payload";
+import { hasTomlRead } from "@/lib/partner-public";
 import {
+	capabilityReport,
 	domainOf,
 	fetchText,
 	parseStellarToml,
 	type StellarToml,
+	tomlCapabilities,
+	tomlReadWrite,
 } from "./lib/stellar-toml";
-import config from "@payload-config";
-import { getPayload } from "payload";
 
 const EXECUTE = process.argv.includes("--execute");
 const FETCH_TIMEOUT_MS = 10_000;
@@ -55,7 +64,6 @@ async function fetchJson(url: string): Promise<Record<string, unknown> | null> {
 		return null;
 	}
 }
-
 
 /**
  * Anchors whose stellar.toml lives on a different host than their marketing
@@ -555,31 +563,28 @@ async function main() {
 				}
 				console.log(`· ${doc.slug}: ${why} — regions backfill only`);
 			} else {
-				// SEPs from declared endpoints
-				const seps: string[] = [];
 				// Provenance trio (SYNTHESIS-2026-08-12 slice 3): which toml, when.
-				// Stamped on EVERY successful parse — not gated on data deltas (the
+				// Stamped on every successful parse that read seps and assets, or
+				// that refreshes a row already read; not gated on data deltas (the
 				// converged-corpus trap: a delta-gated stamp never reaches rows whose
-				// data stopped changing). Admin edits may postdate the snapshot.
-				update.tomlSourceUrl = `https://${domain}/.well-known/stellar.toml`;
-				update.tomlFetchedAt = new Date().toISOString().slice(0, 10);
-				if (toml.topLevel.TRANSFER_SERVER) seps.push("sep-6");
-				if (toml.topLevel.TRANSFER_SERVER_SEP0024) seps.push("sep-24");
-				if (toml.topLevel.DIRECT_PAYMENT_SERVER) seps.push("sep-31");
-				if (seps.length) {
-					update.seps = seps;
-					report.push(`seps=${seps.join(",")}`);
-				}
-
-				// Assets from CURRENCIES
-				if (toml.currencyCodes.length) {
-					update.assets = toml.currencyCodes
-						.slice(0, 25)
-						.map((code) => ({ code }));
-					report.push(
-						`assets=${toml.currencyCodes.slice(0, 8).join(",")}${toml.currencyCodes.length > 8 ? "…" : ""}`,
-					);
-				}
+				// data stopped changing). A partial first read is not stamped
+				// (tomlReadWrite, #1909). Admin edits may postdate the snapshot.
+				// SEPs from declared endpoints, assets from CURRENCIES. What the
+				// parser could not read stays as stored (#1909), and the report
+				// shows the stored value beside the planned one.
+				const caps = tomlCapabilities(toml);
+				const write = tomlReadWrite(
+					caps,
+					{
+						tomlSourceUrl: `https://${domain}/.well-known/stellar.toml`,
+						tomlFetchedAt: new Date().toISOString().slice(0, 10),
+					},
+					hasTomlRead(doc),
+				);
+				Object.assign(update, write);
+				if (!write.tomlFetchedAt) report.push("partial read, not stamped");
+				const seps = caps.seps ?? [];
+				report.push(...capabilityReport(doc, toml));
 
 				// Real ramp capability from /info (prefer SEP-24 server, else SEP-6)
 				const transferServer =

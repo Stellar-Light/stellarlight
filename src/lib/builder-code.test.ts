@@ -19,11 +19,13 @@ import { type BuilderLike, builderCodeActivity } from "./builder-code";
 
 type Doc = Record<string, unknown>;
 
-// Minimal Payload stand-in: answers `find` from canned collections.
+// Minimal Payload stand-in: answers `find` from canned collections, with the
+// totalDocs Payload always returns (a read with no count is not proven whole).
 function fakePayload(collections: { repos: Doc[]; projects: Doc[] }) {
 	return {
 		find: async ({ collection }: { collection: "repos" | "projects" }) => ({
 			docs: collections[collection],
+			totalDocs: collections[collection].length,
 		}),
 	} as any;
 }

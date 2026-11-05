@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { findWholeSet } from "@/lib/whole-set";
 
 export default async function TrendingProjectsSection() {
 	const payload = await getPayloadSafe();
@@ -25,13 +26,15 @@ export default async function TrendingProjectsSection() {
 		// Star counts come from the enriched `repos` collection (keyed by
 		// projectSlug) — the legacy `signals` cache this used is no longer
 		// populated, so it returned nothing and the whole section vanished.
+		// Every active project: `limit: 300` ranked the newest 300 of 905
+		// (2026-11-04). Only the fields this section shows, logo populated.
 		// biome-ignore lint/suspicious/noExplicitAny: Payload Where/doc types are awkward
-		const projectsResult = await payload.find({
+		const projectsResult = await findWholeSet<any>(payload, {
 			collection: "projects",
 			where: { status: { in: ["Development", "Pre-Release", "Live"] } },
-			limit: 300,
+			limit: 0,
 			depth: 1,
-			select: { embedding: false },
+			select: { name: true, slug: true, category: true, logo: true },
 		} as any);
 
 		const projectSlugs = projectsResult.docs.map((p: any) => p.slug);
@@ -56,7 +59,7 @@ export default async function TrendingProjectsSection() {
 			}
 		>();
 		if (projectSlugs.length > 0) {
-			const reposResult = await payload.find({
+			const reposResult = await findWholeSet(payload, {
 				collection: "repos",
 				where: {
 					and: [
@@ -65,7 +68,7 @@ export default async function TrendingProjectsSection() {
 						{ unverifiedStellar: { not_equals: true } },
 					],
 				},
-				limit: 5000,
+				limit: 0,
 				depth: 0,
 				select: {
 					projectSlug: true,
@@ -259,6 +262,7 @@ export function TrendingProjectsSkeleton() {
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 				{Array.from({ length: 8 }).map((_, i) => (
 					<div
+						// biome-ignore lint/suspicious/noArrayIndexKey: eight fixed skeleton boxes that never reorder
 						key={i}
 						className="h-[72px] rounded-xl bg-[#262626] animate-pulse"
 					/>

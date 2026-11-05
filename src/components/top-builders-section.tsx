@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import {
 	fetchAllBuilders,
+	isPublicBuilder,
 	type PassportBuilder,
 } from "@/lib/integrations/stellar-passport";
 
@@ -12,7 +13,7 @@ export default async function TopBuildersSection() {
 	try {
 		const all = await fetchAllBuilders();
 		builders = all
-			.filter((b) => b.github_username)
+			.filter((b) => b.github_username && isPublicBuilder(b))
 			.sort((a, b) => {
 				const aScore =
 					(a.stats?.totalCommits30d ?? 0) * 2 + (a.projects?.length ?? 0);
@@ -125,6 +126,7 @@ export function TopBuildersSkeleton() {
 			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 				{Array.from({ length: 6 }).map((_, i) => (
 					<div
+						// biome-ignore lint/suspicious/noArrayIndexKey: six fixed skeleton boxes that never reorder
 						key={i}
 						className="h-[68px] rounded-xl bg-[#262626] animate-pulse"
 					/>
