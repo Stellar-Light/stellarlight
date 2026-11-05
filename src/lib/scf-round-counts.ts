@@ -10,8 +10,9 @@
  * awarded again later shows only its later round. Our side: awarded rows
  * whose scfAwardedRounds hold the round.
  *
- * Per round: agrees, short (ours below SCF), over (ours above SCF on the
- * exact latest round) or unconfirmed (ours above the floor of an earlier
+ * Per round: agrees, short (ours below SCF), over (ours above SCF where the
+ * count is exact: the latest round, and any later round we alone claim,
+ * where SCF has none) or unconfirmed (ours above the floor of an earlier
  * round: the listing cannot tell a re-awarded project from a false round;
  * scf-crosscheck's roundsOverstated tests those against each page). Status:
  * mismatch when any round is short or over, else match.
@@ -52,8 +53,13 @@ export type RoundCountReport =
 			status: "match" | "mismatch";
 			latest: number;
 			rounds: RoundCount[];
-			/** awarded rows whose rounds were not read (no array): in no round */
+			/** Awarded rows with no rounds and no SCF page cited: nobody read
+			 *  their rounds, so they count in no round. A row with no rounds
+			 *  that cites a page read it (an award SCF does not number). */
 			roundsUnread: number;
+			/** Listed pages whose last round is 0, which names no award: in no
+			 *  round, and named rather than dropped. */
+			roundZero: string[];
 	  };
 
 const PAGE = "https://communityfund.stellar.org/project/";
@@ -84,9 +90,11 @@ export function compareRoundCounts(
 		lastBySlug.set(slug, r as number);
 	}
 	const pagesByRound = new Map<number, string[]>();
+	const roundZero: string[] = [];
 	for (const [slug, r] of lastBySlug) {
 		// a negative code is an award SCF does not number
 		if (r > 0) pagesByRound.set(r, [...(pagesByRound.get(r) ?? []), slug]);
+		else if (r === 0) roundZero.push(slug);
 	}
 	if (pagesByRound.size === 0)
 		return cannot("SCF listing carries no numbered round");
@@ -105,11 +113,17 @@ export function compareRoundCounts(
 		return cannot(
 			`SCF listing lacks ${missing.length} page(s) our rows cite for #${latest}: ${missing.join(", ")}`,
 		);
+	// Rounds only we claim count too: past the latest round SCF has none (an
+	// exact 0); before it, the listing's floor there is 0.
+	for (const r of ours)
+		for (const round of roundsOf(r) ?? [])
+			if (Number.isInteger(round) && round > 0 && !pagesByRound.has(round))
+				pagesByRound.set(round, []);
 	const rounds = [...pagesByRound.entries()]
 		.sort(([a], [b]) => b - a)
 		.map(([round, pages]): RoundCount => {
 			const claiming = ours.filter((r) => roundsOf(r)?.includes(round));
-			const exact = round === latest;
+			const exact = round >= latest;
 			const n = claiming.length;
 			const verdict =
 				n === pages.length
@@ -138,6 +152,8 @@ export function compareRoundCounts(
 			: "match",
 		latest,
 		rounds,
-		roundsUnread: ours.filter((r) => roundsOf(r) === null).length,
+		roundsUnread: ours.filter((r) => !roundsOf(r)?.length && pageOf(r) === null)
+			.length,
+		roundZero,
 	};
 }

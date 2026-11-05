@@ -88,16 +88,20 @@ describe("compareRoundCounts", () => {
 		expect(report.status).toBe("mismatch");
 		if (report.status === "could-not-check") return;
 		expect(report.latest).toBe(45);
-		expect(report.rounds).toEqual([
-			{
-				round: 45,
-				exact: true,
-				scf: 3,
-				ours: 1,
-				verdict: "short",
-				uncited: ["liqvid-hrr", "pods-dxl"],
-			},
-		]);
+		expect(report.rounds[0]).toEqual({
+			round: 45,
+			exact: true,
+			scf: 3,
+			ours: 1,
+			verdict: "short",
+			uncited: ["liqvid-hrr", "pods-dxl"],
+		});
+		// Liqvid's #37: no page in this listing was last awarded in it
+		expect(report.rounds[1]).toMatchObject({
+			round: 37,
+			scf: 0,
+			verdict: "unconfirmed",
+		});
 		const over = compareRoundCounts(
 			[listed("a-1", 45), listed("b-1", 44)],
 			[row([45], "a-1"), row([44, 45], "b-1")],
@@ -147,12 +151,43 @@ describe("compareRoundCounts", () => {
 		expect(short.status).toBe("mismatch");
 	});
 
-	it("a row whose rounds were not read is counted apart, never as not in the round", () => {
+	it("an awarded row with no rounds and no SCF page cited is counted as rounds unread", () => {
+		// The shapes the API serves: rounds [] either way. A row citing a page
+		// read that page (blend-mfy: a Liquidity award, no numbered round); a
+		// row citing none has rounds nobody read.
 		const report = compareRoundCounts(
 			[listed("a-1", 45)],
-			[row([45], "a-1"), row(null, "b-1")],
+			[
+				row([45], "a-1"),
+				{ scfAwardedRounds: [], scfSourceUrl: `${PAGE}blend-mfy` },
+				{ scfAwardedRounds: [], scfSourceUrl: null },
+			],
 		);
 		if (report.status === "could-not-check") throw new Error(report.reason);
 		expect(report.roundsUnread).toBe(1);
+	});
+
+	it("a round only we claim, past the listing's latest, is over", () => {
+		const report = compareRoundCounts(
+			[listed("a-1", 45)],
+			[row([45], "a-1"), row([46], "b-1")],
+		);
+		expect(report.status).toBe("mismatch");
+		if (report.status === "could-not-check") return;
+		expect(report.rounds.find((r) => r.round === 46)).toMatchObject({
+			exact: true,
+			scf: 0,
+			ours: 1,
+			verdict: "over",
+		});
+	});
+
+	it("a listed page whose last round is 0 is named, not dropped", () => {
+		const report = compareRoundCounts(
+			[listed("a-1", 45), listed("z-1", 0)],
+			[row([45], "a-1")],
+		);
+		if (report.status === "could-not-check") throw new Error(report.reason);
+		expect(report.roundZero).toEqual(["z-1"]);
 	});
 });

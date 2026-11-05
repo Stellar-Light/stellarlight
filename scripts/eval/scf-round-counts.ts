@@ -78,8 +78,12 @@ async function main() {
 		process.exit(2);
 	}
 	console.log(
-		`SCF listing ${listing?.length} rows; our awarded rows ${ours?.length}, ${report.roundsUnread} with rounds unread (${BASE})`,
+		`SCF listing ${listing?.length} rows; our awarded rows ${ours?.length}, ${report.roundsUnread} with no rounds and no SCF page cited (rounds unknown) (${BASE})`,
 	);
+	if (report.roundZero.length)
+		console.log(
+			`SCF lists ${report.roundZero.length} page(s) with last round 0, counted in no round: ${report.roundZero.join(", ")}`,
+		);
 	const label = {
 		agrees: "",
 		short: "  SHORT",
