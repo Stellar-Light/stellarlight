@@ -3425,7 +3425,7 @@ export const spec: OpenAPISpec = {
 													items: { type: "string" },
 													nullable: true,
 													description:
-														"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, test wasm workspaces, test files such as foo_test.rs, and a Rust crate kept inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
+														"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
 												},
 												targetProtocol: {
 													type: "integer",
@@ -6946,7 +6946,7 @@ export const spec: OpenAPISpec = {
 															items: { type: "string" },
 															nullable: true,
 															description:
-																"The repo-relative source file of each contractInterface entry (up to 60), same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, test wasm workspaces, test files such as foo_test.rs, and a Rust crate kept inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
+																"The repo-relative source file of each contractInterface entry (up to 60), same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
 														},
 														mainnetContractId: {
 															type: "string",
@@ -12061,7 +12061,7 @@ export const spec: OpenAPISpec = {
 								items: { type: "string" },
 								nullable: true,
 								description:
-									"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, test wasm workspaces, test files such as foo_test.rs, and a Rust crate kept inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
+									"The repo-relative source file of each contractInterface entry, same order and length: contractInterfacePaths[i] is where contractInterface[i] is defined at scannedRef. Interfaces in test code (tests/, __tests__/, fixtures/, testdata/, e2e/, fuzz targets, test helpers, suites and contracts, test wasm workspaces, test files such as foo_test.rs, and test contracts inside an integration/ folder) are left out of contractInterface; one under an examples or template folder is kept, and its path says so. [] when the scan that recorded paths found no interface. null when no paths were recorded: the repo was scanned before 2026-11-04, and such a scan also read integration-test, testdata, e2e and test wasm folders, so an entry may be a test fixture until the next scan.",
 							},
 							targetProtocol: {
 								type: "integer",

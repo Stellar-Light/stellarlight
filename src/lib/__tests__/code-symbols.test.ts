@@ -5,6 +5,7 @@ import {
 	extractCodeSymbols,
 	extractContractInterface,
 	extractJsSymbols,
+	isTestPath,
 	symbolsHaystack,
 } from "../code-symbols";
 
@@ -319,5 +320,39 @@ describe("interfaces carry their source path; test folders stay out (issue #1906
 		];
 		expect(extractJsSymbols(blobs)).toEqual(["connectWallet"]);
 		expect(detectSdkCapabilities(blobs)).toEqual(["tx-building"]);
+	});
+});
+
+// re-check item 3: one shared test-path rule, every listed path covered
+describe("isTestPath, the one test-path rule", () => {
+	it.each([
+		"test-suites/src/lib.rs",
+		"cmd/crates/soroban-test/src/lib.rs",
+		"src/__fixtures__/x.ts",
+		"fuzz/fuzz_targets/x.rs",
+		"support/db/dbtest/db.go",
+		"test-contracts/src/lib.rs",
+		"src/test_helpers/mod.rs",
+		"internal/integration/contracts/increment/src/lib.rs",
+		"integration-tests/src/lib.rs",
+		"soroban-test-wasms/wasm-workspace/auth/src/lib.rs",
+		"__tests__/pay.ts",
+		"src/pay.test.ts",
+		"internal/pay_test.go",
+		"pkg/test_pay.py",
+		"src/main/kotlin/PayTest.kt",
+	])("%s is test code", (p) => {
+		expect(isTestPath(p)).toBe(true);
+	});
+
+	it.each([
+		"contracts/integration/adapter/src/lib.rs",
+		"src/integration/mod.rs",
+		"integration/src/lib.rs",
+		"src/latest/mod.rs",
+		"pkg/latest/latest.go",
+		"contracts/vault/src/lib.rs",
+	])("%s is product code", (p) => {
+		expect(isTestPath(p)).toBe(false);
 	});
 });

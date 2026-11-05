@@ -128,3 +128,16 @@ Re-check item 2 (surface words in productKey): the new tests against b2ec6d52, b
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
 Pass after, with the fix: src/lib/__tests__/repo-search-rank.test.ts Tests 120 passed (120)
 Replay with the clock pinned to the capture time (pin-clock.mjs): fidelity 206/206; base against branch: acceptance 20/20, controls 8/8, unchanged 16/16, canonicalOverName 5/5, fullPath 1/1, 20 changes all attributed; only exn-01 (superseded) moves down.
+
+Re-check item 3 (one shared test-path rule): the new table run against the old rule, exported unchanged, before the fix
+      Tests  8 failed | 45 passed (53)
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > cmd/crates/soroban-test/src/lib.rs is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > contracts/integration/adapter/src/lib.rs is product code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > fuzz/fuzz_targets/x.rs is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > src/__fixtures__/x.ts is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > src/test_helpers/mod.rs is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > support/db/dbtest/db.go is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > test-contracts/src/lib.rs is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > test-suites/src/lib.rs is test code
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the new rule: code-symbols and repo-search-rank, Tests 173 passed (173)
