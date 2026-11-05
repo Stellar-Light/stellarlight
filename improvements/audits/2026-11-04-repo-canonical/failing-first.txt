@@ -1,0 +1,150 @@
+Failing first: the changed and new test files run against the base tree (origin/main f3b19008, a scratch archive)
+      Tests  36 failed | 119 passed (155)
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > JS under a test folder stays out of the symbols and the capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > contracts/tests/fixture/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > e2e/contracts/token/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > each signature comes with the file it was read from, in the same order
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > internal/integration/contracts/increment/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > soroban-test-wasms/wasm-workspace/auth/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > testdata/contract/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/explain-route-interface.test.ts > explainRepo codeVerified interface paths > a renamed repo's old path routes to the repo where it lives now
+ FAIL  src/lib/__tests__/explain-route-interface.test.ts > explainRepo codeVerified interface paths > serves each interface entry's source path, through the route's select
+ FAIL  src/lib/__tests__/hackathon-brief.test.ts > summarizeTrust > drops the full contractInterface (the budget-buster) but keeps its size and a link to the full report
+ FAIL  src/lib/__tests__/repo-relations.test.ts > renamedTo: an old path resolves to where the repo lives now > an archived or superseded repo is a different repo and keeps its own name
+ FAIL  src/lib/__tests__/repo-relations.test.ts > renamedTo: an old path resolves to where the repo lives now > follows a rename, case-insensitively
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > How do I start a new dapp with Scaffold Stellar? routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > Scaffold Stellar routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > Stellar Laboratory routes to stellar/laboratory
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > contract examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > example soroban contracts routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > lab.stellar.org routes to stellar/laboratory
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold stellar routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold-stellar routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > smart contract examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > soroban examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > soroban smart contract examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar lab routes to stellar/laboratory
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar scaffold cli routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar scaffold routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > the old owner/name of a renamed repo finds the repo where it lives now
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > the product outranks a hackathon copy that carries its name
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > [] when there is no interface to place
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > null when the scan predates paths: an entry's path is unknown, not absent
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > null when the stored lists do not pair up
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > pairs each entry with its stored source path
+ FAIL  src/lib/__tests__/scan-write-shape.test.ts > write-shape: the signals-only write gate > ok outcome persists the full signal set + state=scanned
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > an old renamed path answers with the repo where it lives now
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > null paths when the scan predates them
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > serves each interface entry's source path beside it
+ Test Files  7 failed (7)
+⎯⎯⎯⎯⎯⎯ Failed Tests 36 ⎯⎯⎯⎯⎯⎯⎯
+
+Pass after, on the branch: Test Files 7 passed (7); Tests 155 passed (155)
+
+Window cut (third commit, the #1915 class): the new tests run against the second commit (d1ea2d54), before the fix
+      Tests  5 failed | 97 passed (102)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > a capped candidate window says so (the #1915 class) > a browse past its window reports the true eligible count and the cut
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > a capped candidate window says so (the #1915 class) > a q search over a cut window cannot count every match: eligible is null, never a guess
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > a capped candidate window says so (the #1915 class) > a window that holds every row is not cut, and eligible equals total
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > a capped candidate window says so (the #1915 class) > minScore runs in the database, so a browse's eligible count stays exact
+ FAIL  src/lib/__tests__/repo-search-route-counts.test.ts > repo search counts > a browse past its window serves truncated and the true eligible count
+ Test Files  2 failed (2)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 5 ⎯⎯⎯⎯⎯⎯⎯
+
+Pass after, with the fix: Test Files 2 passed (2); Tests 102 passed (102)
+Replay of the third commit over the same corpus: 183 of 183 replay records identical to the second commit's (pages, rankings, totals, matchMode), so the ranking numbers above stay attributable to the second commit.
+
+Review finding 1 (one rename rule on search, explain and trust; the substitution named): the new tests against 3aa39d8f, before the fix
+      Tests  6 failed | 103 passed (109)
+ FAIL  src/lib/__tests__/explain-route-interface.test.ts > explainRepo codeVerified interface paths > a renamed repo's old path routes to the repo where it lives now, and says so
+ FAIL  src/lib/__tests__/explain-route-interface.test.ts > explainRepo codeVerified interface paths > an old path the index holds a row for is explained as itself
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > an old path the index holds a row for keeps its own row (the rule explain and trust follow)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > the old owner/name of a renamed repo finds the repo where it lives now, and says so
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > an old path the index holds a row for is served as itself
+ FAIL  src/lib/__tests__/trust-report.test.ts > trust report interface paths and renamed paths > an old renamed path answers with the repo where it lives now, and says so
+ Test Files  3 failed (3)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 6 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: Test Files 4 passed (4); Tests 122 passed (122)
+
+Review finding 2 (the product float fires on the phrase itself, in any spelling; an exact name keeps rank 1): the new tests against cbc7da39, before the fix
+      Tests  9 failed | 102 passed (111)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > How do I start a new dapp with Scaffold Stellar? maps to nothing
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > a hackathon copy named for the template stays below the product for scaffold_stellar
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > an exact repo name keeps rank 1 over the product float (q=stellar-lab, q=stellar_lab)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > an underscore spelling reaches the repo with that exact name, past a flooded window
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold_stellar routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > soroban_examples routes to stellar/soroban-examples
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar lab notes maps to nothing
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar scaffold cli maps to nothing
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar_lab routes to stellar/laboratory
+ Test Files  1 failed (1)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 9 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: src/lib/__tests__/repo-search-rank.test.ts Tests 111 passed (111)
+
+Review findings 3 and 6 (test layouts per language, the integration clause limited to crates kept inside an integration folder, null paths when none were recorded): the new tests against 0938586e, before the fix
+      Tests  10 failed | 134 passed (144)
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > __tests__/pay.ts is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > integration-tests/src/lib.rs is a test folder: left out of the interface and the symbols
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > integration/src/lib.rs is product code: its interface and symbols stay in
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > internal/pay_test.go is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > pkg/test_pay.py is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > src/integration/mod.rs is product code: its interface and symbols stay in
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > src/main/kotlin/PayTest.kt is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > src/pay.spec.tsx is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/code-symbols.test.ts > interfaces carry their source path; test folders stay out (issue #1906) > src/pay.test.ts is test code in its language: no symbols, no capability tags
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > served interface paths (issue #1906) > null when no paths were recorded, even with no interface
+ Test Files  2 failed (2)
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: Test Files 4 passed (4); Tests 151 passed (151)
+
+Review finding 4 (meta.canonical for the query, not the page): the new tests against fc4ebf62, before the fix
+      Tests  2 failed | 112 passed (114)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > canonical comes from the query, not the page
+ FAIL  src/lib/__tests__/repo-search-route-canonical.test.ts > repo search meta.canonical > names the query's canonical repo on a page that does not hold it
+ Test Files  2 failed (2)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: Test Files 3 passed (3); Tests 115 passed (115)
+
+Re-check item 1 (a bare name that fires a canonical entry defers to the canonical repo): the new tests against e209caf2, before the fix
+      Tests  2 failed | 113 passed (115)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > a bare name that fires a canonical entry ranks the canonical repo first (q=stellar-lab, q=stellar_lab)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > a copy named for a canonical concept does not outrank the canonical repo (soroban-rpc, sep-10, sep10)
+ Test Files  1 failed (1)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: src/lib/__tests__/repo-search-rank.test.ts Tests 115 passed (115)
+Replay over 206 frozen queries, base against branch: canonicalOverName 5/5, fullPath 1/1, controls 8/8, unchanged 16/16; against b3117b2d, 8 queries change: can-01 to can-05 2->1, sep-10 back to the canonical repo, exn-01 and exn-02 (superseded) 1->2.
+Explain decision (frozen-set bar 'explain', fixed before measuring), with explain-routing.mts over the 206 frozen queries:
+  products named inside a question routed exp-01, exp-02, exp-03, exp-04 to their product (exp-06 already routes there by the index) and kept exp-05 off stellar/laboratory;
+  but it also routed unc-09 (q=hackthon-scaffold-stellar, the exact name of a hackathon copy) to stellar-scaffold/cli, which the rule forbids.
+Decision: not implemented. The spec says explainRepo routes a developer product only on its bare name. A variant that keeps hyphenated names whole needs a fresh question set before it is measured.
+
+Re-check item 2 (surface words in productKey): the new tests against b2ec6d52, before the fix
+      Tests  4 failed | 116 passed (120)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold stellar github routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold stellar repo routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar lab repo routes to stellar/laboratory
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar lab source code routes to stellar/laboratory
+ Test Files  1 failed (1)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: src/lib/__tests__/repo-search-rank.test.ts Tests 120 passed (120)
+Replay with the clock pinned to the capture time (pin-clock.mjs): fidelity 206/206; base against branch: acceptance 20/20, controls 8/8, unchanged 16/16, canonicalOverName 5/5, fullPath 1/1, 20 changes all attributed; only exn-01 (superseded) moves down.
+
+Re-check item 3 (one shared test-path rule): the new table run against the old rule, exported unchanged, before the fix
+      Tests  8 failed | 45 passed (53)
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > cmd/crates/soroban-test/src/lib.rs is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > contracts/integration/adapter/src/lib.rs is product code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > fuzz/fuzz_targets/x.rs is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > src/__fixtures__/x.ts is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > src/test_helpers/mod.rs is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > support/db/dbtest/db.go is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > test-contracts/src/lib.rs is test code
+ FAIL  src/lib/__tests__/code-symbols.test.ts > isTestPath, the one test-path rule > test-suites/src/lib.rs is test code
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 8 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the new rule: code-symbols and repo-search-rank, Tests 173 passed (173)
+
+Re-check item 4 (the stand-in test's mock honors the where clause): mutation check on a scratch copy of 0ee73237 where every read that reaches the old row by name (the main fetch, the identity read and the exact-name read) is broken:
+  with the where-honoring mock the test fails: expected 'stellar-scaffold/cli' to be 'theahaco/scaffold-stellar' (Tests 1 failed);
+  with the old mock that hands every row to every read it passes (Tests 1 passed), the defect the review named.
+On the real code the where-honoring test passes.
+
+Re-check item 5 (the spec says which code facts leave test code out; the follow-up queued in improvements/TODO.md): src/lib/__tests__/code-facts-test-rule-spec.test.ts against the spec at dd211947: Tests 1 failed (1); with the change: Tests 1 passed (1).

@@ -11,9 +11,12 @@ import { AMBASSADORS } from "@/data/stellar-ambassadors";
 import { builderCodeActivity, type CodeActivity } from "@/lib/builder-code";
 import {
 	fetchAllBuilders,
+	isPublicBuilder,
 	type PassportBuilder,
+	PUBLIC_BUILDERS,
 } from "@/lib/integrations/stellar-passport";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { findWholeSet } from "@/lib/whole-set";
 
 // One source of truth: the Payload `builders` mirror (synced from Stellar
 // Passport daily by /api/sync/builders). The list used to hit the live
@@ -32,19 +35,29 @@ export const metadata: Metadata = {
 export default async function BuildersPage() {
 	let builders: PassportBuilder[] = [];
 	const activity = new Map<string, CodeActivity>();
+	// true once the activity join ran: a failed or cut join leaves every
+	// row's counts unknown, never zero
+	let activityRead = false;
 	let syncedAt: string | null = null;
+	// the directory's size as the mirror counts it, even when the read
+	// below stops at its ceiling
+	let total: number | null = null;
 
 	const payload = await getPayloadSafe();
 	if (payload) {
 		try {
-			const mirror = await payload.find({
+			const mirror = await findWholeSet<
+				PassportBuilder & { last_synced?: string | null }
+			>(payload, {
 				collection: "builders",
-				where: { visibility: { not_equals: "hidden" } },
+				where: PUBLIC_BUILDERS,
 				limit: 1000,
 				depth: 0,
+				sort: "-createdAt",
 			});
-			builders = mirror.docs as unknown as PassportBuilder[];
-			for (const d of mirror.docs as any[])
+			builders = mirror.docs;
+			total = mirror.totalDocs;
+			for (const d of mirror.docs)
 				if (d.last_synced && (!syncedAt || d.last_synced > syncedAt))
 					syncedAt = d.last_synced;
 		} catch (error) {
@@ -53,7 +66,8 @@ export default async function BuildersPage() {
 	}
 	if (builders.length === 0) {
 		try {
-			builders = await fetchAllBuilders();
+			builders = (await fetchAllBuilders()).filter(isPublicBuilder);
+			total = builders.length;
 		} catch (error) {
 			console.error("Failed to fetch builders:", error);
 		}
@@ -68,6 +82,7 @@ export default async function BuildersPage() {
 		try {
 			for (const [k, v] of await builderCodeActivity(payload, builders as any))
 				activity.set(k, v);
+			activityRead = true;
 		} catch (error) {
 			console.error("builders repo activity failed:", error);
 		}
@@ -141,9 +156,10 @@ export default async function BuildersPage() {
 			featured: !!b.is_featured,
 			commits30d: b.stats?.totalCommits30d ?? 0,
 			passportProjects: b.projects?.length ?? 0,
-			repos: a?.repos.length ?? 0,
-			stars: a?.stars ?? 0,
-			commits90d: a?.commits90d ?? 0,
+			// a builder the join ran for and found nothing has a true zero
+			repos: activityRead ? (a?.repos.length ?? 0) : null,
+			stars: activityRead ? (a?.stars ?? 0) : null,
+			commits90d: activityRead ? (a?.commits90d ?? 0) : null,
 			lastCommitAt: a?.lastCommitAt ?? null,
 			projects: a
 				? [...a.projects.entries()].map(([slug, name]) => ({ slug, name }))
@@ -181,12 +197,23 @@ export default async function BuildersPage() {
 						Builders
 					</h1>
 					<p className="text-muted-foreground">
-						{builders.length} developers building on Stellar. Profiles from
-						Stellar Passport, code activity from the repos we index.
+						{(total ?? builders.length).toLocaleString("en-US")} developers
+						building on Stellar.
+						{total !== null && total > builders.length
+							? ` Showing the newest ${builders.length.toLocaleString("en-US")} of them.`
+							: ""}{" "}
+						Profiles from Stellar Passport, code activity from the repos we
+						index.
 						{syncedAt
 							? ` Profiles synced ${new Date(syncedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}.`
 							: ""}
 					</p>
+					{rows.length > 0 && !activityRead && (
+						<p className="text-sm text-muted-foreground mt-2">
+							Code activity could not be read just now, so repo and commit
+							counts here are unknown, not zero.
+						</p>
+					)}
 				</div>
 
 				{rows.length > 0 ? (

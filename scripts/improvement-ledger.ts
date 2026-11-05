@@ -17,7 +17,7 @@
  * engine/weekly/improvement-ledger-latest.json (git history = the dated archive).
  */
 
-import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -28,6 +28,8 @@ import {
 	isKindMapped,
 	isSyntheticQuery,
 	kindOf,
+	RAVEN_DRIFT_ARTIFACT,
+	ravenDriftFindings,
 	type Severity,
 	SURFACES,
 	type Surface,
@@ -667,15 +669,6 @@ const PACKET_STAMPS_SPEC: SourceSpec = {
 	],
 };
 
-/** raven-drift is a dated file in improvements/engine/, not weekly/. */
-function latestRavenDrift(): string | null {
-	if (!existsSync(ENGINE)) return null;
-	const files = readdirSync(ENGINE)
-		.filter((f) => /^raven-drift-\d{4}-\d{2}-\d{2}\.json$/.test(f))
-		.sort();
-	return files.length ? join(ENGINE, files[files.length - 1]) : null;
-}
-
 function readJson(path: string): Row | null {
 	try {
 		return JSON.parse(readFileSync(path, "utf8"));
@@ -752,32 +745,17 @@ function extractFromSpecs(): { detected: Finding[]; sources: string[] } {
 	}
 
 	// raven-drift (consumer surface): only ops MISSING beyond grace are findings;
-	// lagging-within-grace is expected, not a finding (catalog-lag ≠ drift).
-	const rdPath = latestRavenDrift();
-	if (rdPath) {
-		const rd = readJson(rdPath);
-		if (rd) {
-			sources.push("raven-drift");
-			const missing: string[] = Array.isArray(rd.missingFromCatalog)
-				? rd.missingFromCatalog
-				: [];
-			for (const op of missing) {
-				const probe = str(op);
-				if (!probe) continue;
-				detected.push({
-					id: findingId("raven-drift", probe),
-					source: "raven-drift",
-					surface: "consumer",
-					probe,
-					failureMode: "op-missing-from-catalog",
-					severity: "medium",
-					firstSeen: new Date().toISOString(),
-					lastSeen: new Date().toISOString(),
-					status: "open",
-				});
-			}
-			console.log(`  · raven-drift: ${missing.length} missing op(s)`);
-		}
+	// lagging-within-grace is expected, not a finding (catalog-lag is not drift).
+	// It reads the artifact the daily workflow writes; a run that could not
+	// look files a could-not-check finding and does not count as coverage.
+	const rd = readJson(join(ROOT, RAVEN_DRIFT_ARTIFACT));
+	if (rd) {
+		const { covered, findings } = ravenDriftFindings(rd, nowIso);
+		if (covered) sources.push("raven-drift");
+		detected.push(...findings);
+		console.log(
+			`  · raven-drift: ${covered ? `${findings.length} missing op(s)` : "could not check"} · ${RAVEN_DRIFT_ARTIFACT}`,
+		);
 	}
 
 	return { detected, sources };

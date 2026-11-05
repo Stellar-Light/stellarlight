@@ -10,78 +10,102 @@
 
 const FETCH_TIMEOUT_MS = 10_000;
 
-/* ── minimal stellar.toml parsing (no TOML dep) ─────────────────────────── */
+/* ── stellar.toml parsing lives in src/lib/stellar-toml.ts (shared with the
+ * stablecoin pipeline); re-exported so the scripts' imports stay as they are. */
+import {
+	looksLikeStellarToml,
+	type StellarToml,
+} from "../../src/lib/stellar-toml";
 
-export interface StellarToml {
-	topLevel: Record<string, string>;
-	documentation: Record<string, string>;
-	currencyCodes: string[];
-	/** (code, issuer) pairs from [[CURRENCIES]] blocks — the issuer is the
-	 *  on-chain evidence key the project-side enrichment joins on. Only pairs
-	 *  whose issuer is a well-formed Stellar account (G + 55 base32 chars)
-	 *  are collected; a currency block without an issuer contributes to
-	 *  currencyCodes but never here. */
-	currencies: Array<{ code: string; issuer: string; status?: string }>;
+export {
+	looksLikeStellarToml,
+	parseStellarToml,
+	type StellarToml,
+} from "../../src/lib/stellar-toml";
+
+const SEP_SERVERS: Record<string, string> = {
+	TRANSFER_SERVER: "sep-6",
+	TRANSFER_SERVER_SEP0024: "sep-24",
+	DIRECT_PAYMENT_SERVER: "sep-31",
+};
+
+/** The toml-backed partner fields a successful parse supports (#1909): what
+ * the file declares, [] when it declares none, and null (could-not-check)
+ * when the parser could not read a server key or a currency's code. Writing
+ * only non-empty values let an earlier curated value survive under a fresh
+ * read stamp; writing [] for what we could not read erased a real one. */
+export function tomlCapabilities(toml: StellarToml): {
+	seps: string[] | null;
+	assets: { code: string }[] | null;
+} {
+	const serverUnread = Object.keys(SEP_SERVERS).some((k) =>
+		toml.unreadKeys.includes(k),
+	);
+	return {
+		seps: serverUnread
+			? null
+			: Object.entries(SEP_SERVERS)
+					.filter(([k]) => toml.topLevel[k])
+					.map(([, sep]) => sep),
+		assets: toml.unreadCurrencies.length
+			? null
+			: toml.currencyCodes.slice(0, 25).map((code) => ({ code })),
+	};
 }
 
-/** Parse just the shapes we need: top-level `KEY = "v"`, the [DOCUMENTATION]
- *  table, and `code`/`issuer` inside [[CURRENCIES]] blocks. */
-export function parseStellarToml(text: string): StellarToml {
-	const topLevel: Record<string, string> = {};
-	const documentation: Record<string, string> = {};
-	const currencyCodes: string[] = [];
-	const currencies: Array<{ code: string; issuer: string; status?: string }> =
-		[];
-	let section: "top" | "doc" | "currency" | "other" = "top";
-	// The current [[CURRENCIES]] block accumulates until its next block starts
-	// — key order inside a block is not guaranteed by SEP-1.
-	let cur: { code?: string; issuer?: string; status?: string } = {};
-	const flushCurrency = () => {
-		// Asset codes are case-sensitive on Stellar (nBTC and NBTC are two
-		// assets), so the code keeps the case the operator wrote; only the
-		// issuer is a StrKey, which is uppercase by definition. Uppercasing the
-		// code sent the on-chain join to a 404 for normalfinance.io's nBTC
-		// (2026-09-28) while the real asset had 65 trustlines.
-		const code = cur.code?.trim();
-		const issuer = cur.issuer?.trim().toUpperCase();
-		// SEP-1 `status`: live | dead | test | private. Kept so a join can
-		// decline an asset the operator itself has retired.
-		const status = cur.status?.trim().toLowerCase() || undefined;
-		if (code && !currencyCodes.includes(code)) currencyCodes.push(code);
-		if (
-			code &&
-			issuer &&
-			/^G[A-Z2-7]{55}$/.test(issuer) &&
-			!currencies.some((c) => c.code === code && c.issuer === issuer)
-		)
-			currencies.push(status ? { code, issuer, status } : { code, issuer });
-		cur = {};
+/** The update a successful parse writes: a could-not-check field is left
+ * out, so the stored value stands; it is never written as [] or null. */
+export function capabilityWrite(caps: ReturnType<typeof tomlCapabilities>): {
+	seps?: string[];
+	assets?: { code: string }[];
+} {
+	return {
+		...(caps.seps ? { seps: caps.seps } : {}),
+		...(caps.assets ? { assets: caps.assets } : {}),
 	};
+}
 
-	for (const raw of text.split(/\r?\n/)) {
-		const line = raw.trim();
-		if (!line || line.startsWith("#")) continue;
-		if (line.startsWith("[")) {
-			if (section === "currency") flushCurrency();
-			if (/^\[\[\s*CURRENCIES\s*\]\]/i.test(line)) section = "currency";
-			else if (/^\[\s*DOCUMENTATION\s*\]/i.test(line)) section = "doc";
-			else section = "other";
-			continue;
-		}
-		const m = line.match(/^([A-Za-z0-9_]+)\s*=\s*"([^"]*)"/);
-		if (!m) continue;
-		const [, key, value] = m;
-		if (section === "top") topLevel[key.toUpperCase()] = value;
-		else if (section === "doc") documentation[key.toUpperCase()] = value;
-		else if (section === "currency") {
-			const k = key.toLowerCase();
-			if (k === "code") cur.code = value;
-			else if (k === "issuer") cur.issuer = value;
-			else if (k === "status") cur.status = value;
-		}
-	}
-	if (section === "currency") flushCurrency();
-	return { topLevel, documentation, currencyCodes, currencies };
+/** The read stamps and toml-backed fields one parse writes (#1909). The
+ * stamps mark the row as read, and the API then serves its seps and assets
+ * as what the file declares (an absent seps as []). So a parse that could
+ * not read seps or assets stamps the row only when it already holds a
+ * recorded read; a partial first read writes nothing here. */
+export function tomlReadWrite(
+	caps: ReturnType<typeof tomlCapabilities>,
+	stamp: { tomlSourceUrl: string; tomlFetchedAt: string },
+	priorRead: boolean,
+): {
+	seps?: string[];
+	assets?: { code: string }[];
+	tomlSourceUrl?: string;
+	tomlFetchedAt?: string;
+} {
+	const complete = caps.seps !== null && caps.assets !== null;
+	return complete || priorRead ? { ...stamp, ...capabilityWrite(caps) } : {};
+}
+
+const listed = (xs: unknown): string =>
+	!Array.isArray(xs)
+		? "unset"
+		: xs.length
+			? xs
+					.map((x) =>
+						typeof x === "string" ? x : (x as { code?: string })?.code,
+					)
+					.join(",")
+			: "none";
+
+/** The dry run's lines: the stored value beside the planned one, so a wipe
+ * or an unread field is visible before an execute. */
+export function capabilityReport(
+	stored: { seps?: unknown; assets?: unknown },
+	toml: StellarToml,
+): string[] {
+	const caps = tomlCapabilities(toml);
+	return [
+		`seps ${listed(stored.seps)} → ${caps.seps ? listed(caps.seps) : `unread (${toml.unreadKeys.join(", ")}), kept`}`,
+		`assets ${listed(stored.assets)} → ${caps.assets ? listed(caps.assets) : `unread (${toml.unreadCurrencies.join("; ")}), kept`}`,
+	];
 }
 
 export async function fetchText(url: string): Promise<string | null> {
@@ -107,14 +131,7 @@ export async function fetchText(url: string): Promise<string | null> {
 		// Content sniff: an HTML parking page is not a toml, and the callers'
 		// "soft-404 is a skip" claim was only true if someone checked. First
 		// meaningful line must look like a toml table or KEY assignment.
-		const first =
-			text
-				.split(/\r?\n/)
-				.find((l) => l.trim() && !l.trim().startsWith("#"))
-				?.trim() ?? "";
-		if (first.startsWith("<") || !/^(\[|[A-Za-z0-9_]+\s*=)/.test(first))
-			return null;
-		return text;
+		return looksLikeStellarToml(text) ? text : null;
 	} catch {
 		return null;
 	}

@@ -1,0 +1,128 @@
+// @vitest-environment jsdom
+
+/**
+ * Re-check 2026-11-05: /api/defillama/protocol/{slug} serves null for a
+ * figure, change or history it did not read, and the project page's TVL card
+ * called .map and .toFixed on those nulls. With no error boundary that blanked
+ * /project/wisdomtree always and /project/benji whenever rwa.xyz was unread.
+ * Each null shape renders: no history means no chart, and a null figure or
+ * change reads Unavailable.
+ */
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { ProjectTVLChart } from "./project-tvl-chart";
+
+// visx measures its parent with ResizeObserver; the card is what is tested.
+vi.mock("@/components/charts/area-chart", () => ({
+	AreaChart: () => <div data-testid="tvl-chart" />,
+}));
+vi.mock("@/components/charts/area", () => ({ Area: () => null }));
+vi.mock("@/components/charts/grid", () => ({ Grid: () => null }));
+vi.mock("@/components/charts/x-axis", () => ({ XAxis: () => null }));
+vi.mock("@/components/charts/tooltip", () => ({ ChartTooltip: () => null }));
+
+const base = {
+	found: true,
+	logo: null,
+	category: "RWA",
+	change7d: null,
+	asOf: null,
+};
+const series = [
+	{ date: 1_761_955_200_000, tvl: 120_000_000 },
+	{ date: 1_762_041_600_000, tvl: 129_334_939 },
+];
+
+function renderWith(status: number, body: unknown) {
+	vi.stubGlobal(
+		"fetch",
+		vi.fn(async () => new Response(JSON.stringify(body), { status })),
+	);
+	const client = new QueryClient({
+		defaultOptions: { queries: { retry: false } },
+	});
+	return render(
+		<QueryClientProvider client={client}>
+			<ProjectTVLChart projectName="x" />
+		</QueryClientProvider>,
+	);
+}
+
+afterEach(() => {
+	cleanup();
+	vi.unstubAllGlobals();
+});
+
+describe("the project TVL card renders every shape the route serves", () => {
+	it("Benji with rwa.xyz unread: Unavailable, no chart, the source named", async () => {
+		renderWith(200, {
+			...base,
+			name: "Benji (Franklin Templeton FOBXX)",
+			slug: "benji",
+			currentTVL: null,
+			change1d: null,
+			historicalTVL: null,
+			sourceUrl: "https://app.rwa.xyz/assets/BENJI",
+		});
+		expect(await screen.findByText("Unavailable")).toBeTruthy();
+		expect(screen.queryByTestId("tvl-chart")).toBeNull();
+		expect(screen.getByRole("link", { name: "app.rwa.xyz" })).toBeTruthy();
+	});
+
+	it("WisdomTree (no figure on record): Unavailable, its own source named", async () => {
+		renderWith(200, {
+			...base,
+			name: "WisdomTree",
+			slug: "wisdomtree",
+			currentTVL: null,
+			change1d: null,
+			historicalTVL: null,
+			sourceUrl: "https://www.wisdomtree.com/investments/digital-funds",
+		});
+		expect(await screen.findByText("Unavailable")).toBeTruthy();
+		expect(screen.getByRole("link", { name: "wisdomtree.com" })).toBeTruthy();
+	});
+
+	it("a DefiLlama series with no Stellar figure or 24h change: chart, Unavailable twice", async () => {
+		renderWith(200, {
+			...base,
+			category: "Lending",
+			name: "Quiet",
+			slug: "quiet",
+			currentTVL: null,
+			change1d: null,
+			change7d: -2,
+			historicalTVL: series,
+			asOf: "2025-11-02T00:00:00.000Z",
+		});
+		expect(await screen.findByTestId("tvl-chart")).toBeTruthy();
+		expect(screen.getAllByText("Unavailable")).toHaveLength(2);
+		expect(screen.getByText("-2.00%")).toBeTruthy();
+		expect(screen.getByRole("link", { name: "DeFi Llama" })).toBeTruthy();
+	});
+
+	it("a full reading shows its figure, its changes and the date it was read", async () => {
+		renderWith(200, {
+			...base,
+			category: "Lending",
+			name: "Blend",
+			slug: "blend-pools",
+			currentTVL: 129_334_939,
+			change1d: 1.5,
+			change7d: -2,
+			historicalTVL: series,
+			asOf: "2025-11-02T00:00:00.000Z",
+		});
+		expect(await screen.findByText("$129.33M")).toBeTruthy();
+		expect(screen.getByText("as of 2025-11-02")).toBeTruthy();
+		expect(screen.getByText("+1.50%")).toBeTruthy();
+		expect(screen.queryByText("Unavailable")).toBeNull();
+	});
+
+	it("a failed source read (503) hides the card", async () => {
+		const { container } = renderWith(503, { error: "TVL source read failed" });
+		await waitFor(() => expect(vi.mocked(fetch)).toHaveBeenCalled());
+		expect(container.textContent).toBe("");
+	});
+});

@@ -324,7 +324,7 @@ const SESSIONS = [
 			'"Who can audit my Soroban contract, and is there a USDC off-ramp anchor in LatAm?"',
 		steps: [
 			"GET /api/partners?type=audit-firm&q=soroban → vetted audit firms with services + accepting-clients.",
-			"GET /api/partners?type=anchor&region=latam&q=usdc+off-ramp → LatAm anchors with stellar.toml-verified assets/SEPs/ramps.",
+			"GET /api/partners?type=anchor&region=latam&q=usdc+off-ramp → LatAm anchors with their ramp directions, and assets/SEPs read from each anchor's stellar.toml (null where no read is recorded).",
 			"Only surface partners the API actually returns. Never invent one. Skip archived; note who's accepting clients.",
 			"Link each profile: stellarlight.xyz/partners/{slug} (capabilities, compliance & corridors, contact).",
 		],

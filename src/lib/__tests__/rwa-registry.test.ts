@@ -7,6 +7,7 @@ import {
 	RWA_STATES,
 	RWA_VERIFICATION_LEVELS,
 } from "@/data/rwa-registry";
+import { spec } from "../openapi-spec";
 import {
 	mergeProducts,
 	productsCoverage,
@@ -606,5 +607,48 @@ describe("issuer coverage — a tracked issuer is covered completely (sls-083)",
 					r.verificationLevel === "on-chain-home-domain",
 			),
 		).toBe(true);
+	});
+});
+
+/**
+ * Review 2026-11-04: getRwaAssets documents issuerEntity as the rwa.xyz
+ * label, and FOCGX is not rwa.xyz-listed. The spec now states the rule for
+ * such rows (the label of the same issuer's listed rows, or null); this holds
+ * the data to it, so a hand-typed legal name cannot slip in under the label.
+ */
+describe("issuerEntity on a row rwa.xyz does not list is a listed sibling's label", () => {
+	const listed = RWA_REGISTRY.filter((r) => r.rwaxyzListed);
+	it("every issuer-declared row carries null or a label its issuer's listed rows carry", () => {
+		const strays = RWA_REGISTRY.filter((r) => !r.rwaxyzListed)
+			.filter((r) => r.issuerEntity != null)
+			.filter(
+				(r) =>
+					!listed.some(
+						(l) =>
+							l.issuerEntity === r.issuerEntity &&
+							((r.issuer && l.issuer === r.issuer) ||
+								(r.projectSlug && l.projectSlug === r.projectSlug)),
+					),
+			)
+			.map((r) => `${r.symbol}: ${r.issuerEntity}`);
+		expect(strays).toEqual([]);
+	});
+	it("the spec states the same rule (re-check item 9: the sentence is pinned, not only the data)", () => {
+		const d: string =
+			// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+			(spec as any).paths["/api/rwa"].get.responses["200"].content[
+				"application/json"
+			].schema.properties.assets.items.properties.issuerEntity.description;
+		expect(d).toContain("rwaxyzListed false");
+		expect(d).toContain("label of that issuer's listed rows");
+		expect(d).toContain("not read from the issuer's stellar.toml");
+	});
+
+	it("FOCGX carries BENJI's label, its own issuer account's", () => {
+		const focgx = RWA_REGISTRY.find((r) => r.symbol === "FOCGX");
+		const benji = listed.find(
+			(r) => r.symbol === "BENJI" && r.issuer === focgx?.issuer,
+		);
+		expect(focgx?.issuerEntity).toBe(benji?.issuerEntity);
 	});
 });

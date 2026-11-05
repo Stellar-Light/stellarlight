@@ -15,9 +15,9 @@ import {
 	degradedWarning,
 } from "@/lib/degraded-read";
 import { type FactConfidence, factConfidence } from "@/lib/fact-confidence";
-import { currentRepo, repoSupersession } from "@/lib/repo-relations";
+import { currentRepo, renamedTo, repoSupersession } from "@/lib/repo-relations";
 import { CAP_REGISTRY } from "../data/cap-registry";
-import { symbolsHaystack } from "./code-symbols";
+import { interfacePathsOf, symbolsHaystack } from "./code-symbols";
 import { isKnownInfraNotDeployable } from "./known-infra";
 import {
 	activityStateOf,
@@ -38,7 +38,8 @@ import { parseSdkMajor, protocolForSdkMajor } from "./soroban-versions";
 
 // Minimal shape so we don't couple to the full Payload type.
 interface PayloadLike {
-	find(args: unknown): Promise<{ docs: unknown[] }>;
+	// totalDocs: Payload counts every row the where admits, past the limit.
+	find(args: unknown): Promise<{ docs: unknown[]; totalDocs?: number }>;
 }
 
 interface RepoDoc {
@@ -79,6 +80,7 @@ interface RepoDoc {
 	scannedRef?: unknown;
 	codeSymbols?: unknown;
 	contractInterface?: unknown;
+	contractInterfacePaths?: unknown;
 	stellarDeps?: unknown;
 	mainnetContractId?: string | null;
 	sdkCapabilities?: unknown;
@@ -173,6 +175,10 @@ export interface RepoResult {
 	 * snapshot (null until one exists). null = no verified contract joined —
 	 * NOT a claim the code is unused. */
 	successorRepo: string | null;
+	/** The renamed path the query named, when the index holds no row for it
+	 * and this repo, where GitHub redirects it, stands in (issue #1901). null
+	 * when the row was found under its own name. */
+	renamedFrom: string | null;
 	/** P5 (2026-09-05): supersession as FIELDS, from the curated dated map —
 	 * where to go instead, the repo's own date for it, and the kind. null =
 	 * no curated supersession statement, never 'not superseded'. */
@@ -257,6 +263,10 @@ export interface CodeVerified {
 	scannedRef: string | null;
 	/** Soroban contract ABI: `Contract.fn(arg: Type, …) -> Ret` per #[contractimpl] pub fn (env stripped, matching contractspec). Empty for non-contract repos or pre-2026-08-08 scans. */
 	contractInterface: string[];
+	/** contractInterfacePaths[i] is the repo-relative file contractInterface[i]
+	 * was read from (issue #1906): [] when there is no interface, null when the
+	 * scan predates paths. */
+	contractInterfacePaths: string[] | null;
 	/** Protocol the pinned soroban-sdk major targets per the maintained table — ADVISORY (derived, dated; the sdk→protocol mapping has documented irregularities), null when unknown/never guessed. */
 	targetProtocol: number | null;
 	/** CAPs whose declared protocolVersion matches targetProtocol — the protocol-change grounding for this repo's SDK line. [] when targetProtocol is null. */
@@ -327,6 +337,7 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 		contractInterface: Array.isArray(d.contractInterface)
 			? d.contractInterface.filter((s): s is string => typeof s === "string")
 			: [],
+		contractInterfacePaths: interfacePathsOf(d),
 		stellarDeps: Array.isArray(d.stellarDeps)
 			? d.stellarDeps.filter((s): s is string => typeof s === "string")
 			: [],
@@ -868,6 +879,43 @@ const CANONICAL: Array<{ test: RegExp; repos: string[] }> = [
 	{ test: /\bgo\s*sdk\b/, repos: ["stellar/go-stellar-sdk", "stellar/go"] },
 ];
 
+// Developer products (issue #1901): a product whose repo name does not carry
+// the product's words lost its own name to repos that do. Hackathon copies
+// named *scaffold-stellar* led q="scaffold stellar" while
+// stellar-scaffold/cli ranked 16th, and *-lab repos led q="stellar lab" over
+// stellar/laboratory. Each test reads the WHOLE query, folded by productKey
+// (case, trailing punctuation, and spaces, hyphens or underscores as one
+// separator), so the name alone fires in any spelling, scaffold_stellar
+// included, and a longer phrase that contains it (stellar lab notes, a
+// question) names something else and does not.
+const PRODUCTS: Array<{ test: RegExp; repo: string }> = [
+	{
+		test: /^(?:scaffold stellar|stellar scaffold)$/,
+		repo: "stellar-scaffold/cli",
+	},
+	{
+		test: /^(?:stellar lab(?:oratory)?|lab\.stellar\.org)$/,
+		repo: "stellar/laboratory",
+	},
+	{
+		test: /^(?:soroban examples?|(?:(?:soroban|stellar) )?(?:smart )?contracts? examples?|examples? (?:of )?(?:(?:soroban|stellar) )?(?:smart )?contracts?)$/,
+		repo: "stellar/soroban-examples",
+	},
+];
+// Surface words every row carries (a repo on GitHub with source code) say
+// nothing about which product; search drops them as stopwords, so the name
+// test ignores them too (q="scaffold stellar repo" is the product name).
+const SURFACE_WORDS =
+	/(?:^| )(?:github|repo|repos|repository|repositories|source|code)(?= |$)/g;
+const productKey = (q: string) =>
+	q
+		.trim()
+		.toLowerCase()
+		.replace(/[?!.,;:]+$/, "")
+		.replace(/[\s_-]+/g, " ")
+		.replace(SURFACE_WORDS, "")
+		.trim();
+
 // Canonical repos for a query, priority order, deduped. Empty when the query
 // doesn't hit a curated concept (so normal queries behave exactly as before).
 /**
@@ -884,6 +932,10 @@ export function explicitRepoName(q: string): string | null {
 }
 
 export function canonicalFor(q: string): string[] {
+	// A developer product's name, as the whole query, before the identifier
+	// rule below: scaffold_stellar is that name, not a code symbol.
+	const product = PRODUCTS.find((p) => p.test.test(productKey(q)));
+	if (product) return [currentRepo(product.repo)];
 	// An IDENTIFIER is not a concept phrase: a single-word camelCase/snake_case
 	// query (`contractErrorCodeFromNumber`) wordy-splits into concept
 	// vocabulary ("error code") and floated stellar-core above the repo that
@@ -1105,6 +1157,7 @@ const VERTICAL_FLAGSHIPS: Array<{ test: RegExp; repos: string[] }> = [
 export const CURATED_CANONICAL_REPOS: string[] = [
 	...new Set([
 		...CANONICAL.flatMap((c) => c.repos),
+		...PRODUCTS.map((p) => p.repo),
 		...VERTICAL_FLAGSHIPS.flatMap((c) => c.repos),
 	]),
 ];
@@ -1192,6 +1245,15 @@ export async function searchRepos(
 	/** One line per backend read that failed or timed out (degraded-read.ts):
 	 * the page was served from whatever DID load. Empty when every read ran. */
 	warnings: string[];
+	/** The ranking was cut at its candidate window: rows the filters admit
+	 * past it were never ranked, so `total` counts the window, not every
+	 * match. null when the candidate read failed. */
+	truncated: boolean | null;
+	/** Rows the filters admit: `total` when nothing was cut; when cut, the
+	 * database's count for a no-q browse whose filters all run there; null
+	 * where only ranking every row could count them (a q search, or an
+	 * activity, capability, domain or dependsOn filter). */
+	eligible: number | null;
 }> {
 	const {
 		limit = 20,
@@ -1249,6 +1311,8 @@ export async function searchRepos(
 		matchMode: "none" as RepoMatchMode,
 		matchModeLabel: MATCH_MODE_LABEL.none,
 		warnings: why,
+		truncated: null,
+		eligible: null,
 	});
 	// No DB handle: an infrastructure failure, NOT an absence proof.
 	if (!payload)
@@ -1257,7 +1321,8 @@ export async function searchRepos(
 		const r = await degradedRead(
 			op,
 			() => payload.find(args),
-			{ docs: [] as unknown[] },
+			// a failed read counts nothing: its total is unknown, not zero
+			{ docs: [] as unknown[], totalDocs: undefined },
 			DEFAULT_READ_TIMEOUT_MS,
 		);
 		if (r.warning) warnings.push(r.warning);
@@ -1279,6 +1344,9 @@ export async function searchRepos(
 		// biome-ignore lint/suspicious/noExplicitAny: Payload Where type is awkward
 		const where: any = { ...NOT_GONE };
 		if (language) where.primaryLanguage = { like: language };
+		// In the database too, so its count of the rows a browse admits is
+		// exact; the in-memory pass below stays (the other candidate sources).
+		if (minScore > 0) where.repoScore = { greater_than_equal: minScore };
 		if (tokens.length) {
 			where.or = tokens.flatMap((t) =>
 				termsForToken(t).flatMap((v) => [
@@ -1311,10 +1379,11 @@ export async function searchRepos(
 		if (dependsOn) where.stellarDeps = { like: dependsOn };
 		if (capability) where.sdkCapabilities = { like: capability };
 		const hasStructuredFilter = Boolean(domain || dependsOn || capability);
+		const windowLimit = tokens.length || hasStructuredFilter ? 600 : 200;
 		const res = await find("repos candidate fetch", {
 			collection: "repos",
 			where,
-			limit: tokens.length || hasStructuredFilter ? 600 : 200,
+			limit: windowLimit,
 			sort: "-repoScore",
 			depth: 0,
 			// Drop the README excerpt — it's the largest per-doc field and the
@@ -1325,6 +1394,20 @@ export async function searchRepos(
 		});
 		// The main fetch is the pool; without it there is nothing to rank.
 		if (warnings.length) return failed(warnings);
+		// A fixed window feeding a total and paging must say when it was cut
+		// (the #1915 class): the read's own count says how many rows the
+		// filters admit, at no extra query.
+		const truncated =
+			typeof res.totalDocs === "number"
+				? res.totalDocs > res.docs.length
+				: res.docs.length >= windowLimit;
+		const countable =
+			!tokens.length &&
+			!activity &&
+			!capability &&
+			!domain &&
+			!dependsOn &&
+			typeof res.totalDocs === "number";
 		// Curated concept → canonical repo injection. The authoritative SDF repo for
 		// an infra/protocol question often isn't a keyword candidate, so fetch the
 		// curated set and float it to the top in priority order (canonRank).
@@ -1336,7 +1419,21 @@ export async function searchRepos(
 		// noisy scored list, so a wallet/aggregator can't bury the real flagship.
 		const flagList = flagshipsFor(q);
 		const flagRank = new Map(flagList.map((fn, i) => [fn.toLowerCase(), i]));
-		const injectList = [...new Set([...canonList, ...flagList])];
+		// A renamed repo's old owner/name is an alias of the repo it now lives
+		// at (GitHub 301s it): fetch that repo so the old link still finds it,
+		// even when the index never held the old path (theahaco/scaffold-
+		// stellar, issue #1901). An indexed old row keeps matching its own name.
+		const named = explicitRepoName(q);
+		const renamed = named ? renamedTo(named) : "";
+		const renamedTarget =
+			renamed && renamed.toLowerCase() !== named?.toLowerCase() ? renamed : "";
+		const injectList = [
+			...new Set([
+				...canonList,
+				...flagList,
+				...(renamedTarget ? [renamedTarget] : []),
+			]),
+		];
 		let rawDocs = res.docs as unknown as RepoDoc[];
 		if (injectList.length) {
 			const cres = await find("repos canonical inject", {
@@ -1404,7 +1501,15 @@ export async function searchRepos(
 			/[a-z][A-Z]/.test(qRaw) ||
 			(qRaw.split(/\s+/).length >= 3 && normAlias(qRaw).length >= 8);
 		if (qLooksLikeName && qRaw.length >= 5) {
-			const forms = [...new Set([qRaw, qRaw.replace(/\s+/g, "-")])];
+			const forms = [
+				...new Set([
+					qRaw,
+					qRaw.replace(/\s+/g, "-"),
+					// an underscore spelling (stellar_lab) reaches the hyphenated
+					// name (stellar-lab) that normAlias already equates with it
+					qRaw.replace(/_/g, "-"),
+				]),
+			];
 			const nres = await find("repos exact-name supplement", {
 				collection: "repos",
 				where: {
@@ -1467,6 +1572,20 @@ export async function searchRepos(
 			normAlias(q).length >= 8;
 		const qNorm =
 			qIsIdentifier || qIsPlainName || qIsSpacedName ? normAlias(q) : "";
+		// The rule explain and trust follow: the old path keeps its own row
+		// when the index holds one; the repo it moved to stands in only when
+		// it does not, and then names the path that was asked for.
+		const standIn =
+			renamedTarget &&
+			!rawDocs.some((d) => d.fullName.toLowerCase() === named?.toLowerCase())
+				? renamedTarget.toLowerCase()
+				: "";
+		// meta.canonical answers for the query: its curated repos the index
+		// holds, whatever page, offset or filter is served (a page past the
+		// canonical row used to say null, read as "not a canonical query").
+		const canonHeld = canonList.filter((fn) =>
+			rawDocs.some((d) => d.fullName.toLowerCase() === fn.toLowerCase()),
+		);
 		// The language filter rides the first candidate query, but three more
 		// candidate sources (canonical/flagship injection, the anchor-token net,
 		// the name net) did not carry it, so ?q=SEP-10+authentication&language=
@@ -1592,13 +1711,24 @@ export async function searchRepos(
 			// regardless of token score and outranks keyword/semantic neighbors.
 			// ≥3 chars so degenerate short queries can't ride it.
 			const alias =
-				qNorm.length >= 3 &&
-				(qIsIdentifier || qIsSpacedName
-					? normAlias(repoPart) === qNorm ||
-						normAlias(ownerRaw) === qNorm ||
-						normAlias(r.fullName) === qNorm
-					: // Plain-word queries: owner identity ONLY (see qIsPlainName).
-						normAlias(ownerRaw) === qNorm)
+				(qNorm.length >= 3 &&
+					(qIsIdentifier || qIsSpacedName
+						? normAlias(repoPart) === qNorm ||
+							normAlias(ownerRaw) === qNorm ||
+							normAlias(r.fullName) === qNorm
+						: // Plain-word queries: owner identity ONLY (see qIsPlainName).
+							normAlias(ownerRaw) === qNorm)) ||
+				(standIn && r.fullName.toLowerCase() === standIn)
+					? 1
+					: 0;
+			// The query IS this repo's full path or its name (not its owner):
+			// that identity ranks right after a canonical float and above an
+			// owner-only match. The rename stand-in counts as its name.
+			const nameAlias =
+				(qNorm.length >= 3 &&
+					(qIsIdentifier || qIsSpacedName) &&
+					(normAlias(repoPart) === qNorm || normAlias(r.fullName) === qNorm)) ||
+				(standIn && r.fullName.toLowerCase() === standIn)
 					? 1
 					: 0;
 			// mention check spans name/topics/desc AND readme (F4: a repo whose
@@ -1661,6 +1791,7 @@ export async function searchRepos(
 				matched,
 				viaCorrection,
 				alias,
+				nameAlias,
 				sdf,
 				alive,
 				stale2y,
@@ -1717,12 +1848,18 @@ export async function searchRepos(
 		// Stellar match at the same relevance.
 		filtered.sort(
 			(a, b) =>
+				// The canonical float first: a bare name that fires a canonical
+				// entry (soroban-rpc, sep-10, stellar-lab) answers the concept, so
+				// a copy named after it ranks next, not first. A full owner/name
+				// path never fires one, so the repo it names leads; a bare name
+				// that fires none keeps its exact name first (nameAlias).
 				a.crank - b.crank ||
+				b.nameAlias - a.nameAlias ||
 				// Exact alias identity (sls-025) ABOVE the flagship family float:
 				// when the query IS a repo's owner/name/path, that repo must outrank
 				// even curated family flagships (q="stellar-wallets-kit" was losing
 				// to the wallet float's other three seeds). Canonical corrections
-				// (crank) still rank higher — they fix wrong-repo identities.
+				// (crank) still rank higher than an owner match.
 				b.alias - a.alias ||
 				a.frank - b.frank ||
 				// Stellar evidence BEFORE raw keyword score (F4): coarse 3-tier so
@@ -1812,6 +1949,8 @@ export async function searchRepos(
 						: null,
 				successorRepo:
 					(r as { successorRepo?: string | null }).successorRepo ?? null,
+				renamedFrom:
+					standIn && r.fullName.toLowerCase() === standIn ? named : null,
 				// Read-time from the curated dated map; the stored successorRepo is the
 				// weekly-stamped view of the same map. A stored value is never overridden.
 				supersededBy:
@@ -1923,11 +2062,17 @@ export async function searchRepos(
 		return {
 			repos,
 			total,
-			canonical: repos.filter((r) => r.canonical).map((r) => r.fullName),
+			canonical: canonHeld,
 			searched,
 			matchMode,
 			matchModeLabel: MATCH_MODE_LABEL[matchMode],
 			warnings,
+			truncated,
+			eligible: !truncated
+				? total
+				: countable
+					? (res.totalDocs as number)
+					: null,
 		};
 	} catch (e) {
 		// Every read is wrapped above, so this is the ranking pass throwing on

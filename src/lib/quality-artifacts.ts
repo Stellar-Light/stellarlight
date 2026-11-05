@@ -701,33 +701,38 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				0;
 			const uncataloged =
 				(ravenDrift as { uncataloged?: string[] }).uncataloged ?? [];
+			// A run that could not look shows that and its reason, never counts.
+			const notes = (ravenDrift as { notes?: string[] }).notes ?? [];
 			return g({
 				key: "raven-interlock",
 				title: "Consumer interlock (Raven)",
 				promise:
 					"The #1 consumer's discovery index tracks our contract, checked from OUR side too, with grace for their re-baseline cadence.",
-				measure: { value: cataloged, of: expected, unit: "operations" },
+				measure: probed
+					? { value: cataloged, of: expected, unit: "operations" }
+					: { value: 0, of: null, unit: "operations checked" },
+				...(probed ? {} : { value: "not checked" }),
 				sub: "operations discoverable in the consumer catalog",
-				details: [
-					...(probed
-						? []
-						: [
-								"the catalog could not be read on this run; the counts below are not a measurement",
-							]),
-					`${lagging} op(s) lagging within the ${ravenDrift.graceDays}-day re-baseline grace window (expected)`,
-					`${missing} op(s) missing beyond grace`,
-					...(undiscoverable
-						? [
-								`${undiscoverable} op(s) in the catalog that our own routing words do not reach; our fix`,
-							]
-						: []),
-					...(uncataloged.length
-						? [
-								`${uncataloged.length} op(s) callable but absent from the consumer's discovery index past the ${ravenDrift.graceDays}-day grace window (${uncataloged.join(", ")}): an agent that does not already know the name cannot find them, and no wording of ours can change that`,
-							]
-						: []),
-					`contract ${ravenDrift.specVersion} at measurement`,
-				],
+				details: probed
+					? [
+							`${lagging} op(s) lagging within the ${ravenDrift.graceDays}-day re-baseline grace window (expected)`,
+							`${missing} op(s) missing beyond grace`,
+							...(undiscoverable
+								? [
+										`${undiscoverable} op(s) in the catalog that our own routing words do not reach; our fix`,
+									]
+								: []),
+							...(uncataloged.length
+								? [
+										`${uncataloged.length} op(s) callable but absent from the consumer's discovery index past the ${ravenDrift.graceDays}-day grace window (${uncataloged.join(", ")}): an agent that does not already know the name cannot find them, and no wording of ours can change that`,
+									]
+								: []),
+							`contract ${ravenDrift.specVersion} at measurement`,
+						]
+					: [
+							`the consumer's catalog was not checked on this run: ${notes.join("; ") || "no reason recorded"}`,
+							`contract ${ravenDrift.specVersion} at measurement`,
+						],
 				asOf: ravenDrift.generatedAt,
 				// live-index-guards.yml runs this daily and now commits the
 				// artifact, so the row tracks a real cadence instead of a

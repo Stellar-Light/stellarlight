@@ -21,7 +21,7 @@
 
 import { randomBytes } from "node:crypto";
 import { type NextRequest, NextResponse } from "next/server";
-import { rateLimited } from "@/lib/api-error";
+import { apiError, rateLimited } from "@/lib/api-error";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import {
 	claimVerifiedByDomain,
@@ -141,6 +141,7 @@ export async function OPTIONS() {
 }
 
 export async function POST(req: NextRequest) {
+	const startedAt = Date.now();
 	const limit = rateLimit(req, {
 		endpoint: "/api/partners/submit-listing",
 		limit: RATE_LIMIT_MAX,
@@ -187,13 +188,18 @@ export async function POST(req: NextRequest) {
 
 	const payload = await getPayloadSafe();
 	if (!payload) {
-		return NextResponse.json(
-			{ error: "Service unavailable. Try again shortly.", unavailable: true },
-			{
-				status: 503,
-				headers: { ...rateLimitHeaders(limit), "Retry-After": "2" },
-			},
-		);
+		// An outage the caller retries: the documented RetryableError, never
+		// `unavailable`, which a consumer reads as "do not retry" (#1908).
+		return apiError({
+			status: 503,
+			error: "Service unavailable. Try again shortly.",
+			hint: "Wait 2 seconds, then resend the same request.",
+			advisory:
+				"The partner store could not be opened. This is an outage, NOT a judgment of the listing: nothing was saved.",
+			retryAfterSeconds: 2,
+			startedAt,
+			headers: rateLimitHeaders(limit),
+		});
 	}
 
 	const base = getAppUrl(); // NOT NEXT_PUBLIC_APP_URL — Vercel env carries a localhost value

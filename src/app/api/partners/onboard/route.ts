@@ -33,6 +33,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { type NextRequest, NextResponse } from "next/server";
 import { modelRateLimited, rateLimited } from "@/lib/api-error";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { classifyModelError } from "@/lib/model-failure";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -259,7 +260,7 @@ export async function POST(req: NextRequest) {
 				error: "AI onboarding isn't available right now. Use the form below.",
 				unavailable: true,
 			},
-			{ status: 503, headers: { "Retry-After": "2" } },
+			{ status: 503 },
 		);
 	}
 
@@ -362,27 +363,24 @@ export async function POST(req: NextRequest) {
 			{ status: 400 },
 		);
 	} catch (err) {
+		// Classified by error class and status, never wording (#1908).
 		if (err instanceof Anthropic.RateLimitError)
 			return modelRateLimited(err.headers?.get("retry-after"), limit);
-		// Auth / billing / permission failures (401/403, and the 400 "credit
-		// balance too low") are OUR account-config problem, not the partner's —
-		// surface them like the no-key case so the UI falls back cleanly to the
-		// form instead of implying the partner did something wrong.
-		if (
-			err instanceof Anthropic.AuthenticationError ||
-			err instanceof Anthropic.PermissionDeniedError ||
-			(err instanceof Anthropic.BadRequestError &&
-				/credit balance|billing|quota/i.test(err.message))
-		) {
+		const failure = classifyModelError(err);
+		// A provider 4xx (bad key, no permission, no credit, a request it
+		// rejects) is OUR request or account, not the partner's: surface it
+		// like the no-key case so the UI falls back cleanly to the form
+		// instead of implying the partner did something wrong.
+		if (failure === "unavailable") {
 			return NextResponse.json(
 				{
 					error: "AI onboarding isn't available right now. Use the form below.",
 					unavailable: true,
 				},
-				{ status: 503, headers: { "Retry-After": "2" } },
+				{ status: 503 },
 			);
 		}
-		if (err instanceof Anthropic.APIError) {
+		if (failure === "failed") {
 			// Don't leak provider internals to the client.
 			return NextResponse.json(
 				{ error: "AI onboarding hit a snag. Use the form below." },

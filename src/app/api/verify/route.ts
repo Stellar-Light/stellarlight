@@ -93,6 +93,14 @@ export async function GET(req: NextRequest) {
 					issuerDomain: (d.domain as string) ?? null,
 					verified: (d.verified as boolean) ?? null,
 					updatedAt: (d.updatedAt as string) ?? null,
+					// sls-107: the claim is matched against what the issuer's own
+					// toml names too, not only the brand in `company`.
+					issuerOfRecord: (d.issuerOfRecord as string) ?? null,
+					issuerOfRecordCheck: (d.issuerOfRecordCheck as string) ?? null,
+					issuerOfRecordSourceUrl:
+						(d.issuerOfRecordSourceUrl as string) ?? null,
+					issuerOfRecordAsOf: (d.issuerOfRecordAsOf as string) ?? null,
+					issuerOfRecordNote: (d.issuerOfRecordNote as string) ?? null,
 				}),
 			);
 		const result = issuedVerdict({

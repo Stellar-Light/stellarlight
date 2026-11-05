@@ -91,6 +91,7 @@ describe("contractDomainFor", () => {
 const trust = (over: Partial<TrustReport> = {}): TrustReport => ({
 	repo: {
 		fullName: "blend-capital/blend-contracts-v2",
+		renamedFrom: null,
 		url: "https://github.com/blend-capital/blend-contracts-v2",
 		stars: 100,
 		lastCommitAt: "2026-08-01T00:00:00.000Z",
@@ -110,6 +111,10 @@ const trust = (over: Partial<TrustReport> = {}): TrustReport => ({
 		contractInterface: Array.from(
 			{ length: 42 },
 			(_, i) => `Pool.fn${i}(a: u32) -> u32`,
+		),
+		contractInterfacePaths: Array.from(
+			{ length: 42 },
+			() => "pool/src/contract.rs",
 		),
 		mainnetContractId: "CABC…",
 	},
@@ -150,6 +155,8 @@ describe("summarizeTrust", () => {
 	it("drops the full contractInterface (the budget-buster) but keeps its size and a link to the full report", () => {
 		const s = summarizeTrust(trust());
 		expect("contractInterface" in s.codeTruth).toBe(false);
+		// its paths travel with it (issue #1906)
+		expect("contractInterfacePaths" in s.codeTruth).toBe(false);
 		expect(s.codeTruth.interfaceSize).toBe(42);
 		expect(s.fullReport).toBe(
 			"/api/repos/trust?repo=blend-capital%2Fblend-contracts-v2",

@@ -34,7 +34,12 @@ import {
 	LOCATOR_KINDS,
 	SOURCE_REPO_NAMES,
 } from "../source-locator";
-import { PRICE_BASES } from "../stablecoins";
+import {
+	ISSUER_OF_RECORD_CHECKS,
+	PRICE_BASES,
+	STABLECOIN_ASSET_TYPE_FILTERS,
+	STABLECOIN_ASSET_TYPES,
+} from "../stablecoins";
 import { TRUST_SIGNALS } from "../trust-report";
 
 /**
@@ -334,11 +339,18 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 		expect(spread("DEPLOYMENT_NETWORKS")).toBe(1);
 	});
 
-	it("partnerType (getPartners param, submit-listing body, Partner schema) is PARTNER_TYPES", () => {
+	it("partnerType (getPartners param, submit-listing body, matchPartners body, Partner schema) is PARTNER_TYPES", () => {
 		expect(
 			sorted(S.components.schemas.Partner.properties.partnerType.enum),
 		).toEqual(sorted(PARTNER_TYPES as readonly string[]));
-		expect(spread("PARTNER_TYPES")).toBe(3);
+		expect(
+			sorted(
+				S.paths["/api/partners/match"].post.requestBody.content[
+					"application/json"
+				].schema.properties.type.enum,
+			),
+		).toEqual(sorted(PARTNER_TYPES as readonly string[]));
+		expect(spread("PARTNER_TYPES")).toBe(4);
 	});
 
 	it("REPO_KINDS: one spread, one shared schema object, two sites that equal it (Repo.kind, explainRepo repoMeta.kind)", () => {
@@ -364,6 +376,36 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 		);
 		expect(collection).toMatch(
 			/name:\s*"priceBasis",[\s\S]*?options:\s*\[\.\.\.PRICE_BASES\]/,
+		);
+	});
+
+	it("Stablecoin.assetType is STABLECOIN_ASSET_TYPES, and getStablecoins' assetType filter is those plus none (sls-107)", () => {
+		expect(
+			sorted(S.components.schemas.Stablecoin.properties.assetType.enum),
+		).toEqual(sorted(STABLECOIN_ASSET_TYPES as readonly string[]));
+		const p = S.paths["/api/stablecoins"].get.parameters.find(
+			(x: Param) => x.name === "assetType",
+		) as Param;
+		expect(sorted(p.schema.enum)).toEqual(
+			sorted(STABLECOIN_ASSET_TYPE_FILTERS as readonly string[]),
+		);
+		expect(spread("STABLECOIN_ASSET_TYPES")).toBe(1);
+		expect(spread("STABLECOIN_ASSET_TYPE_FILTERS")).toBe(1);
+	});
+
+	it("Stablecoin.issuerOfRecordCheck is ISSUER_OF_RECORD_CHECKS, in the spec and in the collection that stores it", () => {
+		expect(
+			sorted(
+				S.components.schemas.Stablecoin.properties.issuerOfRecordCheck.enum,
+			),
+		).toEqual(sorted(ISSUER_OF_RECORD_CHECKS as readonly string[]));
+		expect(spread("ISSUER_OF_RECORD_CHECKS")).toBe(1);
+		const collection = readFileSync(
+			resolve(__dirname, "../../collections/Stablecoins.ts"),
+			"utf8",
+		);
+		expect(collection).toMatch(
+			/name:\s*"issuerOfRecordCheck",[\s\S]*?options:\s*\[\.\.\.ISSUER_OF_RECORD_CHECKS\]/,
 		);
 	});
 

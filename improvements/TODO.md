@@ -263,8 +263,49 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 
 ## Next
 
+Found by Stellar Raven's HackMeridian evaluation on 2026-11-02 and filed
+here as #1900 to #1905; each issue carries its read-only probes.
+
+- #1900: a stablecoin's `company` holds the brand, not the issuer's
+  stellar.toml `ORG_NAME` (AUDD, the eight C1 rows), and `assetType` cannot
+  filter yield products (USDY, YLDS) out.
+- #1901: repo search ranks low-score forks above the canonical repo for
+  "scaffold stellar", "stellar lab" and "smart contract examples"; the
+  canonical boost covers infrastructure queries only.
+- #1902: the HackMeridian 2026 record has the qualitative judging criteria
+  but not the weighted rubric on hackmeridian.com/build.
+- #1903: 24 directory rows carry an SCF #45 award where the SCF site lists
+  at least 40; 13 awarded projects have no row, and Liqvid's record omits
+  rounds 30, 44 and 45.
+- #1904: no row for Chainlink Data Feeds on Stellar or for MetaMask's
+  native Stellar network.
+- #1905: `venueRole` is null on 31 of 38 Live DEX rows, and project search
+  ignores a `venueRole` parameter.
+- HackMeridian 2026 has no stored submissions (our own check, 2026-11-04): GET
+  /api/hackathons/builds?hackathon=hackmeridian-2026 warns that none are
+  stored, so no build, contract or package facet covers the event. #1918
+  (a contributor PR) proposes HackProof as the source.
+
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
 unless noted.
+
+- Code facts other than interfaces, symbols and capability tags still read
+  test code. After a rescan, a repo whose only Soroban crate is a test
+  fixture serves an empty contractInterface and no symbols, while
+  isDeployableContract, the auth, storage and event signals,
+  contractMacroCount and the cargo-sdk proof still come from that crate:
+  src/lib/code-signals.ts counts them over every fetched .rs file (the
+  fetch adds up to three test files), and its NON_PRODUCT_MANIFEST_DIR is
+  segment-anchored and lacks e2e. Found by the independent re-check of the
+  2026-11-04 repo-canonical lane (deferred there because it moves stored
+  grades). Plan, measured before any execute: run
+  scripts/scan/scan-repo-code.ts in dry mode over every scanned repo twice,
+  with the current rules and with isTestPath (src/lib/code-symbols.ts)
+  applied to the .rs signal loop, the manifest check and the fetch
+  selection (scripts/scan/fetch-repo-code.ts); recompute repoScore for both
+  with the grade (codeDepth and the farm flags read these signals); list
+  every repo whose score, proof or deployability moves, and ship only with
+  that list reviewed.
 
 - Research authority weighting: a 75/15/10 weighting held out best in
   simulation and changes about 10% of confidence labels (the 2026-10-20
