@@ -108,6 +108,23 @@ describe("which records are stored, and on what basis", () => {
 		expect(
 			findMention(readme("Winner of the Meridian hackathon 2024")),
 		).toBeNull();
+		// Final re-check 2026-11-05: a year near the name, not only beside it.
+		for (const t of [
+			"HackMeridian Rio 2025",
+			"our HackMeridian (2025) project",
+			"HackMeridian in 2025",
+			"2025: HackMeridian",
+		])
+			expect(findMention(readme(t)), t).toBeNull();
+		// A date of this edition near the name still names it.
+		for (const t of [
+			"2026-10-25 HackMeridian kickoff",
+			"HackMeridian 2026 (after Rio 2025)",
+		])
+			expect(findMention(readme(t)), t).toEqual({
+				in: "readme",
+				path: "README.md",
+			});
 		// 2026, or no year at all, names this one.
 		for (const t of [
 			"Built at HackMeridian 2026.",

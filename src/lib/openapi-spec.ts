@@ -353,7 +353,7 @@ const BUILD_ENTRY_BASIS_SCHEMA = {
 	type: "string",
 	enum: [...ENTRY_BASES],
 	description:
-		"Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named with 2026 or no year beside the name (a mention of another edition does not count), at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.",
+		"Present only on a row of a partial list (its event's coverage is partial): why the row is stored, never a record that the organizer received it as an entry. repo-names-event: Scout's own read of the repo's text (its README, name, description, topics or another markdown file) found the event named with 2026, or no year at all, nearest the name in the same line (a mention of another edition does not count), at the path and on the day getHackathonSubmission's entryEvidence.mention gives: the team's own claim. placement-listed: the list the row comes from names a placement for it (winnerSource) and Scout's read of the repo's text did not find the event named. Absent on a DoraHacks row and on a winner imported from the page that names it.",
 };
 
 /** The testnet contracts a stored row's repo cites that passed Scout's checks. */

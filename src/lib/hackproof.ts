@@ -21,20 +21,30 @@ export const EVENT_VARIANT =
 	/hack\w*on[\s_\-.]*meridian|meridian[\s_\-.]*(?:2026[\s_\-.]*)?hack\w*/i;
 /** The edition a mention must name, or leave unnamed. */
 const EDITION = "2026";
-const YEAR_AFTER = /^[\s_\-.]*(\d{4})(?!\d)/;
-const YEAR_BEFORE = /(?<!\d)(\d{4})[\s_\-.]*$/;
+/** A year near a mention, in the same line: within NEAR_AFTER characters
+ * after the name ("HackMeridian Rio 2025", "HackMeridian (2025)") or
+ * NEAR_BEFORE before it ("2025: HackMeridian"). */
+const YEAR = /(?<!\d)(?:19|20)\d{2}(?!\d)/g;
+const NEAR_AFTER = 20;
+const NEAR_BEFORE = 12;
 
-/** Whether the text names this edition: a match of the name with 2026, or
- * no year, right beside it. "HackMeridian 2025" names another one. */
+/** Whether the text names this edition: a match of the name whose nearest
+ * year in the same line is 2026, or that has no year near it. Any other
+ * year nearest the name names another edition. */
 export function namesEdition(text: string, re: RegExp): boolean {
 	for (const m of text.matchAll(new RegExp(re.source, `${re.flags}g`))) {
 		const end = m.index + m[0].length;
-		const after = YEAR_AFTER.exec(text.slice(end, end + 12))?.[1];
-		const before = YEAR_BEFORE.exec(
-			text.slice(Math.max(0, m.index - 12), m.index),
-		)?.[1];
-		if ((after ?? EDITION) === EDITION && (before ?? EDITION) === EDITION)
-			return true;
+		const after = text.slice(end, end + NEAR_AFTER).split("\n")[0];
+		const lead = text.slice(Math.max(0, m.index - NEAR_BEFORE), m.index);
+		const before = lead.slice(lead.lastIndexOf("\n") + 1);
+		const near = [
+			...[...after.matchAll(YEAR)].map((y) => ({ y: y[0], d: y.index })),
+			...[...before.matchAll(YEAR)].map((y) => ({
+				y: y[0],
+				d: before.length - y.index - y[0].length,
+			})),
+		].sort((a, b) => a.d - b.d);
+		if (!near.length || near[0].y === EDITION) return true;
 	}
 	return false;
 }
