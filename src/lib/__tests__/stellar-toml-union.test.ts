@@ -62,13 +62,30 @@ describe("stellar.toml parser: partner and issuer readers together", () => {
 		);
 	});
 
-	it("reads an escaped name and marks an unreadable server key unread", () => {
+	it("reads an escaped ORG_NAME and marks an unreadable server key unread", () => {
 		const t = parseStellarToml(
-			`ORG_NAME = "AUDC \\"PTY\\" LTD"\nTRANSFER_SERVER = ["https://x.example"]`,
+			`TRANSFER_SERVER = ["https://x.example"]\n[DOCUMENTATION]\nORG_NAME = "AUDC \\"PTY\\" LTD"`,
 		);
-		expect(t.topLevel.ORG_NAME).toBe('AUDC "PTY" LTD');
+		expect(t.documentation.ORG_NAME).toBe('AUDC "PTY" LTD');
 		expect(t.unreadKeys).toEqual(["TRANSFER_SERVER"]);
 		expect(tomlCapabilities(t).seps).toBeNull();
+	});
+
+	it("ends an ACCOUNTS array left open at the next key, which is read or recorded unread", () => {
+		const t = parseStellarToml(
+			`ACCOUNTS = [\n"${A}",\nTRANSFER_SERVER = ["https://x.example"]\n`,
+		);
+		expect(t.accounts).toEqual([A]);
+		expect(t.unreadKeys).toEqual(["TRANSFER_SERVER"]);
+		expect(tomlCapabilities(t).seps).toBeNull();
+	});
+
+	it("records a [DOCUMENTATION] key it cannot read as unread, not absent", () => {
+		const t = parseStellarToml(
+			`[DOCUMENTATION]\nORG_NAME = """AUDC\nPTY LTD"""\nORG_URL = "https://x.example"`,
+		);
+		expect(t.documentation).toEqual({ ORG_URL: "https://x.example" });
+		expect(t.unreadDocumentation).toEqual(["ORG_NAME"]);
 	});
 
 	it("leaves the asset list unknown for a linked currency, accounts still read", () => {

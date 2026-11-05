@@ -39,6 +39,9 @@ export interface StellarToml {
 	 *  currency `toml`, a `code_template`, an unreadable code): their codes
 	 *  are UNKNOWN, so the file's asset list is could-not-check. */
 	unreadCurrencies: string[];
+	/** [DOCUMENTATION] keys set in a form this parser does not read: an
+	 *  ORG_NAME among them is could-not-check, never "declares none". */
+	unreadDocumentation: string[];
 }
 
 const STRKEY = /^G[A-Z2-7]{55}$/;
@@ -71,6 +74,7 @@ export function parseStellarToml(text: string): StellarToml {
 	const accounts: string[] = [];
 	const unreadKeys: string[] = [];
 	const unreadCurrencies: string[] = [];
+	const unreadDocumentation: string[] = [];
 	let section: "top" | "doc" | "currency" | "other" = "top";
 	// Inside a multi-line ACCOUNTS = [ ... ] array.
 	let inAccounts = false;
@@ -138,6 +142,7 @@ export function parseStellarToml(text: string): StellarToml {
 	// A key set in a form this parser does not read: could-not-check.
 	const unread = (key: string) => {
 		if (section === "top") unreadKeys.push(key.toUpperCase());
+		else if (section === "doc") unreadDocumentation.push(key.toUpperCase());
 		else if (section === "currency" && key.toLowerCase() === "code")
 			cur.unread ??= "an unreadable code";
 	};
@@ -155,7 +160,8 @@ export function parseStellarToml(text: string): StellarToml {
 			// A header or a key assignment means the array was left open: end
 			// it there and read the line as what it is, so an unclosed
 			// ACCOUNTS cannot swallow the [DOCUMENTATION] table after it.
-			if (line.startsWith("[") || ASSIGN.test(line)) inAccounts = false;
+			if (line.startsWith("[") || /^[A-Za-z0-9_]+\s*=/.test(line))
+				inAccounts = false;
 			else {
 				collectAccounts(line);
 				if (line.replace(/#.*$/, "").includes("]")) inAccounts = false;
@@ -209,5 +215,6 @@ export function parseStellarToml(text: string): StellarToml {
 		accounts,
 		unreadKeys,
 		unreadCurrencies,
+		unreadDocumentation,
 	};
 }

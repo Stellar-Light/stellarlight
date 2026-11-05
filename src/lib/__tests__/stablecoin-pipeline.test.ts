@@ -212,6 +212,21 @@ desc="Example's dollar, issued by Other Mint (Pty) Ltd, and operated by Example 
 		});
 	});
 
+	it("an ORG_NAME the parser cannot read is could-not-check, never names nobody", () => {
+		const toml = `ACCOUNTS = ["${AUDD}"]\n[DOCUMENTATION]\nORG_NAME = """AUDC\nPTY LTD"""\n`;
+		expect(issuerOfRecordFromToml(toml, "AUDD", AUDD)).toEqual({
+			unread: "the toml sets ORG_NAME in a form this parser cannot read",
+		});
+	});
+
+	it("a currency linked to its own toml may list the account: could-not-check, not a miss", () => {
+		const toml = `[DOCUMENTATION]\nORG_NAME="AUDC PTY LTD"\n[[CURRENCIES]]\ntoml="https://x.example/AUDD.toml"\n`;
+		expect(issuerOfRecordFromToml(toml, "AUDD", AUDD)).toEqual({
+			unread:
+				"the toml may list the issuer account where this parser cannot read it (toml=https://x.example/AUDD.toml)",
+		});
+	});
+
 	it("an account listed only in ACCOUNTS is listed", () => {
 		const toml = `ACCOUNTS = [\n  "${MGUSD}",\n]\n[DOCUMENTATION]\nORG_NAME="MoneyGram Payment Systems, Inc."\n`;
 		expect(issuerOfRecordFromToml(toml, "MGUSD", MGUSD)).toEqual({

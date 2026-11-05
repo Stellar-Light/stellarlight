@@ -484,14 +484,32 @@ export function issuerOfRecordFromToml(
 	toml: string,
 	code: string,
 	issuer: string,
-): { name: string; note: string | null } | { miss: string } {
+):
+	| { name: string; note: string | null }
+	| { miss: string }
+	| { unread: string } {
 	const t = parseStellarToml(toml);
 	const listed =
 		t.accounts.includes(issuer) ||
 		t.currencies.some((c) => c.issuer === issuer);
-	if (!listed) return { miss: "the toml does not list the issuer account" };
+	if (!listed) {
+		// A listing this parser could not read may hold the account (a
+		// currency linked to its own toml): unknown, never "does not list".
+		const unreadListing = [
+			...t.unreadCurrencies,
+			...(t.unreadKeys.includes("ACCOUNTS") ? ["ACCOUNTS"] : []),
+		];
+		return unreadListing.length
+			? {
+					unread: `the toml may list the issuer account where this parser cannot read it (${unreadListing.join("; ")})`,
+				}
+			: { miss: "the toml does not list the issuer account" };
+	}
 	const name = t.documentation.ORG_NAME?.trim();
-	if (!name) return { miss: "the toml declares no ORG_NAME" };
+	if (!name)
+		return t.unreadDocumentation.includes("ORG_NAME")
+			? { unread: "the toml sets ORG_NAME in a form this parser cannot read" }
+			: { miss: "the toml declares no ORG_NAME" };
 	const desc =
 		t.currencies.find((c) => c.code === code && c.issuer === issuer)?.desc ??
 		null;
@@ -683,6 +701,8 @@ async function readIssuerOfRecordOnce(
 			why: `${read.url} answered not found; kept as a failed read, since a lapsed or parked domain answers the same`,
 		};
 	const r = issuerOfRecordFromToml(read.text, asset.code, asset.issuer);
+	// Unknown keeps the stored check, like a failed read.
+	if ("unread" in r) return { outcome: "could-not-read", why: r.unread };
 	if ("miss" in r)
 		return {
 			outcome: "not-named",
