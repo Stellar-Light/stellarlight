@@ -43,6 +43,7 @@ const MCP_URL = process.env.RAVEN_MCP_URL || "https://agents.stellar.buzz/mcp";
 // warns about, one env-var name away.
 let MCP_TOKEN = process.env.RAVEN_MCP_TOKEN || process.env.RAVEN_TOKEN || "";
 async function resolveToken(): Promise<void> {
+	MCP_TOKEN = process.env.RAVEN_MCP_TOKEN || process.env.RAVEN_TOKEN || "";
 	if (MCP_TOKEN) return;
 	try {
 		const { readFileSync } = await import("node:fs");
@@ -71,9 +72,13 @@ const RAVEN_POLICY_URL =
 	"https://raw.githubusercontent.com/stellar-experimental/stellar-raven/main/src/policy/scout-exposure.ts";
 export async function loadRavenExposure(): Promise<{
 	source: string;
+	sha256: string;
 	excluded: Set<string>;
+	/** Every exclusion, signature to Raven's name for it; required ones apart. */
+	names: Map<string, string>;
+	required: Set<string>;
 }> {
-	const { scoutExposure } = await import("./eval/raven-policy");
+	const { scoutExposure, sha256 } = await import("./eval/raven-policy");
 	let source = RAVEN_POLICY_URL;
 	let text: string;
 	if (process.env.RAVEN_DIR) {
@@ -89,10 +94,42 @@ export async function loadRavenExposure(): Promise<{
 		text = await res.text();
 	}
 	const { excluded, optionalExcluded } = scoutExposure(text);
+	const names = new Map([...excluded, ...optionalExcluded]);
 	return {
 		source,
-		excluded: new Set([...excluded.keys(), ...optionalExcluded.keys()]),
+		sha256: sha256(text),
+		excluded: new Set(names.keys()),
+		names,
+		required: new Set(excluded.keys()),
 	};
+}
+
+/** What Raven's catalog build asserts about its exclusions, as notes. */
+export function policyNotes(
+	spec: { paths?: Record<string, unknown> },
+	policy: { names: Map<string, string>; required: Set<string> },
+): string[] {
+	const present = new Map<string, string>();
+	for (const [path, methods] of Object.entries(spec.paths ?? {}))
+		for (const [method, op] of Object.entries(
+			methods as Record<string, unknown>,
+		)) {
+			const id = (op as { operationId?: string } | null)?.operationId;
+			if (id) present.set(`${method.toUpperCase()} ${path}`, id);
+		}
+	const notes: string[] = [];
+	for (const [sig, name] of policy.names) {
+		const id = present.get(sig);
+		if (id === undefined && policy.required.has(sig))
+			notes.push(
+				`Raven's policy excludes ${sig} (${name}), which the spec no longer lists; Raven's catalog build fails on an exclusion that resolves to nothing`,
+			);
+		else if (id !== undefined && id !== name)
+			notes.push(
+				`Raven's policy calls ${sig} ${name}, the spec calls it ${id}; Raven's catalog build fails on a renamed exclusion`,
+			);
+	}
+	return notes;
 }
 
 /** The spec ops a discovery sweep should find, and the ones Raven excludes. */
@@ -141,6 +178,10 @@ interface DriftReport {
 	excludedByRavenPolicy: string[];
 	/** Where that policy was read: a clone path or the repository URL. */
 	ravenPolicySource: string;
+	/** sha256 of the policy text read, to tie it to a Raven commit. */
+	ravenPolicySha256: string | null;
+	/** Catalog ops the policy read excludes: main ahead of Raven's deploy. */
+	inCatalogButExcludedByPolicy: string[];
 	catalogOps: string[] | null;
 	/** Absent beyond the grace window (or undatable → old) — real drift. */
 	missingFromCatalog: string[];
@@ -247,7 +288,9 @@ async function rpc(method: string, params?: unknown): Promise<any> {
 	return payload ? JSON.parse(payload) : {};
 }
 
-async function expectedFromSpec(excluded: Set<string>) {
+async function expectedFromSpec(
+	policy: Awaited<ReturnType<typeof loadRavenExposure>>,
+) {
 	const res = await fetch(`${SCOUT_BASE}/api/openapi.json`, {
 		headers: { "User-Agent": UA },
 	});
@@ -255,7 +298,8 @@ async function expectedFromSpec(excluded: Set<string>) {
 	const spec = await res.json();
 	return {
 		version: String(spec.info?.version ?? "?"),
-		...classifySpecOps(spec, excluded),
+		...classifySpecOps(spec, policy.excluded),
+		policyNotes: policyNotes(spec, policy),
 	};
 }
 
@@ -404,6 +448,8 @@ export async function main(argv = process.argv) {
 				expectedOps: [],
 				excludedByRavenPolicy: [],
 				ravenPolicySource: process.env.RAVEN_DIR || RAVEN_POLICY_URL,
+				ravenPolicySha256: null,
+				inCatalogButExcludedByPolicy: [],
 				catalogOps: null,
 				missingFromCatalog: [],
 				undiscoverable: [],
@@ -418,7 +464,7 @@ export async function main(argv = process.argv) {
 			`could not read Raven's exposure policy: ${err instanceof Error ? err.message : err}`,
 		);
 	}
-	const spec = await expectedFromSpec(exposure.excluded);
+	const spec = await expectedFromSpec(exposure);
 	console.log(`spec ${spec.version}: ${spec.ops.length} catalog-relevant ops`);
 	console.log(
 		`  excluded by Raven's own exposure policy, not drift (${exposure.source}): ${spec.excludedByPolicy.join(", ") || "none"}`,
@@ -431,6 +477,8 @@ export async function main(argv = process.argv) {
 		expectedOps: spec.ops,
 		excludedByRavenPolicy: spec.excludedByPolicy,
 		ravenPolicySource: exposure.source,
+		ravenPolicySha256: exposure.sha256,
+		inCatalogButExcludedByPolicy: [],
 		catalogOps: null,
 		missingFromCatalog: [],
 		undiscoverable: [],
@@ -440,8 +488,9 @@ export async function main(argv = process.argv) {
 		claimedOpCount: null,
 		auditArchetypeRoutesToRegistry: null,
 		checked: false,
-		notes: [],
+		notes: [...spec.policyNotes],
 	};
+	for (const n of spec.policyNotes) console.log(`  ⚠ ${n}`);
 
 	await resolveToken();
 	if (!MCP_URL || !MCP_TOKEN) {
@@ -454,7 +503,15 @@ export async function main(argv = process.argv) {
 			"no Raven credential (RAVEN_MCP_TOKEN, or ~/.config/stellarlight/raven.token); the catalog half could not run.",
 		);
 	} else {
-		const cat = await catalogOps(spec.ops);
+		let cat: Awaited<ReturnType<typeof catalogOps>>;
+		try {
+			cat = await catalogOps(spec.ops);
+		} catch (err) {
+			return inconclusive(
+				report,
+				`could not read Raven's catalog: ${err instanceof Error ? err.message : err}`,
+			);
+		}
 		report.checked = true;
 		report.catalogOps = cat.ops;
 		report.claimedOpCount = cat.claimed;
@@ -462,6 +519,9 @@ export async function main(argv = process.argv) {
 		const absent = spec.ops.filter((o) => !cat.ops.includes(o));
 		report.extraInCatalog = cat.ops.filter(
 			(o) => !spec.ops.includes(o) && !spec.excludedByPolicy.includes(o),
+		);
+		report.inCatalogButExcludedByPolicy = cat.ops.filter((o) =>
+			spec.excludedByPolicy.includes(o),
 		);
 
 		// Split absent ops into expected re-baseline lag vs real drift.
@@ -508,6 +568,10 @@ export async function main(argv = process.argv) {
 			console.log(`  ✗ missing beyond grace: ${m}`);
 		for (const e of report.extraInCatalog)
 			console.log(`  ✗ in catalog but not in spec: ${e}`);
+		for (const e of report.inCatalogButExcludedByPolicy)
+			console.log(
+				`  ⚠ in catalog though Raven's policy (sha256 ${exposure.sha256.slice(0, 12)}) excludes it: ${e}; the policy read may be ahead of Raven's deploy`,
+			);
 		if (report.auditArchetypeRoutesToRegistry === false)
 			console.log(
 				"  ⚠ incident/audit archetype does not route to listAudits/searchResearch",
@@ -531,7 +595,9 @@ export async function main(argv = process.argv) {
 	console.log("\nok");
 }
 
-if (process.argv[1]?.includes("check-raven-drift"))
+// Run only as the entry script, not when a path merely contains its name.
+const { isEntry } = await import("./eval/raven-policy");
+if (isEntry(import.meta.url))
 	main().catch((err) => {
 		console.error("raven-drift-guard failed:", err.message ?? err);
 		process.exit(2);

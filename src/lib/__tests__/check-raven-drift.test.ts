@@ -5,6 +5,8 @@
  * read a list typed on 2026-07-21 instead of Raven's policy (review
  * 2026-11-05). It reads the policy with the gate replica's reader.
  */
+
+import { createHash } from "node:crypto";
 import {
 	mkdirSync,
 	mkdtempSync,
@@ -29,7 +31,13 @@ import {
 	classifySpecOps,
 	loadRavenExposure,
 	main,
+	policyNotes,
 } from "../../../scripts/check-raven-drift";
+import {
+	RAVEN_DRIFT_ARTIFACT,
+	ravenDriftFindings,
+} from "../improvement-ledger";
+import { artifactFor } from "../repair-lane";
 
 // Raven's src/policy/scout-exposure.ts layout at fec1c79, fixture data.
 const POLICY = `export const EXCLUDED_SCOUT_OPERATIONS = new Map([
@@ -153,12 +161,12 @@ describe("check-raven-drift", () => {
 // Review 2026-11-05 (second round): both could-not-check exits left the last
 // run's artifact in place, so /api/quality kept its verdict and date.
 describe("check-raven-drift when it cannot look", () => {
-	const run = async () => {
+	const run = async ({ token = "" } = {}) => {
 		const dir = mkdtempSync(join(tmpdir(), "raven-drift-run-"));
 		roots.push(dir);
 		const out = join(dir, "artifact.json");
 		vi.stubEnv("HOME", dir);
-		vi.stubEnv("RAVEN_MCP_TOKEN", "");
+		vi.stubEnv("RAVEN_MCP_TOKEN", token);
 		vi.stubEnv("RAVEN_TOKEN", "");
 		const exit = vi.spyOn(process, "exit").mockImplementation(((
 			code: number,
@@ -198,6 +206,25 @@ describe("check-raven-drift when it cannot look", () => {
 		expect(row?.details[0]).toContain("HTTP 503");
 	});
 
+	it("writes checked: false with the reason when Raven's catalog cannot be reached", async () => {
+		const dir = mkdtempSync(join(tmpdir(), "raven-drift-"));
+		roots.push(dir);
+		mkdirSync(join(dir, "src/policy"), { recursive: true });
+		writeFileSync(join(dir, "src/policy/scout-exposure.ts"), POLICY);
+		vi.stubEnv("RAVEN_DIR", dir);
+		fetchMock.mockImplementation(async (url: unknown) => {
+			if (String(url).endsWith("/api/openapi.json"))
+				return new Response(JSON.stringify(SPEC));
+			throw new TypeError("fetch failed");
+		});
+		const artifact = await run({ token: "test-token" });
+		expect(artifact.checked).toBe(false);
+		expect(artifact.notes.at(-1)).toBe(
+			"could not read Raven's catalog: fetch failed",
+		);
+		fetchMock.mockReset();
+	});
+
 	it("writes checked: false with the reason when there is no Raven credential", async () => {
 		const dir = mkdtempSync(join(tmpdir(), "raven-drift-"));
 		roots.push(dir);
@@ -217,5 +244,101 @@ describe("check-raven-drift when it cannot look", () => {
 			unit: "operations checked",
 		});
 		expect(row?.details[0]).toContain("no Raven credential");
+	});
+});
+
+// Review 2026-11-05 (second round), the remaining items.
+describe("check-raven-drift ties its verdict to the policy it read", () => {
+	it("records the policy's sha256 and names exclusions that resolve to nothing", async () => {
+		vi.stubEnv("RAVEN_DIR", "");
+		fetchMock.mockResolvedValueOnce(new Response(POLICY));
+		const policy = await loadRavenExposure();
+		expect(policy.sha256).toBe(
+			createHash("sha256").update(POLICY).digest("hex"),
+		);
+		const spec = {
+			paths: {
+				"/api/feedback": {
+					get: { operationId: "getFeedbackSchemaV2" },
+					post: { operationId: "submitFeedback" },
+				},
+			},
+		};
+		const notes = policyNotes(spec, policy);
+		expect(notes).toContain(
+			"Raven's policy calls GET /api/feedback getFeedbackSchema, the spec calls it getFeedbackSchemaV2; Raven's catalog build fails on a renamed exclusion",
+		);
+		expect(notes.some((n) => n.includes("GET /api/hackathons/review"))).toBe(
+			true,
+		);
+		// An optional exclusion may be absent, as in Raven's own build.
+		expect(notes.some((n) => n.includes("GET /api/sources/locate"))).toBe(
+			false,
+		);
+	});
+
+	it("starts no run when its path only contains the script's name", async () => {
+		const argv1 = process.argv[1];
+		process.argv[1] =
+			"/tmp/check-raven-drift-row/node_modules/vitest/vitest.mjs";
+		try {
+			vi.resetModules();
+			fetchMock.mockClear();
+			await import("../../../scripts/check-raven-drift");
+			await new Promise((r) => setTimeout(r, 50));
+			expect(fetchMock).not.toHaveBeenCalled();
+		} finally {
+			process.argv[1] = argv1;
+		}
+	});
+});
+
+describe("the drift artifact reaches the ledger and the repair lane", () => {
+	it("is the file the daily workflow writes", () => {
+		const workflow = readFileSync(
+			join(process.cwd(), ".github/workflows/live-index-guards.yml"),
+			"utf8",
+		);
+		expect(workflow).toContain(
+			`scripts/check-raven-drift.ts --json ${RAVEN_DRIFT_ARTIFACT}`,
+		);
+		expect(artifactFor("raven-drift")).toBe(RAVEN_DRIFT_ARTIFACT);
+		const committed = JSON.parse(
+			readFileSync(join(process.cwd(), RAVEN_DRIFT_ARTIFACT), "utf8"),
+		);
+		expect(typeof committed.generatedAt).toBe("string");
+	});
+
+	it("files a drift as a finding and a could-not-check without closing anything", () => {
+		const drift = ravenDriftFindings(
+			{
+				checked: true,
+				missingFromCatalog: ["getPeople"],
+				generatedAt: "2026-11-05T00:00:00Z",
+			},
+			"2026-11-05T01:00:00Z",
+		);
+		expect(drift.covered).toBe(true);
+		expect(
+			drift.findings.map((f) => [f.id, f.failureMode, f.evidenceAt]),
+		).toEqual([
+			[
+				"raven-drift:getpeople",
+				"op-missing-from-catalog",
+				"2026-11-05T00:00:00Z",
+			],
+		]);
+		const blind = ravenDriftFindings(
+			{
+				checked: false,
+				notes: ["no Raven credential"],
+				missingFromCatalog: [],
+			},
+			"2026-11-05T01:00:00Z",
+		);
+		expect(blind.covered).toBe(false);
+		expect(blind.findings).toHaveLength(1);
+		expect(blind.findings[0]?.failureMode).toBe("could-not-check");
+		expect(blind.findings[0]?.detail).toBe("no Raven credential");
 	});
 });
