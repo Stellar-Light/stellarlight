@@ -276,6 +276,22 @@ const TYPE_COVERAGE_PROPS = {
 	hackathonWinners: { type: "integer" },
 };
 
+/** One project's TVL reading in the analyze tvl rollup (top10, staleProjects). */
+const TVL_ROLLUP_ROW_SCHEMA = {
+	type: "object",
+	properties: {
+		slug: { type: "string", nullable: true },
+		name: { type: "string", nullable: true },
+		tvlUSD: { type: "number" },
+		tvlAsOf: { type: "string", format: "date-time", nullable: true },
+		tvlStale: {
+			type: "boolean",
+			description:
+				"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the reading is old. See staleWarning.",
+		},
+	},
+};
+
 /** What a hackathon build became: shared by searchHackathonBuilds and
  * hackathonBrief. Optional on purpose: absent means the link was not checked
  * (the build was read live from DoraHacks), which is not "no project". */
@@ -8456,6 +8472,21 @@ export const spec: OpenAPISpec = {
 					},
 				],
 				responses: {
+					"503": {
+						description:
+							"The projects read behind the clusters failed: an outage, NOT an empty directory or a zero count. Retry after Retry-After. A value filter that matches nothing after a read that ran is a 200 with clusters [] and meta.advisory.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Cluster list",
 						content: {
@@ -8608,6 +8639,21 @@ export const spec: OpenAPISpec = {
 					},
 				],
 				responses: {
+					"503": {
+						description:
+							"The projects read behind categories, funding, tvl or gaps, the repos scan read behind toolchain (dimension=all included for both), or the DoraHacks read behind dimension=hackathons failed: an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After.",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Analytics rollup",
 						content: {
@@ -8634,6 +8680,12 @@ export const spec: OpenAPISpec = {
 												},
 												source: { type: "string", format: "uri" },
 												generatedAt: { type: "string", format: "date-time" },
+												warnings: {
+													type: "array",
+													items: { type: "string" },
+													description:
+														"Present only when a block of a dimension=all response is null because its read failed this request (today: hackathons): what is missing, and that it is unknown, not zero.",
+												},
 											},
 										},
 										toolchain: {
@@ -8680,6 +8732,17 @@ export const spec: OpenAPISpec = {
 														},
 													},
 												},
+												engineeringPractice: {
+													type: "object",
+													description:
+														"Repos whose latest scan recorded tree-level CI and test presence: presence facts only, not CI results.",
+													properties: {
+														reposWithPracticeFacts: { type: "integer" },
+														ciPresent: { type: "integer" },
+														testsPresent: { type: "integer" },
+													},
+												},
+												basis: { type: "string" },
 											},
 										},
 										categories: {
@@ -8832,8 +8895,9 @@ export const spec: OpenAPISpec = {
 										},
 										hackathons: {
 											type: "object",
+											nullable: true,
 											description:
-												"Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed.",
+												"Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed. null (dimension=all only) = the DoraHacks read failed this request: unknown, never zero; meta.warnings says so and the response is not cached. dimension=hackathons answers 503 instead.",
 											properties: {
 												totalEvents: { type: "integer" },
 												byStatus: {
@@ -8851,33 +8915,51 @@ export const spec: OpenAPISpec = {
 										tvl: {
 											type: "object",
 											description:
-												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'.",
+												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning.",
 											properties: {
-												totalTvlUSD: { type: "number" },
+												totalTvlUSD: {
+													type: "number",
+													description:
+														"Sum of every tracked project's last reading, stale ones included (see staleTvlUSD).",
+												},
+												staleTvlUSD: {
+													type: "number",
+													description:
+														"The part of totalTvlUSD from stale readings (tvlAsOf more than 14 days old, or missing, unparseable or in the future); 0 when every reading is fresh. Each figure is rounded once, so totalTvlUSD minus this is the part read within 14 days and equals the fresh rows.",
+												},
 												trackedProjects: { type: "integer" },
 												asOf: {
 													type: "string",
 													format: "date-time",
 													nullable: true,
 													description:
-														"Most recent per-project tvlAsOf refresh; null when nothing is tracked.",
+														"The NEWEST usable per-project tvlAsOf (a missing, unparseable or future date dates nothing): it dates the freshest reading, not the whole total (see oldestAsOf). Null when no summed reading has a usable date.",
+												},
+												oldestAsOf: {
+													type: "string",
+													format: "date-time",
+													nullable: true,
+													description:
+														"The OLDEST usable tvlAsOf among the readings summed. Null when no summed reading has a usable date.",
+												},
+												staleWarning: {
+													type: "string",
+													nullable: true,
+													description:
+														"Non-null when any summed reading is older than 14 days: how many, the oldest date, and their share of totalTvlUSD. Null = every reading is within 14 days.",
 												},
 												provider: { type: "string" },
 												top10: {
 													type: "array",
-													items: {
-														type: "object",
-														properties: {
-															slug: { type: "string", nullable: true },
-															name: { type: "string", nullable: true },
-															tvlUSD: { type: "number" },
-															tvlAsOf: {
-																type: "string",
-																format: "date-time",
-																nullable: true,
-															},
-														},
-													},
+													description:
+														"The ten largest readings, largest first.",
+													items: TVL_ROLLUP_ROW_SCHEMA,
+												},
+												staleProjects: {
+													type: "array",
+													description:
+														"Every stale summed reading (tvlAsOf more than 14 days old, or missing, unparseable or in the future), largest first; [] = none.",
+													items: TVL_ROLLUP_ROW_SCHEMA,
 												},
 												basis: { type: "string" },
 											},
@@ -8946,13 +9028,13 @@ export const spec: OpenAPISpec = {
 													format: "date-time",
 													nullable: true,
 													description:
-														"When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state.",
+														"When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state. Null when this read is neither stored nor compared (deltaUnavailable says why).",
 												},
 												previousSnapshot: {
 													type: "object",
 													nullable: true,
 													description:
-														"The most recent persisted snapshot with a DIFFERENT project set. Null when none exists yet (see deltaUnavailable).",
+														"The most recent persisted snapshot with a DIFFERENT project set whose stored slug list is non-empty and reproduces its projectSetHash: an empty or incomplete stored snapshot is never a baseline. Null when none is found (see deltaUnavailable).",
 													properties: {
 														projectSetHash: { type: "string" },
 														computedAt: {
@@ -9021,7 +9103,7 @@ export const spec: OpenAPISpec = {
 													type: "string",
 													nullable: true,
 													description:
-														"Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable); an explicit reason, never a silent omission.",
+														"Non-null when snapshotDelta cannot be served, stating WHY: no valid differing prior snapshot is stored (empty or incomplete ones are skipped), the most recent stored snapshots read hold no other set, this read found no awarded project or was truncated (it is then neither stored nor compared), or the snapshot store is unavailable; an explicit reason, never a silent omission.",
 												},
 												deltaBasis: { type: "string" },
 											},
@@ -9178,6 +9260,21 @@ export const spec: OpenAPISpec = {
 					{ $ref: "#/components/parameters/limit" },
 				],
 				responses: {
+					"503": {
+						description:
+							"The project or repo read behind the ranking failed (format=csv included): an outage, NOT an empty ranking or a zero count. Retry after Retry-After. A filter that matches nothing after a read that ran is a 200 with projects [].",
+						headers: {
+							"Retry-After": {
+								description: "Seconds to wait before resending (2).",
+								schema: { type: "integer" },
+							},
+						},
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/RetryableError" },
+							},
+						},
+					},
 					"200": {
 						description: "Leaderboard + ecosystem stats",
 						content: {
@@ -11240,12 +11337,18 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf.",
+							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading more than 14 days old.",
 					},
 					tvlAsOf: {
 						type: "string",
 						nullable: true,
 						description: "When tvlUSD was fetched from DefiLlama (ISO 8601).",
+					},
+					tvlStale: {
+						type: "boolean",
+						nullable: true,
+						description:
+							"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future: cite tvlUSD with its tvlAsOf as a past reading, not today's TVL. Only the date is checked, not why the figure is old. false = read within 14 days. null = no tvlUSD.",
 					},
 					tvlSource: {
 						type: "string",
@@ -12260,7 +12363,7 @@ export const spec: OpenAPISpec = {
 								type: "string",
 								enum: ["profile-text", "repo-owner", "code-language"],
 								description:
-									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence); every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.",
+									"'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence, null like every row when the code-evidence read failed); every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.",
 							},
 						},
 					},
@@ -12268,7 +12371,7 @@ export const spec: OpenAPISpec = {
 						type: "array",
 						nullable: true,
 						description:
-							"Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter.",
+							"Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = every repo in the index that this GitHub account owns was read and none matched (a weaker match, not a disqualification). Owners match as GitHub logins do, whole and in any case; repos GitHub reports gone are left out. null = not checked: no q/skill filter, or the code-evidence read failed (meta.failedReads names it), on every row including code-language ones; never 'none'.",
 						items: {
 							type: "object",
 							properties: {
@@ -12725,6 +12828,12 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						description:
 							"When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.",
+					},
+					tvlStale: {
+						type: "boolean",
+						nullable: true,
+						description:
+							"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the figure is old, and sort=tvl still orders by tvlUSD alone, stale or not. false = read within 14 days. null = no tvlUSD.",
 					},
 					assetCode: {
 						type: "string",

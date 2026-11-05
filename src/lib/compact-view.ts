@@ -79,6 +79,7 @@ export const PROJECT_COMPACT: CompactPlan = {
 		deployment: ["network"],
 		tvlUSD: true,
 		tvlAsOf: true,
+		tvlStale: true,
 		scfAwarded: true,
 		scfTotalAwardedUSD: true,
 		audits: true,

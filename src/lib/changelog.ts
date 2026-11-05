@@ -41,6 +41,93 @@ export const CHANGELOG: ChangelogEntry[] = [
 			"Found by live checks on 2026-11-02. getPartner kept its own copy of the partner row: for Bitso, Honey Coin, Coins PH and Yellow Card it served seps [], the checkable claim that we read their SEP-1 file and it lists none, where getPartners served null, and it served curated asset codes as if read from stellar.toml. Both routes now use one serializer and the spec declares the row once, as Partner; [] still means a recorded read found none. Partner.rampTypes now says ramps are either confirmed from the transfer server during a stellar.toml read or entered by a curator, and are curator-entered without a recorded read. partnerAssistant's rows came from a third copy that served every partner's assets and SEPs as stellar.toml facts and called curated ramps verified; all three copies now take toml facts only from a recorded read, and one function decides what a recorded read is. A date without its source URL, or the reverse, is no read. The directory cards show an asset chip only for a recorded read, and the skill and API reference say assets and SEPs are null without one. The stellar.toml enrichment now writes seps and assets on every successful read, [] when the file declares none, so a curated value can no longer survive under a fresh read stamp, and it leaves either field as stored when the file sets it in a form the parser cannot read (a linked currency file, a code template, a multi-line value), so a parser miss can no longer erase a real value either. It reads single-quoted values, and its dry run prints each stored value beside the planned one. A first read that could not read seps or assets does not stamp the row, which would have served the unread field as read; a row already read keeps its unread field under refreshed stamps. This takes effect on the next enrichment run. The partner pages show 'stellar.toml verified' and 'Verified from this partner's stellar.toml' only when a read is recorded with its source URL and its date; otherwise the capabilities read 'Curated by Stellar Light', ramp directions are labelled as recorded, and the compliance card reads 'Curated from' where it read 'Verified from'. matchPartners was the one AI partner route without the account branch, so a refused account answered 502. The three routes now share one classifier that reads the error class and HTTP status, never the message: a 400 for no credit, a 401, a 403, a 404 for a retired model and a 400 for a request the provider rejects all fail the same way on every resend, so they answer 503 with unavailable true, which tells a consumer to fall back to GET /api/partners filters and not to retry; the 503 carried Retry-After 2 before, an invitation to the resend that cannot help. A 5xx, an overload, no connection, a timeout, a 408 and a 409 answer 502, one failed call that a later resend can clear, as does model output that could not be read. A throw that is not a provider error answers 500, now documented. matchPartners documents the validTypes its 400 lists for an unknown type. A failed partner directory read answered 200 with matches [] and the note that no partners are listed; matchPartners now answers 503 with retryAfterSeconds 2, and partnerAssistant tells its model the directory could not be read instead of that no published partner matches, and says so in directoryUnavailable, served only when no search that turn read the directory; a fault in its own scoring is its documented 500, never a directory outage. A need over 2,000 characters made the provider refuse the prompt, which read as the AI path being off; it is the caller's 400 now.",
 	},
 	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"/builders/<login> says which of its reads failed. Code activity, SCF grants and hackathon submissions each read on their own and say unknown when their read fails, where a failed grants or hackathon read showed no grants or said no submissions matched.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"The home page's trending projects and the sitemap read every row. Trending ranked the newest 300 of 905 active projects, and the sitemap stopped each collection at 5,000 rows, which would drop pages from search engines without a word.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"/builders/<login> shows that login's profile or answers not found. The lookup matched part of a login and fell back to its first hit, so /builders/bob showed and titled bobby's profile; a login now matches whole, in any case.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"A read that stops at a ceiling now says so instead of passing a cut set off as all of it. getBuilders' onStellar is null, with the read named in the warnings, when its repo or project read was cut, never a short block; getHackathonBuilds no longer answers that a hackathon value names no event when it could not check every listed event; getLeaderboard reads every eligible project and repo.",
+		detail:
+			"On the site, /leaderboard and /digest/<month> ranked the newest 300 of 905 active projects (32 of the top 50 by stars on /leaderboard differed from GET /api/leaderboard's) and now rank them all. /builders states the directory's true size and says when code activity could not be read rather than showing no repos, a profile says so rather than 'no public code', and /analytics counts SCF-funded projects in the database and leaves a cut sum unknown.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"/api/status `usage.last24h`, `usage.last7d` and `usage.byEndpoint` count a hit whether its createdAt is stored as a date or as text. They were bounded by a date alone, which never matches a value stored as text; the three now come from one match, so byEndpoint sums to last7d.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"getBuilders, /builders and /builders/<login> serve public profiles only. The filter dropped a visibility value the field never holds, so a profile set to private would have been listed, counted, searched and shown at its own URL. Payload's REST and GraphQL now read public profiles only too, unless an admin asks. All 401 profiles are public today, so no count moves.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"/api/status `usage.byEndpoint` counts every hit of the last 7 days. It grouped a read capped at 10,000 rows, so it summed to 10,000 beside a `last7d` of 25,806 and undercounted every endpoint; the counts now come from the database and sum to `last7d`.",
+		detail:
+			"The /analytics page's agent and human split had the same cap and is counted the same way.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		version: "spec@1.9.118",
+		type: "fixed",
+		summary:
+			"getBuilders' `codeEvidence` no longer says none for a builder it did not check. With q, the read of the repos the page's builders own stopped at 300, so a builder whose repos fell past the cut read [] beside a real match; owners matched only in their stored case, so a profile stored as Bob read [] beside repos owned by bob; and a failed read served [] on every row, or a code-language row's admitting repos as if the read had run. Every owned repo is now read, owners match as GitHub logins (whole, any case), [] means all were read and none matched, and a failed read leaves null on every row, with the read named in `meta.failedReads`.",
+		detail:
+			"A login with no Passport profile (match.basis repo-owner) is read in full too: its top five repos by repoScore came from the newest 200 of a substring match, so its best repo could be missing. The same login match now joins onStellar and the profile page's org projects, where a stored case that differed from GitHub's read as no code.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"getBuilders reads every visible profile, not the newest 300: with no q, `counts.total` said 300 under a full set label while 401 profiles were visible, so the oldest were reachable only through a location filter. `counts.total` now counts the set the pages walk (page until offset + returned reaches it), and a q search runs over all of it.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api", "skill"],
+		version: "spec@1.9.117",
+		type: "fixed",
+		summary:
+			"analyzeEcosystem no longer dates a TVL total by its newest reading alone, or compares funding against an empty snapshot: `tvl` gains `staleTvlUSD`, `oldestAsOf`, `staleProjects` and `staleWarning` for readings whose date is more than 14 days old or unusable (3 of 17 on 2026-11-04, 84% of `totalTvlUSD`), TVL rows gain `tvlStale`, and `previousSnapshot` skips empty or incomplete stored snapshots.",
+		detail:
+			"Stale readings stay in `totalTvlUSD`: dropping them would zero the total whenever the weekly refresh stops, and hide figures that are real but dated. `tvlStale` is true when `tvlAsOf` is more than 14 days old, or missing, unparseable or in the future; only the date is checked, not why a figure is old. A future or unparseable date never becomes `asOf` or `oldestAsOf`, and each figure is rounded once, so `totalTvlUSD` minus `staleTvlUSD` is exactly the fresh rows. `tvlStale` rides searchProjects rows and their compact view, getLeaderboard rows (sort=tvl still orders by `tvlUSD` alone) and the rollup's `top10`; the getLeaderboard CSV gains tvl_as_of and tvl_stale columns at the end. Funding: a stored snapshot is a baseline only when its slug list is non-empty and reproduces its `projectSetHash`; 13 stored snapshots hold the empty set (hash e3b0c44298fc1c14), the shape a request whose project read failed wrote, and the live delta against one listed all 582 projects as added. `snapshotAsOf` is now when the current set was first stored (2026-10-03 for b44bd87c48cd5ef9), `deltaUnavailable` says exactly what was read when no baseline is found, a read that finds no awarded project or is truncated is neither stored nor compared, and a new snapshot is stored only once no 503 can follow: after the projects and repos scan reads (a failed DoraHacks read under dimension=all, which serves hackathons null, does not stop it, since the snapshot depends only on the projects read). A failed read is now a 503 (RetryableError, `retryAfterSeconds` 2) where it served zeros or an empty list: analyzeEcosystem's projects read (categories, funding, tvl, gaps, all), its repos scan read (toolchain, all) and its DoraHacks read (hackathons), getLeaderboard (CSV too) and getClusters. Under dimension=all a failed DoraHacks read leaves `hackathons` null with `warnings` in meta, uncached. These 503s change no successful response; a filter that matches nothing after a read that ran is still a 200 with `projects` or `clusters` []. The spec now declares toolchain `basis` and `engineeringPractice`, which were served undeclared. /api/rwa-tvl and /api/defillama/protocol/{slug} no longer serve figures hard-coded in March 2026 (RWA 1,688,000,000 with five issuer values, Benji 625,861,896, WisdomTree 20,000,000) or 0 for a figure they did not read: a failed read is a 503 or the last real reading with its `asOf`, an unread figure, change or history is null, and the homepage TVL cards show Unavailable. A failed source read on /api/defillama/protocol/{slug} (rwa.xyz with a key set, or DefiLlama's protocol list or detail) answers 503 with Retry-After, where it served a 200 of nulls or a 500; with no rwa.xyz key it serves nulls, and the project page's TVL card shows Unavailable for a null figure or change and draws no chart without a history.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"The quality report's Raven interlock guard no longer counts operations that Raven's own exposure policy excludes as missing from Raven's catalog: the daily drift check reads that policy from Raven's repository and lists those operations apart, so the guard expects the 30 operations Raven means to serve, not 37. When the check cannot run, the guard says so with the reason instead of keeping the previous run's verdict and date.",
+	},
+	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",

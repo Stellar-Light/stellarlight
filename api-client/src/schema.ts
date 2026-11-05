@@ -1181,7 +1181,7 @@ export interface components {
             /** Format: uri */
             skill?: string;
         };
-        /** @description Present in meta only when the request had view=compact; absent means full rows. Compact project rows (projects/search `projects`) carry exactly: id, name, slug, canonicalSlug, url, category, types, shortDescription, status, statusAsOf, deployment, tvlUSD, tvlAsOf, scfAwarded, scfTotalAwardedUSD, audits, score, via, confidence, reposCount, onchainContractsCount; deployment keeps only network, confidence only score and label. Compact repo rows (repos/search `repos`, projects/search `codeReferences`) carry exactly: fullName, url, description, primaryLanguage, stars, lastCommitAt, isArchived, activityState, project, hackathonWinner, scfAwarded, repoScore, repoScoreLabel, tier, kind, stellarEvidence, score, knowledgeNotesCount. Every key is on every row, null where there is no value. */
+        /** @description Present in meta only when the request had view=compact; absent means full rows. Compact project rows (projects/search `projects`) carry exactly: id, name, slug, canonicalSlug, url, category, types, shortDescription, status, statusAsOf, deployment, tvlUSD, tvlAsOf, tvlStale, scfAwarded, scfTotalAwardedUSD, audits, score, via, confidence, reposCount, onchainContractsCount; deployment keeps only network, confidence only score and label. Compact repo rows (repos/search `repos`, projects/search `codeReferences`) carry exactly: fullName, url, description, primaryLanguage, stars, lastCommitAt, isArchived, activityState, project, hackathonWinner, scfAwarded, repoScore, repoScoreLabel, tier, kind, stellarEvidence, score, knowledgeNotesCount. Every key is on every row, null where there is no value. */
         CompactView: {
             /** @description Always `compact`: this page carries compact rows. */
             mode: string;
@@ -1427,10 +1427,12 @@ export interface components {
                 driftDays?: number | null;
                 codeChangedSinceAudit?: boolean | null;
             } | null;
-            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf. */
+            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading more than 14 days old. */
             tvlUSD?: number | null;
             /** @description When tvlUSD was fetched from DefiLlama (ISO 8601). */
             tvlAsOf?: string | null;
+            /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future: cite tvlUSD with its tvlAsOf as a past reading, not today's TVL. Only the date is checked, not why the figure is old. false = read within 14 days. null = no tvlUSD. */
+            tvlStale?: boolean | null;
             /** @description Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope; cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth. */
             tvlSource?: string | null;
             /** @description How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time): the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions. */
@@ -2128,12 +2130,12 @@ export interface components {
                     [key: string]: string;
                 };
                 /**
-                 * @description 'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence); every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.
+                 * @description 'profile-text' = free-text hit over a Stellar Passport builder's profile/project prose. 'repo-owner' = a CODE-DERIVED row: the query is a GitHub login that owns indexed Stellar repos but has no Passport profile, so bio/roleTitle are null and the evidence is entirely in codeEvidence (P2 builders-by-name). 'code-language' = admitted by CODE, not prose: at least one query token IS the primary language of a repo this builder owns in the index while their profile never says it (matchedFields INCLUDES 'codeEvidence', matchedTerms naming the language as indexed, proving repos in codeEvidence, null like every row when the code-evidence read failed); every other token still had to hit the prose, so a MIXED row (one token by code, another by prose) also lists the prose fields in matchedFields and still keeps the 'code-language' basis; these candidate rows sort below all prose hits.
                  * @enum {string}
                  */
                 basis?: "profile-text" | "repo-owner" | "code-language";
             } | null;
-            /** @description Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = no direct code evidence in the index (a weaker match, not a disqualification); null without a q/skill filter. */
+            /** @description Indexed repos owned by this builder's GitHub account that match the query: observable facts (language, last activity), kept SEPARATE from subjective profile text. [] = every repo in the index that this GitHub account owns was read and none matched (a weaker match, not a disqualification). Owners match as GitHub logins do, whole and in any case; repos GitHub reports gone are left out. null = not checked: no q/skill filter, or the code-evidence read failed (meta.failedReads names it), on every row including code-language ones; never 'none'. */
             codeEvidence?: {
                 fullName?: string;
                 url?: string | null;
@@ -2362,6 +2364,8 @@ export interface components {
              * @description When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.
              */
             tvlAsOf?: string | null;
+            /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the figure is old, and sort=tvl still orders by tvlUSD alone, stale or not. false = read within 14 days. null = no tvlUSD. */
+            tvlStale?: boolean | null;
             /** @description Code of the project's issued on-chain asset (USDC, CETES, …), from stellar.expert. Null = no verified issued asset in our on-chain seed set. */
             assetCode?: string | null;
             /** @description Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED; never 'zero supply'; untracked issuers sort below every tracked one. */
@@ -7036,6 +7040,17 @@ export interface operations {
                     };
                 };
             };
+            /** @description The projects read behind the clusters failed: an outage, NOT an empty directory or a zero count. Retry after Retry-After. A value filter that matches nothing after a read that ran is a 200 with clusters [] and meta.advisory. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
+                };
+            };
         };
     };
     analyzeEcosystem: {
@@ -7067,6 +7082,8 @@ export interface operations {
                             source?: string;
                             /** Format: date-time */
                             generatedAt?: string;
+                            /** @description Present only when a block of a dimension=all response is null because its read failed this request (today: hackathons): what is missing, and that it is unknown, not zero. */
+                            warnings?: string[];
                         };
                         /** @description Soroban SDK toolchain health across scanned repos: how many run supported / current / deprecated SDK versions, with the deprecated rows named. Present for dimension=all|toolchain. */
                         toolchain?: {
@@ -7087,6 +7104,13 @@ export interface operations {
                                 projectSlug?: string | null;
                                 sorobanSdkVersion?: string | null;
                             }[];
+                            /** @description Repos whose latest scan recorded tree-level CI and test presence: presence facts only, not CI results. */
+                            engineeringPractice?: {
+                                reposWithPracticeFacts?: number;
+                                ciPresent?: number;
+                                testsPresent?: number;
+                            };
+                            basis?: string;
                         };
                         /** @description Present for dimension=all|categories: project counts by category over the active population (see meta.population). */
                         categories?: {
@@ -7170,7 +7194,7 @@ export interface operations {
                                 underbuiltMax?: number;
                             };
                         };
-                        /** @description Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed. */
+                        /** @description Present for dimension=all|hackathons: cross-event rollup from the live DoraHacks feed. null (dimension=all only) = the DoraHacks read failed this request: unknown, never zero; meta.warnings says so and the response is not cached. dimension=hackathons answers 503 instead. */
                         hackathons?: {
                             totalEvents?: number;
                             byStatus?: {
@@ -7180,23 +7204,46 @@ export interface operations {
                             };
                             totalPrizePoolUSD?: number;
                             totalRegisteredHackers?: number;
-                        };
-                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. */
+                        } | null;
+                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning. */
                         tvl?: {
+                            /** @description Sum of every tracked project's last reading, stale ones included (see staleTvlUSD). */
                             totalTvlUSD?: number;
+                            /** @description The part of totalTvlUSD from stale readings (tvlAsOf more than 14 days old, or missing, unparseable or in the future); 0 when every reading is fresh. Each figure is rounded once, so totalTvlUSD minus this is the part read within 14 days and equals the fresh rows. */
+                            staleTvlUSD?: number;
                             trackedProjects?: number;
                             /**
                              * Format: date-time
-                             * @description Most recent per-project tvlAsOf refresh; null when nothing is tracked.
+                             * @description The NEWEST usable per-project tvlAsOf (a missing, unparseable or future date dates nothing): it dates the freshest reading, not the whole total (see oldestAsOf). Null when no summed reading has a usable date.
                              */
                             asOf?: string | null;
+                            /**
+                             * Format: date-time
+                             * @description The OLDEST usable tvlAsOf among the readings summed. Null when no summed reading has a usable date.
+                             */
+                            oldestAsOf?: string | null;
+                            /** @description Non-null when any summed reading is older than 14 days: how many, the oldest date, and their share of totalTvlUSD. Null = every reading is within 14 days. */
+                            staleWarning?: string | null;
                             provider?: string;
+                            /** @description The ten largest readings, largest first. */
                             top10?: {
                                 slug?: string | null;
                                 name?: string | null;
                                 tvlUSD?: number;
                                 /** Format: date-time */
                                 tvlAsOf?: string | null;
+                                /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the reading is old. See staleWarning. */
+                                tvlStale?: boolean;
+                            }[];
+                            /** @description Every stale summed reading (tvlAsOf more than 14 days old, or missing, unparseable or in the future), largest first; [] = none. */
+                            staleProjects?: {
+                                slug?: string | null;
+                                name?: string | null;
+                                tvlUSD?: number;
+                                /** Format: date-time */
+                                tvlAsOf?: string | null;
+                                /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the reading is old. See staleWarning. */
+                                tvlStale?: boolean;
                             }[];
                             basis?: string;
                         };
@@ -7232,10 +7279,10 @@ export interface operations {
                             projectSetHash?: string;
                             /**
                              * Format: date-time
-                             * @description When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state.
+                             * @description When the CURRENT projectSetHash was first observed (persisted snapshot time). computedAt is when THIS response was computed; snapshotAsOf dates the set state. Null when this read is neither stored nor compared (deltaUnavailable says why).
                              */
                             snapshotAsOf?: string | null;
-                            /** @description The most recent persisted snapshot with a DIFFERENT project set. Null when none exists yet (see deltaUnavailable). */
+                            /** @description The most recent persisted snapshot with a DIFFERENT project set whose stored slug list is non-empty and reproduces its projectSetHash: an empty or incomplete stored snapshot is never a baseline. Null when none is found (see deltaUnavailable). */
                             previousSnapshot?: {
                                 projectSetHash?: string;
                                 /** Format: date-time */
@@ -7262,11 +7309,22 @@ export interface operations {
                                     reason?: "dedupe" | "eligibility-reclassification" | "source-correction" | "unknown";
                                 }[];
                             } | null;
-                            /** @description Non-null when snapshotDelta cannot be served, stating WHY (no differing prior snapshot recorded yet, or snapshot store unavailable); an explicit reason, never a silent omission. */
+                            /** @description Non-null when snapshotDelta cannot be served, stating WHY: no valid differing prior snapshot is stored (empty or incomplete ones are skipped), the most recent stored snapshots read hold no other set, this read found no awarded project or was truncated (it is then neither stored nor compared), or the snapshot store is unavailable; an explicit reason, never a silent omission. */
                             deltaUnavailable?: string | null;
                             deltaBasis?: string;
                         };
                     };
+                };
+            };
+            /** @description The projects read behind categories, funding, tvl or gaps, the repos scan read behind toolchain (dimension=all included for both), or the DoraHacks read behind dimension=hackathons failed: an outage, NOT a zero count, total or TVL, and nothing was stored. Retry after Retry-After. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };
@@ -7353,6 +7411,17 @@ export interface operations {
                         };
                         projects?: components["schemas"]["LeaderboardProject"][];
                     };
+                };
+            };
+            /** @description The project or repo read behind the ranking failed (format=csv included): an outage, NOT an empty ranking or a zero count. Retry after Retry-After. A filter that matches nothing after a read that ran is a 200 with projects []. */
+            503: {
+                headers: {
+                    /** @description Seconds to wait before resending (2). */
+                    "Retry-After"?: number;
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RetryableError"];
                 };
             };
         };

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 
-const FALLBACK_TVL = 1_688_000_000;
 const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 interface RWAIssuer {
@@ -9,29 +9,44 @@ interface RWAIssuer {
 	assetCount: number;
 }
 
-const FALLBACK_ISSUERS: RWAIssuer[] = [
-	{ name: "Franklin Templeton", value: 654_500_000, assetCount: 1 },
-	{ name: "Spiko", value: 508_400_000, assetCount: 5 },
-	{ name: "Circle", value: 238_500_000, assetCount: 2 },
-	{ name: "Ondo Finance", value: 123_400_000, assetCount: 1 },
-	{ name: "RedSwan Digital", value: 71_700_000, assetCount: 7 },
-];
-
+// The last reading this instance took from rwa.xyz, and when (asOf).
 let cachedData: {
 	tvl: number;
-	topIssuers: RWAIssuer[];
-	totalAssets: number;
+	// null = not read (the headline-only parse), never "none"
+	topIssuers: RWAIssuer[] | null;
+	totalAssets: number | null;
+	asOf: string;
 	timestamp: number;
 } | null = null;
 
+const served = (d: NonNullable<typeof cachedData>, cached: boolean) =>
+	NextResponse.json({
+		tvl: d.tvl,
+		topIssuers: d.topIssuers,
+		totalAssets: d.totalAssets,
+		asOf: d.asOf,
+		cached,
+	});
+
+const remember = (
+	tvl: number,
+	topIssuers: RWAIssuer[] | null,
+	totalAssets: number | null,
+) => {
+	cachedData = {
+		tvl,
+		topIssuers,
+		totalAssets,
+		asOf: new Date().toISOString(),
+		timestamp: Date.now(),
+	};
+	return cachedData;
+};
+
 export async function GET() {
+	const startedAt = Date.now();
 	if (cachedData && Date.now() - cachedData.timestamp < CACHE_DURATION) {
-		return NextResponse.json({
-			tvl: cachedData.tvl,
-			topIssuers: cachedData.topIssuers,
-			totalAssets: cachedData.totalAssets,
-			cached: true,
-		});
+		return served(cachedData, true);
 	}
 
 	try {
@@ -73,7 +88,8 @@ export async function GET() {
 
 			// Extract top 5 issuers — value is in bridged_token_value_dollar.val
 			const issuerStats = network?.issuer_stats || [];
-			const totalAssets = network?.asset_count || 0;
+			const totalAssets =
+				typeof network?.asset_count === "number" ? network.asset_count : null;
 
 			const sorted = [...issuerStats]
 				.sort(
@@ -130,7 +146,9 @@ export async function GET() {
 			}>) {
 				const name = canonicalName(issuer.name || "Unknown");
 				if (name === null) continue; // excluded
-				const value = issuer.bridged_token_value_dollar?.val || 0;
+				// An issuer with no value read is left out, never listed at $0.
+				const value = issuer.bridged_token_value_dollar?.val;
+				if (typeof value !== "number") continue;
 				const assetCount = issuer.asset_count || 0;
 				const existing = agg.get(name);
 				if (existing) {
@@ -145,59 +163,28 @@ export async function GET() {
 				.sort((a, b) => b.value - a.value)
 				.slice(0, 5);
 
-			if (tvl > 0) {
-				cachedData = { tvl, topIssuers, totalAssets, timestamp: Date.now() };
-				return NextResponse.json({
-					tvl,
-					topIssuers,
-					totalAssets,
-					cached: false,
-				});
-			}
+			if (tvl > 0) return served(remember(tvl, topIssuers, totalAssets), false);
 		} else {
 			const billionMatch = html.match(/\$(\d+\.?\d*)\s*B/);
 			if (billionMatch?.[1]) {
 				const tvl = parseFloat(billionMatch[1]) * 1_000_000_000;
-				if (tvl > 0) {
-					cachedData = {
-						tvl,
-						topIssuers: [],
-						totalAssets: 0,
-						timestamp: Date.now(),
-					};
-					return NextResponse.json({
-						tvl,
-						topIssuers: [],
-						totalAssets: 0,
-						cached: false,
-					});
-				}
+				if (tvl > 0) return served(remember(tvl, null, null), false);
 			}
 		}
 
-		return NextResponse.json({
-			tvl: FALLBACK_TVL,
-			topIssuers: FALLBACK_ISSUERS,
-			totalAssets: 50,
-			cached: false,
-			fallback: true,
-		});
-	} catch (error) {
-		if (cachedData) {
-			return NextResponse.json({
-				tvl: cachedData.tvl,
-				topIssuers: cachedData.topIssuers,
-				totalAssets: cachedData.totalAssets,
-				cached: true,
-				fallback: true,
-			});
-		}
-		return NextResponse.json({
-			tvl: FALLBACK_TVL,
-			topIssuers: FALLBACK_ISSUERS,
-			totalAssets: 50,
-			cached: true,
-			fallback: true,
+		throw new Error("rwa.xyz page held no Distributed Asset Value");
+	} catch {
+		// Review 2026-11-04: a failed read served 1,688,000,000 and five issuer
+		// values hard-coded in March 2026 as the current figure. The last real
+		// reading is served with its date; with none, this is an outage.
+		if (cachedData) return served(cachedData, true);
+		return apiError({
+			status: 503,
+			error: "rwa.xyz read failed",
+			advisory:
+				"The rwa.xyz page could not be read or held no figure. This is an outage, NOT a claim that Stellar holds no RWA value. Retry after Retry-After.",
+			retryAfterSeconds: 60,
+			startedAt,
 		});
 	}
 }
