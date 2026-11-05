@@ -188,6 +188,25 @@ export function capabilityWrite(caps: ReturnType<typeof tomlCapabilities>): {
 	};
 }
 
+/** The read stamps and toml-backed fields one parse writes (#1909). The
+ * stamps mark the row as read, and the API then serves its seps and assets
+ * as what the file declares (an absent seps as []). So a parse that could
+ * not read seps or assets stamps the row only when it already holds a
+ * recorded read; a partial first read writes nothing here. */
+export function tomlReadWrite(
+	caps: ReturnType<typeof tomlCapabilities>,
+	stamp: { tomlSourceUrl: string; tomlFetchedAt: string },
+	priorRead: boolean,
+): {
+	seps?: string[];
+	assets?: { code: string }[];
+	tomlSourceUrl?: string;
+	tomlFetchedAt?: string;
+} {
+	const complete = caps.seps !== null && caps.assets !== null;
+	return complete || priorRead ? { ...stamp, ...capabilityWrite(caps) } : {};
+}
+
 const listed = (xs: unknown): string =>
 	!Array.isArray(xs)
 		? "unset"

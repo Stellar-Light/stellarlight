@@ -238,7 +238,8 @@ export async function POST(req: NextRequest) {
 	let lastNeed = "";
 	let canList = false;
 	// A search this turn could not read the directory: say so in a field a
-	// caller can read, not only in the model's prose (#1908).
+	// caller can read, not only in the model's prose (#1908). Served only
+	// when no search this turn read it, so never beside matches.
 	let directoryUnavailable = false;
 
 	try {
@@ -267,7 +268,9 @@ export async function POST(req: NextRequest) {
 						matches,
 						intent,
 						canList,
-						...(directoryUnavailable ? { directoryUnavailable: true } : {}),
+						...(directoryUnavailable && matches === undefined
+							? { directoryUnavailable: true }
+							: {}),
 					},
 					{ headers: rateLimitHeaders(limit) },
 				);
@@ -341,7 +344,9 @@ export async function POST(req: NextRequest) {
 				matches,
 				intent,
 				canList,
-				...(directoryUnavailable ? { directoryUnavailable: true } : {}),
+				...(directoryUnavailable && matches === undefined
+					? { directoryUnavailable: true }
+					: {}),
 			},
 			{ headers: rateLimitHeaders(limit) },
 		);

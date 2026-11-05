@@ -35,14 +35,15 @@
 import "./load-env";
 import config from "@payload-config";
 import { getPayload } from "payload";
+import { hasTomlRead } from "@/lib/partner-public";
 import {
 	capabilityReport,
-	capabilityWrite,
 	domainOf,
 	fetchText,
 	parseStellarToml,
 	type StellarToml,
 	tomlCapabilities,
+	tomlReadWrite,
 } from "./lib/stellar-toml";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -563,16 +564,25 @@ async function main() {
 				console.log(`· ${doc.slug}: ${why} — regions backfill only`);
 			} else {
 				// Provenance trio (SYNTHESIS-2026-08-12 slice 3): which toml, when.
-				// Stamped on EVERY successful parse — not gated on data deltas (the
+				// Stamped on every successful parse that read seps and assets, or
+				// that refreshes a row already read; not gated on data deltas (the
 				// converged-corpus trap: a delta-gated stamp never reaches rows whose
-				// data stopped changing). Admin edits may postdate the snapshot.
-				update.tomlSourceUrl = `https://${domain}/.well-known/stellar.toml`;
-				update.tomlFetchedAt = new Date().toISOString().slice(0, 10);
+				// data stopped changing). A partial first read is not stamped
+				// (tomlReadWrite, #1909). Admin edits may postdate the snapshot.
 				// SEPs from declared endpoints, assets from CURRENCIES. What the
 				// parser could not read stays as stored (#1909), and the report
 				// shows the stored value beside the planned one.
 				const caps = tomlCapabilities(toml);
-				Object.assign(update, capabilityWrite(caps));
+				const write = tomlReadWrite(
+					caps,
+					{
+						tomlSourceUrl: `https://${domain}/.well-known/stellar.toml`,
+						tomlFetchedAt: new Date().toISOString().slice(0, 10),
+					},
+					hasTomlRead(doc),
+				);
+				Object.assign(update, write);
+				if (!write.tomlFetchedAt) report.push("partial read, not stamped");
 				const seps = caps.seps ?? [];
 				report.push(...capabilityReport(doc, toml));
 

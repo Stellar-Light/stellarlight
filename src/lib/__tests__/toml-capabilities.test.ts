@@ -12,11 +12,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { hasTomlRead, partnerToPublic } from "@/lib/partner-public";
 import {
 	capabilityReport,
 	capabilityWrite,
 	parseStellarToml,
 	tomlCapabilities,
+	tomlReadWrite,
 } from "../../../scripts/lib/stellar-toml";
 
 const ISSUER = "GD5J73EKK5IYL5XS3FBTHHX7CZIYRP7QXDL57XFWGC2WVYWT326OBXRP";
@@ -100,8 +102,55 @@ describe("what the enrichment writes and prints", () => {
 			join(process.cwd(), "scripts/enrich-partners-toml.ts"),
 			"utf8",
 		);
-		expect(script).toContain("Object.assign(update, capabilityWrite(caps));");
+		expect(script).toContain("const write = tomlReadWrite(");
+		expect(script).toContain("hasTomlRead(doc),");
+		expect(script).toContain("Object.assign(update, write);");
+		expect(script).toContain('report.push("partial read, not stamped")');
 		expect(script).toContain("report.push(...capabilityReport(doc, toml));");
 		expect(script).not.toContain("Object.assign(update, caps);");
+	});
+});
+
+describe("a partial read is never stamped as a read", () => {
+	const STAMP = {
+		tomlSourceUrl: "https://x.example/.well-known/stellar.toml",
+		tomlFetchedAt: "2026-11-05",
+	};
+	const unreadServer = parseStellarToml(
+		'TRANSFER_SERVER = """\nhttps://x.example/sep6\n"""\n[DOCUMENTATION]\nORG_NAME="X"\n',
+	);
+	const curated = {
+		slug: "anchor-x",
+		name: "X",
+		partnerType: "anchor",
+		assets: [{ code: "USDC" }],
+		tomlSourceUrl: null,
+		tomlFetchedAt: null,
+	};
+
+	it("a first read that could not read seps writes nothing, so the row still serves unknown", () => {
+		const write = tomlReadWrite(
+			tomlCapabilities(unreadServer),
+			STAMP,
+			hasTomlRead(curated),
+		);
+		expect(write).toEqual({});
+		const row = partnerToPublic({ ...curated, ...write });
+		expect(row.seps).toBeNull();
+		expect(row.assets).toBeNull();
+	});
+
+	it("a complete read stamps the row and writes both fields", () => {
+		const write = tomlReadWrite(
+			caps('TRANSFER_SERVER_SEP0024="https://x.example/sep24"\n'),
+			STAMP,
+			false,
+		);
+		expect(write).toEqual({ ...STAMP, seps: ["sep-24"], assets: [] });
+	});
+
+	it("a row already read refreshes its stamps and keeps the field it could not read", () => {
+		const write = tomlReadWrite(tomlCapabilities(unreadServer), STAMP, true);
+		expect(write).toEqual({ ...STAMP, assets: [] });
 	});
 });

@@ -5277,7 +5277,7 @@ export interface operations {
                         intent?: string | null;
                         /** @description Whether the caller is eligible to submit a listing from here. */
                         canList?: boolean;
-                        /** @description Present and true only when a partner search this turn could not read the directory: matches is absent and the reply did not ground on directory rows. An outage, NOT an empty result: resend later, or browse GET /api/partners. */
+                        /** @description Present and true only when no partner search this turn could read the directory: matches is absent and the reply did not ground on directory rows. An outage, NOT an empty result: resend later, or browse GET /api/partners. */
                         directoryUnavailable?: boolean;
                     };
                 };

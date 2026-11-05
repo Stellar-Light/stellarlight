@@ -53,13 +53,16 @@ vi.mock("@/lib/rate-limit", async (orig) => ({
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 
 /** The partner directory as the routes see it on this request. */
+/** Reads made this test; "first-throws" fails only the first one. */
+let finds = 0;
 let directory:
 	| "ok"
 	| "empty"
 	| "no-handle"
 	| "throws"
 	| "untagged"
-	| "bad-row" = "ok";
+	| "bad-row"
+	| "first-throws" = "ok";
 vi.mock("@/lib/payload-client", () => ({
 	getPayloadSafe: vi.fn(async () =>
 		directory === "no-handle"
@@ -67,6 +70,8 @@ vi.mock("@/lib/payload-client", () => ({
 			: {
 					find: async () => {
 						if (directory === "throws") throw new Error("socket closed");
+						if (directory === "first-throws" && finds++ === 0)
+							throw new Error("socket closed");
 						const docs =
 							directory === "empty"
 								? []
@@ -113,6 +118,7 @@ const KEY = process.env.ANTHROPIC_API_KEY;
 beforeEach(() => {
 	create.mockReset();
 	directory = "ok";
+	finds = 0;
 	process.env.ANTHROPIC_API_KEY = "test-key-not-real";
 });
 afterAll(() => {
@@ -484,5 +490,36 @@ describe("round 3: need cap, scorer faults and match rows", () => {
 		expect(res.status).toBe(500);
 		expect(res.body.directoryUnavailable).toBeUndefined();
 		expectDocumented("/api/partners/assistant", res);
+	});
+});
+
+describe("round 4: a failed read followed by a good one", () => {
+	it("assistant: directoryUnavailable only when no search this turn read the directory", async () => {
+		directory = "first-throws";
+		const search = (id: string) => ({
+			stop_reason: "tool_use",
+			content: [
+				{
+					type: "tool_use",
+					id,
+					name: "search_partners",
+					input: { need: "MXN off-ramp" },
+				},
+			],
+		});
+		create
+			.mockResolvedValueOnce(search("t1"))
+			.mockResolvedValueOnce(search("t2"))
+			.mockResolvedValueOnce({
+				stop_reason: "end_turn",
+				content: [{ type: "text", text: "Here is a fit." }],
+			});
+		const res = await post(
+			"/api/partners/assistant",
+			ROUTES["/api/partners/assistant"],
+		);
+		expect(res.status).toBe(200);
+		expect(Array.isArray(res.body.matches)).toBe(true);
+		expect(res.body.directoryUnavailable).toBeUndefined();
 	});
 });

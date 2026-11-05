@@ -5730,7 +5730,7 @@ export const spec: OpenAPISpec = {
 										directoryUnavailable: {
 											type: "boolean",
 											description:
-												"Present and true only when a partner search this turn could not read the directory: matches is absent and the reply did not ground on directory rows. An outage, NOT an empty result: resend later, or browse GET /api/partners.",
+												"Present and true only when no partner search this turn could read the directory: matches is absent and the reply did not ground on directory rows. An outage, NOT an empty result: resend later, or browse GET /api/partners.",
 										},
 									},
 								},
