@@ -413,11 +413,46 @@
 		"reason": "latent: approved community skills (43 on 2026-11-04)"
 	},
 	{
+		"file": "src/components/blog-highlights.tsx",
+		"collection": "blog",
+		"limit": 6,
+		"count": 2,
+		"reason": "display: the six newest posts, sorted in the database"
+	},
+	{
+		"file": "src/components/community-picks-section.tsx",
+		"collection": "projects",
+		"limit": 20,
+		"count": 1,
+		"reason": "display: the 20 most recently verified picks, sorted in the database"
+	},
+	{
+		"file": "src/components/emerging-apps-section.tsx",
+		"collection": "projects",
+		"limit": 6,
+		"count": 1,
+		"reason": "display: the six newest projects, sorted in the database"
+	},
+	{
+		"file": "src/components/featured-builders-section.tsx",
+		"collection": "builders",
+		"limit": 6,
+		"count": 1,
+		"reason": "display: six public profiles for a section no page renders"
+	},
+	{
 		"file": "src/lib/awards/record.ts",
 		"collection": "award-ballots",
 		"limit": 200,
 		"count": 1,
 		"reason": "page size of a loop that reads every ballot until hasNextPage is false"
+	},
+	{
+		"file": "src/lib/awards/round.ts",
+		"collection": "<unresolved collection>",
+		"limit": 200,
+		"count": 1,
+		"reason": "page size of a loop that reads every nominee and voter of a round until hasNextPage is false"
 	},
 	{
 		"file": "src/lib/contracts-registry.ts",

@@ -35,6 +35,13 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
+			"The home page's trending projects and the sitemap read every row. Trending ranked the newest 300 of 905 active projects, and the sitemap stopped each collection at 5,000 rows, which would drop pages from search engines without a word.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
 			"/builders/<login> shows that login's profile or answers not found. The lookup matched part of a login and fell back to its first hit, so /builders/bob showed and titled bobby's profile; a login now matches whole, in any case.",
 	},
 	{

@@ -1,21 +1,25 @@
 /**
  * A fixed `limit:` truncates in silence: GET /api/builders read 300 of 401
  * profiles and still said "full set" (#1915). This guard finds every Payload
- * find in src/app and src/lib with a literal numeric limit of 2 or more and
+ * find in src/app, src/lib, src/components and src/jobs (every folder that
+ * reads through Payload) with a literal numeric limit of 2 or more and
  * fails unless the call site is listed in fixed-limit-allowed.json with a
  * one-line reason. A read that must be whole goes through findWholeSet
  * (src/lib/whole-set.ts) instead, which says when a set was cut.
  *
  * What it sees: a call `<anything>.find({ ... })` whose first argument is an
  * object literal (also through `as`, `satisfies` and parentheses) holding a
- * `collection` and a `limit` written as a number.
+ * `collection` and a `limit` written as a number. A shorthand `collection`
+ * resolves when the nearest declaration of its name is a const holding a
+ * string literal; any other binding (a parameter, a computed value) is listed
+ * as `<unresolved NAME>` rather than skipped.
  *
  * What it cannot see: a limit held in a name or computed (`limit: PAGE`,
  * `limit: q ? 600 : 200`); an argument object built elsewhere and passed by
  * name; a spread that supplies the collection; a find called by another
  * name; raw driver reads through payload.db; array caps such as
  * `.slice(0, N)`; `limit: 1`, left out on purpose (one row by key); and any
- * file outside src/app and src/lib.
+ * file outside those four folders.
  *
  * An entry keys on file, collection and limit with a count, so a second find
  * with the same three in that file still fails until it is listed.
@@ -34,6 +38,31 @@ const unwrap = (e: ts.Expression): ts.Expression =>
 	ts.isParenthesizedExpression(e)
 		? unwrap(e.expression)
 		: e;
+
+/** The string a shorthand `name` holds at `at`: the nearest const of that
+ * name bound to a string literal, or null when the nearest binding is a
+ * parameter or anything else. */
+function literalConst(at: ts.Node, name: string): string | null {
+	for (let n: ts.Node | undefined = at.parent; n; n = n.parent) {
+		if (
+			ts.isFunctionLike(n) &&
+			n.parameters.some((p) => ts.isIdentifier(p.name) && p.name.text === name)
+		)
+			return null;
+		if (!ts.isBlock(n) && !ts.isSourceFile(n)) continue;
+		for (const st of n.statements) {
+			if (!ts.isVariableStatement(st)) continue;
+			for (const d of st.declarationList.declarations)
+				if (ts.isIdentifier(d.name) && d.name.text === name)
+					return st.declarationList.flags & ts.NodeFlags.Const &&
+						d.initializer &&
+						ts.isStringLiteralLike(d.initializer)
+						? d.initializer.text
+						: null;
+		}
+	}
+	return null;
+}
 
 /** Payload finds with a literal numeric limit of 2 or more, in one file. */
 function cappedFinds(fileName: string, text: string): Site[] {
@@ -56,20 +85,30 @@ function cappedFinds(fileName: string, text: string): Site[] {
 			if (ts.isObjectLiteralExpression(arg)) {
 				const prop = (key: string) =>
 					arg.properties.find(
-						(p): p is ts.PropertyAssignment =>
-							ts.isPropertyAssignment(p) &&
+						(p): p is ts.PropertyAssignment | ts.ShorthandPropertyAssignment =>
+							(ts.isPropertyAssignment(p) ||
+								ts.isShorthandPropertyAssignment(p)) &&
 							(ts.isIdentifier(p.name) || ts.isStringLiteral(p.name)) &&
 							p.name.text === key,
 					);
 				const collection = prop("collection");
 				const limit = prop("limit");
-				if (collection && limit && ts.isNumericLiteral(limit.initializer)) {
+				if (
+					collection &&
+					limit &&
+					ts.isPropertyAssignment(limit) &&
+					ts.isNumericLiteral(limit.initializer)
+				) {
 					const value = Number(limit.initializer.text.replace(/_/g, ""));
+					const named = ts.isShorthandPropertyAssignment(collection)
+						? (literalConst(collection, collection.name.text) ??
+							`<unresolved ${collection.name.text}>`)
+						: ts.isStringLiteral(collection.initializer)
+							? collection.initializer.text
+							: collection.initializer.getText(src);
 					if (value >= 2)
 						out.push({
-							collection: ts.isStringLiteral(collection.initializer)
-								? collection.initializer.text
-								: collection.initializer.getText(src),
+							collection: named,
 							limit: value,
 							line:
 								src.getLineAndCharacterOfPosition(limit.getStart()).line + 1,
@@ -98,6 +137,20 @@ describe("cappedFinds", () => {
 		).toEqual([
 			{ collection: "repos", limit: 300 },
 			{ collection: "audits", limit: 10000 },
+		]);
+	});
+	it("sees a shorthand collection: a literal const resolves, a parameter is listed unresolved", () => {
+		expect(
+			sites(`
+				const collection = "repos";
+				payload.find({ collection, limit: 300 });
+				function pull(collection: string) {
+					return payload.find({ collection, limit: 5000 });
+				}
+			`),
+		).toEqual([
+			{ collection: "repos", limit: 300 },
+			{ collection: "<unresolved collection>", limit: 5000 },
 		]);
 	});
 	it("leaves out limit 0 and 1, computed limits and non-Payload finds", () => {
@@ -141,7 +194,7 @@ const key = (e: { file: string; collection: string; limit: number }) =>
 
 describe("every Payload find with a fixed limit is listed with a reason", () => {
 	const found = new Map<string, { count: number; lines: number[] }>();
-	for (const dir of ["src/app", "src/lib"])
+	for (const dir of ["src/app", "src/lib", "src/components", "src/jobs"])
 		for (const path of sourceFiles(join(ROOT, dir))) {
 			const file = relative(ROOT, path).split(sep).join("/");
 			for (const s of cappedFinds(path, readFileSync(path, "utf8"))) {

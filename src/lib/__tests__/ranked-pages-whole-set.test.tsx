@@ -28,6 +28,7 @@ const repos: Doc[] = projects.map((p, i) => ({
 	id: `r${i}`,
 	projectSlug: p.slug,
 	stars: i === 0 ? 100_000 : i,
+	repoScore: i === 0 ? 999 : i,
 	openIssues: 0,
 	lastCommitAt: "2026-10-01T00:00:00Z",
 }));
@@ -43,6 +44,7 @@ const matches = (d: Doc, w: Where | undefined): boolean =>
 		if ("exists" in op)
 			return (d[k] != null && d[k] !== "") === Boolean(op.exists);
 		if ("equals" in op) return v === String(op.equals);
+		if ("not_equals" in op) return v !== String(op.not_equals);
 		if ("in" in op) return (op.in as unknown[]).map(String).includes(v);
 		if ("greater_than" in op) return v > String(op.greater_than);
 		if ("less_than" in op) return v < String(op.less_than);
@@ -89,6 +91,14 @@ vi.mock("@/components/leaderboard-filters", () => ({
 }));
 
 describe("pages that rank active projects read every one", () => {
+	it("the home page's trending section ranks the oldest active project too", async () => {
+		const { default: TrendingProjectsSection } = await import(
+			"@/components/trending-projects-section"
+		);
+		const html = renderToStaticMarkup(await TrendingProjectsSection());
+		expect(html).toContain('href="/project/p0"');
+	});
+
 	it("/leaderboard?sort=stars ranks the oldest active project too", async () => {
 		const { default: LeaderboardPage } = await import(
 			"@/app/(frontend)/leaderboard/page"
