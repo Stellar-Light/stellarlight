@@ -283,6 +283,41 @@ describe("the University of Waterloo Blockchain Innovation Challenge", () => {
 	});
 });
 
+// Review: the Waterloo cover sat on a host next.config.mjs does not allow,
+// so <Image> on the homepage and /hackathons served it blank.
+describe("a curated event's cover image", () => {
+	/** next.config.mjs's images.remotePatterns, read as written. */
+	const patterns = [
+		...readFileSync(join(process.cwd(), "next.config.mjs"), "utf8").matchAll(
+			/protocol:\s*"(https?)",\s*hostname:\s*"([^"]+)"(?:,\s*pathname:\s*"([^"]+)")?/g,
+		),
+	].map(([, protocol, hostname, pathname]) => ({
+		protocol,
+		hostname,
+		pathname,
+	}));
+	const allowed = (src: string) => {
+		const u = new URL(src);
+		return patterns.some(
+			(p) =>
+				`${p.protocol}:` === u.protocol &&
+				p.hostname === u.hostname &&
+				(!p.pathname ||
+					(p.pathname.endsWith("/**")
+						? u.pathname.startsWith(p.pathname.slice(0, -2))
+						: u.pathname === p.pathname)),
+		);
+	};
+
+	it("is on a host next.config.mjs allows, for every curated event", () => {
+		expect(patterns.length).toBeGreaterThan(3);
+		const blocked = CURATED_HACKATHONS.filter(
+			(h) => h.image_url && !allowed(h.image_url),
+		).map((h) => `${h.uname}: ${h.image_url}`);
+		expect(blocked).toEqual([]);
+	});
+});
+
 // Review: every curated event's page said "DoraHacks-sourced: live
 // submission feed unavailable", and served submissions [] for a roster no
 // one holds.
