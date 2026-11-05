@@ -1597,7 +1597,7 @@ export interface components {
                     };
                     /** @description Curated events only: the page the judging sentence, or its absence, was checked against. */
                     source?: string;
-                    /** @description Present only when judgingCriteria is null: that the page publishes no judging criteria, with the page and the day it was read or checked. A DoraHacks page's note rests on its sections as read (a heading or a label line whose words name judging, scoring or criteria, in English, Spanish or Portuguese). */
+                    /** @description Present only when judgingCriteria is null: that the page publishes no judging criteria, with the page and the day it was read or checked. A DoraHacks page's note rests on its sections as read now (a heading, a line of its own or a bold label naming judging, scoring or criteria, in English, Spanish or Portuguese; a list of judges is not criteria). */
                     judgingNote?: string;
                     /**
                      * Format: date
@@ -1609,7 +1609,7 @@ export interface components {
                     submissionQuestions?: string[];
                     /** @description The page's submission-requirements section, in markdown. null = the page was read (readAt) and has no requirements section: the organizer published none there. */
                     requirements?: string | null;
-                    /** @description The page's judging section, in markdown: under a heading, or a line of its own, that names judging, scoring or criteria (Spanish and Portuguese too). null = the page was read (readAt) or checked (checkedOn) and has no judging section, as judgingNote says: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all. */
+                    /** @description The page's judging section, in markdown, read from the stored page by the current reader: under the event's own heading that names judging, scoring or criteria (Spanish and Portuguese too), a line of its own or a bold label; sections that sit under different tracks come each under its track's name, and a heading that names both sections serves its criteria part. null = the page was read (readAt) or checked (checkedOn) and has no judging section, as judgingNote says: the organizer published no judging criteria there. It is not an unread page; an unread page has no `rules` at all. */
                     judgingCriteria?: string | null;
                     /** Format: date-time */
                     readAt?: string;

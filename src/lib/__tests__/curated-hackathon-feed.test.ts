@@ -644,6 +644,46 @@ describe("judging criteria, or a dated note that the page publishes none", () =>
 		).toEqual([]);
 	});
 
+	// Review round 3: a stored section from an older reading (one combined
+	// section under both, or one track's as the event's) outlived the reader
+	// that fixed it until the next sync.
+	it("serves the stored page as the current reader reads it, over a section stored by an older one", async () => {
+		const combined = [
+			"## Entregables y Criterios de Evaluación",
+			"",
+			"- **Requisitos:**",
+			"    - Video pitch.",
+			"- **Criterios de evaluación:**",
+			"    - Uso de Stellar.",
+		].join("\n");
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([DORA]);
+		const { getHackathonDetail } = await import("@/lib/hackathon-detail");
+		const stale = {
+			find: async (args: { collection: string }) => ({
+				docs:
+					args.collection === "hackathon-events"
+						? [
+								{
+									id: "e1",
+									slug: DORA.uname,
+									title: DORA.title,
+									description: combined,
+									// What the reader before this one stored.
+									judgingSection: combined.split("\n").slice(2).join("\n"),
+									requirementsSection: null,
+									detailReadAt: "2026-11-04T12:35:11.060Z",
+								},
+							]
+						: [],
+			}),
+		};
+		const r = await getHackathonDetail(stale as never, DORA.uname);
+		if (!r.found) throw new Error("not found");
+		const rules = JSON.parse(JSON.stringify(r.body)).hackathon.rules;
+		expect(rules.judgingCriteria).toBe("- Uso de Stellar.");
+		expect(rules.requirements).toBe("- Video pitch.");
+	});
+
 	it("reads criteria a stored page writes as a label line, before the next sync stores them", async () => {
 		const body = await served(
 			"Critérios de Avaliação\n\nInovação e Originalidade, Qualidade Técnica\n\nEntregáveis\n\n- Repositório Git",

@@ -17,7 +17,9 @@ const storedEvent = {
 	id: "e1",
 	slug: "stellar-hacks-zk",
 	title: "Stellar Hacks: Real-World ZK",
-	description: "# Brief\nBuild with ZK.\n\n# Prizes\n- 1st Place: $5,000",
+	// The sync stores the sections it read off this same page.
+	description:
+		"# Brief\nBuild with ZK.\n\n# Submission Requirements\n1. An open-source repo.\n\n# Prizes\n- 1st Place: $5,000",
 	repoRequired: true,
 	videoRequired: true,
 	submissionQuestions: ["Is your repo public?"],

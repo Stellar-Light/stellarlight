@@ -303,20 +303,22 @@ async function curatedWinnersFor(
 	}));
 }
 
-/** A DoraHacks event's rules from its stored page: the sections the sync
- * stored, else the same reading of the stored page (a section the reader
- * learned to find after the page was stored, until the next sync stores
- * it), and a dated note when the page has no judging section. */
+/** A DoraHacks event's rules from its stored page, read by the current
+ * reader: the sections the next sync stores, never one an older reading
+ * stored (a combined section under both, one track's as the event's). The
+ * stored sections only when the page text is missing. A dated note when
+ * the page has no judging section. */
 function storedRules(event: HackathonEvent, readAt: string) {
-	const judgingCriteria =
-		event.judgingSection ?? markdownSection(event.description, JUDGING_HEADING);
+	const read = (heading: RegExp, stored?: string | null) =>
+		event.description
+			? markdownSection(event.description, heading)
+			: (stored ?? null);
+	const judgingCriteria = read(JUDGING_HEADING, event.judgingSection);
 	return {
 		repoRequired: !!event.repoRequired,
 		videoRequired: !!event.videoRequired,
 		submissionQuestions: event.submissionQuestions ?? [],
-		requirements:
-			event.requirementsSection ??
-			markdownSection(event.description, REQUIREMENTS_HEADING),
+		requirements: read(REQUIREMENTS_HEADING, event.requirementsSection),
 		judgingCriteria,
 		...(judgingCriteria
 			? {}
