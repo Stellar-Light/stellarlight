@@ -161,6 +161,49 @@ limit and was split in three. Not yet reproduced except where noted.
   event is over; HackMeridian 2026 results are not published anywhere we
   could read.
 
+## Shipped 2026-11-01
+
+Each fix was reproduced in a test first, reviewed on another model in a
+clone with no remote, and re-checked by the same reviewer. Live checks ran
+after each deploy.
+
+- G1, all confirmed leads, #1894 (spec 1.9.114). Live: stellar/stellar-core
+  lists `tree` in `review.repo.unread` and keeps every count.
+- G4a, #1895 (spec 1.9.115): Date objects, one-counter quiet, the NaN
+  window, the negative TVL, a breakdown with no Stellar figure and $0 over
+  a slug missing upstream. Moot by evidence: the dropped slug (it has no
+  Stellar TVL) and the parent family (`/protocols` has no parent rows).
+  enrich-tvl's map gains soroswap-amm, phoenix and normal; the figures move
+  on its next run. Live: Aquarius reads `clear` on a meaning query.
+  Disclosed: a renamed slug beside a live one (only Blend maps several, all
+  present); one sparse counter restarts a quiet run; a breakdown holding
+  only Stellar-staking reads as no figure.
+- G4b, three of eight, #1898 (spec 1.9.116): after an alias that names the
+  CLI, the command is read against stellar-cli's own commands tree, past
+  the first two words and a stopword, stemmed. Dev set 8, 10, 13 to 10, 12,
+  14 (ranks 1, 3, 10); no case down in the six frozen sets; the priority
+  battery's locate cases do not move (hm26-cc-06 names no CLI alias). Live:
+  d13 from outside the top 10 to rank 1, d14 from 5 to 1. Queued: `build`
+  continues a command; a one-word typed identifier; the ethereum synonym;
+  the bare quickstart alias; a page past the last.
+- G4c, #1896: semicolon-less numeric entities, case-sensitive named
+  entities, the escaped backslash, `.test.mts` and `.test.json`; the check's
+  first test. Main's CI passes under it. Queued: blog report markdown
+  (owner review); decoded entity dashes in research titles.
+- G3, three lows, #1897: siteUrls read as JSON (an unreadable record is
+  could-not-check), the DoraHacks host whole, accents folded in name keys.
+  A largest-figure award rule was reverted in review. The first three syncs
+  after the merge (11-02 to 11-04) read 1,429 builds and changed no stored
+  link. Queued: a pool title with no dollar figure; only the first award
+  stored; a kept link not copied to other events; the public log prints
+  titles.
+
+Raven absorbed Scout 1.9.116 on 11-03 with the four newer operations
+excluded (stellar-raven #347). Its seven poor-fit captures, the reason it
+keeps them out, reproduce on our gate replica, which otherwise accepts
+1.9.116. Its HackMeridian findings (#1900 to #1905) are queued in
+`improvements/TODO.md`.
+
 ## Process notes
 
 - Grok's balance ran out mid-run (402) on two reviews; the fallback was
