@@ -1,17 +1,18 @@
-Base origin/main f3b19008 against the branch at 89585dab (after the review fixes), over the captured corpus and the 189 frozen queries.
-apiVersion during capture: [{"at":"2026-11-04T21:54:46.591Z","apiVersion":"1.9.116"},{"at":"2026-11-04T21:59:24.967Z","apiVersion":"1.9.116"},{"at":"2026-11-04T22:05:37.046Z","apiVersion":"1.9.116"},{"at":"2026-11-04T23:01:21Z","apiVersion":"1.9.116","note":"extra capture start"},{"at":"2026-11-04T23:01:21Z","apiVersion":"1.9.116","note":"extra capture end"}]
-corpus rows: 13810; live pages: 189
-fidelity: 189/189 base first pages identical to live (rows, order, scores, matchMode, total)
+Base origin/main f3b19008 against the branch at 10e7f4ac, both replayed with the clock pinned to the capture time (pin-clock.mjs, PIN_NOW=2026-11-04T22:00:00Z), over the captured corpus and the 206 frozen queries.
+apiVersion during capture: [{"at":"2026-11-04T21:54:46.591Z","apiVersion":"1.9.116"},{"at":"2026-11-04T21:59:24.967Z","apiVersion":"1.9.116"},{"at":"2026-11-04T22:05:37.046Z","apiVersion":"1.9.116"},{"at":"2026-11-04T23:01:21Z","apiVersion":"1.9.116","note":"extra capture start"},{"at":"2026-11-04T23:01:21Z","apiVersion":"1.9.116","note":"extra capture end"},{"at":"2026-11-05T13:25:41Z","apiVersion":"1.9.116","note":"second extra capture start"},{"at":"2026-11-05T13:25:41Z","apiVersion":"1.9.116","note":"second extra capture end"}]
+corpus rows: 13810; live pages: 206
+fidelity: 206/206 base first pages identical to live (rows, order, scores, matchMode, total)
 
 Bars (frozen-set.json)
-  HOLDS  acceptance: expected repo first on the branch: 16/16
+  HOLDS  acceptance: expected repo first on the branch: 20/20
   HOLDS  controls: expected repo first on base and branch: 8/8
-  HOLDS  unchanged: same first page, matchMode and total: 15/15
-  HOLDS  exactName: the repo named by the query first on the branch: 2/2
-  HOLDS  no expected repo moves down: none moved down
-  HOLDS  every change has a mechanism of the change: 15/15
+  HOLDS  unchanged: same first page, matchMode and total: 16/16
+  HOLDS  canonicalOverName: the canonical repo first on the branch: 5/5
+  HOLDS  fullPath: the named repo first on base and branch: 1/1
+  REVIEW  no expected repo moves down: [exactName] exn-01 (q="stellar-lab"): 1 -> 2
+  HOLDS  every change has a mechanism of the change: 20/20
 
-Queries: 189; identical (first page and whole ranking): 174; changed: 15
+Queries: 206; identical (first page and whole ranking): 186; changed: 20
 
 Expected-repo ranks, base -> branch (every query that names a repo)
     [dev] dev-01: 35 -> 35
@@ -134,14 +135,25 @@ Expected-repo ranks, base -> branch (every query that names a repo)
     [naturalLanguage] nl-03: absent -> absent
   + [acceptance] acc-15: 11 -> 1
     [acceptance] acc-16: 1 -> 1
-    [exactName] exn-01: 1 -> 1
-  + [exactName] exn-02: absent -> 1
+  - [exactName] exn-01: 1 -> 2
+  + [exactName] exn-02: absent -> 2
+  + [acceptance] acc-17: 16 -> 1
+  + [acceptance] acc-18: 16 -> 1
+  + [acceptance] acc-19: 17 -> 1
+  + [acceptance] acc-20: 208 -> 1
+    [canonicalOverName] can-01: 1 -> 1
+    [canonicalOverName] can-02: 1 -> 1
+    [canonicalOverName] can-03: 1 -> 1
+  + [canonicalOverName] can-04: 18 -> 1
+  + [canonicalOverName] can-05: 16 -> 1
+    [fullPath] fp-01: 1 -> 1
+    [explain] exp-01: 394 -> 394
+    [explain] exp-02: absent -> absent
+    [explain] exp-03: absent -> absent
+    [explain] exp-04: 8 -> 8
+    [explain] exp-06: 1 -> 1
 
 Every changed query
-  [keyword] sep-10
-    mechanism: exact name above the canonical float (apay-io/sep10)
-    first page: apay-io/sep10 2->1, stellar/stellar-protocol 1->2
-    whole ranking: 190 -> 190 rows, changed
   [acceptance] acc-01 (q="scaffold stellar")
     mechanism: canonical entry (stellar-scaffold/cli)
     expected repo rank: 16 -> 1
@@ -203,12 +215,42 @@ Every changed query
     first page: zhangdav/soroban-examples new->2, CoinFabrik/scout-soroban-examples new->3, fxjrin/stellar-contracts-kit 2->4, WebSoroban/payloop 3->5, stellar-scaffold/ui 4->6, stellar-expert/contract-wasm-interface-parser 5->7, thisyearnofear/trustfall 6->8, stellar/basic-payment-app 7->9, fazzatti/colibri 8->10, axelarnetwork/axelar-amplifier-stellar 9->11, OpenZeppelin/openzeppelin-relayer 10->12, NibrasD/Stellar-VRF 11->13, danielfsha/Card-RPG 12->14, johneliud/school-management 13->15, Poorva-M/Xpense-Web3 14->16, TrustLine-id/stellar-sdk 15->17, kunaldrall29/policywright 16->18, reflector-network/reflector-contract 17->19, stellar/passkey-kit 18->20, stellar/rs-soroban-env 19->off page, stellar/rs-soroban-sdk 20->off page
     whole ranking: 591 -> 595 rows, changed
   [exactName] exn-01 (q="stellar-lab")
-    mechanism: canonical entry (stellar/laboratory); exact name above the canonical float (suryahfz/stellar-lab)
-    expected repo rank: 1 -> 1
-    first page: stellar/laboratory 18->2, StellarDevHub/Web3-Student-Lab 2->3, CaBsCrypto/stellar-agent-merchant-lab 3->4, Nectar-Network/nectar 4->5, ThaisFReis/karn-protocol 5->6, Alouzious/StellarIDE 6->7, Neko-Protocol/neko-web 7->8, Karn-lat/karn-protocol 8->9, hatdong359-star/lab_kit_lending 9->10, Savitura/Savitools 10->11, RevoraOrg/Revora-Frontend 11->12, chinhnghia812/lab_kit_lending 12->13, aldyneronqs/MediTrust 13->14, adletgamer/Axiomer-dashboardx 14->15, VietNg25/dairy_provenance 15->16, phohuyhieu6/lab_kit_lending 16->17, SorobanCrashLab/soroban-crashlab 17->18
+    mechanism: canonical entry (stellar/laboratory)
+    expected repo rank: 1 -> 2
+    first page: stellar/laboratory 18->1, suryahfz/stellar-lab 1->2, StellarDevHub/Web3-Student-Lab 2->3, CaBsCrypto/stellar-agent-merchant-lab 3->4, Nectar-Network/nectar 4->5, ThaisFReis/karn-protocol 5->6, Alouzious/StellarIDE 6->7, Neko-Protocol/neko-web 7->8, Karn-lat/karn-protocol 8->9, hatdong359-star/lab_kit_lending 9->10, Savitura/Savitools 10->11, RevoraOrg/Revora-Frontend 11->12, chinhnghia812/lab_kit_lending 12->13, aldyneronqs/MediTrust 13->14, adletgamer/Axiomer-dashboardx 14->15, VietNg25/dairy_provenance 15->16, phohuyhieu6/lab_kit_lending 16->17, SorobanCrashLab/soroban-crashlab 17->18
     whole ranking: 46 -> 46 rows, changed
   [exactName] exn-02 (q="stellar_lab")
-    mechanism: canonical entry (stellar/laboratory); exact name above the canonical float (suryahfz/stellar-lab)
-    expected repo rank: absent -> 1
-    first page: suryahfz/stellar-lab new->1, stellar/laboratory 16->2, StellarDevHub/Web3-Student-Lab 1->3, CaBsCrypto/stellar-agent-merchant-lab 2->4, Nectar-Network/nectar 3->5, ThaisFReis/karn-protocol 4->6, Alouzious/StellarIDE 5->7, Neko-Protocol/neko-web 6->8, Karn-lat/karn-protocol 7->9, hatdong359-star/lab_kit_lending 8->10, Savitura/Savitools 9->11, RevoraOrg/Revora-Frontend 10->12, chinhnghia812/lab_kit_lending 11->13, aldyneronqs/MediTrust 12->14, adletgamer/Axiomer-dashboardx 13->15, VietNg25/dairy_provenance 14->16, phohuyhieu6/lab_kit_lending 15->17, eq-lab/slender-ui 17->18, SorobanCrashLab/soroban-crashlab 18->19, Toolbox-Lab/Grat 19->20, sambha-lab/sambha 20->off page
+    mechanism: canonical entry (stellar/laboratory)
+    expected repo rank: absent -> 2
+    first page: stellar/laboratory 16->1, suryahfz/stellar-lab new->2, StellarDevHub/Web3-Student-Lab 1->3, CaBsCrypto/stellar-agent-merchant-lab 2->4, Nectar-Network/nectar 3->5, ThaisFReis/karn-protocol 4->6, Alouzious/StellarIDE 5->7, Neko-Protocol/neko-web 6->8, Karn-lat/karn-protocol 7->9, hatdong359-star/lab_kit_lending 8->10, Savitura/Savitools 9->11, RevoraOrg/Revora-Frontend 10->12, chinhnghia812/lab_kit_lending 11->13, aldyneronqs/MediTrust 12->14, adletgamer/Axiomer-dashboardx 13->15, VietNg25/dairy_provenance 14->16, phohuyhieu6/lab_kit_lending 15->17, eq-lab/slender-ui 17->18, SorobanCrashLab/soroban-crashlab 18->19, Toolbox-Lab/Grat 19->20, sambha-lab/sambha 20->off page
+    whole ranking: 44 -> 46 rows, changed
+  [acceptance] acc-17 (q="scaffold stellar repo")
+    mechanism: canonical entry (stellar-scaffold/cli)
+    expected repo rank: 16 -> 1
+    first page: stellar-scaffold/cli 16->1, Gbangbolaoluwagbemiga/SecureFlow-scaffold 1->2, danielgorgonha/hackthon-scaffold-stellar 2->3, masch/stellar-scaffold-front-hackaton 3->4, dropsland-app/dropsland-scaffold 4->5, stevmolina/token-scaffold 5->6, anataliocs/validate-scaffold 6->7, ScaffoldRust/Main-Scaffold-Rust 7->8, stellar-registry/cli 8->9, JulioMCruz/Stellar-mcp 9->10, rohitjadhav07/Nexar 10->11, stellar-scaffold/ui 11->12, Jistriane/ZKID 12->13, yripper/luckyledgers 13->14, Kalchaqui/Loanet-Stellar 14->15, ScaffoldRust/SRust-Basic-Stellar-nextjs-pnpm 15->16
+    whole ranking: 25 -> 25 rows, changed
+  [acceptance] acc-18 (q="scaffold stellar github")
+    mechanism: canonical entry (stellar-scaffold/cli)
+    expected repo rank: 16 -> 1
+    first page: stellar-scaffold/cli 16->1, Gbangbolaoluwagbemiga/SecureFlow-scaffold 1->2, danielgorgonha/hackthon-scaffold-stellar 2->3, masch/stellar-scaffold-front-hackaton 3->4, dropsland-app/dropsland-scaffold 4->5, stevmolina/token-scaffold 5->6, anataliocs/validate-scaffold 6->7, ScaffoldRust/Main-Scaffold-Rust 7->8, stellar-registry/cli 8->9, JulioMCruz/Stellar-mcp 9->10, rohitjadhav07/Nexar 10->11, stellar-scaffold/ui 11->12, Jistriane/ZKID 12->13, yripper/luckyledgers 13->14, Kalchaqui/Loanet-Stellar 14->15, ScaffoldRust/SRust-Basic-Stellar-nextjs-pnpm 15->16
+    whole ranking: 25 -> 25 rows, changed
+  [acceptance] acc-19 (q="stellar lab repo")
+    mechanism: canonical entry (stellar/laboratory)
+    expected repo rank: 17 -> 1
+    first page: stellar/laboratory 17->1, StellarDevHub/Web3-Student-Lab 1->2, CaBsCrypto/stellar-agent-merchant-lab 2->3, Nectar-Network/nectar 3->4, ThaisFReis/karn-protocol 4->5, Alouzious/StellarIDE 5->6, Neko-Protocol/neko-web 6->7, Karn-lat/karn-protocol 7->8, hatdong359-star/lab_kit_lending 8->9, Savitura/Savitools 9->10, RevoraOrg/Revora-Frontend 10->11, chinhnghia812/lab_kit_lending 11->12, aldyneronqs/MediTrust 12->13, adletgamer/Axiomer-dashboardx 13->14, VietNg25/dairy_provenance 14->15, phohuyhieu6/lab_kit_lending 15->16, SorobanCrashLab/soroban-crashlab 16->17
+    whole ranking: 44 -> 44 rows, changed
+  [acceptance] acc-20 (q="stellar lab source code")
+    mechanism: canonical entry (stellar/laboratory)
+    expected repo rank: 208 -> 1
+    first page: stellar/laboratory new->1, Tellus-Cooperative/stellar-paylink 1->2, walnuthq/stellar-source-code-verification 2->3, mergepay/mergepay-api 3->4, LumenWipe/lumenwipe 4->5, StellarDevHub/Web3-Student-Lab 5->6, StellarViewOrg/stellarview-explorer 6->7, Goldii-locks/escrow-backend 7->8, mpprouter/rozo-mpprouter 8->9, reflector-network/reflector-website 9->10, llinsss/payCrypt_v2 10->11, stellar/smart-account-kit 11->12, Stellar-Light/stellarlight 12->13, Toolbox-Lab/Grat 13->14, Nanle-code/StarForge 14->15, AquariusDeFi/dao-aquarius-soroban 15->16, CoinFabrik/scout-audit 16->17, kindfi-org/kindfi 17->18, SorobanCrashLab/soroban-crashlab 18->19, Phoenix-Protocol-Group/phoenix-contracts 19->20, official-jumpa/jumpa 20->off page
+    whole ranking: 294 -> 294 rows, changed
+  [canonicalOverName] can-04 (q="stellar-lab")
+    mechanism: canonical entry (stellar/laboratory)
+    expected repo rank: 18 -> 1
+    first page: stellar/laboratory 18->1, suryahfz/stellar-lab 1->2, StellarDevHub/Web3-Student-Lab 2->3, CaBsCrypto/stellar-agent-merchant-lab 3->4, Nectar-Network/nectar 4->5, ThaisFReis/karn-protocol 5->6, Alouzious/StellarIDE 6->7, Neko-Protocol/neko-web 7->8, Karn-lat/karn-protocol 8->9, hatdong359-star/lab_kit_lending 9->10, Savitura/Savitools 10->11, RevoraOrg/Revora-Frontend 11->12, chinhnghia812/lab_kit_lending 12->13, aldyneronqs/MediTrust 13->14, adletgamer/Axiomer-dashboardx 14->15, VietNg25/dairy_provenance 15->16, phohuyhieu6/lab_kit_lending 16->17, SorobanCrashLab/soroban-crashlab 17->18
+    whole ranking: 46 -> 46 rows, changed
+  [canonicalOverName] can-05 (q="stellar_lab")
+    mechanism: canonical entry (stellar/laboratory)
+    expected repo rank: 16 -> 1
+    first page: stellar/laboratory 16->1, suryahfz/stellar-lab new->2, StellarDevHub/Web3-Student-Lab 1->3, CaBsCrypto/stellar-agent-merchant-lab 2->4, Nectar-Network/nectar 3->5, ThaisFReis/karn-protocol 4->6, Alouzious/StellarIDE 5->7, Neko-Protocol/neko-web 6->8, Karn-lat/karn-protocol 7->9, hatdong359-star/lab_kit_lending 8->10, Savitura/Savitools 9->11, RevoraOrg/Revora-Frontend 10->12, chinhnghia812/lab_kit_lending 11->13, aldyneronqs/MediTrust 12->14, adletgamer/Axiomer-dashboardx 13->15, VietNg25/dairy_provenance 14->16, phohuyhieu6/lab_kit_lending 15->17, eq-lab/slender-ui 17->18, SorobanCrashLab/soroban-crashlab 18->19, Toolbox-Lab/Grat 19->20, sambha-lab/sambha 20->off page
     whole ranking: 44 -> 46 rows, changed
