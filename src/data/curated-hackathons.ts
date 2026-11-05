@@ -304,4 +304,6 @@ export const CURATED_WINNERS_NOTES: Record<string, string> = {
 		"Not announced upstream: no page we could read names this residency's winners (checked 2026-10-22). This is not a claim that no one won.",
 	"apac-stellar-hackathon-2026":
 		"Winners published for one track only: Rise In's builder spotlight (2026-09-01) names Olio 1st in Payment & Consumer Application. No page we could read names the other tracks' winners (checked 2026-10-22), so they are not served; this is not a claim that those tracks had none.",
+	"hackmeridian-2026":
+		"Not announced upstream: no page we could read names this hackathon's winners (hackmeridian.com, meridian.stellar.org/hackmeridian and its Winners Circle session page, checked 2026-10-31). This is not a claim that no one won.",
 };

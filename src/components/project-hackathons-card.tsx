@@ -7,7 +7,14 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import type { ProjectHackathon } from "@/lib/project-hackathons";
+
+export interface ProjectHackathon {
+	slug: string;
+	title: string;
+	placement: string | null;
+	track: string | null;
+	url: string | null;
+}
 
 export function ProjectHackathonsCard({
 	hackathons,

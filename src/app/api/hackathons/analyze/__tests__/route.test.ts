@@ -501,9 +501,9 @@ describe("events whose stored rows are their winners only", () => {
 		// The check: null or at least 100, never a fabricated small number.
 		expect(y2025.submissionCount).toBeNull();
 		expect(y2025.winnerCount).toBe(6);
+		// 2026 has nothing stored yet: unknown, as before.
 		expect(y2026.submissionCount).toBeNull();
-		expect(y2026.winnerCount).toBe(6);
-		expect(y2026.coverage).toBe("winners-only");
+		expect(y2026.coverage).toBeUndefined();
 	});
 
 	it("a full event beside one keeps its counts, profile and shape", async () => {
@@ -629,7 +629,7 @@ describe("events whose stored rows are their winners only", () => {
 	// 12 of them curated winners whose fields are not stored; 68 of 1,371
 	// (5.0%) without them.
 	const LEFT_OUT =
-		"left out of every count and share: 18 rows of hackmeridian-2025 (6), hackmeridian-2026 (6), build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1), whose stored rows are their winners only; the rest covers events whose full listing is stored";
+		"left out of every count and share: 12 rows of hackmeridian-2025 (6), build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1), whose stored rows are their winners only; the rest covers events whose full listing is stored";
 
 	it("analyze across every event leaves winners-only rows out of every count and share, in one line", async () => {
 		const all = await get("analyze", "facet=placement");

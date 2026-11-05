@@ -31,15 +31,6 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
-		date: "2026-11-03",
-		surfaces: ["api"],
-		type: "added",
-		summary:
-			"HackMeridian 2026's six winners are served as builds, each with the GitHub repo HackProof matched to the team's testnet activity: nest and alloy-stellar placed 1st, and private-yield, bookerbob-hackmeridian-2026, 4ward and ZKross runner-up. The winnersNote that called them not announced upstream is removed.",
-		detail:
-			"The placements are those @BuildOnStellar announced on X; each row's url is its HackProof record. A track is carried only where the team declared one (alloy-stellar and private-yield Scale, bookerbob-hackmeridian-2026 and 4ward Genesis). Only the winners are stored, so the event stays winners-only: its submission counts are null.",
-	},
-	{
 		date: "2026-11-01",
 		surfaces: ["api"],
 		type: "fixed",

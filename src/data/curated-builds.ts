@@ -1,5 +1,3 @@
-import hackmeridian2026 from "./hackmeridian-2026-projects.json";
-
 /**
  * Hackathon submissions from events that do not run on DoraHacks
  * (src/data/curated-hackathons.ts), so the sync lane can never read them.
@@ -48,7 +46,6 @@ const winner = (
 	track: string | null,
 	description: string | null,
 	demoUrl: string | null = null,
-	githubUrl: string | null = null,
 ): CuratedBuild => ({
 	id: `curated-${hackathonSlug}-${name
 		.toLowerCase()
@@ -60,7 +57,7 @@ const winner = (
 	placement,
 	isWinner: true,
 	description,
-	githubUrl,
+	githubUrl: null,
 	demoUrl,
 	url,
 });
@@ -71,21 +68,6 @@ const winner2025 = (
 	placement: "1st Place" | "2nd Place" | "3rd Place",
 ): CuratedBuild =>
 	winner("hackmeridian-2025", RECAP_2025, name, placement, track, null);
-
-const hackmeridian2026Winners = hackmeridian2026.projects
-	.filter((p) => p.placement)
-	.map((p) =>
-		winner(
-			hackmeridian2026.event,
-			`${hackmeridian2026.source}/${p.file}.yml`,
-			p.name,
-			p.placement as string,
-			p.track,
-			null,
-			null,
-			`https://github.com/${p.repo}`,
-		),
-	);
 
 const ph2026 = (name: string, placement: string, description: string) =>
 	winner(
@@ -105,7 +87,6 @@ export const CURATED_BUILDS: CuratedBuild[] = [
 	winner2025("Lance", "Composability", "1st Place"),
 	winner2025("Star Lends", "Composability", "2nd Place"),
 	winner2025("Panorama Block", "Composability", "3rd Place"),
-	...hackmeridian2026Winners,
 	// Places as BitPinas heads them; it names no tracks.
 	ph2026(
 		"AbotPera",

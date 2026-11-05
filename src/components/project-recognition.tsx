@@ -1,6 +1,6 @@
 import Link from "next/link";
+import type { ProjectHackathon } from "@/components/project-hackathons-card";
 import { Badge } from "@/components/ui/badge";
-import type { ProjectHackathon } from "@/lib/project-hackathons";
 import { scfBadgeLabel } from "@/lib/project-scf";
 
 interface ProjectRecognitionProps {
