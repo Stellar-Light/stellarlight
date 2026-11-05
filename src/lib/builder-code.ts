@@ -12,6 +12,7 @@
 import type { Payload } from "payload";
 import { ACTIVE_PROJECT_STATUSES } from "./project-status";
 import { NOT_GONE } from "./repo-grade";
+import { findWholeSet, IncompleteRead } from "./whole-set";
 
 export type CodeRepo = {
 	fullName: string;
@@ -59,6 +60,20 @@ export type BuilderLike = {
 		commits12m?: number | null;
 	}> | null;
 };
+
+/**
+ * A where clause matching any of `logins` as GitHub matches a login: whole
+ * and case-insensitive. Payload's `in` is exact and case-sensitive, so a
+ * profile stored as "Bob" never met repos owned by "bob", and a join read
+ * that as none. One anchored pattern, not one per login: Mongo tests every
+ * pattern in an `$in` list against each value.
+ */
+export function loginIn(logins: readonly string[]): { in: RegExp[] } {
+	const alts = [...new Set(logins.filter(Boolean).map((l) => l.toLowerCase()))]
+		.map((l) => l.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))
+		.join("|");
+	return { in: alts ? [new RegExp(`^(?:${alts})$`, "i")] : [] };
+}
 
 const empty = (): CodeActivity => ({
 	repos: [],
@@ -127,13 +142,16 @@ export async function builderCodeActivity(
 		}
 	}
 
-	const repos = await payload.find({
+	// A cut read is not a finished join: onStellar would read as a short
+	// block the spec calls complete, so it throws and the caller says the
+	// join could not run.
+	const repos = await findWholeSet(payload, {
 		collection: "repos",
 		where: {
 			and: [
 				{
 					or: [
-						{ owner: { in: logins } },
+						{ owner: loginIn(logins) },
 						...(declared.size
 							? [
 									{
@@ -164,6 +182,7 @@ export async function builderCodeActivity(
 			primaryLanguage: true,
 		},
 	} as any);
+	if (!repos.complete) throw new IncompleteRead("repos", repos);
 	const langCount = new Map<string, Map<string, number>>();
 
 	const projectSlugs = new Set<string>();
@@ -214,14 +233,14 @@ export async function builderCodeActivity(
 	}
 
 	// project names + projects whose GitHub org is the person
-	const projs = await payload.find({
+	const projs = await findWholeSet(payload, {
 		collection: "projects",
 		where: {
 			and: [
 				{ status: { in: [...ACTIVE_PROJECT_STATUSES] } },
 				{
 					or: [
-						{ "github.orgLogin": { in: logins } },
+						{ "github.orgLogin": loginIn(logins) },
 						...(projectSlugs.size ? [{ slug: { in: [...projectSlugs] } }] : []),
 					],
 				},
@@ -231,6 +250,7 @@ export async function builderCodeActivity(
 		depth: 0,
 		select: { name: true, slug: true, github: true },
 	} as any);
+	if (!projs.complete) throw new IncompleteRead("projects", projs);
 	const nameOf = new Map<string, string>();
 	for (const pj of projs.docs as any[]) {
 		nameOf.set(String(pj.slug), String(pj.name));

@@ -32,6 +32,76 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"/builders/<login> says which of its reads failed. Code activity, SCF grants and hackathon submissions each read on their own and say unknown when their read fails, where a failed grants or hackathon read showed no grants or said no submissions matched.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"The home page's trending projects and the sitemap read every row. Trending ranked the newest 300 of 905 active projects, and the sitemap stopped each collection at 5,000 rows, which would drop pages from search engines without a word.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"/builders/<login> shows that login's profile or answers not found. The lookup matched part of a login and fell back to its first hit, so /builders/bob showed and titled bobby's profile; a login now matches whole, in any case.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"A read that stops at a ceiling now says so instead of passing a cut set off as all of it. getBuilders' onStellar is null, with the read named in the warnings, when its repo or project read was cut, never a short block; getHackathonBuilds no longer answers that a hackathon value names no event when it could not check every listed event; getLeaderboard reads every eligible project and repo.",
+		detail:
+			"On the site, /leaderboard and /digest/<month> ranked the newest 300 of 905 active projects (32 of the top 50 by stars on /leaderboard differed from GET /api/leaderboard's) and now rank them all. /builders states the directory's true size and says when code activity could not be read rather than showing no repos, a profile says so rather than 'no public code', and /analytics counts SCF-funded projects in the database and leaves a cut sum unknown.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"/api/status `usage.last24h`, `usage.last7d` and `usage.byEndpoint` count a hit whether its createdAt is stored as a date or as text. They were bounded by a date alone, which never matches a value stored as text; the three now come from one match, so byEndpoint sums to last7d.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"getBuilders, /builders and /builders/<login> serve public profiles only. The filter dropped a visibility value the field never holds, so a profile set to private would have been listed, counted, searched and shown at its own URL. Payload's REST and GraphQL now read public profiles only too, unless an admin asks. All 401 profiles are public today, so no count moves.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"/api/status `usage.byEndpoint` counts every hit of the last 7 days. It grouped a read capped at 10,000 rows, so it summed to 10,000 beside a `last7d` of 25,806 and undercounted every endpoint; the counts now come from the database and sum to `last7d`.",
+		detail:
+			"The /analytics page's agent and human split had the same cap and is counted the same way.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		version: "spec@1.9.118",
+		type: "fixed",
+		summary:
+			"getBuilders' `codeEvidence` no longer says none for a builder it did not check. With q, the read of the repos the page's builders own stopped at 300, so a builder whose repos fell past the cut read [] beside a real match; owners matched only in their stored case, so a profile stored as Bob read [] beside repos owned by bob; and a failed read served [] on every row, or a code-language row's admitting repos as if the read had run. Every owned repo is now read, owners match as GitHub logins (whole, any case), [] means all were read and none matched, and a failed read leaves null on every row, with the read named in `meta.failedReads`.",
+		detail:
+			"A login with no Passport profile (match.basis repo-owner) is read in full too: its top five repos by repoScore came from the newest 200 of a substring match, so its best repo could be missing. The same login match now joins onStellar and the profile page's org projects, where a stored case that differed from GitHub's read as no code.",
+	},
+	{
+		date: "2026-11-04",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"getBuilders reads every visible profile, not the newest 300: with no q, `counts.total` said 300 under a full set label while 401 profiles were visible, so the oldest were reachable only through a location filter. `counts.total` now counts the set the pages walk (page until offset + returned reaches it), and a q search runs over all of it.",
+	},
+	{
+		date: "2026-11-04",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.117",
 		type: "fixed",

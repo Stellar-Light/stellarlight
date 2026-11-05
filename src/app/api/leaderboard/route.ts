@@ -21,6 +21,7 @@ import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { PROJECT_TYPES } from "@/lib/project-types";
 import { tvlStaleOf } from "@/lib/status-checks";
+import { findWholeSet } from "@/lib/whole-set";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300; // 5 min — Payload data is cheap, but no point hammering it
@@ -254,7 +255,7 @@ export async function GET(req: NextRequest) {
 				projectWhere.types = { in: typeList };
 			}
 
-			const projectsResult = await payload.find({
+			const projectsResult = await findWholeSet<{ slug: string }>(payload, {
 				collection: "projects",
 				where: projectWhere,
 				// Raven cold-agent catch (2026-07-20): limit 300 with NO sort made
@@ -263,7 +264,8 @@ export async function GET(req: NextRequest) {
 				// Fetch every eligible row; the narrow select keeps this cheap on
 				// M0 (the old {embedding:false} still dragged descriptions and
 				// coverage for rows we only read 6 scalars from).
-				limit: 2000,
+				// limit 0: the whole eligible set, so nothing is cut to report
+				limit: 0,
 				depth: 0,
 				select: {
 					name: true,
@@ -300,10 +302,10 @@ export async function GET(req: NextRequest) {
 				}>
 			>();
 			if (projectSlugs.length > 0) {
-				const reposResult = await payload.find({
+				const reposResult = await findWholeSet(payload, {
 					collection: "repos",
 					where: { projectSlug: { in: projectSlugs } },
-					limit: 5000,
+					limit: 0,
 					depth: 0,
 					// Only the stats we aggregate — NOT the README excerpt, which
 					// bloated this fetch enough to time the endpoint out as the repos
