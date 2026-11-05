@@ -8,7 +8,7 @@ license.
 
 Portions are ported, with changes, from
 [stellar-experimental/stellar-raven](https://github.com/stellar-experimental/stellar-raven)
-at commit b1dc866, licensed under the Apache License, Version 2.0. A copy of
+at commit fec1c79, licensed under the Apache License, Version 2.0. A copy of
 that license is in [LICENSES/Apache-2.0.txt](./LICENSES/Apache-2.0.txt).
 
 Changes: Raven's catalog search, the Scout half of its catalog builder, and

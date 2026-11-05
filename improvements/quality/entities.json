@@ -1,18 +1,18 @@
 {
- "generatedAt": "2026-11-04T15:42:09.796Z",
+ "generatedAt": "2026-11-05T13:43:05.892Z",
  "surfaces": [
   {
    "surface": "code",
    "means": "repo scanning, code depth, symbol extraction",
-   "openFindings": 70,
-   "clearedFindings": 33,
+   "openFindings": 74,
+   "clearedFindings": 31,
    "verifiedFindings": 0
   },
   {
    "surface": "directory",
    "means": "the project rows themselves, fields, types, provenance",
-   "openFindings": 2,
-   "clearedFindings": 219,
+   "openFindings": 3,
+   "clearedFindings": 220,
    "verifiedFindings": 0
   },
   {
@@ -53,9 +53,9 @@
  ],
  "findings": {
   "states": "open + refreshQueue + blockedUpstream + cleared + verified = total, disjoint. `open` is the DEFECT backlog we can act on here; `refreshQueue` is open rows that are a refresh rather than a fix (a curated note citing a version upstream has since bumped — true on its asOf date, so not a defect); `blockedUpstream` is open rows an upstream consumer decides (Raven has not re-read our text, or its scorer decides regardless of our text) — carried and re-classified every run, never folded into `open` and never dropped. Kept apart so `open` means work.",
-  "total": 903,
-  "open": 74,
-  "refreshQueue": 109,
+  "total": 916,
+  "open": 79,
+  "refreshQueue": 118,
   "blockedUpstream": 17,
   "blockedBy": {
    "raven-catalog-lag": 11,
@@ -79,13 +79,13 @@
     "raven-routing:which-verticals-on-stellar-have-the-least-compet"
    ]
   },
-  "cleared": 696,
+  "cleared": 695,
   "verified": 7,
   "byKind": {
    "definition": "world = the detector compared our record with the ecosystem and the ecosystem differs or moved (a dead link, a stale note, a project that shut down, a duplicate row, an overstated SCF claim) — the product WORKING, repaired by curation. instrument = our own measurement or serving broke (a golden question we fail, a spec that lies about live behaviour, a promised field served empty). open counts every still-open row across the three open buckets: world.open + instrument.open = open + refreshQueue + blockedUpstream.",
    "world": {
-    "open": 181,
-    "total": 415
+    "open": 195,
+    "total": 428
    },
    "instrument": {
     "open": 19,
@@ -107,13 +107,13 @@
     "open": 0,
     "refresh": 24,
     "blocked": 0,
-    "cleared": 126,
+    "cleared": 127,
     "verified": 0,
     "surface": "directory"
    },
    {
     "mode": "repo-gone",
-    "open": 70,
+    "open": 74,
     "refresh": 0,
     "blocked": 0,
     "cleared": 21,
@@ -193,15 +193,6 @@
     "surface": "contract"
    },
    {
-    "mode": "note-stale",
-    "open": 0,
-    "refresh": 72,
-    "blocked": 0,
-    "cleared": 7,
-    "verified": 0,
-    "surface": "code"
-   },
-   {
     "mode": "routing-miss",
     "open": 0,
     "refresh": 0,
@@ -218,6 +209,15 @@
     "cleared": 4,
     "verified": 0,
     "surface": "retrieval"
+   },
+   {
+    "mode": "note-stale",
+    "open": 0,
+    "refresh": 77,
+    "blocked": 0,
+    "cleared": 5,
+    "verified": 0,
+    "surface": "code"
    },
    {
     "mode": "silent-param",
@@ -292,9 +292,18 @@
     "surface": "consumer"
    },
    {
+    "mode": "stamp-contradicted",
+    "open": 1,
+    "refresh": 0,
+    "blocked": 0,
+    "cleared": 0,
+    "verified": 0,
+    "surface": "directory"
+   },
+   {
     "mode": "supersession-unrecorded",
     "open": 0,
-    "refresh": 13,
+    "refresh": 17,
     "blocked": 0,
     "cleared": 0,
     "verified": 0,
@@ -304,7 +313,7 @@
   "openByAge": [
    {
     "bucket": "≤7d",
-    "count": 14
+    "count": 19
    },
    {
     "bucket": "8–30d",
@@ -321,10 +330,10 @@
   ],
   "recentlyCleared": [
    {
-    "probe": "note-repo-gone:ggoldani/agent-passport",
-    "surface": "code",
-    "failureMode": "note-stale",
-    "clearedAt": "2026-11-03"
+    "probe": "https://stabble.org",
+    "surface": "directory",
+    "failureMode": "broken-link",
+    "clearedAt": "2026-11-05"
    },
    {
     "probe": "https://x.com/boundless_xyz",
@@ -373,18 +382,18 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 138,
-     "recurred": 120,
-     "ratePct": 87
+     "newFindings": 151,
+     "recurred": 128,
+     "ratePct": 84.8
     },
     "lifetime": {
-     "newFindings": 903,
-     "recurred": 350,
-     "ratePct": 38.8
+     "newFindings": 916,
+     "recurred": 358,
+     "ratePct": 39.1
     }
    },
    "reopened": {
-    "count": 16,
+    "count": 17,
     "shareOfClosures": 0.02,
     "regressedFromVerified": 0,
     "note": "a lower bound — re-clearing a reopened finding wipes its reopenedAt stamp, so reopen→reclear cycles are invisible here. regressedFromVerified counts the strongest case: a fix a human asserted had landed that a detector raised again."
@@ -392,20 +401,20 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 138,
-     "repeats": 137,
+     "newFindings": 151,
+     "repeats": 150,
      "ratePct": 99.3
     },
     "lifetime": {
-     "newFindings": 903,
-     "repeats": 896,
+     "newFindings": 916,
+     "repeats": 909,
      "ratePct": 99.2
     },
     "byClass": [
      {
       "class": "cross-surface-consistency",
-      "total": 352,
-      "open": 180,
+      "total": 364,
+      "open": 193,
       "firstSeen": "2026-07-22"
      },
      {
@@ -440,8 +449,8 @@
      },
      {
       "class": "unclassified",
-      "total": 1,
-      "open": 1,
+      "total": 2,
+      "open": 2,
       "firstSeen": "2026-10-26"
      }
     ]
@@ -9478,7 +9487,7 @@
    "tail": {
     "repos": 10011,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 7946
+    "withCodeDepth": 7947
    },
    "knowledgeNotes": {
     "pool": 412,
@@ -9566,15 +9575,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1419
+     "count": 1420
     },
     {
      "label": "slowing",
-     "count": 1137
+     "count": 1152
     },
     {
      "label": "active",
-     "count": 1005
+     "count": 989
     },
     {
      "label": "unknown",
@@ -9629,7 +9638,7 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 11436,
+  "withCodeDepth": 11437,
   "withNotes": 1073,
   "withMainnet": 134,
   "top": [
@@ -10190,7 +10199,7 @@
     "language": "Python",
     "projectSlug": null,
     "notes": 0,
-    "codeDepth": 32,
+    "codeDepth": 28,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10710,7 +10719,7 @@
     "id": "s:link-health",
     "label": "link-health",
     "column": 0,
-    "value": 150
+    "value": 151
    },
    {
     "id": "s:engine-d-demand",
@@ -10722,13 +10731,13 @@
     "id": "s:gone-repos",
     "label": "gone-repos",
     "column": 0,
-    "value": 91
+    "value": 95
    },
    {
     "id": "s:nightly-note-freshness",
     "label": "nightly-note-freshness",
     "column": 0,
-    "value": 79
+    "value": 82
    },
    {
     "id": "s:raven-routing",
@@ -10755,6 +10764,12 @@
     "value": 25
    },
    {
+    "id": "s:supersession-freshness",
+    "label": "supersession-freshness",
+    "column": 0,
+    "value": 17
+   },
+   {
     "id": "s:scf-crosscheck",
     "label": "scf-crosscheck",
     "column": 0,
@@ -10763,12 +10778,6 @@
    {
     "id": "s:engine-e-contract",
     "label": "engine-e-contract",
-    "column": 0,
-    "value": 13
-   },
-   {
-    "id": "s:supersession-freshness",
-    "label": "supersession-freshness",
     "column": 0,
     "value": 13
    },
@@ -10791,14 +10800,14 @@
     "value": 4
    },
    {
-    "id": "s:raven-loop",
-    "label": "raven-loop",
-    "column": 0,
-    "value": 2
-   },
-   {
     "id": "s:packet-recheck",
     "label": "packet-recheck",
+    "column": 0,
+    "value": 3
+   },
+   {
+    "id": "s:raven-loop",
+    "label": "raven-loop",
     "column": 0,
     "value": 2
    },
@@ -10818,13 +10827,13 @@
     "id": "f:directory",
     "label": "directory",
     "column": 1,
-    "value": 221
+    "value": 223
    },
    {
     "id": "f:code",
     "label": "code",
     "column": 1,
-    "value": 103
+    "value": 105
    },
    {
     "id": "f:contract",
@@ -10854,13 +10863,13 @@
     "id": "o:cleared",
     "label": "Cleared",
     "column": 2,
-    "value": 696
+    "value": 695
    },
    {
     "id": "o:open",
     "label": "Open",
     "column": 2,
-    "value": 200
+    "value": 214
    },
    {
     "id": "o:verified",
@@ -10899,7 +10908,7 @@
     "value": 289
    },
    {
-    "source": 9,
+    "source": 10,
     "target": 24,
     "sourceId": "s:scf-crosscheck",
     "targetId": "f:scf",
@@ -10913,7 +10922,7 @@
     "value": 16
    },
    {
-    "source": 10,
+    "source": 11,
     "target": 21,
     "sourceId": "s:engine-e-contract",
     "targetId": "f:contract",
@@ -10955,7 +10964,7 @@
     "value": 18
    },
    {
-    "source": 15,
+    "source": 16,
     "target": 20,
     "sourceId": "s:raven-loop",
     "targetId": "f:code",
@@ -10966,7 +10975,7 @@
     "target": 25,
     "sourceId": "f:code",
     "targetId": "o:cleared",
-    "value": 33
+    "value": 31
    },
    {
     "source": 2,
@@ -10980,7 +10989,7 @@
     "target": 25,
     "sourceId": "f:directory",
     "targetId": "o:cleared",
-    "value": 219
+    "value": 220
    },
    {
     "source": 6,
@@ -11029,42 +11038,42 @@
     "target": 20,
     "sourceId": "s:nightly-note-freshness",
     "targetId": "f:code",
-    "value": 79
+    "value": 82
    },
    {
     "source": 20,
     "target": 26,
     "sourceId": "f:code",
     "targetId": "o:open",
-    "value": 155
+    "value": 168
    },
    {
     "source": 1,
     "target": 19,
     "sourceId": "s:link-health",
     "targetId": "f:directory",
-    "value": 150
+    "value": 151
    },
    {
     "source": 19,
     "target": 26,
     "sourceId": "f:directory",
     "targetId": "o:open",
-    "value": 26
+    "value": 27
    },
    {
     "source": 3,
     "target": 20,
     "sourceId": "s:gone-repos",
     "targetId": "f:code",
-    "value": 91
+    "value": 95
    },
    {
-    "source": 11,
+    "source": 9,
     "target": 20,
     "sourceId": "s:supersession-freshness",
     "targetId": "f:code",
-    "value": 13
+    "value": 17
    },
    {
     "source": 17,
@@ -11074,11 +11083,11 @@
     "value": 1
    },
    {
-    "source": 16,
+    "source": 15,
     "target": 19,
     "sourceId": "s:packet-recheck",
     "targetId": "f:directory",
-    "value": 2
+    "value": 3
    },
    {
     "source": 18,
@@ -11088,7 +11097,7 @@
     "value": 1
    },
    {
-    "source": 15,
+    "source": 16,
     "target": 23,
     "sourceId": "s:raven-loop",
     "targetId": "f:consumer",
@@ -11193,13 +11202,13 @@
    {
     "entity": "repo",
     "field": "code depth reading",
-    "missing": 2374,
+    "missing": 2373,
     "of": 13810,
     "share": 17.2,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
     "exampleSource": "all rows missing this field",
-    "examplePoolSize": 2374,
+    "examplePoolSize": 2373,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
