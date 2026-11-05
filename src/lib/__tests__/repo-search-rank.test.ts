@@ -1305,6 +1305,11 @@ describe("developer products are canonical answers (issue #1901)", () => {
 		["stellar lab", "stellar/laboratory"],
 		["stellar_lab", "stellar/laboratory"],
 		["soroban_examples", "stellar/soroban-examples"],
+		// re-check item 2: surface words that search drops do not hide the name
+		["scaffold stellar repo", "stellar-scaffold/cli"],
+		["scaffold stellar github", "stellar-scaffold/cli"],
+		["stellar lab repo", "stellar/laboratory"],
+		["stellar lab source code", "stellar/laboratory"],
 		["Stellar Laboratory", "stellar/laboratory"],
 		["lab.stellar.org", "stellar/laboratory"],
 		["soroban examples", "stellar/soroban-examples"],
@@ -1339,6 +1344,7 @@ describe("developer products are canonical answers (issue #1901)", () => {
 		"stellar-lab-notes",
 		"stellar scaffold cli",
 		"How do I start a new dapp with Scaffold Stellar?",
+		"stellar lab notes repo",
 	])("%s maps to nothing", (q) => {
 		expect(canonicalFor(q)).toEqual([]);
 	});

@@ -902,12 +902,18 @@ const PRODUCTS: Array<{ test: RegExp; repo: string }> = [
 		repo: "stellar/soroban-examples",
 	},
 ];
+// Surface words every row carries (a repo on GitHub with source code) say
+// nothing about which product; search drops them as stopwords, so the name
+// test ignores them too (q="scaffold stellar repo" is the product name).
+const SURFACE_WORDS =
+	/(?:^| )(?:github|repo|repos|repository|repositories|source|code)(?= |$)/g;
 const productKey = (q: string) =>
 	q
 		.trim()
 		.toLowerCase()
 		.replace(/[?!.,;:]+$/, "")
 		.replace(/[\s_-]+/g, " ")
+		.replace(SURFACE_WORDS, "")
 		.trim();
 
 // Canonical repos for a query, priority order, deduped. Empty when the query

@@ -113,3 +113,18 @@ Re-check item 1 (a bare name that fires a canonical entry defers to the canonica
 ⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
 Pass after, with the fix: src/lib/__tests__/repo-search-rank.test.ts Tests 115 passed (115)
 Replay over 206 frozen queries, base against branch: canonicalOverName 5/5, fullPath 1/1, controls 8/8, unchanged 16/16; against b3117b2d, 8 queries change: can-01 to can-05 2->1, sep-10 back to the canonical repo, exn-01 and exn-02 (superseded) 1->2.
+Explain decision (frozen-set bar 'explain', fixed before measuring), with explain-routing.mts over the 206 frozen queries:
+  products named inside a question routed exp-01, exp-02, exp-03, exp-04 to their product (exp-06 already routes there by the index) and kept exp-05 off stellar/laboratory;
+  but it also routed unc-09 (q=hackthon-scaffold-stellar, the exact name of a hackathon copy) to stellar-scaffold/cli, which the rule forbids.
+Decision: not implemented. The spec says explainRepo routes a developer product only on its bare name. A variant that keeps hyphenated names whole needs a fresh question set before it is measured.
+
+Re-check item 2 (surface words in productKey): the new tests against b2ec6d52, before the fix
+      Tests  4 failed | 116 passed (120)
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold stellar github routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > scaffold stellar repo routes to stellar-scaffold/cli
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar lab repo routes to stellar/laboratory
+ FAIL  src/lib/__tests__/repo-search-rank.test.ts > developer products are canonical answers (issue #1901) > stellar lab source code routes to stellar/laboratory
+ Test Files  1 failed (1)
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+Pass after, with the fix: src/lib/__tests__/repo-search-rank.test.ts Tests 120 passed (120)
+Replay with the clock pinned to the capture time (pin-clock.mjs): fidelity 206/206; base against branch: acceptance 20/20, controls 8/8, unchanged 16/16, canonicalOverName 5/5, fullPath 1/1, 20 changes all attributed; only exn-01 (superseded) moves down.
