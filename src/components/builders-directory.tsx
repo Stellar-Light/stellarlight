@@ -15,7 +15,7 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { useUrlParam } from "@/hooks/use-url-param";
+import { useQueryState } from "@/hooks/use-query-state";
 import { ago, agoSentence } from "@/lib/builder-code";
 
 /** Serializable row the server builds from Passport + our repos index. */
@@ -58,24 +58,23 @@ const SORTS: Array<{ key: SortKey; label: string }> = [
 	{ key: "name", label: "A to Z" },
 ];
 
+const SORT_KEYS = SORTS.map((s) => s.key);
+
 const heat = (r: BuilderRowData) => r.commits30d * 3 + r.commits90d;
 const recentCut = () => Date.now() - 90 * 86_400_000;
 const isRecent = (r: BuilderRowData) =>
 	heat(r) > 0 || Date.parse(r.lastCommitAt ?? "") > recentCut();
 
 export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
-	const [q, setQ] = useUrlParam("q");
-	const [sortParam, setSort] = useUrlParam("sort", "active");
-	const sort = SORTS.some((s) => s.key === sortParam)
-		? (sortParam as SortKey)
-		: "active";
-	const [active, setActive] = useUrlParam("active");
-	const [withProjects, setWithProjects] = useUrlParam("projects");
-	const [ambassadors, setAmbassadors] = useUrlParam("ambassadors");
-	const [countryParam, setCountry] = useUrlParam("country");
-	const onlyActive = active === "1";
-	const onlyProjects = withProjects === "1";
-	const onlyAmbassadors = ambassadors === "1";
+	const [q, setQ] = useQueryState("q", "");
+	const [sort, setSort] = useQueryState<SortKey>("sort", "active", SORT_KEYS);
+	const [onlyActive, setOnlyActive] = useQueryState("active", false);
+	const [onlyProjects, setOnlyProjects] = useQueryState("projects", false);
+	const [onlyAmbassadors, setOnlyAmbassadors] = useQueryState(
+		"ambassadors",
+		false,
+	);
+	const [countryParam, setCountry] = useQueryState("country", "");
 	const country = countryParam || null;
 
 	const hasAmbassadors = rows.some((r) => r.ambassador);
@@ -168,18 +167,18 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 				<div className="flex flex-wrap items-center gap-2">
 					{chip(
 						onlyActive,
-						() => setActive(onlyActive ? "" : "1"),
+						() => setOnlyActive(!onlyActive),
 						"Active in 90 days",
 					)}
 					{chip(
 						onlyProjects,
-						() => setWithProjects(onlyProjects ? "" : "1"),
+						() => setOnlyProjects(!onlyProjects),
 						"Has projects",
 					)}
 					{hasAmbassadors &&
 						chip(
 							onlyAmbassadors,
-							() => setAmbassadors(onlyAmbassadors ? "" : "1"),
+							() => setOnlyAmbassadors(!onlyAmbassadors),
 							"Ambassadors",
 						)}
 					{countries.length > 0 && <span className="mx-1 h-4 w-px bg-border" />}
