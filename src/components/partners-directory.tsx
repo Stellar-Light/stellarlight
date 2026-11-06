@@ -40,6 +40,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useQueryState } from "@/hooks/use-query-state";
 import {
 	FRESHNESS_COLOR,
 	FRESHNESS_LABELS,
@@ -98,10 +99,10 @@ export function PartnersDirectory({
 }: {
 	initial: DirectoryPartner[];
 }) {
-	const [typeFilter, setTypeFilter] = useState("all");
-	const [regionFilter, setRegionFilter] = useState("all");
-	const [showAll, setShowAll] = useState(false);
-	const [query, setQuery] = useState("");
+	const [typeFilter, setTypeFilter] = useQueryState("type", "all");
+	const [regionFilter, setRegionFilter] = useQueryState("region", "all");
+	const [showAll, setShowAll] = useQueryState("all", false);
+	const [query, setQuery] = useQueryState("q", "");
 	const [typeDrawerOpen, setTypeDrawerOpen] = useState(false);
 	const [regionDrawerOpen, setRegionDrawerOpen] = useState(false);
 
