@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { CopyCommand } from "@/components/copy-command";
+import { useQueryState } from "@/hooks/use-query-state";
 
 export interface UnifiedSkill {
 	slug: string;
@@ -84,9 +85,9 @@ export function SkillsMarketplace({
 }: {
 	initialSkills: UnifiedSkill[];
 }) {
-	const [sourceFilter, setSourceFilter] = useState<string>("all");
-	const [kindFilter, setKindFilter] = useState<string>("all");
-	const [query, setQuery] = useState("");
+	const [sourceFilter, setSourceFilter] = useQueryState("source", "all");
+	const [kindFilter, setKindFilter] = useQueryState("kind", "all");
+	const [query, setQuery] = useQueryState("q", "");
 
 	const featuredSkills = useMemo(
 		() => initialSkills.filter((s) => s.featured),
