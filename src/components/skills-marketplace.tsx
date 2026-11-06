@@ -15,7 +15,7 @@ import {
 	Wrench,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { CopyCommand } from "@/components/copy-command";
 import { useQueryState } from "@/hooks/use-query-state";
 
