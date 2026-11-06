@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ago, agoSentence } from "@/lib/builder-code";
@@ -69,6 +69,18 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 	const [onlyProjects, setOnlyProjects] = useState(false);
 	const [onlyAmbassadors, setOnlyAmbassadors] = useState(false);
 	const [country, setCountry] = useState<string | null>(null);
+
+	useEffect(() => {
+		setQ(new URLSearchParams(window.location.search).get("q") ?? "");
+	}, []);
+
+	const updateQuery = (value: string) => {
+		setQ(value);
+		const url = new URL(window.location.href);
+		if (value.trim()) url.searchParams.set("q", value);
+		else url.searchParams.delete("q");
+		window.history.replaceState(null, "", url);
+	};
 
 	const hasAmbassadors = rows.some((r) => r.ambassador);
 	// the regions people are in, most common first (round flag toggles)
@@ -144,7 +156,7 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 						<input
 							value={q}
-							onChange={(e) => setQ(e.target.value)}
+							onChange={(e) => updateQuery(e.target.value)}
 							placeholder="Search builders"
 							aria-label="Search builders"
 							className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-white/30"
