@@ -17,12 +17,19 @@ import {
 	type Quarter,
 	rfpStatus,
 } from "@/data/ideas";
+import { useQueryState } from "@/hooks/use-query-state";
 
 export function IdeasListing() {
-	const [searchQuery, setSearchQuery] = useState("");
-	const [selectedCategory, setSelectedCategory] = useState("all");
-	const [selectedQuarter, setSelectedQuarter] =
-		useState<Quarter>(ACTIVE_QUARTER);
+	const [searchQuery, setSearchQuery] = useQueryState("q", "");
+	const [selectedCategory, setSelectedCategory] = useQueryState(
+		"category",
+		"all",
+	);
+	const [selectedQuarter, setSelectedQuarter] = useQueryState<Quarter>(
+		"quarter",
+		ACTIVE_QUARTER,
+		QUARTERS,
+	);
 	const [displayCount, setDisplayCount] = useState(9);
 	const [categoryOpen, setCategoryOpen] = useState(false);
 	const [showSubmitModal, setShowSubmitModal] = useState(false);
