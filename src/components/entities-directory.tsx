@@ -42,12 +42,11 @@ const SORTS = [
 	{ key: "projects", label: "Most projects" },
 	{ key: "name", label: "A-Z" },
 ] as const;
-type SortKey = (typeof SORTS)[number]["key"];
 const SORT_KEYS = SORTS.map((s) => s.key);
 
 export function EntitiesDirectory({ items }: { items: EntityItem[] }) {
 	const [query, setQuery] = useQueryState("q", "");
-	const [sort, setSort] = useQueryState<SortKey>("sort", "scf", SORT_KEYS);
+	const [sort, setSort] = useQueryState("sort", "scf", SORT_KEYS);
 	const [category, setCategory] = useQueryState("category", "all");
 
 	// Ecosystem summary + the category filter set, from the data itself.

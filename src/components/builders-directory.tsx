@@ -67,13 +67,16 @@ const isRecent = (r: BuilderRowData) =>
 
 export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 	const [q, setQ] = useQueryState("q", "");
-	const [sort, setSort] = useQueryState<SortKey>("sort", "active", SORT_KEYS);
-	const [onlyActive, setOnlyActive] = useQueryState("active", false);
-	const [onlyProjects, setOnlyProjects] = useQueryState("projects", false);
-	const [onlyAmbassadors, setOnlyAmbassadors] = useQueryState(
+	const [sort, setSort] = useQueryState("sort", "active", SORT_KEYS);
+	const [active, setActive] = useQueryState("active", "");
+	const onlyActive = active === "1";
+	const [projectsOnly, setProjectsOnly] = useQueryState("projects", "");
+	const onlyProjects = projectsOnly === "1";
+	const [ambassadorsOnly, setAmbassadorsOnly] = useQueryState(
 		"ambassadors",
-		false,
+		"",
 	);
+	const onlyAmbassadors = ambassadorsOnly === "1";
 	const [countryParam, setCountry] = useQueryState("country", "");
 	const country = countryParam || null;
 
@@ -167,18 +170,18 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 				<div className="flex flex-wrap items-center gap-2">
 					{chip(
 						onlyActive,
-						() => setOnlyActive(!onlyActive),
+						() => setActive(onlyActive ? "" : "1"),
 						"Active in 90 days",
 					)}
 					{chip(
 						onlyProjects,
-						() => setOnlyProjects(!onlyProjects),
+						() => setProjectsOnly(onlyProjects ? "" : "1"),
 						"Has projects",
 					)}
 					{hasAmbassadors &&
 						chip(
 							onlyAmbassadors,
-							() => setOnlyAmbassadors(!onlyAmbassadors),
+							() => setAmbassadorsOnly(onlyAmbassadors ? "" : "1"),
 							"Ambassadors",
 						)}
 					{countries.length > 0 && <span className="mx-1 h-4 w-px bg-border" />}

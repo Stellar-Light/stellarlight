@@ -347,11 +347,7 @@ export function StablecoinExplorer({
 	news,
 }: Props) {
 	const [searchQuery, setSearchQuery] = useQueryState("q", "");
-	const [viewMode, setViewMode] = useQueryState<"table" | "grid">(
-		"view",
-		"table",
-		VIEW_MODES,
-	);
+	const [viewMode, setViewMode] = useQueryState("view", "table", VIEW_MODES);
 	const [selectedAsset, setSelectedAsset] = useQueryState("asset", "all");
 	const [sortField, setSortField] = useState<"supply" | "holders" | null>(null);
 	const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");

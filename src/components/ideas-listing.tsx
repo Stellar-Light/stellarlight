@@ -14,7 +14,6 @@ import {
 	IDEAS,
 	QUARTER_LABELS,
 	QUARTERS,
-	type Quarter,
 	rfpStatus,
 } from "@/data/ideas";
 import { useQueryState } from "@/hooks/use-query-state";
@@ -25,7 +24,7 @@ export function IdeasListing() {
 		"category",
 		"all",
 	);
-	const [selectedQuarter, setSelectedQuarter] = useQueryState<Quarter>(
+	const [selectedQuarter, setSelectedQuarter] = useQueryState(
 		"quarter",
 		ACTIVE_QUARTER,
 		QUARTERS,

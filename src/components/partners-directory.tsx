@@ -101,7 +101,8 @@ export function PartnersDirectory({
 }) {
 	const [typeFilter, setTypeFilter] = useQueryState("type", "all");
 	const [regionFilter, setRegionFilter] = useQueryState("region", "all");
-	const [showAll, setShowAll] = useQueryState("all", false);
+	const [shown, setShown] = useQueryState("all", "");
+	const showAll = shown === "1";
 	const [query, setQuery] = useQueryState("q", "");
 	const [typeDrawerOpen, setTypeDrawerOpen] = useState(false);
 	const [regionDrawerOpen, setRegionDrawerOpen] = useState(false);
@@ -376,7 +377,7 @@ export function PartnersDirectory({
 								No complete profiles match this filter.{" "}
 								<button
 									type="button"
-									onClick={() => setShowAll(true)}
+									onClick={() => setShown("1")}
 									className="text-foreground underline"
 								>
 									View all {hiddenCount}{" "}
@@ -419,7 +420,7 @@ export function PartnersDirectory({
 				<div className="mt-8 text-center">
 					<button
 						type="button"
-						onClick={() => setShowAll(true)}
+						onClick={() => setShown("1")}
 						className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
 					>
 						view {hiddenCount} more {hiddenCount === 1 ? "profile" : "profiles"}{" "}
