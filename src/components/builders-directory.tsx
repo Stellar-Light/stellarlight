@@ -12,9 +12,10 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useUrlParam } from "@/hooks/use-url-param";
 import { ago, agoSentence } from "@/lib/builder-code";
 
 /** Serializable row the server builds from Passport + our repos index. */
@@ -63,24 +64,19 @@ const isRecent = (r: BuilderRowData) =>
 	heat(r) > 0 || Date.parse(r.lastCommitAt ?? "") > recentCut();
 
 export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
-	const [q, setQ] = useState("");
-	const [sort, setSort] = useState<SortKey>("active");
-	const [onlyActive, setOnlyActive] = useState(false);
-	const [onlyProjects, setOnlyProjects] = useState(false);
-	const [onlyAmbassadors, setOnlyAmbassadors] = useState(false);
-	const [country, setCountry] = useState<string | null>(null);
-
-	useEffect(() => {
-		setQ(new URLSearchParams(window.location.search).get("q") ?? "");
-	}, []);
-
-	const updateQuery = (value: string) => {
-		setQ(value);
-		const url = new URL(window.location.href);
-		if (value.trim()) url.searchParams.set("q", value);
-		else url.searchParams.delete("q");
-		window.history.replaceState(null, "", url);
-	};
+	const [q, setQ] = useUrlParam("q");
+	const [sortParam, setSort] = useUrlParam("sort", "active");
+	const sort = SORTS.some((s) => s.key === sortParam)
+		? (sortParam as SortKey)
+		: "active";
+	const [active, setActive] = useUrlParam("active");
+	const [withProjects, setWithProjects] = useUrlParam("projects");
+	const [ambassadors, setAmbassadors] = useUrlParam("ambassadors");
+	const [countryParam, setCountry] = useUrlParam("country");
+	const onlyActive = active === "1";
+	const onlyProjects = withProjects === "1";
+	const onlyAmbassadors = ambassadors === "1";
+	const country = countryParam || null;
 
 	const hasAmbassadors = rows.some((r) => r.ambassador);
 	// the regions people are in, most common first (round flag toggles)
@@ -156,7 +152,7 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 						<input
 							value={q}
-							onChange={(e) => updateQuery(e.target.value)}
+							onChange={(e) => setQ(e.target.value)}
 							placeholder="Search builders"
 							aria-label="Search builders"
 							className="w-full rounded-xl border border-border bg-card pl-9 pr-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-white/30"
@@ -172,14 +168,18 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 				<div className="flex flex-wrap items-center gap-2">
 					{chip(
 						onlyActive,
-						() => setOnlyActive((v) => !v),
+						() => setActive(onlyActive ? "" : "1"),
 						"Active in 90 days",
 					)}
-					{chip(onlyProjects, () => setOnlyProjects((v) => !v), "Has projects")}
+					{chip(
+						onlyProjects,
+						() => setWithProjects(onlyProjects ? "" : "1"),
+						"Has projects",
+					)}
 					{hasAmbassadors &&
 						chip(
 							onlyAmbassadors,
-							() => setOnlyAmbassadors((v) => !v),
+							() => setAmbassadors(onlyAmbassadors ? "" : "1"),
 							"Ambassadors",
 						)}
 					{countries.length > 0 && <span className="mx-1 h-4 w-px bg-border" />}
@@ -187,7 +187,7 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 						<button
 							key={c.code}
 							type="button"
-							onClick={() => setCountry(country === c.code ? null : c.code)}
+							onClick={() => setCountry(country === c.code ? "" : c.code)}
 							aria-pressed={country === c.code}
 							title={`${c.name} (${c.n})`}
 							aria-label={`Only ${c.name}`}
