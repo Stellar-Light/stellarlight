@@ -68,6 +68,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { useQueryState } from "@/hooks/use-query-state";
 import type { NewsItem } from "@/lib/stablecoin-news";
 import type { IssuerLeader, SeriesRow } from "@/lib/stablecoin-series";
 import {
@@ -329,6 +330,8 @@ function BasisTag({ basis }: { basis: string | null }) {
 	);
 }
 
+const VIEW_MODES = ["table", "grid"] as const;
+
 export function StablecoinExplorer({
 	coins,
 	marketCapSeries,
@@ -343,9 +346,13 @@ export function StablecoinExplorer({
 	issuers,
 	news,
 }: Props) {
-	const [searchQuery, setSearchQuery] = useState("");
-	const [viewMode, setViewMode] = useState<"table" | "grid">("table");
-	const [selectedAsset, setSelectedAsset] = useState("all");
+	const [searchQuery, setSearchQuery] = useQueryState("q", "");
+	const [viewMode, setViewMode] = useQueryState<"table" | "grid">(
+		"view",
+		"table",
+		VIEW_MODES,
+	);
+	const [selectedAsset, setSelectedAsset] = useQueryState("asset", "all");
 	const [sortField, setSortField] = useState<"supply" | "holders" | null>(null);
 	const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 	const [selectedCoin, setSelectedCoin] = useState<CoinView | null>(null);
