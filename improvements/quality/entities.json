@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-05T15:44:25.675Z",
+ "generatedAt": "2026-11-06T15:18:55.438Z",
  "surfaces": [
   {
    "surface": "code",
@@ -64,7 +64,7 @@
   "lagPastGrace": {
    "count": 11,
    "graceDays": 20,
-   "oldestDays": 106,
+   "oldestDays": 107,
    "probes": [
     "raven-routing:reflector-oracle-on-stellar",
     "raven-routing:jobs-bounties-and-freelance-work-for-stellar-con",
@@ -382,9 +382,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 151,
-     "recurred": 128,
-     "ratePct": 84.8
+     "newFindings": 143,
+     "recurred": 122,
+     "ratePct": 85.3
     },
     "lifetime": {
      "newFindings": 916,
@@ -401,8 +401,8 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 151,
-     "repeats": 150,
+     "newFindings": 143,
+     "repeats": 142,
      "ratePct": 99.3
     },
     "lifetime": {
@@ -9470,18 +9470,18 @@
   ]
  },
  "repos": {
-  "read": 13810,
-  "population": 13810,
+  "read": 13809,
+  "population": 13809,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 13810,
+  "sampled": 13809,
   "coverage": {
    "curatedIndex": {
-    "repos": 3799,
+    "repos": 3798,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 3490,
+    "withCodeDepth": 3489,
     "depthPct": 92
    },
    "tail": {
@@ -9529,7 +9529,7 @@
    }
   },
   "curatedShape": {
-   "repos": 3799,
+   "repos": 3798,
    "scoreHistogram": [
     {
      "bucket": "0–9",
@@ -9541,7 +9541,7 @@
     },
     {
      "bucket": "20–29",
-     "count": 707
+     "count": 706
     },
     {
      "bucket": "30–39",
@@ -9575,15 +9575,15 @@
    "activityMix": [
     {
      "label": "dormant",
-     "count": 1420
+     "count": 1421
     },
     {
      "label": "slowing",
-     "count": 1155
+     "count": 1156
     },
     {
      "label": "active",
-     "count": 986
+     "count": 983
     },
     {
      "label": "unknown",
@@ -9638,7 +9638,7 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 11437,
+  "withCodeDepth": 11436,
   "withNotes": 1073,
   "withMainnet": 134,
   "top": [
@@ -11138,8 +11138,8 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12737,
-    "of": 13810,
+    "missing": 12736,
+    "of": 13809,
     "share": 92.2,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
@@ -11203,7 +11203,7 @@
     "entity": "repo",
     "field": "code depth reading",
     "missing": 2373,
-    "of": 13810,
+    "of": 13809,
     "share": 17.2,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
