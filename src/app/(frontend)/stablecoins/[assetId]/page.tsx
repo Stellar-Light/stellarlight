@@ -61,7 +61,8 @@ export async function generateMetadata({
 	return {
 		title: `${row.ticker}: ${row.company ?? "Stellar stablecoin"}`,
 		alternates: { canonical: `/stablecoins/${row.assetId}` },
-		description: `${row.ticker}, issued by ${row.company ?? "an unnamed issuer"} and pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
+		// `company` is the brand; only the issuer's own toml names the issuer.
+		description: `${row.ticker}, a ${row.company ?? "Stellar"} stablecoin${row.issuerOfRecordCheck === "named" && row.issuerOfRecord ? ` issued by ${row.issuerOfRecord}` : ""}, pegged to ${row.peg ?? "an unstated currency"}. Market cap, supply, holders and issuer details, measured every six hours.`,
 	};
 }
 
@@ -121,6 +122,21 @@ export default async function StablecoinDetailPage({
 		? (STABLECOIN_MARKETS[`${row.ticker}-${row.issuer}`] ?? [])
 		: [];
 
+	// The issuer of record is dated by its own toml check, not by the
+	// measurement: a failed read does not move this date.
+	const checkedLabel = row.issuerOfRecordAsOf
+		? new Date(row.issuerOfRecordAsOf).toLocaleDateString("en-US", {
+				dateStyle: "medium",
+				timeZone: "UTC",
+			})
+		: null;
+	const issuerLine =
+		row.issuerOfRecordCheck === "named" && row.issuerOfRecord
+			? `Issued by ${row.issuerOfRecord}, per its stellar.toml as read ${checkedLabel ?? "on an unrecorded date"}`
+			: row.issuerOfRecordCheck === "not-named"
+				? `No issuer of record named by its stellar.toml (checked ${checkedLabel ?? "on an unrecorded date"})`
+				: "Issuer of record not read from its stellar.toml yet";
+
 	const measuredLabel = row.updatedAt
 		? `${new Date(row.updatedAt).toLocaleString("en-US", {
 				dateStyle: "medium",
@@ -161,7 +177,8 @@ export default async function StablecoinDetailPage({
 						)}
 					</div>
 					<p className="text-sm text-muted-foreground">
-						Issued by {row.company ?? "an unnamed issuer"}
+						{issuerLine}
+						{row.company ? ` · Brand: ${row.company}` : ""}
 					</p>
 				</div>
 
@@ -223,8 +240,24 @@ export default async function StablecoinDetailPage({
 						<h2 className="text-base font-semibold text-foreground mb-3">
 							Issuer
 						</h2>
-						<Row label="Company">{row.company ?? "-"}</Row>
-						<Row label="Home domain">
+						<Row label="Brand">{row.company ?? "-"}</Row>
+						<Row label="Issuer of record">
+							{row.issuerOfRecordCheck === "named" && row.issuerOfRecord
+								? row.issuerOfRecord
+								: "-"}
+							{checkedLabel && (
+								<span className="block text-xs text-muted-foreground mt-1">
+									{row.issuerOfRecordCheck === "named" ? "read" : "checked"}{" "}
+									{checkedLabel}
+								</span>
+							)}
+							{row.issuerOfRecordNote && (
+								<span className="block text-xs text-muted-foreground mt-1">
+									{row.issuerOfRecordNote}
+								</span>
+							)}
+						</Row>
+						<Row label="Domain">
 							{row.issuerDomain ? (
 								<a
 									href={`https://${row.issuerDomain}`}
@@ -299,9 +332,12 @@ export default async function StablecoinDetailPage({
 								>
 									Horizon account <ExternalLink className="w-3 h-3" />
 								</a>
-								{row.issuerDomain && (
+								{/* Only a toml the pipeline actually read: a URL built from
+								    the curated domain can be one the host never serves
+								    (USDM1's site served none when the row was added). */}
+								{row.issuerOfRecordSourceUrl && (
 									<a
-										href={`https://${row.issuerDomain}/.well-known/stellar.toml`}
+										href={row.issuerOfRecordSourceUrl}
 										target="_blank"
 										rel="noopener noreferrer"
 										className="inline-flex items-center gap-1.5 text-sm px-3 py-2 rounded-lg bg-white/[0.04] border border-border/50 hover:bg-white/[0.07] transition-colors"

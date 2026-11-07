@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+	contractInterfaceEntries,
 	detectSdkCapabilities,
 	extractCodeSymbols,
+	extractContractInterface,
 	extractJsSymbols,
+	isTestPath,
 	symbolsHaystack,
 } from "../code-symbols";
 
@@ -200,5 +203,156 @@ describe("language-frontier capabilities (py/go/jvm)", () => {
 			},
 		]);
 		expect(tags).toEqual([]);
+	});
+});
+
+describe("interfaces carry their source path; test folders stay out (issue #1906)", () => {
+	const impl = (name: string) =>
+		`#[contract]\npub struct ${name};\n#[contractimpl]\nimpl ${name} {\n\tpub fn bump(env: Env, n: u32) -> u32 { n }\n}\n`;
+
+	it("each signature comes with the file it was read from, in the same order", () => {
+		const blobs = [
+			{ path: "contracts/vault/src/lib.rs", text: impl("Vault") },
+			{ path: "examples/demo/src/contract.rs", text: impl("Demo") },
+		];
+		expect(contractInterfaceEntries(blobs)).toEqual([
+			{
+				signature: "Vault.bump(n: u32) -> u32",
+				path: "contracts/vault/src/lib.rs",
+			},
+			// an example folder stays in; its path is what marks it
+			{
+				signature: "Demo.bump(n: u32) -> u32",
+				path: "examples/demo/src/contract.rs",
+			},
+		]);
+		// the string list existing consumers read is unchanged
+		expect(extractContractInterface(blobs)).toEqual([
+			"Vault.bump(n: u32) -> u32",
+			"Demo.bump(n: u32) -> u32",
+		]);
+	});
+
+	it.each([
+		// stellar/stellar-horizon: the six interfaces it served live
+		"internal/integration/contracts/increment/src/lib.rs",
+		// stellar/rs-soroban-env: its test wasms
+		"soroban-test-wasms/wasm-workspace/auth/src/lib.rs",
+		"e2e/contracts/token/src/lib.rs",
+		"testdata/contract/src/lib.rs",
+		"contracts/tests/fixture/src/lib.rs",
+		// review finding 3: an integration-test folder by name
+		"integration-tests/src/lib.rs",
+	])(
+		"%s is a test folder: left out of the interface and the symbols",
+		(path) => {
+			const blobs = [{ path, text: impl("Fixture") }];
+			expect(extractCodeSymbols(blobs)).toEqual([]);
+			expect(contractInterfaceEntries(blobs)).toEqual([]);
+		},
+	);
+
+	it("JS under a test folder stays out of the symbols and the capability tags", () => {
+		const blobs = [
+			{
+				path: "e2e/flows/pay.ts",
+				text: "export function payFlow(a) { return new TransactionBuilder(a); }",
+			},
+		];
+		expect(extractJsSymbols(blobs)).toEqual([]);
+		expect(detectSdkCapabilities(blobs)).toEqual([]);
+	});
+
+	// review finding 3: the test layouts of every language the scanner reads
+	it.each([
+		[
+			"__tests__/pay.ts",
+			"export function payFlow(a) { return new TransactionBuilder(a); }",
+		],
+		[
+			"src/pay.test.ts",
+			"export function payFlow(a) { return new TransactionBuilder(a); }",
+		],
+		[
+			"src/pay.spec.tsx",
+			"export function payFlow(a) { return new TransactionBuilder(a); }",
+		],
+		[
+			"internal/pay_test.go",
+			'import "github.com/stellar/go/txnbuild"\ntx := txnbuild.NewTransaction(p)',
+		],
+		[
+			"pkg/test_pay.py",
+			"from stellar_sdk import TransactionBuilder\nTransactionBuilder(a)",
+		],
+		[
+			"src/main/kotlin/PayTest.kt",
+			"import org.stellar.sdk.TransactionBuilder\nval b = TransactionBuilder(a)",
+		],
+	])(
+		"%s is test code in its language: no symbols, no capability tags",
+		(path, text) => {
+			const blobs = [{ path, text }];
+			expect(extractJsSymbols(blobs)).toEqual([]);
+			expect(detectSdkCapabilities(blobs)).toEqual([]);
+		},
+	);
+
+	// review finding 3: the integration clause covers a crate kept inside an
+	// integration/ folder, never a module or a crate merely named integration
+	it.each(["src/integration/mod.rs", "integration/src/lib.rs"])(
+		"%s is product code: its interface and symbols stay in",
+		(path) => {
+			const blobs = [{ path, text: impl("Bridge") }];
+			expect(extractCodeSymbols(blobs)).toEqual(["bump", "Bridge"]);
+			expect(contractInterfaceEntries(blobs)).toEqual([
+				{ signature: "Bridge.bump(n: u32) -> u32", path },
+			]);
+		},
+	);
+
+	it("a JS integration/ folder stays in: it can hold product code", () => {
+		const blobs = [
+			{
+				path: "src/integration/wallet.ts",
+				text: "export function connectWallet() { return new TransactionBuilder(a); }",
+			},
+		];
+		expect(extractJsSymbols(blobs)).toEqual(["connectWallet"]);
+		expect(detectSdkCapabilities(blobs)).toEqual(["tx-building"]);
+	});
+});
+
+// re-check item 3: one shared test-path rule, every listed path covered
+describe("isTestPath, the one test-path rule", () => {
+	it.each([
+		"test-suites/src/lib.rs",
+		"cmd/crates/soroban-test/src/lib.rs",
+		"src/__fixtures__/x.ts",
+		"fuzz/fuzz_targets/x.rs",
+		"support/db/dbtest/db.go",
+		"test-contracts/src/lib.rs",
+		"src/test_helpers/mod.rs",
+		"internal/integration/contracts/increment/src/lib.rs",
+		"integration-tests/src/lib.rs",
+		"soroban-test-wasms/wasm-workspace/auth/src/lib.rs",
+		"__tests__/pay.ts",
+		"src/pay.test.ts",
+		"internal/pay_test.go",
+		"pkg/test_pay.py",
+		"src/main/kotlin/PayTest.kt",
+	])("%s is test code", (p) => {
+		expect(isTestPath(p)).toBe(true);
+	});
+
+	it.each([
+		"contracts/integration/adapter/src/lib.rs",
+		"src/integration/mod.rs",
+		"integration/src/lib.rs",
+		"src/latest/mod.rs",
+		"pkg/latest/latest.go",
+		"contracts/vault/src/lib.rs",
+	])("%s is product code", (p) => {
+		expect(isTestPath(p)).toBe(false);
 	});
 });

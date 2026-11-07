@@ -145,10 +145,19 @@ const load = cache(async (slug: string): Promise<Loaded> => {
 				.catch(() => null),
 			deadline,
 		]);
-		if (detail) {
+		// A slug no listing read could look for is not "no such event": it
+		// falls through to the facts below, or an error.
+		if (detail && !("unchecked" in detail)) {
 			if (!detail.found) return { found: false };
 			const { hackathon, winners, submissions } = detail.body;
-			return { found: true, late: false, hackathon, winners, submissions };
+			// null: no roster held or none read; the page lists none either way.
+			return {
+				found: true,
+				late: false,
+				hackathon,
+				winners,
+				submissions: submissions ?? [],
+			};
 		}
 		const row =
 			curated ??

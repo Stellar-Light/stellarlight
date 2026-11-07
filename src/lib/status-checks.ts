@@ -66,8 +66,112 @@ export interface StatusCheck {
 	detail: string;
 	/** Date of the reading the result rests on (YYYY-MM-DD), null when none. */
 	asOf: string | null;
-	/** The first linked protocol's DefiLlama page. */
+	/** The DefiLlama page that shows the linked rows (llamaPageFor, the
+	 * row's tvlMethodUrl), else the first linked protocol's page. */
 	sourceUrl: string;
+}
+
+// ── which DefiLlama page carries a row's TVL (sls-102) ─────────────────────
+
+const familyKey = (slugs: readonly string[]) => [...slugs].sort().join(",");
+
+/** The DefiLlama page that shows a row's whole tvlUSD: the protocol's own
+ * page for one mapped row; for several, the parent page whose children are
+ * exactly those rows, as enrich-tvl last read DefiLlama's list and stored
+ * it (llamaListing.parent). Null when the row is not mapped, or when no
+ * single page sums its rows or none was read yet; each llamaSlugs entry is
+ * then one contributing page. Blend read 2026-11-04: parent#blend's children
+ * are its four rows, and https://defillama.com/protocol/blend ("Blend
+ * (Combined)") shows their TVL without pool2 and active loans, the same base
+ * tvlUSD sums. */
+export function llamaPageFor(
+	slugs: readonly string[] | null | undefined,
+	parent: unknown,
+): string | null {
+	if (!slugs?.length) return null;
+	const page =
+		slugs.length === 1 ? slugs[0] : typeof parent === "string" ? parent : "";
+	return page ? `https://defillama.com/protocol/${page}` : null;
+}
+
+/** Why a multi-row tvlUSD has no page to cite, and the repair for each:
+ *   parent-not-read  DefiLlama's list still names a parent whose children are
+ *                    exactly these rows, so the row has not stored it yet
+ *                    (enrich-tvl has not run since): run the TVL lane.
+ *   family-drift     no parent's children are exactly these rows any more:
+ *                    the map must follow DefiLlama's family.
+ *   could-not-check  DefiLlama's list was not read, so neither can be told.
+ */
+export const TVL_CITATION_GAP_ACTIONS = {
+	"parent-not-read":
+		"dispatch enrich-tvl.yml with execute=true: DefiLlama's parent page sums exactly these rows and the row has not stored it yet",
+	"family-drift":
+		"reconcile LLAMA_MAP in scripts/enrich-tvl.ts with DefiLlama's family for these rows: no parent's children are exactly them now",
+	"could-not-check":
+		"DefiLlama's protocol list could not be read, so a missing read and a changed family cannot be told apart: rerun",
+} as const;
+export type TvlCitationGapCause = keyof typeof TVL_CITATION_GAP_ACTIONS;
+
+/** Rows whose tvlUSD sums several DefiLlama rows with no single page to cite
+ * (tvlMethodUrl null), each with its cause, read against DefiLlama's own list
+ * by the same rule the writer uses (llamaParentOf). protocols null = the list
+ * could not be read. The nightly completeness sweep files each one. */
+export function tvlCitationGaps(
+	rows: readonly {
+		slug: string;
+		tvlUSD?: number | null;
+		llamaSlugs?: string[] | null;
+		tvlMethodUrl?: string | null;
+	}[],
+	protocols: readonly { slug: string; parentProtocol?: string | null }[] | null,
+): {
+	slug: string;
+	family: string[];
+	cause: TvlCitationGapCause;
+	action: string;
+}[] {
+	return rows
+		.filter(
+			(r) =>
+				typeof r.tvlUSD === "number" &&
+				(r.llamaSlugs?.length ?? 0) > 1 &&
+				!r.tvlMethodUrl,
+		)
+		.map((r) => {
+			const family = r.llamaSlugs as string[];
+			const cause: TvlCitationGapCause = !protocols
+				? "could-not-check"
+				: llamaParentOf(family, protocols)
+					? "parent-not-read"
+					: "family-drift";
+			return {
+				slug: r.slug,
+				family,
+				cause,
+				action: TVL_CITATION_GAP_ACTIONS[cause],
+			};
+		});
+}
+
+/** Writer side: the DefiLlama parent (its page slug) whose children in the
+ * /protocols list are exactly the mapped slugs. Null for one slug, for slugs
+ * of different families or none, and for a parent with a child the mapping
+ * lacks: its page would then show more than tvlUSD adds. */
+export function llamaParentOf(
+	slugs: readonly string[],
+	protocols: readonly { slug: string; parentProtocol?: string | null }[],
+): string | null {
+	if (slugs.length < 2) return null;
+	const bySlug = new Map(protocols.map((p) => [p.slug, p]));
+	const parents = new Set(slugs.map((s) => bySlug.get(s)?.parentProtocol));
+	const [parent] = parents;
+	if (parents.size !== 1 || !parent?.startsWith("parent#")) return null;
+	const children = protocols
+		.filter((p) => p.parentProtocol === parent)
+		.map((p) => p.slug);
+	return familyKey(children) === familyKey(slugs)
+		? parent.slice("parent#".length)
+		: null;
 }
 
 // ── writer side: enrich-tvl ─────────────────────────────────────────────
@@ -256,6 +360,46 @@ const daysBetween = (from: string, to: string) =>
 
 const usd = (v: number) => `$${Math.round(v).toLocaleString("en-US")}`;
 
+/** A citation that must name a page (a status check, a basis upgrade's
+ * evidence): the page that shows the linked rows, else the first row's own
+ * page. slugs is non-empty. */
+export const llamaCitationFor = (slugs: readonly string[], parent: unknown) =>
+	llamaPageFor(slugs, parent) ?? `https://defillama.com/protocol/${slugs[0]}`;
+
+/** A stored date as ISO 8601, or null when it is missing or unparseable. */
+export function parseDate(v: unknown): string | null {
+	const s = iso(v);
+	const t = s ? Date.parse(s) : Number.NaN;
+	return Number.isFinite(t) ? new Date(t).toISOString() : null;
+}
+
+/** One parse for a served TVL reading. `at` is its date when that date can
+ * date a reading now: parseable and not after `now`. `stale` is true when
+ * `at` is missing or more than TVL_FRESH_DAYS old, null with no reading.
+ * Only the date is checked, not why it is old: enrich-tvl keeps the stored
+ * figure when no DefiLlama row resolves (tvlFieldsFor), and a missed weekly
+ * run leaves every figure as it was (#1912: Sentora's sat from 2026-08-10). */
+export function tvlReadingOf(
+	tvlUSD: unknown,
+	tvlAsOf: unknown,
+	now: Date = new Date(),
+): { at: string | null; stale: boolean | null } {
+	const parsed = parseDate(tvlAsOf);
+	const at = parsed && Date.parse(parsed) <= now.getTime() ? parsed : null;
+	if (typeof tvlUSD !== "number") return { at, stale: null };
+	const fresh = at && daysBetween(at, now.toISOString()) <= TVL_FRESH_DAYS;
+	return { at, stale: !fresh };
+}
+
+/** tvlReadingOf's stale flag, for the row builders. */
+export function tvlStaleOf(
+	tvlUSD: unknown,
+	tvlAsOf: unknown,
+	now: Date = new Date(),
+): boolean | null {
+	return tvlReadingOf(tvlUSD, tvlAsOf, now).stale;
+}
+
 function linkedSlugs(v: unknown): string[] | null {
 	const slugs = Array.isArray(v)
 		? v.filter((s): s is string => typeof s === "string" && s.length > 0)
@@ -271,7 +415,7 @@ function listingCheck(p: any, slugs: string[]): StatusCheck {
 	const base = {
 		check: "defillama-listing" as const,
 		asOf: checkedAt,
-		sourceUrl: `https://defillama.com/protocol/${slugs[0]}`,
+		sourceUrl: llamaCitationFor(slugs, p.llamaListing?.parent),
 	};
 	if (!checkedAt || !l?.state)
 		return {
@@ -325,7 +469,7 @@ function tvlQuietCheck(p: any, slugs: string[], now: Date): StatusCheck {
 		detail,
 		asOf,
 		// where the TVL figure is read; the contract readings are on the row
-		sourceUrl: `https://defillama.com/protocol/${slugs[0]}`,
+		sourceUrl: llamaCitationFor(slugs, p.llamaListing?.parent),
 	});
 	if (typeof p.tvlUSD !== "number")
 		return result("could-not-check", "No DefiLlama TVL figure on record.");

@@ -39,6 +39,7 @@ import { clampLimit, parseFields, pickFields } from "@/lib/http-params";
 import { instanceMemo } from "@/lib/instance-memo";
 import { laneHints, superlativeNote } from "@/lib/lane-hints";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
+import { ANCHOR_PROFILE_SELECT, anchorProfileOf } from "@/lib/partner-public";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { pickDeployment } from "@/lib/project-deployment";
 import {
@@ -67,7 +68,7 @@ import {
 	HIDDEN_PROJECT_STATUSES,
 	RESOLVABLE_PROJECT_STATUSES,
 } from "@/lib/project-status";
-import { PROJECT_TYPES } from "@/lib/project-types";
+import { PROJECT_TYPES, VENUE_ROLES } from "@/lib/project-types";
 import { type RepoResult, searchRepos } from "@/lib/repo-search";
 import {
 	mergeProducts,
@@ -75,7 +76,12 @@ import {
 	productsCoverage,
 } from "@/lib/rwa-products";
 import { serverTiming } from "@/lib/server-timing";
-import { type StatusCheck, statusChecksFor } from "@/lib/status-checks";
+import {
+	llamaPageFor,
+	type StatusCheck,
+	statusChecksFor,
+	tvlStaleOf,
+} from "@/lib/status-checks";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -235,12 +241,16 @@ async function semanticProjectRows(
 			publicGoods: pickPublicGoods(p.publicGoods),
 			tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 			tvlAsOf: p.tvlAsOf ?? null,
+			tvlStale: tvlStaleOf(p.tvlUSD, p.tvlAsOf),
 			// sls-031: TVL methodology provenance (which source, computed how)
 			tvlSource: p.tvlSource ?? null,
 			tvlMethod: p.tvlMethod ?? null,
 			// sls-039: mapped DefiLlama identifiers + citation URL
 			llamaSlugs: pickLlamaSlugs(p.llamaSlugs),
-			tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(p.llamaSlugs)),
+			tvlMethodUrl: llamaPageFor(
+				pickLlamaSlugs(p.llamaSlugs),
+				p.llamaListing?.parent,
+			),
 			// sls-032/035: route-level bridge evidence + DEX-landscape role
 			routes: pickRoutes(p.routes),
 			venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
@@ -302,16 +312,7 @@ const anchorRowsMemo = instanceMemo(REFERENCE_TTL_MS, async () => {
 		limit: 100,
 		depth: 0,
 		pagination: false,
-		select: {
-			name: true,
-			slug: true,
-			country: true,
-			regions: true,
-			assets: true,
-			seps: true,
-			rampTypes: true,
-			lastPartnerUpdateAt: true,
-		},
+		select: ANCHOR_PROFILE_SELECT,
 	});
 });
 
@@ -430,6 +431,8 @@ interface ProjectRow {
 	// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 	onchain?: any;
 	tvlAsOf?: string | null;
+	// #1912: the reading is past the weekly refresh (tvlStaleOf)
+	tvlStale?: boolean | null;
 	// sls-031: TVL provenance — which source produced tvlUSD and how.
 	tvlSource?: string | null;
 	tvlMethod?: string | null;
@@ -882,17 +885,14 @@ function pickOnchain(o: any) {
 	};
 }
 
-// sls-039: served llamaSlugs (null when unmapped — mirrors tvlUSD's "null =
-// not tracked" semantics) + a citation URL to the provider's own protocol
-// page, where the full TVL time series lives.
+// sls-039: served llamaSlugs (null when unmapped, as tvlUSD's null means
+// not tracked). tvlMethodUrl is llamaPageFor: the provider page that shows
+// the whole sum (sls-102), where the full TVL time series lives.
 function pickLlamaSlugs(slugs: unknown): string[] | null {
 	const arr = Array.isArray(slugs)
 		? slugs.filter((s): s is string => typeof s === "string" && s.length > 0)
 		: [];
 	return arr.length ? arr : null;
-}
-function tvlMethodUrlFor(slugs: string[] | null): string | null {
-	return slugs?.length ? `https://defillama.com/protocol/${slugs[0]}` : null;
 }
 
 /** Every bounded read in this request shares one budget, so a stalled
@@ -990,6 +990,25 @@ async function handle(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
+	// venueRole filter (sls-113): the param was ignored with a warning, so
+	// "list the AMMs" meant paging the whole DEX type client-side. venueRole is
+	// a single select, so it is the status pattern: exact match in the read,
+	// at the semantic source, through the fold and on the served rows. A row
+	// whose venueRole is null (not yet classified) never matches.
+	const venueRoleParam = sp.get("venueRole")?.trim() || null;
+	const VALID_VENUE_ROLES = VENUE_ROLES;
+	if (
+		venueRoleParam &&
+		!(VALID_VENUE_ROLES as readonly string[]).includes(venueRoleParam)
+	) {
+		return NextResponse.json(
+			{
+				error: `Invalid venueRole '${venueRoleParam}'.`,
+				validVenueRoles: VALID_VENUE_ROLES,
+			},
+			{ status: 400 },
+		);
+	}
 	// Honest contract (2026-07-11 audit, EMPTY-DISHONEST med): an unknown param
 	// (?country=NG, ?sep=24) was silently dropped — the caller got unfiltered
 	// results while believing they'd filtered. We can't 400 (additive-only
@@ -1004,6 +1023,7 @@ async function handle(req: NextRequest) {
 		"scfAwarded",
 		"scfAwardedOnly",
 		"status",
+		"venueRole",
 		"limit",
 		"offset",
 		"exp",
@@ -1018,7 +1038,7 @@ async function handle(req: NextRequest) {
 	// instead of falling through to a quiet empty or thinner page.
 	const warnings: string[] = unknownParams.length
 		? [
-				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, type, status, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria); structured coverage is matched from query text.`,
+				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, type, status, venueRole, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria); structured coverage is matched from query text.`,
 			]
 		: [];
 
@@ -1048,7 +1068,14 @@ async function handle(req: NextRequest) {
 	// nested wrong). Returning the default project list here is actively harmful —
 	// the caller reports it as the answer ("no escrow/vault projects exist") when
 	// the real projects were never searched. Return an honest empty + how to fix.
-	if (!q && !category && !scfAwardedOnly && !statusParam && !typeParam) {
+	if (
+		!q &&
+		!category &&
+		!scfAwardedOnly &&
+		!statusParam &&
+		!typeParam &&
+		!venueRoleParam
+	) {
 		logApiHit({
 			req,
 			startedAt,
@@ -1141,6 +1168,9 @@ async function handle(req: NextRequest) {
 				// the memory bank recorded and this file's comment already
 				// claimed while the operator below contradicted it.
 				where.types = { in: [typeParam] };
+			}
+			if (venueRoleParam) {
+				where.venueRole = { equals: venueRoleParam };
 			}
 
 			// `let`, not `const`: the fuzzy-recovery rung below may re-point these
@@ -1397,6 +1427,72 @@ async function handle(req: NextRequest) {
 				warnings.push(degradedWarning("projects audits rollup", e));
 			}
 
+			// A lineage shadow is served as its canonical (the fold below), so
+			// under ?status=, ?type= or ?venueRole= it belongs to the set only
+			// when its canonical passes the filter. Decided here, before ranking and
+			// counting: dropped later on the page, the shadow was still counted
+			// and total promised a row no page could serve (sls-113 review). A
+			// failed read leaves the shadows in and nulls the total (not a
+			// decoration read), so an unchecked count is never served as exact.
+			const isShadow = (d: { slug?: string; canonicalSlug?: string | null }) =>
+				!!d.canonicalSlug && d.canonicalSlug !== d.slug;
+			const shadowTargets = [
+				...new Set(
+					(docs as Array<{ slug?: string; canonicalSlug?: string | null }>)
+						.filter(isShadow)
+						.map((d) => d.canonicalSlug as string),
+				),
+			];
+			if (
+				(statusParam || typeParam || venueRoleParam) &&
+				shadowTargets.length
+			) {
+				const canon = await degradedRead(
+					"projects shadow canonicals",
+					() =>
+						payload.find({
+							collection: "projects",
+							where: { slug: { in: shadowTargets } },
+							limit: shadowTargets.length,
+							depth: 0,
+							select: {
+								slug: true,
+								status: true,
+								types: true,
+								venueRole: true,
+							},
+						}),
+					null,
+					DEFAULT_READ_TIMEOUT_MS,
+				);
+				if (canon.warning) warnings.push(canon.warning);
+				if (canon.value) {
+					const bySlug = new Map(
+						(
+							canon.value.docs as Array<{
+								slug: string;
+								status?: string;
+								types?: string[] | null;
+								venueRole?: string | null;
+							}>
+						).map((c) => [c.slug, c]),
+					);
+					docs = docs.filter((d) => {
+						const c = isShadow(d)
+							? bySlug.get(d.canonicalSlug as string)
+							: null;
+						// dangling pointer: the fold keeps the shadow, so it counts
+						return (
+							!c ||
+							((!statusParam || c.status === statusParam) &&
+								(!typeParam ||
+									(Array.isArray(c.types) && c.types.includes(typeParam))) &&
+								(!venueRoleParam || c.venueRole === venueRoleParam))
+						);
+					});
+				}
+			}
+
 			projects = (
 				docs as Array<{
 					id: string;
@@ -1423,6 +1519,7 @@ async function handle(req: NextRequest) {
 					tvlSource?: string | null;
 					tvlMethod?: string | null;
 					llamaSlugs?: string[] | null;
+					llamaListing?: { parent?: string | null } | null;
 					routes?: unknown;
 					venueRole?: string | null;
 					productKind?: string | null;
@@ -1537,12 +1634,16 @@ async function handle(req: NextRequest) {
 					publicGoods: pickPublicGoods(p.publicGoods),
 					tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 					tvlAsOf: p.tvlAsOf ?? null,
+					tvlStale: tvlStaleOf(p.tvlUSD, p.tvlAsOf),
 					// sls-031: TVL methodology provenance
 					tvlSource: p.tvlSource ?? null,
 					tvlMethod: p.tvlMethod ?? null,
 					// sls-039: mapped DefiLlama identifiers + citation URL
 					llamaSlugs: pickLlamaSlugs(p.llamaSlugs),
-					tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(p.llamaSlugs)),
+					tvlMethodUrl: llamaPageFor(
+						pickLlamaSlugs(p.llamaSlugs),
+						p.llamaListing?.parent,
+					),
 					// sls-032/035: route-level bridge evidence + DEX-landscape role
 					routes: pickRoutes(p.routes),
 					venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
@@ -2040,10 +2141,14 @@ async function handle(req: NextRequest) {
 	// !typeParam: an exact-type enumeration's membership is the typed set —
 	// padding it with vector neighbours would re-introduce off-set rows the
 	// belt then strips page-side, recreating the returned<limit ghost pages
-	// this fix removes (sls-033).
+	// this fix removes (sls-033). !venueRoleParam for the same reason: the
+	// role set is a small curated list, and the vector index takes no role
+	// filter, so its nearest neighbours filtered afterwards are a cut sample
+	// of that list, not a search of it (sls-113 review).
 	if (
 		q &&
 		!typeParam &&
+		!venueRoleParam &&
 		offset === 0 &&
 		!didYouMean &&
 		scored.length < limit &&
@@ -2226,12 +2331,16 @@ async function handle(req: NextRequest) {
 					deployment: pickDeployment(c.deployment, c.slug),
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
+					tvlStale: tvlStaleOf(c.tvlUSD, c.tvlAsOf),
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not
 					// inherited from the shadow via the spread.
 					tvlSource: c.tvlSource ?? null,
 					tvlMethod: c.tvlMethod ?? null,
 					llamaSlugs: pickLlamaSlugs(c.llamaSlugs),
-					tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(c.llamaSlugs)),
+					tvlMethodUrl: llamaPageFor(
+						pickLlamaSlugs(c.llamaSlugs),
+						c.llamaListing?.parent,
+					),
 					routes: pickRoutes(c.routes),
 					venueRole: typeof c.venueRole === "string" ? c.venueRole : null,
 					// sls-033: product kind + availability must be the CANONICAL's too
@@ -2295,6 +2404,13 @@ async function handle(req: NextRequest) {
 					const tps = Array.isArray(effective.types) ? effective.types : [];
 					if (!tps.includes(typeParam)) continue;
 				}
+				// ...and ?venueRole= the same way (sls-113).
+				if (
+					venueRoleParam &&
+					effective !== row &&
+					effective.venueRole !== venueRoleParam
+				)
+					continue;
 				if (seen.has(effective.slug)) continue;
 				seen.add(effective.slug);
 				folded.push(effective);
@@ -2329,6 +2445,9 @@ async function handle(req: NextRequest) {
 		baseProjects = baseProjects.filter(
 			(p) => Array.isArray(p.types) && p.types.includes(typeParam),
 		);
+	}
+	if (venueRoleParam) {
+		baseProjects = baseProjects.filter((p) => p.venueRole === venueRoleParam);
 	}
 	// Final liveness float across the FULL assembled list (keyword + semantic
 	// augmentation). A dead project that was the sole strict keyword match must
@@ -2469,27 +2588,13 @@ async function handle(req: NextRequest) {
 		}
 	}
 	// Anchor corridor data (sls-012): Anchor-typed project records described
-	// their coverage only in prose ("20 African countries incl. Nigeria") —
-	// unfilterable, undateable. The partner directory already carries the
-	// STRUCTURED fields (stellar.toml-enriched countries/assets/SEPs/ramps),
-	// so join them on by normalized name instead of duplicating the data.
+	// their coverage only in prose ("20 African countries incl. Nigeria"),
+	// unfilterable and undateable. The partner directory carries the
+	// STRUCTURED fields (assets and SEPs from a recorded stellar.toml read,
+	// ramps and regions as recorded), so join them on by normalized name
+	// instead of duplicating the data (anchorProfileOf, #1909).
 	// Best-effort, one small query only when the page contains Anchor rows.
-	interface AnchorProfile {
-		slug: string;
-		country: string | null;
-		regions: string[];
-		assets: string[];
-		seps: string[];
-		rampTypes: string[];
-		asOf: string | null;
-		url: string;
-		/** sls-049: empty capability arrays are NOT negative claims. "profiled"
-		 * = at least one capability field is verified-filled; "not-profiled" =
-		 * we haven't verified this anchor's capabilities yet (unknown, not
-		 * absent). Capability fields fill only from verifiable sources
-		 * (stellar.toml / the provider's own docs). */
-		profileState: "profiled" | "not-profiled";
-	}
+	type AnchorProfile = ReturnType<typeof anchorProfileOf>;
 	let anchorProfiles = new Map<string, AnchorProfile>();
 	const norm = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
 	// projectsOut is a union of keyword rows (carry `types`) and semantic-search
@@ -2508,42 +2613,8 @@ async function handle(req: NextRequest) {
 				DEFAULT_READ_TIMEOUT_MS,
 			);
 			const m = new Map<string, AnchorProfile>();
-			for (const d of pRes.docs as unknown as Array<Record<string, unknown>>) {
-				const tags = (arr: unknown): string[] =>
-					Array.isArray(arr)
-						? arr
-								.map((x) =>
-									typeof x === "string"
-										? x
-										: String(
-												(x as { tag?: unknown; code?: unknown })?.tag ??
-													(x as { code?: unknown })?.code ??
-													"",
-											),
-								)
-								.filter(Boolean)
-						: [];
-				const assets = tags(d.assets);
-				const seps = tags(d.seps);
-				const rampTypes = tags(d.rampTypes);
-				m.set(norm(String(d.name)), {
-					slug: String(d.slug),
-					country: (d.country as string) ?? null,
-					regions: tags(d.regions),
-					assets,
-					seps,
-					rampTypes,
-					asOf: (d.lastPartnerUpdateAt as string) ?? null,
-					url: `https://stellarlight.xyz/partners/${d.slug}`,
-					// sls-049: make empty-vs-unknown answer-visible — an anchor whose
-					// narrative asserts live corridors but whose capability arrays
-					// are all empty is UNPROFILED, not capability-free.
-					profileState:
-						assets.length || seps.length || rampTypes.length
-							? "profiled"
-							: "not-profiled",
-				});
-			}
+			for (const d of pRes.docs as unknown as Array<Record<string, unknown>>)
+				m.set(norm(String(d.name)), anchorProfileOf(d));
 			anchorProfiles = m;
 		} catch (e) {
 			// best-effort — rows ship without anchorProfile on any error
@@ -2655,6 +2726,29 @@ async function handle(req: NextRequest) {
 		partial: failedReadsOf(warnings).length > 0,
 	});
 
+	// The matchMode label (see the hint comment at matchModeLabel below).
+	const tierLabel = {
+		strict: "all keywords matched",
+		"loose-1": "all but one keyword matched",
+		majority: "majority of keywords matched (broader scope)",
+		corrected: didYouMean
+			? `matched via a typo-distance name recovery: no project is spelled '${didYouMean.from}', so these rows are for '${didYouMean.to}'; verify the identity before relying on it`
+			: "matched via a known spelling correction: the query token does not occur in these rows; verify the identity before relying on it",
+		semantic:
+			"no keyword match: semantically similar results (verify relevance before relying on them)",
+		all: "no keyword filter",
+	}[matchMode];
+	const setLabel =
+		typeParam && q
+			? "type filter defines the result set (every typed row included); q ranks within it"
+			: tierLabel;
+	// The semantic rung does not run under venueRole (sls-113 review): say so,
+	// or semantic false would read like "nothing was found by meaning".
+	const modeLabel =
+		venueRoleParam && q
+			? `${setLabel}; venueRole set: no rows found by meaning are added, so this page holds keyword matches among the classified rows only`
+			: setLabel;
+
 	return NextResponse.json(
 		view({
 			meta: withProjectsPartial({
@@ -2666,6 +2760,7 @@ async function handle(req: NextRequest) {
 					category,
 					type: typeParam,
 					status: statusParam,
+					venueRole: venueRoleParam,
 					scfAwarded: scfAwardedOnly,
 					scfAwardedOnly,
 					limit,
@@ -2709,23 +2804,7 @@ async function handle(req: NextRequest) {
 				//   majority → "most of your keywords matched — broader interpretation"
 				//   semantic → NO keyword matched; vector-similarity guesses only
 				//   all      → no keyword query was supplied
-				matchModeLabel: {
-					strict: "all keywords matched",
-					"loose-1": "all but one keyword matched",
-					majority: "majority of keywords matched (broader scope)",
-					corrected: didYouMean
-						? `matched via a typo-distance name recovery: no project is spelled '${didYouMean.from}', so these rows are for '${didYouMean.to}'; verify the identity before relying on it`
-						: "matched via a known spelling correction: the query token does not occur in these rows; verify the identity before relying on it",
-					semantic:
-						"no keyword match: semantically similar results (verify relevance before relying on them)",
-					all: "no keyword filter",
-				}[matchMode],
-				...(typeParam && q
-					? {
-							matchModeLabel:
-								"type filter defines the result set (every typed row included); q ranks within it",
-						}
-					: {}),
+				matchModeLabel: modeLabel,
 				// total = matches before offset/limit slicing — lets paging
 				// consumers know when they've seen everything. `semantic` counts
 				// the rows on THIS page served by the vector fallback (also part
@@ -2755,7 +2834,7 @@ async function handle(req: NextRequest) {
 				...(projectsWithOrg.some((p) => p.anchorProfile)
 					? {
 							anchorProfileBasis:
-								"anchorProfile capability arrays (assets/seps/rampTypes) fill only from VERIFIABLE sources (the anchor's stellar.toml / its own docs). Empty arrays mean not-yet-profiled (see profileState); NOT that the anchor lacks the capability; never turn an empty array into a negative claim when the description asserts live corridors.",
+								"anchorProfile.assets and seps come only from the anchor's stellar.toml and are null unless a read is recorded (profileState profiled); [] then means the read found none. rampTypes and regions are as recorded, confirmed from the transfer server or entered by a curator, and null when none is. Never turn a null into a negative claim when the description asserts live corridors.",
 						}
 					: {}),
 				// Semantic-only page: NOT a match, and it must not read like one.

@@ -1,6 +1,6 @@
 /**
  * Portions of this file are ported, with changes, from
- * stellar-experimental/stellar-raven at commit b1dc866 (Apache License 2.0),
+ * stellar-experimental/stellar-raven at commit fec1c79 (Apache License 2.0),
  * and through Raven's vendored scorer from @cloudflare/codemode 0.4.2 (MIT
  * License, Copyright (c) 2025 Cloudflare, Inc.). See THIRD-PARTY-NOTICES.md
  * and LICENSES/ for the notices and license texts.
@@ -33,14 +33,16 @@
  * stellarDocs entries from Raven's own inventory, every field identical but
  * provenance (source URL, fetch time). Either miss
  * exits 2, as does a changed ported source file (PORTED_FROM_RAVEN), a missing
- * --raven, or a thrown error: re-port before trusting a verdict. Exit 0 =
+ * --raven, or a thrown error: re-port before trusting a verdict. A missing
+ * --raven exits 2 with the usage line; once a checkout is given, every exit-2
+ * message names the ported files that differ from fec1c79. Exit 0 =
  * Raven would accept, 1 = it would hold (gate breach, a lower accepted total,
  * a per-question hit-to-miss flip in any of the 544 rows across five lanes:
  * 338 legacy, 23 skills, 49 holdout, 122 extended, 12 protocol; or a catalog
  * build guard). Question counts come from Raven's case files, the same for
  * the baseline and the candidate.
  *
- * Ported from Raven at commit b1dc866 (2026-10-15):
+ * Ported from Raven at commit fec1c79 (2026-11-03; first port b1dc866):
  *   src/catalog/vendor/search-scoring.ts  field scorer and coverage gate
  *   src/catalog/scoring.ts                keyword blends, stopword rescue,
  *                                         aliases, acronym rescue, diversity
@@ -53,13 +55,21 @@
  *                                         phrases, schema keywords (DF filter),
  *                                         buildStellarDocs + title keywords,
  *                                         exposure and leak guards
- *   scripts/description-notes.mjs, emitted-text-guard.mjs
+ *   scripts/description-notes.mjs         reference rewrites, clause drops,
+ *                                         schema scrubs
+ *   scripts/emitted-text-guard.mjs, scripts/lib/skill-markdown.mjs
  *   eval/run-routing.mjs, eval/lib/grade.mjs  lanes, grading, gate rule
- * Data is read from the checkout at run time (exclusions, scrubs, notes,
- * retrieval profiles, cases, thresholds), never copied here. Lumenloop and
- * skills entries come from the committed manifest as is: our spec cannot move
- * them. stellarDocs keywords are rebuilt because Raven's title filter reads
- * Scout vocabulary.
+ * Policy is data, read from the checkout at run time with the TypeScript
+ * parser (scripts/eval/raven-policy.ts; a file that does not parse, or a
+ * declaration that is missing, not const, changed later in the file or not a
+ * literal, exits 2): the exclusions in src/policy/scout-exposure.ts and
+ * scripts/exposure.mjs, the scrubs in scripts/description-notes.mjs and the
+ * retired-skill pattern in src/skills/scrub.ts. Policy files are not pinned;
+ * every run prints their sha256 and --json records it. Only ported code is
+ * pinned (PORTED_FROM_RAVEN). Notes, retrieval profiles, cases and thresholds
+ * are read whole from Raven's JSON. None of it is copied here. Lumenloop and skills entries come from the committed
+ * manifest as is: our spec cannot move them. stellarDocs keywords are rebuilt
+ * because Raven's title filter reads Scout vocabulary.
  *
  * Validated 2026-10-20 beyond the self-check: our 1.9.72 snapshot reproduces
  * Raven's own fresh-1.9.72 run (.agents/rounds/2026-10-08-routing-repair in its
@@ -73,14 +83,17 @@
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { isEntry, policyReader, scoutExposure, sha256 } from "./raven-policy";
 
 /**
- * The Raven source files this script ports, hashed at commit b1dc866. Any
+ * The Raven source files this script ports, hashed at commit fec1c79. Any
  * difference fails the self-check: Raven can change its scorer without
  * changing its accepted totals, and a port of old code would then grade a
- * spec by rules Raven no longer runs.
+ * spec by rules Raven no longer runs. Policy files are data: read, shape
+ * checked and hashed into the report on every run, never pinned here.
  */
-const PORTED_FROM_RAVEN: Record<string, string> = {
+export const PORTED_AT = "fec1c79";
+export const PORTED_FROM_RAVEN: Record<string, string> = {
 	"src/catalog/vendor/search-scoring.ts":
 		"718924d10533ea49d472602f600ece0e4d7a0aae3e9e0ca5a95d9a8c6e611b14",
 	"src/catalog/scoring.ts":
@@ -98,13 +111,15 @@ const PORTED_FROM_RAVEN: Record<string, string> = {
 	"src/catalog/extract-routing-phrases.ts":
 		"943251c31eb5ce37ea27ee960ad7aa707a80793df0dfdda8c77df7d16b247812",
 	"scripts/build-catalog.mjs":
-		"ee74cbd0f454fcb1c9befcfe35335d1efdda35b1a3ca6981a6bbc485f32dfa6b",
+		"0cce099cb2d8284811761e2f8fdab80761a3f5d0c3874f109dd398b6061ba0f4",
 	"scripts/description-notes.mjs":
-		"7dcc25e2d52672cdff2fb9ee3916c78d64faf5ee6ccf1816d097e63dcc68c908",
+		"3a7dcd565016bf90516ba47daaad5d43beb04636ea170bd73104b4a2672bfcf5",
 	"scripts/emitted-text-guard.mjs":
-		"4ba4fa5df05cde34ba3516f4fd4cd2c91d1b09c6725a2d65ae83c47830e75717",
+		"45c3f619ce9165fd8c180e39b7432c984e91ec2f7843877181db05d3522636d2",
+	"scripts/lib/skill-markdown.mjs":
+		"0b0e3be17701dff06a8fd97d838dab9c2c477bcc3afd4e8f62920d9d767bcb1b",
 	"eval/run-routing.mjs":
-		"61fdb67b1d8cc17d81afd3719d68e3e56f398104c15d93744a26d701841c11bb",
+		"9a938a710fe3b573e1e0306021e3816c77448ba41be6c375bb15b555de43916a",
 	"eval/lib/grade.mjs":
 		"86d42c16038821629ad517cf9db0a8a6238a197caea8917801463e9986c3a8cf",
 };
@@ -1511,82 +1526,32 @@ interface Policy {
 	retiredSkillRe: RegExp;
 	notes: Map<string, string>; // operationId -> plainText note (from manifest)
 	profiles: Map<string, Profile>; // entry id -> retrievalProfile (from manifest)
+	files: Record<string, string>; // policy file -> sha256, as read this run
 }
 
-function sourceBlock(src: string, start: string, end: string, file: string) {
-	const i = src.indexOf(start);
-	const j = i < 0 ? -1 : src.indexOf(end, i + start.length);
-	if (i < 0 || j < 0)
-		throw new Error(
-			`${file}: "${start}" not found; Raven's source layout changed, update the replica's parser`,
-		);
-	return src.slice(i + start.length, j);
-}
-
-function loadPolicy(dir: string, manifest: { entries: Entry[] }): Policy {
-	const read = (p: string) => readFileSync(join(dir, p), "utf8");
-	const exposure = read("src/policy/scout-exposure.ts");
-	const pairs = (block: string) =>
-		new Map(
-			[...block.matchAll(/\[\s*"([A-Z]+ [^"]+)"\s*,\s*"([^"]+)"\s*\]/g)].map(
-				(m) => [m[1] as string, m[2] as string],
-			),
-		);
-	const strings = (block: string) =>
-		[...block.matchAll(/"((?:[^"\\]|\\.)*)"/g)].map(
-			(m) => JSON.parse(`"${m[1]}"`) as string,
-		);
-	const excluded = pairs(
-		sourceBlock(
-			exposure,
-			"EXCLUDED_SCOUT_OPERATIONS = new Map([",
-			"]);",
-			"scout-exposure.ts",
-		),
+export function loadPolicy(
+	dir: string,
+	manifest: { entries: Entry[] },
+): Policy {
+	const files: Record<string, string> = {};
+	const text = (p: string) => {
+		const t = readFileSync(join(dir, p), "utf8");
+		files[p] = sha256(t);
+		return t;
+	};
+	const reader = (p: string) => policyReader(p, text(p));
+	const { excluded, optionalExcluded, absentPaths } = scoutExposure(
+		text("src/policy/scout-exposure.ts"),
 	);
-	const optionalExcluded = pairs(
-		sourceBlock(
-			exposure,
-			"OPTIONAL_EXCLUDED_SCOUT_OPERATIONS = new Map([",
-			"]);",
-			"scout-exposure.ts",
-		),
+	const scrubs = reader("scripts/description-notes.mjs").record(
+		"SCOUT_DESCRIPTION_SCRUBS",
 	);
-	const absentPaths = new Set(
-		strings(
-			sourceBlock(
-				exposure,
-				"SCOUT_PATHS_ABSENT_FROM_SPEC = new Set(",
-				");",
-				"scout-exposure.ts",
-			),
-		),
+	const excludedLumenloop = [
+		...reader("scripts/exposure.mjs").set("EXCLUDED_LUMENLOOP_OPS"),
+	];
+	const retiredSkillRe = reader("src/skills/scrub.ts").regex(
+		"RETIRED_SKILL_REF_RE",
 	);
-	const notesSrc = read("scripts/description-notes.mjs")
-		.split("\n")
-		.filter((l) => !l.trim().startsWith("//"))
-		.join("\n");
-	const scrubs: Record<string, string[]> = {};
-	for (const m of sourceBlock(
-		notesSrc,
-		"SCOUT_DESCRIPTION_SCRUBS = {",
-		"\n};",
-		"description-notes.mjs",
-	).matchAll(/(\w+):\s*\[([\s\S]*?)\]/g))
-		scrubs[m[1] as string] = strings(m[2] as string);
-	const excludedLumenloop = strings(
-		sourceBlock(
-			read("scripts/exposure.mjs"),
-			"EXCLUDED_LUMENLOOP_OPS = new Set([",
-			"]);",
-			"exposure.mjs",
-		),
-	);
-	const re = read("src/skills/scrub.ts").match(
-		/RETIRED_SKILL_REF_RE\s*=\s*\/(.+?)\/([a-z]*);/,
-	);
-	if (!re)
-		throw new Error("src/skills/scrub.ts: RETIRED_SKILL_REF_RE not found");
 	const notes = new Map<string, string>();
 	const profiles = new Map<string, Profile>();
 	for (const e of manifest.entries) {
@@ -1606,9 +1571,10 @@ function loadPolicy(dir: string, manifest: { entries: Entry[] }): Policy {
 		absentPaths,
 		scrubs,
 		excludedLumenloop,
-		retiredSkillRe: new RegExp(re[1] as string, re[2]),
+		retiredSkillRe,
 		notes,
 		profiles,
+		files,
 	};
 }
 
@@ -1633,7 +1599,22 @@ function leakIn(text: string, p: Policy): string | null {
 		.toLowerCase();
 	for (const sig of p.excludedOps) {
 		const path = sig.split(" ")[1] as string;
-		if (decoded.includes(path.toLowerCase()))
+		// A templated segment (`{id}`) also matches a concrete value. This is
+		// Raven's rule at fec1c79, holes included: an id followed by "/" is no
+		// leak to Raven's build either. Pinned by the parity test in
+		// src/lib/__tests__/raven-gate-replica.test.ts; do not make it stricter.
+		const templated = /\{[^}/]+\}/.test(path)
+			? new RegExp(
+					`${path
+						.toLowerCase()
+						.split(/(\{[^}/]+\})/)
+						.map((part) =>
+							/^\{[^}/]+\}$/.test(part) ? "[^\\s/`)\\]]+" : regexEscape(part),
+						)
+						.join("")}(?![\\w/-])`,
+				)
+			: null;
+		if (decoded.includes(path.toLowerCase()) || templated?.test(decoded))
 			return `excluded scout endpoint path "${path}"`;
 	}
 	if (p.retiredSkillRe.test(text)) return "retired-skill reference";
@@ -1679,14 +1660,24 @@ function rewriteScoutRefs(
 	return out.replace(/(^|[\s(/])\?([a-z])/g, "$1$2");
 }
 
-function schemaScrubber(p: Policy): (value: unknown) => unknown {
+/**
+ * description-notes.mjs SCOUT_TEXT_REF_REWRITES and what reads it: schema
+ * descriptions get non-callable labels (scrubNonExposedScoutSchemaRefs),
+ * operation description fields drop every clause that names a non-exposed
+ * operation (dropNonExposedScoutClauses, Raven #344).
+ */
+function scoutTextScrubs(p: Policy) {
 	const names = new Set(
 		[...p.nonExposedNames].flatMap((n) => [n.toLowerCase(), snakeCase(n)]),
 	);
 	const rewrites: Array<[string, string]> = [
 		...[...p.excludedOps].flatMap((sig): Array<[string, string]> => {
 			const path = sig.slice(sig.indexOf(" ") + 1);
-			const label = `upstream ${(path.split("/").filter(Boolean).at(-1) ?? "").replaceAll("-", " ")}`;
+			const last = path
+				.split("/")
+				.filter((part) => part && !/^\{.*\}$/.test(part))
+				.at(-1);
+			const label = `upstream ${(last ?? "").replaceAll("-", " ")}`;
 			return [
 				[sig, label],
 				[path, label],
@@ -1702,42 +1693,60 @@ function schemaScrubber(p: Policy): (value: unknown) => unknown {
 			]);
 		}),
 	].sort((a, b) => b[0].length - a[0].length);
-	const scrub = (value: unknown): unknown => {
-		if (Array.isArray(value)) return value.map(scrub);
+	const refRe = (needle: string) =>
+		needle.includes("/")
+			? completePathRe(needle)
+			: new RegExp(
+					`(?<![\\w])(?:scout\\.)?${regexEscape(needle)}(?![\\w])`,
+					"gi",
+				);
+	const lists = (text: string) => {
+		const d = text.replace(
+			/\((?:[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)?\s*,\s*)+[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)?\)/g,
+			(list) => {
+				const all = list.slice(1, -1).split(/\s*,\s*/);
+				const kept = all.filter(
+					(n) => !names.has(n.replace(/^scout\./i, "").toLowerCase()),
+				);
+				if (kept.length === all.length) return list;
+				return kept.length > 0 ? `(${kept.join(", ")})` : "";
+			},
+		);
+		return d === text
+			? text
+			: d
+					.replace(/[ \t]+([,.;:!?])/g, "$1")
+					.replace(/[ \t]{2,}/g, " ")
+					.trim();
+	};
+	const dropClauses = (text: string) => {
+		const d = lists(text);
+		// Raven's splitter at fec1c79, byte for byte, pinned by the parity test
+		// in src/lib/__tests__/raven-gate-replica.test.ts: the description Raven
+		// scores is the contract, so do not split more finely here.
+		const clauses = d.split(/(?<=[.!?;])\s+|\n+/u);
+		const kept = clauses.filter(
+			(c) => !rewrites.some(([needle]) => refRe(needle).test(c)),
+		);
+		return kept.length === clauses.length ? d : kept.join(" ").trim();
+	};
+	const scrubSchema = (value: unknown): unknown => {
+		if (Array.isArray(value)) return value.map(scrubSchema);
 		if (!value || typeof value !== "object") return value;
 		const out: Json = {};
 		for (const [key, item] of Object.entries(value)) {
 			if (key !== "description" || typeof item !== "string") {
-				out[key] = scrub(item);
+				out[key] = scrubSchema(item);
 				continue;
 			}
-			let d = item.replace(
-				/\((?:[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)?\s*,\s*)+[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)?\)/g,
-				(list) => {
-					const all = list.slice(1, -1).split(/\s*,\s*/);
-					const kept = all.filter(
-						(n) => !names.has(n.replace(/^scout\./i, "").toLowerCase()),
-					);
-					if (kept.length === all.length) return list;
-					return kept.length > 0 ? `(${kept.join(", ")})` : "";
-				},
-			);
-			for (const [needle, replacement] of rewrites) {
-				d = needle.includes("/")
-					? d.replace(completePathRe(needle), replacement)
-					: d.replace(
-							new RegExp(
-								`(?<![\\w])(?:scout\\.)?${regexEscape(needle)}(?![\\w])`,
-								"gi",
-							),
-							replacement,
-						);
-			}
+			let d = lists(item);
+			for (const [needle, replacement] of rewrites)
+				d = d.replace(refRe(needle), replacement);
 			out[key] = d;
 		}
 		return out;
 	};
-	return scrub;
+	return { scrubSchema, dropClauses };
 }
 
 /**
@@ -1745,7 +1754,7 @@ function schemaScrubber(p: Policy): (value: unknown) => unknown {
  * attachOperationKeywords, over an openapi object deep-sorted the way Raven's
  * refresh-inventory.mjs stores it. Build-guard failures are collected, not thrown.
  */
-function buildScoutEntries(
+export function buildScoutEntries(
 	rawOpenapi: Json,
 	p: Policy,
 	problems: string[],
@@ -1775,11 +1784,10 @@ function buildScoutEntries(
 	for (const sig of p.excluded.keys())
 		if (!present.has(sig))
 			problems.push(`excluded Scout op no longer in the spec: ${sig}`);
-	const optionalPaths = new Set(
-		[...p.optionalExcluded.keys()].map((s) => s.split(" ")[1]),
-	);
+	// Every excluded path, not only the optional ones (Raven #347).
+	const excludedPaths = new Set([...p.excludedOps].map((s) => s.split(" ")[1]));
 	for (const sig of present.keys())
-		if (optionalPaths.has(sig.split(" ")[1]) && !p.excludedOps.has(sig))
+		if (excludedPaths.has(sig.split(" ")[1]) && !p.excludedOps.has(sig))
 			problems.push(`unreviewed Scout op at an excluded path: ${sig}`);
 	for (const [sig, name] of [...p.excluded, ...p.optionalExcluded])
 		if (present.has(sig) && present.get(sig) !== name)
@@ -1788,7 +1796,7 @@ function buildScoutEntries(
 		if (path in paths)
 			problems.push(`previously unlisted Scout path appeared: ${path}`);
 
-	const scrub = schemaScrubber(p);
+	const { scrubSchema: scrub, dropClauses } = scoutTextScrubs(p);
 	const refPairs = scoutRefRewrites(openapi, p);
 	const base =
 		((openapi.servers as Json[] | undefined)?.[0]?.url as string) ??
@@ -1804,17 +1812,23 @@ function buildScoutEntries(
 			const httpMethod = method.toUpperCase();
 			if (p.excludedOps.has(`${httpMethod} ${path}`)) continue;
 			const opId = (op.operationId as string) ?? `${method}_${slugify(path)}`;
-			let raw = [op.summary, op.description]
-				.filter(Boolean)
-				.join(". ")
-				.replace(/\.\.\s/g, ". ");
+			// scrubScoutDescription: needles, then clause drops, per field.
+			let fields = [
+				(op.summary as string | undefined) ?? "",
+				(op.description as string | undefined) ?? "",
+			];
 			for (const needle of p.scrubs[opId] ?? []) {
-				if (!raw.includes(needle))
+				if (!fields.some((text) => text.includes(needle)))
 					problems.push(
 						`SCOUT_DESCRIPTION_SCRUBS["${opId}"] needle no longer matches: ${JSON.stringify(needle)}`,
 					);
-				raw = raw.split(needle).join("");
+				fields = fields.map((text) => text.split(needle).join(""));
 			}
+			const raw = fields
+				.map(dropClauses)
+				.filter(Boolean)
+				.join(". ")
+				.replace(/\.\.\s/g, ". ");
 			const description = plainText(rewriteScoutRefs(raw, refPairs));
 			const note = p.notes.get(opId);
 			if (note !== undefined) consumedNotes.add(opId);
@@ -1899,7 +1913,7 @@ function buildScoutEntries(
 }
 
 /** buildStellarDocs + stellarDocsTitleExtras + attachOperationKeywords(cap 256). */
-function buildDocsEntries(
+export function buildDocsEntries(
 	docsSpec: Json,
 	titles: { titles: Array<{ path: string; title: string }> },
 	others: Entry[],
@@ -1916,16 +1930,17 @@ function buildDocsEntries(
 		inputSchema: op.params,
 		outputSchema: op.outputSchema ?? null,
 		transport: {
-			type: "algolia",
-			index: backend.index,
-			endpoint: backend.endpoint,
-			hosts: backend.hosts,
-			applicationIdEnv: backend.applicationIdEnv,
+			type: "mintlify",
+			apiBase: backend.apiBase,
+			searchPath: backend.searchPath,
+			pagePath: backend.pagePath,
+			siteOrigin: backend.siteOrigin,
 			apiKeyEnv: backend.apiKeyEnv,
+			candidateWindow: backend.candidateWindow,
+			attemptTimeoutsMs: backend.attemptTimeoutsMs,
 			retry: backend.retry,
-			baseParams: backend.baseParams,
 			constraints: backend.constraints,
-			algolia: op.algolia,
+			mintlify: op.mintlify,
 		},
 	}));
 	const searchable = [...others, ...docs].filter((e) => e.searchable !== false);
@@ -1970,15 +1985,12 @@ function buildDocsEntries(
 	}
 	const owners: Array<{ path: string; id: string }> = [];
 	for (const e of docs) {
-		const algolia = ((e.transport as Json).algolia as Json | undefined) ?? {};
-		const prefixes =
-			((algolia.clientFilter as Json | undefined)?.prefixesAnyOf as string[]) ??
-			[];
-		for (const prefix of prefixes)
-			owners.push({
-				path: prefix.replace(/^https?:\/\/[^/]+/, "").replace(/\/$/, ""),
-				id: e.id,
-			});
+		const mintlify = ((e.transport as Json).mintlify as Json | undefined) ?? {};
+		for (const prefix of (mintlify.include as string[] | undefined) ?? []) {
+			// Meeting-note titles are dates and author pages (Raven #309).
+			if (!prefix.startsWith("/docs/")) continue;
+			owners.push({ path: prefix.replace(/\/$/, ""), id: e.id });
+		}
 	}
 	owners.sort((a, b) => b.path.length - a.path.length);
 	const titlesById = new Map<string, string[]>();
@@ -2576,6 +2588,32 @@ function attribute(
 
 // --- CLI ---------------------------------------------------------------------
 
+/** Ported files whose sha256 differs from PORTED_FROM_RAVEN, or are missing. */
+export function changedPortedSources(
+	dir: string,
+	pins = PORTED_FROM_RAVEN,
+): string[] {
+	const changed: string[] = [];
+	for (const [path, sha] of Object.entries(pins)) {
+		let bytes: Buffer;
+		try {
+			bytes = readFileSync(join(dir, path));
+		} catch {
+			changed.push(`${path} (missing)`);
+			continue;
+		}
+		if (createHash("sha256").update(bytes).digest("hex") !== sha)
+			changed.push(path);
+	}
+	return changed;
+}
+
+/** The drift line every exit-2 message after --raven carries. */
+export const portedSourcesLine = (changed: string[]) =>
+	changed.length
+		? `ported Raven sources changed since ${PORTED_AT}: ${changed.join(", ")}`
+		: `ported Raven sources identical to ${PORTED_AT}`;
+
 function arg(name: string): string | undefined {
 	const i = process.argv.indexOf(name);
 	return i >= 0 ? process.argv[i + 1] : undefined;
@@ -2589,6 +2627,8 @@ async function main() {
 		);
 		process.exit(2);
 	}
+	// Hashed before anything that can throw: the catch below names them too.
+	const changedSources = changedPortedSources(resolve(dir));
 	const raven = loadRaven(resolve(dir));
 	const accepted = (raven.gates.evidence as Json).acceptedTotals as Totals;
 	const pinned = (
@@ -2629,19 +2669,12 @@ async function main() {
 				!rebuilt.some((r) => r.id === e.id),
 		)
 		.map((e) => e.id);
-	const changedSources = Object.entries(PORTED_FROM_RAVEN)
-		.filter(([path, sha]) => {
-			try {
-				const bytes = readFileSync(join(raven.dir, path));
-				return createHash("sha256").update(bytes).digest("hex") !== sha;
-			} catch {
-				return true;
-			}
-		})
-		.map(([path]) => path);
 	console.log(`Raven checkout ${raven.dir}`);
+	console.log(`  ${portedSourcesLine(changedSources)}`);
 	console.log(
-		`  ported sources: ${changedSources.length ? `CHANGED since b1dc866 (${changedSources.join(", ")})` : "identical to b1dc866"}`,
+		`  policy read at run time (sha256): ${Object.entries(raven.policy.files)
+			.map(([path, sha]) => `${path} ${sha.slice(0, 12)}`)
+			.join(", ")}`,
 	);
 	console.log(
 		`  manifest sha256 ${raven.manifestSha.slice(0, 12)} ${raven.manifestSha === pinned ? "= gates.json evidence" : "!= gates.json evidence (baseline may be stale)"}`,
@@ -2663,7 +2696,7 @@ async function main() {
 		baseProblems.length
 	) {
 		console.log(
-			"SELF-CHECK FAILED: Raven's scorer, builder or grading changed; re-port (and re-pin PORTED_FROM_RAVEN) before trusting a verdict.",
+			`SELF-CHECK FAILED (${portedSourcesLine(changedSources)}${changedSources.length ? "" : ", so Raven data or a file this script does not port moved"}${baseProblems.length ? `; baseline: ${[...new Set(baseProblems)].join("; ")}` : ""}): re-port, and re-pin PORTED_FROM_RAVEN, before trusting a verdict.`,
 		);
 		process.exit(2);
 	}
@@ -2780,7 +2813,11 @@ async function main() {
 			out,
 			`${JSON.stringify(
 				{
-					raven: { dir: raven.dir, manifestSha256: raven.manifestSha },
+					raven: {
+						dir: raven.dir,
+						manifestSha256: raven.manifestSha,
+						policySha256: raven.policy.files,
+					},
 					candidate: { version, spec: specPath ?? "src/lib/openapi-spec.ts" },
 					accepted,
 					totals,
@@ -2809,10 +2846,18 @@ async function main() {
 	process.exitCode = pass ? 0 : 1;
 }
 
-main().catch((e) => {
-	console.error(
-		"raven-gate-replica failed:",
-		e instanceof Error ? e.message : e,
-	);
-	process.exit(2);
-});
+// Run only as the entry script: a path that merely contains this file's name
+// (a worktree, a test runner) must not start a run on import.
+if (isEntry(import.meta.url))
+	main().catch((e) => {
+		console.error(
+			"raven-gate-replica failed:",
+			e instanceof Error ? e.message : e,
+		);
+		const dir = arg("--raven") ?? process.env.RAVEN_DIR;
+		if (dir)
+			console.error(
+				`  ${portedSourcesLine(changedPortedSources(resolve(dir)))}`,
+			);
+		process.exit(2);
+	});

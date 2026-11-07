@@ -28,6 +28,9 @@ export interface SignalsInput {
 	/** Extracted pub fn/type names (src/lib/code-symbols.ts). */
 	codeSymbols: string[];
 	contractInterface: string[];
+	/** contractInterfacePaths[i] is the file contractInterface[i] was read
+	 * from (issue #1906), same order and length. */
+	contractInterfacePaths: string[];
 	stellarDeps: string[];
 	/** JS/TS SDK capability tags (src/lib/code-symbols.ts detectSdkCapabilities). */
 	sdkCapabilities: string[];
@@ -85,6 +88,7 @@ export function signalsToWrite(
 		farmFlags: s.farmFlags,
 		codeSymbols: s.codeSymbols,
 		contractInterface: s.contractInterface,
+		contractInterfacePaths: s.contractInterfacePaths,
 		stellarDeps: s.stellarDeps,
 		sdkCapabilities: s.sdkCapabilities,
 		codeDomains: s.codeDomains,

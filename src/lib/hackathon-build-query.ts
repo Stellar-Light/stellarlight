@@ -27,6 +27,7 @@ import {
 import { fetchAllDoraHacksHackathonsChecked } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { PROJECT_TYPES } from "@/lib/project-types";
+import { findWholeSet } from "@/lib/whole-set";
 
 export const BUILD_FILTER_PARAMS = [
 	"q",
@@ -97,13 +98,15 @@ export async function listedEvents(): Promise<ListedEvents> {
 	let complete = dora.complete && !!payload;
 	if (payload)
 		try {
-			const res = await payload.find({
+			// a set past the ceiling leaves names unchecked: not complete
+			const res = await findWholeSet<{ slug: string; name: string }>(payload, {
 				collection: "hackathons",
 				limit: 300,
 				depth: 0,
 				select: { slug: true, name: true },
 			});
 			for (const d of res.docs) events.push({ slug: d.slug, title: d.name });
+			complete &&= res.complete;
 		} catch {
 			complete = false;
 		}

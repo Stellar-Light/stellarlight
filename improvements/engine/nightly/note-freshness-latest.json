@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-03T13:15:07.401Z",
+	"generatedAt": "2026-11-05T13:42:25.448Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -98,6 +98,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:trionlabs/stellar-8004:npm:@trionlabs/stellar8004",
+			"note": "note (asOf 2026-09-02) cites 0.0.11; registry latest is 0.0.12 (published 2026-11-03)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:openzeppelin/openzeppelin-relayer:docker:openzeppelin/openzeppelin-relayer",
 			"note": "note (asOf 2026-09-01) cites 2026-08-19; registry latest is 2026-10-22 (published 2026-10-22)",
 			"surface": "code"
@@ -150,6 +155,11 @@
 		{
 			"probe": "note-stale:stellar-broker/client:npm:@stellar-broker/client",
 			"note": "note (asOf 2026-09-01) cites 0.7.0; registry latest is 0.8.0 (published 2026-11-03)",
+			"surface": "code"
+		},
+		{
+			"probe": "note-stale:rahul-soshte/rs-soroban-client:crates:soroban-client",
+			"note": "note (asOf 2026-09-07) cites 0.6.0; registry latest is 0.7.0 (published 2026-11-03)",
 			"surface": "code"
 		},
 		{
@@ -213,6 +223,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:stellar/rs-stellar-archivist:crates:stellar-archivist",
+			"note": "note (asOf 2026-09-14) cites 28.0.0; registry latest is 30.0.0 (published 2026-11-04)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:stellar/rs-stellar-strkey:crates:stellar-strkey",
 			"note": "note (asOf 2026-09-14) cites 0.0.18; registry latest is 1.0.0 (published 2026-10-08)",
 			"surface": "code"
@@ -233,6 +248,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-stale:stellar-expert/tx-meta-effects-parser:npm:@stellar-expert/tx-meta-effects-parser",
+			"note": "note (asOf 2026-09-14) cites 10.1.1; registry latest is 11.0.0 (published 2026-11-03)",
+			"surface": "code"
+		},
+		{
 			"probe": "note-stale:stellar-expert/stellar-tx-signers-inspector:npm:@stellar-expert/tx-signers-inspector",
 			"note": "note (asOf 2026-09-14) cites 2.0.0; registry latest is 3.0.0 (published 2026-10-01)",
 			"surface": "code"
@@ -244,7 +264,7 @@
 		},
 		{
 			"probe": "note-stale:stellar-expert/contract-wasm-interface-parser:npm:@stellar-expert/contract-wasm-interface-parser",
-			"note": "note (asOf 2026-09-14) cites 6.0.1; registry latest is 6.1.1 (published 2026-11-01)",
+			"note": "note (asOf 2026-09-14) cites 6.0.1; registry latest is 6.2.0 (published 2026-11-03)",
 			"surface": "code"
 		},
 		{
@@ -279,7 +299,7 @@
 		},
 		{
 			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
-			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 2.3.1 (published 2026-10-29)",
+			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 2.3.2 (published 2026-11-03)",
 			"surface": "code"
 		},
 		{
@@ -305,6 +325,11 @@
 		{
 			"probe": "note-repo-gone:soomtochukwu/tradeflow",
 			"note": "public note asOf 2026-05-15; github.com/soomtochukwu/tradeflow is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-repo-gone:ggoldani/agent-passport",
+			"note": "public note asOf 2026-09-02; github.com/ggoldani/agent-passport is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
 		},
 		{
