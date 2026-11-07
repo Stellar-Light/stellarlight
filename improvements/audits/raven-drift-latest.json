@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-11-06T13:27:55.944Z",
-	"specVersion": "1.9.122",
+	"generatedAt": "2026-11-07T12:07:15.117Z",
+	"specVersion": "1.9.126",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
@@ -51,16 +51,51 @@
 	"ravenPolicySource": "https://raw.githubusercontent.com/stellar-experimental/stellar-raven/main/src/policy/scout-exposure.ts",
 	"ravenPolicySha256": "b0ad8eb46dc853c7cb155da969fb867928a819e4830486bc757286f9a7c04b60",
 	"inCatalogButExcludedByPolicy": [],
-	"catalogOps": null,
+	"catalogOps": [
+		"analyzeEcosystem",
+		"compareHackathons",
+		"explainRepo",
+		"getBuilders",
+		"getChangelog",
+		"getClusters",
+		"getHackathon",
+		"getHackathons",
+		"getLeaderboard",
+		"getPartner",
+		"getPartners",
+		"getPeople",
+		"getRepoTrust",
+		"getRfps",
+		"getSkill",
+		"getStatus",
+		"hackathonBrief",
+		"listAudits",
+		"listSkills",
+		"matchPartners",
+		"resolveProject",
+		"scfPitch",
+		"searchHackathonBuilds",
+		"searchProjects",
+		"searchRepos",
+		"searchResearch",
+		"vetIdea"
+	],
 	"missingFromCatalog": [],
-	"undiscoverable": [],
+	"undiscoverable": [
+		"getChanges",
+		"listContracts"
+	],
 	"uncataloged": [],
-	"laggingInCatalog": [],
+	"laggingInCatalog": [
+		{
+			"op": "getStablecoins",
+			"addedAt": "2026-11-04",
+			"ageDays": 3
+		}
+	],
 	"extraInCatalog": [],
-	"claimedOpCount": null,
-	"auditArchetypeRoutesToRegistry": null,
-	"checked": false,
-	"notes": [
-		"could not read Raven's catalog: initialize → HTTP 401: "
-	]
+	"claimedOpCount": 30,
+	"auditArchetypeRoutesToRegistry": true,
+	"checked": true,
+	"notes": []
 }
