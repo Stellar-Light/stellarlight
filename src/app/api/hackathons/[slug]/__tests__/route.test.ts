@@ -1102,6 +1102,48 @@ describe("an event whose stored rows are a partial list", () => {
 
 // Audit 2026-11-04: between the deploy and the import, winners was [] beside
 // a note saying each placed row carries its source.
+// Re-check 2026-11-06: a store read that failed read as an empty roster: the
+// note said no roster is held and the winners note that none is stored yet.
+describe("a failed builds read on a curated event whose rows live only in the store", () => {
+	it("says the roster could not be read, serves submissions null and no unstored note", async () => {
+		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");
+		const { fetchAllDoraHacksHackathons } = await import(
+			"@/lib/integrations/dorahacks"
+		);
+		const ev = CURATED_HACKATHONS.find((h) => h.uname === "hackmeridian-2026");
+		vi.mocked(fetchAllDoraHacksHackathons).mockResolvedValueOnce([
+			{ ...ev, source: "curated" } as DoraHacksHackathon,
+		]);
+		vi.mocked(getHackathonBuildsIndex).mockRejectedValueOnce(
+			new Error("store timeout"),
+		);
+		eventPage = undefined;
+		try {
+			const body = await getEvent("hackmeridian-2026");
+			expect(body.submissions).toBeNull();
+			expect(body.winners).toEqual([]);
+			expect(body.meta.note).toMatch(/could not be read just now/);
+			expect(body.meta.note).not.toMatch(/no submission roster is held/);
+			const note = body.hackathon.stats.winnersNote;
+			expect(note).not.toBe(
+				CURATED_WINNERS_NOTES_UNSTORED["hackmeridian-2026"],
+			);
+			expect(note).not.toMatch(/none of them is stored here yet/);
+			expect(note).toMatch(/could not be read just now/);
+			expect(body.hackathon.stats.totalSubmissions).toBeNull();
+			expect(
+				undeclaredInServed(
+					spec,
+					responseSchema(spec, "/api/hackathons/{slug}"),
+					body,
+				),
+			).toEqual([]);
+		} finally {
+			eventPage = storedEvent;
+		}
+	});
+});
+
 describe("a partial event with nothing stored yet", () => {
 	it("says none of the list's placements is stored yet", async () => {
 		const { getHackathonBuildsIndex } = await import("@/lib/hackathon-builds");

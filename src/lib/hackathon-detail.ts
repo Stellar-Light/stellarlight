@@ -558,11 +558,15 @@ export async function getHackathonDetail(
 					await fetchHackathonSubmissions(dora).catch(() => null);
 		// Held: rows read from the store, the curated file or DoraHacks.
 		// Not held: an event off DoraHacks with no curated roster. Unread: a
-		// DoraHacks roster no read reached.
+		// DoraHacks roster no read reached, or a curated event's store that
+		// could not be read (its imported rows are never in the file, so a
+		// failed read is unknown, not an empty roster).
 		const roster = stored.length
 			? "held"
 			: curated
-				? "not-held"
+				? index
+					? "not-held"
+					: "unread"
 				: read
 					? "held"
 					: "unread";
@@ -622,12 +626,15 @@ export async function getHackathonDetail(
 		// winner hidden upstream, a curated event's dated note, winners
 		// named off DoraHacks, or an ended DoraHacks event with none.
 		let winnersNote = hiddenWinnersNote(hidden);
-		// A list's placements not stored yet: the note says so.
+		// A list's placements not stored yet: the note says so. A store that
+		// could not be read says that, never "not stored".
 		if (dora.source === "curated")
 			winnersNote ??=
-				(!winners.some((w) => "winnerSource" in w) &&
-					CURATED_WINNERS_NOTES_UNSTORED[slug]) ||
-				(CURATED_WINNERS_NOTES[slug] ?? null);
+				roster === "unread"
+					? "Winners could not be checked: Scout's stored copy of this event's rows could not be read just now, so winners is empty, not none."
+					: (!winners.some((w) => "winnerSource" in w) &&
+							CURATED_WINNERS_NOTES_UNSTORED[slug]) ||
+						(CURATED_WINNERS_NOTES[slug] ?? null);
 		else if (winners.some((w) => "winnerSource" in w))
 			winnersNote ??=
 				WINNER_OVERLAY.find((e) => e.hackathonSlug === slug)?.note ?? null;
@@ -731,7 +738,9 @@ export async function getHackathonDetail(
 							: curated
 								? roster === "held"
 									? `Event off DoraHacks: submissions and winners come from its curated roster${fromStore ? " in Scout's stored copy" : ""}, each row's url the page that names it.`
-									: "Event off DoraHacks, kept as a curated record of its organizer's pages (externalUrl): no submission roster is held for it, so submissions is null, not none. winners lists the winners its record names, if any; stats.winnersNote says what else is published."
+									: roster === "unread"
+										? "Event off DoraHacks whose stored rows could not be read just now (Scout's stored copy did not answer), so submissions is null, not checked and not none; winners lists the winners its record names, if any."
+										: "Event off DoraHacks, kept as a curated record of its organizer's pages (externalUrl): no submission roster is held for it, so submissions is null, not none. winners lists the winners its record names, if any; stats.winnersNote says what else is published."
 								: fromStore
 									? "DoraHacks event. Submissions, winners, tracks and profile come from Scout's stored copy, refreshed daily; the event page and rules from its stored page (hackathon.rules)."
 									: liveSubmissions.length

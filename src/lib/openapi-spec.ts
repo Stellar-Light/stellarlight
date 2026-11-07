@@ -616,7 +616,7 @@ const EVENT_COVERAGE_SCHEMA = {
 	type: "string",
 	enum: [...COVERAGE_VALUES],
 	description:
-		"Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record. partial: every stored row comes from a list other than the organizer's and at least one is not a winner (HackMeridian 2026's, from HackProof), each row with an entryBasis that says why it is stored; the list is not the event's field and need not hold every entry. In both the size and mix of the field are unknown: its submission counts are null, never the winner or row count, and no share is computed over the rows. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, or none are stored.",
+		"Present only when the event's stored rows are not its full listing. winners-only: every stored row is a winner imported from the page that names it (an event off DoraHacks whose submission list Scout does not hold), so only its winners are on record. partial: every stored row comes from a list other than the organizer's and at least one is not a winner (HackMeridian 2026's, from HackProof), each row with an entryBasis that says why it is stored; the list is not the event's field and need not hold every entry. In both the size and mix of the field are unknown: its submission counts are null, never the winner or row count, and no share is computed over the rows. Absent: the stored rows are the event's listing as the daily DoraHacks sync stores it, none are stored, or the stored copy could not be read with this response (meta.note says so).",
 };
 
 /** compareHackathons' deltas for one field: the events with its highest and
@@ -681,7 +681,7 @@ const HACKATHON_TRACKS_SCHEMA = {
 const EVENT_PROFILE_SCHEMA = {
 	type: "object",
 	description:
-		"What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions. When coverage is winners-only it counts the winners only, and when it is partial the rows of that list, not the event's field, and every share in it is null.",
+		"What the event's stored submissions were about, built with and became, counted like analyzeHackathonSubmissions (shares over known values). Absent when the store holds none of its submissions, or could not be read with this response (meta.note says so). When coverage is winners-only it counts the winners only, and when it is partial the rows of that list, not the event's field, and every share in it is null.",
 	properties: {
 		coverage: EVENT_COVERAGE_SCHEMA,
 		submissions: {
