@@ -26,6 +26,7 @@ import {
 	sameValue,
 } from "../src/lib/curated-import";
 import configPromise from "../src/payload.config";
+import { exitAfterFlush } from "./lib/exit-after-flush";
 
 const EXECUTE = process.argv.includes("--execute");
 // internal: the read-back sees every field; includeSecurityHeld: a held
@@ -179,9 +180,11 @@ async function main() {
 		console.log(`${back.size} curated row(s) stored, every field read back`);
 }
 
+// Exit only after the plan has flushed: a plain process.exit cut the dry
+// run's plan and summary short on the CI runner (2026-11-07).
 main()
-	.then(() => process.exit(process.exitCode ?? 0))
+	.then(() => exitAfterFlush(process.exitCode ?? 0))
 	.catch((e) => {
 		console.error("Fatal:", e);
-		process.exit(1);
+		exitAfterFlush(1);
 	});
