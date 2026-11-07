@@ -4,7 +4,7 @@
  * Re-check 2026-11-05: /api/defillama/protocol/{slug} serves null for a
  * figure, change or history it did not read, and the project page's TVL card
  * called .map and .toFixed on those nulls. With no error boundary that blanked
- * /project/wisdomtree always and /project/benji whenever rwa.xyz was unread.
+ * /project/wisdomtree always, and /project/benji when its Horizon read fails.
  * Each null shape renders: no history means no chart, and a null figure or
  * change reads Unavailable.
  */
@@ -55,19 +55,28 @@ afterEach(() => {
 });
 
 describe("the project TVL card renders every shape the route serves", () => {
-	it("Benji with rwa.xyz unread: Unavailable, no chart, the source named", async () => {
+	it("Benji from Horizon: the figure, its date, its source and how it is counted", async () => {
 		renderWith(200, {
 			...base,
 			name: "Benji (Franklin Templeton FOBXX)",
 			slug: "benji",
-			currentTVL: null,
+			currentTVL: 1_150_573_431.9,
 			change1d: null,
+			change7d: null,
 			historicalTVL: null,
-			sourceUrl: "https://app.rwa.xyz/assets/BENJI",
+			asOf: "2026-11-07T12:00:00.000Z",
+			sourceUrl:
+				"https://horizon.stellar.org/assets?asset_code=BENJI&asset_issuer=GBHNGLLIE3KWGKCHIKMHJ5HVZHYIK7WTBE4QF5PLAKL4CJGSEU7HZIW5",
+			method: "Stellar token supply at $1.00 per share",
 		});
-		expect(await screen.findByText("Unavailable")).toBeTruthy();
+		expect(await screen.findByText("$1.15B")).toBeTruthy();
 		expect(screen.queryByTestId("tvl-chart")).toBeNull();
-		expect(screen.getByRole("link", { name: "app.rwa.xyz" })).toBeTruthy();
+		expect(
+			screen.getByRole("link", { name: "horizon.stellar.org" }),
+		).toBeTruthy();
+		expect(
+			screen.getByText(/Stellar token supply at \$1\.00 per share/),
+		).toBeTruthy();
 	});
 
 	it("WisdomTree (no figure on record): Unavailable, its own source named", async () => {

@@ -138,9 +138,9 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 					</div>
 				)}
 
-				{/* The figure's own source: rwa.xyz and manual rows carry sourceUrl
-				(it read "rwa.xyz" for WisdomTree's page, and "DeFi Llama" for
-				Benji's rwa.xyz series); every other row is DefiLlama's. */}
+				{/* The figure's own source: fund tokens (Benji, from Horizon) and
+				manual rows carry sourceUrl, and a fund token says how it is
+				counted; every other row is DefiLlama's. */}
 				<p className="text-xs text-muted-foreground mt-3">
 					Data from{" "}
 					<a
@@ -154,6 +154,7 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 						{data.sourceUrl ? hostOf(data.sourceUrl) : "DeFi Llama"}
 					</a>{" "}
 					· Stellar chain only
+					{data.method ? ` · ${data.method}` : null}
 				</p>
 			</CardContent>
 		</Card>

@@ -19,6 +19,7 @@ export interface ProtocolTVLData {
 	/** Date of the last series point the figures come from. */
 	asOf?: string | null;
 	sourceUrl?: string; // the figure's own source, when not DefiLlama
+	method?: string | null; // how the figure is counted, when it is not a protocol's TVL
 }
 
 export function useProtocolTVL(projectName: string | null) {

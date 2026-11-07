@@ -1,25 +1,63 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { RWA_REGISTRY } from "@/data/rwa-registry";
 import { apiError } from "@/lib/api-error";
+import { horizonAssetSupply, horizonAssetUrl } from "@/lib/horizon-supply";
 
 type Params = Promise<{ slug: string }>;
 
-// RWA.xyz asset IDs for projects tracked there instead of DeFi Llama
-const RWA_XYZ_ASSETS: Record<
+// Fund tokens whose Stellar figure is their supply at a fixed share price,
+// read from Horizon for the issuer the RWA registry verified from the entity
+// outward. Benji (2026-11-07): Franklin's stellar.toml says "1 BENJI token
+// corresponds to 1 share of the fund" (FOBXX), and the fund's summary
+// prospectus (SEC Form 497K, sec.gov/Archives/edgar/data/0001786958/
+// 000165558926001138/c497k.htm) says it seeks a stable $1.00 share price.
+// rwa.xyz's asset API, read here before, moved off its public v4 path.
+const BENJI = RWA_REGISTRY.find(
+	(r) =>
+		r.id === "BENJI-GBHNGLLIE3KWGKCHIKMHJ5HVZHYIK7WTBE4QF5PLAKL4CJGSEU7HZIW5",
+);
+const SUPPLY_PRICED: Record<
 	string,
 	{
-		assetId: string;
+		code: string;
+		issuer: string;
+		unitPriceUSD: number;
 		name: string;
 		category: string;
+		/** How the figure is counted: token supply, not the fund's reported
+		 * shares outstanding (SEC N-MFP3 for 2026-10-31 reported 833.6M FOBXX
+		 * shares across all chains while Stellar held 1.15B BENJI a week later). */
+		method: string;
 	}
-> = {
-	benji: {
-		assetId: "BENJI", // FOBXX fund, BENJI token on rwa.xyz
-		name: "Benji (Franklin Templeton FOBXX)",
-		category: "RWA",
-	},
-};
+> =
+	BENJI?.code && BENJI.issuer
+		? {
+				benji: {
+					code: BENJI.code,
+					issuer: BENJI.issuer,
+					unitPriceUSD: 1,
+					method: "Stellar token supply at $1.00 per share",
+					name: "Benji (Franklin Templeton FOBXX)",
+					category: "RWA",
+				},
+			}
+		: {};
 
-// Projects on neither DeFi Llama nor rwa.xyz: named with their source page.
+// One Horizon read per asset per 5 minutes, so a page view is not a call.
+const supplyCache: Record<
+	string,
+	{ at: number; value: { supply: number; readAt: string } }
+> = {};
+const SUPPLY_CACHE_TTL = 5 * 60 * 1000;
+async function cachedSupply(code: string, issuer: string) {
+	const hit = supplyCache[`${code}-${issuer}`];
+	if (hit && Date.now() - hit.at < SUPPLY_CACHE_TTL) return hit.value;
+	const value = await horizonAssetSupply(code, issuer);
+	supplyCache[`${code}-${issuer}`] = { at: Date.now(), value };
+	return value;
+}
+
+// Projects with no figure source here: named with their source page.
 // Review 2026-11-04: a figure typed in here in March 2026 (WisdomTree
 // 20,000,000) was served as current with no date; none is served now.
 const MANUAL_TVL_OVERRIDES: Record<
@@ -37,7 +75,7 @@ const MANUAL_TVL_OVERRIDES: Record<
 	},
 };
 
-/** A number DefiLlama or rwa.xyz served, or null: never 0 for unread. */
+/** A number DefiLlama served, or null: never 0 for unread. */
 const num = (v: unknown): number | null =>
 	typeof v === "number" && Number.isFinite(v) ? v : null;
 /** The date of a series' last point (ms epoch), or null. */
@@ -45,67 +83,6 @@ const lastPointAsOf = (series: { date: number }[] | null | undefined) => {
 	const last = series?.at(-1)?.date;
 	return typeof last === "number" ? new Date(last).toISOString() : null;
 };
-
-// Cache for rwa.xyz data (1 hour)
-const rwaCache: Record<string, { data: any; timestamp: number }> = {};
-const RWA_CACHE_TTL = 60 * 60 * 1000;
-
-/**
- * Fetch asset data from rwa.xyz API (requires RWA_XYZ_API_KEY env var).
- * Returns historical TVL timeseries and current value; null only when this
- * deployment holds no key (not configured). A failed read throws: it is an
- * outage the route answers 503, never a figure of null (re-check 2026-11-05).
- */
-async function fetchRwaXyzAsset(assetId: string): Promise<{
-	currentTVL: number | null;
-	historicalTVL: { date: number; tvl: number }[];
-} | null> {
-	const apiKey = process.env.RWA_XYZ_API_KEY;
-	if (!apiKey) return null;
-
-	const cacheKey = assetId;
-	const cached = rwaCache[cacheKey];
-	if (cached && Date.now() - cached.timestamp < RWA_CACHE_TTL) {
-		return cached.data;
-	}
-
-	// Fetch asset timeseries from rwa.xyz
-	const res = await fetch(
-		`https://api.rwa.xyz/v4/assets/${assetId}/timeseries?metric=market_cap&interval=day&chain=stellar`,
-		{
-			headers: {
-				Authorization: `Bearer ${apiKey}`,
-				Accept: "application/json",
-			},
-		},
-	);
-
-	if (!res.ok) throw new Error(`rwa.xyz answered ${res.status}`);
-
-	const json = await res.json();
-	const timeseries = json.data || json.timeseries || json;
-
-	// Parse timeseries into our format
-	const historicalTVL: { date: number; tvl: number }[] = [];
-	let currentTVL: number | null = null;
-
-	if (Array.isArray(timeseries)) {
-		for (const point of timeseries) {
-			const date = new Date(point.date || point.timestamp).getTime();
-			const tvl = point.value || point.market_cap || point.tvl || 0;
-			if (date && tvl) {
-				historicalTVL.push({ date, tvl });
-			}
-		}
-		if (historicalTVL.length > 0) {
-			currentTVL = historicalTVL[historicalTVL.length - 1].tvl;
-		}
-	}
-
-	const result = { currentTVL, historicalTVL };
-	rwaCache[cacheKey] = { data: result, timestamp: Date.now() };
-	return result;
-}
 
 // Cache protocol list for 1 hour in-memory
 let cachedProtocols: any[] | null = null;
@@ -140,25 +117,25 @@ export async function GET(
 	try {
 		const lowerSlug = slug.toLowerCase();
 
-		// 1. Check rwa.xyz assets first (Franklin Templeton, etc.)
-		const rwaAsset = RWA_XYZ_ASSETS[lowerSlug];
-		if (rwaAsset) {
-			const rwaData = await fetchRwaXyzAsset(rwaAsset.assetId);
-
-			// Review 2026-11-04: with no API key or a failed read this served
-			// 625,861,896, hard-coded in March 2026, as the current figure.
+		// 1. Fund tokens priced from their Horizon supply (Franklin's BENJI).
+		// A failed read throws to the 503 below, never a figure.
+		const priced = SUPPLY_PRICED[lowerSlug];
+		if (priced) {
+			const { supply, readAt } = await cachedSupply(priced.code, priced.issuer);
 			return NextResponse.json({
 				found: true,
-				name: rwaAsset.name,
+				name: priced.name,
 				slug: lowerSlug,
 				logo: null,
-				category: rwaAsset.category,
-				currentTVL: rwaData?.currentTVL ?? null,
+				category: priced.category,
+				currentTVL: supply * priced.unitPriceUSD,
 				change1d: null,
 				change7d: null,
-				historicalTVL: rwaData?.historicalTVL ?? null,
-				asOf: lastPointAsOf(rwaData?.historicalTVL),
-				sourceUrl: `https://app.rwa.xyz/assets/${rwaAsset.assetId}`,
+				// Horizon keeps no history: unknown, not an empty series.
+				historicalTVL: null,
+				asOf: readAt,
+				sourceUrl: horizonAssetUrl(priced.code, priced.issuer),
+				method: priced.method,
 			});
 		}
 
@@ -243,14 +220,14 @@ export async function GET(
 			asOf: lastPointAsOf(historicalTVL),
 		});
 	} catch {
-		// Every failure here is an upstream read: rwa.xyz with a key set, or
+		// Every failure here is an upstream read: Horizon for a fund token, or
 		// DefiLlama's protocol list or detail. Each is an outage: 503 with
 		// Retry-After, never a 500 or a 200 of nulls (re-check 2026-11-05).
 		return apiError({
 			status: 503,
 			error: "TVL source read failed",
 			advisory:
-				"rwa.xyz or DefiLlama did not answer this read. This is an outage, NOT a claim the protocol is gone or holds nothing. Retry after Retry-After.",
+				"Horizon or DefiLlama did not answer this read. This is an outage, NOT a claim the protocol is gone or holds nothing. Retry after Retry-After.",
 			retryAfterSeconds: 60,
 			startedAt,
 		});
