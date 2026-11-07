@@ -3,7 +3,10 @@ import { join } from "node:path";
 import { NextRequest } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { CURATED_BUILDS } from "@/data/curated-builds";
-import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
+import {
+	CURATED_HACKATHONS,
+	CURATED_WINNERS_NOTES_UNSTORED,
+} from "@/data/curated-hackathons";
 import { getHackathonBuildsIndex } from "@/lib/hackathon-builds";
 import {
 	type DoraHacksHackathon,
@@ -422,6 +425,38 @@ describe("a DoraHacks event whose roster could not be read", () => {
 		});
 		const miss = await getHackathonDetail(payload, "stellar-hacks-zk");
 		expect("unchecked" in miss).toBe(false);
+	});
+});
+
+// Re-check 2026-11-06: a failed store read on a curated event whose rows
+// live only in the store read as an empty roster ("no roster is held", "none
+// of them is stored here yet").
+describe("a curated event whose stored rows could not be read", () => {
+	it("says the roster could not be read, serves submissions null and no unstored note", async () => {
+		// Its rows are an import's, never in the curated file.
+		expect(
+			CURATED_BUILDS.some((b) => b.hackathonSlug === "hackmeridian-2026"),
+		).toBe(false);
+		vi.mocked(getHackathonBuildsIndex).mockRejectedValueOnce(
+			new Error("store timeout"),
+		);
+		const body = await detail("hackmeridian-2026");
+		expect(body.submissions).toBeNull();
+		expect(body.winners).toEqual([]);
+		expect(body.meta.note).toMatch(/could not be read just now/);
+		expect(body.meta.note).not.toMatch(/no submission roster is held/);
+		const note = body.hackathon.stats.winnersNote;
+		expect(note).not.toBe(CURATED_WINNERS_NOTES_UNSTORED["hackmeridian-2026"]);
+		expect(note).not.toMatch(/none of them is stored here yet/);
+		expect(note).toMatch(/could not be read just now/);
+		expect(body.hackathon.stats.totalSubmissions).toBeNull();
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/{slug}"),
+				body,
+			),
+		).toEqual([]);
 	});
 });
 
