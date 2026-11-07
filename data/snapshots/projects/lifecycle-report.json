@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-11-06T12:57:55.257Z",
+	"generatedAt": "2026-11-07T11:44:11.905Z",
 	"source": "data/snapshots/projects/*.json.gz",
-	"latestSnapshot": "2026-11-06",
+	"latestSnapshot": "2026-11-07",
 	"historyStart": "2026-10-02",
-	"snapshots": 36,
+	"snapshots": 37,
 	"definitions": {
 		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 		"markedLive": "Status Live, on any evidence.",
@@ -13,28 +13,28 @@
 	},
 	"groups": {
 		"all": {
-			"listed": 1006,
-			"launched": 943,
-			"markedLive": 849,
-			"liveOnStrongEvidence": 407,
-			"observedActive": 305,
-			"noActivityData": 413
+			"listed": 1008,
+			"launched": 945,
+			"markedLive": 851,
+			"liveOnStrongEvidence": 409,
+			"observedActive": 306,
+			"noActivityData": 415
 		},
 		"scf": {
 			"listed": 613,
 			"launched": 580,
 			"markedLive": 553,
 			"liveOnStrongEvidence": 243,
-			"observedActive": 201,
+			"observedActive": 202,
 			"noActivityData": 208
 		},
 		"nonScf": {
-			"listed": 393,
-			"launched": 363,
-			"markedLive": 296,
-			"liveOnStrongEvidence": 164,
+			"listed": 395,
+			"launched": 365,
+			"markedLive": 298,
+			"liveOnStrongEvidence": 166,
 			"observedActive": 104,
-			"noActivityData": 205
+			"noActivityData": 207
 		}
 	},
 	"cohorts": {
@@ -63,7 +63,7 @@
 				"launched": 260,
 				"markedLive": 256,
 				"liveOnStrongEvidence": 112,
-				"observedActive": 109,
+				"observedActive": 110,
 				"noActivityData": 105
 			},
 			{
@@ -88,19 +88,21 @@
 			},
 			{
 				"cohort": "2026",
-				"listed": 294,
-				"launched": 264,
-				"markedLive": 203,
-				"liveOnStrongEvidence": 120,
+				"listed": 296,
+				"launched": 266,
+				"markedLive": 205,
+				"liveOnStrongEvidence": 122,
 				"observedActive": 68,
-				"noActivityData": 151
+				"noActivityData": 153
 			}
 		]
 	},
 	"changes": {
 		"since": "2026-10-02",
 		"newlyLaunched": [
+			"chainlink",
 			"kast",
+			"metamask",
 			"stellar-atlas",
 			"zenex"
 		],
