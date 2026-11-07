@@ -2542,6 +2542,19 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Operator README (repo pushed 2026-08-29) states 'Network: Stellar Testnet'; positions settled end-to-end on testnet; LUSD distributor backs the testnet faucet only. A testnet venue is not Live. Development, not Inactive — work is current.",
 	},
+	// sls-113 review, 2026-11-07: lusty is the same product as lusty-finance
+	// above (same site, same repo; the merge is an owner decision, see
+	// improvements/TODO.md). This row read Live on product-integration while
+	// the product still runs on testnet only.
+	lusty: {
+		from: "Live",
+		to: "Pre-Release",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl:
+			"https://stellar.expert/explorer/testnet/contract/CBJZGTCF2PJVHX2BNFTFZ2L2LX6DWD5JMTLHNCVYTSOD3BLVSXZRUCJZ",
+		note: 'Lusty runs on testnet only: its README (pushed 2026-11-06) says "Network: Stellar Testnet" and that an audit is "still to come before mainnet", and the vault its live app calls, CBJZGTCF2PJVHX2BNFTFZ2L2LX6DWD5JMTLHNCVYTSOD3BLVSXZRUCJZ, exists on testnet and not on mainnet (getLedgerEntries, read 2026-11-07).',
+	},
 	mydatacoin: {
 		// Keep the label, admit the basis: no artifact evidences the described
 		// Stellar product. mydatacoin.io is a dead Azure 404 with broken TLS;
@@ -2746,7 +2759,7 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		asOf: "2026-11-07",
 		sourceUrl: "https://docs.cables.finance/support/faq",
-		note: 'Cables\' FAQ says "Cables will launch on Ethereum mainnet to start.", and Horizon holds no Cables asset (read 2026-11-07): the Soroban DEX its audits page lists is not live on Stellar.',
+		note: "Cables' FAQ says \"Cables will launch on Ethereum mainnet to start.\", and Horizon holds no asset from Cables Finance (its one CABLES asset is an unrelated issuer's; read 2026-11-07): the Soroban DEX its audits page lists is not live on Stellar.",
 	},
 	interstellar: {
 		from: "Live",
@@ -5715,7 +5728,7 @@ export const TYPES_SET: Record<string, string[]> = {
 	chartui: ["Analytics"], // chartui.com: "Chartui is a real-time market-data and charting terminal for the Stellar DEX (XLM)"; its Trade widget is a placeholder and places no trade
 	reyts: ["Payments", "Stablecoin"], // reyts.com/.well-known/stellar.toml: "Reyts is a financial technology company building regulated payment and settlement infrastructure."; issues RCAD
 	peerpesa: ["Payments", "Explorer"], // docs.peerpesa.co: "PeerPesa is a stablecoin on and off-ramp for Africa."; runs a Stellar explorer at stellar.peerpesa.co
-	prism: ["Yield"], // prismfi.cc/earn: "Optionally swap to USTRY for Stellar-native RWA yield."
+	prism: ["Bridge", "Yield"], // prismfi.cc/earn: "Deposit EVM USDC to Stellar, optionally swap to USTRY": a cross-chain deposit with optional RWA yield
 	zig3v2: ["Wallet"], // zig3.org app bundle: a wallet that keeps keys behind biometrics; its exchange and swap screens are placeholders and it never places an offer
 	// The other Derivatives rows (sls-113 review, 2026-11-07); their additive
 	// DEX and Exchange tags left TYPES_ADD. lusty and lusty-finance are two

@@ -677,10 +677,11 @@ describe("Derivatives rows are held to the on-chain checks (sls-113, 2026-11-07)
 		);
 		expect(byCheck(out, "tvl-zero-onchain-quiet")?.result).toBe("hit");
 	});
-	it("the spec names every type the TVL check covers", () => {
+	it("the spec names every type the TVL check covers, Derivatives among them", () => {
 		// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
 		const d: string = (spec as any).components.schemas.Project.properties
 			.statusChecks.description;
+		expect(d).toMatch(/only for [^:]*\bDerivatives\b[^:]* rows:/);
 		for (const t of ONCHAIN_USE_TYPES) expect(d, t).toContain(t);
 	});
 	it("the liveness report's TVL floor covers Derivatives, and holds only real types", () => {

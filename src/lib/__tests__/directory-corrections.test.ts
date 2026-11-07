@@ -232,6 +232,8 @@ const VERDICTS: Record<string, string> = {
 	zkcross: "Inactive",
 	cables: "Inactive",
 	interstellar: "Inactive",
+	// Not one of the 26: retyped Derivatives in this pass, and testnet only.
+	lusty: "Pre-Release",
 };
 
 const RETYPED: Record<string, string[]> = {
@@ -243,7 +245,7 @@ const RETYPED: Record<string, string[]> = {
 	chartui: ["Analytics"],
 	reyts: ["Payments", "Stablecoin"],
 	peerpesa: ["Payments", "Explorer"],
-	prism: ["Yield"],
+	prism: ["Bridge", "Yield"],
 	zig3v2: ["Wallet"],
 };
 
@@ -274,6 +276,8 @@ describe("every unclassified Live DEX row ends in one recorded state (sls-113, 2
 			expect(STATUS_FIX[slug].sourceUrl, slug).toMatch(/^https:\/\//);
 			expect(STATUS_FIX[slug].note?.length ?? 0, slug).toBeGreaterThan(60);
 		}
+		// Horizon holds a CABLES asset from an unrelated issuer.
+		expect(STATUS_FIX.cables.note).toMatch(/no asset from Cables Finance/);
 	});
 	it("Balanced reads as a front end over SODAX, not a DEX and stablecoin", () => {
 		const d = DESCRIPTION_FIXES["balanced-network"];
