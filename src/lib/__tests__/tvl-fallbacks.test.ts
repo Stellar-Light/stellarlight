@@ -42,8 +42,6 @@ beforeEach(() => {
 });
 afterEach(() => {
 	vi.unstubAllGlobals();
-	// Each test says whether this deployment holds an rwa.xyz key.
-	delete process.env.RWA_XYZ_API_KEY;
 });
 
 async function rwaTvl() {
@@ -125,18 +123,45 @@ describe("/api/defillama/protocol/{slug} never serves a figure it did not read",
 		},
 	];
 
-	it("Benji with no rwa.xyz key: no figure, no change, no history claimed", async () => {
-		delete process.env.RWA_XYZ_API_KEY;
-		handler = () => json({}, 500);
+	// 2026-11-07: Benji is its Horizon supply at $1.00 a share, read for the
+	// registry's verified issuer (rwa.xyz's asset API moved off its v4 path).
+	const BENJI_ISSUER = "GBHNGLLIE3KWGKCHIKMHJ5HVZHYIK7WTBE4QF5PLAKL4CJGSEU7HZIW5";
+	const benjiRecord = {
+		asset_code: "BENJI",
+		asset_issuer: BENJI_ISSUER,
+		balances: {
+			authorized: "1150573406.8338513",
+			authorized_to_maintain_liabilities: "0.0000000",
+			unauthorized: "25.0775957",
+		},
+		claimable_balances_amount: "0.0000000",
+		liquidity_pools_amount: "0.0000000",
+		contracts_amount: "0.0000000",
+	};
+
+	it("Benji is its Horizon supply at $1.00 a share, dated at the read", async () => {
+		const asked: string[] = [];
+		handler = (url) => {
+			asked.push(url);
+			return json({ _embedded: { records: [benjiRecord] } });
+		};
 		const { status, body } = await protocol("benji");
 		expect(status).toBe(200);
+		expect(body.currentTVL).toBeCloseTo(1150573431.911447, 6);
+		expect(Number.isNaN(Date.parse(body.asOf))).toBe(false);
 		expect(body).toMatchObject({
-			currentTVL: null,
 			change1d: null,
 			change7d: null,
 			historicalTVL: null,
-			asOf: null,
 		});
+		expect(body.sourceUrl).toContain("horizon.stellar.org/assets");
+		expect(asked).toHaveLength(1);
+		expect(asked[0]).toContain(`asset_issuer=${BENJI_ISSUER}`);
+	});
+
+	it("Benji with no Horizon record for the issuer answers 503, not a zero", async () => {
+		handler = () => json({ _embedded: { records: [] } });
+		expect((await protocol("benji")).status).toBe(503);
 	});
 
 	it("WisdomTree: the hard-coded 20,000,000 is gone", async () => {
@@ -170,16 +195,14 @@ describe("/api/defillama/protocol/{slug} never serves a figure it did not read",
 
 	// Re-check 2026-11-05: not configured (no key) and failed (key set, read
 	// failed) both served 200 with nulls; a failed list read was a bare 500.
-	it("Benji with a key and a failed rwa.xyz read answers 503 with Retry-After", async () => {
-		process.env.RWA_XYZ_API_KEY = "test-key-not-real";
+	it("Benji with a failed Horizon read answers 503 with Retry-After", async () => {
 		handler = () => json({ error: "upstream" }, 500);
 		const { status, retryAfter } = await protocol("benji");
 		expect(status).toBe(503);
 		expect(Number(retryAfter)).toBeGreaterThan(0);
 	});
 
-	it("Benji with a key and a thrown rwa.xyz read answers 503 too", async () => {
-		process.env.RWA_XYZ_API_KEY = "test-key-not-real";
+	it("Benji with a thrown Horizon read answers 503 too", async () => {
 		handler = () => {
 			throw new Error("socket hang up");
 		};
