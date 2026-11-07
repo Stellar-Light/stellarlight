@@ -31,6 +31,7 @@ import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isLowValueChunk } from "../../src/lib/research-ingest";
+import { isThin, JUNK_TITLE } from "./research-junk";
 
 const BASE_URL = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -73,20 +74,6 @@ interface ResearchResult {
 	title?: string;
 	content?: string;
 	url?: string;
-}
-
-// Chunks that should never dominate a result set — pure nav / dates / boilerplate.
-const JUNK_TITLE =
-	/^\d{4}-\d{2}-\d{2}$|posts tagged|^meeting notes$|^on this page$/i;
-
-function isThin(content: string): boolean {
-	// Strip markdown headers, breadcrumb bullets, "On this page" scaffolding.
-	const body = content
-		.replace(/^#.*$/gm, "")
-		.replace(/^\s*[-*]\s.*$/gm, "")
-		.replace(/on this page/gi, "")
-		.trim();
-	return body.length < 200;
 }
 
 async function fetchJson(url: string): Promise<unknown> {
