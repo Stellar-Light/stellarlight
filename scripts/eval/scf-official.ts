@@ -661,6 +661,188 @@ export function scfHold(
 	return null;
 }
 
+/** The page's own `"siteUrls":{...}` object, brace-matched off the rebuilt
+ * flight stream. One per page (checked on 531 pages, 2026-10-03). */
+export function siteUrlsOf(txt: string): Record<string, unknown> | null {
+	const at = txt.indexOf('"siteUrls":{');
+	if (at < 0) return null;
+	const start = txt.indexOf("{", at);
+	let depth = 0;
+	for (let i = start; i < txt.length; i++) {
+		if (txt[i] === "{") depth++;
+		else if (txt[i] === "}" && --depth === 0) {
+			try {
+				return JSON.parse(txt.slice(start, i + 1));
+			} catch {
+				return null;
+			}
+		}
+	}
+	return null;
+}
+
+/** An owner or owner/repo GitHub URL, nothing else: the field also carries
+ * GitLab links, Google Docs and comma-joined pairs on real pages. */
+const GITHUB_URL =
+	/^https?:\/\/(?:www\.)?github\.com\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)?\/?$/;
+const githubUrl = (v: unknown): string | undefined =>
+	typeof v === "string" && GITHUB_URL.test(v.trim()) ? v.trim() : undefined;
+/** A single absolute http(s) URL. Bare handles ("@telluscoop") and
+ * scheme-less hosts are dropped rather than guessed at. */
+const httpUrl = (v: unknown): string | undefined =>
+	typeof v === "string" && /^https?:\/\/[^\s,]+$/.test(v.trim())
+		? v.trim()
+		: undefined;
+
+/** What enrich-from-scf reads off one SCF project page. */
+export type ScfPage = {
+	description?: string;
+	website?: string;
+	twitter?: string;
+	github?: string;
+	totalAwarded?: number;
+	awardedRounds?: number[];
+	roundAwards?: Array<{
+		awardName?: string | null;
+		round: number | null;
+		amountUSD: number | null;
+		awardType: string | null;
+	}>;
+	verdictSubmissions?: number;
+	verdictAwardedAny?: number;
+	/** Numbered rounds the page marks lost (every decided card negative). */
+	notAwardedRounds?: number[];
+	/** Page-level project record (title / slug / lastAwardedRound), read for
+	 * pages the listing never served — see SCF_PAGES_BEYOND_CAP. */
+	pageSlug?: string;
+	title?: string;
+	lastAwardedRound?: number;
+};
+
+/** Read one SCF project page's HTML (enrich-from-scf's per-page detail), or
+ * null when the page carries no project record for `slug`. A renamed record's
+ * old slug answers HTTP 200 with Next's not-found payload (Vaquita's old
+ * page, 2026-11-07), and that must read as could-not-read, never as a page
+ * that awards nothing. All 531 listed pages carried their own record on
+ * 2026-11-05. */
+export function readScfPage(html: string, slug: string): ScfPage | null {
+	const result: any = {};
+
+	// Try __NEXT_DATA__ (Pages Router) first
+	const nextDataMatch = html.match(
+		/<script id="__NEXT_DATA__"[^>]*>(.*?)<\/script>/s,
+	);
+	if (nextDataMatch) {
+		try {
+			const nextData = JSON.parse(nextDataMatch[1]);
+			const pageProps = nextData?.props?.pageProps;
+			const project = pageProps?.project || pageProps?.data || pageProps;
+			if (project) {
+				const desc =
+					project.description ||
+					project.projectDescription ||
+					project.shortDescription;
+				if (desc && typeof desc === "string" && desc.length > 20) {
+					result.description = desc.slice(0, 500);
+				}
+				const urls = project.siteUrls || project.urls || project.links || {};
+				if (urls.website) result.website = urls.website;
+				if (urls.x || urls.twitter) result.twitter = urls.x || urls.twitter;
+				if (urls.github) result.github = urls.github;
+				if (project.totalAwarded && typeof project.totalAwarded === "number") {
+					result.totalAwarded = project.totalAwarded;
+				}
+			}
+		} catch {
+			/* ignore parse errors */
+		}
+	}
+
+	// Try __next_f streaming data (App Router) — extract totalAwarded
+	// Data is in escaped JSON like: totalAwarded\":115000
+	if (!result.totalAwarded) {
+		const awardedMatch = html.match(/totalAwarded\\?"?\s*:\s*(\d+(?:\.\d+)?)/);
+		if (awardedMatch) {
+			result.totalAwarded = parseFloat(awardedMatch[1]);
+		}
+	}
+
+	// Page-level project record — the same fields a listing row carries —
+	// for pages the listing never serves (SCF_PAGES_BEYOND_CAP). pageSlug
+	// doubles as the identity check: an unknown slug renders 200 with no
+	// project payload (soft-404), which must read as could-not-parse.
+	// Read off the REBUILT flight stream, not the raw HTML: the stream is
+	// cut into <script> chunks at arbitrary points, and a cut inside this
+	// field sequence blanked the identity check on 3 of 113 pages in the
+	// first dry run (mojoflower-mq4, sorostarter-9b2, opengrants-fdb).
+	const flight = [
+		...html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g),
+	]
+		.map((m) => {
+			try {
+				return JSON.parse(m[1]) as string;
+			} catch {
+				return "";
+			}
+		})
+		.join("");
+	const txt = flight || html.replace(/\\"/g, '"');
+	const pageRec = txt.match(
+		/"title":"([^"]*)","slug":"([a-z0-9-]+)","totalAwarded"/,
+	);
+	if (pageRec?.[2] !== slug) return null;
+	result.title = pageRec[1];
+	result.pageSlug = pageRec[2];
+	const pageRound = txt.match(/"lastAwardedRound":(-?\d+)/);
+	if (pageRound) result.lastAwardedRound = Number(pageRound[1]);
+
+	// Links (2026-10-03). The page is App Router, so the __NEXT_DATA__ read
+	// above never matches and no link had been read since the site moved:
+	// the last run added 0 links across 472 matched projects. The project's
+	// own submission carries them as siteUrls on the flight stream.
+	const urls = siteUrlsOf(txt);
+	if (urls) {
+		result.website ??= httpUrl(urls.website);
+		result.twitter ??= httpUrl(urls.x ?? urls.twitter);
+		result.github ??= githubUrl(urls.github);
+	}
+
+	// Awarded rounds from per-submission VERDICTS ONLY (2026-07-11 fix).
+	// The old "grab every SCF #N on the page" scrape read the badge/
+	// submission arrays, which include NOT-awarded submission rounds —
+	// that corrupted round membership on 74 records (fixed by
+	// scripts/data/fix-scf-rounds.ts; verdict parser shared via
+	// scripts/eval/scf-official.ts). No parseable verdicts → leave
+	// awardedRounds unset rather than guess.
+	const verdicts = parseRoundVerdicts(html);
+	if (verdicts.awarded.size > 0) {
+		result.awardedRounds = [...verdicts.awarded]
+			.map(Number)
+			.sort((a, b) => a - b);
+	}
+	// sls-058 defect 2: per-awarded-round official record (published budget
+	// + award type) from the same submission cards — the reconciling basis
+	// for the page's own totalAwarded.
+	if (verdicts.awards.length > 0) {
+		result.roundAwards = verdicts.awards.map((a) => ({
+			round: a.round,
+			awardName: a.awardName,
+			amountUSD: a.budgetUSD,
+			awardType: a.awardType,
+		}));
+	}
+	// Surfaced for the no-resurrect guard below (main loop): a page that
+	// parses ≥1 submission with ZERO awarded is affirmative evidence of
+	// non-award.
+	result.verdictSubmissions = verdicts.submissions;
+	result.verdictAwardedAny = verdicts.awardedAnyCount;
+	result.notAwardedRounds = [...verdicts.notAwarded]
+		.map(Number)
+		.sort((a, b) => a - b);
+
+	return Object.keys(result).length > 0 ? result : null;
+}
+
 export async function fetchDetailHtml(url: string): Promise<string | null> {
 	try {
 		const res = await fetch(url, {

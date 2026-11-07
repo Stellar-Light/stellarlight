@@ -31,6 +31,15 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-07",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"SCF #30 and $150,000 move from Wellspring to RampMeDaddy on the next enrich-scf run. SCF retitled RampMeDaddy's award record \"Wellspring\", so the sync joined it to the wellspring row by name, and that row served scfAwardedRounds [30, 41] and $250,000; it now serves [41] and $100,000, and rampmedaddy serves its #30. Wellspring's X link becomes x.com/WellspringApp, the account its own site links, on the next curate run.",
+		detail:
+			"Vaquita's scfSourceUrl moves to the page SCF serves now (vaquita-gamified-finance-pqq); its old slug answers 200 with a not-found page, which the sync now reads as no page, never as a page that awards nothing. Its rounds stay [42] and its total $64,900 (the page's awarded total, not the $79,900 paid). SwiftEx's two SCF pages are confirmed as one project by the site both list.",
+	},
+	{
 		date: "2026-11-04",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.126",
