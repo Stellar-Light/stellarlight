@@ -24,6 +24,10 @@ const SUPPLY_PRICED: Record<
 		unitPriceUSD: number;
 		name: string;
 		category: string;
+		/** How the figure is counted: token supply, not the fund's reported
+		 * shares outstanding (SEC N-MFP3 for 2026-10-31 reported 833.6M FOBXX
+		 * shares across all chains while Stellar held 1.15B BENJI a week later). */
+		method: string;
 	}
 > =
 	BENJI?.code && BENJI.issuer
@@ -32,6 +36,7 @@ const SUPPLY_PRICED: Record<
 					code: BENJI.code,
 					issuer: BENJI.issuer,
 					unitPriceUSD: 1,
+					method: "Stellar token supply at $1.00 per share",
 					name: "Benji (Franklin Templeton FOBXX)",
 					category: "RWA",
 				},
@@ -130,6 +135,7 @@ export async function GET(
 				historicalTVL: null,
 				asOf: readAt,
 				sourceUrl: horizonAssetUrl(priced.code, priced.issuer),
+				method: priced.method,
 			});
 		}
 

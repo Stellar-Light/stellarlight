@@ -155,6 +155,8 @@ describe("/api/defillama/protocol/{slug} never serves a figure it did not read",
 			historicalTVL: null,
 		});
 		expect(body.sourceUrl).toContain("horizon.stellar.org/assets");
+		// Token supply, not the fund's reported shares outstanding: said so.
+		expect(body.method).toBe("Stellar token supply at $1.00 per share");
 		expect(asked).toHaveLength(1);
 		expect(asked[0]).toContain(`asset_issuer=${BENJI_ISSUER}`);
 	});

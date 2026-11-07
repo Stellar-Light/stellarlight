@@ -35,7 +35,7 @@ export const CHANGELOG: ChangelogEntry[] = [
 		surfaces: ["api"],
 		type: "fixed",
 		summary:
-			"Benji's Stellar figure is its supply on Horizon at FOBXX's $1.00 share price, read for Franklin Templeton's verified BENJI issuer and dated at the read. It came from rwa.xyz's asset API, which this deployment never held a key for and which has moved off its public path, so the figure was null. A failed Horizon read answers 503; Horizon keeps no history, so none is served.",
+			"Benji's Stellar figure is its supply on Horizon at FOBXX's $1.00 share price, read for Franklin Templeton's verified BENJI issuer and dated at the read. It came from rwa.xyz's asset API, which this deployment never held a key for and which has moved off its public path, so the figure was null. Its method says so: the token supply on Stellar, not the fund's reported shares outstanding. A failed Horizon read answers 503; Horizon keeps no history, so none is served.",
 	},
 	{
 		date: "2026-11-04",
