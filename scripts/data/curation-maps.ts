@@ -2780,6 +2780,15 @@ export const STATUS_FIX: Record<
 // so the daily feed sync wrote tricorn's old name and stellar-registry's old
 // GitHub link back the morning after every weekly curate run.
 
+/** links.twitter corrections, equality-guarded like GITHUB_LINK_FIX below:
+ * the X account a project's own site links. */
+export const TWITTER_LINK_FIX: Record<string, string> = {
+	// 2026-11-07: the row carried x.com/rmd_wallet, the account rampmedaddy.com
+	// links (RampMeDaddy, a sister product of the same company). Wellspring's
+	// own site, wellspring.money, links x.com/WellspringApp.
+	wellspring: "https://x.com/WellspringApp",
+};
+
 /** links.github corrections — equality-guarded overwrites for records whose
  * repo link points at the WRONG place (org renames, project splits). */
 export const GITHUB_LINK_FIX: Record<string, string> = {
@@ -5822,6 +5831,7 @@ export function curatedFieldsFor(slug: string): Set<string> {
 	// Curate's own correction lists (moved here 2026-10-03). A rebrand moves
 	// the name, the description and the website together.
 	if (slug in GITHUB_LINK_FIX) owned.add("links.github");
+	if (slug in TWITTER_LINK_FIX) owned.add("links.twitter");
 	if (slug in REBRANDS) {
 		owned.add("name");
 		owned.add("shortDescription");
@@ -5847,6 +5857,7 @@ export function curatedSlugs(): string[] {
 			...Object.keys(WEBSITE_REMOVE_DEAD),
 			...Object.keys(GITHUB_LINK_REMOVE),
 			...Object.keys(GITHUB_LINK_FIX),
+			...Object.keys(TWITTER_LINK_FIX),
 			...Object.keys(REBRANDS),
 		]),
 	].sort();
@@ -6453,6 +6464,11 @@ export const OWNERSHIP_COVERAGE: Array<{
 	{ map: DOCS_LINKS, name: "DOCS_LINKS", field: "links.docs" },
 	{ map: GITHUB_REPOS_ADD, name: "GITHUB_REPOS_ADD", field: "github" },
 	{ map: GITHUB_LINK_FIX, name: "GITHUB_LINK_FIX", field: "links.github" },
+	{
+		map: TWITTER_LINK_FIX,
+		name: "TWITTER_LINK_FIX",
+		field: "links.twitter",
+	},
 	{ map: REBRANDS, name: "REBRANDS", field: "name" },
 	{ map: REBRANDS, name: "REBRANDS", field: "shortDescription" },
 	{ map: REBRANDS, name: "REBRANDS", field: "links.website" },

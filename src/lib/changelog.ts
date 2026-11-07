@@ -41,6 +41,22 @@ export const CHANGELOG: ChangelogEntry[] = [
 			"Each of the 26 was read against its operator's own material on 2026-11-07. Three trade and gain a role: SwiftEx is wallet-integrated, AIDA and Balanced are trading-ui. Seven are not spot venues and leave DEX: Zenex is Derivatives, EarnBIT Exchange, Chartui Analytics, Reyts Payments and Stablecoin, PeerPesa Payments and Explorer, Prism Bridge and Yield, and Zig3v2 Wallet. Sixteen leave Live with `statusBasis` human-verified, `statusAsOf` 2026-11-07 and the page read as `statusSourceUrl`: TinyAmm, Switchly, XCCY, AXIS and Octarine are Pre-Release (testnet only), Stabble and StarLoom Development, and CLOB, FX Swap, Wombat, Ichi, Grip, Xlmeme, zkCross, Cables and Interstellar Inactive. Balanced's description now says it is a front end for SODAX. XCCY (interest rate swaps) and both Lusty rows (an options yield venue, also Yield) are Derivatives too, and the Live Lusty row moves to Pre-Release: its README says Stellar Testnet, and its vault contract exists on testnet only. searchProjects reads perpetual, perpetuals, perps, futures, derivative and derivatives as asking for the Derivatives type, and `statusChecks` runs tvl-zero-onchain-quiet on Derivatives rows as on DEX, Lending, Bridge and Yield rows. A nightly check names any Live DEX row that has no `venueRole` and no dated reason for it.",
 	},
 	{
+		date: "2026-11-07",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"SCF #30 and $150,000 move from Wellspring to RampMeDaddy on the next enrich-scf run. SCF retitled RampMeDaddy's award record \"Wellspring\", so the sync joined it to the wellspring row by name, and that row served scfAwardedRounds [30, 41] and $250,000; it now serves [41] and $100,000, and rampmedaddy serves its #30. Wellspring's X link becomes x.com/WellspringApp, the account its own site links, on the next curate run.",
+		detail:
+			"Vaquita's scfSourceUrl moves to the page SCF serves now (vaquita-gamified-finance-pqq); its old slug answers 200 with a not-found page, which the sync now reads as no page, never as a page that awards nothing. Its rounds stay [42] and its total $64,900 (the page's awarded total, not the $79,900 paid). SwiftEx's two SCF pages are confirmed as one project by the site both list.",
+	},
+	{
+		date: "2026-11-07",
+		surfaces: ["api"],
+		type: "fixed",
+		summary:
+			"Benji's Stellar figure is its supply on Horizon at FOBXX's $1.00 share price, read for Franklin Templeton's verified BENJI issuer and dated at the read. It came from rwa.xyz's asset API, which this deployment never held a key for and which has moved off its public path, so the figure was null. Its method says so: the token supply on Stellar, not the fund's reported shares outstanding. A failed Horizon read answers 503; Horizon keeps no history, so none is served.",
+	},
+	{
 		date: "2026-11-04",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.126",

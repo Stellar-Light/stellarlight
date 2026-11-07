@@ -38,6 +38,7 @@ import {
 	STATUS_SOURCE_RETRACT,
 	statusFixHold,
 	statusFixNote,
+	TWITTER_LINK_FIX,
 	TYPE_ADD,
 	TYPES_ADD,
 	TYPES_SET,
@@ -2961,6 +2962,33 @@ async function main() {
 			id: d.id,
 			slug,
 			data: { links: { ...(d.links ?? {}), github } },
+		});
+	}
+
+	console.log("\nX link fixes (equality-guarded)");
+	for (const [slug, twitter] of Object.entries(TWITTER_LINK_FIX)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}", skipped`);
+			continue;
+		}
+		if ((d.links?.twitter ?? "").replace(/\/+$/, "") === twitter) {
+			console.log(`  ${slug}: X link already current, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: X ${d.links?.twitter ?? "(none)"} to ${twitter}`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: { links: { ...(d.links ?? {}), twitter } },
 		});
 	}
 
