@@ -263,6 +263,10 @@ export interface HackathonReview {
 			hackathon: string;
 			isWinner: boolean;
 			placement: string | null;
+			/** Present only when the win is named off DoraHacks. */
+			winnerSource?: string;
+			/** Present only on a row of a partial list: why it is stored. */
+			entryBasis?: IndexedBuild["entryBasis"];
 			similarity: number;
 			project?: IndexedBuild["project"];
 		}>;
@@ -403,6 +407,8 @@ export async function buildHackathonReview(
 					hackathon: b.hackathon.title,
 					isWinner: b.isWinner,
 					placement: b.hackathonPlacement,
+					...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
+					...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
 					similarity: Math.round(s * 1000) / 1000,
 					...(b.project !== undefined ? { project: b.project } : {}),
 				})),

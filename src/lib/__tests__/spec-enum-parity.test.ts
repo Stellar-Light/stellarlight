@@ -518,6 +518,23 @@ describe("hackathon submission vocabularies are their constants (spec 1.9.69)", 
 		expect(sorted(row.project.properties.basis.enum)).toEqual(
 			sorted(LINK_BASES),
 		);
+		const { CONTRACT_NETWORKS, ENTRY_BASES, LISTED_TIERS, MENTION_PLACES } =
+			await import("../hackathon-build-links");
+		expect(sorted(row.entryBasis.enum)).toEqual(sorted(ENTRY_BASES));
+		expect(sorted(row.contracts.items.properties.network.enum)).toEqual(
+			sorted(CONTRACT_NETWORKS),
+		);
+		const one =
+			S.paths["/api/hackathons/builds/{id}"].get.responses["200"].content[
+				"application/json"
+			].schema.properties.build.properties;
+		const entryEvidence = one.entryEvidence.properties;
+		expect(sorted(entryEvidence.mention.properties.in.enum)).toEqual(
+			sorted(MENTION_PLACES),
+		);
+		expect(sorted(entryEvidence.listed.properties.tier.enum)).toEqual(
+			sorted(LISTED_TIERS),
+		);
 		const op = S.paths["/api/hackathons/analyze"].get;
 		const param = (name: string) =>
 			(op.parameters as Param[]).find(

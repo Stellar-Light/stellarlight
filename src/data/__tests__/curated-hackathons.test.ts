@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { CURATED_BUILDS } from "../curated-builds";
+import { CURATED_BUILDS, HACKPROOF_BUILDS } from "../curated-builds";
 import {
 	CURATED_HACKATHONS,
 	CURATED_WINNERS_NOTES,
@@ -39,11 +39,29 @@ describe("curated winners notes", () => {
 			n.startsWith("Not announced upstream"),
 		);
 		expect(unannounced.map(([slug]) => slug).sort()).toEqual([
-			"hackmeridian-2026",
 			"stellar-builders-camp-jaipur-2026",
 			"stellar-journey-to-mastery-2026",
 		]);
 		for (const [slug] of unannounced) expect(won.has(slug), slug).toBe(false);
+	});
+
+	// Owner decision 2026-11-04: HackProof's six placements, served
+	// secondhand, never "Not announced upstream".
+	it("says HackMeridian 2026's placements are secondhand: HackProof's file at the pinned commit, its license, the day", () => {
+		const note = CURATED_WINNERS_NOTES["hackmeridian-2026"];
+		const file =
+			"https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/hackmeridian-2026.yaml";
+		expect(
+			note.startsWith("Secondhand: no organizer or SDF page we read names"),
+		).toBe(true);
+		expect(note).toContain(file);
+		expect(note).toMatch(/MIT-licensed/);
+		expect(note).toMatch(/checked 2026-11-04/);
+		expect(note).not.toMatch(/Not announced upstream/);
+		// Every placement it covers carries that file; nothing else places one.
+		const placed = HACKPROOF_BUILDS.filter((b) => b.isWinner);
+		expect(placed).toHaveLength(6);
+		expect(placed.every((b) => b.winnerSource === file)).toBe(true);
 	});
 });
 

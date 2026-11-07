@@ -17,6 +17,7 @@
  */
 import type { Payload } from "payload";
 import { buildContractsRegistry, type ContractRow } from "./contracts-registry";
+import type { EntryBasis } from "./hackathon-build-links";
 import { queryBuilds } from "./hackathon-build-query";
 import {
 	getHackathonBuildsIndex,
@@ -142,6 +143,10 @@ export interface HackathonBrief {
 		endedAt: string | null;
 		isWinner: boolean;
 		placement: string | null;
+		/** Present only when the win is named off DoraHacks. */
+		winnerSource?: string;
+		/** Present only on a row of a partial list: why it is stored. */
+		entryBasis?: EntryBasis;
 		githubUrl: string | null;
 		/** Present only when the repo is held for malware; githubUrl is null. */
 		security?: { held: true; note: string };
@@ -340,6 +345,8 @@ export async function buildHackathonBrief(
 				endedAt: b.hackathon.endedAt ?? null,
 				isWinner: b.isWinner,
 				placement: b.hackathonPlacement ?? null,
+				...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
+				...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
 				githubUrl: b.githubUrl ?? null,
 				...heldSecurity(b),
 				url: b.url ?? null,

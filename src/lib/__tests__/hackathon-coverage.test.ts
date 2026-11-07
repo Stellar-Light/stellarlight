@@ -1,21 +1,31 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { CURATED_BUILDS } from "@/data/curated-builds";
+import { CURATED_BUILDS, HACKPROOF_BUILDS } from "@/data/curated-builds";
 import {
+	CURATED_COVERAGE_NOTES,
 	CURATED_HACKATHONS,
 	CURATED_WINNERS_NOTES,
 } from "@/data/curated-hackathons";
+import { curatedFacts } from "@/lib/curated-import";
 import {
+	COVERAGE_VALUES,
+	coverageEvents,
 	eventCoverage,
 	eventProfile,
+	incompleteEvents,
 	incompleteRows,
+	partialLeftOutWarning,
+	partialNote,
+	partialWarning,
 	winnersOnlyEvents,
 	winnersOnlyWarning,
 } from "@/lib/hackathon-analytics";
+import { ENTRY_BASES } from "@/lib/hackathon-build-links";
 import { parseBuildFilters } from "@/lib/hackathon-build-query";
 import { type IndexedBuild, indexedFromStored } from "@/lib/hackathon-builds";
 import { spec } from "@/lib/openapi-spec";
+import type { HackathonBuild } from "@/payload-types";
 
 const synced = (id: string, event: string, isWinner = false): IndexedBuild => ({
 	id: `dorahacks-buidl-${id}`,
@@ -59,6 +69,23 @@ const curated = (slug?: string): IndexedBuild[] =>
 		}),
 	);
 
+/** HackMeridian 2026's rows as the import writes them (curatedFacts) and
+ * the index reads them. */
+const hackproof = (): IndexedBuild[] => {
+	const ev = CURATED_HACKATHONS.find((h) => h.uname === "hackmeridian-2026");
+	if (!ev) throw new Error("hackmeridian-2026 is not curated");
+	return HACKPROOF_BUILDS.map((b) =>
+		indexedFromStored({
+			...(curatedFacts(b, ev) as unknown as HackathonBuild),
+			id: b.id,
+			firstSeenAt: "2026-11-04T00:00:00.000Z",
+			lastSeenAt: "2026-11-04T00:00:00.000Z",
+			updatedAt: "2026-11-04T00:00:00.000Z",
+			createdAt: "2026-11-04T00:00:00.000Z",
+		}),
+	);
+};
+
 describe("an event's coverage, from its stored rows", () => {
 	it("is winners-only when every row is a curated winner, full when the sync stored the rows, null when none are stored", () => {
 		expect(eventCoverage(curated("hackmeridian-2025"))).toBe("winners-only");
@@ -74,12 +101,13 @@ describe("an event's coverage, from its stored rows", () => {
 		).toBe("full");
 	});
 
-	it("every curated row is a winner, so each curated event is winners-only", () => {
-		// A curated row that is not a winner would make its event read as full;
-		// add a coverage value for a curated listing before importing one.
+	it("every hand-curated row is a winner, so each such event is winners-only; HackProof's list is partial", () => {
 		expect(CURATED_BUILDS.every((b) => b.isWinner)).toBe(true);
 		for (const slug of new Set(CURATED_BUILDS.map((b) => b.hackathonSlug)))
 			expect(eventCoverage(curated(slug)), slug).toBe("winners-only");
+		// A curated row that is not a winner makes its event partial, never full.
+		expect(HACKPROOF_BUILDS.some((b) => !b.isWinner)).toBe(true);
+		expect(eventCoverage(hackproof())).toBe("partial");
 	});
 
 	it("names each winners-only event in an index with its winners", () => {
@@ -229,7 +257,7 @@ describe("the spec declares coverage and the nulls it brings", () => {
 	const detail = (spec.components.schemas as unknown as Record<string, Node>)
 		.HackathonDetailResponse;
 
-	it("names one value, with no null in the enum, everywhere coverage is served", () => {
+	it("names its values, with no null in the enum, everywhere coverage is served", () => {
 		const row = body("/api/hackathons/compare").properties?.hackathons?.items;
 		const group = body("/api/hackathons/analyze").properties?.groups?.items;
 		const event = detail.properties?.hackathon;
@@ -240,7 +268,8 @@ describe("the spec declares coverage and the nulls it brings", () => {
 			event?.properties?.coverage,
 			event?.properties?.profile?.properties?.coverage,
 		]) {
-			expect(c?.enum).toEqual(["winners-only"]);
+			expect(c?.enum).toEqual(["winners-only", "partial"]);
+			expect(c?.enum).toEqual([...COVERAGE_VALUES]);
 			expect(c?.enum).not.toContain(null);
 		}
 	});
@@ -293,5 +322,161 @@ describe("the spec declares coverage and the nulls it brings", () => {
 		expect(warnings).toMatch(
 			/facet=event and by=event do not list those events/,
 		);
+	});
+});
+
+// Owner decision 2026-11-04: a list from a source other than the organizer
+// (HackProof's, for HackMeridian 2026) is coverage partial: counts served,
+// shares null, left out of cross-event counts with one warning line.
+describe("a partial list: counted, never shared out, never mixed into other events", () => {
+	it("is partial when every row is curated and one is not a winner", () => {
+		expect(eventCoverage(hackproof())).toBe("partial");
+		// Its six placements alone would be winners-only.
+		expect(eventCoverage(hackproof().filter((b) => b.isWinner))).toBe(
+			"winners-only",
+		);
+		// A DoraHacks row among them makes the listing the sync's.
+		expect(
+			eventCoverage([...hackproof(), synced("1", "hackmeridian-2026")]),
+		).toBe("full");
+		expect([
+			...coverageEvents([...hackproof(), synced("1", "zk")], "partial"),
+		]).toEqual([["hackmeridian-2026", 97]]);
+	});
+
+	it("its profile counts the 97 rows and the 6 placements, with no submission count and no share", () => {
+		const rows = hackproof().map((b, i) => ({
+			...b,
+			categories: [{ type: i % 2 ? "Payments" : "DeFi", score: 0.8 }],
+		}));
+		const p = eventProfile(rows);
+		expect(p.coverage).toBe("partial");
+		expect(p.submissions).toBeNull();
+		expect(p.winners).toBe(6);
+		expect(p.category).toMatchObject({ builds: 97, known: 97, unknown: 0 });
+		expect(p.category.values.map((v) => [v.value, v.builds, v.share])).toEqual([
+			["DeFi", 49, null],
+			["Payments", 48, null],
+		]);
+		// Not read yet: the sync lane derives these, so they are unknown, never none.
+		expect(p.project).toMatchObject({ builds: 97, known: 0, unknown: 97 });
+		expect(p.package).toMatchObject({ known: 0, unknown: 97 });
+	});
+
+	it("no ratio over it: the coverage and the secondhand placements say why", () => {
+		expect(incompleteRows("hackmeridian-2026", "partial")).toBe(
+			"its stored rows are a partial list from a source other than the organizer (coverage partial), and its placements are secondhand, named by no organizer page (getHackathon stats.winnersNote)",
+		);
+		// Stored or not yet, the event never enters a rate.
+		expect(incompleteRows("hackmeridian-2026", null)).toBe(
+			"its placements are secondhand, named by no organizer page (getHackathon stats.winnersNote)",
+		);
+		expect([
+			...incompleteEvents([
+				...hackproof(),
+				synced("1", "zk"),
+				synced("2", "zk", true),
+			]),
+		]).toEqual(["hackmeridian-2026"]);
+	});
+
+	it("a hackathon filter naming it says its rows are not its field", async () => {
+		const index = [...hackproof(), ...curated(), synced("1", "zk")];
+		const listed = async () => ({ events: [], complete: true });
+		const r = await parseBuildFilters(
+			new URLSearchParams("hackathon=hackmeridian-2026,hackmeridian-2025"),
+			"keyword",
+			index,
+			listed,
+		);
+		if ("error" in r) throw new Error("unexpected 400");
+		expect(r.warnings).toEqual([
+			winnersOnlyWarning([["hackmeridian-2025", 6]]),
+			"the stored rows of hackmeridian-2026 are a partial list from a source other than the organizer (97 rows, coverage partial), not its field, whose size and mix are unknown: its rows are counted and no share is computed over them",
+		]);
+		expect(
+			partialWarning([
+				["a", 2],
+				["b", 1],
+			]),
+		).toBe(
+			"the stored rows of a (2) and b (1) are partial lists from sources other than the organizers (coverage partial), not their fields, whose size and mix are unknown: their rows are counted and no share is computed over them",
+		);
+		expect(partialLeftOutWarning([["hackmeridian-2026", 97]])).toBe(
+			"left out of every count and share: the 97 rows of hackmeridian-2026, a partial list from a source other than the organizer (coverage partial); the rest covers events whose full listing is stored",
+		);
+	});
+
+	it("getHackathon's coverage note gives the rows and the nulls, then the dated note on the list's source", () => {
+		expect(partialNote(97)).toBe(
+			"Not this event's list of submissions: the 97 rows stored here are a partial list from a source other than the organizer, each with an entryBasis that says why it is stored. The size and mix of the field are unknown, so totalSubmissions, each track's submissionCount and outcomes are null, and profile counts these rows with every share null.",
+		);
+		const note = CURATED_COVERAGE_NOTES["hackmeridian-2026"];
+		expect(note).toMatch(
+			/HackProof \(https:\/\/github\.com\/devodii\/hackproof, MIT licensed, commit ea7e1982\)/,
+		);
+		expect(note).toMatch(/checked \d{4}-\d{2}-\d{2}/);
+		expect(note).not.toMatch(/[\u2013\u2014]/);
+		// Each basis it names is one the rows carry.
+		for (const b of ENTRY_BASES) expect(note).toContain(b);
+	});
+});
+
+describe("the spec says what each basis means, and never more", () => {
+	type Node = {
+		properties?: Record<string, Node>;
+		items?: Node;
+		enum?: unknown[];
+		description?: string;
+	};
+	const paths = spec.paths as unknown as Record<
+		string,
+		{
+			get: {
+				responses: Record<
+					string,
+					{ content: Record<string, { schema: Node }> }
+				>;
+			};
+		}
+	>;
+	const body = (path: string) =>
+		paths[path].get.responses["200"].content["application/json"].schema;
+	const detail = (spec.components.schemas as unknown as Record<string, Node>)
+		.HackathonDetailResponse;
+
+	it("serves entryBasis from ENTRY_BASES wherever a stored row is served, with the same text", () => {
+		const row = body("/api/hackathons/builds").properties?.builds?.items
+			?.properties;
+		const one = body("/api/hackathons/builds/{id}").properties?.build
+			?.properties;
+		const winner = detail.properties?.winners?.items?.properties;
+		const sub = detail.properties?.submissions?.items?.properties;
+		const all = [row, one, winner, sub].map((p) => p?.entryBasis);
+		for (const b of all) {
+			expect(b?.enum).toEqual([...ENTRY_BASES]);
+			expect(b?.description).toBe(all[0]?.description);
+		}
+		const text = all[0]?.description ?? "";
+		// Each basis, in its own words: the team's claim, or the list's placement.
+		expect(text).toMatch(
+			/repo-names-event: Scout's own read of the repo's text/,
+		);
+		expect(text).toMatch(/the team's own claim/);
+		expect(text).toMatch(
+			/placement-listed: the list the row comes from names a placement/,
+		);
+		expect(text).toMatch(
+			/never a record that the organizer received it as an entry/,
+		);
+		for (const p of [row, one, winner, sub]) {
+			expect(p?.contracts?.description).toMatch(
+				/A floor, not every contract the team deployed/,
+			);
+			expect(p?.contracts?.description).toMatch(
+				/could not be checked is left out, never served as absent/,
+			);
+		}
+		expect(row?.winnerSource?.description).toMatch(/a secondhand source/);
 	});
 });

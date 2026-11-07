@@ -8,8 +8,10 @@
 
 import { CURATED_BUILDS } from "@/data/curated-builds";
 import {
+	CURATED_COVERAGE_NOTES,
 	CURATED_HACKATHONS,
 	CURATED_WINNERS_NOTES,
+	CURATED_WINNERS_NOTES_UNSTORED,
 } from "@/data/curated-hackathons";
 import { getWinnerLink, LATEST_WINNERS } from "@/data/recent-hackathon-winners";
 import { WINNER_OVERLAY } from "@/data/winner-overlay";
@@ -17,12 +19,15 @@ import {
 	afterEventFields,
 	eventCoverage,
 	eventProfile,
+	partialNote,
 	winnersOnlyNote,
 } from "@/lib/hackathon-analytics";
 import { CURATED_BUILD_ID } from "@/lib/hackathon-build-links";
 import {
 	getHackathonBuildsIndex,
+	type IndexedBuild,
 	indexedFromCurated,
+	readBuildContracts,
 } from "@/lib/hackathon-builds";
 import {
 	hiddenWinnersNote,
@@ -496,9 +501,20 @@ export async function getHackathonDetail(
 					)
 				: [];
 		const fromRecord = !fromStore && stored.length > 0;
-		// Only the winners on record (a curated import): the field is
-		// unknown, so no count of it is served, never the winner count.
-		const winnersOnly = eventCoverage(stored) === "winners-only";
+		// A partial list's contracts are read from the store, not the cached
+		// index; a failed read leaves them absent (unknown, not none).
+		const entryOf = (b: IndexedBuild) => `${b.id}@${b.hackathon.slug}`;
+		const contracts = await readBuildContracts(
+			payload,
+			held.filter((b) => b.entryBasis).map(entryOf),
+		);
+		// Only the winners on record (a curated import or file), or a partial
+		// list from another source: the field is unknown, so no count of it
+		// is served, never the winner or row count.
+		const coverage = eventCoverage(stored);
+		const winnersOnly = coverage === "winners-only";
+		const partial = coverage === "partial";
+		const notField = winnersOnly || partial;
 		// Served in the submission shape this endpoint has always served:
 		// the stored row's other facts live on search, detail and analyze.
 		// Each row's own source: a curated winner is curated, never
@@ -526,6 +542,14 @@ export async function getHackathonDetail(
 					source: CURATED_BUILD_ID.test(b.id)
 						? ("curated" as const)
 						: ("dorahacks" as const),
+					// Why a row of a partial list is stored, and the contracts
+					// its repo cites that passed Scout's checks.
+					...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
+					...(contracts?.has(entryOf(b))
+						? { contracts: contracts.get(entryOf(b)) }
+						: {}),
+					// A placement named off DoraHacks: the page or file naming it.
+					...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
 				}))
 			: curated
 				? []
@@ -534,11 +558,15 @@ export async function getHackathonDetail(
 					await fetchHackathonSubmissions(dora).catch(() => null);
 		// Held: rows read from the store, the curated file or DoraHacks.
 		// Not held: an event off DoraHacks with no curated roster. Unread: a
-		// DoraHacks roster no read reached.
+		// DoraHacks roster no read reached, or a curated event's store that
+		// could not be read (its imported rows are never in the file, so a
+		// failed read is unknown, not an empty roster).
 		const roster = stored.length
 			? "held"
 			: curated
-				? "not-held"
+				? index
+					? "not-held"
+					: "unread"
 				: read
 					? "held"
 					: "unread";
@@ -598,8 +626,15 @@ export async function getHackathonDetail(
 		// winner hidden upstream, a curated event's dated note, winners
 		// named off DoraHacks, or an ended DoraHacks event with none.
 		let winnersNote = hiddenWinnersNote(hidden);
+		// A list's placements not stored yet: the note says so. A store that
+		// could not be read says that, never "not stored".
 		if (dora.source === "curated")
-			winnersNote ??= CURATED_WINNERS_NOTES[slug] ?? null;
+			winnersNote ??=
+				roster === "unread"
+					? "Winners could not be checked: Scout's stored copy of this event's rows could not be read just now, so winners is empty, not none."
+					: (!winners.some((w) => "winnerSource" in w) &&
+							CURATED_WINNERS_NOTES_UNSTORED[slug]) ||
+						(CURATED_WINNERS_NOTES[slug] ?? null);
 		else if (winners.some((w) => "winnerSource" in w))
 			winnersNote ??=
 				WINNER_OVERLAY.find((e) => e.hackathonSlug === slug)?.note ?? null;
@@ -629,15 +664,24 @@ export async function getHackathonDetail(
 		);
 		// An empty list says none. A full roster's tracks as before; a
 		// winners-only roster's with submissionCount unknown; with neither,
-		// the tracks the event's record declares, counts unknown; and null
-		// when nothing tells (hackmeridian-2026 served [] beside two
-		// categories and two tracks its record states).
+		// or over a partial list, the tracks the event's record declares,
+		// counts unknown; and null when nothing tells (hackmeridian-2026
+		// served [] beside two categories and two tracks its record states).
 		const record =
 			dora.source === "curated"
 				? CURATED_HACKATHONS.find((h) => h.uname === slug)
 				: undefined;
+		const declared = record?.tracks?.length
+			? record.tracks.map((t) => ({
+					name: t.name,
+					kind: t.kind,
+					description: t.description,
+					submissionCount: null,
+					winnerCount: null,
+				}))
+			: null;
 		const servedTracks =
-			liveSubmissions.length && !winnersOnly
+			liveSubmissions.length && !notField
 				? liveTracks
 				: winnersOnly && liveTracks.length
 					? // Tracks the record declares keep their kind and line, with
@@ -653,15 +697,10 @@ export async function getHackathonDetail(
 									null,
 							}))
 						: liveTracks.map((t) => ({ ...t, submissionCount: null }))
-					: record?.tracks?.length
-						? record.tracks.map((t) => ({
-								name: t.name,
-								kind: t.kind,
-								description: t.description,
-								submissionCount: null,
-								winnerCount: null,
-							}))
-						: null;
+					: (declared ??
+						(partial && liveTracks.length
+							? liveTracks.map((t) => ({ ...t, submissionCount: null }))
+							: null));
 		// The organizer's page itemizes prizes or not; a curated record is a
 		// summary, so when it itemizes none the split is not known.
 		const tiers = parsePrizeTiers(page);
@@ -671,11 +710,13 @@ export async function getHackathonDetail(
 			...(servedTracks
 				? []
 				: [
-						liveSubmissions.length
-							? "tracks is null: only its winners are stored and none of them names a track, and no record of it declares tracks, so its tracks are not known here, not none."
-							: roster === "unread"
-								? "tracks is null: this event's submission roster could not be read just now and no record of it declares tracks, so its tracks are not known here, not none."
-								: "tracks is null: no submission roster is held for this event and no record of it declares tracks, so its tracks are not known here, not none.",
+						partial
+							? "tracks is null: its stored rows are a partial list and none of them names a track, and no record of it declares tracks, so its tracks are not known here, not none."
+							: liveSubmissions.length
+								? "tracks is null: only its winners are stored and none of them names a track, and no record of it declares tracks, so its tracks are not known here, not none."
+								: roster === "unread"
+									? "tracks is null: this event's submission roster could not be read just now and no record of it declares tracks, so its tracks are not known here, not none."
+									: "tracks is null: no submission roster is held for this event and no record of it declares tracks, so its tracks are not known here, not none.",
 					]),
 			...(prizeTiers
 				? []
@@ -692,19 +733,23 @@ export async function getHackathonDetail(
 					generatedAt: new Date().toISOString(),
 					note: winnersOnly
 						? `Event off DoraHacks with only its winners on record (hackathon.coverage winners-only): submissions and winners list them, from ${fromRecord ? "its curated roster, each row's url the page that names the win" : "Scout's stored copy"}; stats.coverageNote says what that leaves unknown.`
-						: curated
-							? roster === "held"
-								? `Event off DoraHacks: submissions and winners come from its curated roster${fromStore ? " in Scout's stored copy" : ""}, each row's url the page that names it.`
-								: "Event off DoraHacks, kept as a curated record of its organizer's pages (externalUrl): no submission roster is held for it, so submissions is null, not none. winners lists the winners its record names, if any; stats.winnersNote says what else is published."
-							: fromStore
-								? "DoraHacks event. Submissions, winners, tracks and profile come from Scout's stored copy, refreshed daily; the event page and rules from its stored page (hackathon.rules)."
-								: liveSubmissions.length
-									? "DoraHacks-sourced: submissions, winners, and tracks below are pulled live from DoraHacks."
+						: partial
+							? "Event off DoraHacks whose stored rows are a partial list from a source other than the organizer (hackathon.coverage partial): submissions lists them, each with the entryBasis that says why it is stored, and winners the placements that list names, from Scout's stored copy; stats.coverageNote says where the list comes from and what it leaves unknown, and stats.winnersNote where the placements come from."
+							: curated
+								? roster === "held"
+									? `Event off DoraHacks: submissions and winners come from its curated roster${fromStore ? " in Scout's stored copy" : ""}, each row's url the page that names it.`
 									: roster === "unread"
-										? `DoraHacks event whose submission roster could not be read: Scout's stored copy ${index ? "holds none of it" : "could not be read either"} and the live read failed, so submissions is null, not checked and not none.${curatedWinners.length ? " The curated winner roster below still answers 'who won'." : ""} Visit externalUrl for the event page.`
-										: curatedWinners.length
-											? "DoraHacks-sourced: DoraHacks lists no submission for this event; the curated winner roster below still answers 'who won'. Visit externalUrl for all submissions."
-											: "DoraHacks-sourced: DoraHacks lists no submission for this event; visit externalUrl for full detail.",
+										? "Event off DoraHacks whose stored rows could not be read just now (Scout's stored copy did not answer), so submissions is null, not checked and not none; winners lists the winners its record names, if any."
+										: "Event off DoraHacks, kept as a curated record of its organizer's pages (externalUrl): no submission roster is held for it, so submissions is null, not none. winners lists the winners its record names, if any; stats.winnersNote says what else is published."
+								: fromStore
+									? "DoraHacks event. Submissions, winners, tracks and profile come from Scout's stored copy, refreshed daily; the event page and rules from its stored page (hackathon.rules)."
+									: liveSubmissions.length
+										? "DoraHacks-sourced: submissions, winners, and tracks below are pulled live from DoraHacks."
+										: roster === "unread"
+											? `DoraHacks event whose submission roster could not be read: Scout's stored copy ${index ? "holds none of it" : "could not be read either"} and the live read failed, so submissions is null, not checked and not none.${curatedWinners.length ? " The curated winner roster below still answers 'who won'." : ""} Visit externalUrl for the event page.`
+											: curatedWinners.length
+												? "DoraHacks-sourced: DoraHacks lists no submission for this event; the curated winner roster below still answers 'who won'. Visit externalUrl for all submissions."
+												: "DoraHacks-sourced: DoraHacks lists no submission for this event; visit externalUrl for full detail.",
 				},
 				hackathon: {
 					id: `dorahacks-${dora.id}`,
@@ -765,7 +810,9 @@ export async function getHackathonDetail(
 					...(fromStore ? { profile: eventProfile(stored) } : {}),
 					hackersCount: dora.hackers_count || null,
 					source: dora.source === "curated" ? "curated" : "dorahacks",
-					...(winnersOnly ? { coverage: "winners-only" as const } : {}),
+					...(coverage === "winners-only" || coverage === "partial"
+						? { coverage }
+						: {}),
 					stats: {
 						// An empty submission roster is not a count of zero. The
 						// code-curated events ride this branch too (the São Paulo
@@ -773,18 +820,20 @@ export async function getHackathonDetail(
 						// anywhere), and counting its zero rows published
 						// `totalSubmissions: 0` beside twelve winners. Nor is a
 						// roster of winners alone: HackMeridian 2025 served 6.
-						totalSubmissions: winnersOnly
-							? null
-							: liveSubmissions.length || null,
+						totalSubmissions: notField ? null : liveSubmissions.length || null,
 						// DoraHacks' own count beside ours, and why they differ
 						// (sls-092: Real-World ZK serves 319 of DoraHacks' 345).
 						upstreamSubmissions: storedEvent?.upstreamSubmissions ?? null,
 						coverageNote: winnersOnly
 							? winnersOnlyNote(stored.length)
-							: submissionCoverageNote(
-									storedEvent?.upstreamSubmissions,
-									liveSubmissions.length || null,
-								),
+							: partial
+								? [partialNote(stored.length), CURATED_COVERAGE_NOTES[slug]]
+										.filter(Boolean)
+										.join(" ")
+								: submissionCoverageNote(
+										storedEvent?.upstreamSubmissions,
+										liveSubmissions.length || null,
+									),
 						hiddenWinners: hidden,
 						winnersNote,
 						// null, not 0, when no USD figure is known: a prize not yet
@@ -801,7 +850,7 @@ export async function getHackathonDetail(
 						// they describe; with winners alone there is no field
 						// to sum to.
 						outcomes:
-							liveSubmissions.length && !winnersOnly
+							liveSubmissions.length && !notField
 								? {
 										built: 0,
 										inProgress: 0,

@@ -1520,6 +1520,42 @@ export interface HackathonBuild {
 	 */
 	award?: string | null;
 	isWinner?: boolean | null;
+	/**
+	 * The file or page that names this row's placement when it is not the row's own url (a curated row placed by another list). Empty: the placement, if any, is DoraHacks' own or the url's.
+	 */
+	winnerSource?: string | null;
+	/**
+	 * Why a row from a list kept off the organizer's is stored (ENTRY_BASES in src/lib/hackathon-build-links.ts): repo-names-event, the repo's own text names the event; placement-listed, the list names a placement and the repo's text does not name the event. Never an organizer's record of an entry. Empty on DoraHacks rows and on winners imported from the page that names them.
+	 */
+	entryBasis?: string | null;
+	/**
+	 * What entryBasis rests on: where the repo's text names the event and the day it was read, the list's own tier and match, and when the repo was created. Provenance, not a verdict.
+	 */
+	entryEvidence?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * Testnet contracts the repo cites that passed Scout's checks, [{ id, network, createdAt, path, checkedAt }]: the cited file holds the id at HEAD, the instance exists on testnet and stellar.expert dates its creation inside the event. Read only when contractsCheckedAt is set; [] then = none cited passed.
+	 */
+	contracts?:
+		| {
+				[k: string]: unknown;
+		  }
+		| unknown[]
+		| string
+		| number
+		| boolean
+		| null;
+	/**
+	 * When the cited contracts were checked, ISO. Empty = not checked.
+	 */
+	contractsCheckedAt?: string | null;
 	url: string;
 	githubUrl?: string | null;
 	demoUrl?: string | null;
@@ -3859,6 +3895,11 @@ export interface HackathonBuildsSelect<T extends boolean = true> {
 	placement?: T;
 	award?: T;
 	isWinner?: T;
+	winnerSource?: T;
+	entryBasis?: T;
+	entryEvidence?: T;
+	contracts?: T;
+	contractsCheckedAt?: T;
 	url?: T;
 	githubUrl?: T;
 	demoUrl?: T;

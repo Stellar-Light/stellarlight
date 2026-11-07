@@ -39,6 +39,9 @@ const NPM_SCOPE_PREFIXES = [
 	"@sorobanbyexample/",
 	"@colibri/",
 	"@stellar-indexer/",
+	// Stellar-only scopes HackMeridian 2026 builds declare (2026-11-04).
+	"@trustless-work/",
+	"@stellar-scaffold/",
 ];
 
 /** Exact npm package names outside those scopes. */
@@ -53,6 +56,7 @@ const NPM_EXACT = new Set([
 	"sorosan-sdk",
 	"mercury-sdk",
 	"as-soroban-sdk",
+	"@stellar-broker/client",
 ]);
 
 /** Cargo crate names (exact or prefix) that are Stellar-ecosystem. */
@@ -71,6 +75,9 @@ const CARGO_EXACT = new Set([
 	// already reads it as Stellar proof) and the stellar org's own.
 	"soroban-client",
 	"stellar-rpc-client",
+	// Scaffold Stellar's contract registry and Soroswap's library (2026-11-04).
+	"stellar-registry",
+	"soroswap-library",
 ]);
 const CARGO_PREFIXES = ["soroban-env-", "soroban-spec", "stellar-contract-"];
 

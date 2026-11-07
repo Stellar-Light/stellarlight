@@ -66,8 +66,9 @@ interface HackathonSnapshot {
 	 *  makes "2× the submissions but half as durable" answerable. null over
 	 *  incomplete rows (incompleteRows), with `notes` saying why. */
 	activeRatePct?: number | null;
-	/** Present only when the stored rows are the event's winners alone: then
-	 * submissionCount is null and the profile describes the winners. */
+	/** Present only when the stored rows are not the event's field (its
+	 * winners alone, or a partial list from another source): then
+	 * submissionCount is null and the profile describes the stored rows. */
 	coverage?: EventProfile["coverage"];
 	/** What the event's stored submissions were about and built with, counted
 	 * by the same engine as analyzeHackathonSubmissions. Absent when the store
@@ -391,11 +392,26 @@ async function compare(slugs: string[], req: NextRequest) {
 			`${unknownField.map((s) => s.slug).join(", ")}: only ${one ? "its" : "their"} winners are on record (coverage winners-only), so submissionCount is null, unknown, never the winner count; ${one ? "its profile counts" : "their profiles count"} the winners only, with every share null, and ${one ? "it is" : "they are"} left out of facetShifts`,
 		);
 	}
-	// A winners' mix is not the field's, so those events shift nothing.
+	const partial = snapshots.filter(
+		(s) => s.coverage === "partial" && s.submissionCount === null,
+	);
+	if (partial.length) {
+		const one = partial.length === 1;
+		deltas.notes.push(
+			`${partial.map((s) => s.slug).join(", ")}: ${one ? "its stored rows are a partial list" : "their stored rows are partial lists"} from a source other than the organizer (coverage partial), so submissionCount is null, unknown, never the row count; ${one ? "its profile counts" : "their profiles count"} those rows, with every share null, and ${one ? "it is" : "they are"} left out of facetShifts`,
+		);
+	}
+	// Neither a winners' mix nor a partial list's is the field's, so those
+	// events shift nothing.
 	const shifts = facetShifts(
 		new Map(
 			[...byEvent].filter(
-				([slug]) => !winnersOnly.some((s) => s.slug === slug),
+				([slug]) =>
+					!snapshots.some(
+						(s) =>
+							s.slug === slug &&
+							(s.coverage === "winners-only" || s.coverage === "partial"),
+					),
 			),
 		),
 	);
