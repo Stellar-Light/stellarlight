@@ -159,6 +159,8 @@ async function handle(req: NextRequest) {
 	const {
 		repos,
 		total,
+		truncated,
+		eligible,
 		canonical,
 		searched,
 		matchMode,
@@ -243,7 +245,7 @@ async function handle(req: NextRequest) {
 					canonical.length > 0
 						? {
 								repos: canonical,
-								note: "Curated canonical Stellar repos for this infra/protocol query, floated to the top (e.g. error codes → stellar-core/Horizon/SDKs; Horizon lives in stellar/go). Recommend these as the authoritative sources, and chain to their deepWikiUrl for internals.",
+								note: "Curated canonical Stellar repos for this infra, protocol or developer-product query, floated to the top (e.g. error codes → stellar-core and the SDKs; Horizon → stellar/stellar-horizon; Scaffold Stellar → stellar-scaffold/cli). Recommend these as the authoritative sources, and chain to their deepWikiUrl for internals.",
 							}
 						: null,
 				// sls-025: a zero-result page says exactly what WAS searched, so an
@@ -264,7 +266,10 @@ async function handle(req: NextRequest) {
 							},
 						}
 					: {}),
-				counts: { returned: repos.length, total },
+				// truncated: the ranking was cut at its candidate window, so
+				// total counts that window and eligible the rows the filters admit
+				// (the #1915 class; null where only ranking every row could count).
+				counts: { returned: repos.length, total, eligible, truncated },
 			}),
 			repos: repos.map((r) => pickFields(r, fieldsWanted)),
 		}),

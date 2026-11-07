@@ -66,8 +66,7 @@ export default async function Image({
 	const p = await load(slug);
 	const name = p?.name ?? "Stellar Partners";
 	const typeLabel = p ? (PARTNER_TYPE_LABELS[p.partnerType] ?? "Partner") : "";
-	const tagline =
-		p?.tagline ?? "A verified partner in the Stellar ecosystem directory.";
+	const tagline = p?.tagline ?? "A partner in the Stellar ecosystem directory.";
 	const monogram = name.charAt(0).toUpperCase();
 
 	return new ImageResponse(

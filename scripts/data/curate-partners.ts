@@ -134,8 +134,11 @@ const PARTNER_ENRICH: Record<
 // Turkish gambling site super-bahis.live); the live product is bossmoney.com.
 const URL_CORRECTIONS: Record<string, string> = {
 	"anchor-boss-pay": "https://www.bossmoney.com",
-	// 2026-07-09: hanawallet.io 301s permanently to hana.money (rebrand; live).
-	"hana-wallet": "https://hana.money",
+	// sls-100 (#1911): the 2026-07-09 move to hana.money reversed. On
+	// 2026-11-02 hana.money answered 307 to wendmoney.com.au, a different
+	// remittance product; the Hana wallet is at www.hanawallet.io (read
+	// 2026-11-04, Stellar among the chains live in its Chrome extension).
+	"hana-wallet": "https://www.hanawallet.io",
 	// 2026-10-31: freighter.app 301s to varialwallet.com (SDF renamed
 	// Freighter to Varial on 2026-10-29; curate-projects REBRANDS freighter).
 	freighter: "https://varialwallet.com",

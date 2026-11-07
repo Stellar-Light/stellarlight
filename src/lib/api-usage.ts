@@ -148,6 +148,46 @@ export function logApiHit({
 }
 
 /**
+ * Hits since `since`, counted by one $group in the database: one bucket per
+ * value of `field` (or one bucket in all), no documents loaded. A `limit:
+ * 10_000` scan grouped in memory stopped at 10,000 of 25,806 weekly hits
+ * (2026-11-04), so the breakdown summed to 10,000 beside last7d. Through
+ * Payload's own model, so the pluralized collection name ("api-usages") is
+ * right. createdAt is matched as a Date (what payload.create writes) or as
+ * an ISO string, the way the admin demand report matches it: Mongo compares
+ * a bound only with values of its own type, so payload.count, which casts
+ * its bound to a Date, never counted a string-stored hit.
+ */
+async function countSinceBy(
+	payload: NonNullable<Awaited<ReturnType<typeof getPayloadSafe>>>,
+	field: "endpoint" | "uaBucket" | null,
+	since: string,
+): Promise<Array<{ value: string | null; count: number }>> {
+	const model = (
+		payload.db as unknown as {
+			collections?: Record<
+				string,
+				{ aggregate: (p: unknown[]) => PromiseLike<unknown[]> }
+			>;
+		}
+	).collections?.["api-usage"];
+	if (!model) throw new Error("api-usage model unavailable");
+	const from = new Date(since);
+	const groups = (await model.aggregate([
+		{
+			$match: {
+				$or: [
+					{ createdAt: { $gt: from } },
+					{ createdAt: { $gt: from.toISOString() } },
+				],
+			},
+		},
+		{ $group: { _id: field ? `$${field}` : null, count: { $sum: 1 } } },
+	])) as Array<{ _id: string | null; count: number }>;
+	return groups.map((g) => ({ value: g._id ?? null, count: g.count }));
+}
+
+/**
  * Aggregate hit counts for the /api/status endpoint. Returns a small
  * object with total + per-endpoint + last-24h counts. Read access only,
  * runs through Payload's local API so it's fast.
@@ -167,49 +207,25 @@ export async function getUsageStats(): Promise<{
 			Date.now() - 7 * 24 * 60 * 60 * 1000,
 		).toISOString();
 
-		const [total, last24h, last7d] = await Promise.all([
+		// last24h and last7d come from the same match as byEndpoint, so the
+		// per-endpoint counts sum to last7d. total has no date bound to miss.
+		const [total, day, week] = await Promise.all([
 			payload.count({ collection: "api-usage" }),
-			payload.count({
-				collection: "api-usage",
-				where: { createdAt: { greater_than: dayAgo } },
-			}),
-			payload.count({
-				collection: "api-usage",
-				where: { createdAt: { greater_than: weekAgo } },
-			}),
+			countSinceBy(payload, null, dayAgo),
+			countSinceBy(payload, "endpoint", weekAgo),
 		]);
-
-		// Per-endpoint counts over the last 7 days. Uses Payload's own query —
-		// the path that correctly matches the rows (and handles the collection
-		// name + createdAt type) — but trimmed with select:{endpoint} +
-		// pagination:false so it fetches ONLY the one field it needs and skips
-		// the totalDocs count. Previously this pulled up to 10,000 FULL log rows
-		// and grouped them in memory, which made /api/status take ~13s as the
-		// append-only log grew.
-		const sample = await payload.find({
-			collection: "api-usage",
-			where: { createdAt: { greater_than: weekAgo } },
-			limit: 10_000,
-			depth: 0,
-			pagination: false,
-			select: { endpoint: true },
-		});
-		const byEndpointMap = new Map<string, number>();
-		for (const row of sample.docs as Array<{ endpoint?: string }>) {
-			if (!row.endpoint) continue;
-			byEndpointMap.set(
-				row.endpoint,
-				(byEndpointMap.get(row.endpoint) ?? 0) + 1,
+		const sum = (groups: Array<{ count: number }>) =>
+			groups.reduce((n, g) => n + g.count, 0);
+		const byEndpoint = week
+			.flatMap((g) => (g.value ? [{ endpoint: g.value, count: g.count }] : []))
+			.sort(
+				(a, b) => b.count - a.count || a.endpoint.localeCompare(b.endpoint),
 			);
-		}
-		const byEndpoint = [...byEndpointMap.entries()]
-			.map(([endpoint, count]) => ({ endpoint, count }))
-			.sort((a, b) => b.count - a.count);
 
 		return {
 			total: total.totalDocs,
-			last24h: last24h.totalDocs,
-			last7d: last7d.totalDocs,
+			last24h: sum(day),
+			last7d: sum(week),
 			byEndpoint,
 		};
 	} catch {
@@ -232,18 +248,10 @@ export async function getUsageUaSplit(): Promise<Array<{
 		const weekAgo = new Date(
 			Date.now() - 7 * 24 * 60 * 60 * 1000,
 		).toISOString();
-		const sample = await payload.find({
-			collection: "api-usage",
-			where: { createdAt: { greater_than: weekAgo } },
-			limit: 10_000,
-			depth: 0,
-			pagination: false,
-			select: { uaBucket: true },
-		});
 		const map = new Map<string, number>();
-		for (const row of sample.docs as Array<{ uaBucket?: string }>) {
-			const b = row.uaBucket ?? "other";
-			map.set(b, (map.get(b) ?? 0) + 1);
+		for (const g of await countSinceBy(payload, "uaBucket", weekAgo)) {
+			const b = g.value ?? "other";
+			map.set(b, (map.get(b) ?? 0) + g.count);
 		}
 		return [...map.entries()]
 			.map(([bucket, count]) => ({ bucket, count }))

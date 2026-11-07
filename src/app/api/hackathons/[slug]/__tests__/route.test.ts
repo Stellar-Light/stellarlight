@@ -17,7 +17,9 @@ const storedEvent = {
 	id: "e1",
 	slug: "stellar-hacks-zk",
 	title: "Stellar Hacks: Real-World ZK",
-	description: "# Brief\nBuild with ZK.\n\n# Prizes\n- 1st Place: $5,000",
+	// The sync stores the sections it read off this same page.
+	description:
+		"# Brief\nBuild with ZK.\n\n# Submission Requirements\n1. An open-source repo.\n\n# Prizes\n- 1st Place: $5,000",
 	repoRequired: true,
 	videoRequired: true,
 	submissionQuestions: ["Is your repo public?"],
@@ -85,11 +87,19 @@ const doraEvent = {
 	hackers_count: 300,
 	status: 2,
 };
-vi.mock("@/lib/integrations/dorahacks", async (orig) => ({
-	...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
-	fetchAllDoraHacksHackathons: vi.fn(async () => [doraEvent]),
-	fetchHackathonSubmissions: live,
-}));
+vi.mock("@/lib/integrations/dorahacks", async (orig) => {
+	const all = vi.fn(async () => [doraEvent]);
+	return {
+		...(await orig<typeof import("@/lib/integrations/dorahacks")>()),
+		fetchAllDoraHacksHackathons: all,
+		// The detail reads the checked listing: the same rows, read whole.
+		fetchAllDoraHacksHackathonsChecked: vi.fn(async () => ({
+			hackathons: await all(),
+			complete: true,
+		})),
+		fetchHackathonSubmissions: live,
+	};
+});
 const build = (id: string, over: Partial<IndexedBuild> = {}): IndexedBuild => ({
 	id,
 	name: id,
@@ -267,10 +277,10 @@ describe("GET /api/hackathons/{slug} for a DoraHacks event", () => {
 		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce([]);
 		const body = await getEvent();
 		expect(body.hackathon.stats.hiddenWinners).toBeNull();
-		// No roster at all (the live read returned none): its 0 winners is
-		// not a count either.
+		// The live read returned none: a roster read that found none, said
+		// as that, not as one that could not be read.
 		expect(body.hackathon.stats.winnersNote).toMatch(
-			/^Winners could not be checked/,
+			/^DoraHacks lists no submission for this event/,
 		);
 	});
 
@@ -1030,6 +1040,11 @@ describe("tracks and prize tiers that are not known are null, never []", () => {
 				"Judging is an async review of the demo video, pitch deck, GitHub repo and submission answers: Genesis on problem clarity, MVP quality, Stellar integration and continued development potential; Scale on milestones against goals set at pre-event intake, SCF eligibility, production readiness and ecosystem impact.",
 			source: "https://hackmeridian.com",
 			checkedOn: "2026-10-20",
+			// The weighted rubric keeps its own page and day.
+			rubric: expect.objectContaining({
+				source: "https://www.hackmeridian.com/build",
+				checkedOn: "2026-11-04",
+			}),
 		});
 		expect(
 			undeclaredInServed(
@@ -1040,13 +1055,20 @@ describe("tracks and prize tiers that are not known are null, never []", () => {
 		).toEqual([]);
 	});
 
-	it("a record that declares no tracks serves null tracks, and no rules", async () => {
+	it("a record that declares no tracks serves null tracks, and rules that say its page publishes no criteria", async () => {
 		const body = await serveCurated("stellar-builders-camp-jaipur-2026");
 		expect(body.hackathon.tracks).toBeNull();
 		expect(body.tracks).toBeNull();
 		expect(body.hackathon.prizeTiers).toBeNull();
 		expect(body.hackathon.notes).toEqual([NO_ROSTER_NOTE, TIERS_NOTE]);
-		expect("rules" in body.hackathon).toBe(false);
+		// Checked 2026-11-04: the Luma page publishes no judging criteria.
+		expect(body.hackathon.rules).toEqual({
+			judgingCriteria: null,
+			source: "https://luma.com/ajcns4mc",
+			checkedOn: "2026-11-04",
+			judgingNote:
+				"The organizer's page publishes no judging criteria (https://luma.com/ajcns4mc, checked 2026-11-04).",
+		});
 		expect(
 			undeclaredInServed(
 				spec,

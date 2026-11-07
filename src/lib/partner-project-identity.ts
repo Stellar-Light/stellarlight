@@ -86,11 +86,14 @@ export const ALLOWED_DOMAIN_MISMATCHES: Record<
 		reason:
 			"Company vs product: Benji is Franklin Templeton's tokenized-fund product; both are Franklin Templeton properties (verified 2026-07-20)",
 	},
+	// Whoever dispatches curate-partners for hana-wallet deletes this entry,
+	// and its test in src/lib/__tests__/directory-corrections.test.ts ("the
+	// partner half is allowed to lag"), in the same change.
 	"hana-wallet": {
 		partner: "hana.money",
 		project: "hanawallet.io",
 		reason:
-			"Same product, dual domains: hanawallet.io 301-redirects to hana.money and Hana's support center lives on support.hanawallet.io (verified 2026-07-20)",
+			"Transitional, sls-100 (2026-11-04): the Hana wallet is at www.hanawallet.io again and hana.money no longer serves it. curate-projects moves the project row on its weekly run; the partner row moves only when curate-partners is dispatched, so until then the pair is this one. Remove this entry once /api/partners/hana-wallet reads hanawallet.io.",
 	},
 };
 

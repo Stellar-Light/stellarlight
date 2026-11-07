@@ -42,11 +42,13 @@ export interface PublicPartner {
 	description?: string | null;
 	websiteUrl: string | null;
 	acceptingClients: boolean | null;
-	sectors: string[];
-	regions: string[];
-	assets?: string[];
-	seps?: string[];
-	rampTypes?: string[];
+	// null = none recorded (curated tags), or no stellar.toml read recorded
+	// (assets, seps): never "none" (#1909).
+	sectors: string[] | null;
+	regions: string[] | null;
+	assets?: string[] | null;
+	seps?: string[] | null;
+	rampTypes?: string[] | null;
 	country?: string | null;
 	contactable?: boolean;
 	logoUrl?: string | null;
@@ -122,10 +124,12 @@ export function renderMarkdownBold(text: string): React.ReactNode[] {
 	const parts = text.split(/\*\*(.+?)\*\*/g);
 	return parts.map((chunk, i) =>
 		i % 2 === 1 ? (
+			// biome-ignore lint/suspicious/noArrayIndexKey: parts of one immutable string; a part never moves
 			<strong key={i} className="font-semibold text-foreground">
 				{chunk}
 			</strong>
 		) : (
+			// biome-ignore lint/suspicious/noArrayIndexKey: parts of one immutable string; a part never moves
 			<span key={i}>{chunk}</span>
 		),
 	);
@@ -200,6 +204,7 @@ export function PartnerConciergeChat({
 	// Seed the conversation: a handed-off question (from the directory's Ask
 	// box) is sent immediately as the user's first message — the visitor lands
 	// mid-conversation, already being answered. Otherwise open with a greeting.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: runs once on mount by design; the initialized ref guards a double invoke
 	useEffect(() => {
 		if (initialized.current) return; // exactly once, even if the effect re-fires
 		initialized.current = true;
@@ -457,10 +462,14 @@ export function PartnerConciergeChat({
 				<div className="rounded-2xl border border-border bg-card p-5">
 					<div className="grid sm:grid-cols-2 gap-4 mb-5">
 						<div>
-							<label className="block text-xs text-muted-foreground mb-1.5">
+							<label
+								htmlFor="concierge-org-name"
+								className="block text-xs text-muted-foreground mb-1.5"
+							>
 								Organization name
 							</label>
 							<input
+								id="concierge-org-name"
 								value={orgName}
 								onChange={(e) => setOrgName(e.target.value)}
 								placeholder="e.g. Etherfuse"
@@ -468,13 +477,17 @@ export function PartnerConciergeChat({
 							/>
 						</div>
 						<div>
-							<label className="block text-xs text-muted-foreground mb-1.5">
+							<label
+								htmlFor="concierge-contact-email"
+								className="block text-xs text-muted-foreground mb-1.5"
+							>
 								Work email{" "}
 								<span className="text-muted-foreground/60">
 									(becomes your account login)
 								</span>
 							</label>
 							<input
+								id="concierge-contact-email"
 								type="email"
 								value={contactEmail}
 								onChange={(e) => setContactEmail(e.target.value)}
@@ -503,6 +516,7 @@ export function PartnerConciergeChat({
 				</div>
 				<div className="flex items-center gap-3">
 					<button
+						type="button"
 						onClick={submit}
 						disabled={busy || !orgName.trim() || !contactEmail.trim()}
 						className="h-10 px-5 inline-flex items-center gap-2 rounded-xl bg-foreground text-background text-sm font-medium disabled:opacity-40 transition-opacity"
@@ -515,6 +529,7 @@ export function PartnerConciergeChat({
 						Submit for listing
 					</button>
 					<button
+						type="button"
 						onClick={() => setPhase("chat")}
 						className="h-10 px-4 inline-flex items-center gap-2 rounded-xl border border-border text-sm text-muted-foreground hover:text-foreground transition-colors"
 					>
@@ -542,6 +557,7 @@ export function PartnerConciergeChat({
 					className="relative rounded-2xl border border-border bg-card p-4 min-h-[340px] max-h-[60vh] overflow-y-auto space-y-4"
 				>
 					{messages.map((m, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: the conversation only appends, so a turn never moves; data-mi anchors scrolling on the same index
 						<div key={i} data-mi={i} className="space-y-3">
 							<div
 								className={
@@ -610,6 +626,7 @@ export function PartnerConciergeChat({
 				<div className="flex flex-wrap gap-2">
 					{EXAMPLES.map((ex) => (
 						<button
+							type="button"
 							key={ex}
 							onClick={() => sendText(ex)}
 							className="text-xs px-3 py-1.5 rounded-full bg-white/[0.03] border border-border text-muted-foreground hover:text-foreground hover:border-white/25 transition-colors"
@@ -630,6 +647,7 @@ export function PartnerConciergeChat({
 				<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
 				<input
 					ref={inputRef}
+					// biome-ignore lint/a11y/noAutofocus: this page exists to take the message, so its one input takes focus on open
 					autoFocus
 					value={input}
 					onChange={(e) => setInput(e.target.value)}
@@ -649,6 +667,7 @@ export function PartnerConciergeChat({
 			{canList && (
 				<div className="flex items-center gap-3">
 					<button
+						type="button"
 						onClick={buildProfile}
 						disabled={busy}
 						className="h-10 px-4 inline-flex items-center gap-2 rounded-xl bg-foreground text-background text-sm font-medium disabled:opacity-40 transition-opacity"
@@ -723,7 +742,7 @@ export function MatchCard({ p }: { p: PublicPartner }) {
 						{p.country}
 					</span>
 				)}
-				{p.sectors.slice(0, 2).map((s) => (
+				{(p.sectors ?? []).slice(0, 2).map((s) => (
 					<span
 						key={s}
 						className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/90 border border-border"
@@ -731,7 +750,7 @@ export function MatchCard({ p }: { p: PublicPartner }) {
 						{SECTOR_LABELS[s] ?? s}
 					</span>
 				))}
-				{p.regions.slice(0, 1).map((r) => (
+				{(p.regions ?? []).slice(0, 1).map((r) => (
 					<span
 						key={r}
 						className="text-[10px] px-1.5 py-0.5 rounded-md bg-white/[0.03] text-muted-foreground/70 border border-border"

@@ -1,6 +1,6 @@
 {
- "generatedAt": "2026-11-04T09:31:09.166Z",
- "asOf": "2026-11-04T09:31:09.166Z",
+ "generatedAt": "2026-11-06T09:34:08.555Z",
+ "asOf": "2026-11-06T09:34:08.555Z",
  "source": "scripts/check-links.ts",
  "rule": "A URL is listed here only when a probe PROVED it broken (404/410/DNS/refused). A bot wall, a 5xx or a timeout proves nothing and is never listed — those escalate on their own streak. Each entry names the records that cite it, because the repair is on the record, not the URL.",
  "checked": 2798,
@@ -37,6 +37,17 @@
    ],
    "citedByStatus": [
     "69d19a831a0f3c3e3c27072e: n/a"
+   ]
+  },
+  {
+   "url": "https://dropzey.com",
+   "httpStatus": 404,
+   "reason": "Not Found",
+   "targets": [
+    "projects/dropzey.links.website"
+   ],
+   "citedByStatus": [
+    "dropzey: Live"
    ]
   },
   {

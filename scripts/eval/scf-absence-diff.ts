@@ -6,18 +6,19 @@
  *   pnpm exec tsx scripts/eval/scf-absence-diff.ts [--json] [--out=path]
  *
  * Scrapes the server-rendered SCF projects listing (award-round badges
- * included), matches every entry against our directory frame by normalized
- * name/slug containment + token overlap, and reports the UNMATCHED ones —
- * SCF-visible projects we have no record of. Report-only; absences become
- * human-reviewed SEEDS (create-if-missing) per the curation discipline,
- * never auto-created (an SCF submission ≠ a real launched project).
+ * included), matches every entry against our directory frame (servedBy in
+ * scf-official.ts: an exact slug, name or alias, else the single best title
+ * prefix; then a website domain only one row publishes), and reports the
+ * UNMATCHED ones: SCF-visible projects we have no record of. Report-only;
+ * absences become human-reviewed SEEDS (create-if-missing) per the curation
+ * discipline, never auto-created (an SCF submission is not a launched project).
  *
- * Matching is deliberately conservative toward MATCHED (an absence report
- * that cries wolf wastes review time — precision over recall, class 13).
+ * A false match is the costly error here: it deletes a real gap and leaves
+ * no trace, while a false absence reaches a human (sls-111).
  */
 import { writeFileSync } from "node:fs";
 import { registrableDomain } from "../../src/lib/partner-project-identity";
-import { isThirdPartyLink, parseRoundVerdicts } from "./scf-official";
+import { isThirdPartyLink, parseRoundVerdicts, servedBy } from "./scf-official";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -28,28 +29,6 @@ const JSON_OUT = process.argv.includes("--json");
 const OUT_FILE = process.argv
 	.find((x) => x.startsWith("--out="))
 	?.slice("--out=".length);
-
-const canon = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
-const tokens = (s: string) =>
-	new Set(
-		s
-			.toLowerCase()
-			.split(/[^a-z0-9]+/)
-			.filter((t) => t.length >= 3 && !GENERIC.has(t)),
-	);
-const GENERIC = new Set([
-	"the",
-	"and",
-	"for",
-	"stellar",
-	"soroban",
-	"protocol",
-	"platform",
-	"network",
-	"app",
-	"project",
-	"with",
-]);
 
 interface ScfEntry {
 	scfSlug: string;
@@ -155,57 +134,6 @@ async function fetchDirectory(): Promise<
 		}
 	}
 	return rows;
-}
-
-function matches(
-	e: ScfEntry,
-	dir: Array<{
-		slug: string;
-		name: string;
-		kind: "name" | "alias";
-		c: string;
-		t: Set<string>;
-	}>,
-): boolean {
-	const cb = canon(e.base);
-	const first = e.base.split("-")[0];
-	const tb = tokens(e.base.replace(/-/g, " "));
-	for (const d of dir) {
-		if (d.slug === e.base || d.c === cb) return true;
-		// An alias is a WEAKER identity claim than a name — a former name, an
-		// abbreviation, a rebrand — so it earns only the strictest branches:
-		// exact equality (above) and whole-token equality (here). Never
-		// first-token, never prefix, never substring containment: an alias
-		// "Vibrant" must not claim every SCF slug whose first token happens to
-		// be "vibrant".
-		if (d.kind === "alias") {
-			if (d.c.length >= 4 && tb.has(d.c)) return true;
-			continue;
-		}
-		// SCF titles are descriptive ('sfx-super-money-app'); the product name
-		// is usually the FIRST token or a prefix ('cocaxyz' → coca).
-		if (first.length >= 3 && d.c === first) return true;
-		if (d.c.length >= 4 && cb.startsWith(d.c)) return true;
-		if (
-			cb.length >= 5 &&
-			(d.c.includes(cb) || cb.includes(d.c)) &&
-			d.c.length >= 5
-		)
-			return true;
-		// A short name that is a WHOLE TOKEN of the SCF title, rather than a
-		// substring of it. "identity-operating-system-idos" contains "idos", but
-		// canon("idOS") is 4 chars and the containment floor above requires 5.
-		//
-		// The floor is not the bug and must not be lowered: relaxing it to 4 was
-		// measured and produced new FALSE matches —
-		// soroban-disassembler-working-title-ply -> "band",
-		// bpv-stellarmesh-anchor-afq -> "mesh". Those are substrings; this is a
-		// token boundary, which is why it catches idOS and rejects both.
-		if (d.c.length >= 4 && tb.has(d.c)) return true;
-		// all significant SCF-name tokens present in the directory name
-		if (tb.size > 0 && [...tb].every((t) => d.t.has(t))) return true;
-	}
-	return false;
 }
 
 /**
@@ -370,23 +298,10 @@ async function main() {
 	console.error("SCF-awardee absence diff");
 	const [scf, dir] = await Promise.all([fetchScfEntries(), fetchDirectory()]);
 	console.error(`  SCF listing: ${scf.length} | directory: ${dir.length}`);
-	// One index row per IDENTITY STRING, not per project — the shape
-	// report-coverage-gaps.ts already uses. A project answering to two names is
-	// two chances to match, which is the point of carrying aliases at all.
-	// Each row is TAGGED name|alias: matches() grants alias rows only the
-	// strictest branches, because an alias is a weaker identity claim.
-	const dirIdx = dir.flatMap((d) =>
-		[
-			{ n: d.name, kind: "name" as const },
-			...d.aliases.map((n) => ({ n, kind: "alias" as const })),
-		]
-			.filter(
-				(x): x is { n: string; kind: "name" | "alias" } =>
-					typeof x.n === "string" && x.n.trim().length > 0,
-			)
-			.map((x) => ({ ...d, kind: x.kind, c: canon(x.n), t: tokens(x.n) })),
-	);
-	const absent = scf.filter((e) => !matches(e, dirIdx));
+	// servedBy (scf-official.ts): an exact slug, name or alias, else the
+	// single best title prefix. Aliases count only exactly: an alias is a
+	// weaker identity claim than a name.
+	const absent = scf.filter((e) => !servedBy(e.base, dir));
 	console.error(
 		`  unmatched: ${absent.length} — fetching detail pages for award rounds…`,
 	);
@@ -452,13 +367,20 @@ async function main() {
 		}
 	};
 	const byPlatPath = new Map<string, { slug: string; name: string }>();
+	// A domain two rows publish is a builder's or a parent's site, not an
+	// identity: 57blocks.com is on three of our rows, and the AgentSmith x402
+	// page lists it (sls-111). It matches nothing, so the entry reaches a human.
+	const shared = new Set<string>();
 	for (const d of dir) {
 		const dom = regDomain(d.website);
-		if (dom && !PLATFORM.test(dom))
+		if (dom && !PLATFORM.test(dom)) {
+			if ((byDomain.get(dom)?.slug ?? d.slug) !== d.slug) shared.add(dom);
 			byDomain.set(dom, { slug: d.slug, name: d.name });
+		}
 		const pp = platPath(d.website);
 		if (pp) byPlatPath.set(pp, { slug: d.slug, name: d.name });
 	}
+	for (const dom of shared) byDomain.delete(dom);
 	const domainMatched: Array<{ scf: string; slug: string; domain: string }> =
 		[];
 	const stillAbsent = absent.filter((e) => {

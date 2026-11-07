@@ -476,6 +476,24 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-rahul-soshte-rs-soroban-client-crates",
+   "date": "2026-11-05",
+   "run": "42068622510",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
+  },
+  {
+   "rowId": "raven-drift:the-raven-catalog-drift-check-could-not-run",
+   "date": "2026-11-06",
+   "run": "42251080036",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }

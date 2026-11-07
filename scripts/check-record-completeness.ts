@@ -16,6 +16,11 @@
  *      each entry carries its reason + date; never a silent skip).
  *   S2 statusBasis — every project row carries a lifecycle basis (the
  *      sls-024 invariant, corpus-wide: bare-null provenance never returns).
+ *   S3 tvlMethodUrl — a tvlUSD that sums several DefiLlama rows names the
+ *      page that sums them (sls-102). A null is read against DefiLlama's own
+ *      list: a parent that still sums exactly the rows means enrich-tvl has
+ *      not stored it yet (run the TVL lane); none means the family changed
+ *      (reconcile the map); an unread list is could-not-check.
  *
  *   SCOUT_BASE=https://stellarlight.xyz npx tsx scripts/check-record-completeness.ts
  *
@@ -24,6 +29,7 @@
  * into nightly-health.yml.
  */
 
+import { tvlCitationGaps } from "../src/lib/status-checks";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
@@ -171,6 +177,7 @@ async function main() {
 	let scanned = 0;
 	let blank = 0;
 	const blanks: string[] = [];
+	const swept: Row[] = [];
 	for (const cat of [
 		"Anchor",
 		"Asset",
@@ -181,6 +188,7 @@ async function main() {
 	]) {
 		const rows = await sweep(`/api/projects/search?category=${cat}`);
 		scanned += rows.length;
+		swept.push(...rows);
 		for (const p of rows)
 			if (!p.statusBasis) {
 				blank++;
@@ -207,6 +215,50 @@ async function main() {
 				note: `${blank - blanks.length} more rows blank beyond the ${blanks.length} listed`,
 			});
 	}
+
+	// ── S3: a multi-row tvlUSD cites the page that sums it (sls-102) ──
+	// Reuses S2's sweep. enrich-tvl stores the parent it read from DefiLlama
+	// each run; a null here is either a parent not stored yet (right after a
+	// deploy, before the TVL lane runs) or a family that changed upstream.
+	// DefiLlama's list tells them apart, so it is read only when a gap exists.
+	const tvlRows = swept.map((p) => ({
+		slug: String(p.slug),
+		tvlUSD: p.tvlUSD,
+		llamaSlugs: p.llamaSlugs,
+		tvlMethodUrl: p.tvlMethodUrl,
+	}));
+	const anyGap = tvlRows.some(
+		(r) =>
+			typeof r.tvlUSD === "number" &&
+			(r.llamaSlugs?.length ?? 0) > 1 &&
+			!r.tvlMethodUrl,
+	);
+	let protocols: { slug: string; parentProtocol?: string | null }[] | null =
+		null;
+	if (anyGap) {
+		try {
+			const res = await fetch("https://api.llama.fi/protocols", {
+				headers: UA,
+			});
+			const body = res.ok ? await res.json() : null;
+			// Below 1,000 rows the body is not the real list (enrich-tvl's guard).
+			protocols = Array.isArray(body) && body.length >= 1000 ? body : null;
+		} catch {
+			protocols = null;
+		}
+	}
+	const gaps = tvlCitationGaps(tvlRows, protocols);
+	console.log(
+		`S3 tvlMethodUrl: ${swept.filter((p) => (p.llamaSlugs?.length ?? 0) > 1).length} multi-row TVL row(s) · ${gaps.length} with no page that sums them`,
+	);
+	for (const g of gaps) {
+		console.log(`  ✗ ${g.slug}: [${g.family.join(",")}] ${g.cause}`);
+		failRows.push({
+			probe: `tvlMethodUrl null: ${g.slug}`,
+			note: `${g.cause}: tvlUSD sums [${g.family.join(", ")}] with no page cited. ${g.action}`,
+		});
+	}
+	if (gaps.length) failures++;
 
 	writeNightlyFindings("record-completeness", failRows);
 	console.log(failures ? "\nFAILING" : "\nall sweeps clean");

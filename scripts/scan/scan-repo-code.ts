@@ -29,9 +29,9 @@ import { getPayload } from "payload";
 import { deriveCodeDomains } from "../../src/lib/code-domains";
 import { computeFarmScore } from "../../src/lib/code-signals";
 import {
+	contractInterfaceEntries,
 	detectSdkCapabilities,
 	extractCodeSymbols,
-	extractContractInterface,
 	extractJsSymbols,
 } from "../../src/lib/code-symbols";
 import { routeCodeDepth } from "../../src/lib/depth-route";
@@ -520,10 +520,13 @@ async function main() {
 						: extractJsSymbols(r.depthInput.blobs);
 				const sdkCapabilities =
 					r.outcome === "ok" ? detectSdkCapabilities(r.depthInput.blobs) : [];
-				const contractInterface =
+				// Each signature keeps the file it was read from (issue #1906).
+				const ifaceEntries =
 					r.outcome === "ok"
-						? extractContractInterface(r.depthInput.blobs)
+						? contractInterfaceEntries(r.depthInput.blobs)
 						: [];
+				const contractInterface = ifaceEntries.map((e) => e.signature);
+				const contractInterfacePaths = ifaceEntries.map((e) => e.path);
 				const stellarDeps =
 					r.outcome === "ok" ? extractStellarDeps(r.scan.blobs) : [];
 				// Evidence-only domain classification (deps + caps + iface traits) —
@@ -563,6 +566,7 @@ async function main() {
 						farmFlags: farm.flags,
 						codeSymbols: symbols,
 						contractInterface,
+						contractInterfacePaths,
 						stellarDeps,
 						sdkCapabilities,
 						codeDomains,

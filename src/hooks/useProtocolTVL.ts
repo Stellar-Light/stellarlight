@@ -2,17 +2,23 @@
 
 import { useQuery } from "@tanstack/react-query";
 
+/** What /api/defillama/protocol/{slug} serves. null = not read: no figure
+ * published, or a source this deployment does not read. A failed read is a
+ * 503, which hides the card (re-check 2026-11-05). */
 export interface ProtocolTVLData {
 	found: boolean;
 	name: string;
 	slug: string;
-	logo: string;
+	logo: string | null;
 	category: string;
-	currentTVL: number;
-	change1d: number;
-	change7d: number;
-	historicalTVL: { date: number; tvl: number }[];
-	sourceUrl?: string; // for manual overrides (e.g. rwa.xyz)
+	currentTVL: number | null;
+	change1d: number | null;
+	change7d: number | null;
+	/** null = no series read; [] = a series with no points */
+	historicalTVL: { date: number; tvl: number }[] | null;
+	/** Date of the last series point the figures come from. */
+	asOf?: string | null;
+	sourceUrl?: string; // the figure's own source, when not DefiLlama
 }
 
 export function useProtocolTVL(projectName: string | null) {

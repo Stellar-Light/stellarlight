@@ -43,8 +43,11 @@ export interface PageSignals {
 
 const PARKED =
 	/\b(domain (is )?for sale|buy this domain|this domain (is|may be) for sale|hugedomains|sedo\.com|dan\.com|afternic|parked (domain|by)|expireddomains|domain has expired|renew (this|your) domain)\b/i;
+// Plural and gambling forms (2026-11-04): stabble.org, a directory row's
+// site, now serves "Best Crypto Casinos Canada 2026" and read as a product,
+// because \bcasino\b does not match "casinos".
 const SPAM =
-	/\b(togel|toto (togel|macau)|slot gacor|situs (slot|judi|partner)|bocoran|casino|judi online|bandar|c\u1ed5ng game|rbxto|poker online|betting)\b/i;
+	/\b(togel|toto (togel|macau)|slot gacor|situs (slot|judi|partner)|bocoran|casinos?|gambling|sportsbooks?|bookmakers?|judi online|bandar|c\u1ed5ng game|rbxto|poker online|betting)\b/i;
 const SCAFFOLD =
 	/^(create next app|react app|vite \+ react|welcome to nginx!?|apache2 (debian|ubuntu) default page|it works!?|index of \/|default web site page|document)$/i;
 const PLACEHOLDER =
@@ -99,6 +102,14 @@ export function classifyPage(s: PageSignals): {
 	if (title || meta) return { verdict: "product", reason: null };
 	return { verdict: "unknown", reason: null };
 }
+
+/** Verdicts that mean the page now serves another business, or a domain for
+ * sale: the link no longer reaches the product. check-links lists these in
+ * link-health-latest.json (notTheProduct), so they reach the ledger. */
+export const ANOTHER_BUSINESS_VERDICTS: ReadonlySet<PageVerdict> = new Set([
+	"spam",
+	"parked",
+]);
 
 /** Verdicts that mean "this page is not evidence the product is alive". */
 export const NON_PRODUCT_VERDICTS: ReadonlySet<PageVerdict> = new Set([

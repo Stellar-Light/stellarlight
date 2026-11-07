@@ -36,6 +36,7 @@ const okInput: SignalsInput = {
 	contractInterface: [
 		"EscrowContract.initialize_escrow(seller: Address, amount: i128)",
 	],
+	contractInterfacePaths: ["contracts/escrow/src/lib.rs"],
 	stellarDeps: ["soroban-sdk", "sep-41-token"],
 	sdkCapabilities: ["tx-building", "x402"],
 	codeDomains: ["payments-x402"],
@@ -56,6 +57,8 @@ describe("write-shape — the signals-only write gate", () => {
 		expect(w.contractInterface).toEqual([
 			"EscrowContract.initialize_escrow(seller: Address, amount: i128)",
 		]);
+		// issue #1906: each signature's source file, in the same order
+		expect(w.contractInterfacePaths).toEqual(["contracts/escrow/src/lib.rs"]);
 		expect(w.stellarDeps).toEqual(["soroban-sdk", "sep-41-token"]);
 		expect(w.sdkCapabilities).toEqual(["tx-building", "x402"]);
 		// The sdkCapabilities war story (computed-but-unpersisted for a month):
@@ -109,6 +112,17 @@ describe("write-shape — the signals-only write gate", () => {
 			for (const k of FORBIDDEN_WRITE_KEYS)
 				expect(w, `forbidden key ${k}`).not.toHaveProperty(k);
 		}
+	});
+
+	it("every key an ok scan writes is a field of the Repos collection (Payload drops unknown keys in silence)", async () => {
+		const { Repos } = await import("../../collections/Repos");
+		const fields = new Set(
+			Repos.fields.map((f) => ("name" in f ? f.name : "")).filter(Boolean),
+		);
+		const missing = Object.keys(
+			signalsToWrite(okInput, "2026-07-05T00:00:00.000Z"),
+		).filter((k) => !fields.has(k));
+		expect(missing).toEqual([]);
 	});
 
 	it("errorToWrite records the failure, truncated, retryable", () => {

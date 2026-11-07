@@ -143,6 +143,66 @@ export function findingId(source: string, probe: string): string {
 	return `${source}:${slugifyProbe(probe)}`;
 }
 
+/** The artifact live-index-guards.yml writes from scripts/check-raven-drift.ts. */
+export const RAVEN_DRIFT_ARTIFACT =
+	"improvements/audits/raven-drift-latest.json";
+
+/**
+ * Ledger findings from one drift-guard artifact. A run that could not look
+ * (checked: false) is one could-not-check finding and does not cover the
+ * source, so it never closes an open drift finding by silence.
+ */
+export function ravenDriftFindings(
+	rd: {
+		checked?: boolean;
+		notes?: unknown;
+		missingFromCatalog?: unknown;
+		generatedAt?: unknown;
+	},
+	nowIso: string,
+): { covered: boolean; findings: Finding[] } {
+	const base = {
+		source: "raven-drift",
+		surface: "consumer" as Surface,
+		severity: "medium" as Severity,
+		firstSeen: nowIso,
+		lastSeen: nowIso,
+		status: "open" as const,
+		...(typeof rd.generatedAt === "string"
+			? { evidenceAt: rd.generatedAt }
+			: {}),
+	};
+	if (rd.checked === false) {
+		const probe = "the Raven catalog drift check could not run";
+		return {
+			covered: false,
+			findings: [
+				{
+					...base,
+					id: findingId("raven-drift", probe),
+					probe,
+					failureMode: "could-not-check",
+					detail: Array.isArray(rd.notes) ? rd.notes.join("; ") : undefined,
+				},
+			],
+		};
+	}
+	const missing = Array.isArray(rd.missingFromCatalog)
+		? rd.missingFromCatalog
+		: [];
+	return {
+		covered: true,
+		findings: missing
+			.filter((op): op is string => typeof op === "string" && op.length > 0)
+			.map((op) => ({
+				...base,
+				id: findingId("raven-drift", op),
+				probe: op,
+				failureMode: "op-missing-from-catalog",
+			})),
+	};
+}
+
 /**
  * A synthetic / test / probe query — NOT real demand. Mining these as findings
  * manufactures fires on our own noise: health checks, eval probes, fat-finger
@@ -386,6 +446,9 @@ export const MAINTENANCE_MODES = new Set([
 	// A URL a probe PROVED dead. The repair is on the record that cites it —
 	// relink it or retire it — so it is a refresh queue, not a served defect.
 	"broken-link",
+	// A URL that answers but reads as another business or a parked domain:
+	// the same repair on the record, so the same queue.
+	"link-not-the-product",
 ]);
 
 export const isMaintenance = (f: Finding) =>
@@ -423,6 +486,7 @@ export const DEFAULT_KIND: FindingKind = "instrument";
 const KIND_OF: Record<string, FindingKind> = {
 	// ── world: the ecosystem differs from or moved past our record ──
 	"link-health|broken-link": "world", // a URL a probe PROVED dead
+	"link-health|link-not-the-product": "world", // the URL now serves another business
 	"nightly-note-freshness|note-stale": "world", // upstream published past the note's asOf
 	"supersession-freshness|supersession-unrecorded": "world", // the repo was archived upstream
 	"weak-basis-liveness|status-contradicted": "world", // the product's own page denies our Live claim
@@ -465,6 +529,7 @@ const KIND_OF: Record<string, FindingKind> = {
 	"raven-routing|routing-miss": "instrument", // ours or their scorer's — machinery either way
 	"raven-routing|demand-routing-miss": "instrument",
 	"raven-drift|op-missing-from-catalog": "instrument",
+	"raven-drift|could-not-check": "instrument", // the drift guard could not look
 };
 
 export const isKindMapped = (source: string, failureMode: string): boolean =>

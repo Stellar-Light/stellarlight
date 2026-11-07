@@ -170,8 +170,14 @@ function HoverCard({
 	);
 }
 
+// Review 2026-11-04: an unread figure showed as $0 (DeFi) or as a figure
+// hard-coded in March 2026 (RWA). Unknown is shown as unknown.
+const Unavailable = () => (
+	<span className="text-muted-foreground">Unavailable</span>
+);
+
 export default function TVLStats() {
-	const { data: stellarTVL = 0, isLoading } = useStellarTVL();
+	const { data: stellarTVL = null, isLoading } = useStellarTVL();
 	const { data: protocolData } = useDeFiProtocols();
 	const { data: rwaData, isLoading: isRWALoading } = useRWATVL();
 	const [showDefiTooltip, setShowDefiTooltip] = useState(false);
@@ -180,7 +186,8 @@ export default function TVLStats() {
 	const topProtocols = protocolData?.topProtocols ?? [];
 	const totalProtocols = protocolData?.totalProtocols ?? 0;
 
-	const rwaTVL = rwaData?.tvl ?? 1_688_000_000;
+	const rwaTVL = rwaData?.tvl ?? null;
+	const rwaAsOf = rwaData?.asOf ?? null;
 	const topIssuers = rwaData?.topIssuers ?? [];
 	const totalAssets = rwaData?.totalAssets ?? 0;
 
@@ -198,6 +205,7 @@ export default function TVLStats() {
 
 	return (
 		<div className="flex flex-wrap gap-6 mt-6">
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: a hover preview; the link inside is the keyboard path */}
 			<div
 				className="relative"
 				onMouseEnter={() => setShowDefiTooltip(true)}
@@ -220,6 +228,8 @@ export default function TVLStats() {
 						>
 							{isLoading ? (
 								<span className="text-muted-foreground">Loading...</span>
+							) : stellarTVL === null ? (
+								<Unavailable />
 							) : (
 								<TVLNumber value={stellarTVL} />
 							)}
@@ -236,6 +246,7 @@ export default function TVLStats() {
 				)}
 			</div>
 
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: a hover preview; the link inside is the keyboard path */}
 			<div
 				className="relative border-l border-border pl-6"
 				onMouseEnter={() => setShowRwaTooltip(true)}
@@ -258,10 +269,17 @@ export default function TVLStats() {
 						>
 							{isRWALoading ? (
 								<span className="text-muted-foreground">Loading...</span>
+							) : rwaTVL === null ? (
+								<Unavailable />
 							) : (
 								<TVLNumber value={rwaTVL} />
 							)}
 						</p>
+						{rwaTVL !== null && rwaAsOf && (
+							<p className="text-xs text-muted-foreground">
+								as of {rwaAsOf.slice(0, 10)}
+							</p>
+						)}
 					</div>
 				</a>
 

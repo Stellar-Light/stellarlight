@@ -8,6 +8,7 @@ import {
 } from "@/components/usage-chart";
 import { getUsageStats, getUsageUaSplit } from "@/lib/api-usage";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { findWholeSet } from "@/lib/whole-set";
 
 // Recomputed at most every 5 minutes — 30 daily-window counts per render is
 // fine on M0 behind ISR, not fine on every request.
@@ -156,19 +157,18 @@ async function getEcosystemTopline() {
 			payload.count({ collection: "repos" }),
 			payload.count({ collection: "research-docs" }),
 			payload.count({ collection: "partner-accounts" }),
-			payload.find({
+			// The count is the database's; the sum is only as whole as the
+			// read, so a cut read leaves it unknown rather than a partial total.
+			findWholeSet<{ scf?: { totalAwarded?: number | null } }>(payload, {
 				collection: "projects",
 				where: { "scf.awarded": { equals: true } },
 				limit: 1000,
 				depth: 0,
-				pagination: false,
 				select: { scf: true },
 			}),
 		]);
 		let scfTotalUSD = 0;
-		for (const d of funded.docs as Array<{
-			scf?: { totalAwarded?: number | null };
-		}>) {
+		for (const d of funded.docs) {
 			if (typeof d.scf?.totalAwarded === "number")
 				scfTotalUSD += d.scf.totalAwarded;
 		}
@@ -177,8 +177,8 @@ async function getEcosystemTopline() {
 			repos: repos.totalDocs,
 			research: research.totalDocs,
 			partners: partners.totalDocs,
-			scfFundedProjects: funded.docs.length,
-			scfTotalUSD,
+			scfFundedProjects: funded.totalDocs,
+			scfTotalUSD: funded.complete ? scfTotalUSD : null,
 		};
 	} catch {
 		return null;

@@ -15,6 +15,8 @@
  * when a real issuer ships one; never infer.
  */
 
+import type { StablecoinAssetType } from "@/lib/stablecoins";
+
 export type StablecoinPeg =
 	| "USD"
 	| "EUR"
@@ -41,7 +43,12 @@ export interface StablecoinAsset {
 	issuer: string;
 	/** Home domain serving the stellar.toml we read the logo from. */
 	domain: string;
-	/** Issuing company, as it should be attributed. */
+	/**
+	 * The brand the asset is marketed under, as a reader knows it ("Novatti
+	 * Group" for AUDD, "Currency One" for the C1 rows). NOT the legal issuer:
+	 * the pipeline reads the issuer of record from the ORG_NAME in the stellar
+	 * toml at the issuer account's home_domain, never from this field.
+	 */
 	company: string;
 	/** Display name from the issuer's own toml, when it differs from the code. */
 	name?: string;
@@ -58,8 +65,10 @@ export interface StablecoinAsset {
 	preferFallbackLogo?: boolean;
 	/** Use the peg's country flag instead of a logo. */
 	useCountryFlag?: boolean;
-	/** Extra qualifier — e.g. USDY is yield-bearing, not a pure peg. */
-	assetType?: string;
+	/** Extra qualifier: USDY is yield-bearing, not a pure peg. Leave
+	 *  it off only to mean "not classified": the API serves its absence as
+	 *  unknown, never as a verified plain peg. */
+	assetType?: StablecoinAssetType;
 	/**
 	 * A caveat the operator states about itself, carried verbatim from their
 	 * own toml/docs — never our inference. Surfaces on the row's `note` field

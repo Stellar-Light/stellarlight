@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { IdeaShareButton } from "@/components/idea-share-button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { CATEGORY_LABELS, IDEAS, rfpStatus } from "@/data/ideas";
+import { BRIEF_ROSTER, CATEGORY_LABELS, IDEAS, rfpStatus } from "@/data/ideas";
 
 type Params = Promise<{ id: string }>;
 
@@ -42,6 +42,8 @@ export default async function IdeaDetailPage({ params }: { params: Params }) {
 	// sls-060: the page must agree with the API — closed briefs are past
 	// rounds and no longer fundable, so the funding CTA is status-aware.
 	const status = rfpStatus(idea.quarter);
+	const anyOpen = IDEAS.some((i) => rfpStatus(i.quarter) === "open");
+	const brief = idea.publishedBrief;
 
 	return (
 		<div className="min-h-screen relative">
@@ -108,11 +110,58 @@ export default async function IdeaDetailPage({ params }: { params: Params }) {
 								<Card className="border border-border/50 bg-card">
 									<CardContent className="p-6">
 										<h2 className="text-xl font-semibold mb-4 text-foreground">
-											Technical Requirements
+											Technical requirements (idea summary)
 										</h2>
 										<p className="text-muted-foreground leading-relaxed whitespace-pre-line">
 											{idea.technicalRequirements}
 										</p>
+									</CardContent>
+								</Card>
+							)}
+
+							{brief && (
+								<Card className="border border-border/50 bg-card">
+									<CardContent className="p-6">
+										<h2 className="text-xl font-semibold mb-2 text-foreground">
+											Published brief
+										</h2>
+										<p className="text-sm text-muted-foreground mb-4">
+											SCF published this RFP as{" "}
+											<a
+												href={brief.url}
+												target="_blank"
+												rel="noopener noreferrer"
+												className="text-foreground underline underline-offset-4"
+											>
+												{brief.title}
+											</a>{" "}
+											(read {brief.checkedOn}). Where it differs from the idea
+											summary, the brief is what SCF funds.
+										</p>
+										{brief.functionalRequirements && (
+											<>
+												<h3 className="text-sm font-semibold mb-2 text-foreground">
+													Functional requirements
+												</h3>
+												<ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground mb-4">
+													{brief.functionalRequirements.map((r) => (
+														<li key={r}>{r}</li>
+													))}
+												</ul>
+											</>
+										)}
+										{brief.outOfScope && (
+											<>
+												<h3 className="text-sm font-semibold mb-2 text-foreground">
+													Out of scope
+												</h3>
+												<ul className="list-disc pl-5 space-y-1 text-sm text-muted-foreground">
+													{brief.outOfScope.map((r) => (
+														<li key={r}>{r}</li>
+													))}
+												</ul>
+											</>
+										)}
 									</CardContent>
 								</Card>
 							)}
@@ -128,13 +177,16 @@ export default async function IdeaDetailPage({ params }: { params: Params }) {
 										</h3>
 										<p className="text-sm text-muted-foreground mb-4">
 											This RFP belongs to a past round and is no longer
-											fundable. Browse the currently open briefs instead.
+											fundable.{" "}
+											{anyOpen
+												? "Browse the currently open briefs instead."
+												: `No brief is open now: SCF's RFP Track page named none (checked ${BRIEF_ROSTER.checkedOn}).`}
 										</p>
 										<Link
 											href="/ideas"
 											className="inline-flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-semibold bg-foreground text-background hover:opacity-90 transition-opacity"
 										>
-											View open RFPs
+											{anyOpen ? "View open RFPs" : "View all RFPs"}
 										</Link>
 										<a
 											href="https://communityfund.stellar.org/"
