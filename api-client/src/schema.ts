@@ -1243,7 +1243,7 @@ export interface components {
                 asOf: string | null;
                 /**
                  * Format: uri
-                 * @description Where to check the fact: the first linked protocol's DefiLlama page (its listing and TVL figure); the contract readings behind the TVL check are the row's onchain block.
+                 * @description Where to check the fact: the row's tvlMethodUrl when it has one (the protocol's own page, or for several rows the parent page that sums them), else the first linked protocol's DefiLlama page; the contract readings behind the TVL check are the row's onchain block.
                  */
                 sourceUrl: string;
             }[];
@@ -1441,7 +1441,7 @@ export interface components {
             llamaSlugs?: string[] | null;
             /**
              * Format: uri
-             * @description Citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs): the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum; enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.
+             * @description The DefiLlama page that shows the whole tvlUSD, to cite alongside it: the protocol's own page when llamaSlugs has one entry; when it has several, the parent page whose child rows were exactly those slugs at the last TVL refresh (e.g. Blend: https://defillama.com/protocol/blend, its pools and backstop rows combined). Null when not llama-mapped, or when no single DefiLlama page sums the mapped rows (the family changed upstream, or was not read yet); llamaSlugs then lists each contributing page (https://defillama.com/protocol/{slug}).
              */
             tvlMethodUrl?: string | null;
             /** @description When this record is a known duplicate/rename, the slug of the CANONICAL record to prefer; null for canonical records themselves. Follow it before citing counts or funding. */
@@ -3403,6 +3403,8 @@ export interface operations {
                 scfAwarded?: boolean;
                 /** @description Filter by lifecycle status (e.g. status=Inactive lists retired/defunct projects; status=Live restricts to operating ones). Compose with scfAwarded for accountability/diligence: `?scfAwarded=1&status=Inactive` is the roster of SCF-funded projects that have since gone inactive, and `meta.counts.total` is how many. Unknown values return 400 with validStatuses. */
                 status?: "Development" | "Pre-Release" | "Live" | "Inactive";
+                /** @description Filter to projects whose curated `venueRole` equals this value, e.g. `type=DEX&venueRole=amm` lists AMMs and `venueRole=aggregator-router` lists routers. Rows not yet classified (venueRole null) never match, so the result is the classified subset, not every venue of that kind. A venueRole search adds no rows found by meaning, so an empty page means no classified row matched q. Unknown values return 400 with validVenueRoles. */
+                venueRole?: "amm" | "native-orderbook" | "aggregator-router" | "trading-ui" | "wallet-integrated";
                 /** @description Max results per page. The default and cap VARY by endpoint (e.g. projects/search 20/100, builders 50/200, leaderboard 50/300, research 8/25). A value below 1 or above the cap is clamped, not rejected. */
                 limit?: components["parameters"]["limit"];
                 /** @description Number of matching rows to skip before returning (pagination). Page until offset + meta.counts.returned >= meta.counts.total. */
@@ -3427,7 +3429,7 @@ export interface operations {
                     "application/json": components["schemas"]["ProjectSearchResponse"];
                 };
             };
-            /** @description The call is wrong; fix it, do not retry it as is. Answered before any read when: view is not full or compact (validValues), view=compact is sent with fields (validValues), status is not a resolvable status (validStatuses), type is not a product type (validTypes), category is not a category (validCategories), or scfAwarded is not a boolean form (acceptedValues). An unknown parameter is not a 400: it is named in meta.warnings. */
+            /** @description The call is wrong; fix it, do not retry it as is. Answered before any read when: view is not full or compact (validValues), view=compact is sent with fields (validValues), status is not a resolvable status (validStatuses), type is not a product type (validTypes), venueRole is not a venue role (validVenueRoles), category is not a category (validCategories), or scfAwarded is not a boolean form (acceptedValues). An unknown parameter is not a 400: it is named in meta.warnings. */
             400: {
                 headers: {
                     [name: string]: unknown;
@@ -3437,6 +3439,7 @@ export interface operations {
                         validValues?: string[];
                         validStatuses?: string[];
                         validTypes?: string[];
+                        validVenueRoles?: string[];
                         validCategories?: string[];
                         /** @description The boolean forms scfAwarded takes. */
                         acceptedValues?: {

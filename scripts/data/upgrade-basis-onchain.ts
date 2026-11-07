@@ -37,6 +37,7 @@
 
 import "../load-env";
 import { getPayload } from "payload";
+import { llamaCitationFor } from "../../src/lib/status-checks";
 import configPromise from "../../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
@@ -57,6 +58,7 @@ interface Row {
 	tvlAsOf?: string | null;
 	tvlSource?: string | null;
 	llamaSlugs?: string[] | null;
+	llamaListing?: { parent?: string | null } | null;
 	onchain?: {
 		assetCode?: string | null;
 		issuer?: string | null;
@@ -66,17 +68,19 @@ interface Row {
 	} | null;
 }
 
-function evidenceFor(
-	r: Row,
-): { kind: "movement" | "tvl"; asOf: string; url: string; note: string } | null {
+function evidenceFor(r: Row): {
+	kind: "movement" | "tvl";
+	asOf: string;
+	url: string;
+	note: string;
+} | null {
 	const o = r.onchain;
 	if (
 		o?.asOf &&
 		days(o.asOf) <= MAX_MOVEMENT_AGE_DAYS &&
 		((o.assetPaymentsDelta ?? 0) > 0 || (o.assetTradesDelta ?? 0) > 0)
 	) {
-		const asset =
-			o.assetCode && o.issuer ? `${o.assetCode}-${o.issuer}` : null;
+		const asset = o.assetCode && o.issuer ? `${o.assetCode}-${o.issuer}` : null;
 		return {
 			kind: "movement",
 			asOf: o.asOf,
@@ -93,12 +97,12 @@ function evidenceFor(
 		r.tvlAsOf &&
 		days(r.tvlAsOf) <= MAX_TVL_AGE_DAYS
 	) {
-		const slug = r.llamaSlugs?.[0];
+		// The page that shows the whole tvlUSD, not its first row (sls-102).
 		return {
 			kind: "tvl",
 			asOf: r.tvlAsOf,
-			url: slug
-				? `https://defillama.com/protocol/${slug}`
+			url: r.llamaSlugs?.length
+				? llamaCitationFor(r.llamaSlugs, r.llamaListing?.parent)
 				: "https://defillama.com/chain/Stellar",
 			note: `tvl $${Math.round(r.tvlUSD ?? 0).toLocaleString("en-US")}`,
 		};
@@ -131,8 +135,7 @@ let probeNotFound = 0;
 async function horizonJson(
 	u: string,
 ): Promise<
-	| { ok: true; data: Record<string, unknown> }
-	| { ok: false; reason: string }
+	{ ok: true; data: Record<string, unknown> } | { ok: false; reason: string }
 > {
 	probesAttempted += 1;
 	try {
@@ -257,13 +260,12 @@ async function main() {
 			tvlAsOf: true,
 			tvlSource: true,
 			llamaSlugs: true,
+			llamaListing: true,
 			onchain: true,
 		},
 	});
 	const rows = all.docs as unknown as Row[];
-	const weak = rows.filter(
-		(r) => !r.statusBasis || WEAK.has(r.statusBasis),
-	);
+	const weak = rows.filter((r) => !r.statusBasis || WEAK.has(r.statusBasis));
 	const plan: Array<{
 		r: Row;
 		ev: { kind: string; asOf: string; url: string; note: string };

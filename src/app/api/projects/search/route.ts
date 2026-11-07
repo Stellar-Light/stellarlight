@@ -68,7 +68,7 @@ import {
 	HIDDEN_PROJECT_STATUSES,
 	RESOLVABLE_PROJECT_STATUSES,
 } from "@/lib/project-status";
-import { PROJECT_TYPES } from "@/lib/project-types";
+import { PROJECT_TYPES, VENUE_ROLES } from "@/lib/project-types";
 import { type RepoResult, searchRepos } from "@/lib/repo-search";
 import {
 	mergeProducts,
@@ -77,6 +77,7 @@ import {
 } from "@/lib/rwa-products";
 import { serverTiming } from "@/lib/server-timing";
 import {
+	llamaPageFor,
 	type StatusCheck,
 	statusChecksFor,
 	tvlStaleOf,
@@ -246,7 +247,10 @@ async function semanticProjectRows(
 			tvlMethod: p.tvlMethod ?? null,
 			// sls-039: mapped DefiLlama identifiers + citation URL
 			llamaSlugs: pickLlamaSlugs(p.llamaSlugs),
-			tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(p.llamaSlugs)),
+			tvlMethodUrl: llamaPageFor(
+				pickLlamaSlugs(p.llamaSlugs),
+				p.llamaListing?.parent,
+			),
 			// sls-032/035: route-level bridge evidence + DEX-landscape role
 			routes: pickRoutes(p.routes),
 			venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
@@ -881,17 +885,14 @@ function pickOnchain(o: any) {
 	};
 }
 
-// sls-039: served llamaSlugs (null when unmapped — mirrors tvlUSD's "null =
-// not tracked" semantics) + a citation URL to the provider's own protocol
-// page, where the full TVL time series lives.
+// sls-039: served llamaSlugs (null when unmapped, as tvlUSD's null means
+// not tracked). tvlMethodUrl is llamaPageFor: the provider page that shows
+// the whole sum (sls-102), where the full TVL time series lives.
 function pickLlamaSlugs(slugs: unknown): string[] | null {
 	const arr = Array.isArray(slugs)
 		? slugs.filter((s): s is string => typeof s === "string" && s.length > 0)
 		: [];
 	return arr.length ? arr : null;
-}
-function tvlMethodUrlFor(slugs: string[] | null): string | null {
-	return slugs?.length ? `https://defillama.com/protocol/${slugs[0]}` : null;
 }
 
 /** Every bounded read in this request shares one budget, so a stalled
@@ -989,6 +990,25 @@ async function handle(req: NextRequest) {
 			{ status: 400 },
 		);
 	}
+	// venueRole filter (sls-113): the param was ignored with a warning, so
+	// "list the AMMs" meant paging the whole DEX type client-side. venueRole is
+	// a single select, so it is the status pattern: exact match in the read,
+	// at the semantic source, through the fold and on the served rows. A row
+	// whose venueRole is null (not yet classified) never matches.
+	const venueRoleParam = sp.get("venueRole")?.trim() || null;
+	const VALID_VENUE_ROLES = VENUE_ROLES;
+	if (
+		venueRoleParam &&
+		!(VALID_VENUE_ROLES as readonly string[]).includes(venueRoleParam)
+	) {
+		return NextResponse.json(
+			{
+				error: `Invalid venueRole '${venueRoleParam}'.`,
+				validVenueRoles: VALID_VENUE_ROLES,
+			},
+			{ status: 400 },
+		);
+	}
 	// Honest contract (2026-07-11 audit, EMPTY-DISHONEST med): an unknown param
 	// (?country=NG, ?sep=24) was silently dropped — the caller got unfiltered
 	// results while believing they'd filtered. We can't 400 (additive-only
@@ -1003,6 +1023,7 @@ async function handle(req: NextRequest) {
 		"scfAwarded",
 		"scfAwardedOnly",
 		"status",
+		"venueRole",
 		"limit",
 		"offset",
 		"exp",
@@ -1017,7 +1038,7 @@ async function handle(req: NextRequest) {
 	// instead of falling through to a quiet empty or thinner page.
 	const warnings: string[] = unknownParams.length
 		? [
-				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, type, status, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria); structured coverage is matched from query text.`,
+				`Unknown parameter(s) ignored: ${unknownParams.join(", ")}. Results are NOT filtered by them. Supported: q, category, type, status, venueRole, scfAwarded, limit, offset. For country/currency/SEP/network intents, put the term in q (e.g. ?q=anchor+nigeria); structured coverage is matched from query text.`,
 			]
 		: [];
 
@@ -1047,7 +1068,14 @@ async function handle(req: NextRequest) {
 	// nested wrong). Returning the default project list here is actively harmful —
 	// the caller reports it as the answer ("no escrow/vault projects exist") when
 	// the real projects were never searched. Return an honest empty + how to fix.
-	if (!q && !category && !scfAwardedOnly && !statusParam && !typeParam) {
+	if (
+		!q &&
+		!category &&
+		!scfAwardedOnly &&
+		!statusParam &&
+		!typeParam &&
+		!venueRoleParam
+	) {
 		logApiHit({
 			req,
 			startedAt,
@@ -1140,6 +1168,9 @@ async function handle(req: NextRequest) {
 				// the memory bank recorded and this file's comment already
 				// claimed while the operator below contradicted it.
 				where.types = { in: [typeParam] };
+			}
+			if (venueRoleParam) {
+				where.venueRole = { equals: venueRoleParam };
 			}
 
 			// `let`, not `const`: the fuzzy-recovery rung below may re-point these
@@ -1396,6 +1427,72 @@ async function handle(req: NextRequest) {
 				warnings.push(degradedWarning("projects audits rollup", e));
 			}
 
+			// A lineage shadow is served as its canonical (the fold below), so
+			// under ?status=, ?type= or ?venueRole= it belongs to the set only
+			// when its canonical passes the filter. Decided here, before ranking and
+			// counting: dropped later on the page, the shadow was still counted
+			// and total promised a row no page could serve (sls-113 review). A
+			// failed read leaves the shadows in and nulls the total (not a
+			// decoration read), so an unchecked count is never served as exact.
+			const isShadow = (d: { slug?: string; canonicalSlug?: string | null }) =>
+				!!d.canonicalSlug && d.canonicalSlug !== d.slug;
+			const shadowTargets = [
+				...new Set(
+					(docs as Array<{ slug?: string; canonicalSlug?: string | null }>)
+						.filter(isShadow)
+						.map((d) => d.canonicalSlug as string),
+				),
+			];
+			if (
+				(statusParam || typeParam || venueRoleParam) &&
+				shadowTargets.length
+			) {
+				const canon = await degradedRead(
+					"projects shadow canonicals",
+					() =>
+						payload.find({
+							collection: "projects",
+							where: { slug: { in: shadowTargets } },
+							limit: shadowTargets.length,
+							depth: 0,
+							select: {
+								slug: true,
+								status: true,
+								types: true,
+								venueRole: true,
+							},
+						}),
+					null,
+					DEFAULT_READ_TIMEOUT_MS,
+				);
+				if (canon.warning) warnings.push(canon.warning);
+				if (canon.value) {
+					const bySlug = new Map(
+						(
+							canon.value.docs as Array<{
+								slug: string;
+								status?: string;
+								types?: string[] | null;
+								venueRole?: string | null;
+							}>
+						).map((c) => [c.slug, c]),
+					);
+					docs = docs.filter((d) => {
+						const c = isShadow(d)
+							? bySlug.get(d.canonicalSlug as string)
+							: null;
+						// dangling pointer: the fold keeps the shadow, so it counts
+						return (
+							!c ||
+							((!statusParam || c.status === statusParam) &&
+								(!typeParam ||
+									(Array.isArray(c.types) && c.types.includes(typeParam))) &&
+								(!venueRoleParam || c.venueRole === venueRoleParam))
+						);
+					});
+				}
+			}
+
 			projects = (
 				docs as Array<{
 					id: string;
@@ -1422,6 +1519,7 @@ async function handle(req: NextRequest) {
 					tvlSource?: string | null;
 					tvlMethod?: string | null;
 					llamaSlugs?: string[] | null;
+					llamaListing?: { parent?: string | null } | null;
 					routes?: unknown;
 					venueRole?: string | null;
 					productKind?: string | null;
@@ -1542,7 +1640,10 @@ async function handle(req: NextRequest) {
 					tvlMethod: p.tvlMethod ?? null,
 					// sls-039: mapped DefiLlama identifiers + citation URL
 					llamaSlugs: pickLlamaSlugs(p.llamaSlugs),
-					tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(p.llamaSlugs)),
+					tvlMethodUrl: llamaPageFor(
+						pickLlamaSlugs(p.llamaSlugs),
+						p.llamaListing?.parent,
+					),
 					// sls-032/035: route-level bridge evidence + DEX-landscape role
 					routes: pickRoutes(p.routes),
 					venueRole: typeof p.venueRole === "string" ? p.venueRole : null,
@@ -2040,10 +2141,14 @@ async function handle(req: NextRequest) {
 	// !typeParam: an exact-type enumeration's membership is the typed set —
 	// padding it with vector neighbours would re-introduce off-set rows the
 	// belt then strips page-side, recreating the returned<limit ghost pages
-	// this fix removes (sls-033).
+	// this fix removes (sls-033). !venueRoleParam for the same reason: the
+	// role set is a small curated list, and the vector index takes no role
+	// filter, so its nearest neighbours filtered afterwards are a cut sample
+	// of that list, not a search of it (sls-113 review).
 	if (
 		q &&
 		!typeParam &&
+		!venueRoleParam &&
 		offset === 0 &&
 		!didYouMean &&
 		scored.length < limit &&
@@ -2232,7 +2337,10 @@ async function handle(req: NextRequest) {
 					tvlSource: c.tvlSource ?? null,
 					tvlMethod: c.tvlMethod ?? null,
 					llamaSlugs: pickLlamaSlugs(c.llamaSlugs),
-					tvlMethodUrl: tvlMethodUrlFor(pickLlamaSlugs(c.llamaSlugs)),
+					tvlMethodUrl: llamaPageFor(
+						pickLlamaSlugs(c.llamaSlugs),
+						c.llamaListing?.parent,
+					),
 					routes: pickRoutes(c.routes),
 					venueRole: typeof c.venueRole === "string" ? c.venueRole : null,
 					// sls-033: product kind + availability must be the CANONICAL's too
@@ -2296,6 +2404,13 @@ async function handle(req: NextRequest) {
 					const tps = Array.isArray(effective.types) ? effective.types : [];
 					if (!tps.includes(typeParam)) continue;
 				}
+				// ...and ?venueRole= the same way (sls-113).
+				if (
+					venueRoleParam &&
+					effective !== row &&
+					effective.venueRole !== venueRoleParam
+				)
+					continue;
 				if (seen.has(effective.slug)) continue;
 				seen.add(effective.slug);
 				folded.push(effective);
@@ -2330,6 +2445,9 @@ async function handle(req: NextRequest) {
 		baseProjects = baseProjects.filter(
 			(p) => Array.isArray(p.types) && p.types.includes(typeParam),
 		);
+	}
+	if (venueRoleParam) {
+		baseProjects = baseProjects.filter((p) => p.venueRole === venueRoleParam);
 	}
 	// Final liveness float across the FULL assembled list (keyword + semantic
 	// augmentation). A dead project that was the sole strict keyword match must
@@ -2608,6 +2726,29 @@ async function handle(req: NextRequest) {
 		partial: failedReadsOf(warnings).length > 0,
 	});
 
+	// The matchMode label (see the hint comment at matchModeLabel below).
+	const tierLabel = {
+		strict: "all keywords matched",
+		"loose-1": "all but one keyword matched",
+		majority: "majority of keywords matched (broader scope)",
+		corrected: didYouMean
+			? `matched via a typo-distance name recovery: no project is spelled '${didYouMean.from}', so these rows are for '${didYouMean.to}'; verify the identity before relying on it`
+			: "matched via a known spelling correction: the query token does not occur in these rows; verify the identity before relying on it",
+		semantic:
+			"no keyword match: semantically similar results (verify relevance before relying on them)",
+		all: "no keyword filter",
+	}[matchMode];
+	const setLabel =
+		typeParam && q
+			? "type filter defines the result set (every typed row included); q ranks within it"
+			: tierLabel;
+	// The semantic rung does not run under venueRole (sls-113 review): say so,
+	// or semantic false would read like "nothing was found by meaning".
+	const modeLabel =
+		venueRoleParam && q
+			? `${setLabel}; venueRole set: no rows found by meaning are added, so this page holds keyword matches among the classified rows only`
+			: setLabel;
+
 	return NextResponse.json(
 		view({
 			meta: withProjectsPartial({
@@ -2619,6 +2760,7 @@ async function handle(req: NextRequest) {
 					category,
 					type: typeParam,
 					status: statusParam,
+					venueRole: venueRoleParam,
 					scfAwarded: scfAwardedOnly,
 					scfAwardedOnly,
 					limit,
@@ -2662,23 +2804,7 @@ async function handle(req: NextRequest) {
 				//   majority → "most of your keywords matched — broader interpretation"
 				//   semantic → NO keyword matched; vector-similarity guesses only
 				//   all      → no keyword query was supplied
-				matchModeLabel: {
-					strict: "all keywords matched",
-					"loose-1": "all but one keyword matched",
-					majority: "majority of keywords matched (broader scope)",
-					corrected: didYouMean
-						? `matched via a typo-distance name recovery: no project is spelled '${didYouMean.from}', so these rows are for '${didYouMean.to}'; verify the identity before relying on it`
-						: "matched via a known spelling correction: the query token does not occur in these rows; verify the identity before relying on it",
-					semantic:
-						"no keyword match: semantically similar results (verify relevance before relying on them)",
-					all: "no keyword filter",
-				}[matchMode],
-				...(typeParam && q
-					? {
-							matchModeLabel:
-								"type filter defines the result set (every typed row included); q ranks within it",
-						}
-					: {}),
+				matchModeLabel: modeLabel,
 				// total = matches before offset/limit slicing — lets paging
 				// consumers know when they've seen everything. `semantic` counts
 				// the rows on THIS page served by the vector fallback (also part

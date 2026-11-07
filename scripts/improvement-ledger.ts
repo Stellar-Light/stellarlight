@@ -154,6 +154,16 @@ const LINK_HEALTH_SPEC: SourceSpec = {
 			severity: "medium",
 			probe: (r) => str(r?.url),
 		},
+		// A URL that answers 200 but now reads as another business or a parked
+		// domain (page-verdict.ts): the same repair as a dead link, relink or
+		// retire the record (stabble.org, 2026-11-04).
+		{
+			key: "notTheProduct",
+			surface: "directory",
+			mode: "link-not-the-product",
+			severity: "medium",
+			probe: (r) => str(r?.url),
+		},
 	],
 };
 

@@ -32,6 +32,16 @@ export interface ChangelogEntry {
 export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-04",
+		surfaces: ["api", "mcp", "skill"],
+		version: "spec@1.9.123",
+		type: "added",
+		summary:
+			"searchProjects takes venueRole (amm, native-orderbook, aggregator-router, trading-ui or wallet-integrated): type=DEX&venueRole=amm lists the AMMs, venueRole alone is a search, and an unknown value answers 400 with validVenueRoles. It used to be ignored with a warning. Rows whose venueRole is null, not yet classified, never match, and a venueRole search adds no rows found by meaning. The search_projects MCP tool passes it from its next release.",
+		detail:
+			"tvlMethodUrl now links the DefiLlama page that shows the whole tvlUSD. Blend's figure sums four DefiLlama rows and linked the V1 pools row; on 2026-11-04 DefiLlama put $43,591 of the four rows' $127.59M on that row. It links https://defillama.com/protocol/blend once the weekly TVL refresh has confirmed that page's children are exactly those four rows, and is null until then or whenever that family changes. A row mapped to one DefiLlama protocol links that protocol's page as before. statusChecks sourceUrl links tvlMethodUrl's page when there is one, else the first linked row's page. Under status or venueRole, meta.counts.total no longer counts a merged duplicate whose current record fails the filter, so it equals the rows the pages can serve. Curated corrections to the Soroswap, Phoenix and Hana rows, venue roles for five more DEX rows, and new Chainlink and MetaMask rows ship through the curation lane after this release.",
+	},
+	{
+		date: "2026-11-04",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.122",
 		type: "fixed",

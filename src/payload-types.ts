@@ -744,6 +744,7 @@ export interface Project {
 			| ("listed" | "deprecated" | "superseded" | "partial" | "not-found")
 			| null;
 		deadFrom?: string | null;
+		parent?: string | null;
 		checkedAt?: string | null;
 	};
 	provenance: {
@@ -3597,6 +3598,7 @@ export interface ProjectsSelect<T extends boolean = true> {
 		| {
 				state?: T;
 				deadFrom?: T;
+				parent?: T;
 				checkedAt?: T;
 		  };
 	provenance?:

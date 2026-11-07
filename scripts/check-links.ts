@@ -51,6 +51,7 @@ import {
 	UNVERIFIABLE_RUNS_TO_ESCALATE,
 } from "../src/lib/link-history";
 import {
+	ANOTHER_BUSINESS_VERDICTS,
 	classifyPage,
 	type PageVerdict,
 	readPage,
@@ -602,30 +603,53 @@ async function main() {
 	// already Inactive or Draft. One live citer is enough to make it a defect —
 	// a shared URL is not excused by the dead rows that also point at it.
 	const RETIRED = new Set(["Inactive", "Draft"]);
+	const onlyOnRetired = (r: CheckResult & { targets: Target[] }) => {
+		const citers = r.targets.filter((t) => t.collection === "projects");
+		return (
+			citers.length > 0 &&
+			citers.every((t) =>
+				RETIRED.has(String((t as { recordStatus?: string }).recordStatus)),
+			)
+		);
+	};
+	const cites = (r: CheckResult & { targets: Target[] }) => ({
+		targets: r.targets.map((t) => `${t.collection}/${t.recordSlug}.${t.field}`),
+		citedByStatus: r.targets.map(
+			(t) =>
+				`${t.recordSlug}: ${(t as { recordStatus?: string }).recordStatus ?? "n/a"}`,
+		),
+	});
 	const brokenRows = results
 		.filter((r) => r.status === "error")
-		.map((r) => {
-			const citers = r.targets.filter((t) => t.collection === "projects");
-			return {
-				onlyOnRetired:
-					citers.length > 0 &&
-					citers.every((t) =>
-						RETIRED.has(String((t as { recordStatus?: string }).recordStatus)),
-					),
-				row: {
-					url: r.url,
-					httpStatus: r.statusCode ?? null,
-					reason: r.errorReason ?? null,
-					targets: r.targets.map(
-						(t) => `${t.collection}/${t.recordSlug}.${t.field}`,
-					),
-					citedByStatus: r.targets.map(
-						(t) =>
-							`${t.recordSlug}: ${(t as { recordStatus?: string }).recordStatus ?? "n/a"}`,
-					),
-				},
-			};
-		});
+		.map((r) => ({
+			onlyOnRetired: onlyOnRetired(r),
+			row: {
+				url: r.url,
+				httpStatus: r.statusCode ?? null,
+				reason: r.errorReason ?? null,
+				...cites(r),
+			},
+		}));
+	// A page that answers 200 and now reads as another business (gambling
+	// spam) or a domain for sale: the HTTP check passes and the link is still
+	// wrong. stabble.org served "Best Crypto Casinos Canada 2026" from a Live
+	// DEX row on 2026-11-04 and no artifact said so (sls-100 review).
+	const notProductRows = results
+		.filter(
+			(r) =>
+				r.status === "ok" &&
+				!!r.pageVerdict &&
+				ANOTHER_BUSINESS_VERDICTS.has(r.pageVerdict),
+		)
+		.map((r) => ({
+			onlyOnRetired: onlyOnRetired(r),
+			row: {
+				url: r.url,
+				verdict: r.pageVerdict,
+				pageTitle: r.pageTitle ?? null,
+				...cites(r),
+			},
+		}));
 
 	{
 		const dir = join(ROOT, "improvements/audits");
@@ -655,15 +679,30 @@ async function main() {
 						.filter((r) => r.onlyOnRetired)
 						.map((r) => r.row)
 						.sort((a, b) => a.url.localeCompare(b.url)),
+					notTheProductRule:
+						"notTheProduct = a URL that answered 200 but whose title or meta reads as another business (gambling spam) or a domain for sale (src/lib/page-verdict.ts), cited by at least one row that is not retired. It reaches the improvement ledger as link-not-the-product. notTheProductOnRetired = every citing row is already Inactive or Draft.",
+					notTheProduct: notProductRows
+						.filter((r) => !r.onlyOnRetired)
+						.map((r) => r.row)
+						.sort((a, b) => a.url.localeCompare(b.url)),
+					notTheProductOnRetired: notProductRows
+						.filter((r) => r.onlyOnRetired)
+						.map((r) => r.row)
+						.sort((a, b) => a.url.localeCompare(b.url)),
 				},
 				null,
 				1,
 			)}\n`,
 		);
 		const onRetired = brokenRows.filter((r) => r.onlyOnRetired).length;
+		const notProductLive = notProductRows.filter((r) => !r.onlyOnRetired);
 		console.log(
-			`Wrote improvements/audits/link-health-latest.json (${error} proven broken: ${error - onRetired} need a human, ${onRetired} only cited by rows already retired).\n`,
+			`Wrote improvements/audits/link-health-latest.json (${error} proven broken: ${error - onRetired} need a human, ${onRetired} only cited by rows already retired; ${notProductRows.length} answer as another business or a parked domain, ${notProductLive.length} cited by a live row).\n`,
 		);
+		for (const r of notProductLive)
+			console.log(
+				`  not the product (${r.row.verdict}): ${r.row.url} "${r.row.pageTitle ?? ""}"`,
+			);
 	}
 
 	// Class 32 escalation: no single unverifiable probe is a finding, but a URL

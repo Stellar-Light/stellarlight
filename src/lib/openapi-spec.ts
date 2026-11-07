@@ -49,7 +49,7 @@ import {
 	RESOLVABLE_PROJECT_STATUSES,
 	STATUS_BASES,
 } from "./project-status";
-import { PROJECT_TYPES } from "./project-types";
+import { PROJECT_TYPES, VENUE_ROLES } from "./project-types";
 import { RATE_LIMIT_SCOPE } from "./rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
 import { LIVE_READ_PARTS } from "./repo-live-read";
@@ -3136,6 +3136,16 @@ export const spec: OpenAPISpec = {
 							enum: [...RESOLVABLE_PROJECT_STATUSES],
 						},
 					},
+					{
+						name: "venueRole",
+						in: "query",
+						description:
+							"Filter to projects whose curated `venueRole` equals this value, e.g. `type=DEX&venueRole=amm` lists AMMs and `venueRole=aggregator-router` lists routers. Rows not yet classified (venueRole null) never match, so the result is the classified subset, not every venue of that kind. A venueRole search adds no rows found by meaning, so an empty page means no classified row matched q. Unknown values return 400 with validVenueRoles.",
+						schema: {
+							type: "string",
+							enum: [...VENUE_ROLES],
+						},
+					},
 					{ $ref: "#/components/parameters/limit" },
 					{ $ref: "#/components/parameters/offset" },
 					{ $ref: "#/components/parameters/fields" },
@@ -3144,7 +3154,7 @@ export const spec: OpenAPISpec = {
 				responses: {
 					"400": {
 						description:
-							"The call is wrong; fix it, do not retry it as is. Answered before any read when: view is not full or compact (validValues), view=compact is sent with fields (validValues), status is not a resolvable status (validStatuses), type is not a product type (validTypes), category is not a category (validCategories), or scfAwarded is not a boolean form (acceptedValues). An unknown parameter is not a 400: it is named in meta.warnings.",
+							"The call is wrong; fix it, do not retry it as is. Answered before any read when: view is not full or compact (validValues), view=compact is sent with fields (validValues), status is not a resolvable status (validStatuses), type is not a product type (validTypes), venueRole is not a venue role (validVenueRoles), category is not a category (validCategories), or scfAwarded is not a boolean form (acceptedValues). An unknown parameter is not a 400: it is named in meta.warnings.",
 						content: {
 							"application/json": {
 								schema: {
@@ -3162,6 +3172,10 @@ export const spec: OpenAPISpec = {
 													items: { type: "string" },
 												},
 												validTypes: {
+													type: "array",
+													items: { type: "string" },
+												},
+												validVenueRoles: {
 													type: "array",
 													items: { type: "string" },
 												},
@@ -11175,7 +11189,7 @@ export const spec: OpenAPISpec = {
 									type: "string",
 									format: "uri",
 									description:
-										"Where to check the fact: the first linked protocol's DefiLlama page (its listing and TVL figure); the contract readings behind the TVL check are the row's onchain block.",
+										"Where to check the fact: the row's tvlMethodUrl when it has one (the protocol's own page, or for several rows the parent page that sums them), else the first linked protocol's DefiLlama page; the contract readings behind the TVL check are the row's onchain block.",
 								},
 							},
 						},
@@ -11484,13 +11498,7 @@ export const spec: OpenAPISpec = {
 					venueRole: {
 						type: "string",
 						nullable: true,
-						enum: [
-							"amm",
-							"native-orderbook",
-							"aggregator-router",
-							"trading-ui",
-							"wallet-integrated",
-						],
+						enum: [...VENUE_ROLES],
 						description:
 							"Role in the DEX/trading landscape. 'amm' and 'native-orderbook' are INDEPENDENT LIQUIDITY VENUES; 'aggregator-router' routes across venues and runs none; 'trading-ui' is an interface over other venues (e.g. the native SDEX); 'wallet-integrated' is trading embedded in a wallet. A DEX type/cluster count is a directory TAXONOMY count, not a competitor or venue count; count venueRole in ('amm','native-orderbook') for independent venues. Null = not yet classified (unknown, NOT 'not a venue').",
 					},
@@ -11606,7 +11614,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						format: "uri",
 						description:
-							"Citation URL for the project's PRIMARY mapped DefiLlama protocol row (first of llamaSlugs): the provider/method page to cite alongside tvlUSD. When llamaSlugs has multiple entries, tvlUSD sums ALL of them, so this page shows one component, not necessarily the whole sum; enumerate llamaSlugs for the full inclusion set. Null when not llama-mapped.",
+							"The DefiLlama page that shows the whole tvlUSD, to cite alongside it: the protocol's own page when llamaSlugs has one entry; when it has several, the parent page whose child rows were exactly those slugs at the last TVL refresh (e.g. Blend: https://defillama.com/protocol/blend, its pools and backstop rows combined). Null when not llama-mapped, or when no single DefiLlama page sums the mapped rows (the family changed upstream, or was not read yet); llamaSlugs then lists each contributing page (https://defillama.com/protocol/{slug}).",
 					},
 					canonicalSlug: {
 						type: "string",

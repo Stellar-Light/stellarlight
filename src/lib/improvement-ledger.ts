@@ -446,6 +446,9 @@ export const MAINTENANCE_MODES = new Set([
 	// A URL a probe PROVED dead. The repair is on the record that cites it —
 	// relink it or retire it — so it is a refresh queue, not a served defect.
 	"broken-link",
+	// A URL that answers but reads as another business or a parked domain:
+	// the same repair on the record, so the same queue.
+	"link-not-the-product",
 ]);
 
 export const isMaintenance = (f: Finding) =>
@@ -483,6 +486,7 @@ export const DEFAULT_KIND: FindingKind = "instrument";
 const KIND_OF: Record<string, FindingKind> = {
 	// ── world: the ecosystem differs from or moved past our record ──
 	"link-health|broken-link": "world", // a URL a probe PROVED dead
+	"link-health|link-not-the-product": "world", // the URL now serves another business
 	"nightly-note-freshness|note-stale": "world", // upstream published past the note's asOf
 	"supersession-freshness|supersession-unrecorded": "world", // the repo was archived upstream
 	"weak-basis-liveness|status-contradicted": "world", // the product's own page denies our Live claim
