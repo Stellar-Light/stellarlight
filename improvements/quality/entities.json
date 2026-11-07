@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-06T15:18:55.438Z",
+ "generatedAt": "2026-11-07T14:18:45.885Z",
  "surfaces": [
   {
    "surface": "code",
@@ -317,11 +317,11 @@
    },
    {
     "bucket": "8–30d",
-    "count": 51
+    "count": 31
    },
    {
     "bucket": "31–60d",
-    "count": 9
+    "count": 29
    },
    {
     "bucket": ">60d",
@@ -382,9 +382,9 @@
    "definition": "recurredAfterSilence is the metric that steers: the share of NEW findings repeating a (surface, failureMode) pair we had already closed ON SILENCE — closed without repairing, and it came back in kind. reopened is the exact-id version: a finding a detector raised again after closure. classRecurrence is context only.",
    "recurredAfterSilence": {
     "last30d": {
-     "newFindings": 143,
-     "recurred": 122,
-     "ratePct": 85.3
+     "newFindings": 120,
+     "recurred": 100,
+     "ratePct": 83.3
     },
     "lifetime": {
      "newFindings": 916,
@@ -401,9 +401,9 @@
    "classRecurrence": {
     "note": "structurally near 100% with 8 broad classes — context, not a target",
     "last30d": {
-     "newFindings": 143,
-     "repeats": 142,
-     "ratePct": 99.3
+     "newFindings": 120,
+     "repeats": 119,
+     "ratePct": 99.2
     },
     "lifetime": {
      "newFindings": 916,
@@ -458,14 +458,32 @@
   }
  },
  "projects": {
-  "read": 1006,
-  "population": 1139,
-  "servedPopulation": 1006,
+  "read": 1008,
+  "population": 1141,
+  "servedPopulation": 1008,
   "populationNote": "population counts every stored row; the quality census reads only the SERVED ones (Draft rows and folded lineage shadows excluded, matching every public surface).",
   "coveragePct": 100,
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 1006,
+  "sampled": 1008,
   "scatter": [
+   {
+    "slug": "metamask",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
+   {
+    "slug": "chainlink",
+    "prominence": 0,
+    "factsPresent": 4,
+    "missing": [
+     "strongBasis"
+    ],
+    "status": "Live"
+   },
    {
     "slug": "kast",
     "prominence": 0,
@@ -1787,9 +1805,10 @@
    {
     "slug": "stabble",
     "prominence": 0,
-    "factsPresent": 4,
+    "factsPresent": 3,
     "missing": [
-     "strongBasis"
+     "strongBasis",
+     "sourced"
     ],
     "status": "Live"
    },
@@ -8539,11 +8558,11 @@
   "deploymentMix": [
    {
     "network": "unknown",
-    "count": 911
+    "count": 912
    },
    {
     "network": "mainnet",
-    "count": 91
+    "count": 92
    },
    {
     "network": "testnet",
@@ -8551,9 +8570,9 @@
    }
   ],
   "deploymentSplit": {
-   "unknown": 911,
+   "unknown": 912,
    "applicableUnknown": 200,
-   "notApplicable": 711,
+   "notApplicable": 712,
    "means": "rows with deployment unknown, split by whether the question applies: on-chain product types (DEX, DeFi, Lending, Derivatives, Oracle, Bridge, Stablecoin, RWA) vs SDKs, wallets, security, analytics and other apps where 'unknown' is the correct answer."
   },
   "strongByBasis": {
@@ -8564,14 +8583,14 @@
    "package-release": 9
   },
   "strongBasisSplit": {
-   "population": 1006,
+   "population": 1008,
    "populationMeans": "every project row this artifact scored, all statuses — weakLiveRows is counted over exactly this set, despite its historical name",
-   "livePopulation": 849,
-   "weakLiveOnly": 455,
-   "weakLiveRows": 472,
-   "onchainEligible": 6,
-   "appOnly": 466,
-   "deploymentStrongStatusWeak": 1,
+   "livePopulation": 851,
+   "weakLiveOnly": 457,
+   "weakLiveRows": 474,
+   "onchainEligible": 7,
+   "appOnly": 467,
+   "deploymentStrongStatusWeak": 2,
    "means": "weak-basis rows split by whether any on-chain footprint exists (issued asset, joined contract, or known deployment). onchainEligible can earn onchain-activity from dated evidence; appOnly can only reach a strong basis through human verification. deploymentStrongStatusWeak is a different thing entirely: rows whose DEPLOYMENT record carries a strong basis while the STATUS record this board scores does not. scripts/basis-from-deployment.ts propagates the ones whose deployment basis is backed by a citable artifact of a kind that can support that tier, and reports the rest as could-not-propagate — so what remains here is the un-citable residue, not a queue of receipted evidence waiting to be copied."
   },
   "basisMix": [
@@ -8601,7 +8620,7 @@
    },
    {
     "basis": "operator-announcement",
-    "count": 15
+    "count": 17
    },
    {
     "basis": "package-release",
@@ -8613,7 +8632,7 @@
    }
   ],
   "weakestReturned": 40,
-  "weakestTotal": 500,
+  "weakestTotal": 502,
   "weakestTruncated": true,
   "weakest": [
    {
@@ -8883,6 +8902,27 @@
     "missing": [
      "strongBasis",
      "linked"
+    ]
+   },
+   {
+    "slug": "stabble",
+    "name": "Stabble",
+    "status": "Live",
+    "statusBasis": "site-liveness",
+    "prominence": 0,
+    "deploymentNetwork": "unknown",
+    "deploymentBasis": null,
+    "hasOnchainFootprint": false,
+    "deploymentApplies": true,
+    "types": [
+     "DEX"
+    ],
+    "score": 60,
+    "factsPresent": 3,
+    "factsTotal": 5,
+    "missing": [
+     "strongBasis",
+     "sourced"
     ]
    },
    {
@@ -9423,33 +9463,12 @@
     "missing": [
      "strongBasis"
     ]
-   },
-   {
-    "slug": "airswift",
-    "name": "Airswift",
-    "status": "Live",
-    "statusBasis": "site-liveness",
-    "prominence": 0,
-    "deploymentNetwork": "unknown",
-    "deploymentBasis": null,
-    "hasOnchainFootprint": false,
-    "deploymentApplies": true,
-    "types": [
-     "Payments",
-     "Lending"
-    ],
-    "score": 80,
-    "factsPresent": 4,
-    "factsTotal": 5,
-    "missing": [
-     "strongBasis"
-    ]
    }
   ],
   "missingCounts": [
    {
     "field": "strongBasis",
-    "count": 472
+    "count": 474
    },
    {
     "field": "dated",
@@ -9457,7 +9476,7 @@
    },
    {
     "field": "sourced",
-    "count": 0
+    "count": 1
    },
    {
     "field": "typed",
@@ -9470,34 +9489,36 @@
   ]
  },
  "repos": {
-  "read": 13809,
-  "population": 13809,
+  "read": 13815,
+  "population": 13815,
   "coveragePct": 100,
   "duplicateRows": 0,
   "duplicateNote": "no duplicate fullName rows",
   "frame": "Census, not a sample. Every row is enumerated from the unranked Payload listing endpoint (/api/projects, /api/repos), so search ranking cannot move these counts and no row can be excluded by being hard to retrieve.",
-  "sampled": 13809,
+  "sampled": 13815,
   "coverage": {
    "curatedIndex": {
-    "repos": 3798,
+    "repos": 3803,
     "means": "rows a directory record or tracked builder claims (source: project-link, builder-owned)",
-    "withCodeDepth": 3489,
+    "withCodeDepth": 3494,
     "depthPct": 92
    },
    "tail": {
-    "repos": 10011,
+    "repos": 10012,
     "means": "Electric Capital taxonomy rows, indexed for completeness, scanned opportunistically — low coverage here is intended",
-    "withCodeDepth": 7947
+    "withCodeDepth": 7948
    },
    "knowledgeNotes": {
-    "pool": 412,
+    "pool": 414,
     "poolMeans": "curated-index rows with repoScore >= 50, the set curation actually targets",
     "withNotes": 357,
     "triaged": 31,
     "triagedMeans": "examined by the curation pass and recorded as yielding no durable, source-citable fact (internal verdict, never served) — re-examined when the repo gains a registry package or a mainnet deployment",
     "missing": [
+     "BWB-Labs/bwb-stellar",
      "EduNodeOrg/server",
      "EduNodeOrg/website",
+     "Lobstrco/signer-extension-api",
      "LuchoLeonel/lendoor-stellar",
      "Neko-Protocol/neko-backend",
      "Neko-Protocol/neko-mainnet",
@@ -9523,13 +9544,13 @@
     ]
    },
    "mainnetJoin": {
-    "pool": 5874,
+    "pool": 5875,
     "poolMeans": "rows the scanner marked as deployable contracts, the only rows a mainnet join applies to",
-    "joined": 134
+    "joined": 128
    }
   },
   "curatedShape": {
-   "repos": 3798,
+   "repos": 3803,
    "scoreHistogram": [
     {
      "bucket": "0–9",
@@ -9541,23 +9562,23 @@
     },
     {
      "bucket": "20–29",
-     "count": 706
+     "count": 709
     },
     {
      "bucket": "30–39",
-     "count": 490
+     "count": 493
     },
     {
      "bucket": "40–49",
-     "count": 310
+     "count": 307
     },
     {
      "bucket": "50–59",
-     "count": 253
+     "count": 256
     },
     {
      "bucket": "60–69",
-     "count": 97
+     "count": 94
     },
     {
      "bucket": "70–79",
@@ -9569,7 +9590,7 @@
     },
     {
      "bucket": "90–99",
-     "count": 14
+     "count": 16
     }
    ],
    "activityMix": [
@@ -9579,11 +9600,11 @@
     },
     {
      "label": "slowing",
-     "count": 1156
+     "count": 1148
     },
     {
      "label": "active",
-     "count": 983
+     "count": 994
     },
     {
      "label": "unknown",
@@ -9591,25 +9612,25 @@
     },
     {
      "label": "archived",
-     "count": 57
+     "count": 59
     }
    ],
    "languageMix": [
     {
      "label": "TypeScript",
-     "count": 1344
+     "count": 1346
     },
     {
      "label": "unknown",
-     "count": 618
+     "count": 617
     },
     {
      "label": "Rust",
-     "count": 556
+     "count": 558
     },
     {
      "label": "JavaScript",
-     "count": 411
+     "count": 412
     },
     {
      "label": "Python",
@@ -9625,7 +9646,7 @@
     },
     {
      "label": "HTML",
-     "count": 103
+     "count": 104
     },
     {
      "label": "Shell",
@@ -9638,9 +9659,9 @@
    ],
    "languageOther": 48
   },
-  "withCodeDepth": 11436,
-  "withNotes": 1073,
-  "withMainnet": 134,
+  "withCodeDepth": 11442,
+  "withNotes": 1074,
+  "withMainnet": 128,
   "top": [
    {
     "fullName": "stellar/go-stellar-sdk",
@@ -9682,6 +9703,19 @@
     "mainnetJoined": false
    },
    {
+    "fullName": "stellar-scaffold/cli",
+    "repoScore": 95,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Rust",
+    "projectSlug": "scaffold-stellar",
+    "notes": 1,
+    "codeDepth": 37,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
     "fullName": "Consulting-Manao/tansu",
     "repoScore": 95,
     "tier": "quality",
@@ -9690,9 +9724,9 @@
     "language": "TypeScript",
     "projectSlug": "tansu",
     "notes": 1,
-    "codeDepth": 69,
+    "codeDepth": 64,
     "deployable": true,
-    "mainnetJoined": true
+    "mainnetJoined": false
    },
    {
     "fullName": "fazzatti/colibri",
@@ -9786,6 +9820,19 @@
     "mainnetJoined": false
    },
    {
+    "fullName": "stellar/laboratory",
+    "repoScore": 92,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "TypeScript",
+    "projectSlug": "stellar-laboratory",
+    "notes": 1,
+    "codeDepth": 92,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
     "fullName": "Shamba-Records-Limited/microvault",
     "repoScore": 92,
     "tier": "quality",
@@ -9833,20 +9880,7 @@
     "language": "Rust",
     "projectSlug": "solang",
     "notes": 4,
-    "codeDepth": 75,
-    "deployable": true,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "stellar/rs-soroban-env",
-    "repoScore": 89,
-    "tier": "quality",
-    "source": "project-link",
-    "activity": "active",
-    "language": "Rust",
-    "projectSlug": "stellar-development-foundation",
-    "notes": 2,
-    "codeDepth": 52,
+    "codeDepth": 70,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -9887,19 +9921,6 @@
     "notes": 3,
     "codeDepth": 72,
     "deployable": true,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "stellar/laboratory",
-    "repoScore": 88,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": "stellar-laboratory",
-    "notes": 1,
-    "codeDepth": 92,
-    "deployable": false,
     "mainnetJoined": false
    },
    {
@@ -10020,6 +10041,19 @@
     "mainnetJoined": false
    },
    {
+    "fullName": "stellar/rs-soroban-env",
+    "repoScore": 86,
+    "tier": "quality",
+    "source": "project-link",
+    "activity": "active",
+    "language": "Rust",
+    "projectSlug": "stellar-development-foundation",
+    "notes": 2,
+    "codeDepth": 52,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
     "fullName": "stellar/sep45-reference",
     "repoScore": 85,
     "tier": "community",
@@ -10086,7 +10120,7 @@
    },
    {
     "fullName": "blend-capital/blend-sdk-js",
-    "repoScore": 83,
+    "repoScore": 85,
     "tier": "community",
     "source": "project-link",
     "activity": "active",
@@ -10107,6 +10141,19 @@
     "projectSlug": "freighter",
     "notes": 1,
     "codeDepth": 100,
+    "deployable": false,
+    "mainnetJoined": false
+   },
+   {
+    "fullName": "chatch/stellarexplorer",
+    "repoScore": 83,
+    "tier": "community",
+    "source": "project-link",
+    "activity": "active",
+    "language": "TypeScript",
+    "projectSlug": "steepx",
+    "notes": 1,
+    "codeDepth": 53,
     "deployable": false,
     "mainnetJoined": false
    },
@@ -10135,32 +10182,6 @@
     "codeDepth": 37,
     "deployable": false,
     "mainnetJoined": false
-   },
-   {
-    "fullName": "stellar/stellar-mpp-sdk",
-    "repoScore": 81,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": "stellar-mpp-sdk",
-    "notes": 1,
-    "codeDepth": 94,
-    "deployable": false,
-    "mainnetJoined": false
-   },
-   {
-    "fullName": "daccred/attestprotocol",
-    "repoScore": 81,
-    "tier": "community",
-    "source": "project-link",
-    "activity": "active",
-    "language": "TypeScript",
-    "projectSlug": "attest",
-    "notes": 2,
-    "codeDepth": 94,
-    "deployable": true,
-    "mainnetJoined": true
    }
   ],
   "thinnest": [
@@ -10690,19 +10711,19 @@
   {
    "area": "project status",
    "limit": "45% of lifecycle statuses rest on the weakest honest bases: a page answered (site-liveness) or a value inherited from a source (source-inherited).",
-   "measurement": "452 of 1006 rows (census)",
+   "measurement": "452 of 1008 rows (census)",
    "instead": "Weigh statusBasis and statusAsOf on every row; treat human-verified and onchain-activity as the strong tiers, and verify a Live claim against the row's statusSourceUrl before repeating it."
   },
   {
    "area": "project types",
    "limit": "Some rows carry no type, so an exact ?type= enumeration cannot see them even when the project belongs to that vertical.",
-   "measurement": "5 of 1006 sampled rows untyped",
+   "measurement": "5 of 1008 sampled rows untyped",
    "instead": "For discovery, combine ?type= with a q= search; an empty typed result is a statement about our tagging, not about the ecosystem."
   },
   {
    "area": "repo knowledge notes",
    "limit": "Curated, dated repo facts (knowledgeNotes) exist on a minority of indexed repositories.",
-   "measurement": "357 of 412 rows in the curation pool (curated index, repoScore >= 50)",
+   "measurement": "357 of 414 rows in the curation pool (curated index, repoScore >= 50)",
    "instead": "Absence of notes is absence of curation, never evidence about the repo; fall back to codeVerified and activity fields."
   }
  ],
@@ -11111,20 +11132,20 @@
    {
     "entity": "repo",
     "field": "mainnet contract join",
-    "missing": 365,
+    "missing": 369,
     "of": 389,
-    "share": 93.8,
-    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5485 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
+    "share": 94.9,
+    "whyItMatters": "Without a verified contract join we can say code exists, never that it is USED on mainnet. Denominator is the expected tier only — 5486 further low-signal deployable repos (demos/tutorials/experiments) are deliberately excluded: absence of a mainnet join there is expected-normal, and sweeping them in overstated this gap ~10×.",
     "closedBy": "Contract attribution during the scan wave. Absence is absence of a join, never proof of disuse.",
     "exampleSource": "expected-tier deployable contracts (project-linked or repoScore >= 60, not archived) without a join",
-    "examplePoolSize": 365,
+    "examplePoolSize": 369,
     "exampleCap": 12,
     "exampleTruncated": true,
     "examples": [
+     "Consulting-Manao/tansu",
      "fazzatti/colibri",
      "stellar/passkey-kit",
      "Shamba-Records-Limited/microvault",
-     "hyperledger-solang/solang",
      "blend-capital/blend-contracts-v2",
      "stellar/sep45-reference",
      "Phoenix-Protocol-Group/phoenix-contracts",
@@ -11138,8 +11159,8 @@
    {
     "entity": "repo",
     "field": "knowledgeNotes",
-    "missing": 12736,
-    "of": 13809,
+    "missing": 12741,
+    "of": 13815,
     "share": 92.2,
     "whyItMatters": "Curated dated facts are what let an agent cite a repo claim. Without them only raw scan fields are available.",
     "closedBy": "The repo-intel enrich pass, which writes dated notes with sources.",
@@ -11165,10 +11186,10 @@
    {
     "entity": "project",
     "field": "deployment evidence",
-    "missing": 911,
-    "of": 1006,
-    "share": 90.6,
-    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 911 unknown rows, 200 are on-chain product types where the question applies and an agent will ask it; the other 711 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
+    "missing": 912,
+    "of": 1008,
+    "share": 90.5,
+    "whyItMatters": "sls-079: 'Live' says a product operates for users somewhere; it does NOT say which network it is deployed on. Of the 912 unknown rows, 200 are on-chain product types where the question applies and an agent will ask it; the other 712 are SDKs, wallets, security and analytics rows where unknown is the honest answer, not a gap.",
     "closedBy": "Evidence only: a verified mainnet contract join, an on-chain activity reading, or a human-verified operator artifact (DEPLOYMENT_VERIFIED).",
     "exampleSource": "Live on-chain-product rows (DEX/DeFi/Lending/Derivatives/Oracle/Bridge/Stablecoin/RWA) with prominence >= 60 whose deployment is unknown — the rows an agent asks 'is this on mainnet?' about",
     "examplePoolSize": 3,
@@ -11183,10 +11204,10 @@
    {
     "entity": "project",
     "field": "strongBasis",
-    "missing": 472,
-    "of": 1006,
-    "share": 46.9,
-    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 6 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 466 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
+    "missing": 474,
+    "of": 1008,
+    "share": 47,
+    "whyItMatters": "site-liveness means only that a page answered. source-inherited means the value came from elsewhere. Neither is observation of the product. Of the weak rows, 7 hold an on-chain footprint (an issued asset, a joined contract, or a known deployment) and can earn onchain-activity from evidence; the other 467 are app-only and can only move through human verification — the ceiling of this row is people, not lanes.",
     "closedBy": "Human verification with a receipt, an on-chain activity reading, or an operator announcement.",
     "exampleSource": "prominence >= 70 only, the rows a consumer is most likely to hit",
     "examplePoolSize": 4,
@@ -11203,7 +11224,7 @@
     "entity": "repo",
     "field": "code depth reading",
     "missing": 2373,
-    "of": 13809,
+    "of": 13815,
     "share": 17.2,
     "whyItMatters": "No depth reading means the repo was never scanned for real implementation signal.",
     "closedBy": "A scan wave pass over the unscanned tail.",
@@ -11230,7 +11251,7 @@
     "entity": "project",
     "field": "typed",
     "missing": 5,
-    "of": 1006,
+    "of": 1008,
     "share": 0.5,
     "whyItMatters": "An untyped row is invisible to exact ?type= enumeration and to the gaps axis, even when it belongs to that vertical.",
     "closedBy": "Add the type via the curation TYPE_ADD pass, with the row's own description as evidence.",
@@ -11249,16 +11270,18 @@
    {
     "entity": "project",
     "field": "sourced",
-    "missing": 0,
-    "of": 1006,
-    "share": 0,
+    "missing": 1,
+    "of": 1008,
+    "share": 0.1,
     "whyItMatters": "A lifecycle claim with no source cannot be re-checked by a caller. It is our assertion, not evidence.",
     "closedBy": "Curate a dated source URL, or downgrade the basis to match the evidence we actually have.",
     "exampleSource": "highest-prominence rows missing a source URL",
-    "examplePoolSize": 0,
+    "examplePoolSize": 1,
     "exampleCap": 12,
     "exampleTruncated": false,
-    "examples": []
+    "examples": [
+     "stabble"
+    ]
    }
   ]
  }
