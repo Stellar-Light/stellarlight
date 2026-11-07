@@ -6,6 +6,7 @@ import { LeaderboardExportButtons } from "@/components/leaderboard-export-button
 import { LeaderboardFilters } from "@/components/leaderboard-filters";
 import { Card, CardContent } from "@/components/ui/card";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { findWholeSet } from "@/lib/whole-set";
 
 export const dynamic = "force-dynamic";
 
@@ -82,14 +83,22 @@ export default async function LeaderboardPage({
 			};
 			if (categoryFilter) projectWhere.category = { equals: categoryFilter };
 
-			const projectsResult = await payload.find({
+			// Every eligible project, as GET /api/leaderboard ranks them: a
+			// `limit: 300` ranked the newest 300 of 905 (2026-11-04). Only the
+			// fields this page reads (never the embedding), so the whole set
+			// stays a light read.
+			const projectsResult = await findWholeSet<{ slug: string }>(payload, {
 				collection: "projects",
 				where: projectWhere,
-				limit: 300,
+				limit: 0,
 				depth: 0,
-				// Drop the voyage-3 embedding vector — pulling it for up to 300
-				// projects times the query out on the M0 tier.
-				select: { embedding: false },
+				select: {
+					name: true,
+					slug: true,
+					category: true,
+					shortDescription: true,
+					scf: true,
+				},
 			});
 
 			// Per-project GitHub stats come from the enriched `repos` collection
@@ -108,10 +117,10 @@ export default async function LeaderboardPage({
 				}>
 			>();
 			if (projectSlugs.length > 0) {
-				const reposResult = await payload.find({
+				const reposResult = await findWholeSet(payload, {
 					collection: "repos",
 					where: { projectSlug: { in: projectSlugs } },
-					limit: 5000,
+					limit: 0,
 					depth: 0,
 					// Only the scalar stats we aggregate — NOT the README excerpt,
 					// which bloats the fetch as the repos collection grows.

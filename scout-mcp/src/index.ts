@@ -353,7 +353,7 @@ server.registerTool(
 	{
 		title: "Search what was built at Stellar hackathons",
 		description:
-			"Prior-art over hackathon PROTOTYPES: topic search across every submission ('buidl') from all Stellar hackathons (DoraHacks), most of which never become directory projects. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement, repo/demo links, categories and stack. Filters: winnersOnly, hackathon (event slugs), track, category (a directory project type), package (a Stellar package the repo declares). An event named in full in q (its title or slug) becomes the hackathon filter and meta.inferredFilter says so; pass hackathon to choose the event yourself, or hackathon as an empty string to search the name as words in every event. For counts and trends → use analyze_hackathon_submissions; for SHIPPED products → use search_projects.",
+			"Prior-art over hackathon PROTOTYPES: topic search across every stored submission ('buidl') from Stellar hackathons: every DoraHacks submission plus curated ones from events off DoraHacks (winners named by their own pages, and HackMeridian 2026's partial list from HackProof, each with its entryBasis), most of which never become directory projects. Answers 'has anyone already built X at a hackathon?' with each build's name, description, event, placement, repo/demo links, categories and stack. Filters: winnersOnly, hackathon (event slugs), track, category (a directory project type), package (a Stellar package the repo declares). An event named in full in q (its title or slug) becomes the hackathon filter and meta.inferredFilter says so; pass hackathon to choose the event yourself, or hackathon as an empty string to search the name as words in every event. For counts and trends → use analyze_hackathon_submissions; for SHIPPED products → use search_projects.",
 		inputSchema: {
 			...BUILD_FILTER_INPUTS,
 			limit: z
@@ -660,6 +660,19 @@ server.registerTool(
 				.describe(
 					"Filter by lifecycle status (Live, Inactive, Development, Pre-Release). status=Inactive lists retired/defunct projects, useful for 'is X still alive' and post-mortem queries.",
 				),
+			venueRole: z
+				.enum([
+					// Keep in sync with VENUE_ROLES in src/lib/project-types.ts.
+					"amm",
+					"native-orderbook",
+					"aggregator-router",
+					"trading-ui",
+					"wallet-integrated",
+				])
+				.optional()
+				.describe(
+					"Only projects whose curated venueRole is this DEX sub-type, e.g. type=DEX with venueRole=amm lists AMMs. Rows not yet classified (venueRole null) never match, so this is the classified subset, not every venue of that kind.",
+				),
 			scfAwarded: z
 				.boolean()
 				.optional()
@@ -674,12 +687,13 @@ server.registerTool(
 			view: viewInput,
 		},
 	},
-	async ({ q, category, type, status, scfAwarded, limit, view }) => {
+	async ({ q, category, type, status, venueRole, scfAwarded, limit, view }) => {
 		const params = new URLSearchParams();
 		if (q) params.set("q", q);
 		if (category) params.set("category", category);
 		if (type) params.set("type", type);
 		if (status) params.set("status", status);
+		if (venueRole) params.set("venueRole", venueRole);
 		if (scfAwarded) params.set("scfAwarded", "1");
 		if (limit !== undefined) params.set("limit", String(limit));
 		if (view) params.set("view", view);

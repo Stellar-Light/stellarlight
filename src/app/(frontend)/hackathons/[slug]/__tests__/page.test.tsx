@@ -72,6 +72,15 @@ const render = async (slug = "hackmeridian-2026") =>
 		await HackathonDetailPage({ params: Promise.resolve({ slug }) }),
 	);
 const count = (html: string, s: string) => html.split(s).length - 1;
+/** Whether any <a> opens inside another: a card link broken mid-card. */
+const nestedAnchors = (html: string) => {
+	let depth = 0;
+	for (const m of html.matchAll(/<a[\s>]|<\/a>/g)) {
+		depth += m[0] === "</a>" ? -1 : 1;
+		if (depth > 1) return true;
+	}
+	return false;
+};
 /** A stat block's value. */
 const zeroStat = /tracking-tight">0</;
 
@@ -95,6 +104,55 @@ const renderLate = async (slug: string) => {
 };
 
 describe("/hackathons/<slug>", () => {
+	// Audit 2026-11-04: no case rendered a partial event.
+	it("a partial event: its rows as on record, not the organizer's list, each with its basis and a secondhand placement", async () => {
+		const FILE = "https://example.test/hackmeridian-2026.yaml";
+		const row = (id: string, over: Record<string, unknown> = {}) => ({
+			id: `curated-hackmeridian-2026-${id}`,
+			name: id,
+			url: `https://example.test/${id}.yml`,
+			description: null,
+			track: null,
+			entryBasis: "repo-names-event",
+			contracts: [],
+			...over,
+		});
+		const placed = row("nest", {
+			entryBasis: "placement-listed",
+			isWinner: true,
+			hackathonPlacement: "First place",
+			placementRank: 1,
+			winnerSource: FILE,
+		});
+		serve(
+			event({
+				status: "completed",
+				coverage: "partial",
+				stats: stats({
+					winners: 1,
+					coverageNote: "Not this event's list.",
+					winnersNote: "Secondhand: placements.",
+				}),
+			}),
+			[placed],
+			[placed, row("vault", { contracts: [1, 2] }), row("quiet")],
+		);
+		const html = await render();
+		expect(html).toContain("3 on record, not the organizer&#x27;s list");
+		expect(html).not.toContain("Submitted projects");
+		expect(html).toContain(
+			"The team&#x27;s repo names HackMeridian 2026. 2 contracts it cites were created on testnet during the event.",
+		);
+		expect(html).toContain("HackProof lists this repo as a placement");
+		expect(count(html, "The placement is HackProof&#x27;s, secondhand")).toBe(
+			2,
+		);
+		// Cards are links: the source is named as text inside them.
+		expect(html).toContain("Source: example.test/hackmeridian-2026.yaml");
+		expect(nestedAnchors(html)).toBe(false);
+		expect(nestedAnchors("<a href=x><p><a href=y>y</a></p></a>")).toBe(true);
+	});
+
 	it("renders an upcoming curated event from the API's body, with no count it does not hold", async () => {
 		serve(event());
 		const html = await render();

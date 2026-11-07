@@ -5,20 +5,23 @@
  *
  *   pnpm exec tsx scripts/eval/scf-crosscheck.ts [--json] [--out=path]
  *
- * Rides the absence-diff scraper. Scrapes the SCF listing (award-round
- * badges), high-precision-matches each entry to our directory record (exact
- * slug-base or exact canon-name — NOT the absence diff's fuzzy match, which is
- * tuned for recall not precision), and reports two divergence classes:
+ * Rides the absence-diff scraper. Scrapes the SCF listing (round badges are
+ * rounds ENTERED, not won, and it carried none on 2026-11-04),
+ * high-precision-matches each entry to our directory record (exact
+ * slug-base, or an exact name only one row carries), and reports two
+ * divergence classes:
  *
  *   OVERSTATED  we mark scfAwarded=true but the SCF page shows no award badge
- *               (confirmed via a detail-page fetch — the highest concern: we
- *               claim funding the source doesn't corroborate)
- *   UNDERSTATED we mark scfAwarded=false but the SCF listing shows a round
- *               badge (we're hiding real funding from agents)
+ *               (confirmed via a detail-page fetch, the highest concern: we
+ *               claim funding the source does not corroborate)
+ *   UNDERSTATED we mark scfAwarded=false but the SCF page's own verdicts
+ *               show an award (every unawarded match's page is read; we
+ *               would be hiding real funding from agents)
  *
  * Plus a ROUNDS-BACKFILL enrichment list: awarded records with an empty
- * scfAwardedRounds that the SCF page can populate (a data-completeness win,
- * not an error). Report-only — divergences become owner-reviewed curate rows.
+ * scfAwardedRounds whose SCF page awards numbered rounds (read from its
+ * verdicts; a data-completeness win, not an error). Report-only: divergences
+ * become owner-reviewed curate rows.
  *
  * ROUND MEMBERSHIP (the phoenix #18/#24 class, sls-020..051 wave): totals can
  * be right while per-round membership is wrong — a project's detail page
@@ -42,10 +45,12 @@
 import { writeFileSync } from "node:fs";
 import {
 	canon,
+	classifyScfMatch,
 	fetchDetailHtml,
 	fetchScf,
 	parseRoundVerdicts,
 	type ScfEntry,
+	uniqueNames,
 } from "./scf-official";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
@@ -94,6 +99,8 @@ interface DirRow {
 	name: string;
 	scfAwarded: boolean;
 	scfAwardedRounds: string[];
+	/** human-verified rows are curate's (classifyScfMatch skips them) */
+	scfBasis: string | null;
 }
 
 async function fetchDir(): Promise<DirRow[]> {
@@ -120,6 +127,7 @@ async function fetchDir(): Promise<DirRow[]> {
 					name: p.name,
 					scfAwarded: !!p.scfAwarded,
 					scfAwardedRounds: (p.scfAwardedRounds ?? []).map(String),
+					scfBasis: p.scfBasis ?? null,
 				});
 			if (page.length < 100) break;
 		}
@@ -132,14 +140,11 @@ async function main() {
 	const [scf, dir] = await Promise.all([fetchScf(), fetchDir()]);
 	console.error(`  SCF: ${scf.length} | directory: ${dir.length}`);
 
-	// High-precision match: exact slug-base OR exact canon-name. One dir row
-	// per SCF entry (first exact hit). Ambiguous/no match → not compared.
-	const byExactName = new Map<string, DirRow>();
+	// High-precision match: exact slug-base OR an exact name only one row
+	// carries (uniqueNames). A name two rows share is not compared.
+	const byExactName = uniqueNames(dir);
 	const bySlug = new Map<string, DirRow>();
-	for (const d of dir) {
-		bySlug.set(d.slug, d);
-		if (!byExactName.has(canon(d.name))) byExactName.set(canon(d.name), d);
-	}
+	for (const d of dir) bySlug.set(d.slug, d);
 	const matched: Array<{ scf: ScfEntry; dir: DirRow }> = [];
 	for (const e of scf) {
 		const d = bySlug.get(e.base) ?? byExactName.get(canon(e.base));
@@ -147,10 +152,63 @@ async function main() {
 	}
 	console.error(`  high-precision matches: ${matched.length}`);
 
-	// UNDERSTATED: listing shows a badge, we say not-awarded.
-	const understated = matched.filter(
-		(m) => m.scf.rounds.length > 0 && !m.dir.scfAwarded,
+	// UNDERSTATED (we say not awarded, SCF awarded) and ROUNDS-BACKFILL (we
+	// are awarded with no rounds): every such pair's page is read and its own
+	// verdicts decide (classifyScfMatch). A listing badge is a round ENTERED,
+	// and the listing carried none on 2026-11-04, so the badge-driven version
+	// of this check never fired. A page that cannot be read accuses nothing.
+	const nominated = matched.filter(
+		(m) => !m.dir.scfAwarded || m.dir.scfAwardedRounds.length === 0,
 	);
+	console.error(
+		`  reading ${nominated.length} pages of unawarded or roundless matches…`,
+	);
+	const understated: Array<{ scf: ScfEntry; dir: DirRow }> = [];
+	const backfill: Array<{
+		slug: string;
+		name: string;
+		scfRounds: string[];
+		url: string;
+	}> = [];
+	let unreadNominated = 0;
+	let nIdx = 0;
+	async function nominatedWorker() {
+		for (;;) {
+			const i = nIdx++;
+			if (i >= nominated.length) return;
+			const m = nominated[i];
+			const html = await fetchDetailHtml(m.scf.url);
+			if (!html) {
+				unreadNominated++;
+				continue;
+			}
+			const c = classifyScfMatch({
+				ourAwarded: m.dir.scfAwarded,
+				ourRounds: m.dir.scfAwardedRounds,
+				ourBasis: m.dir.scfBasis,
+				v: parseRoundVerdicts(html),
+			});
+			if (c.understated)
+				understated.push({
+					scf: { ...m.scf, rounds: c.understated },
+					dir: m.dir,
+				});
+			if (c.backfill)
+				backfill.push({
+					slug: m.dir.slug,
+					name: m.dir.name,
+					scfRounds: c.backfill,
+					url: m.scf.url,
+				});
+		}
+	}
+	await Promise.all(Array.from({ length: 8 }, nominatedWorker));
+	understated.sort((a, b) => a.dir.slug.localeCompare(b.dir.slug));
+	backfill.sort((a, b) => a.slug.localeCompare(b.slug));
+	if (unreadNominated)
+		console.error(
+			`  ${unreadNominated} nominated page(s) could not be read: nothing accused`,
+		);
 
 	// CURATED LEGACY AWARDS (raven sls-058 / #744): awards the listing-based
 	// comparison above is STRUCTURALLY blind to. sstream and wagelink carry
@@ -253,21 +311,6 @@ async function main() {
 		}
 	}
 	await Promise.all(Array.from({ length: 8 }, worker));
-
-	// ROUNDS-BACKFILL: awarded both sides, we have empty rounds, SCF has them.
-	const backfill = matched
-		.filter(
-			(m) =>
-				m.dir.scfAwarded &&
-				m.dir.scfAwardedRounds.length === 0 &&
-				m.scf.rounds.length > 0,
-		)
-		.map((m) => ({
-			slug: m.dir.slug,
-			name: m.dir.name,
-			scfRounds: m.scf.rounds,
-			url: m.scf.url,
-		}));
 
 	// ROUND MEMBERSHIP: for every awarded match with a non-empty round set,
 	// verify each of OUR rounds against the detail page's per-submission
@@ -379,7 +422,7 @@ async function main() {
 	);
 	for (const o of overstated) console.log(`- ${o.slug} (${o.name}) — ${o.url}`);
 	console.log(
-		`\n## UNDERSTATED (${report.understated.length}) — SCF badge present, we say not awarded\n`,
+		`\n## UNDERSTATED (${report.understated.length}): the SCF page shows an award, we say not awarded\n`,
 	);
 	for (const u of report.understated)
 		console.log(

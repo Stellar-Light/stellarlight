@@ -1,5 +1,8 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { classifyPage } from "../page-verdict";
+import { isMaintenance, kindOf } from "../improvement-ledger";
+import { ANOTHER_BUSINESS_VERDICTS, classifyPage } from "../page-verdict";
 
 // Every fixture is a real page the 2026-08-21 liveness sweep fetched from a
 // row that was `Live` on a site-liveness basis.
@@ -18,6 +21,24 @@ describe("classifyPage — a 200 is not a business", () => {
 				title: "Online138 | Situs Partner Resmi Jawatogel Bocoran Syair",
 			}).verdict,
 		).toBe("spam");
+	});
+	it("a project domain that now ranks casinos (stabble.org, 2026-11-04)", () => {
+		expect(
+			classifyPage({
+				title: "Best Crypto Casinos Canada 2026: Tested & Ranked | Stabble",
+				metaDescription:
+					"We deposited and withdrew real crypto to rank the best crypto casinos in Canada.",
+			}).verdict,
+		).toBe("spam");
+	});
+	it("the other gambling words, singular and plural", () => {
+		for (const title of [
+			"Top Sportsbooks for Bitcoin",
+			"Online Gambling Guide",
+			"Crypto Bookmakers Compared",
+			"Bitcoin Casino Reviews",
+		])
+			expect(classifyPage({ title }).verdict, title).toBe("spam");
 	});
 	it("a domain for sale", () => {
 		expect(
@@ -88,5 +109,29 @@ describe("offsite redirect across a multi-label public suffix", () => {
 			bodyText: null,
 		} as never);
 		expect(v.verdict).not.toBe("offsite-redirect");
+	});
+});
+
+// sls-100 review: a 200 page that reads as another business passed the link
+// check and reached no artifact. check-links now lists it (notTheProduct) and
+// the ledger files it as a curation refresh, like a proven-dead link.
+describe("a page that reads as another business reaches the ledger", () => {
+	const src = (f: string) => readFileSync(join(process.cwd(), f), "utf8");
+	it("gambling spam and parked domains are the verdicts that count", () => {
+		expect([...ANOTHER_BUSINESS_VERDICTS].sort()).toEqual(["parked", "spam"]);
+	});
+	it("check-links writes them and the ledger reads them as a refresh", () => {
+		expect(src("scripts/check-links.ts")).toMatch(
+			/notTheProduct: notProductRows/,
+		);
+		expect(src("scripts/improvement-ledger.ts")).toMatch(
+			/key: "notTheProduct",\s*surface: "directory",\s*mode: "link-not-the-product"/,
+		);
+		expect(kindOf("link-health", "link-not-the-product")).toBe("world");
+		expect(
+			isMaintenance({ failureMode: "link-not-the-product" } as Parameters<
+				typeof isMaintenance
+			>[0]),
+		).toBe(true);
 	});
 });

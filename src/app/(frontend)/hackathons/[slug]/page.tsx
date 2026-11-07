@@ -12,6 +12,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { cache, type ReactNode } from "react";
+import { BuildSourceNote } from "@/components/build-source-note";
 import { Badge } from "@/components/ui/badge";
 import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
 import { getHackathonDetail } from "@/lib/hackathon-detail";
@@ -45,6 +46,11 @@ type Row = {
 	placementRank?: number | null;
 	prizeUsd?: number | null;
 	hackathonPrize?: number | null;
+	/** A row of a partial list: why it is stored. */
+	entryBasis?: string;
+	contracts?: readonly unknown[];
+	isWinner?: boolean;
+	winnerSource?: string;
 };
 
 /** The event as the API serves it; a null count is not known, never 0. */
@@ -145,10 +151,19 @@ const load = cache(async (slug: string): Promise<Loaded> => {
 				.catch(() => null),
 			deadline,
 		]);
-		if (detail) {
+		// A slug no listing read could look for is not "no such event": it
+		// falls through to the facts below, or an error.
+		if (detail && !("unchecked" in detail)) {
 			if (!detail.found) return { found: false };
 			const { hackathon, winners, submissions } = detail.body;
-			return { found: true, late: false, hackathon, winners, submissions };
+			// null: no roster held or none read; the page lists none either way.
+			return {
+				found: true,
+				late: false,
+				hackathon,
+				winners,
+				submissions: submissions ?? [],
+			};
 		}
 		const row =
 			curated ??
@@ -366,7 +381,7 @@ function placementMeta(p: Row) {
 	};
 }
 
-function WinnerCard({ p }: { p: Row }) {
+function WinnerCard({ p, event }: { p: Row; event: string }) {
 	const meta = placementMeta(p);
 	const prize = p.prizeUsd ?? p.hackathonPrize;
 	// The track a prize was won in: the collection's, or the roster's
@@ -404,6 +419,7 @@ function WinnerCard({ p }: { p: Row }) {
 					{blurb}
 				</p>
 			)}
+			<BuildSourceNote row={p} event={event} />
 
 			<div className="flex items-center justify-between text-xs pt-3 border-t border-border/50">
 				{prize ? (
@@ -422,7 +438,7 @@ function WinnerCard({ p }: { p: Row }) {
 	);
 }
 
-function ProjectCard({ p }: { p: Row }) {
+function ProjectCard({ p, event }: { p: Row; event: string }) {
 	const status = (p.hackathonStatus ?? undefined) as
 		| HackathonStatusKey
 		| undefined;
@@ -447,8 +463,11 @@ function ProjectCard({ p }: { p: Row }) {
 				</div>
 			</div>
 			{blurb && (
-				<p className="text-sm text-muted-foreground line-clamp-2">{blurb}</p>
+				<p className="text-sm text-muted-foreground line-clamp-2 mb-3">
+					{blurb}
+				</p>
 			)}
+			<BuildSourceNote row={p} event={event} />
 		</RowLink>
 	);
 }
@@ -466,6 +485,9 @@ export default async function HackathonDetailPage({
 	const { hackathon, winners, late } = loaded;
 	const { stats } = hackathon;
 	const winnersOnly = hackathon.coverage === "winners-only";
+	// A partial list from another source: its rows show, each with its basis,
+	// never counted as the event's submissions.
+	const partial = hackathon.coverage === "partial";
 	// Only its winners on record: they show above, never as its submissions.
 	const projects = winnersOnly ? [] : loaded.submissions;
 	const submitted = stats.totalSubmissions;
@@ -586,7 +608,7 @@ export default async function HackathonDetailPage({
 						{winners.length > 0 && (
 							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 								{winners.map((p) => (
-									<WinnerCard key={p.id} p={p} />
+									<WinnerCard key={p.id} p={p} event={hackathon.name} />
 								))}
 							</div>
 						)}
@@ -653,9 +675,11 @@ export default async function HackathonDetailPage({
 						<h2 className="text-2xl font-bold text-foreground tracking-tight">
 							Projects
 						</h2>
-						{projects.length > 0 && submitted !== null && (
+						{projects.length > 0 && (submitted !== null || partial) && (
 							<span className="text-sm text-muted-foreground">
-								{submitted} submitted
+								{submitted !== null
+									? `${submitted} submitted`
+									: `${projects.length} on record, not the organizer's list`}
 							</span>
 						)}
 					</div>
@@ -680,7 +704,7 @@ export default async function HackathonDetailPage({
 					) : (
 						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 							{projects.map((p) => (
-								<ProjectCard key={p.id} p={p} />
+								<ProjectCard key={p.id} p={p} event={hackathon.name} />
 							))}
 						</div>
 					)}

@@ -1,5 +1,13 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { HACKPROOF_BUILDS } from "@/data/curated-builds";
+import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
+import { curatedFacts } from "@/lib/curated-import";
+import { spec } from "@/lib/openapi-spec";
+import {
+	responseSchema,
+	undeclaredInServed,
+} from "../../../../../../../scripts/contract/served-shape";
 
 vi.mock("@/lib/api-usage", () => ({ logApiHit: vi.fn() }));
 
@@ -136,5 +144,48 @@ describe("GET /api/hackathons/builds/{id} award labels", () => {
 		const res = await get();
 		expect(res.status).toBe(503);
 		expect(res.headers.get("Retry-After")).toBe("2");
+	});
+});
+
+describe("GET /api/hackathons/builds/{id} for a row of a partial list", () => {
+	it("serves why it is stored, what that rests on, its checked contracts and the file naming its placement", async () => {
+		const ev = CURATED_HACKATHONS.find((h) => h.uname === "hackmeridian-2026");
+		const b = HACKPROOF_BUILDS.find((r) => r.isWinner && r.contracts?.length);
+		if (!ev || !b)
+			throw new Error("no placed HackMeridian 2026 row with contracts");
+		doc = {
+			...curatedFacts(b, ev),
+			id: b.id,
+			firstSeenAt: "2026-11-04T00:00:00.000Z",
+			lastSeenAt: "2026-11-04T00:00:00.000Z",
+		};
+		winners = [];
+		const res = await get();
+		expect(res.status).toBe(200);
+		const body = await res.json();
+		expect(body.build).toMatchObject({
+			id: b.id,
+			isWinner: true,
+			placement: b.placement,
+			entryBasis: b.entryBasis,
+			entryEvidence: b.entryEvidence,
+			contracts: b.contracts,
+			contractsCheckedAt: b.contractsCheckedAt,
+			winnerSource: b.winnerSource,
+			repo: b.githubUrl?.replace("https://github.com/", "").toLowerCase(),
+		});
+		expect(body.build.entries[0].winnerSource).toBe(b.winnerSource);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/builds/{id}"),
+				body,
+			),
+		).toEqual([]);
+		// A DoraHacks row carries none of it, and says its contracts were not checked.
+		doc = umbra;
+		const plain = (await (await get()).json()).build;
+		expect("entryBasis" in plain || "contracts" in plain).toBe(false);
+		expect(plain.contractsCheckedAt).toBeNull();
 	});
 });

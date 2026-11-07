@@ -6,6 +6,8 @@ import {
 } from "@/components/charts/series-path-utils";
 import { buildYScalesFromDomains } from "@/components/charts/y-axis-scales";
 import { niceYDomain } from "@/components/charts/y-domain-utils";
+import { STABLECOIN_REGISTRY } from "@/data/stablecoin-registry";
+import { spec } from "../openapi-spec";
 import {
 	capSeriesWithOther,
 	issuerLeaderboard,
@@ -15,7 +17,17 @@ import {
 	toShare,
 	windowed,
 } from "../stablecoin-series";
-import { rankStablecoins, type StoreRow, storeRowToApi } from "../stablecoins";
+import {
+	assetTypeFilter,
+	filterByAssetType,
+	namedIssuingParty,
+	rankStablecoins,
+	STABLECOIN_ASSET_TYPES,
+	STABLECOIN_QUERY_PARAMS,
+	type StoreRow,
+	sameParty,
+	storeRowToApi,
+} from "../stablecoins";
 
 // Real rows as our own `stablecoins` collection stores them, values captured
 // from the first live write 2026-08-19 — the exact denomination trap.
@@ -461,5 +473,233 @@ describe("priceBasis (the USDY understatement, 2026-09-09)", () => {
 			storeRowToApi({ ...USDC, priceBasis: "coingecko" }).priceBasis,
 		).toBeNull();
 		expect(storeRowToApi(USDC).priceBasis).toBeNull();
+	});
+});
+
+/**
+ * sls-107 (2026-11-02): one `company` field held a brand, and agents read it
+ * as the issuer. The row now carries the brand AND the issuer of record the
+ * issuer's own stellar.toml names, each documented for what it is.
+ */
+describe("company is the brand; issuerOfRecord is what the issuer's toml says", () => {
+	it("carries the issuer of record, its toml URL, its date and its note beside the brand", () => {
+		const r = storeRowToApi({
+			code: "MGUSD",
+			company: "MoneyGram",
+			issuerOfRecord: "MoneyGram Payment Systems, Inc.",
+			issuerOfRecordSourceUrl:
+				"https://mgusd.moneygram.com/.well-known/stellar.toml",
+			issuerOfRecordAsOf: "2026-11-05T00:25:00.000Z",
+			issuerOfRecordNote:
+				'stellar.toml desc for MGUSD: "USD-backed stablecoin issued by Bridge on behalf of MoneyGram"',
+		});
+		expect(r.company).toBe("MoneyGram");
+		expect(r.issuerOfRecord).toBe("MoneyGram Payment Systems, Inc.");
+		expect(r.issuerOfRecordSourceUrl).toBe(
+			"https://mgusd.moneygram.com/.well-known/stellar.toml",
+		);
+		expect(r.issuerOfRecordAsOf).toBe("2026-11-05T00:25:00.000Z");
+		expect(r.issuerOfRecordNote).toContain("issued by Bridge");
+	});
+
+	it("an unread issuer of record is null, never the brand", () => {
+		const r = storeRowToApi({ code: "AUDD", company: "Novatti Group" });
+		expect(r.issuerOfRecord).toBeNull();
+		expect(r.issuerOfRecordSourceUrl).toBeNull();
+		expect(r.issuerOfRecordAsOf).toBeNull();
+		expect(r.issuerOfRecordNote).toBeNull();
+	});
+
+	it("namedIssuingParty reads the party after 'issued by', up to 'on behalf of' or the clause end", () => {
+		expect(
+			namedIssuingParty(
+				"USD-backed stablecoin issued by Bridge on behalf of MoneyGram",
+			),
+		).toBe("Bridge");
+		expect(
+			namedIssuingParty(
+				"Zeam ZAR is a 1:1 fiat-backed stable-coin, issued by Zeam Mint (Pty) Ltd, and operated by Zeam SA",
+			),
+		).toBe("Zeam Mint (Pty) Ltd");
+		expect(
+			namedIssuingParty("SBC is a stablecoin issued by Brale. It is"),
+		).toBe("Brale");
+		expect(namedIssuingParty("Asset backed token pegged 1:1")).toBeNull();
+		expect(namedIssuingParty(null)).toBeNull();
+	});
+
+	it("sameParty compares whole names: a bare legal suffix or a fragment never matches (review 2026-11-04)", () => {
+		// The four inputs the review found matching under substring containment.
+		expect(sameParty("Ltd", "AUDC PTY LTD")).toBe(false);
+		expect(sameParty("Inc", "MoneyGram Payment Systems, Inc.")).toBe(false);
+		expect(sameParty("Cambridge", "Bridge")).toBe(false);
+		expect(sameParty("A", "AUDC PTY LTD")).toBe(false);
+		// A partial name is not the same name either.
+		expect(sameParty("Novatti", "Novatti Group")).toBe(false);
+		expect(sameParty("Circle", "Circle Internet Financial, LLC")).toBe(false);
+		expect(sameParty("Zeam Mint (Pty) Ltd", "ZEAM LIMITED")).toBe(false);
+		expect(sameParty("Bridge", "MoneyGram Payment Systems, Inc.")).toBe(false);
+		expect(sameParty("!!!", "Circle")).toBe(false);
+		expect(sameParty("Ltd", "Ltd")).toBe(false);
+	});
+
+	it("sameParty sets aside case, punctuation, spacing and legal-form suffixes", () => {
+		expect(sameParty("Brale", "Brale Inc.")).toBe(true);
+		expect(sameParty("VNX Global Ltd", "VNX Global Ltd.")).toBe(true);
+		expect(sameParty("AUDC Pty Ltd", "AUDC PTY LTD")).toBe(true);
+		expect(sameParty("AUDC", "AUDC PTY LTD")).toBe(true);
+		expect(
+			sameParty("Kinesis Money Panama S.A", "Kinesis Money Panama S.A."),
+		).toBe(true);
+		expect(sameParty("MyKobo", "MYKOBO")).toBe(true);
+		expect(sameParty("My Kobo", "MYKOBO")).toBe(true);
+		expect(sameParty("Zeam Mint", "Zeam Mint (Pty) Ltd")).toBe(true);
+		expect(sameParty("the Bank of X", "Bank of X Ltd")).toBe(true);
+	});
+
+	it("sameParty reads letters in any script and folds accents (re-check item 3)", () => {
+		expect(sameParty("Société Générale", "Societe Generale")).toBe(true);
+		expect(sameParty("Société Générale", "SOCIETE GENERALE S.A.")).toBe(true);
+		expect(sameParty("Banque Société Générale", "Societe Generale")).toBe(
+			false,
+		);
+		expect(sameParty("Банк Х", "Банк Х")).toBe(true);
+		expect(sameParty("Банк Х", "Банк У")).toBe(false);
+		expect(sameParty("三菱UFJ信託銀行", "三菱UFJ信託銀行")).toBe(true);
+		expect(sameParty("三菱", "三菱UFJ信託銀行")).toBe(false);
+	});
+
+	it("sameParty handles spaced forms, keeps English words, and never equates two different legal forms (re-check item 4)", () => {
+		expect(
+			sameParty("Kinesis Money Panama S A", "Kinesis Money Panama S.A."),
+		).toBe(true);
+		expect(
+			sameParty("Kinesis Money Panama S. A.", "Kinesis Money Panama SA"),
+		).toBe(true);
+		expect(sameParty("Pay As", "Pay")).toBe(false);
+		expect(
+			sameParty(
+				"Circle Internet Financial, LLC",
+				"Circle Internet Financial Inc",
+			),
+		).toBe(false);
+		expect(
+			sameParty(
+				"Circle Internet Financial Limited",
+				"Circle Internet Financial Ltd",
+			),
+		).toBe(true);
+		expect(sameParty("AUDC Ltd", "AUDC PTY LTD")).toBe(false);
+		expect(sameParty("Co Op Bank", "Op Bank")).toBe(false);
+		expect(sameParty("Plan B", "Plan")).toBe(false);
+	});
+
+	it("namedIssuingParty does not cut a name at a dot inside it", () => {
+		expect(
+			namedIssuingParty(
+				"ZUSD, issued by GMO-Z.com Trust Company, Inc. until its wind-down",
+			),
+		).toBe("GMO-Z.com Trust Company");
+		expect(
+			namedIssuingParty("issued by Kinesis Money Panama S.A. for holders"),
+		).toBe("Kinesis Money Panama S.A");
+	});
+
+	it("carries issuerOfRecordCheck; a value outside its vocabulary is null", () => {
+		expect(
+			storeRowToApi({ code: "USDT0", issuerOfRecordCheck: "not-named" })
+				.issuerOfRecordCheck,
+		).toBe("not-named");
+		expect(
+			storeRowToApi({ code: "X", issuerOfRecordCheck: "maybe" })
+				.issuerOfRecordCheck,
+		).toBeNull();
+		expect(storeRowToApi({ code: "X" }).issuerOfRecordCheck).toBeNull();
+	});
+});
+
+/**
+ * sls-107, second half: USDY and YLDS (assetType "Yield Stablecoin") sit in the
+ * same list as par coins and ?assetType= answered 400. A qualifier is
+ * recorded only where the registry found the unit is not 1:1 with its peg;
+ * null means no qualifier was recorded (unclassified), not a verified plain
+ * peg, so a qualifier filter never matches a null row and `none` selects the
+ * null rows without calling them par.
+ */
+describe("assetType filter", () => {
+	const rows = [
+		USDY,
+		USDC,
+		GYEN,
+		{ ...USDC, code: "USDM1", assetType: "Treasury-Backed" },
+	].map(storeRowToApi);
+
+	it("resolves a value case-insensitively to its canonical spelling; an unknown value resolves to nothing", () => {
+		expect(assetTypeFilter("yield stablecoin")).toBe("Yield Stablecoin");
+		expect(assetTypeFilter(" Treasury-Backed ")).toBe("Treasury-Backed");
+		expect(assetTypeFilter("NONE")).toBe("none");
+		expect(assetTypeFilter("Fiat-backed")).toBeUndefined();
+	});
+
+	it("a qualifier keeps only the rows recorded with it; a null row never matches one", () => {
+		expect(
+			filterByAssetType(rows, "Yield Stablecoin").map((r) => r.ticker),
+		).toEqual(["USDY"]);
+		expect(
+			filterByAssetType(rows, "Treasury-Backed").map((r) => r.ticker),
+		).toEqual(["USDM1"]);
+	});
+
+	it("none keeps only the rows with no qualifier recorded", () => {
+		expect(filterByAssetType(rows, "none").map((r) => r.ticker)).toEqual([
+			"USDC",
+			"GYEN",
+		]);
+	});
+
+	it("a stored assetType outside the vocabulary is served as null, never passed through", () => {
+		expect(
+			storeRowToApi({ code: "X", assetType: "Mystery" }).assetType,
+		).toBeNull();
+		expect(storeRowToApi(USDY).assetType).toBe("Yield Stablecoin");
+	});
+
+	it("every registry qualifier is in the vocabulary the filter accepts", () => {
+		for (const a of STABLECOIN_REGISTRY)
+			if (a.assetType)
+				expect(STABLECOIN_ASSET_TYPES as readonly string[]).toContain(
+					a.assetType,
+				);
+	});
+});
+
+/** The contract side: every parameter the route reads and every field a row
+ * serves is in the spec, so a filter or field cannot ship undocumented. */
+describe("getStablecoins in the spec", () => {
+	// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+	const S: any = spec;
+	const op = S.paths["/api/stablecoins"].get;
+
+	it("declares exactly the query parameters the route accepts", () => {
+		const names = op.parameters.map((p: { name: string }) => p.name).sort();
+		expect(names).toEqual([...STABLECOIN_QUERY_PARAMS].sort());
+	});
+
+	it("declares every field a row serves", () => {
+		const served = Object.keys(storeRowToApi({ code: "X" }));
+		const declared = Object.keys(S.components.schemas.Stablecoin.properties);
+		expect(served.filter((k) => !declared.includes(k))).toEqual([]);
+	});
+
+	it("declares the issuer-of-record fields as nullable strings", () => {
+		const p = S.components.schemas.Stablecoin.properties;
+		for (const f of [
+			"issuerOfRecord",
+			"issuerOfRecordCheck",
+			"issuerOfRecordSourceUrl",
+			"issuerOfRecordAsOf",
+			"issuerOfRecordNote",
+		])
+			expect(p[f], f).toMatchObject({ type: "string", nullable: true });
 	});
 });

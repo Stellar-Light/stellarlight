@@ -37,9 +37,11 @@ import {
 	STATUS_FIX,
 	STATUS_SOURCE_BACKFILL,
 	STATUS_SOURCE_RETRACT,
+	statusFixNote,
 	TYPE_ADD,
 	TYPES_ADD,
 	TYPES_SET,
+	VENUE_ROLE,
 	WEBSITE_FIXES,
 	WEBSITE_REMOVE,
 	WEBSITE_REMOVE_DEAD,
@@ -672,6 +674,7 @@ const PRODUCT_KIND: Record<string, string> = {
 	// integration-kit — integrating existing wallets into dApps / host wallets
 	"simple-signer": "integration-kit", // "in-browser transaction signer that supports different stellar wallets"
 	"stellar-metamask": "integration-kit", // "Stellar Integration on MetaMask… MetaMask Snaps Platform" — a snap adding Stellar to an existing wallet
+	metamask: "end-user-wallet", // sls-112: support.metamask.io: "MetaMask supports Stellar as a default network, allowing you to manage XLM and other assets" (seeded 2026-11-04)
 	// smart-account-tooling — passkey / smart-account infrastructure
 	"stellar-passport": "smart-account-tooling", // "passkey-secured identity and participation layer"
 	"volta-circuit": "smart-account-tooling", // "smart contract-based security protocol… automated asset protection, recovery"
@@ -1130,6 +1133,30 @@ const PRODUCTS_FIX: Record<
 			note: "contract IDs published in the operator repo; per-network ID labels pending verification, so none is asserted here. Consumer caution: price state observed stale in upstream checks",
 		},
 	],
+	// sls-112 (#1904): one proxy per network serves every feed (seeded in
+	// SEEDS the same day). Both contracts read on stellar.expert 2026-11-04.
+	chainlink: [
+		{
+			name: "Chainlink Data Feeds proxy (Stellar Mainnet)",
+			kind: "oracle-feed",
+			network: "mainnet",
+			status: "live",
+			contractId: "CDQBHEUGLDHMSUHG4IH33RJBUTMNCZOT4JIAQR4WZFRDZW6DR6S32ZLZ",
+			evidenceUrl: "https://docs.chain.link/data-feeds/stellar",
+			asOf: "2026-11-04",
+			note: "one proxy serves every feed; a contract selects a feed by its 32-byte data_id (feed IDs on docs.chain.link/data-feeds/price-feeds/addresses with Stellar selected). Created on mainnet 2026-09-14 per stellar.expert",
+		},
+		{
+			name: "Chainlink Data Feeds proxy (Stellar Testnet)",
+			kind: "oracle-feed",
+			network: "testnet",
+			status: "live",
+			contractId: "CBUF6IADAWPWIDWRTHJNINKXHG2UTIQ6TU2F2HRAXWAI7OT3KJPKK6O4",
+			evidenceUrl: "https://docs.chain.link/data-feeds/stellar",
+			asOf: "2026-11-04",
+			note: "same interface as the mainnet proxy; created on testnet 2026-09-08 per stellar.expert",
+		},
+	],
 };
 
 const COVERAGE_COUNTRY_FIX: Record<string, string[]> = {
@@ -1316,24 +1343,6 @@ const ROUTES_SET: Record<string, CuratedRoute[]> = {
 			asOf: "2026-07-09",
 		},
 	),
-};
-
-/** sls-035 (#517): DEX-landscape role for the clearest records — makes the
- * venue/aggregator/UI distinction data instead of prose, so a DEX cluster
- * count stops reading as a competitor count. EXACT-SYNC for listed slugs.
- * Only unambiguous assignments (one-line evidence each); ambiguous records
- * (hoops, normal, lumenswap, multi-role platforms) stay null = unclassified. */
-const VENUE_ROLE: Record<string, string> = {
-	soroswap: "amm", // soroswap.finance: AMM protocol on Soroban running its own pools; DefiLlama `soroswap` TVL row
-	aquarius: "amm", // aqua.network: AMM pools + liquidity-incentive voting on Stellar; DefiLlama `aquarius-stellar` TVL row
-	phoenix: "amm", // Phoenix DeFi Hub: constant-product + stableswap pools (PHO) on Soroban — runs its own liquidity
-	sushi: "amm", // Sushi's Stellar deployment runs its own AMM pools; DefiLlama `sushi-stellar` TVL row
-	comet: "amm", // WAS a Balancer-style weighted-pool AMM on Soroban (record Inactive — status carries liveness; role is the taxonomy fact)
-	stellarterm: "trading-ui", // stellarterm.com: open-source trading client for the native Stellar DEX — hosts no liquidity of its own
-	stellarx: "trading-ui", // stellarx.com: trading interface over Stellar's native orderbook — no own pools
-	lobstr: "wallet-integrated", // lobstr.co: wallet with in-app swap/SDEX trading — venue access inside a wallet, not an independent venue
-	scopuly: "wallet-integrated", // scopuly.com: wallet + SDEX trading app (typed Wallet/DEX)
-	stellarbroker: "aggregator-router", // stellar.broker: "multi-source liquidity swap router … access to AMMs and Stellar DEX" — routes across venues, runs none
 };
 
 /** Duplicate-record merges (lessons class 10; Engine B S3's 12 groups,
@@ -2456,13 +2465,15 @@ async function main() {
 		// the row is not a write. 141 from===to entries were re-written on every
 		// execute — "143 applied" meant nothing, and the noise hid that tucambio
 		// flipped between two curate maps each run. A stamp only fills an empty
-		// note, so a row with any note is in sync on the note.
+		// note (or replaces one with replaceNote), so statusFixNote says whether
+		// the note is in sync.
+		const note = statusFixNote(fix, d.lifecycle?.note);
 		if (
 			fix.from === fix.to &&
 			(!fix.asOf || String(d.statusAsOf ?? "").slice(0, 10) === fix.asOf) &&
 			(!fix.sourceUrl || d.statusSourceUrl === fix.sourceUrl) &&
 			(!fix.basis || d.statusBasis === fix.basis) &&
-			(!fix.note || !!d.lifecycle?.note)
+			note === null
 		) {
 			console.log(`  ${slug}: stamp already in sync, skip`);
 			continue;
@@ -2473,9 +2484,8 @@ async function main() {
 		// Inactive flips carry their evidence as ecosystem memory (fill-if-
 		// empty): "X WAS a live Y that shut down" beats silence for consumers.
 		// A status MOVE is a verdict: its note replaces whatever was there. A
-		// stamp (from === to) only fills an empty note, as before.
-		if (fix.note && (fix.from !== fix.to || !d.lifecycle?.note))
-			data.lifecycle = { ...(d.lifecycle ?? {}), note: fix.note };
+		// stamp (from === to) only fills an empty note, unless replaceNote.
+		if (note) data.lifecycle = { ...(d.lifecycle ?? {}), note };
 		// Retiring a row FROM Live is itself the proof it was once Live — the
 		// flag a consumer needs to hear "this used to be a real product" rather
 		// than silence. Rides the same write, never guessed.

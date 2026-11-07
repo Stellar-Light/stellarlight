@@ -950,5 +950,47 @@
   "liveRows": 849,
   "liveNoSource": 0,
   "humanVerified": 285
+ },
+ {
+  "date": "2026-11-04",
+  "batteryPass": 90,
+  "batteryFail": 0,
+  "batteryErrors": 0,
+  "parityPass": 51,
+  "openMaps": 0,
+  "honestyDebt": 0,
+  "sampled": 1139,
+  "population": 1139,
+  "liveRows": 849,
+  "liveNoSource": 0,
+  "humanVerified": 285
+ },
+ {
+  "date": "2026-11-05",
+  "batteryPass": 91,
+  "batteryFail": 0,
+  "batteryErrors": 0,
+  "parityPass": 48,
+  "openMaps": 0,
+  "honestyDebt": 0,
+  "sampled": 1139,
+  "population": 1139,
+  "liveRows": 849,
+  "liveNoSource": 0,
+  "humanVerified": 285
+ },
+ {
+  "date": "2026-11-06",
+  "batteryPass": 89,
+  "batteryFail": 2,
+  "batteryErrors": 0,
+  "parityPass": null,
+  "openMaps": 0,
+  "honestyDebt": 0,
+  "sampled": 1139,
+  "population": 1139,
+  "liveRows": 849,
+  "liveNoSource": 0,
+  "humanVerified": 285
  }
 ]

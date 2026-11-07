@@ -31,9 +31,10 @@ export type BuilderRowData = {
 	featured: boolean;
 	commits30d: number;
 	passportProjects: number;
-	repos: number;
-	stars: number;
-	commits90d: number;
+	/** null: the activity read did not run or was cut, so not known */
+	repos: number | null;
+	stars: number | null;
+	commits90d: number | null;
 	lastCommitAt: string | null;
 	projects: Array<{ slug: string; name: string }>;
 	/** projects they only contribute to (org repos they committed to) */
@@ -60,7 +61,9 @@ const SORTS: Array<{ key: SortKey; label: string }> = [
 
 const SORT_KEYS = SORTS.map((s) => s.key);
 
-const heat = (r: BuilderRowData) => r.commits30d * 3 + r.commits90d;
+const heat = (r: BuilderRowData) => r.commits30d * 3 + (r.commits90d ?? 0);
+// an unknown count sorts below every known one, zero included
+const known = (n: number | null) => n ?? -1;
 const recentCut = () => Date.now() - 90 * 86_400_000;
 const isRecent = (r: BuilderRowData) =>
 	heat(r) > 0 || Date.parse(r.lastCommitAt ?? "") > recentCut();
@@ -124,8 +127,10 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 				a.name.localeCompare(b.name),
 			recent: (a, b) =>
 				t(b.lastCommitAt) - t(a.lastCommitAt) || heat(b) - heat(a),
-			repos: (a, b) => b.repos - a.repos || b.stars - a.stars,
-			stars: (a, b) => b.stars - a.stars || b.repos - a.repos,
+			repos: (a, b) =>
+				known(b.repos) - known(a.repos) || known(b.stars) - known(a.stars),
+			stars: (a, b) =>
+				known(b.stars) - known(a.stars) || known(b.repos) - known(a.repos),
 			name: (a, b) => a.name.localeCompare(b.name),
 		};
 		list = [...list].sort(
@@ -308,11 +313,11 @@ function BuilderCard({ r }: { r: BuilderRowData }) {
 									{r.passportProjects !== 1 ? "s" : ""}
 								</span>
 							)}
-							{r.repos > 0 && (
+							{r.repos !== null && r.repos > 0 && (
 								<span className="flex items-center gap-1 tabular-nums">
 									<GitBranch className="w-3 h-3" />
 									{r.repos} Stellar {r.repos === 1 ? "repo" : "repos"}
-									{r.stars > 0 ? `, ${r.stars.toLocaleString()} stars` : ""}
+									{r.stars ? `, ${r.stars.toLocaleString()} stars` : ""}
 									{r.lastCommitAt
 										? `, last commit ${agoSentence(r.lastCommitAt)}`
 										: ""}

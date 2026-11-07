@@ -101,12 +101,16 @@ const LIBRARY_SCOPES: Array<[string, string]> = [
 /** The library a declared package belongs to. */
 /** One event's submissions profiled by the engine: what they were about,
  * what they built with, and what became of them. compareHackathons and
- * getHackathon serve this same shape. On a winners-only event it says so
- * and serves no submission count: it describes the winners only. Over
- * incomplete rows (incompleteRows) it counts and serves no share. */
+ * getHackathon serve this same shape. On a winners-only or partial event it
+ * says so and serves no submission count: it describes the stored rows, not
+ * the field. Over incomplete rows (incompleteRows) it counts and serves no
+ * share. */
 export function eventProfile(builds: IndexedBuild[]) {
 	const coverage = eventCoverage(builds);
-	const winnersOnly = coverage === "winners-only";
+	const notField =
+		coverage === "winners-only" || coverage === "partial"
+			? coverage
+			: undefined;
 	const noShares =
 		!!builds.length && !!incompleteRows(builds[0].hackathon.slug, coverage);
 	const d: typeof distribution = (...args) => {
@@ -114,8 +118,8 @@ export function eventProfile(builds: IndexedBuild[]) {
 		return noShares ? withoutShares(out) : out;
 	};
 	return {
-		...(winnersOnly ? { coverage: COVERAGE_VALUES[0] } : {}),
-		submissions: winnersOnly ? null : builds.length,
+		...(notField ? { coverage: notField } : {}),
+		submissions: notField ? null : builds.length,
 		winners: builds.filter((b) => b.isWinner).length,
 		category: d(builds, "category", { top: 5 }),
 		library: d(builds, "library", { top: 5 }),
@@ -132,8 +136,10 @@ export type EventProfile = ReturnType<typeof eventProfile>;
  * one may. The one rule for every ratio served over stored rows (a share, a
  * winner share, a rate, a prize per winner): its denominator never comes
  * from incomplete rows. Incomplete: only the winners are stored (coverage
- * winners-only), or the winners are published only in part or not at all,
- * which today only a curated event's dated winners note records. */
+ * winners-only), the rows are a partial list from a source other than the
+ * organizer (coverage partial), or the winners are published only in part,
+ * not at all or only secondhand, which today only a curated event's dated
+ * winners note records. */
 export function incompleteRows(
 	slug: string,
 	coverage: ReturnType<typeof eventCoverage> | undefined,
@@ -143,13 +149,20 @@ export function incompleteRows(
 		...(coverage === "winners-only"
 			? ["only its winners are stored (coverage winners-only)"]
 			: []),
-		// Each note's own kind: a test keeps "Not announced upstream" the
-		// prefix of every note that says so.
+		...(coverage === "partial"
+			? [
+					"its stored rows are a partial list from a source other than the organizer (coverage partial)",
+				]
+			: []),
+		// Each note's own kind: a test keeps "Not announced upstream" and
+		// "Secondhand" the prefixes of the notes that say so.
 		...(note
 			? [
 					note.startsWith("Not announced upstream")
 						? "its winners are not announced upstream (getHackathon stats.winnersNote)"
-						: "its winners are published only in part (getHackathon stats.winnersNote)",
+						: note.startsWith("Secondhand")
+							? "its placements are secondhand, named by no organizer page (getHackathon stats.winnersNote)"
+							: "its winners are published only in part (getHackathon stats.winnersNote)",
 				]
 			: []),
 	];
@@ -158,11 +171,10 @@ export function incompleteRows(
 
 /** The events in an index whose rows no rate may count (incompleteRows). */
 export function incompleteEvents(builds: IndexedBuild[]): Set<string> {
-	const winnersOnly = winnersOnlyEvents(builds);
 	return new Set(
-		[...new Set(builds.map((b) => b.hackathon.slug))].filter((slug) =>
-			incompleteRows(slug, winnersOnly.has(slug) ? "winners-only" : "full"),
-		),
+		[...byEvent(builds)]
+			.filter(([slug, rows]) => incompleteRows(slug, eventCoverage(rows)))
+			.map(([slug]) => slug),
 	);
 }
 
@@ -173,39 +185,52 @@ export function withoutShares<T extends Distribution>(d: T): T {
 
 /** The `coverage` values served. Absent means the stored rows are the
  * event's listing, so "full" is never served. The spec spreads this list. */
-export const COVERAGE_VALUES = ["winners-only"] as const;
+export const COVERAGE_VALUES = ["winners-only", "partial"] as const;
+export type Coverage = (typeof COVERAGE_VALUES)[number];
 
 /** What one event's stored rows cover, decided from the rows alone; every
  * reader of an event's counts asks this. full: the event's listing as the
  * DoraHacks sync stores it. winners-only: every row is a curated winner
- * (scripts/import-curated-builds.ts), so only the winners are on record and
- * the size and mix of the field are unknown. null: none stored.
- * ponytail: a curated row that is not a winner makes its event full; a
- * partial curated listing needs its own value (a test keeps every curated
- * row a winner until then). */
+ * imported from the page that names it (scripts/import-curated-builds.ts),
+ * so only the winners are on record. partial: every row is curated and at
+ * least one is not a winner: a list from a source other than the organizer
+ * (HackMeridian 2026's, from HackProof), each row with its entryBasis. In
+ * both the size and mix of the field are unknown. null: none stored. */
 export function eventCoverage(
 	builds: IndexedBuild[],
-): "full" | (typeof COVERAGE_VALUES)[number] | null {
+): "full" | Coverage | null {
 	if (!builds.length) return null;
-	return builds.every((b) => b.isWinner && CURATED_BUILD_ID.test(b.id))
-		? "winners-only"
-		: "full";
+	if (!builds.every((b) => CURATED_BUILD_ID.test(b.id))) return "full";
+	return builds.every((b) => b.isWinner) ? "winners-only" : "partial";
 }
 
-/** Each winners-only event in the index, in index order, with its winners. */
-export function winnersOnlyEvents(builds: IndexedBuild[]): Map<string, number> {
-	const byEvent = new Map<string, IndexedBuild[]>();
+/** The index's rows by event, in index order. */
+function byEvent(builds: IndexedBuild[]): Map<string, IndexedBuild[]> {
+	const out = new Map<string, IndexedBuild[]>();
 	for (const b of builds) {
-		const rows = byEvent.get(b.hackathon.slug);
+		const rows = out.get(b.hackathon.slug);
 		if (rows) rows.push(b);
-		else byEvent.set(b.hackathon.slug, [b]);
+		else out.set(b.hackathon.slug, [b]);
 	}
+	return out;
+}
+
+/** Each event in the index with this coverage, in index order, with its
+ * stored rows. */
+export function coverageEvents(
+	builds: IndexedBuild[],
+	coverage: Coverage,
+): Map<string, number> {
 	return new Map(
-		[...byEvent]
-			.filter(([, rows]) => eventCoverage(rows) === "winners-only")
+		[...byEvent(builds)]
+			.filter(([, rows]) => eventCoverage(rows) === coverage)
 			.map(([slug, rows]) => [slug, rows.length]),
 	);
 }
+
+/** Each winners-only event in the index, in index order, with its winners. */
+export const winnersOnlyEvents = (builds: IndexedBuild[]) =>
+	coverageEvents(builds, "winners-only");
 
 /** getHackathon's stats.coverageNote on a winners-only event. */
 export function winnersOnlyNote(winners: number): string {
@@ -214,6 +239,12 @@ export function winnersOnlyNote(winners: number): string {
 			? "1 row, with the page that names the win as url"
 			: `${winners} rows, with the page that names each win as url`;
 	return `Only this event's winners are on record here (${rows}); its other submissions are not stored. The size and mix of its field are unknown, so totalSubmissions, each track's submissionCount and outcomes are null, never the winner count, and profile counts the winners only, with every share null.`;
+}
+
+/** getHackathon's stats.coverageNote on a partial event, before the
+ * event's own dated note on where the list comes from. */
+export function partialNote(rows: number): string {
+	return `Not this event's list of submissions: the ${rows} ${rows === 1 ? "row" : "rows"} stored here are a partial list from a source other than the organizer, each with an entryBasis that says why it is stored. The size and mix of the field are unknown, so totalSubmissions, each track's submissionCount and outcomes are null, and profile counts these rows with every share null.`;
 }
 
 /** "a (6), b (5) and c (1)" */
@@ -230,6 +261,27 @@ export function winnersOnlyWarning(events: Array<[string, number]>): string {
 		return `only the winners of ${slug} are stored (${n} ${n === 1 ? "row" : "rows"}, coverage winners-only); its other submissions are not, so its rows are its winners, not its field, whose size and mix are unknown, and no share is computed over them`;
 	}
 	return `only the winners of ${listEvents(events)} are stored (coverage winners-only); their other submissions are not, so their rows are their winners, not their fields, whose size and mix are unknown, and no share is computed over them`;
+}
+
+/** The meta.warnings line for partial events a request names or leaves
+ * alone: their rows are counted, never as their fields. */
+export function partialWarning(events: Array<[string, number]>): string {
+	if (events.length === 1) {
+		const [slug, n] = events[0];
+		return `the stored rows of ${slug} are a partial list from a source other than the organizer (${n} ${n === 1 ? "row" : "rows"}, coverage partial), not its field, whose size and mix are unknown: its rows are counted and no share is computed over them`;
+	}
+	return `the stored rows of ${listEvents(events)} are partial lists from sources other than the organizers (coverage partial), not their fields, whose size and mix are unknown: their rows are counted and no share is computed over them`;
+}
+
+/** The meta.warnings line for partial rows analyze left out of a set that
+ * also holds full listings. */
+export function partialLeftOutWarning(events: Array<[string, number]>): string {
+	if (events.length === 1) {
+		const [slug, n] = events[0];
+		return `left out of every count and share: the ${n} ${n === 1 ? "row" : "rows"} of ${slug}, a partial list from a source other than the organizer (coverage partial); the rest covers events whose full listing is stored`;
+	}
+	const rows = events.reduce((a, [, n]) => a + n, 0);
+	return `left out of every count and share: ${rows} rows of ${listEvents(events)}, partial lists from sources other than the organizers (coverage partial); the rest covers events whose full listing is stored`;
 }
 
 /** The meta.warnings line for winners-only rows analyze left out of a set

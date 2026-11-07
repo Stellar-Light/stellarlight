@@ -8,6 +8,8 @@ import {
 	rerankBuilds,
 } from "@/lib/build-rerank";
 import {
+	coverageEvents,
+	partialWarning,
 	winnersOnlyEvents,
 	winnersOnlyWarning,
 } from "@/lib/hackathon-analytics";
@@ -27,6 +29,7 @@ import {
 import { fetchAllDoraHacksHackathonsChecked } from "@/lib/integrations/dorahacks";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { PROJECT_TYPES } from "@/lib/project-types";
+import { findWholeSet } from "@/lib/whole-set";
 
 export const BUILD_FILTER_PARAMS = [
 	"q",
@@ -97,13 +100,15 @@ export async function listedEvents(): Promise<ListedEvents> {
 	let complete = dora.complete && !!payload;
 	if (payload)
 		try {
-			const res = await payload.find({
+			// a set past the ceiling leaves names unchecked: not complete
+			const res = await findWholeSet<{ slug: string; name: string }>(payload, {
 				collection: "hackathons",
 				limit: 300,
 				depth: 0,
 				select: { slug: true, name: true },
 			});
 			for (const d of res.docs) events.push({ slug: d.slug, title: d.name });
+			complete &&= res.complete;
 		} catch {
 			complete = false;
 		}
@@ -245,13 +250,17 @@ export async function parseBuildFilters(
 				`could not check hackathon '${v}': the event listing could not be read; 0 matched from it is not evidence that nothing was built`,
 		),
 	];
-	// A winners-only event's stored rows are its winners, never its field.
-	const onlyWinners = winnersOnlyEvents(indexed);
-	const named = [...slugs].flatMap((s): Array<[string, number]> => {
-		const n = onlyWinners.get(s);
-		return n ? [[s, n]] : [];
-	});
-	if (named.length) warnings.push(winnersOnlyWarning(named));
+	// A winners-only event's stored rows are its winners, and a partial
+	// event's a list from another source: never its field.
+	const named = (events: Map<string, number>) =>
+		[...slugs].flatMap((s): Array<[string, number]> => {
+			const n = events.get(s);
+			return n ? [[s, n]] : [];
+		});
+	const onlyWinners = named(winnersOnlyEvents(indexed));
+	if (onlyWinners.length) warnings.push(winnersOnlyWarning(onlyWinners));
+	const partial = named(coverageEvents(indexed, "partial"));
+	if (partial.length) warnings.push(partialWarning(partial));
 	const opt = (k: string) => sp.get(k)?.trim().toLowerCase() || undefined;
 	return {
 		filters: {

@@ -135,11 +135,6 @@
 		"kind": "prompt"
 	},
 	{
-		"file": "src/lib/integrations/dorahacks.ts",
-		"snippet": "ortedTotal} submissions \u2014 TRUNCATED (page cap hi",
-		"kind": "internal"
-	},
-	{
 		"file": "src/lib/repo-knowledge.ts",
 		"snippet": " is the \"Accelar Studio \u2014 installation and dev e",
 		"kind": "quote"

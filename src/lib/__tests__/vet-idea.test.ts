@@ -538,6 +538,36 @@ describe("vet-idea prior-art builds for short ideas", () => {
 	const priorArt = async (q: string) =>
 		(await buildVetIdea(payload, q)).priorArt;
 
+	// A row of a partial list keeps its basis and its secondhand win's source
+	// in prior art, never a plain win at the event.
+	it("carries a partial-list row's basis and the file that names its placement", async () => {
+		const file = "https://example.test/hackmeridian-2026.yaml";
+		buildsIndex.push({
+			...build("curated-x-pegged", "A pegged stablecoin vault for treasuries."),
+			isWinner: true,
+			hackathonPlacement: "Runner-up",
+			winnerSource: file,
+			entryBasis: "repo-names-event",
+		});
+		try {
+			const p = await priorArt("stablecoin treasuries");
+			const row = p.builds?.find((b) => b.id === "curated-x-pegged");
+			expect(row).toMatchObject({
+				isWinner: true,
+				placement: "Runner-up",
+				winnerSource: file,
+				entryBasis: "repo-names-event",
+			});
+			// A DoraHacks row carries neither.
+			const plain = p.builds?.find((b) => b.id === "peg-desk");
+			expect(plain).toBeTruthy();
+			expect(Object.keys(plain ?? {})).not.toContain("winnerSource");
+			expect(Object.keys(plain ?? {})).not.toContain("entryBasis");
+		} finally {
+			buildsIndex.pop();
+		}
+	});
+
 	it("serves the builds that match every word of a one-word idea", async () => {
 		const p = await priorArt("remittance app");
 		expect(p.builds?.map((b) => b.id).sort()).toEqual([

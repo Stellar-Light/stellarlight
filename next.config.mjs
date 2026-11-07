@@ -37,6 +37,13 @@ const nextConfig = {
 				protocol: "https",
 				hostname: "images.lumacdn.com",
 			},
+			// Velocity's Webflow site (the University of Waterloo challenge),
+			// only its own asset folder on Webflow's shared CDN.
+			{
+				protocol: "https",
+				hostname: "cdn.prod.website-files.com",
+				pathname: "/66e096649930d345e692a0af/**",
+			},
 		],
 	},
 	// Exclude problematic packages from server-side bundling

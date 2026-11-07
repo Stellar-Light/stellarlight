@@ -16,7 +16,28 @@ function formatTVL(value: number): string {
 	return `$${value.toFixed(2)}`;
 }
 
-function ChangeIndicator({ value }: { value: number }) {
+// Re-check 2026-11-05: the route serves null for a figure it did not read,
+// and .toFixed on that null blanked the project page. Unknown reads Unavailable.
+const Unavailable = () => (
+	<span className="text-muted-foreground">Unavailable</span>
+);
+
+/** The source page's host, as the card names it. */
+const hostOf = (url: string) => {
+	try {
+		return new URL(url).hostname.replace(/^www\./, "");
+	} catch {
+		return url;
+	}
+};
+
+function ChangeIndicator({ value }: { value: number | null }) {
+	if (value === null)
+		return (
+			<span className="text-sm font-medium">
+				<Unavailable />
+			</span>
+		);
 	const isPositive = value >= 0;
 	return (
 		<span
@@ -38,7 +59,9 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 
 	if (isLoading || !data) return null;
 
-	const chartData = data.historicalTVL.map((entry) => ({
+	// No history read means no chart, never a crash.
+	const history = data.historicalTVL ?? [];
+	const chartData = history.map((entry) => ({
 		date: new Date(entry.date),
 		tvl: entry.tvl,
 	}));
@@ -58,8 +81,17 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 							Current TVL on Stellar
 						</p>
 						<p className="text-2xl font-bold text-foreground">
-							{formatTVL(data.currentTVL)}
+							{data.currentTVL === null ? (
+								<Unavailable />
+							) : (
+								formatTVL(data.currentTVL)
+							)}
 						</p>
+						{data.currentTVL !== null && data.asOf && (
+							<p className="text-xs text-muted-foreground mt-1">
+								as of {data.asOf.slice(0, 10)}
+							</p>
+						)}
 					</div>
 					{chartData.length > 0 && (
 						<>
@@ -106,36 +138,22 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 					</div>
 				)}
 
+				{/* The figure's own source: rwa.xyz and manual rows carry sourceUrl
+				(it read "rwa.xyz" for WisdomTree's page, and "DeFi Llama" for
+				Benji's rwa.xyz series); every other row is DefiLlama's. */}
 				<p className="text-xs text-muted-foreground mt-3">
-					{data.historicalTVL.length > 0 ? (
-						<>
-							Data from{" "}
-							<a
-								href={`https://defillama.com/protocol/${data.slug}`}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="underline hover:text-foreground transition-colors"
-							>
-								DeFi Llama
-							</a>{" "}
-							· Stellar chain only
-						</>
-					) : data.sourceUrl ? (
-						<>
-							Data from{" "}
-							<a
-								href={data.sourceUrl}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="underline hover:text-foreground transition-colors"
-							>
-								rwa.xyz
-							</a>{" "}
-							· Stellar chain only
-						</>
-					) : (
-						"TVL based on publicly reported AUM"
-					)}
+					Data from{" "}
+					<a
+						href={
+							data.sourceUrl ?? `https://defillama.com/protocol/${data.slug}`
+						}
+						target="_blank"
+						rel="noopener noreferrer"
+						className="underline hover:text-foreground transition-colors"
+					>
+						{data.sourceUrl ? hostOf(data.sourceUrl) : "DeFi Llama"}
+					</a>{" "}
+					· Stellar chain only
 				</p>
 			</CardContent>
 		</Card>

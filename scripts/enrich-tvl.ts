@@ -31,6 +31,8 @@ import "./load-env";
 import { getPayload } from "payload";
 import {
 	llamaListingOf,
+	llamaPageFor,
+	llamaParentOf,
 	stellarTvlOf,
 	tvlFieldsFor,
 } from "../src/lib/status-checks";
@@ -187,8 +189,29 @@ async function main() {
 			continue;
 		}
 		// DefiLlama's verdict, read from the FULL list (a dead protocol can
-		// drop Stellar from its chains).
-		const listing = { ...llamaListingOf(llamaSlugs, all), checkedAt: asOf };
+		// drop Stellar from its chains). parent (sls-102): the page that sums
+		// exactly these rows, which the route cites as tvlMethodUrl; null
+		// when one row is mapped or the family no longer matches the map.
+		const parent = llamaParentOf(llamaSlugs, all);
+		const listing = {
+			...llamaListingOf(llamaSlugs, all),
+			parent,
+			checkedAt: asOf,
+		};
+		if (llamaSlugs.length > 1) {
+			const was = d.llamaListing?.parent ?? null;
+			if (parent)
+				console.log(
+					`  ${ourSlug}: cites ${llamaPageFor(llamaSlugs, parent)}, parent of exactly [${llamaSlugs.join(",")}]`,
+				);
+			// A finding, not a failed run: the row's tvlMethodUrl serves null
+			// from this write on, and the nightly completeness sweep files it
+			// (tvlCitationGaps) so it reaches the improvement ledger.
+			else
+				console.warn(
+					`  ⚠ ${ourSlug}: no DefiLlama parent's children are exactly [${llamaSlugs.join(",")}]${was ? ` (was ${was})` : ""}: tvlMethodUrl serves null until LLAMA_MAP matches the family again`,
+				);
+		}
 		const rows = llamaSlugs
 			.map((ls) => bySlug.get(ls))
 			.filter((r): r is LlamaProtocol => Boolean(r));

@@ -1,8 +1,11 @@
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CURATED_BUILDS } from "@/data/curated-builds";
+import { CURATED_BUILDS, HACKPROOF_BUILDS } from "@/data/curated-builds";
+import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
+import { curatedFacts } from "@/lib/curated-import";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 import { spec } from "@/lib/openapi-spec";
+import type { HackathonBuild } from "@/payload-types";
 import {
 	responseSchema,
 	undeclaredInServed,
@@ -629,7 +632,7 @@ describe("events whose stored rows are their winners only", () => {
 	// 12 of them curated winners whose fields are not stored; 68 of 1,371
 	// (5.0%) without them.
 	const LEFT_OUT =
-		"left out of every count and share: 12 rows of hackmeridian-2025 (6), build-on-stellar-philippines-2026 (5) and apac-stellar-hackathon-2026 (1), whose stored rows are their winners only; the rest covers events whose full listing is stored";
+		"left out of every count and share: 19 rows of hackmeridian-2025 (6), build-on-stellar-philippines-2026 (5), apac-stellar-hackathon-2026 (1) and stellar-pro-hackathon-istanbul-2026 (7), whose stored rows are their winners only; the rest covers events whose full listing is stored";
 
 	it("analyze across every event leaves winners-only rows out of every count and share, in one line", async () => {
 		const all = await get("analyze", "facet=placement");
@@ -747,5 +750,118 @@ describe("events whose stored rows are their winners only", () => {
 			{ value: "kale", builds: 2, winners: 0, share: 0.333 },
 		]);
 		expect(kale.body.meta.warnings).toEqual([LEFT_OUT]);
+	});
+});
+
+// Owner decision 2026-11-04: a partial list's rows are counted, shares null,
+// and left out of cross-event counts with one warning line.
+describe("a partial list beside full listings", () => {
+	const PARTIAL_LEFT_OUT =
+		"left out of every count and share: the 97 rows of hackmeridian-2026, a partial list from a source other than the organizer (coverage partial); the rest covers events whose full listing is stored";
+	const PARTIAL_ALONE =
+		"the stored rows of hackmeridian-2026 are a partial list from a source other than the organizer (97 rows, coverage partial), not its field, whose size and mix are unknown: its rows are counted and no share is computed over them";
+	beforeEach(async () => {
+		const { indexedFromStored } = await import("@/lib/hackathon-builds");
+		const ev = CURATED_HACKATHONS.find((h) => h.uname === "hackmeridian-2026");
+		if (!ev) throw new Error("hackmeridian-2026 is not curated");
+		index.push(
+			...HACKPROOF_BUILDS.map((b) =>
+				indexedFromStored({
+					...(curatedFacts(b, ev) as unknown as HackathonBuild),
+					id: b.id,
+					firstSeenAt: "2026-11-04T00:00:00.000Z",
+					lastSeenAt: "2026-11-04T00:00:00.000Z",
+					updatedAt: "2026-11-04T00:00:00.000Z",
+					createdAt: "2026-11-04T00:00:00.000Z",
+				}),
+			),
+		);
+	});
+
+	it("analyze across every event leaves its rows out of every count and share, in one line", async () => {
+		const { body } = await get("analyze", "facet=placement");
+		expect(body.total).toMatchObject({ field: 6, builds: 6 });
+		expect(body.total.values).toEqual([
+			{ value: "not placed", builds: 5, winners: 0, share: 0.833 },
+			{ value: "winner", builds: 1, winners: 1, share: 0.167 },
+		]);
+		expect(body.meta.warnings).toEqual([PARTIAL_LEFT_OUT]);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/analyze"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("named alone, its rows are counted with every share null, and a by=event group says partial", async () => {
+		const { body } = await get(
+			"analyze",
+			"facet=placement&hackathon=hackmeridian-2026&by=event",
+		);
+		expect(body.total).toMatchObject({ field: 97, builds: 97, known: 97 });
+		expect(body.total.values).toEqual([
+			{ value: "not placed", builds: 91, winners: 0, share: null },
+			{ value: "winner", builds: 6, winners: 6, share: null },
+		]);
+		expect(body.groups).toHaveLength(1);
+		expect(body.groups[0]).toMatchObject({
+			value: "hackmeridian-2026",
+			coverage: "partial",
+		});
+		expect(body.winnersVsOthers).toBeUndefined();
+		expect(body.meta.warnings).toEqual([PARTIAL_ALONE]);
+		const tracks = await get(
+			"analyze",
+			"facet=track&hackathon=hackmeridian-2026",
+		);
+		expect(
+			tracks.body.total.values.map((v: { value: string; builds: number }) => [
+				v.value,
+				v.builds,
+			]),
+		).toEqual([
+			["Genesis", 56],
+			["Scale", 9],
+		]);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/analyze"),
+				body,
+			),
+		).toEqual([]);
+	});
+
+	it("compare serves no submission count for it, keeps its placements and leaves it out of facetShifts", async () => {
+		const { body } = await get("compare", "slugs=kale,hackmeridian-2026");
+		const [kale, meridian] = body.hackathons;
+		expect(kale).toMatchObject({ submissionCount: 2 });
+		expect(meridian).toMatchObject({
+			submissionCount: null,
+			winnerCount: 6,
+			coverage: "partial",
+			prizePerWinnerUSD: null,
+		});
+		expect(meridian.profile).toMatchObject({
+			coverage: "partial",
+			submissions: null,
+			winners: 6,
+		});
+		expect(meridian.notes).toEqual([
+			"prizePerWinnerUSD is null: its stored rows are a partial list from a source other than the organizer (coverage partial), and its placements are secondhand, named by no organizer page (getHackathon stats.winnersNote), so its prize pool over the winners on record is not a prize per winner",
+		]);
+		expect(body.deltas.notes).toContain(
+			"hackmeridian-2026: its stored rows are a partial list from a source other than the organizer (coverage partial), so submissionCount is null, unknown, never the row count; its profile counts those rows, with every share null, and it is left out of facetShifts",
+		);
+		expect(body.deltas.facetShifts).toBeUndefined();
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/compare"),
+				body,
+			),
+		).toEqual([]);
 	});
 });

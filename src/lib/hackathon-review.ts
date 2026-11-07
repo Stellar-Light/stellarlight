@@ -13,9 +13,14 @@
  */
 import type { Payload } from "payload";
 import {
+	type Distribution,
 	distribution,
+	eventCoverage,
 	incompleteEvents,
+	incompleteRows,
 	KEPT_BUILDING_DAYS,
+	type ValueCount,
+	withoutShares,
 } from "@/lib/hackathon-analytics";
 import {
 	parseBuildId,
@@ -258,6 +263,10 @@ export interface HackathonReview {
 			hackathon: string;
 			isWinner: boolean;
 			placement: string | null;
+			/** Present only when the win is named off DoraHacks. */
+			winnerSource?: string;
+			/** Present only on a row of a partial list: why it is stored. */
+			entryBasis?: IndexedBuild["entryBasis"];
 			similarity: number;
 			project?: IndexedBuild["project"];
 		}>;
@@ -268,12 +277,62 @@ export interface HackathonReview {
 		submissions: number;
 		winners: number;
 		shareOfSubmissions: number | null;
+		/** The share's denominator: those submissions with a category read. */
+		outOf: number;
+		/** Those submissions not categorized yet, outside the denominator. */
+		uncategorized: number;
 	} | null;
+	/** Its category within each event it entered, with that event's field. */
+	eventCategories: ReturnType<typeof eventCategoryContext>;
 	/** Why categoryContext is null; null when it is served. */
 	categoryNote: string | null;
 	/** The SCF pitch view over its summary: live round, funded peers, the
 	 * vet-idea competitors, maturity, prior art and supply gap, and angles. */
 	pitch: ScfPitchReport;
+}
+
+/** A submission's category within each event it entered, counted by the
+ * facet engine analyzeHackathonSubmissions uses: the event's stored
+ * submissions, how many have a category read (every share's denominator)
+ * and how many do not, its five largest categories, and this submission's
+ * category among them (null when it has no confident one). No share over
+ * incomplete rows: an event whose stored rows are its winners only, or whose
+ * winners are published in part, keeps its counts with every share null
+ * and its size unknown, and `note` says why. */
+export function eventCategoryContext(
+	index: IndexedBuild[],
+	events: Array<{ slug: string; title: string }>,
+	type: string | null,
+) {
+	const count = (v: ValueCount) => ({
+		type: v.value,
+		submissions: v.builds,
+		winners: v.winners,
+		share: v.share,
+	});
+	return events.map((e) => {
+		const rows = index.filter((b) => b.hackathon.slug === e.slug);
+		const why = incompleteRows(e.slug, eventCoverage(rows));
+		const read = (d: Distribution) => (why ? withoutShares(d) : d);
+		const mix = read(distribution(rows, "category", { top: 5 }));
+		const own = type
+			? read(distribution(rows, "category", { value: type })).values[0]
+			: null;
+		return {
+			hackathon: e.slug,
+			title: e.title,
+			submissions: why ? null : rows.length,
+			categorized: why ? null : mix.known,
+			uncategorized: why ? null : mix.unknown,
+			categories: mix.values.map(count),
+			thisCategory: own ? count(own) : null,
+			...(why
+				? {
+						note: `Counts cover only its rows on record, since ${why}: the event's size is unknown and every share is null.`,
+					}
+				: {}),
+		};
+	});
 }
 
 export async function buildHackathonReview(
@@ -348,6 +407,8 @@ export async function buildHackathonReview(
 					hackathon: b.hackathon.title,
 					isWinner: b.isWinner,
 					placement: b.hackathonPlacement,
+					...(b.winnerSource ? { winnerSource: b.winnerSource } : {}),
+					...(b.entryBasis ? { entryBasis: b.entryBasis } : {}),
 					similarity: Math.round(s * 1000) / 1000,
 					...(b.project !== undefined ? { project: b.project } : {}),
 				})),
@@ -359,8 +420,15 @@ export async function buildHackathonReview(
 						submissions: cat.values[0]?.builds ?? 0,
 						winners: cat.values[0]?.winners ?? 0,
 						shareOfSubmissions: cat.values[0]?.share ?? null,
+						outOf: cat.known,
+						uncategorized: cat.unknown,
 					}
 				: null,
+		eventCategories: eventCategoryContext(
+			index,
+			submission.entries.map((e) => e.hackathon),
+			top ?? null,
+		),
 		categoryNote: top
 			? null
 			: submission.categories

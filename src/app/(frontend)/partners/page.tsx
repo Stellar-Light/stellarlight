@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { PartnersDirectory } from "@/components/partners-directory";
 import { profileStrength } from "@/lib/partner-match";
+import { hasTomlRead } from "@/lib/partner-public";
 import { passesQualityBar } from "@/lib/partner-quality";
 import { getPayloadSafe } from "@/lib/payload-client";
 
@@ -37,9 +38,13 @@ interface DirectoryPartner {
 	description: string | null;
 	sectors: string[];
 	regions: string[];
-	/** stellar.toml-verified anchor capabilities (empty for non-anchors). */
+	/** Asset codes and SEPs on the record: read from stellar.toml only when
+	 * tomlRead, otherwise curated. Search reads them; a card chips assets
+	 * only when tomlRead (#1909). */
 	assets: string[];
 	seps: string[];
+	/** A stellar.toml read is recorded (hasTomlRead: source URL and date). */
+	tomlRead: boolean;
 	rampTypes: string[];
 	country: string | null;
 	acceptingClients: boolean | null;
@@ -90,6 +95,7 @@ async function getPartners(): Promise<DirectoryPartner[]> {
 				.map((a: { code: string }) => a.code)
 				.filter(Boolean),
 			seps: p.seps ?? [],
+			tomlRead: hasTomlRead(p),
 			rampTypes: p.rampTypes ?? [],
 			country: p.country ?? null,
 			acceptingClients: p.acceptingClients ?? null,

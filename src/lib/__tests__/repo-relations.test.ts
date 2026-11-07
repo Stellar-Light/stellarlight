@@ -89,3 +89,25 @@ describe("supersession fields (P5)", () => {
 		expect(repoSupersession("x/y")).toBeNull();
 	});
 });
+
+describe("renamedTo: an old path resolves to where the repo lives now", () => {
+	it("follows a rename, case-insensitively", async () => {
+		const { renamedTo } = await import("../repo-relations");
+		expect(renamedTo("theahaco/scaffold-stellar")).toBe("stellar-scaffold/cli");
+		expect(renamedTo("TheAhaCo/Scaffold-Stellar")).toBe("stellar-scaffold/cli");
+	});
+
+	it("an archived or superseded repo is a different repo and keeps its own name", async () => {
+		const { renamedTo } = await import("../repo-relations");
+		expect(renamedTo("blend-capital/blend-contracts")).toBe(
+			"blend-capital/blend-contracts",
+		);
+		expect(renamedTo("paltalabs/defindex")).toBe("paltalabs/defindex");
+		expect(renamedTo("stellar/js-stellar-sdk")).toBe("stellar/js-stellar-sdk");
+	});
+
+	it("every rename entry points at a repo, so a lookup never resolves to null", () => {
+		for (const [k, v] of Object.entries(REPO_SUPERSESSIONS))
+			if (v.kind === "renamed") expect(v.supersededBy, k).toBeTruthy();
+	});
+});

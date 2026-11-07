@@ -172,6 +172,9 @@ describe("GET /api/hackathons/review", () => {
 			submissions: 2,
 			winners: 2,
 			shareOfSubmissions: 0.667,
+			// The share's denominator, and what fell outside it.
+			outOf: 3,
+			uncategorized: 1,
 		});
 		expect(r.pitch.idea).toBe("TollPay. Stripe for MCP servers.");
 	});
@@ -193,6 +196,49 @@ describe("GET /api/hackathons/review", () => {
 		expect((await get("")).status).toBe(400);
 		expect((await get("link=github.com/nobody/nothing")).status).toBe(404);
 		expect((await get("link=x&extra=1")).status).toBe(400);
+	});
+});
+
+describe("a similar row of a partial list", () => {
+	it("keeps its basis and the file that names its placement", async () => {
+		const { similarToBuild } = await import("@/lib/hackathon-build-semantic");
+		const file = "https://example.test/awards.yaml";
+		index.push(
+			build("curated-x-gate", {
+				name: "Gate",
+				isWinner: true,
+				hackathonPlacement: "Runner-up",
+				winnerSource: file,
+				entryBasis: "repo-names-event",
+			}),
+		);
+		vi.mocked(similarToBuild).mockResolvedValueOnce(
+			new Map([["curated-x-gate", 0.8]]),
+		);
+		try {
+			const { body } = await get("link=github.com/team/toll");
+			expect(body.review.similar.builds).toEqual([
+				{
+					id: "curated-x-gate",
+					name: "Gate",
+					hackathon: "Stellar Hacks: Agents",
+					isWinner: true,
+					placement: "Runner-up",
+					winnerSource: file,
+					entryBasis: "repo-names-event",
+					similarity: 0.8,
+				},
+			]);
+			expect(
+				undeclaredInServed(
+					spec,
+					responseSchema(spec, "/api/hackathons/review"),
+					body,
+				),
+			).toEqual([]);
+		} finally {
+			index.pop();
+		}
 	});
 });
 
@@ -250,6 +296,8 @@ describe("how crowded a category is, across every stored submission", () => {
 				submissions: 2,
 				winners: 2,
 				shareOfSubmissions: 0.667,
+				outOf: 3,
+				uncategorized: 1,
 			});
 		} finally {
 			index.pop();
@@ -418,6 +466,7 @@ describe("GET /api/hackathons/review?hackathon=<slug>", () => {
 			"checks",
 			"similar",
 			"categoryContext",
+			"eventCategories",
 			"categoryNote",
 			"pitch",
 		]);

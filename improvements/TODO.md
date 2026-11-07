@@ -263,8 +263,58 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 
 ## Next
 
+Found by Stellar Raven's HackMeridian evaluation on 2026-11-02 and filed
+here as #1900 to #1905; each issue carries its read-only probes.
+
+- #1900: a stablecoin's `company` holds the brand, not the issuer's
+  stellar.toml `ORG_NAME` (AUDD, the eight C1 rows), and `assetType` cannot
+  filter yield products (USDY, YLDS) out.
+- #1901: repo search ranks low-score forks above the canonical repo for
+  "scaffold stellar", "stellar lab" and "smart contract examples"; the
+  canonical boost covers infrastructure queries only.
+- #1902: the HackMeridian 2026 record has the qualitative judging criteria
+  but not the weighted rubric on hackmeridian.com/build.
+- #1903: 24 directory rows carry an SCF #45 award where the SCF site lists
+  at least 40; 13 awarded projects have no row, and Liqvid's record omits
+  rounds 30, 44 and 45.
+- #1904: no row for Chainlink Data Feeds on Stellar or for MetaMask's
+  native Stellar network.
+- #1905: `venueRole` is null on 31 of 38 Live DEX rows, and project search
+  ignores a `venueRole` parameter.
+- HackMeridian 2026 has no stored submissions (our own check, 2026-11-04): GET
+  /api/hackathons/builds?hackathon=hackmeridian-2026 warns that none are
+  stored, so no build, contract or package facet covers the event. #1918
+  (a contributor PR) proposes HackProof as the source.
+
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
 unless noted.
+
+- Unread SCF facts are served as answers: 392 of 1006 rows served by
+  GET /api/projects/search (paged across every category, 2026-11-05) carry
+  scfAwarded false and scfAwardedRounds [] with no SCF read behind them (no
+  scfBasis, scfAsOf or scfSourceUrl), among them the nine rows the pending
+  enrich-scf execute marks awarded (Enable, Rumble Fish, Docking Zone,
+  SlimePay and five more). Serving null for a row no SCF read covers needs
+  both fields nullable, a contract change; until then the scfAwarded
+  description says false with scfBasis null means no SCF read is recorded.
+  Found by the review of the sls-111 lane (#1903).
+- Code facts other than interfaces, symbols and capability tags still read
+  test code. After a rescan, a repo whose only Soroban crate is a test
+  fixture serves an empty contractInterface and no symbols, while
+  isDeployableContract, the auth, storage and event signals,
+  contractMacroCount and the cargo-sdk proof still come from that crate:
+  src/lib/code-signals.ts counts them over every fetched .rs file (the
+  fetch adds up to three test files), and its NON_PRODUCT_MANIFEST_DIR is
+  segment-anchored and lacks e2e. Found by the independent re-check of the
+  2026-11-04 repo-canonical lane (deferred there because it moves stored
+  grades). Plan, measured before any execute: run
+  scripts/scan/scan-repo-code.ts in dry mode over every scanned repo twice,
+  with the current rules and with isTestPath (src/lib/code-symbols.ts)
+  applied to the .rs signal loop, the manifest check and the fetch
+  selection (scripts/scan/fetch-repo-code.ts); recompute repoScore for both
+  with the grade (codeDepth and the farm flags read these signals); list
+  every repo whose score, proof or deployability moves, and ship only with
+  that list reviewed.
 
 - Research authority weighting: a 75/15/10 weighting held out best in
   simulation and changes about 10% of confidence labels (the 2026-10-20
@@ -294,7 +344,6 @@ unless noted.
   `profile.project` says 12 became directory projects.
 - Winners-only search is not in placement order; its rows carry no
   `placementRank`.
-- Curated event pages say "live submission feed unavailable".
 - `meta.counts.indexedBuilds` is 1,344 in search and 1,371 in analyze under
   one name; the analyze `q` description says it matches like search while its
   default mode differs.

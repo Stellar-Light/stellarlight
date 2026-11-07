@@ -1,38 +1,41 @@
 /**
  * Store the curated hackathon submissions (src/data/curated-builds.ts), from
  * events off DoraHacks such as HackMeridian, as hackathon builds, so search,
- * prior art, briefs, event pages and submission detail serve them.
+ * prior art, briefs, event pages and submission detail serve them: the
+ * winners named by the page that names them, and HackMeridian 2026's records
+ * from HackProof (src/data/hackmeridian-2026-hackproof.json).
  *
  *   pnpm exec tsx scripts/import-curated-builds.ts            # dry run, writes nothing
  *   pnpm exec tsx scripts/import-curated-builds.ts --execute  # write
  *
- * The one writer of `curated-` rows: the DoraHacks sync writes only rows it
- * reads from DoraHacks rosters and never touches these. Upserts by entryKey
- * and writes only a row that changed. A field the data file leaves empty is
+ * The one writer of `curated-` rows' own fields (src/lib/curated-import.ts
+ * names them): the DoraHacks sync writes only the fields it derives (stack,
+ * activity, project link, embedding, categories). Upserts by entryKey and
+ * writes only a row that changed. A field the data file leaves empty is
  * written as null, so a correction clears it. A curated row no longer in the
- * file is hidden (hiddenUpstream), never deleted. Every write is read back.
+ * files is hidden (hiddenUpstream), never deleted. Every write is read back.
  */
 
 import "./load-env";
 import { getPayload } from "payload";
-import { CURATED_BUILDS } from "../src/data/curated-builds";
+import { CURATED_BUILDS, HACKPROOF_BUILDS } from "../src/data/curated-builds";
 import { CURATED_HACKATHONS } from "../src/data/curated-hackathons";
-import { CURATED_BUILD_ID } from "../src/lib/hackathon-build-links";
+import {
+	badCuratedRows,
+	planCuratedImport,
+	sameValue,
+} from "../src/lib/curated-import";
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
 // internal: the read-back sees every field; includeSecurityHeld: a held
 // repo's link is read as stored, not withheld (HackathonBuilds afterRead).
 const CONTEXT = { internal: true, includeSecurityHeld: true };
+const ROWS = [...CURATED_BUILDS, ...HACKPROOF_BUILDS];
 
 async function main() {
 	const events = new Map(CURATED_HACKATHONS.map((h) => [h.uname, h]));
-	const ids = new Set<string>();
-	const bad = CURATED_BUILDS.filter((b) => {
-		const dup = ids.has(b.id);
-		ids.add(b.id);
-		return dup || !events.has(b.hackathonSlug) || !CURATED_BUILD_ID.test(b.id);
-	});
+	const bad = badCuratedRows(ROWS, events);
 	if (bad.length) {
 		console.error(
 			`✗ rows with a duplicate or non-curated id, or naming no curated event: ${bad.map((b) => b.id).join(", ")}`,
@@ -45,9 +48,7 @@ async function main() {
 		`import-curated-builds: ${EXECUTE ? "EXECUTE, rows are written" : "dry run, writes nothing"}`,
 	);
 	const now = new Date().toISOString();
-	const keyOf = (b: (typeof CURATED_BUILDS)[number]) =>
-		`${b.id}@${b.hackathonSlug}`;
-	const keys = CURATED_BUILDS.map(keyOf);
+	const keys = ROWS.map((b) => `${b.id}@${b.hackathonSlug}`);
 	const read = async () =>
 		new Map(
 			(
@@ -63,77 +64,9 @@ async function main() {
 				d as unknown as Record<string, unknown>,
 			]),
 		);
-	const stored = await read();
-	const expected = new Map<string, Record<string, unknown>>();
-	let created = 0;
-	let updated = 0;
-	let same = 0;
-	let failed = 0;
-	for (const b of CURATED_BUILDS) {
-		const ev = events.get(b.hackathonSlug);
-		if (!ev) continue;
-		const entryKey = keyOf(b);
-		const facts: Record<string, unknown> = {
-			buildId: b.id,
-			entryKey,
-			name: b.name,
-			hackathonSlug: b.hackathonSlug,
-			hackathonTitle: ev.title,
-			endedAt: new Date(ev.end_time * 1000).toISOString(),
-			url: b.url,
-			isWinner: b.isWinner,
-			// Written as null when empty, so a second run clears a value the
-			// file corrected (outside review, 2026-10-20).
-			track: b.track ?? null,
-			placement: b.placement ?? null,
-			vision: b.description ?? null,
-			githubUrl: b.githubUrl ?? null,
-			demoUrl: b.demoUrl ?? null,
-			hiddenUpstream: false,
-		};
-		expected.set(entryKey, facts);
-		const old = stored.get(entryKey);
-		const diff = Object.entries(facts).filter(
-			([k, v]) => !sameValue(old?.[k], v),
-		);
-		if (old && !diff.length) {
-			same++;
-			continue;
-		}
-		// The dry run shows exactly what would be written.
-		console.log(`  ${old ? "update" : "create"} ${entryKey}`);
-		for (const [k, v] of diff)
-			console.log(
-				`      ${k}: ${JSON.stringify(old?.[k] ?? null)} -> ${JSON.stringify(v)}`,
-			);
-		if (!EXECUTE) {
-			if (old) updated++;
-			else created++;
-			continue;
-		}
-		try {
-			if (old)
-				await payload.update({
-					collection: "hackathon-builds",
-					id: String(old.id),
-					data: { ...facts, lastSeenAt: now },
-					context: CONTEXT,
-				});
-			else
-				await payload.create({
-					collection: "hackathon-builds",
-					data: { ...facts, firstSeenAt: now, lastSeenAt: now } as never,
-					context: CONTEXT,
-				});
-			if (old) updated++;
-			else created++;
-		} catch (e) {
-			failed++;
-			console.error(`  ✗ ${entryKey}: ${(e as Error).message}`);
-		}
-	}
-	// A curated row no longer in the file (a renamed or withdrawn winner) is
-	// hidden, never deleted, so it stops being served and can come back.
+	// A curated row no longer in the files (a renamed or withdrawn winner, a
+	// record a refresh dropped) is hidden, never deleted, so it stops being
+	// served and can come back.
 	const orphans = (
 		await payload.find({
 			collection: "hackathon-builds",
@@ -150,23 +83,51 @@ async function main() {
 			context: CONTEXT,
 		})
 	).docs as unknown as Array<Record<string, unknown>>;
-	for (const o of orphans) {
-		console.log(`  hide ${o.entryKey}: no longer in curated-builds.ts`);
-		if (!EXECUTE) continue;
-		try {
-			await payload.update({
-				collection: "hackathon-builds",
-				id: String(o.id),
-				data: { hiddenUpstream: true, lastSeenAt: now },
-				context: CONTEXT,
-			});
-		} catch (e) {
-			failed++;
-			console.error(`  ✗ hide ${o.entryKey}: ${(e as Error).message}`);
+	// The dry run shows exactly what would be written.
+	const plan = planCuratedImport(ROWS, events, await read(), orphans);
+	for (const line of plan.lines) console.log(line);
+	let failed = 0;
+	if (EXECUTE) {
+		for (const w of plan.writes) {
+			try {
+				if (w.id)
+					await payload.update({
+						collection: "hackathon-builds",
+						id: w.id,
+						data: { ...w.facts, lastSeenAt: now },
+						context: CONTEXT,
+					});
+				else
+					await payload.create({
+						collection: "hackathon-builds",
+						data: {
+							...w.facts,
+							firstSeenAt: now,
+							lastSeenAt: now,
+						} as never,
+						context: CONTEXT,
+					});
+			} catch (e) {
+				failed++;
+				console.error(`  ✗ ${w.entryKey}: ${(e as Error).message}`);
+			}
+		}
+		for (const o of orphans) {
+			try {
+				await payload.update({
+					collection: "hackathon-builds",
+					id: String(o.id),
+					data: { hiddenUpstream: true, lastSeenAt: now },
+					context: CONTEXT,
+				});
+			} catch (e) {
+				failed++;
+				console.error(`  ✗ hide ${o.entryKey}: ${(e as Error).message}`);
+			}
 		}
 	}
 	console.log(
-		`\n${CURATED_BUILDS.length} curated rows: ${created} created, ${updated} updated, ${same} unchanged, ${orphans.length} to hide, ${failed} failed`,
+		`\n${ROWS.length} curated rows: ${plan.created} created, ${plan.updated} updated, ${plan.unchanged} unchanged, ${orphans.length} to hide, ${failed} failed`,
 	);
 	if (!EXECUTE) {
 		console.log("dry run: nothing written. Re-run with --execute to write.");
@@ -197,7 +158,7 @@ async function main() {
 		: [];
 	const wrong = [
 		...stillServed,
-		...[...expected].flatMap(([k, facts]) => {
+		...[...plan.expected].flatMap(([k, facts]) => {
 			const row = back.get(k);
 			if (!row) return [`${k}: not stored`];
 			return Object.entries(facts)
@@ -216,13 +177,6 @@ async function main() {
 		process.exitCode = 1;
 	} else
 		console.log(`${back.size} curated row(s) stored, every field read back`);
-}
-
-/** Equal as stored: a field written as null may read back absent. */
-function sameValue(stored: unknown, wrote: unknown): boolean {
-	if (wrote === null || wrote === false)
-		return stored === wrote || stored === null || stored === undefined;
-	return JSON.stringify(stored) === JSON.stringify(wrote);
 }
 
 main()

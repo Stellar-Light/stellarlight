@@ -22,6 +22,7 @@
  */
 
 import { type NextRequest, NextResponse } from "next/server";
+import { apiError } from "@/lib/api-error";
 import { logApiHit } from "@/lib/api-usage";
 import { unknownParamWarning } from "@/lib/http-params";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -145,6 +146,7 @@ function buildClusters(
 }
 
 export async function GET(req: NextRequest) {
+	const startedAt = Date.now();
 	const sp = req.nextUrl.searchParams;
 	// Say when a param was dropped (the projects/search treatment, 2026-07-11
 	// audit): a filter we never read returns an unfiltered list the caller
@@ -193,6 +195,7 @@ export async function GET(req: NextRequest) {
 	let availableKeys: string[] = [];
 	let matchedDimension: Dimension | null = null;
 	let population: PopulationScope | null = null;
+	let readFailed = !payload;
 
 	if (payload) {
 		try {
@@ -254,8 +257,27 @@ export async function GET(req: NextRequest) {
 				clusters.sort((a, b) => b.crowdedness - a.crowdedness);
 			}
 		} catch {
-			// fall through
+			readFailed = true;
 		}
+	}
+	// A failed read served a 200 with no clusters and counts 0, cached for
+	// 10 minutes as an empty directory: it is an outage (#1914 class).
+	if (readFailed) {
+		logApiHit({
+			req,
+			endpoint: "/api/clusters",
+			filters: { dimension, minSize, valueFilter: valueFilter || undefined },
+			status: 503,
+			startedAt,
+		});
+		return apiError({
+			status: 503,
+			error: "clusters read failed",
+			advisory:
+				"The projects read behind these clusters failed. This is an outage, NOT a claim that any cluster is empty or that any count is zero. Retry after Retry-After.",
+			retryAfterSeconds: 2,
+			startedAt,
+		});
 	}
 
 	logApiHit({

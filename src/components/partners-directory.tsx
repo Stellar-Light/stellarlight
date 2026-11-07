@@ -60,8 +60,11 @@ interface DirectoryPartner {
 	description: string | null;
 	sectors: string[];
 	regions: string[];
+	/** On the record: stellar.toml facts only when tomlRead, else curated. */
 	assets: string[];
 	seps: string[];
+	/** A stellar.toml read is recorded (source URL and date). */
+	tomlRead: boolean;
 	rampTypes: string[];
 	country: string | null;
 	acceptingClients: boolean | null;
@@ -115,7 +118,7 @@ export function PartnersDirectory({
 			if (typeFilter !== "all") {
 				if (typeFilter === "on-off-ramp") {
 					// Real ramp providers are mostly partnerType=="anchor" with
-					// stellar.toml-verified rampTypes; the filter matches CAPABILITY,
+					// recorded rampTypes; the filter matches CAPABILITY,
 					// not just the self-declared type (which almost nobody picks).
 					if (p.partnerType !== "on-off-ramp" && p.rampTypes.length === 0)
 						return false;
@@ -457,7 +460,9 @@ export function PartnersDirectory({
 /** Up to 4 capability chips, Title-Case — the useful partner facts, compact. */
 function capabilityChips(p: DirectoryPartner): string[] {
 	const chips: string[] = [];
-	for (const a of p.assets) chips.push(a.toUpperCase());
+	// An asset chip reads as a stellar.toml fact, so only a recorded read
+	// earns one; curated codes stay on the profile under their own label.
+	if (p.tomlRead) for (const a of p.assets) chips.push(a.toUpperCase());
 	for (const r of p.rampTypes) chips.push(rampLabel(r));
 	if (p.country) chips.push(p.country);
 	for (const s of p.sectors) chips.push(sectorLabel(s));

@@ -9,6 +9,7 @@ import { PointerHighlight } from "@/components/pointer-highlight";
 import { Badge } from "@/components/ui/badge";
 import {
 	ACTIVE_QUARTER,
+	BRIEF_ROSTER,
 	CATEGORIES,
 	CATEGORY_LABELS,
 	IDEAS,
@@ -130,6 +131,12 @@ export function IdeasListing() {
 			<div className="relative z-10 mb-6 flex items-center gap-2 flex-wrap">
 				{[...QUARTERS].reverse().map((quarter) => {
 					const open = rfpStatus(quarter) === "open";
+					// The active quarter before SCF publishes its briefs is not open.
+					const label = !open
+						? "Closed"
+						: IDEAS.some((idea) => idea.quarter === quarter)
+							? "Open"
+							: "Coming soon";
 					return (
 						<button
 							key={quarter}
@@ -149,12 +156,12 @@ export function IdeasListing() {
 							{QUARTER_LABELS[quarter]}
 							<Badge
 								className={`px-1.5 py-0.5 text-xs font-semibold rounded-full border-0 ${
-									open
+									label === "Open"
 										? "bg-emerald-500/20 text-emerald-400"
 										: "bg-white/10 text-muted-foreground"
 								}`}
 							>
-								{open ? "Open" : "Closed"}
+								{label}
 							</Badge>
 						</button>
 					);
@@ -291,7 +298,9 @@ export function IdeasListing() {
 					<p className="text-sm text-muted-foreground">
 						{searchQuery || selectedCategory !== "all"
 							? "Try adjusting your search or filters"
-							: "No RFPs available for this quarter."}
+							: selectedQuarter === ACTIVE_QUARTER
+								? `SCF has not published its ${QUARTER_LABELS[selectedQuarter]} RFPs yet: its RFP Track page named none open (checked ${BRIEF_ROSTER.checkedOn}).`
+								: "No RFPs available for this quarter."}
 					</p>
 				</div>
 			)}

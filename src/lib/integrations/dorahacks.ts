@@ -75,14 +75,6 @@ const STELLAR_RE = /stellar|soroban/i;
  * legacy `DoraHacksHackathon` shape. `status` no longer exists upstream and is
  * derived from `timeline_end` (past end = 2/ended, else 1/active).
  */
-/**
- * A timed-out upstream read must not be mistaken for a complete one: it is
- * rethrown, so a caller leaves that event out (the sync, the index's live
- * fallback) instead of reading it as empty.
- */
-const isAbortError = (e: unknown): boolean =>
-	e instanceof Error && (e.name === "TimeoutError" || e.name === "AbortError");
-
 async function fetchOrgHackathons(
 	orgId: number,
 ): Promise<DoraHacksHackathon[]> {
@@ -352,10 +344,12 @@ async function fetchWinnerPrizeMap(
  * Fetches the live submission ("buidl") roster for one DoraHacks hackathon.
  * The v1 hub buidls endpoint is keyed by numeric hackathon id (uname is still
  * needed for the winner-assignments join), and each row nests the project
- * under `buidl`. Read-through: returns [] on a failed roster read (feed down /
- * WAF / unknown id) so callers degrade gracefully. A failed read of the
- * winner assignments throws instead, as a timeout does: a roster without
- * them would serve, and store, every winner as unplaced.
+ * under `buidl`. [] only when DoraHacks answers with no submission. Any
+ * failed read throws: a roster page that answers an error or cannot be
+ * parsed, a timeout, the winner assignments unreadable (a roster without
+ * them would serve, and store, every winner as unplaced). Callers tell a
+ * failed read from an empty one: [] on a failed read served "checked, none"
+ * for a roster no read reached.
  */
 export async function fetchHackathonSubmissions(
 	hackathon: Pick<DoraHacksHackathon, "id" | "uname">,
@@ -365,6 +359,7 @@ export async function fetchHackathonSubmissions(
 	try {
 		let page = 1;
 		let reportedTotal: number | null = null;
+		let whole = false;
 		// The cap is a runaway guard, NOT a size assumption. It used to be 6
 		// pages on the reasoning that "DoraHacks events are at most a few
 		// hundred submissions" — but we ask for page_size=100 and DoraHacks
@@ -380,7 +375,10 @@ export async function fetchHackathonSubmissions(
 				next: { revalidate: 3600 },
 				signal: AbortSignal.timeout(5000),
 			});
-			if (!res.ok) break;
+			if (!res.ok)
+				throw new Error(
+					`DoraHacks submissions for ${hackathon.uname}: HTTP ${res.status}`,
+				);
 			// biome-ignore lint/suspicious/noExplicitAny: external DoraHacks API shape
 			const data: any = await res.json();
 			// DoraHacks reports the true total on every page — keep it so the
@@ -425,21 +423,24 @@ export async function fetchHackathonSubmissions(
 					source: "dorahacks",
 				});
 			}
-			if (!data?.next) break;
+			if (!data?.next) {
+				whole = true;
+				break;
+			}
 			page += 1;
 		}
-		// Say so when the read was short. Silence here is what let a 13%
-		// under-count ship as though it were the whole set.
-		if (reportedTotal !== null && out.length < reportedTotal)
-			console.error(
-				`DoraHacks ${hackathon.uname}: read ${out.length} of ${reportedTotal} submissions — TRUNCATED (page cap hit). The published count will be short.`,
+		// A read cut short (the page cap, or fewer rows than its own count) is
+		// a failed read: served whole, a 13% under-count shipped as the set.
+		if (!whole || (reportedTotal !== null && out.length < reportedTotal))
+			throw new Error(
+				`DoraHacks submissions for ${hackathon.uname}: read cut short (${out.length} of ${reportedTotal ?? "an unknown number"})`,
 			);
 	} catch (err) {
 		console.error(
 			`Error fetching DoraHacks submissions for ${hackathon.uname}:`,
 			err,
 		);
-		if (isAbortError(err)) throw err;
+		throw err;
 	}
 	return out;
 }

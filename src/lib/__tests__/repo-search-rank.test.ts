@@ -32,6 +32,51 @@ function mockPayload(docs: any[]): any {
 	return { find: async () => ({ docs, totalDocs: docs.length }) };
 }
 
+/** A mock that answers each read by its where clause, as the MongoDB adapter
+ * does (re-check item 4): like = every space-separated word a
+ * case-insensitive substring of the field (any element of an array); in;
+ * equals; not_equals; greater_than_equal; or; and; sort -repoScore; limit.
+ * A test that depends on a row being fetched fails when the read misses it. */
+// biome-ignore lint/suspicious/noExplicitAny: mock payload
+function whereDb(docs: any[]): any {
+	const text = (v: unknown) =>
+		(Array.isArray(v) ? v.join("\n") : String(v ?? "")).toLowerCase();
+	const vals = (v: unknown) => (Array.isArray(v) ? v : [v]);
+	// biome-ignore lint/suspicious/noExplicitAny: Payload where shape
+	const ok = (d: any, w: any): boolean =>
+		Object.entries(w ?? {}).every(([k, c]) => {
+			// biome-ignore lint/suspicious/noExplicitAny: Payload where shape
+			if (k === "or") return (c as any[]).some((x) => ok(d, x));
+			// biome-ignore lint/suspicious/noExplicitAny: Payload where shape
+			if (k === "and") return (c as any[]).every((x) => ok(d, x));
+			return Object.entries(c as Record<string, unknown>).every(([op, a]) => {
+				if (op === "like")
+					return String(a)
+						.toLowerCase()
+						.split(" ")
+						.every((word) => text(d[k]).includes(word));
+				if (op === "in")
+					return vals(d[k]).some((v) => (a as unknown[]).includes(v));
+				if (op === "equals") return vals(d[k]).includes(a);
+				if (op === "not_equals") return !vals(d[k]).includes(a);
+				if (op === "greater_than_equal") return Number(d[k] ?? 0) >= Number(a);
+				throw new Error(`unsupported operator ${op}`);
+			});
+		});
+	return {
+		// biome-ignore lint/suspicious/noExplicitAny: Payload find args
+		find: async (args: any) => {
+			const hits = docs
+				.filter((d) => ok(d, args.where))
+				.sort((x, y) => (y.repoScore ?? 0) - (x.repoScore ?? 0));
+			return {
+				docs: hits.slice(0, args.limit ?? hits.length),
+				totalDocs: hits.length,
+			};
+		},
+	};
+}
+
 describe("searchRepos F4 ranking", () => {
 	it("a code-verified Stellar repo outranks a no-evidence repo with a stronger name hit", async () => {
 		const alien = doc({
@@ -1287,5 +1332,384 @@ describe("language filter survives every candidate source (2026-09-05)", () => {
 			{ language: "python", limit: 10 },
 		);
 		expect(repos.map((r) => r.fullName)).toEqual(["acme/sep10-py"]);
+	});
+});
+
+describe("developer products are canonical answers (issue #1901)", () => {
+	// A product whose repo name does not carry the product's words lost its
+	// own name to repos that do: hackathon copies of the scaffold template
+	// led q="scaffold stellar" while stellar-scaffold/cli ranked 16th.
+	const PRODUCTS: Array<[string, string]> = [
+		["scaffold stellar", "stellar-scaffold/cli"],
+		["Scaffold Stellar", "stellar-scaffold/cli"],
+		["stellar scaffold", "stellar-scaffold/cli"],
+		["scaffold-stellar", "stellar-scaffold/cli"],
+		// review finding 2: underscore spellings are the same name
+		["scaffold_stellar", "stellar-scaffold/cli"],
+		["Scaffold Stellar?", "stellar-scaffold/cli"],
+		["stellar lab", "stellar/laboratory"],
+		["stellar_lab", "stellar/laboratory"],
+		["soroban_examples", "stellar/soroban-examples"],
+		// re-check item 2: surface words that search drops do not hide the name
+		["scaffold stellar repo", "stellar-scaffold/cli"],
+		["scaffold stellar github", "stellar-scaffold/cli"],
+		["stellar lab repo", "stellar/laboratory"],
+		["stellar lab source code", "stellar/laboratory"],
+		["Stellar Laboratory", "stellar/laboratory"],
+		["lab.stellar.org", "stellar/laboratory"],
+		["soroban examples", "stellar/soroban-examples"],
+		["smart contract examples", "stellar/soroban-examples"],
+		["soroban smart contract examples", "stellar/soroban-examples"],
+		["example soroban contracts", "stellar/soroban-examples"],
+		["contract examples", "stellar/soroban-examples"],
+	];
+	it.each(PRODUCTS)("%s routes to %s", (q, repo) => {
+		expect(canonicalFor(q)[0]).toBe(repo);
+	});
+
+	// The same words inside another name, a bare word, or a topic that names a
+	// more specific answer must not fire the float.
+	it.each([
+		"scaffold",
+		"scaffold template",
+		"lab",
+		"laboratory",
+		"stellar labs",
+		"examples",
+		"escrow contract examples",
+		"token contract example",
+		"hackthon-scaffold-stellar",
+		"stellar-scaffold-front-hackaton",
+		"stellar-agent-merchant-lab",
+		"soroban crash lab",
+		"stellar-scaffold/ui",
+		// review finding 2: a longer phrase that contains a product name names
+		// something else (a repo named stellar-lab-notes, a question)
+		"stellar lab notes",
+		"stellar-lab-notes",
+		"stellar scaffold cli",
+		"How do I start a new dapp with Scaffold Stellar?",
+		"stellar lab notes repo",
+	])("%s maps to nothing", (q) => {
+		expect(canonicalFor(q)).toEqual([]);
+	});
+
+	const copy = doc({
+		fullName: "someone/hackthon-scaffold-stellar",
+		description: "Hackathon dapp",
+		codeScanState: "scanned",
+		stellarProof: "cargo-sdk",
+		repoScore: 16,
+		stars: 0,
+	});
+	const cli = doc({
+		fullName: "stellar-scaffold/cli",
+		description:
+			"The easiest way to build Stellar apps. One command scaffolds your contracts",
+		codeScanState: "scanned",
+		stellarProof: "cargo-sdk",
+		repoScore: 77,
+		stars: 53,
+	});
+
+	it("the product outranks a hackathon copy that carries its name", async () => {
+		const { repos, canonical } = await searchRepos(
+			mockPayload([copy, cli]),
+			"scaffold stellar",
+			{ limit: 5 },
+		);
+		expect(repos.map((r) => r.fullName)).toEqual([
+			"stellar-scaffold/cli",
+			"someone/hackthon-scaffold-stellar",
+		]);
+		expect(repos[0].canonical).toBe(true);
+		expect(canonical).toEqual(["stellar-scaffold/cli"]);
+	});
+
+	// The coordinator's rule after the re-check: a bare name that fires a
+	// canonical entry defers to the canonical repo, then the exact name.
+	it("a bare name that fires a canonical entry ranks the canonical repo first (q=stellar-lab, q=stellar_lab)", async () => {
+		const named = doc({
+			fullName: "someone/stellar-lab",
+			description: "notes from a workshop",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 14,
+			stars: 0,
+		});
+		const lab = doc({
+			fullName: "stellar/laboratory",
+			description: "A set of tools to try out the Stellar network",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			repoScore: 88,
+			stars: 112,
+		});
+		for (const q of ["stellar-lab", "stellar_lab"]) {
+			const { repos } = await searchRepos(mockPayload([lab, named]), q, {
+				limit: 5,
+			});
+			expect(repos.map((r) => r.fullName).slice(0, 2), q).toEqual([
+				"stellar/laboratory",
+				"someone/stellar-lab",
+			]);
+		}
+	});
+
+	it("a copy named for a canonical concept does not outrank the canonical repo (soroban-rpc, sep-10, sep10)", async () => {
+		const rpc = doc({
+			fullName: "stellar/stellar-rpc",
+			description: "RPC server for Soroban",
+			codeScanState: "scanned",
+			stellarProof: "lang-sdk",
+			repoScore: 90,
+		});
+		const rpcCopy = doc({ fullName: "someone/soroban-rpc", repoScore: 20 });
+		const spec = doc({
+			fullName: "stellar/stellar-protocol",
+			description: "Stellar protocol and SEP documents",
+			repoScore: 80,
+		});
+		const sepRepo = doc({ fullName: "someone/sep10", repoScore: 30 });
+		for (const [q, want] of [
+			["soroban-rpc", "stellar/stellar-rpc"],
+			["sep-10", "stellar/stellar-protocol"],
+			["sep10", "stellar/stellar-protocol"],
+		]) {
+			const { repos } = await searchRepos(
+				mockPayload([rpcCopy, sepRepo, rpc, spec]),
+				q,
+				{ limit: 5 },
+			);
+			expect(repos[0].fullName, q).toBe(want);
+		}
+	});
+
+	it("a full owner/name path ranks the repo it names first", async () => {
+		const spec = doc({
+			fullName: "stellar/stellar-protocol",
+			description: "Stellar protocol and SEP documents",
+			repoScore: 80,
+		});
+		const sepRepo = doc({ fullName: "someone/sep10", repoScore: 30 });
+		const { repos } = await searchRepos(
+			mockPayload([spec, sepRepo]),
+			"someone/sep10",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("someone/sep10");
+	});
+
+	it("an underscore spelling reaches the repo with that exact name, past a flooded window", async () => {
+		const named = doc({ fullName: "someone/stellar-lab", repoScore: 14 });
+		const flood = Array.from({ length: 5 }, (_, i) =>
+			doc({ fullName: `org/lab-${i}`, description: "lab", repoScore: 90 }),
+		);
+		const payload = {
+			// Only the exact-name read (limit 20) can bring the named repo in,
+			// and only when one of its forms is a substring of that repo's name.
+			find: async (args: {
+				limit?: number;
+				where?: {
+					or?: Array<{
+						fullName?: { like?: string };
+						name?: { like?: string };
+					}>;
+				};
+			}) => {
+				if (args.limit !== 20) return { docs: flood, totalDocs: flood.length };
+				const forms = (args.where?.or ?? []).map((w) =>
+					String(w.fullName?.like ?? w.name?.like ?? "").toLowerCase(),
+				);
+				return {
+					docs: forms.some((f) => named.fullName.includes(f)) ? [named] : [],
+				};
+			},
+		};
+		const { repos } = await searchRepos(payload, "stellar_lab", { limit: 5 });
+		// reached: in the ranking (the canonical repo, absent here, would lead)
+		expect(repos.map((r) => r.fullName)).toContain("someone/stellar-lab");
+	});
+
+	it("a hackathon copy named for the template stays below the product for scaffold_stellar", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([copy, cli]),
+			"scaffold_stellar",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("stellar-scaffold/cli");
+	});
+
+	// review finding 4: meta.canonical answers for the query, so a page past
+	// the canonical row still names it (null means the query is not routed)
+	it("canonical comes from the query, not the page", async () => {
+		const { repos, canonical } = await searchRepos(
+			mockPayload([copy, cli]),
+			"scaffold stellar",
+			{ limit: 1, offset: 1 },
+		);
+		expect(repos.map((r) => r.fullName)).toEqual([
+			"someone/hackthon-scaffold-stellar",
+		]);
+		expect(canonical).toEqual(["stellar-scaffold/cli"]);
+	});
+
+	it("the copy's own exact name still finds the copy first", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([copy, cli]),
+			"hackthon-scaffold-stellar",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("someone/hackthon-scaffold-stellar");
+	});
+
+	it("the old owner/name of a renamed repo finds the repo where it lives now, and says so", async () => {
+		const { repos } = await searchRepos(
+			mockPayload([copy, cli]),
+			"theahaco/scaffold-stellar",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("stellar-scaffold/cli");
+		// the stand-in names the path that was asked for
+		expect(repos[0].renamedFrom).toBe("theahaco/scaffold-stellar");
+	});
+
+	it("an old path the index holds a row for keeps its own row (the rule explain and trust follow)", async () => {
+		const old = doc({
+			fullName: "theahaco/scaffold-stellar",
+			description: "Scaffold Stellar (old path)",
+			codeScanState: "scanned",
+			stellarProof: "cargo-sdk",
+			repoScore: 16,
+			stars: 0,
+		});
+		// the old row must come from the reads themselves, not a mock that
+		// hands every row to every read (re-check item 4)
+		const { repos } = await searchRepos(
+			whereDb([old, cli]),
+			"theahaco/scaffold-stellar",
+			{ limit: 5 },
+		);
+		expect(repos[0].fullName).toBe("theahaco/scaffold-stellar");
+		expect(repos.every((r) => r.renamedFrom === null)).toBe(true);
+	});
+});
+
+describe("served interface paths (issue #1906)", () => {
+	const served = async (over: Record<string, unknown>) =>
+		(
+			await searchRepos(
+				mockPayload([
+					doc({
+						fullName: "acme/vault",
+						description: "vault contracts",
+						codeScanState: "scanned",
+						stellarProof: "cargo-sdk",
+						...over,
+					}),
+				]),
+				"vault",
+				{ limit: 1 },
+			)
+		).repos[0].codeVerified;
+
+	it("pairs each entry with its stored source path", async () => {
+		const cv = await served({
+			contractInterface: ["Vault.bump(n: u32) -> u32"],
+			contractInterfacePaths: ["contracts/vault/src/lib.rs"],
+		});
+		expect(cv?.contractInterface).toEqual(["Vault.bump(n: u32) -> u32"]);
+		expect(cv?.contractInterfacePaths).toEqual(["contracts/vault/src/lib.rs"]);
+	});
+
+	it("null when the scan predates paths: an entry's path is unknown, not absent", async () => {
+		const cv = await served({
+			contractInterface: ["Vault.bump(n: u32) -> u32"],
+		});
+		expect(cv?.contractInterfacePaths).toBeNull();
+	});
+
+	it("[] when the scan that recorded paths found no interface", async () => {
+		const cv = await served({
+			contractInterface: [],
+			contractInterfacePaths: [],
+		});
+		expect(cv?.contractInterfacePaths).toEqual([]);
+	});
+
+	// review finding 6: nothing recorded is unknown, never "checked, none"
+	it("null when no paths were recorded, even with no interface", async () => {
+		expect(
+			(await served({ contractInterface: [] }))?.contractInterfacePaths,
+		).toBeNull();
+		expect((await served({}))?.contractInterfacePaths).toBeNull();
+	});
+
+	it("null when the stored lists do not pair up", async () => {
+		const cv = await served({
+			contractInterface: ["Vault.bump(n: u32) -> u32", "Vault.drain()"],
+			contractInterfacePaths: ["contracts/vault/src/lib.rs"],
+		});
+		expect(cv?.contractInterfacePaths).toBeNull();
+	});
+});
+
+describe("a capped candidate window says so (the #1915 class)", () => {
+	// The no-q browse ranks the top 200 rows by repoScore and a q search the
+	// top 600. counts.total counted that window as if it were every match:
+	// live, the browse said total 200 and offset 200 served nothing against
+	// 13,810 indexed repos.
+	const many = (n: number, over: Record<string, unknown> = {}) =>
+		Array.from({ length: n }, (_, i) =>
+			doc({ fullName: `org/repo-${i}`, repoScore: n - i, ...over }),
+		);
+	// Answers like the database: honours limit and the repoScore floor, and
+	// counts every row the where admits.
+	const db = (rows: Array<Record<string, unknown>>) => ({
+		find: async (args: {
+			limit?: number;
+			where?: { repoScore?: { greater_than_equal?: number } };
+		}) => {
+			const floor = args.where?.repoScore?.greater_than_equal ?? -Infinity;
+			const hits = rows.filter((r) => Number(r.repoScore) >= floor);
+			return {
+				docs: hits.slice(0, args.limit ?? hits.length),
+				totalDocs: hits.length,
+			};
+		},
+	});
+
+	it("a browse past its window reports the true eligible count and the cut", async () => {
+		const res = await searchRepos(db(many(250)), "", { limit: 20 });
+		expect(res.total).toBe(200);
+		expect(res.truncated).toBe(true);
+		expect(res.eligible).toBe(250);
+	});
+
+	it("a window that holds every row is not cut, and eligible equals total", async () => {
+		const res = await searchRepos(db(many(30)), "", { limit: 20 });
+		expect(res.truncated).toBe(false);
+		expect(res.total).toBe(30);
+		expect(res.eligible).toBe(30);
+	});
+
+	it("minScore runs in the database, so a browse's eligible count stays exact", async () => {
+		const res = await searchRepos(db(many(250)), "", {
+			limit: 20,
+			minScore: 40,
+		});
+		// repoScore 40..250: 211 rows admitted, 200 of them ranked
+		expect(res.eligible).toBe(211);
+		expect(res.truncated).toBe(true);
+	});
+
+	it("a q search over a cut window cannot count every match: eligible is null, never a guess", async () => {
+		const res = await searchRepos(
+			db(many(700, { description: "vault contracts" })),
+			"vault",
+			{ limit: 5 },
+		);
+		expect(res.truncated).toBe(true);
+		expect(res.eligible).toBeNull();
 	});
 });
