@@ -11,60 +11,45 @@
  *
  * It had not bitten because the two labels usually agree. The damage lands
  * precisely when we know better, which is the reason to hold the row at all.
+ *
+ * This file used to test its own copy of the rule, and the copy drifted: on
+ * 2026-09-07 the sync's list became STRONG_STATUS_BASES, which adds
+ * package-release and leaves operator-announcement out, while the copy kept
+ * the first list and kept passing. It now runs feedOwnedFields, the function
+ * the sync calls (sls-113 review, 2026-11-07).
  */
 import { describe, expect, it } from "vitest";
-import { withoutCuratedFields } from "../utils/curated-fields";
-
-/** The rule the sync applies, in isolation: an explicit list of tiers WE
- *  produced. site-liveness is deliberately absent — see the test below. */
-const EARNED = new Set([
-	"human-verified",
-	"onchain-activity",
-	"product-integration",
-	"repo-activity",
-	"operator-announcement",
-]);
-const earned = (basis: string | null | undefined) => EARNED.has(String(basis));
-
-/** owned = curation-map ownership, plus status when the row earned it. */
-function ownedFor(
-	mapOwned: string[],
-	basis: string | null | undefined,
-): Set<string> {
-	const owned = new Set(mapOwned);
-	if (earned(basis)) owned.add("status");
-	return owned;
-}
+import { STATUS_BASES, STRONG_STATUS_BASES } from "../project-status";
+import { feedOwnedFields, withoutCuratedFields } from "../utils/curated-fields";
 
 const feedPatch = {
 	status: "Live",
 	name: "Whatever",
 	links: { website: "https://feed" },
 };
+const strong = new Set<string>(STRONG_STATUS_BASES);
 
 describe("feed status precedence", () => {
-	for (const basis of [
-		"human-verified",
-		"onchain-activity",
-		"product-integration",
-		"repo-activity",
-		"operator-announcement",
-	]) {
+	for (const basis of STRONG_STATUS_BASES) {
 		it(`does not overwrite a ${basis} status`, () => {
 			const { data, protectedFields } = withoutCuratedFields(
 				{ ...feedPatch },
-				ownedFor([], basis),
+				feedOwnedFields(new Set(), basis),
 			);
 			expect(data).not.toHaveProperty("status");
 			expect(protectedFields).toContain("status");
 		});
 	}
 
-	for (const basis of [null, undefined, "source-inherited", "unverified"]) {
-		it(`still refreshes a ${String(basis)} status — the feed is the best we have`, () => {
+	for (const basis of [
+		null,
+		undefined,
+		...STATUS_BASES.filter((b) => !strong.has(b)),
+	]) {
+		it(`still refreshes a ${String(basis)} status`, () => {
 			const { data } = withoutCuratedFields(
 				{ ...feedPatch },
-				ownedFor([], basis),
+				feedOwnedFields(new Set(), basis),
 			);
 			expect(data.status).toBe("Live");
 		});
@@ -75,17 +60,15 @@ describe("feed status precedence", () => {
 		// often months stale. Protecting it would mean the feed could never tell
 		// us a project died — the one thing an upstream curator is well placed
 		// to notice. This is a deliberate trade, not an oversight.
-		const { data } = withoutCuratedFields(
-			{ ...feedPatch },
-			ownedFor([], "site-liveness"),
+		expect(feedOwnedFields(new Set(), "site-liveness").has("status")).toBe(
+			false,
 		);
-		expect(data.status).toBe("Live");
 	});
 
 	it("map ownership still applies alongside the basis rule", () => {
 		const { data, protectedFields } = withoutCuratedFields(
 			{ ...feedPatch },
-			ownedFor(["links.website"], "repo-activity"),
+			feedOwnedFields(new Set(["links.website"]), "repo-activity"),
 		);
 		expect(data).not.toHaveProperty("status");
 		expect((data.links as Record<string, unknown>).website).toBeUndefined();

@@ -1,4 +1,5 @@
 import type { Payload } from "payload";
+import { PROJECT_TYPES } from "../project-types";
 
 interface RankedSearchOptions {
 	query: string;
@@ -49,30 +50,10 @@ function applyScfFilter(baseWhere: any, scfFilter?: string) {
  *
  * Ranking: name startsWith > name contains > org-only match
  */
-/** Option values of the projects.types / projects.category selects (see src/collections/Projects.ts). */
-const PROJECT_TYPES = [
-	"Wallet",
-	"DEX",
-	"Lending",
-	"Bridge",
-	"Infrastructure",
-	"Payments",
-	"Anchor",
-	"SDK",
-	"Indexer",
-	"Explorer",
-	"Analytics",
-	"AI",
-	"Gaming",
-	"Education",
-	"Security",
-	"NFT",
-	"RWA",
-	"Stablecoin",
-	"Social Impact",
-	"RPC",
-	"Faucet",
-];
+/** Option values of the projects.category select (src/collections/Projects.ts).
+ * Types come from PROJECT_TYPES: this file's own copy of that list stopped at
+ * Faucet, so the box never matched Card Issuing, Exchange, Oracle, Yield or
+ * Derivatives by type (sls-113 review, 2026-11-07). */
 const PROJECT_CATEGORIES = [
 	"Infrastructure",
 	"Tooling",

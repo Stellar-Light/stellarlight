@@ -31,6 +31,7 @@
  */
 
 import { probeExternal } from "../src/lib/probe-external";
+import { TVL_FLOOR_TYPES } from "../src/lib/status-checks";
 
 const BASE = (process.env.BASE_URL || "https://stellarlight.xyz").replace(
 	/\/$/,
@@ -41,14 +42,7 @@ const CONCURRENCY = 8;
 const TIMEOUT_MS = 12_000;
 const STALE_DAYS = 365;
 const TVL_FLOOR_USD = 5_000;
-const DEFI_TYPES = new Set([
-	"DeFi",
-	"DEX",
-	"AMM",
-	"Lending",
-	"Yield",
-	"Protocol/Contract",
-]);
+const DEFI_TYPES = new Set<string>(TVL_FLOOR_TYPES);
 
 async function j(path: string): Promise<any> {
 	const res = await fetch(`${BASE}${path}`, {

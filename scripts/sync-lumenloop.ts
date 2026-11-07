@@ -12,9 +12,9 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import yaml from "js-yaml";
 import { getPayload } from "payload";
-import { STRONG_STATUS_BASES } from "../src/lib/project-status";
 import {
 	changedFields,
+	feedOwnedFields,
 	withoutCuratedFields,
 } from "../src/lib/utils/curated-fields";
 import {
@@ -194,7 +194,6 @@ async function main() {
 					// the feed must not write them back (lessons class 32). Curating
 					// a record never made it ineligible for this branch, so every
 					// curated field was reverted within 24h of any curate run.
-					const owned = curatedFieldsFor(slug);
 					// A status a LANE earned outranks a feed label, whether or not a
 					// curation map happens to name the row. The map protected 161 of
 					// 309 touched rows; the other 148 carried repo-activity (84),
@@ -214,9 +213,10 @@ async function main() {
 					// died — losing the one thing an upstream curator is well placed
 					// to notice. The feed keeps refreshing those; it may not touch a
 					// status our own lanes or a human established.
-					const EARNED_STATUS_BASES = new Set<string>(STRONG_STATUS_BASES);
-					if (EARNED_STATUS_BASES.has(String(doc.statusBasis)))
-						owned.add("status");
+					const owned = feedOwnedFields(
+						curatedFieldsFor(slug),
+						doc.statusBasis,
+					);
 					const { data: patch, protectedFields } = withoutCuratedFields(
 						mapped,
 						owned,

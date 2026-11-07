@@ -771,3 +771,31 @@ describe("tokenHits reads each token in the whole query's context", () => {
 			expect(scoreTokens(hay, q)).toBe(tokenHits(hay, q).length);
 	});
 });
+
+describe("derivatives words reach the Derivatives type (sls-113, 2026-11-07)", () => {
+	for (const q of [
+		"perpetuals on Stellar",
+		"perps",
+		"perpetual futures",
+		"crypto futures",
+		"derivatives on Stellar",
+		"a derivative exchange",
+	])
+		it(`"${q}" carries Derivatives intent into the candidate query`, () => {
+			const t = tokenize(q);
+			expect(intentTypesFor(t).has("Derivatives")).toBe(true);
+			expect(structuredSelectClauses(t)).toContainEqual({
+				types: { in: ["Derivatives"] },
+			});
+		});
+	it('"options" stays a shopping word: "wallet options" asks for wallets', () => {
+		// The SHOPPING list beside nameMatchScore reads options as "choices";
+		// as an intent word it would admit and rank Derivatives rows there.
+		expect([...intentTypesFor(tokenize("wallet options"))]).toEqual(["Wallet"]);
+	});
+	it("the future of payments is not futures", () => {
+		expect(
+			intentTypesFor(tokenize("the future of payments")).has("Derivatives"),
+		).toBe(false);
+	});
+});

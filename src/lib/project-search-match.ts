@@ -371,6 +371,16 @@ export const INTENT_TYPE: Record<string, string> = {
 	yield: "Yield",
 	vault: "Yield",
 	vaults: "Yield",
+	// sls-113 (2026-11-07): contracts on a price have their own type. "options"
+	// is left out: SHOPPING (nameMatchScore) reads it as choices, as in "wallet
+	// options". "futures" only plural: "the future of payments" is no market.
+	derivative: "Derivatives",
+	derivatives: "Derivatives",
+	perp: "Derivatives",
+	perps: "Derivatives",
+	perpetual: "Derivatives",
+	perpetuals: "Derivatives",
+	futures: "Derivatives",
 	anchor: "Anchor",
 	"on-ramp": "Anchor",
 	onramp: "Anchor",

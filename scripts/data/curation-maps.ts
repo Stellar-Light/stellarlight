@@ -5502,7 +5502,6 @@ export const TYPES_ADD: Record<string, string[]> = {
 	"pathpulse-ai": ["AI"], // on-device-AI road intelligence from crowdsourced driver cameras
 	"offer-hub": ["Payments"], // freelance marketplace whose on-chain core is crypto payments/escrow
 	muney: ["Payments", "Stablecoin"], // B2B stablecoin payment infrastructure converting USDC to local value
-	lusty: ["Exchange"], // options venue (covered calls/puts), server-settled today
 	"for-yield": ["Stablecoin", "Lending", "Yield"], // EURC-denominated regulated yield product routing deposits into Blend/DeFindex (site)
 	chainless: ["Wallet"], // self-custody MPC wallet investment app (Web3Auth, Pix on-ramp)
 	amulets: ["Wallet", "Card Issuing", "Stablecoin"], // stablecoin banking app: dollar account, swaps, Visa card spend
@@ -5515,7 +5514,6 @@ export const TYPES_ADD: Record<string, string[]> = {
 	blockroll: ["Payments", "Stablecoin", "Card Issuing"], // USDC payments + DeFindex yield + Visa card funded from Stellar USDC
 	"stellarx-ph": ["Education"], // developer education/community program (Soroban workshops, roadshows)
 	acta: ["Security"], // decentralized identity / verifiable credentials — the directory's Security typing for identity (idOS, Chaincerts precedent)
-	xccy: ["DEX"], // decentralized fixed-income markets via on-chain interest-rate swaps
 	"squid-router": ["Bridge"], // cross-chain swap/bridge aggregator on Axelar routing assets to Stellar
 	volta: ["Wallet"], // non-custodial smart-contract multisig wallet / enterprise asset control panel
 	turbolong: ["Lending"], // leveraged longs built as atomic recursive Blend lending loops
@@ -5719,6 +5717,12 @@ export const TYPES_SET: Record<string, string[]> = {
 	peerpesa: ["Payments", "Explorer"], // docs.peerpesa.co: "PeerPesa is a stablecoin on and off-ramp for Africa."; runs a Stellar explorer at stellar.peerpesa.co
 	prism: ["Yield"], // prismfi.cc/earn: "Optionally swap to USTRY for Stellar-native RWA yield."
 	zig3v2: ["Wallet"], // zig3.org app bundle: a wallet that keeps keys behind biometrics; its exchange and swap screens are placeholders and it never places an offer
+	// The other Derivatives rows (sls-113 review, 2026-11-07); their additive
+	// DEX and Exchange tags left TYPES_ADD. lusty and lusty-finance are two
+	// rows for one product (same site, same repo).
+	xccy: ["Derivatives"], // docs.xccy.finance/introduction/what-is-xccy: "An interest rate swap market on Stellar that trades a lending venue's floating yield against a fixed rate for a fixed term."
+	lusty: ["Derivatives", "Yield"], // lusty.finance: "An options yield venue on Stellar. You sell a covered call on the asset you hold, or a cash-secured put with dollars"
+	"lusty-finance": ["Derivatives", "Yield"], // same product as lusty: lusty.finance names itself a "Crypto Options Protocol" that pays the option premium upfront
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

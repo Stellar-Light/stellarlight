@@ -236,6 +236,9 @@ const VERDICTS: Record<string, string> = {
 
 const RETYPED: Record<string, string[]> = {
 	zenex: ["Derivatives"],
+	xccy: ["Derivatives"],
+	lusty: ["Derivatives", "Yield"],
+	"lusty-finance": ["Derivatives", "Yield"],
 	earnbit: ["Exchange"],
 	chartui: ["Analytics"],
 	reyts: ["Payments", "Stablecoin"],
@@ -249,13 +252,12 @@ describe("every unclassified Live DEX row ends in one recorded state (sls-113, 2
 		for (const [slug, types] of Object.entries(RETYPED))
 			expect(TYPES_SET[slug], slug).toEqual(types);
 	});
-	it("no additive map puts DEX back on a re-typed row", () => {
-		// TYPES_SET runs after TYPES_ADD and TYPE_ADD: a DEX added to the same
+	it("no additive map adds a type the exact set leaves out", () => {
+		// TYPES_SET runs after TYPES_ADD and TYPE_ADD: a type added to the same
 		// slug would flip its types on every curate run, as Oracle once did.
-		for (const slug of Object.keys(RETYPED)) {
-			expect(TYPES_ADD[slug] ?? [], slug).not.toContain("DEX");
-			expect(TYPE_ADD[slug] ?? [], slug).not.toContain("DEX");
-		}
+		for (const [slug, types] of Object.entries(RETYPED))
+			for (const t of [...(TYPES_ADD[slug] ?? []), ...(TYPE_ADD[slug] ?? [])])
+				expect(types, slug).toContain(t);
 	});
 	it("Derivatives is a type, with a definition", () => {
 		expect(PROJECT_TYPES).toContain("Derivatives");
