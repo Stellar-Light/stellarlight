@@ -289,6 +289,15 @@ here as #1900 to #1905; each issue carries its read-only probes.
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
 unless noted.
 
+- Unread SCF facts are served as answers: 392 of 1006 rows served by
+  GET /api/projects/search (paged across every category, 2026-11-05) carry
+  scfAwarded false and scfAwardedRounds [] with no SCF read behind them (no
+  scfBasis, scfAsOf or scfSourceUrl), among them the nine rows the pending
+  enrich-scf execute marks awarded (Enable, Rumble Fish, Docking Zone,
+  SlimePay and five more). Serving null for a row no SCF read covers needs
+  both fields nullable, a contract change; until then the scfAwarded
+  description says false with scfBasis null means no SCF read is recorded.
+  Found by the review of the sls-111 lane (#1903).
 - Code facts other than interfaces, symbols and capability tags still read
   test code. After a rescan, a repo whose only Soroban crate is a test
   fixture serves an empty contractInterface and no symbols, while

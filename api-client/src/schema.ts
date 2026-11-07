@@ -1284,6 +1284,7 @@ export interface components {
                 slug?: string;
             } | null;
             logoUrl?: string | null;
+            /** @description Whether an SCF award is on record for the project. false with scfBasis null means no SCF read is recorded for this row, so it is not evidence that SCF did not fund the project. Cite a false only with scfBasis and scfSourceUrl. */
             scfAwarded?: boolean;
             scfTotalAwardedUSD?: number | null;
             /**
