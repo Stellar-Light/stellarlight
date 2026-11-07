@@ -12,9 +12,10 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { useQueryState } from "@/hooks/use-query-state";
 import { ago, agoSentence } from "@/lib/builder-code";
 
 /** Serializable row the server builds from Passport + our repos index. */
@@ -58,6 +59,8 @@ const SORTS: Array<{ key: SortKey; label: string }> = [
 	{ key: "name", label: "A to Z" },
 ];
 
+const SORT_KEYS = SORTS.map((s) => s.key);
+
 const heat = (r: BuilderRowData) => r.commits30d * 3 + (r.commits90d ?? 0);
 // an unknown count sorts below every known one, zero included
 const known = (n: number | null) => n ?? -1;
@@ -66,12 +69,19 @@ const isRecent = (r: BuilderRowData) =>
 	heat(r) > 0 || Date.parse(r.lastCommitAt ?? "") > recentCut();
 
 export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
-	const [q, setQ] = useState("");
-	const [sort, setSort] = useState<SortKey>("active");
-	const [onlyActive, setOnlyActive] = useState(false);
-	const [onlyProjects, setOnlyProjects] = useState(false);
-	const [onlyAmbassadors, setOnlyAmbassadors] = useState(false);
-	const [country, setCountry] = useState<string | null>(null);
+	const [q, setQ] = useQueryState("q", "");
+	const [sort, setSort] = useQueryState("sort", "active", SORT_KEYS);
+	const [active, setActive] = useQueryState("active", "");
+	const onlyActive = active === "1";
+	const [projectsOnly, setProjectsOnly] = useQueryState("projects", "");
+	const onlyProjects = projectsOnly === "1";
+	const [ambassadorsOnly, setAmbassadorsOnly] = useQueryState(
+		"ambassadors",
+		"",
+	);
+	const onlyAmbassadors = ambassadorsOnly === "1";
+	const [countryParam, setCountry] = useQueryState("country", "");
+	const country = countryParam || null;
 
 	const hasAmbassadors = rows.some((r) => r.ambassador);
 	// the regions people are in, most common first (round flag toggles)
@@ -165,14 +175,18 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 				<div className="flex flex-wrap items-center gap-2">
 					{chip(
 						onlyActive,
-						() => setOnlyActive((v) => !v),
+						() => setActive(onlyActive ? "" : "1"),
 						"Active in 90 days",
 					)}
-					{chip(onlyProjects, () => setOnlyProjects((v) => !v), "Has projects")}
+					{chip(
+						onlyProjects,
+						() => setProjectsOnly(onlyProjects ? "" : "1"),
+						"Has projects",
+					)}
 					{hasAmbassadors &&
 						chip(
 							onlyAmbassadors,
-							() => setOnlyAmbassadors((v) => !v),
+							() => setAmbassadorsOnly(onlyAmbassadors ? "" : "1"),
 							"Ambassadors",
 						)}
 					{countries.length > 0 && <span className="mx-1 h-4 w-px bg-border" />}
@@ -180,7 +194,7 @@ export function BuildersDirectory({ rows }: { rows: BuilderRowData[] }) {
 						<button
 							key={c.code}
 							type="button"
-							onClick={() => setCountry(country === c.code ? null : c.code)}
+							onClick={() => setCountry(country === c.code ? "" : c.code)}
 							aria-pressed={country === c.code}
 							title={`${c.name} (${c.n})`}
 							aria-label={`Only ${c.name}`}

@@ -11,8 +11,9 @@
 
 import { ArrowUpRight, Search } from "lucide-react";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { EntityLogo } from "@/components/entity-logo";
+import { useQueryState } from "@/hooks/use-query-state";
 import { type EntityStats, entitySummary, formatUSD } from "@/lib/entity-stats";
 
 function agoLabel(iso: string) {
@@ -41,12 +42,12 @@ const SORTS = [
 	{ key: "projects", label: "Most projects" },
 	{ key: "name", label: "A-Z" },
 ] as const;
-type SortKey = (typeof SORTS)[number]["key"];
+const SORT_KEYS = SORTS.map((s) => s.key);
 
 export function EntitiesDirectory({ items }: { items: EntityItem[] }) {
-	const [query, setQuery] = useState("");
-	const [sort, setSort] = useState<SortKey>("scf");
-	const [category, setCategory] = useState<string>("all");
+	const [query, setQuery] = useQueryState("q", "");
+	const [sort, setSort] = useQueryState("sort", "scf", SORT_KEYS);
+	const [category, setCategory] = useQueryState("category", "all");
 
 	// Ecosystem summary + the category filter set, from the data itself.
 	const { totalScf, fundedOrgs, totalProjects, categories } = useMemo(() => {
