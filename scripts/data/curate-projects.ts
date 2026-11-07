@@ -18,7 +18,6 @@ import {
 	parseGithubIdentity,
 	parseGithubRepoRef,
 } from "../../src/lib/github-identity";
-import { STRONG_STATUS_BASES } from "../../src/lib/project-status";
 import { fillScfFromDupe } from "../../src/lib/scf-merge";
 import configPromise from "../../src/payload.config";
 import {
@@ -37,6 +36,7 @@ import {
 	STATUS_FIX,
 	STATUS_SOURCE_BACKFILL,
 	STATUS_SOURCE_RETRACT,
+	statusFixHold,
 	statusFixNote,
 	TYPE_ADD,
 	TYPES_ADD,
@@ -2391,7 +2391,10 @@ async function main() {
 			);
 			continue;
 		}
-		if (d.status !== fix.from) {
+		// The from-guard and the stronger-basis rule, in that order
+		// (statusFixHold, curation-maps.ts, where a test runs them).
+		const hold = statusFixHold(fix, d);
+		if (hold === "from-guard") {
 			// An entry that already moved the row keeps owning its lifecycle note:
 			// when the stored note lags the verdict (fill-if-empty left the earlier
 			// Live packet note on five rows retired or downgraded on 2026-09-06),
@@ -2441,21 +2444,12 @@ async function main() {
 		// evidence; there is nothing to write. A status MOVE is a verdict and
 		// still writes as the entry says.
 		// The FIFTH copy of this list, found 2026-09-08 while wiring
-		// package-release. It is a local const inside a loop, so the sweep that
+		// package-release, was a local const inside this loop, so the sweep that
 		// replaced the four exported copies did not see it. Left stale it is a
 		// live bug: a row that had EARNED package-release would not be
-		// recognised as strong, and a weak curated entry could overwrite it —
-		// precisely what this guard exists to prevent, which it learned from
-		// blend having site-liveness re-stamped over onchain-activity on every
-		// execute.
-		const STRONG = new Set<string>(STRONG_STATUS_BASES);
-		if (
-			fix.from === fix.to &&
-			fix.basis &&
-			!fix.withdraw &&
-			!STRONG.has(fix.basis) &&
-			STRONG.has(String(d.statusBasis ?? ""))
-		) {
+		// recognised as strong, and a weak curated entry could overwrite it.
+		// statusFixHold reads the shared list (isStrongStatusBasis).
+		if (hold === "stronger-basis") {
 			console.log(
 				`  ${slug}: keeps ${d.statusBasis} — the curated ${fix.basis} entry is weaker than the basis a lane earned; nothing written`,
 			);

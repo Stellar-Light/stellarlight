@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-07",
+		surfaces: ["api", "mcp"],
+		version: "spec@1.9.127",
+		type: "added",
+		summary:
+			"Project types gain Derivatives: perpetuals, futures, options, or rate or FX swaps, contracts on a price rather than spot exchange. searchProjects and getLeaderboard accept type=Derivatives, the hackathon build operations accept and can serve it as a category, and the search_projects MCP tool takes it from its next release. Once the curation lane runs, every Live DEX row carries a `venueRole`: type=DEX&status=Live returns 15 rows, where on 2026-11-07 it returned 38 with 26 unclassified.",
+		detail:
+			"Each of the 26 was read against its operator's own material on 2026-11-07. Three trade and gain a role: SwiftEx is wallet-integrated, AIDA and Balanced are trading-ui. Seven are not spot venues and leave DEX: Zenex is Derivatives, EarnBIT Exchange, Chartui Analytics, Reyts Payments and Stablecoin, PeerPesa Payments and Explorer, Prism Yield and Zig3v2 Wallet. Sixteen leave Live with `statusBasis` human-verified, `statusAsOf` 2026-11-07 and the page read as `statusSourceUrl`: TinyAmm, Switchly, XCCY, AXIS and Octarine are Pre-Release (testnet only), Stabble and StarLoom Development, and CLOB, FX Swap, Wombat, Ichi, Grip, Xlmeme, zkCross, Cables and Interstellar Inactive. Balanced's description now says it is a front end for SODAX. A nightly check names any Live DEX row that has no `venueRole` and no dated reason for it.",
+	},
+	{
 		date: "2026-11-04",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.126",

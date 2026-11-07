@@ -334,6 +334,7 @@ export interface Project {
 				| "Exchange"
 				| "Oracle"
 				| "Yield"
+				| "Derivatives"
 		  )[]
 		| null;
 	/**

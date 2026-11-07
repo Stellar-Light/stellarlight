@@ -37,6 +37,7 @@
 import "../load-env";
 import { getPayload } from "payload";
 import { NON_PRODUCT_VERDICTS } from "../../src/lib/page-verdict";
+import { SITE_LIVENESS_MAY_REPLACE } from "../../src/lib/project-status";
 import { curatedFieldsFor } from "./curation-maps";
 
 const { default: configPromise } = await import("../../src/payload.config");
@@ -44,7 +45,7 @@ const { default: configPromise } = await import("../../src/payload.config");
 const EXECUTE = process.argv.includes("--execute");
 
 /** Bases a site ping is allowed to replace. Anything else outranks it. */
-const WEAK = new Set(["source-inherited", "unverified"]);
+const WEAK = new Set<string>(SITE_LIVENESS_MAY_REPLACE);
 
 /** Older than this and a successful check is history, not evidence. */
 const MAX_EVIDENCE_AGE_DAYS = 60;
