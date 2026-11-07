@@ -19,7 +19,7 @@ import northStarSeries from "../../improvements/audits/north-star-series.json";
 // Weekly re-probe of every human-verified packet stamp against its own
 // deciding URL (scripts/check-packet-stamps.ts).
 import packetStamps from "../../improvements/audits/packet-stamps-latest.json";
-import ravenDrift from "../../improvements/audits/raven-drift-latest.json";
+import ravenDriftArtifact from "../../improvements/audits/raven-drift-latest.json";
 import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
 import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
 import deepwiki from "../../improvements/engine/independent-calibration-latest.json";
@@ -49,6 +49,24 @@ import honestyBaseline from "../../specs/honesty-baseline.json";
 import opacityBaseline from "../../specs/opacity-baseline.json";
 import openapi from "../../specs/openapi.json";
 import { EVIDENCE_GRACE_DAYS } from "./improvement-ledger";
+
+/** The drift guard's artifact, typed here rather than inferred from the run
+ * that was committed last: a run that could not read the consumer's catalog
+ * writes catalogOps and claimedOpCount as null, and an inferred `null` type
+ * failed the build (2026-11-06). */
+const ravenDrift = ravenDriftArtifact as {
+	generatedAt: string;
+	specVersion: string;
+	graceDays: number;
+	checked?: boolean;
+	expectedOps: unknown[];
+	catalogOps: unknown[] | null;
+	missingFromCatalog: unknown[];
+	laggingInCatalog: unknown[];
+	undiscoverable?: unknown[];
+	uncataloged?: string[];
+	notes?: string[];
+};
 
 /** The packet-stamp artifact's row shape. Named explicitly because a green
  * run's `rows` still types fine, but any filtered/mapped subset of a JSON
