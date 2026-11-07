@@ -13,16 +13,16 @@
  */
 import "./load-env";
 import { getPayload } from "payload";
-import {
-	cleanTitle as cleanScfTitle,
-	findTitlePrefixMatch,
-	normSpaceless,
-	stemSlugHash,
-} from "../src/lib/identity";
 import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
 import {
-	parseRoundVerdicts,
+	foldLinkNote,
+	matchListingRow,
+	SCF_SLUG_OVERRIDES,
+} from "./data/scf-joins";
+import {
+	readScfPage,
+	type ScfPage,
 	scfHold,
 	showsAward,
 	uniqueNames,
@@ -46,53 +46,6 @@ const stats = {
 };
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/** EQUALITY-ONLY normalization — see src/lib/identity.ts for why
- * containment on this form is banned (the 18-row poisoning). */
-const normalize = normSpaceless;
-
-/** Generate slug from name */
-function toSlug(name: string): string {
-	return name
-		.toLowerCase()
-		.replace(/[^a-z0-9\s-]/g, "")
-		.replace(/[\s_]+/g, "-")
-		.replace(/-+/g, "-")
-		.replace(/^-|-$/g, "");
-}
-
-/** The page's own `"siteUrls":{...}` object, brace-matched off the rebuilt
- * flight stream. One per page (checked on 531 pages, 2026-10-03). */
-function siteUrlsOf(txt: string): Record<string, unknown> | null {
-	const at = txt.indexOf('"siteUrls":{');
-	if (at < 0) return null;
-	const start = txt.indexOf("{", at);
-	let depth = 0;
-	for (let i = start; i < txt.length; i++) {
-		if (txt[i] === "{") depth++;
-		else if (txt[i] === "}" && --depth === 0) {
-			try {
-				return JSON.parse(txt.slice(start, i + 1));
-			} catch {
-				return null;
-			}
-		}
-	}
-	return null;
-}
-
-/** An owner or owner/repo GitHub URL, nothing else: the field also carries
- * GitLab links, Google Docs and comma-joined pairs on real pages. */
-const GITHUB_URL =
-	/^https?:\/\/(?:www\.)?github\.com\/[A-Za-z0-9_.-]+(?:\/[A-Za-z0-9_.-]+)?\/?$/;
-const githubUrl = (v: unknown): string | undefined =>
-	typeof v === "string" && GITHUB_URL.test(v.trim()) ? v.trim() : undefined;
-/** A single absolute http(s) URL. Bare handles ("@telluscoop") and
- * scheme-less hosts are dropped rather than guessed at. */
-const httpUrl = (v: unknown): string | undefined =>
-	typeof v === "string" && /^https?:\/\/[^\s,]+$/.test(v.trim())
-		? v.trim()
-		: undefined;
 
 /** Download image buffer */
 async function downloadImage(
@@ -128,29 +81,7 @@ function getExtension(ct: string): string {
 }
 
 /** Scrape project detail page for additional data */
-async function scrapeDetailPage(slug: string): Promise<{
-	description?: string;
-	website?: string;
-	twitter?: string;
-	github?: string;
-	totalAwarded?: number;
-	awardedRounds?: number[];
-	roundAwards?: Array<{
-		awardName?: string | null;
-		round: number | null;
-		amountUSD: number | null;
-		awardType: string | null;
-	}>;
-	verdictSubmissions?: number;
-	verdictAwardedAny?: number;
-	/** Numbered rounds the page marks lost (every decided card negative). */
-	notAwardedRounds?: number[];
-	/** Page-level project record (title / slug / lastAwardedRound), read for
-	 * pages the listing never served — see SCF_PAGES_BEYOND_CAP. */
-	pageSlug?: string;
-	title?: string;
-	lastAwardedRound?: number;
-} | null> {
+async function scrapeDetailPage(slug: string): Promise<ScfPage | null> {
 	try {
 		const res = await fetch(
 			`https://communityfund.stellar.org/project/${slug}`,
@@ -163,129 +94,7 @@ async function scrapeDetailPage(slug: string): Promise<{
 			},
 		);
 		if (!res.ok) return null;
-		const html = await res.text();
-
-		const result: any = {};
-
-		// Try __NEXT_DATA__ (Pages Router) first
-		const nextDataMatch = html.match(
-			/<script id="__NEXT_DATA__"[^>]*>(.*?)<\/script>/s,
-		);
-		if (nextDataMatch) {
-			try {
-				const nextData = JSON.parse(nextDataMatch[1]);
-				const pageProps = nextData?.props?.pageProps;
-				const project = pageProps?.project || pageProps?.data || pageProps;
-				if (project) {
-					const desc =
-						project.description ||
-						project.projectDescription ||
-						project.shortDescription;
-					if (desc && typeof desc === "string" && desc.length > 20) {
-						result.description = desc.slice(0, 500);
-					}
-					const urls = project.siteUrls || project.urls || project.links || {};
-					if (urls.website) result.website = urls.website;
-					if (urls.x || urls.twitter) result.twitter = urls.x || urls.twitter;
-					if (urls.github) result.github = urls.github;
-					if (
-						project.totalAwarded &&
-						typeof project.totalAwarded === "number"
-					) {
-						result.totalAwarded = project.totalAwarded;
-					}
-				}
-			} catch {
-				/* ignore parse errors */
-			}
-		}
-
-		// Try __next_f streaming data (App Router) — extract totalAwarded
-		// Data is in escaped JSON like: totalAwarded\":115000
-		if (!result.totalAwarded) {
-			const awardedMatch = html.match(
-				/totalAwarded\\?"?\s*:\s*(\d+(?:\.\d+)?)/,
-			);
-			if (awardedMatch) {
-				result.totalAwarded = parseFloat(awardedMatch[1]);
-			}
-		}
-
-		// Page-level project record — the same fields a listing row carries —
-		// for pages the listing never serves (SCF_PAGES_BEYOND_CAP). pageSlug
-		// doubles as the identity check: an unknown slug renders 200 with no
-		// project payload (soft-404), which must read as could-not-parse.
-		// Read off the REBUILT flight stream, not the raw HTML: the stream is
-		// cut into <script> chunks at arbitrary points, and a cut inside this
-		// field sequence blanked the identity check on 3 of 113 pages in the
-		// first dry run (mojoflower-mq4, sorostarter-9b2, opengrants-fdb).
-		const flight = [
-			...html.matchAll(/self\.__next_f\.push\(\[1,("(?:[^"\\]|\\.)*")\]\)/g),
-		]
-			.map((m) => {
-				try {
-					return JSON.parse(m[1]) as string;
-				} catch {
-					return "";
-				}
-			})
-			.join("");
-		const txt = flight || html.replace(/\\"/g, '"');
-		const pageRec = txt.match(
-			/"title":"([^"]*)","slug":"([a-z0-9-]+)","totalAwarded"/,
-		);
-		if (pageRec) {
-			result.title = pageRec[1];
-			result.pageSlug = pageRec[2];
-		}
-		const pageRound = txt.match(/"lastAwardedRound":(-?\d+)/);
-		if (pageRound) result.lastAwardedRound = Number(pageRound[1]);
-
-		// Links (2026-10-03). The page is App Router, so the __NEXT_DATA__ read
-		// above never matches and no link had been read since the site moved:
-		// the last run added 0 links across 472 matched projects. The project's
-		// own submission carries them as siteUrls on the flight stream.
-		const urls = siteUrlsOf(txt);
-		if (urls) {
-			result.website ??= httpUrl(urls.website);
-			result.twitter ??= httpUrl(urls.x ?? urls.twitter);
-			result.github ??= githubUrl(urls.github);
-		}
-
-		// Awarded rounds from per-submission VERDICTS ONLY (2026-07-11 fix).
-		// The old "grab every SCF #N on the page" scrape read the badge/
-		// submission arrays, which include NOT-awarded submission rounds —
-		// that corrupted round membership on 74 records (fixed by
-		// scripts/data/fix-scf-rounds.ts; verdict parser shared via
-		// scripts/eval/scf-official.ts). No parseable verdicts → leave
-		// awardedRounds unset rather than guess.
-		const verdicts = parseRoundVerdicts(html);
-		if (verdicts.awarded.size > 0) {
-			result.awardedRounds = [...verdicts.awarded]
-				.map(Number)
-				.sort((a, b) => a - b);
-		}
-		// sls-058 defect 2: per-awarded-round official record (published budget
-		// + award type) from the same submission cards — the reconciling basis
-		// for the page's own totalAwarded.
-		if (verdicts.awards.length > 0) {
-			result.roundAwards = verdicts.awards.map((a) => ({
-				round: a.round,
-				awardName: a.awardName,
-				amountUSD: a.budgetUSD,
-				awardType: a.awardType,
-			}));
-		}
-		// Surfaced for the no-resurrect guard below (main loop): a page that
-		// parses ≥1 submission with ZERO awarded is affirmative evidence of
-		// non-award.
-		result.verdictSubmissions = verdicts.submissions;
-		result.verdictAwardedAny = verdicts.awardedAnyCount;
-		result.notAwardedRounds = [...verdicts.notAwarded]
-			.map(Number)
-			.sort((a, b) => a - b);
-
-		return Object.keys(result).length > 0 ? result : null;
+		return readScfPage(await res.text(), slug);
 	} catch {
 		return null;
 	}
@@ -363,131 +172,7 @@ async function main() {
 		),
 	);
 
-	// 4. Match and enrich
-	// sls-061 (#767): SCF titles that no normalization reaches — the API title
-	// names the PRODUCT/SUBMISSION, our record names the project. Keyed by the
-	// SCF slug (stable), mapped to OUR slug. Each pair verified 2026-08-07
-	// against the SCF page + our record before adding; never guessed.
-	const SCF_SLUG_OVERRIDES: Record<string, string> = {
-		// nightly-completeness residual since 2026-08-31: coala-pay is awarded
-		// (rounds 22, 31, 35 — see SCF_SUBMISSION_LINKS in curate-projects.ts)
-		// but both SCF pages are submission-named, so no round award was ever
-		// populated. r22 page-verified on anticipatory-aid-on-soroban-f7j, r35 on
-		// coala-pay-billy-wallet-9mi (2026-09-01).
-		"anticipatory-aid-on-soroban-f7j": "coala-pay",
-		"coala-pay-billy-wallet-9mi": "coala-pay",
-		// One row, several pages (2026-09-06): the second page is submission-
-		// named and carries a later round. Every pair host-matched to our row
-		// and page-parsed; the fold below keeps every page's award (before it,
-		// the last page written won and curate's promote-only linkage put the
-		// dropped round back — the row flipped on every execute).
-		"prices-api-rfp-ctx-1vo": "ctx", // r41 $138,000 · rates.ctx.com (ctxcom-evm carries r19)
-		"octopos-g6i": "untangled", // r41 $120,000 · stellar.untangled.finance (untangled-qcs carries r31 + Liquidity '25 Q3)
-		"institutional-liquidity-infrastructure-for-stellar-k5c": "lobster", // r42 $115,000 · lobster-protocol.com, github.com/lobster-protocol (lobster-vzw carries r36)
-		// tucambio's stored slug tucambio-wallets-lru renders no project payload
-		// (soft-404); the project's page is submission-named.
-		"seasonal-workers-payroll-lru": "tucambio", // r37 $75,000 + r43 $100,000 · tucambio.app, github.com/tucambioapp
-		// Wave 2 (2026-09-06): rows the title-prefix matcher rightly rejects
-		// ("Team Finance" ≠ "TrustSwap: Team Finance"; "Choppaddi" is FastBuka's
-		// page retitled — same hash vmf, choppaddi.com is the row's site).
-		"trustswap-team-finance-coa": "trustswap", // r36 $120,000 · team.finance
-		"choppaddi-vmf": "fastbuka", // r38 $70,000 + r44 $80,000 (#35 not awarded) · choppaddi.com; folds with fast-buka-delivery-nbo (no submissions)
-		// 2026-09-06: SCF's "Hermes: Stellar's Own Perpetual Exchange" links
-		// github.com/zenith-protocols — that is our ZENEX row (zenex.trade, org
-		// zenith-protocols, described "Zenex, formerly Hermes"). The name matcher
-		// gave the page to our unrelated `hermes` row (OrbitCDP's perp exchange,
-		// github.com/orbit-cdp/hermes), which carried $150,000 that is not its
-		// award; that row is unlinked in SCF_FIX. Two live products share a name,
-		// so only the link intersection decides.
-		"hermes-isy": "zenex", // #32 $150,000 · github: github.com/zenith-protocols
-		"bondhiveonchain-fixed-deposit-pbl": "bondhive",
-		"coinsph-stellar-remittances-qwo": "coins-ph",
-		"identity-operating-system-idos-nqg": "idos",
-		"peer-by-honeycoin-inz": "honey-coin",
-		"pelago-airswift-nkm": "airswift",
-		// Soroban → Stellar rename class (product renamed, SCF page didn't).
-		"soroban-security-portal-7ea": "stellar-security-portal",
-		// sls-063 (2026-08-11, stellar-raven): 10 more product/submission-named
-		// slugs, each page-verified locally — parseRoundVerdicts on the official
-		// page reproduces the finding's exact round + budget before mapping.
-		// vottun disambiguated by evidence: the developer-platform page carries
-		// the r27 award; the wirex-vottun page does not.
-		// Seed-review linkage (2026-09-01): four rows from the 2026-08-31
-		// absence review whose SCF page titles are submission-named, so the
-		// name matcher can never join them — the review's own evidence URLs
-		// carry the page slugs. Each page-verified via parseRoundVerdicts
-		// before mapping: pagcrypto r42/$96k · upesa r42/$86k (its stored r41
-		// is NOT page-awarded — linkage lets the crosscheck adjudicate it) ·
-		// roberto-sanz r22/$9k + r24/$30k · verseprop r33/$112,020 (stored
-		// r31/r32 not page-awarded — same adjudication path). Coala Pay
-		// deliberately NOT mapped: the only listed page ("Billy Wallet")
-		// shows r35/$60k vs our stored [22,31] — likely multiple pages per
-		// project; a wrong single-page join would mis-scope totals.
-		// Legacy-award linkage wave 2 (2026-09-01): the remaining nine
-		// no-linkage rows' page slugs were sitting in the seed-review map's
-		// own evidence URLs all along. Every page verified via
-		// parseRoundVerdicts before mapping; eight agree exactly with stored
-		// rounds, escala's page marks #42/#43 "Not Awarded" (award = #44/$70k
-		// — map corrected in the same change). Coala Pay stays deliberately
-		// UNJOINED: it is a real multi-page project (r22 on
-		// anticipatory-aid-on-soroban-f7j, r35 on coala-pay-billy-wallet-9mi,
-		// r31 unverdicted on both) and a single-slug join would let the
-		// exact-replace drop the unverdicted round.
-		"stellar-women-bootcamp-r5v": "womenbiz",
-		"embedded-collective-investment-via-soroban-syi": "escala",
-		"confidential-transfers-and-balances-hdt": "fairblock",
-		"solo-labs-iy1": "ichi",
-		"soroban-disassembler-working-title-ply": "inferera",
-		"advanced-debugging-for-soroban-contracts-5sr": "simbolik",
-		"rfp-soroban-wasm-specialized-reverse-engineering-tool-mxh":
-			"soroban-decompiler",
-		"stellar-surge-1gh": "dfs-labs",
-		"smart-account-onboarding-8yr": "the-aha-company",
-		"regulated-brl-settlement-for-fx-and-institutional-payments-on-stellar-2vu":
-			"pagcrypto",
-		"liquid-by-upesa-dvq": "upesa",
-		"social-podcast-ini": "roberto-sanz-criptomonedas",
-		"a-real-estate-tokenization-platform-ss1": "verseprop",
-		"allbridge-core-3lc": "allbridge",
-		"obsrvr-prism-fvl": "obsrvr",
-		"ibis-stablecoin-neobank-ramp-api-infrastructure-g4c": "ibis",
-		"digibank-non-custodial-n1t": "digibank",
-		"vottun-developer-platform-c2v": "vottun",
-		"upesa-formerly-utoken-pbs": "utoken",
-		"usdc-swap-stellar-cctp-bridge-yv8": "usdc-swap",
-		"transfuse-multichain-asset-bridge-iyi": "transfuse",
-		"catalyst-blockchain-manager-woe": "catalyst",
-		"blade-tradfi-to-defi-bridge-zgq": "blade",
-		// title-prefix rule casualties, same-entity page-verified (2026-08-12):
-		// Greep pay = Greeppay; zkCrossDEX = zkCross's DEX; CashAbroad Smart
-		// Treasury = Cash Abroad's second submission.
-		"greep-pos-greep-pay-hfe": "greeppay",
-		"zkcrossdex-ipb": "zkcross",
-		"cashabroad-smart-treasury-wla": "cash-abroad",
-		// sls-111 (2026-11-04): a submission-named SCF #45 page whose own site,
-		// slimepay.com, is the row's site. r45 $35,000 (its #44 not awarded).
-		"the-merchant-settlement-rail-for-africa-bzf": "slimepay",
-		// sls-111: rows with a 3 or 4 letter name that is not an acronym no
-		// longer join by title prefix (a row named Lend would take any title
-		// starting "Lend"). These live joins are kept here instead, each with
-		// the page's own site equal to the row's site (2026-11-05).
-		"bexo-wallet-usdc-payments-cross-border-transfers-qr-merchant-payments-for-latin-america-uyu":
-			"bexo", // bexo.app
-		"lendxyz-7xc": "lend", // app.lend.xyz
-		"zarf-protocol-zarfto-b5n": "zarf", // zarf.to
-		"loop-cashback-everywhere-with-stellar-zom": "loop", // loopfinance.io
-		"sfx-super-money-app-uav": "sfx", // sfxchange.co
-		"lul-serving-the-unbanked-ckz": "lulpay", // lulpay.com (the lul row is its lineage shadow)
-		"eara-european-regulated-rwa-ecosystem-dmu": "eara", // earaglobal.com
-		"rozo-one-tap-to-pay-vqy": "rozo", // rozo.ai
-		"cobo-custody-integration-for-institution-p8i": "cobo", // cobo.com
-		"cocaxyz-5fk": "coca", // coca.xyz
-		"paid-payrolling-0sk": "paid", // p-aid.world
-		// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
-		// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
-		// `band`, which otherwise matches nothing and would keep stale data.
-		"band-protocol-2ob": "band",
-	};
+	// 4. Match and enrich (SCF_SLUG_OVERRIDES: scripts/data/scf-joins.ts)
 
 	// Pages BEYOND the 500-row listing cap (2026-09-06). /backend/projects
 	// serves the same 500 rows whatever it is asked (search/round/page/offset/
@@ -645,45 +330,14 @@ async function main() {
 	const unmatched: string[] = [];
 
 	for (const scf of scfProjects) {
-		// Trim parenthetical/whitespace noise from SCF titles before normalizing
-		// (e.g. "Soroban Optimistic Oracle  (SOO) " → "soroban optimistic oracle").
-		const cleanTitle = cleanScfTitle(scf.title);
-		const normTitle = normalize(cleanTitle);
-		const scfSlug = toSlug(cleanTitle);
-		// SCF slugs carry a trailing hash (e.g. "warp-drive-7tk") — stem it so it
-		// joins our "warp-drive" / "warpdrive" records.
-		const scfSlugStem = stemSlugHash(String(scf.slug || ""));
-
-		let ours =
-			bySlug.get(SCF_SLUG_OVERRIDES[String(scf.slug)] ?? "") ||
-			byNormName.get(normTitle) ||
-			bySlug.get(scfSlug) ||
-			bySlug.get(scf.slug) ||
-			bySlug.get(scfSlugStem) ||
-			byNormName.get(normalize(scfSlugStem));
-
-		// Partial matching, last resort — TITLE-PREFIX ONLY (sls-043 regression,
-		// 2026-08-12): normalize() strips spaces, so plain substring containment
-		// matched across word seams ("Soroban Disassembler" → soro**band**issa…
-		// wrote another project's r41/$100k onto Band Protocol; "ars" absorbed
-		// FOUR different projects via stell**ars**/…). Even word-boundary
-		// containment fails for generic one-word names ("Basilic — Stablecoin
-		// Rails…" is not the project "Rails"). The rule the data supports: the
-		// official TITLE must START with our project's name at a token boundary
-		// (or vice versa) — "Band Protocol" ↔ "Band" ✓, "DIA Oracles" ↔ "DIA" ✓,
-		// tagline mentions ✗. Legit tail matches ("…by Gateway.fm") get explicit
-		// SCF_SLUG_OVERRIDES instead. Rejections are logged for that triage.
-		if (!ours && normTitle.length >= 4) {
-			ours = findTitlePrefixMatch(
-				cleanTitle,
-				ourProjects,
-				(proj, why) =>
-					console.log(
-						`  partial REJECTED (${why}): ours "${proj.name}" vs SCF "${scf.title}"`,
-					),
-				identityOf,
-			);
-		}
+		let ours = matchListingRow(
+			scf,
+			{ rows: ourProjects, bySlug, byNormName, identityOf },
+			(proj, why) =>
+				console.log(
+					`  partial REJECTED (${why}): ours "${proj.name}" vs SCF "${scf.title}"`,
+				),
+		);
 
 		// A lineage shadow (Draft + canonicalSlug, #1337) is not a record. The
 		// name matcher joined "Liqvid" to the parked duplicate `liqvid` and wrote
@@ -744,12 +398,8 @@ async function main() {
 		const detail = await scrapeDetailPage(scfSlug);
 		await sleep(300);
 		if (!detail) {
-			beyondCap.unparseable.push(`${scfSlug} (HTTP error or network failure)`);
-			continue;
-		}
-		if (detail.pageSlug !== scfSlug) {
 			beyondCap.unparseable.push(
-				`${scfSlug} (no project payload at that slug)`,
+				`${scfSlug} (HTTP error, network failure or no project payload at that slug)`,
 			);
 			continue;
 		}
@@ -822,20 +472,29 @@ async function main() {
 					String(a.slug).localeCompare(String(b.slug)),
 			);
 		const primary = pages[0];
-		// Two NAME-matched pages on one row are two SCF records titled alike —
-		// a rename (wellspring-xuv is the team's RampMeDaddy page retitled
-		// "Wellspring") or a second product of one company (cashabroad's Smart
-		// Treasury). Say so in the log: a fold of two unrelated projects that
-		// merely share a name would look identical, and only a reader can tell.
-		if (pages.filter((p) => !viaOverride(p)).length > 1)
-			console.log(
-				`  WARN ${ours.slug}: ${pages.filter((p) => !viaOverride(p)).length} pages joined by NAME alone (${pages
-					.filter((p) => !viaOverride(p))
-					.map((p) => p.slug)
-					.join(
-						", ",
-					)}) — confirm they are one project before trusting the fold`,
+		// Two NAME-matched pages on one row are two SCF records titled alike:
+		// a second submission of one project (swiftex), a second product of
+		// one company (cashabroad's Smart Treasury), or another project's page
+		// retitled (wellspring-xuv, RampMeDaddy's page, folded into wellspring
+		// until 2026-11-07). A link every page shares with the row (its site,
+		// or its exact GitHub repo) confirms the fold; without one a reader
+		// must, so the log says WARN.
+		const byName = pages.filter((p) => !viaOverride(p));
+		if (byName.length > 1) {
+			const names = byName.map((p) => p.slug).join(", ");
+			const shared = foldLinkNote(
+				byName.map((p) => ({
+					website: p.detail?.website,
+					github: p.detail?.github,
+				})),
+				ours,
 			);
+			console.log(
+				shared
+					? `  ${ours.slug}: ${byName.length} pages joined by name, confirmed by links (${shared}): ${names}`
+					: `  WARN ${ours.slug}: ${byName.length} pages joined by NAME alone (${names}), and no link confirms they are one project; confirm before trusting the fold`,
+			);
+		}
 		const details = pages.map((p) => p.detail).filter(Boolean);
 		const totals = details.map((d) => d.totalAwarded);
 		const seen = new Set<string>();
@@ -1097,7 +756,11 @@ async function main() {
 				newLinks.website = detail.website;
 				linksChanged = true;
 			}
-			if (detail.twitter && !currentLinks.twitter) {
+			if (
+				detail.twitter &&
+				!currentLinks.twitter &&
+				!owned.has("links.twitter")
+			) {
 				newLinks.twitter = detail.twitter;
 				linksChanged = true;
 			}
