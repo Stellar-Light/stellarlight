@@ -41,7 +41,7 @@ const storedBefore = (b: (typeof CURATED_BUILDS)[number]) => ({
 });
 
 describe("import-curated-builds' dry run, over fixtures", () => {
-	it("first run: creates the 97 HackMeridian 2026 rows and leaves the 12 stored winners as they are", () => {
+	it("first run: creates the 97 HackMeridian 2026 rows and leaves the stored winners as they are", () => {
 		expect(badCuratedRows(ROWS, events)).toEqual([]);
 		const stored = new Map(
 			CURATED_BUILDS.map((b) => [
@@ -50,7 +50,12 @@ describe("import-curated-builds' dry run, over fixtures", () => {
 			]),
 		);
 		const plan = planCuratedImport(ROWS, events, stored);
-		expect([plan.created, plan.updated, plan.unchanged]).toEqual([97, 0, 12]);
+		// Every stored curated winner unchanged, however many the file holds.
+		expect([plan.created, plan.updated, plan.unchanged]).toEqual([
+			97,
+			0,
+			CURATED_BUILDS.length,
+		]);
 		expect(plan.writes.every((w) => w.id === null)).toBe(true);
 		expect(plan.lines.filter((l) => l.startsWith("  create "))).toHaveLength(
 			97,
@@ -115,7 +120,13 @@ describe("import-curated-builds' dry run, over fixtures", () => {
 		const plan = planCuratedImport(ROWS, events, stored, [
 			{ entryKey: "curated-hackmeridian-2026-dropped@hackmeridian-2026" },
 		]);
-		expect([plan.created, plan.updated, plan.unchanged]).toEqual([0, 1, 108]);
+		// One HackMeridian 2026 row changed; the other 96 and every curated
+		// winner unchanged.
+		expect([plan.created, plan.updated, plan.unchanged]).toEqual([
+			0,
+			1,
+			CURATED_BUILDS.length + 96,
+		]);
 		expect(plan.writes).toEqual([
 			{ entryKey: facts.entryKey, id: "db-moved", facts },
 		]);
