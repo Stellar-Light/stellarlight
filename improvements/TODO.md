@@ -639,3 +639,11 @@ Found 2026-10-23 in review of the smart wallet O2 ship
   put it in a URL (request logs, browser history). It signs every session,
   so rotating logs every admin and partner out [no rotation unless a log
   holding it is known to be readable by others].
+- Lusty has two rows for one product: `lusty` (served Live on
+  product-integration; the curation lane moves it to Pre-Release) and
+  `lusty-finance` (Development, human-verified 2026-08-29), both linking
+  lusty.finance and the same repo. Evidence read 2026-11-07: the repo README
+  says "Network: Stellar Testnet", and the vault the live app calls
+  (CBJZGTCF2PJVHX2BNFTFZ2L2LX6DWD5JMTLHNCVYTSOD3BLVSXZRUCJZ) exists on testnet
+  and not on mainnet. Merge them into one row with a canonical pointer and one
+  status [keep both rows, no merge, until decided].

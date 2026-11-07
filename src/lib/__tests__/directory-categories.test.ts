@@ -10,35 +10,11 @@ import {
 	DIRECTORY_CATEGORIES,
 	MIN_ROWS,
 } from "../directory-categories";
+import { PROJECT_TYPES } from "../project-types";
 
-/** The `types` enum as /api/projects/search reports it. */
-const VALID_TYPES = new Set([
-	"Wallet",
-	"DEX",
-	"Lending",
-	"Bridge",
-	"Infrastructure",
-	"Payments",
-	"Anchor",
-	"SDK",
-	"Indexer",
-	"Explorer",
-	"Analytics",
-	"AI",
-	"Gaming",
-	"Education",
-	"Security",
-	"NFT",
-	"RWA",
-	"Stablecoin",
-	"Social Impact",
-	"RPC",
-	"Faucet",
-	"Card Issuing",
-	"Exchange",
-	"Oracle",
-	"Yield",
-]);
+/** The `types` enum as /api/projects/search reports it: the one list, not a
+ * copy (this file's copy stopped at Yield). */
+const VALID_TYPES = new Set<string>(PROJECT_TYPES);
 
 describe("DIRECTORY_CATEGORIES", () => {
 	it("has unique slugs — a duplicate silently shadows a page", () => {

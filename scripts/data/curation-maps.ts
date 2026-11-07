@@ -14,7 +14,10 @@ const ASOF_SEED = "2026-08-31";
 // package-release landed: every curated entry using the new tier failed to
 // typecheck against a union that predated it. That is the sixth copy of this
 // list found on 2026-09-08 — the type as well as the value.
-import type { StatusBasis } from "../../src/lib/project-status";
+import {
+	isStrongStatusBasis,
+	type StatusBasis,
+} from "../../src/lib/project-status";
 import type { VENUE_ROLES } from "../../src/lib/project-types";
 export type { StatusBasis };
 
@@ -145,13 +148,17 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://registry.npmjs.org/@defarm/mcp",
 		note: "@defarm/mcp@0.1.0 on npm, published 2026-08-22 (17d before the 2026-09-08 sweep). The registry names defarm-repo/defarm-mcp as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
 	},
+	// Rewritten in place 2026-11-07 (sls-113, #1905): this was a
+	// package-release Live stamp from @axis-markets/json-storage on npm. A
+	// helper package shipping says nothing about where the venue runs, and the
+	// operator's docs say it is not on mainnet.
 	axis: {
 		from: "Live",
-		to: "Live",
-		basis: "package-release",
-		asOf: "2026-06-21",
-		sourceUrl: "https://registry.npmjs.org/@axis-markets/json-storage",
-		note: "@axis-markets/json-storage@0.2.0 on npm, published 2026-06-21 (79d before the 2026-09-08 sweep). The registry names axis-markets/json-storage as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+		to: "Pre-Release",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://axis.markets/docs/developers/networks/",
+		note: 'AXIS\'s networks page says "AXIS is not deployed on mainnet yet." (read 2026-11-07). Its earlier Live stamp rested on an npm release of @axis-markets/json-storage, a helper package, not on the order book running on mainnet.',
 	},
 	cypher: {
 		from: "Live",
@@ -912,13 +919,15 @@ export const STATUS_FIX: Record<
 			"https://api.stellar.expert/explorer/public/asset/KALE-GBDVX4VELCDSQ54KQJYTNHXAHFLBCA77ZY2USQBM4CSHTTV7DME7KALE/stats-history",
 		note: "Re-graded 2026-09-05 under the product-state rule: KALE asset shows 532,475 payments on 2026-09-05 (stellar.expert stats-history), kalefarm.xyz renders the farm app, own repo kalepail/KALE-sc pushed 2026-03-06.",
 	},
+	// Rewritten in place 2026-11-07 (sls-113, #1905): the 2026-09-05 Live
+	// re-grade read ICHI's EVM vaults and already found no Stellar surface.
 	ichi: {
 		from: "Live",
-		to: "Live",
+		to: "Inactive",
 		basis: "human-verified",
-		asOf: "2026-09-05",
-		sourceUrl: "https://ichi.org/",
-		note: "Re-graded 2026-09-05 under the product-state rule: page renders TOTAL VALUE LOCKED $18.21m, 897 vaults, 45 AMMs; DefiLlama reports $7.75M TVL dated 2026-09-05; app.ichi.org loads the vault app. No Stellar surface visible; no row repo.",
+		asOf: "2026-11-07",
+		sourceUrl: "https://docs.ichi.org/home/contract-addresses",
+		note: "ICHI's site and docs are EVM only: its contract addresses page lists Ethereum, Polygon, Arbitrum, Base and other EVM deployments and nothing on Stellar (read 2026-11-07). The Stellar port its SCF #26 award funded never shipped; ichi.org's TVL is its EVM vaults.",
 	},
 	alterscope: {
 		from: "Live",
@@ -1955,13 +1964,16 @@ export const STATUS_FIX: Record<
 		basis: "site-liveness",
 		note: "decaf.so serves the live app; our only linked repo is decafteam/.github, a profile repo, so repo recency says nothing about the product.",
 	},
+	// Rewritten in place 2026-11-07 (sls-113, #1905): this was a site-liveness
+	// Live stamp. wombat.exchange answers for Wombat's EVM product; Stellar is
+	// still an open item on its roadmap.
 	wombat: {
 		from: "Live",
-		to: "Live",
-		asOf: "2026-07-23",
-		sourceUrl: "https://wombat.exchange/",
-		basis: "site-liveness",
-		note: "wombat.exchange serves the live app; v1-core is a stable contract repo.",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://docs.wombat.exchange/roadmap.md",
+		note: 'Wombat\'s own roadmap lists "Stellar?" as an unchecked item, and its docs and app serve EVM chains only (read 2026-11-07): the Stellar exchange its SCF #18 entry described is not live. wombat.exchange answering is the EVM product.',
 	},
 	// Same refresh class: vesseo's row asserted basis source-inherited with
 	// no sourceUrl. vesseoapp.com verified live 2026-07-20 (product landing,
@@ -2530,6 +2542,19 @@ export const STATUS_FIX: Record<
 		basis: "human-verified",
 		note: "Operator README (repo pushed 2026-08-29) states 'Network: Stellar Testnet'; positions settled end-to-end on testnet; LUSD distributor backs the testnet faucet only. A testnet venue is not Live. Development, not Inactive — work is current.",
 	},
+	// sls-113 review, 2026-11-07: lusty is the same product as lusty-finance
+	// above (same site, same repo; the merge is an owner decision, see
+	// improvements/TODO.md). This row read Live on product-integration while
+	// the product still runs on testnet only.
+	lusty: {
+		from: "Live",
+		to: "Pre-Release",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl:
+			"https://stellar.expert/explorer/testnet/contract/CBJZGTCF2PJVHX2BNFTFZ2L2LX6DWD5JMTLHNCVYTSOD3BLVSXZRUCJZ",
+		note: 'Lusty runs on testnet only: its README (pushed 2026-11-06) says "Network: Stellar Testnet" and that an audit is "still to come before mainnet", and the vault its live app calls, CBJZGTCF2PJVHX2BNFTFZ2L2LX6DWD5JMTLHNCVYTSOD3BLVSXZRUCJZ, exists on testnet and not on mainnet (getLedgerEntries, read 2026-11-07).',
+	},
 	mydatacoin: {
 		// Keep the label, admit the basis: no artifact evidences the described
 		// Stellar product. mydatacoin.io is a dead Azure 404 with broken TLS;
@@ -2630,6 +2655,119 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://app.spectra.finance/api/v1/stellar/pools",
 		basis: "onchain-activity",
 		note: "Live on Stellar mainnet: seven PT markets served by the operator's own API with on-chain contracts and $750k TVL; the row's earlier text said the Stellar bridge was in development.",
+	},
+	// ── sls-113 (#1905), 2026-11-07: Live DEX rows that are no live venue ──
+	// Every Live DEX row with no venueRole was read against its operator's own
+	// material. Rows that trade got a role (VENUE_ROLE) and rows that are not
+	// spot venues left DEX (TYPES_SET); these leave Live. Testnet-only products
+	// are Pre-Release, funded builds with no product yet are Development, and
+	// products with no live Stellar surface are Inactive. axis, wombat and ichi
+	// are rewritten in place above.
+	tinyamm: {
+		from: "Live",
+		to: "Pre-Release",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://testnet.tinyamm.com/",
+		note: "TinyAmm runs on testnet only: the testnet.tinyamm.com app bundle carries an empty mainnet token list, and tinyamm.com answers HTTP 522 (read 2026-11-07).",
+	},
+	switchly: {
+		from: "Live",
+		to: "Pre-Release",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://github.com/SwitchlyProtocol/node-launcher",
+		note: 'Switchly\'s node launcher says "the stagenet id is a placeholder pending the network launch", and switchly.com bridges Sepolia USDC to Stellar Testnet USDC (read 2026-11-07): its network has not launched.',
+	},
+	xccy: {
+		from: "Live",
+		to: "Pre-Release",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://docs.xccy.finance/developers/smart-contracts",
+		note: 'XCCY\'s smart contracts page says "There is no Stellar mainnet deployment." (read 2026-11-07): its interest-rate swap markets run on testnet.',
+	},
+	octarine: {
+		from: "Live",
+		to: "Pre-Release",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl:
+			"https://github.com/mystic-finance/Stellar-RFQ/blob/main/docs/DEPLOYMENTS.md",
+		note: 'Octarine\'s deployments file lists its testnet contracts and, under Mainnet, "Not deployed." (read 2026-11-07).',
+	},
+	stabble: {
+		from: "Live",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://communityfund.stellar.org/project/stabble-u9u",
+		note: "Stabble holds an SCF #43 build award, but its only Stellar code is a testnet landing page, and stabble.org now serves a casino page (read 2026-11-07): funded, with no product on Stellar yet.",
+	},
+	starloom: {
+		from: "Live",
+		to: "Development",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://starloom.io/",
+		note: "starloom.io offers only a waitlist form, and its app, launchpad and docs subdomains do not resolve (read 2026-11-07): the launchpad is not live.",
+	},
+	clob: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://github.com/dCLOB",
+		note: "dclob.com, the site its SCF #29 build named, has no DNS record and is unregistered (Verisign RDAP 404), and the dCLOB GitHub organisation its SCF page links holds no public repository (read 2026-11-07).",
+	},
+	"fx-swap": {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://hedgeeffective.com/hedgehog",
+		note: 'The Hedgehog page on hedgeeffective.com answers HTTP 404, "We couldn\'t find the page you were looking for.", and the site offers no FX swap product (read 2026-11-07).',
+	},
+	grip: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://trygrip.co/",
+		note: "trygrip.co redirects to unrelated sites (persadaposnews.id on 2026-11-07), and Grip's iOS app is delisted: no product of its own answers.",
+	},
+	xlmeme: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://xlmeme.com/",
+		note: "xlmeme.com redirects to xl.fun, which is unregistered (the .fun registry lists it as available, 2026-11-07): the memepad answers nowhere.",
+	},
+	zkcross: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl:
+			"https://docs.zkcross.network/ecosystem-validation/ecosystem-deployments-and-grants",
+		note: 'zkCross\'s docs describe its Stellar work in the past tense ("On Stellar, zkCross delivered cross-chain liquidity routing"), its app subdomains do not resolve, and its Soroban repository is gone (read 2026-11-07).',
+	},
+	cables: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://docs.cables.finance/support/faq",
+		note: "Cables' FAQ says \"Cables will launch on Ethereum mainnet to start.\", and Horizon holds no asset from Cables Finance (its one CABLES asset is an unrelated issuer's; read 2026-11-07): the Soroban DEX its audits page lists is not live on Stellar.",
+	},
+	interstellar: {
+		from: "Live",
+		to: "Inactive",
+		basis: "human-verified",
+		asOf: "2026-11-07",
+		sourceUrl: "https://interstellar.exchange/",
+		note: "Every interstellar.exchange path times out, its Google Play page answers 404 and its iOS app is delisted, and the account that issues its BTC, BCH and DOGE tokens, GCNSGHUCG5VMGLT5RIYYZSO7VQULQKAJ62QA33DBC5PPBSO57LFWVV6P, has signed nothing in Horizon's history since 2025-09-23 (read 2026-11-07).",
 	},
 };
 
@@ -5078,14 +5216,28 @@ export const VENUE_ROLE: Record<string, (typeof VENUE_ROLES)[number]> = {
 	sodax: "aggregator-router", // docs.sodax.com/llms.txt: "Cross-network swaps filled by solvers" and "SODAX routes and settles; solvers on the marketplace fill"; Stellar trustline and sponsoring guides in the same docs
 	stellarport: "wallet-integrated", // stellarport.io: Wallet and Exchange tabs, "The new SDEX portal has been released": SDEX trading inside a wallet
 	lumenswap: "trading-ui", // lumenswap.io ("Decentralized Exchange on Stellar"): its app bundle sends only classic offers, path payments and liquidity-pool deposits to Horizon, no Soroban calls: an interface over SDEX and protocol pools
+	// 2026-11-07 pass: the three Live DEX rows still without a role that do
+	// trade, each read from the operator's own material. The other 23 left
+	// DEX (TYPES_SET) or Live (STATUS_FIX) the same day.
+	swiftex: "wallet-integrated", // github.com/SwiftExWallet/SwiftEx README: "Multi-chain crypto wallet for Ethereum, BNB, Polygon, Stellar DEX, and more."; its newOffer modal places SDEX offers on Networks.PUBLIC and AMM swaps go through Aquarius (iOS SwiftEx Wallet 1.0.8, 2026-08-24)
+	aida: "trading-ui", // back.aidapp.com/dex lists chain "Stellar", chainId "MAINNET", with venues "SDex AMM", "Aquarius", "SoroSwap" and "Phoenix": the app swaps through them and places SDEX limit orders, and holds no liquidity (fee proxy CDB5KKYYC4SFUPW3VZ3MLQ4P6G5J7ZCY2ZYZSYAFUV5EF5A2GWBZPLJO on mainnet)
+	"balanced-network": "trading-ui", // balanced.network/timeline/: "This is the final step in Balanced's transition from protocol to frontend-only, and it is no longer a community-owned app." (2025-11-04): a front end over SODAX Intents
 	// Left null on purpose (2026-11-04 pass): tinyamm runs its own AMM, but
 	// only testnet.tinyamm.com answers, so it is no independent venue on the
 	// network a venue count means; axis runs its own Soroban limit order book
 	// (axis.markets/docs), which is neither amm nor the native SDEX book
 	// native-orderbook names; perps, launchpads, CEX, remittance and vault
 	// rows are not spot venues; the rest could not be verified on Stellar
-	// from the operator's own pages.
+	// from the operator's own pages. On 2026-11-07 each of these rows left
+	// Live (STATUS_FIX) or DEX (TYPES_SET) instead.
 };
+
+/** sls-113 (#1905): a Live DEX row that stays venueRole null, with a dated
+ * reason it cannot be classified yet. Every other Live DEX row must carry a
+ * role, a type that is not DEX or a status that is not Live: the nightly
+ * record-completeness sweep (S4) files each one that has none of them. Empty
+ * on 2026-11-07, when every row had a recorded state. */
+export const VENUE_ROLE_UNRESOLVED: Record<string, string> = {};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Moved verbatim from curate-projects.ts (2026-07-26, lessons class 32). These
@@ -5096,6 +5248,14 @@ export const VENUE_ROLE: Record<string, (typeof VENUE_ROLES)[number]> = {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const DESCRIPTION_FIXES: Record<string, string> = {
+	// sls-113 (#1905), read 2026-11-07 from balanced.network/timeline/: Balanced
+	// began using SODAX Intents for its trades on 2025-09-15 ("the first step in
+	// Balanced's transition from a protocol to a frontend"), its DAO removed
+	// governance and stopped BALN inflation on 2025-11-04, and Balanced v2
+	// (2026-04-07) is "an interface for third-party protocols", starting with
+	// SODAX. The page still lists Stellar among its chains (2026-09-10).
+	"balanced-network":
+		"Balanced is a front end for SODAX, no longer a protocol: its trades are intent-based cross-chain swaps filled through SODAX, and its app also offers cross-chain transfers and a money market through SODAX, with Stellar among its chains. Its DAO removed governance and stopped BALN inflation in November 2025, BALN holders can migrate to SODA, and bnUSD has a new version from Balanced's move to the SODAX stack.",
 	// Lane DQ1 (2026-10-23, reworded after review to what the operator's own
 	// pages say, read 2026-10-23): docs.allbridge.io calls Core "our current
 	// bridge" and Classic deprecated (stops November 2026); docs-core says
@@ -5364,7 +5524,6 @@ export const TYPES_ADD: Record<string, string[]> = {
 	"pathpulse-ai": ["AI"], // on-device-AI road intelligence from crowdsourced driver cameras
 	"offer-hub": ["Payments"], // freelance marketplace whose on-chain core is crypto payments/escrow
 	muney: ["Payments", "Stablecoin"], // B2B stablecoin payment infrastructure converting USDC to local value
-	lusty: ["Exchange"], // options venue (covered calls/puts), server-settled today
 	"for-yield": ["Stablecoin", "Lending", "Yield"], // EURC-denominated regulated yield product routing deposits into Blend/DeFindex (site)
 	chainless: ["Wallet"], // self-custody MPC wallet investment app (Web3Auth, Pix on-ramp)
 	amulets: ["Wallet", "Card Issuing", "Stablecoin"], // stablecoin banking app: dollar account, swaps, Visa card spend
@@ -5377,9 +5536,7 @@ export const TYPES_ADD: Record<string, string[]> = {
 	blockroll: ["Payments", "Stablecoin", "Card Issuing"], // USDC payments + DeFindex yield + Visa card funded from Stellar USDC
 	"stellarx-ph": ["Education"], // developer education/community program (Soroban workshops, roadshows)
 	acta: ["Security"], // decentralized identity / verifiable credentials — the directory's Security typing for identity (idOS, Chaincerts precedent)
-	xccy: ["DEX"], // decentralized fixed-income markets via on-chain interest-rate swaps
 	"squid-router": ["Bridge"], // cross-chain swap/bridge aggregator on Axelar routing assets to Stellar
-	zenex: ["DEX"], // decentralized perpetuals exchange on Soroban (pool model + oracle pricing)
 	volta: ["Wallet"], // non-custodial smart-contract multisig wallet / enterprise asset control panel
 	turbolong: ["Lending"], // leveraged longs built as atomic recursive Blend lending loops
 	soropg: ["SDK"], // browser IDE/playground for Soroban contracts (Okashi SDK-typing precedent)
@@ -5572,6 +5729,22 @@ export const TYPES_SET: Record<string, string[]> = {
 	pakananet: ["Payments", "AI", "RWA", "Security"], // pakana.net: private ZK payments/compliance infrastructure, not a wallet (multisig-escrow is one feature)
 	stellarfolio: ["Analytics"], // stellarfolio.app: read-only portfolio viewer — enter ANY public address to view its assets; holds no keys
 	equilibre: ["Analytics"], // equilibre.io: portfolio rebalancer / DEX trading tool, wallet-independent (also already defunct — see STATUS_FIX)
+	// sls-113 (#1905), 2026-11-07: Live rows typed DEX that are not spot
+	// venues, re-typed from each operator's own material. Exact sets, so the
+	// DEX label leaves; zenex's additive DEX left TYPES_ADD with it.
+	zenex: ["Derivatives"], // github.com/zenith-protocols/zenex-agent: "Tooling for bots and AI agents that trade Zenex perpetuals on Stellar."; its XLM-USD market contract emits orders and liquidations on mainnet
+	earnbit: ["Exchange"], // earnbit.com: "First Crypto Exchange with Built-in Live Streaming"; a custodial exchange whose market list includes XLM_USDT
+	chartui: ["Analytics"], // chartui.com: "Chartui is a real-time market-data and charting terminal for the Stellar DEX (XLM)"; its Trade widget is a placeholder and places no trade
+	reyts: ["Payments", "Stablecoin"], // reyts.com/.well-known/stellar.toml: "Reyts is a financial technology company building regulated payment and settlement infrastructure."; issues RCAD
+	peerpesa: ["Payments", "Explorer"], // docs.peerpesa.co: "PeerPesa is a stablecoin on and off-ramp for Africa."; runs a Stellar explorer at stellar.peerpesa.co
+	prism: ["Bridge", "Yield"], // prismfi.cc/earn: "Deposit EVM USDC to Stellar, optionally swap to USTRY": a cross-chain deposit with optional RWA yield
+	zig3v2: ["Wallet"], // zig3.org app bundle: a wallet that keeps keys behind biometrics; its exchange and swap screens are placeholders and it never places an offer
+	// The other Derivatives rows (sls-113 review, 2026-11-07); their additive
+	// DEX and Exchange tags left TYPES_ADD. lusty and lusty-finance are two
+	// rows for one product (same site, same repo).
+	xccy: ["Derivatives"], // docs.xccy.finance/introduction/what-is-xccy: "An interest rate swap market on Stellar that trades a lending venue's floating yield against a fixed rate for a fixed term."
+	lusty: ["Derivatives", "Yield"], // lusty.finance: "An options yield venue on Stellar. You sell a covered call on the asset you hold, or a cash-secured put with dollars"
+	"lusty-finance": ["Derivatives", "Yield"], // same product as lusty: lusty.finance names itself a "Crypto Options Protocol" that pays the option premium upfront
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -5606,6 +5779,31 @@ export function statusFixNote(
 	if (!fix.note) return null;
 	if (fix.from !== fix.to || !stored) return fix.note;
 	return fix.replaceNote && stored !== fix.note ? fix.note : null;
+}
+
+/** Why curate-projects leaves the stored row alone for a STATUS_FIX entry, or
+ * null when the entry writes. Moved here from curate-projects on 2026-11-07,
+ * unchanged, so a test runs the rule curate runs (sls-113 precedence):
+ *  - "from-guard": an entry writes only onto a row still at `from`, so a
+ *    stamp (from === to) never re-opens a row a later verdict moved: a
+ *    site-liveness Live stamp cannot touch a row that is now Inactive.
+ *  - "stronger-basis": a stamp with a weak basis never overwrites a strong
+ *    one a lane or a person earned. A status MOVE is a verdict and writes as
+ *    the entry says; `withdraw` retracts a wrong strong stamp on purpose. */
+export function statusFixHold(
+	fix: { from: string; to: string; basis?: string; withdraw?: boolean },
+	row: { status?: string | null; statusBasis?: string | null },
+): "from-guard" | "stronger-basis" | null {
+	if (row.status !== fix.from) return "from-guard";
+	if (
+		fix.from === fix.to &&
+		fix.basis &&
+		!fix.withdraw &&
+		!isStrongStatusBasis(fix.basis) &&
+		isStrongStatusBasis(row.statusBasis)
+	)
+		return "stronger-basis";
+	return null;
 }
 
 export function curatedFieldsFor(slug: string): Set<string> {

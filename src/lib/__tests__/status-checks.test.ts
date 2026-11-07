@@ -7,14 +7,17 @@ import { describe, expect, it } from "vitest";
 import { PROJECT_COMPACT } from "../compact-view";
 import { factConfidence } from "../fact-confidence";
 import { spec } from "../openapi-spec";
+import { PROJECT_TYPES } from "../project-types";
 import {
 	CHECK_RESULTS,
 	llamaListingOf,
+	ONCHAIN_USE_TYPES,
 	QUIET_DAYS,
 	quietSinceFor,
 	STATUS_CHECKS,
 	statusChecksFor,
 	stellarTvlOf,
+	TVL_FLOOR_TYPES,
 	TVL_FRESH_DAYS,
 	tvlFieldsFor,
 	tvlStaleOf,
@@ -649,5 +652,41 @@ describe("statusChecksFor: what a reading must hold before it decides", () => {
 		).toBeNull();
 		// No breakdown at all: the total stands, as before.
 		expect(stellarTvlOf([{ tvl: 7 }])).toBe(7);
+	});
+});
+
+describe("Derivatives rows are held to the on-chain checks (sls-113, 2026-11-07)", () => {
+	// A perpetuals or rate-swap protocol IS on-chain use, as a DEX is: Zenex's
+	// XLM-USD market contract emits its orders and liquidations on mainnet.
+	it("TVL 0 and 60+ days of contract silence caveat a Derivatives row as they do a DEX", () => {
+		const out = statusChecksFor(
+			{
+				...allbridge,
+				types: ["Derivatives"],
+				llamaListing: {
+					state: "listed",
+					deadFrom: null,
+					checkedAt: "2026-10-26",
+				},
+				onchain: {
+					...allbridge.onchain,
+					quietSince: "2026-08-20T00:00:00.000Z",
+				},
+			},
+			NOW,
+		);
+		expect(byCheck(out, "tvl-zero-onchain-quiet")?.result).toBe("hit");
+	});
+	it("the spec names every type the TVL check covers, Derivatives among them", () => {
+		// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+		const d: string = (spec as any).components.schemas.Project.properties
+			.statusChecks.description;
+		expect(d).toMatch(/only for [^:]*\bDerivatives\b[^:]* rows:/);
+		for (const t of ONCHAIN_USE_TYPES) expect(d, t).toContain(t);
+	});
+	it("the liveness report's TVL floor covers Derivatives, and holds only real types", () => {
+		expect(TVL_FLOOR_TYPES as readonly string[]).toContain("Derivatives");
+		for (const t of TVL_FLOOR_TYPES)
+			expect(PROJECT_TYPES as readonly string[], t).toContain(t);
 	});
 });

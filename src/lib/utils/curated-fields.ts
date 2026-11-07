@@ -11,6 +11,21 @@
  * src/ so it is unit-testable without loading a Payload config.
  */
 
+import { isStrongStatusBasis } from "../project-status";
+
+/** The fields a feed sync may not write on a row: those a curation map owns,
+ * plus `status` when the row's basis was earned (STRONG_STATUS_BASES). Moved
+ * here from sync-lumenloop on 2026-11-07, unchanged, so a test runs the rule
+ * the sync runs: its test had kept a copy of the earned list that drifted. */
+export function feedOwnedFields(
+	mapOwned: ReadonlySet<string>,
+	statusBasis: string | null | undefined,
+): Set<string> {
+	const owned = new Set(mapOwned);
+	if (isStrongStatusBasis(statusBasis)) owned.add("status");
+	return owned;
+}
+
 /** Remove curated fields from a feed patch.
  *
  * Supports dotted paths ("links.website") so protecting one curated link does

@@ -91,3 +91,14 @@ export const STRONG_STATUS_BASES = [
 
 export const isStrongStatusBasis = (b: string | null | undefined): boolean =>
 	!!b && (STRONG_STATUS_BASES as readonly string[]).includes(b);
+
+/**
+ * The bases the liveness lane (scripts/data/upgrade-status-basis.ts) may
+ * replace with site-liveness: a page that answered outranks only a label no
+ * one checked. The lane writes basis, date and source, never `status`, so a
+ * site that still answers cannot re-open a row a person moved off Live.
+ */
+export const SITE_LIVENESS_MAY_REPLACE = [
+	"source-inherited",
+	"unverified",
+] as const satisfies readonly StatusBasis[];

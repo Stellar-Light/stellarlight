@@ -50,6 +50,10 @@ export const PROJECT_TYPES = [
 	// rather than be force-fitted into Lending, the same class gap as
 	// Oracle/Card Issuing before it.
 	"Yield",
+	// Contracts on a price rather than spot exchange (sls-113, 2026-11-07).
+	// Zenex trades XLM-USD perpetuals against a pool and sat in DEX for want
+	// of a member, so a venue count read a derivatives market as a spot venue.
+	"Derivatives",
 ] as const;
 
 export type ProjectType = (typeof PROJECT_TYPES)[number];
@@ -111,4 +115,6 @@ export const TYPE_DEFINITIONS: Record<ProjectType, string> = {
 	Oracle: "Provides price or data feeds that contracts read.",
 	Yield:
 		"Vaults, strategies or structured products that earn yield on deposited assets.",
+	Derivatives:
+		"Perpetuals, futures, options, or rate or FX swaps: contracts on a price, not spot exchange.",
 };

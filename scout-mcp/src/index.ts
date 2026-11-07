@@ -649,6 +649,7 @@ server.registerTool(
 					"Exchange",
 					"Oracle",
 					"Yield",
+					"Derivatives",
 				])
 				.optional()
 				.describe(

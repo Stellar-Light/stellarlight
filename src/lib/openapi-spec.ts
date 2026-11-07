@@ -76,7 +76,11 @@ import {
 	STABLECOIN_ASSET_TYPE_FILTERS,
 	STABLECOIN_ASSET_TYPES,
 } from "./stablecoins";
-import { CHECK_RESULTS, STATUS_CHECKS } from "./status-checks";
+import {
+	CHECK_RESULTS,
+	ONCHAIN_USE_TYPES,
+	STATUS_CHECKS,
+} from "./status-checks";
 import { TRUST_SIGNALS } from "./trust-report";
 import { API_VERSION } from "./version";
 
@@ -99,6 +103,10 @@ interface OpenAPISpec {
 // generated consumer could not project a valid live response from the
 // contract, and Raven gates exposure of GET /api/verify on exactly that.
 const VERIFY_CLAIM_TYPES = ["audited", "live", "maintained", "issued"];
+
+// The types tvl-zero-onchain-quiet covers, as prose read from the code's list:
+// a hand-written copy here would miss the next type, as it missed Derivatives.
+const ONCHAIN_USE_TYPES_TEXT = `${ONCHAIN_USE_TYPES.slice(0, -1).join(", ")} and ${ONCHAIN_USE_TYPES.at(-1)}`;
 
 // ── Shared response fragments (opacity ratchet burn-down) ──────────────────
 // Each fragment mirrors a serializer that several operations share, typed
@@ -11276,8 +11284,7 @@ export const spec: OpenAPISpec = {
 					},
 					statusChecks: {
 						type: "array",
-						description:
-							"Checks of the status label against stored upstream facts, present only on rows with a DefiLlama link (llamaSlugs); absent means the row has no DefiLlama link, so neither check applies. defillama-listing: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for DEX, Lending, Bridge and Yield rows: hit when a DefiLlama TVL of 0 read within the last 14 days, over a listing that found every linked slug, meets 60 or more days of observed time in which no tracked contract emitted an event or took a sub-call (both counters read for every contract), clear when a fresh TVL is above 0 or a contract moved in the latest window, could-not-check otherwise (no TVL figure or one that is negative, a TVL reading older than 14 days, a listing with a linked slug missing upstream, no tracked contract, a counter not read, a reading date that cannot be read, or under 60 days observed). A could-not-check result is not a clean bill.",
+						description: `Checks of the status label against stored upstream facts, present only on rows with a DefiLlama link (llamaSlugs); absent means the row has no DefiLlama link, so neither check applies. defillama-listing: hit when DefiLlama marks every linked slug dead (a deadFrom date, or deprecated with nothing locked and no live listing in its parentProtocol family), clear when it lists one as active, could-not-check when it was not read yet, a slug is missing upstream (a rename or removal), or a deprecated slug looks superseded (no deadFrom while value is still locked or a family listing is live): deprecated alone is never a hit. tvl-zero-onchain-quiet, only for ${ONCHAIN_USE_TYPES_TEXT} rows: hit when a DefiLlama TVL of 0 read within the last 14 days, over a listing that found every linked slug, meets 60 or more days of observed time in which no tracked contract emitted an event or took a sub-call (both counters read for every contract), clear when a fresh TVL is above 0 or a contract moved in the latest window, could-not-check otherwise (no TVL figure or one that is negative, a TVL reading older than 14 days, a listing with a linked slug missing upstream, no tracked contract, a counter not read, a reading date that cannot be read, or under 60 days observed). A could-not-check result is not a clean bill.`,
 						items: {
 							type: "object",
 							required: ["check", "result", "detail", "asOf", "sourceUrl"],

@@ -21,6 +21,12 @@
  *      list: a parent that still sums exactly the rows means enrich-tvl has
  *      not stored it yet (run the TVL lane); none means the family changed
  *      (reconcile the map); an unread list is could-not-check.
+ *   S4 venueRole: every row served as Live and DEX carries a venueRole or a
+ *      dated reason in VENUE_ROLE_UNRESOLVED (sls-113); a row that is no
+ *      venue leaves Live or DEX instead. A null role drops the row out of
+ *      every venue count without a word. Search honours type=DEX with
+ *      status=Live (2026-11-07: 38 of 47 DEX rows), and the check reads both
+ *      fields again on every row.
  *
  *   SCOUT_BASE=https://stellarlight.xyz npx tsx scripts/check-record-completeness.ts
  *
@@ -30,6 +36,8 @@
  */
 
 import { tvlCitationGaps } from "../src/lib/status-checks";
+import { unclassifiedLiveDexRows } from "../src/lib/venue-role-coverage";
+import { VENUE_ROLE_UNRESOLVED } from "./data/curation-maps";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
 const BASE = process.env.SCOUT_BASE || "https://stellarlight.xyz";
@@ -259,6 +267,41 @@ async function main() {
 		});
 	}
 	if (gaps.length) failures++;
+
+	// ── S4: every Live DEX row has a recorded state (sls-113, #1905) ──
+	// A role (VENUE_ROLE), a type that is not DEX or a status that is not Live
+	// takes a row out of this list; VENUE_ROLE_UNRESOLVED excuses one with a
+	// dated reason. Each other row is a residual, named.
+	const liveDex = await sweep("/api/projects/search?type=DEX&status=Live");
+	if (liveDex.length === 0) {
+		console.error("✗ S4 swept 0 Live DEX rows: an outage, not a clean pass");
+		failRows.push({
+			probe: "S4 sweep outage",
+			note: "0 Live DEX rows returned",
+		});
+		failures++;
+	} else {
+		const unclassified = unclassifiedLiveDexRows(
+			liveDex.map((p) => ({
+				slug: String(p.slug),
+				status: p.status,
+				types: p.types,
+				venueRole: p.venueRole,
+			})),
+			VENUE_ROLE_UNRESOLVED,
+		);
+		console.log(
+			`S4 venueRole: ${liveDex.length} Live DEX rows · ${unclassified.length} with no role and no documented reason`,
+		);
+		for (const p of unclassified) {
+			console.log(`  ✗ ${p.slug}: venueRole null`);
+			failRows.push({
+				probe: `venueRole null: ${p.slug}`,
+				note: "Live DEX row with no venueRole: classify it in VENUE_ROLE, correct its type or status, or give a dated reason in VENUE_ROLE_UNRESOLVED (scripts/data/curation-maps.ts)",
+			});
+		}
+		if (unclassified.length) failures++;
+	}
 
 	writeNightlyFindings("record-completeness", failRows);
 	console.log(failures ? "\nFAILING" : "\nall sweeps clean");

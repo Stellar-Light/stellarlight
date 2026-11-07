@@ -15,8 +15,8 @@
  *                            is not a death: DefiLlama also retires listings a
  *                            successor replaced (909 deprecated rows on
  *                            2026-10-23, 63 still holding value).
- *   tvl-zero-onchain-quiet   an on-chain protocol type (DEX, Lending, Bridge,
- *                            Yield) with a DefiLlama TVL of 0 read within
+ *   tvl-zero-onchain-quiet   an on-chain protocol type (ONCHAIN_USE_TYPES)
+ *                            with a DefiLlama TVL of 0 read within
  *                            TVL_FRESH_DAYS and no event or sub-call on any
  *                            tracked contract for QUIET_DAYS of OBSERVED time
  *                            (enrich-onchain writes onchain.quietSince).
@@ -41,8 +41,27 @@ export const QUIET_DAYS = 60;
 export const TVL_FRESH_DAYS = 14;
 
 /** Types whose product IS on-chain use: with no value locked and no contract
- * activity, such a protocol is not operating as listed. */
-export const ONCHAIN_USE_TYPES = ["DEX", "Lending", "Bridge", "Yield"] as const;
+ * activity, such a protocol is not operating as listed. Derivatives joined
+ * with the type (sls-113, 2026-11-07): a perpetuals or rate-swap protocol is
+ * on-chain use too, and Zenex's market contract emits its orders on mainnet. */
+export const ONCHAIN_USE_TYPES = [
+	"DEX",
+	"Lending",
+	"Bridge",
+	"Yield",
+	"Derivatives",
+] as const;
+
+/** The types the liveness report (scripts/report-liveness.ts) holds to its
+ * DefiLlama TVL floor: DeFi records, read as DefiLlama counts DeFi, which
+ * tracks bridges apart. Its copy also listed DeFi, AMM and Protocol/Contract,
+ * which are not types, so no row ever matched them (none served, 2026-11-07). */
+export const TVL_FLOOR_TYPES = [
+	"DEX",
+	"Lending",
+	"Yield",
+	"Derivatives",
+] as const;
 
 export const LLAMA_LISTING_STATES = [
 	"listed",
