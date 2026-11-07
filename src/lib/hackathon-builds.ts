@@ -8,6 +8,7 @@
  * cold fan-out.
  */
 import { unstable_cache } from "next/cache";
+import type { CuratedBuild } from "@/data/curated-builds";
 import { overlayWinnerOf } from "@/data/winner-overlay";
 import { INDEX_BYTES_RED, indexBytes } from "@/lib/builds-index-size";
 import { DEFAULT_READ_TIMEOUT_MS, withReadTimeout } from "@/lib/degraded-read";
@@ -338,6 +339,34 @@ const linkedProject = (d: HackathonBuild, facts?: ProjectFacts) =>
 				...(facts ? facts : {}),
 			}
 		: null;
+
+/** A curated row (src/data/curated-builds.ts) as the index serves it once
+ * scripts/import-curated-builds.ts has stored it, for a curated event the
+ * store does not hold yet: the file is the roster, the store its copy.
+ * `source` reads "dorahacks" as on every stored row; readers tell a curated
+ * row by its id. */
+export function indexedFromCurated(
+	b: CuratedBuild,
+	hackathon: IndexedBuild["hackathon"],
+): IndexedBuild {
+	return {
+		id: b.id,
+		name: b.name,
+		description: b.description,
+		githubUrl: b.githubUrl,
+		demoUrl: b.demoUrl,
+		videoUrl: null,
+		track: b.track,
+		hackathonPlacement: b.placement,
+		award: null,
+		isWinner: b.isWinner,
+		voteCount: null,
+		url: b.url,
+		source: "dorahacks",
+		hackathon,
+		haystack: haystackOf(b.name, b.description, b.track, null),
+	};
+}
 
 /** A stored row in the shape the index serves. `vision` (DoraHacks' one-line
  * summary) stays `description`, as the live read has always served it. */

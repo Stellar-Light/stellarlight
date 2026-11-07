@@ -26,21 +26,34 @@ export const CATEGORY_LABELS: Record<(typeof CATEGORIES)[number], string> = {
 
 export type Category = (typeof CATEGORIES)[number];
 
-export const QUARTERS = ["q1-2026", "q2-2026", "q3-2026"] as const;
+export const QUARTERS = ["q1-2026", "q2-2026", "q3-2026", "q4-2026"] as const;
 export type Quarter = (typeof QUARTERS)[number];
 export const QUARTER_LABELS: Record<Quarter, string> = {
 	"q1-2026": "Q1 2026",
 	"q2-2026": "Q2 2026",
 	"q3-2026": "Q3 2026",
+	"q4-2026": "Q4 2026",
 };
 
 /**
- * The currently-fundable quarter — RFPs in this quarter are "open" for
+ * The currently-fundable quarter: RFPs in this quarter are "open" for
  * builders to claim, with winners eligible for SCF grant funding. Prior
- * quarters are closed (already funded or moved on). Bump this when a
- * new SCF round opens.
+ * quarters are closed (already funded or moved on). It is the quarter
+ * BRIEF_ROSTER's page names; a brief stays open here until this moves, so
+ * recheck that page, and bump BRIEF_ROSTER.checkedOn, when it changes.
  */
-export const ACTIVE_QUARTER: Quarter = "q3-2026";
+export const ACTIVE_QUARTER: Quarter = "q4-2026";
+
+/** The official page the open briefs were last checked against, and the
+ * day. SCF's RFP Track page lists the briefs open now under "Current Open
+ * RFPs"; on 2026-11-04 it read "October 2026: New Q4 RFPs are coming soon."
+ * and named none, so no brief here is in q4-2026 yet. /api/rfps serves this
+ * as meta.briefRoster. */
+export const BRIEF_ROSTER = {
+	source:
+		"https://stellar.gitbook.io/scf-handbook/scf-awards/build-award/rfp-track",
+	checkedOn: "2026-11-04",
+} as const;
 
 /** Status of an RFP relative to ACTIVE_QUARTER. */
 export type RfpStatus = "open" | "closed";
@@ -49,15 +62,54 @@ export function rfpStatus(quarter: Quarter): RfpStatus {
 	return quarter === ACTIVE_QUARTER ? "open" : "closed";
 }
 
+/** The brief SCF published for an idea it took up as an RFP: its title on
+ * the RFP Track page, a commit-pinned copy of that page that carries it (the
+ * live page drops a quarter's briefs when the next quarter's arrive), and
+ * the day that copy was read. */
+export interface PublishedBrief {
+	title: string;
+	url: string;
+	checkedOn: string;
+	/** The brief's functional requirements, restated short, in its order.
+	 * Absent: not restated here; the brief at url has them. */
+	functionalRequirements?: string[];
+	/** What the brief rules out of scope, restated short. Absent: not
+	 * restated here. */
+	outOfScope?: string[];
+}
+
 export interface Idea {
 	id: string;
 	title: string;
 	description: string;
+	/** The idea's own summary of what to build, as /ideas shows it. Not the
+	 * published brief: some were written before SCF published one, and can
+	 * differ from it (publishedBrief). */
 	technicalRequirements: string | null;
 	category: Category;
 	authorName: string;
 	quarter: Quarter;
+	/** Absent: no published brief is linked. None was found in the RFP Track
+	 * page's history (checked 2026-11-04), which is not a claim SCF
+	 * published none. */
+	publishedBrief?: PublishedBrief;
 }
+
+// Commit-pinned copies of SCF's RFP Track page, each the last version that
+// carried a quarter's briefs, all read 2026-11-04.
+const RFP_TRACK = (commit: string) =>
+	`https://github.com/stellar/scf-handbook/blob/${commit}/scf-awards/build-award/rfp-track.md`;
+/** 2026-04-17: the six Q1 2026 briefs. */
+const Q1_BRIEFS = RFP_TRACK("be0c693d89a0990d9fabebc61fd2894d23ec55e2");
+/** 2026-07-23: the five Q2 2026 briefs. */
+const Q2_BRIEFS = RFP_TRACK("1e04b79973358e3dea58d821ed6419b50c93370c");
+/** 2026-07-29: the two Q3 2026 briefs. */
+const Q3_BRIEFS = RFP_TRACK("7abdddd09fe05c6de47de300a5cde73caa61cb02");
+const brief = (url: string, title: string): PublishedBrief => ({
+	title,
+	url,
+	checkedOn: "2026-11-04",
+});
 
 export const IDEAS: Idea[] = [
 	{
@@ -70,6 +122,7 @@ export const IDEAS: Idea[] = [
 		category: "infrastructure",
 		authorName: "Jake",
 		quarter: "q1-2026",
+		publishedBrief: brief(Q1_BRIEFS, "Prices API"),
 	},
 	{
 		id: "defi-positions-api",
@@ -81,6 +134,7 @@ export const IDEAS: Idea[] = [
 		category: "defi",
 		authorName: "Jake",
 		quarter: "q1-2026",
+		publishedBrief: brief(Q1_BRIEFS, "DeFi Positions API"),
 	},
 	{
 		id: "c-address-tooling",
@@ -92,6 +146,7 @@ export const IDEAS: Idea[] = [
 		category: "infrastructure",
 		authorName: "Tyler",
 		quarter: "q1-2026",
+		publishedBrief: brief(Q1_BRIEFS, "C-Address Tooling & Onboarding"),
 	},
 	{
 		id: "soroban-block-explorer",
@@ -103,6 +158,7 @@ export const IDEAS: Idea[] = [
 		category: "infrastructure",
 		authorName: "Keeks",
 		quarter: "q1-2026",
+		publishedBrief: brief(Q1_BRIEFS, "Soroban-first Block Explorer"),
 	},
 	{
 		id: "concentrated-liquidity-amm",
@@ -136,6 +192,10 @@ export const IDEAS: Idea[] = [
 		category: "developer-tooling",
 		authorName: "Matej",
 		quarter: "q1-2026",
+		publishedBrief: brief(
+			Q1_BRIEFS,
+			"Soroban Specialized Reverse Engineering Tool",
+		),
 	},
 	{
 		id: "ai-webide",
@@ -158,6 +218,10 @@ export const IDEAS: Idea[] = [
 		category: "defi",
 		authorName: "Rahim",
 		quarter: "q1-2026",
+		publishedBrief: brief(
+			Q1_BRIEFS,
+			"Hummingbot integration (open source trading engine)",
+		),
 	},
 	{
 		id: "trustline-onboarder",
@@ -169,6 +233,7 @@ export const IDEAS: Idea[] = [
 		category: "payments",
 		authorName: "Tyler",
 		quarter: "q2-2026",
+		publishedBrief: brief(Q2_BRIEFS, "Trustline onboarder"),
 	},
 	{
 		id: "passkey-ui-kit",
@@ -180,6 +245,7 @@ export const IDEAS: Idea[] = [
 		category: "developer-tooling",
 		authorName: "Keeks",
 		quarter: "q2-2026",
+		publishedBrief: brief(Q2_BRIEFS, "Passkey UI"),
 	},
 	{
 		id: "account-demolisher",
@@ -191,6 +257,7 @@ export const IDEAS: Idea[] = [
 		category: "consumer-dapps",
 		authorName: "Jake",
 		quarter: "q2-2026",
+		publishedBrief: brief(Q2_BRIEFS, "Account Demolisher"),
 	},
 	{
 		id: "contract-source-verification",
@@ -202,6 +269,34 @@ export const IDEAS: Idea[] = [
 		category: "infrastructure",
 		authorName: "Matej",
 		quarter: "q2-2026",
+		// The idea above predates the brief: SCF's brief (rewritten 27 May
+		// 2026) asks for SEP-58 rebuilds on an SDF-allowlisted image and rules
+		// deterministic Rust compilation research out.
+		publishedBrief: {
+			...brief(Q2_BRIEFS, "Contract Source Verification Service"),
+			functionalRequirements: [
+				"Accepts source submissions (a tarball or equivalent) tied to a target Wasm hash.",
+				"Rebuilds the source with an SDF-allowlisted trusted build image, named by the SEP-58 bldimg field; the proposal states its image allowlist policy.",
+				"A free public API answers verification status by contract ID or Wasm hash, with the SEP-58 fields recorded (bldimg, bldopt, source_repo, source_rev, tarball_url, tarball_sha256), the linked source, build metadata, an image trust signal and a timestamp.",
+				"One shared result layer that explorers, Lab and wallets query without rebuilding; a design that makes every consumer rebuild, or rests on one hardcoded verifier, does not qualify.",
+				"Several verifiers each report against the deployed Wasm hash, and a disagreement shows per verifier, not as one status.",
+				"Covers Mainnet and Testnet.",
+				"Verifies contracts deployed before launch; retroactive verification of non-upgradable contracts is a priority.",
+				"Accepts every SEP-58 source mode: public repo (source_repo and source_rev), hosted tarball (tarball_url and tarball_sha256) and content-addressed (tarball_sha256 alone), with IPFS a first-tier channel beside HTTPS and neither HTTPS nor GitHub hardcoded; responses say which mode applies.",
+				"A CLI or developer submission flow, with the API shaped to fit stellar-cli.",
+				"Exposes verification metadata that explorers (Stellar Expert, StellarChain, Stellar Lab) and other tools can consume.",
+				"Keeps SEP-55 attestations and SEP-58 rebuild verification apart as distinct trust levels.",
+				"Aligns the API with the verifier-API SEP once that spec is written.",
+			],
+			outOfScope: [
+				"How each verifier chooses to display results, such as for contracts without public source.",
+				"Writing SEP-58 or SEP-55; coordination is expected.",
+				"Producing the trusted stellar-cli Docker images, which SDF maintains.",
+				"Changes to SDF-owned tools (stellar-cli, Stellar Lab) beyond exposing the APIs they consume.",
+				"UI work on any one third-party explorer.",
+				"Fully deterministic Rust compilation as a research effort: the brief asks for the best reproducibility available today, anchored on the SDF-allowlisted images.",
+			],
+		},
 	},
 	{
 		id: "oz-accounts-policy-builder",
@@ -213,6 +308,7 @@ export const IDEAS: Idea[] = [
 		category: "developer-tooling",
 		authorName: "Ishan",
 		quarter: "q2-2026",
+		publishedBrief: brief(Q2_BRIEFS, "OZ accounts policy builder"),
 	},
 	{
 		id: "layerzero-dvn",
@@ -224,6 +320,7 @@ export const IDEAS: Idea[] = [
 		category: "infrastructure",
 		authorName: "SCF Delegates",
 		quarter: "q3-2026",
+		publishedBrief: brief(Q3_BRIEFS, "Stellar-compatible LayerZero DVN"),
 	},
 	{
 		id: "x402-facilitator-bazaar",
@@ -235,5 +332,9 @@ export const IDEAS: Idea[] = [
 		category: "payments",
 		authorName: "SCF Delegates",
 		quarter: "q3-2026",
+		publishedBrief: brief(
+			Q3_BRIEFS,
+			"X402 Facilitator with Bazaar (discovery) support",
+		),
 	},
 ];

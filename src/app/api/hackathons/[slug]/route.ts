@@ -42,6 +42,15 @@ export async function GET(
 
 	try {
 		const detail = await getHackathonDetail(payload, slug);
+		if (!detail.found && "unchecked" in detail)
+			return apiError({
+				status: 503,
+				error: detail.body.error,
+				advisory:
+					"A DoraHacks listing read failed, so this slug was not looked for in every listing. This is an outage, not a statement that the hackathon is unknown. Retry after Retry-After.",
+				retryAfterSeconds: 30,
+				startedAt,
+			});
 		if (!detail.found) return NextResponse.json(detail.body, { status: 404 });
 		logApiHit({
 			req,

@@ -157,7 +157,7 @@ Load when the user query matches one of these shapes; the patterns here show the
 **User:** "Who can audit my Soroban contract, and is there a USDC off-ramp anchor in LatAm?"
 **Agent action:**
 1. Audit firms: `GET /api/partners?type=audit-firm&q=soroban` → real, vetted providers (Veridise, OtterSec, Runtime Verification, Certora, Halborn) with services + accepting-clients + contact.
-2. Anchors: `GET /api/partners?type=anchor&region=latam&q=usdc+off-ramp` → LatAm anchors with stellar.toml-verified assets/SEPs/ramps (e.g. Anclap, CLPX); report each partner's asset codes, ramp direction, and country.
+2. Anchors: `GET /api/partners?type=anchor&region=latam&q=usdc+off-ramp` → LatAm anchors (e.g. Anclap, CLPX) with their ramp directions, and assets/SEPs read from each anchor's stellar.toml (null where no read is recorded, never 'none'); report each partner's asset codes, ramp direction, and country.
 3. Only surface partners actually returned by the API; never invent a provider. Skip archived; note whether each is accepting clients.
 4. Link each profile: `https://stellarlight.xyz/partners/{slug}` (rich profile: capabilities, compliance & corridors, links).
 5. **Not for:** a built product/project → use `search_projects`; a teammate to collaborate with → use `get_builders`.

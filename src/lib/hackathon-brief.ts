@@ -88,7 +88,10 @@ export function contractDomainFor(
 export interface TrustSummary {
 	repo: TrustReport["repo"];
 	project: TrustReport["project"];
-	codeTruth: Omit<TrustReport["codeTruth"], "contractInterface">;
+	codeTruth: Omit<
+		TrustReport["codeTruth"],
+		"contractInterface" | "contractInterfacePaths"
+	>;
 	usage: TrustReport["usage"];
 	audits: {
 		count: number;
@@ -107,7 +110,11 @@ export interface TrustSummary {
 
 /** Trim a TrustReport to what a brief needs. Pure. */
 export function summarizeTrust(t: TrustReport): TrustSummary {
-	const { contractInterface: _iface, ...codeTruth } = t.codeTruth;
+	const {
+		contractInterface: _iface,
+		contractInterfacePaths: _paths,
+		...codeTruth
+	} = t.codeTruth;
 	return {
 		repo: t.repo,
 		project: t.project,

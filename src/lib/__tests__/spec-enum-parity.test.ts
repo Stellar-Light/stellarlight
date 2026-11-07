@@ -19,7 +19,7 @@ import {
 	RESOLVABLE_PROJECT_STATUSES,
 	STATUS_BASES,
 } from "../project-status";
-import { PROJECT_TYPES } from "../project-types";
+import { PROJECT_TYPES, VENUE_ROLES } from "../project-types";
 import { RATE_LIMIT_SCOPE } from "../rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "../repo-grade";
 import { REPO_MATCH_MODES } from "../repo-search";
@@ -34,7 +34,12 @@ import {
 	LOCATOR_KINDS,
 	SOURCE_REPO_NAMES,
 } from "../source-locator";
-import { PRICE_BASES } from "../stablecoins";
+import {
+	ISSUER_OF_RECORD_CHECKS,
+	PRICE_BASES,
+	STABLECOIN_ASSET_TYPE_FILTERS,
+	STABLECOIN_ASSET_TYPES,
+} from "../stablecoins";
 import { TRUST_SIGNALS } from "../trust-report";
 
 /**
@@ -254,6 +259,23 @@ describe("status and types params are the code's lists too (found 2026-09-09 by 
 		expect(PROJECT_TYPES).toContain("Yield");
 	});
 
+	it("venueRole (Project field, searchProjects ?venueRole, the collection) is VENUE_ROLES (sls-113)", () => {
+		expect(
+			sorted(S.components.schemas.Project.properties.venueRole.enum),
+		).toEqual(sorted(VENUE_ROLES));
+		expect(sorted(param(searchOp, "venueRole").schema.enum)).toEqual(
+			sorted(VENUE_ROLES),
+		);
+		expect(collection).toMatch(
+			/name:\s*"venueRole",[\s\S]*?options:\s*\[\.\.\.VENUE_ROLES\]/,
+		);
+		const search = readFileSync(
+			resolve(__dirname, "../../app/api/projects/search/route.ts"),
+			"utf8",
+		);
+		expect(search).toContain("VALID_VENUE_ROLES = VENUE_ROLES");
+	});
+
 	it("both route validators use the shared lists, not local literals", () => {
 		const search = readFileSync(
 			resolve(__dirname, "../../app/api/projects/search/route.ts"),
@@ -270,6 +292,30 @@ describe("status and types params are the code's lists too (found 2026-09-09 by 
 		expect(search).not.toMatch(/const VALID_STATUSES\s*=\s*\[/);
 		expect(search).not.toMatch(/const VALID_TYPES\s*=\s*\[/);
 		expect(lb).not.toMatch(/const VALID_TYPES\s*=\s*\[/);
+	});
+});
+
+describe("the MCP search_projects tool copies the same lists (sls-113 review)", () => {
+	// scout-mcp ships as its own npm package and cannot import src/lib, so its
+	// enums are literals; this keeps each one equal to the code's list.
+	const mcp = readFileSync(
+		resolve(__dirname, "../../../scout-mcp/src/index.ts"),
+		"utf8",
+	);
+	const tool = mcp.slice(mcp.indexOf('"search_projects"'));
+	const literals = (name: string) =>
+		[
+			...(
+				tool.match(
+					new RegExp(`${name}:\\s*z\\s*\\.enum\\(\\[([\\s\\S]*?)\\]\\)`),
+				)?.[1] ?? ""
+			).matchAll(/"([^"]+)"/g),
+		].map((m) => m[1]);
+	it("venueRole is VENUE_ROLES", () => {
+		expect(sorted(literals("venueRole"))).toEqual(sorted(VENUE_ROLES));
+	});
+	it("type is PROJECT_TYPES", () => {
+		expect(sorted(literals("type"))).toEqual(sorted(PROJECT_TYPES));
 	});
 });
 
@@ -293,11 +339,18 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 		expect(spread("DEPLOYMENT_NETWORKS")).toBe(1);
 	});
 
-	it("partnerType (getPartners param, submit-listing body, Partner schema) is PARTNER_TYPES", () => {
+	it("partnerType (getPartners param, submit-listing body, matchPartners body, Partner schema) is PARTNER_TYPES", () => {
 		expect(
 			sorted(S.components.schemas.Partner.properties.partnerType.enum),
 		).toEqual(sorted(PARTNER_TYPES as readonly string[]));
-		expect(spread("PARTNER_TYPES")).toBe(3);
+		expect(
+			sorted(
+				S.paths["/api/partners/match"].post.requestBody.content[
+					"application/json"
+				].schema.properties.type.enum,
+			),
+		).toEqual(sorted(PARTNER_TYPES as readonly string[]));
+		expect(spread("PARTNER_TYPES")).toBe(4);
 	});
 
 	it("REPO_KINDS: one spread, one shared schema object, two sites that equal it (Repo.kind, explainRepo repoMeta.kind)", () => {
@@ -323,6 +376,36 @@ describe("no spec enum literal mirrors an exported vocabulary any more", () => {
 		);
 		expect(collection).toMatch(
 			/name:\s*"priceBasis",[\s\S]*?options:\s*\[\.\.\.PRICE_BASES\]/,
+		);
+	});
+
+	it("Stablecoin.assetType is STABLECOIN_ASSET_TYPES, and getStablecoins' assetType filter is those plus none (sls-107)", () => {
+		expect(
+			sorted(S.components.schemas.Stablecoin.properties.assetType.enum),
+		).toEqual(sorted(STABLECOIN_ASSET_TYPES as readonly string[]));
+		const p = S.paths["/api/stablecoins"].get.parameters.find(
+			(x: Param) => x.name === "assetType",
+		) as Param;
+		expect(sorted(p.schema.enum)).toEqual(
+			sorted(STABLECOIN_ASSET_TYPE_FILTERS as readonly string[]),
+		);
+		expect(spread("STABLECOIN_ASSET_TYPES")).toBe(1);
+		expect(spread("STABLECOIN_ASSET_TYPE_FILTERS")).toBe(1);
+	});
+
+	it("Stablecoin.issuerOfRecordCheck is ISSUER_OF_RECORD_CHECKS, in the spec and in the collection that stores it", () => {
+		expect(
+			sorted(
+				S.components.schemas.Stablecoin.properties.issuerOfRecordCheck.enum,
+			),
+		).toEqual(sorted(ISSUER_OF_RECORD_CHECKS as readonly string[]));
+		expect(spread("ISSUER_OF_RECORD_CHECKS")).toBe(1);
+		const collection = readFileSync(
+			resolve(__dirname, "../../collections/Stablecoins.ts"),
+			"utf8",
+		);
+		expect(collection).toMatch(
+			/name:\s*"issuerOfRecordCheck",[\s\S]*?options:\s*\[\.\.\.ISSUER_OF_RECORD_CHECKS\]/,
 		);
 	});
 

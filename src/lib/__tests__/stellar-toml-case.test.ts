@@ -36,3 +36,42 @@ code = "NOISSUER"
 		).toHaveLength(1);
 	});
 });
+
+/**
+ * Re-check items 7 and 8 (2026-11-04): the parser moved to src/lib and
+ * learned ACCOUNTS. An unclosed `ACCOUNTS = [` must not swallow the table
+ * after it (enrich-partners-toml would then read [DOCUMENTATION] as missing
+ * and skip the partner), and single-quoted TOML literal strings, which SEP-1
+ * allows and the old reader dropped, are read.
+ */
+describe("stellar.toml parser edge cases", () => {
+	const G = "GA5ZSEJYB37JRC5AVCIA5MOP4RHTM335X2KGX3IHOJAPP5RE34K4KZVN";
+
+	it("a header line ends an ACCOUNTS array left open, and its table is read", () => {
+		const parsed = parseStellarToml(
+			`ACCOUNTS = [\n"${G}"\n[DOCUMENTATION]\nORG_NAME="Example Org"\n[[CURRENCIES]]\ncode="USDC"\nissuer="${G}"\n`,
+		);
+		expect(parsed.accounts).toEqual([G]);
+		expect(parsed.documentation.ORG_NAME).toBe("Example Org");
+		expect(parsed.topLevel.ORG_NAME).toBeUndefined();
+		expect(parsed.currencies).toEqual([{ code: "USDC", issuer: G }]);
+	});
+
+	it("an assignment line ends an ACCOUNTS array left open, too", () => {
+		const parsed = parseStellarToml(
+			`ACCOUNTS = [\n"${G}"\nVERSION = "2.0.0"\n`,
+		);
+		expect(parsed.accounts).toEqual([G]);
+		expect(parsed.topLevel.VERSION).toBe("2.0.0");
+	});
+
+	it("single-quoted literal strings are read, as SEP-1 (TOML) allows", () => {
+		const parsed = parseStellarToml(
+			`[DOCUMENTATION]\nORG_NAME = 'Literal Org'\n[[CURRENCIES]]\ncode = 'XLIT'\nissuer = '${G}'\ndesc = 'It is "quoted" inside'\n`,
+		);
+		expect(parsed.documentation.ORG_NAME).toBe("Literal Org");
+		expect(parsed.currencies).toEqual([
+			{ code: "XLIT", issuer: G, desc: 'It is "quoted" inside' },
+		]);
+	});
+});

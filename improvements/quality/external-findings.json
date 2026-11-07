@@ -1,25 +1,27 @@
 {
- "generatedAt": "2026-11-04T15:42:24.430Z",
+ "generatedAt": "2026-11-06T15:19:08.798Z",
  "consumer": "stellar-experimental/stellar-raven",
  "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it.",
  "counts": {
-  "reported-upstream": 22,
+  "reported-upstream": 13,
   "declined-upstream": 1
  },
  "ourResponse": {
-  "fixShipped": 3,
+  "fixShipped": 5,
   "fixShippedIds": [
    "sls-024",
    "sls-029",
-   "sls-033"
+   "sls-033",
+   "sls-101",
+   "sls-107"
   ],
-  "fixApplicable": 22,
+  "fixApplicable": 13,
   "declined": 1,
-  "distinctIssuesClosed": 3,
+  "distinctIssuesClosed": 5,
   "scoredBy": "our own linked GitHub issue state. This is NOT the consumer's verdict and must never be rendered as one.",
   "note": "A record can read reported-upstream on their side while our linked issue is closed: we shipped the fix and their re-verification has not run yet. Neither status is allowed to speak for the other."
  },
- "total": 23,
+ "total": 14,
  "records": [
   {
    "id": "sls-024",
@@ -82,60 +84,6 @@
    }
   },
   {
-   "id": "sls-095",
-   "title": "Scout cannot resolve Varial because the freighter project still uses its former name",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-095-freighter-varial-rename-identity.md",
-   "ourIssue": null
-  },
-  {
-   "id": "sls-096",
-   "title": "GET /api/rfps?status=open lists Q3 briefs that the official SCF page removed",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-096-rfp-open-briefs-after-official-withdrawal.md",
-   "ourIssue": 1907,
-   "ourResponse": {
-    "issue": 1907,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1907"
-   }
-  },
-  {
-   "id": "sls-097",
-   "title": "POST /api/partners/match omits its HTTP 502 failure response from OpenAPI",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-097-partner-match-undocumented-502.md",
-   "ourIssue": 1908,
-   "ourResponse": {
-    "issue": 1908,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1908"
-   }
-  },
-  {
-   "id": "sls-098",
-   "title": "Partner pages falsely verify unfetched stellar.toml data; detail responses turn unknown SEPs into empty lists",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-098-partner-page-toml-verified-badge-without-toml.md",
-   "ourIssue": 1909,
-   "ourResponse": {
-    "issue": 1909,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1909"
-   }
-  },
-  {
    "id": "sls-099",
    "title": "Scout Soroswap descriptions omit current API venues and do not distinguish Phoenix contract support",
    "status": "reported-upstream",
@@ -175,8 +123,8 @@
    "ourIssue": 1912,
    "ourResponse": {
     "issue": 1912,
-    "state": "open",
-    "closedAt": null,
+    "state": "closed",
+    "closedAt": "2026-11-05",
     "url": "https://github.com/Stellar-Light/stellarlight/issues/1912"
    }
   },
@@ -196,66 +144,6 @@
    }
   },
   {
-   "id": "sls-103",
-   "title": "GET /api/analyze funding delta treats an empty snapshot as a valid comparison",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-103-funding-delta-against-empty-snapshot.md",
-   "ourIssue": 1914,
-   "ourResponse": {
-    "issue": 1914,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1914"
-   }
-  },
-  {
-   "id": "sls-104",
-   "title": "GET /api/builders caps its full set at 300 and omits rows reachable with location filters",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-104-builders-unfiltered-full-set-capped.md",
-   "ourIssue": 1915,
-   "ourResponse": {
-    "issue": 1915,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1915"
-   }
-  },
-  {
-   "id": "sls-105",
-   "title": "GET /api/rfps source-verification requirements omit the published brief scope and source",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-105-rfp-brief-requirements-from-idea-not-published-brief.md",
-   "ourIssue": 1916,
-   "ourResponse": {
-    "issue": 1916,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1916"
-   }
-  },
-  {
-   "id": "sls-106",
-   "title": "GET /api/hackathons omits the completed Rise In Stellar Pro Hackathon",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-106-hackathon-feed-omits-stellar-events.md",
-   "ourIssue": 1917,
-   "ourResponse": {
-    "issue": 1917,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1917"
-   }
-  },
-  {
    "id": "sls-107",
    "title": "Stablecoin rows give a brand as company instead of the stellar.toml issuer, and yield products cannot be filtered out",
    "status": "reported-upstream",
@@ -265,44 +153,14 @@
    "ourIssue": 1900,
    "ourResponse": {
     "issue": 1900,
-    "state": "open",
-    "closedAt": null,
+    "state": "closed",
+    "closedAt": "2026-11-05",
     "url": "https://github.com/Stellar-Light/stellarlight/issues/1900"
    }
   },
   {
-   "id": "sls-109",
-   "title": "Repo search ranks low-score forks above canonical repos for 'scaffold stellar' and 'stellar lab'",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-109-repo-search-ranks-forks-over-canonical.md",
-   "ourIssue": 1901,
-   "ourResponse": {
-    "issue": 1901,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1901"
-   }
-  },
-  {
-   "id": "sls-110",
-   "title": "HackMeridian records omit the published rubric weights",
-   "status": "reported-upstream",
-   "discovered": "2026-11-02",
-   "disposition": null,
-   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-110-hackmeridian-rubric-weights.md",
-   "ourIssue": 1902,
-   "ourResponse": {
-    "issue": 1902,
-    "state": "open",
-    "closedAt": null,
-    "url": "https://github.com/Stellar-Light/stellarlight/issues/1902"
-   }
-  },
-  {
    "id": "sls-111",
-   "title": "Directory marks 24 SCF #45 awards; the SCF site lists at least 40, and Liqvid's record omits rounds 30, 44, and 45",
+   "title": "Directory marks 24 SCF #45 awards; the SCF site lists at least 40, and Liqvid omits awarded round 45",
    "status": "reported-upstream",
    "discovered": "2026-11-02",
    "disposition": null,
@@ -358,6 +216,21 @@
     "state": "open",
     "closedAt": null,
     "url": "https://github.com/Stellar-Light/stellarlight/issues/1906"
+   }
+  },
+  {
+   "id": "sls-115",
+   "title": "Refresh or invalidate the Horizon ceiling answer when its scanned source changes",
+   "status": "reported-upstream",
+   "discovered": "2026-11-06",
+   "disposition": null,
+   "sourceUrl": "https://github.com/stellar-experimental/stellar-raven/blob/main/improvements/stellar-light-scout/sls-115-horizon-ceiling-note-scan-drift.md",
+   "ourIssue": 1933,
+   "ourResponse": {
+    "issue": 1933,
+    "state": "open",
+    "closedAt": null,
+    "url": "https://github.com/Stellar-Light/stellarlight/issues/1933"
    }
   }
  ]

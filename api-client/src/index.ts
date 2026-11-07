@@ -268,7 +268,12 @@ export class ScoutClient {
 
 	/** Stellar stablecoins ranked by USD market cap (not raw supply). */
 	getStablecoins(
-		params: { sort?: string; peg?: string; limit?: number } = {},
+		params: {
+			sort?: string;
+			peg?: string;
+			assetType?: string;
+			limit?: number;
+		} = {},
 	): Promise<Record<string, unknown>> {
 		return this.get("/api/stablecoins", params);
 	}

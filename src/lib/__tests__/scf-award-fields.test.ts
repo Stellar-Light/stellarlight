@@ -16,7 +16,10 @@
  * so award ROUNDS must come from the verdicts, never from page text.
  */
 import { describe, expect, it } from "vitest";
-import { parseRoundVerdicts } from "../../../scripts/eval/scf-official";
+import {
+	parseRoundVerdicts,
+	scfHold,
+} from "../../../scripts/eval/scf-official";
 
 const card = (c: {
 	id: string;
@@ -115,5 +118,155 @@ describe("award fields in either order (2026-10-03)", () => {
 			].join("\n"),
 		);
 		expect(v.awards.find((a) => a.round === 40)?.budgetUSD).toBeNull();
+	});
+});
+
+// sls-111 (2026-11-04). Saved copies of the live page data: each card object
+// verbatim from liqvid-hrr and enable-duq, under the page's own project
+// record. Only the latest card's status is a parameter: on 2026-10-03 both
+// cards still sat in a pipeline status (the lane stored Liqvid with
+// lastAwardedRound 45, totalAwarded 235000 and rounds [37]; its log held
+// Enable at awarded=false). Both read "Awarded" by 2026-11-04.
+const liqvidPage = (status45: string, totalAwarded = 235000) =>
+	`{"project":{"id":"recGQNG0gXyv5aHrR","title":"Liqvid","slug":"liqvid-hrr","totalAwarded":${totalAwarded},"totalPaid":147250,"siteUrls":{"website":"https://liqvid.xyz/"},"awarded":true,"lastAwardedRound":45,"eligible":"Build","buildAwardRounds":["SCF #30","SCF #37","SCF #44","SCF #45"],"submissions":[` +
+	[
+		`{"id":"recLauVL3boo779AG","title":"Liqvid X Stellar RWA Lending Market","status":"${status45}","project":"recGQNG0gXyv5aHrR","projectName":"$24","roundName":"SCF #45","budget":97500,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$25"}`,
+		'{"id":"recIPO2uN2oa0uitf","title":"Stellar RWA Lending Market","status":"Not Awarded","project":"recGQNG0gXyv5aHrR","projectName":"$27","roundName":"SCF #44","budget":97500,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$28"}',
+		'{"id":"rec2aZKPZ8SmvFoGS","title":"Committed Yield RWAs on Stellar","status":"Awarded","project":"recGQNG0gXyv5aHrR","projectName":"$2a","roundName":"SCF #37","budget":137500,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$2b"}',
+		'{"id":"rec91jnTCLjHH1ssP","title":"Cross-Chain Interoperability (GMP) infrastructure and Liquidity for RWAs on Stellar","status":"Not Awarded","project":"recGQNG0gXyv5aHrR","projectName":"$2d","roundName":"SCF #30","budget":135000,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$2e"}',
+	].join(",") +
+	"]}}";
+
+const enablePage = (status45: string) =>
+	`{"project":{"id":"rec6DnJ4it4NQrDuQ","title":"Enable","slug":"enable-duq","totalAwarded":76000,"totalPaid":7600,"siteUrls":{"website":"https://www.humanity.link/"},"awarded":true,"lastAwardedRound":45,"buildAwardRounds":["SCF #43","SCF #45"],"submissions":[` +
+	[
+		`{"id":"recZeBSnr1JqjPt4C","title":"Humanitarian Aid Payments on Stellar","status":"${status45}","project":"rec6DnJ4it4NQrDuQ","projectName":"$25","roundName":"SCF #45","budget":76000,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$26"}`,
+		'{"id":"recbyuKM3UBIMEWYp","title":"Stellar Off-Ramps for Communities","status":"Panel Review Failed","project":"rec6DnJ4it4NQrDuQ","projectName":"$28","roundName":"SCF #43","budget":100000,"awardType":"Build","isCvvc":false,"isOwnedByUser":false,"thumbnail":"$29"}',
+	].join(",") +
+	"]}}";
+
+/** The per-page detail enrich-from-scf builds from the parse. */
+const detailOf = (html: string) => {
+	const v = parseRoundVerdicts(html);
+	return {
+		awardedRounds: [...v.awarded].map(Number).sort((a, b) => a - b),
+		roundAwards: v.awards,
+		verdictSubmissions: v.submissions,
+		verdictAwardedAny: v.awardedAnyCount,
+		notAwardedRounds: [...v.notAwarded].map(Number).sort((a, b) => a - b),
+	};
+};
+
+describe("SCF #45 coverage (sls-111)", () => {
+	it("award rounds come from the verdicts, never from buildAwardRounds", () => {
+		// The page lists #30, #37, #44 and #45 in buildAwardRounds, but #30 and
+		// #44 read "Not Awarded", and its own total is #37 + #45 exactly.
+		const v = parseRoundVerdicts(liqvidPage("Awarded"));
+		expect([...v.awarded].sort()).toEqual(["37", "45"]);
+		expect([...v.notAwarded].sort()).toEqual(["30", "44"]);
+	});
+
+	it("a pinned latest round still disbursing is an award beside an earlier Awarded round", () => {
+		const v = parseRoundVerdicts(liqvidPage("Information Collection"));
+		expect([...v.awarded].sort()).toEqual(["37", "45"]);
+		expect(v.awards).toEqual([
+			{ round: 37, budgetUSD: 137500, awardType: "Build" },
+			{ round: 45, budgetUSD: 97500, awardType: "Build" },
+		]);
+		// The count stays the accusation counter: one card says "Awarded".
+		expect(v.awardedAnyCount).toBe(1);
+	});
+
+	it("the pinned round needs the page total to match exactly", () => {
+		const v = parseRoundVerdicts(liqvidPage("Information Collection", 240000));
+		expect([...v.awarded]).toEqual(["37"]);
+	});
+
+	it("an unread false yields to a page that pins an award", () => {
+		// The no-resurrect guard read only the Awarded-card count, so on
+		// 2026-10-03 it held Enable (a row nobody had read: Payload's default
+		// awarded=false) over the #45 award its page pins.
+		const page = detailOf(enablePage("Information Collection"));
+		expect(page.awardedRounds).toEqual([45]);
+		expect(page.verdictAwardedAny).toBe(0);
+		expect(scfHold({ awarded: false }, page, true)).toBeNull();
+	});
+
+	it("an unread false holds when the page shows no award at all", () => {
+		// The coopstable class: the listing's round code says awarded, every
+		// card on the page lost.
+		const page = detailOf(
+			'{"id":"rec-coop","status":"Not Awarded","roundName":"SCF #30","budget":50000,"awardType":"Build"}',
+		);
+		expect(scfHold({ awarded: false }, page, true)).not.toBeNull();
+	});
+
+	it("a removal an SCF correction made is held against any page", () => {
+		// fix-scf-rounds' poison clear nulls the basis and source and keeps
+		// another project's page slug: the page that matched is not this row's.
+		const page = detailOf(enablePage("Awarded"));
+		expect(
+			scfHold(
+				{ awarded: false, slug: "choppaddi-vmf", asOf: "2026-08-12" },
+				page,
+				true,
+			),
+		).not.toBeNull();
+	});
+
+	it("a dated official-record false yields only to an award after its losses", () => {
+		// fix-scf-rounds' boolean fix (coopstable) set false because every
+		// decided card lost (#38, #40) and kept the official-record citation.
+		const coop = {
+			awarded: false,
+			basis: "official-record",
+			asOf: "2026-07-11",
+			sourceUrl:
+				"https://communityfund.stellar.org/project/coopstable-v2-yield-sharing-stablecoin-nrc",
+		};
+		const lost = [
+			'{"id":"rec-c38","status":"Not Awarded","roundName":"SCF #38","budget":90000,"awardType":"Build"}',
+			'{"id":"rec-c40","status":"Not Awarded","roundName":"SCF #40","budget":90000,"awardType":"Build"}',
+		];
+		// a later round's award: the reason for the false no longer holds
+		const later = detailOf(
+			[
+				...lost,
+				'{"id":"rec-c46","status":"Awarded","roundName":"SCF #46","budget":80000,"awardType":"Build"}',
+			].join("\n"),
+		);
+		expect(scfHold(coop, later, true)).toBeNull();
+		// the same losses and nothing after them: the false stands
+		expect(scfHold(coop, detailOf(lost.join("\n")), true)).not.toBeNull();
+		// an award only in an earlier round than a loss is not after it
+		const earlier = detailOf(
+			[
+				'{"id":"rec-c37","status":"Awarded","roundName":"SCF #37","budget":50000,"awardType":"Build"}',
+				...lost,
+			].join("\n"),
+		);
+		expect(scfHold(coop, earlier, true)).not.toBeNull();
+	});
+
+	it("a human-verified record is curate's: the reader writes nothing to it", () => {
+		// pen and hermes: SCF_FIX unlinks them (awarded false, rounds [], slug
+		// null). Writing the page slug back with a page round would serve
+		// awarded false beside round 45, and curate would undo it next run.
+		const page = detailOf(enablePage("Awarded"));
+		expect(
+			scfHold(
+				{ awarded: false, basis: "human-verified", slug: null },
+				page,
+				true,
+			),
+		).not.toBeNull();
+		// an awarded human-verified row gains no page round either
+		expect(
+			scfHold(
+				{ awarded: true, basis: "human-verified", slug: "aquarius-l4a" },
+				page,
+				true,
+			),
+		).not.toBeNull();
 	});
 });

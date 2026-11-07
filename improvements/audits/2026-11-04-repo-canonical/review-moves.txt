@@ -1,0 +1,179 @@
+Rank moves the review fixes made, measured against the reviewed head 8c8b07a5 (read 'base' below as that head, 'branch' as 89585dab). Same corpus (13,810 rows) and the 189 frozen queries. The bars of the frozen set are judged against origin/main in report.txt, not here.
+
+apiVersion during capture: [{"at":"2026-11-04T21:54:46.591Z","apiVersion":"1.9.116"},{"at":"2026-11-04T21:59:24.967Z","apiVersion":"1.9.116"},{"at":"2026-11-04T22:05:37.046Z","apiVersion":"1.9.116"},{"at":"2026-11-04T23:01:21Z","apiVersion":"1.9.116","note":"extra capture start"},{"at":"2026-11-04T23:01:21Z","apiVersion":"1.9.116","note":"extra capture end"}]
+corpus rows: 13810; live pages: 189
+fidelity: 175/189 base first pages identical to live (rows, order, scores, matchMode, total); differ: acceptance acc-01 | acceptance acc-02 | acceptance acc-03 | acceptance acc-04 | acceptance acc-05 | acceptance acc-06 | acceptance acc-07 | acceptance acc-10 | acceptance acc-12 | acceptance acc-13 | naturalLanguage nl-02 | naturalLanguage nl-03 | exactName exn-01 | unchanged unc-14
+
+Bars (frozen-set.json)
+  HOLDS  acceptance: expected repo first on the branch: 16/16
+  HOLDS  controls: expected repo first on base and branch: 8/8
+  FAILS  unchanged: same first page, matchMode and total: 14/15; failing: [unchanged] unc-14 (q="stellar lab notes")
+  HOLDS  exactName: the repo named by the query first on the branch: 2/2
+  REVIEW  no expected repo moves down: [naturalLanguage] nl-02 (q="How do I start a new dapp with Scaffold Stellar?"): 1 -> 394 | [naturalLanguage] nl-03 (q="Which repo is the source of Stellar Lab, the browser tool for building transactions?"): 1 -> absent
+  FAILS  every change has a mechanism of the change: 5/8
+
+Queries: 189; identical (first page and whole ranking): 181; changed: 8
+
+Expected-repo ranks, base -> branch (every query that names a repo)
+    [dev] dev-01: 35 -> 35
+    [dev] dev-02: 2 -> 2
+    [dev] dev-03: 49 -> 49
+    [dev] dev-04: 4 -> 4
+    [dev] dev-05: 1 -> 1
+    [dev] dev-06: 31 -> 31
+    [dev] dev-07: 4 -> 4
+    [dev] dev-08: absent -> absent
+    [dev] dev-09: absent -> absent
+    [dev] dev-10: 353 -> 353
+    [dev] dev-11: 2 -> 2
+    [dev] dev-12: absent -> absent
+    [dev] dev-13: 35 -> 35
+    [dev] dev-14: 18 -> 18
+    [dev] dev-15: 53 -> 53
+    [dev] dev-16: 1 -> 1
+    [dev] dev-17: 28 -> 28
+    [dev] dev-18: absent -> absent
+    [dev] dev-19: 415 -> 415
+    [dev] dev-20: 1 -> 1
+    [dev] dev-21: absent -> absent
+    [dev] dev-22: 140 -> 140
+    [dev] dev-23: 4 -> 4
+    [dev] dev-24: 19 -> 19
+    [dev] dev-25: 2 -> 2
+    [battery] hm26-sc-03: 70 -> 70
+    [battery] hm26-sc-04: 111 -> 111
+    [battery] hm26-sa-03: 1 -> 1
+    [battery] hm26-sa-04: 71 -> 71
+    [battery] hm26-cc-03: 256 -> 256
+    [battery] hm26-cc-04: 38 -> 38
+    [exact-full] stellar/js-stellar-sdk: 1 -> 1
+    [exact-name] stellar/js-stellar-sdk: 1 -> 1
+    [exact-full] stellar/rs-soroban-sdk: 1 -> 1
+    [exact-name] stellar/rs-soroban-sdk: 1 -> 1
+    [exact-full] stellar/stellar-cli: 1 -> 1
+    [exact-name] stellar/stellar-cli: 1 -> 1
+    [exact-full] stellar/stellar-core: 1 -> 1
+    [exact-name] stellar/stellar-core: 1 -> 1
+    [exact-full] stellar/freighter: 1 -> 1
+    [exact-name] stellar/freighter: 1 -> 1
+    [exact-full] stellar/passkey-kit: 1 -> 1
+    [exact-name] stellar/passkey-kit: 1 -> 1
+    [exact-full] stellar/smart-account-kit: 1 -> 1
+    [exact-name] stellar/smart-account-kit: 1 -> 1
+    [exact-full] stellar/anchor-platform: 1 -> 1
+    [exact-name] stellar/anchor-platform: 1 -> 1
+    [exact-full] stellar/stellar-rpc: 1 -> 1
+    [exact-name] stellar/stellar-rpc: 1 -> 1
+    [exact-full] stellar/quickstart: 1 -> 1
+    [exact-name] stellar/quickstart: 1 -> 1
+    [exact-full] stellar/soroban-examples: 1 -> 1
+    [exact-name] stellar/soroban-examples: 1 -> 1
+    [exact-full] stellar/js-stellar-base: 1 -> 1
+    [exact-name] stellar/js-stellar-base: 1 -> 1
+    [exact-full] stellar/go-stellar-sdk: 1 -> 1
+    [exact-name] stellar/go-stellar-sdk: 1 -> 1
+    [exact-full] StellarCN/py-stellar-base: 1 -> 1
+    [exact-name] StellarCN/py-stellar-base: 1 -> 1
+    [exact-full] OpenZeppelin/stellar-contracts: 1 -> 1
+    [exact-name] OpenZeppelin/stellar-contracts: 1 -> 1
+    [exact-full] OpenZeppelin/openzeppelin-relayer: 1 -> 1
+    [exact-name] OpenZeppelin/openzeppelin-relayer: 1 -> 1
+    [exact-full] axelarnetwork/axelar-amplifier-stellar: 1 -> 1
+    [exact-name] axelarnetwork/axelar-amplifier-stellar: 1 -> 1
+    [exact-full] blend-capital/blend-contracts-v2: 1 -> 1
+    [exact-name] blend-capital/blend-contracts-v2: 1 -> 1
+    [exact-full] blend-capital/blend-contracts: 1 -> 1
+    [exact-name] blend-capital/blend-contracts: 1 -> 1
+    [exact-full] soroswap/core: 1 -> 1
+    [exact-name] soroswap/core: 5 -> 5
+    [exact-full] soroswap/aggregator: 1 -> 1
+    [exact-name] soroswap/aggregator: 5 -> 5
+    [exact-full] reflector-network/reflector-contract: 1 -> 1
+    [exact-name] reflector-network/reflector-contract: 1 -> 1
+    [exact-full] Creit-Tech/Stellar-Wallets-Kit: 1 -> 1
+    [exact-name] Creit-Tech/Stellar-Wallets-Kit: 1 -> 1
+    [exact-full] Creit-Tech/xBull-Wallet: 1 -> 1
+    [exact-name] Creit-Tech/xBull-Wallet: 1 -> 1
+    [exact-full] script3/soroban-governor: 1 -> 1
+    [exact-name] script3/soroban-governor: 1 -> 1
+    [exact-full] Phoenix-Protocol-Group/phoenix-contracts: 1 -> 1
+    [exact-name] Phoenix-Protocol-Group/phoenix-contracts: 1 -> 1
+    [exact-full] allbridge-io/allbridge-core-soroban-contracts: 1 -> 1
+    [exact-name] allbridge-io/allbridge-core-soroban-contracts: 1 -> 1
+    [exact-full] Trustless-Work/trustlesswork-smart-contract-stellar: 1 -> 1
+    [exact-name] Trustless-Work/trustlesswork-smart-contract-stellar: 1 -> 1
+    [exact-full] fazzatti/colibri: 1 -> 1
+    [exact-name] fazzatti/colibri: 1 -> 1
+    [exact-full] circlefin/stellar-cctp: 1 -> 1
+    [exact-name] circlefin/stellar-cctp: 1 -> 1
+    [project-name] Blend: 1 -> 1
+    [project-name] Reflector: 1 -> 1
+    [acceptance] acc-01: 1 -> 1
+    [acceptance] acc-02: 1 -> 1
+    [acceptance] acc-03: 1 -> 1
+    [acceptance] acc-04: 1 -> 1
+    [acceptance] acc-05: 1 -> 1
+    [acceptance] acc-06: 1 -> 1
+    [acceptance] acc-07: 1 -> 1
+    [acceptance] acc-08: 1 -> 1
+    [acceptance] acc-09: 1 -> 1
+    [acceptance] acc-10: 1 -> 1
+    [acceptance] acc-11: 1 -> 1
+    [acceptance] acc-12: 1 -> 1
+    [acceptance] acc-13: 1 -> 1
+    [acceptance] acc-14: 1 -> 1
+    [controls] ctl-01: 1 -> 1
+    [controls] ctl-02: 1 -> 1
+    [controls] ctl-03: 1 -> 1
+    [controls] ctl-04: 1 -> 1
+    [controls] ctl-05: 1 -> 1
+    [controls] ctl-06: 1 -> 1
+    [controls] ctl-07: 1 -> 1
+    [controls] ctl-08: 1 -> 1
+    [naturalLanguage] nl-01: 166 -> 166
+  - [naturalLanguage] nl-02: 1 -> 394
+  - [naturalLanguage] nl-03: 1 -> absent
+  + [acceptance] acc-15: 11 -> 1
+    [acceptance] acc-16: 1 -> 1
+  + [exactName] exn-01: 2 -> 1
+  + [exactName] exn-02: absent -> 1
+
+Every changed query
+  [keyword] sep-10
+    mechanism: exact name above the canonical float (apay-io/sep10)
+    first page: apay-io/sep10 2->1, stellar/stellar-protocol 1->2
+    whole ranking: 190 -> 190 rows, changed
+  [naturalLanguage] nl-02 (q="How do I start a new dapp with Scaffold Stellar?")
+    mechanism: NONE (unexplained)
+    expected repo rank: 1 -> 394
+    first page: josealfredo79/stellar-crud-dapp-new 2->1, Stellar-split/split-app 3->2, Sentinel-Labss/sentinel-app 4->3, Sarthakdhere0211/Stellar-PayDapp 5->4, sroc9820-svg/ev_charge 6->5, stellar/rs-stellar-rpc-client 7->6, stellar-experimental/henyey 8->7, OpenZeppelin/openzeppelin-monitor 9->8, stellar-registry/cli 10->9, jamesbachini/zk-Rock-Paper-Scissors 11->10, AstronLabs/remitMortage 12->11, gmanjuns027/Poison-Game 13->12, SphinxBSD/aether-grid 14->13, AshFrancis/stellarsprint 15->14, sphinxar/aether-grid 16->15, theyuvan/zk-THRONE 17->16, kalepail/phantom-code 18->17, denissejane/KapitKita 19->18, dogstarapps/dogstar-mylab-contracts 20->19, kalepail/ohloss new->20, stellar-scaffold/cli 1->off page
+    whole ranking: 446 -> 446 rows, changed
+  [naturalLanguage] nl-03 (q="Which repo is the source of Stellar Lab, the browser tool for building transactions?")
+    mechanism: NONE (unexplained)
+    expected repo rank: 1 -> absent
+    first page: LumenWipe/lumenwipe 2->1, Scopuly/scopuly-browser-extension 3->2, TS-mfon/stellar-agent-api-bazaar 4->3, stellar-experimental/stellar-contract-verify-plugin 5->4, Ebioro-UAB/ebioro-wallet-migration 6->5, CoinFabrik/scout-audit 7->6, OpenZeppelin/ui-builder 8->7, Pulsefy/Soter 9->8, mericcintosun/riskon 10->9, SourceXXL/alian_structure-UI 11->10, CoinFabrik/scout-soroban 12->11, findolor/sorodrop 13->12, Tellus-Cooperative/stellar-paylink 14->13, LabsCrypt/remitlend 15->14, LabsCrypt/flowfi 16->15, Echo-Mirror-Butler/Echo-Mirror-Butler- 17->16, ognla-payeasy/payeasy 18->17, ANTAPEX/Soroban-Registry 19->18, theblockfreight/stellarfreight 20->19, mergepay/mergepay-api new->20, stellar/laboratory 1->off page
+    whole ranking: 417 -> 416 rows, changed
+  [acceptance] acc-15 (q="scaffold_stellar")
+    mechanism: canonical entry (stellar-scaffold/cli)
+    expected repo rank: 11 -> 1
+    first page: stellar-scaffold/cli 11->1, Gbangbolaoluwagbemiga/SecureFlow-scaffold 1->2, danielgorgonha/hackthon-scaffold-stellar 2->3, masch/stellar-scaffold-front-hackaton 3->4, dropsland-app/dropsland-scaffold 4->5, stevmolina/token-scaffold 5->6, anataliocs/validate-scaffold 6->7, ScaffoldRust/Main-Scaffold-Rust 7->8, stellar-registry/cli 8->9, JulioMCruz/Stellar-mcp 9->10, rohitjadhav07/Nexar 10->11
+    whole ranking: 25 -> 25 rows, changed
+  [acceptance] acc-16 (q="soroban_examples")
+    mechanism: canonical entry (stellar/soroban-examples); exact name above the canonical float (stellar/soroban-examples)
+    expected repo rank: 1 -> 1
+    first page: zhangdav/soroban-examples new->2, CoinFabrik/scout-soroban-examples new->3, fxjrin/stellar-contracts-kit 2->4, WebSoroban/payloop 3->5, stellar-scaffold/ui 4->6, stellar-expert/contract-wasm-interface-parser 5->7, thisyearnofear/trustfall 6->8, stellar/basic-payment-app 7->9, fazzatti/colibri 8->10, axelarnetwork/axelar-amplifier-stellar 9->11, OpenZeppelin/openzeppelin-relayer 10->12, NibrasD/Stellar-VRF 11->13, danielfsha/Card-RPG 12->14, johneliud/school-management 13->15, Poorva-M/Xpense-Web3 14->16, TrustLine-id/stellar-sdk 15->17, kunaldrall29/policywright 16->18, reflector-network/reflector-contract 17->19, stellar/passkey-kit 18->20, stellar/rs-soroban-env 19->off page, stellar/rs-soroban-sdk 20->off page
+    whole ranking: 591 -> 595 rows, changed
+  [exactName] exn-01 (q="stellar-lab")
+    mechanism: canonical entry (stellar/laboratory); exact name above the canonical float (suryahfz/stellar-lab)
+    expected repo rank: 2 -> 1
+    first page: suryahfz/stellar-lab 2->1, stellar/laboratory 1->2
+    whole ranking: 46 -> 46 rows, changed
+  [exactName] exn-02 (q="stellar_lab")
+    mechanism: canonical entry (stellar/laboratory); exact name above the canonical float (suryahfz/stellar-lab)
+    expected repo rank: absent -> 1
+    first page: suryahfz/stellar-lab new->1, stellar/laboratory 16->2, StellarDevHub/Web3-Student-Lab 1->3, CaBsCrypto/stellar-agent-merchant-lab 2->4, Nectar-Network/nectar 3->5, ThaisFReis/karn-protocol 4->6, Alouzious/StellarIDE 5->7, Neko-Protocol/neko-web 6->8, Karn-lat/karn-protocol 7->9, hatdong359-star/lab_kit_lending 8->10, Savitura/Savitools 9->11, RevoraOrg/Revora-Frontend 10->12, chinhnghia812/lab_kit_lending 11->13, aldyneronqs/MediTrust 12->14, adletgamer/Axiomer-dashboardx 13->15, VietNg25/dairy_provenance 14->16, phohuyhieu6/lab_kit_lending 15->17, eq-lab/slender-ui 17->18, SorobanCrashLab/soroban-crashlab 18->19, Toolbox-Lab/Grat 19->20, sambha-lab/sambha 20->off page
+    whole ranking: 44 -> 46 rows, changed
+  [unchanged] unc-14 (q="stellar lab notes")
+    mechanism: NONE (unexplained)
+    first page: StellarDevHub/Web3-Student-Lab 2->1, muflihimaduddin/stellar-notes-dapp 3->2, YM1Rfr/soroban-notes-smart-contract 4->3, avlkyy/stellar-notes-contract 5->4, tusharpamnani/Stellar-Notes 6->5, CaBsCrypto/stellar-agent-merchant-lab 7->6, nivek-ph/blockchain-notes 8->7, HoangCaoPhong/HCMUS-NoteHub 9->8, thnimn/collaborative-notes-web3 10->9, stellar-experimental/js-private-payments-sdk 11->10, NethermindEth/stellar-private-payments 12->11, kaankacar/stellar-wallet-gallery 13->12, Nectar-Network/nectar 14->13, wyhaines/soroban-render-sdk 15->14, stellar-sharpy/sharpy-contracts 16->15, armlynobinguar/Stellar-Bootcamp-2026 17->16, JulioMCruz/Stellar-mcp 18->17, nickthelegend/xorr-zk-stellar 19->18, ThaisFReis/karn-protocol 20->19, Stellar-Global-Rails/StellarGlobalRails new->20, stellar/laboratory 1->off page
+    whole ranking: 94 -> 94 rows, changed

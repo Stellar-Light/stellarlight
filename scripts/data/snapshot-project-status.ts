@@ -54,7 +54,7 @@ async function getJson(url: string): Promise<any> {
 const day = (s: unknown) =>
 	typeof s === "string" && s.length >= 10 ? s.slice(0, 10) : null;
 
-async function servedProjects(): Promise<{
+export async function servedProjects(): Promise<{
 	rows: SnapshotRow[];
 	byStatus: Record<string, number>;
 }> {
@@ -80,10 +80,12 @@ async function servedProjects(): Promise<{
 			if (!page.length) break;
 			offset += page.length;
 		}
-		if (got.length !== total)
+		// A partial page with its count intact lost a decoration read (repos,
+		// activity): its rows are not what the directory serves, so not stored.
+		if (partial || got.length !== total)
 			throw new Error(
 				partial
-					? `${status}: read ${got.length} rows, but a page was partial (a backend read failed), so the set is uncounted or incomplete`
+					? `${status}: read ${got.length} rows, but a page was partial (a backend read failed), so its rows are uncounted or incomplete`
 					: `${status}: read ${got.length} of ${total}`,
 			);
 		byStatus[status] = got.length;
@@ -234,9 +236,11 @@ async function main() {
 	);
 }
 
-main()
-	.then(() => process.exit(0))
-	.catch((e) => {
-		console.error("FATAL:", e);
-		process.exit(1);
-	});
+// Run only as the lane's entry point: a test imports servedProjects.
+if (process.argv[1]?.includes("snapshot-project-status"))
+	main()
+		.then(() => process.exit(0))
+		.catch((e) => {
+			console.error("FATAL:", e);
+			process.exit(1);
+		});

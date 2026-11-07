@@ -64,6 +64,9 @@ export interface Judging {
 	source: string;
 	checkedOn: string;
 	categories: Array<{ category: string; criteria: JudgedCriterion[] }>;
+	/** The organizer's weighted rubric, when it publishes one: its weights,
+	 * with its own page and day, never a score of this repo. */
+	rubric?: NonNullable<NonNullable<CuratedHackathon["judging"]>["rubric"]>;
 }
 
 const NOT_READ =
@@ -519,5 +522,6 @@ export function buildJudging(
 						};
 			}),
 		})),
+		...(event.judging?.rubric ? { rubric: event.judging.rubric } : {}),
 	};
 }

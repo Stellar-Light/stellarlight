@@ -9,18 +9,23 @@
  * instead of a production incident.
  */
 
+/** Lowercase with accents folded, never deleted: José is jose, not jos
+ * (sls-111). Canonical decomposition, the rule hackathon-build-links'
+ * folded() uses. */
+const fold = (name: string) =>
+	name.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+
 /** Spaceless lowercase alnum — EQUALITY ONLY. Never use for containment:
  * word seams vanish, so "Soroban Disassembler" CONTAINS "band"
  * (soro·band·issassembler) — the 2026-08-12 18-row award poisoning. */
 export function normSpaceless(name: string): string {
-	return name.toLowerCase().replace(/[^a-z0-9]/g, "");
+	return fold(name).replace(/[^a-z0-9]/g, "");
 }
 
 /** Lowercase with runs of non-alnum collapsed to single spaces — the form
  * token-boundary rules operate on. */
 export function normSpaced(name: string): string {
-	return name
-		.toLowerCase()
+	return fold(name)
 		.replace(/[^a-z0-9]+/g, " ")
 		.trim();
 }
@@ -50,4 +55,84 @@ export function titlePrefixMatch(a: string, b: string): boolean {
 	if (!as || !bs) return false;
 	const [short, long] = as.length <= bs.length ? [as, bs] : [bs, as];
 	return long === short || long.startsWith(`${short} `);
+}
+
+/** A directory name under three letters never joins by prefix ("Op"); one
+ * of three or four joins only when written as an acronym (BWB, CTX, DIA,
+ * LINK), because Lend or Pay starts too many titles to identify one. */
+const MIN_PREFIX_NAME = 3;
+const isAcronym = (name: string) => {
+	const s = name.replace(/[^\p{L}\p{N}]/gu, "");
+	return /\p{Lu}/u.test(s) && s === s.toUpperCase();
+};
+
+/**
+ * The partial matcher: the single best row for an official title, or
+ * undefined. Candidates are rows whose name passes titlePrefixMatch;
+ * spaceless containment only picks them, so a rejected candidate never ends
+ * the search ("velo" inside "de·velo·pment" hid Rumble Fish's awards,
+ * sls-111). A row named exactly as the title wins outright; otherwise the
+ * best candidate shares the longest prefix with the title. A tie for either
+ * is no match: the first hit in row order is not an identity. `identityOf`
+ * says which rows are one project (a lineage shadow and its canonical row),
+ * so those never tie with each other.
+ */
+export function findTitlePrefixMatch<T extends { name?: unknown }>(
+	title: string,
+	rows: Iterable<T>,
+	onSkip?: (row: T, why: string) => void,
+	identityOf: (row: T) => unknown = (row) => row,
+): T | undefined {
+	const norm = normSpaceless(title);
+	const spaced = normSpaced(title);
+	const titleLen = spaced.length;
+	let exact: T | undefined;
+	let exactTied = false;
+	let best: T | undefined;
+	let bestLen = 0;
+	let tied = false;
+	for (const row of rows) {
+		const name = String(row.name ?? "");
+		const key = normSpaceless(name);
+		if (!key || (!key.includes(norm) && !norm.includes(key))) continue;
+		if (normSpaced(name) === spaced) {
+			if (exact === undefined) exact = row;
+			else if (identityOf(row) !== identityOf(exact)) exactTied = true;
+			continue;
+		}
+		if (key.length < MIN_PREFIX_NAME) {
+			onSkip?.(row, "name under three letters");
+			continue;
+		}
+		if (key.length <= 4 && !isAcronym(name)) {
+			onSkip?.(row, "short name not written as an acronym");
+			continue;
+		}
+		if (!titlePrefixMatch(title, name)) {
+			onSkip?.(row, "not title-prefix");
+			continue;
+		}
+		// the shared prefix: the shorter of the two names
+		const len = Math.min(titleLen, normSpaced(name).length);
+		if (len > bestLen) {
+			best = row;
+			bestLen = len;
+			tied = false;
+		} else if (
+			len === bestLen &&
+			best !== undefined &&
+			identityOf(row) !== identityOf(best)
+		)
+			tied = true;
+	}
+	if (exact !== undefined) {
+		if (!exactTied) return exact;
+		onSkip?.(exact, "two rows carry this exact name");
+		return undefined;
+	}
+	if (tied && best !== undefined) {
+		onSkip?.(best, "tied with another row");
+		return undefined;
+	}
+	return best;
 }

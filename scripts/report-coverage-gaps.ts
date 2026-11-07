@@ -89,7 +89,7 @@ interface DirRow {
  * the first run of this report flagged Blend/Aquarius/Soroswap as "missing"
  * because they sat past the cap. Same approach as scf-absence-diff, which
  * discovers the category enum from the endpoint's own 400 response. */
-async function fetchDirectory(): Promise<DirRow[]> {
+export async function fetchDirectory(): Promise<DirRow[]> {
 	const bad = await fetch(`${BASE}/api/projects/search?category=bogus`);
 	const cats: string[] =
 		((await bad.json()) as { validCategories?: string[] }).validCategories ??
@@ -97,11 +97,22 @@ async function fetchDirectory(): Promise<DirRow[]> {
 	if (!cats.length) throw new Error("could not discover validCategories");
 	const bySlug = new Map<string, DirRow>();
 	for (const c of cats) {
+		let total = 0;
+		let got = 0;
 		for (let offset = 0; ; offset += 100) {
 			const d = await j(
 				`${BASE}/api/projects/search?category=${encodeURIComponent(c)}&limit=100&offset=${offset}`,
 			);
+			// Review 2026-11-04: a partial 200 page (a backend read failed) ended
+			// the category, and every project past it read as missing from the
+			// directory. Refused whole, as the lifecycle snapshot refuses one.
+			if (d.meta?.partial === true)
+				throw new Error(
+					`${c}: the page at offset ${offset} was partial (a backend read failed), so the directory frame is incomplete; no gap report from it`,
+				);
+			total = d.meta?.counts?.total ?? 0;
 			const rows = d.projects ?? [];
+			got += rows.length;
 			for (const p of rows) {
 				bySlug.set(p.slug, {
 					name: p.name ?? p.slug,
@@ -114,6 +125,7 @@ async function fetchDirectory(): Promise<DirRow[]> {
 			}
 			if (rows.length < 100 || offset > 2000) break;
 		}
+		if (got !== total) throw new Error(`${c}: read ${got} of ${total}`);
 	}
 	return [...bySlug.values()];
 }
@@ -588,9 +600,11 @@ async function main() {
 	);
 }
 
-main()
-	.then(() => process.exit(process.exitCode ?? 0))
-	.catch((e) => {
-		console.error("FATAL", e);
-		process.exit(1);
-	});
+// Run only as the lane's entry point: a test imports fetchDirectory.
+if (process.argv[1]?.includes("report-coverage-gaps"))
+	main()
+		.then(() => process.exit(process.exitCode ?? 0))
+		.catch((e) => {
+			console.error("FATAL", e);
+			process.exit(1);
+		});

@@ -15,10 +15,13 @@
  *    accuses (callers must treat unparseable pages as unverifiable).
  */
 
+import { findTitlePrefixMatch, normSpaceless } from "../../src/lib/identity";
+
 export const SCF = "https://communityfund.stellar.org";
 
-export const canon = (s: string) =>
-	(s || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+/** Spaceless lowercase with accents folded: the matcher's own normSpaceless,
+ * so the crosscheck and the enrich read "Cryptoconexión" alike (sls-111). */
+export const canon = (s: string) => normSpaceless(s || "");
 
 export interface ScfEntry {
 	base: string;
@@ -427,24 +430,37 @@ export function parseRoundVerdicts(html: string): {
 	// honest. `submissions`/`awardedAnyCount` are deliberately untouched —
 	// the reconcile adds award knowledge, never accusation evidence, so the
 	// never-accuse and no-resurrect guards keep their meaning.
-	if (awardedAnyCount === 0 && awardByRound.size === 0) {
-		const pageAward = /"awarded":true,"lastAwardedRound":(\d+)/.exec(txt);
-		const pageTotal = /"totalAwarded":(\d+)/.exec(txt);
-		if (pageAward && pageTotal) {
-			const r = Number(pageAward[1]);
-			const total = Number(pageTotal[1]);
-			const inRound = [...neutralByKey.values()].filter(
-				(c) => c.roundNum === r,
-			);
-			if (total > 0 && inRound.length === 1 && inRound[0].budgetUSD === total) {
-				awarded.add(String(r));
-				notAwarded.delete(String(r));
-				awardByRound.set(r, {
-					round: r,
-					budgetUSD: total,
-					awardType: inRound[0].awardType,
-				});
-			}
+	// The same pin holds beside earlier Awarded cards (sls-111: liqvid-hrr on
+	// 2026-10-03, #37 Awarded, #45 still in Information Collection, total =
+	// #37 + #45 to the dollar, and the lane stored rounds [37]). The neutral
+	// budget must then equal the total less every award the page itemizes,
+	// and each of those needs a known budget: a partial sum never passes.
+	const pageAward = /"awarded":true,"lastAwardedRound":(\d+)/.exec(txt);
+	const pageTotal = /"totalAwarded":(\d+)/.exec(txt);
+	const itemized = [
+		...[...awardByRound.values()].map((a) => a.budgetUSD),
+		...cards
+			.filter((c) => c.isAward && c.roundNum === null)
+			.map((c) => c.budgetUSD),
+	];
+	if (
+		pageAward &&
+		pageTotal &&
+		!awarded.has(pageAward[1]) &&
+		itemized.every((b) => b !== null)
+	) {
+		const r = Number(pageAward[1]);
+		const rest =
+			Number(pageTotal[1]) - itemized.reduce<number>((s, b) => s + (b ?? 0), 0);
+		const inRound = [...neutralByKey.values()].filter((c) => c.roundNum === r);
+		if (rest > 0 && inRound.length === 1 && inRound[0].budgetUSD === rest) {
+			awarded.add(String(r));
+			notAwarded.delete(String(r));
+			awardByRound.set(r, {
+				round: r,
+				budgetUSD: rest,
+				awardType: inRound[0].awardType,
+			});
 		}
 	}
 	// Awards SCF does not number. "Liquidity Award - '24 Q1" carries no SCF #N,
@@ -489,6 +505,160 @@ export function parseRoundVerdicts(html: string): {
 		),
 	];
 	return { awarded, notAwarded, submissions, awardedAnyCount, awards };
+}
+
+/**
+ * Whether a parsed page (enrich-from-scf's per-page detail) shows an award in
+ * any form: an Awarded card, a round the page's own summary pins (the
+ * reconciliation in parseRoundVerdicts), or an award record. The
+ * Awarded-card count alone stays 0 by design for a pinned award whose card
+ * still sits in a pipeline status, so a guard reading only the count held
+ * Enable at awarded=false over its SCF #45 award (sls-111, 2026-10-03).
+ */
+export function showsAward(
+	page:
+		| {
+				awardedRounds?: readonly unknown[];
+				roundAwards?: readonly unknown[];
+				verdictAwardedAny?: number;
+		  }
+		| null
+		| undefined,
+): boolean {
+	return (
+		(page?.awardedRounds?.length ?? 0) > 0 ||
+		(page?.roundAwards?.length ?? 0) > 0 ||
+		(page?.verdictAwardedAny ?? 0) > 0
+	);
+}
+
+/**
+ * The directory row an SCF slug base names, for the absence diff, or
+ * undefined: an exact slug, name or alias, else the single best title prefix
+ * over names (findTitlePrefixMatch). In an absence report a false hit is not
+ * a mislabel, it deletes a real gap: the old first-hit rules (a shared
+ * prefix, a 5-letter substring, any shared word) filed Onboard under our
+ * Onboarding Club row and AgentSmith x402 under our x402 row (sls-111).
+ */
+export function servedBy<
+	R extends { slug: string; name: string; aliases?: string[] },
+>(base: string, rows: R[]): R | undefined {
+	const key = normSpaceless(base);
+	const exact = rows.find(
+		(r) =>
+			r.slug === base ||
+			normSpaceless(r.name) === key ||
+			(r.aliases ?? []).some((a) => normSpaceless(a) === key),
+	);
+	return exact ?? findTitlePrefixMatch(base.replace(/-/g, " "), rows);
+}
+
+/** Rows by canon name, for names exactly one project carries: a name two
+ * projects share identifies neither (scf-crosscheck took the first row,
+ * enrich-from-scf the last, sls-111). `identityOf` says which rows are one
+ * project (a lineage shadow and its canonical row); `onShared` hears every
+ * name it drops, for a person to decide. */
+export function uniqueNames<R extends { name: string }>(
+	rows: R[],
+	identityOf: (row: R) => unknown = (row) => row,
+	onShared?: (name: string, rows: R[]) => void,
+): Map<string, R> {
+	const byName = new Map<string, R[]>();
+	for (const r of rows) {
+		const key = canon(r.name);
+		if (key) byName.set(key, [...(byName.get(key) ?? []), r]);
+	}
+	const out = new Map<string, R>();
+	for (const [key, named] of byName) {
+		if (new Set(named.map(identityOf)).size === 1) out.set(key, named[0]);
+		else onShared?.(key, named);
+	}
+	return out;
+}
+
+/**
+ * What one matched pair (an SCF page, our row) says, for scf-crosscheck:
+ * understated when our row serves scfAwarded false and the page shows an
+ * award (its awarded rounds, maybe none when the award has no number);
+ * backfill when our row is awarded with no rounds and the page awards
+ * numbered rounds. Only the page's verdicts decide: a listing badge is a
+ * round ENTERED, never an award (and the listing carried none on
+ * 2026-11-04, so a badge-driven check never fired). A page that could not
+ * be read (v null) says nothing, and neither does a human-verified row:
+ * curate's SCF_FIX owns it, and an unlinked one (pen, hermes) is false on
+ * purpose beside another project's page (sls-111).
+ */
+export function classifyScfMatch(m: {
+	ourAwarded: boolean;
+	ourRounds: string[];
+	ourBasis?: string | null;
+	v: ReturnType<typeof parseRoundVerdicts> | null;
+}): { understated?: string[]; backfill?: string[] } {
+	if (!m.v || m.ourBasis === "human-verified") return {};
+	const rounds = [...m.v.awarded].sort((a, b) => Number(a) - Number(b));
+	if (!m.ourAwarded)
+		return rounds.length > 0 || m.v.awardedAnyCount > 0
+			? { understated: rounds }
+			: {};
+	return m.ourRounds.length === 0 && rounds.length > 0
+		? { backfill: rounds }
+		: {};
+}
+
+/** The stored projects.scf fields scfHold reads. */
+export interface StoredScf {
+	awarded?: boolean | null;
+	basis?: string | null;
+	asOf?: string | null;
+	sourceUrl?: string | null;
+	slug?: string | null;
+}
+
+/**
+ * Why enrich-from-scf must leave a row's SCF record as it is, or null when
+ * the page decides it. One field, one writer (sls-111):
+ * - a human-verified record is curate's (SCF_FIX). The reader adds nothing:
+ *   curate syncs its rounds exactly, so a page round the reader added would
+ *   be removed on curate's next run and added back on the enrich's, and on
+ *   an unlinked row (pen, hermes) it would serve awarded false beside it;
+ * - an awarded=false from an official read (basis official-record, such as
+ *   fix-scf-rounds' boolean fix, set when every decided card lost) yields
+ *   only to a page that awards a numbered round after every round the page
+ *   marks lost: a later round's award. The page carries no dates, so round
+ *   order stands in for "after its asOf";
+ * - any other awarded=false an SCF writer stamped (a date, source or page
+ *   slug without that basis: a poison clear, an unlink) is a removal, and
+ *   the reader never undoes it;
+ * - an unstamped false (the default of a row nobody has read) yields to a
+ *   page that shows an award in any form (showsAward), and holds when the
+ *   page decides its cards and awards nothing (the coopstable class).
+ */
+export function scfHold(
+	current: StoredScf | null | undefined,
+	page:
+		| (Parameters<typeof showsAward>[0] & {
+				verdictSubmissions?: number;
+				notAwardedRounds?: readonly number[];
+		  })
+		| null
+		| undefined,
+	pageSaysAwarded: boolean,
+): string | null {
+	if (current?.basis === "human-verified")
+		return "human-verified record: curate SCF_FIX owns it";
+	if (current?.awarded !== false || !pageSaysAwarded) return null;
+	if (current.basis === "official-record") {
+		const won = Math.max(0, ...(page?.awardedRounds ?? []).map(Number));
+		const lost = Math.max(0, ...(page?.notAwardedRounds ?? []));
+		return won > lost
+			? null
+			: "awarded=false from an official read, and no award after its losses";
+	}
+	if (current.basis || current.asOf || current.sourceUrl || current.slug)
+		return "awarded=false was set by an SCF correction: a removal";
+	if ((page?.verdictSubmissions ?? 0) > 0 && !showsAward(page))
+		return "the page decides its cards and shows no award";
+	return null;
 }
 
 export async function fetchDetailHtml(url: string): Promise<string | null> {

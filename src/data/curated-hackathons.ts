@@ -5,9 +5,15 @@
  * URL it was verified against. Shape mirrors DoraHacksHackathon so the
  * page, the API and the homepage section render them with the same code.
  *
+ * Scope (owner decision, 2026-11-04): the feed covers
+ * Stellar-presented hackathons and university challenges: events Stellar
+ * or SDF presents, powers or co-hosts, such as a university challenge
+ * powered by Stellar. Events on DoraHacks come from the DoraHacks feed.
+ *
  * Add a row when an event is announced; the status (upcoming / active /
  * ended) is derived from the dates at request time, never hand-set.
- * Verified 2026-08-17; HackMeridian rows 2026-10-20.
+ * Verified 2026-08-17; HackMeridian rows 2026-10-20 (the 2026 rubric
+ * 2026-11-04); the Stellar Pro Hackathon 2026-11-04.
  */
 import type { DoraHacksHackathon } from "@/lib/integrations/dorahacks";
 
@@ -58,7 +64,36 @@ export interface CuratedHackathon extends DoraHacksHackathon {
 		 * test holds each to one clause of it: "<category> on <a>, <b> and
 		 * <c>". reviewSubmission's judging block reads these. */
 		criteria?: Array<{ category: string; criteria: string[] }>;
+		/** The weighted rubric the organizer publishes, when it publishes one:
+		 * each criterion and its weight in percent, in the page's order and
+		 * words, each scored scoreMin to scoreMax, with its own page and day
+		 * (it can sit on another page than the sentence). A test holds the
+		 * weights to 100. getHackathon serves it as rules.rubric. */
+		rubric?: {
+			/** Absent: the page publishes no score scale. */
+			scoreMin?: number;
+			scoreMax?: number;
+			/** criterion is the page's label. A slot the page scores under a
+			 * different name in each category (its label joins them) names
+			 * each in byCategory: the category, its criterion, what it scores.
+			 * A test holds byCategory to the record's categories. */
+			criteria: Array<{
+				criterion: string;
+				weightPercent: number;
+				byCategory?: Array<{
+					category: string;
+					criterion: string;
+					scores: string;
+				}>;
+			}>;
+			source: string;
+			checkedOn: string;
+		};
 	};
+	/** The organizer's page was read and publishes no judging criteria: the
+	 * page and the day. getHackathon then serves rules.judgingCriteria null
+	 * with a dated judgingNote. Absent with no judging: not checked. */
+	judgingChecked?: { source: string; checkedOn: string };
 }
 
 export const CURATED_HACKATHONS: CuratedHackathon[] = [
@@ -134,6 +169,40 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 					],
 				},
 			],
+			// hackmeridian.com/build: one rubric scores every project, each
+			// criterion 1 to 5. Its 20% slot is Track Alignment for Genesis and
+			// Ecosystem Alignment for Scale.
+			rubric: {
+				scoreMin: 1,
+				scoreMax: 5,
+				criteria: [
+					{
+						criterion:
+							"Track Alignment (Genesis) / Ecosystem Alignment (Scale)",
+						weightPercent: 20,
+						byCategory: [
+							{
+								category: "Genesis",
+								criterion: "Track Alignment",
+								scores: "Fit with Stellar Unlocked and/or Stellar Composed.",
+							},
+							{
+								category: "Scale",
+								criterion: "Ecosystem Alignment",
+								scores: "Fit with and value to the Stellar ecosystem.",
+							},
+						],
+					},
+					{ criterion: "User Value & Problem", weightPercent: 20 },
+					{ criterion: "Technical Execution", weightPercent: 15 },
+					{ criterion: "Innovation", weightPercent: 15 },
+					{ criterion: "Hackathon Progress", weightPercent: 10 },
+					{ criterion: "Market & Ecosystem Potential", weightPercent: 10 },
+					{ criterion: "Product Design & UX", weightPercent: 10 },
+				],
+				source: "https://www.hackmeridian.com/build",
+				checkedOn: "2026-11-04",
+			},
 		},
 		external_url: "https://meridian.stellar.org/hackmeridian",
 		image_url:
@@ -170,6 +239,12 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 					"Payments, stablecoins, RWAs, cross-border, wallets, AI + blockchain, anchors.",
 			},
 		],
+		// Its page, read 2026-11-04, publishes no judging criteria.
+		judgingChecked: {
+			source:
+				"https://www.risein.com/programs/stellar-journey-to-mastery-monthly-builder-challenges",
+			checkedOn: "2026-11-04",
+		},
 		external_url:
 			"https://www.risein.com/programs/stellar-journey-to-mastery-monthly-builder-challenges",
 		image_url:
@@ -192,6 +267,13 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		field: "Payments,DeFi,APAC",
 		ecosystem: "Stellar",
 		organization: { id: -20, name: "Rise In" },
+		// Its page, read 2026-11-04, ties prizes to "minimum quality
+		// requirements and technical benchmarks set by the judging committee"
+		// and lists no criteria.
+		judgingChecked: {
+			source: "https://www.risein.com/programs/apac-stellar-hackathon",
+			checkedOn: "2026-11-04",
+		},
 		external_url: "https://www.risein.com/programs/apac-stellar-hackathon",
 		image_url:
 			"https://files.risein.com/programs/co8um-cohort-1778746738617png",
@@ -214,6 +296,11 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		field: "IRL,Residency,India",
 		ecosystem: "Stellar",
 		organization: { id: -20, name: "Rise In" },
+		// The Luma page, read 2026-11-04, publishes no judging criteria.
+		judgingChecked: {
+			source: "https://luma.com/ajcns4mc",
+			checkedOn: "2026-11-04",
+		},
 		external_url: "https://luma.com/ajcns4mc",
 		image_url:
 			"https://images.lumacdn.com/cdn-cgi/image/format=auto,fit=cover,dpr=1,anim=false,background=white,quality=75,width=800,height=420/event-social/uf/71ddf351-c388-4ea1-82ca-fb4fc120dded.png",
@@ -225,7 +312,7 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		title: "Build on Stellar Philippines Hackathon",
 		uname: "build-on-stellar-philippines-2026",
 		description:
-			"Stellar PH and Rise In's national hackathon: 165 registrations, 32 submissions, 28 mainnet deployments; ₱60,000 in prizes. Winners: AbotPera, PinkRaft, Axial, Sobre, TyFi.",
+			"Stellar PH and Rise In's national hackathon: 165 registrations, 32 submissions, 28 mainnet deployments; ₱60,000 in prizes. Judging weighed real-world impact at 30%, technical execution on Stellar at 25%, UX and usability at 20%, innovation at 15% and feasibility at 10%. Winners: AbotPera, PinkRaft, Axial, Sobre, TyFi.",
 		// Launch day 18 May (the page body; no time of day published), so a
 		// daytime start: local midnight served 17 May.
 		start_time: ts("2026-05-18T09:00:00+08:00"),
@@ -237,6 +324,26 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		field: "Payments,Philippines",
 		ecosystem: "Stellar",
 		organization: { id: -20, name: "Rise In" },
+		// The page's judging table, read 2026-11-04: five criteria and their
+		// weights, with no score scale.
+		judging: {
+			text: "Judging weighed real-world impact at 30%, technical execution on Stellar at 25%, UX and usability at 20%, innovation at 15% and feasibility at 10%.",
+			source:
+				"https://www.risein.com/programs/build-on-stellar-philippines-hackathon",
+			checkedOn: "2026-11-04",
+			rubric: {
+				criteria: [
+					{ criterion: "Real-World Impact", weightPercent: 30 },
+					{ criterion: "Technical Execution (Stellar)", weightPercent: 25 },
+					{ criterion: "UX / Usability", weightPercent: 20 },
+					{ criterion: "Innovation", weightPercent: 15 },
+					{ criterion: "Feasibility", weightPercent: 10 },
+				],
+				source:
+					"https://www.risein.com/programs/build-on-stellar-philippines-hackathon",
+				checkedOn: "2026-11-04",
+			},
+		},
 		external_url:
 			"https://www.risein.com/programs/build-on-stellar-philippines-hackathon",
 		image_url:
@@ -286,8 +393,96 @@ export const CURATED_HACKATHONS: CuratedHackathon[] = [
 		field: "IRL,Meridian",
 		ecosystem: "Stellar",
 		organization: { id: 3096, name: "Stellar Development Foundation" },
+		// SDF's recap, read 2026-11-04, names no HackMeridian judging criteria.
+		judgingChecked: {
+			source:
+				"https://stellar.org/blog/foundation-news/the-blueprint-at-meridian-2025",
+			checkedOn: "2026-11-04",
+		},
 		external_url:
 			"https://stellar.org/blog/foundation-news/the-blueprint-at-meridian-2025",
+		source: "curated",
+		kind: "hackathon",
+	},
+	{
+		id: -1008,
+		title: "Stellar Pro Hackathon, Istanbul",
+		uname: "stellar-pro-hackathon-istanbul-2026",
+		description:
+			"Rise In's 36-hour in-person hackathon, presented by Stellar, at Grand Pera in Beyoğlu, Istanbul, on 19 to 20 September 2026. Two tracks: the Genesis Track (open to builders who want to start from scratch) and the Scale Track (invite-only, for teams already beyond the first prototype stage). $15,000 prize pool. The Stellar team reviewed every submission on the hackathon criteria and each project's quality and progress, shortlisted teams from each track, and only the shortlisted teams presented live to the jury. Rise In's recap (30 September) counts 153 participants and 85 projects (Genesis 98 and 53, Scale 55 and 32). Winners: in Genesis, Pera Wallet, Plink, StellarCard and Payper, first to fourth; in Scale, Pacta, Koul and Mono, first to third. Rise In's page lists 18 to 20 September: its start, midnight on the 19th in Istanbul (GMT+3), is the 18th in UTC, and its program text gives 19 to 20 September.",
+		// risein.com/programs/stellar-pro-hackathon (read 2026-11-04): dates,
+		// place, prize pool, "Presented by Stellar", tracks, judging; the recap,
+		// risein.com/blog/stellar-pro-hackathon-153-builders-85-projects-and-a-path-to-enterprise
+		// (2026-09-30), the counts and the winners (src/data/curated-builds.ts).
+		// The page's start, midnight on the 19th Istanbul time, is the 18th in
+		// UTC, so the day is kept at UTC midnight and no hour of it is claimed.
+		// The end is the page's own: 23:59:59 on the 20th, Istanbul time.
+		start_time: ts("2026-09-19T00:00:00Z"),
+		end_time: ts("2026-09-20T23:59:59+03:00"),
+		bonus_price: 15000,
+		hackers_count: 153,
+		winner_announced: true,
+		status: 2,
+		field: "IRL,Turkiye",
+		ecosystem: "Stellar",
+		organization: { id: -20, name: "Rise In" },
+		// Every entry is in one of the two (the recap splits both counts).
+		tracks: [
+			{
+				name: "Genesis Track",
+				kind: "category",
+				description: "Open to builders who want to start from scratch.",
+			},
+			{
+				name: "Scale Track",
+				kind: "category",
+				description:
+					"Invite-only, for teams already beyond the first prototype stage.",
+			},
+		],
+		// How the page says the event is judged; it publishes no list of
+		// criteria ("shared with participants before the submission deadline").
+		judging: {
+			text: "The Stellar team reviewed every submission on the hackathon criteria and each project's quality and progress, shortlisted teams from each track, and only the shortlisted teams presented live to the jury.",
+			source: "https://www.risein.com/programs/stellar-pro-hackathon",
+			checkedOn: "2026-11-04",
+		},
+		external_url: "https://www.risein.com/programs/stellar-pro-hackathon",
+		image_url:
+			"https://files.risein.com/programs/2kgsl-cohort-1787226687290jpeg",
+		source: "curated",
+		kind: "hackathon",
+	},
+	{
+		id: -1009,
+		title: "Blockchain Innovation Challenge powered by Stellar, Waterloo",
+		uname: "blockchain-innovation-challenge-waterloo-2026",
+		description:
+			"A two-week challenge for University of Waterloo students, hosted by Velocity and powered by Stellar, from 2 to 18 November 2026: build Stellar solutions that widen access to savings, credit, payments and identity verification for underserved people. $15,000 in prizes. The kick-off on 2 November (4 to 6 pm, Black and Gold Room, SLC) is mandatory for every participant; teams in the Top 16 present at a project showcase on 16 November, and the Top 8 at the final awards on 18 November (5 to 7:30 pm), both at the Innovation Arena, 280 Joseph St, Kitchener. Open to current undergraduate and graduate students.",
+		// Velocity's page and the University of Waterloo's event page, both
+		// read 2026-11-04: title, dates, prizes, host, audience and the
+		// mandatory dates. The days are kept at UTC midnight and 23:59, with no
+		// hour claimed, as for the other date-only rows.
+		start_time: ts("2026-11-02T00:00:00Z"),
+		end_time: ts("2026-11-18T23:59:00Z"),
+		bonus_price: 15000,
+		hackers_count: 0,
+		winner_announced: false,
+		status: 1,
+		field: "IRL,University,Canada",
+		ecosystem: "Stellar",
+		organization: { id: -21, name: "Velocity" },
+		// Neither page, read 2026-11-04, publishes judging criteria; teams
+		// advance to a Top 16 and a Top 8.
+		judgingChecked: {
+			source:
+				"https://www.velocityincubator.com/programs-events/the-blockchain-innovation-challenge-powered-by-stellar",
+			checkedOn: "2026-11-04",
+		},
+		external_url:
+			"https://www.velocityincubator.com/programs-events/the-blockchain-innovation-challenge-powered-by-stellar",
+		image_url:
+			"https://cdn.prod.website-files.com/66e096649930d345e692a0af/6aa0710787b46641ceb63f44_Stellar-challenge-header-image.avif",
 		source: "curated",
 		kind: "hackathon",
 	},

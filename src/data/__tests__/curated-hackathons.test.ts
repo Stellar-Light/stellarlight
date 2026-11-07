@@ -139,8 +139,10 @@ describe("tracks and judging a curated record declares", () => {
 	it("come from the record's own description, with no new claim", () => {
 		const declaring = CURATED_HACKATHONS.filter((h) => h.tracks || h.judging);
 		expect(declaring.map((h) => h.uname).sort()).toEqual([
+			"build-on-stellar-philippines-2026",
 			"hackmeridian-2026",
 			"stellar-journey-to-mastery-2026",
+			"stellar-pro-hackathon-istanbul-2026",
 		]);
 		for (const h of declaring) {
 			for (const t of h.tracks ?? []) {

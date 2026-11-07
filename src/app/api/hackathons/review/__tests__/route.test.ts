@@ -172,6 +172,9 @@ describe("GET /api/hackathons/review", () => {
 			submissions: 2,
 			winners: 2,
 			shareOfSubmissions: 0.667,
+			// The share's denominator, and what fell outside it.
+			outOf: 3,
+			uncategorized: 1,
 		});
 		expect(r.pitch.idea).toBe("TollPay. Stripe for MCP servers.");
 	});
@@ -293,6 +296,8 @@ describe("how crowded a category is, across every stored submission", () => {
 				submissions: 2,
 				winners: 2,
 				shareOfSubmissions: 0.667,
+				outOf: 3,
+				uncategorized: 1,
 			});
 		} finally {
 			index.pop();
@@ -461,6 +466,7 @@ describe("GET /api/hackathons/review?hackathon=<slug>", () => {
 			"checks",
 			"similar",
 			"categoryContext",
+			"eventCategories",
 			"categoryNote",
 			"pitch",
 		]);

@@ -19,7 +19,7 @@ import northStarSeries from "../../improvements/audits/north-star-series.json";
 // Weekly re-probe of every human-verified packet stamp against its own
 // deciding URL (scripts/check-packet-stamps.ts).
 import packetStamps from "../../improvements/audits/packet-stamps-latest.json";
-import ravenDrift from "../../improvements/audits/raven-drift-latest.json";
+import ravenDriftArtifact from "../../improvements/audits/raven-drift-latest.json";
 import scriptsTypes from "../../improvements/audits/scripts-types-latest.json";
 import workflowHealth from "../../improvements/audits/workflow-health-latest.json";
 import deepwiki from "../../improvements/engine/independent-calibration-latest.json";
@@ -49,6 +49,24 @@ import honestyBaseline from "../../specs/honesty-baseline.json";
 import opacityBaseline from "../../specs/opacity-baseline.json";
 import openapi from "../../specs/openapi.json";
 import { EVIDENCE_GRACE_DAYS } from "./improvement-ledger";
+
+/** The drift guard's artifact, typed here rather than inferred from the run
+ * that was committed last: a run that could not read the consumer's catalog
+ * writes catalogOps and claimedOpCount as null, and an inferred `null` type
+ * failed the build (2026-11-06). */
+const ravenDrift = ravenDriftArtifact as {
+	generatedAt: string;
+	specVersion: string;
+	graceDays: number;
+	checked?: boolean;
+	expectedOps: unknown[];
+	catalogOps: unknown[] | null;
+	missingFromCatalog: unknown[];
+	laggingInCatalog: unknown[];
+	undiscoverable?: unknown[];
+	uncataloged?: string[];
+	notes?: string[];
+};
 
 /** The packet-stamp artifact's row shape. Named explicitly because a green
  * run's `rows` still types fine, but any filtered/mapped subset of a JSON
@@ -701,33 +719,38 @@ export function getGuardRows(now: Date = new Date()): GuardRow[] {
 				0;
 			const uncataloged =
 				(ravenDrift as { uncataloged?: string[] }).uncataloged ?? [];
+			// A run that could not look shows that and its reason, never counts.
+			const notes = (ravenDrift as { notes?: string[] }).notes ?? [];
 			return g({
 				key: "raven-interlock",
 				title: "Consumer interlock (Raven)",
 				promise:
 					"The #1 consumer's discovery index tracks our contract, checked from OUR side too, with grace for their re-baseline cadence.",
-				measure: { value: cataloged, of: expected, unit: "operations" },
+				measure: probed
+					? { value: cataloged, of: expected, unit: "operations" }
+					: { value: 0, of: null, unit: "operations checked" },
+				...(probed ? {} : { value: "not checked" }),
 				sub: "operations discoverable in the consumer catalog",
-				details: [
-					...(probed
-						? []
-						: [
-								"the catalog could not be read on this run; the counts below are not a measurement",
-							]),
-					`${lagging} op(s) lagging within the ${ravenDrift.graceDays}-day re-baseline grace window (expected)`,
-					`${missing} op(s) missing beyond grace`,
-					...(undiscoverable
-						? [
-								`${undiscoverable} op(s) in the catalog that our own routing words do not reach; our fix`,
-							]
-						: []),
-					...(uncataloged.length
-						? [
-								`${uncataloged.length} op(s) callable but absent from the consumer's discovery index past the ${ravenDrift.graceDays}-day grace window (${uncataloged.join(", ")}): an agent that does not already know the name cannot find them, and no wording of ours can change that`,
-							]
-						: []),
-					`contract ${ravenDrift.specVersion} at measurement`,
-				],
+				details: probed
+					? [
+							`${lagging} op(s) lagging within the ${ravenDrift.graceDays}-day re-baseline grace window (expected)`,
+							`${missing} op(s) missing beyond grace`,
+							...(undiscoverable
+								? [
+										`${undiscoverable} op(s) in the catalog that our own routing words do not reach; our fix`,
+									]
+								: []),
+							...(uncataloged.length
+								? [
+										`${uncataloged.length} op(s) callable but absent from the consumer's discovery index past the ${ravenDrift.graceDays}-day grace window (${uncataloged.join(", ")}): an agent that does not already know the name cannot find them, and no wording of ours can change that`,
+									]
+								: []),
+							`contract ${ravenDrift.specVersion} at measurement`,
+						]
+					: [
+							`the consumer's catalog was not checked on this run: ${notes.join("; ") || "no reason recorded"}`,
+							`contract ${ravenDrift.specVersion} at measurement`,
+						],
 				asOf: ravenDrift.generatedAt,
 				// live-index-guards.yml runs this daily and now commits the
 				// artifact, so the row tracks a real cadence instead of a

@@ -15,13 +15,18 @@ import "./load-env";
 import { getPayload } from "payload";
 import {
 	cleanTitle as cleanScfTitle,
+	findTitlePrefixMatch,
 	normSpaceless,
 	stemSlugHash,
-	titlePrefixMatch,
 } from "../src/lib/identity";
 import configPromise from "../src/payload.config";
 import { curatedFieldsFor } from "./data/curation-maps";
-import { parseRoundVerdicts } from "./eval/scf-official";
+import {
+	parseRoundVerdicts,
+	scfHold,
+	showsAward,
+	uniqueNames,
+} from "./eval/scf-official";
 
 const args = process.argv.slice(2);
 const dryRun = !args.includes("--execute");
@@ -36,6 +41,7 @@ const stats = {
 	descriptionsAdded: 0,
 	linksAdded: 0,
 	skipped: 0,
+	held: 0,
 	errors: 0,
 };
 
@@ -137,6 +143,8 @@ async function scrapeDetailPage(slug: string): Promise<{
 	}>;
 	verdictSubmissions?: number;
 	verdictAwardedAny?: number;
+	/** Numbered rounds the page marks lost (every decided card negative). */
+	notAwardedRounds?: number[];
 	/** Page-level project record (title / slug / lastAwardedRound), read for
 	 * pages the listing never served — see SCF_PAGES_BEYOND_CAP. */
 	pageSlug?: string;
@@ -273,6 +281,9 @@ async function scrapeDetailPage(slug: string): Promise<{
 		// non-award.
 		result.verdictSubmissions = verdicts.submissions;
 		result.verdictAwardedAny = verdicts.awardedAnyCount;
+		result.notAwardedRounds = [...verdicts.notAwarded]
+			.map(Number)
+			.sort((a, b) => a - b);
 
 		return Object.keys(result).length > 0 ? result : null;
 	} catch {
@@ -338,12 +349,19 @@ async function main() {
 	}
 	console.log(`Loaded ${ourProjects.length} projects from DB\n`);
 
-	const byNormName = new Map<string, any>();
 	const bySlug = new Map<string, any>();
-	for (const p of ourProjects) {
-		byNormName.set(normalize(p.name), p);
-		bySlug.set(p.slug, p);
-	}
+	for (const p of ourProjects) bySlug.set(p.slug, p);
+	// a lineage shadow and its canonical row are one project
+	// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+	const identityOf = (p: any) =>
+		p.canonicalSlug && bySlug.has(p.canonicalSlug) ? p.canonicalSlug : p.slug;
+	// One exact name, one project (sls-111): a name two projects carry joins
+	// neither. The map used to keep whichever row loaded last.
+	const byNormName = uniqueNames(ourProjects, identityOf, (name, rows) =>
+		console.log(
+			`  shared name "${name}": ${rows.map((r) => r.slug).join(", ")}; no page joins either by name, a person decides`,
+		),
+	);
 
 	// 4. Match and enrich
 	// sls-061 (#767): SCF titles that no normalization reaches — the API title
@@ -446,6 +464,25 @@ async function main() {
 		"greep-pos-greep-pay-hfe": "greeppay",
 		"zkcrossdex-ipb": "zkcross",
 		"cashabroad-smart-treasury-wla": "cash-abroad",
+		// sls-111 (2026-11-04): a submission-named SCF #45 page whose own site,
+		// slimepay.com, is the row's site. r45 $35,000 (its #44 not awarded).
+		"the-merchant-settlement-rail-for-africa-bzf": "slimepay",
+		// sls-111: rows with a 3 or 4 letter name that is not an acronym no
+		// longer join by title prefix (a row named Lend would take any title
+		// starting "Lend"). These live joins are kept here instead, each with
+		// the page's own site equal to the row's site (2026-11-05).
+		"bexo-wallet-usdc-payments-cross-border-transfers-qr-merchant-payments-for-latin-america-uyu":
+			"bexo", // bexo.app
+		"lendxyz-7xc": "lend", // app.lend.xyz
+		"zarf-protocol-zarfto-b5n": "zarf", // zarf.to
+		"loop-cashback-everywhere-with-stellar-zom": "loop", // loopfinance.io
+		"sfx-super-money-app-uav": "sfx", // sfxchange.co
+		"lul-serving-the-unbanked-ckz": "lulpay", // lulpay.com (the lul row is its lineage shadow)
+		"eara-european-regulated-rwa-ecosystem-dmu": "eara", // earaglobal.com
+		"rozo-one-tap-to-pay-vqy": "rozo", // rozo.ai
+		"cobo-custody-integration-for-institution-p8i": "cobo", // cobo.com
+		"cocaxyz-5fk": "coca", // coca.xyz
+		"paid-payrolling-0sk": "paid", // p-aid.world
 		// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
 		// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
 		// `band`, which otherwise matches nothing and would keep stale data.
@@ -637,18 +674,15 @@ async function main() {
 		// tagline mentions ✗. Legit tail matches ("…by Gateway.fm") get explicit
 		// SCF_SLUG_OVERRIDES instead. Rejections are logged for that triage.
 		if (!ours && normTitle.length >= 4) {
-			for (const [key, proj] of byNormName) {
-				if (!key || (!key.includes(normTitle) && !normTitle.includes(key)))
-					continue;
-				if (titlePrefixMatch(cleanTitle, String(proj.name ?? ""))) {
-					ours = proj;
-				} else {
+			ours = findTitlePrefixMatch(
+				cleanTitle,
+				ourProjects,
+				(proj, why) =>
 					console.log(
-						`  partial REJECTED (not title-prefix): ours "${proj.name}" vs SCF "${scf.title}"`,
-					);
-				}
-				break;
-			}
+						`  partial REJECTED (${why}): ours "${proj.name}" vs SCF "${scf.title}"`,
+					),
+				identityOf,
+			);
 		}
 
 		// A lineage shadow (Draft + canonicalSlug, #1337) is not a record. The
@@ -719,11 +753,7 @@ async function main() {
 			);
 			continue;
 		}
-		const awardedOnPage =
-			(detail.roundAwards?.length ?? 0) > 0 ||
-			(detail.awardedRounds?.length ?? 0) > 0 ||
-			(detail.verdictAwardedAny ?? 0) > 0;
-		if (!awardedOnPage) {
+		if (!showsAward(detail)) {
 			if ((detail.verdictSubmissions ?? 0) > 0)
 				beyondCap.notAwarded.push(scfSlug);
 			else beyondCap.unparseable.push(`${scfSlug} (page verdicts nothing)`);
@@ -835,6 +865,9 @@ async function main() {
 				(n, d) => n + (d.verdictAwardedAny ?? 0),
 				0,
 			),
+			notAwardedRounds: [
+				...new Set(details.flatMap((d) => d.notAwardedRounds ?? [])),
+			].sort((a, b) => a - b),
 		};
 		const lastAwardedRound =
 			Math.max(...pages.map((p) => Number(p.lastAwardedRound) || 0)) ||
@@ -929,14 +962,13 @@ async function main() {
 						]),
 					));
 
-		// One field, one writer (2026-09-06): a human-verified block (curate
-		// SCF_FIX) is the writer of record for its values — the page's total can
-		// include an ineligible round (aquarius: page $391k, paid $291k) and its
-		// award types are not what the human recorded. This lane only ADDS to
-		// such a row: rounds and round awards the page shows that the block
-		// lacks (union; stored tuples win), plus the citation when missing.
-		// Before this the two lanes flipped aquarius, stride, palremit and
-		// autoaction on every execute.
+		// One field, one writer: a human-verified block (curate SCF_FIX) is the
+		// writer of record for its values. The page's total can include an
+		// ineligible round (aquarius: page $391k, paid $291k), and curate syncs
+		// the rounds exactly, so this lane writes nothing to such a row
+		// (scfHold below). What the page shows that the block lacks is logged
+		// for a human to carry into SCF_FIX (sls-111; until then the lane
+		// added it, and curate took it away again).
 		const humanOwned = currentScf.basis === "human-verified";
 		const storedRounds: number[] = (currentScf.awardedRounds ?? []).map(Number);
 		// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
@@ -958,49 +990,20 @@ async function main() {
 				currentScf.sourceUrl !== pageUrl
 			: pageDiffers;
 
-		// No-resurrect guard (2026-07-11): if this record is already
-		// awarded=false and the official page affirmatively shows ZERO awarded
-		// submissions, don't let API round-codes flip it back to true (the
-		// coopstable class, corrected by scripts/data/fix-scf-rounds.ts).
-		// Narrow on purpose: records currently awarded=true are unaffected,
-		// and this script still never auto-flips true→false.
-		const skipResurrect =
-			currentScf.awarded === false &&
-			isAwarded &&
-			(detail?.verdictSubmissions ?? 0) > 0 &&
-			(detail?.verdictAwardedAny ?? 0) === 0;
+		// scfHold (scf-official.ts): curate's rows, a removal an SCF correction
+		// made (fix-scf-rounds' poison clears), and an unread false on a page
+		// that awards nothing (the coopstable no-resurrect class) all stand. An
+		// official-record false (the boolean fix) yields to an award in a round
+		// after the rounds the page marks lost. An unread false yields to a
+		// page that shows an award in any form: the Awarded-card count alone
+		// held enable at false over its page-pinned #45 (2026-10-03).
+		const hold = scfHold(currentScf, detail, isAwarded);
 
-		if (hasNewData && skipResurrect) {
+		if (hasNewData && hold) {
 			console.log(
-				`    SCF: NO-RESURRECT — awarded=false stands (official page shows ${detail?.verdictSubmissions} submission(s), zero awarded)`,
+				`    SCF: HOLD (${hold}); page shows +rounds [${addRounds.join(", ")}] +awards ${addRA.map((r) => `#${r.round ?? r.awardName}:$${r.amountUSD ?? "?"}`).join(" ") || "none"}, slug=${scf.slug}`,
 			);
-		} else if (hasNewData && humanOwned) {
-			const pageLast = Number(scf.lastAwardedRound) || 0;
-			const storedLast = Number(currentScf.lastAwardedRound) || 0;
-			updateData.scf = {
-				...currentScf,
-				slug: scf.slug,
-				sourceUrl: pageUrl,
-				asOf: new Date().toISOString().slice(0, 10),
-				lastAwardedRound: storedRound(
-					pageLast > storedLast ? pageLast : currentScf.lastAwardedRound,
-				),
-				awardedRounds: [...storedRounds, ...addRounds].sort((a, b) => a - b),
-				roundAwards: [
-					// biome-ignore lint/suspicious/noExplicitAny: Payload array rows
-					...storedRA.map((r: any) => ({
-						round: r.round ?? null,
-						awardName: r.awardName ?? null,
-						amountUSD: r.amountUSD ?? null,
-						awardType: r.awardType ?? null,
-					})),
-					...addRA,
-				],
-			};
-			console.log(
-				`    SCF (human-verified, additive): +rounds [${addRounds.join(", ")}] +awards ${addRA.map((r) => `#${r.round ?? r.awardName}:$${r.amountUSD ?? "?"}`).join(" ") || "none"}, slug=${scf.slug}`,
-			);
-			stats.scfDataUpdated++;
+			stats.held++;
 		} else if (hasNewData) {
 			updateData.scf = {
 				awarded: isAwarded,
@@ -1147,6 +1150,7 @@ async function main() {
 	console.log(`  Descriptions:     ${stats.descriptionsAdded}`);
 	console.log(`  Links:            ${stats.linksAdded}`);
 	console.log(`Skipped (no new):   ${stats.skipped}`);
+	console.log(`SCF held (scfHold): ${stats.held}`);
 	console.log(`Errors:             ${stats.errors}`);
 	console.log(
 		`Beyond-cap pages:   ${beyondCap.queued.length} awarded · ${beyondCap.notAwarded.length} not awarded on page · ${beyondCap.unparseable.length} could not parse`,

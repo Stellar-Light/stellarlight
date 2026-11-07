@@ -502,8 +502,8 @@ export function StablecoinCharts({
 
 			<div className="col-span-full lg:col-span-6">
 				<Panel
-					title="Top Issuers"
-					description="Leading stablecoin issuers by market cap"
+					title="Top Brands"
+					description="Stablecoin brands by market cap; a brand is not always the issuer of record"
 				>
 					<div className="h-[300px] overflow-auto">
 						<div className="space-y-2">
