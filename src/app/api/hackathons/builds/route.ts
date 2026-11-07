@@ -20,7 +20,11 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { RERANK_TOP } from "@/lib/build-rerank";
 import { inferEventFilter, textlessEventWarning } from "@/lib/event-in-query";
-import { afterEventFields, distribution } from "@/lib/hackathon-analytics";
+import {
+	afterEventFields,
+	countSubmissions,
+	distribution,
+} from "@/lib/hackathon-analytics";
 import {
 	BUILD_FILTER_PARAMS,
 	listedEvents,
@@ -112,8 +116,8 @@ export async function GET(req: NextRequest) {
 	// Pages share one ranking: offset skips that many matched builds.
 	const offset = clampOffset(sp.get("offset"));
 	// Submissions, not event entries: a submission entered in several events
-	// is one result here (sls-092).
-	const indexedTotal = new Set(indexed.map((b) => b.id)).size;
+	// is one result here (sls-092), and one count in analyze.
+	const indexedTotal = countSubmissions(indexed);
 
 	// Filters, scoring and the meaning fallback live in
 	// src/lib/hackathon-build-query.ts, shared with analyze, so the operations
@@ -255,7 +259,7 @@ export async function GET(req: NextRequest) {
 				counts: {
 					indexedBuilds: indexedTotal,
 					matched: scored.length,
-					// Event entries that match: analyze's unit for the same filter.
+					// Event entries that match: each event's own count of the same filter.
 					entries,
 					// Matched by name, held back: most of q is in no submission.
 					withheldByName: withheld.length,

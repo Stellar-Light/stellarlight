@@ -16,6 +16,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import {
 	categoryMeasures,
+	countSubmissions,
 	coverageEvents,
 	type Distribution,
 	distribution,
@@ -135,8 +136,9 @@ export async function GET(req: NextRequest) {
 	}
 	// No rate over incomplete rows (incompleteRows). Beside full listings they
 	// are left out of every count and share, in one line: across every event
-	// 12 curated winners made the winners 80 of 1,383 (5.8%), where the full
-	// listings give 68 of 1,371. Alone, they keep their counts, shares null.
+	// 12 curated winners made the winners 80 of 1,356 submissions (5.9%),
+	// where the full listings give 68 of 1,344 (5.1%) (live 1.9.116). Alone,
+	// they keep their counts, shares null.
 	const winnersOnly = winnersOnlyEvents(indexed);
 	const partial = coverageEvents(indexed, "partial");
 	const incompleteSet = incompleteEvents(indexed);
@@ -152,7 +154,7 @@ export async function GET(req: NextRequest) {
 		noShares ? withoutShares(d) : d;
 	const opts = { top, value };
 	const total = {
-		field: counted.length,
+		field: countSubmissions(counted),
 		...shares(distribution(matched, facet, opts)),
 	};
 	// A winners-only or partial event's group says so; it is grouped only
@@ -304,8 +306,8 @@ export async function GET(req: NextRequest) {
 				},
 				by: by ?? null,
 				value: value ?? null,
-				counts: { indexedBuilds: indexed.length },
-				note: "Shares are over `known` (builds whose value is known); `unknown` builds are counted apart, never as none. A build can count under several categories or packages, so shares can sum past 1. `field` = builds passing every filter except q; builds / field is the share of the field that matched q. Groups by event run oldest first. winnersVsOthers compares winners with everyone else in the same set: lift above 1 = more common among winners. Small counts are noise: read `winners` and `others` before the lift.",
+				counts: { indexedBuilds: countSubmissions(indexed) },
+				note: "Shares are over `known` (builds whose value is known); `unknown` builds are counted apart, never as none. A build is a submission, counted once as searchHackathonBuilds counts it, even when it entered several events; it counts under every category or package it carries and in each event, year or track its entries have, so shares can sum past 1 and groups past the total. It is a winner (placement, by=placement, winnersVsOthers) when any of its entries placed, and its activity is measured from the event of that placed entry, else its latest. `field` = builds passing every filter except q; builds / field is the share of the field that matched q. Groups by event run oldest first. winnersVsOthers compares winners (a submission that placed in any of its entries) with everyone else in the same set: lift above 1 = more common among winners. Small counts are noise: read `winners` and `others` before the lift.",
 			},
 			total,
 			...(groups ? { groups } : {}),

@@ -347,7 +347,7 @@ describe("GET /api/hackathons/builds when q's words are in no build", () => {
 				r.id,
 				r.matchedTerms,
 			]),
-		).toEqual([["agentpay", ["ai", "agents,", "payments,", "café"]]]);
+		).toEqual([["agentpay", ["ai", "agents", "payments", "café"]]]);
 		expect(body.meta.warnings).toBeUndefined();
 	});
 
@@ -531,7 +531,7 @@ describe("GET /api/hackathons/builds labels a shared award as a category", () =>
 });
 
 describe("GET /api/hackathons/builds counts both units", () => {
-	it("serves event entries beside unique submissions, the unit analyze counts", async () => {
+	it("serves event entries beside unique submissions, the unit analyze counts too", async () => {
 		const { GET } = await import("../route");
 		const read = async (qs: string) =>
 			(

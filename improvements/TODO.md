@@ -289,6 +289,13 @@ here as #1900 to #1905; each issue carries its read-only probes.
 Found by the 2026-10-20 round's consumer-style QA round and contract audit
 unless noted.
 
+- Hackathon builds: a submission's project link, repoMissing and activity
+  are still read per row (src/lib/hackathon-builds.ts,
+  sameFactsPerSubmission merges only types and packages), so a winner whose
+  link was checked only on an unplaced row reads unknown in the winner
+  groups of analyzeHackathonSubmissions (project, projectStatus and scf
+  facets). Merge them in sameFactsPerSubmission. Found by the 2026-11-05
+  review of lane R10; no instance in the rows saved 2026-11-04.
 - Unread SCF facts are served as answers: 392 of 1006 rows served by
   GET /api/projects/search (paged across every category, 2026-11-05) carry
   scfAwarded false and scfAwardedRounds [] with no SCF read behind them (no

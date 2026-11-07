@@ -485,7 +485,7 @@ const buildFilterParams = (
 		in: "query",
 		required: false,
 		description:
-			"Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events; under this filter each row is that event's own entry, with its own placement.",
+			"Only these events: up to 10, comma-separated, each an event's slug or its exact title, any case. An event getHackathons lists whose submissions are not stored matches nothing, and meta.warnings says so; a value that names no event getHackathons lists answers 400 with validHackathons, the slugs of every event with stored submissions. A submission can enter several events: under this filter each row is a named event's own entry, with its own placement, and one entered in several named events is one row, its best entry among those that match (a placed one first, then the latest), and one count.",
 		schema: { type: "string" },
 	},
 	{
@@ -4247,7 +4247,7 @@ export const spec: OpenAPISpec = {
 				},
 				parameters: [
 					...buildFilterParams(
-						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when it covers half of q's words, or when its name holds one of them unless most of q's words occur as a whole word in no submission (text or declared packages). A word of four letters or more also matches inside a longer word. In a question (q ends with ? or opens with which, who, whom, whose, what, where, when, why, how, has, have, had, did, does, do, is, are, was, were, can, could, will, would or should, followed by a space), the question marks and the words that ask about an outcome or the past rather than a topic (won, win, wins, winner, winners, winning, prize, prizes, award, awards, awarded, placed, hackathon, hackathons, built, builds, past, ever, previous, previously, anyone, someone, already, before) are not searched, unless they are all q holds. When any of q's words occurs as a whole word in no submission, meta.warnings names those words and says what the listed builds are, and says when a build whose name matched was held back (meta.counts.withheldByName). With no hackathon parameter, an event named in full in q (its title, in any case, accents and punctuation aside, or its slug, hyphens included, in any case) becomes the hackathon filter and leaves q (meta.inferredFilter). The rest of q is searched inside that event; a rest made only of words the search skips (stopwords and generic words such as app, token, crypto, money, stellar, github) and words that ask for the event's entries (winners, builds, projects, places, awards, rankings) lists the event as the filter alone does. When the rest matches none of the event's rows and none of them holds a description, meta.warnings says so. A name start several events share infers nothing; meta.warnings names those events. Any hackathon parameter turns this off: send hackathon= with no value to search the words as text in every event.",
+						"Topic to search build names, descriptions and the packages their repos declare (prior-art lookup). A build is listed when it covers half of q's words, or when its name holds one of them unless most of q's words occur as a whole word in no submission (text or declared packages). A submission entered in several events matches when any of its entries does (each entry's track and award are its own) and is listed as the best of those. A word of four letters or more also matches inside a longer word. In a question (q ends with ? or opens with which, who, whom, whose, what, where, when, why, how, has, have, had, did, does, do, is, are, was, were, can, could, will, would or should, followed by a space), the question marks and the words that ask about an outcome or the past rather than a topic (won, win, wins, winner, winners, winning, prize, prizes, award, awards, awarded, placed, hackathon, hackathons, built, builds, past, ever, previous, previously, anyone, someone, already, before) are not searched, unless they are all q holds. When any of q's words occurs as a whole word in no submission, meta.warnings names those words and says what the listed builds are, and says when a build whose name matched was held back (meta.counts.withheldByName). With no hackathon parameter, an event named in full in q (its title, in any case, accents and punctuation aside, or its slug, hyphens included, in any case) becomes the hackathon filter and leaves q (meta.inferredFilter). The rest of q is searched inside that event; a rest made only of words the search skips (stopwords and generic words such as app, token, crypto, money, stellar, github) and words that ask for the event's entries (winners, builds, projects, places, awards, rankings) lists the event as the filter alone does. When the rest matches none of the event's rows and none of them holds a description, meta.warnings says so. A name start several events share infers nothing; meta.warnings names those events. Any hackathon parameter turns this off: send hackathon= with no value to search the words as text in every event.",
 						"hybrid",
 					),
 					{
@@ -4355,7 +4355,7 @@ export const spec: OpenAPISpec = {
 														entries: {
 															type: "integer",
 															description:
-																"Event entries that match: a submission entered in several events counts once per event. analyzeHackathonSubmissions counts this unit, so for the same filters and mode its total.builds equals this, not matched, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows or a partial event's rows, which analyze leaves out beside full listings (its meta.warnings names them).",
+																"Event entries that match: a submission entered in several events counts once per event, as each event's own count does. analyzeHackathonSubmissions counts submissions, so for the same filters and mode its total.builds equals matched, not this, with two exceptions that count here and not in analyze: a declared package q matched, and a winners-only event's rows or a partial event's rows, which analyze leaves out beside full listings (its meta.warnings names them).",
 														},
 														withheldByName: {
 															type: "integer",
@@ -4592,7 +4592,7 @@ export const spec: OpenAPISpec = {
 				summary:
 					"Trends and counts across Stellar hackathon submissions, with lift",
 				description:
-					"Counts over every stored Stellar hackathon submission, during and after its event. `facet`: category (project types), library or package (Stellar SDKs declared), activity (commits 90+ days after), project (became a directory project), projectStatus (its status today) and its grant funding, placement, event or year. `by=event` or `by=year` makes a trend; every answer compares winners with the rest (lift). Shares are over known values. Unit: event entries (a submission in two events counts twice). Same filters as searchHackathonBuilds; for the builds themselves → use searchHackathonBuilds.",
+					"Counts over every stored Stellar hackathon submission, during and after its event. `facet`: category (project types), library or package (Stellar SDKs declared), activity (commits 90+ days after), project (became a directory project), projectStatus (its status today) and its grant funding, placement, event or year. `by=event` or `by=year` makes a trend; every answer compares winners with the rest (lift). Shares are over known values. Unit: submissions (one in two events counts once). Same filters as searchHackathonBuilds; for the builds themselves → use searchHackathonBuilds.",
 				"x-routing": {
 					purpose:
 						"Spot trends across Stellar hackathons: what share of submissions do X, which SDKs winners use, how a category moved event by event, what the winners did differently, and who kept building.",
@@ -4644,7 +4644,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: false,
 						description:
-							"What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project (a floor). projectStatus: that project's directory status today. scf: whether SCF funded it. placement: winner or not. track, event, year.",
+							"What to count (default category). category: directory project types. library: the Stellar libraries a repo builds on (renamed and sibling packages folded together). package: the exact packages a repo declares. activity: commits on the submitted repo 90+ days after the event, archived, or repo not found. project: became a directory project (a floor). projectStatus: that project's directory status today. scf: whether SCF funded it. placement: winner or not. track, event, year. A submission entered in several events counts once: a winner when any entry placed, its activity from the event of its placed entry, else its latest.",
 						schema: {
 							type: "string",
 							enum: [...FACET_IDS],
@@ -4656,7 +4656,7 @@ export const spec: OpenAPISpec = {
 						in: "query",
 						required: false,
 						description:
-							"Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q.",
+							"Split the counts: event (a trend, oldest event first), year, placement or track. Each group carries `field`, its size before q. A submission counts once in each event, year or track group its entries fall in, so groups can sum past the total; by=placement puts it in one, winner when any of its entries placed.",
 						schema: { type: "string", enum: [...GROUP_FACETS] },
 					},
 					{
@@ -4762,7 +4762,7 @@ export const spec: OpenAPISpec = {
 														indexedBuilds: {
 															type: "integer",
 															description:
-																"Event entries in the index. A submission entered in several events counts once per event.",
+																"Submissions in the index, as searchHackathonBuilds counts them: a submission entered in several events counts once.",
 														},
 													},
 												},

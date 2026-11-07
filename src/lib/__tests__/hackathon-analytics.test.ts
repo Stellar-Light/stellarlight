@@ -157,6 +157,104 @@ describe("winners against the rest", () => {
 	});
 });
 
+// L2-04: a submission entered in several events is one row per event, and
+// analyze counted every row. Blend Pool Creator's entries, saved 2026-11-04:
+// 1st place at Blend, unplaced at PaltaLabs.
+describe("a submission entered in several events", () => {
+	const blend = { categories: cat("Lending"), stack: ["@stellar/stellar-sdk"] };
+	const rows = [
+		build("dorahacks-buidl-27438", {
+			...blend,
+			event: "stellar-hacks-blend",
+			endedAt: "2025-07-07",
+			isWinner: true,
+			track: "Main Track",
+		}),
+		build("dorahacks-buidl-27438", {
+			...blend,
+			event: "stellar-hacks-paltalabs",
+			endedAt: "2025-08-07",
+		}),
+		build("another", {
+			categories: cat("DEX"),
+			event: "stellar-hacks-paltalabs",
+			endedAt: "2025-08-07",
+		}),
+	];
+
+	it("counts once in a total, under every value its entries carry", () => {
+		const d = distribution(rows, "category", { now: NOW });
+		expect(d).toMatchObject({ builds: 2, known: 2, unknown: 0 });
+		expect(d.values[0]).toEqual({
+			value: "Lending",
+			builds: 1,
+			winners: 1,
+			share: 0.5,
+		});
+		const events = distribution(rows, "event", { now: NOW }).values;
+		expect(events.map((v) => [v.value, v.builds, v.winners])).toEqual([
+			["stellar-hacks-paltalabs", 2, 0],
+			["stellar-hacks-blend", 1, 1],
+		]);
+	});
+
+	it("counts once in each group its entries fall in", () => {
+		const g = distributionBy(rows, rows, "category", "year", { now: NOW });
+		expect(g.map((x) => [x.value, x.field, x.builds])).toEqual([
+			["2025", 2, 2],
+		]);
+	});
+
+	it("counts placement once: a winner when any of its entries placed", () => {
+		const d = distribution(rows, "placement", { now: NOW });
+		expect(d).toMatchObject({ builds: 2, known: 2 });
+		expect(d.values.map((v) => [v.value, v.builds, v.winners])).toEqual([
+			["winner", 1, 1],
+			["not placed", 1, 0],
+		]);
+		const g = distributionBy(rows, rows, "category", "placement", {
+			now: NOW,
+		});
+		expect(g.map((x) => [x.value, x.field, x.builds])).toEqual([
+			["not placed", 1, 1],
+			["winner", 1, 1],
+		]);
+	});
+
+	// DarkWater ZK, saved 2026-11-04: its two events ended 11 days apart, so
+	// its repo kept building 90 days after one and not after the other.
+	it("measures activity from one entry, the event search shows it in", () => {
+		const activity = {
+			lastCommitAt: "2026-05-25T06:45:35Z",
+			archived: false,
+		};
+		const darkWater = [
+			build("dorahacks-buidl-39905", {
+				activity,
+				event: "buildonstellarchile",
+				endedAt: "2026-03-06",
+			}),
+			build("dorahacks-buidl-39905", {
+				activity,
+				event: "stellar-hacks-zk-gaming",
+				endedAt: "2026-02-23",
+			}),
+		];
+		const d = distribution(darkWater, "activity", { now: NOW });
+		expect(d).toMatchObject({ builds: 1, known: 1 });
+		expect(d.values.map((v) => [v.value, v.builds])).toEqual([
+			["no commits 90+ days after", 1],
+		]);
+	});
+
+	it("is a winner, not one of the others, when any of its entries placed", () => {
+		expect(winnersVsOthers(rows, "category", { now: NOW })).toMatchObject({
+			winnersKnown: 1,
+			othersKnown: 1,
+		});
+	});
+});
+
 describe("shared filters", () => {
 	const events = [
 		build("a1", { event: "a" }),

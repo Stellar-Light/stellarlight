@@ -628,9 +628,9 @@ describe("events whose stored rows are their winners only", () => {
 		]);
 	});
 
-	// Live 1.9.97 across every event: 80 winners of 1,383 entries (5.8%),
-	// 12 of them curated winners whose fields are not stored; 68 of 1,371
-	// (5.0%) without them.
+	// Live 1.9.116 across every event: 80 winners of 1,356 submissions
+	// (5.9%), 12 of them curated winners whose fields are not stored; 68 of
+	// 1,344 (5.1%) without them.
 	const LEFT_OUT =
 		"left out of every count and share: 19 rows of hackmeridian-2025 (6), build-on-stellar-philippines-2026 (5), apac-stellar-hackathon-2026 (1) and stellar-pro-hackathon-istanbul-2026 (7), whose stored rows are their winners only; the rest covers events whose full listing is stored";
 
