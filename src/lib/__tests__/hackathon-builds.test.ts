@@ -1560,6 +1560,38 @@ describe("a submission entered in two events", () => {
 		expect(dedupeBuilds([...rows, rows[1]])).toHaveLength(2);
 	});
 
+	// Audit 2026-11-04: two HackMeridian 2026 repos are both "Nomad Vault",
+	// and the name rule served one of the 97 stored rows' pair, by read order.
+	it("keeps curated rows that share a name by their own ids; a DoraHacks resubmission still counts once", () => {
+		const curated = (id: string): IndexedBuild => ({
+			...build(
+				"Nomad Vault",
+				"A vault.",
+				false,
+				`curated-hackmeridian-2026-${id}`,
+			),
+			hackathon: {
+				title: "HackMeridian 2026",
+				slug: "hackmeridian-2026",
+				endedAt: null,
+			},
+		});
+		expect(
+			dedupeBuilds([curated("nomad-vault"), curated("nomad-vault-vercel")]).map(
+				(b) => b.id,
+			),
+		).toEqual([
+			"curated-hackmeridian-2026-nomad-vault",
+			"curated-hackmeridian-2026-nomad-vault-vercel",
+		]);
+		// The same curated row twice is still one.
+		expect(
+			dedupeBuilds([curated("nomad-vault"), curated("nomad-vault")]),
+		).toHaveLength(1);
+		const again = { ...rows[1], id: "dorahacks-buidl-99999" };
+		expect(dedupeBuilds([rows[1], again])).toHaveLength(1);
+	});
+
 	it("an event filter serves that event's own row", () => {
 		const hit = searchHackathonBuilds(rows, "", {
 			hackathons: ["stellar-hacks-blend"],

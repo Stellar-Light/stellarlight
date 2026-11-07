@@ -135,6 +135,47 @@ export const HackathonBuilds: CollectionConfig = {
 			},
 		},
 		{ name: "isWinner", type: "checkbox", defaultValue: false, index: true },
+		// The five fields below: one writer, scripts/import-curated-builds.ts.
+		{
+			name: "winnerSource",
+			type: "text",
+			admin: {
+				description:
+					"The file or page that names this row's placement when it is not the row's own url (a curated row placed by another list). Empty: the placement, if any, is DoraHacks' own or the url's.",
+			},
+		},
+		{
+			name: "entryBasis",
+			type: "text",
+			admin: {
+				description:
+					"Why a row from a list kept off the organizer's is stored (ENTRY_BASES in src/lib/hackathon-build-links.ts): repo-names-event, the repo's own text names the event; placement-listed, the list names a placement and the repo's text does not name the event. Never an organizer's record of an entry. Empty on DoraHacks rows and on winners imported from the page that names them.",
+			},
+		},
+		{
+			name: "entryEvidence",
+			type: "json",
+			admin: {
+				description:
+					"What entryBasis rests on: where the repo's text names the event and the day it was read, the list's own tier and match, and when the repo was created. Provenance, not a verdict.",
+			},
+		},
+		{
+			name: "contracts",
+			type: "json",
+			admin: {
+				description:
+					"Testnet contracts the repo cites that passed Scout's checks, [{ id, network, createdAt, path, checkedAt }]: the cited file holds the id at HEAD, the instance exists on testnet and stellar.expert dates its creation inside the event. Read only when contractsCheckedAt is set; [] then = none cited passed.",
+			},
+		},
+		{
+			name: "contractsCheckedAt",
+			type: "text",
+			admin: {
+				description:
+					"When the cited contracts were checked, ISO. Empty = not checked.",
+			},
+		},
 		{ name: "url", type: "text", required: true },
 		{ name: "githubUrl", type: "text" },
 		{ name: "demoUrl", type: "text" },

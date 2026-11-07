@@ -42,6 +42,38 @@ soroban-sdk = { features = ["testutils"] }
 		).toEqual(["blend-contract-sdk", "sep-41-token", "soroban-sdk"]);
 	});
 
+	// Owner decision 2026-11-04: five Stellar-only names HackMeridian 2026
+	// builds declare, and nothing broader.
+	it("collects Trustless Work, Scaffold Stellar, Stellar Broker, the registry and Soroswap's library", () => {
+		const pkg = JSON.stringify({
+			dependencies: {
+				"@trustless-work/escrow": "3.0.0",
+				"@stellar-scaffold/ui": "0.1.0",
+				"@stellar-broker/client": "1.2.0",
+				"@stellar-broker/other": "1.0.0",
+				"trustless-work": "1.0.0",
+			},
+		});
+		const cargo = `
+[dependencies]
+stellar-registry = "0.1"
+soroswap-library = { version = "1.0" }
+stellar-registry-cli = "0.1"
+`;
+		expect(
+			extractStellarDeps([
+				{ path: "package.json", text: pkg },
+				{ path: "Cargo.toml", text: cargo },
+			]),
+		).toEqual([
+			"@stellar-broker/client",
+			"@stellar-scaffold/ui",
+			"@trustless-work/escrow",
+			"soroswap-library",
+			"stellar-registry",
+		]);
+	});
+
 	it("unparseable package.json and null blobs contribute nothing", () => {
 		expect(
 			extractStellarDeps([

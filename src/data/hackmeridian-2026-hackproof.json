@@ -1,0 +1,4103 @@
+{
+	"about": "HackMeridian 2026 records from HackProof (https://github.com/devodii/hackproof) at commit ea7e1982c9beea491048e668fa6dfb62a4f9a8e5, kept where the repo's own text names the event (basis repo-names-event) or HackProof lists a placement (placement-listed), with Scout's own reads of each repo and of each contract it cites, made at checkedAt. Built by scripts/build-hackmeridian-2026-hackproof.ts; refresh only through its dry run. Each row's url is its HackProof record at that commit. HackProof's license follows.",
+	"license": "MIT License\n\nCopyright (c) 2026 Emmanuel Odii\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.",
+	"source": {
+		"repo": "https://github.com/devodii/hackproof",
+		"commit": "ea7e1982c9beea491048e668fa6dfb62a4f9a8e5",
+		"records": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026",
+		"awards": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/hackmeridian-2026.yaml"
+	},
+	"event": "hackmeridian-2026",
+	"window": {
+		"start": "2026-10-25T09:00:00.000Z",
+		"end": "2026-10-26T12:00:00.000Z"
+	},
+	"checkedAt": "2026-11-05T14:47:37Z",
+	"rows": [
+		{
+			"file": "4ward",
+			"repo": "ygk94/4ward",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/4ward.yml",
+			"name": "4ward",
+			"description": null,
+			"homepage": "https://fistea-hackmeridian.vercel.app",
+			"track": "Genesis",
+			"placement": "Runner-up",
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T11:49:37Z",
+			"commitsInWindow": 138,
+			"contracts": [
+				{
+					"id": "CACSMEBQLBR73CH6BRPGY7LDDE2P63C6WPZEJPZNIP5DLT5IN6O5VWA4",
+					"createdAt": "2026-10-26T02:45:32Z",
+					"path": ".env.testnet"
+				},
+				{
+					"id": "CAQY7OYOJTXBAJ6SSUC72EUGWBDDPFENPIDQMCUJZ35YKXUNR7V6YGRK",
+					"createdAt": "2026-10-25T20:46:42Z",
+					"path": "docs/memo-front-pricing.md"
+				},
+				{
+					"id": "CARFDCPIC3CYMSGUSONWLS7WDSCMARHNZP4XKMJODGKKHWWCOA7657M3",
+					"createdAt": "2026-10-25T20:46:07Z",
+					"path": "docs/memo-front-pricing.md"
+				},
+				{
+					"id": "CD2D3KQDUCE7SHQNT4XJUMQRHQNDNJUKE45TER2LSHAJPYCTRXX6NBVU",
+					"createdAt": "2026-10-26T02:44:52Z",
+					"path": ".env.testnet"
+				}
+			]
+		},
+		{
+			"file": "acta-gate-meridian",
+			"repo": "ACTA-Team/acta-gate-meridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/acta-gate-meridian.yml",
+			"name": "ACTA Gate",
+			"description": "Design by acta-team",
+			"homepage": "https://gate.acta.build",
+			"track": "Scale",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T11:32:30Z",
+			"commitsInWindow": 44,
+			"contracts": [
+				{
+					"id": "CAFMLGTKEZAPPSKMQE75M7OT4JQTVOSETZE5BFWOSZZHSM5RYVNVCFVL",
+					"createdAt": "2026-10-26T00:38:17Z",
+					"path": "docs/deployments/acta-gate-testnet.md"
+				},
+				{
+					"id": "CANAF2JQGMRTNPAXOLOJ5TIZC4M3XXYRNKYJOJNUFPY5ZCWR5IK5ORA5",
+					"createdAt": "2026-10-26T00:34:17Z",
+					"path": "docs/deployments/acta-gate-testnet.md"
+				},
+				{
+					"id": "CANBOQLEQANRSRXZHELRWVECMJ6YZCUTF6YY7VH2YDVHIN2LBWTZLJHF",
+					"createdAt": "2026-10-26T00:32:37Z",
+					"path": "docs/IDEA.md"
+				},
+				{
+					"id": "CAZUHZRKTGYD2DSIQCTKX5KO3HS4FI565D256HFY5YWAJGLD367GBEAN",
+					"createdAt": "2026-10-25T17:53:42Z",
+					"path": "docs/deployments/acta-gate-testnet.md"
+				},
+				{
+					"id": "CBHPFHOBDDDHP2PFVWGSFOI4THVPQF5I5RZMHCSBZ362FYWJYZ4RWNSE",
+					"createdAt": "2026-10-25T18:21:12Z",
+					"path": "docs/deployments/acta-gate-testnet.md"
+				},
+				{
+					"id": "CBNICQYB5VOIWYPS4WF27OAKCKEALW54SYGFETN63UYF6537KCQZEH66",
+					"createdAt": "2026-10-25T17:41:22Z",
+					"path": "docs/deployments/acta-gate-testnet.md"
+				},
+				{
+					"id": "CC2CIJ6L6CA6ZWPK4DUQEI2M3IQIC4XV5WWTURGOHJE2LZYXJO6UAINA",
+					"createdAt": "2026-10-26T00:32:27Z",
+					"path": "docs/IDEA.md"
+				},
+				{
+					"id": "CCGVBGVF5V4L7N6QNHBZQLZ6LY7W6ZUFR4JCPWCUKATQWUFBX5TS3OWZ",
+					"createdAt": "2026-10-25T17:41:37Z",
+					"path": "docs/IDEA.md"
+				},
+				{
+					"id": "CCJACTUKEMDSICCWLUFF4GWLD3H2KZRWXUTUC7342JZ7FNDGHMYXYHIJ",
+					"createdAt": "2026-10-25T18:21:27Z",
+					"path": "docs/deployments/acta-gate-testnet.md"
+				},
+				{
+					"id": "CCPEKQVBJP5XK4WLJS3XOVJFH2Q2IQPJK4DAYKUS3NGMCGWMXUJU5TKU",
+					"createdAt": "2026-10-25T17:41:02Z",
+					"path": "docs/IDEA.md"
+				},
+				{
+					"id": "CDC6ADAFNM2FSNWM7IG5OJNT7ENTGXGHIAZZWEQW6H5N545ADGGNUAG7",
+					"createdAt": "2026-10-26T00:32:17Z",
+					"path": "docs/IDEA.md"
+				},
+				{
+					"id": "CDNCAGEI3OCL5G6NL7UVKYR7Q34UPBGPO4SZB3YKOHCPKU5U33LN5UOD",
+					"createdAt": "2026-10-25T17:41:12Z",
+					"path": "docs/deployments/acta-gate-testnet.md"
+				}
+			]
+		},
+		{
+			"file": "agent-pass",
+			"repo": "berryxmas/agent-pass",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/agent-pass.yml",
+			"name": "Agent Pass",
+			"description": "Let AI agents pay to use any Express app: USDC on Stellar over MPP, a pass recorded in a Soroban contract, set up by one sentence in Claude Code. HackMeridian 2026.",
+			"homepage": "https://agent-pass-sample.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T00:42:41Z",
+			"commitsInWindow": 8,
+			"contracts": [
+				{
+					"id": "CAELB5AVBEO7V5RIDQBYCXU7466AEFYUNYU7JCSIELYUWBNR4XU6KSE3",
+					"createdAt": "2026-10-25T15:20:52Z",
+					"path": "docs/deploy.md"
+				},
+				{
+					"id": "CDLR2ABHIPQ7SNWJKT3S5EE7DFTZ2VB2FJLISODIFNLYCRUCZKBFYJKU",
+					"createdAt": "2026-10-25T16:16:32Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "agent-payment-gate",
+			"repo": "InnokentyB/agent-payment-gate",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/agent-payment-gate.yml",
+			"name": "Agent Payment Gate",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "doc",
+				"path": "docs/DEMO-UI-RUNBOOK.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T10:05:40Z",
+			"commitsInWindow": 4,
+			"contracts": [
+				{
+					"id": "CBVSDZ7SP7FHB4FFXVX57WYNYFUG6GSENPBKDTDAZ2MJM2N6CPR3QG3N",
+					"createdAt": "2026-10-25T23:10:37Z",
+					"path": "docs/TESTNET-ACCEPTANCE-2026-10-25.md"
+				}
+			]
+		},
+		{
+			"file": "agentspacialeconomy",
+			"repo": "CaBsCrypto/AgentSpacialEconomy",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/agentspacialeconomy.yml",
+			"name": "Agentic Realities · Spatial AI for Venues and Events",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T18:14:39Z",
+			"commitsInWindow": 88,
+			"contracts": [
+				{
+					"id": "CA77KJNQHENANFHA44W4SQRELNN7GQ2BP7CXTM2PZHUGHHGYCSDJDLDW",
+					"createdAt": "2026-10-26T08:57:12Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCF3QILVXKYOUE4M2SVZJYOWYQZ3IMS3DODPKPN2UVZELIKMVI63OCQS",
+					"createdAt": "2026-10-26T06:24:47Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDKOF36Q7DSFDL7EG34YSU2IWC7NXGKJOHUX3IO2A6HPF3OU5KVFQTGM",
+					"createdAt": "2026-10-26T06:39:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDYMS23PEXE4WMVSMJAWOFOODEVV2S4IQJQUFTHFKFWAFAEVMFBWQRVD",
+					"createdAt": "2026-10-26T04:30:32Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "alloy-stellar",
+			"repo": "0xDanomite/alloy-stellar",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/alloy-stellar.yml",
+			"name": "Alloy on Stellar",
+			"description": "Multi-asset fund tokens on Stellar: create, price, rebalance and redeem portfolios of real-world assets onchain. Live on mainnet.",
+			"homepage": "https://alloy-stellar.vercel.app",
+			"track": "Scale",
+			"placement": "First place",
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T15:32:35Z",
+			"commitsInWindow": 85,
+			"contracts": [
+				{
+					"id": "CAZJIYK3WGFJPNSB3TSUIPDZ4AP5MFRS6SHWVUY7QJONB3BNTI4IP75B",
+					"createdAt": "2026-10-25T14:38:42Z",
+					"path": "deployments/testnet.json"
+				}
+			]
+		},
+		{
+			"file": "ancora",
+			"repo": "raglibol-re/ancora",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/ancora.yml",
+			"name": "ancora",
+			"description": "A finance account for any organization that feels like a modern banking app and runs on Stellar in the background. Organizations set their own rules; the account enforces them.",
+			"homepage": "https://ancora-gray.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "doc",
+				"path": "CLAUDE.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T12:13:56Z",
+			"commitsInWindow": 78,
+			"contracts": [
+				{
+					"id": "CDO3YV5KMKPZTJLTLODIKNBYSTPJYLDKFKXOAGE52NJXF7FZMLACX2PE",
+					"createdAt": "2026-10-25T22:50:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDPQV7C2XRWVDGWBIEHNE6IOMC56KSAITMESJBI7BULJSIGSVAQD4QCM",
+					"createdAt": "2026-10-25T19:12:37Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDUFVNCHZE64O37RQZQQ6ZKYDLS3RZ6YKYJDD66XNEPYHVWW6OO6V4NS",
+					"createdAt": "2026-10-25T19:53:52Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "arqueo",
+			"repo": "Dabuca/arqueo",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/arqueo.yml",
+			"name": "Arqueo",
+			"description": null,
+			"homepage": "https://arqueo-sooty.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:25:46Z",
+			"commitsInWindow": 212,
+			"contracts": [
+				{
+					"id": "CBPCC6AT3756K43DGTRKLIZFOY5TODHZXGBJS4X4KZ64TFWUQDPEWU4L",
+					"createdAt": "2026-10-25T22:16:07Z",
+					"path": "app/.env.example"
+				},
+				{
+					"id": "CBUNXLPEKPDGZOEJB4PRBZHXTZ6JOXCH7RAVW6LJTDY62BI2G2LXMUH6",
+					"createdAt": "2026-10-25T16:47:42Z",
+					"path": "docs/evidence-R17-settings.md"
+				},
+				{
+					"id": "CCTQZ3T7OGITLMSWRCQU5KVVHM2C6ST4JCX6ZY6C35ZU4Y2A2GFZMIT4",
+					"createdAt": "2026-10-26T10:11:17Z",
+					"path": "app/.env.example"
+				}
+			]
+		},
+		{
+			"file": "arturshirokov-hackmeridian",
+			"repo": "ArturShirokov/hackmeridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/arturshirokov-hackmeridian.yml",
+			"name": "doc2dpp",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T08:33:16Z",
+			"commitsInWindow": 158,
+			"contracts": []
+		},
+		{
+			"file": "avocate-harvest-escrow",
+			"repo": "Arkessiah/avocate-harvest-escrow",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/avocate-harvest-escrow.yml",
+			"name": "Avocate Harvest Escrow",
+			"description": null,
+			"homepage": "https://avocate-harvest-escrow.vercel.app",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T11:48:49Z",
+			"commitsInWindow": 90,
+			"contracts": [
+				{
+					"id": "CBHU4N74WPLTXFNQ6JERWD7A3CIZCHVG433BCWOYYP3SR677FWPZNXBF",
+					"createdAt": "2026-10-25T14:58:22Z",
+					"path": "deploy/deployments/testnet-smoke.md"
+				},
+				{
+					"id": "CDAEMNCIH7ALNKVHDGAVOR5FWT2KZFW5AZCP7TTSDJP6NAD3EWJPHH3D",
+					"createdAt": "2026-10-25T14:59:12Z",
+					"path": "deploy/deployments/testnet-smoke.md"
+				},
+				{
+					"id": "CDAHTGYCWIHSJOLUJDLUIZJOC7P7DCTTPLQLPJIIMS5ID2S6L2W7X4VK",
+					"createdAt": "2026-10-25T20:28:52Z",
+					"path": "audits/2026-10-25-security-audit.md"
+				}
+			]
+		},
+		{
+			"file": "bookerbob-hackmeridian-2026",
+			"repo": "hustle1hustle/bookerbob-hackmeridian-2026",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/bookerbob-hackmeridian-2026.yml",
+			"name": "BookerBob: Proof of Loyalty",
+			"description": "BookerBob: Google for agentic commerce. Agents rank and buy on zero-knowledge proof of customer: Semaphore v4 Groth16 on BN254, Poseidon trees, P-256 and USDC in one Soroban call.",
+			"homepage": "https://stellarbob2026.xyz",
+			"track": "Genesis",
+			"placement": "Runner-up",
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T12:28:19Z",
+			"commitsInWindow": 301,
+			"contracts": [
+				{
+					"id": "CBEGVNZFDZMOBKYVP27D5Q6Y7OHKWC2P3DAKQNC3MGTO5OW5JHAL5EBY",
+					"createdAt": "2026-10-25T13:08:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBZ7I3VOQEMK5LKDZLCUJ4VU6KQX5WT747XN4KLGM23EIUCISTDX5MTL",
+					"createdAt": "2026-10-25T12:39:22Z",
+					"path": "docs/bench.md"
+				},
+				{
+					"id": "CCSGYUKTZ54IE3U5YP3JEZ2AXMP5SE63CBWGX6MKW4ZVKX24MQCCSGTD",
+					"createdAt": "2026-10-25T12:38:22Z",
+					"path": "docs/testnet.md"
+				},
+				{
+					"id": "CDRKD65UBKOVLOABILPJTSZYB7JXWZQOLCJGD4FHQ37EXEPGHEFIPYWN",
+					"createdAt": "2026-10-25T12:30:07Z",
+					"path": "docs/testnet.md"
+				}
+			]
+		},
+		{
+			"file": "breakwater",
+			"repo": "Belvast-Innovation/Breakwater",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/breakwater.yml",
+			"name": "Breakwater",
+			"description": "Foundry-style invariant fuzzing for Soroban, with attack packs for smart-account policies and TTL state archival.",
+			"homepage": "https://breakwater.belvast.de",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:45:42Z",
+			"commitsInWindow": 29,
+			"contracts": [
+				{
+					"id": "CA7UFPQ3MHRQGIOHG6B5TPBJZLZL6HCNCYNWPILVDDC6AHOMM5BJ5OJN",
+					"createdAt": "2026-10-25T15:25:57Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBKDNENFLCLUE3U4NH55T5N5JIX6S6WS2FFDXCPWMXJM7ZQGPXVH3HJI",
+					"createdAt": "2026-10-25T15:26:52Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBS6AO2L5RKKLHIC2FJOH66UIL2OHCPSSO6GAUCYNXMMI3RRQLG3D5KP",
+					"createdAt": "2026-10-25T15:30:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CC2N5OKRJ5MA2SEVIUSRSMPRODN73Z2OH6CYZ7YHIZVAVD72N6K4PSCB",
+					"createdAt": "2026-10-25T15:26:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CC6Z5UZYWG5CR43YYGUZCMOGQHO2NEQZIU7M4MBR2NG3ELZQN7G2RRD7",
+					"createdAt": "2026-10-25T15:26:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCIEVOGO6RZSCHN6COE3NLMDT3WOXSPTDPYDJMPVSULFREACAJ6CS247",
+					"createdAt": "2026-10-25T15:26:12Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "caravel",
+			"repo": "rcusans-code/Caravel",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/caravel.yml",
+			"name": "Caravel",
+			"description": "On-chain term repo for tokenized Treasuries on Stellar: fixed-term, fixed-rate USDC loans against tokenized money-market funds, priced off daily NAV, settled with atomic DvP.",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T12:06:51Z",
+			"commitsInWindow": 341,
+			"contracts": [
+				{
+					"id": "CAMV2PZKNGQDNR6XZHN6P2H5QA4H25OFE5HNZUG3YHVBVZWBU6V6WDJS",
+					"createdAt": "2026-10-25T14:42:47Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CAPUQPL7K5ZNCQRYQ5UNZMG5B3NVK7B6J7JFIVLSBLR7X4U4WHUY5ORK",
+					"createdAt": "2026-10-25T17:40:42Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CAUH5JJNNRHRSQAYY6EODFNNXCP7FHDCK6CTXQMNMZ27JQ7JUAXTADXR",
+					"createdAt": "2026-10-25T20:22:22Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CAUXSFOLHKHIVYB75JZVQPOSNIEWMUZ6GRSC7XSXCX5SKFC7DYC5CND5",
+					"createdAt": "2026-10-26T07:22:02Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CBGLMWL7FETVMAD6H73BV7H6WT3EY5BXKZOAFJGKVVWYIIKVS4Y4APNJ",
+					"createdAt": "2026-10-25T17:05:37Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CBJGKHDVAJE3PZMV6XPPSMMGWICPW2VMNFZYKEEUHWWUOXX2WCIWYPYF",
+					"createdAt": "2026-10-25T20:02:12Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CBPMOBTTYFPQ2C2GWVXZ3T3CJP3G6H3AJT6ZATBSE3CINWYIZ23HR6CY",
+					"createdAt": "2026-10-26T10:19:22Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CBVZDOKRSBI7DKSH7XX5XZ5JM2AIINYU4PIFHAYJLMHB3QJDYCDZ2A4S",
+					"createdAt": "2026-10-25T13:03:57Z",
+					"path": ".env"
+				},
+				{
+					"id": "CBWTB23F5PQTGX2QYOA3FJB3M6ZHDRCTT33XFKHXFD5SJJFTJEA7YTD6",
+					"createdAt": "2026-10-26T08:26:52Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CBZOHBJ6CSLXD4HTW5KCYU5KLE7O3ZLYAZDLPUKOOUCZ6IV6FQKJKOU2",
+					"createdAt": "2026-10-25T20:44:17Z",
+					"path": ".env"
+				},
+				{
+					"id": "CCFP3L7TZ6BLCN7FYHFVYF3JXJDZ47QKSIAKMXV6AYVBDFWJNZJ3DP53",
+					"createdAt": "2026-10-25T17:58:22Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CCLJQE4O6EZX3IRLPNDTEP63VAEME2J77AXH7J4LRSOFP7CAY2X3XRVC",
+					"createdAt": "2026-10-26T09:55:12Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CD4Q2QTOIRJOUPKK46N5MZMTRQXZVOO6N5FRXHK3BEBBPDSXQNQMK6YN",
+					"createdAt": "2026-10-26T07:44:02Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CDCYRLASS44B6UUZNUJCXTYIJUXJOWG4LBECAD66S3467SAKWY6PBO5I",
+					"createdAt": "2026-10-26T11:15:42Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CDLNYC24T5VFUMRLHAJ4FKIKATJNWB6ZD4H4BV475B2Q4FI7SGX5T7ZL",
+					"createdAt": "2026-10-25T20:44:32Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CDMLJAW5C6L5S66TMBHOOMJBR5PVWNJ7VABEMMOYSKH2ZJ7Y4AFZ5JEX",
+					"createdAt": "2026-10-25T22:59:07Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CDVVWEKOW3J24B4YBE4RFKSGKGUN5PMZ6VN2QH7EFBZGVL7IZ64F242R",
+					"createdAt": "2026-10-25T14:33:22Z",
+					"path": "deployments/testnet.json"
+				}
+			]
+		},
+		{
+			"file": "card-place-stellar",
+			"repo": "Lothinnt/card-place-stellar",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/card-place-stellar.yml",
+			"name": "Card Place - A safer way to buy and sell trading cards",
+			"description": "A safer way to buy and sell trading cards: escrow and vault contracts on Stellar (Soroban), x402 AI appraisal agent, web and mobile marketplace",
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T00:25:38Z",
+			"commitsInWindow": 19,
+			"contracts": [
+				{
+					"id": "CC2NP5O5E5L4463WLWTEPXOR3KEBYY7FMQMZT56TYLBJUVCP3DJHLG2O",
+					"createdAt": "2026-10-26T07:50:27Z",
+					"path": "README.fr.md"
+				}
+			]
+		},
+		{
+			"file": "carimbo",
+			"repo": "W0lfyo/carimbo",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/carimbo.yml",
+			"name": "Carimbo",
+			"description": null,
+			"homepage": "https://carimbo-six.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T16:49:25Z",
+			"commitsInWindow": 29,
+			"contracts": []
+		},
+		{
+			"file": "cdp-clear",
+			"repo": "PhilipLewellen/cdp-clear",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/cdp-clear.yml",
+			"name": "CDP Clear",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "likely",
+			"method": null,
+			"repoCreatedAt": "2026-10-25T17:59:37Z",
+			"commitsInWindow": 179,
+			"contracts": []
+		},
+		{
+			"file": "chama",
+			"repo": "lmstewart88/chama",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/chama.yml",
+			"name": "Chama",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T20:29:38Z",
+			"commitsInWindow": 14,
+			"contracts": [
+				{
+					"id": "CAL5JXN7KJYLMBB3ZEIGRQXWIIGBOG3636T3OSHTB6CCREVFCB3SWZOM",
+					"createdAt": "2026-10-25T22:53:52Z",
+					"path": "packages/bindings/README.md"
+				},
+				{
+					"id": "CCIN5YYNDCAKI5L25MVCXUX3N4ROHI6ZPJUPWDYUFF2KBEL6NHOVKCRE",
+					"createdAt": "2026-10-26T00:45:27Z",
+					"path": ".env.example"
+				}
+			]
+		},
+		{
+			"file": "cherrypay-wallet",
+			"repo": "sohamtech-uk/cherrypay-wallet",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/cherrypay-wallet.yml",
+			"name": "Cherry Pay Wallet",
+			"description": "Cherrypay wallet powered by Stellar",
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "likely",
+			"method": null,
+			"repoCreatedAt": "2026-10-25T11:52:27Z",
+			"commitsInWindow": 350,
+			"contracts": []
+		},
+		{
+			"file": "cityofzion-hackmeridian",
+			"repo": "CityOfZion/hackmeridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/cityofzion-hackmeridian.yml",
+			"name": "hackmeridian",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "name",
+				"path": null
+			},
+			"tier": "likely",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T17:25:58Z",
+			"commitsInWindow": 13,
+			"contracts": []
+		},
+		{
+			"file": "clippay",
+			"repo": "fdddf/clippay",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/clippay.yml",
+			"name": "ClipPay - pay-per-view creator bounties on Stellar",
+			"description": "Pay-per-view creator bounties on Stellar: budgets escrowed in Soroban, passkey wallets, payouts in seconds, cash-out via anchors",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T17:53:38Z",
+			"commitsInWindow": 36,
+			"contracts": [
+				{
+					"id": "CAH4SE2CYMGWWTEY4HKJOQ2XAYFEJLC64DR4VZBWX2YBFEC3IVYNGAR2",
+					"createdAt": "2026-10-25T17:20:57Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBYEMM7I4OXD5DTWGKCKT7NDLRB357W5Q32ZUX3Z7E5MQP37UQQYWVXT",
+					"createdAt": "2026-10-25T17:56:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCAN5IDEZ3A3AZ5BH7BTETJOSWIHMSIIFXC2ZE53IALQOFZIO6D6LP2W",
+					"createdAt": "2026-10-25T15:28:17Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "cmi-hackthon-meridian",
+			"repo": "devfelipenunes/CMI-hackthon-meridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/cmi-hackthon-meridian.yml",
+			"name": "CMI-hackthon-meridian",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "doc",
+				"path": "specs/docs/PRODUCT-ROADMAP.md"
+			},
+			"tier": "likely",
+			"method": "wasm_hash_match",
+			"repoCreatedAt": "2026-10-25T11:59:19Z",
+			"commitsInWindow": 26,
+			"contracts": []
+		},
+		{
+			"file": "confidential-rwa",
+			"repo": "abaresks24/confidential-rwa",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/confidential-rwa.yml",
+			"name": "Confidential RWA - private yield-bearing treasury on Stellar",
+			"description": "Private yield-bearing RWA treasury on Stellar: make a rebasing tokenized asset confidential (HackMeridian 2026, Genesis/Composed)",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T02:24:38Z",
+			"commitsInWindow": 3,
+			"contracts": [
+				{
+					"id": "CA5KJS2XWA74M727HVPQGRVGFBNTC4NONV67PBI46ZQCNDSB44F2BG3F",
+					"createdAt": "2026-10-25T23:13:12Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CCI6UCDLXQU7FPDVWZNHYAXCQXBW2HYT4XFTUC6ME6LTX2UOWSX7SO6P",
+					"createdAt": "2026-10-25T23:12:37Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CCQNKSFQNWJINCOMYVCVWHC6SYNTS3MU7G6SF3XMKDMC4VVVTETOY3AH",
+					"createdAt": "2026-10-25T23:12:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDI4DXFNVFPJXI7HA5PN4PEGVDE6YEA7AWUOV2ZV6RLCNFXD7YI4BO3E",
+					"createdAt": "2026-10-25T23:08:47Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CDTZL6HUYZMC2FVX5QNSY5YWF2ALELI6IRZKJ4OHLJ4B5P5NWBXBUZJU",
+					"createdAt": "2026-10-25T23:12:12Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "dealpassport",
+			"repo": "aonishchenko/dealpassport",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/dealpassport.yml",
+			"name": "Deal Passport",
+			"description": "Project for hackmeridian 2026 Lisbon hackathon",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T22:29:59Z",
+			"commitsInWindow": 28,
+			"contracts": [
+				{
+					"id": "CAIS42T3EWMLDN3PUW2AWXRQMKKHPB5W7DWUHUODD7C6WHEUEMJBQGKX",
+					"createdAt": "2026-10-25T23:09:42Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CAVXDBDAGR3S5BNHSZFNOJIC4IUMVRSQPWABQYODMW26LS5V6DVWHHPB",
+					"createdAt": "2026-10-25T23:16:47Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCJYMPW6AIZNIR3ACK6IK2MMLDTLVGPJL2OHSKGZMYM3YWBDYYFGKKKZ",
+					"createdAt": "2026-10-25T23:53:47Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "diversify",
+			"repo": "thisyearnofear/diversify",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/diversify.yml",
+			"name": "DiversiFi",
+			"description": null,
+			"homepage": "https://diversifiapp.vercel.app",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-01-14T13:45:05Z",
+			"commitsInWindow": 16,
+			"contracts": [
+				{
+					"id": "CBH5NT2HEIQGBMTABOPRPRUJKDNHU3HFIY6STSN7QZSCX7WXSLCOAVC2",
+					"createdAt": "2026-10-26T05:30:57Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDQUT55ICBFEC6JGMZDJEHA47ECWQOAYHLNFHO2ULFLDQVIDNMKL4WT6",
+					"createdAt": "2026-10-26T05:23:37Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "drainmywallet",
+			"repo": "bilfrux/DrainMyWallet",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/drainmywallet.yml",
+			"name": "DrainMyWallet",
+			"description": "Best UX award, HackMeridian 2026. A security wargame for Soroban: exploit deliberately vulnerable Stellar smart contracts on testnet, with every win verified on-chain.",
+			"homepage": "https://drainmywallet.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T16:35:53Z",
+			"commitsInWindow": 58,
+			"contracts": [
+				{
+					"id": "CA6L5VQSIYDW6D5WGOPKF3YETYAQVY54KV4XPAQG3JQMB4TLO7XN6YU6",
+					"createdAt": "2026-10-26T10:05:47Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CAFAPEKDAFXAQGB6HETOMY4TLLK4MP7E2CPYVPPLJR5UBBTUQUHVL7ZG",
+					"createdAt": "2026-10-26T10:05:52Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "dvdnd",
+			"repo": "forever8896/dvdnd",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/dvdnd.yml",
+			"name": "dvdnd",
+			"description": "Tokenized private equity on Stellar: fixed-price raises for profitable businesses, ZK residence gating, USDC dividends to locked holders.",
+			"homepage": "https://dvdnd.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T12:01:48Z",
+			"commitsInWindow": 114,
+			"contracts": [
+				{
+					"id": "CAJSMXTDKZSBM5KH745LCPF6LCPWR2CHFSTSIKD7RRBXBBBHRQJCYNOL",
+					"createdAt": "2026-10-25T14:34:42Z",
+					"path": "deployments/testnet.env"
+				},
+				{
+					"id": "CB5EJPS7K33FE3IGEFW6VINJD5MBL3HJ32I2JOAN34AMICBW73MZED3L",
+					"createdAt": "2026-10-25T11:49:52Z",
+					"path": "deployments/evidence.md"
+				},
+				{
+					"id": "CBF7CRLLMXVZIUB5PHHPWLOBQHC7FB6OHENFV23T46LRZM72E36GVC7Q",
+					"createdAt": "2026-10-25T14:28:27Z",
+					"path": "deployments/testnet.env"
+				},
+				{
+					"id": "CBPU52XUHU4UQ3MUBOXITFNHQMOON3SDEWN2IVKPGRCZSQTRTCLGDB7N",
+					"createdAt": "2026-10-25T11:49:37Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBWDBHPVZ435XL4UVUIXO4PFUEA7S4XENSKVUDI7XSXA2C3DZOBQWHWC",
+					"createdAt": "2026-10-25T20:48:32Z",
+					"path": "deployments/evidence.md"
+				},
+				{
+					"id": "CCBMO6FN53CBZILJ6PBU4DODLRYK27RQH5ESWVDPMNPVH5VILUZV4E5C",
+					"createdAt": "2026-10-25T17:17:52Z",
+					"path": "deployments/evidence.md"
+				},
+				{
+					"id": "CCHX6UXEPIXLRALJIK2JZWCQ3OLQER7HYOGFVYYYSOP2UJERLEEEGCGZ",
+					"createdAt": "2026-10-25T20:50:37Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCJCRABWLOEOXVDRHSJXLS5HDOCUCZWY2X2N27NUP24H62N6DKYISX5P",
+					"createdAt": "2026-10-25T19:04:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCL5K3BT7EKT47SLRIHL23AMKELXPY34WATWMRLKGW2ZWYOALE66Y2TZ",
+					"createdAt": "2026-10-25T14:34:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCTY5CZFMXTBH4EPWKFHRVWDEHOFVEEWE3EPOGJEPKR65AJIG5CFLWX4",
+					"createdAt": "2026-10-25T11:49:27Z",
+					"path": "deployments/evidence.md"
+				},
+				{
+					"id": "CDJYRHBPWYU4C5WMJXHBG4UOUGUH562EXRGZ3ORZFA5VJKFO4BBPQ2X5",
+					"createdAt": "2026-10-25T14:28:37Z",
+					"path": "deployments/testnet.env"
+				},
+				{
+					"id": "CDU5CGRWVSMFKQWRNJLP5XAKHQAF624QTLUNCONHJ4GQHOZOVAQROHKM",
+					"createdAt": "2026-10-25T14:34:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDWUC63EYRCEVQISAN7MZNAAOMT76VW6PTSVIUXTX3PDPXWJBNWJFJXY",
+					"createdAt": "2026-10-25T11:49:17Z",
+					"path": "deployments/evidence.md"
+				}
+			]
+		},
+		{
+			"file": "fathom-hack-meridian-2026",
+			"repo": "celadari/fathom-hack-meridian-2026",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/fathom-hack-meridian-2026.yml",
+			"name": "fathom-hack-meridian-2026",
+			"description": "Fathom: sealed RWA auctions on Stellar that work as a liquidity oracle, built for HackMeridian Lisbon 2026 (Genesis track). Orders are sealed in the browser (Poseidon commitments, Noir proofs) and cleared at one uniform price. Results publish as SEP-40 price plus locked-money depth that lending pools use to cap borrowing. Live on testnet.",
+			"homepage": "https://fathom-b3t.pages.dev",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "name",
+				"path": null
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T02:55:26Z",
+			"commitsInWindow": 53,
+			"contracts": [
+				{
+					"id": "CA2FYHX4E5MQZB7RJOQR7P6CJZS57GGMP7NTGOA4R4VZPFQHEZQRPYAU",
+					"createdAt": "2026-10-25T21:20:22Z",
+					"path": "app/.env.production"
+				},
+				{
+					"id": "CAD4UVA3IBEQIWCGABQS72TXKNE3ICOKU3ESRFFXAEU5PCQKPFGUVVVZ",
+					"createdAt": "2026-10-25T22:56:57Z",
+					"path": "app/.env.production"
+				},
+				{
+					"id": "CAI3KKLOO5L6J3DGTNK7BASTWD67CNE7YMCOUFDNZOEQ3PW77MWMDOAV",
+					"createdAt": "2026-10-25T21:19:37Z",
+					"path": "app/.env.production"
+				},
+				{
+					"id": "CB2XYQYVE5ZQEJSKFXNB47HKHNKW5WP2PCPMYRGVSZ2PKMBW5HCGGQ5P",
+					"createdAt": "2026-10-26T03:24:07Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBP2U65323GODHUBALNCZSQZZJBYEM6EB37GQGY5JPVKWEAOADQLJOYN",
+					"createdAt": "2026-10-26T03:25:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCFQPYDC7JKJPEIR6PQLT2VF4U2GRYGIK5QCNEUTRUVBGU6L63GRKFTA",
+					"createdAt": "2026-10-25T23:26:42Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCHVIQYCZZXVHSEXRLHV53GIGACOLENCFNHJNBICS4JYJMZBDEYKS5PS",
+					"createdAt": "2026-10-26T03:23:57Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCKQ7A3LPDOC75PCWMIIVG6YBUUFZSJEGTFOHYTHNFPTBGTBVRFMMHQ4",
+					"createdAt": "2026-10-25T21:19:42Z",
+					"path": "app/.env.production"
+				},
+				{
+					"id": "CCRMWYI4NHQMPYGVTL5MSBS5SJUZYPYEX52KJ4RXLT6S7LNY5Y7R24F6",
+					"createdAt": "2026-10-26T03:26:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCUGEO27VXVN3EEISUZ2HNGOA4BNAM427ABIEMAPIWBJXGA3KDY7PG4B",
+					"createdAt": "2026-10-26T03:24:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CD66PTNIW7PY32N4OUKRFQJXHVDW5FBD2UZQG6AFHUTQVOU24QXE5GEM",
+					"createdAt": "2026-10-26T03:23:47Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDALVDWVEQI56NRDAFO2GU5YD77KFNNWNFEMLWSAZYVPWBBNIMLZU7AM",
+					"createdAt": "2026-10-26T03:25:42Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDASZDGFIAKR3Q443BLI67IMG7OZKQYFABZBEO5ZO3BC4RQ5OYHD4ZTE",
+					"createdAt": "2026-10-26T03:26:12Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDJNBL45S4OZABEBIH7ERSMXCSNE5QDIBGE35KIEIKOCHUBOVGQOFPQG",
+					"createdAt": "2026-10-26T03:23:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDLLGJQUQ2SNV6267S7TSLS3IU6ASGOQP6MKCLMUEHC4D7DFLVNDFDEI",
+					"createdAt": "2026-10-25T21:54:02Z",
+					"path": "app/.env.production"
+				},
+				{
+					"id": "CDLLSBQXPVPRT4DM3MVOLAPQRJ72T44YWM2HSHVSEWKCDJGD37NU2E5T",
+					"createdAt": "2026-10-26T03:23:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDVMYAYRRQC2QJDBGNHUD54SA2DMJJQJR2W5IAFVQGA3SDPZ4I3O6LXY",
+					"createdAt": "2026-10-25T22:56:52Z",
+					"path": "app/.env.production"
+				}
+			]
+		},
+		{
+			"file": "fermento",
+			"repo": "the-axmc/Fermento",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/fermento.yml",
+			"name": "Fermento",
+			"description": null,
+			"homepage": "https://fermento-iota.vercel.app",
+			"track": "Scale",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2025-08-21T08:24:56Z",
+			"commitsInWindow": 41,
+			"contracts": [
+				{
+					"id": "CAM52GOAFA6XF3JAZKTUIXZSRTELLRQBNXRUGNHOCYE33BSKV4LNOMAQ",
+					"createdAt": "2026-10-25T14:09:32Z",
+					"path": "deploy/testnet.env"
+				},
+				{
+					"id": "CCAEAGUXEF2ME43WREP2QBDEMQ332LIMNITN7KJ4B3WIMLDAO6DKN43M",
+					"createdAt": "2026-10-25T15:43:27Z",
+					"path": ".env.example"
+				},
+				{
+					"id": "CD6LRJ3HQKWTLYMKTFQWSCH6FEZM636JFK54534QR3WUMBISRJZQBZ5J",
+					"createdAt": "2026-10-25T15:44:22Z",
+					"path": "deploy/testnet.env"
+				},
+				{
+					"id": "CD6WW2WZBEUMA6HOQ5VCEQ2VCKBILR34XQ5Y7FO6FD7SQ5LQOIGFPADC",
+					"createdAt": "2026-10-25T14:09:52Z",
+					"path": "deploy/testnet.env"
+				},
+				{
+					"id": "CDBVC4Z3DZMIDK4XO55WSJU3BLLBDFMR6QK2BNX4HTPYIU7T66N6TQLT",
+					"createdAt": "2026-10-25T14:09:12Z",
+					"path": "environments.toml"
+				}
+			]
+		},
+		{
+			"file": "fiavel-hack-lisbon",
+			"repo": "Rjk3d/Fiavel_Hack_Lisbon",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/fiavel-hack-lisbon.yml",
+			"name": "Fiável",
+			"description": null,
+			"homepage": "https://fiavel-hack-lisbon.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:08:06Z",
+			"commitsInWindow": 48,
+			"contracts": [
+				{
+					"id": "CA4U4VVURIG54YYGN5SJUQZT3GZIRRTPQM3NUGEP4YKIGGHA3ZQGKJX5",
+					"createdAt": "2026-10-25T12:59:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CB3RTZPIIKNJFNR6S5DUY37RUPBTEWFLFCHO5Y7YORPSAC5EDFYWH3JO",
+					"createdAt": "2026-10-25T22:03:12Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "ghost-proof",
+			"repo": "siwakadrianna-byte/ghost-proof",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/ghost-proof.yml",
+			"name": "👻 Ghost-Proof",
+			"description": "Escrow for freelance designers on Stellar: no more getting ghosted.",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "likely",
+			"method": null,
+			"repoCreatedAt": "2026-10-25T14:18:07Z",
+			"commitsInWindow": 24,
+			"contracts": []
+		},
+		{
+			"file": "hack-meridian-2026",
+			"repo": "grmkris/hack-meridian-2026",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/hack-meridian-2026.yml",
+			"name": "Nod",
+			"description": "HackMeridian 2026 (Stellar): Foldkit + Effect + Alchemy on Cloudflare, Soroban contracts on testnet",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T11:44:22Z",
+			"commitsInWindow": 393,
+			"contracts": [
+				{
+					"id": "CAFLFU5GH7QZ6KF3FBKRV7VW5XFYUKQPCFFTCPTKVEUG4TDT5B2ZOXGL",
+					"createdAt": "2026-10-25T18:26:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCFGBIGVHAUEGFNXATDBYTKU42UMHTVYKNRX3GJ4Z2R4SFNHILDRZDEW",
+					"createdAt": "2026-10-25T19:58:32Z",
+					"path": "evidence/shots/README.md"
+				},
+				{
+					"id": "CCLFB4I4CNGWHHL53UO33CSWKKXJBANMDGOGL43J7RBT7SWK2H2BPGN4",
+					"createdAt": "2026-10-25T11:35:42Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDE4KSAHEDFVZ6SDX6WZGH5JEE3R4BIBTLKOPKJRW54FY6A6KUE2ROYX",
+					"createdAt": "2026-10-25T19:14:32Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "hackmeridian-stellar-hackathon",
+			"repo": "MohamedDataX/HackMeridian-stellar-Hackathon",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/hackmeridian-stellar-hackathon.yml",
+			"name": "Zepho",
+			"description": "Zepho: EUR/USD forward hedging for supply chains, settled in USDC on Stellar (Soroban, Reflector, OpenZeppelin).",
+			"homepage": "https://zepho.pages.dev",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:43:20Z",
+			"commitsInWindow": 43,
+			"contracts": [
+				{
+					"id": "CBRJ6VSKB44BSCCJVMYT3CFDXHAEGJUXQFBPSGAW76W6IZCJEZRVR2VH",
+					"createdAt": "2026-10-25T18:31:42Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBZTPM7A6HJWRMVNLBUQ3C7VSXT2ZMWX5PAWSIC7XAQ72TWIKP332SYJ",
+					"createdAt": "2026-10-25T17:59:12Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDBSXHPF5DYJUUFLLQK2JWRNLBBV7TFYKFTJUPTDTKEAJXFJ7E6ZOTHI",
+					"createdAt": "2026-10-25T18:31:32Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "hackmeridian2026",
+			"repo": "Team-hackmeridian-2026/Hackmeridian2026",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/hackmeridian2026.yml",
+			"name": "BioLicensing",
+			"description": "University patent licences on Stellar : funded in EURC, released by milestones, royalties shared automatically",
+			"homepage": "https://biolicensing.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-09T08:06:22Z",
+			"commitsInWindow": 79,
+			"contracts": []
+		},
+		{
+			"file": "human-bond",
+			"repo": "herbstephens/Human-Bond",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/human-bond.yml",
+			"name": "🤝 HumanBond",
+			"description": "The first proof-of-humanity partnership protocol. Live on World Chain. Search HumanBond in World App.",
+			"homepage": "https://humanbond-lisbon-nu.vercel.app/",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "doc",
+				"path": "HACKMERIDIAN.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-04-22T19:08:03Z",
+			"commitsInWindow": 12,
+			"contracts": [
+				{
+					"id": "CARYG72V3VODNIIQS4ZR6TKBDVFGELRXXBEAYK65LZWFUAQ4OFA27OQ7",
+					"createdAt": "2026-10-25T14:32:12Z",
+					"path": "HACKMERIDIAN.md"
+				},
+				{
+					"id": "CCPRUNAVZNPAQJ7XOLO6D23GLWIDS3TZX3YIQ3YDMUTVVAFF5RSZOB6E",
+					"createdAt": "2026-10-25T14:44:37Z",
+					"path": "HACKMERIDIAN.md"
+				},
+				{
+					"id": "CCWG6L5SPDXV2K7URGZQPDTEH2A4UBBFGHCLODGULVA6FOTNB4WTKEBQ",
+					"createdAt": "2026-10-25T14:39:27Z",
+					"path": "HACKMERIDIAN.md"
+				}
+			]
+		},
+		{
+			"file": "indexify-mvp",
+			"repo": "recentlyhatched/indexify-mvp",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/indexify-mvp.yml",
+			"name": "PensionBridge Africa - HackMeridian MVP",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T13:32:34Z",
+			"commitsInWindow": 7,
+			"contracts": [
+				{
+					"id": "CCZMYMCF5DUSV37J3TGXSLUUG7UAV6ZSL5PJI4TVAISJQUK3TXJHUXFU",
+					"createdAt": "2026-10-25T18:37:12Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "kado-hackmeridian",
+			"repo": "eduruizhipolito/kado-hackmeridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/kado-hackmeridian.yml",
+			"name": "Kadó",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T18:21:13Z",
+			"commitsInWindow": 32,
+			"contracts": []
+		},
+		{
+			"file": "keystone",
+			"repo": "Lagouze/keystone",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/keystone.yml",
+			"name": "Keystone",
+			"description": "Tokenized money market fund collateral on Stellar - Soroban contracts, keeper and margin call simulations.",
+			"homepage": "https://keystone-eta-ebon.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:46:06Z",
+			"commitsInWindow": 143,
+			"contracts": [
+				{
+					"id": "CA6OA3I4EPINUCZAVFTPHCQCBH4IQLCYZNHGNJBDWFEQP7IL23PSJV7D",
+					"createdAt": "2026-10-26T08:17:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CALNED2G3Y2XLDMGZMFR2KR7RIWSL3FN36QAL4TNC27233AC5BJNLV4H",
+					"createdAt": "2026-10-25T23:25:32Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CALYRUMGT3J3P32NHBDTRDWJD3JU2AEIXEKRCFDNZ7I6GHKU5DBBKFWA",
+					"createdAt": "2026-10-26T01:01:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CAPZEIRJMFSSXN34DG3XV35H6STUEQZOFAH3MCXYJQ3VSRI4EVGDMFX2",
+					"createdAt": "2026-10-26T06:29:57Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CARBSCRLX2DJKMGYB3TPJ7WEAWZZ5HSIOE4CXY4PG6ZGR3Y5HZLON226",
+					"createdAt": "2026-10-25T23:26:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CATMOIWU2FMO43TGLWH4A6SHCIMVHQ5YYXCV2VUN6ZSQMHHKUJRXDC5B",
+					"createdAt": "2026-10-26T02:42:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBL4SMJNYNXAFWGBKXMNA5U23PBSAFZ2OUDRD2EALCSCA5Y3GG4GIERD",
+					"createdAt": "2026-10-26T02:30:57Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCLE3RBDYNMRMBVTAPXLQ5JRWQOGR3RHOQYCMH43N6VYY6T2OGSZCB2N",
+					"createdAt": "2026-10-25T22:28:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CD3MAB27BM57BM5SVGAIM5CTBDJPAVSUHFCKDHNZHBHBMNGI6KX7QAC7",
+					"createdAt": "2026-10-26T01:03:37Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDL5GRMUQGDTCFVRKJPXKUUIXYLICZOPQP54WYODPGN2XLIVHKWGTQA2",
+					"createdAt": "2026-10-25T23:20:37Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "kintsu",
+			"repo": "nseguias/kintsu",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/kintsu.yml",
+			"name": "Kintsu",
+			"description": "Stellar wallet backed up to 3 NFC tags, with an offline 2FA device approving every payment. HackMeridian 2026.",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "likely",
+			"method": null,
+			"repoCreatedAt": "2026-10-26T09:42:44Z",
+			"commitsInWindow": 42,
+			"contracts": []
+		},
+		{
+			"file": "kotizi-stellar-meridian",
+			"repo": "kotizi/kotizi-stellar-meridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/kotizi-stellar-meridian.yml",
+			"name": "Kotizi on Stellar",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T13:29:47Z",
+			"commitsInWindow": 32,
+			"contracts": [
+				{
+					"id": "CA3LSTPIZWLX3DXRZMZMQPS63OWJ3FR3ZUW4VVH3J5ZR4YWKEAUBIZJV",
+					"createdAt": "2026-10-25T18:51:57Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CADKFUPE2RCG4RUD5C4JHIE5DBZ27AT7KFAIZSLMTJO4NNHWTITLIGHK",
+					"createdAt": "2026-10-25T18:19:27Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CAJMDP3KW22MHPDYM22JOUNDKXO34RG6PLI4325JY6QFQP37JGZJWJZ7",
+					"createdAt": "2026-10-25T19:01:47Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CAT65NQ3OYCX6EOAZRNU5JM6IMXQ5I6KJMNJRDIOF5WQKOYVNJ43MD5G",
+					"createdAt": "2026-10-25T19:21:07Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CC4VXKV4PXLGJDKFXPRHSO527JSWWRPBWRYTO3UBIXXVGVF67MD5ZXUB",
+					"createdAt": "2026-10-25T18:19:37Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CDLG5PWRFTSLQNCWGFEBU4AEHKPMQCI5O4KXB3RGINP4Q2AY5BTQVFCR",
+					"createdAt": "2026-10-25T19:22:12Z",
+					"path": "DEPLOYMENTS.md"
+				}
+			]
+		},
+		{
+			"file": "kovan",
+			"repo": "kovan-protocol/kovan",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/kovan.yml",
+			"name": "Kovan",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:04:06Z",
+			"commitsInWindow": 112,
+			"contracts": [
+				{
+					"id": "CA2NXNPDGZ674K467K3K2IXV342BTPJ7YJRLVZPT4LCSJS5GHLVSMEN7",
+					"createdAt": "2026-10-26T10:22:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CA3UJGOTLFZG46SL565IDQTYFAPD7ZU6P7C63MTBSUOY7FDWCHFPGXWP",
+					"createdAt": "2026-10-26T09:07:52Z",
+					"path": "docs/MANDATES.md"
+				},
+				{
+					"id": "CAEU4VYRTV4ZDHFGCRYQNPN6URDOYLP4TS4OMRAJX5RD7AMLWBTYW6G4",
+					"createdAt": "2026-10-25T12:56:52Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CAQAHBSHKEUQCXUMFCD65GNRTKDNE5A7HOHA7XVOKVKTV4H4O63OWJYB",
+					"createdAt": "2026-10-26T09:03:07Z",
+					"path": "deployments/mandate-release-74c5789668a69ca5.json"
+				},
+				{
+					"id": "CAS7ARNTLTRAD4WLYGIXC5EVMFZBETIQROJ2UWOJGU4QQY5XQT3K2LKJ",
+					"createdAt": "2026-10-25T13:45:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CAU7NRSW3YNW44J7XPC5PCM2TSWONADW27DYRXXFB4BWY433SFPRBF7A",
+					"createdAt": "2026-10-25T23:51:42Z",
+					"path": "docs/SDK.md"
+				},
+				{
+					"id": "CBOOAYAVDNAKBAH2OE57O4FDQW4OKCTDJDNJ6MGYM5AP2L46VTGBCON6",
+					"createdAt": "2026-10-26T10:35:47Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CC4CBCZ6MDBWBHXDG2CJV6QDRBLRE6GM3V5EWKY27E7X7UKXXRRL76XM",
+					"createdAt": "2026-10-26T10:24:12Z",
+					"path": "docs/MANDATES.md"
+				},
+				{
+					"id": "CCRU56E3WHFFGEQ7LZ4HEEL6MWVZE7BBHB36H4F6Y27T6GGY4SCR2FMM",
+					"createdAt": "2026-10-25T12:23:22Z",
+					"path": "docs/YIELD_DEMO_RESEARCH.md"
+				},
+				{
+					"id": "CDEQUCR4OHOQHWPIP5RONRR46G7DTJMFZKNKRIQJCLYACDDZGWKAISD2",
+					"createdAt": "2026-10-25T12:57:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDP6UNP5YZ6NIMJ2XVQGYLBUAA5RP2LD7SPIRBP4VTVZLKPKCHFX42BR",
+					"createdAt": "2026-10-25T22:30:42Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDY2C6TLNPDNETNU5Z6764MJ7WXOX7EB77YGH6HT73XCWA6ANFZJDXIF",
+					"createdAt": "2026-10-25T11:29:27Z",
+					"path": "docs/YIELD.md"
+				}
+			]
+		},
+		{
+			"file": "lendara-shield",
+			"repo": "Lendara-Org/lendara-shield",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/lendara-shield.yml",
+			"name": "Lendara Shield",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T20:20:21Z",
+			"commitsInWindow": 118,
+			"contracts": [
+				{
+					"id": "CBGH7D7JZ3FRJ6ILEDRABBUWTEEV42CKBWTPQQWMHNF7H3OXWREEOAFA",
+					"createdAt": "2026-10-25T22:22:17Z",
+					"path": "docs/spikes/spp.md"
+				},
+				{
+					"id": "CBXCTA27XVLULCT4O5LCE2ETKW7A6PXEOFXOKHHFP4JCPRT72T7HBQLL",
+					"createdAt": "2026-10-25T22:22:12Z",
+					"path": "docs/spikes/spp.md"
+				},
+				{
+					"id": "CCAEA4MKORUJV3G3V47SKWLJKQZBYGGFU42JSCXNUIJIZMNN2MSDLFMO",
+					"createdAt": "2026-10-25T22:22:52Z",
+					"path": "docs/spikes/spp.md"
+				},
+				{
+					"id": "CCETAQARCUMNMCLJKQM6UNY2QJDOJZYGI54MXA3FMPJY4VJDMN2L26GB",
+					"createdAt": "2026-10-26T07:20:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCQWHSMUF35HFOLUV5PTUVDMV55MTIZM7CD66AEC5KWPGHINGHACFC7Z",
+					"createdAt": "2026-10-25T22:22:27Z",
+					"path": "docs/spikes/spp.md"
+				},
+				{
+					"id": "CCWU7V5HXV6NKPJ3UEZMTGFWK3V35YO42AQTPSXPN2GSDK3RXLICNLKT",
+					"createdAt": "2026-10-26T07:20:07Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDD66GL3HT5JLRIB5BHAV36XFSEAGRXMGRJJ4VK747ODBXEJ77YAC7OF",
+					"createdAt": "2026-10-26T07:20:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDKEJFD2TJGJ5TL2COAA6ULRDCO55EPBCYB2LZD2QKSR4MAO6NPRRMWL",
+					"createdAt": "2026-10-25T22:22:37Z",
+					"path": "docs/spikes/spp.md"
+				}
+			]
+		},
+		{
+			"file": "lisbon-hackmeridian",
+			"repo": "AlbyCosmy99/lisbon-hackmeridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/lisbon-hackmeridian.yml",
+			"name": "AuditLedger - Trustless B2B Financial Audit & Soroban Merkle Notarization",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T14:51:49Z",
+			"commitsInWindow": 17,
+			"contracts": [
+				{
+					"id": "CDF4JHYPUJA67S62TVWFDLV7PDDGH4H7PGN4ANUUFLLCPZNCM76VLKED",
+					"createdAt": "2026-10-25T15:22:12Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "lotus-stellar",
+			"repo": "skar8848/lotus-stellar",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/lotus-stellar.yml",
+			"name": "Lotus",
+			"description": "Lotus on Stellar: yield-bearing receipt token for the SDEX (HackMeridian 2026)",
+			"homepage": "https://lotus-stellar.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T20:46:08Z",
+			"commitsInWindow": 51,
+			"contracts": [
+				{
+					"id": "CA5JHSNNGRX3QLLNRLOTDCXYGAYVC3ZRHXX6IWXQAD6YLILZ7TL2AHG6",
+					"createdAt": "2026-10-25T18:48:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CC264FOWPI5R5FG4276ZIPGJ5OG5AP3IZ4RZNMC2KQNJDA7LQSFQ3SEI",
+					"createdAt": "2026-10-25T22:02:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCCZ6XUDCWTOKZS6AYNECY3QPOFBICGMBBZXM63U4WZQD4EBFYFW2QKG",
+					"createdAt": "2026-10-25T20:58:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCE2ISQKVWZJAZL6FRW227WDVWXODWUZ75ZQXGPKJWXERRW64NHS4CA3",
+					"createdAt": "2026-10-26T00:25:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDNG7T2KSDQ7ZYXHSDAM63RLLVPCQ5V6T5GRTXOOX47EZEMU636ZFPNG",
+					"createdAt": "2026-10-25T21:35:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDOXTKGMK7MHEIOVXN5OBETMFUQATRQCB5NHFBFKCVUF5OUHQHVTN6CF",
+					"createdAt": "2026-10-25T21:22:37Z",
+					"path": "deployments/testnet.pool.json"
+				}
+			]
+		},
+		{
+			"file": "lumaid",
+			"repo": "nielslecodeur/Lumaid",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/lumaid.yml",
+			"name": "Lumaid",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "doc",
+				"path": "docs/GITHUB_SETUP.md"
+			},
+			"tier": "likely",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T10:50:38Z",
+			"commitsInWindow": 45,
+			"contracts": []
+		},
+		{
+			"file": "lumensplit",
+			"repo": "manuuvllgs/LumenSplit",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/lumensplit.yml",
+			"name": "LumenSplit",
+			"description": "Expenses organizer among friends based on stellar",
+			"homepage": "https://lumensplit.vercel.app",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:39:56Z",
+			"commitsInWindow": 49,
+			"contracts": [
+				{
+					"id": "CBCRUQ2EQXN6E7YCNM2K3M2NHUU6IZUZWX65PAVROL2VWQC2DCWWYNEX",
+					"createdAt": "2026-10-25T18:10:22Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "merit",
+			"repo": "don-radman/merit",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/merit.yml",
+			"name": "Merit",
+			"description": null,
+			"homepage": "https://merit-sable.vercel.app",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T02:56:45Z",
+			"commitsInWindow": 53,
+			"contracts": [
+				{
+					"id": "CAGT434JHKHHBVENOHNB4FX6NYUMDHTWUPJGK3VDPGATC5PBAYHKFBKU",
+					"createdAt": "2026-10-25T12:30:02Z",
+					"path": "contracts/NOTES.md"
+				},
+				{
+					"id": "CAX3QU5ZIJG4KZSDJRRXGJDX2252DVMJ27673XYTNTTO334XJYP25ONS",
+					"createdAt": "2026-10-25T12:45:47Z",
+					"path": "contracts/SPIKE.md"
+				},
+				{
+					"id": "CB45BGTIVC256HCUFHY2D42UI3XA2TG2HH3HUTIBZH56SNRWCSEZJWU4",
+					"createdAt": "2026-10-25T12:13:42Z",
+					"path": "contracts/SPIKE.md"
+				},
+				{
+					"id": "CBG7RUBLJTIDEY2CQNW2OV2NRRL2LNUQ753DH7IHLHAVVDZTPFMDVQQC",
+					"createdAt": "2026-10-25T12:58:02Z",
+					"path": "contracts/NOTES.md"
+				},
+				{
+					"id": "CC6RQUT2FCWQS26ESG3TL4MG2TPPXGUTTSCPV4KOVBRD3OCCOG7FRA7C",
+					"createdAt": "2026-10-25T13:27:47Z",
+					"path": "src/bindings/introducer-rails/README.md"
+				},
+				{
+					"id": "CCDOLC5SK5IUSSLBRKQEPMDUGTWU4M35CRV25PHSJ4NC6MSBDH5UUTCM",
+					"createdAt": "2026-10-25T14:20:22Z",
+					"path": "contracts/NOTES.md"
+				},
+				{
+					"id": "CCXDZXDL6KHPB2EBTK7COJ2DFLCYOGE3B2IA5K4RCPW7UZ7DIT4EOTUW",
+					"createdAt": "2026-10-25T12:11:52Z",
+					"path": "contracts/SPIKE.md"
+				},
+				{
+					"id": "CD55RTP347AHOKTC57QRHNTTXDIST7Q3UITD5VEJXWTWX73DD6Y2TEGH",
+					"createdAt": "2026-10-25T12:05:22Z",
+					"path": "contracts/SPIKE.md"
+				},
+				{
+					"id": "CDENXKDNNRLQ7F3C7VI3EWFPJBUMO5L6BDV2CZE6LSCP47G5JUGTPJT4",
+					"createdAt": "2026-10-25T16:08:57Z",
+					"path": "DEMO.md"
+				},
+				{
+					"id": "CDHJYRAMWXJXNSSA36YIZFSMPWRBDN2KLLEY5KWLOS2P2JXKXIDSN3YX",
+					"createdAt": "2026-10-25T12:45:52Z",
+					"path": "contracts/SPIKE.md"
+				}
+			]
+		},
+		{
+			"file": "middlemate",
+			"repo": "curtismoncoq/Middlemate",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/middlemate.yml",
+			"name": "Middlemate",
+			"description": "Middlemate lets people and AI agents buy inference and APIs per request, while giving providers a financial reason to deliver what they advertise.",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T12:02:53Z",
+			"commitsInWindow": 68,
+			"contracts": [
+				{
+					"id": "CAHJN3HANWQVJUPQO43PXLCCK4ZAA2Y2EOJYTI7WJAO4WYWFB34GSH2D",
+					"createdAt": "2026-10-25T14:31:07Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCRBI5SWFCRIFPTJPEEWRO3I6U7DYULTXZXLZFYKOZCWZAGFTPDWEUXT",
+					"createdAt": "2026-10-25T19:10:57Z",
+					"path": ".env.example"
+				},
+				{
+					"id": "CCW4UFJ7MSNSWOQWZWG3XOF2IVVWVRINK3YCEROH6PDO4LW5ZPA6ELUA",
+					"createdAt": "2026-10-25T17:12:52Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "mohamedkhellaf-hackmeridian",
+			"repo": "mohamedkhellaf/hackmeridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/mohamedkhellaf-hackmeridian.yml",
+			"name": "StellSec",
+			"description": null,
+			"homepage": "https://hackmeridian-psi.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:00:47Z",
+			"commitsInWindow": 100,
+			"contracts": [
+				{
+					"id": "CAIKMS2B4ATWKOKW7BLWQB7Z4JASPZC4EKZ3XL72N7OYSSKKHKW4GKY6",
+					"createdAt": "2026-10-26T08:50:52Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CAJ2WJP4CUM2GGRB2A5P2M2H5GI45CTZSECV7SL3RTQMGYEKZ7ZDGBAX",
+					"createdAt": "2026-10-25T20:32:42Z",
+					"path": "docs/contract-abi.md"
+				},
+				{
+					"id": "CAMY4ZKY7JLKZMONDOTVHDSXWLMDSLERFS7YJEH5JYZDIKV5HOAT2KRJ",
+					"createdAt": "2026-10-25T23:06:47Z",
+					"path": "docs/contract-abi.md"
+				},
+				{
+					"id": "CBASUA3LJEZ6G66V2JTB4OHQCHUIH5EK2ZPMLY73GTIBBDZ6JLRMJUEE",
+					"createdAt": "2026-10-26T00:50:02Z",
+					"path": "docs/contract-abi.md"
+				},
+				{
+					"id": "CBRTUM4NF5P5ENYSPPOTT3NMRCPT65QSKMD2BB3AJPLU2C4YCFOCMSQC",
+					"createdAt": "2026-10-25T19:38:22Z",
+					"path": "docs/contract-abi.md"
+				},
+				{
+					"id": "CBZNS63L23N3Y3GHU6H57AU6OVZ3FOAPM7Z54ATDRC472Q5DWV6UVKCN",
+					"createdAt": "2026-10-26T08:08:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CC6AI7AKKEVSXH3QQF7HBXZNIBS4ACFP2UQLXG3WOAZ5VDFCTXVFPWNK",
+					"createdAt": "2026-10-26T07:56:42Z",
+					"path": "docs/contract-abi.md"
+				},
+				{
+					"id": "CCLESNOFSQRXIURARMBB35F6DVOQHW2LX5OUABQTWWJWLPY2D5UUAAIW",
+					"createdAt": "2026-10-25T20:25:42Z",
+					"path": "docs/contract-testnet-evidence.md"
+				},
+				{
+					"id": "CDFMHZYILFD7O7G2JWVHR222WWFVA5DSSZDOJY7RIXX674WKQV2NSDKT",
+					"createdAt": "2026-10-26T01:34:17Z",
+					"path": "docs/contract-testnet-evidence.md"
+				},
+				{
+					"id": "CDRS3BBFHUTB66OBP6Z3744QM7C7XDXLV5ZJ5URSFTAQMBJQCMZTL673",
+					"createdAt": "2026-10-25T19:06:52Z",
+					"path": "docs/contract-abi.md"
+				}
+			]
+		},
+		{
+			"file": "monolith",
+			"repo": "Rushyard/Monolith",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/monolith.yml",
+			"name": "Monolith",
+			"description": null,
+			"homepage": "https://monolith-nine-rosy.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:48:23Z",
+			"commitsInWindow": 134,
+			"contracts": [
+				{
+					"id": "CAOT4RM7SYJPLT5XQVPYDEX6HKQOZFODZE6KQVUQJZUSVJY6HBWUVGHQ",
+					"createdAt": "2026-10-25T12:48:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CB5YIDSUCNESNOJK2UFFJA6E3O5BGAPYEQ6F353WGNM4UBGGX3H45IGQ",
+					"createdAt": "2026-10-25T13:33:07Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBBDHCHRKXP2EROB5JN3EMCMZ4VOOIXSOKDNVPJKY4KIJXZ53ZDC3ZVB",
+					"createdAt": "2026-10-25T12:48:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CC5D2NUS2GXAWMTK2DMSNJHVRGRH5GBEZNUMEPIOPBPQQJN6GDLO43KA",
+					"createdAt": "2026-10-25T12:48:37Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "nata-stellar",
+			"repo": "developerfred/nata-stellar",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/nata-stellar.yml",
+			"name": "nata",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T22:22:46Z",
+			"commitsInWindow": 78,
+			"contracts": [
+				{
+					"id": "CBLE7UFHEZT7YCWABJN5JCH5V7O4BVUWRNCPYZ5HVTUKDGV3OIAVKSXV",
+					"createdAt": "2026-10-25T19:45:17Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "neko-tokenization-hackmeridian",
+			"repo": "Neko-Protocol/neko-tokenization-hackmeridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/neko-tokenization-hackmeridian.yml",
+			"name": "Neko Tokenization",
+			"description": "Neko’s RWA launchpad on Stellar: AI-assisted issuer onboarding, a legal knowledge base, human compliance review, and SEP-57 tokens with Soroban investment vaults.",
+			"homepage": "https://launch.tryneko.io/",
+			"track": "Scale",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T13:57:59Z",
+			"commitsInWindow": 154,
+			"contracts": [
+				{
+					"id": "CALYW5WW5YYUHWRVXYCZ3F4XRQZ5SBV76USFKHX754BW4V6WDMIJTHAL",
+					"createdAt": "2026-10-25T22:21:07Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CASQETGMSXSJR6V5FAUITYU36HVNA7EI5O2H2ZEWDXEIMXVLV2LE5XFY",
+					"createdAt": "2026-10-26T02:04:52Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CBR537B4JXILAX7CGDYTTHDBJZSPYMABADDDK4DTNF4RZ62F2XRMMTYI",
+					"createdAt": "2026-10-25T22:21:57Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CBYUESUTVUB4NV7PV63DYZYVK2DUIWASUKK55RBG7BVQLOZ2YCEJ76T4",
+					"createdAt": "2026-10-25T22:21:27Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CBZ6CLFDKALOASYTVL36KLBWMFJXTFN77BK5HO5GVP37MKO5ZNCEUI63",
+					"createdAt": "2026-10-25T22:22:32Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CC2PULZW3YW3ZRE2Z43RJ5HQDO6L4KAJTDDI5CFMV65662VFAR7F45PC",
+					"createdAt": "2026-10-25T22:22:17Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CCXYSLXVY3SIKTIKLP2FB5BHLGMKCV6YHQAWMZZUN5HKJA5OSFE4EC2S",
+					"createdAt": "2026-10-25T22:22:27Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CDHKGCJE6UEWQC6HM22XSQDAWITTV3KR4FARYLXS7JJ3OE667X36GC3X",
+					"createdAt": "2026-10-25T22:23:12Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CDVJ7VI3QWP7CC7SLZ3BVXDOOSAZBNKQNFK7HU5CX2EZCOC2I34ELROV",
+					"createdAt": "2026-10-25T22:21:52Z",
+					"path": "deployments/testnet.json"
+				}
+			]
+		},
+		{
+			"file": "nema",
+			"repo": "emirykl/nema",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/nema.yml",
+			"name": "Nema - USDT0 yield vault on Stellar",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "likely",
+			"method": null,
+			"repoCreatedAt": "2026-10-25T22:40:45Z",
+			"commitsInWindow": 70,
+			"contracts": []
+		},
+		{
+			"file": "nest",
+			"repo": "ethan-r13n/nest",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/nest.yml",
+			"name": "Nest",
+			"description": "Nest - discovery, research, and wallet-approved execution across Stellar DeFi.",
+			"homepage": null,
+			"track": null,
+			"placement": "First place",
+			"basis": "placement-listed",
+			"mention": null,
+			"tier": "verified",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T22:49:21Z",
+			"commitsInWindow": 89,
+			"contracts": []
+		},
+		{
+			"file": "nicolecarolina-hackmeridian",
+			"repo": "NicoleCarolina/HackMeridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/nicolecarolina-hackmeridian.yml",
+			"name": "DCA Platform · Stellar",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T14:41:36Z",
+			"commitsInWindow": 20,
+			"contracts": [
+				{
+					"id": "CCCT7ERFARCNHA2TSAL2LQLLYUTPICWHSQL7KQBC43AHUORAEHJACQHS",
+					"createdAt": "2026-10-25T18:40:42Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "nilo",
+			"repo": "Nearx-Labs/nilo",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/nilo.yml",
+			"name": "Nilo",
+			"description": "Personalized agent that helps you interact with the Stellar network using natural language",
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:43:54Z",
+			"commitsInWindow": 64,
+			"contracts": [
+				{
+					"id": "CDDWGI7BZMRP4H4NREJVGO56RWIZISX6BARK5T3MZGHLK5JAXW2R7YZJ",
+					"createdAt": "2026-10-26T11:26:22Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "nirium-watch",
+			"repo": "Eras256/nirium-watch",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/nirium-watch.yml",
+			"name": "Nirium Watch",
+			"description": null,
+			"homepage": "https://nirium-watch.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T22:21:38Z",
+			"commitsInWindow": 53,
+			"contracts": []
+		},
+		{
+			"file": "nomad-vault",
+			"repo": "harsxul/nomad-vault",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/nomad-vault.yml",
+			"name": "Nomad Vault",
+			"description": "Hire anywhere. Pay without borders. USDC payroll on Stellar: smart-account treasury with on-chain spending limits, contractor-owned vaults, private payments.",
+			"homepage": "https://harsxul.github.io/nomad-vault/",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T17:42:35Z",
+			"commitsInWindow": 31,
+			"contracts": [
+				{
+					"id": "CAL4OMZXICKRSDJA3SFNJMXWFYQCNGF5UXYAYNHSD5APOLYH6APDWSEQ",
+					"createdAt": "2026-10-25T17:12:47Z",
+					"path": "config/deployments.testnet.json"
+				},
+				{
+					"id": "CBN3QXLCAC22MQYPGQW5UKLWQBQGVG7RMJKAEDH7GQNOTFQCCHHARQL4",
+					"createdAt": "2026-10-25T17:12:57Z",
+					"path": "config/deployments.testnet.json"
+				},
+				{
+					"id": "CBQEGC3W3LQYOXVDGZOBNY2TCYPDALNXDBREUVLW4FTS7FOL352KHMBX",
+					"createdAt": "2026-10-26T10:41:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCBW5GLO53X2K5H6ACMQDNWHWJXPCWTJGE5YW6EZVVRIP3AE6QP27X22",
+					"createdAt": "2026-10-26T10:30:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDOTGUOHQIZMIRA7WEKW4NMXH23LPPTPTOWLP6WA7ZV2AMQDUQRIME6X",
+					"createdAt": "2026-10-25T16:58:07Z",
+					"path": "config/deployments.testnet.json"
+				}
+			]
+		},
+		{
+			"file": "nomad-vault-vercel",
+			"repo": "Karinapostemp/nomad-vault-vercel",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/nomad-vault-vercel.yml",
+			"name": "Nomad Vault",
+			"description": "Nomad Vault web app mirror for Vercel deployment",
+			"homepage": "https://flying-orion-wcarm0d-54zg5vg42k-7981.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T21:33:24Z",
+			"commitsInWindow": 13,
+			"contracts": [
+				{
+					"id": "CAL4OMZXICKRSDJA3SFNJMXWFYQCNGF5UXYAYNHSD5APOLYH6APDWSEQ",
+					"createdAt": "2026-10-25T17:12:47Z",
+					"path": "config/deployments.testnet.json"
+				},
+				{
+					"id": "CBN3QXLCAC22MQYPGQW5UKLWQBQGVG7RMJKAEDH7GQNOTFQCCHHARQL4",
+					"createdAt": "2026-10-25T17:12:57Z",
+					"path": "config/deployments.testnet.json"
+				},
+				{
+					"id": "CCVNAZBHRAG2C62DUTR2CCZPKORIK33ILZK5OGD6SUJJFVR6TX4DP54B",
+					"createdAt": "2026-10-26T00:10:47Z",
+					"path": "config/deployments.testnet.json"
+				},
+				{
+					"id": "CDOTGUOHQIZMIRA7WEKW4NMXH23LPPTPTOWLP6WA7ZV2AMQDUQRIME6X",
+					"createdAt": "2026-10-25T16:58:07Z",
+					"path": "config/deployments.testnet.json"
+				}
+			]
+		},
+		{
+			"file": "orloj-stellar",
+			"repo": "Deivitto/orloj-stellar",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/orloj-stellar.yml",
+			"name": "Orloj Stellar: HackMeridian materials",
+			"description": "Orloj Stellar - private development mirror of GianfrancoBazzani/orloj-registry",
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T11:02:05Z",
+			"commitsInWindow": 16,
+			"contracts": []
+		},
+		{
+			"file": "passport-pay",
+			"repo": "LucasCariddi/Passport-pay",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/passport-pay.yml",
+			"name": "Passport Pay",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T11:33:50Z",
+			"commitsInWindow": 19,
+			"contracts": [
+				{
+					"id": "CBIRF3XX45F2I356XLDDALKSKQWRXMUNFVBF7A65TRSEWXVXHRYP56VS",
+					"createdAt": "2026-10-25T16:17:42Z",
+					"path": "docs/ARCHITECTURE.md"
+				},
+				{
+					"id": "CDJKAFUYH6WE6OWLP3BPMUDLKHQTCENLZSKIMHBMH436F6DGSVJN26TJ",
+					"createdAt": "2026-10-25T18:11:02Z",
+					"path": ".env.example"
+				}
+			]
+		},
+		{
+			"file": "payraast",
+			"repo": "hakeemullahjan/payraast",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/payraast.yml",
+			"name": "PayRaast",
+			"description": "hack_meridian lisbon 2026",
+			"homepage": "https://payraast-delta.vercel.app",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "description",
+				"path": null
+			},
+			"tier": "likely",
+			"method": null,
+			"repoCreatedAt": "2026-10-25T17:10:56Z",
+			"commitsInWindow": 7,
+			"contracts": []
+		},
+		{
+			"file": "payslip",
+			"repo": "34m0r/payslip",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/payslip.yml",
+			"name": "Payslip",
+			"description": "Confidential payroll on Stellar, and a payslip that proves your income without revealing it. HackMeridian 2026.",
+			"homepage": "https://payslip-34-m0-r.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T17:58:41Z",
+			"commitsInWindow": 27,
+			"contracts": [
+				{
+					"id": "CA2QVJTD3SC5JEKK7EFGP4RTX7AFL77B2TQPY44HF3QUZEXSWKHJ2X2H",
+					"createdAt": "2026-10-25T17:02:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBGBFZ4XRV2YB4UQXJYZRM4INDSZGZKW2V3FJEDVKPRPNBUSAEHEC6VF",
+					"createdAt": "2026-10-25T17:03:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCNRBMHND4ZLECGR4ZXBFV2JAYRGI5XM7I4GFSWO4X2SU7DJIM7RPR4S",
+					"createdAt": "2026-10-25T17:02:42Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "peaje-zbe",
+			"repo": "marcocpp/peaje-zbe",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/peaje-zbe.yml",
+			"name": "ZBE Toll on Stellar",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:48:19Z",
+			"commitsInWindow": 29,
+			"contracts": [
+				{
+					"id": "CBVQ4A2P662QNLTL6SZMZUIXK6WALFHL5S7AJXYAG7HY4WIBRJWW5BX7",
+					"createdAt": "2026-10-25T23:20:52Z",
+					"path": "PROGRESS.md"
+				},
+				{
+					"id": "CCC7DQXGQIQJ735OJT6UXL2OTB3UF23A6YGMPOYXEIAETM5OYPWGVYPQ",
+					"createdAt": "2026-10-26T11:12:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CD3R2MSNY6JQ5UB2AKRMYVUX2TTP6UWZX2S5JXZNOLH2MQ3KSJAAFPVQ",
+					"createdAt": "2026-10-26T11:12:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CD5JL5TEAH2D2UV6RGT4MQL4R43B3ESQ7KX4VKZEKY2JCIRGIWVBI5QQ",
+					"createdAt": "2026-10-25T23:20:47Z",
+					"path": "PROGRESS.md"
+				}
+			]
+		},
+		{
+			"file": "pelamandarinas-project",
+			"repo": "beaguzman/pelamandarinas_project",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/pelamandarinas-project.yml",
+			"name": "Cascada Pay",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:10:07Z",
+			"commitsInWindow": 20,
+			"contracts": [
+				{
+					"id": "CDR3H3DNLWXRB46JUSFCBXSLFCU23RXYHJSFNWZQXQEGLXSKONT24AQY",
+					"createdAt": "2026-10-25T18:04:22Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "peridot-markets",
+			"repo": "joshschcom/peridot-markets",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/peridot-markets.yml",
+			"name": "Peridot Markets",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "wasm_hash_match",
+			"repoCreatedAt": "2026-10-25T12:43:30Z",
+			"commitsInWindow": 232,
+			"contracts": []
+		},
+		{
+			"file": "phonedo",
+			"repo": "ParriCode/phonedo",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/phonedo.yml",
+			"name": "🩺 Phonendo",
+			"description": "Plataforma de integración de sensores con verificación en blockchian",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-23T18:23:34Z",
+			"commitsInWindow": 84,
+			"contracts": [
+				{
+					"id": "CACUZG5V45NPFFB5JSLHMTF6NHEP5GMGZ5QJKJPET4ZIRTWOW6VS2VQS",
+					"createdAt": "2026-10-26T11:32:37Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CAPZ2O7LPTRGJ2Q7TTHMCHOKRZ4T7KU5I4E74M2U3YUTC3XONIQDOP2D",
+					"createdAt": "2026-10-25T12:12:52Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBF2MBQ6W4S6LD3JSIM3NNZET5KBUKOADRZSKIYZRZBAXRM6OJZCNSFI",
+					"createdAt": "2026-10-25T12:04:57Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCLQFKRWBLRSPLVAFWBLG22LPRGP3GEV47CGXA6C3VAGPQ2QITE3DNYL",
+					"createdAt": "2026-10-26T11:32:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CD3ZLDTB7QKJLMAIBSCL75TRHE6IUZ27RW5FLWNB4F3GUQENZZZSM45H",
+					"createdAt": "2026-10-25T18:24:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDH7PZQYQCYBCRO56F4WJP5BMEFPIBAEAQUAHKENXRYHZCTZPEH6UW3E",
+					"createdAt": "2026-10-26T11:41:57Z",
+					"path": "apps/publisher/config.json"
+				},
+				{
+					"id": "CDNPBN6HZP4PZKRFOOA2PYC772KF4THXTJNKHBS5Y33HCAVDWCVO5SRE",
+					"createdAt": "2026-10-25T17:58:32Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "pinakion",
+			"repo": "ThaisFReis/pinakion",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/pinakion.yml",
+			"name": "Pinakion",
+			"description": "Verifiable jury selection for governance on Stellar.",
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T17:36:24Z",
+			"commitsInWindow": 90,
+			"contracts": [
+				{
+					"id": "CBEX5AEAUDKK4SUZGXQPM26QZHNZZ5X3ELCSIQJ3V6SZKUCQ4B57NI5F",
+					"createdAt": "2026-10-26T03:56:32Z",
+					"path": "docs/evidencia-processo-registro.json"
+				},
+				{
+					"id": "CBPHNZLGQIUEC4BEC53ZP7P65LLIBT5JTWTHMZVAMCGZCEN3PSUHTPQN",
+					"createdAt": "2026-10-25T17:43:07Z",
+					"path": "docs/evidencia-testnet-sorteio.md"
+				},
+				{
+					"id": "CBUQU5MH2KWBWDHQEZL53U7CYPMKHLI3USOJOHE544IIOG7PWFQRLSFL",
+					"createdAt": "2026-10-25T20:39:57Z",
+					"path": "docs/evidencia-testnet-bilhete.md"
+				},
+				{
+					"id": "CBVWEEIGMZWLGSK4JG5M5VP6N4DWTZXAN4V2EHVXHZ6B74MNHHH3MIA3",
+					"createdAt": "2026-10-25T19:00:47Z",
+					"path": "docs/evidencia-testnet-sorteio.md"
+				},
+				{
+					"id": "CCICALAV6OQOOE347USWKQUASXFRXY6VTC2JBWA55SJVSSKVPVXPMCE3",
+					"createdAt": "2026-10-25T22:54:07Z",
+					"path": "docs/evidencia-testnet-spike.md"
+				},
+				{
+					"id": "CCRBKLS64WDUSKQSQF4ON4GJF4Q5KPEAF54TQD4RIWDAJ5TOERKU2NVL",
+					"createdAt": "2026-10-26T01:11:12Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCVLAMSF7SXEVU4EJIHN7P24HHBGKJPKLJ26DXR7DAWPLEG66IYYR6F2",
+					"createdAt": "2026-10-26T03:56:42Z",
+					"path": "docs/evidencia-processo-registro.json"
+				},
+				{
+					"id": "CCWD4XWB6L5LF3RVL2JHPKPIRIFJ47PCNRCBRJLPEMYGQSPNAZXKZCSH",
+					"createdAt": "2026-10-26T01:11:07Z",
+					"path": "docs/evidencia-testnet-bilhete.md"
+				},
+				{
+					"id": "CCX3X4IH5PNELSDAF2WOBR27IJ4PYBQFH5CQPF25YPZU5PBHEYBSEO5Q",
+					"createdAt": "2026-10-26T03:56:52Z",
+					"path": "docs/evidencia-processo-registro.json"
+				},
+				{
+					"id": "CDWBWAHUZ3MC3BJXJIW5O74MNUXH76VCGBIVFQU3XJJFGML3VKFIXQT7",
+					"createdAt": "2026-10-26T03:31:52Z",
+					"path": "docs/SOURCES.md"
+				}
+			]
+		},
+		{
+			"file": "plan4her-stellar",
+			"repo": "Paolag93/plan4her-stellar",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/plan4her-stellar.yml",
+			"name": "Plan4Her",
+			"description": "Plan4Her - Privacy-first, cycle-aware productivity app with community habit pools powered by Stellar. HackMeridian 2026.",
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "likely",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T21:44:05Z",
+			"commitsInWindow": 47,
+			"contracts": []
+		},
+		{
+			"file": "pledge",
+			"repo": "jzelada97/Pledge",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/pledge.yml",
+			"name": "Pledge · rental deposits that earn yield on Stellar",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T14:48:48Z",
+			"commitsInWindow": 66,
+			"contracts": [
+				{
+					"id": "CBHM2LC6ERMGRDVTYW4NNX5S2DVZPPYEVPC4AIUM426J5CME6MZCCRYU",
+					"createdAt": "2026-10-25T20:19:42Z",
+					"path": "deployments/testnet.json"
+				},
+				{
+					"id": "CBTENJ2ATPZTN5ZE5LMAQVX64DF3OMNZHVIUSMB7CQSEK2R6EN4ZGEJI",
+					"createdAt": "2026-10-25T19:14:07Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CC3QA5DN37DBUFLFFOLXZYXRL4MZ2GAKQ5OTJDG2AQ7DMGRGCKV5W2IL",
+					"createdAt": "2026-10-25T20:19:32Z",
+					"path": "deployments/testnet.json"
+				}
+			]
+		},
+		{
+			"file": "portus",
+			"repo": "AzrielTheHellrazor/portus",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/portus.yml",
+			"name": "Portus · Sovereign Multi-Currency Treasury Engine on Stellar",
+			"description": "Portus - Institutional multi-currency corporate treasury on Stellar",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T10:20:56Z",
+			"commitsInWindow": 6,
+			"contracts": [
+				{
+					"id": "CC2Q2JLSIHMIXS4VQMNG57FXO4LPUQPSK2Z6CQAQXH5AKL6Y5NX4TBCF",
+					"createdAt": "2026-10-25T12:23:42Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CD4S3FUVKPPHQMOI36AWTPGBYNWYRVHFNMRPATEIHENURQK77A5YTMWU",
+					"createdAt": "2026-10-25T12:23:32Z",
+					"path": ".env.example"
+				}
+			]
+		},
+		{
+			"file": "private-yield",
+			"repo": "troqpay/private-yield",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/private-yield.yml",
+			"name": "TroqPay Private Yield",
+			"description": "Private B2B payments on Stellar that keep earning yield: Stellar Private Payments over DeFindex vault shares (HackMeridian 2026, testnet)",
+			"homepage": null,
+			"track": "Scale",
+			"placement": "Runner-up",
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T14:08:08Z",
+			"commitsInWindow": 12,
+			"contracts": [
+				{
+					"id": "CABZFHJSCXVOVOEJGUHT6XX52AEAZOTDTYSEMBIJIQSYXO3YRJU3ONKG",
+					"createdAt": "2026-10-25T14:12:52Z",
+					"path": "src/config/demo-testnet-deployments.json"
+				},
+				{
+					"id": "CAE6HNKLDQ6VON5TCMCXZ52CPFAZ6NPOZCOMUXRAG2LFNLL6LOIWGTDI",
+					"createdAt": "2026-10-25T14:13:12Z",
+					"path": "src/config/demo-testnet-deployments.json"
+				},
+				{
+					"id": "CAMO33KOE6GHNHJMCPQWPBZTHCACLX6M7X6USNXCRXRTSOZMD4ZDNFLI",
+					"createdAt": "2026-10-25T14:14:57Z",
+					"path": "src/config/demo-testnet-deployments.json"
+				},
+				{
+					"id": "CB5LRBHZVPM3XMUUVTVDRPGVRGHDKVWBEZEKIP4FZETJRS6O2TMHYOIQ",
+					"createdAt": "2026-10-25T14:12:42Z",
+					"path": "src/config/demo-testnet-deployments.json"
+				},
+				{
+					"id": "CBKAD242VE3TRF7URVNAMWNS36JGZVVHSMGHB2JPU3IM5SQXOIDFVH6G",
+					"createdAt": "2026-10-25T14:12:22Z",
+					"path": "src/config/demo-testnet-deployments.json"
+				},
+				{
+					"id": "CBPWSNW3UM4VYIDNW3MBZYRXI2NNNUPV2HEQHA5DKUN2AEFFVVBLROIR",
+					"createdAt": "2026-10-25T14:13:02Z",
+					"path": "src/config/demo-testnet-deployments.json"
+				},
+				{
+					"id": "CDYDMR6FKNNP7VZIPK2RVAZDL337SI7C2YXOVD4K4KBZHBJEMIO6ZH73",
+					"createdAt": "2026-10-25T14:12:32Z",
+					"path": "src/config/demo-testnet-deployments.json"
+				}
+			]
+		},
+		{
+			"file": "proof-of-trading",
+			"repo": "AgroSmart-Contracts/Proof-Of-Trading",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/proof-of-trading.yml",
+			"name": "Proof of Trading",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T08:36:41Z",
+			"commitsInWindow": 9,
+			"contracts": [
+				{
+					"id": "CDY4E5QNPU4GEAQG6RI526DSUK3TTRI6ONGWVTBKUZQY5XTZFF3BFVK7",
+					"createdAt": "2026-10-25T11:37:47Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "qafila",
+			"repo": "Ilyes-Ali-Jeridi/qafila",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/qafila.yml",
+			"name": "Qafila",
+			"description": "Qafila: halal trade finance on Stellar. HackMeridian 2026.",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T12:51:33Z",
+			"commitsInWindow": 99,
+			"contracts": [
+				{
+					"id": "CA4AB4M6I3TKNXN4IW6AG35JLSO7SRP66WZA34KILBOA4J6UVSXZJHMC",
+					"createdAt": "2026-10-25T15:59:32Z",
+					"path": "docs/SPIKES-product.md"
+				},
+				{
+					"id": "CAJW4MIEZXIUFHGLQISXLDF3XIHJOLGSKGDQQHBIQJ2BJU34ZT3COSPV",
+					"createdAt": "2026-10-25T15:25:27Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBNWSWHDEJ5X2BXJBQHT5SVIZQSEGD3WMWAMKPXOKEJV3XU4L6GJIXFR",
+					"createdAt": "2026-10-25T14:53:37Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBTIMGAALCOAJRV2NP3NQMEQBPRBQDIBSPP6HFSNIAHMY26L6MAGNRRJ",
+					"createdAt": "2026-10-25T15:36:47Z",
+					"path": "docs/SPIKES-product.md"
+				},
+				{
+					"id": "CCGDMYX62UDKXJJD5RCFEPOPODJCL4XS43SLRXDDMK7HKGGD4SJH3AG6",
+					"createdAt": "2026-10-25T15:26:02Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CD2ULYK6GXHCCDNLD2VX4UCBCWRLC2AEZHIYSZNRD5RBGINWLON7MOCK",
+					"createdAt": "2026-10-25T14:45:52Z",
+					"path": "docs/SPIKES-chain.md"
+				},
+				{
+					"id": "CD5COFFHUHIORWNGNRHTSGGQGOJQUVC6IZUOKO43RZMBP3TZ56UHCGJY",
+					"createdAt": "2026-10-25T15:58:47Z",
+					"path": "docs/SPIKES-product.md"
+				},
+				{
+					"id": "CD7JYELMF6W5LLWINWJ7XO6BYAMDFBYLJ4VTMTOZ3LWCFH2MZ7MQWXZP",
+					"createdAt": "2026-10-25T14:39:32Z",
+					"path": "deployments/testnet-e2e.json"
+				},
+				{
+					"id": "CDQN2BBF2LANDZNSZ3SG5KJFGJRCMXDTJBKRWCLGZXX3UJ6333DL3TW6",
+					"createdAt": "2026-10-25T14:49:42Z",
+					"path": "docs/SPIKES-chain.md"
+				}
+			]
+		},
+		{
+			"file": "quits",
+			"repo": "karlostoteles/QUITS",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/quits.yml",
+			"name": "Quits",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-20T14:17:44Z",
+			"commitsInWindow": 35,
+			"contracts": [
+				{
+					"id": "CAQOQKI4GOX36MPWTYK27TNJB32I5VRLEHGADOUHOFUBMISUWIUHH5J2",
+					"createdAt": "2026-10-25T15:03:32Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCWBDAO2NT7KLBYPWNPAPCG7DSYSRW7P3QIPYLO2PI4J43W57FTN5RNK",
+					"createdAt": "2026-10-25T15:01:37Z",
+					"path": "contracts/deployments/testnet.json"
+				}
+			]
+		},
+		{
+			"file": "rebalancing-vault",
+			"repo": "synt-tech/rebalancing_vault",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/rebalancing-vault.yml",
+			"name": "Y.A.R.V. - Automated Rebalancing Vaults",
+			"description": "HackMeridian 2026 - Automated Rebalancing Vaults. Deposit-and-forget share-token vaults for Stellar concentrated-liquidity pools: cl_aquarius DeFindex strategy + platform contracts, live on testnet.",
+			"homepage": "https://synt.tech/rebalancing_vault",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T10:20:15Z",
+			"commitsInWindow": 69,
+			"contracts": [
+				{
+					"id": "CB4LGZVUF345GF5MLMWIZZR2E222SX6DAPQ2DOP3WEKQKBGJRO7I3RES",
+					"createdAt": "2026-10-26T00:22:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CB5NI7ZGBCSSPUF5635AHJRAZGCMK2YQI7MNT2GBGGJU4XXHP77A6SJN",
+					"createdAt": "2026-10-26T00:24:22Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CB74CKXGUTTFP5P3ZEOX3VDR376YJKNLFQ6RKPX6QTEITHNG62D5F6RV",
+					"createdAt": "2026-10-26T00:22:32Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CBJDZPVX6NI5FWFYV7VILKBKBP7V77II47ATS77TBSXWIKQYWNA56QTU",
+					"createdAt": "2026-10-26T00:24:17Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CBS4PBYTM5O26PFSKYGKN4G6ZFRYWKNJKKQ6CL4JFGFNIXHM637CVXZW",
+					"createdAt": "2026-10-26T03:20:37Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CCUDORIMXIIJYOYYE5NEFBZ25JSJXNMQDPELGQRRHJY4IYNKBWV7AR5S",
+					"createdAt": "2026-10-26T00:24:12Z",
+					"path": "DEPLOYMENTS.md"
+				},
+				{
+					"id": "CDEYX7WBCCSYXOFBMBOCB2WTLLROPQAWS5YQKUTYSDNBPD23EGASH5LQ",
+					"createdAt": "2026-10-26T00:22:17Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDJ467CMUO6R6BLW4PTSMVEGVTUKVNNSIBFLHMK5Q6GK2WMYEDQTKRTR",
+					"createdAt": "2026-10-26T00:22:07Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CDKAKRSZZB2NTOBSTT2KDEZSSLOZSQ4DKTGP6RGSJXFUUY6ZQ2HZLPGF",
+					"createdAt": "2026-10-26T04:02:57Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "red-sentinal",
+			"repo": "red-sentinel-ai/red-sentinal",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/red-sentinal.yml",
+			"name": "Red Sentinel",
+			"description": "AI Agent Battle Arena on Multiple Chains. Break agents with prompts and earn real onchain money",
+			"homepage": "https://redsentinel.xyz/",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2025-05-20T13:43:29Z",
+			"commitsInWindow": 9,
+			"contracts": [
+				{
+					"id": "CBJ6XDS76GYHL6KJCE2W5V7Z4ZFW2TSPL5BE7WDNKMQ4VDVLLBJIOMFM",
+					"createdAt": "2026-10-26T05:40:17Z",
+					"path": ".env.example"
+				}
+			]
+		},
+		{
+			"file": "sansara",
+			"repo": "karmainaria/sansara",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/sansara.yml",
+			"name": "Relic & Thread",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T13:06:10Z",
+			"commitsInWindow": 25,
+			"contracts": [
+				{
+					"id": "CABGIFZGNV4YPKYB2EDKWQXONJIAZEQHPZ25EWSX3WIXOD3QWOLEEMVT",
+					"createdAt": "2026-10-25T14:26:22Z",
+					"path": "step3.sh"
+				},
+				{
+					"id": "CBPXUJWJ4BYYSV35XYWEL2NCUFK7UCZPELWV43PZLHNXJNXAUBDQ445O",
+					"createdAt": "2026-10-25T15:23:07Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CD6GNUPVRAAF4U3EWOE5RDNVWX6JM4QORVQUAADTNHWQGA4LER6IAWD3",
+					"createdAt": "2026-10-25T14:02:02Z",
+					"path": "step2.sh"
+				}
+			]
+		},
+		{
+			"file": "sendabussines",
+			"repo": "SendaLabs/SendaBussines",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/sendabussines.yml",
+			"name": "Senda Business",
+			"description": null,
+			"homepage": "https://senda-bussines.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "likely",
+			"method": null,
+			"repoCreatedAt": "2026-10-25T18:42:05Z",
+			"commitsInWindow": 31,
+			"contracts": []
+		},
+		{
+			"file": "sendrpay",
+			"repo": "joinsendr/SendrPay",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/sendrpay.yml",
+			"name": "Sendr Pay",
+			"description": "Pay like a local, anywhere in the world. Sendr Pay lets you use your USDC wallet to pay local merchants abroad by scanning QR codes without transferring money cross-border to a local bank account.",
+			"homepage": "https://sendrpay.sendr.cash",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "likely",
+			"method": null,
+			"repoCreatedAt": "2026-10-25T13:41:20Z",
+			"commitsInWindow": 17,
+			"contracts": []
+		},
+		{
+			"file": "seyf-p",
+			"repo": "Seyfert-Labs/SEYF-P",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/seyf-p.yml",
+			"name": "SEYF",
+			"description": null,
+			"homepage": "https://www.seyf.app",
+			"track": "Scale",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-06-24T17:07:07Z",
+			"commitsInWindow": 98,
+			"contracts": [
+				{
+					"id": "CABH4NNGEVFHEJLASJRSULT3YYRK3FYPZDZKTMZMSWPF3JEYQWYALS2Q",
+					"createdAt": "2026-10-25T13:55:42Z",
+					"path": "soroban/DEPLOYMENTS.md"
+				},
+				{
+					"id": "CASAU3YCJQYXAVKNUTSHTH5F2DJVES7BM3QOVN4RD2NVAVLD2DRUM7ZI",
+					"createdAt": "2026-10-25T20:53:02Z",
+					"path": "docs/contracts.md"
+				},
+				{
+					"id": "CC5CLKMAJU7KHMUUJWXM7RJ6E7OCN6LPI66GPL26LJMH7YDTAU6XQ6BZ",
+					"createdAt": "2026-10-25T17:40:52Z",
+					"path": "docs/hackmeridian-plan.md"
+				},
+				{
+					"id": "CCLC3HRPL2GYXTGOFFNKITQGPYLZXQG4TO7OV6M533PGXZ3ZQBOGEGTZ",
+					"createdAt": "2026-10-25T13:51:22Z",
+					"path": "soroban/DEPLOYMENTS.md"
+				},
+				{
+					"id": "CDG5V5GRD7KYJBREQXRVDEUSJCGCUZSI3EXD5ZHF2WDM7WKZLU5I75XB",
+					"createdAt": "2026-10-25T14:11:22Z",
+					"path": "soroban/DEPLOYMENTS.md"
+				}
+			]
+		},
+		{
+			"file": "shake",
+			"repo": "franciscogfsm/shake",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/shake.yml",
+			"name": "shake",
+			"description": null,
+			"homepage": "https://shake-lake.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:08:59Z",
+			"commitsInWindow": 102,
+			"contracts": [
+				{
+					"id": "CAQ6KAVIUSXSO2A6T44TC6USH3WP67R7YYORMLMLVTRG6ZDBHGQIZ2JW",
+					"createdAt": "2026-10-25T16:37:02Z",
+					"path": ".env.example"
+				},
+				{
+					"id": "CCHCT7HSKEOCFVOUPYHDAK4AOBIDIOVBXZDTL2XW7RTJJNGZGPDYYUKY",
+					"createdAt": "2026-10-25T14:13:27Z",
+					"path": "docs/plan.md"
+				}
+			]
+		},
+		{
+			"file": "sozu-offline",
+			"repo": "Sozu-Capital/sozu-offline",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/sozu-offline.yml",
+			"name": "Sozu Offline",
+			"description": "A BLE mesh for confidential offline payments on Stellar",
+			"homepage": "https://offline.sozu.capital",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T15:49:05Z",
+			"commitsInWindow": 29,
+			"contracts": [
+				{
+					"id": "CDSCQSVWKTYR7EUJK5EQXIFI4L2C4LCPQOIUYP6PMG6KW4O2BZGCRLLV",
+					"createdAt": "2026-10-25T20:03:52Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "stablecoin-close",
+			"repo": "Inferara/stablecoin-close",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/stablecoin-close.yml",
+			"name": "stablecoin-close",
+			"description": "Stablecoin settlement and report anchoring on Stellar: Soroban contracts, payer and verifier pages, and a reference fetcher for the haruno.stellar.month/1 snapshot.",
+			"homepage": null,
+			"track": "Scale",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-20T15:03:41Z",
+			"commitsInWindow": 27,
+			"contracts": [
+				{
+					"id": "CAU56RULWM446LJCYIRMWIJSBL4NE5DBLTHJ4GPXTKUVQ7BUYTQAZ2CS",
+					"createdAt": "2026-10-25T16:33:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CB4SGMUT56YKMYQWOQN2T3FTBZOJBZHYUYYV6QTVTJGGCYLWIIDOBPWB",
+					"createdAt": "2026-10-25T16:34:02Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "starlog",
+			"repo": "nina-osk/Starlog",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/starlog.yml",
+			"name": "Starlog",
+			"description": "Hackaton Meridian 2026",
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "doc",
+				"path": "PLAN.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T14:41:06Z",
+			"commitsInWindow": 23,
+			"contracts": [
+				{
+					"id": "CB6ENR37I5ZIGRAWHTYBTWI4ZCOTZKK2I75CLLHCDIUTP3QG4VO2WL6S",
+					"createdAt": "2026-10-25T17:09:27Z",
+					"path": "packages/estela-pass/README.md"
+				},
+				{
+					"id": "CBOIYZWJMSMNET35AO2ZVJXGP5BM3HQVTLIH4TZCOCUC35N6BRS2CPIE",
+					"createdAt": "2026-10-25T14:48:37Z",
+					"path": "PLAN.md"
+				},
+				{
+					"id": "CDQQ7PKXRNOYZUW47USR6OJCODKPH45OCYRODEMYHO7LJZDO7Y2HF7ZD",
+					"createdAt": "2026-10-25T17:09:57Z",
+					"path": "packages/estela-stamps/README.md"
+				},
+				{
+					"id": "CDUARFKLW2YDKWIUZAAFY2BQCWOJU46H6NVY4ZKHRPLTSDTHYPZAHCTD",
+					"createdAt": "2026-10-25T17:10:37Z",
+					"path": "packages/estela-escrow/README.md"
+				}
+			]
+		},
+		{
+			"file": "stellar-p2p",
+			"repo": "vmichalik/stellar-p2p",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/stellar-p2p.yml",
+			"name": "Pactlane",
+			"description": "Pactlane: peer-to-peer Stellar exchange with authenticated bank-payment evidence.",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "wasm_hash_match",
+			"repoCreatedAt": "2026-10-25T10:27:23Z",
+			"commitsInWindow": 69,
+			"contracts": []
+		},
+		{
+			"file": "stellar-split",
+			"repo": "Michella-stack/Stellar-Split",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/stellar-split.yml",
+			"name": "Stellar-Split",
+			"description": "Split shared expenses and settle in USDC on Stellar. Built for families and workers who send money across borders, with agent support via x402.",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T12:14:35Z",
+			"commitsInWindow": 326,
+			"contracts": [
+				{
+					"id": "CDEJ3M45EYOPSTZISTUC7NIHKJ22IXWY4CZJLIED3LM5WJ4TSBIQMU43",
+					"createdAt": "2026-10-26T10:23:47Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "stelleye",
+			"repo": "Gastaan/Stelleye",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/stelleye.yml",
+			"name": "Stelleye",
+			"description": null,
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T06:16:11Z",
+			"commitsInWindow": 7,
+			"contracts": [
+				{
+					"id": "CAYXBP4DF3SG2J3224M6HA7X3OXVUCL2XLP3EWPPJ6LTX6UPFMBVUPTP",
+					"createdAt": "2026-10-26T05:51:02Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "swiftex-recovery-contracts",
+			"repo": "SwiftExWallet/swiftex_recovery_contracts",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/swiftex-recovery-contracts.yml",
+			"name": "SwiftEx Recovery Contracts",
+			"description": "SwiftEx Wallet Recovery via ZK powered email.",
+			"homepage": null,
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T17:03:35Z",
+			"commitsInWindow": 6,
+			"contracts": [
+				{
+					"id": "CDT5MXYHAZK6YPTWFBKPECHGPCBQFINME6WJCONXCT73RKJRDIJ2HYJK",
+					"createdAt": "2026-10-25T16:47:12Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "toolport",
+			"repo": "HackatonWinnners/toolport",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/toolport.yml",
+			"name": "Toolport",
+			"description": "One port for every paid tool",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "likely",
+			"method": null,
+			"repoCreatedAt": "2026-10-25T22:37:08Z",
+			"commitsInWindow": 45,
+			"contracts": []
+		},
+		{
+			"file": "trust-meridian",
+			"repo": "Wilivms/trust-meridian",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/trust-meridian.yml",
+			"name": "Trust Meridian",
+			"description": null,
+			"homepage": "https://trust-meridian.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T11:57:13Z",
+			"commitsInWindow": 39,
+			"contracts": [
+				{
+					"id": "CBRLDAQIKYQZQM5V2D5JZLZ5GA4JB4VNNGS5YGCZW56XPGZ7OVW22GQD",
+					"createdAt": "2026-10-25T12:27:37Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCRU56E3WHFFGEQ7LZ4HEEL6MWVZE7BBHB36H4F6Y27T6GGY4SCR2FMM",
+					"createdAt": "2026-10-25T12:23:22Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCVRSMT42L5SPEQWYTXUO5NY5B7GQSKRC4YDWYV36XBHU6AORGREQWPM",
+					"createdAt": "2026-10-25T12:18:47Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCXSVXARY5NY2GN5XRJF37SYFKHPH7I3H7BNWB5WSGMK5AW3LCEEDT3R",
+					"createdAt": "2026-10-25T12:19:07Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "tsuna",
+			"repo": "CHAAIISE/tsuna",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/tsuna.yml",
+			"name": "Tsuna",
+			"description": "Tsuna: DeFi vaults on Stellar where AI agents propose and the contract enforces the limits, checked on-chain on every call.",
+			"homepage": "https://leash-fi.vercel.app",
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-26T00:47:19Z",
+			"commitsInWindow": 131,
+			"contracts": [
+				{
+					"id": "CAC2HRI4PWFA2AIT257O4QFYE2PPMKORTNSR7OFLXZ4G3SDEOQD4JOYK",
+					"createdAt": "2026-10-25T19:09:42Z",
+					"path": "deployments/passkey.testnet.json"
+				},
+				{
+					"id": "CAFCIHI5SO5AC46AYRVPFXSEKS4QNVWHRXD67PJNVQ55TT3NLVL2DFDN",
+					"createdAt": "2026-10-25T20:28:42Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CATM5LOHXN7CPSAA4AYLRSI2RY2TIWIZOJFYLGOHP2H5AYOUQR2R4JLW",
+					"createdAt": "2026-10-25T19:12:52Z",
+					"path": "deployments/pay.testnet.json"
+				},
+				{
+					"id": "CAU563FCQGGON3Q4GG4Z4UBPGY2542GJNJJE2PHJTMA5STYNSRRGYW6F",
+					"createdAt": "2026-10-26T08:33:47Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CAWPWRQVRDWXSYV3Q3ERRVGZR3JQZKS5YSON3QWPT7SV37A7S4AENVMX",
+					"createdAt": "2026-10-25T21:17:37Z",
+					"path": "deployments/fleet.testnet.json"
+				},
+				{
+					"id": "CBANZEDTXPSMYO2SSV67LVF3LHKT5NKUD4KAA6V5VNISCHYU5XCRWSRL",
+					"createdAt": "2026-10-25T20:28:47Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBGBW4I4FS4FDJDNLEXOQD3MRBBLBQRWZJV6JATSRKZOAF2UVCFVRO26",
+					"createdAt": "2026-10-26T06:49:07Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CCQRAXUEY5ZBNZUV3AODG2KKRBC3CSXQISS75XWBMAHRQLHCXHMUI6YD",
+					"createdAt": "2026-10-25T19:12:57Z",
+					"path": "deployments/pay.testnet.json"
+				},
+				{
+					"id": "CCQW2UW5BDDKQYJXGXFGLDQOSBHTVWRNNRJTYYE52RKI7MS7GXGAYN4G",
+					"createdAt": "2026-10-25T20:28:12Z",
+					"path": "deployments/agent.testnet.json"
+				},
+				{
+					"id": "CD7SXLZ72H3C3ZKIOAZYUCVOGX2PJHZC7IQ6DNHFTPIMYWKOYERQBHVI",
+					"createdAt": "2026-10-25T19:13:12Z",
+					"path": "deployments/cctp.testnet.json"
+				},
+				{
+					"id": "CDCFBQKZPACXNWPY362GEJZCBVHQTHMET67QSQ6K4WUMTIFEEZVSKKPL",
+					"createdAt": "2026-10-25T19:33:27Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "unlocksharesxstellar",
+			"repo": "nelsonalexis/UnlockSharesXStellar",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/unlocksharesxstellar.yml",
+			"name": "UnlockSharesXStellar",
+			"description": null,
+			"homepage": "https://unlock-shares-x-stellar.vercel.app",
+			"track": null,
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "doc",
+				"path": "unlockshares-frontend/README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T10:32:25Z",
+			"commitsInWindow": 32,
+			"contracts": [
+				{
+					"id": "CAQTJG3HZJPXGDV2WCXNYDXI7EDFHI6XTN6ZN2WJFGTHJTYHTRBJNZNG",
+					"createdAt": "2026-10-25T20:26:57Z",
+					"path": "unlockshares-frontend/src/services/lending.ts"
+				},
+				{
+					"id": "CC6G43TN5GTSSSX4K5XMYPJOAU5XB7V6J7L5BGX4GDIM4MNOHFA5OETB",
+					"createdAt": "2026-10-25T17:20:52Z",
+					"path": "unlockshares-frontend/src/services/stellarRisk.ts"
+				}
+			]
+		},
+		{
+			"file": "usagepay",
+			"repo": "skopolabs/usagepay",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/usagepay.yml",
+			"name": "UsagePay - HackMeridian Lisbon 2026 MVP",
+			"description": "UsagePay enables verifiable machine-to-machine payments for metered services on Stellar.",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T15:15:51Z",
+			"commitsInWindow": 79,
+			"contracts": [
+				{
+					"id": "CBDYDMFWEZXPLEZVIWGOPK6W3FNSBNEZNFHUZ4GQKS3DA4OZHJKOGXN4",
+					"createdAt": "2026-10-25T11:49:42Z",
+					"path": "implementation-versions.json"
+				},
+				{
+					"id": "CBFRK646MGAOQK5M7ZALES7ATVNNTTF4ULBJ3WQ6Z5FEH4IDBGW7XHKM",
+					"createdAt": "2026-10-25T18:42:32Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "witness",
+			"repo": "fabian416/witness",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/witness.yml",
+			"name": "Witness",
+			"description": "Proof before payment: a Stellar escrow releases only when the condition is proven. Signed, anchored verdicts from pluggable verifiers (AI reads, code decides). Piggy x Lendoor at HackMeridian 2026.",
+			"homepage": null,
+			"track": "Scale",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "deployer_in_repo",
+			"repoCreatedAt": "2026-10-25T13:56:20Z",
+			"commitsInWindow": 29,
+			"contracts": []
+		},
+		{
+			"file": "writz",
+			"repo": "WritzProtocol/writz",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/writz.yml",
+			"name": "Writz Protocol",
+			"description": "Bitcoin lending on Stellar. Native BTC stays on Bitcoin, verified by an on-chain light client on Soroban, and borrowers receive USDC. No bridge, no custodian, no wrapped tokens.",
+			"homepage": "https://writz.xyz",
+			"track": "Scale",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-06-23T05:32:39Z",
+			"commitsInWindow": 42,
+			"contracts": [
+				{
+					"id": "CBX23YKCCJMAMBMSCNP6YVKEXUIYK2CTKSR4TQ3RVBPAFYZFVCW7W4EO",
+					"createdAt": "2026-10-25T15:53:27Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "yield-bearing-rental-deposit",
+			"repo": "ddortabencomo/yield-bearing-rental-deposit",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/yield-bearing-rental-deposit.yml",
+			"name": "Blendlord · Yield-Bearing Rental Deposits",
+			"description": "Rental deposits that earn yield: held in USDC by a neutral Soroban escrow, supplied to Blend, and released via a deduction-first waterfall. Built at HackMeridian 2026.",
+			"homepage": null,
+			"track": "Genesis",
+			"placement": null,
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T14:09:42Z",
+			"commitsInWindow": 22,
+			"contracts": [
+				{
+					"id": "CAUS4P47QJ4Y6L4NSAB45PUFOWLAFNMNHUGW6G2UCRTD3LCWH2ETWD2R",
+					"createdAt": "2026-10-25T17:53:47Z",
+					"path": "scaffold.yml"
+				},
+				{
+					"id": "CAYD7CI37ASKCBKVPJ4XMEE6MLSRN6JNCAJ3H6DWWQ6ZCDOOQEJ34ERN",
+					"createdAt": "2026-10-26T00:17:47Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBKF46ALDRFM6BXJWSKY375LFTEMPOU67XXNJQO6TJ4H6TPKI5WCYDAA",
+					"createdAt": "2026-10-25T23:38:07Z",
+					"path": "README.md"
+				}
+			]
+		},
+		{
+			"file": "zkross",
+			"repo": "enzoblain/ZKross",
+			"url": "https://github.com/devodii/hackproof/blob/ea7e1982c9beea491048e668fa6dfb62a4f9a8e5/data/2026/zkross.yml",
+			"name": "ZKross",
+			"description": null,
+			"homepage": null,
+			"track": null,
+			"placement": "Runner-up",
+			"basis": "repo-names-event",
+			"mention": {
+				"in": "readme",
+				"path": "README.md"
+			},
+			"tier": "verified",
+			"method": "contract_in_repo",
+			"repoCreatedAt": "2026-10-25T16:30:57Z",
+			"commitsInWindow": 80,
+			"contracts": [
+				{
+					"id": "CABLVEPQP7PN22YFXJJNX42PG7LTP3PPVAFIYE5LFQVDND5SBSTUSQYM",
+					"createdAt": "2026-10-25T21:07:32Z",
+					"path": "https://zkross.pages.dev/assets/index-Zi1DV6ON.js"
+				},
+				{
+					"id": "CBVC37MFGWDBTLAEGTEYPTTQDUO7KDVDD5RHWZVYN6BYOY3RTDLBGKRS",
+					"createdAt": "2026-10-25T21:08:07Z",
+					"path": "README.md"
+				},
+				{
+					"id": "CBWGOXIVKPSHNSV5ZTKIY2ZADDO6VGOGK2HM6XU7A24APCWLBCLK4KQM",
+					"createdAt": "2026-10-25T21:07:02Z",
+					"path": "https://zkross.pages.dev/assets/index-Zi1DV6ON.js"
+				},
+				{
+					"id": "CBY6HVRKKVMZ7DN4XAJZGLBJ4UYNDJJLPYRDETQ6RAD4LHFBUMX6LZS3",
+					"createdAt": "2026-10-25T21:07:07Z",
+					"path": "https://zkross.pages.dev/assets/index-Zi1DV6ON.js"
+				},
+				{
+					"id": "CC63X4XNTSNZ6MONLFYXQ2NH6AH2O3KN653PPEVLQWM4RQVVZFPF3MVH",
+					"createdAt": "2026-10-25T21:07:17Z",
+					"path": "https://zkross.pages.dev/assets/index-Zi1DV6ON.js"
+				},
+				{
+					"id": "CD3TP3PL7U63IEEB4LQCEFV2AMZSOWGWQN6JKFLO7KMXGWM7CARSW2EP",
+					"createdAt": "2026-10-25T21:07:47Z",
+					"path": "https://zkross.pages.dev/assets/index-Zi1DV6ON.js"
+				}
+			]
+		}
+	],
+	"left": [
+		{
+			"file": "402scope-trust",
+			"repo": "arturete58-sys/402scope-trust",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 15 of 15 other markdown files read)"
+		},
+		{
+			"file": "agama-stellar",
+			"repo": "agamafinance/agama-stellar",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 2 of 2 other markdown files read)"
+		},
+		{
+			"file": "agent-wallet-sdk",
+			"repo": "up2itnow0822/agent-wallet-sdk",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 18 of 18 other markdown files read)"
+		},
+		{
+			"file": "airlock-guard-2",
+			"repo": "najathammouri-prog/Airlock-Guard-2",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 1 of 1 other markdown files read)"
+		},
+		{
+			"file": "artifex-contracts",
+			"repo": "0xVeraHQ/artifex-contracts",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 1 of 1 other markdown files read)"
+		},
+		{
+			"file": "astros",
+			"repo": "Eco-RV/AstrOS",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 53 of 53 other markdown files read)"
+		},
+		{
+			"file": "atahanyild-koul",
+			"repo": "atahanyild/koul",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 9 of 9 other markdown files read)"
+		},
+		{
+			"file": "backstage",
+			"repo": "n1n4xyz/backstage",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 0 of 0 other markdown files read)"
+		},
+		{
+			"file": "ballast",
+			"repo": "DevTobis/ballast",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 37 of 37 other markdown files read)"
+		},
+		{
+			"file": "batch-contract-stellar",
+			"repo": "C-payments/batch-contract-stellar",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 1 of 1 other markdown files read)"
+		},
+		{
+			"file": "bind",
+			"repo": "wrever/bind",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 29 of 29 other markdown files read)"
+		},
+		{
+			"file": "blnt-v3-migration",
+			"repo": "BLNT-Protocol/blnt-v3-migration",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 13 of 13 other markdown files read)"
+		},
+		{
+			"file": "chateaux-meridian",
+			"repo": "elszalencia/chateaux-meridian",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 12 of 12 other markdown files read)"
+		},
+		{
+			"file": "citypass",
+			"repo": "Bran18/citypass",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 34 of 34 other markdown files read)"
+		},
+		{
+			"file": "cli",
+			"repo": "stellar-scaffold/cli",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 45 of 45 other markdown files read)"
+		},
+		{
+			"file": "cuotia",
+			"repo": "fredericjasmin/cuotia",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 11 of 11 other markdown files read)"
+		},
+		{
+			"file": "devfest-harambeeone",
+			"repo": "RockieRaheem/Devfest_HarambeeOne",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 24 of 24 other markdown files read)"
+		},
+		{
+			"file": "enza",
+			"repo": "infoenzastore-cmd/enza",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 5 of 5 other markdown files read)"
+		},
+		{
+			"file": "enza3-mvmnt1",
+			"repo": "infoenzastore-cmd/enza3.mvmnt1",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 11 of 11 other markdown files read)"
+		},
+		{
+			"file": "explorador-agent-loan-stellar",
+			"repo": "joaointech/explorador-agent-loan-stellar",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 10 of 10 other markdown files read)"
+		},
+		{
+			"file": "flowpay",
+			"repo": "flowpay-bmoni/flowpay",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 94 of 94 other markdown files read)"
+		},
+		{
+			"file": "forepay",
+			"repo": "forepay-stellar/forepay",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 27 of 27 other markdown files read)"
+		},
+		{
+			"file": "gamelock",
+			"repo": "Innokeshka1/gamelock",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 13 of 13 other markdown files read)"
+		},
+		{
+			"file": "gateflow",
+			"repo": "Pythagoras-x/GateFlow",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 0 of 0 other markdown files read)"
+		},
+		{
+			"file": "genesis402-stellar-facilitator",
+			"repo": "FTHTrading/genesis402-stellar-facilitator",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 7 of 7 other markdown files read)"
+		},
+		{
+			"file": "greenledger",
+			"repo": "emprendamosahora2030-sudo/greenledger",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 7 of 7 other markdown files read)"
+		},
+		{
+			"file": "hackathons-landing",
+			"repo": "defindex-io/hackathons-landing",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 1 of 1 other markdown files read)"
+		},
+		{
+			"file": "hackmeridian-cos",
+			"repo": "pwsaragossy/hackmeridian-cos",
+			"reason": "the repo answers not found, so its own text cannot be read"
+		},
+		{
+			"file": "harmony",
+			"repo": "zelena-tech/harmony",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 15 of 15 other markdown files read)"
+		},
+		{
+			"file": "holdfast",
+			"repo": "vicistar-star/Holdfast",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 24 of 24 other markdown files read)"
+		},
+		{
+			"file": "keepalive",
+			"repo": "Songu3020/keepalive",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 7 of 7 other markdown files read)"
+		},
+		{
+			"file": "keylease-core",
+			"repo": "KeyLease-Security/keylease-core",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 25 of 25 other markdown files read)"
+		},
+		{
+			"file": "koul-me-koul",
+			"repo": "koul-me/koul",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 9 of 9 other markdown files read)"
+		},
+		{
+			"file": "kyros2-0",
+			"repo": "arturete58-sys/kyros2.0",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 13 of 13 other markdown files read)"
+		},
+		{
+			"file": "latch",
+			"repo": "karagozemin/LATCH",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 11 of 11 other markdown files read)"
+		},
+		{
+			"file": "loot",
+			"repo": "Klorenn/LOOT",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 14 of 14 other markdown files read)"
+		},
+		{
+			"file": "mallaka",
+			"repo": "NnamdiCyber/Mallaka",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 44 of 44 other markdown files read)"
+		},
+		{
+			"file": "marketpulse-oracle",
+			"repo": "ogaziedaniel80-droid/marketpulse-oracle",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 52 of 52 other markdown files read)"
+		},
+		{
+			"file": "meritable",
+			"repo": "syncedtoblog/meritable",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 2 of 2 other markdown files read)"
+		},
+		{
+			"file": "microvault",
+			"repo": "Shamba-Records-Limited/microvault",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 25 of 25 other markdown files read)"
+		},
+		{
+			"file": "my-stellar-yield-vault",
+			"repo": "helasnoussi/my-stellar-yield-vault",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 0 of 0 other markdown files read)"
+		},
+		{
+			"file": "nova",
+			"repo": "infiniteezverse/nova",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 1 of 1 other markdown files read)"
+		},
+		{
+			"file": "oneid",
+			"repo": "oneid-ng/oneid",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 17 of 17 other markdown files read)"
+		},
+		{
+			"file": "oz-policy-builder",
+			"repo": "untangledfinance/oz-policy-builder",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 21 of 21 other markdown files read)"
+		},
+		{
+			"file": "payloop",
+			"repo": "WebSoroban/payloop",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 3 of 3 other markdown files read)"
+		},
+		{
+			"file": "polai-contracts",
+			"repo": "polaiLabs/polai-contracts",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 4 of 4 other markdown files read)"
+		},
+		{
+			"file": "polai-frontend",
+			"repo": "polaiLabs/polai-frontend",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 6 of 6 other markdown files read)"
+		},
+		{
+			"file": "poolfi-build-1",
+			"repo": "PoolFi-LTD/PoolFi-Build-1",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 2 of 2 other markdown files read)"
+		},
+		{
+			"file": "presign-guard",
+			"repo": "Fizzl13/presign-guard",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 5 of 5 other markdown files read)"
+		},
+		{
+			"file": "qrypton-vault",
+			"repo": "osdeniz/qrypton-vault",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 3 of 3 other markdown files read)"
+		},
+		{
+			"file": "redevice",
+			"repo": "Ihlasthetics/redevice",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 2 of 2 other markdown files read)"
+		},
+		{
+			"file": "rhitta",
+			"repo": "Kaycee276/Rhitta",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 5 of 5 other markdown files read)"
+		},
+		{
+			"file": "rwa-crowdfund-stellar",
+			"repo": "NUNRIBHAC/rwa-crowdfund-stellar",
+			"reason": "the repo answers not found, so its own text cannot be read"
+		},
+		{
+			"file": "scaffold-stellar-agentic",
+			"repo": "bitfalt/scaffold-stellar-agentic",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 39 of 39 other markdown files read)"
+		},
+		{
+			"file": "sdk",
+			"repo": "StellarAid-network/sdk",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 9 of 9 other markdown files read)"
+		},
+		{
+			"file": "secretspay-stellar-daap",
+			"repo": "Isaac2399/Secretspay-stellar-daap",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 0 of 0 other markdown files read)"
+		},
+		{
+			"file": "seidar",
+			"repo": "seidar-hq/seidar",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 22 of 22 other markdown files read)"
+		},
+		{
+			"file": "sidekey",
+			"repo": "Row-Bear/sidekey",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 1 of 1 other markdown files read)"
+		},
+		{
+			"file": "slasettle-vault",
+			"repo": "SLASettleHQ/slasettle-vault",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 14 of 14 other markdown files read)"
+		},
+		{
+			"file": "soroprove",
+			"repo": "drank40/soroprove",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 15 of 15 other markdown files read)"
+		},
+		{
+			"file": "sorostream-app",
+			"repo": "HassanKorey/SoroStream-app",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 8 of 8 other markdown files read)"
+		},
+		{
+			"file": "sorottl-backend",
+			"repo": "SoroTTL-Network/sorottl-backend",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 1 of 1 other markdown files read)"
+		},
+		{
+			"file": "sorottl-sdk",
+			"repo": "SoroTTL-Network/sorottl-sdk",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 2 of 2 other markdown files read)"
+		},
+		{
+			"file": "sounding",
+			"repo": "seekdaseek/sounding",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 6 of 6 other markdown files read)"
+		},
+		{
+			"file": "starpocket",
+			"repo": "mizukuhiiragi/starpocket",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 3 of 3 other markdown files read)"
+		},
+		{
+			"file": "stellar-anchor",
+			"repo": "slimepay/stellar-anchor",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 4 of 4 other markdown files read)"
+		},
+		{
+			"file": "stellar-chat",
+			"repo": "Pe4enable/stellar.chat",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 2 of 2 other markdown files read)"
+		},
+		{
+			"file": "stellar-confidential-token-demo",
+			"repo": "brozorec/stellar-confidential-token-demo",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 3 of 3 other markdown files read)"
+		},
+		{
+			"file": "stellar-forge",
+			"repo": "agnesnaomiolim-cloud/Stellar-forge",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 353 of 353 other markdown files read)"
+		},
+		{
+			"file": "stellar-p30-check",
+			"repo": "Protocol-30/stellar-p30-check",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 26 of 26 other markdown files read)"
+		},
+		{
+			"file": "stellar-postage",
+			"repo": "devOgazi/Stellar-Postage",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 17 of 17 other markdown files read)"
+		},
+		{
+			"file": "stellar-private-payments",
+			"repo": "NethermindEth/stellar-private-payments",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 43 of 43 other markdown files read)"
+		},
+		{
+			"file": "stellar-quickpass",
+			"repo": "jxsu404/stellar-quickpass",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 38 of 38 other markdown files read)"
+		},
+		{
+			"file": "stellar-rtgs",
+			"repo": "rodrodros/stellar-rtgs",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 13 of 13 other markdown files read)"
+		},
+		{
+			"file": "stellar2bitcoin",
+			"repo": "CryptoValencia/stellar2bitcoin",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 3 of 3 other markdown files read)"
+		},
+		{
+			"file": "streamora",
+			"repo": "Strea-mora/Streamora",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 9 of 9 other markdown files read)"
+		},
+		{
+			"file": "tinkazo",
+			"repo": "nema1502/tinkazo",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 49 of 49 other markdown files read)"
+		},
+		{
+			"file": "turbolong",
+			"repo": "Dgetsylver/TurboLong",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 35 of 35 other markdown files read)"
+		},
+		{
+			"file": "veilpay",
+			"repo": "armsves/veilpay",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 1 of 1 other markdown files read)"
+		},
+		{
+			"file": "x402-stellar-ticket-gating",
+			"repo": "nicolasguasca1/x402-stellar-ticket-gating",
+			"reason": "the repo answers not found, so its own text cannot be read"
+		},
+		{
+			"file": "x402git-stellar",
+			"repo": "pcmarts/x402git-stellar",
+			"reason": "its own text does not name HackMeridian (README, name, description, topics and 0 of 0 other markdown files read)"
+		},
+		{
+			"file": "xoracle",
+			"repo": "elmersaid/xoracle",
+			"reason": "the repo answers not found, so its own text cannot be read"
+		}
+	],
+	"contractsLeft": [
+		{
+			"file": "hackmeridian2026",
+			"id": "CA27S6FTSNZVVRYGYPMLSKXXR5LDGSK44ENN6HAEIZDSU5UZRPWGIGEZ",
+			"reason": "the cited file: read at HEAD, the id is not in it"
+		},
+		{
+			"file": "hackmeridian2026",
+			"id": "CBTTMKLJKBIMOJCLG3KBZFDKEH5OJMAGZR2NCHE2GF7NN5TPFJ5B4FIB",
+			"reason": "the cited file: read at HEAD, the id is not in it"
+		},
+		{
+			"file": "hackmeridian2026",
+			"id": "CDONN5PWL4UWU4H5QUE7LBWC3MPIR3GSVGTQHLKB7LHF2OOWVJBKVK5P",
+			"reason": "the cited file: read at HEAD, the id is not in it"
+		},
+		{
+			"file": "writz",
+			"id": "CABF7VK7F25ZGDLV6EWSAU3NYQYKDQNDSJIISDMDZAUASMSXUADSHZGG",
+			"reason": "the cited file: read at HEAD, the id is not in it"
+		}
+	]
+}

@@ -25,6 +25,10 @@
  * these hits land in the `probe` bucket, not demand mining.
  */
 
+import {
+	INDEX_BYTES_RED,
+	indexSizeVerdict,
+} from "../src/lib/builds-index-size";
 import { RESOLVABLE_PROJECT_STATUSES } from "../src/lib/project-status";
 import { type NightlyFailure, writeNightlyFindings } from "./nightly-findings";
 
@@ -565,6 +569,30 @@ async function productModelHolds() {
 	}
 }
 
+// ── 7. the builds index fits Next's cache ───────────────────────────────
+// Next caches the submissions index as one item of at most 2 MB; past it the
+// set fails with no error and every request rebuilds it from the store.
+// /api/status serves its measured size.
+async function buildsIndexFits() {
+	console.log(`\n◆ builds index size (red above ${INDEX_BYTES_RED} bytes)`);
+	const { body } = await getJson("/api/status");
+	const row = (body?.sources ?? []).find(
+		(s: { name?: string }) => s?.name === "hackathonBuilds",
+	);
+	const verdict = indexSizeVerdict(row?.indexBytes);
+	if (verdict === "could-not-check") {
+		unchecked++;
+		console.log(
+			"  ? builds index size: /api/status served none (could not check)",
+		);
+	} else if (verdict === "red")
+		bad(
+			"builds index size",
+			`${row.indexBytes} bytes, over ${INDEX_BYTES_RED}: near Next's 2 MB cache item limit, past which every request rebuilds the index from the store`,
+		);
+	else ok(`builds index ${row.indexBytes} bytes, under ${INDEX_BYTES_RED}`);
+}
+
 (async () => {
 	console.log(`Live canary against ${BASE}`);
 	await silentEmpty();
@@ -573,6 +601,7 @@ async function productModelHolds() {
 	await everyPageRenders();
 	await totalIsLimitIndependent();
 	await productModelHolds();
+	await buildsIndexFits();
 	console.log(
 		`\n${passes} passed, ${failures} failed, ${unchecked} could not check`,
 	);

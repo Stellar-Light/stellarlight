@@ -1,7 +1,11 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HACKPROOF_BUILDS } from "@/data/curated-builds";
+import { CURATED_HACKATHONS } from "@/data/curated-hackathons";
+import { curatedFacts } from "@/lib/curated-import";
 import type { IndexedBuild } from "@/lib/hackathon-builds";
 import { spec } from "@/lib/openapi-spec";
+import type { HackathonBuild } from "@/payload-types";
 import {
 	responseSchema,
 	undeclaredInServed,
@@ -852,5 +856,79 @@ describe("GET /api/hackathons/builds reranks hybrid results", () => {
 		const body = await get("kept quiet", "keyword");
 		expect(body.meta.reranked).toBeUndefined();
 		expect(fetch).not.toHaveBeenCalled();
+	});
+});
+
+describe("GET /api/hackathons/builds rows of a partial list", () => {
+	it("serve why each is stored, its checked contracts and the file that names a placement", async () => {
+		const { getHackathonBuildsIndex, indexedFromStored } = await import(
+			"@/lib/hackathon-builds"
+		);
+		const ev = CURATED_HACKATHONS.find((h) => h.uname === "hackmeridian-2026");
+		if (!ev) throw new Error("hackmeridian-2026 is not curated");
+		vi.mocked(getHackathonBuildsIndex).mockResolvedValueOnce(
+			HACKPROOF_BUILDS.map((b) =>
+				indexedFromStored({
+					...(curatedFacts(b, ev) as unknown as HackathonBuild),
+					id: b.id,
+					firstSeenAt: "2026-11-04T00:00:00.000Z",
+					lastSeenAt: "2026-11-04T00:00:00.000Z",
+					updatedAt: "2026-11-04T00:00:00.000Z",
+					createdAt: "2026-11-04T00:00:00.000Z",
+				}),
+			),
+		);
+		// Contracts are not in the cached index: the route reads the page's
+		// from the store.
+		const { getPayloadSafe } = await import("@/lib/payload-client");
+		const stored = HACKPROOF_BUILDS.map((b) => ({
+			entryKey: `${b.id}@hackmeridian-2026`,
+			contracts: b.contracts,
+			contractsCheckedAt: b.contractsCheckedAt,
+		}));
+		const contractReads: unknown[] = [];
+		vi.mocked(getPayloadSafe).mockResolvedValueOnce({
+			find: async (a: { select?: Record<string, unknown> }) => {
+				contractReads.push(a.select);
+				return { docs: a.select?.contracts ? stored : [] };
+			},
+		} as never);
+		const { GET } = await import("../route");
+		const res = await GET(
+			new NextRequest(
+				"https://x.test/api/hackathons/builds?hackathon=hackmeridian-2026&limit=100",
+			),
+		);
+		expect(res.status).toBe(200);
+		const body = await res.json();
+		const rows = body.builds as Array<Record<string, unknown>>;
+		expect(body.meta.counts.matched).toBe(97);
+		expect(rows.every((r) => r.entryBasis)).toBe(true);
+		// Winners first, each with the file that names its placement.
+		expect(rows.slice(0, 6).every((r) => r.isWinner && r.winnerSource)).toBe(
+			true,
+		);
+		expect(rows.filter((r) => r.winnerSource)).toHaveLength(6);
+		// Every row was checked: its kept contracts, [] when none passed,
+		// read from the store in one read.
+		expect(contractReads).toEqual([
+			{ entryKey: true, contracts: true, contractsCheckedAt: true },
+		]);
+		expect(rows.every((r) => Array.isArray(r.contracts))).toBe(true);
+		expect(
+			rows.reduce((n, r) => n + (r.contracts as unknown[]).length, 0),
+		).toBe(
+			HACKPROOF_BUILDS.reduce((n, b) => n + (b.contracts?.length ?? 0), 0),
+		);
+		expect(body.meta.warnings).toEqual([
+			"the stored rows of hackmeridian-2026 are a partial list from a source other than the organizer (97 rows, coverage partial), not its field, whose size and mix are unknown: its rows are counted and no share is computed over them",
+		]);
+		expect(
+			undeclaredInServed(
+				spec,
+				responseSchema(spec, "/api/hackathons/builds"),
+				body,
+			),
+		).toEqual([]);
 	});
 });
