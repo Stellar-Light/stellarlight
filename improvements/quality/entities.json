@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-08T12:27:37.354Z",
+ "generatedAt": "2026-11-08T14:28:01.001Z",
  "surfaces": [
   {
    "surface": "code",
@@ -9581,11 +9581,11 @@
     },
     {
      "label": "slowing",
-     "count": 1169
+     "count": 1170
     },
     {
      "label": "active",
-     "count": 970
+     "count": 969
     },
     {
      "label": "unknown",

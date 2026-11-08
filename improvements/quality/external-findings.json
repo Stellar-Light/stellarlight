@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-07T14:18:53.671Z",
+ "generatedAt": "2026-11-08T14:28:11.015Z",
  "consumer": "stellar-experimental/stellar-raven",
  "definition": "Defects filed against this service by stellar-raven, its largest agent consumer, from that project's own evaluation battery. These carry more signal than our internal detectors because the answer key is not ours. Status is whatever THEIR record says, never our opinion of it.",
  "counts": {
@@ -7,7 +7,7 @@
   "declined-upstream": 1
  },
  "ourResponse": {
-  "fixShipped": 10,
+  "fixShipped": 11,
   "fixShippedIds": [
    "sls-024",
    "sls-029",
@@ -18,11 +18,12 @@
    "sls-102",
    "sls-107",
    "sls-112",
+   "sls-113",
    "sls-114"
   ],
   "fixApplicable": 13,
   "declined": 1,
-  "distinctIssuesClosed": 10,
+  "distinctIssuesClosed": 11,
   "scoredBy": "our own linked GitHub issue state. This is NOT the consumer's verdict and must never be rendered as one.",
   "note": "A record can read reported-upstream on their side while our linked issue is closed: we shipped the fix and their re-verification has not run yet. Neither status is allowed to speak for the other."
  },
@@ -203,8 +204,8 @@
    "ourIssue": 1905,
    "ourResponse": {
     "issue": 1905,
-    "state": "open",
-    "closedAt": null,
+    "state": "closed",
+    "closedAt": "2026-11-07",
     "url": "https://github.com/Stellar-Light/stellarlight/issues/1905"
    }
   },
