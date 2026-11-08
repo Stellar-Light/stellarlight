@@ -81,7 +81,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.8092271089553833,
+      "topScore": 0.8090511560440063,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -585,7 +585,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.79648756980896,
+      "topScore": 0.798236608505249,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -593,7 +593,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Cross-Chain USDC Transfers with CCTP"
+      "sample": "Smart Contract Asset Interoperability"
     },
     {
       "id": "bridge-solana-to-stellar",
@@ -621,7 +621,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.7094740867614746,
+      "topScore": 0.7101369500160217,
       "urlOk": null,
       "scoreOk": null,
       "top1Ok": null,
@@ -657,7 +657,7 @@
       "matched": true,
       "missingRegexes": [],
       "forbiddenHits": [],
-      "topScore": 0.6354921112478152,
+      "topScore": 0.6591282594979,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -665,7 +665,7 @@
       "thin": true,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Software Versions"
+      "sample": "Stellar Weekly Roundup: Week of Nov 6, 2026"
     },
     {
       "id": "recent-mainnet-upgrade",
@@ -677,7 +677,7 @@
         "protocol\\s*2[6-9]|zipper"
       ],
       "forbiddenHits": [],
-      "topScore": 0.7108401656150818,
+      "topScore": 0.6725113687538802,
       "urlOk": null,
       "scoreOk": true,
       "top1Ok": null,
@@ -685,7 +685,7 @@
       "thin": false,
       "junk": 0,
       "badTitle": 0,
-      "sample": "Bell, Protocol 30 Upgrade Guide"
+      "sample": "Stellar Weekly Roundup: Week of Nov 6, 2026"
     },
     {
       "id": "blend-incident-facts",
@@ -907,11 +907,13 @@
       "id": "soroban-hosterror-decode",
       "category": "soroban-dev",
       "mode": "research",
-      "status": "PASS",
-      "matched": true,
-      "missingRegexes": [],
+      "status": "FAIL",
+      "matched": false,
+      "missingRegexes": [
+        "LimitExceeded"
+      ],
       "forbiddenHits": [],
-      "topScore": 0.7502743005752563,
+      "topScore": 0.7481234073638916,
       "urlOk": true,
       "scoreOk": true,
       "top1Ok": null,
@@ -958,5 +960,5 @@
       "sample": "Publish events from a smart contract"
     }
   ],
-  "generatedAt": "2026-11-05T13:31:52Z"
+  "generatedAt": "2026-11-08T12:15:22Z"
 }
