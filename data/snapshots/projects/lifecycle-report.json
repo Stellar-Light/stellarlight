@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-11-07T11:44:11.905Z",
+	"generatedAt": "2026-11-08T11:56:42.887Z",
 	"source": "data/snapshots/projects/*.json.gz",
-	"latestSnapshot": "2026-11-07",
+	"latestSnapshot": "2026-11-08",
 	"historyStart": "2026-10-02",
-	"snapshots": 37,
+	"snapshots": 38,
 	"definitions": {
 		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 		"markedLive": "Status Live, on any evidence.",
@@ -14,27 +14,27 @@
 	"groups": {
 		"all": {
 			"listed": 1008,
-			"launched": 945,
-			"markedLive": 851,
-			"liveOnStrongEvidence": 409,
-			"observedActive": 306,
-			"noActivityData": 415
+			"launched": 937,
+			"markedLive": 834,
+			"liveOnStrongEvidence": 405,
+			"observedActive": 301,
+			"noActivityData": 413
 		},
 		"scf": {
-			"listed": 613,
-			"launched": 580,
-			"markedLive": 553,
-			"liveOnStrongEvidence": 243,
-			"observedActive": 202,
-			"noActivityData": 208
+			"listed": 623,
+			"launched": 582,
+			"markedLive": 550,
+			"liveOnStrongEvidence": 246,
+			"observedActive": 200,
+			"noActivityData": 210
 		},
 		"nonScf": {
-			"listed": 395,
-			"launched": 365,
-			"markedLive": 298,
-			"liveOnStrongEvidence": 166,
-			"observedActive": 104,
-			"noActivityData": 207
+			"listed": 385,
+			"launched": 355,
+			"markedLive": 284,
+			"liveOnStrongEvidence": 159,
+			"observedActive": 101,
+			"noActivityData": 203
 		}
 	},
 	"cohorts": {
@@ -50,21 +50,21 @@
 			},
 			{
 				"cohort": "rounds 16-30",
-				"listed": 239,
-				"launched": 231,
-				"markedLive": 216,
-				"liveOnStrongEvidence": 92,
-				"observedActive": 67,
-				"noActivityData": 68
+				"listed": 242,
+				"launched": 232,
+				"markedLive": 212,
+				"liveOnStrongEvidence": 93,
+				"observedActive": 66,
+				"noActivityData": 69
 			},
 			{
 				"cohort": "rounds 31-45",
-				"listed": 283,
-				"launched": 260,
-				"markedLive": 256,
-				"liveOnStrongEvidence": 112,
-				"observedActive": 110,
-				"noActivityData": 105
+				"listed": 290,
+				"launched": 261,
+				"markedLive": 257,
+				"liveOnStrongEvidence": 114,
+				"observedActive": 109,
+				"noActivityData": 106
 			},
 			{
 				"cohort": "round unknown",
@@ -80,20 +80,20 @@
 			{
 				"cohort": "2025",
 				"listed": 99,
-				"launched": 99,
-				"markedLive": 93,
+				"launched": 98,
+				"markedLive": 91,
 				"liveOnStrongEvidence": 44,
 				"observedActive": 36,
-				"noActivityData": 54
+				"noActivityData": 53
 			},
 			{
 				"cohort": "2026",
-				"listed": 296,
-				"launched": 266,
-				"markedLive": 205,
-				"liveOnStrongEvidence": 122,
-				"observedActive": 68,
-				"noActivityData": 153
+				"listed": 286,
+				"launched": 257,
+				"markedLive": 193,
+				"liveOnStrongEvidence": 115,
+				"observedActive": 65,
+				"noActivityData": 150
 			}
 		]
 	},
@@ -106,7 +106,17 @@
 			"stellar-atlas",
 			"zenex"
 		],
-		"newlyInactive": [],
+		"newlyInactive": [
+			"cables",
+			"clob",
+			"fx-swap",
+			"grip",
+			"ichi",
+			"interstellar",
+			"wombat",
+			"xlmeme",
+			"zkcross"
+		],
 		"revived": []
 	},
 	"survival": {
