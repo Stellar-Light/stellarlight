@@ -5,7 +5,10 @@
  * repo — 27 provably wrong against 4 provably right, all published under a
  * signal named "verified-contract-id". These are those cases. */
 import { describe, expect, it, vi } from "vitest";
-import { verifyMainnetContract } from "../../../scripts/scan/fetch-repo-code";
+import {
+	keepStoredContract,
+	verifyMainnetContract,
+} from "../../../scripts/scan/fetch-repo-code";
 
 const ID_A = `C${"A".repeat(55)}`;
 const ID_B = `C${"B".repeat(55)}`;
@@ -89,12 +92,73 @@ describe("verifyMainnetContract ownership", () => {
 		).toEqual({ id: ID_B, basis: "self-validated" });
 	});
 
-	it("returns null on 429 rather than falling through to another candidate", async () => {
+	it("answers could-not-check on 429 rather than falling through to another candidate", async () => {
 		// Half of a 137-row audit came back 429 in one burst. Could-not-look
 		// must not read as could-not-find, or a worse id gets promoted.
 		stub({ [ID_A]: { contract: ID_A }, [ID_B]: { contract: ID_B } }, 429);
+		expect(await verifyMainnetContract(`${ID_A} ${ID_B}`, "acme/vault")).toBe(
+			"could-not-check",
+		);
+	});
+});
+
+// 2026-11-06: stellar.expert's API went paid and answers 402. The scanner read
+// that as "no such contract" and wrote null over six verified ids
+// (Lobster-Protocol/stellar-integrations, Eras256/Nirium, Tansu, Reflector's
+// connector, Skyhitz, Trion), and lowered their code depth with them.
+describe("verifyMainnetContract: a check that did not run is not an answer", () => {
+	it("reads a 402 (paid API) as could-not-check, never as no contract", async () => {
+		stub({ [ID_A]: { contract: ID_A } }, 402);
+		expect(await verifyMainnetContract(`ours: ${ID_A}`, "acme/vault")).toBe(
+			"could-not-check",
+		);
+	});
+
+	it("reads a network failure as could-not-check, never letting a later id stand in", async () => {
+		vi.stubGlobal("fetch", async (url: string) => {
+			if (String(url).endsWith(ID_A)) throw new Error("socket hang up");
+			return { ok: true, status: 200, json: async () => ({ contract: ID_B }) };
+		});
+		expect(
+			await verifyMainnetContract(`${ID_A} then ${ID_B}`, "acme/vault"),
+		).toBe("could-not-check");
+	});
+
+	it("still reads a 404 for every id as a checked answer: no contract", async () => {
+		stub({});
 		expect(
 			await verifyMainnetContract(`${ID_A} ${ID_B}`, "acme/vault"),
 		).toBeNull();
+	});
+});
+
+describe("keepStoredContract: the scan scores and writes the stored id when its check did not run", () => {
+	const fresh = (unread: boolean) => ({
+		mainnetContractUnread: unread,
+		depthInput: {
+			scalars: { mainnetContractId: null, mainnetContractBasis: null },
+		} as never as Parameters<typeof keepStoredContract>[0]["depthInput"],
+	});
+	const stored = {
+		mainnetContractId: ID_A,
+		mainnetContractBasis: "published" as const,
+	};
+
+	it("puts the stored id and basis back when the check could not run", () => {
+		const r = fresh(true);
+		expect(keepStoredContract(r, stored)).toBe(true);
+		expect(r.depthInput.scalars).toMatchObject({
+			mainnetContractId: ID_A,
+			mainnetContractBasis: "published",
+		});
+	});
+
+	it("leaves a check that ran alone, even when it found nothing", () => {
+		const r = fresh(false);
+		expect(keepStoredContract(r, stored)).toBe(false);
+		expect(r.depthInput.scalars).toMatchObject({
+			mainnetContractId: null,
+			mainnetContractBasis: null,
+		});
 	});
 });

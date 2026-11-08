@@ -44,7 +44,12 @@ import {
 	verifyWrites,
 } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
-import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
+import {
+	createGh,
+	fetchRepoCode,
+	keepStoredContract,
+	RateLimitError,
+} from "./fetch-repo-code";
 import { poolWarning, SCANNED_POOL_CAP } from "./scan-repo-code-pool";
 import { errorToWrite, signalsToWrite } from "./write-shape";
 
@@ -283,6 +288,8 @@ async function main() {
 				lastCommitAt: true,
 				codeScannedAt: true,
 				triageTags: true,
+				mainnetContractId: true,
+				mainnetContractBasis: true,
 			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
@@ -341,6 +348,8 @@ async function main() {
 						lastCommitAt: true,
 						codeScannedAt: true,
 						triageTags: true,
+						mainnetContractId: true,
+						mainnetContractBasis: true,
 					},
 				});
 		// Page through the unscanned pool until the wave is FULL of scannable
@@ -375,6 +384,8 @@ async function main() {
 					codeScanState: true,
 					lastCommitAt: true,
 					triageTags: true,
+					mainnetContractId: true,
+					mainnetContractBasis: true,
 				},
 			});
 			unscannedTotal = res.totalDocs;
@@ -433,6 +444,7 @@ async function main() {
 	let contractReposWithIface = 0;
 	let errored = 0;
 	let incomplete = 0;
+	let contractUnread = 0;
 	let budgetStopped = false;
 	const lifts: {
 		full: string;
@@ -458,6 +470,10 @@ async function main() {
 		try {
 			const r = await fetchRepoCode(gh, full);
 			callsUsed += (r?.pathsFetched ?? 2) + 5; // tree+meta+tags+readme overhead
+			// A mainnet check that could not run keeps what the last one found,
+			// for the depth score and the write alike (stellar.expert went paid
+			// on 2026-11-06 and its 402s erased six verified ids).
+			if (r && keepStoredContract(r, doc)) contractUnread++;
 			// Canonical platform repos never need to PROVE they're Stellar —
 			// they ARE Stellar. The dep-based proof detector is self-
 			// referentially blind to them (js-stellar-sdk depends on
@@ -699,6 +715,10 @@ async function main() {
 	console.log(
 		"tier/unverified/repoScore writes: 0 (by construction — write-shape.ts)",
 	);
+	if (contractUnread)
+		console.log(
+			`mainnet contract check could not run for ${contractUnread} repo(s): their stored ids were kept`,
+		);
 	if (contractRepos)
 		console.log(
 			`interface coverage: ${contractReposWithIface}/${contractRepos} contract repos in this wave extracted ≥1 signature${contractReposWithIface < contractRepos ? " — the gap rows are extraction misses worth a look" : ""}`,

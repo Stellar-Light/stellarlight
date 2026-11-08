@@ -542,13 +542,17 @@ export interface RepoCodeResult {
 	/** Blobs served by raw.githubusercontent.com (free of the REST pool). */
 	rawFetched: number;
 	contractCrates: number;
+	/** The mainnet check could not run, so depthInput's contract fields are
+	 * unknown, not empty: a writer keeps what it has stored. */
+	mainnetContractUnread: boolean;
 }
 
 /** Verify a README-claimed contract id actually exists on Stellar MAINNET via
- * stellar.expert. Positive-only + fail-open: any network/API problem returns
- * null (never penalizes). Guards: only strkey-shaped ids are probed, and the
- * response must ECHO the requested id — the bare /contract/ endpoint answers
- * 200 with a LIST, so status alone would false-verify an empty/garbage id. */
+ * stellar.expert. A 404 is an answer (no such contract); any other failure
+ * returns CONTRACT_UNREAD, never null: null is written over the stored id.
+ * Guards: only strkey-shaped ids are probed, and the response must ECHO the
+ * requested id — the bare /contract/ endpoint answers 200 with a LIST, so
+ * status alone would false-verify an empty/garbage id. */
 export type MainnetContract = {
 	id: string;
 	/** How we know the address belongs to THIS repo.
@@ -557,6 +561,28 @@ export type MainnetContract = {
 	 *                   provably isn't theirs, but nothing proves it is. */
 	basis: "self-validated" | "published";
 };
+
+/** The mainnet check could not run: stellar.expert answered other than 200
+ * or 404 (402 since 2026-11-06, when its API went paid), or not at all. Not a
+ * finding that the repo has no contract: 169 rescans from then wrote null over
+ * six verified ids, Reflector's and Tansu's among them. */
+export const CONTRACT_UNREAD = "could-not-check" as const;
+
+/** When this scan's mainnet check could not run, score and write with the
+ * stored contract fields instead of its empty ones. Returns whether it did. */
+export function keepStoredContract(
+	r: Pick<RepoCodeResult, "mainnetContractUnread" | "depthInput">,
+	stored: {
+		mainnetContractId?: string | null;
+		mainnetContractBasis?: MainnetContract["basis"] | null;
+	},
+): boolean {
+	if (!r.mainnetContractUnread) return false;
+	r.depthInput.scalars.mainnetContractId = stored.mainnetContractId ?? null;
+	r.depthInput.scalars.mainnetContractBasis =
+		stored.mainnetContractBasis ?? null;
+	return true;
+}
 
 /** Resolve the mainnet contract a repo actually OWNS from the ids in its README.
  *
@@ -580,7 +606,7 @@ export type MainnetContract = {
 export async function verifyMainnetContract(
 	readmeText: string | null,
 	repoFullName?: string | null,
-): Promise<MainnetContract | null> {
+): Promise<MainnetContract | null | typeof CONTRACT_UNREAD> {
 	const ids = [...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? [])].slice(
 		0,
 		3,
@@ -603,11 +629,17 @@ export async function verifyMainnetContract(
 			// negative would silently promote a worse candidate id in its place.
 			if (res.status === 429 || res.status >= 500) {
 				clearTimeout(t);
-				return null;
+				return CONTRACT_UNREAD;
+			}
+			// A 404 is stellar.expert saying it has no such contract; any other
+			// refusal (402 Payment Required, 401, 403) is a check that did not run.
+			if (res.status === 404) {
+				clearTimeout(t);
+				continue;
 			}
 			if (!res.ok) {
 				clearTimeout(t);
-				continue;
+				return CONTRACT_UNREAD;
 			}
 			// finding 6: clearing on header-arrival left the BODY read unbounded
 			// (undici default 300s) — a stalling stellar.expert could hang a wave.
@@ -633,7 +665,9 @@ export async function verifyMainnetContract(
 			}
 			fallback ??= { id, basis: "published" };
 		} catch {
-			// fail-open: unverifiable is not unverified-negative
+			// Unverifiable is not unverified-negative, and a later id must not
+			// stand in for one that could not be read.
+			return CONTRACT_UNREAD;
 		}
 	}
 	return fallback;
@@ -725,7 +759,9 @@ export async function fetchRepoCode(
 				acct,
 			)
 		: null;
-	const mainnetContract = await verifyMainnetContract(readmeText, full);
+	const checked = await verifyMainnetContract(readmeText, full);
+	const mainnetContractUnread = checked === CONTRACT_UNREAD;
+	const mainnetContract = mainnetContractUnread ? null : checked;
 	const mainnetContractId = mainnetContract?.id ?? null;
 	const mainnetContractBasis = mainnetContract?.basis ?? null;
 	const tagsRes = await (
@@ -792,5 +828,6 @@ export async function fetchRepoCode(
 		pathsFetched: acct.api,
 		rawFetched: acct.raw,
 		contractCrates: contractCrateDirs.length,
+		mainnetContractUnread,
 	};
 }
