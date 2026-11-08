@@ -9,6 +9,7 @@
  * Cargo.tomls on a SEPARATE budget so they never starve the source-file budget.
  */
 
+import { StrKey } from "@stellar/stellar-sdk";
 import type { DepthBlob, DepthInput } from "../../src/lib/code-depth";
 import {
 	type CodeFacts,
@@ -17,7 +18,6 @@ import {
 	type Blob as SigBlob,
 	type StellarProof,
 } from "../../src/lib/code-signals";
-import { StrKey } from "@stellar/stellar-sdk";
 import { TEMPLATE_NAME_RE } from "../../src/lib/repo-grade";
 import { type DepBlob, extractStellarDeps } from "../../src/lib/stellar-deps";
 
