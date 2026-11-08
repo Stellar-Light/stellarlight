@@ -274,9 +274,11 @@ answers 402 (refresh-rwa's first red run is 19:39Z).
   trionlabs/stellar-8004. Probe: GET /api/contracts?limit=100 then
   &offset=100 lists 129 rows (135 on 2026-11-04) and none of the six. Each
   README still cites a live mainnet WASM contract (getLedgerEntries on
-  mainnet.sorobanrpc.com). The scanner fix keeps stored ids from now on;
-  restoring these six needs stellar.expert access or an owner-approved write
-  with basis `published` (Nirium and Lobster were `published` on 11-04).
+  mainnet.sorobanrpc.com). The scanner fix keeps stored ids from now on,
+  and the check now reads mainnet RPC, the WASM's SEP-55 source_repo and
+  GitHub attestations instead of stellar.expert, so a rescan of each repo
+  (`--only`, dry then execute) restores them. Measured 2026-11-07: Tansu
+  and hitz-gravity read self-validated, the other four published.
 - refresh-rwa records "stellar.expert returned no asset record" for a 402.
   Its numbers are kept and marked unmeasured, so only the note is wrong.
 - The scan pools do not select `primaryLanguage`, so the allowlist pin in
