@@ -4,14 +4,19 @@
  * contracts and 8 were contracts stellar.expert attributes to a different
  * repo — 27 provably wrong against 4 provably right, all published under a
  * signal named "verified-contract-id". These are those cases. */
+import { StrKey } from "@stellar/stellar-sdk";
 import { describe, expect, it, vi } from "vitest";
 import {
 	keepStoredContract,
+	mainnetCheckUnread,
 	verifyMainnetContract,
 } from "../../../scripts/scan/fetch-repo-code";
 
-const ID_A = `C${"A".repeat(55)}`;
-const ID_B = `C${"B".repeat(55)}`;
+// Real contract strkeys: the scanner probes only ids whose checksum holds.
+const ID_A = StrKey.encodeContract(Buffer.alloc(32, 1));
+const ID_B = StrKey.encodeContract(Buffer.alloc(32, 2));
+// The id's shape with a broken checksum, as a typo or a truncation leaves it.
+const BAD = `C${"A".repeat(55)}`;
 
 /** Serve stellar.expert responses by contract id. */
 function stub(byId: Record<string, unknown>, status = 200) {
@@ -124,11 +129,42 @@ describe("verifyMainnetContract: a check that did not run is not an answer", () 
 		).toBe("could-not-check");
 	});
 
+	it("never probes an id whose checksum fails, so a typo cannot end the check as unread", async () => {
+		const asked: string[] = [];
+		vi.stubGlobal("fetch", async (url: string) => {
+			const id = String(url).split("/").pop() as string;
+			asked.push(id);
+			if (id === BAD) return { ok: false, status: 400, json: async () => ({}) };
+			return { ok: true, status: 200, json: async () => ({ contract: id }) };
+		});
+		expect(
+			await verifyMainnetContract(`${BAD} then ${ID_B}`, "acme/vault"),
+		).toEqual({ id: ID_B, basis: "published" });
+		expect(asked).toEqual([ID_B]);
+	});
+
 	it("still reads a 404 for every id as a checked answer: no contract", async () => {
 		stub({});
 		expect(
 			await verifyMainnetContract(`${ID_A} ${ID_B}`, "acme/vault"),
 		).toBeNull();
+	});
+});
+
+describe("mainnetCheckUnread: when the scan's contract check did not run", () => {
+	it("is unread when the README exists but could not be read", () => {
+		expect(mainnetCheckUnread(true, null, null)).toBe(true);
+	});
+	it("is an answer when the repo has no README, so it cites no id", () => {
+		expect(mainnetCheckUnread(false, null, null)).toBe(false);
+	});
+	it("is an answer when the README was read and the check ran", () => {
+		expect(mainnetCheckUnread(true, "no ids here", null)).toBe(false);
+	});
+	it("is unread when stellar.expert could not answer", () => {
+		expect(mainnetCheckUnread(true, `ours ${ID_A}`, "could-not-check")).toBe(
+			true,
+		);
 	});
 });
 

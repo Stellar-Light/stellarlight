@@ -17,6 +17,7 @@ import {
 	type Blob as SigBlob,
 	type StellarProof,
 } from "../../src/lib/code-signals";
+import { StrKey } from "@stellar/stellar-sdk";
 import { TEMPLATE_NAME_RE } from "../../src/lib/repo-grade";
 import { type DepBlob, extractStellarDeps } from "../../src/lib/stellar-deps";
 
@@ -551,7 +552,7 @@ export interface RepoCodeResult {
  * stellar.expert. A 404 is an answer (no such contract); any other failure
  * returns CONTRACT_UNREAD, never null: null is written over the stored id.
  * Guards: only strkey-shaped ids are probed, and the response must ECHO the
- * requested id — the bare /contract/ endpoint answers 200 with a LIST, so
+ * requested id: the bare /contract/ endpoint answers 200 with a LIST, so
  * status alone would false-verify an empty/garbage id. */
 export type MainnetContract = {
 	id: string;
@@ -567,6 +568,17 @@ export type MainnetContract = {
  * finding that the repo has no contract: 169 rescans from then wrote null over
  * six verified ids, Reflector's and Tansu's among them. */
 export const CONTRACT_UNREAD = "could-not-check" as const;
+
+/** The mainnet check did not run: the README exists but could not be read,
+ * or stellar.expert could not answer. A repo with no README cites no id, so
+ * its null is an answer. */
+export function mainnetCheckUnread(
+	readmeListed: boolean,
+	readmeText: string | null,
+	checked: MainnetContract | null | typeof CONTRACT_UNREAD,
+): boolean {
+	return (readmeListed && readmeText === null) || checked === CONTRACT_UNREAD;
+}
 
 /** When this scan's mainnet check could not run, score and write with the
  * stored contract fields instead of its empty ones. Returns whether it did. */
@@ -607,10 +619,11 @@ export async function verifyMainnetContract(
 	readmeText: string | null,
 	repoFullName?: string | null,
 ): Promise<MainnetContract | null | typeof CONTRACT_UNREAD> {
-	const ids = [...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? [])].slice(
-		0,
-		3,
-	);
+	// A shape with a bad checksum is no contract id: never probe it, so a typo
+	// can neither end the check as unread nor take one of the three slots.
+	const ids = [...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? [])]
+		.filter((id) => StrKey.isValidContract(id))
+		.slice(0, 3);
 	const own = (repoFullName ?? "").toLowerCase();
 	let fallback: MainnetContract | null = null;
 	for (const id of ids) {
@@ -760,8 +773,13 @@ export async function fetchRepoCode(
 			)
 		: null;
 	const checked = await verifyMainnetContract(readmeText, full);
-	const mainnetContractUnread = checked === CONTRACT_UNREAD;
-	const mainnetContract = mainnetContractUnread ? null : checked;
+	const mainnetContractUnread = mainnetCheckUnread(
+		!!readmeEntry,
+		readmeText,
+		checked,
+	);
+	const mainnetContract =
+		mainnetContractUnread || checked === CONTRACT_UNREAD ? null : checked;
 	const mainnetContractId = mainnetContract?.id ?? null;
 	const mainnetContractBasis = mainnetContract?.basis ?? null;
 	const tagsRes = await (
