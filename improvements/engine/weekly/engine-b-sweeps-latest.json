@@ -156,21 +156,21 @@
   },
   "s2_field_population": {
     "Infrastructure": {
-      "shortDescription": "98% (202/206)",
-      "types": "99% (204/206)",
-      "supportedNetworks": "55% (113/206)",
-      "logoUrl": "76% (157/206)"
+      "shortDescription": "98% (203/207)",
+      "types": "99% (205/207)",
+      "supportedNetworks": "55% (114/207)",
+      "logoUrl": "76% (157/207)"
     },
     "Tooling": {
       "shortDescription": "97% (179/184)",
       "types": "100% (184/184)",
-      "logoUrl": "82% (151/184)"
+      "logoUrl": "83% (152/184)"
     },
     "User-Facing App": {
-      "shortDescription": "99% (401/406)",
-      "types": "100% (404/406)",
-      "supportedNetworks": "74% (300/406)",
-      "logoUrl": "85% (345/406)"
+      "shortDescription": "99% (402/407)",
+      "types": "100% (405/407)",
+      "supportedNetworks": "75% (305/407)",
+      "logoUrl": "85% (346/407)"
     },
     "Asset": {
       "shortDescription": "33% (12/36)",
@@ -181,9 +181,9 @@
     "Protocol/Contract": {
       "shortDescription": "100% (158/158)",
       "types": "99% (157/158)",
-      "supportedNetworks": "77% (122/158)",
-      "logoUrl": "80% (127/158)",
-      "tvlUSD": "9% (14/158)"
+      "supportedNetworks": "78% (123/158)",
+      "logoUrl": "81% (128/158)",
+      "tvlUSD": "10% (16/158)"
     },
     "Anchor": {
       "shortDescription": "93% (14/15)",
@@ -363,20 +363,20 @@
     ]
   },
   "s4_staleness": {
-    "liveNoDatedSignal": 383,
-    "liveStale365": 135,
+    "liveNoDatedSignal": 378,
+    "liveStale365": 134,
     "sample": [
       {
         "slug": "nodies",
         "name": "Nodies",
-        "ageDays": 608,
+        "ageDays": 615,
         "hasDated": true,
         "tvlUSD": null
       },
       {
         "slug": "band",
         "name": "Band",
-        "ageDays": 976,
+        "ageDays": 983,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -418,7 +418,7 @@
       {
         "slug": "lightecho",
         "name": "Lightecho",
-        "ageDays": 419,
+        "ageDays": 426,
         "hasDated": true,
         "tvlUSD": null
       },
@@ -508,6 +508,6 @@
       }
     ]
   },
-  "generatedAt": "2026-11-01T15:58:01Z",
+  "generatedAt": "2026-11-08T16:00:37Z",
   "evalKey": "engine-b-sweeps"
 }
