@@ -1,8 +1,8 @@
 {
-	"generatedAt": "2026-11-03T15:28:51.352Z",
+	"generatedAt": "2026-11-10T15:48:08.418Z",
 	"basis": "archived repos from the public repos API (isArchived=true), restricted to the curated pool (project-linked or repoScore >= 60), compared against REPO_SUPERSESSIONS keys",
-	"archivedTotal": 282,
-	"archivedInPool": 57,
+	"archivedTotal": 289,
+	"archivedInPool": 64,
 	"covered": 40,
 	"missing": [
 		{
@@ -18,6 +18,12 @@
 			"url": "https://github.com/MetaMask/snap-stellar-wallet"
 		},
 		{
+			"fullName": "gateway-fm/open-privacy-suite",
+			"projectSlug": "gatewayfm",
+			"repoScore": 45,
+			"url": "https://github.com/gateway-fm/open-privacy-suite"
+		},
+		{
 			"fullName": "stellar/devrel-discord-bot",
 			"projectSlug": "stellar-development-foundation",
 			"repoScore": 44,
@@ -30,10 +36,40 @@
 			"url": "https://github.com/stellar/mcp-stellar-xdr"
 		},
 		{
+			"fullName": "Wadzzo2023/brand-wadzzo",
+			"projectSlug": "wadzzo",
+			"repoScore": 37,
+			"url": "https://github.com/Wadzzo2023/brand-wadzzo"
+		},
+		{
+			"fullName": "Wadzzo2023/wadzz0",
+			"projectSlug": "wadzzo",
+			"repoScore": 36,
+			"url": "https://github.com/Wadzzo2023/wadzz0"
+		},
+		{
 			"fullName": "tracefinance/frontend-challenge",
 			"projectSlug": "trace",
 			"repoScore": 26,
 			"url": "https://github.com/tracefinance/frontend-challenge"
+		},
+		{
+			"fullName": "Wadzzo2023/wadzzoWebAR-public",
+			"projectSlug": "wadzzo",
+			"repoScore": 23,
+			"url": "https://github.com/Wadzzo2023/wadzzoWebAR-public"
+		},
+		{
+			"fullName": "Wadzzo2023/express-wadzzo",
+			"projectSlug": "wadzzo",
+			"repoScore": 23,
+			"url": "https://github.com/Wadzzo2023/express-wadzzo"
+		},
+		{
+			"fullName": "equilibriumco/nebula",
+			"projectSlug": "quasar",
+			"repoScore": 22,
+			"url": "https://github.com/equilibriumco/nebula"
 		},
 		{
 			"fullName": "dfns/edwards-schnorr",
@@ -82,6 +118,12 @@
 			"projectSlug": "drips",
 			"repoScore": 11,
 			"url": "https://github.com/drips-network/ecosystems"
+		},
+		{
+			"fullName": "equilibriumco/quasar",
+			"projectSlug": "quasar",
+			"repoScore": 10,
+			"url": "https://github.com/equilibriumco/quasar"
 		},
 		{
 			"fullName": "bidalihq/commerce-sdk-android",
