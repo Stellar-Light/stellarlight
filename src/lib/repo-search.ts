@@ -281,9 +281,9 @@ export interface CodeVerified {
 	/** Public code-symbol surface (pub fn/type names) from the scanned sources —
 	 * what the repo IMPLEMENTS. Empty until a post-2026-07-08 scan. */
 	symbols: string[];
-	/** README contract id VERIFIED to exist on Stellar mainnet (stellar.expert
-	 * echo-check at scan time) — unfakeable deployment evidence; null when no
-	 * verified address. */
+	/** README contract id confirmed on Stellar mainnet at scan time (an RPC
+	 * read of its contract instance); existence, not ownership. Null when no
+	 * confirmed address. */
 	mainnetContractId: string | null;
 	/** Stellar SDK capability tags from the repo's JS/TS sources (tx-building,
 	 * signing, soroban-rpc, sep10-auth, wallet-kit, …) — what a dapp actually

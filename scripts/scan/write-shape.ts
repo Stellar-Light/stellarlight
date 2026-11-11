@@ -36,7 +36,7 @@ export interface SignalsInput {
 	sdkCapabilities: string[];
 	/** Evidence-only domain labels (src/lib/code-domains.ts deriveCodeDomains). */
 	codeDomains: string[];
-	/** README contract id VERIFIED on-chain via stellar.expert (fetch layer). */
+	/** README contract id confirmed on mainnet by an RPC read (fetch layer). */
 	mainnetContractId: string | null;
 	mainnetContractBasis?: "self-validated" | "published" | null;
 	/** Commit SHA the facts were computed at (provenance pin). */

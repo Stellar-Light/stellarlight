@@ -44,9 +44,10 @@ export interface DepthBlob {
 
 /** Repo-level scalars from the GraphQL query (all near-free). */
 export interface DepthScalars {
-	/** Mainnet contract id from the README VERIFIED to exist on-chain via
-	 * stellar.expert (fetch layer; null = none found or unverifiable). Unfakeable
-	 * positive evidence — an address string alone is cheap, a live contract isn't. */
+	/** Mainnet contract id from the README VERIFIED to exist on-chain by mainnet
+	 * RPC (fetch layer; null = none found; a check that could not run keeps the
+	 * stored id). Unfakeable positive evidence: an address string alone is
+	 * cheap, a live contract isn't. */
 	mainnetContractId?: string | null;
 	mainnetContractBasis?: "self-validated" | "published" | null;
 	isFork?: boolean;
@@ -636,8 +637,8 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 		1,
 		Math.max(input.scalars.releaseCount ?? 0, input.scalars.tagCount ?? 0) / 3,
 	);
-	// v3: on-chain-VERIFIED deployment (fetch layer checks stellar.expert) is
-	// worth ~3x a bare address mention — the address string is fakeable, the
+	// v3: on-chain-VERIFIED deployment (fetch layer checks mainnet RPC) is
+	// worth ~3x a bare address mention: the address string is fakeable, the
 	// live mainnet contract is not.
 	const addrMention = /\bC[A-Z2-7]{55}\b/.test(input.scalars.readmeText ?? "");
 	const deployedAddr = input.scalars.mainnetContractId

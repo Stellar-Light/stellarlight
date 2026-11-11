@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-11",
+		surfaces: ["api"],
+		version: "spec@1.9.128",
+		type: "fixed",
+		summary:
+			'A repo\'s mainnet contract id (`mainnetContractId`, and `contractId` and `contractBasis` on /api/contracts) is confirmed by reading Stellar mainnet directly instead of stellar.expert, whose API answers 402 since 2026-11-06. The scanner read those 402 answers as "no contract" and cleared verified ids: /api/contracts fell from 135 rows on 2026-11-04 to 128. A check that cannot run now keeps the stored id, as does an id whose instance the RPC no longer lists.',
+		detail:
+			"Existence is an RPC read of the contract instance. A Stellar Asset Contract is excluded. self-validated means the contract's WASM names the repo as its source (SEP-55 source_repo) and the repo holds a GitHub build attestation for that WASM; a build attested to another repo is excluded; anything else is published. The ids cleared since 2026-11-06 come back when their repos are rescanned.",
+	},
+	{
 		date: "2026-11-07",
 		surfaces: ["api", "mcp"],
 		version: "spec@1.9.127",

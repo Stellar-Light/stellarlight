@@ -8,7 +8,7 @@
  * registry (per-project reports + currency), and successions.
  *
  * MEMBERSHIP IS EVIDENCE-GATED: a row exists only when the scanner verified
- * a README-claimed contract id live on mainnet (stellar.expert echo-check)
+ * a README-claimed contract id live on mainnet (an RPC read of its instance)
  * OR enrich-onchain attributed real on-chain activity to the repo. No
  * self-declared registries, no directory prose. The set is small today and
  * grows exactly as fast as scans + weekly on-chain passes reach repos —

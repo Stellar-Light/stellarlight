@@ -205,9 +205,9 @@ export async function buildTrustReport(
 		signals.push("deep-code");
 	if ((usage?.contracts ?? 0) >= 1) signals.push("live-on-mainnet");
 	// "verified" has to mean verified. A resolvable address only proves the
-	// contract exists; self-validated is the only basis under which stellar.expert
-	// independently attributes it to THIS repo. Anything weaker publishes an
-	// address, which is a real but different claim.
+	// contract exists; self-validated is the only basis under which the build
+	// itself (SEP-55 source_repo, GitHub-attested) names THIS repo. Anything
+	// weaker publishes an address, which is a real but different claim.
 	if (d.mainnetContractId)
 		signals.push(
 			d.mainnetContractBasis === "self-validated"

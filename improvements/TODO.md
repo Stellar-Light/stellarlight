@@ -263,6 +263,29 @@ item is fixed. API base URL: https://www.stellarlight.xyz.
 
 ## Next
 
+Found on 2026-11-07 while measuring contract evidence for hackathon builds:
+stellar.expert's API went paid between 07:19Z and 19:39Z on 2026-11-06 and
+answers 402 (refresh-rwa's first red run is 19:39Z).
+
+- Six verified mainnet contract ids were erased by rescans after the 402s
+  began: Consulting-Manao/tansu, Eras256/Nirium,
+  Lobster-Protocol/stellar-integrations,
+  reflector-network/reflector-stellar-connector, skyhitz/hitz-gravity and
+  trionlabs/stellar-8004. Probe: GET /api/contracts?limit=100 then
+  &offset=100 lists 129 rows (135 on 2026-11-04) and none of the six. Each
+  README still cites a live mainnet WASM contract (getLedgerEntries on
+  mainnet.sorobanrpc.com). The scanner fix keeps stored ids from now on,
+  and the check now reads mainnet RPC, the WASM's SEP-55 source_repo and
+  GitHub attestations instead of stellar.expert, so a rescan of each repo
+  (`--only`, dry then execute) restores them. Measured 2026-11-07: Tansu
+  and hitz-gravity read self-validated, the other four published.
+- refresh-rwa records "stellar.expert returned no asset record" for a 402.
+  Its numbers are kept and marked unmeasured, so only the note is wrong.
+- The scan pools do not select `primaryLanguage`, so the allowlist pin in
+  scripts/scan/scan-repo-code.ts reads it as empty: an allowlisted canonical
+  repo whose proof reads none, or whose scan is not ok, is pinned `lang-sdk`
+  on a pool wave (an `--only` run reads the whole row).
+
 Found by Stellar Raven's HackMeridian evaluation on 2026-11-02 and filed
 here as #1900 to #1905; each issue carries its read-only probes.
 

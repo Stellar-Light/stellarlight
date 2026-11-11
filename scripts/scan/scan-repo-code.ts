@@ -44,7 +44,12 @@ import {
 	verifyWrites,
 } from "../../src/lib/utils/read-back";
 import configPromise from "../../src/payload.config";
-import { createGh, fetchRepoCode, RateLimitError } from "./fetch-repo-code";
+import {
+	createGh,
+	fetchRepoCode,
+	keepStoredContract,
+	RateLimitError,
+} from "./fetch-repo-code";
 import { poolWarning, SCANNED_POOL_CAP } from "./scan-repo-code-pool";
 import { errorToWrite, signalsToWrite } from "./write-shape";
 
@@ -283,6 +288,8 @@ async function main() {
 				lastCommitAt: true,
 				codeScannedAt: true,
 				triageTags: true,
+				mainnetContractId: true,
+				mainnetContractBasis: true,
 			},
 		});
 		// biome-ignore lint/suspicious/noExplicitAny: minimal doc shape
@@ -341,6 +348,8 @@ async function main() {
 						lastCommitAt: true,
 						codeScannedAt: true,
 						triageTags: true,
+						mainnetContractId: true,
+						mainnetContractBasis: true,
 					},
 				});
 		// Page through the unscanned pool until the wave is FULL of scannable
@@ -375,6 +384,8 @@ async function main() {
 					codeScanState: true,
 					lastCommitAt: true,
 					triageTags: true,
+					mainnetContractId: true,
+					mainnetContractBasis: true,
 				},
 			});
 			unscannedTotal = res.totalDocs;
@@ -433,6 +444,7 @@ async function main() {
 	let contractReposWithIface = 0;
 	let errored = 0;
 	let incomplete = 0;
+	let contractUnread = 0;
 	let budgetStopped = false;
 	const lifts: {
 		full: string;
@@ -456,8 +468,14 @@ async function main() {
 		let data: Record<string, any>;
 		let line: string;
 		try {
-			const r = await fetchRepoCode(gh, full);
+			const r = await fetchRepoCode(gh, full, {
+				storedMainnetContractId: doc.mainnetContractId ?? null,
+			});
 			callsUsed += (r?.pathsFetched ?? 2) + 5; // tree+meta+tags+readme overhead
+			// A mainnet check that could not run keeps what the last one found,
+			// for the depth score and the write alike (stellar.expert went paid
+			// on 2026-11-06 and its 402s erased six verified ids).
+			if (r && keepStoredContract(r, doc)) contractUnread++;
 			// Canonical platform repos never need to PROVE they're Stellar —
 			// they ARE Stellar. The dep-based proof detector is self-
 			// referentially blind to them (js-stellar-sdk depends on
@@ -601,7 +619,12 @@ async function main() {
 						lifts.push({ full, proof: r.proof, depth, cur, predicted });
 					// `via=` is the reader the SOURCES chose — a wave log that says
 					// proof=lang-sdk via=js is the mislabel being read correctly.
-					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} via=${(route?.route ?? "-").padEnd(5)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length}`;
+					// The contract this write carries, and what the row held before,
+					// so a dry run shows the change it would make.
+					const planned = r.depthInput.scalars.mainnetContractId ?? null;
+					const held = doc.mainnetContractId ?? null;
+					const contract = `contract=${planned ? `${planned.slice(0, 8)}/${r.depthInput.scalars.mainnetContractBasis ?? "?"}` : "none"}${r.mainnetContractUnread ? " (check did not run: stored kept)" : planned !== held ? ` was=${held ? held.slice(0, 8) : "none"}` : ""}`;
+					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} via=${(route?.route ?? "-").padEnd(5)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length} ${contract}`;
 				} else {
 					if (r.outcome === "incomplete") incomplete++;
 					else errored++;
@@ -699,6 +722,10 @@ async function main() {
 	console.log(
 		"tier/unverified/repoScore writes: 0 (by construction — write-shape.ts)",
 	);
+	if (contractUnread)
+		console.log(
+			`mainnet contract check could not run for ${contractUnread} repo(s): their stored ids were kept`,
+		);
 	if (contractRepos)
 		console.log(
 			`interface coverage: ${contractReposWithIface}/${contractRepos} contract repos in this wave extracted ≥1 signature${contractReposWithIface < contractRepos ? " — the gap rows are extraction misses worth a look" : ""}`,

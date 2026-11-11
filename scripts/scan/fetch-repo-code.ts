@@ -9,6 +9,7 @@
  * Cargo.tomls on a SEPARATE budget so they never starve the source-file budget.
  */
 
+import { StrKey, xdr } from "@stellar/stellar-sdk";
 import type { DepthBlob, DepthInput } from "../../src/lib/code-depth";
 import {
 	type CodeFacts,
@@ -17,6 +18,15 @@ import {
 	type Blob as SigBlob,
 	type StellarProof,
 } from "../../src/lib/code-signals";
+import {
+	codeKey,
+	contractMeta,
+	countAttestations,
+	instanceKey,
+	ownership,
+	readLedgerEntries,
+	sourceRepo,
+} from "../../src/lib/contract-ownership";
 import { TEMPLATE_NAME_RE } from "../../src/lib/repo-grade";
 import { type DepBlob, extractStellarDeps } from "../../src/lib/stellar-deps";
 
@@ -537,26 +547,62 @@ export interface RepoCodeResult {
 		tagCount: number;
 		nameLooksTemplate: boolean;
 	};
-	/** REST blob calls made for this repo (the ones that spend the pool). */
+	/** REST calls made for this repo beyond the fixed overhead: blob reads and
+	 * contract attestation checks (the ones that spend the pool). */
 	pathsFetched: number;
 	/** Blobs served by raw.githubusercontent.com (free of the REST pool). */
 	rawFetched: number;
 	contractCrates: number;
+	/** The mainnet check could not run, so depthInput's contract fields are
+	 * unknown, not empty: a writer keeps what it has stored. */
+	mainnetContractUnread: boolean;
 }
 
-/** Verify a README-claimed contract id actually exists on Stellar MAINNET via
- * stellar.expert. Positive-only + fail-open: any network/API problem returns
- * null (never penalizes). Guards: only strkey-shaped ids are probed, and the
- * response must ECHO the requested id — the bare /contract/ endpoint answers
- * 200 with a LIST, so status alone would false-verify an empty/garbage id. */
+/** A README-claimed contract id that runs on Stellar MAINNET (mainnet RPC
+ * finds its instance), with the evidence for whose it is. */
 export type MainnetContract = {
 	id: string;
 	/** How we know the address belongs to THIS repo.
-	 *  self-validated — stellar.expert's own source validation names this repo.
-	 *  published      — the repo publishes it and we ruled out the two ways it
-	 *                   provably isn't theirs, but nothing proves it is. */
+	 *  self-validated  the WASM's SEP-55 source_repo names this repo, and this
+	 *                  repo holds a GitHub attestation for the WASM's hash.
+	 *  published       the repo publishes it and we ruled out the two ways it
+	 *                  provably isn't theirs, but nothing proves it is. */
 	basis: "self-validated" | "published";
 };
+
+/** The mainnet check could not run: the RPC or GitHub's attestation API gave
+ * no usable answer. Not a finding that the repo has no contract: when the
+ * check still asked stellar.expert, its API went paid on 2026-11-06 and its
+ * 402s led 169 rescans to write null over six verified ids, Reflector's and
+ * Tansu's among them. */
+export const CONTRACT_UNREAD = "could-not-check" as const;
+
+/** The mainnet check did not run: the README exists but could not be read,
+ * or the contract check could not answer. A repo with no README cites no id,
+ * so its null is an answer. */
+export function mainnetCheckUnread(
+	readmeListed: boolean,
+	readmeText: string | null,
+	checked: MainnetContract | null | typeof CONTRACT_UNREAD,
+): boolean {
+	return (readmeListed && readmeText === null) || checked === CONTRACT_UNREAD;
+}
+
+/** When this scan's mainnet check could not run, score and write with the
+ * stored contract fields instead of its empty ones. Returns whether it did. */
+export function keepStoredContract(
+	r: Pick<RepoCodeResult, "mainnetContractUnread" | "depthInput">,
+	stored: {
+		mainnetContractId?: string | null;
+		mainnetContractBasis?: MainnetContract["basis"] | null;
+	},
+): boolean {
+	if (!r.mainnetContractUnread) return false;
+	r.depthInput.scalars.mainnetContractId = stored.mainnetContractId ?? null;
+	r.depthInput.scalars.mainnetContractBasis =
+		stored.mainnetContractBasis ?? null;
+	return true;
+}
 
 /** Resolve the mainnet contract a repo actually OWNS from the ids in its README.
  *
@@ -569,74 +615,91 @@ export type MainnetContract = {
  * stellar.expert independently attributes to a DIFFERENT repo — 27 provably
  * wrong against 4 provably right.
  *
- * Two exclusions are provable, so we apply them:
- *   - `asset` present  => a Stellar Asset Contract. A network token wrapper is
- *     shared by everyone who mentions it and is never a repo's own contract.
- *   - `validation.repository` naming someone else => provably not this repo's.
- * What survives is ranked: a self-validated match wins over a merely published
- * one, so a repo that ships a verifiable contract is never represented by an
- * unproven sibling id.
+ * stellar.expert's API went paid on 2026-11-06, so the same rules now run on
+ * evidence read directly (src/lib/contract-ownership.ts), in README order:
+ *   - the RPC lists no instance => not a mainnet contract; next id. The one
+ *     exception is the id this repo already holds (storedId): a contract
+ *     cannot be deleted, and the RPC serves live state only, so its absence
+ *     more likely means eviction to the hot archive. That reads as a check
+ *     that did not run, and the scan keeps the stored id.
+ *   - a Stellar Asset Contract executable => a network token wrapper, shared
+ *     by everyone who mentions it and never a repo's own contract; next id.
+ *   - the WASM's SEP-55 source_repo names another repo, and that repo holds
+ *     a GitHub attestation for the WASM's hash => provably not this repo's.
+ *   - source_repo names this repo and this repo holds an attestation =>
+ *     self-validated, and it wins at once.
+ *   - anything else (no source_repo, or one nothing attests) => published;
+ *     the first such id is the answer when none is self-validated, so a repo
+ *     that ships a verifiable contract is never represented by an unproven
+ *     sibling id.
+ * A check that could not run (the RPC failed or did not answer, or GitHub
+ * answered an attestation request other than 200 or 404) returns
+ * CONTRACT_UNREAD at once: a later id must not stand in for one that could
+ * not be read. Each attestation request counts in acct.api, the scan's
+ * GitHub budget.
  */
 export async function verifyMainnetContract(
 	readmeText: string | null,
 	repoFullName?: string | null,
-): Promise<MainnetContract | null> {
-	const ids = [...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? [])].slice(
-		0,
-		3,
-	);
-	const own = (repoFullName ?? "").toLowerCase();
-	let fallback: MainnetContract | null = null;
-	for (const id of ids) {
-		try {
-			const ctrl = new AbortController();
-			const t = setTimeout(() => ctrl.abort(), 6000);
-			const res = await fetch(
-				`https://api.stellar.expert/explorer/public/contract/${id}`,
-				{
-					headers: { "user-agent": "sl-code-scan" },
-					signal: ctrl.signal,
-				},
-			);
-			// A 429/5xx means we could not look, not that the id is bad. Half of
-			// a 137-row audit came back 429 on a burst — treating that as a
-			// negative would silently promote a worse candidate id in its place.
-			if (res.status === 429 || res.status >= 500) {
-				clearTimeout(t);
-				return null;
+	acct?: BlobAccount,
+	storedId?: string | null,
+): Promise<MainnetContract | null | typeof CONTRACT_UNREAD> {
+	// A shape with a bad checksum is no contract id: never probe it, so a typo
+	// can neither end the check as unread nor take one of the three slots.
+	const ids = [...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? [])]
+		.filter((id) => StrKey.isValidContract(id))
+		.slice(0, 3);
+	try {
+		const keys = ids.map((id) => instanceKey(id));
+		const instances = await readLedgerEntries(keys);
+		if (!instances) return CONTRACT_UNREAD;
+		const wasm = new Map<string, Buffer>();
+		for (const [n, id] of ids.entries()) {
+			const entry = instances.get(keys[n]);
+			if (!entry) {
+				if (storedId && id === storedId) return CONTRACT_UNREAD;
+				continue; // not a mainnet contract
 			}
-			if (!res.ok) {
-				clearTimeout(t);
+			const executable = xdr.LedgerEntryData.fromXDR(entry.xdr, "base64")
+				.contractData()
+				.val()
+				.instance()
+				.executable();
+			if (executable.switch().name === "contractExecutableStellarAsset")
 				continue;
-			}
-			// finding 6: clearing on header-arrival left the BODY read unbounded
-			// (undici default 300s) — a stalling stellar.expert could hang a wave.
-			const j = (await res.json()) as {
-				contract?: string;
-				asset?: string;
-				validation?: { repository?: string };
-			};
-			clearTimeout(t);
-			if (j?.contract !== id) continue;
-			if (j.asset) continue;
-			const repo = j.validation?.repository;
-			if (repo) {
-				const named = repo
-					.replace(/\.git$/, "")
-					.replace(/\/+$/, "")
-					.split("/")
-					.slice(-2)
-					.join("/")
-					.toLowerCase();
-				if (!own || named !== own) continue;
-				return { id, basis: "self-validated" };
-			}
-			fallback ??= { id, basis: "published" };
-		} catch {
-			// fail-open: unverifiable is not unverified-negative
+			wasm.set(id, executable.wasmHash());
 		}
+		const codes = await readLedgerEntries(
+			[...wasm.values()].map((hash) => codeKey(hash)),
+		);
+		if (!codes) return CONTRACT_UNREAD;
+		let fallback: MainnetContract | null = null;
+		for (const [id, hash] of wasm) {
+			// The instance runs this WASM, so a missing code entry is an answer
+			// that is not whole, not evidence about the contract.
+			const code = codes.get(codeKey(hash));
+			if (!code) return CONTRACT_UNREAD;
+			const claimed = sourceRepo(
+				contractMeta(
+					xdr.LedgerEntryData.fromXDR(code.xdr, "base64").contractCode().code(),
+				),
+			);
+			let attested = 0;
+			if (claimed) {
+				if (acct) acct.api++;
+				const n = await countAttestations(claimed, hash);
+				if (n === null) return CONTRACT_UNREAD;
+				attested = n;
+			}
+			const basis = ownership(repoFullName ?? "", claimed, attested);
+			if (basis === "self-validated") return { id, basis };
+			if (basis === "published") fallback ??= { id, basis };
+		}
+		return fallback;
+	} catch {
+		// An answer that does not decode is a check that did not run.
+		return CONTRACT_UNREAD;
 	}
-	return fallback;
 }
 
 /** Fetch a repo's code + derive everything the scoring/tiering needs. Read-only. */
@@ -647,7 +710,12 @@ export async function fetchRepoCode(
 	 * eval pins a fixture whose upstream repo moved on (its label describes
 	 * code that is gone from HEAD); production scans never pass it. The repo's
 	 * own metadata (fork, tags, topics) is still read as it is today. */
-	opts: { ref?: string } = {},
+	opts: {
+		ref?: string;
+		/** The repo's stored mainnetContractId: an id it already holds is never
+		 * cleared because the RPC no longer lists its instance. */
+		storedMainnetContractId?: string | null;
+	} = {},
 ): Promise<RepoCodeResult | null> {
 	const [owner, name] = full.split("/");
 	if (!owner || !name) return null;
@@ -725,7 +793,19 @@ export async function fetchRepoCode(
 				acct,
 			)
 		: null;
-	const mainnetContract = await verifyMainnetContract(readmeText, full);
+	const checked = await verifyMainnetContract(
+		readmeText,
+		full,
+		acct,
+		opts.storedMainnetContractId,
+	);
+	const mainnetContractUnread = mainnetCheckUnread(
+		!!readmeEntry,
+		readmeText,
+		checked,
+	);
+	const mainnetContract =
+		mainnetContractUnread || checked === CONTRACT_UNREAD ? null : checked;
 	const mainnetContractId = mainnetContract?.id ?? null;
 	const mainnetContractBasis = mainnetContract?.basis ?? null;
 	const tagsRes = await (
@@ -792,5 +872,6 @@ export async function fetchRepoCode(
 		pathsFetched: acct.api,
 		rawFetched: acct.raw,
 		contractCrates: contractCrateDirs.length,
+		mainnetContractUnread,
 	};
 }

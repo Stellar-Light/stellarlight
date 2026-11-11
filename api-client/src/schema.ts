@@ -2139,7 +2139,7 @@ export interface components {
                 }[];
                 /** @description Stellar-ecosystem dependencies from the repo's manifests (Cargo.toml dependency sections + package.json dep maps), allowlist-matched package names stored verbatim: the dependency graph. Forward read: the repo's stack. Reverse read: search the package name to find dependents (adoption evidence no README mention can fake). Empty until a post-2026-08-10 scan. */
                 stellarDeps?: string[];
-                /** @description README-claimed contract id VERIFIED to exist on Stellar mainnet at scan time (stellar.expert echo-check): unfakeable deployment evidence. Null when no verified address. */
+                /** @description README-claimed contract id confirmed on Stellar mainnet at scan time by an RPC read of its contract instance; a confirmed id is kept when a later scan cannot run the check or no longer sees the instance. Existence is not ownership: read the repo's contract basis. Null when no confirmed address. */
                 mainnetContractId?: string | null;
                 /** @description Stellar SDK capability tags detected in the repo's JS/TS sources; what a dapp actually DOES with the SDK: tx-building, signing, x402/mpp agent payments, soroban-rpc, contract-invoke, horizon, sep10-auth, sep24-ramp, wallet-kit, passkey, fee-bump. Closed tag set; [] = no JS sources analyzed yet or none detected (scan-dated, not a negative). */
                 sdkCapabilities?: string[];
@@ -6839,10 +6839,10 @@ export interface operations {
                             note?: string;
                         };
                         contracts?: {
-                            /** @description Mainnet contract id (C…) published by this repo and resolved live on stellar.expert, with shared token contracts (SACs) and contracts stellar.expert attributes to another repo excluded. When the repo published no id but on-chain enrichment attributed contracts to it, the first attributed address is served here with `contractBasis: onchain-attributed` and the full list in `verifiedContracts`; null only when neither exists. Read `contractBasis` before treating it as the repo's own deployment. */
+                            /** @description Mainnet contract id (C…) published by this repo and confirmed on Stellar mainnet by the scanner's RPC read of its contract instance (a confirmed id is kept when a later read cannot run or no longer lists the instance), with shared token contracts (SACs) and contracts whose build is attested to another repo excluded. When the repo published no id but on-chain enrichment attributed contracts to it, the first attributed address is served here with `contractBasis: onchain-attributed` and the full list in `verifiedContracts`; null only when neither exists. Read `contractBasis` before treating it as the repo's own deployment. */
                             contractId?: string | null;
                             /**
-                             * @description Ownership evidence for contractId. self-validated = stellar.expert's source validation independently names THIS repo. published = the repo publishes the address and it is provably neither a shared token contract nor another repo's, but nothing proves it is this repo's deployment. onchain-attributed = the repo published no id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. null = recorded before the basis was tracked.
+                             * @description Ownership evidence for contractId. self-validated = the contract's WASM names THIS repo as its source (SEP-55 source_repo) and this repo holds a GitHub build attestation for that WASM. published = the repo publishes the address and it is provably neither a shared token contract nor another repo's, but nothing proves it is this repo's deployment. onchain-attributed = the repo published no id; the address comes from on-chain enrichment, which recorded stellar.expert naming this repo as the contract's source on the project row. null = recorded before the basis was tracked.
                              * @enum {string|null}
                              */
                             contractBasis?: "self-validated" | "published" | "onchain-attributed" | null;
