@@ -545,7 +545,7 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"README contract id resolved live on Stellar mainnet via stellar.expert, with shared token contracts and other projects' contracts excluded (scanner)",
+					"README contract id confirmed on Stellar mainnet by an RPC read of its contract instance, with shared token contracts and contracts attested to other repos excluded (scanner)",
 			},
 		},
 		{
@@ -560,7 +560,7 @@ export const Repos: CollectionConfig = {
 			admin: {
 				position: "sidebar",
 				description:
-					"Ownership evidence for mainnetContractId (self-validated = stellar.expert names this repo)",
+					"Ownership evidence for mainnetContractId (self-validated = the WASM's SEP-55 source_repo names this repo and this repo holds a GitHub build attestation for it)",
 			},
 		},
 		// Soft relevance flag — legit-but-unproven Stellar repo, excluded from

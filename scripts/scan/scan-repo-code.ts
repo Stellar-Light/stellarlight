@@ -468,7 +468,9 @@ async function main() {
 		let data: Record<string, any>;
 		let line: string;
 		try {
-			const r = await fetchRepoCode(gh, full);
+			const r = await fetchRepoCode(gh, full, {
+				storedMainnetContractId: doc.mainnetContractId ?? null,
+			});
 			callsUsed += (r?.pathsFetched ?? 2) + 5; // tree+meta+tags+readme overhead
 			// A mainnet check that could not run keeps what the last one found,
 			// for the depth score and the write alike (stellar.expert went paid

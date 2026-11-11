@@ -6,7 +6,7 @@
  *   GET /api/contracts?domain=oracle       → filter by code-evidenced domain
  *
  * MEMBERSHIP IS EVIDENCE-GATED: a row exists only when the scanner verified
- * a README-claimed contract id live on mainnet (stellar.expert echo-check)
+ * a README-claimed contract id live on mainnet (an RPC read of its instance)
  * OR weekly on-chain enrichment attributed real activity to the repo. Each
  * row joins code truth (proof, depth, interface, domains), live usage,
  * per-project audit records, and succession. Absence here is NOT a claim a

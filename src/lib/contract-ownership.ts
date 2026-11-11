@@ -1,8 +1,9 @@
 /**
  * Whose deployed Soroban contract is it? The evidence stellar.expert read for
  * us until its API went paid on 2026-11-06, read directly:
- *   - mainnet RPC getLedgerEntries: the contract instance, live or archived,
- *     and the code entry holding the WASM it runs;
+ *   - mainnet RPC getLedgerEntries: the contract instance, when the RPC lists
+ *     it (live, or past its live-until ledger but not yet evicted to the hot
+ *     archive), and the code entry holding the WASM it runs;
  *   - SEP-55: a verifiable build writes `source_repo` ("github:owner/name")
  *     into the WASM's contractmetav0 custom section;
  *   - GitHub's build attestations for the WASM's sha256 in that repo.
@@ -34,8 +35,9 @@ export interface LedgerEntry {
 }
 
 /** getLedgerEntries over any number of keys, 100 per call. The map holds
- * every entry the RPC lists, live or archived, by its key; a key it does not
- * list has no entry. Null when any call failed: could not check. */
+ * every entry the RPC lists, by its key; a key it does not list has no entry.
+ * The RPC serves live ledger state, so an entry evicted to the hot archive may
+ * be missing. Null when any call failed: could not check. */
 export async function readLedgerEntries(
 	keys: string[],
 	rpcUrl = MAINNET_RPC,
@@ -102,9 +104,12 @@ export function contractMeta(wasm: Buffer): Map<string, string> {
 		const size = uleb();
 		const end = Math.min(i + size, wasm.length);
 		if (id === 0) {
-			const nameLength = uleb();
-			const name = wasm.toString("utf8", i, i + nameLength);
-			i += nameLength;
+			// A name never runs past its own section: a crafted length must not
+			// turn into a large string to compare.
+			const nameLength = uleb(); // advances i past the length itself
+			const nameEnd = Math.min(i + nameLength, end);
+			const name = wasm.toString("utf8", i, nameEnd);
+			i = nameEnd;
 			if (name === "contractmetav0") {
 				// SCMetaEntry: an int32 kind, 0 (SC_META_V0), then key and val.
 				while (i + 4 <= end && wasm.readInt32BE(i) === 0) {

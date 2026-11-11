@@ -617,8 +617,11 @@ export function keepStoredContract(
  *
  * stellar.expert's API went paid on 2026-11-06, so the same rules now run on
  * evidence read directly (src/lib/contract-ownership.ts), in README order:
- *   - no instance on mainnet (getLedgerEntries, live or archived) => not a
- *     mainnet contract; next id.
+ *   - the RPC lists no instance => not a mainnet contract; next id. The one
+ *     exception is the id this repo already holds (storedId): a contract
+ *     cannot be deleted, and the RPC serves live state only, so its absence
+ *     more likely means eviction to the hot archive. That reads as a check
+ *     that did not run, and the scan keeps the stored id.
  *   - a Stellar Asset Contract executable => a network token wrapper, shared
  *     by everyone who mentions it and never a repo's own contract; next id.
  *   - the WASM's SEP-55 source_repo names another repo, and that repo holds
@@ -639,6 +642,7 @@ export async function verifyMainnetContract(
 	readmeText: string | null,
 	repoFullName?: string | null,
 	acct?: BlobAccount,
+	storedId?: string | null,
 ): Promise<MainnetContract | null | typeof CONTRACT_UNREAD> {
 	// A shape with a bad checksum is no contract id: never probe it, so a typo
 	// can neither end the check as unread nor take one of the three slots.
@@ -652,7 +656,10 @@ export async function verifyMainnetContract(
 		const wasm = new Map<string, Buffer>();
 		for (const [n, id] of ids.entries()) {
 			const entry = instances.get(keys[n]);
-			if (!entry) continue; // not a mainnet contract
+			if (!entry) {
+				if (storedId && id === storedId) return CONTRACT_UNREAD;
+				continue; // not a mainnet contract
+			}
 			const executable = xdr.LedgerEntryData.fromXDR(entry.xdr, "base64")
 				.contractData()
 				.val()
@@ -703,7 +710,12 @@ export async function fetchRepoCode(
 	 * eval pins a fixture whose upstream repo moved on (its label describes
 	 * code that is gone from HEAD); production scans never pass it. The repo's
 	 * own metadata (fork, tags, topics) is still read as it is today. */
-	opts: { ref?: string } = {},
+	opts: {
+		ref?: string;
+		/** The repo's stored mainnetContractId: an id it already holds is never
+		 * cleared because the RPC no longer lists its instance. */
+		storedMainnetContractId?: string | null;
+	} = {},
 ): Promise<RepoCodeResult | null> {
 	const [owner, name] = full.split("/");
 	if (!owner || !name) return null;
@@ -781,7 +793,12 @@ export async function fetchRepoCode(
 				acct,
 			)
 		: null;
-	const checked = await verifyMainnetContract(readmeText, full, acct);
+	const checked = await verifyMainnetContract(
+		readmeText,
+		full,
+		acct,
+		opts.storedMainnetContractId,
+	);
 	const mainnetContractUnread = mainnetCheckUnread(
 		!!readmeEntry,
 		readmeText,

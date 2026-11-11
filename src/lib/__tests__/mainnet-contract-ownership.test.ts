@@ -102,6 +102,10 @@ function mainnet() {
 		asset(id: string) {
 			instance(id, xdr.ContractExecutable.contractExecutableStellarAsset());
 		},
+		/** Drop a WASM's code entry while its instance stays listed. */
+		forgetCode(hash: string) {
+			ledger.delete(codeKey(Buffer.from(hash, "hex")));
+		},
 		attest(repo: string, hash: string, count = 1) {
 			attested.set(`${repo.toLowerCase()} ${hash}`, count);
 		},
@@ -363,7 +367,114 @@ describe("verifyMainnetContract: a check that did not run is not an answer", () 
 	});
 });
 
+// Review 2026-11-11 of the RPC rewrite: paths a scan can meet that no case
+// covered, each of which must neither erase a stored id nor invent an owner.
+describe("verifyMainnetContract: missing or malformed evidence", () => {
+	it("keeps the id the repo already holds when the RPC no longer lists its instance", async () => {
+		// A contract cannot be deleted; the RPC serves live state only, so an
+		// instance evicted to the hot archive can be missing from the answer.
+		mainnet().serve();
+		expect(
+			await verifyMainnetContract(
+				`ours: ${ID_A}`,
+				"acme/vault",
+				undefined,
+				ID_A,
+			),
+		).toBe("could-not-check");
+	});
+
+	it("still reads an absent instance as no contract when the repo holds a different id", async () => {
+		mainnet().serve();
+		expect(
+			await verifyMainnetContract(
+				`ours: ${ID_A}`,
+				"acme/vault",
+				undefined,
+				ID_B,
+			),
+		).toBeNull();
+	});
+
+	it("reads a listed instance whose code entry is missing as could-not-check", async () => {
+		const chain = mainnet();
+		chain.forgetCode(chain.wasm(ID_A, { source_repo: "github:acme/vault" }));
+		chain.serve();
+		expect(await verifyMainnetContract(`ours: ${ID_A}`, "acme/vault")).toBe(
+			"could-not-check",
+		);
+	});
+
+	it("reads an attestation answer listing none as no attestation: published, not self-validated", async () => {
+		const chain = mainnet();
+		const hash = chain.wasm(ID_A, { source_repo: "github:acme/vault" });
+		chain.serve((u) =>
+			u === attestationUrl("acme/vault", hash)
+				? Response.json({ attestations: [] })
+				: undefined,
+		);
+		expect(await verifyMainnetContract(`ours: ${ID_A}`, "acme/vault")).toEqual({
+			id: ID_A,
+			basis: "published",
+		});
+	});
+
+	it("treats a malformed source_repo as no claim and never builds a URL from it", async () => {
+		for (const claim of [
+			"https://github.com/acme/vault",
+			"github:acme/vault/../../other",
+			"github:acme/va%2Fult",
+			"github:../vault",
+		]) {
+			const chain = mainnet();
+			chain.wasm(ID_A, { source_repo: claim });
+			const { urls } = chain.serve();
+			expect(
+				await verifyMainnetContract(`ours: ${ID_A}`, "acme/vault"),
+			).toEqual({ id: ID_A, basis: "published" });
+			expect(urls.every((u) => u === MAINNET_RPC)).toBe(true);
+		}
+	});
+
+	it("reads an instance entry that does not decode as could-not-check", async () => {
+		const chain = mainnet();
+		chain.serve((u) =>
+			u === MAINNET_RPC
+				? Response.json({
+						jsonrpc: "2.0",
+						id: 1,
+						result: {
+							latestLedger: 65364392,
+							entries: [{ key: instanceKey(ID_A), xdr: "AAAA" }],
+						},
+					})
+				: undefined,
+		);
+		expect(await verifyMainnetContract(`ours: ${ID_A}`, "acme/vault")).toBe(
+			"could-not-check",
+		);
+	});
+});
+
 describe("contractMeta: SEP-55 meta from a WASM", () => {
+	it("stops a section name at its section's end, whatever length it claims", () => {
+		// id 0, size 7, then a name length of 0xffffffff that the 7 bytes cannot
+		// hold, repeated through about 126 KB: unclamped, each name decoded the
+		// rest of the buffer, about 2 s of CPU (review, 2026-11-11).
+		const crafted = Buffer.concat([
+			Buffer.from([0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00]),
+			Buffer.from([0x00, 0x07, 0xff, 0xff, 0xff, 0xff, 0x0f, 0x41, 0x41]),
+			Buffer.concat(
+				Array.from({ length: 18_000 }, () =>
+					Buffer.from([0x00, 0x05, 0xff, 0xff, 0xff, 0xff, 0x0f]),
+				),
+			),
+		]);
+		const started = performance.now();
+		expect(contractMeta(crafted).size).toBe(0);
+		expect(performance.now() - started).toBeLessThan(200);
+	});
+
 	it("reads every contractmetav0 section, and a truncated entry ends the read without a throw", () => {
 		const wasm = wasmWith(
 			{ rsver: "1.89.0" },
