@@ -619,7 +619,12 @@ async function main() {
 						lifts.push({ full, proof: r.proof, depth, cur, predicted });
 					// `via=` is the reader the SOURCES chose — a wave log that says
 					// proof=lang-sdk via=js is the mislabel being read correctly.
-					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} via=${(route?.route ?? "-").padEnd(5)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length}`;
+					// The contract this write carries, and what the row held before,
+					// so a dry run shows the change it would make.
+					const planned = r.depthInput.scalars.mainnetContractId ?? null;
+					const held = doc.mainnetContractId ?? null;
+					const contract = `contract=${planned ? `${planned.slice(0, 8)}/${r.depthInput.scalars.mainnetContractBasis ?? "?"}` : "none"}${r.mainnetContractUnread ? " (check did not run: stored kept)" : planned !== held ? ` was=${held ? held.slice(0, 8) : "none"}` : ""}`;
+					line = `  ok     ${full.padEnd(44)} proof=${r.proof.padEnd(15)} depth=${depth.toFixed(2)} via=${(route?.route ?? "-").padEnd(5)} farm=${farm.score} syms=${symbols.length} iface=${contractInterface.length} ${contract}`;
 				} else {
 					if (r.outcome === "incomplete") incomplete++;
 					else errored++;
