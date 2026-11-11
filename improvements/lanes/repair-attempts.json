@@ -530,6 +530,15 @@
    "pr": null,
    "costUsd": 0,
    "note": "agent run failed: "
+  },
+  {
+   "rowId": "nightly-note-freshness:note-stale-stellar-stellar-disbursement-platform",
+   "date": "2026-11-11",
+   "run": "43060019430",
+   "outcome": "error",
+   "pr": null,
+   "costUsd": 0,
+   "note": "agent run failed: "
   }
  ]
 }
