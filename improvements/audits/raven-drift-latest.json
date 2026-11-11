@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-10T13:58:36.881Z",
+	"generatedAt": "2026-11-11T13:13:25.068Z",
 	"specVersion": "1.9.127",
 	"graceDays": 10,
 	"expectedOps": [
@@ -90,7 +90,7 @@
 		{
 			"op": "getStablecoins",
 			"addedAt": "2026-11-04",
-			"ageDays": 6
+			"ageDays": 7
 		}
 	],
 	"extraInCatalog": [],
