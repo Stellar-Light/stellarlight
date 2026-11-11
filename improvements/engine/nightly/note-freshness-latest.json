@@ -1,5 +1,5 @@
 {
-	"generatedAt": "2026-11-05T13:42:25.448Z",
+	"generatedAt": "2026-11-11T13:10:53.803Z",
 	"detector": "note-freshness",
 	"failures": [
 		{
@@ -9,7 +9,7 @@
 		},
 		{
 			"probe": "note-stale:idos-network/idos-sdk-js:npm:@idos-network/client",
-			"note": "note (asOf 2026-08-11) cites 1.5.0; registry latest is 4.0.0 (published 2026-11-03)",
+			"note": "note (asOf 2026-08-11) cites 1.5.0; registry latest is 5.0.0 (published 2026-11-11)",
 			"surface": "code"
 		},
 		{
@@ -24,7 +24,7 @@
 		},
 		{
 			"probe": "note-stale:dfns/dfns-sdk-python:pypi:dfns-sdk",
-			"note": "note (asOf 2026-09-13) cites 0.0.4; registry latest is 1.0.4 (published 2026-10-23)",
+			"note": "note (asOf 2026-09-13) cites 0.0.4; registry latest is 1.0.5 (published 2026-11-06)",
 			"surface": "code"
 		},
 		{
@@ -34,7 +34,7 @@
 		},
 		{
 			"probe": "note-stale:blindpaylabs/blindpay-mcp:npm:@blindpay/mcp",
-			"note": "note (asOf 2026-09-02) cites 1.7.1; registry latest is 1.10.0 (published 2026-10-30)",
+			"note": "note (asOf 2026-09-02) cites 1.7.1; registry latest is 1.10.3 (published 2026-11-09)",
 			"surface": "code"
 		},
 		{
@@ -99,7 +99,7 @@
 		},
 		{
 			"probe": "note-stale:trionlabs/stellar-8004:npm:@trionlabs/stellar8004",
-			"note": "note (asOf 2026-09-02) cites 0.0.11; registry latest is 0.0.12 (published 2026-11-03)",
+			"note": "note (asOf 2026-09-02) cites 0.0.11; registry latest is 0.0.13 (published 2026-11-05)",
 			"surface": "code"
 		},
 		{
@@ -209,7 +209,7 @@
 		},
 		{
 			"probe": "note-stale:NethermindEth/stellar-private-payments:npm:stellar-private-payments",
-			"note": "note (asOf 2026-09-14) cites 0.1.0; registry latest is 0.2.1 (published 2026-10-16)",
+			"note": "note (asOf 2026-09-14) cites 0.1.0; registry latest is 0.3.0 (published 2026-11-09)",
 			"surface": "code"
 		},
 		{
@@ -269,7 +269,7 @@
 		},
 		{
 			"probe": "note-stale:RozoAI/rozo-checkout-skill:npm:@rozoai/checkout",
-			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.24 (published 2026-11-02)",
+			"note": "note (asOf 2026-09-14) cites 0.1.10; registry latest is 0.1.26 (published 2026-11-11)",
 			"surface": "code"
 		},
 		{
@@ -284,7 +284,7 @@
 		},
 		{
 			"probe": "note-stale:stellar-registry/cli:crates:stellar-registry-cli",
-			"note": "note (asOf 2026-09-14) cites 0.1.1; registry latest is 0.3.0 (published 2026-11-02)",
+			"note": "note (asOf 2026-09-14) cites 0.1.1; registry latest is 0.3.1 (published 2026-11-09)",
 			"surface": "code"
 		},
 		{
@@ -299,7 +299,7 @@
 		},
 		{
 			"probe": "note-stale:nirvana-labs/nirvana-typescript:npm:@nirvana-labs/nirvana",
-			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 2.3.2 (published 2026-11-03)",
+			"note": "note (asOf 2026-09-14) cites 2.0.1; registry latest is 3.1.0 (published 2026-11-10)",
 			"surface": "code"
 		},
 		{
@@ -333,6 +333,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-repo-gone:stellar-expert/tx-meta-effects-parser",
+			"note": "public note asOf 2026-09-14; github.com/stellar-expert/tx-meta-effects-parser is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
 			"probe": "note-repo-gone:soroswap/docs",
 			"note": "public note asOf 2026-09-14; github.com/soroswap/docs is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
@@ -353,6 +358,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-repo-gone:57blocks/agentsmith-x402",
+			"note": "public note asOf 2026-09-14; github.com/57blocks/agentsmith-x402 is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
 			"probe": "note-repo-gone:Kali-Decoder/stellar-crates-tinder",
 			"note": "public note asOf 2026-09-14; github.com/Kali-Decoder/stellar-crates-tinder is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
@@ -368,6 +378,11 @@
 			"surface": "code"
 		},
 		{
+			"probe": "note-repo-gone:Brale-xyz/canton-backup-utility",
+			"note": "public note asOf 2026-09-14; github.com/Brale-xyz/canton-backup-utility is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
 			"probe": "note-repo-gone:axis-markets/stellarexpert-data-source",
 			"note": "public note asOf 2026-09-14; github.com/axis-markets/stellarexpert-data-source is 404 — the note describes a repo that no longer exists",
 			"surface": "code"
@@ -380,6 +395,11 @@
 		{
 			"probe": "note-repo-gone:PagCrypto/token-list",
 			"note": "public note asOf 2026-09-14; github.com/PagCrypto/token-list is 404 — the note describes a repo that no longer exists",
+			"surface": "code"
+		},
+		{
+			"probe": "note-predates-archival:equilibriumco/nebula",
+			"note": "public note asOf 2026-09-14; repo archived 2026-11-06 — the note describes a live repo",
 			"surface": "code"
 		},
 		{

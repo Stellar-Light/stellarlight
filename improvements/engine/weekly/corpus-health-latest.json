@@ -1,7 +1,7 @@
 {
   "frame": {
-    "chunks": 18042,
-    "docs": 3203
+    "chunks": 18105,
+    "docs": 3213
   },
   "s5_junk_urls": {
     "count": 0,
@@ -13,24 +13,38 @@
     "sample": []
   },
   "s7_coverage": {
+    "sdf-blog": {
+      "chunks": 2481,
+      "datedPct": 100,
+      "newestAgeDays": 3,
+      "undated": false,
+      "stalled": false
+    },
     "lumenloop-research": {
-      "chunks": 570,
+      "chunks": 580,
       "datedPct": 100,
       "newestAgeDays": 2,
       "undated": false,
       "stalled": false
     },
     "dev-docs": {
-      "chunks": 5255,
-      "datedPct": 62,
-      "newestAgeDays": 12,
+      "chunks": 5282,
+      "datedPct": 61,
+      "newestAgeDays": 19,
       "undated": false,
       "stalled": false
     },
-    "sdf-blog": {
-      "chunks": 2471,
+    "release": {
+      "chunks": 260,
       "datedPct": 100,
-      "newestAgeDays": 4,
+      "newestAgeDays": 6,
+      "undated": false,
+      "stalled": false
+    },
+    "cap": {
+      "chunks": 959,
+      "datedPct": 98,
+      "newestAgeDays": 19,
       "undated": false,
       "stalled": false
     },
@@ -43,13 +57,6 @@
       "reason": "GitHub READMEs state no publication date",
       "stalled": false
     },
-    "release": {
-      "chunks": 256,
-      "datedPct": 100,
-      "newestAgeDays": 7,
-      "undated": false,
-      "stalled": false
-    },
     "scf-proposal": {
       "chunks": 5797,
       "datedPct": 0,
@@ -59,31 +66,24 @@
       "reason": "SCF submission pages state no date; each document names its award round instead",
       "stalled": false
     },
-    "cap": {
-      "chunks": 947,
-      "datedPct": 98,
-      "newestAgeDays": 17,
-      "undated": false,
-      "stalled": false
-    },
     "sep": {
       "chunks": 690,
       "datedPct": 99,
-      "newestAgeDays": 33,
+      "newestAgeDays": 40,
       "undated": false,
       "stalled": false
     },
     "audit": {
       "chunks": 1157,
       "datedPct": 100,
-      "newestAgeDays": 93,
+      "newestAgeDays": 100,
       "undated": false,
       "stalled": false
     },
     "ec-developer-report": {
       "chunks": 45,
       "datedPct": 100,
-      "newestAgeDays": 1401,
+      "newestAgeDays": 1408,
       "undated": false,
       "stalled": false
     },
@@ -99,35 +99,35 @@
     "sdf-org": {
       "chunks": 80,
       "datedPct": 29,
-      "newestAgeDays": 12,
+      "newestAgeDays": 19,
       "undated": false,
       "stalled": false
     },
     "security-program": {
       "chunks": 10,
       "datedPct": 100,
-      "newestAgeDays": 179,
+      "newestAgeDays": 186,
       "undated": false,
       "stalled": false
     },
     "incident": {
       "chunks": 1,
       "datedPct": 100,
-      "newestAgeDays": 166,
+      "newestAgeDays": 173,
       "undated": false,
       "stalled": false
     },
     "lumenloop": {
       "chunks": 246,
       "datedPct": 62,
-      "newestAgeDays": 141,
+      "newestAgeDays": 148,
       "undated": false,
       "stalled": false
     },
     "paper": {
       "chunks": 27,
       "datedPct": 100,
-      "newestAgeDays": 3903,
+      "newestAgeDays": 3910,
       "undated": false,
       "stalled": false
     }
@@ -142,6 +142,6 @@
       "boilerplateOverlap": 159
     }
   },
-  "generatedAt": "2026-11-01T15:58:01Z",
+  "generatedAt": "2026-11-08T16:00:37Z",
   "evalKey": "corpus-health"
 }

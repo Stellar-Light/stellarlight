@@ -1,9 +1,9 @@
 {
   "windowDays": 14,
   "frame": {
-    "loggedHits": 53844,
-    "realHits": 8716,
-    "distinctQueries": 4389,
+    "loggedHits": 45457,
+    "realHits": 10645,
+    "distinctQueries": 5012,
     "replayed": 250
   },
   "okRate": 99,
@@ -11,8 +11,8 @@
     {
       "endpoint": "/api/research",
       "query": "test",
-      "hits": 68,
-      "lastSeen": "2026-11-01T13:13:12.259Z",
+      "hits": 47,
+      "lastSeen": "2026-11-08T12:15:38.768Z",
       "days": 14,
       "buckets": [
         "other"
@@ -24,7 +24,7 @@
       "endpoint": "/api/repos/search",
       "query": "flurbomatic quantifold widgetron on stellar",
       "hits": 14,
-      "lastSeen": "2026-11-01T14:26:56.547Z",
+      "lastSeen": "2026-11-08T14:27:13.625Z",
       "days": 14,
       "buckets": [
         "other"
@@ -33,18 +33,18 @@
       "evidence": "0 results"
     },
     {
-      "endpoint": "/api/projects/search",
-      "query": "specguard",
-      "hits": 5,
-      "lastSeen": "2026-10-20T16:14:17.810Z",
+      "endpoint": "/api/research",
+      "query": "help",
+      "hits": 6,
+      "lastSeen": "2026-11-07T10:55:55.566Z",
       "days": 1,
       "buckets": [
         "other"
       ],
-      "class": "GAP",
-      "evidence": "no record held; endpoint said so via advisory (curation gap, not a ranking bug)"
+      "class": "WEAK",
+      "evidence": "top confidence 0.4"
     }
   ],
-  "generatedAt": "2026-11-01T15:58:01Z",
+  "generatedAt": "2026-11-08T16:00:37Z",
   "evalKey": "engine-d-demand"
 }

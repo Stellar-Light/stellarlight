@@ -1,16 +1,29 @@
 {
-  "generatedAt": "2026-11-01T15:58:01Z",
+  "generatedAt": "2026-11-08T16:00:37Z",
   "frame": {
     "scf": 531,
-    "directory": 1006,
+    "directory": 1008,
     "matched": 340,
-    "roundsChecked": 338
+    "roundsChecked": 340
   },
   "overstated": [],
   "understated": [],
   "roundsBackfill": [],
   "roundsOverstated": [],
   "roundsUnverifiable": [
+    {
+      "slug": "wirex-pay",
+      "name": "Wirex",
+      "ourRounds": [
+        "35",
+        "41"
+      ],
+      "url": "https://communityfund.stellar.org/project/wirex-pay-h22",
+      "officialAwardedRounds": [
+        "35"
+      ],
+      "reason": "no submission verdict found for round(s) #41"
+    },
     {
       "slug": "swiftex",
       "name": "SwiftEx",
@@ -48,7 +61,6 @@
       "slug": "wellspring",
       "name": "Wellspring",
       "ourRounds": [
-        "30",
         "41"
       ],
       "url": "https://communityfund.stellar.org/project/wellspring-xuv",
@@ -85,16 +97,6 @@
       "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
-      "slug": "minisend",
-      "name": "Minisend",
-      "ourRounds": [
-        "45"
-      ],
-      "url": "https://communityfund.stellar.org/project/minisend-7tt",
-      "officialAwardedRounds": [],
-      "reason": "no parseable submission cards on the page \u2014 never accuse"
-    },
-    {
       "slug": "swiftex",
       "name": "SwiftEx",
       "ourRounds": [
@@ -108,17 +110,14 @@
       "reason": "no submission verdict found for round(s) #35"
     },
     {
-      "slug": "wellspring",
-      "name": "Wellspring",
+      "slug": "minisend",
+      "name": "Minisend",
       "ourRounds": [
-        "30",
-        "41"
+        "45"
       ],
-      "url": "https://communityfund.stellar.org/project/wellspring-rdo",
-      "officialAwardedRounds": [
-        "41"
-      ],
-      "reason": "no submission verdict found for round(s) #30"
+      "url": "https://communityfund.stellar.org/project/minisend-7tt",
+      "officialAwardedRounds": [],
+      "reason": "no parseable submission cards on the page \u2014 never accuse"
     },
     {
       "slug": "the-strategists",
