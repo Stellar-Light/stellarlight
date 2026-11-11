@@ -4082,7 +4082,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-07-23T01:38:08.372Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -4110,7 +4110,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-07-23T02:37:05.018Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -4138,7 +4138,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-07-23T02:37:05.018Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -6315,7 +6315,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-08-28T15:54:52.406Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7046,7 +7046,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-08-31T19:51:18.114Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7528,9 +7528,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-02T17:42:51.016Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -7556,9 +7556,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-02T17:42:51.016Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-09-18T10:16:00.055Z"
  },
@@ -7584,7 +7584,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7598,7 +7598,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7612,7 +7612,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7626,7 +7626,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7640,7 +7640,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7654,7 +7654,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7668,7 +7668,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-scorer",
@@ -7682,7 +7682,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7696,7 +7696,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7710,7 +7710,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7724,7 +7724,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7738,7 +7738,7 @@
   "failureMode": "routing-miss",
   "severity": "medium",
   "firstSeen": "2026-09-05T05:08:19.275Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-09-14T17:22:49.184Z",
   "blockedOn": "raven-catalog-lag",
@@ -7752,9 +7752,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-05T09:35:27.531Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-10-26T11:46:58.557Z"
  },
@@ -7794,9 +7794,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-06T09:52:07.185Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-11-05T13:42:59.314Z"
  },
@@ -7948,9 +7948,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -8269,9 +8269,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -8408,9 +8408,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -8449,9 +8449,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -8812,9 +8812,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -8881,9 +8881,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -9202,9 +9202,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -9257,9 +9257,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-06T17:38:09.840Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -9298,9 +9298,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-07T10:58:33.072Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -9326,9 +9326,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-09T10:20:31.289Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-10-01T12:02:37.203Z"
  },
@@ -9340,9 +9340,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-09T10:20:31.289Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-10-07T12:13:49.464Z"
  },
@@ -9354,9 +9354,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-09T10:20:31.289Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -9382,9 +9382,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-10T10:15:50.109Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -9396,9 +9396,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-10T10:15:50.109Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-09-17T10:38:59.203Z"
  },
@@ -9508,9 +9508,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-15T10:42:08.103Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9703,9 +9703,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-17T10:38:59.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9716,9 +9716,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-17T10:38:59.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9729,9 +9729,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-17T10:38:59.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9742,9 +9742,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-17T10:38:59.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9755,9 +9755,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-18T10:16:00.055Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world",
   "reopenedAt": "2026-10-13T13:11:39.149Z"
  },
@@ -9769,9 +9769,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-18T10:16:00.055Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9782,9 +9782,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-18T10:16:00.055Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9809,9 +9809,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-19T09:56:27.692Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9822,9 +9822,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-19T09:56:27.692Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9877,9 +9877,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-22T10:34:53.700Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -9890,9 +9890,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-22T10:34:53.700Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10001,9 +10001,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -10014,9 +10014,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -10027,9 +10027,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -10040,9 +10040,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10053,9 +10053,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10066,9 +10066,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10079,9 +10079,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-24T10:45:08.452Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10092,9 +10092,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -10105,9 +10105,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10118,9 +10118,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10131,9 +10131,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10144,9 +10144,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-25T10:46:57.233Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10227,9 +10227,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-26T10:29:24.546Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10240,9 +10240,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-26T10:29:24.546Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10267,9 +10267,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-09-27T10:59:51.525Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10280,9 +10280,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-27T10:59:51.525Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10293,9 +10293,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-09-28T12:14:16.247Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -10306,9 +10306,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-09-28T12:14:16.247Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10319,9 +10319,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10332,9 +10332,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10345,9 +10345,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10358,9 +10358,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10371,9 +10371,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10384,9 +10384,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10397,9 +10397,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10410,9 +10410,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -10423,9 +10423,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10436,9 +10436,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10449,9 +10449,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10462,9 +10462,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10475,9 +10475,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10488,9 +10488,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10501,9 +10501,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10514,9 +10514,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-01T12:02:37.203Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10527,7 +10527,7 @@
   "failureMode": "status-contradicted",
   "severity": "medium",
   "firstSeen": "2026-10-02T11:34:15.977Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-11-05T16:28:10.222Z",
   "kind": "world"
@@ -10554,9 +10554,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-02T11:34:15.977Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10567,9 +10567,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-02T11:34:15.977Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10580,9 +10580,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-10-04T11:31:15.282Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -10593,9 +10593,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-10-04T11:31:15.282Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -10802,9 +10802,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-04T11:31:15.282Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10815,9 +10815,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-05T12:54:29.797Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10828,9 +10828,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-05T12:54:29.797Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10855,9 +10855,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-10-07T12:13:49.464Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -10868,9 +10868,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-10-07T12:13:49.464Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -10881,9 +10881,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-10-07T12:13:49.464Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -10908,9 +10908,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-10-07T12:13:49.464Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -10921,9 +10921,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-07T12:13:49.464Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -10962,9 +10962,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10975,9 +10975,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -10988,9 +10988,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11001,9 +11001,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11014,9 +11014,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11027,9 +11027,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11040,9 +11040,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11053,9 +11053,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11066,9 +11066,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11079,9 +11079,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11092,9 +11092,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11105,9 +11105,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11118,9 +11118,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11131,9 +11131,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11144,9 +11144,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11157,9 +11157,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11170,9 +11170,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11183,9 +11183,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11196,9 +11196,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11209,9 +11209,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11236,9 +11236,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-08T12:27:42.433Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -11263,9 +11263,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-11T11:49:37.854Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11290,9 +11290,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-10-11T11:49:37.854Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -11303,9 +11303,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-10-11T11:49:37.854Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -11316,9 +11316,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-10-11T11:49:37.854Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -11413,9 +11413,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-11T11:49:37.854Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -11426,9 +11426,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-11T11:49:37.854Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -11537,9 +11537,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-12T13:45:45.158Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -11550,9 +11550,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-10-14T10:51:30.015Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -11563,9 +11563,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-10-14T10:51:30.015Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -11576,9 +11576,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-10-14T10:51:30.015Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -11589,9 +11589,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-10-14T10:51:30.015Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -11602,9 +11602,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-14T10:51:30.015Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -11615,9 +11615,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-14T10:51:30.015Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -11628,9 +11628,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11641,9 +11641,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11654,9 +11654,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11667,9 +11667,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11680,9 +11680,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11693,9 +11693,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11706,9 +11706,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11719,9 +11719,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11732,9 +11732,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11745,9 +11745,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11758,9 +11758,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11771,9 +11771,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11784,9 +11784,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11797,9 +11797,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11810,9 +11810,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11823,9 +11823,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11836,9 +11836,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11849,9 +11849,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11862,9 +11862,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11875,9 +11875,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-16T10:20:02.137Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -11902,9 +11902,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-19T11:30:03.218Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11915,9 +11915,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-19T11:30:03.218Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11928,9 +11928,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-10-19T11:30:03.218Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -11955,9 +11955,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-19T11:30:03.218Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -11968,9 +11968,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-19T11:30:03.218Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -11981,9 +11981,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -11994,9 +11994,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12007,9 +12007,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12020,9 +12020,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12033,9 +12033,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12046,9 +12046,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12059,9 +12059,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -12072,9 +12072,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12085,9 +12085,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12098,9 +12098,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-21T10:49:45.201Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12111,9 +12111,9 @@
   "failureMode": "golden-fail",
   "severity": "high",
   "firstSeen": "2026-10-25T10:23:53.635Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:24:14Z",
+  "evidenceAt": "2026-11-11T12:59:58Z",
   "kind": "instrument"
  },
  {
@@ -12124,9 +12124,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-25T10:23:53.635Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12137,9 +12137,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-25T10:23:53.635Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12150,9 +12150,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-25T10:23:53.635Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world",
   "reopenedAt": "2026-11-05T13:42:59.314Z"
  },
@@ -12164,9 +12164,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-25T10:23:53.635Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12177,9 +12177,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-25T10:23:53.635Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12260,9 +12260,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-26T11:46:58.557Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12273,7 +12273,7 @@
   "failureMode": "raven-consumer-miss",
   "severity": "high",
   "firstSeen": "2026-10-26T11:46:58.557Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-11-08T16:00:37.163Z",
   "kind": "instrument"
@@ -12286,9 +12286,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-10-27T11:15:32.745Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12299,9 +12299,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12312,9 +12312,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12325,9 +12325,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12338,9 +12338,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12351,9 +12351,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12364,9 +12364,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12377,9 +12377,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12390,9 +12390,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12403,9 +12403,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12416,9 +12416,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12429,9 +12429,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12442,9 +12442,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12455,9 +12455,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12468,9 +12468,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12481,9 +12481,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -12494,9 +12494,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -12507,9 +12507,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -12520,9 +12520,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -12561,9 +12561,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -12574,9 +12574,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12587,9 +12587,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12600,9 +12600,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12613,9 +12613,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12626,9 +12626,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-01T12:15:23.834Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12639,9 +12639,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-02T14:05:41.690Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12652,9 +12652,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-03T13:15:51.009Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12665,9 +12665,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-03T13:15:51.009Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12678,9 +12678,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12691,9 +12691,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12704,9 +12704,9 @@
   "failureMode": "repo-gone",
   "severity": "high",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-08T13:49:07.151Z",
+  "evidenceAt": "2026-11-10T15:11:56.780Z",
   "kind": "world"
  },
  {
@@ -12731,9 +12731,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -12744,9 +12744,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -12757,9 +12757,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -12770,9 +12770,9 @@
   "failureMode": "supersession-unrecorded",
   "severity": "low",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-03T15:28:51.352Z",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
   "kind": "world"
  },
  {
@@ -12797,9 +12797,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12810,9 +12810,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12823,9 +12823,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12836,7 +12836,7 @@
   "failureMode": "stamp-contradicted",
   "severity": "high",
   "firstSeen": "2026-11-05T13:42:59.314Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-11-04T15:47:21.181Z",
   "kind": "world"
@@ -12849,9 +12849,9 @@
   "failureMode": "broken-link",
   "severity": "medium",
   "firstSeen": "2026-11-08T12:27:28.794Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -12862,9 +12862,9 @@
   "failureMode": "link-not-the-product",
   "severity": "medium",
   "firstSeen": "2026-11-08T12:27:28.794Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T09:59:55.639Z",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
   "kind": "world"
  },
  {
@@ -12875,9 +12875,9 @@
   "failureMode": "golden-fail",
   "severity": "high",
   "firstSeen": "2026-11-08T12:27:28.794Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:24:14Z",
+  "evidenceAt": "2026-11-11T12:59:58Z",
   "kind": "instrument"
  },
  {
@@ -12888,9 +12888,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-08T12:27:28.794Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12901,9 +12901,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-08T12:27:28.794Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12914,9 +12914,9 @@
   "failureMode": "note-stale",
   "severity": "low",
   "firstSeen": "2026-11-08T12:27:28.794Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:35:06.805Z",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
   "kind": "world"
  },
  {
@@ -12927,7 +12927,7 @@
   "failureMode": "demand-miss",
   "severity": "high",
   "firstSeen": "2026-11-09T14:35:52.934Z",
-  "lastSeen": "2026-11-09T14:35:52.934Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
   "evidenceAt": "2026-11-08T16:00:37Z",
   "kind": "instrument"
@@ -12941,8 +12941,152 @@
   "severity": "low",
   "firstSeen": "2026-11-09T14:35:52.934Z",
   "lastSeen": "2026-11-09T14:35:52.934Z",
+  "status": "cleared",
+  "evidenceAt": "2026-11-11T13:11:37.491Z",
+  "kind": "instrument",
+  "clearedAt": "2026-11-11T13:11:37.491Z"
+ },
+ {
+  "id": "supersession-freshness:gateway-fm-open-privacy-suite",
+  "source": "supersession-freshness",
+  "surface": "code",
+  "probe": "gateway-fm/open-privacy-suite",
+  "failureMode": "supersession-unrecorded",
+  "severity": "low",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
   "status": "open",
-  "evidenceAt": "2026-11-09T14:34:22.796Z",
-  "kind": "instrument"
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
+  "kind": "world"
+ },
+ {
+  "id": "supersession-freshness:wadzzo2023-brand-wadzzo",
+  "source": "supersession-freshness",
+  "surface": "code",
+  "probe": "Wadzzo2023/brand-wadzzo",
+  "failureMode": "supersession-unrecorded",
+  "severity": "low",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
+  "kind": "world"
+ },
+ {
+  "id": "supersession-freshness:wadzzo2023-wadzz0",
+  "source": "supersession-freshness",
+  "surface": "code",
+  "probe": "Wadzzo2023/wadzz0",
+  "failureMode": "supersession-unrecorded",
+  "severity": "low",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
+  "kind": "world"
+ },
+ {
+  "id": "supersession-freshness:wadzzo2023-wadzzowebar-public",
+  "source": "supersession-freshness",
+  "surface": "code",
+  "probe": "Wadzzo2023/wadzzoWebAR-public",
+  "failureMode": "supersession-unrecorded",
+  "severity": "low",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
+  "kind": "world"
+ },
+ {
+  "id": "supersession-freshness:wadzzo2023-express-wadzzo",
+  "source": "supersession-freshness",
+  "surface": "code",
+  "probe": "Wadzzo2023/express-wadzzo",
+  "failureMode": "supersession-unrecorded",
+  "severity": "low",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
+  "kind": "world"
+ },
+ {
+  "id": "supersession-freshness:equilibriumco-nebula",
+  "source": "supersession-freshness",
+  "surface": "code",
+  "probe": "equilibriumco/nebula",
+  "failureMode": "supersession-unrecorded",
+  "severity": "low",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
+  "kind": "world"
+ },
+ {
+  "id": "supersession-freshness:equilibriumco-quasar",
+  "source": "supersession-freshness",
+  "surface": "code",
+  "probe": "equilibriumco/quasar",
+  "failureMode": "supersession-unrecorded",
+  "severity": "low",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-10T15:48:08.418Z",
+  "kind": "world"
+ },
+ {
+  "id": "link-health:https-kuratek-com",
+  "source": "link-health",
+  "surface": "directory",
+  "probe": "https://kuratek.com",
+  "failureMode": "broken-link",
+  "severity": "medium",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
+  "kind": "world"
+ },
+ {
+  "id": "link-health:https-stellar-subsprotocol-com",
+  "source": "link-health",
+  "surface": "directory",
+  "probe": "https://stellar.subsprotocol.com",
+  "failureMode": "broken-link",
+  "severity": "medium",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
+  "kind": "world"
+ },
+ {
+  "id": "link-health:https-ourblink-cash",
+  "source": "link-health",
+  "surface": "directory",
+  "probe": "https://ourblink.cash",
+  "failureMode": "link-not-the-product",
+  "severity": "medium",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-11T09:37:34.268Z",
+  "kind": "world"
+ },
+ {
+  "id": "nightly-note-freshness:note-repo-gone-57blocks-agentsmith-x402",
+  "source": "nightly-note-freshness",
+  "surface": "code",
+  "probe": "note-repo-gone:57blocks/agentsmith-x402",
+  "failureMode": "note-stale",
+  "severity": "low",
+  "firstSeen": "2026-11-11T13:11:37.491Z",
+  "lastSeen": "2026-11-11T13:11:37.491Z",
+  "status": "open",
+  "evidenceAt": "2026-11-11T13:10:53.803Z",
+  "kind": "world"
  }
 ]

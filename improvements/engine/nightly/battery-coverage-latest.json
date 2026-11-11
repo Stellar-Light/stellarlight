@@ -1,11 +1,5 @@
 {
-	"generatedAt": "2026-11-09T14:34:22.796Z",
+	"generatedAt": "2026-11-11T13:10:09.341Z",
 	"detector": "battery-coverage",
-	"failures": [
-		{
-			"probe": "battery:q-eco-defi-projects-discovery",
-			"note": "top 0.00 < 0.6 via projects/confidence for \"Who is building DeFi on Stellar — give me a directory of the main DeFi projects.\" (defi-ecosystem); best: none",
-			"surface": "corpus"
-		}
-	]
+	"failures": []
 }
