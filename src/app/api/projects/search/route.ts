@@ -83,6 +83,10 @@ import {
 	tvlStaleOf,
 	tvlUnavailableOf,
 } from "@/lib/status-checks";
+import {
+	type AvailabilityCheck,
+	pickAvailabilityCheck,
+} from "@/lib/wallet-coverage";
 
 /**
  * Semantic project search via Atlas $vectorSearch over project embeddings
@@ -177,6 +181,7 @@ async function semanticProjectRows(
 				// sls-033: wallet product kind + per-platform availability
 				productKind: 1,
 				availability: 1,
+				availabilityCheck: 1,
 				score: { $meta: "vectorSearchScore" },
 			},
 		},
@@ -261,6 +266,10 @@ async function semanticProjectRows(
 			// sls-033: wallet product kind + per-platform availability
 			productKind: typeof p.productKind === "string" ? p.productKind : null,
 			availability: pickAvailability(p.availability),
+			availabilityCheck: pickAvailabilityCheck(
+				p.availabilityCheck,
+				pickAvailability(p.availability),
+			),
 			hackathon: null,
 			hackathonPlacement: p.hackathonPlacement ?? null,
 			hackathonPrize: null,
@@ -457,6 +466,9 @@ interface ProjectRow {
 	// "unavailable") — availability is deliberately separate from `status`.
 	productKind?: string | null;
 	availability?: PlatformAvailability[] | null;
+	// sls-033: a dated check behind a null availability (none-found or
+	// could-not-check); null when availability has rows or nobody checked.
+	availabilityCheck?: AvailabilityCheck | null;
 	canonicalSlug: string | null;
 	// sls-050: rename continuity as data — aliases resolve here in search and
 	// the block carries provenance. Null when the project never renamed.
@@ -1531,6 +1543,7 @@ async function handle(req: NextRequest) {
 					venueRole?: string | null;
 					productKind?: string | null;
 					availability?: unknown;
+					availabilityCheck?: unknown;
 					canonicalSlug?: string | null;
 					lifecycle?: { wasLive?: boolean; note?: string } | null;
 					logo?: { url?: string; filename?: string } | string | null;
@@ -1658,6 +1671,10 @@ async function handle(req: NextRequest) {
 					// sls-033: wallet product kind + per-platform availability
 					productKind: typeof p.productKind === "string" ? p.productKind : null,
 					availability: pickAvailability(p.availability),
+					availabilityCheck: pickAvailabilityCheck(
+						p.availabilityCheck,
+						pickAvailability(p.availability),
+					),
 					canonicalSlug: p.canonicalSlug ?? null,
 					identity: pickIdentity(p),
 					lifecycle: pickLifecycle(p.lifecycle),
@@ -2355,6 +2372,10 @@ async function handle(req: NextRequest) {
 					// sls-033: product kind + availability must be the CANONICAL's too
 					productKind: typeof c.productKind === "string" ? c.productKind : null,
 					availability: pickAvailability(c.availability),
+					availabilityCheck: pickAvailabilityCheck(
+						c.availabilityCheck,
+						pickAvailability(c.availability),
+					),
 					canonicalSlug: null,
 					identity: pickIdentity(c),
 					lifecycle: pickLifecycle(c.lifecycle),

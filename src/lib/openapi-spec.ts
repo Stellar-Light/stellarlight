@@ -54,7 +54,14 @@ import {
 	RESOLVABLE_PROJECT_STATUSES,
 	STATUS_BASES,
 } from "./project-status";
-import { PROJECT_TYPES, VENUE_ROLES } from "./project-types";
+import {
+	AVAILABILITY_CHECK_RESULTS,
+	AVAILABILITY_PLATFORMS,
+	AVAILABILITY_STATES,
+	PRODUCT_KINDS,
+	PROJECT_TYPES,
+	VENUE_ROLES,
+} from "./project-types";
 import { RATE_LIMIT_SCOPE } from "./rate-limit";
 import { CODE_SCAN_STATES, REPO_KINDS } from "./repo-grade";
 import { LIVE_READ_PARTS } from "./repo-live-read";
@@ -11987,8 +11994,9 @@ export const spec: OpenAPISpec = {
 					productKind: {
 						type: "string",
 						nullable: true,
+						enum: [...PRODUCT_KINDS],
 						description:
-							"Curated product-kind for wallet-class records (hardware-wallet | mobile-app | browser-extension | web-app | protocol | sdk-kit). null = not-yet-classified (never a negative claim).",
+							"What kind of wallet-landscape product a Wallet row is, curated from the operator's own description: end-user-wallet (an app people or organizations hold funds in), hardware-wallet (a physical signing device), connectivity-protocol (a wallet-to-dApp connection protocol, not a wallet), wallet-sdk (a library or platform for building wallets), integration-kit (a library for connecting existing wallets to dApps), smart-account-tooling (passkey or smart-account infrastructure). Null = not yet classified (unknown, never 'not a wallet').",
 					},
 					availability: {
 						type: "array",
@@ -11996,15 +12004,30 @@ export const spec: OpenAPISpec = {
 						items: {
 							type: "object",
 							properties: {
-								platform: { type: "string" },
-								state: { type: "string" },
+								platform: { type: "string", enum: [...AVAILABILITY_PLATFORMS] },
+								state: { type: "string", enum: [...AVAILABILITY_STATES] },
 								storeUrl: { type: "string", nullable: true },
 								checkedAt: { type: "string", nullable: true },
 								note: { type: "string", nullable: true },
 							},
 						},
 						description:
-							"Per-platform availability with as-of dates. null = not curated.",
+							"Per-platform app availability, each row dated by checkedAt (YYYY-MM-DD). platform sms is a wallet used by text message, with no app; its storeUrl is the operator's page for that service. available = the store listing or product surface at storeUrl was reachable on checkedAt; unavailable = the operator listed or announced the product for that platform but it could not be used there on checkedAt: the listing is gone or 404s, the product is not out yet, or the operator says it has shut down (the note says which; storeUrl is null unless a listing is still up). Rows say where the product's app is offered, not that it supports Stellar on that platform, and are separate from `status` (lifecycle). Null = no platform fact recorded: unknown, never 'unavailable'; availabilityCheck says whether a check found none.",
+					},
+					availabilityCheck: {
+						type: "object",
+						nullable: true,
+						properties: {
+							result: { type: "string", enum: [...AVAILABILITY_CHECK_RESULTS] },
+							checkedAt: { type: "string", format: "date" },
+							sources: {
+								type: "array",
+								items: { type: "string", format: "uri" },
+							},
+							note: { type: "string" },
+						},
+						description:
+							"A dated check behind a null availability. result none-found = the sources (the operator's site, docs or repo and the store links they give) were read on checkedAt and offer no app, extension, device, web app or SMS service, or the operator's domain no longer resolves (the note says which); could-not-check = a source could not be read on checkedAt. Unknown either way, never 'unavailable'; note says what the sources showed. Null when availability has rows or no check is recorded.",
 					},
 					types: {
 						type: "array",

@@ -1,10 +1,8 @@
 {
 	"$comment": "Type errors in scripts/ that predate the guard. A ratchet: entries may be REMOVED (in the PR that fixes them) and never added. Regenerate: pnpm exec tsx scripts/check-scripts-types.ts --update",
-	"updatedAt": "2026-09-14T22:11:11.155Z",
-	"count": 28,
+	"updatedAt": "2026-11-12T00:05:10.524Z",
+	"count": 26,
 	"errors": [
-		"scripts/agents/apply-wallet-availability.ts :: error TS2345 :: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.",
-		"scripts/agents/apply-wallet-availability.ts :: error TS2769 :: No overload matches this call.",
 		"scripts/apply-status-batch.ts :: error TS2769 :: No overload matches this call.",
 		"scripts/backfill-code-tier.ts :: error TS2769 :: No overload matches this call.",
 		"scripts/data/award-import.ts :: error TS2322 :: Type '{ slug: { equals: string; }; status?: undefined; } | { status: { equals: string; }; slug?: undefined; }' is not assignable to type 'Where | undefined'.",
@@ -33,8 +31,6 @@
 		"scripts/set-types.ts :: error TS2769 :: No overload matches this call."
 	],
 	"occurrences": {
-		"scripts/agents/apply-wallet-availability.ts :: error TS2345 :: Argument of type 'string | undefined' is not assignable to parameter of type 'string'.": 1,
-		"scripts/agents/apply-wallet-availability.ts :: error TS2769 :: No overload matches this call.": 1,
 		"scripts/apply-status-batch.ts :: error TS2769 :: No overload matches this call.": 1,
 		"scripts/backfill-code-tier.ts :: error TS2769 :: No overload matches this call.": 1,
 		"scripts/data/award-import.ts :: error TS2322 :: Type '{ slug: { equals: string; }; status?: undefined; } | { status: { equals: string; }; slug?: undefined; }' is not assignable to type 'Where | undefined'.": 1,

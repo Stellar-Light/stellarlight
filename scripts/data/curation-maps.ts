@@ -18,7 +18,13 @@ import {
 	isStrongStatusBasis,
 	type StatusBasis,
 } from "../../src/lib/project-status";
-import type { VENUE_ROLES } from "../../src/lib/project-types";
+import type {
+	AVAILABILITY_PLATFORMS,
+	AVAILABILITY_STATES,
+	PRODUCT_KINDS,
+	VENUE_ROLES,
+} from "../../src/lib/project-types";
+import type { AvailabilityCheck } from "../../src/lib/wallet-coverage";
 export type { StatusBasis };
 
 /** Launch-status corrections (boxy 2026-07-09: "some are in process of
@@ -160,13 +166,17 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://axis.markets/docs/developers/networks/",
 		note: 'AXIS\'s networks page says "AXIS is not deployed on mainnet yet." (read 2026-11-07). Its earlier Live stamp rested on an npm release of @axis-markets/json-storage, a helper package, not on the order book running on mainnet.',
 	},
+	// Rewritten in place 2026-11-11 (sls-033), as axis was above: this was a
+	// package-release Live stamp from @cypherhq/agent-pay on npm. The operator
+	// has since announced the shutdown itself, and a package published in April
+	// says nothing about a platform its owner says is gone.
 	cypher: {
 		from: "Live",
-		to: "Live",
-		basis: "package-release",
-		asOf: "2026-04-28",
-		sourceUrl: "https://registry.npmjs.org/@cypherhq/agent-pay",
-		note: "@cypherhq/agent-pay@0.1.0-beta.15 on npm, published 2026-04-28 (133d before the 2026-09-08 sweep). The registry names CypherD-IO/agent-pay as the package source (npm repository.url), a backlink that cannot be produced without controlling both the repo and the namespace. Basis moved off site-liveness, which only ever meant a page answered.",
+		to: "Inactive",
+		basis: "operator-announcement",
+		asOf: "2026-11-11",
+		sourceUrl: "https://cypherhq.io/notice-of-termination",
+		note: "Cypher's notice of termination, dated 2026-07-08, gives 2026-09-06 as the Service End Date: \"After this date, the Cypher mobile application and the Cypher Card will no longer be operational.\" Its home page timeline adds that the dApp and business platform end the same day, after Cypher's acquisition by Nium. Read 2026-11-11; the store listings are still up.",
 	},
 	drips: {
 		from: "Live",
@@ -5267,6 +5277,1385 @@ export const VENUE_ROLE: Record<string, (typeof VENUE_ROLES)[number]> = {
  * record-completeness sweep (S4) files each one that has none of them. Empty
  * on 2026-11-07, when every row had a recorded state. */
 export const VENUE_ROLE_UNRESOLVED: Record<string, string> = {};
+
+/** sls-033 (#519): productKind, WHAT KIND of wallet-landscape product each row
+ * is, so a consumer can tell an end-user wallet from adjacent tooling: hardware
+ * wallets, connectivity protocols, wallet SDKs, integration kits, and passkey
+ * or smart-account tooling. Values are PRODUCT_KINDS (src/lib/project-types.ts).
+ * Fill-if-different, applied by curate-projects.ts. Each row is grounded in the
+ * operator's own product description. Moved here from curate-projects.ts on
+ * 2026-11-11, assignments unchanged except stellar-metamask, so a test can pin
+ * every entry and the nightly sweep can read the reasons beside it. A Wallet
+ * row left off this map must carry a dated reason in PRODUCT_KIND_UNRESOLVED;
+ * productKind null means "not yet classified", never "not a wallet". */
+export const PRODUCT_KIND: Record<string, (typeof PRODUCT_KINDS)[number]> = {
+	// hardware-wallet: the description says "hardware wallet"
+	ledger: "hardware-wallet", // "Ledger is a hardware wallet designed to securely store…"
+	trezor: "hardware-wallet", // "Trezor is a hardware wallet…"
+	onekey: "hardware-wallet", // "Open-source hardware and software wallet with Stellar support"
+	// wallet-sdk: a library or builder for BUILDING wallets
+	spatium: "wallet-sdk", // "open-source Web3 Wallet Builder for businesses"
+	// integration-kit: integrating existing wallets into dApps
+	"simple-signer": "integration-kit", // "in-browser transaction signer that supports different stellar wallets"
+	// 2026-11-11: was integration-kit. The operator calls the Snap "A non custodial
+	// Stellar Wallet for metamask" (npm stellar-snap 1.0.9) and the Snaps Directory
+	// says it lets users "manage, send, and receive stellar tokens": a wallet people
+	// hold funds in, not a library for connecting wallets to dApps.
+	"stellar-metamask": "end-user-wallet",
+	metamask: "end-user-wallet", // sls-112: support.metamask.io: "MetaMask supports Stellar as a default network, allowing you to manage XLM and other assets" (seeded 2026-11-04)
+	// smart-account-tooling: passkey or smart-account infrastructure
+	"stellar-passport": "smart-account-tooling", // "passkey-secured identity and participation layer"
+	"volta-circuit": "smart-account-tooling", // "smart contract-based security protocol… automated asset protection, recovery"
+	humantech: "smart-account-tooling", // "keys, wallets, and identity infrastructure for personhood, self-custody"
+	// end-user-wallet: a consumer or institutional app users hold funds in
+	lobstr: "end-user-wallet",
+	xbull: "end-user-wallet",
+	freighter: "end-user-wallet",
+	hana: "end-user-wallet",
+	beans: "end-user-wallet",
+	albedo: "end-user-wallet",
+	rabet: "end-user-wallet",
+	vesseo: "end-user-wallet",
+	"solar-wallet": "end-user-wallet",
+	"hot-wallet": "end-user-wallet",
+	"bitget-wallet": "end-user-wallet",
+	klever: "end-user-wallet",
+	mpcvault: "end-user-wallet",
+	"unstoppable-wallet": "end-user-wallet",
+	sollpay: "end-user-wallet",
+	sentit: "end-user-wallet",
+	freelii: "end-user-wallet",
+	"freedom-pay-wallet": "end-user-wallet",
+	coca: "end-user-wallet",
+	bousol: "end-user-wallet",
+	"ben-wallet": "end-user-wallet",
+	peer: "end-user-wallet",
+	meru: "end-user-wallet",
+	lemon: "end-user-wallet",
+	"kotani-pay": "end-user-wallet",
+	bebop: "end-user-wallet",
+	blaze: "end-user-wallet",
+	cypher: "end-user-wallet",
+	scopuly: "end-user-wallet",
+	"neon-wallet": "end-user-wallet",
+	bexo: "end-user-wallet",
+	akuna: "end-user-wallet",
+	stellarport: "end-user-wallet",
+	interstellar: "end-user-wallet",
+	empowch: "end-user-wallet",
+	elsa: "end-user-wallet",
+	"boss-revolution": "end-user-wallet",
+	"tago-cash": "end-user-wallet",
+	ripio: "end-user-wallet",
+	emigro: "end-user-wallet",
+	nemorixpay: "end-user-wallet",
+	airgap: "end-user-wallet", // "turn a spare smartphone into a fully offline cold wallet": an end-user cold wallet app (software, not a hardware product)
+	// sls-033 residual (2026-07-15): the 14 null-productKind Wallet rows of that
+	// day, each web-verified via the directory-quality-verify workflow. 10 live
+	// wallets were classified here; 3 non-wallets lost the Wallet type in
+	// TYPES_SET (pakananet, stellarfolio, equilibre).
+	decaf: "end-user-wallet", // App Store "Decaf Wallet", non-custodial Solana+Stellar, MoneyGram off-ramp
+	"cactus-link": "end-user-wallet", // Cactus Link Chrome-extension wallet (Matrixport / Cactus Custody)
+	lumexo: "end-user-wallet", // lumexo.io "Your Stellar Wallet & DEX": self-custody accounts (an in-app swap is not a standalone DEX)
+	swiftex: "end-user-wallet", // App Store "SwiftEx Wallet: Multi-Chain Wallet & Swaps", self-custody (wallet first, swap is a feature)
+	hedgepay: "end-user-wallet", // "Your Self-Custodial App": a stablecoin wallet on Stellar/Soroban (yield is an in-app feature)
+	cobo: "wallet-sdk", // Wallet-as-a-Service: one API/SDK stack; institutional WaaS + custody infra (Cobo Guard is a companion)
+	openxswitch: "wallet-sdk", // wallet-as-a-service / WaaS + custody infra for African fintechs (B2B, developer-facing)
+	"hito-wallet": "hardware-wallet", // Hito HOLD: a physical $150 NFC hardware wallet device
+	arculus: "hardware-wallet", // Arculus Key Card: a physical signing device + companion app
+	keystone: "hardware-wallet", // Keystone 3 Pro: an air-gapped cold hardware wallet
+	// sls-033 recheck (2026-08-13): the agent-stack seed row, a library that
+	// CREATES and operates Stellar wallets programmatically for AI agents
+	// (signing, tx-building, x402/mpp caps verified by code scan). A wallet
+	// built BY software from a library = wallet-sdk.
+	"stellar-agent-wallet-skill": "wallet-sdk",
+	// sls-033, 2026-11-11: the 11 Wallet rows still null, each read from the
+	// operator's own site, docs or repo that day.
+	amulets: "end-user-wallet", // App Store and Play "Amulets: Crypto Card & Wallet"; amulets.io: "a simple dollar account to hold stablecoins"
+	chainless: "end-user-wallet", // App Store listing: "A Chainless é uma carteira de autocustódia" (a self-custody wallet)
+	haven: "end-user-wallet", // haven.hn: "Haven is a self-custodial software application"; its app manifest: "Self-custody and privacy for your crypto"
+	ibis: "end-user-wallet", // usaibis.com: "La billetera para freelancers" (the wallet for freelancers), App Store and Play app "Ibis"
+	"piggy-wallet": "end-user-wallet", // app.piggywallet.app: "earn returns on the money available in your family wallet"
+	zig3v2: "end-user-wallet", // zig3.org: "Create A New Wallet", sign-in with Finger/Face or an existing Stellar wallet
+	"openzeppelin-stellar-privacy-wallet": "end-user-wallet", // repo README: "A passkey-secured smart wallet for Stellar with two real privacy rails"
+	privy: "wallet-sdk", // privy.io: "Embedded wallets for seamless user onboarding"; docs.privy.io signs Stellar transactions under Tier 2
+	rehive: "wallet-sdk", // rehive.com: "Launch your own stablecoin neobank", a white-label app stack (Rehive Pay is its own app on it)
+	"smart-treasury": "smart-account-tooling", // smarttreasury.io: "a Stellar-native programmable treasury account"; users sign with Freighter or xBull and the funds sit in a Soroban smart account
+	// MXlet was left null on 2026-08-13 because xlet.io no longer resolves. Its
+	// own repo (github.com/MattPearce/xlet, read 2026-11-11) says what it was:
+	// "open source software to transform cheap devices into secure hardware
+	// cryptocurrency wallets", firmware for M5Stack devices with BLE companion
+	// apps. The kind is the taxonomy fact; status Inactive carries liveness.
+	mxlet: "hardware-wallet",
+};
+
+/** sls-033: a Wallet row that stays productKind null, with a dated reason it
+ * cannot be classified yet. Every other Wallet row must carry a kind: the
+ * nightly record-completeness sweep (S6) files each one that has neither.
+ * Empty on 2026-11-11, when every Wallet row had a kind. */
+export const PRODUCT_KIND_UNRESOLVED: Record<string, string> = {};
+
+/** The shape of one `availability` row in the curated maps (Projects.ts
+ * availability). storeUrl is left out on an unavailable row. */
+export interface AvailabilityRow {
+	platform: (typeof AVAILABILITY_PLATFORMS)[number];
+	state: (typeof AVAILABILITY_STATES)[number];
+	storeUrl?: string;
+	checkedAt: string;
+	note?: string;
+}
+
+/** sls-033 (#519): per-platform app availability, DATED and store-checked,
+ * deliberately separate from lifecycle `status` (a Live project can have a
+ * dead store listing, as xBull's did). EXACT-SYNC for listed slugs, applied by
+ * curate-projects.ts with WALLET_AVAILABILITY below. The `available` rows of
+ * 2026-07-14 were curl-verified live that day (200 on the exact surface URL);
+ * the xBull ios/android `unavailable` rows carry the 2026-07-13 re-check date
+ * and note the issue cited. A wallet left off keeps availability empty, which
+ * means unknown, never "unavailable". checkedAt dates each row; re-verify
+ * before relying. Moved here from curate-projects.ts on 2026-11-11 so a test
+ * can read every served note; its 16 notes that served an em dash were
+ * reworded then, same words otherwise. */
+export const AVAILABILITY_SET: Record<string, AvailabilityRow[]> = {
+	// ── Store evidence 2026-09-07. Every listing below was found on the
+	// PROJECT'S OWN SITE, never by searching a store for the project's name:
+	// the operator publishing their own store link IS the intersection, and a
+	// name search is the collision trap that cost 26 of 31 matches on the
+	// package-registry pass. Release dates come from Apple's lookup API by id
+	// and Play's "Updated on"; all 13 shipped a build within 90 days.
+	// Three ship under a product name that differs from the row (fastbuka →
+	// "Choppaddi", providencia-onchain → "VIIO", utoken → "Upesa"); kept,
+	// because the link came from their own site, and named here so the
+	// mismatch is visible rather than silently resolved.
+	akuna: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/akuna-wallet/id6748705575?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Akuna Wallet, release 2026-08-31, found via the project's own site",
+		},
+	],
+	bousol: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/bousol-wallet-paon-bleu-inc/id6503965498?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Bousol Wallet - Paon Bleu Inc., release 2026-08-26, found via the project's own site",
+		},
+	],
+	dollarize: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/dollarize-usd-account/id1627818185?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Dollarize: USD Account, release 2026-08-10, found via the project's own site",
+		},
+	],
+	ebioro: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/ebioro/id1662259255?uo=4",
+			checkedAt: "2026-09-07",
+			note: "ebioro, release 2026-09-06, found via the project's own site",
+		},
+	],
+	fastbuka: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/choppaddi/id6761775761?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Choppaddi, release 2026-08-03, found via the project's own site",
+		},
+	],
+	fewticket: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/fewticket/id6743091510?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Fewticket, release 2026-09-02, found via the project's own site",
+		},
+	],
+	"freedom-pay-wallet": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/freedom-pay-wallet/id6448116005?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Freedom Pay Wallet, release 2026-07-16, found via the project's own site",
+		},
+	],
+	meru: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/meru-cuenta-en-d%C3%B3lares/id1636697895?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Meru | Cuenta en dólares, release 2026-09-06, found via the project's own site",
+		},
+	],
+	"providencia-onchain": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/viio/id6452803312?uo=4",
+			checkedAt: "2026-09-07",
+			note: "VIIO, release 2026-08-31, found via the project's own site",
+		},
+	],
+	scopex: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/scopex/id6456889025?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Scopex, release 2026-08-28, found via the project's own site",
+		},
+	],
+	seevcash: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/seevcash-send-money-anywhere/id6444502519?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Seevcash: Send Money Anywhere, release 2026-09-06, found via the project's own site",
+		},
+	],
+	utoken: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/upesa/id6480348587?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Upesa, release 2026-08-19, found via the project's own site",
+		},
+	],
+	yolat: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/yolat/id6742225873?uo=4",
+			checkedAt: "2026-09-07",
+			note: "Yolat, release 2026-09-04, found via the project's own site",
+		},
+	],
+	xbull: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://xbull.app",
+			checkedAt: "2026-07-14",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/xbull-wallet/omajpeaffjgmlpmhbfdjepdejoemifpe",
+			checkedAt: "2026-07-14",
+		},
+		{
+			platform: "ios",
+			state: "unavailable",
+			checkedAt: "2026-07-13",
+			note: "formerly-listed iOS app not reachable (sls-033 #519 re-check); web + Chrome extension remain live",
+		},
+		{
+			platform: "android",
+			state: "unavailable",
+			checkedAt: "2026-07-13",
+			note: "formerly-listed Play app not reachable (sls-033 #519 re-check); web + Chrome extension remain live",
+		},
+	],
+	freighter: [
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/freighter/bcacfldlkkdogcmkkibnjlakofdplcbk",
+			checkedAt: "2026-07-14",
+		},
+	],
+	ledger: [
+		{
+			platform: "hardware-device",
+			state: "available",
+			storeUrl: "https://shop.ledger.com",
+			checkedAt: "2026-07-14",
+		},
+	],
+	lobstr: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://lobstr.co",
+			checkedAt: "2026-07-14",
+		},
+	],
+	// sls-033 residual (2026-07-15): app availability for the newly-classified
+	// wallets, each URL reached live via the directory-quality-verify workflow.
+	decaf: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/decaf-wallet/id1616564038",
+			checkedAt: "2026-07-15",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=so.decaf.wallet",
+			checkedAt: "2026-07-15",
+		},
+	],
+	"cactus-link": [
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/cactus-link/chiilpgkfmcopocdffapngjcbggdehmj",
+			checkedAt: "2026-07-15",
+			note: "Chrome Web Store, v2.1.30, offered by Matrixport (Cactus Custody)",
+		},
+	],
+	lumexo: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://app.lumexo.io/",
+			checkedAt: "2026-07-15",
+		},
+		{
+			platform: "ios",
+			state: "unavailable",
+			checkedAt: "2026-07-15",
+			note: "mobile app 'arriving soon': no App Store listing yet",
+		},
+		{
+			platform: "android",
+			state: "unavailable",
+			checkedAt: "2026-07-15",
+			note: "mobile app 'arriving soon': no Play listing yet",
+		},
+	],
+	swiftex: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/swiftex-wallet/id6759080930",
+			checkedAt: "2026-07-15",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=org.app.swiftEx.wallet",
+			checkedAt: "2026-07-15",
+		},
+	],
+	"hito-wallet": [
+		{
+			platform: "hardware-device",
+			state: "available",
+			storeUrl: "https://shop.hito.xyz/products/hold",
+			checkedAt: "2026-07-15",
+			note: "physical HOLD device ($150); listing live, currently sold out (limited edition)",
+		},
+	],
+	hedgepay: [
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=finance.nabla.hedgepay",
+			checkedAt: "2026-07-15",
+			note: "developer Nabla Finance OU",
+		},
+	],
+	cobo: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://www.cobo.com/products/wallet/mpc",
+			checkedAt: "2026-07-15",
+			note: "Cobo Portal WaaS dashboard",
+		},
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/cobo-guard/id6450997458",
+			checkedAt: "2026-07-15",
+			note: "Cobo Guard: companion MPC key-share/signing app",
+		},
+	],
+	arculus: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/arculus-wallet/id1575425801",
+			checkedAt: "2026-07-15",
+			note: "companion app to the Arculus Key Card",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=co.arculus.wallet.android",
+			checkedAt: "2026-07-15",
+		},
+	],
+	keystone: [
+		{
+			platform: "hardware-device",
+			state: "available",
+			storeUrl: "https://keyst.one/shop/products/keystone-3-pro",
+			checkedAt: "2026-07-15",
+			note: "Keystone 3 Pro air-gapped cold wallet ($149)",
+		},
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/keystone-nexus/id6742313403",
+			checkedAt: "2026-07-15",
+			note: "Keystone Nexus companion app",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.keystone.wallet",
+			checkedAt: "2026-07-15",
+			note: "Keystone Nexus companion app",
+		},
+	],
+};
+
+/** sls-033, 2026-11-11: per-platform availability for the Wallet rows that
+ * had none. Same shape, meaning and writer as AVAILABILITY_SET above
+ * (EXACT-SYNC for listed slugs). The two maps never share a slug: curate-projects stops before
+ * planning if they do. New entries go here.
+ *
+ * Every row was read on 2026-11-11. A store listing counts only when the
+ * operator's own site, docs or repo links it (never a store search by name),
+ * and it was then read in the store itself: Apple's lookup API by id, the
+ * Google Play page, the Chrome Web Store page. An unavailable row says in its
+ * note why: an operator link that now leads nowhere, or a product its operator
+ * has shut down (storeUrl then keeps the listing that is still up). A row says
+ * where the app is offered, not that it supports Stellar there; a note says so
+ * where checked. */
+export const WALLET_AVAILABILITY: Record<string, AvailabilityRow[]> = {
+	albedo: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://albedo.link/",
+			checkedAt: "2026-11-11",
+			note: "Albedo v1.3.0 web app offers 'Create Albedo account'. The repo README describes a browser extension but links no store listing",
+		},
+	],
+	amulets: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/br/app/amulets-crypto-card-wallet/id6752910730",
+			checkedAt: "2026-11-11",
+			note: "Amulets: Crypto Card & Wallet by Amulets Labs, LLC, version 1.63.0 released 2026-11-09; linked from amulets.io",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=io.amulets.wallet",
+			checkedAt: "2026-11-11",
+			note: "Amulets: Crypto Card & Wallet by Amulets Labs, LLC, updated 2026-11-08; linked from amulets.io",
+		},
+	],
+	"bitget-wallet": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/bitget-wallet-crypto-payfi/id1395301115",
+			checkedAt: "2026-11-11",
+			note: "Bitget Wallet: Crypto, PayFi by BitKeep Global Inc., version 9.69.0 released 2026-11-05; linked from web3.bitget.com/wallet-download",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.bitkeep.wallet",
+			checkedAt: "2026-11-11",
+			note: "Bitget Wallet: Crypto, Bitcoin, updated 2026-11-04; linked from web3.bitget.com/wallet-download",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/bitget-wallet-crypto-web3/jiidiaalihmmhddjgbnbgdfflelocpak",
+			checkedAt: "2026-11-11",
+			note: "Chrome Web Store, version 2.21.12 updated 2026-11-07; linked from web3.bitget.com/wallet-download",
+		},
+	],
+	"boss-revolution": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/boss-money-transfer-send-cash/id1169518032",
+			checkedAt: "2026-11-11",
+			note: "BOSS Money Transfer. Send Cash by IDT Global Processing Services, version 26.10.3 released 2026-11-02; linked from bossmoney.com. The listing describes money transfers and names no stablecoin",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.bossrevolution.money.production",
+			checkedAt: "2026-11-11",
+			note: "BOSS Money Transfer. Send Cash by Boss Revolution, updated 2026-10-29; linked from bossmoney.com",
+		},
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://app.bossmoney.com/login",
+			checkedAt: "2026-11-11",
+			note: "BOSS Money web app ('Send money anywhere', sign-in by phone number); linked from bossmoney.com",
+		},
+	],
+	chainless: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/br/app/chainless-patrim%C3%B4nio-soberano/id6476666418",
+			checkedAt: "2026-11-11",
+			note: "Chainless: Patrimônio Soberano by Notus Labs LTDA, version 1.27.5 released 2026-11-03; linked from chainless.finance",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=team.notus.chainless",
+			checkedAt: "2026-11-11",
+			note: "Chainless: Patrimônio Soberano by Notus Labs, updated 2026-10-29; linked from chainless.finance",
+		},
+	],
+	coca: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/coca-crypto-card-wallet/id1594165139",
+			checkedAt: "2026-11-11",
+			note: "COCA: Crypto Card & Wallet by CCA LABS FZCO, version 3.11.1 released 2026-11-06; linked from coca.xyz. The app keeps the former Wirex wallet bundle id",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.wirex.wallet",
+			checkedAt: "2026-11-11",
+			note: "COCA: Crypto Card & Wallet by CCA LABS, updated 2026-11-06; linked from coca.xyz",
+		},
+	],
+	// Shut down by its operator on 2026-09-06 while its listings stay up: the
+	// timeline on cypherhq.io says "The current Cypher mobile app, dApp, and
+	// business platform will no longer be available", so each row is
+	// unavailable and keeps the URL its button still opens.
+	cypher: [
+		{
+			platform: "ios",
+			state: "unavailable",
+			storeUrl: "https://apps.apple.com/in/app/cypher-wallet/id1604120414",
+			checkedAt: "2026-11-11",
+			note: "'Get for iOS' on cypherhq.io still opens this listing (Cypher Wallet, last release 2026-07-14), but the operator says the mobile app is no longer available after its 2026-09-06 shutdown",
+		},
+		{
+			platform: "android",
+			state: "unavailable",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.cypherd.androidwallet",
+			checkedAt: "2026-11-11",
+			note: "'Get for Android' on cypherhq.io still opens this listing (updated 2026-07-13), but the operator says the mobile app is no longer available after its 2026-09-06 shutdown",
+		},
+		{
+			platform: "web",
+			state: "unavailable",
+			storeUrl: "https://app.cypherhq.io/",
+			checkedAt: "2026-11-11",
+			note: "'Go to App' on cypherhq.io still opens this dApp's Connect Wallet screen, but the operator says the dApp is no longer available after its 2026-09-06 shutdown",
+		},
+	],
+	empowch: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/shaheen-money/id1601795189",
+			checkedAt: "2026-11-11",
+			note: "Listed as 'Shaheen money' by Bankey LLC, which empowch.com names as its trademark owner; version 2.6.3 released 2026-10-26; linked from empowch.com/fintech",
+		},
+		{
+			platform: "android",
+			state: "unavailable",
+			checkedAt: "2026-11-11",
+			note: "The Google Play link on empowch.com/fintech (com.app.bankey) returned 404",
+		},
+	],
+	hana: [
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/hana-wallet/jfdlamikmbghhapbgfoogdffldioobgl",
+			checkedAt: "2026-11-11",
+			note: "Chrome Web Store, version 5.15.10 updated 2026-11-10; linked from hanawallet.io, which lists Stellar as live in the extension",
+		},
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/hana-wallet/id6447821572",
+			checkedAt: "2026-11-11",
+			note: "Hana Wallet by Hana Tech Pty Ltd, version 1.93.20 released 2026-10-01; linked from the hanawallet.io site script. The listing does not name Stellar",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.HanaTech.Wallet",
+			checkedAt: "2026-11-11",
+			note: "Hana Wallet by HanaTech, updated 2026-10-07; linked from the hanawallet.io site script. The listing does not name Stellar",
+		},
+	],
+	haven: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://go.haven.hn",
+			checkedAt: "2026-11-11",
+			note: "Haven web app opened by 'Launch App' on haven.hn. Its code names Starknet and EVM networks and no Stellar network; the row's status is Development",
+		},
+	],
+	humantech: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://waap.xyz/",
+			checkedAt: "2026-11-11",
+			note: "'Open the wallet' on wallet.human.tech opens this sign-in page; that page lists EVM, Sui and Solana networks, not Stellar",
+		},
+	],
+	ibis: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/ve/app/ibis/id6472091320",
+			checkedAt: "2026-11-11",
+			note: "Ibis by Ibis Payments LLC, version 1.0.50 released 2026-06-08; usaibis.com links api.usaibis.com/app/ios, which redirects here",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.usaibis.ibis",
+			checkedAt: "2026-11-11",
+			note: "Ibis by Ibis Payments LLC, updated 2026-06-08; usaibis.com links api.usaibis.com/app/android, which redirects here",
+		},
+	],
+	interstellar: [
+		{
+			platform: "ios",
+			state: "unavailable",
+			checkedAt: "2026-11-11",
+			note: "App Store id1437679072, linked from interstellar.exchange (archived 2026-06-07), has no listing: the page 404s and lookup returns no result",
+		},
+		{
+			platform: "android",
+			state: "unavailable",
+			checkedAt: "2026-11-11",
+			note: "Google Play cm.fintech.interstellar, linked from interstellar.exchange (archived 2026-06-07), returned 404",
+		},
+	],
+	// No app: the operator's wallet runs over SMS. Its pages say SMS, not USSD
+	// (kotanipay.com/sms "SMS Wallet", the docs' SMS send and webhook APIs).
+	"kotani-pay": [
+		{
+			platform: "sms",
+			state: "available",
+			storeUrl: "https://kotanipay.com/sms",
+			checkedAt: "2026-11-11",
+			note: "kotanipay.com/sms describes its SMS Wallet: 'Access blockchain technology without the internet', a non-custodial wallet with a 4 digit PIN and cash-out to mobile money. It is offered to partners through an integration (the page's steps are KYB onboarding, a tech call and integration; the docs' SMS API runs on an integrator account), not a public number, and the SMS service itself was not tested",
+		},
+	],
+	lemon: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/ar/app/lemon-billetera-virtual/id1499421511",
+			checkedAt: "2026-11-11",
+			note: "Lemon Billetera virtual by Lemon Cash Inc, version 3.0.21 released 2026-10-27, Argentina storefront; the 'Descargá la app' link on lemon.me redirects here",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.applemoncash",
+			checkedAt: "2026-11-11",
+			note: "Lemon Billetera Virtual by Lemon Cash Inc, updated 2026-10-26; the 'Descargá la app' link on lemon.me redirects here",
+		},
+	],
+	metamask: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/metamask-trade-crypto/id1438144202",
+			checkedAt: "2026-11-11",
+			note: "MetaMask: Trade Crypto by ConsenSys AG, version 8.19.0 released 2026-11-09; linked from metamask.com/download. The listing names Stellar",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=io.metamask",
+			checkedAt: "2026-11-11",
+			note: "MetaMask: Trade Crypto, updated 2026-11-06; linked from metamask.com/download. The listing names Stellar",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn",
+			checkedAt: "2026-11-11",
+			note: "Chrome Web Store, version 13.56.0 updated 2026-11-09; linked from metamask.com/download. The listing does not name Stellar",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://addons.mozilla.org/en-US/firefox/addon/ether-metamask/",
+			checkedAt: "2026-11-11",
+			note: "Firefox Add-ons, version 13.55.0.0 updated 2026-11-11; linked from metamask.com/download",
+		},
+	],
+	mpcvault: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://console.mpcvault.com/",
+			checkedAt: "2026-11-11",
+			note: "MPCVault Console sign-in ('Non-custodial Web3 wallet for teams'), linked from mpcvault.com; docs.mpcvault.com covers Stellar",
+		},
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/mpcvault-multisig-wallet/id1622756458",
+			checkedAt: "2026-11-11",
+			note: "MPCVault Multisig Wallet by MetaLoop Inc, version 1.161.0 released 2026-11-06; in the Download menu on mpcvault.com",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.mpcvault.mobileapp.android",
+			checkedAt: "2026-11-11",
+			note: "MPCVault Multisig Wallet by MetaLoop Inc, updated 2026-11-08; in the Download menu on mpcvault.com",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/mpcvault/jgfmfplofjigjfokigdiaiibhonfnedj",
+			checkedAt: "2026-11-11",
+			note: "Chrome Web Store, version 1.0.127 updated 2026-11-09; in the Download menu on mpcvault.com",
+		},
+	],
+	"neon-wallet": [
+		{
+			platform: "desktop",
+			state: "available",
+			storeUrl:
+				"https://github.com/CityOfZion/neon-wallet-desktop/releases/latest",
+			checkedAt: "2026-11-11",
+			note: "v3.11.0 released 2026-06-12 for macOS, Windows and Linux; the desktop buttons on coz.io/products/neon-wallet-3 download from it",
+		},
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/br/app/neon-wallet-mobile/id1530111452",
+			checkedAt: "2026-11-11",
+			note: "Neon Wallet Mobile by COZ Inc., version 1.13.0 released 2026-06-12; opened by the iOS button on coz.io",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=io.cityofzion.neon",
+			checkedAt: "2026-11-11",
+			note: "Neon Wallet by COZ, Inc., updated 2026-06-07; opened by the Android button on coz.io. The listing names Stellar Blockchain Support",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://github.com/CityOfZion/neon-wallet-aero/releases/latest",
+			checkedAt: "2026-11-11",
+			note: "The Chrome button on coz.io downloads neon-0.9.1.zip (2026-06-12) from this release to load unpacked; no store listing",
+		},
+	],
+	"openzeppelin-stellar-privacy-wallet": [
+		{
+			platform: "web",
+			state: "unavailable",
+			checkedAt: "2026-11-11",
+			note: "The testnet app the repo README links ('Try it live', privacywallet.coderipper.xyz) returned 404 from its host",
+		},
+	],
+	openxswitch: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://console.openxswitch.com/signin",
+			checkedAt: "2026-11-11",
+			note: "Developer console sign-in, linked as Console on openxswitch.com. The operator's site and docs name no Stellar network",
+		},
+	],
+	"piggy-wallet": [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://app.piggywallet.app",
+			checkedAt: "2026-11-11",
+			note: "Piggy Wallet web app opened by 'Ingresar' on piggywallet.app; it showed 'Login / Signup'. The site also runs an early-access waitlist",
+		},
+	],
+	privy: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://dashboard.privy.io/",
+			checkedAt: "2026-11-11",
+			note: "Developer dashboard linked from privy.io; Privy is an SDK and API for apps that embed wallets, not a consumer app",
+		},
+	],
+	rehive: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/rehive-pay/id1371128319",
+			checkedAt: "2026-11-11",
+			note: "Rehive Pay, the operator's own app on its white-label stack (rehive.com: 'Try Rehive Pay'), version 8.0.2 released 2026-10-08",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.rehivewallet",
+			checkedAt: "2026-11-11",
+			note: "Rehive Pay by Rehive, updated 2026-10-08; linked from rehive.com",
+		},
+	],
+	scopuly: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://scopuly.com/wallet",
+			checkedAt: "2026-11-11",
+			note: "Scopuly web wallet (assets, trade, swap, send) on scopuly.com",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=com.sdex.app",
+			checkedAt: "2026-11-11",
+			note: "Scopuly: Stellar DeFi Wallet by Scopuly, updated 2026-09-01; linked from scopuly.com",
+		},
+		{
+			platform: "desktop",
+			state: "available",
+			storeUrl: "https://scopuly.com/source/scopuly-universal.dmg",
+			checkedAt: "2026-11-11",
+			note: "macOS disk image linked as 'Mac .dmg' on scopuly.com, last modified 2026-09-14",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/scopuly-stellar-mobile-si/gfblddiiepicpjpffokeojikcphggmmd",
+			checkedAt: "2026-11-11",
+			note: "Scopuly Stellar Signer on the Chrome Web Store, version 0.3.8 updated 2026-10-23; linked from scopuly.com, also as its Brave and Opera install",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://microsoftedge.microsoft.com/addons/detail/dgdmamodkdcafjehfelpcnifpldbfmai",
+			checkedAt: "2026-11-11",
+			note: "Scopuly Stellar Signer on Microsoft Edge Add-ons, version 0.3.8 updated 2026-10-22; linked from scopuly.com",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://addons.mozilla.org/en-US/firefox/addon/scopuly-stellar-signer/",
+			checkedAt: "2026-11-11",
+			note: "Scopuly Stellar Mobile Signer on Firefox Add-ons, version 0.3.8 updated 2026-10-22; linked from scopuly.com",
+		},
+		{
+			platform: "ios",
+			state: "unavailable",
+			checkedAt: "2026-11-11",
+			note: "The App Store link on scopuly.com (id1383402218, also its Mac App Store link) has no listing: the page 404s and lookup returns no result in 21 storefronts",
+		},
+	],
+	"smart-treasury": [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://smarttreasury.io/app",
+			checkedAt: "2026-11-11",
+			note: "STA Console on Stellar mainnet, opened by 'Launch App' on smarttreasury.io; operators connect Freighter or xBull",
+		},
+	],
+	"stellar-passport": [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://stellarpassport.xyz/",
+			checkedAt: "2026-11-11",
+			note: "Stellar Passport web app: 'Sign in with a passkey and get a Stellar wallet in seconds', with 'Get your passport' and event stamps (read in a browser; command-line TLS clients on the checking network failed)",
+		},
+	],
+	"stellar-metamask": [
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl: "https://snaps.metamask.io/snap/npm/stellar-snap/",
+			checkedAt: "2026-11-11",
+			note: "MetaMask Snaps Directory listing (installs into the MetaMask extension), under 1K installs; npm stellar-snap 1.0.9 published 2025-07-08",
+		},
+	],
+	"tago-cash": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/tagocash/id6752428469",
+			checkedAt: "2026-11-11",
+			note: "TagoCash by TagoBits, Inc, version 1.0.20 released 2026-10-30; linked from tago.cash/download-app",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=com.tago.cash",
+			checkedAt: "2026-11-11",
+			note: "TagoCash by TagoBits, updated 2026-10-29; linked from tago.cash/download-app",
+		},
+	],
+	trezor: [
+		{
+			platform: "hardware-device",
+			state: "available",
+			storeUrl: "https://trezor.io/store",
+			checkedAt: "2026-11-11",
+			note: "Trezor Safe 7, Safe 5 and Safe 3 on sale; trezor.io/coins/wallet/stellar lists these three as the models that support Stellar",
+		},
+		{
+			platform: "desktop",
+			state: "available",
+			storeUrl: "https://trezor.io/trezor-suite",
+			checkedAt: "2026-11-11",
+			note: "'Download for desktop' served Trezor Suite 26.10.3",
+		},
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/trezor-suite/id1631884497",
+			checkedAt: "2026-11-11",
+			note: "Trezor Suite by Trezor Company s.r.o., version 26.10.2 released 2026-10-28; linked from trezor.io/trezor-suite, which says only Trezor Safe 7 works with iOS",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=io.trezor.suite",
+			checkedAt: "2026-11-11",
+			note: "Trezor Suite by Trezor, updated 2026-10-24; linked from trezor.io/trezor-suite",
+		},
+	],
+	"unstoppable-wallet": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/unstoppable-crypto-wallet/id1447619907",
+			checkedAt: "2026-11-11",
+			note: "Unstoppable: Crypto Wallet by Horizontal Systems, version 0.53.1 released 2026-11-02; linked from unstoppable.money/faq",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=io.horizontalsystems.bankwallet",
+			checkedAt: "2026-11-11",
+			note: "Unstoppable: Crypto Wallet by Horizontal Systems, updated 2026-11-04; linked from unstoppable.money/faq",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://f-droid.org/en/packages/io.horizontalsystems.bankwallet/",
+			checkedAt: "2026-11-11",
+			note: "F-Droid, latest version added 2026-11-09; linked from unstoppable.money",
+		},
+	],
+	zig3v2: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://zig3.org/",
+			checkedAt: "2026-11-11",
+			note: "Zig3V2 web app: 'Create A New Wallet' and sign-in with Finger/Face, Freighter, Albedo, Rabet, Ledger or Trezor",
+		},
+	],
+	// Folded in 2026-11-11 from apply-wallet-availability, retired as a writer
+	// the same day so availability has one writer. These 27 rows are the
+	// stored values exactly as that lane wrote them from the reviewed drafts
+	// of 2026-08-13 and 2026-08-14 (improvements/drafts/), so the curate dry
+	// run reads them as in sync and writes nothing, except Rabet: its stored
+	// note served an em dash, now parentheses, so the lane rewrites that one
+	// note. Their checkedAt is the drafts' date, not 2026-11-11.
+	airgap: [
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=it.airgap.vault",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Play Store link for AirGap Vault (it.airgap.vault)",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=it.airgap.wallet",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Play Store link for AirGap Wallet (it.airgap.wallet)",
+		},
+	],
+	beans: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/beans-app/id1616633340",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: App Store link present; 'View in the Apple Store' and iOS store URL in markup",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.beansapp.app",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Play Store link present; 'View in the Play Store' and Play store URL in markup",
+		},
+	],
+	bexo: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/ar/app/beexo-wallet/id1533311061",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: App Store link present; text: 'Disponible para iOS y Android' and 'Descargar para iOS'",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=com.beexo",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Play Store link present; text: 'Disponible para iOS y Android' and 'Descargar para Android'",
+		},
+	],
+	emigro: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/app/emigro-pay-without-borders/id6475793514",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: 'Download on the App Store' with Apple App Store link",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=co.emigro.app",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: 'Get it on Google Play' with Play Store link",
+		},
+	],
+	"hot-wallet": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/hot-wallet/id6740916148",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: App Store link for HOT Wallet in page markup/footer",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/hot-wallet/mpeengabcnhhjjgleiodimegnkpcenbk",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Chrome Web Store link; text lists 'Extenstion 100%' as released",
+		},
+	],
+	klever: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/br/app/klever-wallet-bitcoin-cripto/id1615064243",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: App Store link for Klever Wallet; 'APPLE 4.8 out of 5 979 reviews'",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/klever-wallet/ifclboecfhkjbpmhgehodcjpciihhmif",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Chrome Web Store link for Klever Wallet extension",
+		},
+	],
+	onekey: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/app/id1609559473",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: App Store link for OneKey app; footer lists iOS",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=so.onekey.app.wallet",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Play Store link for so.onekey.app.wallet; footer lists Android",
+		},
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chromewebstore.google.com/detail/onekey/jnmbobjmhlngoefaiojfljckilhhlhcj",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Chrome Web Store link; 'Download browser extension - Connect OneKey to any dApp'",
+		},
+	],
+	peer: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/us/app/peer-the-everything-app/id1531810971",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: App Store link for 'Peer - The Everything App' present in page markup",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.dn.honeycoin&hl=en",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Play Store link (com.dn.honeycoin, HoneyCoin) present in page markup",
+		},
+	],
+	rabet: [
+		{
+			platform: "browser-extension",
+			state: "available",
+			storeUrl:
+				"https://chrome.google.com/webstore/detail/rabet/hgmoaheomcjnaheggkfafnjilfcefbmo",
+			checkedAt: "2026-08-13",
+			note: 'curator-agent draft: "This product is available for Chrome, Firefox, Edge, and Brave" (Chrome Web Store link present)',
+		},
+	],
+	ripio: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/ar/app/ripio-app-crypto-wallet/id1221006761",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: App Store link for 'Ripio App Crypto Wallet' (AR); page mentions '4.3 en App Store'",
+		},
+	],
+	"simple-signer": [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://sign.bigger.systems",
+			checkedAt: "2026-08-14",
+			note: "curator-agent draft: Runs in-browser; opens windows at https://sign.bigger.systems/connect, /sign, /payment and can be embedded on any website",
+		},
+	],
+	"solar-wallet": [
+		{
+			platform: "android",
+			state: "available",
+			storeUrl: "https://play.google.com/store/apps/details?id=io.solarwallet",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Play Store link in markup; page text 'Install on Android'",
+		},
+	],
+	sollpay: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/fr/app/sollpay/id6746510838",
+			checkedAt: "2026-08-13",
+			note: 'curator-agent draft: "Download on Apple App Store" with direct App Store link',
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.mercurylabs.sollpayhq",
+			checkedAt: "2026-08-13",
+			note: 'curator-agent draft: "Download on Google Play" with direct Play Store link',
+		},
+	],
+	stellarport: [
+		{
+			platform: "web",
+			state: "available",
+			storeUrl: "https://stellarport.io",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: Noncustodial wallet runs in-browser: 'Every transaction is done directly on your machine. Your secret key is only stored in memory' at stell",
+		},
+	],
+	vesseo: [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl:
+				"https://apps.apple.com/ar/app/vesseo-tu-billetera-de-usdc/id1514223107",
+			checkedAt: "2026-08-13",
+			note: "curator-agent draft: App Store link in page markup; '4,6 ★ en App Store'",
+		},
+	],
+	"volta-circuit": [
+		{
+			platform: "ios",
+			state: "available",
+			storeUrl: "https://apps.apple.com/us/app/threshold-v/id6744829082",
+			checkedAt: "2026-08-14",
+			note: "curator-agent draft: 'Mobile App Download ThresholdV - Turn your phone into a secure signing device'; App Store link present",
+		},
+		{
+			platform: "android",
+			state: "available",
+			storeUrl:
+				"https://play.google.com/store/apps/details?id=com.voltacircuit.threshold",
+			checkedAt: "2026-08-14",
+			note: "curator-agent draft: 'Mobile App Download ThresholdV'; Play Store link id com.voltacircuit.threshold",
+		},
+	],
+};
+
+/** sls-033, 2026-11-11: the checked-empty state. A Wallet row whose sources
+ * were read and offer no app, extension, device, web app or SMS service, or
+ * whose operator domain no longer resolves (none-found, the note says which),
+ * or whose sources could not be read (could-not-check), gets the dated check
+ * here instead of a guessed availability. curate-projects writes it to
+ * availabilityCheck only while the row has no availability, and clears it
+ * once the row has some. To move a slug to rows, add them to
+ * WALLET_AVAILABILITY: a slug named here too is allowed, and that run writes
+ * the rows and clears the check; drop the entry here afterwards. Removing an
+ * entry without adding rows does not clear the stored check: the planner only
+ * visits slugs a map names, so the old check keeps being served. */
+export const AVAILABILITY_CHECKED: Record<string, AvailabilityCheck> = {
+	bebop: {
+		result: "none-found",
+		checkedAt: "2026-11-11",
+		sources: [
+			"https://x.com/bebopcash",
+			"https://github.com/christopherkarani/escrowcotract",
+		],
+		note: "No website on record; x.com/bebopcash showed 'This account doesn't exist'; the linked repo (an escrow contract, last push 2024-11-14) links no app",
+	},
+	"ben-wallet": {
+		result: "none-found",
+		checkedAt: "2026-11-11",
+		sources: [
+			"https://myben.gitbook.io/ben-platform/releases.md",
+			"https://github.com/ben-platform",
+			"https://myben.xyz/",
+		],
+		note: "The docs say early Android builds ship as APKs under GitHub Releases, and no wallet release is published there; myben.xyz is a pre-launch waitlist ('Almost there! ... we'll let you know when it's ready'), with no app yet",
+	},
+	blaze: {
+		result: "could-not-check",
+		checkedAt: "2026-11-11",
+		sources: ["https://blaze.money/", "https://blaze.money/about"],
+		note: "blaze.money/about offers 'Download Blaze on iOS and Android' only through an email form, so no store link could be read; the home page now presents an AI CFO product for businesses",
+	},
+	elsa: {
+		result: "none-found",
+		checkedAt: "2026-11-11",
+		sources: ["https://elsa.care/", "https://elsa.care/about"],
+		note: "elsa.care links no app; it says its 2021 consumer remittance app became Borderless, a B2B payments API, in 2023",
+	},
+	freelii: {
+		result: "none-found",
+		checkedAt: "2026-11-11",
+		sources: ["https://freelii.app", "https://github.com/freelii"],
+		note: "The operator's domain no longer resolves: freelii.app, the site its GitHub org names, is NXDOMAIN. The org links no app and its last push was 2025-07-28",
+	},
+	mxlet: {
+		result: "none-found",
+		checkedAt: "2026-11-11",
+		sources: ["https://xlet.io/", "https://github.com/MattPearce/xlet"],
+		note: "The operator's domain no longer resolves: xlet.io has no address record. The repo (last push 2020-06-28) builds firmware for M5Stack devices and BLE companion apps and links no store listing",
+	},
+	nemorixpay: {
+		result: "none-found",
+		checkedAt: "2026-11-11",
+		sources: ["https://nemorixpay.com/"],
+		note: "The App Store and Google Play badges on nemorixpay.com link to '#'; the site offers a beta-tester sign-up form",
+	},
+	sentit: {
+		result: "none-found",
+		checkedAt: "2026-11-11",
+		sources: ["https://sentit.io/"],
+		note: "sentit.io now runs a waitlist for tokenized Nigerian government debt on ERC-20 tokens; it links no app and does not name Stellar",
+	},
+	spatium: {
+		result: "none-found",
+		checkedAt: "2026-11-11",
+		sources: [
+			"https://spatium.net/",
+			"https://web.archive.org/web/20250404155959/https://www.spatium.net/",
+		],
+		note: "The operator's domain no longer resolves: spatium.net has no address record. Its last archived copy (2025-04-04), which links the record's X handle, offered a Bitcoin wallet and a wallet SDK and links no store listing",
+	},
+	"stellar-agent-wallet-skill": {
+		result: "none-found",
+		checkedAt: "2026-11-11",
+		sources: [
+			"https://github.com/mpprouter/stellar-agent-wallet-skill",
+			"https://clawhub.ai/plugins/stellar-agent-wallet",
+		],
+		note: "An agent skill, installed from its repo (release v1.8.2, 2026-08-11) or ClawHub; it has no app, extension or web app",
+	},
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Moved verbatim from curate-projects.ts (2026-07-26, lessons class 32). These

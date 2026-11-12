@@ -7,9 +7,10 @@
  * wants to store-check by hand), fetches each operator's own site, and asks
  * Claude to extract per-platform availability WITH evidence — but it writes
  * NOTHING to the DB. Output is a dated drafts file the workflow commits via
- * PR (the human gate is the diff review), and a separate applier
- * (apply-wallet-availability.ts, dry-run default) lands only reviewed
- * drafts, only into empty fields, with read-back verification.
+ * PR (the human gate is the diff review). A reviewed entry lands by being
+ * copied into WALLET_AVAILABILITY (scripts/data/curation-maps.ts), which the
+ * curate-projects lane writes; the separate applier was retired on
+ * 2026-11-11 so availability has one writer.
  *
  * Evidence rules the prompt enforces and the code re-checks:
  *   - a platform claim needs a store/product URL from the fetched text;
@@ -27,20 +28,14 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { getPayload } from "payload";
+import { AVAILABILITY_PLATFORMS } from "../../src/lib/project-types";
 import config from "../../src/payload.config";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const limitIdx = process.argv.indexOf("--limit");
 const LIMIT = Number((limitIdx !== -1 && process.argv[limitIdx + 1]) || "10");
 const MODEL = "claude-opus-4-8";
-const PLATFORMS = [
-	"ios",
-	"android",
-	"web",
-	"browser-extension",
-	"desktop",
-	"hardware-device",
-] as const;
+const PLATFORMS = AVAILABILITY_PLATFORMS;
 
 interface Draft {
 	slug: string;
@@ -216,7 +211,7 @@ Reply with ONLY a JSON object: {"entries":[{"platform":"…","storeUrl":"…","n
 		`${JSON.stringify({ generatedAt: new Date().toISOString(), model: MODEL, drafts }, null, "\t")}\n`,
 	);
 	console.log(
-		`\n${drafts.length} draft(s) → ${out} — review via PR, land via apply-wallet-availability.ts (dry-run default)`,
+		`\n${drafts.length} draft(s) → ${out}: review via PR, then land an entry by copying it into WALLET_AVAILABILITY (scripts/data/curation-maps.ts), which the curate-projects lane writes`,
 	);
 }
 

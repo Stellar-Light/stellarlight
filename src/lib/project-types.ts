@@ -73,6 +73,46 @@ export const VENUE_ROLES = [
 ] as const;
 
 /**
+ * The `productKind` vocabulary (sls-033): what kind of wallet-landscape
+ * product a row is. One list for the collection, the spec and the curated
+ * map (PRODUCT_KIND in scripts/data/curation-maps.ts).
+ */
+export const PRODUCT_KINDS = [
+	"end-user-wallet",
+	"hardware-wallet",
+	"connectivity-protocol",
+	"wallet-sdk",
+	"integration-kit",
+	"smart-account-tooling",
+] as const;
+
+/** Platforms and states of an `availability` row (sls-033). sms is a wallet
+ * used by text message on any phone, with no app or internet (Kotani Pay's
+ * SMS Wallet, 2026-11-11); its storeUrl is the operator's page for it. */
+export const AVAILABILITY_PLATFORMS = [
+	"ios",
+	"android",
+	"web",
+	"browser-extension",
+	"desktop",
+	"hardware-device",
+	"sms",
+] as const;
+export const AVAILABILITY_STATES = ["available", "unavailable"] as const;
+
+/**
+ * `availabilityCheck.result` (sls-033): why `availability` is null after a
+ * recorded check. none-found = the named sources were read and offer no app,
+ * extension, device, web app or SMS service, or the operator's domain no
+ * longer resolves (the note says which); could-not-check = a source could not
+ * be read.
+ */
+export const AVAILABILITY_CHECK_RESULTS = [
+	"none-found",
+	"could-not-check",
+] as const;
+
+/**
  * What each type means, in one line a reader (or a typed-decision model) can
  * apply to a project description. Keyed by the vocabulary itself, so a new
  * PROJECT_TYPES member without a definition does not compile.

@@ -301,6 +301,28 @@ answers 402 (refresh-rwa's first red run is 19:39Z).
   scripts/scan/scan-repo-code.ts reads it as empty: an allowlisted canonical
   repo whose proof reads none, or whose scan is not ok, is pinned `lang-sdk`
   on a pool wave (an `--only` run reads the whole row).
+Found reading the 41 Wallet rows for sls-033 on 2026-11-11 (each row's
+sources are in WALLET_AVAILABILITY and AVAILABILITY_CHECKED,
+scripts/data/curation-maps.ts). Cypher's status moved to Inactive on its own
+shutdown notice (STATUS_FIX); the rest are for the status lane.
+
+- For the status lane, status Live with evidence that is not a shutdown
+  statement, so not moved: freelii.app and spatium.net no longer resolve;
+  x.com/bebopcash does not exist and the record has no site; Blaze, Elsa
+  and Sentit now offer a different product (an AI CFO, a B2B payments API, a
+  tokenized-debt waitlist). Ben Wallet is Live while its docs ship no APK
+  yet and myben.xyz is a pre-launch waitlist. A dead domain, a pivot or a
+  waitlist is not the operator saying the product ended or launched.
+- Typed Wallet with no Stellar evidence read: OpenXSwitch (site and full
+  docs), Sentit (site) and Spatium (archived home page). Haven's app names
+  no Stellar network either, but its Development status may cover a
+  Stellar build.
+- human.tech keeps productKind smart-account-tooling, but its Stellar product
+  is identity credentials (Human ID verifications recorded as tokens on
+  Soroban, docs.passport.xyz), and its wallet page lists EVM, Sui and
+  Solana, not Stellar. The vocabulary has no identity kind.
+- Blaze's check is could-not-check: its store link is sent only through an
+  email form. Retry when the operator publishes the link.
 
 Found by Stellar Raven's HackMeridian evaluation on 2026-11-02 and filed
 here as #1900 to #1905; each issue carries its read-only probes.
