@@ -10,6 +10,7 @@
  * here asserts a number the snapshots do not hold: a definition that has no
  * data yet says when it will.
  */
+import { isStrongStatusBasis } from "./project-status";
 
 /** One project as the directory served it on the snapshot day. */
 export interface SnapshotRow {
@@ -40,16 +41,6 @@ export interface Snapshot {
 	projects: SnapshotRow[];
 }
 
-/** Statuses that rest on the product itself, not only on a page answering. */
-export const STRONG_STATUS_BASES = [
-	"repo-activity",
-	"onchain-activity",
-	"product-integration",
-	"package-release",
-	"operator-announcement",
-	"human-verified",
-] as const;
-
 export const ACTIVE_WINDOW_DAYS = 180;
 
 export const DEFINITIONS = {
@@ -57,7 +48,7 @@ export const DEFINITIONS = {
 		"Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 	markedLive: "Status Live, on any evidence.",
 	liveOnStrongEvidence:
-		"Status Live where the status rests on the product itself (repo activity, on-chain activity, a product integration, a package release, an operator announcement or a human check), not only on its website answering.",
+		"Status Live where the status rests on the product itself (repo activity, on-chain activity, a product integration, a package release or a human check), not on its website answering or on the team's own announcement.",
 	observedActive: `A commit in a linked repo within ${ACTIVE_WINDOW_DAYS} days of the snapshot, or a mainnet deployment observed through on-chain activity.`,
 	noActivityData:
 		"Launched, with no linked repo commit and no on-chain deployment record: alive or not, we cannot observe it.",
@@ -70,9 +61,9 @@ const daysBetween = (a: string, b: string) =>
 export const isLaunched = (p: SnapshotRow) =>
 	p.status === "Live" || (p.status === "Inactive" && p.wasLive === true);
 export const isMarkedLive = (p: SnapshotRow) => p.status === "Live";
+/** Strong = STRONG_STATUS_BASES, the one list every surface reads. */
 export const isLiveOnStrongEvidence = (p: SnapshotRow) =>
-	p.status === "Live" &&
-	(STRONG_STATUS_BASES as readonly string[]).includes(p.basis ?? "");
+	p.status === "Live" && isStrongStatusBasis(p.basis);
 const onchainLive = (p: SnapshotRow) =>
 	p.network === "mainnet" && p.networkBasis === "onchain-activity";
 export const isObservedActive = (p: SnapshotRow, date: string) =>

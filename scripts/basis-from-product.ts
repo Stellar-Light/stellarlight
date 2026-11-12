@@ -22,20 +22,18 @@
  * Dry-run by default; --execute writes.
  */
 import "./load-env";
-import { getPayload } from "payload";
 import { probeProduct } from "../src/lib/product-probe";
-import configPromise from "../src/payload.config";
+import { STRONG_STATUS_BASES } from "../src/lib/project-status";
 
 const EXECUTE = process.argv.includes("--execute");
 const LIMIT = Number(
 	process.argv.find((a) => a.startsWith("--limit="))?.split("=")[1] ?? "0",
 );
-/** A probe never overwrites a person, nor stronger on-chain evidence. */
-const NEVER_OVERWRITE = new Set([
-	"human-verified",
-	"onchain-activity",
-	"product-integration",
-]);
+/** A probe never overwrites any strong basis (the one canonical list): a
+ *  person, on-chain evidence, its own award, or a repo or package reading. */
+export const NEVER_OVERWRITE: ReadonlySet<string> = new Set(
+	STRONG_STATUS_BASES,
+);
 /** Types whose liveness is a package/repo question, not a website question. */
 const LIBRARY_TYPES = new Set([
 	"SDK",
@@ -66,7 +64,11 @@ const hasOnchain = (p: any) =>
 	p?.deployment?.network === "mainnet" ||
 	p?.deployment?.network === "testnet";
 
-(async () => {
+async function main() {
+	// Imported here, not at module scope, so a unit test can import this
+	// lane's protected set without booting Payload or opening a DB connection.
+	const { getPayload } = await import("payload");
+	const configPromise = (await import("../src/payload.config")).default;
 	const payload = await getPayload({ config: await configPromise });
 	const res = await payload.find({
 		collection: "projects",
@@ -151,4 +153,6 @@ const hasOnchain = (p: any) =>
 		process.exit(2);
 	}
 	process.exit(0);
-})();
+}
+
+if (process.argv[1]?.includes("basis-from-product")) main();

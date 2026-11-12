@@ -23,19 +23,35 @@
  * Dry-run by default; --execute writes.
  */
 import "./load-env";
-import { getPayload } from "payload";
-import configPromise from "../src/payload.config";
+import { STRONG_STATUS_BASES } from "../src/lib/project-status";
 
 const EXECUTE = process.argv.includes("--execute");
 /** Beyond this, the snapshot describes a product we haven't seen recently. */
 const MAX_EVIDENCE_AGE_DAYS = 90;
-/** A person's verdict is never overwritten by a probe — and that is the ONLY
- *  basis this lane refuses to touch. onchain-activity used to be in here too,
- *  which froze the lane's own output: a row awarded once could never be
- *  re-dated, so statusAsOf rotted while fresh snapshots arrived every day, and
- *  a wrong citation could never be corrected. A dated claim that can never be
- *  re-dated is the same failure as one that was never dated. */
-const NEVER_OVERWRITE = new Set(["human-verified"]);
+/** The strong bases this lane may replace, and only these. Each is a
+ *  documented upgrade: the statusBasis spec ranks onchain-activity above
+ *  repo-activity, package-release and product-integration (WEAKEST LAST), so
+ *  an observed on-chain delta outranks a commit date, a registry publish or an
+ *  observed integration. And the lane re-dates its own award: onchain-activity
+ *  used to be protected here, which froze the lane's own output (a row
+ *  awarded once could never be re-dated, so statusAsOf rotted while fresh
+ *  snapshots arrived every day, and a wrong citation could never be
+ *  corrected). */
+export const REPLACES_STRONG = [
+	"onchain-activity",
+	"repo-activity",
+	"package-release",
+	"product-integration",
+] as const satisfies readonly (typeof STRONG_STATUS_BASES)[number][];
+/** Every other strong basis is never touched: today that is human-verified,
+ *  because a person outranks a probe. Derived from the canonical list, so a
+ *  strong basis added later is protected until someone ranks it below
+ *  onchain-activity on purpose. */
+export const NEVER_OVERWRITE: ReadonlySet<string> = new Set(
+	STRONG_STATUS_BASES.filter(
+		(b) => !(REPLACES_STRONG as readonly string[]).includes(b),
+	),
+);
 
 /** `url` cites the exact thing observed — the asset or the specific contract
  *  whose delta moved. A citation that points somewhere else is not evidence. */
@@ -82,7 +98,11 @@ function evidenceOf(onchain: any): Ev | null {
 	return null;
 }
 
-(async () => {
+async function main() {
+	// Imported here, not at module scope, so a unit test can import this
+	// lane's protected set without booting Payload or opening a DB connection.
+	const { getPayload } = await import("payload");
+	const configPromise = (await import("../src/payload.config")).default;
 	const payload = await getPayload({ config: await configPromise });
 	const res = await payload.find({
 		collection: "projects",
@@ -178,4 +198,6 @@ function evidenceOf(onchain: any): Ev | null {
 		`\nawarded ${t.awarded} | refreshed ${t.refreshed} | already current ${t.upToDate} | human-verified (untouched) ${t.alreadyStrong} | no movement in window ${t.noEvidence} | evidence too old ${t.stale} | undated ${t.noDate} | shadows skipped ${t.shadow}`,
 	);
 	process.exit(0);
-})();
+}
+
+if (process.argv[1]?.includes("basis-from-onchain")) main();
