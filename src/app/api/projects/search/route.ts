@@ -50,6 +50,7 @@ import {
 	type NetworksBasis,
 	pickDeployment,
 } from "@/lib/project-deployment";
+import { groupProjectRepos, type ProjectRepoRef } from "@/lib/project-repos";
 import {
 	anchorIdentityHit,
 	anchorTokens,
@@ -576,19 +577,6 @@ function pickIdentity(p: any): ProjectRow["identity"] {
 		renamedAt: p.renamedAt ?? null,
 		sourceUrl: p.renameSourceUrl ?? null,
 	};
-}
-
-// A project's own indexed code repo (compact form, attached per project row).
-interface ProjectRepoRef {
-	fullName: string;
-	url: string;
-	primaryLanguage: string | null;
-	stars: number;
-	repoScore: number;
-	repoScoreLabel: string | null;
-	judgeScore: number | null;
-	hackathonWinner: boolean;
-	lastCommitAt: string | null;
 }
 
 // Synonyms, stemming, intent-type mapping, structured-signal matching, and the
@@ -2447,6 +2435,8 @@ async function handle(req: NextRequest) {
 			lastActivityAt: string | null;
 		}
 	> = baseProjects.map((p) => ({ ...p, repos: [], lastActivityAt: null }));
+	// The rows audit drift reads: the served repos plus any gone one among them.
+	const activityBySlug = new Map<string, ProjectRepoRef[]>();
 	if (payload && baseProjects.length) {
 		const slugs = baseProjects.map((p) => p.slug).filter(Boolean);
 		try {
@@ -2475,44 +2465,27 @@ async function handle(req: NextRequest) {
 						hackathonWinner: true,
 						projectSlug: true,
 						lastCommitAt: true,
+						// A repo GitHub 404s (gone) is not cited; see project-repos.ts.
+						codeScanState: true,
 					},
 				}),
 				DEFAULT_READ_TIMEOUT_MS,
 			);
-			const bySlug = new Map<string, ProjectRepoRef[]>();
-			for (const r of repoRes.docs as unknown as Array<
-				Record<string, unknown>
-			>) {
-				const s = r.projectSlug as string | undefined;
-				if (!s) continue;
-				const arr = bySlug.get(s) ?? [];
-				if (arr.length >= 5) continue; // top 5 per project (already score-sorted)
-				arr.push({
-					fullName: String(r.fullName),
-					url: (r.url as string) ?? `https://github.com/${r.fullName}`,
-					primaryLanguage: (r.primaryLanguage as string) ?? null,
-					stars: (r.stars as number) ?? 0,
-					repoScore: (r.repoScore as number) ?? 0,
-					repoScoreLabel: (r.repoScoreLabel as string) ?? null,
-					judgeScore: (r.judgeScore as number) ?? null,
-					hackathonWinner: !!r.hackathonWinner,
-					lastCommitAt: (r.lastCommitAt as string) ?? null,
-				});
-				bySlug.set(s, arr);
-			}
-			// Project-level dated signal: most recent commit across the project's
-			// own repos, so "is this project active?" answers carry an as-of date
-			// without a second lookup. Null when no repo has a known commit date.
+			// Top 5 per project (already score-sorted), gone repos left out of
+			// `repos` but still counted in lastActivityAt and audit drift: the
+			// project-level dated signal, so "is this project active?" answers
+			// carry an as-of date without a second lookup.
+			const bySlug = groupProjectRepos(
+				repoRes.docs as unknown as Array<Record<string, unknown>>,
+			);
 			projectsOut = baseProjects.map((p) => {
-				const repos = bySlug.get(p.slug) ?? [];
-				const lastActivityAt = repos.reduce<string | null>(
-					(max, r) =>
-						r.lastCommitAt && (!max || r.lastCommitAt > max)
-							? r.lastCommitAt
-							: max,
-					null,
-				);
-				return { ...p, repos, lastActivityAt };
+				const g = bySlug.get(p.slug);
+				if (g) activityBySlug.set(p.slug, g.activity);
+				return {
+					...p,
+					repos: g?.repos ?? [],
+					lastActivityAt: g?.lastActivityAt ?? null,
+				};
 			});
 		} catch (e) {
 			// best-effort — ship projects without per-project repos on any error
@@ -2652,7 +2625,10 @@ async function handle(req: NextRequest) {
 		anchorProfile: isAnchorRow(p)
 			? (anchorProfiles.get(norm(p.name)) ?? null)
 			: null,
-		audits: withAuditDrift(auditsBySlug.get(p.slug as string) ?? null, p.repos),
+		audits: withAuditDrift(
+			auditsBySlug.get(p.slug as string) ?? null,
+			activityBySlug.get(p.slug as string) ?? p.repos,
+		),
 	}));
 
 	// sls-056: report counts from the FINAL served array. The page

@@ -33,6 +33,16 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-12",
 		surfaces: ["api"],
+		version: "spec@1.9.138",
+		type: "fixed",
+		summary:
+			"searchProjects and getLeaderboard rows no longer list a repo marked gone (GitHub answered 404 to the gone-repos probe; scanState `gone`). It leaves searchProjects' `repos`, as it already left searchRepos and codeReferences, and still counts toward `lastActivityAt` and audit drift. getLeaderboard moves it from `repos` to a new `goneRepos` list and keeps it in every number, so `repoCount` equals the two lists' lengths summed; the CSV appends a gone_repos column. A repo going private is not the project stopping, so nothing is down-ranked.",
+		detail:
+			"Measured 2026-11-12 over the 1,020 listed projects: 2,542 project-linked repos, 82 of them 404 on GitHub across 47 projects, 55 of those cited in a row's top five `repos` on 37 projects. Only 24 of the 82 were marked gone, 12 of them among the 55 cited: those leave on deploy. The other 43 cited ones stay listed until the gone-repos execute marks them, because the probe read only rows at error or gone and 56 of the 82 sat at scanned. The probe's pool now adds every project-linked repo the weekly enrich pass has not refreshed for 8 days (774 rows, holding 79 of the 82; the other 3 were last refreshed 2026-11-07 and 2026-11-09); a stale stamp puts a row in the pool, and the GitHub read is the verdict. Marking a row gone stays an owner-dispatched execute. GitHub answers 404 for a private repo and a deleted one alike, so neither is a verdict on the project. The project page lists repos by the same rule.",
+	},
+	{
+		date: "2026-11-12",
+		surfaces: ["api"],
 		version: "spec@1.9.137",
 		type: "fixed",
 		summary:

@@ -19,6 +19,7 @@ import { clampLimit, unknownParamWarning } from "@/lib/http-params";
 import { jsonSafe } from "@/lib/json-safe";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { isGone } from "@/lib/project-repos";
 import { PROJECT_TYPES } from "@/lib/project-types";
 import { tvlStaleOf, tvlUnavailableOf } from "@/lib/status-checks";
 import { findWholeSet } from "@/lib/whole-set";
@@ -67,8 +68,12 @@ interface ProjectRow {
 		/** Newest activitySignals.asOf among the summed repos; null with commits90d. */
 		commits90dAsOf: string | null;
 		repoCount: number;
-		/** The exact repos the stats aggregate over — repoCount === repos.length. */
+		/** The repos the stats aggregate over, minus any marked gone:
+		 *  repoCount === repos.length + goneRepos.length. */
 		repos: string[];
+		/** Aggregated repos GitHub answered 404 for (marked gone): counted in
+		 *  every number above, never listed as the project's repo. */
+		goneRepos: string[];
 	};
 }
 
@@ -101,6 +106,8 @@ function toCsv(rows: ProjectRow[]): string {
 		// older column keeps its position.
 		"tvl_as_of",
 		"tvl_stale",
+		// 2026-11-12: repos marked gone left `repos`; appended, as above.
+		"gone_repos",
 	].join(",");
 	const lines = rows.map((r) =>
 		[
@@ -122,6 +129,7 @@ function toCsv(rows: ProjectRow[]): string {
 			r.shortDescription ?? "",
 			r.tvlAsOf ?? "",
 			r.tvlStale ?? "",
+			r.github.goneRepos.join(";"),
 		]
 			.map(csvEscape)
 			.join(","),
@@ -302,6 +310,7 @@ export async function GET(req: NextRequest) {
 						asOf?: string | null;
 					} | null;
 					stellarProof?: string | null;
+					codeScanState?: string | null;
 				}>
 			>();
 			if (projectSlugs.length > 0) {
@@ -331,6 +340,8 @@ export async function GET(req: NextRequest) {
 						stellarProof: true,
 						// sls-036: index-refresh timestamp feeds meta.dataAsOf
 						updatedAt: true,
+						// A repo marked gone is counted, not listed (project-repos.ts).
+						codeScanState: true,
 					},
 				});
 				for (const r of reposResult.docs as Array<{
@@ -345,6 +356,7 @@ export async function GET(req: NextRequest) {
 					} | null;
 					stellarProof?: string | null;
 					updatedAt?: string | null;
+					codeScanState?: string | null;
 				}>) {
 					// ISO-8601 strings compare correctly lexicographically.
 					if (r.updatedAt && (!dataAsOf || r.updatedAt > dataAsOf))
@@ -445,8 +457,15 @@ export async function GET(req: NextRequest) {
 						// The exact universe the numbers above are computed over —
 						// sorted so the list is stable across runs. A consumer can now
 						// reconcile "activity" against a known set instead of trusting
-						// an opaque count (raven #742 residual 3 / sls-036).
+						// an opaque count (raven #742 residual 3 / sls-036). A repo
+						// marked gone is in the numbers and in goneRepos, not repos.
 						repos: repos
+							.filter((r) => !isGone(r))
+							.map((r) => r.fullName)
+							.filter((x): x is string => !!x)
+							.sort(),
+						goneRepos: repos
+							.filter(isGone)
 							.map((r) => r.fullName)
 							.filter((x): x is string => !!x)
 							.sort(),
@@ -622,13 +641,13 @@ export async function GET(req: NextRequest) {
 				// read the issues rollup as an activity/quality ranking.
 				metricDefinitions: {
 					activity:
-						"sort=activity orders by github.commits90d: default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window. The sum counts only linked repos whose scanned code proves Stellar use (stellarProof other than none): a company's unrelated repositories do not count; read github.repos for the full linked set. This service's own rows (stellar-light) are excluded from every ranking: the directory is the instrument, not a subject.",
+						"sort=activity orders by github.commits90d: default-branch commits over the trailing 90 days summed across the project's indexed repos (the enrich pass's activitySignals, dated by github.commits90dAsOf), recency (github.lastActivityAt) breaking ties. null commits90d = no indexed repo carries a count (an index gap, never zero activity) and sorts last. `range` filters MEMBERSHIP by last-commit recency; it does not narrow the 90-day volume window. The sum counts only linked repos whose scanned code proves Stellar use (stellarProof other than none): a company's unrelated repositories do not count; read github.repos and github.goneRepos for the full linked set. This service's own rows (stellar-light) are excluded from every ranking: the directory is the instrument, not a subject.",
 					stars:
 						"github.totalStars = sum of GitHub stargazer counts across the project's indexed repos, as of the last index refresh.",
 					issues:
 						"github.openIssuesTotal = sum of OPEN issues across the project's indexed repos: an issue-only count (GitHub GraphQL issues(states:OPEN); EXCLUDES pull requests, so it will not match GitHub's REST open_issues_count, which includes PRs). This is a BACKLOG snapshot, not an activity or quality ranking.",
 					repoCount:
-						"github.repoCount = how many indexed repos are attributed to the project; our index's coverage, not the project's total GitHub footprint.",
+						"github.repoCount = how many indexed repos are attributed to the project, the ones in github.goneRepos included; our index's coverage, not the project's total GitHub footprint.",
 					lastActivityAt:
 						"Latest default-branch commit (fallback: last push) across the project's indexed repos, as of the last index refresh: a dated repo-source timestamp, not a live GitHub read.",
 					range:

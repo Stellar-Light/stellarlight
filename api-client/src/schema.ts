@@ -1551,7 +1551,7 @@ export interface components {
             reposCount?: number | null;
             /** @description view=compact rows only: how many entries the left-out `onchain.contracts` list has. Null = no on-chain record was read for this project, not zero contracts. Absent on full rows, which carry `onchain` itself. */
             onchainContractsCount?: number | null;
-            /** @description This project’s top indexed GitHub repos, surfaced inline (same shape as /api/repos/search items). Cite as the project’s code references. */
+            /** @description This project’s top indexed GitHub repos, surfaced inline (same shape as /api/repos/search items). Cite as the project’s code references. A repo marked gone (GitHub answered 404 to the gone-repos probe; scanState `gone` on /api/repos/trust) is left out, as on /api/repos/search, and still counts toward lastActivityAt, since a repo going private is not the project stopping. A repo that went 404 after the probe last marked rows is still listed until it is marked. */
             repos?: components["schemas"]["Repo"][];
             /**
              * Format: date-time
@@ -2603,10 +2603,12 @@ export interface components {
                  * @description Latest default-branch commit (fallback: last push) across indexed repos. Null when no indexed repo has a known date.
                  */
                 lastActivityAt?: string | null;
-                /** @description Indexed repos attributed to the project: our index's coverage, not the project's total GitHub footprint. */
+                /** @description Indexed repos attributed to the project, the ones in goneRepos included: our index's coverage, not the project's total GitHub footprint. */
                 repoCount?: number;
-                /** @description The exact repositories (owner/name) the stats above aggregate over; repoCount === repos.length, sorted. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column. */
+                /** @description The repositories (owner/name) the stats above aggregate over, minus any marked gone, sorted; repoCount === repos.length + goneRepos.length. Lets a consumer reconcile 'activity' against a known set instead of trusting an opaque count; the members are our INDEX's attribution, so a repo absent here may still exist on GitHub (coverage, not a negative claim). Also served in the CSV export as a ';'-joined `repos` column. */
                 repos?: string[];
+                /** @description Aggregated repositories (owner/name) marked gone: GitHub answered 404 to the gone-repos probe (scanState `gone` on /api/repos/trust), which it does for a private repo and a deleted one alike. Counted in every number above, since a repo going private is not the project stopping, and never listed in repos. [] = none marked. Sorted; also the CSV's last column, gone_repos. */
+                goneRepos?: string[];
             };
         };
         /** @description One Stellar stablecoin from /api/stablecoins, measured every 6h from Horizon, Stellar Expert and live peg FX. marketCapUSD is the ONLY cross-row-comparable size metric; `supply` is raw units in the asset's own `peg`. null on any metric = not measured, never 'zero'. Identity is (code, issuer); two live assets can share a ticker (Circle's EURC and MyKobo's EURC are different assets), so never merge or match on `ticker` alone; join on `assetId` or `issuer`. */
@@ -6572,7 +6574,7 @@ export interface operations {
                                 /** @description TrustReport codeTruth minus the full contractInterface and its contractInterfacePaths (interfaceSize is kept). */
                                 codeTruth?: {
                                     /**
-                                     * @description Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself, so the code facts here describe something no longer reachable; such rows are excluded from searchRepos and builder code evidence. null = never stamped.
+                                     * @description Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself, so the code facts here describe something no longer reachable; such rows are excluded from searchRepos, from the repos listed on searchProjects and getLeaderboard rows and from builder code evidence. null = never stamped.
                                      * @enum {string|null}
                                      */
                                     scanState?: "pending" | "scanned" | "error" | "incomplete" | "gone" | null;
@@ -6898,7 +6900,7 @@ export interface operations {
                             } | null;
                             codeTruth?: {
                                 /**
-                                 * @description Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself; such rows are excluded from searchRepos and builder code evidence. null = never stamped.
+                                 * @description Scan lifecycle of this repo row. `gone` = GitHub answered 404 for the repository itself; such rows are excluded from searchRepos, from the repos listed on searchProjects and getLeaderboard rows and from builder code evidence. null = never stamped.
                                  * @enum {string|null}
                                  */
                                 scanState?: "pending" | "scanned" | "error" | "incomplete" | "gone" | null;

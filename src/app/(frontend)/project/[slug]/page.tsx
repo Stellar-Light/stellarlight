@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/card";
 import { projectLogo } from "@/data/project-logos";
 import { getPayloadSafe } from "@/lib/payload-client";
+import { loadProjectPageGithub } from "@/lib/project-repos";
 import { RESOLVABLE_PROJECT_STATUSES } from "@/lib/project-status";
 import { getAppUrl } from "@/lib/utils/app-url";
 
@@ -224,6 +225,7 @@ export default async function ProjectDetailPage({
 		lastActivityAt: string | null;
 		openIssuesTotal: number;
 		totalStars: number;
+		repoCount: number;
 		repos: Array<{
 			owner: string;
 			name: string;
@@ -241,51 +243,9 @@ export default async function ProjectDetailPage({
 		// `signals` cache + live GitHub fetch this used is no longer viable
 		// (signals is not populated and DB writes are blocked), so stars read
 		// back as zero — read the authoritative repo stats directly.
-		const reposResult = await payload.find({
-			collection: "repos",
-			where: { projectSlug: { equals: project.slug } },
-			limit: 100,
-			depth: 0,
-			select: {
-				fullName: true,
-				url: true,
-				stars: true,
-				openIssues: true,
-				lastCommitAt: true,
-			},
-		});
-		if (reposResult.docs.length > 0) {
-			// biome-ignore lint/suspicious/noExplicitAny: Payload doc type is awkward
-			const enriched = (reposResult.docs as any[]).map((r) => {
-				const [owner, ...rest] = String(r.fullName ?? "").split("/");
-				return {
-					owner: owner ?? "",
-					name: rest.join("/") || (r.fullName ?? ""),
-					url: r.url ?? (r.fullName ? `https://github.com/${r.fullName}` : ""),
-					lastCommitAt: r.lastCommitAt ?? null,
-					openIssues: r.openIssues ?? 0,
-					stargazerCount: r.stars ?? 0,
-				};
-			});
-			const lastTs = Math.max(
-				0,
-				...enriched.map((x) =>
-					x.lastCommitAt ? new Date(x.lastCommitAt).getTime() : 0,
-				),
-			);
-			gh = {
-				lastActivityAt: lastTs > 0 ? new Date(lastTs).toISOString() : null,
-				openIssuesTotal: enriched.reduce(
-					(sum, x) => sum + (x.openIssues || 0),
-					0,
-				),
-				totalStars: enriched.reduce(
-					(sum, x) => sum + (x.stargazerCount || 0),
-					0,
-				),
-				repos: enriched,
-			};
-		}
+		// A repo marked gone is counted in the totals and left out of the
+		// list, the same rule as searchProjects (src/lib/project-repos.ts).
+		gh = await loadProjectPageGithub(payload, project.slug);
 	} catch (error) {
 		// Silently handle GitHub fetch errors
 	}
@@ -729,8 +689,8 @@ export default async function ProjectDetailPage({
 									</div>
 								</div>
 								<p className="text-xs text-muted-foreground">
-									Across {gh?.repos?.length ?? 0}{" "}
-									{gh?.repos?.length === 1 ? "repository" : "repositories"}
+									Across {gh?.repoCount ?? 0}{" "}
+									{gh?.repoCount === 1 ? "repository" : "repositories"}
 								</p>
 							</CardContent>
 						</Card>

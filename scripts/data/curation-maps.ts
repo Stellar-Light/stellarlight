@@ -2875,6 +2875,62 @@ export const GITHUB_LINK_FIX: Record<string, string> = {
 	// the extension is the wallet's main repo, the one its release notes come
 	// from (STATUS_FIX freighter sources github.com/stellar/freighter/releases).
 	freighter: "https://github.com/stellar/freighter",
+	// ── 2026-11-12 repo-link sweep (GitHub API and github.com, read-only).
+	// The stored link names a repo GitHub now redirects (301) to another
+	// owner. enrich-repos already indexes the repo under the new path, so the
+	// row's links.github and the repo it cites named two different owners.
+	// Each value below except paykit's is GitHub's own redirect target for the
+	// stored link, which proves it is the same repository; the comment beside
+	// each names the tie between the new owner and the row. paykit is a
+	// relink, not a redirect: its old link, the usepaykit org, still answers
+	// 200. Not relinked: planet-pay, whose link redirects to an account whose
+	// repo has no README and a description that does not name the row.
+	// techlibs (a 13-repo dev studio) moved it to BWB's org; README: "Soroban
+	// contracts and Stellar integration code for BWB Digital Assets".
+	bwb: "https://github.com/BWB-Labs/bwb-stellar",
+	// moved from an individual's account to the wallet's org, which holds ten
+	// swift-ex repos; README: "SwiftEx Wallet".
+	swiftex: "https://github.com/SwiftExWallet/SwiftEx",
+	// the row's own site (equilibrium.co) links github.com/equilibriumco.
+	quasar: "https://github.com/equilibriumco/quasar",
+	// the row's own site (sodax.com) links this exact repo.
+	sodax: "https://github.com/gosodax/sodax-sdks",
+	// the new org is "Hyperledger Solang, an LF Decentralized Trust lab".
+	solang: "https://github.com/hyperledger-solang/solang",
+	// moved out of gaudiatech ("Kata Games"); the README's logo is served
+	// from kata.games.
+	katagames: "https://github.com/pyved-solution/pyved-engine",
+	// grants-projects is "Grant Projects by BIoT Labs"; same company's org.
+	"ea-kazi": "https://github.com/BIoTLabs/EA_KAZI_backend_ic",
+	// moved from an individual's account. No page names the new owner: the
+	// tie is the redirect plus the repo's own README, "Stellar Conditional
+	// Ownership and Rental Smart Contract" (the row is plutus.rentals).
+	plutus: "https://github.com/MavenArchive/stelien",
+	// the old owner's account answers 404. No page names the new owner: the
+	// tie is the redirect plus the repo's own description (it has no
+	// README), "Woocommerce plugin for Swplug".
+	swplug: "https://github.com/flarcos/swplug-plugin",
+	// the old owner's account answers 404 (renamed) and the repo redirects;
+	// the row's own site (stellartools.xyz) still links the old path, so this
+	// is the same repository. Its README is create-next-app boilerplate.
+	"stellar-tools": "https://github.com/yripper/stellar-tools",
+	// a relink, not a redirect: the row linked the usepaykit org, which
+	// still answers 200. Its own site (usepaykit.dev) links this repo, and
+	// the payrouteshq org says it is the maker of "StellarTools, PayKit SDK
+	// and more". The row's usepaykit/stellar-tools moved there too. The
+	// repo, not the org: the org also holds products of its own.
+	paykit: "https://github.com/payrouteshq/paykit-sdk",
+	// ── 2026-11-12: the stored repo answers 404 (private or deleted; GitHub
+	// answers the same for both) and a successor ties back to the row.
+	// SAFU's two rows both linked an individual's safu-protocol repo. The same
+	// owner's safu-soroban README: "SAFU ProtectionPool: Soroban ... built for
+	// SCF #44", the round the safu-protocol row says funded it.
+	safu: "https://github.com/mrkanchwala/safu-soroban",
+	"safu-protocol": "https://github.com/mrkanchwala/safu-soroban",
+	// the old owner account (PeerPESA-dAPP) answers 404; the peerpesa org's
+	// profile links peerpesa.co, the row's own site, and holds
+	// Stellar.PeerPESA ("Peerpesa-Stellar ... DApp").
+	peerpesa: "https://github.com/peerpesa",
 };
 
 /** Rebrands — name, website, and description move together so both the old

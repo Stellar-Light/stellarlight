@@ -99,13 +99,6 @@
 	},
 	{
 		"file": "src/app/(frontend)/project/[slug]/page.tsx",
-		"collection": "repos",
-		"limit": 100,
-		"count": 1,
-		"reason": "latent: one project's repos, not measured against the cap here"
-	},
-	{
-		"file": "src/app/(frontend)/project/[slug]/page.tsx",
 		"collection": "transparency-logs",
 		"limit": 3,
 		"count": 1,
@@ -488,6 +481,13 @@
 		"limit": 200,
 		"count": 1,
 		"reason": "latent: partner rows (50 on 2026-11-04)"
+	},
+	{
+		"file": "src/lib/project-repos.ts",
+		"collection": "repos",
+		"limit": 100,
+		"count": 1,
+		"reason": "latent: one project's repos for its page, not measured against the cap here"
 	},
 	{
 		"file": "src/lib/research-ingest.ts",
