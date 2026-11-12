@@ -32,6 +32,7 @@ import {
 	GITHUB_LINK_FIX,
 	GITHUB_LINK_REMOVE,
 	GITHUB_REPOS_ADD,
+	GITHUB_REPOS_SET,
 	LIFECYCLE_NOTE_SET,
 	LOGO_SET,
 	lifecycleNoteHold,
@@ -863,6 +864,67 @@ const DUPE_MERGES: Array<{
 	// so on this list "same description" is a reason to LOOK, never a verdict.
 	// Same shape as lightsail/xlm.sh and ultra-stellar/lobstr: one org, several
 	// products, correctly separate rows.
+	// 2026-11-12 (identity lane): still two products. inferera is renamed
+	// soroban-ret (NAME_FIXES), the decompiler its award paid for, and the
+	// two rows stop sharing a site and an org link.
+	//
+	// ── Identity lane 2026-11-12 (owner request). Each pair was read from its
+	// own site, repo, README and SCF page. Folded only where both rows are one
+	// product; the canonical is the row with the newer or stronger status
+	// evidence, or the current name, and copyScf moves an award that sits on
+	// the shadow only.
+	// safustaking.com serves one product ("SAFU Staking": stake USDC in one
+	// pool on Stellar), the site both rows link; SCF's safu-protocol-dmh
+	// (#44, $30,000) names that site. safu holds the stronger evidence
+	// (product-integration, 2026-09-04); safu-protocol sat at Development on
+	// a page answering.
+	{ dupe: "safu-protocol", canonical: "safu", copyScf: true },
+	// Byte-identical description, same site and same repo
+	// (CryptixAG/Tokenlaunchpad): the cryptix row IS the token launchpad,
+	// named for its company. cryptix.ag is a venture builder that lists
+	// Stellar among 20 supported chains and carries no Stellar product of its
+	// own. The canonical keeps its human Inactive verdict (tokenlaunchpad.eu
+	// redirects to cryptix.ag); the shadow's Live label was unverified.
+	{ dupe: "cryptix", canonical: "stellar-token-launchpad" },
+	// Same repo, Beans-BV/dotnet-stellar-sdk, the .NET SDK SCF funds as a
+	// public good (net-sdk-cfe). The canonical is the row Stellar's SDK page
+	// names; the award record moves with the fold.
+	{ dupe: "net-sdk", canonical: "net-stellar-sdk", copyScf: true },
+	// Same repo, Soneso/stellar-ios-mac-sdk; ios-stellar-sdk already cites
+	// its SCF public-goods page (ios-stellar-sdk-tdq).
+	{ dupe: "ios-mac-stellar-sdk", canonical: "ios-stellar-sdk" },
+	// Same site (lusty.finance) and repo (utkurock/Lusty); owner go
+	// 2026-11-12 on the TODO decision. lusty carries the 2026-11-07 verdict
+	// (Pre-Release: testnet only, vault absent from mainnet) and the
+	// product's own name; SCF #44 ($82,500) moves over from lusty-finance.
+	{ dupe: "lusty-finance", canonical: "lusty", copyScf: true },
+	// Autowhale renamed itself Renesis: autowhale.io and autowhale.net
+	// redirect to renesis.fi, whose organization record names Autowhale GmbH
+	// as the legal name, and both rows describe one portfolio management and
+	// execution system. The rename case: current name canonical, the SCF #34
+	// award ($150,000) moves from the old name.
+	{ dupe: "autowhale", canonical: "renesis", copyScf: true },
+	// Same repo, NibrasD/Stellar-VRF (ECVRF plus drand for Soroban), which is
+	// SCF #44's VRF-Soroban (GITHUB_LINK_FIX vrf-soroban says why). The
+	// shadow had no description and its Live label rested on commits; the
+	// canonical moves to Live on its mainnet contract (STATUS_FIX), so the
+	// fold hides no running product.
+	{ dupe: "stellar-vrf", canonical: "vrf-soroban" },
+	// Same repo (bytemaster333/Soroban-ELK) and same app: SCF's
+	// stellar-command-insights-sci-czo (#29, $35,000) names both the repo
+	// and soroban-elk's netlify site as Stellar Command Insights'.
+	{ dupe: "soroban-elk", canonical: "stellar-command-insights" },
+	// NOT FOLDED, 2026-11-12: one maker, two products, each its own SCF
+	// record. A shared link was the wrong one and is fixed in the link maps;
+	// both rows stay.
+	//   estrela / allbridge: Estrela is Allbridge's Soroban stablecoin AMM
+	//     (SCF #22 and #35), Allbridge Core its bridge (SCF #20 and #23);
+	//     allbridge.io presents Estrela as "an AMM built on Soroban".
+	//   octarine / mystic: Octarine (SCF #44) is the RFQ venue "powered by
+	//     Mystic"; Mystic (SCF #29) is its RWA lending market.
+	//   chaincerts / chaincred, catalyst / chef, rampmedaddy / wellspring,
+	//   pakananet / stellar-razor-and-blazor-suite: different products,
+	//     different SCF records; one row of each pair cited the other's repo.
 	// ── Weakest-queue triage 2026-08-28: the dashboard's 40%-score rows were
 	// mostly no-basis DUPLICATES of already-triaged rows. Folding removes them
 	// from every serving surface and from the queue.
@@ -1308,6 +1370,50 @@ async function main() {
 						...existing.map((e) => ({ owner: e.owner, name: e.name })),
 						...missing,
 					],
+				},
+			},
+		});
+	}
+
+	// ── GITHUB_REPOS_SET: the whole github group, exact (2026-11-12) ──
+	// enrich-repos claims every repo in github.repos, and orgLogin makes the
+	// row a sibling of that org, so a link fix alone left a lost repo claimed.
+	console.log("\n── GitHub repos set (exact github group) ──");
+	const groupText = (g?: {
+		orgLogin?: string | null;
+		repos?: Array<{ owner?: string; name?: string }> | null;
+	}) =>
+		`orgLogin ${g?.orgLogin || "(none)"}, repos ${
+			(g?.repos ?? []).map((x) => `${x.owner}/${x.name}`).join(" ") || "(none)"
+		}`;
+	for (const [slug, want] of Object.entries(GITHUB_REPOS_SET)) {
+		const r = await payload.find({
+			collection: "projects",
+			where: { slug: { equals: slug } },
+			limit: 1,
+			depth: 0,
+			overrideAccess: true,
+		});
+		// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
+		const d = r.docs[0] as any;
+		if (!d) {
+			console.log(`  WARN: no project "${slug}", skipped`);
+			continue;
+		}
+		const have = groupText(d.github);
+		if (have.toLowerCase() === groupText(want).toLowerCase()) {
+			console.log(`  ${slug}: github group already set, skip`);
+			continue;
+		}
+		console.log(`  ${slug}: github {${have}} → {${groupText(want)}}`);
+		writes.push({
+			id: d.id,
+			slug,
+			data: {
+				github: {
+					...(d.github ?? {}),
+					orgLogin: want.orgLogin,
+					repos: want.repos.map((x) => ({ owner: x.owner, name: x.name })),
 				},
 			},
 		});
@@ -2450,7 +2556,9 @@ async function main() {
 			);
 			continue;
 		}
-		console.log(`  ${slug}: github REMOVED (was ${d.links.github} — 404)`);
+		// The reason lives beside each entry: most are a 404, some are another
+		// product's live repo (2026-11-12), so the log asserts no cause.
+		console.log(`  ${slug}: github REMOVED (was ${d.links.github})`);
 		writes.push({
 			id: d.id,
 			slug,
