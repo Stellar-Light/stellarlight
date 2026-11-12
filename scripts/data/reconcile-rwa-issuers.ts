@@ -26,7 +26,13 @@
  *                            ids from the envelope preimage, interface from
  *                            stellar.expert) → verify, then add a row or exclude
  *
- * Exit 1 on any of the five. A could-not-check is a red on purpose: an
+ *   level-stale              the toml at a tracked issuer's own home_domain
+ *                            declares a row the registry holds below
+ *                            toml-bidirectional: the link holds both ways, so
+ *                            promote the row (an untabled issuer's message
+ *                            names the same rows)
+ *
+ * Exit 1 on any of the six. A could-not-check is a red on purpose: an
  * unread toml cannot be reported as reconciled (a 4xx is a red, not a skip).
  * An on-chain-only issuer whose toml still does not answer is reported as
  * information, not a red — that is the state the registry already admits.
@@ -162,6 +168,57 @@ async function classifyToken(
 	return dec === "ok" ? "token" : "not-token";
 }
 
+/** Rows of this issuer that its own home-domain toml now declares while the
+ * registry holds them below toml-bidirectional: the link holds both ways, so
+ * the level is stale. PYUSD sat at on-chain-only from 2026-09-04 because its
+ * toml answered 403 that day, and a could-not-check is no finding
+ * (2026-11-12). Only the toml AT the issuer's home_domain counts: a tabled
+ * issuer's coverage entry can read the entity's toml instead (Rivool's reads
+ * rivool.finance while its issuer names lobstr.co), and that is one way. */
+export function promotable(
+	rows: ReadonlyArray<{
+		id: string;
+		code: string | null;
+		issuer: string | null;
+		verificationLevel: string;
+	}>,
+	issuer: string,
+	homeDomain: string | null,
+	tomlUrl: string,
+	declaredCodes: readonly string[],
+): string[] {
+	if (
+		!homeDomain ||
+		tomlUrl !== `https://${homeDomain}/.well-known/stellar.toml`
+	)
+		return [];
+	return rows
+		.filter(
+			(r) =>
+				r.issuer === issuer &&
+				r.verificationLevel !== "toml-bidirectional" &&
+				!!r.code &&
+				declaredCodes.includes(r.code),
+		)
+		.map((r) => r.id);
+}
+
+/** An account's home_domain from Horizon, or null when it sets none or the
+ * read failed (a failed read promotes nothing). */
+async function homeDomainOf(account: string): Promise<string | null> {
+	try {
+		const acct = (await (
+			await fetch(`https://horizon.stellar.org/accounts/${account}`, {
+				headers: UA,
+				signal: AbortSignal.timeout(20_000),
+			})
+		).json()) as { home_domain?: string };
+		return acct.home_domain ?? null;
+	} catch {
+		return null;
+	}
+}
+
 async function main() {
 	const ids = new Set(RWA_REGISTRY.map((r) => r.id));
 	const byUrl = new Map<string, typeof RWA_ISSUER_COVERAGE>();
@@ -170,6 +227,7 @@ async function main() {
 
 	const untracked: string[] = [];
 	const stale: string[] = [];
+	const levelStale: string[] = [];
 	const unreadable: string[] = [];
 	const untabled: string[] = [];
 	const stillDark: string[] = [];
@@ -192,6 +250,17 @@ async function main() {
 					untracked.push(
 						`${code}-${c.issuer} (${c.issuerEntity ?? "?"}, ${url})`,
 					);
+			const promote = promotable(
+				RWA_REGISTRY,
+				c.issuer,
+				await homeDomainOf(c.issuer),
+				url,
+				live,
+			);
+			if (promote.length)
+				levelStale.push(
+					`${c.issuerEntity ?? c.issuer}: ${url} is the issuer's home_domain toml and declares ${promote.join(", ")}, held below toml-bidirectional`,
+				);
 			const a = [...new Set(live)].sort().join(",");
 			const b = [...new Set(c.declared)].sort().join(",");
 			if (a !== b)
@@ -213,18 +282,8 @@ async function main() {
 		),
 	];
 	for (const issuer of outside) {
-		let home: string | null = null;
-		try {
-			const acct = (await (
-				await fetch(`https://horizon.stellar.org/accounts/${issuer}`, {
-					headers: UA,
-					signal: AbortSignal.timeout(20_000),
-				})
-			).json()) as { home_domain?: string };
-			home = acct.home_domain ?? null;
-		} catch {
-			/* Horizon hiccup: treated as still dark below */
-		}
+		// A Horizon hiccup reads as null: treated as still dark below.
+		const home = await homeDomainOf(issuer);
 		const url = home ? `https://${home}/.well-known/stellar.toml` : null;
 		const body = url ? await readToml(url) : null;
 		if (body === null) {
@@ -232,8 +291,15 @@ async function main() {
 			continue;
 		}
 		const live = parseCurrencies(body).filter((d) => d.issuer === issuer);
+		const promote = promotable(
+			RWA_REGISTRY,
+			issuer,
+			home,
+			url as string,
+			live.map((d) => d.code),
+		);
 		untabled.push(
-			`${issuer} → ${url} answers and declares [${live.map((d) => d.code).join(",")}] under this account: add an RWA_ISSUER_COVERAGE entry (and rows for any code not tracked)`,
+			`${issuer} → ${url} answers and declares [${live.map((d) => d.code).join(",")}] under this account: add an RWA_ISSUER_COVERAGE entry (and rows for any code not tracked)${promote.length ? `; its home_domain names that toml, so these rows hold both ways and belong at toml-bidirectional: ${promote.join(", ")}` : ""}`,
 		);
 	}
 
@@ -364,6 +430,10 @@ async function main() {
 		untabled,
 	);
 	line(
+		"LEVEL STALE: the issuer's own home_domain toml declares a row held below toml-bidirectional",
+		levelStale,
+	);
+	line(
 		"DEPLOYER DRIFT — a Soroban entity deployed a token contract the registry lacks",
 		deployerDrift,
 	);
@@ -376,6 +446,7 @@ async function main() {
 		stale.length +
 		unreadable.length +
 		untabled.length +
+		levelStale.length +
 		deployerDrift.length;
 	console.log(
 		red
@@ -385,7 +456,8 @@ async function main() {
 	process.exit(red ? 1 : 0);
 }
 
-main().catch((e) => {
-	console.error(e);
-	process.exit(1);
-});
+if (process.argv[1]?.includes("reconcile-rwa-issuers"))
+	main().catch((e) => {
+		console.error(e);
+		process.exit(1);
+	});

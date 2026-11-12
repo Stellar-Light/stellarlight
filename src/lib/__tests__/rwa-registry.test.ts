@@ -247,13 +247,20 @@ describe("registry -> project deployment (sls-023: 47 of 61 RWA rows had network
 		expect(deploymentFromRegistry(unknown, null)).toEqual(unknown);
 	});
 
-	it("does not lend a deployed-no-supply contract as deployment evidence", () => {
-		const d = deploymentFromRegistry(unknown, "spiko");
+	it("lends only a minted row: Etherfuse's zero-supply CETESZ is never the evidence", () => {
+		const d = deploymentFromRegistry(unknown, "etherfuse");
 		expect(d.network).toBe("mainnet");
-		const dead = RWA_REGISTRY.find(
-			(r) => r.state === "deployed-no-supply" && r.projectSlug === "spiko",
-		);
-		if (dead?.contract) expect(d.sourceUrl).not.toContain(dead.contract);
+		const minted = RWA_REGISTRY.filter(
+			(r) =>
+				r.projectSlug === "etherfuse" &&
+				(r.state === "live" || r.state === "issued-single-holder"),
+		).sort((a, b) => a.id.localeCompare(b.id))[0];
+		expect(minted?.state).toBe("live");
+		expect(d.asOf).toBe(minted?.verifiedAt);
+	});
+
+	it("lends nothing from a row whose attribution rests on rwa.xyz's listing (Spiko's contract-metadata rows, 2026-11-12)", () => {
+		expect(deploymentFromRegistry(unknown, "spiko")).toEqual(unknown);
 	});
 });
 
@@ -333,9 +340,13 @@ describe("audit corrections (cross-vendor, 2026-09-04)", () => {
 			sourceUrl: null,
 			asOf: null,
 		};
+		// The one single-holder row with a project today is Rivool's RVL5, an
+		// entity-toml row: its link holds one way, so it lends no deployment
+		// (2026-11-12). Every other level lends from a minted state.
+		expect(single?.verificationLevel).toBe("entity-toml");
 		expect(
 			deploymentFromRegistry(unknown, single?.projectSlug as string).network,
-		).toBe("mainnet");
+		).toBe("unknown");
 		const dead = RWA_REGISTRY.find((r) => r.state === "deployed-no-supply");
 		expect(
 			registryProducts(dead?.projectSlug as string).some(
@@ -568,16 +579,21 @@ describe("issuer coverage — a tracked issuer is covered completely (sls-083)",
 			if (!c.complete) falses++;
 		}
 		expect(covered).toBeGreaterThanOrEqual(10);
-		// Both branches of the rule are exercised by real data, so the test is
-		// not a tautology on today's snapshot.
-		expect(falses).toBeGreaterThanOrEqual(1);
+		// Circle's EURC issuer was the last unreconciled one; its toml was read
+		// on 2026-11-12, so no covered project is incomplete today. A new false
+		// is a finding to read, not a number to update.
+		expect(falses).toBe(0);
 	});
 
-	it("Circle is NOT complete: the EURC issuer's home domain serves no toml, so a green flag would be sls-083 again", () => {
+	it("Circle is complete once its EURC issuer's toml was read (2026-11-12): both issuers reconciled", () => {
 		const c = productsCoverage("circle");
-		expect(c?.issuersUnreconciled).toBe(1);
-		expect(c?.complete).toBe(false);
-		expect(c?.declared).toBe(c?.tracked); // the covered issuer IS fully tracked
+		expect(c).toMatchObject({
+			issuers: 2,
+			issuersUnreconciled: 0,
+			declared: 2,
+			tracked: 2,
+			complete: true,
+		});
 	});
 
 	it("SBRL: tracked and served, and the product says the issuer calls it a private offering", () => {

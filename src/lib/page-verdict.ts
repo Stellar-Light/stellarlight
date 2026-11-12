@@ -125,6 +125,70 @@ export const NON_PRODUCT_VERDICTS: ReadonlySet<PageVerdict> = new Set([
 export const NO_PAGE_READ =
 	/(^|\.)(github\.com|x\.com|twitter\.com|linkedin\.com|discord\.(gg|com)|t\.me|medium\.com|youtube\.com|apps\.apple\.com|play\.google\.com|npmjs\.com|crates\.io|jsr\.io)$/i;
 
+/**
+ * Hosts whose pages are ABOUT a project but belong to someone else: a code
+ * host, the SCF project page, a link-in-bio page, a docs, blog or notes host,
+ * a social or video profile, a package registry, a hackathon page. A 200
+ * there, or a stellar.toml read from that origin, describes the host and
+ * never the product (audit 2026-11-12: lumenshade's product-integration was
+ * SDF's sample toml at communityfund.stellar.org; dobprotocol's site-liveness
+ * was a Linktree). Subdomains count (moonlight-10.gitbook.io). Hosting
+ * platforms (vercel.app, github.io, netlify.app) are not here: a site
+ * deployed there IS the product. Nor are app stores, whose listing is the
+ * product's own distribution, or SDF's own product hosts under stellar.org.
+ */
+export const THIRD_PARTY_HOSTS = [
+	"github.com",
+	"gitlab.com",
+	"bitbucket.org",
+	"communityfund.stellar.org",
+	"linktr.ee",
+	"beacons.ai",
+	"bio.link",
+	"bento.me",
+	"gitbook.io",
+	"gitbook.com",
+	"notion.site",
+	"notion.so",
+	"medium.com",
+	"substack.com",
+	"mirror.xyz",
+	"docs.google.com",
+	"x.com",
+	"twitter.com",
+	"t.me",
+	"discord.com",
+	"discord.gg",
+	"linkedin.com",
+	"youtube.com",
+	"youtu.be",
+	"instagram.com",
+	"facebook.com",
+	"npmjs.com",
+	"npmjs.org",
+	"pypi.org",
+	"crates.io",
+	"jsr.io",
+	"dorahacks.io",
+	"devpost.com",
+] as const;
+
+/** The THIRD_PARTY_HOSTS entry a URL sits on, or null for anything else,
+ * including a value that is not a URL. A bare host is read as https. */
+export function thirdPartyHost(url: string | null | undefined): string | null {
+	const raw = (url ?? "").trim();
+	if (!raw) return null;
+	let host: string;
+	try {
+		host = new URL(/^https?:\/\//i.test(raw) ? raw : `https://${raw}`).hostname;
+	} catch {
+		return null;
+	}
+	return (
+		THIRD_PARTY_HOSTS.find((h) => host === h || host.endsWith(`.${h}`)) ?? null
+	);
+}
+
 /** Bounded GET of the first 64 KB so the verdict can see the title/meta.
  * Skipped for hosts where a page title says nothing about a product. */
 export async function readPage(

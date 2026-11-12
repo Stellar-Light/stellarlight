@@ -1927,6 +1927,12 @@ async function main() {
 			);
 			continue;
 		}
+		if (hold === "earned-basis") {
+			console.log(
+				`  ${slug}: keeps ${d.statusBasis}, a basis a lane earned over the curated ${fix.basis} entry; nothing written`,
+			);
+			continue;
+		}
 		// Idempotence (2026-09-06): a stamp whose every field already matches
 		// the row is not a write. 141 from===to entries were re-written on every
 		// execute — "143 applied" meant nothing, and the noise hid that tucambio

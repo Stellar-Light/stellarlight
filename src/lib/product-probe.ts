@@ -10,6 +10,7 @@
  * That distinction is the whole reason it is a separate tier from
  * human-verified, which means a person looked.
  */
+import { thirdPartyHost } from "./page-verdict";
 
 /** Markers specific enough that a marketing page about Stellar won't match.
  *  The bare word "stellar" is deliberately absent — it is the name of the
@@ -117,6 +118,18 @@ export async function probeProduct(
 	rawUrl: string,
 	timeoutMs = 12_000,
 ): Promise<ProbeResult> {
+	// A page on somebody else's host is about the project, not the product:
+	// its origin's toml is the host's (lumenshade read SDF's sample toml off
+	// its SCF page) and its markup is the host's (a repo README naming the
+	// SDK). Nothing read there is this product's integration.
+	const host = thirdPartyHost(rawUrl);
+	if (host)
+		return {
+			kind: null,
+			detail: `third-party host ${host}: its pages and stellar.toml describe the host, not the product`,
+			url: null,
+			couldNotCheck: false,
+		};
 	let origin: string;
 	try {
 		origin = new URL(rawUrl).origin;

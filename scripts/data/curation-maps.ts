@@ -27,6 +27,30 @@ import type {
 import type { AvailabilityCheck } from "../../src/lib/wallet-coverage";
 export type { StatusBasis };
 
+/** The third-party host class (audit 2026-11-12): a status that rested on a
+ * page on somebody else's host, such as a GitHub repository, a Linktree,
+ * GitBook docs, a YouTube channel or the SCF project page. What that page
+ * answers describes the host, so the basis is withdrawn to unverified, dated,
+ * and the status kept: missing evidence is never a verdict. unverified means
+ * no citable source, so STATUS_SOURCE_RETRACT nulls the stored one; the entry
+ * carries no sourceUrl, and curate neither rewrites nor fetches it.
+ * `withdraw` only where the stored basis is strong (lumenshade's
+ * product-integration). */
+function hostBasisWithdrawn(
+	status: "Live" | "Development",
+	read: string,
+	withdraw?: true,
+) {
+	return {
+		from: status,
+		to: status,
+		basis: "unverified" as const,
+		asOf: "2026-11-12",
+		...(withdraw ? { withdraw } : {}),
+		note: `Basis withdrawn 2026-11-12: this status rested on ${read}, a page on a host the project does not own, and what that page answers describes the host, not the product, so it is no longer cited as the status source. The status stands until evidence about the product itself arrives; this is no finding that it stopped.`,
+	};
+}
+
 /** Launch-status corrections (boxy 2026-07-09: "some are in process of
  * launching while allbridge has launched"). Each row is grounded in the
  * project's OWN current materials — never a staleness heuristic:
@@ -2822,6 +2846,179 @@ export const STATUS_FIX: Record<
 		sourceUrl: "https://vnx.li/blog",
 		note: "VNX no longer offers exchange services for VEUR and no longer lists it among its stablecoins: VNX Commodities AG's notice of 2026-04-22 said its exchange services of VEUR 'will be fully discontinued', with holders to settle by 22 May 2026, and VNX's stablecoins page (read 2026-11-11) lists only VCHF and VGBP.",
 	},
+	// 2026-11-12, the third-party host class: each status below rested on a
+	// page on somebody else's host (hostBasisWithdrawn). Swept over the public
+	// API's seven categories that day; the status of each row is kept.
+	"5x-crypto": hostBasisWithdrawn(
+		"Live",
+		"its YouTube channel page (youtube.com) answering",
+	),
+	"assemblyscript-soroban-sdk": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	astrocore: hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"ben-wallet": hostBasisWithdrawn(
+		"Live",
+		"its GitBook docs (gitbook.io) answering",
+	),
+	constellation: hostBasisWithdrawn(
+		"Live",
+		"its GitHub organization page (github.com) answering",
+	),
+	"cross-platform-soroban-rpc-sdk": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	dobprotocol: hostBasisWithdrawn(
+		"Live",
+		"its Linktree page (linktr.ee) answering",
+	),
+	"hi-fifo": hostBasisWithdrawn(
+		"Live",
+		"its YouTube channel page (youtube.com) answering",
+	),
+	"ios-mac-stellar-sdk": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"js-worker-sdk": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"kmac-state-machine-template": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"kyc-token": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	lumenshade: hostBasisWithdrawn(
+		"Live",
+		"the stellar.toml at communityfund.stellar.org, the origin of its SCF project page (the fund's own sample, with a testnet passphrase and the fund's accounts)",
+		true,
+	),
+	"luminary-s-archive": hostBasisWithdrawn(
+		"Live",
+		"its YouTube channel page (youtube.com) answering",
+	),
+	moonlight: hostBasisWithdrawn(
+		"Live",
+		"its GitBook docs (gitbook.io) answering",
+	),
+	"net-sdk": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"open-gamefi-sdk": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"roberto-sanz": hostBasisWithdrawn(
+		"Live",
+		"a YouTube video page (youtube.com) answering",
+	),
+	"roberto-sanz-criptomonedas": hostBasisWithdrawn(
+		"Live",
+		"its YouTube channel page (youtube.com) answering",
+	),
+	sanctum: hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	sendin: hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"simple-signer": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	solarkraft: hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"soroban-copilot": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"soroban-decompiler": hostBasisWithdrawn(
+		"Development",
+		"its GitHub repository page (github.com) answering",
+	),
+	"soroban-pre-order-contract": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"soroban-react": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	sorobanmath: hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	sstream: hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"stellar-c-sdk": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	"stellar-command-insights": hostBasisWithdrawn(
+		"Development",
+		"its GitHub repository page (github.com) answering",
+	),
+	// stellar-qt-sdk's website is a thread on galactictalk.org, a forum the
+	// galactictalk row runs, so the host list cannot carry it: fixed per row.
+	"stellar-qt-sdk": hostBasisWithdrawn(
+		"Live",
+		"a thread on galactictalk.org, the forum another directory project (galactictalk) runs, answering",
+	),
+	"stellar-nest": hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	teken: hostBasisWithdrawn(
+		"Live",
+		"its GitHub repository page (github.com) answering",
+	),
+	web3dev: hostBasisWithdrawn(
+		"Live",
+		"its Discord invite page (discord.com) answering",
+	),
+	// Two rows of the class with their own answering site, where the evidence
+	// on the third-party page supports a basis of its own (2026-11-12).
+	// sentora: the stored source is Sentora's launch post in its own Medium
+	// publication (medium.com/sentora, whose feed names Sentora as its author),
+	// read 2026-07-15 when the row was seeded. A team's own launch post
+	// describes the product, so the basis is operator-announcement; the entry
+	// keeps the stored source rather than restating it, so curate does not
+	// fetch Medium for its pre-launch scan.
+	sentora: {
+		from: "Live",
+		to: "Live",
+		basis: "operator-announcement",
+		asOf: "2026-07-15",
+		note: "Basis corrected 2026-11-12: this Live status rests on Sentora's own launch post in its Medium publication (medium.com/sentora), read 2026-07-15, which announces its curated vaults on the Stellar network. That is the team's own statement about the product, an operator announcement; it had been filed as site-liveness, which would mean a page answering.",
+	},
+	// x402: its stored source was the npm page for @x402/stellar, a page on a
+	// host x402 does not own. The registry document behind it is evidence of a
+	// different kind: 2.30.0 published 2026-11-04, and npm's repository field
+	// names github.com/x402-foundation/x402, this row's own repository.
+	x402: {
+		from: "Live",
+		to: "Live",
+		basis: "package-release",
+		asOf: "2026-11-04",
+		sourceUrl: "https://registry.npmjs.org/@x402/stellar",
+		note: "Basis corrected 2026-11-12: @x402/stellar 2.30.0 was published to npm on 2026-11-04, and the registry names github.com/x402-foundation/x402, this project's own repository, as the package source. The status had rested on the npm web page answering, filed as site-liveness.",
+	},
 };
 
 /** Website corrections (liveness triage 2026-07-10, boxy-approved): the
@@ -3479,12 +3676,7 @@ export const SEEDS: Array<{
 	// isn't left for the source-inherited backfill floor to stamp. Optional.
 	statusAsOf?: string;
 	statusSourceUrl?: string;
-	statusBasis?:
-		| "operator-announcement"
-		| "site-liveness"
-		| "onchain-activity"
-		| "human-verified"
-		| "source-inherited";
+	statusBasis?: StatusBasis;
 }> = [
 	// ── SCF absences, 2026-09-14 packet, owner-approved 2026-09-15 ──────────
 	// Nine projects the Stellar Community Fund awarded that the directory did
@@ -4893,8 +5085,11 @@ export const SEEDS: Array<{
 	// from the directory (no strict match on /api/projects/search). Grounded in
 	// the Sentora launch post (medium.com/sentora/sentora-launches-vaults-on-the-
 	// stellar-network...) + each product's own site. Web-verified live today, so
-	// they carry site-liveness provenance on create (not the source-inherited
-	// backfill floor).
+	// they carried site-liveness provenance on create (not the source-inherited
+	// backfill floor). 2026-11-12: a Medium post is a page on a host Sentora
+	// does not own, so it is no site-liveness. Sentora's own launch post is
+	// an operator announcement; for the hub, which another company wrote
+	// about, the create-time basis is unverified.
 	{
 		slug: "stellar-defi-hub",
 		name: "Stellar DeFi Hub",
@@ -4913,7 +5108,7 @@ export const SEEDS: Array<{
 		statusAsOf: "2026-07-15",
 		statusSourceUrl:
 			"https://medium.com/sentora/sentora-launches-vaults-on-the-stellar-network-accessible-via-stellar-defi-hub-2b09749cd789",
-		statusBasis: "site-liveness",
+		statusBasis: "unverified",
 	},
 	{
 		slug: "sentora",
@@ -4933,7 +5128,7 @@ export const SEEDS: Array<{
 		statusAsOf: "2026-07-15",
 		statusSourceUrl:
 			"https://medium.com/sentora/sentora-launches-vaults-on-the-stellar-network-accessible-via-stellar-defi-hub-2b09749cd789",
-		statusBasis: "site-liveness",
+		statusBasis: "operator-announcement",
 	},
 	// Coverage-gap report, first curation pass (2026-07-16): the two verified
 	// DefiLlama misses. Both measured by llama's STELLAR-chain adapter
@@ -5003,7 +5198,7 @@ export const SEEDS: Array<{
 		provenance: { source: "AdminEdit" },
 		statusAsOf: "2026-07-31",
 		statusSourceUrl: "https://jsr.io/@colibri/core",
-		statusBasis: "site-liveness",
+		statusBasis: "package-release",
 	},
 	// 2026-08-01 (boxy): Stellar Indexer — earrietadev's (Creit-Tech / xBull)
 	// indexing service, raised in the SDF Discord (kalepail + Raph thread on
@@ -5029,7 +5224,7 @@ export const SEEDS: Array<{
 		provenance: { source: "AdminEdit" },
 		statusAsOf: "2026-08-01",
 		statusSourceUrl: "https://jsr.io/@stellar-indexer/stellar-indexer-sdk",
-		statusBasis: "site-liveness",
+		statusBasis: "package-release",
 	},
 	// 2026-08-08 (boxy): agent-economy batch from trionlabs/awesome-stellar-ai
 	// (community-curated list; we're on it ourselves). 15 projects verified
@@ -5054,7 +5249,7 @@ export const SEEDS: Array<{
 		},
 		provenance: { source: "AdminEdit" },
 		statusSourceUrl: "https://github.com/stellar/stellar-mpp-sdk",
-		statusBasis: "site-liveness",
+		statusBasis: "unverified",
 	},
 	{
 		slug: "stellar-8004",
@@ -5089,7 +5284,7 @@ export const SEEDS: Array<{
 		},
 		provenance: { source: "AdminEdit" },
 		statusSourceUrl: "https://www.npmjs.com/package/@x402/stellar",
-		statusBasis: "site-liveness",
+		statusBasis: "package-release",
 	},
 	{
 		slug: "stellar-agent-search",
@@ -5106,7 +5301,7 @@ export const SEEDS: Array<{
 		},
 		provenance: { source: "AdminEdit" },
 		statusSourceUrl: "https://registry.npmjs.org/stellar-agent-search/latest",
-		statusBasis: "site-liveness",
+		statusBasis: "package-release",
 	},
 	{
 		slug: "mpp-router",
@@ -5390,7 +5585,7 @@ export const SEEDS: Array<{
 		links: { website: "https://www.youtube.com/@RobertoSanzCriptomonedas" },
 		provenance: { source: "AdminEdit" },
 		statusAsOf: ASOF_SEED,
-		statusBasis: "site-liveness",
+		statusBasis: "unverified",
 		statusSourceUrl: "https://www.youtube.com/@RobertoSanzCriptomonedas",
 	},
 	{
@@ -7765,20 +7960,29 @@ export function statusFixNote(
  *    site-liveness Live stamp cannot touch a row that is now Inactive.
  *  - "stronger-basis": a stamp with a weak basis never overwrites a strong
  *    one a lane or a person earned. A status MOVE is a verdict and writes as
- *    the entry says; `withdraw` retracts a wrong strong stamp on purpose. */
+ *    the entry says; `withdraw` retracts a wrong strong stamp on purpose.
+ *  - "earned-basis": a stamp with a strong basis other than human-verified
+ *    never overwrites a different strong basis on the row; only a person's
+ *    stamp, or `withdraw`, replaces evidence a lane earned. */
 export function statusFixHold(
 	fix: { from: string; to: string; basis?: string; withdraw?: boolean },
 	row: { status?: string | null; statusBasis?: string | null },
-): "from-guard" | "stronger-basis" | null {
+): "from-guard" | "stronger-basis" | "earned-basis" | null {
 	if (row.status !== fix.from) return "from-guard";
 	if (
 		fix.from === fix.to &&
 		fix.basis &&
 		!fix.withdraw &&
-		!isStrongStatusBasis(fix.basis) &&
 		isStrongStatusBasis(row.statusBasis)
-	)
-		return "stronger-basis";
+	) {
+		if (!isStrongStatusBasis(fix.basis)) return "stronger-basis";
+		// A strong stamp, other than a person's, never writes over a different
+		// strong basis a lane earned after it: x402's package-release stamp
+		// would otherwise overwrite a product-integration award every Tuesday,
+		// and the lane would award it back (2026-11-12).
+		if (fix.basis !== "human-verified" && fix.basis !== row.statusBasis)
+			return "earned-basis";
+	}
 	return null;
 }
 
@@ -7914,6 +8118,17 @@ export const DEPLOYMENT_VERIFIED: Record<
 	// issuance of their codes is a fake-issuer farm - see the 2026-08-28
 	// lesson), redswan (no toml, no on-chain asset), spacewalk (only a 2023
 	// roadmap graphic). Absence of evidence stays visible.
+	// 2026-11-12: spiko leaves the 2026-08-28 unknown list above. That note
+	// was about fake issuers of Spiko's ticker codes as classic assets; its
+	// real tokens are Soroban contracts, and Spiko's own docs name them. Its
+	// claim had rested on its RWA registry rows (contract-metadata, attributed
+	// by rwa.xyz's listing), which lend no deployment under the two-way rule.
+	spiko: {
+		network: "mainnet",
+		sourceUrl: "https://docs.spiko.io/documentation/tokenization/addresses",
+		checkedAt: "2026-11-12",
+		note: "Spiko's own docs (Tokenization, Addresses, read 2026-11-12) list its Stellar contracts, each linked to stellar.expert's public network explorer, and all nine tokens are registry rows the mainnet ledger holds (getLedgerEntries, 2026-11-12): USTBL CARUUX2FZNPH6DGJOEUFSIUQWYHNL5AVDV7PMVSHWL7OBYIBFC76F4TO, EUTBL CBGV2QFQBBGEQRUKUMCPO3SZOHDDYO6SCP5CH6TW7EALKVHCXTMWDDOF, UKTBL CDT3KU6TQZNOHKNOHNAFFDQZDURVC3MSTL4ML7TUTZGNOPBZCLABP4FR, SPKCC CDS2GCAQTNQINSCJUJIVBJXILKBWP5PU7LOBGHMP3X47QCQBFKPMTCNT, eurSPKCC CDWOB6T7SVSMMQN5V3P2OPTBAXOP7DAZHGVW3PYTZIKHVFKN6TBSXR6A, SAFO CDGSC6BA4TCAOVSFQCUEHDMOIIHYYVNYBT6YEARS4MX3ITAHUINVGQHX, eurSAFO CBOOCGZSVRSZFRE4U2NWR2B4RXYVJWRCBTGOUD2JPI2TDJPWMTJX7FZP, gbpSAFO CAGYRRKPFSWKM6SJOE4QAAVYMOSHMDS5WOQ4T5A2E6XNCU7LZZKUNQKP and chfSAFO CAJD2IBSP7VO2VYJQUYJSOGPJINTUYV7MQITINXVPTIH3CCLCUENNMW4 (zero supply). The page also lists Spiko's Permission Manager and Redemption Manager contracts.",
+	},
 	ondo: {
 		network: "mainnet",
 		sourceUrl: "https://ondo.finance/.well-known/stellar.toml",
@@ -8238,6 +8453,11 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
 	b4b: "https://b4b.app/",
 	chaincred: "https://prince29chouhan.github.io/chaincred_landing",
 	localcoin: "https://localcoin.us/",
+	// 2026-11-12: the product-integration stamp cited the toml at the origin of
+	// lumenshade's SCF project page, which is the fund's own sample (testnet
+	// passphrase, the fund's accounts). It names nothing of LumenShade's;
+	// STATUS_FIX withdraws the basis it backed.
+	lumenshade: "https://communityfund.stellar.org/.well-known/stellar.toml",
 	pactta: "https://pactta.com/",
 	"scam-flagging-system":
 		"https://docs.google.com/spreadsheets/d/1jckwz3x1h6kjkm6zczthdshk_whhnitygtv8r24anho/edit?usp=sharing",
@@ -8250,6 +8470,48 @@ export const STATUS_SOURCE_RETRACT: Record<string, string> = {
 	stabble: "https://stabble.org/",
 	venalabs: "https://venalabs.com/",
 	whalestack: "https://coinqvest.com/",
+	// 2026-11-12, the third-party host class: the status source of each row
+	// STATUS_FIX moves to unverified (hostBasisWithdrawn), keyed to the exact
+	// stored value read that day. unverified means no citable source.
+	"5x-crypto": "https://youtube.com/@5x.crypto",
+	"assemblyscript-soroban-sdk": "https://github.com/soneso/as-soroban-sdk",
+	astrocore: "https://github.com/astroband/astrocore",
+	"ben-wallet": "https://ben-wallet.gitbook.io/ben-wallet",
+	constellation: "https://github.com/constellation-protocol",
+	"cross-platform-soroban-rpc-sdk":
+		"https://github.com/frankszendzielarz/sorobanrpcsdk",
+	dobprotocol: "https://linktr.ee/dobprotocol",
+	"hi-fifo": "https://youtube.com/@hififo",
+	"ios-mac-stellar-sdk": "https://github.com/soneso/stellar-ios-mac-sdk",
+	"js-worker-sdk": "https://github.com/cloudouble/stellar-js-worker-sdk",
+	"kmac-state-machine-template": "https://github.com/huitemagico/kmac",
+	"kyc-token": "https://github.com/tigerblocks/bbf",
+	"luminary-s-archive": "https://youtube.com/@LuminarysArchive/featured",
+	moonlight: "https://moonlight-10.gitbook.io/moonlight-docs",
+	"net-sdk": "https://github.com/Beans-BV/dotnet-stellar-sdk",
+	"open-gamefi-sdk":
+		"https://github.com/yanis7774/stellar-gamefi-integration/tree/main",
+	"roberto-sanz":
+		"https://youtube.com/watch?v=kxOnnUeiNuE&list=PLrUGRHjdAfuh3sHINCCyZtmJy64P3nSXD&ab_channel=RobertoSanz",
+	"roberto-sanz-criptomonedas":
+		"https://www.youtube.com/@RobertoSanzCriptomonedas",
+	sanctum: "https://github.com/zkbricks/mpc-zexe",
+	sendin: "https://github.com/sendin-org/sendin",
+	"simple-signer": "https://github.com/fsodano/simple-stellar-signer",
+	solarkraft: "https://github.com/freespek/solarkraft",
+	"soroban-copilot": "https://github.com/mootz12/soroban-copilot",
+	"soroban-decompiler":
+		"https://github.com/salaheldinsoliman/soroban-decompiler",
+	"soroban-pre-order-contract": "https://github.com/aolieman/soroban-pre-order",
+	"soroban-react": "https://github.com/paltalabs/soroban-react",
+	sorobanmath: "https://github.com/rahul-soshte/soroban-math",
+	sstream: "https://github.com/rahimklaber/sstream",
+	"stellar-c-sdk": "https://github.com/lightsail-network/libstellar",
+	"stellar-command-insights": "https://github.com/bytemaster333/Soroban-ELK",
+	"stellar-nest": "https://github.com/alkeops/it-s-not-another-package",
+	"stellar-qt-sdk": "https://galactictalk.org/d/2300-sdk-for-stellar-qt",
+	teken: "https://github.com/moonbite-gmbh/multisig-ui",
+	web3dev: "https://discord.com/invite/web3dev",
 };
 
 /**

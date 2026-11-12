@@ -36,11 +36,12 @@
 
 import "../load-env";
 import { getPayload } from "payload";
-import { NON_PRODUCT_VERDICTS } from "../../src/lib/page-verdict";
+import {
+	NON_PRODUCT_VERDICTS,
+	thirdPartyHost,
+} from "../../src/lib/page-verdict";
 import { SITE_LIVENESS_MAY_REPLACE } from "../../src/lib/project-status";
 import { curatedFieldsFor } from "./curation-maps";
-
-const { default: configPromise } = await import("../../src/payload.config");
 
 const EXECUTE = process.argv.includes("--execute");
 
@@ -65,72 +66,34 @@ function sameTarget(a: string, b: string): boolean {
 	return norm(a) === norm(b);
 }
 
-async function main() {
-	console.log(
-		`status-basis upgrade — ${EXECUTE ? "EXECUTE" : "DRY RUN (no writes)"}\n`,
-	);
-	const payload = await getPayload({ config: await configPromise });
+export type Check = {
+	url?: string;
+	status?: string;
+	statusCode?: number | null;
+	lastSuccessAt?: string | null;
+	lastChecked?: string | null;
+	pageVerdict?: string | null;
+	pageTitle?: string | null;
+	redirectTo?: string | null;
+};
 
-	const [projects, checks] = await Promise.all([
-		payload.find({
-			collection: "projects",
-			limit: 5000,
-			depth: 0,
-			select: {
-				slug: true,
-				name: true,
-				status: true,
-				statusBasis: true,
-				statusAsOf: true,
-				statusSourceUrl: true,
-				links: true,
-			},
-		}),
-		payload.find({
-			collection: "link-checks",
-			limit: 20000,
-			depth: 0,
-			select: {
-				url: true,
-				status: true,
-				statusCode: true,
-				lastSuccessAt: true,
-				lastChecked: true,
-				pageVerdict: true,
-				pageTitle: true,
-				redirectTo: true,
-			},
-		}),
-	]);
+export type Row = {
+	id: string;
+	slug: string;
+	status?: string | null;
+	statusBasis?: string | null;
+	links?: { website?: string | null } | null;
+};
 
-	type Check = {
-		url?: string;
-		status?: string;
-		statusCode?: number | null;
-		lastSuccessAt?: string | null;
-		lastChecked?: string | null;
-		pageVerdict?: string | null;
-		pageTitle?: string | null;
-		redirectTo?: string | null;
-	};
-	const live: Check[] = (checks.docs as Check[]).filter(
-		(c) => c.url && c.lastSuccessAt,
-	);
-	console.log(
-		`${projects.totalDocs} projects · ${checks.totalDocs} link checks (${live.length} with a recorded success)\n`,
-	);
-	if (live.length === 0) {
-		console.error(
-			"✗ no successful link checks at all — instrument failure, not an absence of live sites",
-		);
-		process.exit(1);
-	}
-
+/** The upgrade pass's whole decision, with no database: which weak rows gain
+ * site-liveness from the link checks, and why every other row does not. */
+export function planUpgrade(projects: Row[], checks: Check[]) {
+	const live: Check[] = checks.filter((c) => c.url && c.lastSuccessAt);
 	// Every check keyed by target (incl. ones with no success) — the
 	// downgrade pass needs the latest verdict even when the site no longer
 	// answers at all.
 	const allByTarget = new Map<string, Check>();
-	for (const c of checks.docs as Check[]) {
+	for (const c of checks) {
 		if (!c.url) continue;
 		const key = c.url
 			.trim()
@@ -172,6 +135,8 @@ async function main() {
 		title: string;
 	}> = [];
 	let noWebsite = 0;
+	/** A website on somebody else's host: what answers there is the host. */
+	const thirdParty: Array<{ slug: string; site: string; host: string }> = [];
 	let noCheck = 0;
 	let staleEvidence = 0;
 	let strongerBasis = 0;
@@ -185,13 +150,7 @@ async function main() {
 		why: string;
 		lastChecked: string;
 	}> = [];
-	for (const p of projects.docs as Array<{
-		id: string;
-		slug: string;
-		status?: string | null;
-		statusBasis?: string | null;
-		links?: { website?: string | null } | null;
-	}>) {
+	for (const p of projects) {
 		const basis = p.statusBasis ?? null;
 		if (basis && !WEAK.has(basis)) {
 			strongerBasis++;
@@ -200,6 +159,14 @@ async function main() {
 		const site = p.links?.website?.trim();
 		if (!site) {
 			noWebsite++;
+			continue;
+		}
+		// A GitHub repo, a Linktree, GitBook docs or the SCF project page
+		// answers for its host, not the product (dobprotocol, moonlight and
+		// 30 more earned site-liveness here this way, audit 2026-11-12).
+		const host = thirdPartyHost(site);
+		if (host) {
+			thirdParty.push({ slug: p.slug, site, host });
 			continue;
 		}
 		const key = site
@@ -264,8 +231,88 @@ async function main() {
 		});
 	}
 
+	return {
+		live,
+		byTarget,
+		allByTarget,
+		upgrade,
+		nonProduct,
+		thirdParty,
+		noCheckRows,
+		curatedOwned,
+		noWebsite,
+		noCheck,
+		staleEvidence,
+		strongerBasis,
+	};
+}
+
+async function main() {
+	console.log(
+		`status-basis upgrade — ${EXECUTE ? "EXECUTE" : "DRY RUN (no writes)"}\n`,
+	);
+	const { default: configPromise } = await import("../../src/payload.config");
+	const payload = await getPayload({ config: await configPromise });
+
+	const [projects, checks] = await Promise.all([
+		payload.find({
+			collection: "projects",
+			limit: 5000,
+			depth: 0,
+			select: {
+				slug: true,
+				name: true,
+				status: true,
+				statusBasis: true,
+				statusAsOf: true,
+				statusSourceUrl: true,
+				links: true,
+			},
+		}),
+		payload.find({
+			collection: "link-checks",
+			limit: 20000,
+			depth: 0,
+			select: {
+				url: true,
+				status: true,
+				statusCode: true,
+				lastSuccessAt: true,
+				lastChecked: true,
+				pageVerdict: true,
+				pageTitle: true,
+				redirectTo: true,
+			},
+		}),
+	]);
+
+	const {
+		live,
+		byTarget,
+		allByTarget,
+		upgrade,
+		nonProduct,
+		thirdParty,
+		noCheckRows,
+		curatedOwned,
+		noWebsite,
+		noCheck,
+		staleEvidence,
+		strongerBasis,
+	} = planUpgrade(projects.docs as Row[], checks.docs as Check[]);
+	console.log(
+		`${projects.totalDocs} projects · ${checks.totalDocs} link checks (${live.length} with a recorded success)\n`,
+	);
+	if (live.length === 0) {
+		console.error(
+			"✗ no successful link checks at all — instrument failure, not an absence of live sites",
+		);
+		process.exit(1);
+	}
+
 	console.log(`already carry a stronger basis : ${strongerBasis}`);
 	console.log(`no website link                : ${noWebsite}`);
+	console.log(`website on a third-party host  : ${thirdParty.length}`);
 	console.log(`no successful check for it     : ${noCheck}`);
 	console.log(
 		`check too old (>${MAX_EVIDENCE_AGE_DAYS}d), left weak : ${staleEvidence}`,
@@ -281,6 +328,13 @@ async function main() {
 			console.log(
 				`  ${r.slug.padEnd(28)} ${r.status.padEnd(12)} ${r.lastChecked}  ${r.why.padEnd(44)} ${r.site}`,
 			);
+	}
+	if (thirdParty.length) {
+		console.log(
+			`\n── ${thirdParty.length} weak rows whose website is a page on a third-party host: never site-liveness (relink to the product's own site) ──`,
+		);
+		for (const r of thirdParty.sort((a, b) => a.slug.localeCompare(b.slug)))
+			console.log(`  ${r.slug.padEnd(28)} ${r.host.padEnd(26)} ${r.site}`);
 	}
 	console.log(`\n→ ${upgrade.length} rows gain basis=site-liveness\n`);
 	for (const u of upgrade.slice(0, 8)) {
@@ -394,7 +448,8 @@ async function main() {
 	process.exit(after.totalDocs >= wrote ? 0 : 1);
 }
 
-main().catch((e) => {
-	console.error("Fatal:", e);
-	process.exit(1);
-});
+if (process.argv[1]?.includes("upgrade-status-basis"))
+	main().catch((e) => {
+		console.error("Fatal:", e);
+		process.exit(1);
+	});

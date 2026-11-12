@@ -98,7 +98,13 @@ const hasOnchain = (p: any) =>
 		`${all.length} active rows · ${eligible.length} eligible (weak basis, no on-chain footprint, not a library, has a URL) · probing ${todo.length} — ${EXECUTE ? "EXECUTING" : "dry run"}\n`,
 	);
 
-	const t = { awarded: 0, noEvidence: 0, placeholder: 0, couldNotCheck: 0 };
+	const t = {
+		awarded: 0,
+		noEvidence: 0,
+		placeholder: 0,
+		couldNotCheck: 0,
+		thirdParty: 0,
+	};
 	const byKind: Record<string, number> = {};
 	for (const p of todo) {
 		const url = productUrl(p) as string;
@@ -123,6 +129,9 @@ const hasOnchain = (p: any) =>
 					},
 					context: { internal: true },
 				});
+		} else if (r.detail.startsWith("third-party host")) {
+			t.thirdParty++;
+			console.log(`  HOST  ${String(p.slug).padEnd(28)} ${r.detail}`);
 		} else if (/placeholder|parked/.test(r.detail)) {
 			t.placeholder++;
 			console.log(`  PARKED ${String(p.slug).padEnd(27)} ${r.detail}`);
@@ -132,7 +141,7 @@ const hasOnchain = (p: any) =>
 		await new Promise((r) => setTimeout(r, PACE_MS));
 	}
 	console.log(
-		`\nawarded ${t.awarded} ${JSON.stringify(byKind)} | no marker found ${t.noEvidence} | parked/placeholder ${t.placeholder} | could-not-check ${t.couldNotCheck}`,
+		`\nawarded ${t.awarded} ${JSON.stringify(byKind)} | no marker found ${t.noEvidence} | parked/placeholder ${t.placeholder} | third-party host ${t.thirdParty} | could-not-check ${t.couldNotCheck}`,
 	);
 	// A run that could not look at most of the set proves nothing about it.
 	if (todo.length && t.couldNotCheck > todo.length / 2) {

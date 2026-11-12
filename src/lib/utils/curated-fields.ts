@@ -26,6 +26,23 @@ export function feedOwnedFields(
 	return owned;
 }
 
+/** Whether the feed may stamp its own provenance (basis source-inherited,
+ * its file as the source) on a row: only where it may write the status and
+ * the row holds no evidence. A row whose status a curation map owns keeps the
+ * basis, date and source the map wrote (2026-11-12: a dated unverified stamp
+ * would otherwise flip back to source-inherited every morning). */
+export function feedStampsProvenance(
+	owned: ReadonlySet<string>,
+	statusBasis: string | null | undefined,
+): boolean {
+	return (
+		!owned.has("status") &&
+		(!statusBasis ||
+			statusBasis === "source-inherited" ||
+			statusBasis === "unverified")
+	);
+}
+
 /** Remove curated fields from a feed patch.
  *
  * Supports dotted paths ("links.website") so protecting one curated link does

@@ -20,7 +20,11 @@
  */
 import { describe, expect, it } from "vitest";
 import { STATUS_BASES, STRONG_STATUS_BASES } from "../project-status";
-import { feedOwnedFields, withoutCuratedFields } from "../utils/curated-fields";
+import {
+	feedOwnedFields,
+	feedStampsProvenance,
+	withoutCuratedFields,
+} from "../utils/curated-fields";
 
 const feedPatch = {
 	status: "Live",
@@ -73,5 +77,38 @@ describe("feed status precedence", () => {
 		expect(data).not.toHaveProperty("status");
 		expect((data.links as Record<string, unknown>).website).toBeUndefined();
 		expect(protectedFields.sort()).toEqual(["links.website", "status"]);
+	});
+});
+
+/** The sync stamped source-inherited and its own file over a weak basis even
+ * where a STATUS_FIX entry owns the row's status, so a dated unverified stamp
+ * (2026-11-12: 27 of the 36 third-party-host rows are in the feed) would be
+ * flipped back every morning and rewritten every Tuesday. */
+describe("the feed's provenance stamp", () => {
+	it("never lands on a row whose status a curation map owns", () => {
+		for (const basis of [null, "source-inherited", "unverified"])
+			expect(
+				feedStampsProvenance(
+					feedOwnedFields(new Set(["status"]), basis),
+					basis,
+				),
+				String(basis),
+			).toBe(false);
+	});
+	it("still dates an unowned row with no evidence behind it", () => {
+		for (const basis of [null, undefined, "source-inherited", "unverified"])
+			expect(
+				feedStampsProvenance(feedOwnedFields(new Set(), basis), basis),
+				String(basis),
+			).toBe(true);
+	});
+	it("never replaces evidence a lane or a person recorded", () => {
+		for (const basis of STATUS_BASES.filter(
+			(b) => b !== "source-inherited" && b !== "unverified",
+		))
+			expect(
+				feedStampsProvenance(feedOwnedFields(new Set(), basis), basis),
+				basis,
+			).toBe(false);
 	});
 });
