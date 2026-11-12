@@ -1,10 +1,9 @@
 // @vitest-environment node
 
 /**
- * /ideas and the brief pages once SCF's RFP Track page names no open brief
- * (October 2026: Q4 RFPs coming soon): the page opens on the empty active
- * quarter without calling it open, and the dropped Q3 briefs render as
- * closed past-round briefs, not as 404s.
+ * /ideas and the brief pages: the page opens on the active quarter's briefs
+ * as SCF's RFP Track page lists them (Q4 2026, published 2026-11-11), and the
+ * dropped Q3 briefs render as closed past-round briefs, not as 404s.
  */
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -18,20 +17,22 @@ const tabs = (html: string) =>
 	);
 
 describe("/ideas", () => {
-	it("opens on Q4 2026, coming soon with no brief, and every earlier quarter closed", () => {
+	it("opens on Q4 2026 with SCF's two published briefs open, and every earlier quarter closed", () => {
 		const html = renderToStaticMarkup(<IdeasListing />);
 		expect(tabs(html)).toEqual([
-			"Q4 2026: Coming soon",
+			"Q4 2026: Open",
 			"Q3 2026: Closed",
 			"Q2 2026: Closed",
 			"Q1 2026: Closed",
 		]);
-		expect(html).toContain("No RFPs found");
-		// Review: "No RFPs available for this quarter." under "Coming soon".
-		expect(html).not.toContain("No RFPs available for this quarter.");
 		expect(html).toContain(
-			"SCF has not published its Q4 2026 RFPs yet: its RFP Track page named none open (checked 2026-11-04).",
+			"Web and API Analytics for Stellar Ecosystem Projects",
 		);
+		expect(html).toContain(
+			"XDR/CAP-Coverage Audit Tool and Indexer-Hardening Guide",
+		);
+		expect(html).not.toContain("No RFPs found");
+		expect(html).not.toContain("SCF has not published its Q4 2026 RFPs yet");
 	});
 });
 
@@ -55,10 +56,10 @@ describe("a brief page", () => {
 		);
 	});
 
-	it("does not send a reader to open briefs when none is open", async () => {
+	it("sends a reader of a closed brief to the open ones, now that SCF lists some", async () => {
 		const html = await render("layerzero-dvn");
-		expect(html).not.toContain("Browse the currently open briefs instead");
-		expect(html).toContain("No brief is open now");
+		expect(html).toContain("Browse the currently open briefs instead");
+		expect(html).not.toContain("No brief is open now");
 	});
 });
 

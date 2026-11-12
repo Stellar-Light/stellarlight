@@ -31,6 +31,16 @@ export interface ChangelogEntry {
 /** Latest-first. */
 export const CHANGELOG: ChangelogEntry[] = [
 	{
+		date: "2026-11-12",
+		surfaces: ["api"],
+		version: "spec@1.9.136",
+		type: "changed",
+		summary:
+			"getRfps serves SCF's two Q4 2026 briefs as open: Web and API Analytics for Stellar Ecosystem Projects, and XDR/CAP-Coverage Audit Tool and Indexer-Hardening Guide, which SCF's RFP Track page published on 2026-11-11. counts.open is 2, and meta.briefRoster gives that page as checked on 2026-11-12.",
+		detail:
+			"Each brief is restated from SCF's own text and linked to the commit-pinned page version that published it (scf-handbook 4cc1fae3, read 2026-11-12). The page marks each brief's budget section as for internal review only, so no budget is restated. The spec@1.9.122 entry's open brief count of 0 describes the page as read on 2026-11-04, before SCF published these.",
+	},
+	{
 		date: "2026-11-11",
 		surfaces: ["api", "skill"],
 		version: "spec@1.9.135",
