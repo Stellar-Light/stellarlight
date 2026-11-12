@@ -54,8 +54,11 @@ function ChangeIndicator({ value }: { value: number | null }) {
 	);
 }
 
-export function ProjectTVLChart({ projectName }: { projectName: string }) {
-	const { data, isLoading } = useProtocolTVL(projectName);
+/** The project page's TVL card, keyed by the project's slug: the route
+ * serves the project's own row (#1912), so the card and the API row show one
+ * figure, one date and one reason, never a protocol matched by name. */
+export function ProjectTVLChart({ projectSlug }: { projectSlug: string }) {
+	const { data, isLoading } = useProtocolTVL(projectSlug);
 
 	if (isLoading || !data) return null;
 
@@ -65,6 +68,9 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 		date: new Date(entry.date),
 		tvl: entry.tvl,
 	}));
+	// A project row's weekly figure comes with no 24h or 7d change.
+	const changes =
+		chartData.length > 0 && (data.change1d !== null || data.change7d !== null);
 
 	return (
 		<Card className="mb-8 border border-border/50 bg-card shadow-sm">
@@ -74,26 +80,32 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 			<CardContent>
 				{/* Stats Row */}
 				<div
-					className={`grid grid-cols-1 ${chartData.length > 0 ? "sm:grid-cols-3" : "sm:grid-cols-1 max-w-sm"} gap-4 mb-6`}
+					className={`grid grid-cols-1 ${changes ? "sm:grid-cols-3" : "sm:grid-cols-1 max-w-sm"} gap-4 mb-6`}
 				>
 					<div className="rounded-lg bg-background/50 border border-border/50 p-4">
-						<p className="text-sm text-muted-foreground mb-1">
-							Current TVL on Stellar
-						</p>
+						<p className="text-sm text-muted-foreground mb-1">TVL on Stellar</p>
 						<p className="text-2xl font-bold text-foreground">
-							{data.currentTVL === null ? (
-								<Unavailable />
-							) : (
+							{data.currentTVL !== null ? (
 								formatTVL(data.currentTVL)
+							) : data.unavailable ? (
+								"No figure"
+							) : (
+								<Unavailable />
 							)}
 						</p>
 						{data.currentTVL !== null && data.asOf && (
 							<p className="text-xs text-muted-foreground mt-1">
 								as of {data.asOf.slice(0, 10)}
+								{data.stale ? ", older than 14 days" : null}
+							</p>
+						)}
+						{data.currentTVL === null && data.unavailable && (
+							<p className="text-xs text-muted-foreground mt-1">
+								{data.unavailable}
 							</p>
 						)}
 					</div>
-					{chartData.length > 0 && (
+					{changes && (
 						<>
 							<div className="rounded-lg bg-background/50 border border-border/50 p-4">
 								<p className="text-sm text-muted-foreground mb-1">24h Change</p>
@@ -138,21 +150,25 @@ export function ProjectTVLChart({ projectName }: { projectName: string }) {
 					</div>
 				)}
 
-				{/* The figure's own source: fund tokens (Benji, from Horizon) and
-				manual rows carry sourceUrl, and a fund token says how it is
-				counted; every other row is DefiLlama's. */}
+				{/* The figure's own source: the page that shows it (a fund token's
+				Horizon record, a manual source, or the DefiLlama page that sums
+				the row's mapped protocols), and how it is counted when it is not
+				one protocol's TVL. No page sums some multi-protocol rows: then
+				DefiLlama is named, unlinked. */}
 				<p className="text-xs text-muted-foreground mt-3">
 					Data from{" "}
-					<a
-						href={
-							data.sourceUrl ?? `https://defillama.com/protocol/${data.slug}`
-						}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="underline hover:text-foreground transition-colors"
-					>
-						{data.sourceUrl ? hostOf(data.sourceUrl) : "DeFi Llama"}
-					</a>{" "}
+					{data.sourceUrl ? (
+						<a
+							href={data.sourceUrl}
+							target="_blank"
+							rel="noopener noreferrer"
+							className="underline hover:text-foreground transition-colors"
+						>
+							{hostOf(data.sourceUrl)}
+						</a>
+					) : (
+						"DeFi Llama"
+					)}{" "}
 					· Stellar chain only
 					{data.method ? ` · ${data.method}` : null}
 				</p>

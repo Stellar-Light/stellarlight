@@ -870,20 +870,34 @@ export const Projects: CollectionConfig = {
 		},
 		{
 			// DefiLlama-verified TVL (system-written by scripts/enrich-tvl.ts).
-			// null = NOT TRACKED on DefiLlama — never "zero TVL" (class 3);
-			// llama-listed protocols with ~$0 feed the liveness report instead.
+			// null = no figure, never "zero TVL" (class 3): an unlinked row, or a
+			// linked one whose tvlUnavailable says why; llama-listed protocols
+			// with ~$0 feed the liveness report instead.
 			name: "tvlUSD",
 			type: "number",
 			admin: {
 				description:
-					"DefiLlama TVL in USD (sum of mapped llama rows). null = not tracked, NOT zero.",
+					"DefiLlama TVL in USD (sum of mapped llama rows). null = no figure, NOT zero: unlinked, or tvlUnavailable says why.",
 			},
 		},
 		{
 			name: "tvlAsOf",
 			type: "date",
 			admin: {
-				description: "When tvlUSD was fetched (class 8: dated metrics).",
+				description:
+					"When tvlUSD was fetched (class 8: dated metrics); with tvlUnavailable, when DefiLlama was read and published no figure.",
+			},
+		},
+		{
+			// #1912 (2026-11-11): one writer, scripts/enrich-tvl.ts (tvlFieldsFor),
+			// on every row it links to DefiLlama: the reason on a row it read
+			// with no Stellar figure, null beside a figure. A stored figure is
+			// never kept beside it, so an old figure is never served as current.
+			name: "tvlUnavailable",
+			type: "text",
+			admin: {
+				description:
+					"Why tvlUSD holds no figure on a DefiLlama-linked row, dated in the text (DefiLlama lists the slugs but publishes no Stellar figure, or they could not be read). Null beside a figure. Written by enrich-tvl only.",
 			},
 		},
 		{
@@ -911,7 +925,7 @@ export const Projects: CollectionConfig = {
 		{
 			// Curated mapping to DefiLlama protocol slugs (several per project —
 			// e.g. blend = pools + pools-v2 + backstops). Maintained in
-			// scripts/enrich-tvl.ts LLAMA_MAP; stored for provenance.
+			// LLAMA_MAP (src/lib/status-checks.ts); stored for provenance.
 			name: "llamaSlugs",
 			type: "text",
 			hasMany: true,
@@ -925,7 +939,7 @@ export const Projects: CollectionConfig = {
 			type: "group",
 			admin: {
 				description:
-					"DefiLlama's verdict on the mapped slugs: listed; deprecated (every slug dead: a deadFrom date, or deprecated with nothing locked and no live family listing); superseded (retired but undated with value locked or a live family listing); partial (retired slugs plus a missing one); not-found (renamed or removed upstream). Only deprecated reads as a death. Written by enrich-tvl.",
+					"DefiLlama's verdict on the mapped slugs: listed; deprecated (every slug dead: a deadFrom date, or deprecated with nothing locked and no live family listing); superseded (retired but undated with value locked or a live family listing); partial (retired slugs plus a missing one); not-found (renamed or removed upstream). Only deprecated reads as a death. doublecounted: DefiLlama files a mapped slug's Stellar TVL as also counted under another protocol, so the analyze total leaves the row out. Written by enrich-tvl.",
 			},
 			fields: [
 				{
@@ -947,6 +961,14 @@ export const Projects: CollectionConfig = {
 					// https://defillama.com/protocol/{parent} as tvlMethodUrl.
 					name: "parent",
 					type: "text",
+				},
+				{
+					// #1912 audit (2026-11-11): DefiLlama's own verdict, from its
+					// /lite/protocols2 list, that a mapped slug's Stellar TVL is also
+					// counted under another protocol (Stellar-doublecounted). The
+					// analyze total leaves such rows out. Null = not read yet.
+					name: "doublecounted",
+					type: "checkbox",
 				},
 				{ name: "checkedAt", type: "date" },
 			],

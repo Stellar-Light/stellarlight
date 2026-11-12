@@ -659,7 +659,7 @@ export default async function ProjectDetailPage({
 				)}
 
 				{/* TVL Stats & Chart (DeFi protocols only) */}
-				<ProjectTVLChart projectName={project.name} />
+				<ProjectTVLChart projectSlug={project.slug} />
 
 				{/* Built By - Linked Entities */}
 				{linkedEntities.length > 0 && (

@@ -81,6 +81,7 @@ import {
 	type StatusCheck,
 	statusChecksFor,
 	tvlStaleOf,
+	tvlUnavailableOf,
 } from "@/lib/status-checks";
 
 /**
@@ -157,6 +158,8 @@ async function semanticProjectRows(
 				// them (F3 class), so semantic rows serialized TVL as null.
 				tvlUSD: 1,
 				tvlAsOf: 1,
+				// #1912: why a linked row has no figure (the F3 projection class)
+				tvlUnavailable: 1,
 				tvlSource: 1,
 				tvlMethod: 1,
 				// sls-039: mapped provider identifiers ride semantic rows too
@@ -242,6 +245,7 @@ async function semanticProjectRows(
 			tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 			tvlAsOf: p.tvlAsOf ?? null,
 			tvlStale: tvlStaleOf(p.tvlUSD, p.tvlAsOf),
+			tvlUnavailable: tvlUnavailableOf(p),
 			// sls-031: TVL methodology provenance (which source, computed how)
 			tvlSource: p.tvlSource ?? null,
 			tvlMethod: p.tvlMethod ?? null,
@@ -433,6 +437,8 @@ interface ProjectRow {
 	tvlAsOf?: string | null;
 	// #1912: the reading is past the weekly refresh (tvlStaleOf)
 	tvlStale?: boolean | null;
+	// #1912: why a DefiLlama-linked row has no figure (tvlUnavailableOf)
+	tvlUnavailable?: string | null;
 	// sls-031: TVL provenance — which source produced tvlUSD and how.
 	tvlSource?: string | null;
 	tvlMethod?: string | null;
@@ -1516,6 +1522,7 @@ async function handle(req: NextRequest) {
 					// biome-ignore lint/suspicious/noExplicitAny: passthrough group
 					publicGoods?: any;
 					tvlAsOf?: string | null;
+					tvlUnavailable?: string | null;
 					tvlSource?: string | null;
 					tvlMethod?: string | null;
 					llamaSlugs?: string[] | null;
@@ -1635,6 +1642,7 @@ async function handle(req: NextRequest) {
 					tvlUSD: typeof p.tvlUSD === "number" ? p.tvlUSD : null,
 					tvlAsOf: p.tvlAsOf ?? null,
 					tvlStale: tvlStaleOf(p.tvlUSD, p.tvlAsOf),
+					tvlUnavailable: tvlUnavailableOf(p),
 					// sls-031: TVL methodology provenance
 					tvlSource: p.tvlSource ?? null,
 					tvlMethod: p.tvlMethod ?? null,
@@ -2332,6 +2340,7 @@ async function handle(req: NextRequest) {
 					tvlUSD: typeof c.tvlUSD === "number" ? c.tvlUSD : null,
 					tvlAsOf: c.tvlAsOf ?? null,
 					tvlStale: tvlStaleOf(c.tvlUSD, c.tvlAsOf),
+					tvlUnavailable: tvlUnavailableOf(c),
 					// provenance + sls-039/032/035 fields must be the CANONICAL's, not
 					// inherited from the shadow via the spread.
 					tvlSource: c.tvlSource ?? null,

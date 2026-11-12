@@ -10,17 +10,27 @@ import { spec } from "../openapi-spec";
 import { PROJECT_TYPES } from "../project-types";
 import {
 	CHECK_RESULTS,
+	doublecountedOf,
+	LLAMA_MAP,
+	type LlamaTvlInput,
 	llamaListingOf,
+	llamaRowsFor,
+	MIN_PROTOCOLS,
+	MIN_STELLAR_PROTOCOLS,
 	ONCHAIN_USE_TYPES,
+	protocolListProblem,
 	QUIET_DAYS,
 	quietSinceFor,
 	STATUS_CHECKS,
 	statusChecksFor,
+	stellarDoublecountedIds,
 	stellarTvlOf,
 	TVL_FLOOR_TYPES,
 	TVL_FRESH_DAYS,
 	tvlFieldsFor,
+	tvlReadOf,
 	tvlStaleOf,
+	tvlUnavailableOf,
 } from "../status-checks";
 
 const NOW = new Date("2026-10-26T12:00:00.000Z");
@@ -124,7 +134,7 @@ describe("llamaListingOf: DefiLlama's verdict on the mapped slugs", () => {
 	});
 });
 
-describe("stellarTvlOf and tvlFieldsFor: a missing TVL is null, never 0", () => {
+describe("stellarTvlOf: a missing TVL is null, never 0", () => {
 	it("prefers the Stellar slice, then the protocol total", () => {
 		expect(stellarTvlOf([{ chainTvls: { Stellar: 5 }, tvl: 900 }])).toBe(5);
 		expect(stellarTvlOf([{ tvl: 7 }])).toBe(7);
@@ -136,42 +146,338 @@ describe("stellarTvlOf and tvlFieldsFor: a missing TVL is null, never 0", () => 
 		expect(stellarTvlOf([{ tvl: null, chainTvls: {} }])).toBeNull();
 		expect(stellarTvlOf([{ tvl: null }, { tvl: 3 }])).toBe(3);
 	});
-	it("a resolved mapping writes its TVL and slugs", () => {
-		expect(
-			tvlFieldsFor(["a", "b"], ["a", "b"], [{ tvl: 2.4 }, { tvl: 1 }]),
-		).toEqual({ tvlUSD: 3, llamaSlugs: ["a", "b"] });
+});
+
+// #1912 (2026-11-11): tvlFieldsFor reads each mapped slug from DefiLlama's
+// FULL list. The Stellar-only list could not tell "listed with no Stellar
+// figure" (DefiLlama's answer) from "not listed" (could not check), so Spiko
+// and Etherfuse kept their 2026-09-14 figures for eight weeks.
+describe("tvlFieldsFor: a figure, no figure (dated), or could not check", () => {
+	const AT = "2026-11-11T22:47:04.000Z";
+	const onStellar = (tvl: number | null, more: object = {}) => ({
+		chains: ["Stellar"],
+		tvl,
+		...more,
 	});
-	it("no Stellar row under the same slugs: the stored TVL stays", () => {
-		expect(tvlFieldsFor(["soroswap"], ["soroswap"], [])).toBeNull();
-	});
-	it("a live row without a figure under the same slugs keeps the stored TVL (a one-run gap)", () => {
+	it("every slug listed with a figure: the Stellar sum, no reason", () => {
 		expect(
-			tvlFieldsFor(["x"], ["x"], [{ tvl: null, deprecated: null }]),
-		).toBeNull();
-		expect(
-			tvlFieldsFor(["x", "y"], ["x", "y"], [{ tvl: 5 }, { tvl: null }]),
-		).toBeNull();
+			tvlFieldsFor(["a", "b"], ["a", "b"], [onStellar(2.4), onStellar(1)], AT),
+		).toEqual({ tvlUSD: 3, llamaSlugs: ["a", "b"], tvlUnavailable: null });
 	});
-	it("a retired row without a figure writes null: upstream stopped computing it", () => {
+	it("listed with no Stellar chain and no figure: tvlUSD null with a dated reason, never 0", () => {
+		// spiko and etherfuse as /protocols served them on 2026-11-11
+		const out = tvlFieldsFor(
+			["spiko"],
+			["spiko"],
+			[{ chains: [], tvl: null, chainTvls: {} }],
+			AT,
+		);
+		expect(out).toEqual({
+			tvlUSD: null,
+			llamaSlugs: ["spiko"],
+			tvlUnavailable:
+				"DefiLlama lists spiko but publishes no Stellar TVL figure for it (checked 2026-11-11).",
+		});
+	});
+	it("a figure on other chains only is no Stellar figure, under the same slugs or not", () => {
+		const curator = {
+			chains: ["Ethereum", "Solana"],
+			tvl: 2_780_582_444,
+			chainTvls: { Ethereum: 1_533_086_219, Solana: 373_365_292 },
+		};
+		expect(tvlFieldsFor(["c"], ["c"], [curator], AT)?.tvlUSD).toBeNull();
+		expect(tvlFieldsFor(["c"], ["c"], [curator], AT)?.tvlUnavailable).toMatch(
+			/publishes no Stellar TVL figure for it \(checked 2026-11-11\)/,
+		);
+		// Beside a row on Stellar it is a partial sum, never the row's figure
+		// (#1912 audit): could not check, so a moved mapping is cleared.
+		expect(
+			tvlFieldsFor(["c", "hub"], [], [curator, onStellar(80.4)], AT),
+		).toEqual({
+			tvlUSD: null,
+			llamaSlugs: ["c", "hub"],
+			tvlUnavailable:
+				"No Stellar TVL could be read for c, hub: DefiLlama publishes a Stellar figure for only some of them (checked 2026-11-11).",
+		});
+	});
+	it("one slug of a multi-slug row off Stellar keeps the stored sum, never the remainder (#1912 audit)", () => {
+		// blend-pools-v2 leaving Stellar would have left blend-pools' $39,517
+		// as Blend's whole figure.
+		const blend = [
+			onStellar(39_517, { chainTvls: { Stellar: 39_517 } }),
+			{
+				chains: ["Ethereum"],
+				tvl: 115_000_000,
+				chainTvls: { Ethereum: 115_000_000 },
+			},
+			onStellar(0, { chainTvls: { Stellar: 0 } }),
+			onStellar(0, { chainTvls: { Stellar: 0 } }),
+		];
+		const slugs = ["a", "b", "c", "d"];
+		expect(tvlReadOf(slugs, blend)).toEqual({ outcome: "partial" });
+		expect(tvlFieldsFor(slugs, slugs, blend, AT)).toBeNull();
+		// A retired slug without a figure is not a partial: it adds nothing.
+		const retired = [
+			onStellar(39_517),
+			onStellar(null, { deprecated: true, deadFrom: "2026-01-01" }),
+		];
+		expect(tvlReadOf(["a", "b"], retired)).toEqual({
+			outcome: "figure",
+			tvlUSD: 39_517,
+		});
+		// No live slug carries a Stellar figure: DefiLlama's answer, dated.
+		const none = [
+			{ chains: [], tvl: null, chainTvls: {} },
+			{ chains: [], tvl: null, chainTvls: {} },
+		];
+		expect(tvlReadOf(["a", "b"], none)).toEqual({ outcome: "no-figure" });
+		expect(tvlFieldsFor(["a", "b"], ["a", "b"], none, AT)?.tvlUnavailable).toBe(
+			"DefiLlama lists a, b but publishes no Stellar TVL figure for them (checked 2026-11-11).",
+		);
+	});
+	it("a retired row without a figure is no figure: upstream stopped computing it", () => {
 		expect(
 			tvlFieldsFor(
 				["allbridge-core"],
 				["allbridge-core"],
-				[{ tvl: null, deprecated: true, deadFrom: "2026-08-31" }],
+				[onStellar(null, { deprecated: true, deadFrom: "2026-08-31" })],
+				AT,
 			),
-		).toEqual({ tvlUSD: null, llamaSlugs: ["allbridge-core"] });
+		).toEqual({
+			tvlUSD: null,
+			llamaSlugs: ["allbridge-core"],
+			tvlUnavailable:
+				"DefiLlama lists allbridge-core but publishes no Stellar TVL figure for it (checked 2026-11-11).",
+		});
 	});
-	it("a live row without a figure under moved slugs is cleared too", () => {
-		expect(tvlFieldsFor(["new"], ["old"], [{ tvl: null }])).toEqual({
+	it("a slug missing from the list under the same slugs: could not check, the stored fields stay", () => {
+		// sentora from 2026-08-17 and templar-protocol on 2026-11-09
+		expect(tvlFieldsFor(["sentora"], ["sentora"], [], AT)).toBeNull();
+		// One of several missing: the rest is not the whole sum.
+		expect(tvlFieldsFor(["x", "y"], ["x", "y"], [onStellar(5)], AT)).toBeNull();
+	});
+	it("a live row on Stellar without a figure under the same slugs keeps the stored TVL (a one-run gap)", () => {
+		expect(tvlFieldsFor(["x"], ["x"], [onStellar(null)], AT)).toBeNull();
+		expect(
+			tvlFieldsFor(["x", "y"], ["x", "y"], [onStellar(5), onStellar(null)], AT),
+		).toBeNull();
+	});
+	it("could not check under moved slugs: the old mapping's figure is cleared, with why", () => {
+		expect(tvlFieldsFor(["new"], ["old"], [onStellar(null)], AT)).toEqual({
 			tvlUSD: null,
 			llamaSlugs: ["new"],
+			tvlUnavailable:
+				"No Stellar TVL could be read for new: a live listing on Stellar came back without a figure this run (checked 2026-11-11).",
+		});
+		expect(tvlFieldsFor(["gone"], ["old"], [], AT)).toEqual({
+			tvlUSD: null,
+			llamaSlugs: ["gone"],
+			tvlUnavailable:
+				"No Stellar TVL could be read for gone: DefiLlama's protocol list does not hold it (checked 2026-11-11).",
 		});
 	});
-	it("no Stellar row under moved slugs: the old figure is cleared", () => {
-		expect(tvlFieldsFor(["allbridge-next"], ["allbridge-core"], [])).toEqual({
+	it("a listed slug with no chain under moved slugs is DefiLlama's answer, dated", () => {
+		expect(
+			tvlFieldsFor(
+				["allbridge-next"],
+				["allbridge-core"],
+				[{ chains: [], tvl: null, chainTvls: {} }],
+				AT,
+			),
+		).toEqual({
 			tvlUSD: null,
 			llamaSlugs: ["allbridge-next"],
+			tvlUnavailable:
+				"DefiLlama lists allbridge-next but publishes no Stellar TVL figure for it (checked 2026-11-11).",
 		});
+	});
+	it("tvlUnavailableOf serves the reason only while there is no figure", () => {
+		const why =
+			"DefiLlama lists spiko but publishes no Stellar TVL figure for it (checked 2026-11-11).";
+		expect(tvlUnavailableOf({ tvlUSD: null, tvlUnavailable: why })).toBe(why);
+		expect(tvlUnavailableOf({ tvlUnavailable: why })).toBe(why);
+		expect(tvlUnavailableOf({ tvlUSD: 0, tvlUnavailable: why })).toBeNull();
+		expect(tvlUnavailableOf({ tvlUSD: null, tvlUnavailable: "" })).toBeNull();
+		expect(tvlUnavailableOf({ tvlUSD: null })).toBeNull();
+	});
+});
+
+// The plan the enrich-tvl dry run makes for the #1912 rows, from DefiLlama's
+// /protocols list as read 2026-11-11T22:47Z (each row trimmed to the fields
+// read; templar-lending's chainTvls to two of its chains). Neither sentora nor
+// templar-protocol is in that list: both are parent pages now.
+const LIST_2026_11_11: (LlamaTvlInput & { slug: string })[] = [
+	{ slug: "spiko", chains: [], tvl: null, chainTvls: {} },
+	{ slug: "etherfuse", chains: [], tvl: null, chainTvls: {} },
+	{ slug: "allbridge-next", chains: [], tvl: null, chainTvls: {} },
+	{
+		slug: "stellar-defi-hub",
+		chains: ["Stellar"],
+		tvl: 80769055.05454363,
+		chainTvls: { Stellar: 80769055.05454363 },
+	},
+	{
+		slug: "sentora-curator",
+		chains: ["Ethereum", "Ink", "Solana", "Tempo"],
+		tvl: 2780582444.3555136,
+		chainTvls: {
+			Ink: 806246893.089237,
+			Solana: 373365292.02340823,
+			Tempo: 67884039.67833374,
+			Ethereum: 1533086219.564535,
+		},
+	},
+	{
+		slug: "templar-lending",
+		chains: ["Stellar", "Ethereum"],
+		tvl: 28587875.175082993,
+		chainTvls: { Stellar: 11589629.090683961, Ethereum: 10614249.017921638 },
+	},
+	{
+		slug: "templar-precept",
+		chains: ["Stellar"],
+		tvl: 38.573055980964,
+		chainTvls: { Stellar: 38.573055980964 },
+	},
+];
+describe("LLAMA_MAP follows DefiLlama's current identities (#1912)", () => {
+	const AT = "2026-11-11T22:47:04.000Z";
+	const plan = (row: string, storedSlugs: string[]) => {
+		const slugs = LLAMA_MAP[row];
+		const listed = slugs.flatMap((s) =>
+			LIST_2026_11_11.filter((p) => p.slug === s),
+		);
+		return tvlFieldsFor(slugs, storedSlugs, listed, AT);
+	};
+	it("sentora reads stellar-defi-hub, the Stellar vaults it curates: a fresh figure", () => {
+		expect(plan("sentora", ["sentora"])).toEqual({
+			tvlUSD: 80769055,
+			llamaSlugs: ["stellar-defi-hub"],
+			tvlUnavailable: null,
+		});
+	});
+	it("templar-protocol reads templar-lending, its renamed listing", () => {
+		expect(plan("templar-protocol", ["templar-protocol"])).toEqual({
+			tvlUSD: 11589629,
+			llamaSlugs: ["templar-lending"],
+			tvlUnavailable: null,
+		});
+	});
+	it("spiko, etherfuse and allbridge carry no figure and a dated reason", () => {
+		for (const [row, slug] of [
+			["spiko", "spiko"],
+			["etherfuse", "etherfuse"],
+			["allbridge", "allbridge-next"],
+		])
+			expect(plan(row, [slug]), row).toEqual({
+				tvlUSD: null,
+				llamaSlugs: [slug],
+				tvlUnavailable: `DefiLlama lists ${slug} but publishes no Stellar TVL figure for it (checked 2026-11-11).`,
+			});
+	});
+	it("one DefiLlama slug belongs to one row: none is summed twice", () => {
+		const slugs = Object.values(LLAMA_MAP).flat();
+		expect(slugs.length).toBeGreaterThan(20);
+		expect(new Set(slugs).size).toBe(slugs.length);
+		// The directory's own stellar-defi-hub row stays unlinked (see the map).
+		expect(LLAMA_MAP).not.toHaveProperty("stellar-defi-hub");
+	});
+});
+
+// #1912 audit (2026-11-11): what the lane reads from DefiLlama's lists
+// before it writes anything.
+describe("DefiLlama's lists: a degraded answer, a CEX slug and double counts (#1912 audit)", () => {
+	// A /protocols body the size of the real one (9,004 rows on 2026-11-11):
+	// 35 Stellar rows, the rest elsewhere.
+	const list = (blankChains: boolean) =>
+		Array.from({ length: MIN_PROTOCOLS + 50 }, (_, i) => ({
+			id: String(i),
+			slug: `p${i}`,
+			category: "Dexs",
+			chains: blankChains ? [] : i < 35 ? ["Stellar"] : ["Ethereum"],
+			tvl: blankChains ? null : 1000,
+			chainTvls: blankChains ? {} : { [i < 35 ? "Stellar" : "Ethereum"]: 1000 },
+		}));
+	it("a well-formed list with its chains blank is no list: nothing is written", () => {
+		expect(protocolListProblem(list(false))).toBeNull();
+		// The audit's shape: 200, at least 1,000 rows, every chain list empty
+		// and every tvl null. It read all 21 mapped rows as "no Stellar
+		// figure" and cleared them, green.
+		expect(protocolListProblem(list(true))).toMatch(
+			/0 Stellar protocols \(< 20/,
+		);
+		expect(MIN_STELLAR_PROTOCOLS).toBe(20);
+		expect(protocolListProblem(list(false).slice(0, 999))).toMatch(/999/);
+		// Chains intact but every Stellar figure $0 or missing (#1912 audit
+		// re-check): no reading, so no $0 is written over a mapped row.
+		const zeros = list(false).map((p, i) =>
+			i < 35 ? { ...p, tvl: 0, chainTvls: { Stellar: 0 } } : p,
+		);
+		expect(protocolListProblem(zeros)).toMatch(/no Stellar figure above \$0/);
+		const nulls = list(false).map((p, i) =>
+			i < 35 ? { ...p, tvl: null, chainTvls: {} } : p,
+		);
+		expect(protocolListProblem(nulls)).toMatch(/no Stellar figure above \$0/);
+		expect(protocolListProblem({ error: "down" })).toMatch(/no protocols/);
+		// The run reads the guard before it opens the store.
+		const script = readFileSync(
+			join(process.cwd(), "scripts/enrich-tvl.ts"),
+			"utf8",
+		);
+		const guard = script.indexOf("protocolListProblem(all)");
+		expect(guard).toBeGreaterThan(0);
+		expect(guard).toBeLessThan(script.indexOf("getPayload({"));
+	});
+	it("a CEX listing is never a mapped row's TVL", () => {
+		const rows = [
+			{ slug: "dex", category: "Dexs" },
+			{ slug: "exchange", category: "CEX" },
+		];
+		expect(llamaRowsFor(["exchange", "dex"], rows)).toEqual({
+			listed: [{ slug: "dex", category: "Dexs" }],
+			missing: ["exchange"],
+		});
+	});
+	it("DefiLlama's own double-count verdict on Stellar is read from its lite list", () => {
+		const lite = (blank: boolean) => ({
+			protocols: Array.from({ length: MIN_PROTOCOLS }, (_, i) => ({
+				defillamaId: String(i),
+				chainTvls: blank
+					? {}
+					: i < 30
+						? {
+								Stellar: { tvl: 5 },
+								...(i < 2 ? { "Stellar-doublecounted": { tvl: 5 } } : {}),
+							}
+						: { Ethereum: { tvl: 5 } },
+			})),
+		});
+		expect(stellarDoublecountedIds(lite(false))).toEqual(new Set(["0", "1"]));
+		// A blank or short list is no verdict: each row keeps its own.
+		expect(stellarDoublecountedIds(lite(true))).toBeNull();
+		expect(stellarDoublecountedIds({ protocols: [] })).toBeNull();
+		// Stellar rows with no double-count key at all left the keys out: no
+		// verdict, so the stored ones stay (#1912 audit re-check).
+		const keyless = lite(false);
+		for (const p of keyless.protocols)
+			delete (p.chainTvls as Record<string, unknown>)["Stellar-doublecounted"];
+		expect(stellarDoublecountedIds(keyless)).toBeNull();
+		// With the keys present on other chains, no Stellar key is DefiLlama
+		// saying nothing on Stellar is double counted: every verdict clears,
+		// so a flag cannot outlive DefiLlama's own.
+		const clear = lite(false);
+		for (const p of clear.protocols) {
+			const c = p.chainTvls as Record<string, unknown>;
+			delete c["Stellar-doublecounted"];
+			if (c.Ethereum) c["Ethereum-doublecounted"] = { tvl: 5 };
+		}
+		expect(stellarDoublecountedIds(clear)).toEqual(new Set());
+		const ids = new Set(["8425"]);
+		expect(doublecountedOf([{ id: "8425" }], [], ids, false)).toBe(true);
+		expect(doublecountedOf([{ id: "6122" }], [], ids, true)).toBe(false);
+		expect(doublecountedOf([{ id: "8425" }], [], null, false)).toBe(false);
+		expect(doublecountedOf([], ["gone"], ids, true)).toBe(true);
+		expect(doublecountedOf([], ["gone"], ids, undefined)).toBeNull();
 	});
 });
 
@@ -567,6 +873,36 @@ describe("every serving point carries the guard, and the spec declares it", () =
 			const f = s.components.schemas[name].properties.tvlStale;
 			expect(f).toMatchObject({ type: "boolean", nullable: true });
 		}
+	});
+	it("every TVL row serves tvlUnavailable from the one helper, and the spec declares it (#1912)", () => {
+		const builders = (route.match(/\.\.\.statusChecksFor\(\w+\)/g) ?? [])
+			.length;
+		const why = /tvlUnavailable: tvlUnavailableOf\(\w+\)/g;
+		expect((route.match(why) ?? []).length).toBe(builders);
+		// the semantic rows' $project (the F3 projection class)
+		expect(route).toMatch(/tvlUnavailable: 1/);
+		const board = readFileSync(
+			join(process.cwd(), "src/app/api/leaderboard/route.ts"),
+			"utf8",
+		);
+		expect((board.match(why) ?? []).length).toBe(1);
+		expect(board).toMatch(/tvlUnavailable: true/);
+		// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+		const s: any = spec;
+		for (const name of ["Project", "LeaderboardProject"]) {
+			const f = s.components.schemas[name].properties.tvlUnavailable;
+			expect(f).toMatchObject({ type: "string", nullable: true });
+		}
+	});
+	it("enrich-tvl reads tvlUnavailable back, and never reports a missing figure as $0 (#1912)", () => {
+		const script = readFileSync(
+			join(process.cwd(), "scripts/enrich-tvl.ts"),
+			"utf8",
+		);
+		expect(script).toMatch(/VERIFIED_FIELDS = \[[^\]]*"tvlUnavailable"/s);
+		// The liveness report read stellarTvlOf(...) ?? 0 and printed "TVL $0"
+		// for Spiko, Etherfuse and Sentora.
+		expect(script).not.toMatch(/\) \?\? 0;/);
 	});
 });
 

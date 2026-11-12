@@ -592,18 +592,35 @@ Found 2026-10-23 by the prize-labels lane and its review
 Found 2026-10-23 by the dead-protocol guard round
 (`improvements/rounds/2026-10-23-dead-protocol-guard.md`):
 
-- Two DefiLlama slugs in `scripts/enrich-tvl.ts` LLAMA_MAP no longer
-  resolve, so their TVL freezes and the listing check reads could-not-check:
-  `soroswap` (now `soroswap-amm`, Stellar slice $1,177,991 on 2026-10-23;
-  stored tvlAsOf 2026-10-19) and `sentora` (now `sentora-curator`, which no
-  longer lists Stellar; stored $10,393,904 at tvlAsOf 2026-08-10).
-- Three LLAMA_MAP keys match no public directory row, so those rows carry
-  no DefiLlama link and the status checks never see them:
-  `phoenix-protocol` (the row is `phoenix`, Live; DefiLlama
-  `phoenix-defi-hub` $47,473 on Stellar), `normal-stellar-amm` (the row is
-  `normal`, Live, human-verified 2026-09-02; DefiLlama `normal` TVL $0, and
-  normalfinance.io's own stellar.toml marks all ten of its currencies
-  `status = "dead"`, read 2026-10-23) and `whalehub` (no row).
+- DefiLlama slugs in LLAMA_MAP that stopped resolving, so their TVL froze
+  and the listing check read could-not-check. `soroswap` reads
+  `soroswap-amm` since 2026-10-31 (served fresh on 2026-11-09). `sentora`
+  (a parent page now; its Stellar vaults are `stellar-defi-hub`, $80,769,055
+  on 2026-11-11, where the row served $10,393,904 from 2026-08-10) and
+  `templar-protocol` (a parent page since 2026-11-04; the row's listing is
+  `templar-lending`) are remapped on branch `lane/r1111-tvl-availability`
+  (#1912, sls-101), not merged. LLAMA_MAP now lives in
+  `src/lib/status-checks.ts`, and a mapped slug missing from DefiLlama's list
+  fails the enrich-tvl run. Done when: merged, deployed and the enrich-tvl
+  execute has run; live, `/api/projects/search?q=sentora` serves
+  `llamaSlugs` [stellar-defi-hub] with a figure dated that run, and
+  templar-protocol serves [templar-lending].
+- Three LLAMA_MAP keys matched no public directory row. `phoenix` and
+  `normal` were remapped to their rows (both served with a DefiLlama link on
+  2026-11-11); `whalehub` still matches no row (the enrich-tvl run warns "no
+  project whalehub" every week).
+- Rows DefiLlama lists on Stellar that LLAMA_MAP does not link, so their
+  rows (and, since #1912, their project pages) serve no TVL. Found
+  2026-11-11 by measuring the project page's old name lookup over all 1,008
+  public rows: by exact name `huma` ($2,726,521 on Stellar), `k2-lend`
+  ($8,800) and `alula` ($263); by name prefix, likely the same products,
+  `untangled` (untangled-rwa $151,510), `vaquita` (vaquita-protocol
+  $30,584), `xoxno` (xoxno-lending $138,660) and `balanced-network`
+  (balanced-exchange $5,584). Each needs an identity check before a map
+  entry. Not candidates: `stellar-defi-hub` (its vaults are Sentora's row),
+  and `binance`, `gate-io` and `cex-io` (CEX reserves, excluded by rule).
+  Benji's project page shows its Horizon supply at $1.00 a share while its
+  API row has no tvlUSD.
 - Estrela is served Live (basis repo-activity) with Allbridge Core's bridge
   routes copied in curate-projects, but its SCF page (#22 and #35) describes
   Allbridge's Soroban stablecoin AMM (allbridge-io/dex-soroban-contracts, last

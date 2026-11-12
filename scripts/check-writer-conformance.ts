@@ -62,6 +62,9 @@ const WRITERS: Record<string, "read-back" | string> = {
 	"scripts/check-gone-repos.ts": "read-back",
 	"scripts/sync-hackathon-builds.ts": "read-back",
 	"scripts/build-source-locators.ts": "read-back",
+	// The one writer of tvlUSD, tvlAsOf, tvlUnavailable, llamaSlugs, tvlSource,
+	// tvlMethod and llamaListing on the rows LLAMA_MAP links (#1912).
+	"scripts/enrich-tvl.ts": "read-back",
 };
 for (const [file, expectation] of Object.entries(WRITERS)) {
 	let src = "";

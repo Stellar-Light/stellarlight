@@ -721,13 +721,17 @@ export interface Project {
 		| boolean
 		| null;
 	/**
-	 * DefiLlama TVL in USD (sum of mapped llama rows). null = not tracked, NOT zero.
+	 * DefiLlama TVL in USD (sum of mapped llama rows). null = no figure, NOT zero: unlinked, or tvlUnavailable says why.
 	 */
 	tvlUSD?: number | null;
 	/**
-	 * When tvlUSD was fetched (class 8: dated metrics).
+	 * When tvlUSD was fetched (class 8: dated metrics); with tvlUnavailable, when DefiLlama was read and published no figure.
 	 */
 	tvlAsOf?: string | null;
+	/**
+	 * Why tvlUSD holds no figure on a DefiLlama-linked row, dated in the text (DefiLlama lists the slugs but publishes no Stellar figure, or they could not be read). Null beside a figure. Written by enrich-tvl only.
+	 */
+	tvlUnavailable?: string | null;
 	/**
 	 * Source that produced tvlUSD (e.g. "defillama"). Null = legacy value predating provenance.
 	 */
@@ -738,7 +742,7 @@ export interface Project {
 	tvlMethod?: string | null;
 	llamaSlugs?: string[] | null;
 	/**
-	 * DefiLlama's verdict on the mapped slugs: listed; deprecated (every slug dead: a deadFrom date, or deprecated with nothing locked and no live family listing); superseded (retired but undated with value locked or a live family listing); partial (retired slugs plus a missing one); not-found (renamed or removed upstream). Only deprecated reads as a death. Written by enrich-tvl.
+	 * DefiLlama's verdict on the mapped slugs: listed; deprecated (every slug dead: a deadFrom date, or deprecated with nothing locked and no live family listing); superseded (retired but undated with value locked or a live family listing); partial (retired slugs plus a missing one); not-found (renamed or removed upstream). Only deprecated reads as a death. doublecounted: DefiLlama files a mapped slug's Stellar TVL as also counted under another protocol, so the analyze total leaves the row out. Written by enrich-tvl.
 	 */
 	llamaListing?: {
 		state?:
@@ -746,6 +750,7 @@ export interface Project {
 			| null;
 		deadFrom?: string | null;
 		parent?: string | null;
+		doublecounted?: boolean | null;
 		checkedAt?: string | null;
 	};
 	provenance: {
@@ -3651,6 +3656,7 @@ export interface ProjectsSelect<T extends boolean = true> {
 	embedding?: T;
 	tvlUSD?: T;
 	tvlAsOf?: T;
+	tvlUnavailable?: T;
 	tvlSource?: T;
 	tvlMethod?: T;
 	llamaSlugs?: T;
@@ -3660,6 +3666,7 @@ export interface ProjectsSelect<T extends boolean = true> {
 				state?: T;
 				deadFrom?: T;
 				parent?: T;
+				doublecounted?: T;
 				checkedAt?: T;
 		  };
 	provenance?:

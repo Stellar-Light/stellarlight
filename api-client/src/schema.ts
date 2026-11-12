@@ -759,7 +759,7 @@ export interface paths {
         };
         /**
          * Stellar ecosystem developer activity
-         * @description Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric; activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.
+         * @description Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric; activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = no figure, never zero; see tvlUnavailable). Ranks PROJECTS, not people → use getBuilders.
          */
         get: operations["getLeaderboard"];
         put?: never;
@@ -1431,17 +1431,19 @@ export interface components {
                 driftDays?: number | null;
                 codeChangedSinceAudit?: boolean | null;
             } | null;
-            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading more than 14 days old. */
+            /** @description Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = no figure, never 'zero TVL': with llamaSlugs null the row is not linked to DefiLlama here (most non-DeFi projects); with llamaSlugs set, tvlUnavailable says why there is none, dated (for example, the linked DefiLlama protocol publishes no Stellar figure: an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading more than 14 days old. */
             tvlUSD?: number | null;
-            /** @description When tvlUSD was fetched from DefiLlama (ISO 8601). */
+            /** @description When tvlUSD was fetched from DefiLlama (ISO 8601); with tvlUnavailable set, when DefiLlama was read and gave no figure. */
             tvlAsOf?: string | null;
             /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future: cite tvlUSD with its tvlAsOf as a past reading, not today's TVL. Only the date is checked, not why the figure is old. false = read within 14 days. null = no tvlUSD. */
             tvlStale?: boolean | null;
+            /** @description Non-null when the row is linked to DefiLlama (llamaSlugs) but holds no tvlUSD, saying why with the date it was read (also its tvlAsOf): DefiLlama lists the linked protocol but publishes no Stellar figure for it, or its slugs could not be read since its mapping changed. Never a zero and never an old figure: the last figure is not kept beside it. Null beside a figure, on a row with no DefiLlama link, and on a linked row not refreshed since this field was added (the weekly refresh writes it). */
+            tvlUnavailable?: string | null;
             /** @description Source that produced tvlUSD (e.g. 'defillama'). Null = legacy value predating provenance. Concurrent sources (operator site, DefiLlama, Dune) legitimately differ by pricing time and inclusion scope; cite tvlUSD as '<tvlSource> as of <tvlAsOf>', never as exact universal truth. */
             tvlSource?: string | null;
             /** @description How tvlUSD was computed (e.g. sum of the mapped DefiLlama protocol rows in llamaSlugs, USD at DefiLlama pricing time): the inclusion-scope note that lets a consumer reconcile modest cross-source differences instead of calling them contradictions. */
             tvlMethod?: string | null;
-            /** @description The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project, e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider; this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked). */
+            /** @description The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project, e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider; this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null with tvlUnavailable null: not linked here). */
             llamaSlugs?: string[] | null;
             /**
              * Format: uri
@@ -2485,15 +2487,17 @@ export interface components {
             types?: string[];
             shortDescription?: string | null;
             scfAwarded?: boolean;
-            /** @description DefiLlama-verified TVL in USD. null = NOT TRACKED on DefiLlama; never 'zero TVL'; most non-DeFi projects are legitimately untracked. Dated by tvlAsOf. */
+            /** @description DefiLlama-verified TVL in USD. null = no figure, never 'zero TVL': the row is not linked to DefiLlama (most non-DeFi projects), or it is and tvlUnavailable says why. Dated by tvlAsOf. */
             tvlUSD?: number | null;
             /**
              * Format: date-time
-             * @description When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.
+             * @description When tvlUSD was fetched from DefiLlama (dated-metrics rule); with tvlUnavailable set, when DefiLlama was read and gave no figure. Null when not linked to DefiLlama, or not read yet.
              */
             tvlAsOf?: string | null;
             /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the figure is old, and sort=tvl still orders by tvlUSD alone, stale or not. false = read within 14 days. null = no tvlUSD. */
             tvlStale?: boolean | null;
+            /** @description Non-null when the row is linked to DefiLlama (llamaSlugs) but holds no tvlUSD, saying why with the date it was read (also its tvlAsOf): DefiLlama lists the linked protocol but publishes no Stellar figure for it, or its slugs could not be read since its mapping changed. Never a zero and never an old figure: the last figure is not kept beside it. Null beside a figure, on a row with no DefiLlama link, and on a linked row not refreshed since this field was added (the weekly refresh writes it). */
+            tvlUnavailable?: string | null;
             /** @description Code of the project's issued on-chain asset (USDC, CETES, …), from stellar.expert. Null = no verified issued asset in our on-chain seed set. */
             assetCode?: string | null;
             /** @description Circulating supply of the issued asset in whole asset units (sort=supply orders by this). null = NOT TRACKED; never 'zero supply'; untracked issuers sort below every tracked one. */
@@ -7696,12 +7700,13 @@ export interface operations {
                             totalPrizePoolUSD?: number;
                             totalRegisteredHackers?: number;
                         } | null;
-                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning. */
+                        /** @description Present for dimension=all|tvl: DefiLlama-verified TVL rollup; a project without a figure is never 'zero TVL': it is not linked to DefiLlama, or it is named in unavailableProjects with the dated reason. A project whose Stellar TVL DefiLlama files as double counted is summed apart, in doublecountedTvlUSD. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning. */
                         tvl?: {
-                            /** @description Sum of every tracked project's last reading, stale ones included (see staleTvlUSD). */
+                            /** @description Sum of every summed project's last reading, stale ones included (see staleTvlUSD). Projects DefiLlama files as double counted on Stellar are left out whole, so the total can undercount deposits that no summed protocol holds (see doublecountedProjects); a project whose double-count verdict was not read yet is summed, and may count the same deposits twice. */
                             totalTvlUSD?: number;
                             /** @description The part of totalTvlUSD from stale readings (tvlAsOf more than 14 days old, or missing, unparseable or in the future); 0 when every reading is fresh. Each figure is rounded once, so totalTvlUSD minus this is the part read within 14 days and equals the fresh rows. */
                             staleTvlUSD?: number;
+                            /** @description How many readings totalTvlUSD sums: rows with a tvlUSD figure that DefiLlama does not file as double counted. unavailableProjects and doublecountedProjects are not counted. */
                             trackedProjects?: number;
                             /**
                              * Format: date-time
@@ -7716,7 +7721,7 @@ export interface operations {
                             /** @description Non-null when any summed reading is older than 14 days: how many, the oldest date, and their share of totalTvlUSD. Null = every reading is within 14 days. */
                             staleWarning?: string | null;
                             provider?: string;
-                            /** @description The ten largest readings, largest first. */
+                            /** @description The ten largest summed readings, largest first. */
                             top10?: {
                                 slug?: string | null;
                                 name?: string | null;
@@ -7735,6 +7740,30 @@ export interface operations {
                                 tvlAsOf?: string | null;
                                 /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the reading is old. See staleWarning. */
                                 tvlStale?: boolean;
+                            }[];
+                            /** @description The sum of doublecountedProjects: readings DefiLlama files as double counted on Stellar (the same deposits counted under another protocol too) and leaves out of its own Stellar total. Not part of totalTvlUSD, and never to be added to it. A flagged project is left out whole, so deposits it holds that no summed protocol also holds are in neither figure. 0 when there are none. */
+                            doublecountedTvlUSD?: number;
+                            /** @description Every reading left out of totalTvlUSD because DefiLlama files the project's Stellar TVL as double counted (enrich-tvl stores its verdict weekly), largest first; [] = none. A project whose verdict was not read yet is summed instead. */
+                            doublecountedProjects?: {
+                                slug?: string | null;
+                                name?: string | null;
+                                tvlUSD?: number;
+                                /** Format: date-time */
+                                tvlAsOf?: string | null;
+                                /** @description true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the reading is old. See staleWarning. */
+                                tvlStale?: boolean;
+                            }[];
+                            /** @description Every project of the rollup's population (Development, Live, Pre-Release) linked to DefiLlama (llamaSlugs) that holds no tvlUSD, ordered by slug (the order is not a rank): not summed in totalTvlUSD and not counted in trackedProjects. [] = every such linked project holds a figure. */
+                            unavailableProjects?: {
+                                slug?: string | null;
+                                name?: string | null;
+                                /**
+                                 * Format: date-time
+                                 * @description When DefiLlama was last read for the row; null when no usable date is stored.
+                                 */
+                                tvlAsOf?: string | null;
+                                /** @description Non-null when the row is linked to DefiLlama (llamaSlugs) but holds no tvlUSD, saying why with the date it was read (also its tvlAsOf): DefiLlama lists the linked protocol but publishes no Stellar figure for it, or its slugs could not be read since its mapping changed. Never a zero and never an old figure: the last figure is not kept beside it. Null beside a figure, on a row with no DefiLlama link, and on a linked row not refreshed since this field was added (the weekly refresh writes it). */
+                                tvlUnavailable?: string | null;
                             }[];
                             basis?: string;
                         };
@@ -7823,7 +7852,7 @@ export interface operations {
     getLeaderboard: {
         parameters: {
             query?: {
-                /** @description Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD; sort=supply orders by issued-asset circulating supply (assetSupply). For both, null = untracked → those rows sort last, never treated as 0. */
+                /** @description Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD; sort=supply orders by issued-asset circulating supply (assetSupply). For both, null = no figure (for tvl, tvlUnavailable says why on a row linked to DefiLlama) → those rows sort last, never treated as 0. */
                 sort?: "activity" | "stars" | "issues" | "tvl" | "supply";
                 /** @description Activity time-window for the leaderboard. An unrecognized value returns 400. */
                 range?: "7d" | "30d" | "90d" | "1y" | "all";

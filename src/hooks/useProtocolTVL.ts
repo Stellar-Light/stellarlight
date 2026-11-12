@@ -2,9 +2,11 @@
 
 import { useQuery } from "@tanstack/react-query";
 
-/** What /api/defillama/protocol/{slug} serves. null = not read: no figure
- * published, or a source this deployment does not read. A failed read is a
- * 503, which hides the card (re-check 2026-11-05). */
+/** What /api/defillama/protocol/{project slug} serves: a fund token's own
+ * figure (Benji), a manual source (WisdomTree), or the project's own row as
+ * its API row serves it (#1912: never a name match). null = not read: no
+ * figure published, or a source this deployment does not read. A failed read
+ * is a 503, which hides the card (re-check 2026-11-05). */
 export interface ProtocolTVLData {
 	found: boolean;
 	name: string;
@@ -16,26 +18,30 @@ export interface ProtocolTVLData {
 	change7d: number | null;
 	/** null = no series read; [] = a series with no points */
 	historicalTVL: { date: number; tvl: number }[] | null;
-	/** Date of the last series point the figures come from. */
+	/** Date of the reading the figure comes from. */
 	asOf?: string | null;
-	sourceUrl?: string; // the figure's own source, when not DefiLlama
-	method?: string | null; // how the figure is counted, when it is not a protocol's TVL
+	/** The row's figure is more than 14 days old (tvlStale). */
+	stale?: boolean | null;
+	/** Why a linked row holds no figure, dated (tvlUnavailable). */
+	unavailable?: string | null;
+	sourceUrl?: string | null; // the page that shows the figure
+	method?: string | null; // how the figure is counted, when it is not one protocol's TVL
 }
 
-export function useProtocolTVL(projectName: string | null) {
+export function useProtocolTVL(projectSlug: string | null) {
 	return useQuery<ProtocolTVLData | null>({
-		queryKey: ["/api/defillama/protocol", projectName],
+		queryKey: ["/api/defillama/protocol", projectSlug],
 		queryFn: async () => {
-			if (!projectName) return null;
+			if (!projectSlug) return null;
 			const res = await fetch(
-				`/api/defillama/protocol/${encodeURIComponent(projectName)}`,
+				`/api/defillama/protocol/${encodeURIComponent(projectSlug)}`,
 			);
 			if (!res.ok) return null;
 			const data = await res.json();
 			if (!data.found) return null;
 			return data as ProtocolTVLData;
 		},
-		enabled: !!projectName,
+		enabled: !!projectSlug,
 		staleTime: 5 * 60 * 1000, // 5 minutes
 	});
 }

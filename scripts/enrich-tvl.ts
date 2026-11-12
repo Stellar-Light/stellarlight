@@ -5,9 +5,17 @@
  *   pnpm exec tsx scripts/enrich-tvl.ts --execute  # write tvlUSD/tvlAsOf (+ tvlSource/tvlMethod provenance, sls-031)
  *
  * Design rules (lesson classes baked in):
- *   - null = NOT TRACKED on DefiLlama, never "zero TVL" (class 3). Only
- *     records in LLAMA_MAP are ever written; everything else stays null.
+ *   - null = no figure, never "zero TVL" (class 3). Only records in
+ *     LLAMA_MAP (src/lib/status-checks.ts) are ever written; every other row
+ *     stays unlinked and null.
  *   - every value carries tvlAsOf (class 8: dated metrics).
+ *   - trinary per mapped row (#1912, tvlFieldsFor): a figure is written; a
+ *     row DefiLlama lists with no Stellar figure is written as tvlUSD null
+ *     with a dated tvlUnavailable, never 0 and never the old figure; a row
+ *     that could not be checked keeps what it holds, and a mapped slug
+ *     missing from DefiLlama's list fails the run after every write, so a
+ *     rename upstream reaches the exit code, not only the log (Sentora
+ *     resolved no row in 13 green weekly runs).
  *   - TVL never penalizes: it is served as a fact and used as a positive
  *     tie-break only — a new protocol without a llama listing ranks exactly
  *     as before (boxy: "don't rely on it too heavily, it misses new ones").
@@ -18,7 +26,11 @@
  * own verdict on its slugs (listed / deprecated / not-found), read from the
  * FULL protocol list, since a dead protocol can drop its chain list. The
  * status checks (src/lib/status-checks.ts) read it; not-found is a rename or
- * removal upstream, never a death.
+ * removal upstream, never a death. Its doublecounted (#1912 audit,
+ * 2026-11-11) is DefiLlama's own verdict, from its lite list, that a mapped
+ * protocol's Stellar TVL is also counted under another protocol (Upshift's
+ * Stellar vaults hold Gami Labs' two and the Sentora USDC vault Stellar DeFi
+ * Hub counts); the analyze total leaves such rows out.
  *
  * Beyond writes, the run REPORTS (never acts on):
  *   - LIVENESS candidates: llama-listed, TVL < $5k, our status still Live —
@@ -30,11 +42,19 @@
 import "./load-env";
 import { getPayload } from "payload";
 import {
+	doublecountedOf,
+	LLAMA_MAP,
 	llamaListingOf,
 	llamaPageFor,
 	llamaParentOf,
+	llamaRowsFor,
+	parseDate,
+	protocolListProblem,
+	stellarDoublecountedIds,
 	stellarTvlOf,
+	TVL_FRESH_DAYS,
 	tvlFieldsFor,
+	tvlReadOf,
 } from "../src/lib/status-checks";
 import {
 	formatMismatches,
@@ -44,53 +64,6 @@ import {
 import configPromise from "../src/payload.config";
 
 const EXECUTE = process.argv.includes("--execute");
-
-/** ourSlug → DefiLlama slugs (several rows sum to one protocol, e.g. Blend). */
-const LLAMA_MAP: Record<string, string[]> = {
-	blend: [
-		"blend-pools",
-		"blend-pools-v2",
-		"blend-backstop",
-		"blend-backstop-v2",
-	],
-	aquarius: ["aquarius-stellar"],
-	// 2026-10-31: DefiLlama renamed soroswap to soroswap-amm ($1.16M on
-	// Stellar); soroswap-aggregator lists no chain and no TVL. The old slug
-	// read not-found and left the 10-19 figure in place.
-	soroswap: ["soroswap-amm"],
-	// The directory row is phoenix: the old key matched no row, so the TVL
-	// was never written (the dry run's "no project" warning).
-	phoenix: ["phoenix-defi-hub"],
-	slender: ["slender"],
-	fxdao: ["fxdao"],
-	// 2026-10-23 (DQ1): allbridge-core is deprecated on DefiLlama (deadFrom
-	// 2026-08-31) after the 2026-07-19 exploit; Allbridge runs on as
-	// Allbridge Next, listed as allbridge-next (a bridge aggregator with no
-	// TVL and no chain list). The repoint clears the Core figure (tvlUSD
-	// null, see tvlFieldsFor) and keeps the listing check on the live product.
-	allbridge: ["allbridge-next"],
-	defindex: ["defindex"],
-	etherfuse: ["etherfuse"],
-	spiko: ["spiko"],
-	"templar-protocol": ["templar-protocol"],
-	sushi: ["sushi-stellar"],
-	excellar: ["excellar"],
-	scopuly: ["scopuly"],
-	// The directory row is normal (the old key matched no row).
-	normal: ["normal"],
-	whalehub: ["whalehub"],
-	upshift: ["upshift"],
-	// Coverage-gap pass 2026-07-16: the two verified llama misses (seeded the
-	// same day) + sentora (seeded 2026-07-15 without TVL wiring). All three
-	// have llama chainTvls.Stellar — TVL rows fill from the Stellar slice.
-	"gami-labs": ["gami-labs"],
-	"defa-invoicemate": ["defa-by-invoicemate"],
-	sentora: ["sentora"],
-	// 2026-09-26: Spectra V2 lists Stellar among its chains (chainTvls.Stellar
-	// $750k on 2026-09-26, the seven Stellar PT markets); the Stellar slice
-	// is what lands, never the $18.9M multichain total.
-	"spectra-finance": ["spectra-v2"],
-};
 
 const LIVENESS_THRESHOLD_USD = 5_000;
 
@@ -103,6 +76,8 @@ const TVL_METHOD =
 	"sum of the project's mapped DefiLlama protocol rows (see llamaSlugs; e.g. Blend = pools + backstops), STELLAR-chain slice (chainTvls.Stellar) where DefiLlama publishes a per-chain breakdown — a multichain protocol's cross-chain total is not its Stellar footprint — falling back to the protocol total only when no breakdown exists; USD at DefiLlama's pricing time; refreshed weekly (tvlAsOf)";
 
 interface LlamaProtocol {
+	/** DefiLlama's protocol id: the lite list's defillamaId. */
+	id?: string;
 	slug: string;
 	name: string;
 	category?: string;
@@ -124,10 +99,6 @@ interface LlamaProtocol {
 // for a protocol it stopped computing, and this lane wrote that as $0 for
 // allbridge-core (found 2026-10-23).
 
-/** Below this the /protocols body is not the real list (8,807 rows on
- * 2026-10-23): reading listings from it would mark every slug not-found. */
-const MIN_PROTOCOLS = 1_000;
-
 async function main() {
 	console.log(
 		`Mode: ${EXECUTE ? "EXECUTE (writes)" : "DRY RUN (read-only)"}\n`,
@@ -138,16 +109,36 @@ async function main() {
 	});
 	if (!res.ok) throw new Error(`llama fetch failed: ${res.status}`);
 	const all = (await res.json()) as LlamaProtocol[];
-	if (!Array.isArray(all) || all.length < MIN_PROTOCOLS)
-		throw new Error(
-			`llama list has ${Array.isArray(all) ? all.length : "no"} protocols (< ${MIN_PROTOCOLS}): not the real list, nothing written`,
-		);
+	// Too few rows, or too few on Stellar (a degraded answer with its chains
+	// blank), is not DefiLlama's list: nothing is written (#1912 audit).
+	const problem = protocolListProblem(all);
+	if (problem) throw new Error(problem);
 	const stellar = all.filter(
 		(p) => p.chains?.includes("Stellar") && p.category !== "CEX",
 	);
 	const bySlug = new Map(stellar.map((p) => [p.slug, p]));
 	console.log(
 		`DefiLlama: ${stellar.length} Stellar-chain protocols (CEX excluded)\n`,
+	);
+	// DefiLlama's own double-count verdict on Stellar (its lite list), so the
+	// analyze total sums each deposit once. Unread: each row keeps its stored
+	// verdict, and the run says so.
+	let doublecountedIds: Set<string> | null = null;
+	try {
+		const lite = await fetch("https://api.llama.fi/lite/protocols2", {
+			headers: { "User-Agent": "stellarlight-scout-enrich" },
+			signal: AbortSignal.timeout(60_000),
+		});
+		doublecountedIds = lite.ok
+			? stellarDoublecountedIds(await lite.json())
+			: null;
+	} catch {
+		doublecountedIds = null;
+	}
+	console.log(
+		doublecountedIds
+			? `DefiLlama files ${doublecountedIds.size} protocol(s) as double counted on Stellar\n`
+			: "⚠ DefiLlama's lite list could not be read: every row keeps its stored double-count verdict\n",
 	);
 
 	const payload = await getPayload({ config: await configPromise });
@@ -161,6 +152,7 @@ async function main() {
 		"tvlUSD",
 		"tvlAsOf",
 		"llamaSlugs",
+		"tvlUnavailable",
 		"tvlSource",
 		"tvlMethod",
 		"llamaListing",
@@ -172,6 +164,8 @@ async function main() {
 		string,
 		{ id: string; data: Record<string, unknown> }
 	>();
+	/** Mapped rows not checked: a slug missing from DefiLlama's list. */
+	const unresolved: string[] = [];
 
 	console.log("── TVL and listing writes (mapped protocols only) ──");
 	for (const [ourSlug, llamaSlugs] of Object.entries(LLAMA_MAP)) {
@@ -193,9 +187,22 @@ async function main() {
 		// exactly these rows, which the route cites as tvlMethodUrl; null
 		// when one row is mapped or the family no longer matches the map.
 		const parent = llamaParentOf(llamaSlugs, all);
+		// Each mapped slug is read from the FULL list (#1912), CEX rows left
+		// out (llamaRowsFor): a slug listed without Stellar among its chains is
+		// DefiLlama's answer (no Stellar figure), where the Stellar-only list
+		// read it as missing and left Spiko's and Etherfuse's figures in place
+		// for eight weeks. Only a slug the list does not hold is missing.
+		const { listed, missing } = llamaRowsFor(llamaSlugs, all);
+		const read = tvlReadOf(llamaSlugs, listed);
 		const listing = {
 			...llamaListingOf(llamaSlugs, all),
 			parent,
+			doublecounted: doublecountedOf(
+				listed,
+				missing,
+				doublecountedIds,
+				d.llamaListing?.doublecounted,
+			),
 			checkedAt: asOf,
 		};
 		if (llamaSlugs.length > 1) {
@@ -212,15 +219,18 @@ async function main() {
 					`  ⚠ ${ourSlug}: no DefiLlama parent's children are exactly [${llamaSlugs.join(",")}]${was ? ` (was ${was})` : ""}: tvlMethodUrl serves null until LLAMA_MAP matches the family again`,
 				);
 		}
-		const rows = llamaSlugs
-			.map((ls) => bySlug.get(ls))
-			.filter((r): r is LlamaProtocol => Boolean(r));
-		const tvl = tvlFieldsFor(llamaSlugs, d.llamaSlugs, rows);
+		if (missing.length)
+			unresolved.push(`${ourSlug} (${missing.join(", ")} not listed)`);
+		else if (read.outcome === "partial")
+			unresolved.push(`${ourSlug} (a Stellar figure for only some slugs)`);
+		const tvl = tvlFieldsFor(llamaSlugs, d.llamaSlugs, listed, asOf);
 		const data: Record<string, unknown> = tvl
 			? {
 					tvlUSD: tvl.tvlUSD,
 					tvlAsOf: asOf,
 					llamaSlugs: tvl.llamaSlugs,
+					// #1912: why tvlUSD holds no figure, dated; null beside a figure
+					tvlUnavailable: tvl.tvlUnavailable,
 					// sls-031: provenance rides every write (additive fields)
 					tvlSource: TVL_SOURCE,
 					tvlMethod: TVL_METHOD,
@@ -228,22 +238,24 @@ async function main() {
 				}
 			: { llamaListing: listing };
 		const deadNote = listing.deadFrom ? `, dead from ${listing.deadFrom}` : "";
+		const was = `${typeof d.tvlUSD === "number" ? `$${d.tvlUSD.toLocaleString()}` : "null"} of ${parseDate(d.tvlAsOf)?.slice(0, 10) ?? "no date"}`;
+		const stored = (d.llamaSlugs ?? []).join(",");
+		const moved =
+			stored !== llamaSlugs.join(",")
+				? `; llamaSlugs [${stored}] → [${llamaSlugs.join(",")}]`
+				: "";
+		const dc = listing.doublecounted ? "; double counted on Stellar" : "";
 		if (!tvl)
 			console.log(
-				rows.length
-					? `  ${ourSlug}: a live llama row came back without a TVL figure (a one-run gap upstream): TVL left as stored; listing ${listing.state}${deadNote}`
-					: `  ${ourSlug}: no Stellar llama row resolved (${llamaSlugs.join(",")}): TVL left as stored; listing ${listing.state}${deadNote}`,
-			);
-		else if (
-			tvl.tvlUSD === null &&
-			(d.llamaSlugs ?? []).join(",") !== llamaSlugs.join(",")
-		)
-			console.log(
-				`  ${ourSlug}: mapping moved (${(d.llamaSlugs ?? []).join(",") || "none"} → ${llamaSlugs.join(",")}) and the new slugs carry no Stellar TVL figure, so tvlUSD ← null (was ${d.tvlUSD ?? "null"}); listing ${listing.state}${deadNote}`,
+				missing.length
+					? `  ✗ ${ourSlug}: ${missing.join(",")} not in DefiLlama's protocol list (renamed or removed upstream, or a CEX listing): could not check, TVL left as stored (${was}); listing ${listing.state}`
+					: read.outcome === "partial"
+						? `  ✗ ${ourSlug}: DefiLlama publishes a Stellar figure for only some of ${llamaSlugs.join(",")}: their sum is not the row's figure, TVL left as stored (${was})`
+						: `  ${ourSlug}: a live llama row on Stellar came back without a TVL figure (a one-run gap upstream): TVL left as stored (${was}); listing ${listing.state}${deadNote}`,
 			);
 		else
 			console.log(
-				`  ${ourSlug}: tvlUSD ← ${tvl.tvlUSD === null ? "null (no TVL figure upstream)" : `$${tvl.tvlUSD.toLocaleString()}`} (${llamaSlugs.length} row(s)); listing ${listing.state}${deadNote}`,
+				`  ${ourSlug}: tvlUSD ← ${tvl.tvlUSD === null ? "null" : `$${tvl.tvlUSD.toLocaleString()}`} (was ${was})${moved}${tvl.tvlUnavailable ? `; tvlUnavailable ← ${tvl.tvlUnavailable}` : ""}; listing ${listing.state}${deadNote}${dc}`,
 			);
 		if (EXECUTE) {
 			try {
@@ -267,13 +279,15 @@ async function main() {
 		"\n── LIVENESS candidates (llama-listed, TVL < $5k, status Live) ──",
 	);
 	for (const [ourSlug, llamaSlugs] of Object.entries(LLAMA_MAP)) {
-		const tvl =
-			stellarTvlOf(
-				llamaSlugs
-					.map((ls) => bySlug.get(ls))
-					.filter((r): r is LlamaProtocol => Boolean(r)),
-			) ?? 0;
-		if (tvl >= LIVENESS_THRESHOLD_USD) continue;
+		const tvl = stellarTvlOf(
+			llamaSlugs
+				.map((ls) => bySlug.get(ls))
+				.filter((r): r is LlamaProtocol => Boolean(r)),
+		);
+		// No Stellar figure is no reading, never $0: this report printed
+		// "TVL $0" for Spiko, Etherfuse and Sentora while DefiLlama published
+		// none for them (#1912).
+		if (tvl === null || tvl >= LIVENESS_THRESHOLD_USD) continue;
 		const found = await payload.find({
 			collection: "projects",
 			where: { slug: { equals: ourSlug } },
@@ -351,8 +365,21 @@ async function main() {
 		}
 	}
 
+	// A mapped slug missing from DefiLlama's list, or a family DefiLlama now
+	// publishes a Stellar figure for only in part, is could-not-check: its row
+	// kept its stored figure, which only ages from here, until the map is
+	// reconciled. So it fails the run, after every write, and reaches the exit
+	// code, not only a log line: sentora resolved no row in 13 green weekly
+	// runs (#1912).
+	if (unresolved.length) {
+		console.error(
+			`\n✗ ${unresolved.length} mapped row(s) could not be checked: ${unresolved.join("; ")}. A row under unchanged slugs keeps its stored TVL, dated by tvlAsOf (served stale after ${TVL_FRESH_DAYS} days); a row whose slugs just changed serves no figure, with the reason. Reconcile LLAMA_MAP in src/lib/status-checks.ts with DefiLlama's list.`,
+		);
+		process.exitCode = 1;
+	}
+
 	console.log(
-		`\nDONE: ${EXECUTE ? `${written} written, ${failed} failed, ${mismatches.length} did-not-persist` : "dry run — no writes"}.`,
+		`\nDONE: ${EXECUTE ? `${written} written, ${failed} failed, ${mismatches.length} did-not-persist` : "dry run, no writes"}, ${unresolved.length} could not be checked.`,
 	);
 	if (failed) process.exitCode = 1;
 	process.exit(process.exitCode ?? 0);
