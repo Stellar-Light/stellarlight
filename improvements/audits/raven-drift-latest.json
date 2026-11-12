@@ -1,6 +1,6 @@
 {
-	"generatedAt": "2026-11-11T13:13:25.068Z",
-	"specVersion": "1.9.127",
+	"generatedAt": "2026-11-12T14:16:56.581Z",
+	"specVersion": "1.9.135",
 	"graceDays": 10,
 	"expectedOps": [
 		"analyzeEcosystem",
@@ -90,7 +90,7 @@
 		{
 			"op": "getStablecoins",
 			"addedAt": "2026-11-04",
-			"ageDays": 7
+			"ageDays": 8
 		}
 	],
 	"extraInCatalog": [],
