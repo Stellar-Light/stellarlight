@@ -385,7 +385,7 @@ export interface Project {
 	canonicalSlug?: string | null;
 	lifecycle?: {
 		/**
-		 * True if this project ever reached Live/production (distinguishes a real product that later died from one abandoned in development). Lets consumers say 'used to be live'.
+		 * True if this project's product once reached Live: operating for users, not on testnet only (distinguishes a real product that later died from one abandoned in development). A correction from a mistaken Live label to Development or Pre-Release clears it; a project that really launched keeps it. Lets consumers say 'used to be live'.
 		 */
 		wasLive?: boolean | null;
 		/**
