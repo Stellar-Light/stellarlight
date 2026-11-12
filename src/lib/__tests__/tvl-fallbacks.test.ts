@@ -7,7 +7,28 @@
 import { NextRequest } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-type Handler = (url: string) => Response | Promise<Response>;
+// #1912 (2026-11-11): the project page's TVL card reads the project's own
+// row by slug, so the store is mocked; DefiLlama serves only page history.
+const db = vi.hoisted(() => ({
+	rows: [] as Record<string, unknown>[],
+	down: false,
+}));
+vi.mock("@/lib/payload-client", () => ({
+	getPayloadSafe: vi.fn(async () =>
+		db.down
+			? null
+			: {
+					find: vi.fn(async (a: { where: { slug: { equals: string } } }) => ({
+						docs: db.rows.filter((r) => r.slug === a.where.slug.equals),
+					})),
+				},
+	),
+}));
+
+type Handler = (
+	url: string,
+	init?: RequestInit,
+) => Response | Promise<Response>;
 let handler: Handler;
 const json = (body: unknown, status = 200) =>
 	new Response(JSON.stringify(body), { status });
@@ -35,9 +56,13 @@ const page = (tvl: number) =>
 
 beforeEach(() => {
 	vi.resetModules();
+	db.rows = [];
+	db.down = false;
 	vi.stubGlobal(
 		"fetch",
-		vi.fn(async (url: string) => handler(String(url))),
+		vi.fn(async (url: string, init?: RequestInit) =>
+			handler(String(url), init),
+		),
 	);
 });
 afterEach(() => {
@@ -102,30 +127,57 @@ describe("/api/rwa-tvl never serves a figure it did not read", () => {
 });
 
 describe("/api/defillama/protocol/{slug} never serves a figure it did not read", () => {
+	// DefiLlama's Stellar list as the old name lookup read it (Stellar slices
+	// of 2026-11-11): the protocols a project NAME used to match.
 	const protocols = [
-		{
-			name: "Blend",
-			slug: "blend-pools",
-			chains: ["Stellar"],
-			chainTvls: { Stellar: 129_334_939 },
-			change_1d: 1.5,
-			change_7d: -2,
-			logo: null,
-			category: "Lending",
-		},
-		{
-			name: "Quiet",
-			slug: "quiet",
-			chains: ["Stellar"],
-			chainTvls: {},
-			logo: null,
-			category: "Dexes",
-		},
-	];
+		["Blend Pools V2", "blend-pools-v2", 116_448_444],
+		["Binance CEX", "binance-cex", 218_389_415],
+		["Aquarius", "aquarius-stellar", 37_887_387],
+		["Stellar DeFi Hub", "stellar-defi-hub", 80_769_055],
+	].map(([name, slug, stellar]) => ({
+		name,
+		slug,
+		chains: ["Stellar"],
+		chainTvls: { Stellar: stellar },
+		change_1d: 1.5,
+		change_7d: -2,
+		logo: null,
+		category: "Lending",
+	}));
+	const series = (page: string) =>
+		json({
+			name: page,
+			chainTvls: {
+				Stellar: {
+					tvl: [
+						{ date: 1_762_732_800, totalLiquidityUSD: 79_000_000 },
+						{ date: 1_762_819_200, totalLiquidityUSD: 80_769_055 },
+					],
+				},
+			},
+		});
+	const llama = (url: string) =>
+		url.endsWith("/protocols")
+			? json(protocols)
+			: series(url.slice(url.lastIndexOf("/") + 1));
+	const daysAgo = (n: number) =>
+		new Date(Date.now() - n * 86_400_000).toISOString();
+	const row = (slug: string, more: Record<string, unknown>) => ({
+		slug,
+		name: slug,
+		category: "Lending",
+		status: "Live",
+		tvlUSD: null,
+		tvlAsOf: null,
+		llamaSlugs: null,
+		llamaListing: null,
+		...more,
+	});
 
 	// 2026-11-07: Benji is its Horizon supply at $1.00 a share, read for the
 	// registry's verified issuer (rwa.xyz's asset API moved off its v4 path).
-	const BENJI_ISSUER = "GBHNGLLIE3KWGKCHIKMHJ5HVZHYIK7WTBE4QF5PLAKL4CJGSEU7HZIW5";
+	const BENJI_ISSUER =
+		"GBHNGLLIE3KWGKCHIKMHJ5HVZHYIK7WTBE4QF5PLAKL4CJGSEU7HZIW5";
 	const benjiRecord = {
 		asset_code: "BENJI",
 		asset_issuer: BENJI_ISSUER,
@@ -173,28 +225,6 @@ describe("/api/defillama/protocol/{slug} never serves a figure it did not read",
 		expect(body.change1d).toBeNull();
 	});
 
-	it("a DefiLlama protocol with no Stellar figure serves null, not 0", async () => {
-		handler = (url) =>
-			url.endsWith("/protocols")
-				? json(protocols)
-				: json({ chainTvls: {}, currentChainTvls: {} });
-		const { status, body } = await protocol("quiet");
-		expect(status).toBe(200);
-		expect(body).toMatchObject({
-			currentTVL: null,
-			change1d: null,
-			change7d: null,
-		});
-	});
-
-	it("a failed detail read is a 503, not not-found", async () => {
-		handler = (url) =>
-			url.endsWith("/protocols") ? json(protocols) : json({}, 502);
-		const { status, body } = await protocol("blend");
-		expect(status).toBe(503);
-		expect(body.found).toBeUndefined();
-	});
-
 	// Re-check 2026-11-05: not configured (no key) and failed (key set, read
 	// failed) both served 200 with nulls; a failed list read was a bare 500.
 	it("Benji with a failed Horizon read answers 503 with Retry-After", async () => {
@@ -211,45 +241,222 @@ describe("/api/defillama/protocol/{slug} never serves a figure it did not read",
 		expect((await protocol("benji")).status).toBe(503);
 	});
 
-	it("a failed DefiLlama protocols list read answers 503 with Retry-After, not a 500", async () => {
-		handler = (url) =>
-			url.endsWith("/protocols") ? json({ error: "down" }, 500) : json({});
-		const { status, retryAfter, body } = await protocol("blend");
-		expect(status).toBe(503);
-		expect(Number(retryAfter)).toBeGreaterThan(0);
-		expect(body.retryAfterSeconds).toBeGreaterThan(0);
+	it("a project's card is its own row: figure, date, freshness, and its page's Stellar history (#1912)", async () => {
+		const asked: string[] = [];
+		handler = (url) => {
+			asked.push(url);
+			return llama(url);
+		};
+		const at = daysAgo(2);
+		db.rows = [
+			row("sentora", {
+				name: "Sentora",
+				tvlUSD: 80_769_055,
+				tvlAsOf: at,
+				llamaSlugs: ["stellar-defi-hub"],
+				llamaListing: { state: "listed", parent: null },
+			}),
+		];
+		const { status, body } = await protocol("sentora");
+		expect(status).toBe(200);
+		expect(body).toMatchObject({
+			found: true,
+			name: "Sentora",
+			currentTVL: 80_769_055,
+			asOf: at,
+			stale: false,
+			unavailable: null,
+			change1d: null,
+			change7d: null,
+			sourceUrl: "https://defillama.com/protocol/stellar-defi-hub",
+			method: null,
+		});
+		expect(body.historicalTVL).toEqual([
+			{ date: 1_762_732_800_000, tvl: 79_000_000 },
+			{ date: 1_762_819_200_000, tvl: 80_769_055 },
+		]);
+		// Only the page that shows the figure is read, never the name list.
+		expect(asked).toEqual(["https://api.llama.fi/protocol/stellar-defi-hub"]);
 	});
 
-	it("a thrown DefiLlama detail read answers 503", async () => {
+	it("a linked row DefiLlama gives no Stellar figure: null with its dated reason, never 0 (#1912)", async () => {
+		handler = (url) =>
+			url.endsWith("/protocol/spiko")
+				? json({ chainTvls: {}, currentChainTvls: {} })
+				: llama(url);
+		const why =
+			"DefiLlama lists spiko but publishes no Stellar TVL figure for it (checked 2026-11-11).";
+		db.rows = [
+			row("spiko", {
+				name: "Spiko",
+				tvlAsOf: daysAgo(1),
+				tvlUnavailable: why,
+				llamaSlugs: ["spiko"],
+			}),
+		];
+		const { status, body } = await protocol("spiko");
+		expect(status).toBe(200);
+		expect(body).toMatchObject({
+			found: true,
+			currentTVL: null,
+			stale: null,
+			unavailable: why,
+			historicalTVL: [],
+			sourceUrl: "https://defillama.com/protocol/spiko",
+		});
+	});
+
+	it("a project name never borrows another protocol's TVL (#1912)", async () => {
+		const asked: string[] = [];
+		handler = (url) => {
+			asked.push(url);
+			return llama(url);
+		};
+		// "Lend" matched Blend Pools V2 ($116M) by name, "Binance" its own
+		// exchange reserves; neither row is linked to DefiLlama.
+		db.rows = [
+			row("lend", { name: "Lend" }),
+			row("binance", { name: "Binance" }),
+		];
+		for (const slug of ["lend", "binance", "stellar-defi-hub"]) {
+			const { status, body } = await protocol(slug);
+			expect(status, slug).toBe(404);
+			expect(body.found, slug).toBe(false);
+		}
+		expect(asked).toEqual([]);
+	});
+
+	it("a multi-protocol row serves its own sum, cites the page that sums it, and says so (#1912)", async () => {
+		const asked: string[] = [];
+		handler = (url) => {
+			asked.push(url);
+			return llama(url);
+		};
+		const slugs = [
+			"blend-pools",
+			"blend-pools-v2",
+			"blend-backstop",
+			"blend-backstop-v2",
+		];
+		db.rows = [
+			row("blend", {
+				name: "Blend",
+				tvlUSD: 115_148_044,
+				tvlAsOf: daysAgo(2),
+				llamaSlugs: slugs,
+				llamaListing: { state: "listed", parent: "blend" },
+			}),
+		];
+		const { body } = await protocol("blend");
+		expect(body).toMatchObject({
+			currentTVL: 115_148_044,
+			sourceUrl: "https://defillama.com/protocol/blend",
+			method: `the sum of 4 DefiLlama protocols: ${slugs.join(", ")}`,
+		});
+		expect(asked).toEqual(["https://api.llama.fi/protocol/blend"]);
+		// No page sums the rows: no history and no page cited, the sum named.
+		db.rows = [
+			row("blend", {
+				tvlUSD: 115_148_044,
+				tvlAsOf: daysAgo(2),
+				llamaSlugs: slugs,
+			}),
+		];
+		const none = (await protocol("blend")).body;
+		expect(none).toMatchObject({
+			currentTVL: 115_148_044,
+			historicalTVL: null,
+			sourceUrl: null,
+		});
+		expect(none.method).toContain("the sum of 4 DefiLlama protocols");
+	});
+
+	it("an old row figure is served with its date and flagged stale (#1912)", async () => {
+		handler = llama;
+		db.rows = [
+			row("sentora", {
+				tvlUSD: 10_393_904,
+				tvlAsOf: "2026-08-10T06:16:01.283Z",
+				llamaSlugs: ["stellar-defi-hub"],
+			}),
+		];
+		const { body } = await protocol("sentora");
+		expect(body).toMatchObject({
+			currentTVL: 10_393_904,
+			asOf: "2026-08-10T06:16:01.283Z",
+			stale: true,
+		});
+	});
+
+	it("a failed or thrown history read keeps the row's figure and serves no history (#1912)", async () => {
+		db.rows = [
+			row("aquarius", {
+				name: "Aquarius",
+				tvlUSD: 37_359_057,
+				tvlAsOf: daysAgo(2),
+				llamaSlugs: ["aquarius-stellar"],
+			}),
+		];
+		handler = (url) =>
+			url.endsWith("/protocols") ? json(protocols) : json({}, 502);
+		const failed = await protocol("aquarius");
+		expect(failed.status).toBe(200);
+		expect(failed.body).toMatchObject({
+			currentTVL: 37_359_057,
+			historicalTVL: null,
+		});
 		handler = (url) => {
 			if (url.endsWith("/protocols")) return json(protocols);
 			throw new Error("connection reset");
 		};
-		expect((await protocol("blend")).status).toBe(503);
+		expect((await protocol("aquarius")).body.historicalTVL).toBeNull();
 	});
 
-	it("a full reading is served with its figures and the date of its last point", async () => {
-		handler = (url) =>
+	it("a history read past 8 s is abandoned: the row's figure stands, with no chart (#1912 audit)", async () => {
+		db.rows = [
+			row("aquarius", {
+				tvlUSD: 37_359_057,
+				tvlAsOf: daysAgo(2),
+				llamaSlugs: ["aquarius-stellar"],
+			}),
+		];
+		const asked: number[] = [];
+		const timeout = vi
+			.spyOn(AbortSignal, "timeout")
+			.mockImplementation((ms: number) => {
+				asked.push(ms);
+				const c = new AbortController();
+				c.abort(new DOMException("The operation timed out.", "TimeoutError"));
+				return c.signal;
+			});
+		// The page never answers; only the timeout's signal ends the read.
+		handler = (url, init) =>
 			url.endsWith("/protocols")
 				? json(protocols)
-				: json({
-						chainTvls: {
-							Stellar: {
-								tvl: [
-									{ date: 1_761_955_200, totalLiquidityUSD: 120_000_000 },
-									{ date: 1_762_041_600, totalLiquidityUSD: 129_334_939 },
-								],
-							},
-						},
+				: new Promise<Response>((_, reject) => {
+						const signal = init?.signal;
+						if (!signal) return;
+						if (signal.aborted) reject(signal.reason);
+						signal.addEventListener("abort", () => reject(signal.reason));
 					});
-		const { status, body } = await protocol("blend");
-		expect(status).toBe(200);
-		expect(body).toMatchObject({
-			currentTVL: 129_334_939,
-			change1d: 1.5,
-			change7d: -2,
-			asOf: new Date(1_762_041_600 * 1000).toISOString(),
-		});
-		expect(body.historicalTVL).toHaveLength(2);
+		try {
+			const { status, body } = await protocol("aquarius");
+			expect(status).toBe(200);
+			expect(body).toMatchObject({
+				currentTVL: 37_359_057,
+				historicalTVL: null,
+			});
+			expect(asked).toContain(8000);
+		} finally {
+			timeout.mockRestore();
+		}
+	});
+
+	it("a failed project store read answers 503 with Retry-After, not a 404 or a zero (#1912)", async () => {
+		handler = llama;
+		db.down = true;
+		const { status, retryAfter } = await protocol("sentora");
+		expect(status).toBe(503);
+		expect(Number(retryAfter)).toBeGreaterThan(0);
 	});
 });

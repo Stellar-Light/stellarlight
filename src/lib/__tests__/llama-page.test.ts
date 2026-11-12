@@ -29,6 +29,8 @@ const BLEND = [
 	"blend-backstop",
 	"blend-backstop-v2",
 ];
+const SPIKO_WHY =
+	"DefiLlama lists spiko but publishes no Stellar TVL figure for it (checked 2026-11-02).";
 
 describe("llamaPageFor: the page that shows the whole tvlUSD", () => {
 	it("one mapped row cites its own page", () => {
@@ -157,8 +159,8 @@ describe("tvlCitationGaps: a multi-row sum with no page is a finding", () => {
 describe("every TVL citation goes through the shared helpers", () => {
 	// The class: a writer or route building https://defillama.com/protocol/
 	// from llamaSlugs[0] cites one row of a sum. Only status-checks.ts builds
-	// the URL. The project page's TVL chart is exempt: it charts the one
-	// protocol its name lookup found and links that same protocol's page.
+	// the URL. The project page's TVL card no longer builds one (#1912): it
+	// links the page its route cites for the row, or none.
 	const ROOT = process.cwd();
 	const files = ["src", "scripts"].flatMap((dir) =>
 		(readdirSync(join(ROOT, dir), { recursive: true }) as string[])
@@ -172,10 +174,23 @@ describe("every TVL citation goes through the shared helpers", () => {
 			),
 		);
 		expect(files.length).toBeGreaterThan(100); // the scan must not pass vacuously
-		expect(builders.sort()).toEqual([
-			"src/components/project-tvl-chart.tsx",
-			"src/lib/status-checks.ts",
-		]);
+		expect(builders.sort()).toEqual(["src/lib/status-checks.ts"]);
+	});
+	it("the project page keys its TVL card by the project's slug, never its name (#1912)", () => {
+		// A name lookup across DefiLlama's Stellar list put Blend's pools on
+		// "Lend" and Binance's exchange reserves on its page as TVL.
+		const page = readFileSync(
+			join(ROOT, "src/app/(frontend)/project/[slug]/page.tsx"),
+			"utf8",
+		);
+		expect(page).toMatch(/<ProjectTVLChart projectSlug=\{project\.slug\} \/>/);
+		const route = readFileSync(
+			join(ROOT, "src/app/api/defillama/protocol/[slug]/route.ts"),
+			"utf8",
+		);
+		expect(route).not.toMatch(
+			/startsWith|\.includes\(lowerSlug\)|toLowerCase\(\) ===/,
+		);
 	});
 });
 
@@ -208,8 +223,14 @@ vi.mock("@/lib/payload-client", () => ({
 							lending("unverified", BLEND),
 							lending("slender", ["slender"]),
 							lending("two-families", ["blend-pools", "slender"]),
+							// #1912: linked, and DefiLlama publishes no Stellar figure
+							{
+								...lending("spiko", ["spiko"]),
+								tvlUSD: null,
+								tvlUnavailable: SPIKO_WHY,
+							},
 						],
-						totalDocs: 4,
+						totalDocs: 5,
 					}
 				: { docs: [], totalDocs: 0 },
 		),
@@ -245,6 +266,27 @@ describe("GET /api/projects/search tvlMethodUrl (sls-102)", () => {
 			unverified: null,
 			slender: "https://defillama.com/protocol/slender",
 			"two-families": null,
+			spiko: "https://defillama.com/protocol/spiko",
 		});
+	});
+
+	it("a linked row with no figure serves why, dated, never 0 or an old figure (#1912)", async () => {
+		vi.resetModules();
+		const { GET } = await import("../../app/api/projects/search/route");
+		const pending = GET(
+			new NextRequest("https://x.test/api/projects/search?type=Lending"),
+		);
+		await vi.advanceTimersByTimeAsync(10_000);
+		const body = await (await pending).json();
+		const by = Object.fromEntries(
+			body.projects.map((p: { slug: string }) => [p.slug, p]),
+		);
+		expect(by.spiko).toMatchObject({
+			tvlUSD: null,
+			tvlStale: null,
+			tvlUnavailable: SPIKO_WHY,
+			llamaSlugs: ["spiko"],
+		});
+		expect(by.blend).toMatchObject({ tvlUSD: 1000, tvlUnavailable: null });
 	});
 });

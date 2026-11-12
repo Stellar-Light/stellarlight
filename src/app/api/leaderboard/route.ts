@@ -20,7 +20,7 @@ import { jsonSafe } from "@/lib/json-safe";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
 import { getPayloadSafe } from "@/lib/payload-client";
 import { PROJECT_TYPES } from "@/lib/project-types";
-import { tvlStaleOf } from "@/lib/status-checks";
+import { tvlStaleOf, tvlUnavailableOf } from "@/lib/status-checks";
 import { findWholeSet } from "@/lib/whole-set";
 
 export const dynamic = "force-dynamic";
@@ -40,13 +40,15 @@ interface ProjectRow {
 	shortDescription: string | null;
 	scfAwarded: boolean;
 	// DefiLlama-verified TVL (2026-07-21 institutional battery: sort=tvl was
-	// the natural "top DeFi by TVL" ask and 400'd). null = NOT TRACKED on
-	// DefiLlama — never "zero TVL" (class 3); tvlAsOf dates the number
-	// (class 8).
+	// the natural "top DeFi by TVL" ask and 400'd). null = no figure, never
+	// "zero TVL" (class 3): not linked to DefiLlama, or tvlUnavailable says
+	// why; tvlAsOf dates the number (class 8).
 	tvlUSD: number | null;
 	tvlAsOf: string | null;
 	// #1912: the reading is past the weekly refresh (tvlStaleOf)
 	tvlStale: boolean | null;
+	// #1912: why a DefiLlama-linked row has no figure (tvlUnavailableOf)
+	tvlUnavailable: string | null;
 	// On-chain issued-asset stats (2026-07-21 institutional battery: "biggest
 	// stablecoin by supply" had no sort). From stellar.expert via
 	// enrich-onchain-projects.ts; null = NOT TRACKED (no verified issued asset
@@ -276,6 +278,7 @@ export async function GET(req: NextRequest) {
 					scf: true,
 					tvlUSD: true,
 					tvlAsOf: true,
+					tvlUnavailable: true,
 					onchain: true,
 				},
 			});
@@ -364,6 +367,7 @@ export async function GET(req: NextRequest) {
 					scf?: { awarded?: boolean };
 					tvlUSD?: number | null;
 					tvlAsOf?: string | null;
+					tvlUnavailable?: string | null;
 					onchain?: {
 						assetCode?: string | null;
 						assetSupply?: number | null;
@@ -418,6 +422,7 @@ export async function GET(req: NextRequest) {
 					tvlUSD: project.tvlUSD ?? null,
 					tvlAsOf: project.tvlAsOf ?? null,
 					tvlStale: tvlStaleOf(project.tvlUSD, project.tvlAsOf),
+					tvlUnavailable: tvlUnavailableOf(project),
 					assetCode:
 						typeof project.onchain?.assetCode === "string"
 							? project.onchain.assetCode
@@ -504,9 +509,9 @@ export async function GET(req: NextRequest) {
 					(a, b) => b.github.openIssuesTotal - a.github.openIssuesTotal,
 				);
 			} else if (sort === "tvl") {
-				// null = NOT TRACKED on DefiLlama (class 3) — untracked projects
-				// sort BELOW every tracked one (including tracked ~$0), never
-				// interleaved as if they had zero TVL.
+				// null = no figure (class 3): those rows sort BELOW every row with
+				// a figure (including ~$0), never interleaved as if they had zero
+				// TVL.
 				rows.sort((a, b) => {
 					if (a.tvlUSD === null && b.tvlUSD === null) return 0;
 					if (a.tvlUSD === null) return 1;
@@ -630,7 +635,7 @@ export async function GET(req: NextRequest) {
 						"range=7d/30d/90d/1y keeps only projects whose lastActivityAt falls inside the window. stars/issues totals remain all-time rollups; they are NOT recomputed within the window.",
 					dataAsOf:
 						"meta.dataAsOf = the most recent index-refresh timestamp across the repo rows this response aggregated; every github.* number is as-of this moment, NOT a live GitHub read. Distinct from meta.generatedAt (when the response was serialized). Null when no indexed repos matched the filter.",
-					tvl: "sort=tvl orders by tvlUSD: DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = NOT TRACKED on DefiLlama (never 'zero TVL'); untracked projects sort below every tracked one. tvlStale true = the row's tvlAsOf is more than 14 days old, or missing, unparseable or in the future (only the date is checked); the order is tvlUSD alone, stale or not. TVL covers DeFi-style protocols only; most projects are legitimately untracked. The CSV carries tvl_as_of and tvl_stale.",
+					tvl: "sort=tvl orders by tvlUSD: DefiLlama-verified TVL in USD, dated per-row by tvlAsOf. tvlUSD null = no DefiLlama figure, never 'zero TVL': the row is not linked to DefiLlama, or it is and tvlUnavailable says why, dated; those rows sort below every row with a figure. tvlStale true = the row's tvlAsOf is more than 14 days old, or missing, unparseable or in the future (only the date is checked); the order is tvlUSD alone, stale or not. TVL covers DeFi-style protocols only; most projects have no DefiLlama link. The CSV carries tvl_as_of and tvl_stale.",
 					supply:
 						"sort=supply orders by assetSupply: circulating supply of the project's issued asset in WHOLE ASSET UNITS of its own denomination (assetCode names it: USDC, CETES, …), from stellar.expert. This is NOT USD-comparable across assets; a JPY or ARS coin's unit count dwarfs a USD coin's without being larger in value. For a USD-comparable stablecoin ranking (market cap, complete set incl. USDY/Ondo), use getStablecoins (/api/stablecoins) instead. assetSupply null = NOT TRACKED (no verified issued asset in our on-chain seed set), never 'zero supply'; untracked projects sort below every tracked one. assetHolders = trustline holder count.",
 				},

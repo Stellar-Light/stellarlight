@@ -44,7 +44,7 @@ function renderWith(status: number, body: unknown) {
 	});
 	return render(
 		<QueryClientProvider client={client}>
-			<ProjectTVLChart projectName="x" />
+			<ProjectTVLChart projectSlug="x" />
 		</QueryClientProvider>,
 	);
 }
@@ -108,7 +108,77 @@ describe("the project TVL card renders every shape the route serves", () => {
 		expect(await screen.findByTestId("tvl-chart")).toBeTruthy();
 		expect(screen.getAllByText("Unavailable")).toHaveLength(2);
 		expect(screen.getByText("-2.00%")).toBeTruthy();
-		expect(screen.getByRole("link", { name: "DeFi Llama" })).toBeTruthy();
+		// No source page: DefiLlama is named, never linked to a page built
+		// from the slug (#1912: that page could be another protocol's).
+		expect(screen.getByText(/Data from DeFi Llama/)).toBeTruthy();
+		expect(screen.queryByRole("link")).toBeNull();
+	});
+
+	// #1912 (2026-11-11): the card is the project's own row, as its API row
+	// serves it.
+	it("a linked row with no Stellar figure reads No figure with its dated reason, never Unavailable or 0", async () => {
+		const why =
+			"DefiLlama lists spiko but publishes no Stellar TVL figure for it (checked 2026-11-11).";
+		renderWith(200, {
+			...base,
+			name: "Spiko",
+			slug: "spiko",
+			currentTVL: null,
+			change1d: null,
+			historicalTVL: [],
+			asOf: "2026-11-11T22:47:04.000Z",
+			stale: null,
+			unavailable: why,
+			sourceUrl: "https://defillama.com/protocol/spiko",
+		});
+		expect(await screen.findByText("No figure")).toBeTruthy();
+		expect(screen.getByText(why)).toBeTruthy();
+		expect(screen.queryByText("Unavailable")).toBeNull();
+		expect(screen.queryByText(/\$0/)).toBeNull();
+		expect(screen.getByRole("link", { name: "defillama.com" })).toBeTruthy();
+	});
+
+	it("an old row figure says it is older than 14 days", async () => {
+		renderWith(200, {
+			...base,
+			name: "Sentora",
+			slug: "sentora",
+			currentTVL: 10_393_904,
+			change1d: null,
+			historicalTVL: null,
+			asOf: "2026-08-10T06:16:01.283Z",
+			stale: true,
+			unavailable: null,
+			sourceUrl: "https://defillama.com/protocol/stellar-defi-hub",
+		});
+		expect(await screen.findByText("$10.39M")).toBeTruthy();
+		expect(
+			screen.getByText("as of 2026-08-10, older than 14 days"),
+		).toBeTruthy();
+	});
+
+	it("a multi-protocol row names its sum and its page; a weekly figure shows no change tiles", async () => {
+		renderWith(200, {
+			...base,
+			name: "Blend",
+			slug: "blend",
+			currentTVL: 115_148_044,
+			change1d: null,
+			change7d: null,
+			historicalTVL: series,
+			asOf: "2026-11-09T13:44:29.805Z",
+			stale: false,
+			unavailable: null,
+			sourceUrl: "https://defillama.com/protocol/blend",
+			method:
+				"the sum of 4 DefiLlama protocols: blend-pools, blend-pools-v2, blend-backstop, blend-backstop-v2",
+		});
+		expect(await screen.findByText("$115.15M")).toBeTruthy();
+		expect(screen.getByTestId("tvl-chart")).toBeTruthy();
+		expect(screen.queryByText("24h Change")).toBeNull();
+		expect(screen.queryByText("Unavailable")).toBeNull();
+		expect(screen.getByText(/the sum of 4 DefiLlama protocols/)).toBeTruthy();
+		expect(screen.getByRole("link", { name: "defillama.com" })).toBeTruthy();
 	});
 
 	it("a full reading shows its figure, its changes and the date it was read", async () => {

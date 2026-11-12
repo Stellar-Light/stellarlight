@@ -34,7 +34,12 @@ import {
 	type PopulationScope,
 	populationScope,
 } from "@/lib/population";
-import { parseDate, TVL_FRESH_DAYS, tvlReadingOf } from "@/lib/status-checks";
+import {
+	parseDate,
+	TVL_FRESH_DAYS,
+	tvlReadingOf,
+	tvlUnavailableOf,
+} from "@/lib/status-checks";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 600;
@@ -125,10 +130,15 @@ interface ProjectDoc {
 	hackathonPlacement?: string;
 	hackathonPrize?: number;
 	scf?: { awarded?: boolean; totalAwarded?: number; awardedRounds?: number[] };
-	// DefiLlama TVL facts (scripts/enrich-tvl.ts): null = not tracked there,
-	// never "zero TVL". Every value is dated via tvlAsOf.
+	// DefiLlama TVL facts (scripts/enrich-tvl.ts): null = no figure, never
+	// "zero TVL". Every value is dated via tvlAsOf; a linked row (llamaSlugs)
+	// with no figure carries tvlUnavailable, why (#1912).
 	tvlUSD?: number | null;
 	tvlAsOf?: string | null;
+	llamaSlugs?: string[] | null;
+	tvlUnavailable?: string | null;
+	// #1912 audit: DefiLlama files the row's Stellar TVL as double counted
+	llamaListing?: { doublecounted?: boolean | null } | null;
 }
 
 export async function GET(req: NextRequest) {
@@ -278,6 +288,11 @@ export async function GET(req: NextRequest) {
 					// sls-038: TVL facts for the tvl rollup (null = not DefiLlama-tracked).
 					tvlUSD: true,
 					tvlAsOf: true,
+					// #1912: a linked row with no figure is listed, with why
+					llamaSlugs: true,
+					tvlUnavailable: true,
+					// #1912 audit: DefiLlama's double-count verdict on the row
+					llamaListing: true,
 				},
 			});
 			projects = r.docs as unknown as ProjectDoc[];
@@ -612,19 +627,31 @@ export async function GET(req: NextRequest) {
 		// future or unparseable date dates nothing), and each figure is rounded
 		// once, so the stale part, the rows and the total add up.
 		const now = new Date();
+		// #1912 audit (2026-11-11): DefiLlama files some rows' Stellar TVL as
+		// also counted under another protocol (Upshift's Stellar vaults hold
+		// Gami Labs' two and the Sentora USDC vault Stellar DeFi Hub counts).
+		// Those are read like any other but summed apart, so a deposit is
+		// summed once.
+		const doublecounted = (p: ProjectDoc) =>
+			p.llamaListing?.doublecounted === true;
+		const readingOf = (p: ProjectDoc) => {
+			const { at, stale } = tvlReadingOf(p.tvlUSD, p.tvlAsOf, now);
+			const row = {
+				slug: p.slug ?? null,
+				name: p.name ?? null,
+				tvlUSD: Math.round(p.tvlUSD ?? 0),
+				tvlAsOf: parseDate(p.tvlAsOf),
+				tvlStale: stale === true,
+			};
+			return { row, at };
+		};
+		const counted = projects
+			.filter((p) => typeof p.tvlUSD === "number" && doublecounted(p))
+			.map(readingOf)
+			.sort((a, b) => b.row.tvlUSD - a.row.tvlUSD);
 		const readings = projects
-			.filter((p) => typeof p.tvlUSD === "number")
-			.map((p) => {
-				const { at, stale } = tvlReadingOf(p.tvlUSD, p.tvlAsOf, now);
-				const row = {
-					slug: p.slug ?? null,
-					name: p.name ?? null,
-					tvlUSD: Math.round(p.tvlUSD ?? 0),
-					tvlAsOf: parseDate(p.tvlAsOf),
-					tvlStale: stale === true,
-				};
-				return { row, at };
-			})
+			.filter((p) => typeof p.tvlUSD === "number" && !doublecounted(p))
+			.map(readingOf)
 			.sort((a, b) => b.row.tvlUSD - a.row.tvlUSD);
 		const stale = readings.filter((r) => r.row.tvlStale);
 		const sum = (rs: typeof readings) =>
@@ -638,6 +665,23 @@ export async function GET(req: NextRequest) {
 		const dates = datesOf(readings);
 		const oldestStale = datesOf(stale)[0]?.slice(0, 10);
 		const usd = (n: number) => `$${n.toLocaleString("en-US")}`;
+		// #1912: a row linked to DefiLlama with no figure is named, with the
+		// dated reason its project row serves, never summed as 0 or as an old
+		// figure. Ordered by slug: the order is not a rank.
+		const unavailableProjects = projects
+			.filter(
+				(p) =>
+					typeof p.tvlUSD !== "number" &&
+					Array.isArray(p.llamaSlugs) &&
+					p.llamaSlugs.length > 0,
+			)
+			.map((p) => ({
+				slug: p.slug ?? null,
+				name: p.name ?? null,
+				tvlAsOf: parseDate(p.tvlAsOf),
+				tvlUnavailable: tvlUnavailableOf(p),
+			}))
+			.sort((a, b) => (a.slug ?? "").localeCompare(b.slug ?? ""));
 		result.tvl = {
 			totalTvlUSD,
 			staleTvlUSD,
@@ -650,7 +694,10 @@ export async function GET(req: NextRequest) {
 			provider: "DefiLlama",
 			top10: readings.slice(0, 10).map((r) => r.row),
 			staleProjects: stale.map((r) => r.row),
-			basis: `Sum of per-project tvlUSD across ACTIVE directory projects tracked on DefiLlama (tvlUSD != null; null = not tracked there, never zero: untracked protocols are simply absent, so this UNDERCOUNTS chain-wide TVL), each figure rounded to the dollar once, so totalTvlUSD, staleTvlUSD and the rows add up. Values are per-protocol DefiLlama totals refreshed weekly: asOf = the newest usable per-project tvlAsOf, oldestAsOf = the oldest. A reading whose tvlAsOf is more than ${TVL_FRESH_DAYS} days old, or missing, unparseable or in the future, is stale; only the date is checked, not why the reading is old. A stale reading stays in totalTvlUSD, never dropped or zeroed, and is summed in staleTvlUSD, listed in staleProjects and named in staleWarning; totalTvlUSD minus staleTvlUSD is the part read within ${TVL_FRESH_DAYS} days. CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated: never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf/tvlStale also ride each /api/projects/search row.`,
+			unavailableProjects,
+			doublecountedTvlUSD: sum(counted),
+			doublecountedProjects: counted.map((r) => r.row),
+			basis: `Sum of per-project tvlUSD across ACTIVE directory projects linked to DefiLlama (tvlUSD != null; null = no figure, never zero), each figure rounded to the dollar once, so totalTvlUSD, staleTvlUSD and the rows add up. Protocols not linked here are absent, so the total leaves out TVL DefiLlama tracks for them. A project whose Stellar TVL DefiLlama itself files as double counted (the same deposits counted under another protocol too: on 2026-11-11 Upshift's Stellar vaults held both of Gami Labs' vaults and the Sentora USDC vault that Stellar DeFi Hub counts) is not summed, as DefiLlama leaves it out of its own Stellar total: doublecountedProjects lists it, and doublecountedTvlUSD is its part, never to be added to totalTvlUSD. A flagged project is left out whole, so the total can undercount deposits that no summed protocol holds. A project whose double-count verdict has not been read yet (the weekly refresh stores it) is summed, and then the total may count the same deposits under more than one protocol. Values are per-protocol DefiLlama totals refreshed weekly: asOf = the newest usable per-project tvlAsOf, oldestAsOf = the oldest. A reading whose tvlAsOf is more than ${TVL_FRESH_DAYS} days old, or missing, unparseable or in the future, is stale; only the date is checked, not why the reading is old. A stale reading stays in totalTvlUSD, never dropped or zeroed, and is summed in staleTvlUSD, listed in staleProjects and named in staleWarning; totalTvlUSD minus staleTvlUSD is the part read within ${TVL_FRESH_DAYS} days. A project linked to DefiLlama (llamaSlugs) that holds no figure, because DefiLlama lists it with no Stellar figure or its slugs could not be read since its mapping changed, is not summed and not counted in trackedProjects: unavailableProjects names it with the dated reason (tvlUnavailable), so neither a zero nor an old figure stands in for it. CEX reserve rows excluded; a cross-chain protocol's figure follows DefiLlama's own protocol accounting. As-of dated: never an exact to-the-dollar live figure. Per-project tvlUSD/tvlAsOf/tvlStale/tvlUnavailable also ride each /api/projects/search row.`,
 		};
 	}
 

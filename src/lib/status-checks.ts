@@ -107,10 +107,20 @@ export function llamaPageFor(
 	slugs: readonly string[] | null | undefined,
 	parent: unknown,
 ): string | null {
+	const page = llamaPageSlugOf(slugs, parent);
+	return page ? `https://defillama.com/protocol/${page}` : null;
+}
+
+/** llamaPageFor's page as a DefiLlama slug (its API reads
+ * api.llama.fi/protocol/{slug}), or null. */
+export function llamaPageSlugOf(
+	slugs: readonly string[] | null | undefined,
+	parent: unknown,
+): string | null {
 	if (!slugs?.length) return null;
 	const page =
 		slugs.length === 1 ? slugs[0] : typeof parent === "string" ? parent : "";
-	return page ? `https://defillama.com/protocol/${page}` : null;
+	return page || null;
 }
 
 /** Why a multi-row tvlUSD has no page to cite, and the repair for each:
@@ -125,7 +135,7 @@ export const TVL_CITATION_GAP_ACTIONS = {
 	"parent-not-read":
 		"dispatch enrich-tvl.yml with execute=true: DefiLlama's parent page sums exactly these rows and the row has not stored it yet",
 	"family-drift":
-		"reconcile LLAMA_MAP in scripts/enrich-tvl.ts with DefiLlama's family for these rows: no parent's children are exactly them now",
+		"reconcile LLAMA_MAP in src/lib/status-checks.ts with DefiLlama's family for these rows: no parent's children are exactly them now",
 	"could-not-check":
 		"DefiLlama's protocol list could not be read, so a missing read and a changed family cannot be told apart: rerun",
 } as const;
@@ -195,6 +205,75 @@ export function llamaParentOf(
 
 // ── writer side: enrich-tvl ─────────────────────────────────────────────
 
+/** Directory slug to the DefiLlama protocol slugs enrich-tvl reads for it
+ * (several rows sum to one protocol, e.g. Blend). Only these rows are ever
+ * written; every other row stays unlinked. One DefiLlama slug belongs to one
+ * row: two rows on one slug would count its TVL twice in the analyze total. */
+export const LLAMA_MAP: Record<string, readonly string[]> = {
+	blend: [
+		"blend-pools",
+		"blend-pools-v2",
+		"blend-backstop",
+		"blend-backstop-v2",
+	],
+	aquarius: ["aquarius-stellar"],
+	// 2026-10-31: DefiLlama renamed soroswap to soroswap-amm ($1.16M on
+	// Stellar); soroswap-aggregator lists no chain and no TVL. The old slug
+	// read not-found and left the 10-19 figure in place.
+	soroswap: ["soroswap-amm"],
+	// The directory row is phoenix: the old key matched no row, so the TVL
+	// was never written (the dry run's "no project" warning).
+	phoenix: ["phoenix-defi-hub"],
+	slender: ["slender"],
+	fxdao: ["fxdao"],
+	// 2026-10-23 (DQ1): allbridge-core is deprecated on DefiLlama (deadFrom
+	// 2026-08-31) after the 2026-07-19 exploit; Allbridge runs on as
+	// Allbridge Next, listed as allbridge-next (a bridge aggregator with no
+	// TVL and no chain list). The repoint cleared the Core figure, and the
+	// row now carries tvlUnavailable instead (see tvlFieldsFor).
+	allbridge: ["allbridge-next"],
+	defindex: ["defindex"],
+	// 2026-11-11 (#1912): DefiLlama lists etherfuse and spiko with no TVL
+	// figure and no chain. Neither resolved a Stellar row from the 2026-09-21
+	// run on, which left their 2026-09-14 figures as stored for eight weeks;
+	// each now carries tvlUnavailable instead of a figure.
+	etherfuse: ["etherfuse"],
+	spiko: ["spiko"],
+	// 2026-11-11 (#1912): DefiLlama now serves templar-protocol as a parent
+	// page over templar-lending, the listing this row read (the same Stellar
+	// series, from 2025-12-04), and templar-precept (listed 2026-11-04:
+	// lending markets by the same team, a Blend v2 fork, $39 on Stellar on
+	// 2026-11-11). The old slug read not-found on 2026-11-09 and left the
+	// 2026-11-02 figure in place.
+	"templar-protocol": ["templar-lending"],
+	sushi: ["sushi-stellar"],
+	excellar: ["excellar"],
+	scopuly: ["scopuly"],
+	// The directory row is normal (the old key matched no row).
+	normal: ["normal"],
+	whalehub: ["whalehub"],
+	upshift: ["upshift"],
+	// Coverage-gap pass 2026-07-16: the two verified llama misses (seeded the
+	// same day). Both have llama chainTvls.Stellar: TVL rows fill from the
+	// Stellar slice.
+	"gami-labs": ["gami-labs"],
+	"defa-invoicemate": ["defa-by-invoicemate"],
+	// 2026-11-11 (#1912): DefiLlama now serves sentora as a parent page over
+	// sentora-curator, which lists no Stellar, and stellar-defi-hub (Stellar
+	// DeFi Hub, listed 2026-08-14), which counts the Stellar vaults Sentora
+	// curates: its Stellar series is the one this row read before ($1,348 on
+	// 2026-07-16, $10,409,309 on 2026-08-10). The old slug resolved no row
+	// from the 2026-08-17 run on and left the 2026-08-10 figure in place.
+	// This directory also lists stellar-defi-hub (the vaults' front end,
+	// stellardefihub.com) as its own row; it stays unlinked, so the vaults
+	// are counted once.
+	sentora: ["stellar-defi-hub"],
+	// 2026-09-26: Spectra V2 lists Stellar among its chains (chainTvls.Stellar
+	// $750k on 2026-09-26, the seven Stellar PT markets); the Stellar slice
+	// is what lands, never the $18.9M multichain total.
+	"spectra-finance": ["spectra-v2"],
+};
+
 export interface LlamaListingInput {
 	slug: string;
 	deprecated?: boolean | null;
@@ -251,6 +330,9 @@ export function llamaListingOf(
 }
 
 export interface LlamaTvlInput {
+	/** The chains DefiLlama lists the protocol on: a row is read for Stellar
+	 * only when Stellar is among them. */
+	chains?: readonly string[] | null;
 	tvl?: number | null;
 	chainTvls?: Record<string, number | null> | null;
 	deprecated?: boolean | null;
@@ -282,29 +364,187 @@ const sameSlugs = (stored: unknown, mapped: readonly string[]) =>
 	stored.length === mapped.length &&
 	mapped.every((s, i) => stored[i] === s);
 
+/** Below this the /protocols body is not the real list (8,807 rows on
+ * 2026-10-23): reading listings from it would mark every slug not-found. */
+export const MIN_PROTOCOLS = 1_000;
+
+/** Below this many Stellar rows (CEX left out) a /protocols body is not
+ * DefiLlama's Stellar coverage. Every logged enrich-tvl run from 2026-07-11
+ * to 2026-11-09 read 31 to 36 (35 on 2026-11-11); 20 leaves room for real
+ * delistings and still stops a degraded answer whose chains came back
+ * blank, which would read every mapped slug as listed with no Stellar
+ * figure and clear every row (#1912 audit, 2026-11-11). */
+export const MIN_STELLAR_PROTOCOLS = 20;
+
+const onStellarChain = (p: { chains?: readonly string[] | null }) =>
+	Array.isArray(p?.chains) && p.chains.includes("Stellar");
+
+/** Why a /protocols answer cannot be read as DefiLlama's list, or null when
+ * it can: too few rows, too few Stellar rows, or no Stellar figure above $0
+ * among them. The run writes nothing on a non-null answer (could not
+ * check). */
+export function protocolListProblem(all: unknown): string | null {
+	if (!Array.isArray(all) || all.length < MIN_PROTOCOLS)
+		return `llama list has ${Array.isArray(all) ? all.length : "no"} protocols (< ${MIN_PROTOCOLS}): not the real list, nothing written`;
+	const stellar = all.filter((p) => onStellarChain(p) && p?.category !== "CEX");
+	if (stellar.length < MIN_STELLAR_PROTOCOLS)
+		return `llama list has ${stellar.length} Stellar protocols (< ${MIN_STELLAR_PROTOCOLS}; every logged run read 31 to 36): not DefiLlama's Stellar coverage, nothing written`;
+	// Every Stellar figure missing or zero is no reading either: it would
+	// write $0 or no figure over every mapped row (#1912 audit re-check).
+	const figures = stellar
+		.map(rowTvl)
+		.filter((v): v is number => typeof v === "number" && Number.isFinite(v));
+	if (!figures.some((v) => v > 0))
+		return `llama list has ${stellar.length} Stellar protocols but no Stellar figure above $0 (${figures.length} figures read): not DefiLlama's Stellar coverage, nothing written`;
+	return null;
+}
+
+/** The mapped slugs' rows in DefiLlama's full list, CEX rows left out (an
+ * exchange's reserves are not a protocol's TVL, so a CEX slug is never
+ * summed), and the mapped slugs not found there. */
+export function llamaRowsFor<
+	T extends { slug: string; category?: string | null },
+>(
+	mapped: readonly string[],
+	protocols: readonly T[],
+): { listed: T[]; missing: string[] } {
+	const bySlug = new Map(
+		protocols.filter((p) => p.category !== "CEX").map((p) => [p.slug, p]),
+	);
+	return {
+		listed: mapped.flatMap((s) => {
+			const p = bySlug.get(s);
+			return p ? [p] : [];
+		}),
+		missing: mapped.filter((s) => !bySlug.has(s)),
+	};
+}
+
+/** What DefiLlama's list says about one mapped row's Stellar TVL (#1912):
+ *   figure     every mapped slug is listed and every live one carries a
+ *              Stellar figure: their sum (a retired slug without one adds
+ *              nothing, since DefiLlama stopped computing it).
+ *   no-figure  every mapped slug is listed and none carries a Stellar
+ *              figure: Stellar is not among its chains, or it was retired
+ *              without one. DefiLlama answered.
+ *   missing    a mapped slug is not in the list (renamed or removed
+ *              upstream, or a CEX listing): could not check.
+ *   gap        a live slug on Stellar came back without a figure (a one-run
+ *              gap upstream): could not check.
+ *   partial    some live slugs carry a Stellar figure and another carries
+ *              none: their sum is part of the row's figure, never all of it
+ *              (#1912 audit: blend-pools-v2 off Stellar would have left
+ *              $39,517 of $115.7M): could not check. */
+export type TvlRead =
+	| { outcome: "figure"; tvlUSD: number }
+	| { outcome: "no-figure" | "missing" | "gap" | "partial" };
+
+export function tvlReadOf(
+	mapped: readonly string[],
+	listed: readonly LlamaTvlInput[],
+): TvlRead {
+	if (listed.length < mapped.length) return { outcome: "missing" };
+	const stellarRows = listed.filter(onStellarChain);
+	if (stellarRows.some((r) => rowTvl(r) === null && !isRetired(r)))
+		return { outcome: "gap" };
+	const tvl = stellarTvlOf(stellarRows);
+	if (tvl === null) return { outcome: "no-figure" };
+	if (listed.some((r) => !isRetired(r) && !onStellarChain(r)))
+		return { outcome: "partial" };
+	return { outcome: "figure", tvlUSD: Math.round(tvl) };
+}
+
 /** The TVL fields enrich-tvl writes for one mapped project, or null to leave
- * the stored TVL alone. A sum is written only when every live row carries a
- * figure; a retired row (deprecated or dated dead) without one counts as
- * none, since DefiLlama stopped computing it. A live row without a figure is
- * a one-run gap upstream: under the same slugs the stored reading stays
- * (dated by tvlAsOf). Under slugs the map no longer names, the stored figure
- * is not this mapping's, so it is cleared. */
+ * the stored ones alone. `listed` holds the mapped slugs' rows as DefiLlama's
+ * full /protocols list serves them (llamaRowsFor), on any chain or none,
+ * read at `checkedAt`. By tvlReadOf's outcome:
+ *   figure     the Stellar sum, and no reason.
+ *   no-figure  DefiLlama answered, so the stored figure is cleared and
+ *              tvlUnavailable says why, dated: an old figure is not today's,
+ *              and no figure is never $0.
+ *   otherwise  could not check. Under the same slugs the stored fields stay,
+ *              dated by tvlAsOf, and age into tvlStale. Under slugs the map
+ *              no longer names, the stored figure is another mapping's, so
+ *              it is cleared, with the reason. */
 export function tvlFieldsFor(
 	mapped: readonly string[],
 	storedSlugs: unknown,
-	stellarRows: readonly LlamaTvlInput[],
-): { tvlUSD: number | null; llamaSlugs: string[] } | null {
-	const gap = stellarRows.some((r) => rowTvl(r) === null && !isRetired(r));
-	if (stellarRows.length && !gap) {
-		const tvl = stellarTvlOf(stellarRows);
-		return {
-			tvlUSD: tvl === null ? null : Math.round(tvl),
-			llamaSlugs: [...mapped],
-		};
-	}
-	return sameSlugs(storedSlugs, mapped)
-		? null
-		: { tvlUSD: null, llamaSlugs: [...mapped] };
+	listed: readonly LlamaTvlInput[],
+	checkedAt: string,
+): {
+	tvlUSD: number | null;
+	llamaSlugs: string[];
+	tvlUnavailable: string | null;
+} | null {
+	const on = `(checked ${checkedAt.slice(0, 10)})`;
+	const names = mapped.join(", ");
+	const one = mapped.length === 1;
+	const fields = (tvlUSD: number | null, tvlUnavailable: string | null) => ({
+		tvlUSD,
+		llamaSlugs: [...mapped],
+		tvlUnavailable,
+	});
+	const read = tvlReadOf(mapped, listed);
+	if (read.outcome === "figure") return fields(read.tvlUSD, null);
+	if (read.outcome === "no-figure")
+		return fields(
+			null,
+			`DefiLlama lists ${names} but publishes no Stellar TVL figure for ${one ? "it" : "them"} ${on}.`,
+		);
+	if (sameSlugs(storedSlugs, mapped)) return null;
+	const why = {
+		missing: `DefiLlama's protocol list does not hold ${one ? "it" : "all of them"}`,
+		gap: "a live listing on Stellar came back without a figure this run",
+		partial: "DefiLlama publishes a Stellar figure for only some of them",
+	}[read.outcome];
+	return fields(
+		null,
+		`No Stellar TVL could be read for ${names}: ${why} ${on}.`,
+	);
+}
+
+/** DefiLlama's own double-count verdict on Stellar, from its
+ * /lite/protocols2 list: the ids (the /protocols `id`) of the protocols
+ * whose Stellar TVL it also files as Stellar-doublecounted, because the
+ * same deposits are counted under another protocol too; its Stellar chain
+ * total leaves them out ($210.4M on 2026-11-11 against $432.1M summed).
+ * Null when the body is not the real list, or files nothing as double
+ * counted: each row then keeps its stored verdict. */
+export function stellarDoublecountedIds(lite: unknown): Set<string> | null {
+	const rows = (lite as { protocols?: unknown } | null)?.protocols;
+	if (!Array.isArray(rows) || rows.length < MIN_PROTOCOLS) return null;
+	const onStellar = rows.filter((p) => p?.chainTvls?.Stellar != null);
+	if (onStellar.length < MIN_STELLAR_PROTOCOLS) return null;
+	const ids = new Set(
+		onStellar
+			.filter((p) => p.chainTvls["Stellar-doublecounted"] != null)
+			.map((p) => String(p.defillamaId)),
+	);
+	if (ids.size) return ids;
+	// No Stellar double-count key: either the list left the keys out, which
+	// read as none would re-sum about $213M on a green run (7 listings on
+	// 2026-11-11), or DefiLlama files nothing on Stellar as double counted.
+	// The keys on other chains tell them apart: with none anywhere it is no
+	// verdict and each row keeps its own; with some, Stellar is clear.
+	const keysElsewhere = rows.some((p) =>
+		Object.keys(p?.chainTvls ?? {}).some((k) => k.endsWith("-doublecounted")),
+	);
+	return keysElsewhere ? ids : null;
+}
+
+/** A mapped row's llamaListing.doublecounted: true when DefiLlama files any
+ * of its listed slugs as double counted on Stellar, false when none. When
+ * the lite list could not be read, or a mapped slug is missing (the row
+ * could not be checked), the stored verdict stays. */
+export function doublecountedOf(
+	listed: readonly { id?: string | number | null }[],
+	missing: readonly string[],
+	ids: ReadonlySet<string> | null,
+	stored: unknown,
+): boolean | null {
+	if (!ids || missing.length)
+		return typeof stored === "boolean" ? stored : null;
+	return listed.some((r) => r.id != null && ids.has(String(r.id)));
 }
 
 // ── writer side: enrich-onchain ─────────────────────────────────────────
@@ -396,7 +636,7 @@ export function parseDate(v: unknown): string | null {
  * date a reading now: parseable and not after `now`. `stale` is true when
  * `at` is missing or more than TVL_FRESH_DAYS old, null with no reading.
  * Only the date is checked, not why it is old: enrich-tvl keeps the stored
- * figure when no DefiLlama row resolves (tvlFieldsFor), and a missed weekly
+ * figure when it could not check a row (tvlFieldsFor), and a missed weekly
  * run leaves every figure as it was (#1912: Sentora's sat from 2026-08-10). */
 export function tvlReadingOf(
 	tvlUSD: unknown,
@@ -417,6 +657,21 @@ export function tvlStaleOf(
 	now: Date = new Date(),
 ): boolean | null {
 	return tvlReadingOf(tvlUSD, tvlAsOf, now).stale;
+}
+
+/** Why a row serves no tvlUSD although DefiLlama was read for it: the
+ * reason enrich-tvl stored (tvlFieldsFor, dated in its text and by tvlAsOf),
+ * served only while tvlUSD holds no figure; null otherwise. For the row
+ * builders and the analyze rollup alike. */
+export function tvlUnavailableOf(p: {
+	tvlUSD?: unknown;
+	tvlUnavailable?: unknown;
+}): string | null {
+	return typeof p.tvlUSD !== "number" &&
+		typeof p.tvlUnavailable === "string" &&
+		p.tvlUnavailable
+		? p.tvlUnavailable
+		: null;
 }
 
 function linkedSlugs(v: unknown): string[] | null {

@@ -184,6 +184,136 @@ describe("tvl: a reading older than the weekly refresh is named beside the total
 		).toEqual([]);
 	});
 
+	it("a linked row with no figure is named with its dated reason and never summed (#1912)", async () => {
+		const why =
+			"DefiLlama lists spiko but publishes no Stellar TVL figure for it (checked 2026-11-02).";
+		h.projects = [
+			tvlRow(rows[1]),
+			// Sentora's reading is still old: it stays in the total, flagged.
+			tvlRow(rows[3]),
+			{
+				id: "spiko",
+				slug: "spiko",
+				name: "Spiko",
+				status: "Live",
+				tvlUSD: null,
+				tvlAsOf: "2026-11-02T13:19:15.688Z",
+				llamaSlugs: ["spiko"],
+				tvlUnavailable: why,
+			},
+			// Linked, no figure, last refreshed before reasons were written.
+			{
+				id: "allbridge",
+				slug: "allbridge",
+				name: "Allbridge",
+				status: "Live",
+				tvlUSD: null,
+				tvlAsOf: "2026-10-26T10:55:36.129Z",
+				llamaSlugs: ["allbridge-next"],
+			},
+			// A reason stored beside a figure is not served.
+			{
+				...tvlRow(rows[2]),
+				llamaSlugs: ["aquarius-stellar"],
+				tvlUnavailable: why,
+			},
+			// Not linked: in neither list.
+			{ id: "x", slug: "x", status: "Live", tvlUSD: null, llamaSlugs: [] },
+		];
+		const { status, body } = await analyze("tvl");
+		expect(status).toBe(200);
+		const tvl = body.tvl as Doc;
+		expect(tvl.totalTvlUSD).toBe(129334939 + 10393904 + 38081272);
+		expect(tvl.trackedProjects).toBe(3);
+		expect(tvl.unavailableProjects).toEqual([
+			{
+				slug: "allbridge",
+				name: "Allbridge",
+				tvlAsOf: "2026-10-26T10:55:36.129Z",
+				tvlUnavailable: null,
+			},
+			{
+				slug: "spiko",
+				name: "Spiko",
+				tvlAsOf: "2026-11-02T13:19:15.688Z",
+				tvlUnavailable: why,
+			},
+		]);
+		expect((tvl.staleProjects as Doc[]).map((p) => p.slug)).toEqual([
+			"sentora",
+		]);
+		expect(tvl.staleTvlUSD).toBe(10393904);
+		expect(tvl.staleWarning).toMatch(/1 of 3/);
+		expect(tvl.oldestAsOf).toBe("2026-08-10T06:16:01.283Z");
+		expect(String(tvl.basis)).toMatch(/unavailableProjects/);
+		expect(
+			undeclaredInServed(spec, responseSchema(spec, "/api/analyze"), body),
+		).toEqual([]);
+	});
+
+	it("a reading DefiLlama files as double counted on Stellar is summed apart, never into the total (#1912 audit)", async () => {
+		const fresh = "2026-11-02T13:19:15.688Z";
+		const linked = (
+			slug: string,
+			tvlUSD: number,
+			doublecounted: boolean | null,
+		) => ({
+			id: slug,
+			slug,
+			name: slug,
+			status: "Live",
+			tvlUSD,
+			tvlAsOf: fresh,
+			llamaSlugs: [slug],
+			llamaListing: { state: "listed", doublecounted },
+		});
+		// 2026-11-11: Upshift's Stellar vaults hold Gami Labs' two vaults and
+		// the Sentora USDC vault that Stellar DeFi Hub (the sentora row) counts.
+		h.projects = [
+			linked("blend", 116_487_961, false),
+			linked("upshift", 82_264_516, true),
+			linked("sentora", 80_769_055, true),
+			linked("gami-labs", 30_587_667, true),
+			// Not read yet: summed, and the basis says the total may double count.
+			linked("aquarius", 37_887_387, null),
+		];
+		const { status, body } = await analyze("tvl");
+		expect(status).toBe(200);
+		const tvl = body.tvl as Doc;
+		expect(tvl.totalTvlUSD).toBe(116_487_961 + 37_887_387);
+		expect(tvl.trackedProjects).toBe(2);
+		expect(tvl.doublecountedTvlUSD).toBe(82_264_516 + 80_769_055 + 30_587_667);
+		expect((tvl.doublecountedProjects as Doc[]).map((p) => p.slug)).toEqual([
+			"upshift",
+			"sentora",
+			"gami-labs",
+		]);
+		expect((tvl.top10 as Doc[]).map((p) => p.slug)).toEqual([
+			"blend",
+			"aquarius",
+		]);
+		expect(String(tvl.basis)).toMatch(/double counted/);
+		expect(String(tvl.basis)).toMatch(
+			/may count the same deposits under more than one protocol/,
+		);
+		expect(String(tvl.basis)).not.toMatch(/UNDERCOUNTS/);
+		// Left out whole: what no summed protocol holds is in neither figure.
+		const whole =
+			/left out whole, so the total can undercount deposits that no summed protocol holds/;
+		expect(String(tvl.basis)).toMatch(whole);
+		// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+		const spec_tvl = (responseSchema(spec, "/api/analyze") as any).properties
+			.tvl.properties;
+		expect(spec_tvl.totalTvlUSD.description).toMatch(whole);
+		expect(spec_tvl.totalTvlUSD.description).toMatch(
+			/may count the same deposits twice/,
+		);
+		expect(spec_tvl.doublecountedTvlUSD.description).toMatch(/left out whole/);
+		expect(
+			undeclaredInServed(spec, responseSchema(spec, "/api/analyze"), body),
+		).toEqual([]);
+	});
+
 	it("an all-fresh total carries no warning and an empty stale list", async () => {
 		h.projects = rows
 			.filter(([, , at]) => at.startsWith("2026-11"))
@@ -193,6 +323,10 @@ describe("tvl: a reading older than the weekly refresh is named beside the total
 		expect(tvl.staleProjects).toEqual([]);
 		expect(tvl.staleWarning).toBeNull();
 		expect(tvl.oldestAsOf).toBe("2026-11-02T13:19:15.688Z");
+		// [] is a checked answer: every linked row holds a figure (#1912)
+		expect(tvl.unavailableProjects).toEqual([]);
+		expect(tvl.doublecountedProjects).toEqual([]);
+		expect(tvl.doublecountedTvlUSD).toBe(0);
 	});
 });
 

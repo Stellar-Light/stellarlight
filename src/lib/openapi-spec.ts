@@ -294,6 +294,11 @@ const TYPE_COVERAGE_PROPS = {
 	hackathonWinners: { type: "integer" },
 };
 
+/** Why a row serves no tvlUSD (#1912): the same text and nulls on project
+ * rows, leaderboard rows and the analyze rollup's unavailableProjects. */
+const TVL_UNAVAILABLE_DESCRIPTION =
+	"Non-null when the row is linked to DefiLlama (llamaSlugs) but holds no tvlUSD, saying why with the date it was read (also its tvlAsOf): DefiLlama lists the linked protocol but publishes no Stellar figure for it, or its slugs could not be read since its mapping changed. Never a zero and never an old figure: the last figure is not kept beside it. Null beside a figure, on a row with no DefiLlama link, and on a linked row not refreshed since this field was added (the weekly refresh writes it).";
+
 /** One project's TVL reading in the analyze tvl rollup (top10, staleProjects). */
 const TVL_ROLLUP_ROW_SCHEMA = {
 	type: "object",
@@ -9333,19 +9338,23 @@ export const spec: OpenAPISpec = {
 										tvl: {
 											type: "object",
 											description:
-												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; null/absent projects are NOT tracked there, never 'zero TVL'. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning.",
+												"Present for dimension=all|tvl: DefiLlama-verified TVL rollup; a project without a figure is never 'zero TVL': it is not linked to DefiLlama, or it is named in unavailableProjects with the dated reason. A project whose Stellar TVL DefiLlama files as double counted is summed apart, in doublecountedTvlUSD. Refreshed weekly; a reading older than 14 days stays in the total and is named in staleTvlUSD, staleProjects and staleWarning.",
 											properties: {
 												totalTvlUSD: {
 													type: "number",
 													description:
-														"Sum of every tracked project's last reading, stale ones included (see staleTvlUSD).",
+														"Sum of every summed project's last reading, stale ones included (see staleTvlUSD). Projects DefiLlama files as double counted on Stellar are left out whole, so the total can undercount deposits that no summed protocol holds (see doublecountedProjects); a project whose double-count verdict was not read yet is summed, and may count the same deposits twice.",
 												},
 												staleTvlUSD: {
 													type: "number",
 													description:
 														"The part of totalTvlUSD from stale readings (tvlAsOf more than 14 days old, or missing, unparseable or in the future); 0 when every reading is fresh. Each figure is rounded once, so totalTvlUSD minus this is the part read within 14 days and equals the fresh rows.",
 												},
-												trackedProjects: { type: "integer" },
+												trackedProjects: {
+													type: "integer",
+													description:
+														"How many readings totalTvlUSD sums: rows with a tvlUSD figure that DefiLlama does not file as double counted. unavailableProjects and doublecountedProjects are not counted.",
+												},
 												asOf: {
 													type: "string",
 													format: "date-time",
@@ -9370,7 +9379,7 @@ export const spec: OpenAPISpec = {
 												top10: {
 													type: "array",
 													description:
-														"The ten largest readings, largest first.",
+														"The ten largest summed readings, largest first.",
 													items: TVL_ROLLUP_ROW_SCHEMA,
 												},
 												staleProjects: {
@@ -9378,6 +9387,41 @@ export const spec: OpenAPISpec = {
 													description:
 														"Every stale summed reading (tvlAsOf more than 14 days old, or missing, unparseable or in the future), largest first; [] = none.",
 													items: TVL_ROLLUP_ROW_SCHEMA,
+												},
+												doublecountedTvlUSD: {
+													type: "number",
+													description:
+														"The sum of doublecountedProjects: readings DefiLlama files as double counted on Stellar (the same deposits counted under another protocol too) and leaves out of its own Stellar total. Not part of totalTvlUSD, and never to be added to it. A flagged project is left out whole, so deposits it holds that no summed protocol also holds are in neither figure. 0 when there are none.",
+												},
+												doublecountedProjects: {
+													type: "array",
+													description:
+														"Every reading left out of totalTvlUSD because DefiLlama files the project's Stellar TVL as double counted (enrich-tvl stores its verdict weekly), largest first; [] = none. A project whose verdict was not read yet is summed instead.",
+													items: TVL_ROLLUP_ROW_SCHEMA,
+												},
+												unavailableProjects: {
+													type: "array",
+													description:
+														"Every project of the rollup's population (Development, Live, Pre-Release) linked to DefiLlama (llamaSlugs) that holds no tvlUSD, ordered by slug (the order is not a rank): not summed in totalTvlUSD and not counted in trackedProjects. [] = every such linked project holds a figure.",
+													items: {
+														type: "object",
+														properties: {
+															slug: { type: "string", nullable: true },
+															name: { type: "string", nullable: true },
+															tvlAsOf: {
+																type: "string",
+																format: "date-time",
+																nullable: true,
+																description:
+																	"When DefiLlama was last read for the row; null when no usable date is stored.",
+															},
+															tvlUnavailable: {
+																type: "string",
+																nullable: true,
+																description: TVL_UNAVAILABLE_DESCRIPTION,
+															},
+														},
+													},
 												},
 												basis: { type: "string" },
 											},
@@ -9540,7 +9584,7 @@ export const spec: OpenAPISpec = {
 				tags: ["Ecosystem"],
 				summary: "Stellar ecosystem developer activity",
 				description:
-					"Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric; activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = untracked, never zero). Ranks PROJECTS, not people → use getBuilders.",
+					"Ranked list of the top / most active Stellar projects by GitHub activity (`sort=activity|stars|issues|tvl` over a `range`; `category` filter; `format=csv`) with per-project GitHub rollups, plus an Electric Capital dev-count macro block. `meta.metricDefinitions` defines each served metric; activity = 90-day commit volume across Stellar-evidenced repos (github.commits90d; null = index gap, sorts last), ties by recency; issues = open backlog (not activity); tvl = DefiLlama-verified TVL (null = no figure, never zero; see tvlUnavailable). Ranks PROJECTS, not people → use getBuilders.",
 				"x-routing": {
 					purpose:
 						"Ranked active-project leaderboard + Electric Capital ecosystem developer stats. Population = EVERY Live/Development/Pre-Release project with its indexed-repo rollup (default range=all); absence from the top-N means ranked below N or no indexed repos; never a liveness verdict.",
@@ -9629,7 +9673,7 @@ export const spec: OpenAPISpec = {
 						name: "sort",
 						in: "query",
 						description:
-							"Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD; sort=supply orders by issued-asset circulating supply (assetSupply). For both, null = untracked → those rows sort last, never treated as 0.",
+							"Order the project leaderboard. An unrecognized value returns 400 with the valid list. sort=tvl orders by DefiLlama-verified tvlUSD; sort=supply orders by issued-asset circulating supply (assetSupply). For both, null = no figure (for tvl, tvlUnavailable says why on a row linked to DefiLlama) → those rows sort last, never treated as 0.",
 						schema: {
 							type: "string",
 							enum: ["activity", "stars", "issues", "tvl", "supply"],
@@ -11778,18 +11822,24 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = NOT TRACKED on DefiLlama (never 'zero TVL'); with llamaSlugs set, null means the linked DefiLlama protocol publishes no TVL figure for Stellar (an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading more than 14 days old.",
+							"Total value locked in USD per DefiLlama, summed across the protocol's tracked components. null = no figure, never 'zero TVL': with llamaSlugs null the row is not linked to DefiLlama here (most non-DeFi projects); with llamaSlugs set, tvlUnavailable says why there is none, dated (for example, the linked DefiLlama protocol publishes no Stellar figure: an aggregator, or a protocol DefiLlama stopped computing). Refreshed weekly; see tvlAsOf, and tvlStale for a reading more than 14 days old.",
 					},
 					tvlAsOf: {
 						type: "string",
 						nullable: true,
-						description: "When tvlUSD was fetched from DefiLlama (ISO 8601).",
+						description:
+							"When tvlUSD was fetched from DefiLlama (ISO 8601); with tvlUnavailable set, when DefiLlama was read and gave no figure.",
 					},
 					tvlStale: {
 						type: "boolean",
 						nullable: true,
 						description:
 							"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future: cite tvlUSD with its tvlAsOf as a past reading, not today's TVL. Only the date is checked, not why the figure is old. false = read within 14 days. null = no tvlUSD.",
+					},
+					tvlUnavailable: {
+						type: "string",
+						nullable: true,
+						description: TVL_UNAVAILABLE_DESCRIPTION,
 					},
 					tvlSource: {
 						type: "string",
@@ -11808,7 +11858,7 @@ export const spec: OpenAPISpec = {
 						nullable: true,
 						items: { type: "string" },
 						description:
-							"The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project, e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider; this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null = not tracked).",
+							"The curated DefiLlama protocol slugs whose rows SUM to tvlUSD (several per project, e.g. Blend = pools + backstops). The mapped-provider identifiers tvlMethod refers to: follow each as https://defillama.com/protocol/{slug} for the provider's own page and full TVL time series (history/peak/record live at the provider; this API serves the current dated point only). Null = not llama-mapped (matches tvlUSD null with tvlUnavailable null: not linked here).",
 					},
 					tvlMethodUrl: {
 						type: "string",
@@ -13342,20 +13392,25 @@ export const spec: OpenAPISpec = {
 						type: "number",
 						nullable: true,
 						description:
-							"DefiLlama-verified TVL in USD. null = NOT TRACKED on DefiLlama; never 'zero TVL'; most non-DeFi projects are legitimately untracked. Dated by tvlAsOf.",
+							"DefiLlama-verified TVL in USD. null = no figure, never 'zero TVL': the row is not linked to DefiLlama (most non-DeFi projects), or it is and tvlUnavailable says why. Dated by tvlAsOf.",
 					},
 					tvlAsOf: {
 						type: "string",
 						format: "date-time",
 						nullable: true,
 						description:
-							"When tvlUSD was fetched from DefiLlama (dated-metrics rule). Null when untracked.",
+							"When tvlUSD was fetched from DefiLlama (dated-metrics rule); with tvlUnavailable set, when DefiLlama was read and gave no figure. Null when not linked to DefiLlama, or not read yet.",
 					},
 					tvlStale: {
 						type: "boolean",
 						nullable: true,
 						description:
 							"true = tvlAsOf is more than 14 days before this response, or missing, unparseable or in the future. Only the date is checked, not why the figure is old, and sort=tvl still orders by tvlUSD alone, stale or not. false = read within 14 days. null = no tvlUSD.",
+					},
+					tvlUnavailable: {
+						type: "string",
+						nullable: true,
+						description: TVL_UNAVAILABLE_DESCRIPTION,
 					},
 					assetCode: {
 						type: "string",
