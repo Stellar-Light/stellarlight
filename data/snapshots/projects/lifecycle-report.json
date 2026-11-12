@@ -1,9 +1,9 @@
 {
-	"generatedAt": "2026-11-11T12:43:53.080Z",
+	"generatedAt": "2026-11-12T13:46:24.870Z",
 	"source": "data/snapshots/projects/*.json.gz",
-	"latestSnapshot": "2026-11-11",
+	"latestSnapshot": "2026-11-12",
 	"historyStart": "2026-10-02",
-	"snapshots": 41,
+	"snapshots": 42,
 	"definitions": {
 		"launched": "Reached live: status Live now, or Inactive with a record that it was live before. Development and pre-release projects have not launched.",
 		"markedLive": "Status Live, on any evidence.",
@@ -13,28 +13,28 @@
 	},
 	"groups": {
 		"all": {
-			"listed": 1008,
+			"listed": 1020,
 			"launched": 937,
-			"markedLive": 834,
-			"liveOnStrongEvidence": 405,
-			"observedActive": 299,
-			"noActivityData": 413
+			"markedLive": 830,
+			"liveOnStrongEvidence": 401,
+			"observedActive": 283,
+			"noActivityData": 423
 		},
 		"scf": {
-			"listed": 623,
+			"listed": 635,
 			"launched": 582,
 			"markedLive": 550,
 			"liveOnStrongEvidence": 246,
-			"observedActive": 198,
+			"observedActive": 193,
 			"noActivityData": 210
 		},
 		"nonScf": {
 			"listed": 385,
 			"launched": 355,
-			"markedLive": 284,
-			"liveOnStrongEvidence": 159,
-			"observedActive": 101,
-			"noActivityData": 203
+			"markedLive": 280,
+			"liveOnStrongEvidence": 155,
+			"observedActive": 90,
+			"noActivityData": 213
 		}
 	},
 	"cohorts": {
@@ -54,12 +54,12 @@
 				"launched": 232,
 				"markedLive": 212,
 				"liveOnStrongEvidence": 93,
-				"observedActive": 66,
+				"observedActive": 61,
 				"noActivityData": 69
 			},
 			{
 				"cohort": "rounds 31-45",
-				"listed": 290,
+				"listed": 302,
 				"launched": 261,
 				"markedLive": 257,
 				"liveOnStrongEvidence": 114,
@@ -81,19 +81,19 @@
 				"cohort": "2025",
 				"listed": 99,
 				"launched": 98,
-				"markedLive": 91,
-				"liveOnStrongEvidence": 44,
-				"observedActive": 36,
-				"noActivityData": 53
+				"markedLive": 88,
+				"liveOnStrongEvidence": 41,
+				"observedActive": 31,
+				"noActivityData": 57
 			},
 			{
 				"cohort": "2026",
 				"listed": 286,
 				"launched": 257,
-				"markedLive": 193,
-				"liveOnStrongEvidence": 115,
-				"observedActive": 65,
-				"noActivityData": 150
+				"markedLive": 192,
+				"liveOnStrongEvidence": 114,
+				"observedActive": 59,
+				"noActivityData": 156
 			}
 		]
 	},
@@ -109,13 +109,17 @@
 		"newlyInactive": [
 			"cables",
 			"clob",
+			"cypher",
 			"fx-swap",
 			"grip",
+			"gyen",
 			"ichi",
 			"interstellar",
+			"veur",
 			"wombat",
 			"xlmeme",
-			"zkcross"
+			"zkcross",
+			"zusd"
 		],
 		"revived": []
 	},
