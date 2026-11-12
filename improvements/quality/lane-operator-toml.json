@@ -1,31 +1,19 @@
 {
  "lane": "operator-toml",
- "generatedAt": "2026-11-11T15:32:51.527Z",
+ "generatedAt": "2026-11-12T16:10:06.303Z",
  "stage": 1,
- "cleanWeeks": 8,
+ "cleanWeeks": 0,
  "stageEntryThresholdWeeks": 2,
  "lastRun": {
-  "id": 42846964641,
-  "at": "2026-11-10T15:41:23Z",
-  "event": "schedule",
+  "id": 43150007119,
+  "at": "2026-11-12T03:42:40Z",
+  "event": "workflow_dispatch",
   "conclusion": "success"
  },
  "lastCountedRunId": 42846964641,
  "stamps": [
   {
    "slug": "agtrail",
-   "network": "mainnet"
-  },
-  {
-   "slug": "estrela",
-   "network": "mainnet"
-  },
-  {
-   "slug": "lumenswap",
-   "network": "mainnet"
-  },
-  {
-   "slug": "normal",
    "network": "mainnet"
   },
   {
@@ -41,11 +29,21 @@
    "network": "mainnet"
   },
   {
-   "slug": "xlmeme",
+   "slug": "velo",
    "network": "mainnet"
   }
  ],
- "upgrades": [],
- "corrections": [],
+ "upgrades": [
+  "lumenswap",
+  "normal",
+  "xlmeme"
+ ],
+ "corrections": [
+  {
+   "slug": "estrela",
+   "was": "operator-toml/mainnet",
+   "now": "(no deployment)"
+  }
+ ],
  "note": "QUALITY.md §3: Stage 2 (auto-merge for bounded work) opens at 2 consecutive intervention-free weeks. A correction (stamp removed or network changed by a human) resets the counter; an upgrade to human-verified on the same network does not. Only successful SCHEDULED runs advance the counter — the weekly cadence is the clock."
 }
