@@ -1,0 +1,76 @@
+# Partner coverage eval (weekly, read-only). Scores how Scout surfaces 88
+# announced partners (scripts/eval/partner-coverage.json: 59 SDF-sourced, 28
+# partner-sourced, 1 listed from its operator's site): the row, its rank for
+# the partner's name, types, status and network against the source, and
+# recall on 17 partner questions, against the live public API. The ratchet is
+# scripts/eval/partner-coverage-baseline.json.
+#
+# A production monitor, never a PR gate: public API only, no secrets, no
+# writes, about one request a second, no /api/ask.
+#
+# Only one red is by design: exit 1 WITH a report, which the script writes
+# only after scoring finished, so it is a regression against the baseline.
+# Exit 1 without a report is a crash before scoring (a bad import, a tsx load
+# failure); exit 2 is no verdict (production unreadable, the API version
+# moved on a rerun too, or the API refused a request); exit 3 is the script
+# failing. All of those red "Could not score", which workflow health reads
+# as the lane broken (scripts/check-workflow-health.ts):
+# workflow-health: signal-steps: ^Propagate the red$
+name: Partner coverage eval
+
+on:
+  schedule:
+    # Thursdays 06:30 UTC, after the week's enrich and curate lanes.
+    - cron: "30 6 * * 4"
+  workflow_dispatch: {}
+
+concurrency:
+  group: partner-eval
+  cancel-in-progress: false
+
+permissions: { contents: read }
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: "24", cache: "pnpm" }
+      - run: pnpm install --frozen-lockfile
+      - name: Score partner coverage
+        id: eval
+        continue-on-error: true
+        shell: bash
+        run: |
+          set +e
+          pnpm exec tsx scripts/eval/partner-coverage.ts --json partner-coverage.json --md partner-coverage.md
+          code=$?
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          if [ -s partner-coverage.json ]; then echo "report=yes" >> "$GITHUB_OUTPUT"; else echo "report=no" >> "$GITHUB_OUTPUT"; fi
+          exit $code
+      - name: Job summary
+        if: always()
+        run: cat partner-coverage.md >> "$GITHUB_STEP_SUMMARY" || echo "No summary was written." >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: partner-coverage
+          path: |
+            partner-coverage.json
+            partner-coverage.md
+          if-no-files-found: warn
+      - name: Could not score
+        if: steps.eval.outputs.code != '0' && (steps.eval.outputs.code != '1' || steps.eval.outputs.report != 'yes')
+        env:
+          CODE: ${{ steps.eval.outputs.code }}
+          REPORT: ${{ steps.eval.outputs.report }}
+        run: |
+          echo "exit '$CODE', report '$REPORT': 1 without a report = crashed before scoring; 2 = no verdict (production unreadable, API version moved, or a request refused); 3 = the script failed"
+          exit 2
+      - name: Propagate the red
+        if: steps.eval.outputs.code == '1' && steps.eval.outputs.report == 'yes'
+        run: exit 1

@@ -1,0 +1,1921 @@
+{
+	"$comment": "Announced partners Scout should surface, with the source behind every expectation: 88 partners, 59 sourced from SDF pages (stellar.org and developers.stellar.org), 28 from the partner's own announcement, and 1 (Stellar Index) listed from its operator's own site, which is not an SDF partner. source.owner marks which. Built from the read-only 2026-11-11 partner coverage measurement (17 questions). Scored by scripts/eval/partner-coverage.ts with the pure rules in src/lib/partner-coverage.ts. Judgement calls live in `overrides`, each with its reason; everything else traces to `source.url` or `expectedNetwork.source`.",
+	"measuredAt": "2026-11-11",
+	"rubric": {
+		"classes": "well: the expected row ranks within k for the partner's first query, carries an expected type, a status the source allows, a website on a partner domain, and no network contradicting a sourced one. wrong: a row exists but one of those fails, it is found only by an alternate query, or a row with the partner's name holds another slug. research-only: no row, but the research top 5 for '<first query> stellar' holds the announcement URL or a document naming the partner. missing: neither. could-not-check: a read the class needs failed after retries; never counted as a miss.",
+		"status": "source status live: the row must be Live. coming: anything but Live or Inactive. announced: anything but Inactive. Overrides may narrow this.",
+		"types": "Expected types use Scout's types enum. RPC providers must carry RPC so the RPC filter finds them; indexers carry Indexer or Analytics as their product is; Scout has no Custody type, so custodians count when typed Infrastructure, Wallet or Security.",
+		"network": "deployment.network equal to the sourced network passes; unknown is a depth gap, not a wrong row; the other network is a wrong row.",
+		"resolve": "A depth check, not part of the class: /api/projects/resolve on the partner name, then each query, must return the expected slug.",
+		"domains": "Domains ending in stellar.org check a row's website but never identify a row, since SDF-owned pages host many rows.",
+		"ratchet": "A worse class, a check that worsens (pass, then unknown, then fail), a worse rank for the partner's own name, or a question that loses an expected partner is a regression. research-only and missing share one tier, so a move between them is reported, not failed. When a question expects more partners than k, only a smaller found count is a regression; a swap is reported."
+	},
+	"k": {
+		"partner": 5,
+		"question": 10
+	},
+	"categories": {
+		"oracle": "Oracles",
+		"bridge": "Bridges and interop",
+		"rpc": "RPC and node providers",
+		"indexer": "Indexers and data",
+		"custody": "Custody",
+		"wallet": "Wallets",
+		"exchange": "Exchanges",
+		"stablecoin": "Stablecoin issuers",
+		"rwa": "Tokenized funds and RWA issuers",
+		"payments": "Payments and anchors",
+		"security": "Security",
+		"defi": "DeFi"
+	},
+	"partners": [
+		{
+			"name": "Chainlink",
+			"category": "oracle",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/blog/foundation-news/chainlink-is-now-live-on-stellar-unleashing-a-new-wave-of-defi-innovation",
+				"date": "2026-10-14",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Chainlink Data Feeds and Data Streams live on Stellar; Stellar joined Chainlink Scale on 2025-10-31 (CCIP announced, not live)."
+			},
+			"aliases": ["chainlink"],
+			"queries": ["Chainlink"],
+			"domains": ["chain.link"],
+			"expectedSlug": "chainlink",
+			"expectedTypes": ["Oracle"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/oracles/oracle-providers"
+			},
+			"notes": "Mainnet Data Feeds proxy CDQBHEUG... per SDF oracle docs (listed 2026-10-16). CCIP: announced 2025-10-31, nothing shows it live."
+		},
+		{
+			"name": "Pyth",
+			"category": "oracle",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/blog/developers/real-time-prices-for-stellars-4b-tokenized-assets-economy",
+				"date": "2026-09-14",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Pyth Pro pull oracle (Lazer verifier) live on Stellar mainnet with Pyth Indices."
+			},
+			"aliases": ["pyth", "pyth network", "pyth pro"],
+			"queries": ["Pyth"],
+			"domains": ["pyth.network", "pyth.com"],
+			"expectedSlug": "pyth",
+			"expectedTypes": ["Oracle"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://stellar.org/blog/developers/real-time-prices-for-stellars-4b-tokenized-assets-economy"
+			},
+			"notes": "Pyth's own post 2026-09-08. Subscription required to receive data."
+		},
+		{
+			"name": "RedStone",
+			"category": "oracle",
+			"weight": 3,
+			"source": {
+				"url": "https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/",
+				"date": "2026-03-04",
+				"owner": "partner",
+				"status": "live",
+				"says": "RedStone push oracle live on Stellar mainnet: SEP-40 contract plus per-asset MultiFeed feeds."
+			},
+			"aliases": ["redstone", "redstone oracles", "redstone finance"],
+			"queries": ["RedStone"],
+			"domains": ["redstone.finance"],
+			"expectedSlug": "redstone-finance",
+			"expectedTypes": ["Oracle"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://blog.redstone.finance/2026/03/04/stellar-finally-gets-the-oracle-infrastructure-it-deserves/"
+			},
+			"notes": "SDF oracle docs list it (added 2026-10-13); used by Blend and Templar."
+		},
+		{
+			"name": "Band Protocol",
+			"category": "oracle",
+			"weight": 2,
+			"source": {
+				"url": "https://blog.bandprotocol.com/bandprotocol-integration-with-stellar-smart-contracts/",
+				"date": "2024-03-07",
+				"owner": "partner",
+				"status": "live",
+				"says": "Band StandardReference oracle deployed on Soroban mainnet and testnet."
+			},
+			"aliases": ["band", "band protocol", "band oracle"],
+			"queries": ["Band Protocol"],
+			"domains": ["bandprotocol.com"],
+			"expectedSlug": "band",
+			"expectedTypes": ["Oracle"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/oracles/oracle-providers"
+			},
+			"notes": "SDF oracle docs list mainnet and testnet contracts."
+		},
+		{
+			"name": "Reflector",
+			"category": "oracle",
+			"weight": 3,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/oracles/oracle-providers",
+				"date": "2025-01-07",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Reflector SEP-40 oracle (Stellar DEX, CEX/DEX and FX feeds) on mainnet, listed in SDF oracle docs."
+			},
+			"aliases": ["reflector", "reflector network", "reflector oracle"],
+			"queries": ["Reflector"],
+			"domains": ["reflector.network"],
+			"expectedSlug": "reflector",
+			"expectedTypes": ["Oracle"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/oracles/oracle-providers"
+			},
+			"notes": "No dated launch post; date = earliest SDF docs commit listing it. Used by Blend, OrbitCDP, DeFindex."
+		},
+		{
+			"name": "DIA",
+			"category": "oracle",
+			"weight": 1,
+			"source": {
+				"url": "https://www.diadata.org/blog/post/soroban-stellar-oracle-dia/",
+				"date": "2024-12-17",
+				"owner": "partner",
+				"status": "live",
+				"says": "DIA oracle on Soroban (SDF docs list a testnet contract only)."
+			},
+			"aliases": ["dia", "dia oracle", "dia oracles", "dia data"],
+			"queries": ["DIA oracle", "DIA"],
+			"domains": ["diadata.org"],
+			"expectedSlug": "dia",
+			"expectedTypes": ["Oracle"],
+			"expectedNetwork": {
+				"network": "testnet",
+				"source": "https://developers.stellar.org/docs/data/oracles/oracle-providers"
+			},
+			"notes": "Testnet only per SDF docs."
+		},
+		{
+			"name": "LayerZero",
+			"category": "bridge",
+			"weight": 3,
+			"source": {
+				"url": "https://layerzero.network/blog/layerzero-endpoint-on-stellar-usdt0",
+				"date": "2026-09-02",
+				"owner": "partner",
+				"status": "live",
+				"says": "LayerZero Endpoint live on Stellar; USDT0 is the first OFT."
+			},
+			"aliases": ["layerzero"],
+			"queries": ["LayerZero"],
+			"domains": ["layerzero.network"],
+			"expectedSlug": null,
+			"expectedTypes": ["Bridge"],
+			"notes": "SDF same day: stellar.org/blog/foundation-news/usdt0-is-now-live-on-stellar."
+		},
+		{
+			"name": "Axelar",
+			"category": "bridge",
+			"weight": 3,
+			"source": {
+				"url": "https://axelar.network/blog/axelar-stellar-integration",
+				"date": "2026-02-16",
+				"owner": "partner",
+				"status": "live",
+				"says": "Axelar GMP and ITS integration with Stellar complete; Squid Router live at launch."
+			},
+			"aliases": ["axelar"],
+			"queries": ["Axelar"],
+			"domains": ["axelar.network"],
+			"expectedSlug": "axelar",
+			"expectedTypes": ["Bridge"],
+			"notes": "SDF cross-chain docs list Axelar GMP and ITS."
+		},
+		{
+			"name": "Circle CCTP",
+			"category": "bridge",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/blog/foundation-news/circle-cctp-is-live-on-stellar",
+				"date": "2026-05-19",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Circle CCTP live: native USDC between Stellar and 23 chains, with Hooks."
+			},
+			"aliases": [
+				"cctp",
+				"circle cctp",
+				"cross-chain transfer protocol",
+				"circle cross-chain transfer protocol"
+			],
+			"queries": ["CCTP", "Circle CCTP"],
+			"domains": ["circle.com"],
+			"expectedSlug": "circle-cctp-cross-chain-transfer-protocol",
+			"expectedTypes": ["Bridge"]
+		},
+		{
+			"name": "Allbridge",
+			"category": "bridge",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/allbridge-launch-connects-stellar-network-to-ethereum-solana-and-polygon",
+				"date": "2023-07-11",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Allbridge bridge connects Stellar to Ethereum, Solana and Polygon; Allbridge Core on Soroban later."
+			},
+			"aliases": ["allbridge", "allbridge core", "allbridge classic"],
+			"queries": ["Allbridge"],
+			"domains": ["allbridge.io"],
+			"expectedSlug": "allbridge",
+			"expectedTypes": ["Bridge"],
+			"notes": "Unverified third-party claim that Core was paused."
+		},
+		{
+			"name": "NEAR Intents",
+			"category": "bridge",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/blog/ecosystem/stellar-2025-year-in-review",
+				"date": "2025-12-31",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF 2025 review: NEAR Intents integrated Stellar (swaps into XLM and USDC from 20+ chains)."
+			},
+			"aliases": ["near intents"],
+			"queries": ["NEAR Intents"],
+			"domains": ["near-intents.org", "near.org"],
+			"expectedSlug": null,
+			"expectedTypes": ["Bridge"],
+			"notes": "Go-live 2025-08-19 per third-party only."
+		},
+		{
+			"name": "Wormhole",
+			"category": "bridge",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/blog/ecosystem/stellar-2025-year-in-review",
+				"date": "2025-12-31",
+				"owner": "sdf",
+				"status": "coming",
+				"says": "SDF is partnering with Nethermind on a bridge between Stellar and Wormhole."
+			},
+			"aliases": ["wormhole"],
+			"queries": ["Wormhole"],
+			"domains": ["wormhole.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["Bridge"],
+			"notes": "One line in the SDF 2025 review; nothing shows it live."
+		},
+		{
+			"name": "Rhino.fi",
+			"category": "bridge",
+			"weight": 1,
+			"source": {
+				"url": "https://rhino.fi/blog/stellar-rhinofi-stablecoin-cross-chain-rail",
+				"date": "2026-07-30",
+				"owner": "partner",
+				"status": "live",
+				"says": "Rhino.fi opened a USDC route to and from Stellar with $2M liquidity."
+			},
+			"aliases": ["rhino.fi", "rhinofi", "rhino fi"],
+			"queries": ["Rhino.fi"],
+			"domains": ["rhino.fi"],
+			"expectedSlug": null,
+			"expectedTypes": ["Bridge"]
+		},
+		{
+			"name": "SODAX",
+			"category": "bridge",
+			"weight": 1,
+			"source": {
+				"url": "https://developers.stellar.org/docs/tools/infra-tools/cross-chain",
+				"date": null,
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF cross-chain docs list SODAX intent-based execution and liquidity connecting Stellar with 20+ networks.",
+				"dateNote": "undated: a docs listing; no publish date was recorded for it and the docs history was not read"
+			},
+			"aliases": ["sodax"],
+			"queries": ["SODAX"],
+			"domains": ["sodax.com"],
+			"expectedSlug": "sodax",
+			"expectedTypes": ["Bridge"],
+			"notes": "Undated docs listing."
+		},
+		{
+			"name": "LI.FI",
+			"category": "bridge",
+			"weight": 1,
+			"source": {
+				"url": "https://docs.li.fi/introduction/stellar-ecosystem",
+				"date": null,
+				"owner": "partner",
+				"status": "live",
+				"says": "LI.FI routes into and out of Stellar via Polymer, CCTP, NEAR Intents and Soroswap.",
+				"dateNote": "undated: a docs page; no publish date was recorded for it"
+			},
+			"aliases": ["li.fi", "lifi", "li fi"],
+			"queries": ["LI.FI", "LiFi"],
+			"domains": ["li.fi"],
+			"expectedSlug": "lifi",
+			"expectedTypes": ["Bridge"]
+		},
+		{
+			"name": "Alchemy",
+			"category": "rpc",
+			"weight": 3,
+			"source": {
+				"url": "https://www.alchemy.com/blog/stellar-support-is-live-on-alchemy",
+				"date": "2026-04-16",
+				"owner": "partner",
+				"status": "live",
+				"says": "Stellar RPC live on Alchemy (2026-04-16); Stellar Data API for transfers, balances and NFTs (2026-07-08)."
+			},
+			"aliases": ["alchemy"],
+			"queries": ["Alchemy"],
+			"domains": ["alchemy.com"],
+			"expectedSlug": "alchemy",
+			"expectedTypes": ["RPC"],
+			"notes": "SDF docs list Alchemy as RPC provider (added 2026-03-24) and as indexer (Stellar Data API)."
+		},
+		{
+			"name": "QuickNode",
+			"category": "rpc",
+			"weight": 3,
+			"source": {
+				"url": "https://www.quicknode.com/blog/quicknode-announces-support-for-stellar-and-its-horizon-api",
+				"date": "2023-08-30",
+				"owner": "partner",
+				"status": "live",
+				"says": "QuickNode supports Stellar and Horizon; Stellar RPC on mainnet and testnet."
+			},
+			"aliases": ["quicknode"],
+			"queries": ["QuickNode"],
+			"domains": ["quicknode.com"],
+			"expectedSlug": "quicknode",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://www.quicknode.com/blog/quicknode-announces-support-for-stellar-and-its-horizon-api"
+			}
+		},
+		{
+			"name": "Blockdaemon",
+			"category": "rpc",
+			"weight": 2,
+			"source": {
+				"url": "https://www.blockdaemon.com/blog/announcing-support-for-soroban",
+				"date": "2024-02-20",
+				"owner": "partner",
+				"status": "live",
+				"says": "Blockdaemon Soroban RPC support plus Stellar nodes and full-history Horizon."
+			},
+			"aliases": ["blockdaemon"],
+			"queries": ["Blockdaemon"],
+			"domains": ["blockdaemon.com"],
+			"expectedSlug": "blockdaemon",
+			"expectedTypes": ["RPC"]
+		},
+		{
+			"name": "Ankr",
+			"category": "rpc",
+			"weight": 2,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2025-10-23",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list Ankr RPC (testnet, mainnet, public full-archive endpoint)."
+			},
+			"aliases": ["ankr"],
+			"queries": ["Ankr"],
+			"domains": ["ankr.com"],
+			"expectedSlug": "ankr",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/apis/rpc/providers"
+			},
+			"notes": "No announcement post; listed since at least 2025-10-23."
+		},
+		{
+			"name": "Validation Cloud",
+			"category": "rpc",
+			"weight": 2,
+			"source": {
+				"url": "https://blog.validationcloud.io/stellar",
+				"date": "2024-03-05",
+				"owner": "partner",
+				"status": "live",
+				"says": "Validation Cloud Node API live on Soroban mainnet."
+			},
+			"aliases": ["validation cloud"],
+			"queries": ["Validation Cloud"],
+			"domains": ["validationcloud.io"],
+			"expectedSlug": "validation-cloud",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://blog.validationcloud.io/stellar"
+			}
+		},
+		{
+			"name": "Chainstack",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://chainstack.com/chainstack-introduces-stellar-support/",
+				"date": "2026-08-24",
+				"owner": "partner",
+				"status": "live",
+				"says": "Chainstack introduced Stellar Global and Dedicated nodes on mainnet and testnet."
+			},
+			"aliases": ["chainstack"],
+			"queries": ["Chainstack"],
+			"domains": ["chainstack.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://chainstack.com/chainstack-introduces-stellar-support/"
+			}
+		},
+		{
+			"name": "GetBlock",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://getblock.io/blog/getblock-launches-stellar-rpc-node-access",
+				"date": "2025-12-26",
+				"owner": "partner",
+				"status": "live",
+				"says": "GetBlock launched Stellar RPC node access on mainnet."
+			},
+			"aliases": ["getblock"],
+			"queries": ["GetBlock"],
+			"domains": ["getblock.io"],
+			"expectedSlug": "getblock",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://getblock.io/blog/getblock-launches-stellar-rpc-node-access"
+			}
+		},
+		{
+			"name": "OnFinality",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://blog.onfinality.io/build-on-stellar-with-onfinalitys-scalable-rpc-endpoints/",
+				"date": "2025-08-20",
+				"owner": "partner",
+				"status": "live",
+				"says": "OnFinality added Stellar RPC endpoints (Horizon and Soroban) to its marketplace."
+			},
+			"aliases": ["onfinality"],
+			"queries": ["OnFinality"],
+			"domains": ["onfinality.io"],
+			"expectedSlug": "onfinality",
+			"expectedTypes": ["RPC"],
+			"notes": "Date from search snippet."
+		},
+		{
+			"name": "NowNodes",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2025-10-23",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list NowNodes RPC for futurenet, testnet and mainnet."
+			},
+			"aliases": ["nownodes"],
+			"queries": ["NowNodes"],
+			"domains": ["nownodes.io"],
+			"expectedSlug": "nownodes",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/apis/rpc/providers"
+			},
+			"notes": "Listed since at least 2025-10-23."
+		},
+		{
+			"name": "Gateway.fm",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2025-10-23",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list Gateway RPC with public testnet and mainnet endpoints and RPC archive."
+			},
+			"aliases": ["gateway.fm", "gateway fm", "gateway"],
+			"queries": ["Gateway.fm"],
+			"domains": ["gateway.fm"],
+			"expectedSlug": "gatewayfm",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/apis/rpc/providers"
+			},
+			"notes": "Listed since at least 2025-10-23."
+		},
+		{
+			"name": "Obsrvr",
+			"category": "rpc",
+			"weight": 2,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2025-10-23",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list Obsrvr RPC and Horizon plus Obsrvr Gateway and Flow data products."
+			},
+			"aliases": ["obsrvr", "obsrvr gateway", "obsrvr flow"],
+			"queries": ["Obsrvr"],
+			"domains": ["withobsrvr.com"],
+			"expectedSlug": "obsrvr",
+			"expectedTypes": ["RPC"],
+			"notes": "Stellar-native provider."
+		},
+		{
+			"name": "InfStones",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2025-10-23",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list InfStones RPC on mainnet with dedicated nodes."
+			},
+			"aliases": ["infstones"],
+			"queries": ["InfStones"],
+			"domains": ["infstones.com"],
+			"expectedSlug": "infstones",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/apis/rpc/providers"
+			},
+			"notes": "Listed since at least 2025-10-23."
+		},
+		{
+			"name": "Nodies",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2025-10-23",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list Nodies RPC and Horizon with public endpoints."
+			},
+			"aliases": ["nodies"],
+			"queries": ["Nodies"],
+			"domains": ["nodies.org", "nodies.app"],
+			"expectedSlug": "nodies",
+			"expectedTypes": ["RPC"],
+			"notes": "Listed since at least 2025-10-23."
+		},
+		{
+			"name": "Lightsail Network",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2025-10-23",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list Lightsail Network Quasar RPC, full-archive RPC and Galexie data lake on mainnet."
+			},
+			"aliases": [
+				"lightsail",
+				"lightsail network",
+				"quasar",
+				"lightsail network - quasar"
+			],
+			"queries": ["Lightsail Network"],
+			"domains": ["lightsail.network"],
+			"expectedSlug": "lightsail-network-quasar",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/apis/rpc/providers"
+			},
+			"notes": "Listed since at least 2025-10-23."
+		},
+		{
+			"name": "Uniblock",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2025-10-23",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list Uniblock RPC on testnet and mainnet."
+			},
+			"aliases": ["uniblock"],
+			"queries": ["Uniblock"],
+			"domains": ["uniblock.dev"],
+			"expectedSlug": "uniblock",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/apis/rpc/providers"
+			},
+			"notes": "Listed since at least 2025-10-23."
+		},
+		{
+			"name": "Exaion",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2025-12-26",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list Exaion RPC on mainnet with dedicated nodes and archive."
+			},
+			"aliases": ["exaion"],
+			"queries": ["Exaion"],
+			"domains": ["exaion.com"],
+			"expectedSlug": "exaion",
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/apis/rpc/providers"
+			},
+			"notes": "Docs commit 2025-12-26."
+		},
+		{
+			"name": "node101",
+			"category": "rpc",
+			"weight": 1,
+			"source": {
+				"url": "https://developers.stellar.org/docs/data/apis/rpc/providers",
+				"date": "2026-09-08",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF docs list node101 RPC on testnet and mainnet with dedicated nodes and archive."
+			},
+			"aliases": ["node101"],
+			"queries": ["node101"],
+			"domains": ["node101.io"],
+			"expectedSlug": null,
+			"expectedTypes": ["RPC"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://developers.stellar.org/docs/data/apis/rpc/providers"
+			},
+			"notes": "Docs commit 2026-09-08."
+		},
+		{
+			"name": "Mercury",
+			"category": "indexer",
+			"weight": 2,
+			"source": {
+				"url": "https://blog-up.pages.dev/blog/mercury-beta-release",
+				"date": "2024-02-01",
+				"owner": "partner",
+				"status": "live",
+				"says": "xyclooLabs released the Mercury beta for Soroban: a subscriptions web app, a more stable Mercury core with ZephyrVM integration, and Stellar classic indexing."
+			},
+			"aliases": ["mercury", "mercury indexer", "mercury data"],
+			"queries": ["Mercury"],
+			"domains": ["mercurydata.app"],
+			"expectedSlug": "mercury",
+			"expectedTypes": ["Indexer"]
+		},
+		{
+			"name": "Goldsky",
+			"category": "indexer",
+			"weight": 2,
+			"source": {
+				"url": "https://goldsky.com/changelog/2026-02-27",
+				"date": "2026-02-27",
+				"owner": "partner",
+				"status": "live",
+				"says": "Goldsky Turbo pipelines serve Stellar mainnet and testnet; Goldsky populates the AWS public Galexie data lake."
+			},
+			"aliases": ["goldsky"],
+			"queries": ["Goldsky"],
+			"domains": ["goldsky.com"],
+			"expectedSlug": "goldsky",
+			"expectedTypes": ["Indexer"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://goldsky.com/changelog/2026-02-27"
+			}
+		},
+		{
+			"name": "The Graph",
+			"category": "indexer",
+			"weight": 2,
+			"source": {
+				"url": "https://forum.thegraph.com/t/streamingfast-march-2025-update/6476",
+				"date": "2025-03-18",
+				"owner": "partner",
+				"status": "live",
+				"says": "Stellar Firehose and Substreams endpoints launched (Substreams only; no Subgraphs)."
+			},
+			"aliases": ["the graph", "thegraph", "substreams", "streamingfast"],
+			"queries": ["The Graph"],
+			"domains": ["thegraph.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["Indexer"]
+		},
+		{
+			"name": "Allium",
+			"category": "indexer",
+			"weight": 1,
+			"source": {
+				"url": "https://allium.so/blog/may-product-update/",
+				"date": "2025-06-12",
+				"owner": "partner",
+				"status": "live",
+				"says": "Allium's May 2025 product update lists Stellar among 17 newly supported chains."
+			},
+			"aliases": ["allium"],
+			"queries": ["Allium"],
+			"domains": ["allium.so"],
+			"expectedSlug": null,
+			"expectedTypes": ["Indexer", "Analytics"]
+		},
+		{
+			"name": "SubQuery",
+			"category": "indexer",
+			"weight": 1,
+			"source": {
+				"url": "https://subquery.network/blog/subquery-now-supports-soroban",
+				"date": "2024-03-21",
+				"owner": "partner",
+				"status": "live",
+				"says": "SubQuery supports Soroban and Stellar mainnet indexing."
+			},
+			"aliases": ["subquery"],
+			"queries": ["SubQuery"],
+			"domains": ["subquery.network"],
+			"expectedSlug": "subquery",
+			"expectedTypes": ["Indexer"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://subquery.network/blog/subquery-now-supports-soroban"
+			}
+		},
+		{
+			"name": "Space and Time",
+			"category": "indexer",
+			"weight": 1,
+			"source": {
+				"url": "https://spaceandtime.io/blog/space-and-time-enables-new-sophisticated-financial-apps-for-the-stellar-ecosystem",
+				"date": "2025-11-05",
+				"owner": "partner",
+				"status": "live",
+				"says": "Space and Time indexes Stellar as a verifiable dataset under an SDF partnership."
+			},
+			"aliases": ["space and time", "spaceandtime", "space & time"],
+			"queries": ["Space and Time"],
+			"domains": ["spaceandtime.io"],
+			"expectedSlug": "space-and-time",
+			"expectedTypes": ["Indexer", "Analytics"]
+		},
+		{
+			"name": "Stellar Index",
+			"category": "indexer",
+			"weight": 1,
+			"source": {
+				"url": "https://stellarindex.io",
+				"date": null,
+				"owner": "operator",
+				"status": "live",
+				"says": "Stellar Index: Stellar explorer, history, supply and price API (stellarindex.io).",
+				"dateNote": "undated: the operator's own site; no listing date was recorded for it"
+			},
+			"aliases": ["stellar index", "stellarindex"],
+			"queries": ["Stellar Index"],
+			"domains": ["stellarindex.io"],
+			"expectedSlug": null,
+			"expectedTypes": ["Indexer", "Explorer"],
+			"notes": "Not an SDF partner: no SDF page names it. Included on request; the source is the operator's own site."
+		},
+		{
+			"name": "Dune",
+			"category": "indexer",
+			"weight": 2,
+			"source": {
+				"url": "https://dune.com/blog/stellar-is-now-live-on-dune",
+				"date": "2024-10-14",
+				"owner": "partner",
+				"status": "live",
+				"says": "Stellar raw tables live on Dune, updated hourly."
+			},
+			"aliases": ["dune", "dune analytics"],
+			"queries": ["Dune"],
+			"domains": ["dune.com"],
+			"expectedSlug": "dune",
+			"expectedTypes": ["Analytics", "Indexer"],
+			"notes": "Also on SDF analytics providers page."
+		},
+		{
+			"name": "Hubble",
+			"category": "indexer",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/blog/developers/beyond-the-blockchain-unlocking-the-power-of-analytics-with-hubble",
+				"date": "2023-07-11",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF's public BigQuery dataset of full Stellar history (Hubble)."
+			},
+			"aliases": ["hubble", "stellar hubble"],
+			"queries": ["Hubble"],
+			"domains": ["developers.stellar.org", "stellar.org"],
+			"expectedSlug": "hubble",
+			"expectedTypes": ["Analytics", "Indexer"],
+			"notes": "SDF-owned. 'Hubble now faster than light' 2024-10-09."
+		},
+		{
+			"name": "Fireblocks",
+			"category": "custody",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/walletconnect-expands-stellar-network-support-and-partnership-with-penrose-partners-to-bring-walletconnect-pay-to-bermuda-in-support-of-the-government-s-onchain-economy-vision",
+				"date": "2026-10-29",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Fireblocks supports Stellar wallets and classic tokens; SDF named it a WalletConnect-on-Stellar launch partner."
+			},
+			"aliases": ["fireblocks"],
+			"queries": ["Fireblocks"],
+			"domains": ["fireblocks.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["Infrastructure", "Wallet", "Security"],
+			"notes": "Fireblocks docs: Tokenization on Stellar (classic tokens, not Soroban tokens). No dated launch post."
+		},
+		{
+			"name": "BitGo",
+			"category": "custody",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/blog/ecosystem/leading-crypto-custodian-bitgo-now-supports-stellar-usdc",
+				"date": "2021-04-22",
+				"owner": "sdf",
+				"status": "live",
+				"says": "BitGo supports USDC on Stellar in custody (XLM multisig custody since 2018)."
+			},
+			"aliases": ["bitgo"],
+			"queries": ["BitGo"],
+			"domains": ["bitgo.com"],
+			"expectedSlug": "bitgo",
+			"expectedTypes": ["Infrastructure", "Wallet", "Security"]
+		},
+		{
+			"name": "Anchorage Digital",
+			"category": "custody",
+			"weight": 3,
+			"source": {
+				"url": "https://www.anchorage.com/insights/anchorage-digital-supports-custody-for-tokenized-cetes-etherfuses-tokenized-mexican-government-debt-on-stellar",
+				"date": "2026-06-15",
+				"owner": "partner",
+				"status": "live",
+				"says": "Anchorage custodies XLM (2019) and Etherfuse CETES on Stellar (2026)."
+			},
+			"aliases": ["anchorage", "anchorage digital"],
+			"queries": ["Anchorage Digital", "Anchorage"],
+			"domains": ["anchorage.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["Infrastructure", "Wallet", "Security"]
+		},
+		{
+			"name": "Taurus",
+			"category": "custody",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/taurus-custody-and-issuance-platforms-now-available-on-stellar",
+				"date": "2024-06-24",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Taurus custody (PROTECT) and issuance (CAPITAL) available on Stellar; Soroban support added 2026-10-29."
+			},
+			"aliases": ["taurus", "taurus sa", "taurus-protect"],
+			"queries": ["Taurus"],
+			"domains": ["taurushq.com"],
+			"expectedSlug": "taurus",
+			"expectedTypes": ["Infrastructure", "Wallet", "Security"]
+		},
+		{
+			"name": "Copper",
+			"category": "custody",
+			"weight": 1,
+			"source": {
+				"url": "https://copper.co/insights/company-news/copper-stellar-network-integration",
+				"date": "2023-09-25",
+				"owner": "partner",
+				"status": "live",
+				"says": "Copper enhanced its Stellar integration, adding USDC and more Stellar tokens."
+			},
+			"aliases": ["copper", "copper.co"],
+			"queries": ["Copper"],
+			"domains": ["copper.co"],
+			"expectedSlug": null,
+			"expectedTypes": ["Infrastructure", "Wallet", "Security"]
+		},
+		{
+			"name": "Utila",
+			"category": "custody",
+			"weight": 1,
+			"source": {
+				"url": "https://newsletter.utila.io/p/2025-november",
+				"date": "2025-11-28",
+				"owner": "partner",
+				"status": "live",
+				"says": "Utila added Stellar as a native integration in its institutional wallet platform; WalletConnect launch partner."
+			},
+			"aliases": ["utila"],
+			"queries": ["Utila"],
+			"domains": ["utila.io"],
+			"expectedSlug": null,
+			"expectedTypes": ["Infrastructure", "Wallet", "Security"]
+		},
+		{
+			"name": "Ledger",
+			"category": "wallet",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/blog/ecosystem/ledger-live-integrates-usdc-on-stellar",
+				"date": "2022-07-28",
+				"owner": "sdf",
+				"status": "live",
+				"says": "USDC on Stellar live in Ledger Live (XLM supported earlier)."
+			},
+			"aliases": ["ledger", "ledger live"],
+			"queries": ["Ledger"],
+			"domains": ["ledger.com"],
+			"expectedSlug": "ledger",
+			"expectedTypes": ["Wallet"]
+		},
+		{
+			"name": "Trezor",
+			"category": "wallet",
+			"weight": 2,
+			"source": {
+				"url": "https://trezor.io/other/product-updates/trezor-suite-updates/trezor-suite-update-july-2025",
+				"date": "2025-07",
+				"owner": "partner",
+				"status": "live",
+				"says": "Stellar (XLM) available in Trezor Suite; full Stellar token support December 2025."
+			},
+			"aliases": ["trezor", "trezor suite"],
+			"queries": ["Trezor"],
+			"domains": ["trezor.io"],
+			"expectedSlug": "trezor",
+			"expectedTypes": ["Wallet"]
+		},
+		{
+			"name": "MetaMask",
+			"category": "wallet",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/metamask-makes-stellar-a-default-network-bringing-global-payments-into-the-open-money-platform",
+				"date": "2026-10-29",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Stellar is a default network in MetaMask Mobile and Extension."
+			},
+			"aliases": ["metamask"],
+			"queries": ["MetaMask"],
+			"domains": ["metamask.io"],
+			"expectedSlug": "metamask",
+			"expectedTypes": ["Wallet"]
+		},
+		{
+			"name": "WalletConnect",
+			"category": "wallet",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/walletconnect-expands-stellar-network-support-and-partnership-with-penrose-partners-to-bring-walletconnect-pay-to-bermuda-in-support-of-the-government-s-onchain-economy-vision",
+				"date": "2026-10-29",
+				"owner": "sdf",
+				"status": "live",
+				"says": "WalletConnect expanded Stellar support and launched WalletConnect Pay on Stellar in Bermuda."
+			},
+			"aliases": ["walletconnect"],
+			"queries": ["WalletConnect"],
+			"domains": ["walletconnect.com", "walletconnect.network", "reown.com"],
+			"expectedSlug": "walletconnect",
+			"expectedTypes": ["Wallet", "Infrastructure", "SDK", "Payments"]
+		},
+		{
+			"name": "Varial",
+			"category": "wallet",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/blog/foundation-news/freighter-is-now-varial",
+				"date": "2026-10-29",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF's Freighter wallet renamed Varial with Discover, swaps and Collectibles."
+			},
+			"aliases": ["varial", "freighter", "freighter wallet", "varial wallet"],
+			"queries": ["Varial", "Freighter"],
+			"domains": [
+				"freighter.app",
+				"varial.app",
+				"varialwallet.com",
+				"varial.io"
+			],
+			"expectedSlug": "freighter",
+			"expectedTypes": ["Wallet"]
+		},
+		{
+			"name": "LOBSTR",
+			"category": "wallet",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/walletconnect-expands-stellar-network-support-and-partnership-with-penrose-partners-to-bring-walletconnect-pay-to-bermuda-in-support-of-the-government-s-onchain-economy-vision",
+				"date": "2026-10-29",
+				"owner": "sdf",
+				"status": "live",
+				"says": "LOBSTR is the first wallet live with WalletConnect Pay on Stellar; PYUSD launch wallet."
+			},
+			"aliases": ["lobstr", "lobstr wallet"],
+			"queries": ["LOBSTR"],
+			"domains": ["lobstr.co"],
+			"expectedSlug": "lobstr",
+			"expectedTypes": ["Wallet"]
+		},
+		{
+			"name": "Arculus",
+			"category": "wallet",
+			"weight": 1,
+			"source": {
+				"url": "https://www.composecure.com/composecure-news/composecure-integrates-arculus-with-moneygram-becomes-first-hardware-wallet-to-provide-global-cash-in-cash-out-through-stellar",
+				"date": "2025-04-21",
+				"owner": "partner",
+				"status": "live",
+				"says": "Arculus hardware wallet integrated MoneyGram Access for USDC on Stellar cash in and out."
+			},
+			"aliases": ["arculus", "arculus wallet"],
+			"queries": ["Arculus"],
+			"domains": ["getarculus.com", "composecure.com"],
+			"expectedSlug": "arculus",
+			"expectedTypes": ["Wallet"]
+		},
+		{
+			"name": "Tala",
+			"category": "wallet",
+			"weight": 1,
+			"source": {
+				"url": "https://stellar.org/press/tala-unveils-non-custodial-crypto-wallet-to-further-empower-the-global-majority",
+				"date": "2024-10-15",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Tala launched a non-custodial crypto wallet powered by Stellar."
+			},
+			"aliases": ["tala"],
+			"queries": ["Tala"],
+			"domains": ["tala.co"],
+			"expectedSlug": "tala",
+			"expectedTypes": ["Wallet", "Payments"]
+		},
+		{
+			"name": "Coinbase",
+			"category": "exchange",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/blog/ecosystem/coinbase-integrates-with-usdc-on-stellar",
+				"date": "2023-06-23",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Coinbase supports USDC deposits and withdrawals over Stellar."
+			},
+			"aliases": ["coinbase"],
+			"queries": ["Coinbase"],
+			"domains": ["coinbase.com"],
+			"expectedSlug": "coinbase",
+			"expectedTypes": ["Exchange"],
+			"notes": "Coinbase Wallet / Base app lists XLM as unsupported (support removed), so the exchange is the integration."
+		},
+		{
+			"name": "Circle",
+			"category": "stablecoin",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/usdc-is-live-on-the-stellar-network",
+				"date": "2021-02-02",
+				"owner": "sdf",
+				"status": "live",
+				"says": "USDC live on Stellar (2021-02-02); EURC live on Stellar (2023-09-26)."
+			},
+			"aliases": [
+				"circle",
+				"usdc",
+				"circle usdc",
+				"usd coin",
+				"eurc",
+				"circle (usdc)"
+			],
+			"queries": ["Circle", "USDC"],
+			"domains": ["circle.com"],
+			"expectedSlug": "circle",
+			"expectedTypes": ["Stablecoin"]
+		},
+		{
+			"name": "PayPal",
+			"category": "stablecoin",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/paypal-pyusd-is-now-available-on-stellar",
+				"date": "2025-09-18",
+				"owner": "sdf",
+				"status": "live",
+				"says": "PayPal USD (PYUSD) live on Stellar."
+			},
+			"aliases": ["paypal", "pyusd", "paypal usd", "paypal pyusd"],
+			"queries": ["PayPal", "PYUSD"],
+			"domains": ["paypal.com"],
+			"expectedSlug": "pyusd",
+			"expectedTypes": ["Stablecoin"]
+		},
+		{
+			"name": "Tether (USDT0)",
+			"category": "stablecoin",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/usdt0-goes-live-on-stellar-connecting-unified-dollar-liquidity-to-the-world-s-most-accessible-network",
+				"date": "2026-09-02",
+				"owner": "sdf",
+				"status": "live",
+				"says": "USDT0 live on Stellar via LayerZero OFT."
+			},
+			"aliases": ["usdt0", "tether", "usdt", "tether usdt0"],
+			"queries": ["USDT0", "Tether"],
+			"domains": ["usdt0.to", "tether.to"],
+			"expectedSlug": "usdt0",
+			"expectedTypes": ["Stablecoin"]
+		},
+		{
+			"name": "Paxos",
+			"category": "stablecoin",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/paxos-plans-expansion-to-stellar-network-in-collaboration-with-stellar-development-foundation",
+				"date": "2024-10-16",
+				"owner": "sdf",
+				"status": "announced",
+				"says": "Paxos plans to bring its tokenization platform and regulated stablecoins to Stellar (Paxos issues PYUSD)."
+			},
+			"aliases": ["paxos"],
+			"queries": ["Paxos"],
+			"domains": ["paxos.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["Stablecoin", "RWA"]
+		},
+		{
+			"name": "SG-FORGE",
+			"category": "stablecoin",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/societe-generale-forge-advances-its-multichain-strategy-and-selects-the-stellar-network-to-deploy-its-mica-compliant-stablecoin",
+				"date": "2025-02-20",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Societe Generale FORGE deployed its MiCA-compliant EURCV stablecoin on Stellar."
+			},
+			"aliases": [
+				"sg-forge",
+				"sg forge",
+				"societe generale forge",
+				"société générale forge",
+				"eurcv",
+				"societe generale"
+			],
+			"queries": ["SG-FORGE", "Societe Generale", "EURCV"],
+			"domains": ["sgforge.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["Stablecoin"]
+		},
+		{
+			"name": "Figure",
+			"category": "stablecoin",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/figure-announces-launch-of-ylds-on-stellar-network",
+				"date": "2026-05-05",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Figure launched YLDS, an SEC-registered yield-bearing dollar product, on Stellar."
+			},
+			"aliases": ["figure", "ylds", "figure ylds", "figure markets"],
+			"queries": ["Figure YLDS", "YLDS"],
+			"domains": ["figure.com", "figuremarkets.com"],
+			"expectedSlug": "ylds",
+			"expectedTypes": ["Stablecoin", "RWA", "Yield"]
+		},
+		{
+			"name": "AllUnity",
+			"category": "stablecoin",
+			"weight": 1,
+			"source": {
+				"url": "https://stellar.org/press/eurau-launches-on-the-stellar-network",
+				"date": "2026-04-13",
+				"owner": "sdf",
+				"status": "live",
+				"says": "AllUnity (DWS, Flow Traders, Galaxy) euro stablecoin EURAU live on Stellar."
+			},
+			"aliases": ["allunity", "eurau"],
+			"queries": ["AllUnity", "EURAU"],
+			"domains": ["allunity.com"],
+			"expectedSlug": "eurau",
+			"expectedTypes": ["Stablecoin"]
+		},
+		{
+			"name": "Brale",
+			"category": "stablecoin",
+			"weight": 1,
+			"source": {
+				"url": "https://brale.xyz/blog/introducing-stablecoin-issuance-api",
+				"date": "2023-11-29",
+				"owner": "partner",
+				"status": "live",
+				"says": "Brale Stablecoin Issuance API supports minting and redeeming on Stellar; issues USDGLO."
+			},
+			"aliases": ["brale"],
+			"queries": ["Brale"],
+			"domains": ["brale.xyz"],
+			"expectedSlug": "brale",
+			"expectedTypes": ["Stablecoin", "Infrastructure"]
+		},
+		{
+			"name": "Novatti",
+			"category": "stablecoin",
+			"weight": 1,
+			"source": {
+				"url": "https://stellar.org/press/novatti-announces-audd-stablecoin-to-go-live-on-november-1",
+				"date": "2022-10-11",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Novatti's AUDD stablecoin live on Stellar from 2022-11-01."
+			},
+			"aliases": ["novatti", "audd"],
+			"queries": ["AUDD", "Novatti"],
+			"domains": ["novatti.com", "audd.digital"],
+			"expectedSlug": "audd",
+			"expectedTypes": ["Stablecoin"]
+		},
+		{
+			"name": "U.S. Bank",
+			"category": "stablecoin",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/blog/ecosystem/a-bank-issued-stablecoin-moves-real-money-on-stellar",
+				"date": "2026-09-09",
+				"owner": "sdf",
+				"status": "announced",
+				"says": "U.S. Bank completed a pilot transaction on Stellar with its USBDC stablecoin."
+			},
+			"aliases": ["u.s. bank", "us bank", "usbdc"],
+			"queries": ["U.S. Bank", "US Bank USBDC"],
+			"domains": ["usbank.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["Stablecoin"],
+			"notes": "Pilot, not a public launch."
+		},
+		{
+			"name": "Franklin Templeton",
+			"category": "rwa",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/franklin-templeton-stellar-development-foundation-mark-five-years-of-benji-the-first-u-s-registered-tokenized-money-market-fund",
+				"date": "2026-04-30",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Franklin OnChain U.S. Government Money Fund (FOBXX, BENJI) on Stellar since 2021; five-year mark."
+			},
+			"aliases": ["franklin templeton", "benji", "fobxx", "franklin onchain"],
+			"queries": ["Franklin Templeton", "BENJI"],
+			"domains": ["franklintempleton.com"],
+			"expectedSlug": "benji",
+			"expectedTypes": ["RWA"]
+		},
+		{
+			"name": "Ondo",
+			"category": "rwa",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/ondo-finance-launches-usdy-on-stellar",
+				"date": "2025-09-17",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Ondo launched its USDY yieldcoin on Stellar."
+			},
+			"aliases": ["ondo", "ondo finance", "usdy", "ondo usdy"],
+			"queries": ["Ondo", "USDY"],
+			"domains": ["ondo.finance"],
+			"expectedSlug": "ondo",
+			"expectedTypes": ["RWA", "Stablecoin", "Yield"]
+		},
+		{
+			"name": "WisdomTree",
+			"category": "rwa",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/stellar-statement-on-wisdomtree-prime-being-available-to-users-in-41-states",
+				"date": "2024-05-09",
+				"owner": "sdf",
+				"status": "live",
+				"says": "WisdomTree's digital funds and gold token are on Stellar (Prime available in 41 states)."
+			},
+			"aliases": ["wisdomtree", "wisdomtree prime", "wisdomtree connect"],
+			"queries": ["WisdomTree"],
+			"domains": ["wisdomtree.com"],
+			"expectedSlug": "wisdomtree",
+			"expectedTypes": ["RWA"]
+		},
+		{
+			"name": "State Street / Galaxy",
+			"category": "rwa",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/state-street-galaxy-onchain-liquidity-sweep-fund-goes-live-on-stellar",
+				"date": "2026-09-29",
+				"owner": "sdf",
+				"status": "live",
+				"says": "State Street Galaxy Onchain Liquidity Sweep Fund (SWEEP) live on Stellar."
+			},
+			"aliases": ["state street", "galaxy", "sweep", "state street galaxy"],
+			"queries": ["State Street", "SWEEP fund"],
+			"domains": ["statestreet.com", "ssga.com", "galaxy.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["RWA"]
+		},
+		{
+			"name": "Centrifuge",
+			"category": "rwa",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/centrifuge-brings-derwa-to-stellar-launching-with-usd20m-into-dejtrsy-and-dejaaa",
+				"date": "2025-09-17",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Centrifuge deRWA (deJTRSY, deJAAA) on Stellar with a $20M anchor."
+			},
+			"aliases": ["centrifuge"],
+			"queries": ["Centrifuge"],
+			"domains": ["centrifuge.io"],
+			"expectedSlug": "centrifuge",
+			"expectedTypes": ["RWA"],
+			"notes": "SDF page says 'upcoming launch'; Centrifuge's own 'debuts deRWA on Stellar' post and DeFiLlama indicate live."
+		},
+		{
+			"name": "Janus Henderson",
+			"category": "rwa",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/janus-henderson-and-centrifuge-launch-blockchain-native-fund-tracking-the-nasdaq-100-index-r-jqqq",
+				"date": "2026-10-27",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Janus Henderson and Centrifuge launched JQQQ, a Nasdaq-100 fund launching exclusively on Stellar."
+			},
+			"aliases": ["janus henderson", "jqqq"],
+			"queries": ["Janus Henderson", "JQQQ"],
+			"domains": ["janushenderson.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["RWA"]
+		},
+		{
+			"name": "Archax",
+			"category": "rwa",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/archax-and-stellar-cement-strategic-collaboration-for-tokenised-rwas",
+				"date": "2025-08-18",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF strategic partnership and investment (2025-08-18); EURGOVY and USD GOVY tokenized government bills on Stellar."
+			},
+			"aliases": ["archax"],
+			"queries": ["Archax"],
+			"domains": ["archax.com"],
+			"expectedSlug": "archax",
+			"expectedTypes": ["RWA", "Exchange"]
+		},
+		{
+			"name": "Securitize",
+			"category": "rwa",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/securitize-to-integrate-with-stellar-network",
+				"date": "2026-10-28",
+				"owner": "sdf",
+				"status": "announced",
+				"says": "Securitize announced plans to integrate with Stellar."
+			},
+			"aliases": ["securitize"],
+			"queries": ["Securitize"],
+			"domains": ["securitize.io"],
+			"expectedSlug": "securitize",
+			"expectedTypes": ["RWA"]
+		},
+		{
+			"name": "Etherfuse",
+			"category": "rwa",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/blog/foundation-news/global-bonds-local-impact-stablebonds-on-stellar",
+				"date": "2025-02-12",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Etherfuse Stablebonds (CETES and other sovereign bonds) available on Stellar."
+			},
+			"aliases": ["etherfuse", "stablebonds", "cetes", "etherfuse stablebonds"],
+			"queries": ["Etherfuse"],
+			"domains": ["etherfuse.com"],
+			"expectedSlug": "etherfuse",
+			"expectedTypes": ["RWA", "Stablecoin"]
+		},
+		{
+			"name": "Spiko",
+			"category": "rwa",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/safo-becomes-the-world-s-largest-tokenized-fund-seven-months-after-launch",
+				"date": "2026-10-29",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Spiko tokenized money market funds on Stellar (Oct 2025); SAFO with Amundi became the largest tokenized fund."
+			},
+			"aliases": ["spiko", "safo", "spiko safo"],
+			"queries": ["Spiko", "SAFO"],
+			"domains": ["spiko.io", "spiko.finance"],
+			"expectedSlug": "spiko",
+			"expectedTypes": ["RWA"],
+			"notes": "SDF calls Spiko the largest RWA issuer on Stellar."
+		},
+		{
+			"name": "Mercado Bitcoin",
+			"category": "rwa",
+			"weight": 1,
+			"source": {
+				"url": "https://stellar.org/press/mercado-bitcoin-announces-usd200-million-rwa-issuance-on-stellar-network",
+				"date": "2025-09-18",
+				"owner": "sdf",
+				"status": "announced",
+				"says": "Mercado Bitcoin will issue $200M of tokenized fixed income and equity on Stellar."
+			},
+			"aliases": ["mercado bitcoin"],
+			"queries": ["Mercado Bitcoin"],
+			"domains": ["mercadobitcoin.com.br"],
+			"expectedSlug": null,
+			"expectedTypes": ["RWA", "Exchange"]
+		},
+		{
+			"name": "DTCC",
+			"category": "rwa",
+			"weight": 2,
+			"source": {
+				"url": "https://www.dtcc.com/news/2026/may/27/tokenization-service-to-connect-with-stellar-public-blockchain-as-dtc-advances-multi-chain-strategy",
+				"date": "2026-05-27",
+				"owner": "partner",
+				"status": "coming",
+				"says": "DTC's tokenization service will connect to Stellar; DTC-tokenized assets expected on Stellar in H1 2027."
+			},
+			"aliases": ["dtcc"],
+			"queries": ["DTCC"],
+			"domains": ["dtcc.com"],
+			"expectedSlug": "dtcc",
+			"expectedTypes": ["RWA", "Infrastructure"],
+			"notes": "SDF case study stellar.org/case-studies/dtcc (undated)."
+		},
+		{
+			"name": "21X",
+			"category": "rwa",
+			"weight": 1,
+			"source": {
+				"url": "https://stellar.org/press/21x-technically-integrated-on-the-stellar-network-solidifying-its-position-as-a-regulated-multi-chain-trading-venue",
+				"date": "2025-12-18",
+				"owner": "sdf",
+				"status": "live",
+				"says": "21X EU-regulated tokenized securities venue technically live on Stellar."
+			},
+			"aliases": ["21x"],
+			"queries": ["21X"],
+			"domains": ["21x.eu"],
+			"expectedSlug": null,
+			"expectedTypes": ["RWA", "Exchange"]
+		},
+		{
+			"name": "MoneyGram",
+			"category": "payments",
+			"weight": 3,
+			"source": {
+				"url": "https://stellar.org/press/moneygram-and-stellar-extend-partnership-to-scale-real-world-stablecoin-utility-globally",
+				"date": "2026-04-22",
+				"owner": "sdf",
+				"status": "live",
+				"says": "MoneyGram and SDF extended their partnership; Stellar-powered stablecoin balance live in Colombia and El Salvador."
+			},
+			"aliases": ["moneygram", "moneygram access", "moneygram international"],
+			"queries": ["MoneyGram"],
+			"domains": ["moneygram.com"],
+			"expectedSlug": "moneygram",
+			"expectedTypes": ["Payments", "Anchor"],
+			"notes": "Partner since 2021; Tier 1 validator announced 2026-07-16."
+		},
+		{
+			"name": "Wirex",
+			"category": "payments",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/wirex-and-stellar-go-live-with-dual-stablecoin-visa-settlement-in-usdc-and-eurc-for-7-million-users",
+				"date": "2025-11-18",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Wirex dual-stablecoin (USDC, EURC) Visa settlement on Stellar live."
+			},
+			"aliases": ["wirex"],
+			"queries": ["Wirex"],
+			"domains": ["wirexapp.com", "wirex.com"],
+			"expectedSlug": "wirex-pay",
+			"expectedTypes": ["Payments", "Card Issuing"]
+		},
+		{
+			"name": "BVNK",
+			"category": "payments",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/bvnk-expands-multi-chain-stablecoin-infrastructure-with-stellar-integration",
+				"date": "2026-09-22",
+				"owner": "sdf",
+				"status": "live",
+				"says": "BVNK integrated Stellar into its stablecoin payments platform and API."
+			},
+			"aliases": ["bvnk"],
+			"queries": ["BVNK"],
+			"domains": ["bvnk.com"],
+			"expectedSlug": "bvnk",
+			"expectedTypes": ["Payments"]
+		},
+		{
+			"name": "Airtm",
+			"category": "payments",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/airtm-and-bvnk-partner-to-expand-wallet-native-payments-to-emerging-markets",
+				"date": "2026-10-29",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Airtm uses Stellar (SDF invested $15M in 2021); Airtm and BVNK partnership on Stellar announced 2026-10-29."
+			},
+			"aliases": ["airtm"],
+			"queries": ["Airtm"],
+			"domains": ["airtm.com"],
+			"expectedSlug": "airtm",
+			"expectedTypes": ["Payments", "Wallet"]
+		},
+		{
+			"name": "Yellow Card",
+			"category": "payments",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/yellow-card-introduces-usdc-on-stellar",
+				"date": "2024-02-13",
+				"owner": "sdf",
+				"status": "announced",
+				"says": "Yellow Card set to introduce USDC on Stellar for African on/off-ramps."
+			},
+			"aliases": ["yellow card"],
+			"queries": ["Yellow Card"],
+			"domains": ["yellowcard.io"],
+			"expectedSlug": "yellow-card",
+			"expectedTypes": ["Anchor", "Payments"]
+		},
+		{
+			"name": "Movantis",
+			"category": "payments",
+			"weight": 1,
+			"source": {
+				"url": "https://stellar.org/press/movantis-integrates-with-the-stellar-network-to-expand-its-cross-border-payments-infrastructure",
+				"date": "2026-10-28",
+				"owner": "sdf",
+				"status": "announced",
+				"says": "Movantis adds Stellar USDC settlement for US to El Salvador flows."
+			},
+			"aliases": ["movantis"],
+			"queries": ["Movantis"],
+			"domains": ["movantis.com"],
+			"expectedSlug": null,
+			"expectedTypes": ["Payments"]
+		},
+		{
+			"name": "OpenZeppelin",
+			"category": "security",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/blog/foundation-news/sdf-partners-with-openzeppelin-to-enhance-stellar-smart-contract-development",
+				"date": "2025-01-30",
+				"owner": "sdf",
+				"status": "live",
+				"says": "SDF two-year partnership with OpenZeppelin: Stellar contracts library, tooling and security."
+			},
+			"aliases": ["openzeppelin"],
+			"queries": ["OpenZeppelin"],
+			"domains": ["openzeppelin.com"],
+			"expectedSlug": "openzeppelin",
+			"expectedTypes": ["Security", "SDK"]
+		},
+		{
+			"name": "Range",
+			"category": "security",
+			"weight": 1,
+			"source": {
+				"url": "https://stellar.org/press/moneygram-figure-markets-and-range-to-help-secure-the-stellar-network-by-joining-as-tier-1-validators",
+				"date": "2026-07-16",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Range joins as a Tier 1 validator; SDF uses Range risk and compliance tooling."
+			},
+			"aliases": ["range", "range security"],
+			"queries": ["Range"],
+			"domains": ["range.org"],
+			"expectedSlug": "range",
+			"expectedTypes": ["Security", "Analytics"],
+			"notes": "Also on SDF analytics providers page."
+		},
+		{
+			"name": "Curve",
+			"category": "defi",
+			"weight": 2,
+			"source": {
+				"url": "https://stellar.org/press/curve-brings-onchain-liquidity-infrastructure-to-the-stellar-network-in-its-first-native-non-evm-integration",
+				"date": "2026-10-29",
+				"owner": "sdf",
+				"status": "live",
+				"says": "Curve StableSwap live on Stellar mainnet, its first native non-EVM integration."
+			},
+			"aliases": ["curve", "curve finance", "curve stellar"],
+			"queries": ["Curve"],
+			"domains": ["curve.finance"],
+			"expectedSlug": null,
+			"expectedTypes": ["DEX"],
+			"expectedNetwork": {
+				"network": "mainnet",
+				"source": "https://stellar.org/press/curve-brings-onchain-liquidity-infrastructure-to-the-stellar-network-in-its-first-native-non-evm-integration"
+			}
+		}
+	],
+	"questions": [
+		{
+			"id": "q1",
+			"question": "Which oracles are available on Stellar?",
+			"type": "Oracle",
+			"expected": [
+				"Chainlink",
+				"Pyth",
+				"RedStone",
+				"Band Protocol",
+				"Reflector",
+				"DIA"
+			]
+		},
+		{
+			"id": "q2",
+			"question": "What RPC providers support Stellar and Soroban?",
+			"type": "RPC",
+			"expected": [
+				"Alchemy",
+				"QuickNode",
+				"Blockdaemon",
+				"Ankr",
+				"Validation Cloud",
+				"Chainstack",
+				"GetBlock",
+				"OnFinality",
+				"NowNodes",
+				"Gateway.fm",
+				"Obsrvr",
+				"InfStones",
+				"Nodies",
+				"Lightsail Network",
+				"Uniblock",
+				"Exaion",
+				"node101"
+			]
+		},
+		{
+			"id": "q3",
+			"question": "Which custodians support Stellar assets?",
+			"type": null,
+			"expected": [
+				"Fireblocks",
+				"BitGo",
+				"Anchorage Digital",
+				"Taurus",
+				"Copper",
+				"Utila"
+			]
+		},
+		{
+			"id": "q4",
+			"question": "Which bridges connect Stellar to Ethereum?",
+			"type": "Bridge",
+			"expected": [
+				"LayerZero",
+				"Axelar",
+				"Circle CCTP",
+				"Allbridge",
+				"NEAR Intents",
+				"Rhino.fi",
+				"SODAX",
+				"LI.FI"
+			]
+		},
+		{
+			"id": "q5",
+			"question": "Is Pyth on Stellar?",
+			"type": null,
+			"expected": ["Pyth"]
+		},
+		{
+			"id": "q6",
+			"question": "Is Chainlink live on Stellar?",
+			"type": null,
+			"expected": ["Chainlink"]
+		},
+		{
+			"id": "q7",
+			"question": "Does Alchemy support Stellar?",
+			"type": null,
+			"expected": ["Alchemy"]
+		},
+		{
+			"id": "q8",
+			"question": "Is LayerZero on Stellar?",
+			"type": null,
+			"expected": ["LayerZero"]
+		},
+		{
+			"id": "q9",
+			"question": "Is Wormhole on Stellar?",
+			"type": null,
+			"expected": ["Wormhole"]
+		},
+		{
+			"id": "q10",
+			"question": "Which institutions issue tokenized funds on Stellar?",
+			"type": "RWA",
+			"expected": [
+				"Franklin Templeton",
+				"WisdomTree",
+				"Ondo",
+				"State Street / Galaxy",
+				"Spiko",
+				"Janus Henderson",
+				"Centrifuge",
+				"Archax",
+				"Etherfuse"
+			]
+		},
+		{
+			"id": "q11",
+			"question": "Which stablecoins are issued on Stellar?",
+			"type": "Stablecoin",
+			"expected": [
+				"Circle",
+				"PayPal",
+				"Tether (USDT0)",
+				"SG-FORGE",
+				"AllUnity",
+				"Novatti",
+				"Brale"
+			]
+		},
+		{
+			"id": "q12",
+			"question": "Which indexers and data APIs can I use for Stellar?",
+			"type": "Indexer",
+			"expected": [
+				"Mercury",
+				"Goldsky",
+				"The Graph",
+				"Allium",
+				"SubQuery",
+				"Space and Time",
+				"Stellar Index",
+				"Alchemy",
+				"Obsrvr",
+				"Hubble",
+				"Dune"
+			]
+		},
+		{
+			"id": "q13",
+			"question": "Which hardware and browser wallets support Stellar?",
+			"type": "Wallet",
+			"expected": [
+				"Ledger",
+				"Trezor",
+				"MetaMask",
+				"Varial",
+				"LOBSTR",
+				"Arculus"
+			]
+		},
+		{
+			"id": "q14",
+			"question": "How do I move USDC between Ethereum and Stellar?",
+			"type": "Bridge",
+			"expected": [
+				"Circle CCTP",
+				"Allbridge",
+				"Rhino.fi",
+				"NEAR Intents",
+				"LI.FI"
+			]
+		},
+		{
+			"id": "q15",
+			"question": "Which payment companies use Stellar for cross-border settlement?",
+			"type": "Payments",
+			"expected": [
+				"MoneyGram",
+				"Wirex",
+				"BVNK",
+				"Airtm",
+				"Yellow Card",
+				"Movantis"
+			]
+		},
+		{
+			"id": "q16",
+			"question": "Is USDT available on Stellar?",
+			"type": null,
+			"expected": ["Tether (USDT0)", "LayerZero"]
+		},
+		{
+			"id": "q17",
+			"question": "Which analytics platforms have Stellar data?",
+			"type": "Analytics",
+			"expected": ["Dune", "Hubble", "Allium", "Space and Time", "Range"]
+		}
+	],
+	"overrides": {
+		"21X": {
+			"researchMentions": false,
+			"reason": "The only research hit for '21X stellar' is a false positive ('a 21X increase in transaction volume', SDF Story of 2020), so only the announcement URL counts as research coverage."
+		},
+		"Curve": {
+			"researchMentions": false,
+			"reason": "Research hits for 'Curve stellar' are elliptic-curve CAPs and docs, not Curve Finance, so only the announcement URL counts as research coverage."
+		},
+		"The Graph": {
+			"expectedSlug": "streamingfast",
+			"reason": "No row is named The Graph; the StreamingFast row (the Substreams provider The Graph's Stellar support runs on) answers for it through the streamingfast alias. Its website is streamingfast.io, so the website check fails and the partner scores as a wrong row, as measured."
+		},
+		"Securitize": {
+			"expectedStatus": ["Draft", "Development", "Pre-Release"],
+			"reason": "SDF calls the integration planned (2026-10-28); a Live row resting on site liveness of securitize.io carries no Stellar evidence, so Live counts as wrong until a launch is sourced."
+		},
+		"Obsrvr": {
+			"expectedTypes": ["RPC", "Indexer"],
+			"reason": "The Obsrvr company row is typed Indexer; its RPC product row (Horizon-as-a-Service, withobsrvr.com, typed RPC) is a separate row, so Indexer on the company row counts as correctly typed."
+		},
+		"Franklin Templeton": {
+			"domainsAdd": ["benjiinvestments.com"],
+			"reason": "The row's website is the partner's official product site, which counts as the partner's domain."
+		},
+		"WisdomTree": {
+			"domainsAdd": ["wisdomtreeprime.com"],
+			"reason": "The row's website is the partner's official product site, which counts as the partner's domain."
+		},
+		"Figure": {
+			"domainsAdd": ["ylds.com"],
+			"reason": "The row's website is the partner's official product site, which counts as the partner's domain."
+		},
+		"MetaMask": {
+			"domainsAdd": ["metamask.com"],
+			"reason": "The row's website is the partner's official product site, which counts as the partner's domain."
+		},
+		"Novatti": {
+			"alsoSlugs": ["novatti"],
+			"reason": "Novatti, the AUDD issuer, has a company row (novatti, novatti.com) beside the AUDD stablecoin row (audd) that answers its own name; either row answers a question expecting Novatti, as the measurement's domain match counted."
+		},
+		"Copper": {
+			"researchContext": ["custod"],
+			"reason": "Copper is also a commodity word: the research top 5 for 'Copper stellar' includes an SCF submission listing copper concentrate deals. A mention counts only within 80 characters of custody, custodian or custodial, which keeps the three documents that name Copper the custodian."
+		}
+	}
+}
