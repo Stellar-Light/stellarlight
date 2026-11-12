@@ -6,7 +6,8 @@
  * separately and an outage in one never blanks the others:
  *
  *   contract   derived locally from (code, issuer) — deterministic, no network
- *   blend      a committed pool registry — a link and a pool name, no fetch
+ *   blend      a committed pool registry matched on the asset contract, with
+ *              rates read live from each pool over Soroban RPC
  *   liquidity  Horizon's own liquidity-pool index — first-party and keyless,
  *              so it does not vanish the way a third-party pool index can
  *
@@ -42,7 +43,7 @@ interface BlendPool {
  * the explorer. Committed rather than discovered: it is a short, slow-moving
  * list, and a wrong "Blend supports this" is worse than a missing one.
  */
-const BLEND_POOLS: BlendPool[] = [
+export const BLEND_POOLS: BlendPool[] = [
 	{
 		// Blend's Fixed Pool — $187.8M supplied against YieldBlox's $229.6k
 		// (mainnet.blend.capital, read 2026-09-02), and the pool contract's own
@@ -55,7 +56,7 @@ const BLEND_POOLS: BlendPool[] = [
 		// XLM is not a stablecoin, so it has no row here.
 		assets: {
 			USDC: "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
-			EURC: "CCLZD7VBOC2URNA27BVJPB35F2MHTFDWBMV3HP3EIJVLUXM3UJKZL3VV",
+			EURC: "CDTKPWPLOURQA2SGTKTUQOWRCBZEORB4BWBOMJ3D3ZTQQSGE5F6JBQLV",
 		},
 	},
 	{
@@ -63,7 +64,7 @@ const BLEND_POOLS: BlendPool[] = [
 		name: "YieldBlox Pool",
 		assets: {
 			USDC: "CCW67TSZV3SSS2HXMBQ5JFGCKJNXKZM7UQUWUZPUTHXSTZLEO7SJMI75",
-			EURC: "CCLZD7VBOC2URNA27BVJPB35F2MHTFDWBMV3HP3EIJVLUXM3UJKZL3VV",
+			EURC: "CDTKPWPLOURQA2SGTKTUQOWRCBZEORB4BWBOMJ3D3ZTQQSGE5F6JBQLV",
 			PYUSD: "CCCRWH6Q3FNP3I2I57BDLM5AFAT7O6OF6GKQOC6SSJNDAVRZ57SPHGU2",
 			USDGLO: "CB226ZOEYXTBPD3QEGABTJYSKZVBP2PASEISLG3SBMTN5CE4QZUVZ3CE",
 		},
@@ -79,14 +80,13 @@ export interface BlendListing {
 	borrowAPY: number | null;
 }
 
-/** Every pool that lists a ticker, in registry order (deepest pool first). */
-function poolsFor(ticker: string) {
-	const out: Array<{ pool: BlendPool; assetId: string }> = [];
-	for (const pool of BLEND_POOLS) {
-		const assetId = pool.assets[ticker];
-		if (assetId) out.push({ pool, assetId });
-	}
-	return out;
+/** Every pool whose reserves include this asset contract, in registry order
+ * (deepest pool first). Matched on the contract id, never the ticker: two
+ * live assets can share a ticker, and only one of them is the pool's. */
+function poolsFor(assetId: string) {
+	return BLEND_POOLS.filter((pool) =>
+		Object.values(pool.assets).includes(assetId),
+	);
 }
 
 /** Daily compounding, the convention Blend's own UI quotes. */
@@ -95,30 +95,24 @@ function aprToApy(apr: number): number {
 }
 
 /**
- * Blend's listing for a ticker, or null when no pool lists it.
+ * Every Blend pool that lists the asset (code, issuer), deepest first.
  *
- * Reads live reserve state over Soroban RPC. The rates are the part that can
- * fail — an RPC hiccup leaves them null while the pool name and link still
- * render, because "Blend lists this asset" stays true regardless. A null rate
- * is never rendered as 0%: "we could not read the pool" and "this pool pays
- * nothing" are opposite claims.
+ * Reads live reserve state over Soroban RPC, per pool and independently. The
+ * rates are the part that can fail: an RPC hiccup leaves that row's APYs null
+ * while the pool name and link still render, because "Blend lists this asset"
+ * stays true regardless. A null rate is never rendered as 0%: "we could not
+ * read the pool" and "this pool pays nothing" are opposite claims.
  */
-export async function blendListing(
-	ticker: string,
-): Promise<BlendListing | null> {
-	return (await blendListings(ticker))[0] ?? null;
-}
-
-/**
- * Every Blend pool that lists the ticker, deepest first. Rates are read per
- * pool and independently: one pool failing to load leaves that row's APYs null
- * while the others still carry theirs.
- */
-export async function blendListings(ticker: string): Promise<BlendListing[]> {
-	const matches = poolsFor(ticker);
-	if (matches.length === 0) return [];
+export async function blendListings(
+	code: string,
+	issuer: string,
+): Promise<BlendListing[]> {
+	const assetId = sacContractId(code, issuer);
+	if (!assetId) return [];
+	const pools = poolsFor(assetId);
+	if (pools.length === 0) return [];
 	return (
-		await Promise.all(matches.map((m) => readPool(m.pool, m.assetId)))
+		await Promise.all(pools.map((pool) => readPool(pool, assetId)))
 	).filter((l): l is BlendListing => l !== null);
 }
 
@@ -282,7 +276,10 @@ export function tradeLinks(code: string, issuer: string) {
 			name: "StellarTerm",
 			url: `https://stellarterm.com/exchange/${code}-${issuer}/XLM-native`,
 		},
-		{ name: "Aqua", url: `https://aqua.network/pools?search=${code}` },
+		{
+			name: "Aqua",
+			url: `https://aqua.network/pools?search=${encodeURIComponent(code)}`,
+		},
 		{ name: "Soroswap", url: "https://app.soroswap.finance/pools" },
 	];
 }
@@ -329,7 +326,7 @@ const SUSHI_FEE_TIERS = [100, 500, 3000] as const;
  * liquidity today sits against XLM and the major dollar/euro tokens, so
  * these four find it; add a hub when a real pool is found outside them.
  */
-const SUSHI_HUBS: Array<{ label: string; id: string }> = [
+export const SUSHI_HUBS: Array<{ label: string; id: string }> = [
 	{ label: "XLM", id: XLM_SAC },
 	{
 		label: "USDC",
@@ -341,7 +338,7 @@ const SUSHI_HUBS: Array<{ label: string; id: string }> = [
 	},
 	{
 		label: "EURC",
-		id: "CCLZD7VBOC2URNA27BVJPB35F2MHTFDWBMV3HP3EIJVLUXM3UJKZL3VV",
+		id: "CDTKPWPLOURQA2SGTKTUQOWRCBZEORB4BWBOMJ3D3ZTQQSGE5F6JBQLV",
 	},
 ];
 const RPC_URL = "https://mainnet.sorobanrpc.com";
