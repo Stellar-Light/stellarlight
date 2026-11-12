@@ -423,7 +423,7 @@ export interface Project {
 	deployment?: {
 		network?: ("mainnet" | "testnet" | "unknown") | null;
 		/**
-		 * Evidence class: mainnet-contract-join | onchain-activity | stablecoin-issuance | human-verified
+		 * Evidence class: human-verified | onchain-activity | mainnet-contract-join | defillama-tvl | rwa-registry | operator-toml. Expected with mainnet or testnet, with sourceUrl and asOf (sls-024); the deployment pass writes them together and a nightly sweep reports a value without them.
 		 */
 		basis?: string | null;
 		sourceUrl?: string | null;
