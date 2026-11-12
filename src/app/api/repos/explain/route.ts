@@ -16,6 +16,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { logApiHit } from "@/lib/api-usage";
 import { interfacePathsOf } from "@/lib/code-symbols";
+import { isOwnContract } from "@/lib/contract-basis";
 import { askDeepWiki } from "@/lib/deepwiki";
 import { isKnownInfraNotDeployable } from "@/lib/known-infra";
 import { methodNotAllowed } from "@/lib/method-not-allowed";
@@ -184,6 +185,7 @@ export async function GET(req: NextRequest) {
 		successorRepo: string | null;
 		symbols: string[];
 		mainnetContractId: string | null;
+		mainnetContractBasis: string | null;
 		sdkCapabilities: string[];
 		codeDomains: string[];
 		contractInterface: string[];
@@ -244,6 +246,7 @@ export async function GET(req: NextRequest) {
 					codeScannedAt: true,
 					codeSymbols: true,
 					mainnetContractId: true,
+					mainnetContractBasis: true,
 					sdkCapabilities: true,
 					codeDomains: true,
 					contractInterface: true,
@@ -306,6 +309,9 @@ export async function GET(req: NextRequest) {
 									.slice(0, 20)
 							: [],
 						mainnetContractId: (d.mainnetContractId as string) ?? null,
+						mainnetContractBasis: d.mainnetContractId
+							? ((d.mainnetContractBasis as string) ?? null)
+							: null,
 						sdkCapabilities: Array.isArray(d.sdkCapabilities)
 							? (d.sdkCapabilities as unknown[]).filter(
 									(s): s is string => typeof s === "string",
@@ -424,8 +430,14 @@ export async function GET(req: NextRequest) {
 			bits.push(`SDK capabilities: ${cv.sdkCapabilities.join(", ")}.`);
 		if (cv.codeDomains.length)
 			bits.push(`Code-evidenced domains: ${cv.codeDomains.join(", ")}.`);
+		// A README cites the contracts it calls as readily as its own: an id
+		// the source rule judged cited is never called this repo's deployment.
 		if (cv.mainnetContractId)
-			bits.push(`Deployed on mainnet as \`${cv.mainnetContractId}\`.`);
+			bits.push(
+				isOwnContract(cv.mainnetContractBasis)
+					? `Deployed on mainnet as \`${cv.mainnetContractId}\` (contract basis ${cv.mainnetContractBasis ?? "not recorded"}).`
+					: `Its README names mainnet contract \`${cv.mainnetContractId}\`, which is not judged this repo's deployment (contract basis cited: neither its source nor a same-owner repo it points to defines it).`,
+			);
 		bits.push(
 			`For the full mechanism, read the source at https://github.com/${repo}.`,
 		);

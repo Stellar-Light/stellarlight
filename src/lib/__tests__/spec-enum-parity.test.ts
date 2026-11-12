@@ -12,6 +12,7 @@ import {
 	RWA_VERIFICATION_LEVELS,
 } from "@/data/rwa-registry";
 import { CODE_DOMAINS } from "../code-domains";
+import { CONTRACT_BASES } from "../contract-basis";
 import { BOOL_FALSE_VALUES, BOOL_TRUE_VALUES } from "../http-params";
 import { RESEARCH_MODES } from "../match-mode";
 import { SOURCE_CHECK_STATES } from "../note-pins";
@@ -701,6 +702,47 @@ describe("locateSource enums are the code's lists", () => {
 			"utf8",
 		);
 		expect(src).toContain("options: [...LOCATOR_KINDS]");
+	});
+});
+
+/** 2026-11-11: a contract a README only cites was served as the repo's own.
+ * The basis that says whose it is rides beside every served id, from one
+ * list the scanner writes, the collection stores and the spec documents. */
+describe("contract basis is ONE list", () => {
+	// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+	const found: any[] = [];
+	// biome-ignore lint/suspicious/noExplicitAny: walking untyped spec JSON
+	const walk = (o: any) => {
+		if (!o || typeof o !== "object") return;
+		if (o.mainnetContractId && o.mainnetContractBasis)
+			found.push(o.mainnetContractBasis);
+		for (const v of Object.values(o)) walk(v);
+	};
+	walk(S);
+	it("every repo surface that serves mainnetContractId serves its basis from CONTRACT_BASES", () => {
+		// explain, vet-idea competitors, trust report, repo search results
+		expect(found.length).toBeGreaterThanOrEqual(4);
+		for (const b of found)
+			expect(sorted(b.enum)).toEqual(sorted(CONTRACT_BASES));
+		const src = readFileSync(
+			resolve(__dirname, "../../collections/Repos.ts"),
+			"utf8",
+		);
+		expect(src).toMatch(
+			/name:\s*"mainnetContractBasis",[\s\S]*?options:\s*\[\.\.\.CONTRACT_BASES\]/,
+		);
+	});
+	it("the registry never serves cited", () => {
+		const e =
+			S.paths["/api/contracts"].get.responses["200"].content["application/json"]
+				.schema.properties.contracts.items.properties.contractBasis.enum;
+		// Every stored basis but cited, plus on-chain attribution.
+		expect(sorted(e)).toEqual(
+			sorted([
+				...CONTRACT_BASES.filter((b) => b !== "cited"),
+				"onchain-attributed",
+			]),
+		);
 	});
 });
 

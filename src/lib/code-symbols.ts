@@ -177,6 +177,137 @@ export function extractContractInterface(blobs: SymbolBlob[]): string[] {
 	return contractInterfaceEntries(blobs).map((e) => e.signature);
 }
 
+/** The body of the brace block that opens at or after `from`; null when
+ * none opens. */
+function braceBody(text: string, from: number): string | null {
+	const open = text.indexOf("{", from);
+	if (open < 0) return null;
+	let depth = 1;
+	let i = open + 1;
+	while (i < text.length && depth > 0) {
+		if (text[i] === "{") depth++;
+		else if (text[i] === "}") depth--;
+		i++;
+	}
+	return text.slice(open + 1, i - 1);
+}
+
+/** Every #[contractimpl] impl block in a repo's fetched, non-test Rust
+ * sources, each brace-matched so nothing leaks in from a neighbouring
+ * non-contract impl in the same file. */
+function* contractImplBlocks(blobs: SymbolBlob[]): Generator<{
+	contract: string;
+	isTraitImpl: boolean;
+	block: string;
+	path: string;
+}> {
+	for (const b of blobs) {
+		if (!b.text || !b.path.toLowerCase().endsWith(".rs") || isTestPath(b.path))
+			continue;
+		if (!/#\s*\[\s*contractimpl\s*\]/.test(b.text)) continue;
+		const clean = stripCommentsAndStrings(b.text);
+		for (const im of clean.matchAll(IMPL_RE)) {
+			const block = braceBody(clean, im.index + im[0].length);
+			if (block === null) continue;
+			yield { contract: im[2], isTraitImpl: !!im[1], block, path: b.path };
+		}
+	}
+}
+
+// The ownership check reads more forms than the served interface, which
+// keeps IMPL_RE until its own measured change: attribute arguments
+// (`#[contractimpl(contracttrait)]`, the newer SDK's form), other attributes
+// before `impl`, and a trait named by a path or with generics (`impl
+// token::Interface for Token`, how a SEP-41 token implemented its interface;
+// gabrielfonte/stellar-token read 4 of its 14 deployed functions without it).
+// Groups: 1 attribute arguments, 2 attributes after it, 3 trait, 4 type.
+const OWN_IMPL_RE =
+	/#\s*\[\s*contractimpl\s*(\([^)\n]{0,80}\))?\s*\]\s*((?:#\s*\[[^\]\n]*\]\s*)*)(?:pub\s+)?impl(?:\s*<[^>\n]{0,80}>)?\s+(?:([A-Za-z_][A-Za-z0-9_]*(?:::[A-Za-z_][A-Za-z0-9_]*)*(?:\s*<[^>\n]{0,80}>)?)\s+for\s+)?([A-Za-z_][A-Za-z0-9_]*)/g;
+// An inline test module, whose mock contracts are not the repo's source.
+// `#[cfg(test)]` or `#[cfg(any(test, feature = "testutils"))]`; strings are
+// already stripped, so a feature name cannot be read.
+const CFG_TEST_MOD_RE =
+	/#\s*\[\s*cfg\s*\(\s*(?:test|any\s*\([^()\n]*\btest\b[^()\n]*\))\s*\)\s*\]\s*(?:#\s*\[[^\]\n]*\]\s*)*(?:pub(?:\s*\([^)\n]{0,64}\))?\s+)?mod\s+[A-Za-z_][A-Za-z0-9_]*\s*\{/g;
+/** Is this a Rust file of the repo's own contract source? Not test code,
+ * and not a mock contract or test utility outside isTestPath's folders: a
+ * folder or file named mock-something or something-mock (contracts/mock-pool/,
+ * contracts/pool-mock/, contracts/mockoracle/, src/mock_pool.rs), or
+ * src/testutils.rs. */
+export function isOwnSourcePath(p: string): boolean {
+	return (
+		p.toLowerCase().endsWith(".rs") &&
+		!isTestPath(p) &&
+		!/(^|\/)(mock[\w-]*|[\w-]*[-_]mocks?)(\/|\.rs$)|(^|\/)testutils?\.rs$/i.test(
+			p,
+		)
+	);
+}
+
+/** What a repo's own #[contractimpl] blocks define, for comparing with a
+ * deployed WASM's contractspecv0: the name of every function they export
+ * (pub fns of inherent impls, every fn of a trait impl), with no cap and
+ * whatever its arguments look like; and `defaults`: for each contract type
+ * with a trait impl that takes functions from the trait's own defaults
+ * (`#[contractimpl(contracttrait)]`, `#[default_impl]`, or a trait impl with
+ * no fn in its block, as OpenZeppelin's tokens are written), the functions
+ * its impls do name, since its deployed WASM exports more than any block
+ * names. A #[contractclient] trait or a contractimport! client, which a
+ * caller of the contract also has, is never read; nor are test code, inline
+ * #[cfg(test)] modules, mock contracts and test utilities. */
+export function contractSource(blobs: SymbolBlob[]): {
+	defined: Set<string>;
+	defaults: Set<string>[];
+} {
+	const defined = new Set<string>();
+	// Per contract type: the functions its impls name, and whether a trait
+	// impl of it takes the trait's defaults.
+	const types = new Map<string, { names: Set<string>; defaults: boolean }>();
+	for (const b of blobs) {
+		if (
+			!b.text ||
+			!isOwnSourcePath(b.path) ||
+			!/#\s*\[\s*contractimpl\b/.test(b.text)
+		)
+			continue;
+		let clean = stripCommentsAndStrings(b.text);
+		for (const m of [...clean.matchAll(CFG_TEST_MOD_RE)].reverse()) {
+			const body = braceBody(clean, m.index + m[0].length - 1);
+			if (body !== null)
+				clean =
+					clean.slice(0, m.index) +
+					clean.slice(m.index + m[0].length + body.length + 1);
+		}
+		for (const im of clean.matchAll(OWN_IMPL_RE)) {
+			const block = braceBody(clean, im.index + im[0].length);
+			if (block === null) continue;
+			const isTraitImpl = !!im[3];
+			const type = types.get(im[4]) ?? { names: new Set(), defaults: false };
+			types.set(im[4], type);
+			let fns = 0;
+			for (const m of block.matchAll(/\b(pub\s+)?fn\s+([a-z_][a-z0-9_]*)/g))
+				if (m[1] || isTraitImpl) {
+					defined.add(m[2]);
+					type.names.add(m[2]);
+					fns++;
+				}
+			if (
+				isTraitImpl &&
+				(fns === 0 ||
+					/contracttrait/.test(im[1] ?? "") ||
+					/default_impl/.test(im[2] ?? "") ||
+					/#\s*\[\s*default_impl\s*\]\s*(?:#\s*\[[^\]\n]*\]\s*)*$/.test(
+						clean.slice(Math.max(0, im.index - 200), im.index),
+					))
+			)
+				type.defaults = true;
+		}
+	}
+	return {
+		defined,
+		defaults: [...types.values()].filter((t) => t.defaults).map((t) => t.names),
+	};
+}
+
 /** The same signatures, each with the repo-relative file it was read from,
  * so a reader can tell a shipped contract from an example (issue #1906). */
 export function contractInterfaceEntries(
@@ -186,25 +317,7 @@ export function contractInterfaceEntries(
 	const seen = new Set<string>();
 	for (const b of blobs) {
 		if (out.length >= MAX_IFACE_FNS) break;
-		if (!b.text || !b.path.toLowerCase().endsWith(".rs") || isTestPath(b.path))
-			continue;
-		if (!/#\s*\[\s*contractimpl\s*\]/.test(b.text)) continue;
-		const clean = stripCommentsAndStrings(b.text);
-		for (const im of clean.matchAll(IMPL_RE)) {
-			const isTraitImpl = !!im[1];
-			const contract = im[2];
-			// Brace-match the impl block so signatures never leak in from a
-			// neighbouring non-contract impl in the same file.
-			const open = clean.indexOf("{", im.index + im[0].length);
-			if (open < 0) continue;
-			let depth = 1;
-			let i = open + 1;
-			while (i < clean.length && depth > 0) {
-				if (clean[i] === "{") depth++;
-				else if (clean[i] === "}") depth--;
-				i++;
-			}
-			const block = clean.slice(open + 1, i - 1);
+		for (const { contract, isTraitImpl, block } of contractImplBlocks([b])) {
 			for (const m of block.matchAll(SIG_RE)) {
 				// bare fn is the exported surface ONLY in trait impls; in
 				// inherent impls the macro exports pub fns alone — a bare fn

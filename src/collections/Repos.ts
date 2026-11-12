@@ -1,4 +1,5 @@
 import type { CollectionConfig } from "payload";
+import { CONTRACT_BASES } from "../lib/contract-basis";
 import { activityStateOf, CODE_SCAN_STATES } from "../lib/repo-grade";
 import { repoSupersession } from "../lib/repo-relations";
 import { adminOnly, isAdmin } from "./access";
@@ -575,18 +576,19 @@ export const Repos: CollectionConfig = {
 			},
 		},
 		{
-			// WHOSE contract it is — the thing mainnetContractId alone never said.
-			// "published" means we ruled out the two provable ways it isn't this
-			// repo's, not that we proved it is; only "self-validated" earns the
-			// verified-contract-id trust signal.
+			// WHOSE contract it is, the thing mainnetContractId alone never said
+			// (src/lib/contract-basis.ts). self-validated, source-matched and
+			// sibling-matched are judged the repo's own deployment; cited is a
+			// contract its README names that neither its source nor a same-owner
+			// repo it points to defines; published is not judged yet.
 			name: "mainnetContractBasis",
 			type: "select",
-			options: ["self-validated", "published"],
+			options: [...CONTRACT_BASES],
 			index: true,
 			admin: {
 				position: "sidebar",
 				description:
-					"Ownership evidence for mainnetContractId (self-validated = the WASM's SEP-55 source_repo names this repo and this repo holds a GitHub build attestation for it)",
+					"Whose contract mainnetContractId is: self-validated (the WASM's SEP-55 source_repo names this repo, which holds a GitHub build attestation for it), source-matched (this repo's own #[contractimpl] source defines the deployed functions: at least half, or all when it exports fewer than four), sibling-matched (a same-owner repo this repo points to defines them), cited (neither does: usually a contract the repo calls; the only basis not served as the repo's deployment), published (not judged: stored before spec 1.9.135, or a scan could not decide)",
 			},
 		},
 		// Soft relevance flag — legit-but-unproven Stellar repo, excluded from

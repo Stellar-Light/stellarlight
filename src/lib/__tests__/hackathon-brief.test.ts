@@ -117,6 +117,7 @@ const trust = (over: Partial<TrustReport> = {}): TrustReport => ({
 			() => "pool/src/contract.rs",
 		),
 		mainnetContractId: "CABC…",
+		mainnetContractBasis: "self-validated",
 	},
 	usage: {
 		contracts: 1,

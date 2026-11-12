@@ -69,3 +69,42 @@ describe("trust report interface paths and renamed paths", () => {
 		expect(r?.repo.renamedFrom).toBeNull();
 	});
 });
+
+/** 2026-11-11: reflector-network/reflector-stellar-connector held the
+ * SushiSwap factory its README gives as a config default, and the report
+ * signalled publishes-contract-id for it beside a bare id. */
+describe("trust report contract basis", () => {
+	const row = (fullName: string, basis: string | null) => ({
+		fullName,
+		codeScanState: "scanned",
+		mainnetContractId:
+			"CD3KRKGDRVWPXVB3VXLUMQKMX6XZ6Q2H334IVZD4XXNAMKSRVQL5GLYF",
+		mainnetContractBasis: basis,
+	});
+	const report = async (basis: string | null) =>
+		buildTrustReport(payloadOf([row("acme/app", basis)]), "acme/app");
+
+	it("serves the basis beside the id, and a cited id signals cites-contract-id", async () => {
+		const r = await report("cited");
+		expect(r?.codeTruth.mainnetContractBasis).toBe("cited");
+		expect(r?.signals).toContain("cites-contract-id");
+		expect(r?.signals).not.toContain("publishes-contract-id");
+	});
+
+	it("a basis not judged yet is served as before, with the basis visible", async () => {
+		for (const basis of ["published", null]) {
+			const r = await report(basis);
+			expect(r?.signals).toContain("publishes-contract-id");
+			expect(r?.signals).not.toContain("cites-contract-id");
+			expect(r?.codeTruth.mainnetContractBasis).toBe(basis);
+		}
+	});
+
+	it("source-matched and sibling-matched publish the id; self-validated verifies it", async () => {
+		for (const basis of ["source-matched", "sibling-matched"])
+			expect((await report(basis))?.signals).toContain("publishes-contract-id");
+		expect((await report("self-validated"))?.signals).toContain(
+			"verified-contract-id",
+		);
+	});
+});

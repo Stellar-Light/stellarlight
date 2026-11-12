@@ -10,6 +10,7 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { isOwnContract } from "../../src/lib/contract-basis";
 import {
 	countByKind,
 	type Finding,
@@ -353,6 +354,7 @@ type Repo = {
 	knowledgeNotes?: unknown[];
 	codeDepth?: number | null;
 	mainnetContractId?: string | null;
+	mainnetContractBasis?: string | null;
 	isDeployableContract?: boolean | null;
 	lastCommitAt?: string | null;
 	isArchived?: boolean;
@@ -405,7 +407,8 @@ const repos = [...repoSeen.values()].map((r) => ({
 	// name (codeInUse.contracts) against raw rows returned 2 where the truth
 	// was 76 — the exact raw-vs-serialized trap this repo has hit before.
 	deployable: r.isDeployableContract === true,
-	mainnetJoined: !!r.mainnetContractId,
+	// An id the README only cites is another project's contract, not a join.
+	mainnetJoined: !!r.mainnetContractId && isOwnContract(r.mainnetContractBasis),
 }));
 
 // Per-surface rollup: the shape a CONSUMER asks about, "how healthy is the

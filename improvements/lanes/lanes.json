@@ -59,14 +59,6 @@
 			"since": null
 		},
 		{
-			"id": "backfill-contract-basis",
-			"workflow": "backfill-contract-basis.yml",
-			"cadence": "dispatch",
-			"executeInput": "execute",
-			"writeSet": "re-judges every stored mainnetContractId against ownership evidence and rewrites its basis (shared-token / attributed-elsewhere / own / no-evidence)",
-			"since": null
-		},
-		{
 			"id": "backfill-knowledge-notes",
 			"workflow": "backfill-knowledge-notes.yml",
 			"cadence": "cron 23 3 * * *",

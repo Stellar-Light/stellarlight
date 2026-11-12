@@ -8,18 +8,23 @@
  * registry (per-project reports + currency), and successions.
  *
  * MEMBERSHIP IS EVIDENCE-GATED: a row exists only when the scanner verified
- * a README-claimed contract id live on mainnet (an RPC read of its instance)
- * OR enrich-onchain attributed real on-chain activity to the repo. No
- * self-declared registries, no directory prose. The set is small today and
- * grows exactly as fast as scans + weekly on-chain passes reach repos —
- * meta carries that honesty note.
+ * a README contract id live on mainnet and did not judge it cited
+ * (src/lib/contract-basis.ts) OR enrich-onchain attributed real on-chain
+ * activity to the repo. An id the README only cites (a contract the repo
+ * calls) is never listed as the repo's contract: on 2026-11-11 Reflector's
+ * connector was listed with the SushiSwap factory and three repos with one
+ * Blend pool. An id not judged yet (published) is listed as before.
+ * No self-declared registries, no directory prose. The set grows exactly as
+ * fast as scans + weekly on-chain passes reach repos; meta carries that note.
  */
 
 import type { Payload } from "payload";
+import { isOwnContract } from "./contract-basis";
 
 export interface ContractRow {
-	/** Verified mainnet contract id (C…), null when membership came via
-	 * usage attribution without a specific id in the repo's README. */
+	/** The repo's mainnet contract id (C…, any basis but cited), else the
+	 * first address on-chain enrichment attributed to it; null when the row
+	 * is here for live usage alone. */
 	contractId: string | null;
 	/** Every mainnet address on-chain enrichment attributed to THIS repo
 	 *  (stellar.expert names the repo as the contract's source), carried on the
@@ -221,16 +226,22 @@ async function buildRegistryRows(payload: Payload): Promise<ContractRow[]> {
 		const ciu = d.codeInUse;
 		const attributed =
 			attributedByRepo.get(String(d.fullName).toLowerCase()) ?? [];
-		const ownId = d.mainnetContractId ? String(d.mainnetContractId) : null;
+		// An id the source rule judged cited is not the repo's deployment: it
+		// neither names the row nor admits it. One not judged yet (published,
+		// or no basis) is served as before until a rescan judges it.
+		const ownId =
+			d.mainnetContractId && isOwnContract(d.mainnetContractBasis)
+				? String(d.mainnetContractId)
+				: null;
 		return {
 			contractId: ownId ?? attributed[0]?.address ?? null,
-			contractBasis: d.mainnetContractBasis
-				? String(d.mainnetContractBasis)
-				: ownId
-					? null
-					: attributed.length
-						? "onchain-attributed"
-						: null,
+			contractBasis: ownId
+				? d.mainnetContractBasis
+					? String(d.mainnetContractBasis)
+					: null
+				: attributed.length
+					? "onchain-attributed"
+					: null,
 			verifiedContracts: attributed,
 			repo: { fullName: String(d.fullName), url: d.url ? String(d.url) : null },
 			project: d.projectSlug
@@ -265,5 +276,7 @@ async function buildRegistryRows(payload: Payload): Promise<ContractRow[]> {
 		};
 	});
 
-	return rows;
+	// Membership is the repo's own contract or live usage; a row the query
+	// found only for an id it cites has neither.
+	return rows.filter((r) => r.contractId || r.codeInUse);
 }

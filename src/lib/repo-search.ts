@@ -86,6 +86,7 @@ interface RepoDoc {
 	contractInterfacePaths?: unknown;
 	stellarDeps?: unknown;
 	mainnetContractId?: string | null;
+	mainnetContractBasis?: string | null;
 	sdkCapabilities?: unknown;
 	codeDomains?: unknown;
 	activitySignals?: {
@@ -298,6 +299,10 @@ export interface CodeVerified {
 	 * read of its contract instance); existence, not ownership. Null when no
 	 * confirmed address. */
 	mainnetContractId: string | null;
+	/** Whose mainnetContractId is (src/lib/contract-basis.ts): every basis
+	 * but cited (self-validated, source-matched, sibling-matched, or published
+	 * and not judged yet) is served as the repo's deployment. */
+	mainnetContractBasis: string | null;
 	/** Stellar SDK capability tags from the repo's JS/TS sources (tx-building,
 	 * signing, soroban-rpc, sep10-auth, wallet-kit, …) — what a dapp actually
 	 * DOES with the SDK; [] until scanned post-2026-07-09 or no JS sources. */
@@ -373,6 +378,9 @@ function codeVerifiedOf(d: RepoDoc): CodeVerified | null {
 				}));
 		})(),
 		mainnetContractId: d.mainnetContractId ?? null,
+		mainnetContractBasis: d.mainnetContractId
+			? (d.mainnetContractBasis ?? null)
+			: null,
 		sdkCapabilities: Array.isArray(d.sdkCapabilities)
 			? d.sdkCapabilities.filter((s): s is string => typeof s === "string")
 			: [],

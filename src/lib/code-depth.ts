@@ -34,6 +34,8 @@
  * OpenZeppelin code read 0.62.
  */
 
+import { type ContractBasis, isOwnContract } from "./contract-basis";
+
 // ── Inputs ───────────────────────────────────────────────────────────────────
 
 /** One fetched Rust/Cargo/toml blob. `text` null when present-but-unreadable. */
@@ -49,7 +51,7 @@ export interface DepthScalars {
 	 * stored id). Unfakeable positive evidence: an address string alone is
 	 * cheap, a live contract isn't. */
 	mainnetContractId?: string | null;
-	mainnetContractBasis?: "self-validated" | "published" | null;
+	mainnetContractBasis?: ContractBasis | null;
 	isFork?: boolean;
 	parentFullName?: string | null; // fork parent (owner/name)
 	commitCount?: number | null;
@@ -641,11 +643,16 @@ export function computeCodeDepth(input: DepthInput): CodeDepthResult {
 	// worth ~3x a bare address mention: the address string is fakeable, the
 	// live mainnet contract is not.
 	const addrMention = /\bC[A-Z2-7]{55}\b/.test(input.scalars.readmeText ?? "");
-	const deployedAddr = input.scalars.mainnetContractId
-		? 1
-		: addrMention
-			? 0.35
-			: 0;
+	// An id the source rule judged cited earns no deployment credit: a README
+	// that cites another project's contract is an address mention. One not
+	// judged yet (published, or no basis) is scored as before.
+	const deployedAddr =
+		input.scalars.mainnetContractId &&
+		isOwnContract(input.scalars.mainnetContractBasis)
+			? 1
+			: addrMention
+				? 0.35
+				: 0;
 
 	const substance =
 		0.16 * workspaceBreadth +

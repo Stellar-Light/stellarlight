@@ -97,3 +97,38 @@ describe("explainRepo codeVerified interface paths", () => {
 		expect(body.renamedFrom).toBeNull();
 	});
 });
+
+/** 2026-11-11: the answer said "Deployed on mainnet as" for any held id,
+ * Reflector's connector's SushiSwap factory default among them. */
+describe("explainRepo contract basis", () => {
+	const SUSHI = "CD3KRKGDRVWPXVB3VXLUMQKMX6XZ6Q2H334IVZD4XXNAMKSRVQL5GLYF";
+	const withId = (basis: string) =>
+		ROWS.push({
+			fullName: "reflector-network/reflector-stellar-connector",
+			codeScanState: "scanned",
+			stellarProof: "js-sdk",
+			mainnetContractId: SUSHI,
+			mainnetContractBasis: basis,
+		});
+	it("serves the basis through the route's select, and never calls a cited id the repo's deployment", async () => {
+		withId("cited");
+		const body = await call(
+			"q=how+are+prices+read&repo=reflector-network/reflector-stellar-connector",
+		);
+		expect(body.codeVerified.mainnetContractBasis).toBe("cited");
+		expect(body.answer).not.toContain("Deployed on mainnet");
+		expect(body.answer).toContain("not judged this repo's deployment");
+	});
+	it("an owned or not yet judged id reads as the repo's deployment, basis named", async () => {
+		for (const basis of ["source-matched", "published"]) {
+			ROWS = [...BASE_ROWS];
+			withId(basis);
+			const body = await call(
+				"q=how+are+prices+read&repo=reflector-network/reflector-stellar-connector",
+			);
+			expect(body.answer).toContain(
+				`Deployed on mainnet as \`${SUSHI}\` (contract basis ${basis})`,
+			);
+		}
+	});
+});

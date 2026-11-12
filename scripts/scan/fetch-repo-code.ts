@@ -18,6 +18,8 @@ import {
 	type Blob as SigBlob,
 	type StellarProof,
 } from "../../src/lib/code-signals";
+import { contractSource, isOwnSourcePath } from "../../src/lib/code-symbols";
+import type { ContractBasis } from "../../src/lib/contract-basis";
 import {
 	codeKey,
 	contractMeta,
@@ -25,7 +27,11 @@ import {
 	instanceKey,
 	ownership,
 	readLedgerEntries,
+	sameOwnerLinks,
+	sourceMatches,
 	sourceRepo,
+	specFunctions,
+	submoduleTargets,
 } from "../../src/lib/contract-ownership";
 import {
 	type NotePin,
@@ -649,12 +655,11 @@ export interface RepoCodeResult {
  * finds its instance), with the evidence for whose it is. */
 export type MainnetContract = {
 	id: string;
-	/** How we know the address belongs to THIS repo.
-	 *  self-validated  the WASM's SEP-55 source_repo names this repo, and this
-	 *                  repo holds a GitHub attestation for the WASM's hash.
-	 *  published       the repo publishes it and we ruled out the two ways it
-	 *                  provably isn't theirs, but nothing proves it is. */
-	basis: "self-validated" | "published";
+	/** Whose it is (src/lib/contract-basis.ts): self-validated,
+	 * source-matched and sibling-matched are this repo's deployment; cited is
+	 * a contract the README names that neither this repo nor a same-owner repo
+	 * it points to defines; published is a case the scan could not decide. */
+	basis: ContractBasis;
 };
 
 /** The mainnet check could not run: the RPC or GitHub's attestation API gave
@@ -681,7 +686,7 @@ export function keepStoredContract(
 	r: Pick<RepoCodeResult, "mainnetContractUnread" | "depthInput">,
 	stored: {
 		mainnetContractId?: string | null;
-		mainnetContractBasis?: MainnetContract["basis"] | null;
+		mainnetContractBasis?: ContractBasis | null;
 	},
 ): boolean {
 	if (!r.mainnetContractUnread) return false;
@@ -689,6 +694,158 @@ export function keepStoredContract(
 	r.depthInput.scalars.mainnetContractBasis =
 		stored.mainnetContractBasis ?? null;
 	return true;
+}
+
+/** A read of a repo's contract source: contractSource()'s answer, and
+ * `unread`: a selected Rust file of its own source could not be read, or
+ * GitHub truncated its tree, so a function it lacks may only be unread. */
+export type SourceRead = ReturnType<typeof contractSource> & {
+	unread: boolean;
+};
+
+/** What a scan knows about the repo's own source, whether GitHub lists it
+ * as a fork, and the same-owner repos it points to (submodule targets, then
+ * README links), with a reader for theirs. `opaque`: a gitlink whose target
+ * cannot be read. */
+export type ContractSource = SourceRead & {
+	isFork: boolean;
+	siblings?: {
+		pointed: string[];
+		opaque: boolean;
+		read: (repo: string) => Promise<SourceRead | null | typeof CONTRACT_UNREAD>;
+	};
+};
+
+/** Same-owner repos read per contract: SEP-55's, then submodules, then README
+ * links. ponytail: a README linking more same-owner repos than this keeps
+ * the rest unread, so an owner's source past the fifth reads as cited; a
+ * search of the owner's repos would lift it. */
+const SIBLINGS_READ = 5;
+/** Rust files read from each such repo. */
+const SIBLING_FILES = 60;
+
+/** Could the deployed contract be one whose trait impls take the trait's
+ * defaults? Yes when such a contract type names no function the WASM lacks:
+ * its source names fewer functions than it exports, so a low match proves
+ * nothing. A type that names a function the WASM does not export is another
+ * contract. */
+function takesDefaults(deployed: string[], defaults: Set<string>[]): boolean {
+	const exported = new Set(deployed);
+	return defaults.some((names) => [...names].every((n) => exported.has(n)));
+}
+
+/** Whose contract is it when this repo's own source does not define it?
+ *   sibling-matched  a same-owner repo it points to defines the deployed
+ *                    functions (sourceMatches).
+ *   published        not decidable: a repo it points to is hidden (GitHub
+ *                    answers 404, so private or gone), a submodule's target
+ *                    cannot be read, or a sibling's trait impls take
+ *                    functions from trait defaults.
+ *   cited            every repo it points to was read whole and none defines
+ *                    it, or it points to none.
+ * CONTRACT_UNREAD when GitHub gave no usable answer or a sibling's read was
+ * not whole. `read` caches each repo's answer across the README's ids. */
+async function siblingBasis(
+	repo: string,
+	claimed: string | null,
+	deployed: string[],
+	sib: NonNullable<ContractSource["siblings"]>,
+	read: Map<string, Promise<SourceRead | null | typeof CONTRACT_UNREAD>>,
+): Promise<"sibling-matched" | "published" | "cited" | typeof CONTRACT_UNREAD> {
+	const owner = repo.toLowerCase().split("/")[0];
+	const pointed = [
+		...(claimed &&
+		claimed.split("/")[0] === owner &&
+		claimed !== repo.toLowerCase()
+			? [claimed]
+			: []),
+		...sib.pointed,
+	]
+		.filter(
+			(r, i, all) =>
+				all.findIndex((x) => x.toLowerCase() === r.toLowerCase()) === i,
+		)
+		.slice(0, SIBLINGS_READ);
+	let undecided = sib.opaque;
+	let partial = false;
+	for (const r of pointed) {
+		const key = r.toLowerCase();
+		let answer = read.get(key);
+		if (!answer) {
+			answer = sib.read(r);
+			read.set(key, answer);
+		}
+		const got = await answer;
+		if (got === CONTRACT_UNREAD) return CONTRACT_UNREAD;
+		if (got === null) undecided = true;
+		else if (sourceMatches(deployed, got.defined)) return "sibling-matched";
+		else {
+			partial ||= got.unread;
+			undecided ||= takesDefaults(deployed, got.defaults);
+		}
+	}
+	if (partial) return CONTRACT_UNREAD;
+	return undecided ? "published" : "cited";
+}
+
+/** A repo's contract source, read from its default branch: its contract and
+ * lib entry files, then its largest other own-source Rust files,
+ * SIBLING_FILES in all. A fork defines nothing of its own: its source is its
+ * parent's. Null when GitHub does not show the repo (404: private or gone);
+ * CONTRACT_UNREAD when it gave no usable answer. GitHub's redirect for a
+ * moved repo is followed. */
+export async function readContractFns(
+	gh: Gh,
+	repo: string,
+	acct: BlobAccount,
+): Promise<SourceRead | null | typeof CONTRACT_UNREAD> {
+	acct.api++;
+	const metaRes = await gh(`/repos/${repo}`);
+	if (metaRes.status === 404) return null;
+	if (!metaRes.ok) return CONTRACT_UNREAD;
+	const meta = await metaRes.json();
+	const none = { defined: new Set<string>(), defaults: [], unread: false };
+	if (meta?.fork) return none;
+	const full = String(meta?.full_name ?? "");
+	const branch = meta?.default_branch;
+	if (!full.includes("/") || !branch) return CONTRACT_UNREAD;
+	acct.api++;
+	const treeRes = await gh(
+		`/repos/${full}/git/trees/${encodeURIComponent(branch)}?recursive=1`,
+	);
+	// An empty repository has no tree: nothing it could define.
+	if (treeRes.status === 404 || treeRes.status === 409) return none;
+	if (!treeRes.ok) return CONTRACT_UNREAD;
+	const treeBody = await treeRes.json();
+	const tree: TreeEntry[] = treeBody.tree ?? [];
+	const entry = (p: string) =>
+		/\/src\/(contract|lib)\.rs$|^src\/(contract|lib)\.rs$/.test(p);
+	const files = tree
+		// fetchBlob reads a file over 400 KB as unreadable, which would leave
+		// every check of this repo unread: such a file is generated, not source.
+		.filter(
+			(e) =>
+				e.type === "blob" &&
+				isOwnSourcePath(e.path) &&
+				(e.size ?? 0) <= 400_000,
+		)
+		.sort(
+			(a, b) =>
+				Number(entry(b.path)) - Number(entry(a.path)) ||
+				(b.size ?? 0) - (a.size ?? 0),
+		)
+		.slice(0, SIBLING_FILES);
+	const [owner, name] = full.split("/");
+	const blobs: DepthBlob[] = [];
+	for (const f of files)
+		blobs.push({
+			path: f.path,
+			text: await fetchBlob(gh, owner, name, f.sha, f.path, branch, acct),
+		});
+	return {
+		...contractSource(blobs),
+		unread: treeBody.truncated === true || blobs.some((b) => b.text === null),
+	};
 }
 
 /** Resolve the mainnet contract a repo actually OWNS from the ids in its README.
@@ -712,13 +869,21 @@ export function keepStoredContract(
  *   - a Stellar Asset Contract executable => a network token wrapper, shared
  *     by everyone who mentions it and never a repo's own contract; next id.
  *   - the WASM's SEP-55 source_repo names another repo, and that repo holds
- *     a GitHub attestation for the WASM's hash => provably not this repo's.
+ *     a GitHub attestation for the WASM's hash => provably not this repo's:
+ *     cited (the Blend pools six repos cite are attested to Blend's repo).
  *   - source_repo names this repo and this repo holds an attestation =>
  *     self-validated, and it wins at once.
- *   - anything else (no source_repo, or one nothing attests) => published;
- *     the first such id is the answer when none is self-validated, so a repo
- *     that ships a verifiable contract is never represented by an unproven
- *     sibling id.
+ *   - anything else (no source_repo, or one nothing attests) is judged on
+ *     the WASM's exported functions (contractspecv0) against the functions
+ *     this repo's own #[contractimpl] source defines (`source.defined`):
+ *     source-matched when it defines at least half of them and the repo is
+ *     not a fork, else cited. A README cites the contracts it calls as
+ *     readily as the ones it deployed: on 2026-11-11 Reflector's connector
+ *     held the SushiSwap factory it reads prices from, lumenmap held
+ *     Soroswap's factory, six repos held two Blend pools.
+ * The answer is the first source-matched id, else the first cited one, so a
+ * repo that ships a contract is never represented by an id it only cites,
+ * and a cited id is kept with its basis rather than dropped.
  * A check that could not run (the RPC failed or did not answer, or GitHub
  * answered an attestation request other than 200 or 404) returns
  * CONTRACT_UNREAD at once: a later id must not stand in for one that could
@@ -730,12 +895,24 @@ export async function verifyMainnetContract(
 	repoFullName?: string | null,
 	acct?: BlobAccount,
 	storedId?: string | null,
+	source: ContractSource = {
+		defined: new Set(),
+		defaults: [],
+		unread: false,
+		isFork: false,
+	},
 ): Promise<MainnetContract | null | typeof CONTRACT_UNREAD> {
 	// A shape with a bad checksum is no contract id: never probe it, so a typo
 	// can neither end the check as unread nor take one of the three slots.
-	const ids = [...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? [])]
-		.filter((id) => StrKey.isValidContract(id))
-		.slice(0, 3);
+	const named = [
+		...new Set(readmeText?.match(/\bC[A-Z2-7]{55}\b/g) ?? []),
+	].filter((id) => StrKey.isValidContract(id));
+	const ids = named.slice(0, 3);
+	// The id this repo holds is judged again wherever its README still names
+	// it: Kryon-Protocol/Kryon's README grew a table of eleven ids above its
+	// mainnet one, and a rescan would have erased the held id unread.
+	if (storedId && named.includes(storedId) && !ids.includes(storedId))
+		ids.push(storedId);
 	try {
 		const keys = ids.map((id) => instanceKey(id));
 		const instances = await readLedgerEntries(keys);
@@ -760,17 +937,22 @@ export async function verifyMainnetContract(
 			[...wasm.values()].map((hash) => codeKey(hash)),
 		);
 		if (!codes) return CONTRACT_UNREAD;
-		let fallback: MainnetContract | null = null;
+		let matched: MainnetContract | null = null;
+		let unjudged: MainnetContract | null = null;
+		let cited: MainnetContract | null = null;
+		const read = new Map<
+			string,
+			Promise<SourceRead | null | typeof CONTRACT_UNREAD>
+		>();
 		for (const [id, hash] of wasm) {
 			// The instance runs this WASM, so a missing code entry is an answer
 			// that is not whole, not evidence about the contract.
 			const code = codes.get(codeKey(hash));
 			if (!code) return CONTRACT_UNREAD;
-			const claimed = sourceRepo(
-				contractMeta(
-					xdr.LedgerEntryData.fromXDR(code.xdr, "base64").contractCode().code(),
-				),
-			);
+			const bytes = xdr.LedgerEntryData.fromXDR(code.xdr, "base64")
+				.contractCode()
+				.code();
+			const claimed = sourceRepo(contractMeta(bytes));
 			let attested = 0;
 			if (claimed) {
 				if (acct) acct.api++;
@@ -778,11 +960,52 @@ export async function verifyMainnetContract(
 				if (n === null) return CONTRACT_UNREAD;
 				attested = n;
 			}
-			const basis = ownership(repoFullName ?? "", claimed, attested);
+			const deployed = specFunctions(bytes);
+			const basis = ownership(repoFullName ?? "", claimed, attested, {
+				deployed,
+				defined: source.defined,
+				isFork: source.isFork,
+			});
 			if (basis === "self-validated") return { id, basis };
-			if (basis === "published") fallback ??= { id, basis };
+			if (basis === "source-matched") {
+				matched ??= { id, basis };
+				continue;
+			}
+			// Provably not this team's: a fork, whose source and pointers are
+			// its parent's, or a build attested to another owner's repo.
+			const owner = (repoFullName ?? "").toLowerCase().split("/")[0];
+			if (
+				source.isFork ||
+				(basis === "other-repo" && claimed?.split("/")[0] !== owner)
+			) {
+				cited ??= { id, basis: "cited" };
+				continue;
+			}
+			// Not this repo's source. A team's frontend or SDK repo points to
+			// the repo its contract lives in: the build's SEP-55 source_repo, a
+			// git submodule, or a README link, under the same GitHub owner.
+			const side = source.siblings
+				? await siblingBasis(
+						repoFullName ?? "",
+						claimed,
+						deployed,
+						source.siblings,
+						read,
+					)
+				: "cited";
+			if (side === CONTRACT_UNREAD) return CONTRACT_UNREAD;
+			if (side === "sibling-matched") {
+				matched ??= { id, basis: side };
+				continue;
+			}
+			// Nothing matched. Only a whole read of this repo's source can say
+			// cited, and trait defaults leave its functions unnamed.
+			if (source.unread) return CONTRACT_UNREAD;
+			if (side === "published" || takesDefaults(deployed, source.defaults))
+				unjudged ??= { id, basis: "published" };
+			else cited ??= { id, basis: "cited" };
 		}
-		return fallback;
+		return matched ?? unjudged ?? cited;
 	} catch {
 		// An answer that does not decode is a check that did not run.
 		return CONTRACT_UNREAD;
@@ -849,6 +1072,7 @@ export async function fetchRepoCode(
 
 	const sel = selectDepthPaths(tree, cargoIsSoroban);
 	const shaByPath = new Map(tree.map((e) => [e.path, e.sha]));
+	const sizeByPath = new Map(tree.map((e) => [e.path, e.size]));
 	const blobs: DepthBlob[] = [];
 	for (const p of sel.cargos)
 		blobs.push({ path: p, text: cargoText.get(p) ?? null });
@@ -880,11 +1104,53 @@ export async function fetchRepoCode(
 				acct,
 			)
 		: null;
+	// The repo's own contract functions, read from the sources this scan
+	// fetched: a contract id is this repo's only if its source, or a
+	// same-owner repo it points to, defines it.
+	const gitlinks = tree.filter((e) => e.type === "commit").map((e) => e.path);
+	const gitmodulesEntry = gitlinks.length
+		? tree.find((e) => e.path === ".gitmodules")
+		: undefined;
+	const submodules = submoduleTargets(
+		full,
+		gitlinks,
+		gitmodulesEntry
+			? await fetchBlob(
+					gh,
+					owner,
+					name,
+					gitmodulesEntry.sha,
+					gitmodulesEntry.path,
+					blobRef,
+					acct,
+				)
+			: null,
+	);
 	const checked = await verifyMainnetContract(
 		readmeText,
 		full,
 		acct,
 		opts.storedMainnetContractId,
+		{
+			...contractSource(blobs),
+			// A Rust file of its own source it could not read, or a truncated
+			// tree, leaves a missing function unknown, not absent. A file over
+			// fetchBlob's 400 KB cap is generated, not source: it never could be.
+			unread:
+				!treeComplete ||
+				blobs.some(
+					(b) =>
+						b.text === null &&
+						isOwnSourcePath(b.path) &&
+						(sizeByPath.get(b.path) ?? 0) <= 400_000,
+				),
+			isFork: !!meta.fork,
+			siblings: {
+				pointed: [...submodules.targets, ...sameOwnerLinks(full, readmeText)],
+				opaque: submodules.opaque,
+				read: (repo) => readContractFns(gh, repo, acct),
+			},
+		},
 	);
 	const mainnetContractUnread = mainnetCheckUnread(
 		!!readmeEntry,

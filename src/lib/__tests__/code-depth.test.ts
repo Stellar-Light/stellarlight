@@ -465,10 +465,35 @@ describe("v3 verified-mainnet deployment term", () => {
 					"Deployed: CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
 				mainnetContractId:
 					"CAC5SKP5FJT2ZZ7YLV4UCOM6Z5SQCCVPZWHLLLVQNQG2RWWOOSP3IYRL",
+				mainnetContractBasis: "source-matched",
 			}),
 		).codeDepth;
 		expect(mention).toBeGreaterThan(none);
 		expect(verified).toBeGreaterThan(mention);
+	});
+
+	it("an id the README only cites scores as a mention, never as a deployment", () => {
+		// 2026-11-11: Reflector's connector earned the deployment term for the
+		// SushiSwap factory its README gives as a config default.
+		const scalars = {
+			readmeText:
+				"factoryContract: CD3KRKGDRVWPXVB3VXLUMQKMX6XZ6Q2H334IVZD4XXNAMKSRVQL5GLYF",
+			mainnetContractId:
+				"CD3KRKGDRVWPXVB3VXLUMQKMX6XZ6Q2H334IVZD4XXNAMKSRVQL5GLYF",
+		};
+		const mention = computeCodeDepth(
+			base({ readmeText: scalars.readmeText }),
+		).codeDepth;
+		expect(
+			computeCodeDepth(base({ ...scalars, mainnetContractBasis: "cited" }))
+				.codeDepth,
+		).toBe(mention);
+		// Not judged yet: scored as before, as a deployment.
+		for (const basis of ["published", null] as const)
+			expect(
+				computeCodeDepth(base({ ...scalars, mainnetContractBasis: basis }))
+					.codeDepth,
+			).toBeGreaterThan(mention);
 	});
 });
 
