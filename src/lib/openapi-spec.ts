@@ -22,6 +22,16 @@ import {
 	RWA_STATES,
 	RWA_VERIFICATION_LEVELS,
 } from "../data/rwa-registry";
+import {
+	ADVISORY_SEVERITIES,
+	ADVISORY_SOURCES,
+	ALSO_AFFECTS_MAX_HOPS,
+	APPLIES_TO,
+	IDIOM_SCOPES,
+	INHERITED_PINS,
+	PACKAGE_STATUSES,
+	SDK_REGISTRIES,
+} from "../data/sdk-facts";
 import { CODE_DOMAINS } from "./code-domains";
 import { PROJECT_COMPACT, REPO_COMPACT, VIEW_VALUES } from "./compact-view";
 import { CONTRACT_BASES } from "./contract-basis";
@@ -83,8 +93,8 @@ import { LIVE_READ_PARTS } from "./repo-live-read";
 import { REPO_MATCH_MODES } from "./repo-search";
 import { INDICATOR_KINDS } from "./repo-security";
 import { RESEARCH_SOURCES } from "./research-sources";
-import { DEPRECATED_BY, VERSION_STATUSES } from "./soroban-versions";
 import { PRODUCTS_COVERAGE_BASES } from "./rwa-products";
+import { DEPRECATED_BY, VERSION_STATUSES } from "./soroban-versions";
 import {
 	AUTHORITY_ROLES,
 	LOCATE_MATCH_MODES,
@@ -1479,6 +1489,16 @@ const REVIEW_JUDGING_PROPERTIES = {
 		},
 	},
 };
+
+/** One SDK major's adoption row (toolchain.adoption). */
+const MAJOR_SHARE = {
+	type: "object",
+	properties: {
+		major: { type: "integer" },
+		repos: { type: "integer" },
+		share: { type: "number" },
+	},
+} as const;
 
 export const spec: OpenAPISpec = {
 	openapi: "3.1.0",
@@ -9284,6 +9304,238 @@ export const spec: OpenAPISpec = {
 														reposWithPracticeFacts: { type: "integer" },
 														ciPresent: { type: "integer" },
 														testsPresent: { type: "integer" },
+													},
+												},
+												factsAsOf: {
+													type: "string",
+													format: "date",
+													description:
+														"When the SDK facts below were last read from their sources as a set; each row also carries its own asOf. A weekly check re-reads the advisories, registry fields (deprecated message, latest major, yanks) and the soroban-sdk crates.io index behind them and flags drift; it does not re-read the renamed and moved statements or the idiom source pages.",
+												},
+												advisories: {
+													type: "array",
+													description:
+														"Security advisories on the packages in packages, each as its publisher records it: the GitHub Advisory Database (source reviewed, unreviewed or malware) or, where the database does not hold one, the maintainer's repository advisory (source repository). affected is verbatim. alsoAffects names the soroban-sdk releases whose dependency tree reaches an affected version of a crate in affected, with the path, so a repo can inherit an advisory on a crate it never declares; the walk has a depth cap, so check the lockfile (Cargo.lock, package-lock.json) for the versions actually built. Not a mapping of scanned repos to advisories. Order carries no rank.",
+													items: {
+														type: "object",
+														properties: {
+															ghsa: { type: "string" },
+															cve: { type: "string", nullable: true },
+															severity: {
+																type: "string",
+																enum: [...ADVISORY_SEVERITIES],
+															},
+															summary: { type: "string" },
+															source: {
+																type: "string",
+																enum: [...ADVISORY_SOURCES],
+															},
+															url: { type: "string", format: "uri" },
+															repository: {
+																type: "string",
+																description: "owner/repo of the affected code.",
+															},
+															publishedAt: { type: "string", format: "date" },
+															affected: {
+																type: "array",
+																items: {
+																	type: "object",
+																	properties: {
+																		ecosystem: {
+																			type: "string",
+																			description:
+																				"GitHub's advisory ecosystem (rust = crates.io).",
+																		},
+																		package: { type: "string" },
+																		vulnerableRange: {
+																			type: "string",
+																			description:
+																				"Comparators joined by ', ', e.g. '>= 25.0.0, < 25.3.0'.",
+																		},
+																		firstPatched: {
+																			type: "string",
+																			nullable: true,
+																			description:
+																				"null = the advisory names no patched version.",
+																		},
+																	},
+																},
+															},
+															alsoAffects: {
+																type: "array",
+																description: `soroban-sdk releases whose dependency tree reaches an affected version of a crate in affected, read from the crates.io index: normal, non-optional dependencies through soroban-* and stellar-* crates, up to ${ALSO_AFFECTS_MAX_HOPS} hops, stable releases. Per release and build class the strongest path is kept. [] = no soroban-sdk release reaches an affected version within ${ALSO_AFFECTS_MAX_HOPS} hops of that tree, not a clearance beyond it: check the lockfile.`,
+																items: {
+																	type: "object",
+																	properties: {
+																		ecosystem: { type: "string" },
+																		package: {
+																			type: "string",
+																			description:
+																				"The crate a repo declares (soroban-sdk).",
+																		},
+																		vulnerableRange: {
+																			type: "string",
+																			description:
+																				"Its releases that inherit the advisory, in the advisory range grammar.",
+																		},
+																		via: {
+																			type: "string",
+																			description:
+																				"The crate the advisory names (the last crate of path).",
+																		},
+																		path: {
+																			type: "array",
+																			items: { type: "string" },
+																			description:
+																				"Crate names from package to via, e.g. soroban-sdk, soroban-env-host, soroban-env-common, stellar-xdr.",
+																		},
+																		targets: {
+																			type: "array",
+																			items: { type: "string", nullable: true },
+																			description:
+																				"The target cfg of each hop (one per hop); null = every target.",
+																		},
+																		appliesTo: {
+																			type: "string",
+																			enum: [...APPLIES_TO],
+																			description:
+																				"The builds the path is in, from every hop's target: a host-only path never reaches the deployed wasm contract.",
+																		},
+																		pin: {
+																			type: "string",
+																			enum: [...INHERITED_PINS],
+																			description:
+																				"exact = every hop of path is an = requirement, so those builds compile an affected version; minimum = at least one hop admits a range of versions, so the lockfile decides.",
+																		},
+																		basis: { type: "string" },
+																		sourceUrl: {
+																			type: "string",
+																			format: "uri",
+																		},
+																	},
+																},
+															},
+															asOf: { type: "string", format: "date" },
+														},
+													},
+												},
+												packages: {
+													type: "array",
+													description:
+														"Stellar SDK packages and their status on their own registry: active, deprecated (the registry's own deprecated field), renamed (the publisher names a new package; the old name still resolves unmarked) or moved (the publisher names a new registry or scope; the old one still gets releases for now). statement is the publisher's words, verbatim. Packages named by an advisory are listed too. Order carries no rank.",
+													items: {
+														type: "object",
+														properties: {
+															registry: {
+																type: "string",
+																enum: [...SDK_REGISTRIES],
+															},
+															name: { type: "string" },
+															repository: { type: "string" },
+															status: {
+																type: "string",
+																enum: [...PACKAGE_STATUSES],
+															},
+															statusScope: {
+																type: "string",
+																nullable: true,
+																description:
+																	"What the status covers when it is not the whole package (soroban-cli: renamed as a binary, still a library); null = the whole package.",
+															},
+															replacement: {
+																type: "object",
+																nullable: true,
+																description: "null for an active package.",
+																properties: {
+																	registry: {
+																		type: "string",
+																		enum: [...SDK_REGISTRIES],
+																	},
+																	name: { type: "string" },
+																},
+															},
+															statement: { type: "string", nullable: true },
+															statementUrl: {
+																type: "string",
+																format: "uri",
+																nullable: true,
+															},
+															latestMajor: {
+																type: "integer",
+																description:
+																	"Major of the registry's latest stable release on asOf.",
+															},
+															withdrawnVersions: {
+																type: "array",
+																items: { type: "string" },
+																description:
+																	"Versions the registry marks not for use: crates.io and JSR yanks, npm versions deprecated one by one. [] = checked, none.",
+															},
+															registryUrl: { type: "string", format: "uri" },
+															asOf: { type: "string", format: "date" },
+														},
+													},
+												},
+												idioms: {
+													type: "array",
+													description:
+														"Deprecated code patterns with their replacements, each stated by an official source (SDK or CLI source, release notes, or developers.stellar.org) and applying from appliesFrom. Not every deprecation: a pattern missing here is not a claim that it is current. pattern is a JavaScript regular expression source, no flags, applied to one line at a time; a match is a place to look, not proof of use. Order carries no rank.",
+													items: {
+														type: "object",
+														properties: {
+															id: { type: "string" },
+															scope: {
+																type: "string",
+																enum: [...IDIOM_SCOPES],
+															},
+															deprecated: { type: "string" },
+															replacement: { type: "string" },
+															pattern: { type: "string" },
+															example: { type: "string" },
+															appliesFrom: {
+																type: "object",
+																properties: {
+																	name: { type: "string" },
+																	version: { type: "string" },
+																},
+															},
+															statement: { type: "string" },
+															sourceUrl: { type: "string", format: "uri" },
+															asOf: { type: "string", format: "date" },
+														},
+													},
+												},
+												adoption: {
+													type: "object",
+													description:
+														"Repos per SDK major, from each repo's stored requirement (the first major it names; git, path, workspace and unpinned requirements are not readable). share = repos / readable. byMajor is newest major first, not a rank.",
+													properties: {
+														sorobanSdk: {
+															type: "object",
+															description:
+																"Over scannedRepos (repos carrying a soroban-sdk version).",
+															properties: {
+																repos: { type: "integer" },
+																readable: { type: "integer" },
+																byMajor: { type: "array", items: MAJOR_SHARE },
+															},
+														},
+														jsSdk: {
+															type: "object",
+															description:
+																"@stellar/stellar-sdk over every scanned repo whose stored JS dependency it is, with or without a soroban-sdk version. The scan stores one Stellar JS dependency per repo (@stellar/stellar-sdk first), so repos is a floor.",
+															properties: {
+																reposWithNpmDependency: {
+																	type: "integer",
+																	description:
+																		"Scanned repos whose stored Stellar JS dependency is an npm package (any the scanner reads, not only @stellar/stellar-sdk); the scanner's language markers are not counted.",
+																},
+																measurementComplete: { type: "boolean" },
+																repos: { type: "integer" },
+																readable: { type: "integer" },
+																byMajor: { type: "array", items: MAJOR_SHARE },
+															},
+														},
 													},
 												},
 												basis: { type: "string" },

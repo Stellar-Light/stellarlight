@@ -33,6 +33,14 @@ export const CHANGELOG: ChangelogEntry[] = [
 	{
 		date: "2026-11-12",
 		surfaces: ["api", "skill"],
+		version: "spec@1.9.141",
+		type: "added",
+		summary:
+			"analyzeEcosystem's toolchain block serves dated SDK facts, so a drift checker reads them instead of inferring them from the capped deprecatedRepos sample. `toolchain.advisories`: 8 security advisories on 6 Stellar SDK packages, each with GHSA and CVE ids, severity, affected ranges verbatim, first patched version and published date, and `alsoAffects`: the soroban-sdk releases whose dependency tree reaches an affected version of the crate the advisory names, read from the crates.io index up to 4 hops, each with its `path`, `pin` and `appliesTo` (the soroban-sdk-macros, soroban-env-host, stellar-strkey and both stellar-xdr advisories reach soroban-sdk users this way; soroban-sdk 29.0.1 reaches stellar-xdr 28.0.0 through soroban-env-host and soroban-env-common). `toolchain.packages`: 16 packages on crates.io, npm and JSR with status (4 deprecated by npm, soroban-cli and @stellar/freighter-api renamed, the Wallets Kit's npm scope moved to JSR), `statusScope`, replacement, the publisher's words and yanked versions. `toolchain.idioms`: 10 deprecated code patterns with replacement, a per-line regex, the first release they apply from and the source. `toolchain.adoption`: repos per soroban-sdk and @stellar/stellar-sdk major. Every row carries its source URL and `asOf`; the operation description is unchanged.",
+	},
+	{
+		date: "2026-11-12",
+		surfaces: ["api", "skill"],
 		version: "spec@1.9.140",
 		type: "fixed",
 		summary:
