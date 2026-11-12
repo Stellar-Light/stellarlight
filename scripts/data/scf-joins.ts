@@ -149,6 +149,33 @@ export const SCF_SLUG_OVERRIDES: Record<string, string> = {
 	"cobo-custody-integration-for-institution-p8i": "cobo", // cobo.com
 	"cocaxyz-5fk": "coca", // coca.xyz
 	"paid-payrolling-0sk": "paid", // p-aid.world
+	// sls-111 (2026-11-11): the twelve SCF #45 awardees the directory had no
+	// row for, seeded in SEEDS (scripts/data/curation-maps.ts) from these
+	// pages. Each joins by its page slug, never by name: most rows are named
+	// for the product, not the SCF title. The comment names the link the page
+	// and the row share; the three rows with none were seeded from the page
+	// itself (statusSourceUrl), because the site the page gives is dead
+	// (Astrolabe, ZKELLA) or a person's repository (Principal).
+	"pollar-nqe": "pollar", // pollar.xyz
+	"pods-dxl": "pods", // deframe.io
+	"agentsmith-x402-stellar-facilitator-and-bazaar-discovery-kdw":
+		"agentsmith-x402", // 57blocks.com/blockchain, which lists AgentSmith
+	"cara7-yyx": "cara7", // cara7.com
+	"astrolabe-bzg": "astrolabe", // seeded from the page; its vercel.app site is gone
+	"onboard-kvj": "onboard", // onboard.xyz
+	"nila-fwc": "nila", // nila.land
+	"principal-vzt": "principal-protocol", // seeded from the page; its site is a person's repository, not linked
+	"zkella-protocol-compliance-ready-confidential-finance-infrastructure-for-stellar-sib":
+		"zkella", // seeded from the page; its site, zaiffer.org, answers 404
+	"canary-protocol-y4l": "canary-protocol", // canaryprotocol.com
+	"fermah-pay-w3c": "fermah-pay", // fermah.xyz
+	"open-rwa-vault-infrastructure-nis": "strata", // bootnode.dev, whose Strata page names this award
+	// Beamable's #38 page is titled "Onboard Game Devs with Beamable", so with
+	// the onboard row above the title-prefix matcher would hand it to Onboard
+	// (a join simulation over all 531 listed pages found it, and no other).
+	// Its site, beamable.com, and its GitHub org are the beamable row's, and
+	// its #38 $150,000 is the award that row carries with no page cited.
+	"onboard-game-devs-with-beamable-m5q": "beamable",
 	// Canonical-vs-dupe routing (sls-043 close-out): official "Band Protocol"
 	// exact-matches the band-protocol DUPE row by name; the CANONICAL slug is
 	// `band`, which otherwise matches nothing and would keep stale data.

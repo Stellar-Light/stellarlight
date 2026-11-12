@@ -1,0 +1,363 @@
+{
+	"$comment": "Known SCF round shortfalls and swaps: rounds where the directory carries fewer awards than SCF's own round page lists, and rounds whose totals agree while an SCF award page no row carries is offset by a row the check cannot tie to a page: no served scfSourceUrl, or a wrong join (scf equal to ours, the pages named). A listed page named in missing that is carried now is stale and must be dropped from the list. A ratchet read by scripts/eval/scf-round-counts.ts after every enrich-scf execute: a short round not listed here, a listed round whose shortfall grew, and any round where ours is over SCF fail; a listed round whose shortfall shrank or closed also fails until its entry is lowered or removed. Entries are only ever lowered or removed, never raised or added, except in a reviewed change. missing: the SCF award pages (https://communityfund.stellar.org/project/<slug>) no row carries in that round, the intake list in improvements/TODO.md; it can exceed scf minus ours where a row claims the round with no page the check can tie it to. Pages outside SCF's 531-row listing are named here by slug but appear at run time only by record id, so they are not checked.",
+	"asOf": "2026-11-11",
+	"basis": "SCF's 46 round pages and the 531-row listing, read 2026-11-11, against the served directory after the curate-projects and enrich-scf executes for sls-111 (the twelve SCF #45 seeds and Beamable's #38 page joined); measured, not estimated.",
+	"rounds": [
+		{
+			"round": 44,
+			"scf": 46,
+			"ours": 43,
+			"missing": [
+				"oz-accounts-policy-builder-by-gatewayfm-mqp",
+				"passkey-ui-sj6",
+				"soroban-contract-source-verification-service-bax"
+			]
+		},
+		{
+			"round": 42,
+			"scf": 27,
+			"ours": 27,
+			"missing": ["unstoppable-money-eii"]
+		},
+		{
+			"round": 40,
+			"scf": 24,
+			"ours": 22,
+			"missing": [
+				"bpv-stellarmesh-anchor-afq",
+				"post-quantum-secure-wallets-for-stellar-97o"
+			]
+		},
+		{
+			"round": 38,
+			"scf": 24,
+			"ours": 22,
+			"missing": ["institutional-treasury-xlm-wyu", "vanna-protocol-icb"]
+		},
+		{
+			"round": 37,
+			"scf": 19,
+			"ours": 19,
+			"missing": ["paysomeai-7gh", "stellar-integration-in-adamik-api-piy"]
+		},
+		{
+			"round": 36,
+			"scf": 23,
+			"ours": 22,
+			"missing": [
+				"meta-contracts-in-stellar-p4c",
+				"zkfetch-zktls-powered-oracle-solution-mfy"
+			]
+		},
+		{
+			"round": 35,
+			"scf": 21,
+			"ours": 20,
+			"missing": ["flow-sbr", "muwpay-qwa"]
+		},
+		{
+			"round": 34,
+			"scf": 17,
+			"ours": 17,
+			"missing": ["greep-pos-greep-pay-mhp"]
+		},
+		{
+			"round": 33,
+			"scf": 14,
+			"ours": 14,
+			"missing": ["hyperledger-solang-dwa"]
+		},
+		{
+			"round": 32,
+			"scf": 17,
+			"ours": 16,
+			"missing": [
+				"oneclickfi-xgi",
+				"soroban-rpc-sdk-dep",
+				"stellar-attestation-service-lda"
+			]
+		},
+		{
+			"round": 30,
+			"scf": 22,
+			"ours": 22,
+			"missing": ["convexity-humanitarian-aid-transfer-solution-chats-bd8"]
+		},
+		{
+			"round": 29,
+			"scf": 40,
+			"ours": 34,
+			"missing": [
+				"borderdollar-kyf",
+				"chrysalis-nkf",
+				"ea-kazi-1qp",
+				"sorobuilder-kgh",
+				"stellar-attestation-service-lda",
+				"the-hub-citizens-portal-yac",
+				"unalivio-nil"
+			]
+		},
+		{
+			"round": 28,
+			"scf": 30,
+			"ours": 24,
+			"missing": [
+				"blip-rnf",
+				"grip-fuv",
+				"merkle-tree-airdrop-tooling-rlq",
+				"octo-ultimate-sociofi-nft-hub-cf7",
+				"prophe-okb",
+				"sgf-solutions-tdi"
+			]
+		},
+		{
+			"round": 27,
+			"scf": 36,
+			"ours": 30,
+			"missing": [
+				"chaincred-rk7",
+				"formal-verso-i5m",
+				"infrastructure-support-liquify-x8y",
+				"institutional-treasury-xlm-wyu",
+				"stellar-talent-platform-p3z",
+				"stellar-time-machine-llg"
+			]
+		},
+		{
+			"round": 26,
+			"scf": 43,
+			"ours": 42,
+			"missing": ["borderdollar-kyf", "mimoto-b9d", "muwpay-qwa"]
+		},
+		{
+			"round": 25,
+			"scf": 27,
+			"ours": 24,
+			"missing": [
+				"forge-cxk",
+				"soroban-and-stellar-content-g7j",
+				"soroban-cli-cross-platform-gui-57v"
+			]
+		},
+		{
+			"round": 24,
+			"scf": 27,
+			"ours": 26,
+			"missing": ["stocken-capital-legaltech-wid"]
+		},
+		{
+			"round": 23,
+			"scf": 25,
+			"ours": 20,
+			"missing": [
+				"aurapay-xkw",
+				"formal-verso-i5m",
+				"hyperledger-solang-dwa",
+				"paygo-crypto-ajc",
+				"skeeper-a-keeper-platform-8rf",
+				"styx-a-soroban-cosmos-bridge-qw2"
+			]
+		},
+		{
+			"round": 22,
+			"scf": 33,
+			"ours": 30,
+			"missing": [
+				"anchor-transparency-node-f6w",
+				"gecko-fuzz-emh",
+				"ramm-global-retail-commerce-zbg",
+				"soracleorg-posted-bdt",
+				"typiqo-i6b"
+			]
+		},
+		{
+			"round": 21,
+			"scf": 26,
+			"ours": 20,
+			"missing": [
+				"fixed-rate-fixie-dxh",
+				"localcoin-tdn",
+				"lumoscore-ckm",
+				"soroban-cli-cross-platform-gui-57v",
+				"typiqo-i6b",
+				"zkfetch-zktls-powered-oracle-solution-mfy"
+			]
+		},
+		{
+			"round": 20,
+			"scf": 33,
+			"ours": 28,
+			"missing": [
+				"amber-rwa-tokenization-on-stellar-sku",
+				"aurapay-xkw",
+				"bank2bit-s7u",
+				"formal-verso-i5m",
+				"hyperledger-solang-dwa",
+				"sorscan-svd"
+			]
+		},
+		{
+			"round": 19,
+			"scf": 16,
+			"ours": 14,
+			"missing": ["canfy-a2m", "multiclique-th6"]
+		},
+		{
+			"round": 18,
+			"scf": 15,
+			"ours": 12,
+			"missing": ["kometpay-raw", "nebula-egz", "submission recjsi9sxCFtNeYwi"]
+		},
+		{
+			"round": 17,
+			"scf": 19,
+			"ours": 16,
+			"missing": ["arcturus-caq", "basement-mdg", "plutus-kmw"]
+		},
+		{
+			"round": 16,
+			"scf": 21,
+			"ours": 17,
+			"missing": [
+				"didstellar-om5",
+				"pactta-api-kgf",
+				"sorosorcerercom-x3s",
+				"unalivio-nil"
+			]
+		},
+		{
+			"round": 15,
+			"scf": 12,
+			"ours": 8,
+			"missing": [
+				"elio-dao-8ut",
+				"pluto-loans-b2b-snb",
+				"soroban-smart-option-contract-2ty",
+				"submission rec52b54tNWXJ3tI3"
+			]
+		},
+		{
+			"round": 14,
+			"scf": 12,
+			"ours": 9,
+			"missing": [
+				"kometpay-raw",
+				"soroban-assistant-h9o",
+				"soroban-smart-option-contract-2ty"
+			]
+		},
+		{
+			"round": 13,
+			"scf": 14,
+			"ours": 11,
+			"missing": ["azores-metaverse-e17", "sorobix-bfy", "the-blue-marble-zsl"]
+		},
+		{
+			"round": 11,
+			"scf": 20,
+			"ours": 17,
+			"missing": ["mythforge-3tz", "snnac-r1e", "stex-yga"]
+		},
+		{
+			"round": 10,
+			"scf": 15,
+			"ours": 10,
+			"missing": [
+				"bpv-stellarmesh-anchor-afq",
+				"mythforge-3tz",
+				"paysomeai-7gh",
+				"pluto-loans-b2b-snb",
+				"the-blue-marble-zsl",
+				"vitreous-jdm"
+			]
+		},
+		{
+			"round": 9,
+			"scf": 14,
+			"ours": 11,
+			"missing": ["answerly-omb", "benkiko-rest-apis-tia", "quidroo-xdv"]
+		},
+		{
+			"round": 8,
+			"scf": 7,
+			"ours": 4,
+			"missing": ["cryptocannoneer-tzl", "instantdao-zce", "wally-ygy"]
+		},
+		{
+			"round": 7,
+			"scf": 8,
+			"ours": 5,
+			"missing": [
+				"boss-money-former-leaf-global-hxt",
+				"optionblox-yieldblox-4mn",
+				"whalestack-5ag"
+			]
+		},
+		{
+			"round": 6,
+			"scf": 8,
+			"ours": 5,
+			"missing": ["ayadee-trak-j7v", "crypto-link-2ej", "relax-rbc"]
+		},
+		{
+			"round": 5,
+			"scf": 9,
+			"ours": 1,
+			"missing": [
+				"cosmicvote-qlc",
+				"free-voting-platform-0pp",
+				"lettuce-4zo",
+				"mxlet-mq9",
+				"opensolar-teb",
+				"rigel-yeo",
+				"stellar-update-g85",
+				"the-interstellar-platform-6rb"
+			]
+		},
+		{
+			"round": 4,
+			"scf": 8,
+			"ours": 3,
+			"missing": [
+				"apayio-lpa",
+				"nicetrade-qrp",
+				"sdk-for-stellar-qt-mab",
+				"sendit-ll9",
+				"whalestack-5ag"
+			]
+		},
+		{
+			"round": 3,
+			"scf": 8,
+			"ours": 4,
+			"missing": [
+				"blue-orion-wpj",
+				"cosmiclink-kno",
+				"lumens-for-charity-rui",
+				"stellar-battle-hha"
+			]
+		},
+		{
+			"round": 2,
+			"scf": 8,
+			"ours": 4,
+			"missing": [
+				"centaurus-i4z",
+				"getblockcardcom-afx",
+				"stellarauth-nnk",
+				"stellarpay-dy1"
+			]
+		},
+		{
+			"round": 1,
+			"scf": 8,
+			"ours": 4,
+			"missing": [
+				"equilibreio-ok2",
+				"lumenaut-pool-0nd",
+				"stellar-community-forum-3om",
+				"swplug-pba"
+			]
+		}
+	]
+}

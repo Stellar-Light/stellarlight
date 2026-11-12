@@ -3203,6 +3203,30 @@ export const ALIAS_ADD: Record<string, string[]> = {
 	// The SCF project is "Enable"; the company and website are Humanity Link,
 	// so a reader who knows either name finds the row (packet 2026-09-14).
 	enable: ["Humanity Link"],
+	// The SCF #45 seeds (sls-111, 2026-11-11): the other name the SCF page or
+	// the operator's own site gives each product.
+	pods: ["Deframe"], // the page: "Deframe (by Pods)"
+	"agentsmith-x402": ["AgentSmith"], // 57Blocks' own name for the product
+	"principal-protocol": ["Principal"], // the SCF project title
+	zkella: ["ZKELLA Protocol"], // the SCF title's leading words
+	// An SCF PROJECT title is an identity once its page is joined to the row
+	// by slug in SCF_SLUG_OVERRIDES (scripts/data/scf-joins.ts): it is the
+	// name SCF's funded-projects listing shows, so a reader who has only that
+	// name must reach the row (sls-111: Raven resolved both titles below and
+	// got found: false). A free-text SUBMISSION title or description is still
+	// never an identity, and neither is a project title that reads as a
+	// category and would answer a category query (verseprop's "A real estate
+	// tokenization platform", the 2026-08-31 rule below). Each alias here was
+	// checked on 2026-11-11 against every served row, by resolve and by
+	// search's name match: no other row carries it, and no other row's name
+	// or alias query changes its answer. Search's name match ranks the row
+	// first (score 3) for the whole title and for a question built around it,
+	// such as "what is Open RWA Vault Infrastructure", "open rwa vault" or
+	// "The Merchant Settlement Rail for Africa on Stellar"; a partial phrase
+	// ("rwa vault", "settlement rail for africa", "merchant settlement rail
+	// africa") and a category question ("best rwa vault") are not promoted.
+	strata: ["Open RWA Vault Infrastructure", "Open RWA Vault"], // open-rwa-vault-infrastructure-nis; the short form is how the intake list and Raven cite it
+	slimepay: ["The Merchant Settlement Rail for Africa"], // the-merchant-settlement-rail-for-africa-bzf
 	zenex: ["Hermes"],
 	// ── 2026-08-31 SCF absence review (docs/SCF-SEED-REVIEW-2026-08-31.md):
 	// product names their SCF submissions use, verified by website-domain
@@ -3254,6 +3278,122 @@ export const TYPE_ADD: Record<string, string[]> = {
 	"sextant-agent": ["AI", "Payments"], // agentic payments over x402/MPP
 };
 
+/**
+ * Rows whose stored supportedNetworks curate clears: SUPPORTED_NETWORKS below,
+ * which curate-projects.ts applies, maps each to [] (exact-sync, the mechanism that cleared
+ * allbridge on 2026-10-23 and now serves its derived onchain-activity list),
+ * so the API serves the networks it derives from evidence. A stored list is
+ * served with networksBasis "curated", which the spec reads as complete. The
+ * nine SCF #45 seeds of 2026-09-15 stored ["stellar"], a Stellar-only claim
+ * for teams that run on other chains too (Minisend: EVM chains and Solana).
+ * Each is SCF-awarded with no contracts, TVL or anchor coverage on record
+ * (read 2026-11-11), so the derived list is ["stellar"] with basis scf-award,
+ * which claims nothing about other chains. No served value is lost: only the
+ * basis changes, from a complete list to a non-exhaustive one.
+ */
+export const NETWORKS_DERIVED: string[] = [
+	"balance",
+	"micro-be",
+	"catlog",
+	"urbanflip",
+	"lunar-finance",
+	"haven",
+	"enable",
+	"minisend",
+	"bwb",
+];
+
+// Moved here from curate-projects.ts (2026-11-11) unchanged in effect, so a
+// test can read what curate applies.
+// sls-017 (durable half): chains a project supports, lowercase. Fill-if-empty:
+// so omission ≠ negation on wallet/multichain records.
+export const SUPPORTED_NETWORKS: Record<string, string[]> = {
+	// Self-audit "bridge corridors" red (persistent since 2026-07-11): Bridge-
+	// typed rows must carry non-empty verified networks. Each below asserted
+	// from the project's OWN materials 2026-07-16 (precision over recall
+	// verified subset, never the marketing chain-count).
+	proofbridge: ["stellar", "evm"], // pfbridge.xyz / its own description: "connecting Stellar and Ethereum" ZK bridge
+	// Second wave (2026-07-16, same red): the check's q=bridge window surfaced
+	// wowmax once the first four cleared: preempting every remaining Live
+	// Bridge-typed row with empty networks in one pass (full type=Bridge sweep,
+	// not the window).
+	wowmax: ["evm"], // wowmax.exchange: multi-chain EVM DEX/bridge aggregator; its own description says "EXPANDING to Stellar": stellar deliberately NOT asserted until the deployment is live
+	usher: ["stellar"], // usher.so: "Enhancing Stellar's Anchors with the T Node": Stellar-native anchor infrastructure
+	"soroban-polygon-interop": ["stellar", "evm"], // EEA crosschain spec: Soroban ↔ Polygon (EVM) asset transfers
+	"one-click": ["stellar"], // oneclick.fi: DeFi onboarding listed for its Stellar corridor; other chains not per-chain verified
+	rango: ["stellar", "evm"], // rango.exchange aggregates 70+ chains; asserting the verified subset (Stellar routing is why it is listed; EVM is its core business)
+	liquidsfi: ["stellar"], // liquids.fi (ex-ZKLiquid, Stellar-origin SCF-track project); cross-chain expansion claims not yet per-chain verified
+	lobstr: ["stellar", "xrpl"],
+	"ultra-stellar": ["stellar", "xrpl"],
+	// Bridge corridor matrix (2026-07-09: "same issue for Solana?": yes).
+	// Every row below verified from PRIMARY sources on 2026-07-09 (vendor
+	// docs/APIs, quotes in the PR): the original Beacon-Q3 seeds were
+	// [stellar, evm] only, hiding real Solana/Tron/XRPL/... corridors.
+	// "evm" is the umbrella users' chain-names map onto via the search
+	// synonym layer (ethereum/polygon/base/bnb/arbitrum → evm).
+	// This list is EXACT-SYNC for its slugs (see apply loop): the canonical
+	// place to update a listed project's networks is HERE, not the admin.
+	// Lane DQ1 (2026-10-23): empty = exact-sync clears the curated matrix,
+	// so the row serves its derived evidence (onchain-activity: contracts on
+	// Stellar) with networksBasis saying so. The old matrix came from Core's
+	// pool API, which ended in July 2026; docs-core now lists EVM chains,
+	// Tron, Solana, Sui and Stacks, with Stellar unavailable pending audit,
+	// and the operator names no Stellar route for Allbridge Next.
+	allbridge: [],
+	"circle-cctp-cross-chain-transfer-protocol": [
+		"stellar", // CCTP V2 domain 27 (standard transfer)
+		"evm",
+		"solana",
+		"sui",
+		"aptos",
+		"noble",
+		"starknet",
+	], // developers.circle.com/cctp/concepts/supported-chains-and-domains
+	axelar: ["stellar", "evm", "solana", "sui", "xrpl"], // axelar-chains-config mainnet.json: stellar mainnet contracts deployed
+	rozo: ["stellar", "evm", "solana"], // rozo.ai/llms.txt: pay-in/out Ethereum/Arbitrum/Base/BSC/Polygon/Solana/Stellar; "Stellar CCTP V2 is live on ROZO"
+	spacewalk: ["stellar", "polkadot", "kusama"], // pendulumchain.org: Pendulum (Polkadot) + Amplitude (Kusama), launched
+	stronghold: ["stellar", "evm", "xrpl"], // gateway.stronghold.co/bridge (SHx-only: Stellar⇄Ethereum + XRPL leg live)
+	"templar-protocol": ["stellar", "bitcoin", "evm", "near"], // templarfi.org/blog/stellar launch post; bridgeless (NEAR chain sigs)
+	warpdrive: ["stellar", "evm"], // warp-drive.xyz targets Base/Ethereum/Optimism/BNB: NOT yet launched (see STATUS_FIX)
+	tricorn: ["stellar", "evm"], // Coinspect-audited Stellar⇄EVM bridge; live as Utexo (boxy-confirmed 2026-07-09)
+	helix: ["canton"], // helixlabs.org: "not live on any chain other than Canton"; Stellar = roadmap (see STATUS_FIX)
+	zkcross: ["stellar", "evm"],
+	// #414 real bridges (verified 2026-07-11):
+	rubic: [
+		"stellar",
+		"evm",
+		"solana",
+		"bitcoin",
+		"tron",
+		"near",
+		"polkadot",
+		"cosmos",
+		"sui",
+		"aptos",
+		"xrpl",
+		"ton",
+	], // Rubic's own chains API (api-v2.rubic.exchange/api/info/chains): 101 chains incl. STELLAR + dedicated rubic_stellar_api provider
+	"via-labs": ["evm"], // docs.vialabs.io omnichain messaging/bridging; public chain registry is exclusively EVM chain IDs: only evm verifiable
+	transfuse: ["stellar", "evm"], // github transfuselabs/transfuse-bridge: Stellar⇄Ethereum USDC/USDT bridge (testnet-only per README)
+	"bim-exchange": ["evm"], // bim.finance: swap/bridge interface aggregating Kyberswap/Bungee: EVM aggregator stacks; no non-EVM chain named
+	"usdc-swap": ["stellar", "evm", "solana"], // usdcswap.com sitemap: STE↔ETH/ARB/OPT/BASE/POL/AVA/SOL routes; Circle CCTP + horizon in app bundle
+	houdiniswap: ["stellar", "evm", "solana", "bitcoin", "tron"], // app.houdiniswap.com token picker: XLM/USDC-on-Stellar verified live; BTC/ETH/SOL/TRON named
+	// Not reviewed (TODO): the matrix was copied from Allbridge Core, but
+	// Estrela's SCF page describes a Soroban stablecoin AMM. Empty until
+	// reviewed, so its served networks are derived (basis scf-award), never
+	// claimed as curated.
+	estrela: [],
+	rarible: ["evm"], // sls-037 precision fix: SCF award + Rarible STELLAR schema enum establish the RELATIONSHIP, but public Stellar support is not verifiable on Rarible's live API/UI (the GT-19 blind lane and our recheck): evm only until it is; the award/integration story lives in prose+statusSourceUrl, not the deployment field
+	// sls-029 oracle network evidence (Live oracles with EMPTY networks made
+	// materially different deployment claims look equivalent). Both rows below
+	// verified from PRIMARY sources 2026-07-11:
+	band: ["stellar", "evm", "xrpl", "cosmos"], // stellar: developers.stellar.org/docs/data/oracles/oracle-providers lists Band's deployed MAINNET contract CCQXWMZVM3KRTXTUPTN53YHL272QGKF32L7XEDNZ2S6OSUFK3NFBGG5M (+ bandprotocol/band-std-reference-contracts-soroban + Band's own integration post); evm/xrpl/cosmos: docs.bandchain.org supported-blockchains MAINNET table (Astar/Celo/Cronos/Harmony/Sonic/Xlayer/... → evm umbrella; XRPL named; Secret/Nibiru → cosmos). That Band table LAGS: Stellar is absent from it despite the deployed, actively-relaying mainnet contract (sls-029 live reads 2026-07-10).
+	lightecho: ["stellar"], // github.com/bp-ventures/lightecho-stellar-oracle README: deployed MAINNET contract CDOR3QD27WAAF4TK4MO33TGQXR6RPNANNVLOY277W2XVV6ZVJ6X6X42T (+ testnet CA335...); Stellar-only Soroban oracle (BP Ventures). Deployment evidence, NOT freshness: sls-029's probe observed its mainnet price state ~4 months stale (2026-07-10).
+	// Stored lists cleared so the row serves its derived networks, the
+	// allbridge mechanism above (NETWORKS_DERIVED says why).
+	...Object.fromEntries(NETWORKS_DERIVED.map((slug) => [slug, []])),
+};
+
 export const SEEDS: Array<{
 	slug: string;
 	name: string;
@@ -3295,6 +3435,13 @@ export const SEEDS: Array<{
 	// same distinction backfill-deployment.ts draws between operating for
 	// users and deployed on mainnet. statusSourceUrl cites the SCF page; the
 	// basis records that a human reviewed the packet on the asOf date.
+	//
+	// supportedNetworks was ["stellar"] here, which the API serves with
+	// networksBasis "curated", read by the spec as a complete list: false for
+	// Minisend (EVM chains and Solana) and unclaimed for the rest. A seed only
+	// ever creates, so emptying these literals changes no stored row;
+	// NETWORKS_DERIVED (below) has curate clear the stored lists (sls-111,
+	// 2026-11-11).
 
 	{
 		slug: "balance",
@@ -3302,7 +3449,7 @@ export const SEEDS: Array<{
 		category: "Infrastructure",
 		status: "Development",
 		types: ["Payments"],
-		supportedNetworks: ["stellar"],
+		supportedNetworks: [],
 		shortDescription:
 			"Balance will add institutional-grade custody and payment infrastructure for Stellar assets. The project will enable regulated financial institutions, fintechs, funds, and enterprises to securely hold XLM and Stellar-issued assets, create and manage wallets, enforce transaction policies, and move assets through Balance’s API and institutional interface.",
 		links: { website: "https://balance.ca/" },
@@ -3318,7 +3465,7 @@ export const SEEDS: Array<{
 		category: "Infrastructure",
 		status: "Development",
 		types: ["RWA", "Payments"],
-		supportedNetworks: ["stellar"],
+		supportedNetworks: [],
 		shortDescription:
 			"Problem French marinas use clonable RFID cards to distribute water and electricity to boaters, causing ~€385K in annual losses across our 11 contracted marinas. Credit purchases also depend on marina office opening hours: ~25% of high-season arrivals occur outside these hours, limiting access to utilities and representing ~€1.2M in potential annual revenue.",
 		links: { website: "https://www.micro-be.com/en/entreprise.htm" },
@@ -3333,7 +3480,7 @@ export const SEEDS: Array<{
 		category: "User-Facing App",
 		status: "Development",
 		types: ["Payments"],
-		supportedNetworks: ["stellar"],
+		supportedNetworks: [],
 		shortDescription:
 			"Catlog is a commerce operating system for Africa's social sellers. 2,000+ merchants across Nigeria, Ghana, Kenya, and South Africa use us to take orders, manage inventory, and collect payments from their phones. Payments remain their hardest problem. Millions of consumers in our markets hold crypto but must off-ramp to fiat before spending with local merchants.",
 		links: { website: "https://catlog.shop" },
@@ -3348,7 +3495,7 @@ export const SEEDS: Array<{
 		category: "User-Facing App",
 		status: "Development",
 		types: ["RWA"],
-		supportedNetworks: ["stellar"],
+		supportedNetworks: [],
 		shortDescription:
 			"Urbanflip is a live real estate co-investment platform with over $90M invested through it in the last 12 months. Each operation sits in a Spanish SPV holding legal title to one asset; verified professional investors participate as creditors via private placements.",
 		links: { website: "https://urbanflip.io/" },
@@ -3364,7 +3511,7 @@ export const SEEDS: Array<{
 		category: "Protocol/Contract",
 		status: "Development",
 		types: ["DEX", "Bridge"],
-		supportedNetworks: ["stellar"],
+		supportedNetworks: [],
 		shortDescription:
 			"Lunar Finance is building the execution layer for on-chain transactions: a unified meta-aggregation platform that abstracts the complexity of fragmented liquidity across blockchains and delivers optimal trade and bridging outcomes. Our vision is to become the default infrastructure for value movement across Web3. As liquidity fragments across chains, bridges, and DEXs, inefficiencies increase.",
 		links: { website: "https://lunarfinance.io" },
@@ -3380,7 +3527,7 @@ export const SEEDS: Array<{
 		category: "User-Facing App",
 		status: "Development",
 		types: ["Wallet", "Payments"],
-		supportedNetworks: ["stellar"],
+		supportedNetworks: [],
 		shortDescription:
 			"Haven - privacy-first crypto neobank ------------------------------------------- Everyday banking on public blockchains, without exposing the user's financial life on a public ledger. problem Every on-chain payment exposes the payer. Anyone can look up a wallet and see salary, balances, and purchase history. solution Haven packages private, compliant payments into a product people already know how to use, a neobank.",
 		links: { website: "https://haven.hn" },
@@ -3396,7 +3543,7 @@ export const SEEDS: Array<{
 		category: "User-Facing App",
 		status: "Development",
 		types: ["Payments", "Social Impact"],
-		supportedNetworks: ["stellar"],
+		supportedNetworks: [],
 		shortDescription:
 			"Here’s a tightened version under 1100 characters: Humanity Link is building Enable, a financial infrastructure layer designed to improve how aid and value move globally. Over the past several years, we have worked with organizations such as the Red Cross and Norwegian Refugee Council, supporting more than $70 million in aid delivery through digital communication and cash assistance systems.",
 		links: { website: "https://www.humanity.link/" },
@@ -3411,7 +3558,7 @@ export const SEEDS: Array<{
 		category: "Infrastructure",
 		status: "Development",
 		types: ["Payments", "Stablecoin"],
-		supportedNetworks: ["stellar"],
+		supportedNetworks: [],
 		shortDescription:
 			"Minisend is a cross-chain stablecoin settlement infrastructure for Africa. Users and businesses send USDC or USDT to a single address and settle to M-Pesa, Airtel Money, or a bank account in Kenya, Nigeria, or Ghana in seconds, with an onramp in the other direction. Minisend is live today across 26 EVM chains and solana , serving traders, freelancers, and businesses that receive cross-border payments.",
 		links: { website: "https://minisend.xyz/" },
@@ -3426,7 +3573,7 @@ export const SEEDS: Array<{
 		category: "User-Facing App",
 		status: "Development",
 		types: ["RWA"],
-		supportedNetworks: ["stellar"],
+		supportedNetworks: [],
 		shortDescription:
 			"BWB Digital Assets is a real estate private equity investment platform that uses tokenization to optimize performance and enhance transparency, financial returns, and user experience. The investments are public offerings compliant with CVM (SEC equivalent).",
 		links: { website: "https://www.bwbi.com.br/" },
@@ -3435,6 +3582,272 @@ export const SEEDS: Array<{
 		statusSourceUrl:
 			"https://communityfund.stellar.org/project/bwb-brazilian-real-estate-yields-on-stellar-zab",
 		statusBasis: "human-verified",
+	},
+
+	// SCF #45 awardees with no row (sls-111, read 2026-11-11). SCF's own
+	// round page (communityfund.stellar.org/awards/reccaFUJmN4HNQxvo) lists 37
+	// Awarded submissions in SCF #45 and three more in Information Collection
+	// whose project pages pin the award (awarded true, lastAwardedRound 45, a
+	// total equal to the budget): 40 awards, the same 40 pages the listing
+	// gives lastAwardedRound 45. The directory carried 28 of them; these are
+	// the other twelve. Each page was read with parseRoundVerdicts
+	// (scripts/eval/scf-official.ts): round 45 awarded, the budget below, and
+	// a 200 from the page. Each was checked absent the same day: GET
+	// /api/projects/resolve for the name, every alias and the site's domain
+	// answered found false, GET /api/projects/<slug> answered 404, and none of
+	// the 1,008 served rows lists the site's domain (57blocks.com aside: three
+	// other 57Blocks rows link it). enrich-scf joins each row to its page
+	// through SCF_SLUG_OVERRIDES (scripts/data/scf-joins.ts) and writes the
+	// SCF fields; this block writes none of them (one field, one writer).
+	//
+	// Every field comes from the page or the operator's own site, never a team
+	// member's: no person is named, and a repository under a person's account
+	// is never linked, even where the page gives it as the project's site
+	// (Principal). An organization, or the project's own branded account
+	// (NilaDAO, named Nila.land, holding only Nila's repositories), is fine.
+	// status follows the team's own SCF submission (statusBasis
+	// operator-announcement, which may describe plans): Development where the
+	// Stellar work is planned or under way, Pre-Release where the submission
+	// shows it running on Stellar testnet or in a pilot (Pollar, Cara7). None
+	// is Live, the 2026-09-15 rule: an award still disbursing, and a product
+	// live on another chain is not a live Stellar product. supportedNetworks
+	// stays empty: a stored list is served as networksBasis "curated", which
+	// the spec reads as complete, and most of these run on other chains too;
+	// once the award is written the API derives ["stellar"] with basis
+	// scf-award, which claims nothing about other chains.
+	{
+		// pollar-nqe: #45 Awarded, $89,500 (its #42 entry Not Awarded). The
+		// page cites a Stellar testnet integration and sponsor account.
+		slug: "pollar",
+		name: "Pollar",
+		category: "Tooling",
+		status: "Pre-Release",
+		types: ["SDK", "Payments"],
+		supportedNetworks: [],
+		shortDescription:
+			"Pollar is a payments and onboarding SDK for apps on Stellar and Solana: embedded wallets, sponsored fees, trustline and reserve handling, local QR and bank ramps, and KYC in one integration. On Stellar it creates or links a Soroban smart account through social login, pays fees through fee-bump transactions, sponsors account reserves and enables the asset an app needs during onboarding.",
+		links: {
+			website: "https://www.pollar.xyz/",
+			github: "https://github.com/pollar-xyz/pollar",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl: "https://communityfund.stellar.org/project/pollar-nqe",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// pods-dxl: #45 in Information Collection, $125,000, pinned by the
+		// page's own total. deframe.io titles itself Pods; ALIAS_ADD adds the
+		// product name.
+		slug: "pods",
+		name: "Pods",
+		category: "Tooling",
+		status: "Development",
+		types: ["Infrastructure", "Yield"],
+		supportedNetworks: [],
+		shortDescription:
+			"Pods builds Deframe, a DeFi API for wallets and fintechs: one integration for swaps, cross-chain yield strategies and an RWA yield aggregator. Its planned Stellar integration is to surface Stellar yield (RWA yield included) and Stellar swap venues through the API and to open its cross-chain yield strategies to Stellar wallets.",
+		links: { website: "https://deframe.io" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl: "https://communityfund.stellar.org/project/pods-dxl",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// agentsmith-x402-stellar-facilitator-and-bazaar-discovery-kdw: #45
+		// Awarded, $122,000; the page calls the project pre-launch. Its site,
+		// 57blocks.com/blockchain, lists AgentSmith as 57Blocks' open source
+		// x402 payments and discovery for Stellar.
+		slug: "agentsmith-x402",
+		name: "AgentSmith x402",
+		category: "Tooling",
+		status: "Development",
+		types: ["Payments", "AI"],
+		supportedNetworks: [],
+		shortDescription:
+			"AgentSmith x402 is 57Blocks' x402 payment facilitator and Bazaar discovery layer for Stellar, built on its AgentSmith agent infrastructure so AI agents can discover paid services and pay them with no integration built in advance. The facilitator is to run on Stellar testnet and pubnet, settling any SEP-41 token (USDC by default) through Soroban authorization, under a permissive license that lets teams fork or self-host it.",
+		links: { website: "https://57blocks.com/blockchain" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/agentsmith-x402-stellar-facilitator-and-bazaar-discovery-kdw",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// cara7-yyx: #45 Awarded, $127,900. The page reports a pilot on
+		// Stellar and targets institutional issuance in Q1 2027.
+		slug: "cara7",
+		name: "Cara7",
+		category: "User-Facing App",
+		status: "Pre-Release",
+		types: ["RWA"],
+		supportedNetworks: [],
+		shortDescription:
+			"Cara7 tokenizes auto asset-backed securities: the vehicle loans and leases behind a deal and the ABS notes it issues, linked by a payment waterfall written as a Soroban contract that pays principal and interest to investors in EURC. Its SCF submission reports a pilot on Stellar, two deal generations on a 20-lease EV portfolio, and targets institutional issuance in Q1 2027.",
+		links: { website: "https://cara7.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl: "https://communityfund.stellar.org/project/cara7-yyx",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// astrolabe-bzg: #45 Awarded, $117,900. The page's site, the MVP at
+		// stellar-explorer-tau.vercel.app, answered DEPLOYMENT_NOT_FOUND on
+		// 2026-11-11 and the page's other links are people's, so the row
+		// carries no link, and WEBSITE_REMOVE_DEAD keeps the enrich from
+		// filling the dead one. Development: nothing on it can be checked.
+		slug: "astrolabe",
+		name: "Astrolabe",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Explorer", "Indexer"],
+		supportedNetworks: [],
+		shortDescription:
+			"Astrolabe is a block explorer for Stellar that renders operations as plain-language sentences and decodes Soroban invocations, return values and events. Its SCF #45 build is its own data layer: a self-hosted mainnet RPC node and an indexer over full ledger history, for holder maps, fund-flow tracing, event search, alerts, contract source verification and a public API.",
+		links: {},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl: "https://communityfund.stellar.org/project/astrolabe-bzg",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// onboard-kvj: #45 Awarded, $89,000. Not our OnBoarding Club row: no
+		// shared site or GitHub org.
+		slug: "onboard",
+		name: "Onboard",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: [],
+		shortDescription:
+			"Onboard runs a cross-border payments app, a business app and an API for multi-currency accounts, cards, stablecoin wallets and local-currency payouts, settling mainly in USDC on Base. It plans to add USDC on Stellar as a settlement network, a LatAm off-ramp through BlindPay, and Circle CCTP to move USDC between Base and Stellar.",
+		links: { website: "https://onboard.xyz" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl: "https://communityfund.stellar.org/project/onboard-kvj",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// nila-fwc: #45 Awarded, $95,000. nila.land says its Stellar dollar
+		// position is in development and not open for deposits; the page
+		// targets mainnet disbursement for December 2026. NilaDAO is the
+		// project's own GitHub account (the page lists its repositories).
+		slug: "nila",
+		name: "Nila",
+		category: "User-Facing App",
+		status: "Development",
+		types: ["Lending", "Social Impact"],
+		supportedNetworks: [],
+		shortDescription:
+			"Nila lends to smallholder women farmers in Tamil Nadu, India, through credit unions on stablecoin rails, with satellite crop verification in place of field agents. In production on Polygon since December 2025 by the team's account, it is moving its money layer to Stellar: a Soroban funding pool, bulk USDC disbursement through the Stellar Disbursement Platform and cash-out through MoneyGram Ramps, with the first mainnet disbursement targeted for December 2026.",
+		links: {
+			website: "https://nila.land",
+			github: "https://github.com/NilaDAO/nila-soroban",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl: "https://communityfund.stellar.org/project/nila-fwc",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// principal-vzt: #45 Awarded, $116,000 (its #44 entry Not Awarded).
+		// The page gives a repository under a person's GitHub account as the
+		// project's site, and the project has no site of its own, so the row
+		// carries no link; WEBSITE_REMOVE keeps enrich-scf from filling that
+		// repository in from the page. ALIAS_ADD adds the SCF title.
+		slug: "principal-protocol",
+		name: "Principal Protocol",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Yield", "RWA"],
+		supportedNetworks: [],
+		shortDescription:
+			"Principal Protocol is a Soroban-native yield tokenization protocol for Stellar real-world assets: it wraps a yield-bearing asset and splits it into Principal Tokens, redeemable at maturity for fixed income, and Yield Tokens that carry the yield until maturity, traded against a PT/SY liquidity pool.",
+		links: {},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl: "https://communityfund.stellar.org/project/principal-vzt",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// zkella-protocol-compliance-ready-confidential-finance-infrastructure-for-stellar-sib:
+		// #45 Awarded, $127,800. The page's site, www.zaiffer.org, answered
+		// 404 on 2026-11-11 (the apex too), and its repository sits under a
+		// team member's account, so the row carries no link and
+		// WEBSITE_REMOVE_DEAD keeps the enrich from filling the dead one.
+		slug: "zkella",
+		name: "ZKELLA",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Infrastructure", "SDK"],
+		supportedNetworks: [],
+		shortDescription:
+			"ZKELLA is a confidential finance stack for Soroban: CT-20, a confidential token standard that wraps existing Stellar assets for shielded transfers, with zero-knowledge circuits and verifier contracts on the Protocol 25 (X-Ray) BN254 and Poseidon primitives, viewing keys for compliance disclosure, a note-state indexer and a TypeScript SDK.",
+		links: {},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/zkella-protocol-compliance-ready-confidential-finance-infrastructure-for-stellar-sib",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// canary-protocol-y4l: #45 in Information Collection, $120,000, pinned
+		// by the page's own total.
+		slug: "canary-protocol",
+		name: "Canary Protocol",
+		category: "Tooling",
+		status: "Development",
+		types: ["Bridge", "Infrastructure"],
+		supportedNetworks: [],
+		shortDescription:
+			"Canary Protocol runs a LayerZero DVN, an independent verifier of cross-chain messages that runs in TEEs with K-of-N RPC quorum and keys held in HSMs. It plans to extend the DVN to Stellar with a Soroban DVN contract and Stellar pathways in its verifier: testnet first, then an audit, then mainnet and a LayerZero directory listing.",
+		links: { website: "https://www.canaryprotocol.com/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/canary-protocol-y4l",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// fermah-pay-w3c: #45 Awarded, $65,000. The page: "On Stellar: nothing
+		// yet. This would be our first deployment here."
+		slug: "fermah-pay",
+		name: "Fermah Pay",
+		category: "Protocol/Contract",
+		status: "Development",
+		types: ["Payments"],
+		supportedNetworks: [],
+		shortDescription:
+			"Fermah Pay is prepaid billing for paid APIs and services: customers deposit once, usage draws the balance down, subscriptions charge on schedule and payers never hold a gas token. It bills Fermah's proof marketplace and plans its first Stellar deployment on Soroban, behind the standard x402 facilitator interface.",
+		links: { website: "https://fermah.xyz/" },
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl: "https://communityfund.stellar.org/project/fermah-pay-w3c",
+		statusBasis: "operator-announcement",
+	},
+	{
+		// open-rwa-vault-infrastructure-nis: #45 Awarded, $69,000, submitted as
+		// "Strata, a Vault Kit for RWA". The page's site is bootnode.dev, whose
+		// Strata entry and strata.bootnode.dev both name the SCF #45 award;
+		// the code is in BootNode's organization. ALIAS_ADD carries the SCF
+		// project title, an identity because the page is joined by slug.
+		slug: "strata",
+		name: "Strata",
+		category: "Tooling",
+		status: "Development",
+		types: ["RWA", "Yield"],
+		supportedNetworks: [],
+		shortDescription:
+			"Strata is BootNode's open source vault kit for real-world assets on Stellar: Soroban contracts on OpenZeppelin's SEP-41 token and SEP-56 vault with a guarded valuation oracle, allowlisted subscriptions and redemptions, a notice-period redemption queue and USDC settlement, plus a white-label investor dApp and an admin panel. Its SCF project is titled Open RWA Vault Infrastructure.",
+		links: {
+			website: "https://strata.bootnode.dev",
+			github: "https://github.com/BootNodeDev/strata-vault-kit",
+		},
+		provenance: { source: "AdminEdit" },
+		statusAsOf: "2026-11-11",
+		statusSourceUrl:
+			"https://communityfund.stellar.org/project/open-rwa-vault-infrastructure-nis",
+		statusBasis: "operator-announcement",
 	},
 
 	{
@@ -7780,6 +8193,11 @@ export const WEBSITE_REMOVE_DEAD: Record<string, string> = {
 	tribal: "https://tribal.credit", // "registered with gandi"
 	vitreous: "https://vitreous.co", // domain does not resolve
 	"websoroban-ide": "https://websoroban.vercel.app", // HTTP 404
+	// SCF #45 seeds (sls-111, 2026-11-11): the site each SCF page gives is
+	// dead, so the row is seeded without one, and owning links.website here
+	// keeps enrich-scf from filling the dead site back in from the page.
+	astrolabe: "https://stellar-explorer-tau.vercel.app/", // DEPLOYMENT_NOT_FOUND
+	zkella: "https://www.zaiffer.org/", // HTTP 404, the apex too
 };
 
 export const WEBSITE_REMOVE: Record<string, string> = {
@@ -7863,6 +8281,11 @@ export const WEBSITE_REMOVE: Record<string, string> = {
 	sora: "https://posted.app/",
 	// parked domain page
 	stellarauth: "https://stellarauth.com/",
+	// sls-111 seed (2026-11-11): the site SCF's page gives Principal Protocol
+	// is a repository under a person's GitHub account, not the project's own
+	// link. Live, so not the dead map; owning links.website here keeps
+	// enrich-scf from filling it in from the page.
+	"principal-protocol": "https://github.com/Mars12-dev/principal-protocol",
 };
 
 /**
