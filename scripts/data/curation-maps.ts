@@ -8127,7 +8127,17 @@ export const GITHUB_REPOS_ADD: Record<
 	// same org's raum-raumfi-v3 ("CLMM implementation of RaumFi DEX", pushed
 	// 2026-05-30) is the repo the Development status now rests on (see
 	// STATUS_FIX) — attach it so enrich-repos indexes it.
-	"raum-network": [{ owner: "Raum-Network", name: "raum-raumfi-v3" }],
+	"raum-network": [
+		{ owner: "Raum-Network", name: "raum-raumfi-v3" },
+		// 2026-11-12: the rest of RaumFi DEX, claimed only by the Draft row
+		// raumfi (a bare org link that does not count), so the repo pass would
+		// unlink them: core-v2 ("Raum-Core Native V2 AMM", the AMM between the
+		// linked core-v1 and v3), the backend (API and Soroban listener) and the
+		// bot posting "Live Transactions Happening From RaumFi DEX".
+		{ owner: "Raum-Network", name: "raum-raumfi-core-v2" },
+		{ owner: "Raum-Network", name: "raum-raumfi-backend" },
+		{ owner: "Raum-Network", name: "raum-raumfi-discordbot" },
+	],
 	// 2026-09-26: the row links github.com/perspectivefi (from the site's own
 	// GitHub nav link); these are that org's Stellar/Soroban repos, each
 	// describing itself as Spectra's Stellar core, PT bridge, or PT oracle.
@@ -8139,7 +8149,43 @@ export const GITHUB_REPOS_ADD: Record<
 	// 2026-10-23: the living DeFindex repo (see GITHUB_LINK_FIX defindex) is
 	// not indexed, so searchRepos cannot give it the archived repo's place.
 	// Attach it so enrich-repos indexes it under the project.
-	defindex: [{ owner: "defindex-io", name: "stellar-contracts" }],
+	defindex: [
+		{ owner: "defindex-io", name: "stellar-contracts" },
+		// 2026-11-12: DeFindex's current code that it stopped claiming when its
+		// link moved to defindex-io, so the repo pass would unlink it. The SDK
+		// is the repo npm's @defindex/sdk 0.3.0 names; GitHub answers 301 to
+		// defindex-io/defindex-sdk (pushed 2026-11-12). Listed under the OLD
+		// path, as for attest-contract above: the pass finds the stored row by
+		// it and rewrites it under the new name. defindex-rescue is the vault
+		// rescue and rebalancing tooling (pushed 2026-02-26) and the
+		// integration tutorial uses the current REST API (pushed 2026-01-13).
+		// Not claimed: defindex-hackathon and defindex-meru-sdk (May 2024, the
+		// Dart package's last release) and the empty defindex-ybx-incident.
+		{ owner: "paltalabs", name: "defindex-sdk" },
+		{ owner: "paltalabs", name: "defindex-rescue" },
+		{ owner: "paltalabs", name: "defindex-integration-tutorial" },
+	],
+	// 2026-11-12: Normal's own repos, claimed by its folded duplicate
+	// normal-finance (a bare link to the normalfinance org) and by nothing
+	// once the fold left normal linking one repo. Each is Normal's: the
+	// protocol (stellar-v1, normalfinance.io), its interface, its oracle
+	// (named for it, though only a README so far), its Rust types (crate
+	// normal-rust-types) and the Expo app (app.json name "normal"). utils
+	// ("across Normal repositories") and normal-api ("built solely to
+	// support Normal's web app and mobile users") are Normal's pre-Stellar
+	// backend code, claimed because Normal owns them. Not claimed, so they
+	// unlink: tesseract (a mixer, another product), subquery (SubQuery's
+	// stock starter), and normal-auth, stellar-crank, arbitrage-bot and
+	// defindex-strategies (a README only, or README and licence).
+	normal: [
+		{ owner: "normalfinance", name: "stellar-v1" },
+		{ owner: "normalfinance", name: "normal-v1-interface" },
+		{ owner: "normalfinance", name: "normal-oracle" },
+		{ owner: "normalfinance", name: "normal-api" },
+		{ owner: "normalfinance", name: "utils" },
+		{ owner: "normalfinance", name: "rust-types" },
+		{ owner: "normalfinance", name: "mobile" },
+	],
 	// 2026-11-12: the Allbridge Core bridge's JS SDK, which estrela claimed
 	// until its link moved to its own AMM repo. Claimed here so the repo pass
 	// rejoins the stored row to the bridge's project: the allbridge-io org

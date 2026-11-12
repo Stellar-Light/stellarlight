@@ -6,9 +6,11 @@
  * SCF / prominence signals into a repoScore grade, and upsert into `repos`.
  *
  * Powers /api/repos/search (Tyler's "show me zk repos" gap). Needs GITHUB_TOKEN
- * for the GraphQL calls. Dry-run by default; --execute writes.
+ * for the GraphQL calls. Dry-run by default; --execute writes. Repos no
+ * project claims any more are listed every run and unlinked only with
+ * --execute --unlink (src/lib/repo-unlink.ts).
  *
- *   GITHUB_TOKEN=... DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/enrich-repos.ts [--execute]
+ *   GITHUB_TOKEN=... DOTENV_CONFIG_PATH=.env.local npx tsx -r dotenv/config scripts/enrich-repos.ts [--execute] [--unlink]
  */
 import "./load-env";
 import { getPayload } from "payload";
@@ -34,6 +36,13 @@ import { repoNameOwner, STELLAR_SIGNAL } from "../src/lib/repo-org-attribution";
 import { REPO_SUCCESSIONS } from "../src/lib/repo-relations";
 import { CURATED_CANONICAL_REPOS } from "../src/lib/repo-search";
 import { deriveTriageTags } from "../src/lib/repo-triage";
+import {
+	ANSWERED_FETCH_ERRORS,
+	applyRepoUnlinks,
+	planRepoUnlinks,
+	UNLINK_VERIFIED_FIELDS,
+	writesUnlinks,
+} from "../src/lib/repo-unlink";
 import { formatMismatches, verifyWrites } from "../src/lib/utils/read-back";
 import configPromise from "../src/payload.config";
 
@@ -342,8 +351,30 @@ async function main() {
 
 	let orgRepoCount = 0;
 	let orgReposDropped = 0;
+	// The unlink's inputs (src/lib/repo-unlink.ts): who can still claim each
+	// expanded org's repos, what every claim resolved to, and every read that
+	// failed, since a failed read makes the claim set partial.
+	const orgClaimants = new Map<string, Set<string>>();
+	const claimedIds = new Set<string>();
+	const claimedNames = new Set<string>();
+	const failures: string[] = [];
 	for (const { login, project: p } of orgByLogin.values()) {
-		const repos = await listOwnerRepos(login);
+		orgClaimants.set(
+			login.toLowerCase(),
+			new Set(
+				[...(orgSiblings.get(login.toLowerCase()) ?? []), p]
+					.map((sp) => String(sp.slug ?? ""))
+					.filter(Boolean),
+			),
+		);
+		let repos: OwnerRepo[];
+		try {
+			repos = await listOwnerRepos(login);
+		} catch (e) {
+			failures.push(`org ${login}: ${e instanceof Error ? e.message : e}`);
+			console.log(`  org ${login.padEnd(26)} ⚠ listing failed`);
+			continue;
+		}
 		if (!repos.length) continue;
 		const signal = repos.filter(isStellarRepo);
 		const dedicated = signal.length / repos.length >= 0.5;
@@ -424,6 +455,8 @@ async function main() {
 			`Expanded ${orgByLogin.size} orgs → ${orgRepoCount} indexed (${orgReposDropped} non-Stellar dropped).\n`,
 		);
 
+	for (const e of byFull.values())
+		if (e.project.slug) claimedNames.add(e.full.toLowerCase());
 	let entries = [...byFull.values()];
 	if (ONLY)
 		entries = entries.filter(
@@ -463,12 +496,18 @@ async function main() {
 	/** Load-bearing fields this writer owns — what the read-back verifies. Not
 	 * the whole document: these are the values the ranking and attribution
 	 * actually depend on, so a silent drop here (#615) is what would hurt. */
+	// Plus every field an unlink writes (projectName, scfAwarded,
+	// hackathonWinner, projectUnlink, knowledgeNotes); the main loop's notes
+	// are left out of its own compare below.
 	const VERIFIED_FIELDS = [
-		"projectSlug",
-		"repoScore",
-		"repoScoreLabel",
-		"lastEnrichedAt",
-	] as const;
+		...new Set([
+			"projectSlug",
+			"repoScore",
+			"repoScoreLabel",
+			"lastEnrichedAt",
+			...UNLINK_VERIFIED_FIELDS,
+		]),
+	];
 	/** fullName → what was sent, so the read-back compares against the claim. */
 	const sentByRepo = new Map<string, Record<string, unknown>>();
 	/** doc id → human fullName, so mismatch output stays readable. */
@@ -488,6 +527,8 @@ async function main() {
 		// index — only index references we could actually verify. Re-runs pick
 		// up anything transiently rate-limited.
 		if (!info) {
+			if (project.slug && !ANSWERED_FETCH_ERRORS.has(enrichError ?? ""))
+				failures.push(`${full}: ${enrichError ?? "no data"}`);
 			console.log(
 				`  skip   ${full.padEnd(42)} ⚠ ${enrichError?.slice(0, 50) ?? "no data"}`,
 			);
@@ -545,6 +586,11 @@ async function main() {
 				console.log(
 					`  rename ${full} → ${info.nameWithOwner} (converging on the canonical row)`,
 				);
+		}
+		if (project.slug) {
+			if (info.nameWithOwner)
+				claimedNames.add(info.nameWithOwner.toLowerCase());
+			if (existing) claimedIds.add(String(existing.id));
 		}
 		const grade = info
 			? repoGrade({
@@ -657,6 +703,8 @@ async function main() {
 				: {}),
 			projectSlug: project.slug,
 			projectName: project.name,
+			// A claimed row carries no unlink record (set by the unlink below).
+			...(project.slug ? { projectUnlink: null } : {}),
 			// sls-064 analog: curated generation relation — wholesale each pass.
 			// Keyed by the CANONICAL name the row is written under, never by
 			// `full` (the name the project record lists). For a moved or renamed
@@ -743,7 +791,11 @@ async function main() {
 				// read-back re-litigates identity and finds rename-twin rows
 				// (24 stale-duplicate artifacts on the first batched pass).
 				// The writer knows exactly which row it wrote; verify THAT row.
-				sentByRepo.set(writtenId, data as unknown as Record<string, unknown>);
+				// Notes built from the registry carry `triggers`, which the schema
+				// does not store (storedNoteShape in repo-knowledge), so a compare
+				// would always mismatch; the unlink's notes are compared.
+				const { knowledgeNotes: _notes, ...verified } = data;
+				sentByRepo.set(writtenId, verified);
 				labelById.set(
 					writtenId,
 					String((data as { fullName?: string }).fullName ?? full),
@@ -754,6 +806,70 @@ async function main() {
 			}
 		}
 	}
+	// ── unlink: rows no project claims any more (src/lib/repo-unlink.ts) ──
+	// Upserting only what projects claim left every dropped claim linked
+	// forever. This writer owns projectSlug, so it also clears it, with the
+	// reason and date on the row, read back below with every other write.
+	// Every run prints the plan; only --execute with --unlink writes it, so
+	// scheduled and chained runs report the drift and change nothing.
+	let linkedRows: Doc[] = [];
+	try {
+		linkedRows = (
+			await payload.find({
+				collection: "repos",
+				where: { source: { equals: "project-link" } },
+				pagination: false,
+				depth: 0,
+				select: {
+					fullName: true,
+					projectSlug: true,
+					source: true,
+					knowledgeNotes: true,
+				},
+				// internal: the unlink rewrites notes, so it must see the
+				// internal ones the read hook strips for everyone else.
+				context: { includeSecurityHeld: true, internal: true },
+			})
+		).docs as Doc[];
+	} catch (e) {
+		// Not fatal: the writes above still need their read-back.
+		failures.push(`repo rows: ${e instanceof Error ? e.message : e}`);
+	}
+	const unlinkPlan = planRepoUnlinks({
+		rows: linkedRows.map((d) => ({
+			id: String(d.id),
+			fullName: String(d.fullName),
+			projectSlug: d.projectSlug ?? null,
+			source: d.source ?? null,
+			knowledgeNotes: d.knowledgeNotes ?? null,
+		})),
+		claimedIds,
+		claimedNames,
+		orgClaimants,
+		targeted: !!ONLY || LIMIT > 0,
+		failures,
+	});
+	console.log("\n── Unlink: rows no project claims ──");
+	if (unlinkPlan.abstain) {
+		console.log(`  unlinking nothing: ${unlinkPlan.abstain}`);
+		if (unlinkPlan.overCap) process.exitCode = 1;
+	}
+	const applied = await applyRepoUnlinks(unlinkPlan.unlinks, {
+		write: writesUnlinks(process.argv),
+		at: new Date().toISOString(),
+		// The lib types stored notes more loosely than payload-types does.
+		update: (id, data) =>
+			payload.update({ collection: "repos", id, data: data as Doc }),
+		log: (line) => console.log(line),
+	});
+	for (const [id, w] of applied.written) {
+		sentByRepo.set(id, w.data as unknown as Record<string, unknown>);
+		labelById.set(id, w.fullName);
+	}
+	for (const f of applied.failed) console.error(`  WRITE FAILED: unlink ${f}`);
+	writeFailed += applied.failed.length;
+	const unlinked = applied.written.size;
+
 	// ── read-back: prove the writes PERSISTED (lessons class 20/32, #615) ──
 	// "N created, N updated" counts resolved calls, not stored data.
 	// payload.update() drops keys with no schema field at that path without
@@ -772,6 +888,8 @@ async function main() {
 					limit: ids.length,
 					depth: 0,
 					overrideAccess: true,
+					// projectUnlink is internal: afterRead strips it otherwise.
+					context: { internal: true },
 				});
 				return new Map(
 					// biome-ignore lint/suspicious/noExplicitAny: Payload doc shape
@@ -787,6 +905,7 @@ async function main() {
 						id: key,
 						depth: 0,
 						overrideAccess: true,
+						context: { internal: true },
 					});
 					return (one as Record<string, unknown>) ?? null;
 				} catch {
@@ -809,7 +928,7 @@ async function main() {
 	}
 
 	console.log(
-		`\n${EXECUTE ? `DONE: ${created} created, ${updated} updated, ${failed} fetch-failed, ${writeFailed} write-failed, ${mismatchCount} did-not-persist.` : `DRY RUN — ${entries.length} repos, ${failed} would fail fetch.`}`,
+		`\n${EXECUTE ? `DONE: ${created} created, ${updated} updated, ${unlinked} unlinked, ${failed} fetch-failed, ${writeFailed} write-failed, ${mismatchCount} did-not-persist.` : `DRY RUN — ${entries.length} repos, ${failed} would fail fetch, ${unlinkPlan.unlinks.length} would unlink.`}`,
 	);
 	if (writeFailed) process.exitCode = 1;
 	// Was `process.exit(0)` — which STOMPED the exitCode set above, so a wave
