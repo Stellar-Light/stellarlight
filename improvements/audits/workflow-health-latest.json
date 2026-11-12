@@ -1,8 +1,8 @@
 {
-	"asOf": "2026-11-12T01:26:08.653Z",
+	"asOf": "2026-11-12T01:37:17.977Z",
 	"source": "scripts/check-workflow-health.ts",
-	"checked": 114,
-	"healthy": 103,
+	"checked": 113,
+	"healthy": 102,
 	"broken": [
 		{
 			"file": "enrich-onchain.yml",
@@ -57,7 +57,7 @@
 		{
 			"file": "workflow-health.yml",
 			"state": "failing",
-			"why": "58 failed run(s) since its last green 57d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "59 failed run(s) since its last green 57d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	],
 	"rows": [
@@ -341,7 +341,7 @@
 			"name": "consumption-guard",
 			"cron": "23 6 * * 1",
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T01:23:11Z",
+			"lastSuccessAt": "2026-11-12T01:34:41Z",
 			"ageDays": 0,
 			"graceDays": 21,
 			"runs": 94,
@@ -363,7 +363,7 @@
 			"name": "Contract gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T01:23:11Z",
+			"lastSuccessAt": "2026-11-12T01:34:42Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -566,17 +566,6 @@
 			"graceDays": 21,
 			"runs": 10,
 			"why": "10 runs since this file was last edited, zero successes — dies at \"Guard — one row per repo\", not a declared signal step (window capped at 100 runs — any older green is beyond it)"
-		},
-		{
-			"file": "enrich-scf.yml",
-			"name": "Enrich SCF data (manual)",
-			"cron": null,
-			"state": "ok",
-			"lastSuccessAt": "2026-11-07T22:13:26Z",
-			"ageDays": 4,
-			"graceDays": 45,
-			"runs": 12,
-			"why": "last green 4d ago (manual tool — age not judged)"
 		},
 		{
 			"file": "enrich-tvl.yml",
@@ -803,7 +792,7 @@
 			"name": "Next build gate",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T01:01:54Z",
+			"lastSuccessAt": "2026-11-12T01:32:04Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 90,
@@ -869,7 +858,7 @@
 			"name": "PG Atlas data upload",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T01:23:11Z",
+			"lastSuccessAt": "2026-11-12T01:34:41Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 100,
@@ -880,11 +869,11 @@
 			"name": "post-deploy-eval",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T01:00:14Z",
+			"lastSuccessAt": "2026-11-12T01:23:11Z",
 			"ageDays": 0,
 			"graceDays": 45,
-			"runs": 75,
-			"why": "last green 0d ago"
+			"runs": 76,
+			"why": "last green 0d ago (nothing under src/lib/openapi-spec.ts, src/app/api/**, src/lib/*search*, src/lib/search/**, src/lib/research-rank.ts, src/lib/confidence.ts, scripts/eval/golden-questions.json has changed since — nothing to do, not stale)"
 		},
 		{
 			"file": "prune-denied-repos.yml",
@@ -1034,7 +1023,7 @@
 			"name": "Secret scan",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T01:23:11Z",
+			"lastSuccessAt": "2026-11-12T01:34:41Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -1221,7 +1210,7 @@
 			"name": "Unit tests",
 			"cron": null,
 			"state": "ok",
-			"lastSuccessAt": "2026-11-12T01:23:11Z",
+			"lastSuccessAt": "2026-11-12T01:34:41Z",
 			"ageDays": 0,
 			"graceDays": 45,
 			"runs": 94,
@@ -1313,7 +1302,7 @@
 			"ageDays": 57,
 			"graceDays": 21,
 			"runs": 92,
-			"why": "58 failed run(s) since its last green 57d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
+			"why": "59 failed run(s) since its last green 57d ago — it is trying and losing, not idle; dies at \"Mirror drift (scout-mcp)\""
 		}
 	]
 }
